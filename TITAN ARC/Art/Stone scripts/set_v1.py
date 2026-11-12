@@ -58,7 +58,11 @@ def mats():
         m.diffuse_color = (*lin(PAL[n]), 1); out.append(m)
     return out
 
-THEME = os.environ.get("SET_THEME", "iron")   # stone / iron / magma / storm / crystal: one armour script for every set
+THEME = os.environ.get("SET_THEME", "iron")   # starter / brawler / stone / iron / magma / storm / crystal / star: one armour script for every set
+SPIKY = THEME not in ("starter", "brawler")    # padded sets: no spikes, fins or fangs
+PSC = 1.22 if THEME == "star" else 1.0          # STAR: huge round gold shoulders
+PMAT = ("metal", "metal", "metal") if THEME == "star" else ("stone", "stone2", "stone")
+PN = 14 if THEME in ("star", "brawler") else 8  # round pauldrons for the padded and the star set
 def V(x, f, z): return Vector((x, -f, z))          # f = towards the character's FRONT (Blender front is -Y)
 
 def setmat(bm, m):
@@ -439,7 +443,7 @@ def torso():
         plate(G, "stone", FR("F", 0, 44, 0), q if sx > 0 else q[::-1], 0, 29, 5.0, top=0.88, jit=1.2, seed=60 + sx)
         pass   # v6: chest straps and rivets removed (cleaner chest like a catalog bundle)
     # ---- IRON v3 detail pass: a row of iron fangs under the chest plate, rivet rows on the collar ----
-    for x in (-64, -38, -13, 13, 38, 64):
+    for x in ((-64, -38, -13, 13, 38, 64) if SPIKY and THEME != "star" else ()):
         spike(G, (x, 72, 352), (x * 1.04, 88, 312 - (10 if abs(x) < 20 else 0)), 10.5, m=("slate" if THEME == "crystal" and abs(x) > 30 else "crystal"), sides=5)   # glowing crystal fangs (read like Korblox's teeth)
     for sx in (-1, 1):
         for u in (34, 58, 82): rivet(G, FR("F", 0, 73, 0), sx * u, 478 - (u - 34) * 0.25, 3.6, 2.6)
@@ -533,7 +537,7 @@ def leg(s):
     loft(G, "suit", s, [(304, c + 2, 40, -46, 42, 11), (236, c + 1, 37, -44, 41, 11), (176, c, 34, -42, 40, 10)], 2.0)
     t = loft(G, "stone", s, [(292, c + 2, 44, -49, 49, 19, 0.28, 0.3), (282, c + 2, 47, -51, 51, 20, 0.28, 0.3), (240, c + 1, 45, -49, 50, 19, 0.1, 0.1), (204, c, 41, -46, 49, 17, -0.32), (196, c, 38, -44, 47, 16, -0.36)], 2.6, keep=True)
     t = carve(t, FR("F", s * (c + 1), 50, 0), ({"iron": [mu([(-16, 262), (-16, 214)]), mu([(16, 262), (16, 214)])], "crystal": [mu([(-16, 262), (-16, 214)]), mu([(16, 262), (16, 214)])],
-                                           "storm": [mu([(-8, 266), (10, 248), (-8, 234), (10, 212)])]}.get(THEME) or (crack(mu([(-20, 254), (2, 232), (-14, 208)]), 500 + s) + crack(mu([(18, 262), (6, 240)]), 520 + s))), 3.2, 3.0); keepfin(t, G)
+                                           "storm": [mu([(-8, 266), (10, 248), (-8, 234), (10, 212)])], "star": [mu([(0, 262), (0, 214)])], "brawler": [mu([(0, 262), (0, 214)])], "starter": [mu([(0, 262), (0, 214)])]}.get(THEME) or (crack(mu([(-20, 254), (2, 232), (-14, 208)]), 500 + s) + crack(mu([(18, 262), (6, 240)]), 520 + s))), 3.2, 3.0); keepfin(t, G)
     plate(G, "stone", FR("F", s * c, 40, 0), octa(0, 177, 36, 24, 0.4), 0, 24, 4.5, top=0.78, seed=210 + s)                     # knee cap
     # ---- lower leg (v9): deep shin greave like Korblox, flows straight into the sabaton, no bucket cuff ----
     G = side + "LowerLeg"
@@ -541,7 +545,7 @@ def leg(s):
     t = loft(G, "stone", s, [(166, c, 48, -51, 62, 20, 0.5), (158, c, 51, -53, 66, 21, 0.45), (146, c, 48, -50, 66, 19, 0.2), (118, c, 45, -47, 62, 18),
                             (92, c, 42, -45, 57, 17), (70, c, 40, -43, 52, 16), (58, c, 39, -42, 50, 15)], 2.6, keep=True)
     t = carve(t, FR("F", s * c, 64, 0), ({"iron": [mu([(0, 146), (0, 96)]), mu([(-14, 108), (0, 96), (14, 108)])], "crystal": [mu([(0, 146), (0, 96)]), mu([(-14, 108), (0, 96), (14, 108)])],
-                                    "storm": [mu([(-10, 148), (8, 130), (-8, 116), (8, 96)])]}.get(THEME) or crack(mu([(14, 140), (-6, 116), (10, 92)]), 504 + s)), 3.2, 3.0); keepfin(t, G)
+                                    "storm": [mu([(-10, 148), (8, 130), (-8, 116), (8, 96)])], "star": [mu([(0, 146), (0, 96)])], "brawler": [mu([(0, 146), (0, 96)])], "starter": [mu([(0, 146), (0, 96)])]}.get(THEME) or crack(mu([(14, 140), (-6, 116), (10, 92)]), 504 + s)), 3.2, 3.0); keepfin(t, G)
     # ---- foot (v9): sabaton = heel cup + three overlapping lames down the instep + rounded toe cap, thin sole with a stone rim ----
     G = side + "Foot"; bx = s * c; cf = -2.0; kb = 50.0 / 54.0
     def ov(f0, f1, w0, w1, n=14):
@@ -573,15 +577,15 @@ def leg(s):
     G = side + "LowerLeg"
     trim(G, s, 150, 143, c, 49, -51, 67, 19, 0.2)                                     # trim under the knee guard
     trim(G, s, 74, 67, c, 41, -44, 54, 16)                                            # trim at the ankle
-    for zz, ll in ((132, 40), (100, 32)):                                             # swept fins on the outside of the greave
+    for zz, ll in (((132, 40), (100, 32)) if SPIKY else ()):                          # swept fins on the outside of the greave
         spike(G, (s * (c + 40), -10, zz), (s * (c + 40 + ll), -40, zz + 22), 10.5)
     G = side + "UpperLeg"
     crystal(G, (s * c, 58, 177), (s * c, 80, 177), 12.5)                               # cyan gem on the knee cop
-    spike(G, (s * c, 48, 194), (s * c, 70, 238), 11.0)                                 # short spike above the knee
+    if SPIKY: spike(G, (s * c, 48, 194), (s * c, 70, 238), 11.0)                      # short spike above the knee
     for zz in (214, 234, 254): rivet(G, FR("F", s * (c + s * 30), 50, 0), 0, zz, 3.4, 2.4); rivet(G, FR("F", s * (c - s * 30), 50, 0), 0, zz, 3.4, 2.4)
     G = side + "Foot"
     for fo in (-30.0, -8.0): rivet(G, FR(out, bx + s * 51, cf + fo, 0), 0, 58, 4.2, 3.0)
-    spike(G, (bx + s * 42, cf - 40, 40), (bx + s * 72, cf - 80, 58), 11.0)             # heel spur
+    if SPIKY: spike(G, (bx + s * 42, cf - 40, 40), (bx + s * 72, cf - 80, 58), 11.0)  # heel spur
     plate(G, "metal", FR("T", bx, cf, 0), [(x * 0.9, -f) for x, f in ((-40, 84), (40, 84), (34, 100), (0, 106), (-34, 100))][::-1], 22, 27, 1.2)   # polished toe cap
 
 def arm(s):
@@ -610,14 +614,14 @@ def arm(s):
                 x2 = x * math.cos(tilt) - zz * math.sin(tilt); z2 = x * math.sin(tilt) + zz * math.cos(tilt)
                 pts.append(V(ax + s * (cu + x2), af + cf_ + y, cz + z2))
         return hull(G, m, pts, 3.0, keep=keep)
-    t = cap(6, 0, jz + 8, 68, 61, 40, -6, "stone", tilt=math.radians(-24), keep=True)                  # top lame
+    t = cap(6, 0, jz + 8, 68 * PSC, 61 * PSC, 40 * PSC, -6, PMAT[0], tilt=math.radians(-24), n=PN, keep=True)                  # top lame
     t = carve(t, FR(out, ax + s * 68.0, af, 0), [spiral(0, jz + 10, 14, flip=-s if out == "L" else s)], 5.0, 3.6); keepfin(t, G)
-    cap(20, 0, jz - 18, 64, 59, 30, -4, "stone2", tilt=math.radians(-40))                               # middle lame
-    cap(32, 0, jz - 40, 57, 54, 23, -3, "stone", tilt=math.radians(-55))                                 # lower lame
+    cap(20, 0, jz - 18, 64 * PSC, 59 * PSC, 30 * PSC, -4, PMAT[1], tilt=math.radians(-40), n=PN)                               # middle lame
+    cap(32, 0, jz - 40, 57 * PSC, 54 * PSC, 23 * PSC, -3, PMAT[2], tilt=math.radians(-55), n=PN)                                 # lower lame
     for fo in (-40.0, 40.0): rivet(G, FR("F" if fo > 0 else "B", ax + s * 30, af + fo * 1.55, 0), 0, jz + 6, 5.0, 3.5)
     # v11b (owner 14:32 "the crystals are floating"): sit every crystal ON the top lame. Find the lame's surface height under each base
     # (same ellipsoid + tilt as cap(6, 0, jz + 8, 68, 61, 40, tilt -24 deg)) and sink the base 9 units into the stone.
-    def dome_top(xo, yo, cu=6.0, cz=jz + 8, rx=68.0, ry=61.0, rz=40.0, tilt=math.radians(-24)):
+    def dome_top(xo, yo, cu=6.0, cz=jz + 8, rx=68.0 * PSC, ry=61.0 * PSC, rz=40.0 * PSC, tilt=math.radians(-24)):
         """height of the TOP surface of the top lame above (xo, yo): of all surface points whose x lands within 3 units of xo,
         take the HIGHEST (the old nearest-match search could return the underside, so pieces sank inside the shoulder)."""
         k = max(0.0, 1 - (yo / ry) ** 2) ** 0.5; tgt = xo - cu; best_z = None; near = None
@@ -650,7 +654,7 @@ def arm(s):
             crystal(G, (ax + s * bx_, af + by_, bz), (ax + s * tx_, af + ty_, bz + tz_), r_)
         gem_socket()
     elif THEME == "magma":                                   # a basalt CHIMNEY vent on each shoulder (glowing mouth) + two basalt spikes
-        bx_, by_, h_, r_, lean = 22, -18, 74, 19, -16
+        bx_, by_, h_, r_, lean = 22, -16, 86, 27, -18                       # wider (owner: chimneys read thin)
         bz = dome_top(bx_, by_) - 12.0; cxx = abs(ax + s * bx_)
         secs = []
         for t in (0.0, 0.5, 0.84, 0.86, 1.0):
@@ -669,6 +673,15 @@ def arm(s):
             pts = [(u * sc_ * 1.6, bz + v * sc_ * 1.3) for u, v in bolt]
             plate(G, "crystal", FR("F", ax + s * bx_, af + by_, 0), pts if s > 0 else [(-u, v) for u, v in pts][::-1], -5, 5, 1.2)
         gem_socket()
+    elif THEME == "brawler":                                 # padded leather pads: a strap + two rivets on each pad
+        gz = dome_top(30, 0) - 6.0
+        plate(G, "leather", FR("F", ax + s * 28, af + 46, 0), [(-30, gz - 8), (30, gz - 8), (30, gz - 22), (-30, gz - 22)], 0, 5, 1.2)
+        for u in (-20, 20): rivet(G, FR("F", ax + s * 28, af + 51, 0), u, gz - 15, 4.0, 3.0)
+    elif THEME == "star":                                    # a gold five-point STAR on the front of each huge round gold shoulder + a gem in it
+        gz = dome_top(26, 30) - 4.0
+        st = [((40 if k % 2 == 0 else 17) * math.sin(math.pi * k / 5), gz + (40 if k % 2 == 0 else 17) * math.cos(math.pi * k / 5)) for k in range(10)]
+        plate(G, "metal", FR("F", ax + s * 26, af + 52 * PSC * 0.6, 0), st[::-1], 0, 9, 1.4)
+        crystal(G, (ax + s * 26, af + 52 * PSC * 0.6 + 6, gz), (ax + s * 26, af + 52 * PSC * 0.6 + 22, gz), 10.0)
     elif THEME == "crystal":                                 # big crystal clusters (cyan + pink), swept up/out/back like wings
         for (bx_, by_, tx_, ty_, tz_, r_, m_) in ((24, -8, 70, -90, 128, 22, "crystal"), (8, 16, 30, -30, 92, 15, "slate"), (46, -36, 116, -110, 70, 17, "crystal"), (38, 20, 74, 14, 60, 12, "slate")):
             bz = dome_top(bx_, by_) - 12.0
@@ -700,7 +713,7 @@ def arm(s):
     elif THEME == "crystal":                                                           # CRYSTAL: crystal shards down the back of the forearm
         for zz, ll, m_ in ((386, 52, "crystal"), (352, 40, "slate")):
             crystal(G, (ax + s * 8, af - 38, zz), (ax + s * 22, af - 38 - ll, zz + 30), 11.0, m=m_)
-    else:
+    elif SPIKY:
         for zz, ll in ((384, 46), (348, 36)):                                            # two swept fins down the back of the forearm
             spike(G, (ax + s * 8, af - 40, zz), (ax + s * 18, af - 40 - ll, zz + 26), 11.0)
     for fo in (-18.0, 0.0, 18.0): rivet(G, FR(out, ax + s * 46.0, af + fo, 0), 0, 340, 3.4, 2.4)
@@ -738,7 +751,75 @@ def smooth_round(big):
     for f in out.faces: f.smooth = f.material_index not in keep
     return out
 
+def extras():
+    """IRON / STAR: a cloth cape (Accessory in game, on BodyBackAttachment). STAR: a gold ring of stars standing behind the head,
+    held by a gold rod from the back plate (connected, not floating: owner rule)."""
+    if THEME not in ("iron", "star"): return
+    long_ = THEME == "star"
+    G = "Cape"; nu, nv = 14, 12
+    top, bot = 506.0, (96.0 if long_ else 250.0); wt, wb = 150.0, (250.0 if long_ else 196.0)
+    def pt(i, j, side):
+        u = i / nu - 0.5; t = j / nv
+        x = u * (wt + (wb - wt) * t)
+        z = top + (bot - top) * t
+        f = -84.0 - (54.0 if long_ else 28.0) * t ** 1.4 + 26.0 * (2 * u) ** 2 * (1 - 0.4 * t)       # hangs back, wraps round the shoulders
+        f += -7.0 * math.sin(i * 1.9) * t                                                            # soft folds, bigger at the hem
+        return V(x, f + (0.0 if side == 0 else -4.0), z)
+    bm = bmesh.new(); vv = {}
+    for side in (0, 1):
+        for i in range(nu + 1):
+            for j in range(nv + 1): vv[(side, i, j)] = bm.verts.new(pt(i, j, side))
+    for i in range(nu):
+        for j in range(nv):
+            bm.faces.new([vv[(0, i, j)], vv[(0, i + 1, j)], vv[(0, i + 1, j + 1)], vv[(0, i, j + 1)]])
+            bm.faces.new([vv[(1, i, j + 1)], vv[(1, i + 1, j + 1)], vv[(1, i + 1, j)], vv[(1, i, j)]])
+    for i in range(nu):
+        for j in (0, nv):
+            a, b_ = vv[(0, i, j)], vv[(0, i + 1, j)]; c_, d_ = vv[(1, i + 1, j)], vv[(1, i, j)]
+            bm.faces.new([a, b_, c_, d_] if j == nv else [d_, c_, b_, a])
+    for j in range(nv):
+        for i in (0, nu):
+            a, b_ = vv[(0, i, j)], vv[(0, i, j + 1)]; c_, d_ = vv[(1, i, j + 1)], vv[(1, i, j)]
+            bm.faces.new([a, b_, c_, d_] if i == 0 else [d_, c_, b_, a])
+    setmat(bm, "moss"); fin(bm, G, True)
+    # hem trim + clasp bar along the top
+    for j0, j1, m in ((nv - 1, nv, "metal"),):
+        bm2 = bmesh.new(); r2 = {}
+        for i in range(nu + 1):
+            for k, j in enumerate((j0 + 0.55, j1)):
+                p0 = pt(i, j, 0); r2[(i, k, 0)] = bm2.verts.new(p0 + Vector((0, 1.5, 0))); r2[(i, k, 1)] = bm2.verts.new(p0 + Vector((0, -5.5, 0)))
+        for i in range(nu):
+            for s_ in (0, 1):
+                bm2.faces.new([r2[(i, 0, s_)], r2[(i + 1, 0, s_)], r2[(i + 1, 1, s_)], r2[(i, 1, s_)]])
+        setmat(bm2, m); fin(bm2, G)
+    box(G, "metal", (0, -86, 504), (156, 10, 12), 2)
+    for sx in (-1, 1): rivet(G, FR("B", 0, -92, 0), sx * 66, 504, 9, 6)                                   # clasps
+    if THEME == "star":
+        H = "Halo"; cz_, cf_ = 712.0, -96.0; R_ = 92.0
+        ring = bmesh.new(); bmesh.ops.create_circle(ring, cap_ends=False, radius=1.0, segments=48)
+        bm3 = bmesh.new()
+        for k in range(48):                                                                       # a thin gold torus, upright behind the head
+            a0 = 2 * math.pi * k / 48; a1 = 2 * math.pi * (k + 1) / 48
+            ps = []
+            for a_ in (a0, a1):
+                cx, cz = math.cos(a_) * R_, math.sin(a_) * R_
+                for b_ in range(6):
+                    bb = 2 * math.pi * b_ / 6; r = R_ + math.cos(bb) * 5.0
+                    ps.append(V(math.cos(a_) * r, cf_ + math.sin(bb) * 5.0, cz_ + math.sin(a_) * r))
+            vs = [bm3.verts.new(p) for p in ps]
+            for b_ in range(6):
+                bm3.faces.new([vs[b_], vs[(b_ + 1) % 6], vs[6 + (b_ + 1) % 6], vs[6 + b_]])
+        bmesh.ops.remove_doubles(bm3, verts=bm3.verts[:], dist=0.01); setmat(bm3, "metal"); fin(bm3, H, True)
+        for k in range(7):                                                                        # seven gold stars on the ring
+            a_ = math.pi * (0.5 + (k - 3) * 0.26)
+            sx_, sz_ = math.cos(a_) * R_, cz_ + math.sin(a_) * R_
+            st = [((22 if q % 2 == 0 else 9) * math.sin(math.pi * q / 5), (22 if q % 2 == 0 else 9) * math.cos(math.pi * q / 5)) for q in range(10)]
+            plate(H, "metal", FR("B", sx_, cf_ - 6, 0), [(-u, sz_ + v) for u, v in st], -4, 6, 1.2)
+        box(H, "metal", (0, cf_ + 2, (cz_ - R_ + 520) / 2), (9, 9, cz_ - R_ - 520 + 12), 1.5)      # the rod from the back plate up to the ring
+        box(H, "metal", (0, (cf_ - 92) / 2, 520), (10, abs(cf_ + 92) + 10, 10), 1.5)
+
 def build():
+
     global MATS
     MATS = mats()
     c = bpy.data.collections.get(COLL)
@@ -751,6 +832,7 @@ def build():
     for k in list(PARTS): del PARTS[k]
     character(); body(); torso(); waist(); shoulders()
     for s in (-1, 1): leg(s); arm(s)
+    extras()
     tris = 0; rep = []
     for grp, bms in PARTS.items():
         me = bpy.data.meshes.new(grp); big = bmesh.new()

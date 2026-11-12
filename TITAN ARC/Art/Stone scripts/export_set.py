@@ -25,6 +25,8 @@ REG = {"Torso": ["UpperTorso", "LowerTorso"]}                     # v10c: one ma
 for sd in ("Left", "Right"):
     REG[sd + "Arm"] = [sd + n for n in ("UpperArm", "LowerArm")]          # hands = ROBLOX Boy meshes in game, no texels for ours
     REG[sd + "Leg"] = [sd + n for n in ("UpperLeg", "LowerLeg", "Foot")]
+XTRA = [n for n in ("Cape", "Halo") if n in bpy.data.objects]
+if XTRA: REG["Extra"] = XTRA                                       # cape / halo accessories get their own map
 src_mat = bpy.data.materials.new("bake_src"); src_mat.use_nodes = True; nt = src_mat.node_tree; nt.nodes.clear()
 uvn = nt.nodes.new("ShaderNodeUVMap"); uvn.uv_map = "atlas"
 tc = nt.nodes.new("ShaderNodeTexImage"); tc.image = col_img; te = nt.nodes.new("ShaderNodeTexImage"); te.image = glo_img
