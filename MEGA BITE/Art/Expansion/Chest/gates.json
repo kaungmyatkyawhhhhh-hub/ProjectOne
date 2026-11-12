@@ -1,0 +1,13 @@
+{
+ "front_iou": 0.961,
+ "top_iou": 0.911,
+ "end_iou": 0.927,
+ "tris": 4252,
+ "size_studs": [
+  15.41,
+  12.37,
+  10.86
+ ],
+ "open_edges": 0,
+ "pass": true
+}
