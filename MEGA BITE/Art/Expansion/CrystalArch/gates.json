@@ -1,0 +1,34 @@
+{
+ "side_iou": 0.876,
+ "top_iou": 0.897,
+ "front_iou": 0.599,
+ "open_edges": 0,
+ "tris": 5092,
+ "size_studs": [
+  150.2,
+  66.4,
+  76.9
+ ],
+ "px_per_stud": {
+  "side": 6.467,
+  "top": 5.373,
+  "front": 5.45
+ },
+ "contract_views": [
+  "side",
+  "top"
+ ],
+ "pass": false,
+ "tolerance_1_stud": {
+  "side": {
+   "sheet_covered": 0.977,
+   "model_inside_sheet": 0.98
+  },
+  "top": {
+   "sheet_covered": 0.983,
+   "model_inside_sheet": 0.964
+  }
+ },
+ "note": "faceted rock: the strict IoU loses thin slivers along the jagged outline; within 1 stud the model follows the sheet",
+ "front_view": "not a contract view"
+}

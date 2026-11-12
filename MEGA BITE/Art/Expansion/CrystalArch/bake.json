@@ -1,0 +1,1 @@
+{"group": {"Rock": "Rock", "RockDark": "Rock", "CryCyan": "Crystals", "CryPurple": "Crystals", "CryPink": "Crystals", "Mush": "Glow", "Spot": "Glow", "Star": "Glow", "Flower": "Glow", "Stem": "Decor", "CoralY": "Decor", "Shelf": "Decor", "CoralP": "Decor"}, "flat": ["Rock", "RockDark", "CryCyan", "CryPurple", "CryPink", "Star"], "default": "Rock", "floor_z": -0.4}
