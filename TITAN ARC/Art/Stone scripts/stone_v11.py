@@ -554,10 +554,29 @@ def arm(s):
     cap(20, 0, jz - 18, 64, 59, 30, -4, "stone2", tilt=math.radians(-40))                               # middle lame
     cap(32, 0, jz - 40, 57, 54, 23, -3, "stone", tilt=math.radians(-55))                                 # lower lame
     for fo in (-40.0, 40.0): rivet(G, FR("F" if fo > 0 else "B", ax + s * 30, af + fo * 1.55, 0), 0, jz + 6, 5.0, 3.5)
-    crystal(G, (ax + s * 26, af - 6, jz + 46), (ax + s * 76, af - 70, jz + 118), 15)        # v6: two green crystals per pauldron, mirrored
-    crystal(G, (ax + s * 6, af + 14, jz + 50), (ax + s * 34, af - 38, jz + 104), 11)
-    crystal(G, (ax + s * 44, af - 34, jz + 34), (ax + s * 96, af - 96, jz + 70), 10)
-    moss(G, (ax + s * 6, af + 12, jz + 48), 20, 12, 5, 95 + (1 if s > 0 else 0), strands=3, slen=22, sdir=(0, 1, 0), size=(6, 10))
+    # v11b (owner 14:32 "the crystals are floating"): sit every crystal ON the top lame. Find the lame's surface height under each base
+    # (same ellipsoid + tilt as cap(6, 0, jz + 8, 68, 61, 40, tilt -24 deg)) and sink the base 9 units into the stone.
+    def dome_top(xo, yo, cu=6.0, cz=jz + 8, rx=68.0, ry=61.0, rz=40.0, tilt=math.radians(-24)):
+        best = None
+        for i in range(0, 401):
+            for zz in (rz * k / 40.0 for k in range(0, 41)):
+                pass
+            break
+        # search the ellipsoid surface for the point whose rotated x matches xo
+        for a_i in range(0, 721):
+            a_ = math.pi * a_i / 720.0                      # 0..pi : polar angle from the top
+            x = rx * math.sin(a_); z = rz * math.cos(a_)
+            for sgn in (1, -1):
+                xx = sgn * x
+                k = max(0.0, 1 - (yo / ry) ** 2) ** 0.5    # shrink by the y offset
+                x2 = xx * k * math.cos(tilt) - z * k * math.sin(tilt); z2 = xx * k * math.sin(tilt) + z * k * math.cos(tilt)
+                if best is None or abs(x2 - (xo - cu)) < best[0] - 1e-9 or (abs(abs(x2 - (xo - cu)) - best[0]) < 0.5 and z2 > best[1]):
+                    if best is None or abs(x2 - (xo - cu)) <= best[0] + 0.5: best = (abs(x2 - (xo - cu)), z2)
+        return cz + best[1]
+    for (bx_, by_, tx_, ty_, tz_, r_) in ((26, -6, 76, -70, 72, 15), (6, 14, 34, -38, 56, 11), (44, -34, 96, -96, 38, 10)):
+        bz = dome_top(bx_, by_) - 9.0
+        crystal(G, (ax + s * bx_, af + by_, bz), (ax + s * tx_, af + ty_, bz + tz_), r_)
+    moss(G, (ax + s * 6, af + 12, dome_top(6, 12) - 2.0), 20, 12, 5, 95 + (1 if s > 0 else 0), strands=3, slen=22, sdir=(0, 1, 0), size=(6, 10))
     # ---- v7 hand: a real gloved hand like the catalog bundles (owner 12:35: "the roblox catalog bundle hands are different from ours")
     #      relaxed open hand, palm towards the leg, the four fingers together and slightly curled in, the thumb in front; smooth dark glove + a stone cuff
     G = side + "Hand"
