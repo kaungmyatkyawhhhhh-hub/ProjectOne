@@ -40,3 +40,22 @@ Landmarks as Atomic streaming models, the 4 heroes Persistent (visible as goals)
 
 ## Sheets (ChatGPT, 13 Nov ~01:10; vault `MEGA BITE\Art\Expansion\`)
 Landmarks: statue head, galleon, whale skeleton, lighthouse, crystal arch. Creatures: turtle, blue whale, eel, kraken. Kit: 8 Open Sea props.
+
+## 13 Nov 01:23 - owner: "use this skill [roblox-3d-model-from-sheet], redo everything that u did with this skill and future ones too"
+- The first quick models (crystal arch, lighthouse v1, whale skeleton, statue v1) were built by eye without the skill's gates, so they are all being redone.
+- Tried two automatic sheet-to-mesh methods (silhouette hull, row-loft). Both passed the IoU number but looked bad (boxy, smeared paint), so IoU alone is not enough. Back to hand-written builders with every size measured from the sheet, as the approved shark/fish generators were made.
+- New gate tools in `Art\Expansion\Tools\`: `gate_obj.py` (silhouette IoU per view at the sheet's measured px/stud with an explicit anchor, open edges, mismatch overlay), `compare2.py` + `layout2.py` (ortho renders pasted into the sheet layout, 3 hero views, backface check).
+- **Lighthouse v2** (`Art\Expansion\Lighthouse\lighthouse_v2.py`): bands, deck, lantern, dome and taper measured from the front view; kelp traced from the sheet (contour-to-mesh); corals, sponges and clams placed from the measured views; colours = sheet medians. Gates: side 0.85, front 0.85, top 0.79 (target 0.90), open edges 0, backfaces 0. Not passing yet. The sheet's views disagree on the hill size (front wide, top narrow), and the model has less coral, starfish and barnacle detail than the sheet.
+- Statue sheet v2 made (upright in all three views): `mb_sheet_lm_statue_v2.png`.
+- Rule (home note #6): the owner approves each model before the next one starts, so the remaining models wait for the owner's call on the lighthouse.
+
+## 13 Nov 01:41 - owner: "keep improving until its 1:1 exact copy, no mistakes" + "dont use lots of triangles" -> Lighthouse v3 PASSES
+`Art\Expansion\Lighthouse\lighthouse_v3.py` (rebuilds from the sheet; needs `Tools\lmkit_v2.py`, `hk.py`, `gate_obj_v2.py`, pip `triangle`).
+- **Gates:** side IoU **0.914**, front IoU **0.916** (need 0.90), open edges **0**, backfaces **0**, **7,208 triangles** (v2 was 18,752), 16 colour parts, 212 x 161 x 150 studs. Roblox model asset **86068219049218** (Approved), set up in `ServerStorage.MB_LM_Lighthouse_v3` (colours, Neon lamp, anchored, collisions on the solid parts). Not placed in the map yet.
+- **How it is made (all measured or traced from the sheet):** tower radius by height from both elevations; band, deck, rail, lantern, dome and ball rows from the front view; the door and the broken hole are the sheet's own outlines cut through the wall (you can swim in; dark inside); starfish and barnacles traced and wrapped on the tower; kelp, corals, sponges, clams and starfish are the sheet's outlines turned into meshes (constrained Delaunay) from BOTH elevations; the hill's skyline per column from both elevations (rounded-min mound) + 54 two-tone boulders that never rise above the sheet's skyline; colours = medians sampled from the sheet.
+- **Where the sheet contradicts itself (so an exact copy of all three views cannot exist):**
+  1. Top view: the hill is 111 studs deep there but 168 wide in the front view. The two elevations win; top IoU is 0.60 (documented, not a gate).
+  2. The door faces the camera in both elevations. One door cannot. It sits at 45 degrees between them; the hole and the starfish keep their measured angles from the door.
+  3. The tower flares more in the front view (radius 30.2 at z=40) than in the side view (25.8). The model uses the average.
+- Not modelled (2D paint detail): chipped paint edges, wood grain, the soft shading. Flat colours per part instead (no texture, cheaper for phones).
+- Lessons: (a) IoU alone is not enough (hull and row-loft passed IoU and looked bad); (b) register each view by a MEASURED anchor (tower axis column, floor row, px per stud), never by the bbox centre (was 5 px off); (c) geometry below the floor silently costs IoU; (d) outline meshes need a constrained triangulation (plain Delaunay + centroid test dropped a third of the kelp); (e) keep one shell + colour by face instead of one solid per band (-1,300 triangles).
