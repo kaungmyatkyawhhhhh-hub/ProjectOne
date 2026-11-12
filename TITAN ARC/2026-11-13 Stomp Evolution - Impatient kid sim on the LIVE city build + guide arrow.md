@@ -92,3 +92,23 @@ Spam alone doesn't fix the city search problem, but on top of the arrow it adds 
 - Quest 3 now says "Buy an UPGRADE".
 - In the sim this is the same as "pads near wherever you are" (version F) and better: zero walking.
 - Checked in Play: buying Stomp Power took 8 coins and gave Lv 1 with the toast. Saved as v85.
+
+## UI pass + COMING NEXT tiles (02:41, owner: "make the ui's better also the brawler and awaken and crown disappear when the requirments has been reached on the screen")
+**Upgrades v2** (SE_Upgrades) in the kid-card style:
+- each upgrade is its own coloured card (gradient, dark slab, black outline, a shine strip);
+- the icon pokes out on the left, tilted;
+- a white FredokaOne name, a dark "Lv N" pill and the plate price button with a coin;
+- a tilted gold "UPGRADES" sticker on top.
+
+Layout:
+- Desktop: a column under TALENTS.
+- Phones (SMALL): one row along the bottom middle, clear of the thumbstick and jump.
+- It hides while a window or the cutscene is up.
+- Bug found: the new ScreenGui defaulted to ZIndexBehavior Global, so the price plates drew under the cards. It is set to Sibling now.
+
+**COMING NEXT tiles** (`refreshLocks` in StompClient). A tile now pops (x1.25) and goes away for good once its requirement is reached:
+- the evolve tile only teases BRAWLER (the height bar already says what's next after that);
+- AWAKEN goes at STAR or after the first Awaken;
+- CROWN goes once you wear the crown.
+
+Checked in Play (BRAWLER vanished at 1.94 m). Saved as v86.
