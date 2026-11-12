@@ -53,7 +53,20 @@ Old scripts: `ServerStorage.MB_<name>_preUIFx_12Nov` (StoreUI, HeroCard, FishCli
 - No script errors.
 - Not checked: a real equip (it would change the save: the burst was fired by hand), a phone, Reduced Motion.
 
-## Left for pass 2 (seen, not built)
+## Pass 2 (12 Nov, 14:00, owner: "ok next step")
+Picture: `UI\MEGA_BITE_UI_pass2_12Nov.jpg`. Old scripts: `ServerStorage.MB_<name>_preUIPass2_12Nov` (UIFx, Settings, Index).
+- **Settings:** every choice pill is a 3D button now (a darker lip under it, the pill sinks onto it when pressed; lime lip when chosen, blue-grey when not); unchosen text darker (#5D7397) so it reads on a phone; the window ends 10 units under the last row (measured at run time, it had an empty strip).
+- **Index:** the "7/8 found" pill is a progress bar (navy track, lime fill with a sheen, "7/8 FOUND" on it); a new fish fills it with a spring, a pop and a few glints.
+- **New UI glint** `mb_ui_glint_white.png`, asset **94289337313940** (`UI\fx\`, drawn in code: two tapered beams + a soft core, a 4-point star, not a ray ring). Replaces the VFX-sheet star (109154755081516) in `UIFx`, which read small and yellowish. Burst glints bigger (about 22-40 px) and stay bright for most of their flight.
+- Checked in Play: Settings layout and pills, the Index bar (7/8, fill 0.875), the new glint in a burst on the Shop. No script errors. Not checked: a real new fish filling the bar, a phone.
+- Note: `ContentProvider:PreloadAsync` reported "Failure" for the new glint while an ImageLabel with it loaded fine (the same unreliable result as on 12 Nov morning).
+
+## Still open after pass 2
+1. Shop: the skin pictures always show the Reef Shark; showing the player's CURRENT shark in each skin needs 7 x 5 renders (35 images).
+2. Shop: the featured side minis are hidden at phone width.
+3. A phone test of all of it.
+
+## Pass 1 list (kept for history)
 1. Settings: an empty strip under the last row; the unchosen pills are flat grey next to the 3D buttons elsewhere.
 2. Index: the "7/8 FOUND" pill could be a progress bar toward the next page reward, like the reference's Collection bar.
 3. Shop: the featured side minis are hidden at phone width; the skins grid could show the player's CURRENT shark in each skin instead of the Reef Shark pictures.
