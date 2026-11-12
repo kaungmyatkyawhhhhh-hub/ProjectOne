@@ -101,3 +101,10 @@ Saturation itself isn't the problem; too many hues is.
 - ChatGPT comes back too bright for our grade (icon mean 0.39, corners 0.11). Fix in code, keeping the face: protect bright low-saturation pixels (face mask, blurred), then gamma ~1.2 + a radial vignette to ~0.12 at the corners on everything else. Result: mean 0.32, corners 0.02, 48% black / 12% white at 64 px, face 30x the corners.
 - The "clip > 0.97" metric counts saturated glow too: the 23x winner also measures 23%, so compare against the winner rather than a fixed 20%.
 - Logo on a cyan thumbnail: a cyan-recoloured logo melts into the lightning; the brand PINK logo pops (cyan's opposite). Keep the brand logo; darken a pocket top-left (radial, -70%) under it.
+
+## Lessons 13 Nov (Galaxy Incremental icon v2)
+- The winner-composition swap works across games, not only across GYM ARC updates: attach the GYM ARC 23x winner and say "copy its composition EXACTLY, only the theme changes to SPACE". Result: a split face (bacon / living galaxy) that passes the grade in one try (mean 0.21, 66% black, one violet family).
+- ChatGPT's split-face icon comes back slightly dark on the face (white only 6.5% at 64 px). Fix in code: mask bright low-saturation pixels, blur the mask, push them 55% toward white (white 8.2%, everything else unchanged).
+- "Planet in hand" with the face lit by the planet = pink face. Keep the face lit by a white key; the glowing object must not be the face's light source.
+- Letter icons ("NI", "RI") only work for incrementals that already have fans. A new game leads with bacon + a story.
+- Workflow note: the ChatGPT image can't come back into the workspace (tool output is too small). Grade it in the ChatGPT tab with canvas JS, then download to the owner's Downloads folder.
