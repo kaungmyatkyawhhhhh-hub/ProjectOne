@@ -204,7 +204,7 @@ GLY = [np.array(g, np.float32) for g in (
     [[1,1,1,0,0],[0,0,1,0,0],[1,1,1,1,1],[1,0,0,0,1],[1,1,0,1,1]],
     [[0,1,1,1,1],[0,1,0,0,0],[0,1,1,1,0],[0,0,0,1,0],[1,1,1,1,0]])]
 GLYS = np.stack(GLY)
-def glyph_mask(P, Nn, cell=13.0, seed=7):
+def glyph_mask(P, Nn, cell=17.0, seed=7):
     ax = np.argmax(np.abs(Nn), 1)
     u = np.where(ax == 0, P[:, 1], P[:, 0]); v = np.where(ax == 2, P[:, 1], P[:, 2])
     cu = np.floor(u / cell); cv = np.floor(v / cell)
@@ -223,8 +223,8 @@ def paint_stone(sel, base, lightc, darkc, crack_amt, moss_amt, wear=1.0, glyphs=
     P = pos[sel]
     b = np.tile(base, (sel.sum(), 1))
     # cloudy mottling (Korblox: soft light/dark blotches) + grain
-    cloud = sstep(0.35, 0.68, fbm(P, 30.0, 3, 101))
-    v = 1.0 + 0.05 * ct[sel, 0] + 0.22 * (big[sel] - 0.5) + 0.20 * (cloud - 0.5) + 0.10 * (med[sel] - 0.5) + 0.07 * (fine[sel] - 0.5) + 0.05 * (grit[sel] - 0.5)
+    cloud = fbm(P, 34.0, 3, 101)
+    v = 1.0 + 0.05 * ct[sel, 0] + 0.20 * (big[sel] - 0.5) + 0.22 * (cloud - 0.5) + 0.06 * (med[sel] - 0.5) + 0.04 * (fine[sel] - 0.5)
     b = b * v[:, None]
     b[:, 0] *= 1 + 0.045 * ct[sel, 1]; b[:, 2] *= 1 - 0.06 * ct[sel, 1] + 0.05 * (big[sel] - 0.5)
     b = b * (0.62 + 0.62 * shade_dir[sel])[:, None]                                                       # painted light, a bit softer
@@ -246,7 +246,8 @@ def paint_stone(sel, base, lightc, darkc, crack_amt, moss_amt, wear=1.0, glyphs=
     # carved glyph band along plate borders
     if glyphs > 0:
         on, glip = glyph_mask(P, nor[sel])
-        band = sstep(2.8, 3.8, d_cvx[sel]) * sstep(16.5, 15.0, d_cvx[sel]) * (span[sel].max(1) > 95.0) * glyphs
+        flat = sstep(0.86, 0.93, np.abs(nor[sel]).max(1))      # only on flat faces: on curved ones the plane flips and the glyphs turn into scribbles
+        band = sstep(2.8, 3.8, d_cvx[sel]) * sstep(20.5, 19.0, d_cvx[sel]) * (span[sel].max(1) > 95.0) * flat * glyphs
         b = mix(b, darkc * 0.75, on * band * 0.8); b = mix(b, lightc, glip * band * 0.35)
     # moss / lichen on tops and in corners
     ms = sstep(0.52, 0.72, fbm(P, 26.0, 3, 41)) * np.clip(0.3 + 0.7 * np.maximum(up[sel], 0) + 0.15 * (1 - occ), 0, 1) * moss_amt
