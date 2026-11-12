@@ -331,3 +331,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - Give visible plates the texels: one map per limb and shrink hidden UV islands. Studio shows textures below 1024, so detail must be big enough to survive about 256 px.
 - Patterns projected on the dominant axis must stay off curved faces (they turn into scribbles).
 - Re-exports change the UVs: always ship the mesh and its maps together.
+
+## Armour that isn't stiff (12 Nov, Stone v11)
+- Judge in a walk pose, side by side with a catalog bundle.
+- No straight drums with flat horizontal rims: taper limbs and angle the rims (elbow guard up at the back, knee guard peaked at the front, plates sweeping down on the outside).
+- Never let the under-suit show at joints; plates overlap the joint.
+- Spikes and crystals sweep back and out, never straight up.
