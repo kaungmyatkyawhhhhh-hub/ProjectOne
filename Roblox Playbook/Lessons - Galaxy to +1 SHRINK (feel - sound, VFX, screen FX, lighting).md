@@ -356,3 +356,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - Cause: we copied the GYM ARC winner's transformation layout without checking that the transformation exists in Galaxy. In GYM ARC the player really does grow into a titan; in Galaxy he never becomes a galaxy. The grade passed, the meaning failed.
 - Fix: bacon (white, amazed) looking up at what he grew: his little rock island with a huge blazing star system rising from it (`galaxy_icon_v2_C_starsystem`).
 - Rule: before borrowing a winning composition, write the game's core loop in one line ("tiny rock → huge star system → supernova"). The icon's story must be THAT loop. A layout from another game is only a template for framing, light and contrast, never for the story.
+
+## Read the game's OWN research before any art (13 Nov, Galaxy icon v2, 2nd correction)
+- What felt bad: icon C (an amazed bacon under a violet star system). Owner: "this dont look good, i think u forgot the research".
+- Cause: I only skimmed the recipe's template. I never opened the research notes behind it, which already held a written Galaxy icon spec (in "What the owner clicks" and the "Roblox front page icons" note): an awed/worried bacon face lit by a star swelling into Supernova, one huge "+1", a warm star glow on dark blue, the face big and breaking the frame. I invented a violet scheme with no emotion and no number.
+- Fix: icon D was made exactly to that spec in one try (new ChatGPT chat "Create Roblox Icon", with the game's low-poly `render_system.png` attached for the style), then graded in code (face protected, gamma 1.25, vignette).
+- Rule: before ANY icon or thumbnail, open every research note the recipe links to, plus the game's shot list, and search them for the game's name. Copy any spec written there into the prompt word for word. Never invent a colour scheme when the research already names one.
