@@ -1,0 +1,34 @@
+{
+ "side_iou": 0.715,
+ "top_iou": 0.74,
+ "front_iou": 0.471,
+ "open_edges": 0,
+ "tris": 9446,
+ "size_studs": [
+  201.5,
+  92.1,
+  51.9
+ ],
+ "px_per_stud": {
+  "side": 7.425,
+  "top": 4.175,
+  "front": 7.6
+ },
+ "contract_views": [
+  "side",
+  "top"
+ ],
+ "pass": false,
+ "note": "thin skeleton: strict IoU is low because rib and decoration outlines only a stud apart do not overlap; within 1 stud (0.5% of the length) the model follows the sheet",
+ "tolerance_1_stud": {
+  "side": {
+   "sheet_covered": 0.916,
+   "model_inside_sheet": 0.941
+  },
+  "top": {
+   "sheet_covered": 0.904,
+   "model_inside_sheet": 0.972
+  }
+ },
+ "front_view": "not a contract view (the sheet's front view is drawn in perspective)"
+}
