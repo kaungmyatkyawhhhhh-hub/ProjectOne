@@ -28,7 +28,9 @@ Followed: [[2026-11-05 PLAYBOOK - Roblox icon, thumbnail and logo recipe]] and t
 ## New set (in the owner's Downloads → move to `Celestial Incremental/Assets/thumbs/v2/`)
 | File | What | Grade (mean / black / white / corners / hues) | Verdict |
 |---|---|---|---|
-| galaxy_icon_v2_A_splitface.png | The GYM ARC 23x-winner composition: left = normal bright bacon, right = bacon turned into a living galaxy (black starry skin, violet nebula, blazing white star eye, cyan crack edge). Face brightened in code (face mask +55% toward white) | 0.22 / 64% / 8.2% / 0.017 / violet + cyan | **USE: main icon** |
+| galaxy_icon_v2_A_splitface.png | The GYM ARC 23x-winner composition: left = normal bright bacon, right = bacon turned into a living galaxy (black starry skin, violet nebula, blazing white star eye, cyan crack edge). Face brightened in code (face mask +55% toward white) | 0.22 / 64% / 8.2% / 0.017 / violet + cyan | REJECTED by the owner (13 Nov 00:17): "doesnt make sense" (he never turns into a galaxy in the game) |
+| **galaxy_icon_v2_C_starsystem.png** | Amazed bacon (white face, lower left) looking up at what he grew: his little rock island with a huge blazing star and 3 planets on rings rising from it. Shows the real loop (tiny rock → star system) | 0.29 / 50% / 7.9% / 0.028 | REJECTED by the owner (13 Nov 00:20): "dont look good, u forgot the research" |
+| **galaxy_icon_v2_D_supernova_plus1.png** (raw: galaxy_icon_v2_D_raw.png) | THE RESEARCH SPEC (What the owner clicks + front page icons): extreme close-up, awed/worried bacon face breaking the frame, his little low-poly island's star swelling into Supernova, a huge "+1" top-left, warm gold against dark blue. Graded in code (face kept, gamma 1.25, vignette) | 0.37 / 44.5% / 12.3% / 0.07 | **USE: main icon** (ChatGPT chat "Create Roblox Icon", 13 Nov) |
 | galaxy_icon_v2_B_planet.png | Bacon holding a tiny planet about to go supernova | 0.27 / 52% / 6.3% / 0.006 | Backup only: the face came out pink and the story is weaker |
 | galaxy_thumb_v2_1_supernova_1-2Qa.png | Bacon dives at the camera, his island + a star going supernova behind him, huge "1.2Qa/s" (the ad creative that scaled best) | 0.30 / 56% / 13.9% / 0.018 / one violet family 81% | **USE: thumbnail 1** (no logo: the number fills the top) |
 | galaxy_thumb_v2_2_blackhole.png | Bacon clings to his island's edge while a black hole (cyan ring) sucks in planets, "???" | 0.26 / 61% / 9.5% / 0.05 | **USE: thumbnail 2** (logo top-left optional) |
@@ -36,7 +38,7 @@ Followed: [[2026-11-05 PLAYBOOK - Roblox icon, thumbnail and logo recipe]] and t
 ## Still to do
 1. **Owner:** move the 4 files from Downloads into the vault folder above. Or connect the Downloads folder in the Claude app so Claude can do it.
 2. Upload: Creator Dashboard > Galaxy > Places > Thumbnails.
-   - Icon = A.
+   - Icon = D (supernova +1).
    - Home page: thumbnails 1 + 2, plus keep the old "1.2Qa/s" one 2-3 days as a baseline.
    - Then judge by click rate in the ads / the experience page.
 3. Next thumbnails, same chat, "same exact style":
@@ -50,3 +52,7 @@ Followed: [[2026-11-05 PLAYBOOK - Roblox icon, thumbnail and logo recipe]] and t
   - `GYM ARC/Assets/thumbs_nov/bacon_real_v1.png`;
   - `icon_chatgpt_v6_pink.png`.
 - Then icon B, thumb 1 and thumb 2, all as follow-ups with "same exact style, grade and darkness". The full text is in the chat.
+
+
+## Note on the thumbnails (13 Nov 00:25)
+Thumbnails 1 and 2 use the invented violet scheme, not the research's warm gold + dark blue. The shot list also says search image #1 should be the BEFORE → AFTER island (bare rock vs glowing system). Redo them in the "Create Roblox Icon" chat, matching icon D: #1 before/after, #2 1.2Qa/s, #3 Supernova, #4 the Sector 2 gate "???".
