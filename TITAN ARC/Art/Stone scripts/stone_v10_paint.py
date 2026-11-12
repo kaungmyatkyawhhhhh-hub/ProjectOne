@@ -307,8 +307,8 @@ def paint_stone(sel, base, lightc, darkc, crack_amt, moss_amt, wear=1.0, glyphs=
     if glyphs > 0:
         on, glip = glyph_mask(P, nor[sel])
         flat = sstep(0.86, 0.93, np.abs(nor[sel]).max(1))      # only on flat faces: on curved ones the plane flips and the glyphs turn into scribbles
-        band = sstep(2.8, 3.8, d_cvx[sel]) * sstep(20.5, 19.0, d_cvx[sel]) * (span[sel].max(1) > 95.0) * flat * glyphs
-        b = mix(b, darkc * 0.75, on * band * 0.8); b = mix(b, lightc, glip * band * 0.35)
+        band = sstep(3.0, 4.0, d_cvx[sel]) * sstep(17.5, 16.0, d_cvx[sel]) * (span[sel].max(1) > 140.0) * flat * glyphs
+        b = mix(b, darkc * 0.8, on * band * 0.58); b = mix(b, lightc, glip * band * 0.28)
     # moss / lichen on tops and in corners
     ms = sstep(0.52, 0.72, fbm(P, 26.0, 3, 41)) * np.clip(0.3 + 0.7 * np.maximum(up[sel], 0) + 0.15 * (1 - occ), 0, 1) * moss_amt
     b = mix(b, c255(104, 118, 38) * (0.8 + 0.4 * fine[sel])[:, None], np.clip(ms, 0, 1) * 0.62)
