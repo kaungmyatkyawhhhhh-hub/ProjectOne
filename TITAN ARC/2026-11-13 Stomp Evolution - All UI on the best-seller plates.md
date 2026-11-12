@@ -41,3 +41,44 @@ They replace the sepia medallions in `C.CardArt`.
 - **Fresh images showed blank plates/icons for a few seconds:** new `StarterPlayerScripts.SE_Preload` preloads every plate, K.Img icon, card art and the sparkle at startup.
 
 Checked in Play: the HUD, the MY BUILD window, the evolve card and the hand. Saved.
+
+## UI motion + sound set v3 (03:01, owner: "add tons of animations to the ui and motion effects, also super satisfying sounds effects")
+Calm rule from the same night: motion ANSWERS something; nothing loops forever on screen; idle motion is rare and small. All of it is off under Reduced Motion.
+
+**Sound set v3** (code-made, `Audio/sfx_v3/` + `make3_py.txt`; group 33151111, universe Use granted):
+| Sound | ID | Use |
+|---|---|---|
+| UI_Pop | 127705911134682 | bubbly pop for presses and panels |
+| UI_Tick | 115063563106247 | soft tick for hover and wiggles |
+| Coin_Tick | 107695457364195 | rising coin ladder while the counter counts up |
+| Cash | 103045931849837 | the cha-ching when you buy an upgrade |
+| QuestDone | 101845737545868 | the fanfare |
+| BarStep | 112926602705344 | each 10% of the way to the next form, and quest progress |
+| Unlock | 94750113825601 | the shing when a COMING NEXT tile goes |
+| ToastIn | 70645274609439 | toast swoosh |
+| LevelUp | 99311842030964 | upgrade level up |
+| Whoosh2 | 126137201866415 | windows and the HUD entry |
+
+New audio says "Asset has not been reviewed" for a few minutes after upload. It worked on the next play.
+
+**New `StarterPlayerScripts.SE_UIMotion`:**
+- **Entry:** coins, quest, Talents, upgrades, height and next bar slide in from their edges one after another (Back ease, soft whooshes).
+- **Coins:** the counter punches (elastic) and the coin icon spins 360°; Coin_Tick climbs in pitch for quick gains (ladder resets after 1.2 s).
+- **Height:** punch + the arrow hops (max 4/s). BarStep plays each 10% toward the next form and the next bar punches.
+- **Quest:** BarStep on progress; quest done = fanfare + a confetti burst from the card + an elastic pop.
+- **Windows:** a soft blur (10) behind any open window + a whoosh in and out.
+- **Talents:** with picks waiting, it wiggles once every ~4 s + a tick (no breathing).
+
+**StompClient:**
+- toasts drop in from above with a tilt and a Back bounce + ToastIn, and leave upward (the plates fade too);
+- buying plays Cash, quest done plays QuestDone;
+- a COMING NEXT tile vanishing plays Unlock + a confetti burst.
+
+**SE_Upgrades:**
+- hover = the icon tile tilts + a rising tick;
+- can't afford = the row shakes no;
+- buy = 4 coins fly in an arc from the coin counter into the price pill (each lands with a tick), then the row pops, the tile spins back from -30°, a confetti burst from the pill, the level text pops 1.5x and LevelUp plays.
+
+**Fix:** SE_Preload used Decals for image IDs, which spammed "No asset content representation" warnings. It uses ImageLabels now.
+
+Checked in Play: spam stomps + buying Stomp Power; console clean. Saved.
