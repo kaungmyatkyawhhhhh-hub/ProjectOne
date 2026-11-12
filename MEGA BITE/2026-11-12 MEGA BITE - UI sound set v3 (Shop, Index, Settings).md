@@ -5,6 +5,7 @@ created: 2026-11-12
 # MEGA BITE - UI sound set v3: Shop, Index and Settings (12 Nov 2026)
 
 Owner (12 Nov, 12:16): "the shop and index and settings sfx should be better".
+**Owner (12 Nov, 12:36), after hearing the before / after video: "ok i approve". This set is the approved UI sound family: new UI sounds must use the same voice and key.**
 Back to [[00 MEGA BITE Home]] · rules: [[K06 Art, UI, VFX, sound and lighting]] · research: [[Playbook notes - Sound and music]] · reference: [[2026-11-12 Watch study - 3D pet card and egg hatch screen (owner recording 11 Nov)]]
 
 ## What was wrong (read from the live scripts)
@@ -28,7 +29,7 @@ One voice for everything: a short pluck (sine + soft FM + 2nd and 4th partials) 
 
 | Sound (`MB_Sounds`) | When | What it is | Length | Asset id |
 |---|---|---|---|---|
-| `UIClick` (2 takes live) | small buttons, Buy | dry pop on C6 / E6 (a third take on D6 is uploaded but was still in review) | 0.2 s | 108382158708247, 136141808986542; pending 78767617213752 (old 125500194205274) |
+| `UIClick` (3 takes) | small buttons, Buy | dry pop on C6 / D6 / E6 (the D6 take was approved by Roblox and added at 12:45) | 0.2 s | 108382158708247, 78767617213752, 136141808986542 (old 125500194205274) |
 | `UISelect` | tap a skin, pass or fish (the 3D card spins) | pop, a whoosh that peaks as the card is edge-on, a soft G6 landing chime | 0.9 s | 96514211604453 |
 | `UITab` | Shop tabs | one crisp C6; the code plays Featured / Skins / Passes as C, D, E | 0.27 s | 82805371158794 |
 | `UIOpenShop` | Shop button | up-whoosh into G5-C6-E6-G6 with sparkle | 0.94 s | 114285962529579 |
