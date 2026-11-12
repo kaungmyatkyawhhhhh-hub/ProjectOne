@@ -62,3 +62,23 @@ Also tested (no gain, within noise): compressing the form gates (Magma 3.9, Stor
 5. "NEW!" smash index popup.
 
 It's a model: the real check is the onboarding funnel after the next test.
+
+## Spam stomp (02:21, owner: "it still dont feel like titan simulator, in titan simulator u spam punch and not like punch stuff")
+The design doc v0 already planned this ("Every stomp pays, even on bare ground"; `Calc/anytap.py`), but the live server paid nothing for a stomp that hit no prop.
+
+**Built** (backup `ServerStorage.StompServer_preSpamStomp_13Nov`):
+- Every stomp grows you. A bare stomp pays `C.BareMass = 0.3` of the Mass of the best prop you can smash (with Stomp Power, Awaken, shards and the Heavy Heel/Big Bones cards).
+- It also pays `C.BareCoins = 0.15` of that prop's coins, kept as a fraction until it adds up.
+- Bare stomps count toward Ground Pound, so spamming builds up to the x6 hit.
+- Props stay the bonus: full Mass, coins and the crumble.
+- Client: each spam stomp shows a "+0.6" style number (one decimal under 10) and a coin when one is earned; Ground Pound shows its toast.
+- Checked in Play: spamming on an empty road reaches BRAWLER in 9.0 s, no errors. Saved.
+
+**Sim with spam:**
+| Version | 5 min | 5 min @7 s |
+|---|---|---|
+| Live + spam | 8% | 1% |
+| + guide arrow + spam (both built) | **77%** | 41% |
+| + events / pads / golden + spam | **94%** | 72% |
+
+Spam alone doesn't fix the city search problem, but on top of the arrow it adds about 10 points, and with the events it's close to the goal.
