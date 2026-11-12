@@ -319,3 +319,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - Painted material beats noisy realism: smooth, top-lit, crisp light edge trim, few cracks.
 - TextureID on Plastic for every piece; set every BodyColors field to white.
 - InsertService:LoadAsset of a model asset returns Model > Model > parts: go one level down.
+
+## Bundle hands + boots (12 Nov, Stone v9)
+- A Roblox bundle hand mesh with a classic TextureID shows beige skin blotches. Colour it with a SurfaceAppearance ColorMap instead (TextureID empty).
+- Boots like Korblox: a shin greave that tapers into a tall ankle cup, overlapping plates down the instep, a rounded toe, and a thin sole with a stone rim. No bucket cuff and no glowing sole slab.
+- Before showing the owner a screenshot, make sure it is OUR model (place it alone or check its texture IDs). The v8 screenshot showed Korblox by mistake.
+- A texture that fails its first fetch stays failed for the Studio session: re-upload a fresh copy.
