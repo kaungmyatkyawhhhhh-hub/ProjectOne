@@ -46,3 +46,19 @@ Sensitivity (A vs B+C+D): patience 7 s: 60 s stay 5.7 % -> 27.9 %; 11 s: 18.9 % 
 ## Next
 - The new worst point (D): the trek itself and the first minutes in the Open Sea. Ideas to test next: a Piranha that is faster in the trek (cruise 14 -> 16), Open Sea schools a bit denser near the ring, an "Open Sea!" arrival card with the x2 EXP shown.
 - After launch: read the 7-step funnel; if step 6 (Open Sea) drops most, it matches the sim.
+
+## 13 Nov 00:15 - owner: "yes do all what sim said" -> the rest built
+- **E as a SEA CURRENT (instead of moving the map):** during the "Swim out to the OPEN SEA" quest the ground arrows are a current; swimming along them (heading within ~40 deg) carries you x1.7 (`Bus.State.current`, set in MB_GuideArrows, applied in MB_Swim); the chevrons turn cyan and flow 2.6x faster while you ride. Checked in Play: a Piranha riding it swam 44 studs/s (top 26) and crossed 184 studs in 4 s; no server speed-check warnings (the server allows up to the DART speed, 2.3x top).
+- **Piranha cruise 14 -> 16** (GameConfig.Evolutions).
+- **Open Sea schools nearer the reef edge:** open-zone fish spawn/respawn at radius OpenSeaMin + (Max - Min) x u^1.7 (was uniform 300-380).
+- Backups: `ServerStorage.GameConfig_preSimAll_13Nov` (+ the earlier MB_FishServer / MB_GuideArrows backups; MB_Swim has `MB_Swim_preFpRmb_12Nov` from just before).
+
+| Patience | Version | still playing at 60 s | 120 s | Barracuda by 5 min | Piranha at |
+|---|---|---|---|---|---|
+| 11 s | A live before the sim | 18.3% | 0.2% | 0.2% | 33.7 s |
+| 11 s | B+C+D | 60.8% | 14.2% | 16.7% | 33.7 s |
+| 11 s | ALL | **74.0%** | **21.4%** | **34.0%** | 33.2 s |
+| 7 s | A -> ALL | 5.7% -> 40.0% | 0% -> 5.3% | 0% -> 12.4% | |
+| 16 s | A -> ALL | 38.2% -> 91.5% | 1.7% -> 44.6% | 1.1% -> 57.9% | |
+
+**New top quit points (median kid):** lost in the Open Sea while eating 15 there (37 %) and waiting for a predator for "DART away from a predator" (31 %). Next ideas: a predator that comes to you during that quest (a "practice" Barracuda that lunges slowly), arrows to Open Sea fish for that quest, the Eat 15 goal lowered to 10.
