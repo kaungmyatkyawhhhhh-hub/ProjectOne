@@ -810,8 +810,11 @@ function Roads.build(data, opts)
 				-- carved under the next hairpin leg up)
 				-- (opts.clearHalf, Yangon decks: only the deck's own width; a ramp foot must not dig under the
 				-- side lanes beside it)
-				local wide = opts.clearHalf or (math.max(a.wl, a.wr, b.wl, b.wr) + WALK)
-				workspace.Terrain:FillBlock(cf * CFrame.new(0, SLAB / 2 - 4 + 11, 0), Vector3.new(wide * 2, 22, len + grow), Enum.Material.Air)
+				-- (each side only to its own edge plus its own pavement: a side lane's 3.5-stud inner walk left a
+				-- trench 6.5 studs wide beside it, review 13 Nov. Local +X is the road's right, as in stripCF.)
+				local cl = opts.clearHalf or (math.max(a.wl, b.wl) + (r.walkL or WALK))
+				local cr = opts.clearHalf or (math.max(a.wr, b.wr) + (r.walkR or WALK))
+				workspace.Terrain:FillBlock(cf * CFrame.new((cr - cl) / 2, SLAB / 2 - 4 + 11, 0), Vector3.new(cl + cr, 22, len + grow), Enum.Material.Air)
 			end
 			-- outside the town: flush concrete shoulders (the ground under them is cleared too)
 			if not town and not opts.surfaceOnly then

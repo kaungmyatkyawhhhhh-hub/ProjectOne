@@ -101,6 +101,19 @@ end
 local function lineDist(o, i: number, px: number, pz: number, ax: number?, az: number?, nx: number?, nz: number?): number
 	local best = math.huge
 	local pts = o.pts
+	-- (a road ends square at a cut: nothing of it lies past that end. Review 13 Nov: the loop's cut end
+	-- reached 30 studs into the Kabar Aye side lanes and took their lines away)
+	if o.cut then
+		for e = math.max(1, i - 2), math.min(#pts, i + 2) do
+			if not o.cut[e] then
+				local p = pts[e]
+				local s = (px - p.pos.X) * p.dir.X + (pz - p.pos.Z) * p.dir.Z
+				if (o.cut[e + 1] and s > 0) or (o.cut[e - 1] and s < 0) then
+					return math.huge
+				end
+			end
+		end
+	end
 	for j = math.max(1, i - 2), math.min(#pts - 1, i + 1) do
 		if o.cut and (o.cut[j] or o.cut[j + 1]) then
 			continue

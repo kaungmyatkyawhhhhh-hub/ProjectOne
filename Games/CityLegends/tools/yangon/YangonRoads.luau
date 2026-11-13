@@ -91,7 +91,12 @@ end
 local function edgeXZ(o, i: number, side: number): (number, number)
 	local s = o.s[i]
 	local rx, rz = rightOf(s)
-	return s[1] + rx * o.half * side, s[3] + rz * o.half * side
+	-- (each sample's own half width on that side, s[7] left / s[8] right, as Roads.build lays the edge)
+	local h = (if side < 0 then s[7] elseif side > 0 then s[8] else 0) or o.half
+	if side == 0 then
+		h = 0
+	end
+	return s[1] + rx * h * side, s[3] + rz * h * side
 end
 
 -- a road's half width at sample i (the wider side: step 4 widens the loop where side lanes leave it)
@@ -462,7 +467,7 @@ function M.findMouths(names: { string })
 				local bestRank = nil
 				for oi, b in M.near(s0[1], s0[3], 2) do
 					local big = M.list[oi]
-					if big.rank < o.rank and polyDist(big, b[2], s0[1], s0[3]) < big.half and (not bestRank or big.rank < bestRank) then
+					if big.rank < o.rank and polyDist(big, b[2], s0[1], s0[3]) < M.halfAt(big, b[2]) and (not bestRank or big.rank < bestRank) then
 						bestRank = big.rank
 						m = { road = name, i0 = i0, step = step, big = big, bigI = b[2], on = big.name }
 					end
@@ -477,7 +482,7 @@ function M.findMouths(names: { string })
 					if not b then
 						return true
 					end
-					return polyDist(m.big, b[2], px, pz) > m.big.half + 0.5
+					return polyDist(m.big, b[2], px, pz) > M.halfAt(m.big, b[2]) + 0.5
 				end
 				local k = i0
 				while true do
@@ -779,7 +784,8 @@ end
 function M.findCorners()
 	M.corners, M.cornerSpan = {}, {}
 	local ringPts = M.ringOuter()
-	for _, m in M.mouths do
+	local pass = {}
+	for mi, m in M.mouths do
 		local S = M.R[m.road]
 		local sideP = {}
 		for _, side in { -1, 1 } do
@@ -818,6 +824,19 @@ function M.findCorners()
 			assert(px, "corner: " .. m.road .. " side " .. side .. " never meets " .. m.on)
 			sideP[side] = { px = px, pz = pz, ePts = ePts, bPts = bPts, ka = ka, ta = ta, kb = kb, tb = tb, sb = sb }
 		end
+		pass[mi] = sideP
+	end
+	-- (review, 13 Nov) every corner starts about T studs from its P. Where another junction's corner point
+	-- is closer than 2 T + 4 along the same kerb, both corners would overlap: T shrinks to 0.45 of the gap.
+	local allP = {}
+	for mi, sideP in pass do
+		for _, side in { -1, 1 } do
+			table.insert(allP, { mi = mi, px = sideP[side].px, pz = sideP[side].pz })
+		end
+	end
+	for mi, m in M.mouths do
+		local sideP = pass[mi]
+		local S = M.R[m.road]
 		for _, side in { -1, 1 } do
 			local c = sideP[side]
 			local other = sideP[-side]
@@ -836,6 +855,14 @@ function M.findCorners()
 			end
 			local theta = math.acos(math.clamp(ux * vx + uz * vz, -1, 1))
 			local T = if m.ring then M.CORNER_T_RING else M.CORNER_T
+			for _, q in allP do
+				if q.mi ~= mi then
+					local gap = hyp(q.px - c.px, q.pz - c.pz)
+					if gap < 2 * T + 4 then
+						T = math.min(T, 0.45 * gap)
+					end
+				end
+			end
 			local r = T * math.tan(theta / 2)
 			-- the circle's centre on the wedge's bisector, then pulled until it is r from both kerb lines
 			-- (they are not quite straight: the ring is round, the loop bends)
@@ -1721,7 +1748,9 @@ function M.buildBarriers()
 			local half = M.halfAt(o, i) + M.WALK
 			local n = math.max(1, math.floor(half * 2 / M.BARRIER_SEG + 0.5))
 			local seg = half * 2 / n
-			local look = CFrame.lookAt(Vector3.zero, Vector3.new(rx, 0, rz)).Rotation
+			-- (looking along the road: the block's X, its long side, lies across it. Review 13 Nov: looking
+			-- across turned every block into a fin with a car-wide gap beside it)
+			local look = CFrame.lookAt(Vector3.zero, Vector3.new(fx, 0, fz)).Rotation
 			for k = 0, n - 1 do
 				local lat = -half + seg * (k + 0.5)
 				local onWalk = math.abs(lat) > M.halfAt(o, i)
@@ -1874,12 +1903,13 @@ function M.checkMouths()
 end
 
 -- the whole of step 5: every road (steps 3 and 4 with the streets), the decks, the barriers, then the
--- scrub (it should find nothing; it says what it took)
+-- scrub (it moves the few specks left where junction zones meet to ServerStorage.YangonScraps and says
+-- what it took)
 function M.step5()
 	local log = { M.step4() }
 	task.wait()
 	table.insert(log, M.buildBarriers())
-	table.insert(log, M.scrub(false))
+	table.insert(log, M.scrub(true))
 	return table.concat(log, "\n")
 end
 
