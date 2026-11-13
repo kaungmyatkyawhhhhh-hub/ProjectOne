@@ -189,6 +189,15 @@ class Screen:
                     e['t1'] = start
             start = max(start, s.centre_free)
         s.cines.append((start, start + length))
+        if s.f.get('key_queue'):
+            # the cutscene PAUSES the KEY queue too: what was showing / waiting comes back after it
+            push = start + length + 0.4
+            for o in sorted(s.els, key=lambda o: o['t0']):
+                if not o['key'] or o.get('stays') or o.get('cine') or o['region'] not in ('toast', 'centre'): continue
+                if o['t1'] > start and o['t0'] < start + length and o['t1'] > o['t0']:
+                    d = o['t1'] - o['t0']; o['t0'] = max(push, o['t0']); o['t1'] = o['t0'] + d; push = o['t1'] + 0.15
+                    o.pop('hidden_from', None)
+            s.key_free = max(s.key_free, push); s.toast_free = max(s.toast_free, push)
         s.add(name=name, region='modal', t0=start, t1=start + length, key=True, words=key_words, cine=True)
         s.flashes.append(start + length * 0.8)
         s.sting(start, 'windup'); s.sting(start + length * 0.8, 'boom')
@@ -334,6 +343,8 @@ def score(S, kid):
             if e['region'] in ('centre', 'toast', 'lumi', 'float') and any(o['region'] == 'modal' for o in vis if o is not e) and not cine:
                 if e['region'] == 'centre': continue      # a card under a window / under another card
             reading.append(e)
+        modal_keys = [e for e in reading if e['region'] == 'modal']
+        if modal_keys: reading = modal_keys        # a card / window the kid opened has their attention
         if load <= kid['slots'] and reading:
             for e in reading: e['read'] += DT / len(reading)
     if over_run >= 0.5: overload += over_run

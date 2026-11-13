@@ -97,6 +97,13 @@ def lane(line, d0, d1, offset, half_fn, height_fn, name, side):
     for k in range(n):
         d = d0 + (d1 - d0) * k / (n - 1)
         x, y, z, tx, tz = line.at(d)
+        # (on a sample of the line: offset along that sample's own stored direction, as Roads.build lays
+        # its cross-section; the chord's differs by up to 2 degrees, half a stud at 16 out: LaneCheck found
+        # the gap it left at the Kabar Aye split)
+        j = min(range(len(line.c)), key=lambda q: abs(line.c[q] - d))
+        if abs(line.c[j] - d) < 1e-6:
+            Ls = math.hypot(line.s[j][3], line.s[j][4])
+            tx, tz = line.s[j][3] / Ls, line.s[j][4] / Ls
         rx, rz = -tz, tx
         o = offset(d) * side
         pts.append([x + rx * o, z + rz * o, d])
