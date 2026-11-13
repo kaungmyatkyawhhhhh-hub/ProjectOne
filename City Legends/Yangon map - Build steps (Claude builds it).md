@@ -25,7 +25,7 @@ Rules for every step:
 - [x] **5. Streets** (13 Nov, version 750). The 30 streets, their junction mouths and round corners, and barriers at the 16 map-edge road ends. Log entry "13 Nov 2026, step 5" below.
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes. **6a done** (13 Nov, version 752): grass up to the pavements near junctions, dashed middle line on the one-way side lanes. Still to do: road meshes (part count).
 - [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). Tested in Play the same day: traffic drives the loop, both flyovers, the side lanes and the roundabout.
-- [ ] **8. Buildings and landmarks.** Yangon-style blocks along the roads, Novotel, Optima and MM Plaza, far-city backdrop at the map edge.
+- [x] **8. Buildings and landmarks** (13 Nov, version 764). 1,267 Yangon-style buildings along every road, Optima Werkz, Novotel and Myanmar Plaza, the far city with Shwedagon on the horizon. Log entry "13 Nov 2026, step 8" below.
 - [ ] **9. Move in the game.** Venues, houses, gas stations, spawn at Optima, fast travel spots, minimap.
 - [ ] **10. Night lights.** Street lamps on main roads, lit buildings, never dark.
 - [ ] **11. Switch over.** Move Monaco to ServerStorage (kept, not deleted), playtest, phone performance check.
@@ -231,3 +231,38 @@ Rules for every step:
     - What works: the owner reopens the place and presses Play; the MCP then drives that session (Client / Server `execute_luau`, keys) and Stop works.
     - Switch the save store to the test one BEFORE the owner presses Play. Right after the reopen, a Play started on the live save. It was stopped within 5 seconds; it loaded the save and changed nothing.
   - Pictures: `Yangon 7 - ...jpg` in this folder.
+- 13 Nov 2026, step 8 (owner: "Yes, step 8"). Version **764** = "Yangon step 8: buildings, landmarks, far city".
+  - **Reference study first** (Brain method). Research note: [[2026-11-13 Research - Yangon buildings (step 8)]]. Findings:
+    - **Optima** is Optima Werkz Yangon, a car tuning workshop on Thanlwin Road. That's a good start point for a car meet.
+    - **Novotel** is Novotel Yangon Max: 15 floors, two towers on a podium.
+    - **MM Plaza** is Myanmar Plaza: a 5-floor mall with towers behind.
+    - **Ordinary buildings** are pastel walk-ups (about 90% of Yangon's flats), shophouses with big signboards, condo towers near the big junctions, and gated villas on the leafy streets.
+  - **Plots** (`tools/yangon/d10_plots.py` -> `imports/refs/map/ygn_plots.json`, in Studio `YangonData.Plots`): 1,267 rectangles facing their road, 4.5 studs behind the pavement.
+    - Nothing within the road's pavement + 3 of any road, 40 of a deck, the roundabout or water (the OSM lake outlines). They don't overlap, and 12% of frontage is left empty.
+    - The three landmarks are placed first, at the design's spots.
+    - First run gave 432 plots: a front exactly on the clearance line failed by rounding. The setback is now 1.5 more than the clearance.
+  - **Buildings** (`tools/yangon/YangonBuildings.luau` on Monaco's kit `tools/riviera/Buildings.luau`):
+    - The kit gives real window recesses, a pane per lit window tagged `Window` (WorldFx lights them at night) and `Detail` tagged LOD.
+    - Yangon types: walk-up (pastel, grilled balconies with washing, AC units, black and blue water tanks), shophouse (roller shutters, wide signboard, some rooftop signs that glow at night), condo tower (named crown, only near Hledan, Myanmar Plaza and University Avenue's end), gated villa (hipped red or green roof, wall and steel gate, yard trees).
+    - Floors are game scale (12 ground, 9 a floor), not the map's 1.6 studs a metre: at that the buildings would be doll-sized next to the cars.
+    - No glass rails (half-transparent parts are banned on phones). Made-up shop names only.
+    - **Landmarks:**
+      - Optima Werkz: workshop, roller doors, office, pylon, forecourt with attribute `MeetSpot`.
+      - Novotel: podium, 15-floor tower and a wing, "NOVOTEL" board on a navy band, canopy.
+      - Myanmar Plaza: white mall, dark-glass corner atrium, red pylon, two towers.
+      - All three as plain text, no logo artwork.
+    - Result: 553 walk-ups, 409 villas, 292 shophouses, 10 towers, 3 landmarks; 137,912 parts (109 a building; Monaco's were 244); built in 41 s.
+    - `Unstack` (no faces on one plane): about 0.8 pairs left a building, against 42 in Monaco's finished city.
+  - **Far city** (`tools/yangon/YangonFar.luau`, in `Workspace.Yangon.Far`, Persistent, nothing collides):
+    - The map had nothing past its edge. The skirt fills grass outward 2,600 studs at each stretch of edge's own height (222 fills).
+    - Then a belt of 520 trees 30-360 past the edge, and 431 distant buildings in clusters 420+ out (body, three window strips, cap), taller towards Hledan and downtown.
+    - **Shwedagon:** the gold stupa on its hill at its real bearing, about 2 km south, 1.4 times true size so it reads from the streets. It is tagged `LampGlow`, so it glows gold at night.
+    - A rebuild measured the ground on the first hill and raised the stupa about 60 studs. It looks fine; to redo it, measure the ground off the hill.
+  - **Totals:** Yangon 330,072 parts (roads 185k, buildings 138k). Monaco unchanged (388,029) until step 11.
+  - **Not done:**
+    - The middles of the big blocks between roads are empty grass (fine from the street, sparse from above).
+    - No street dressing yet (power poles, rain trees, lamps: step 10).
+    - Optima's look is a guess: the research found no photo of the real workshop.
+    - Quality-nerd kid check and phone-size pictures: with the Play test in step 11.
+  - **Owner to decide:** the real names (Novotel, Myanmar Plaza, Optima Werkz) are on the buildings as plain text because the plan names them. Say if they should be made-up names instead (trademarks).
+  - Pictures: `Yangon 8 - ...jpg` in this folder.
