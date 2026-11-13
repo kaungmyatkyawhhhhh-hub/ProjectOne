@@ -59,7 +59,7 @@ class Screen:
         s.stings = []; s.flashes = []
         s.collide = Counter(); s.blocked = 0; s.merged = 0; s.delays = []
         s.toast_free = 0.0; s.banner_free = 0.0; s.centre_free = 0.0; s.mini_free = 0.0
-        s.last_sting = -9; s.mini_batch = None
+        s.last_sting = -9; s.mini_batch = None; s.key_free = 0.0
 
     # --- helpers
     def in_cine(s, t):
@@ -116,6 +116,10 @@ class Screen:
         if key and s.f.get('calm_wait'):                            # KEY news waits until no card / window is up
             start = s.after_calm(start)
             if s.toast_free > start: start = s.toast_free
+        if key and s.f.get('key_queue'):                            # ONE KEY message at a time, anywhere on screen
+            while start < s.key_free:
+                start = s.after_calm(s.key_free)
+            s.key_free = start + hold
         if not key and start - t > 4: return                        # stale minor news is dropped
         s.delays.append(start - t)
         s.toast_free = start + hold + 0.15
@@ -144,6 +148,8 @@ class Screen:
                 b['t1'] = max(b['t1'], t + 1.0); s.merged += 1; return
             start = max(t, s.centre_free)
             if s.in_cine(start): start = s.cine_end(start) + 0.4
+            if s.f.get('key_queue'):
+                start = max(start, s.key_free); s.key_free = start + max(1.2, s.need(title_words))
             s.delays.append(start - t)
             e = s.add(name='NEW tier mini', region='centre', t0=start, t1=start + max(1.2, s.need(title_words)), key=key, words=title_words)
             s.mini_batch = e; s.centre_free = e['t1'] + 0.2; s.sting(start, 'milestone')
@@ -164,6 +170,14 @@ class Screen:
             s.delays.append(start - t)
         e = s.add(name=name, region=region, t0=start, t1=start + dur, key=key, words=words, choice=choice)
         if s.f.get('centre_queue'): s.centre_free = e['t1'] + 0.2
+        if s.f.get('key_queue'):
+            # a card the kid opened PAUSES the KEY queue: what was showing / waiting comes back after it, in order
+            push = e['t1'] + 0.3
+            for o in sorted(s.els, key=lambda o: o['t0']):
+                if o is e or not o['key'] or o.get('stays') or o.get('cine') or o['region'] not in ('toast', 'centre'): continue
+                if o['t1'] > e['t0'] and o['t0'] < e['t1'] and o['t1'] > o['t0']:
+                    d = o['t1'] - o['t0']; o['t0'] = max(push, o['t0']); o['t1'] = o['t0'] + d; push = o['t1'] + 0.15
+            s.key_free = max(s.key_free, push); s.toast_free = max(s.toast_free, push)
         return e
 
     def cutscene(s, t, name, length, key_words):
@@ -216,13 +230,15 @@ def build(flags, events, rng, kid, phase):
             S.sting(t, 'cometAppear')
             blocked = any(e['region'] == 'modal' and e['t0'] <= t < e['t1'] for e in S.els) or S.in_cine(t)
             if blocked: S.blocked += 1
-            if phase == 'first10' and tut_on and t < 150:
+            if phase == 'first10' and tut_on and t < 150 and not flags.get('lumi_says_comet'):
                 S.toast(t, 'LUMI tap-the-comet toast', S.W(4, 3), True, kind='LUMI comet')
             if not blocked and rng.random() < 0.7:
                 S.add(name='comet +N float', region='float', t0=t + 2, t1=t + 3.2)
         elif w.startswith('TUT STEP'):
             S.add(name='+ESSENCE floats', region='float', t0=t, t1=t + 1.2)
             t_l = S.after_calm(t) if flags.get('calm_wait') else t
+            if flags.get('key_queue'):
+                t_l = max(t_l, S.key_free); S.key_free = t_l + S.need(5)
             for o in S.els:                      # the card shows ONE step: the new text replaces the old
                 if o['name'] == 'LUMI card new step' and o['t1'] > t_l: o['t1'] = t_l; o['superseded'] = True
             S.add(name='LUMI card new step', region='lumi', t0=t_l, t1=t_l + 30, key=True, words=5, stays=True, w=0)
@@ -351,6 +367,8 @@ VERSIONS = [
     ('v6 + banner gets its own band', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True)),
     ('v7 + KEY news waits for calm (no card / window up)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True)),
     ('v8 + shorter KEY texts', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True)),
+    ('v9 + ONE queue for every KEY message (toast, mini, LUMI step)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True, key_queue=True)),
+    ('v10 + "tap the comet" lives on the LUMI card (no toast)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True, key_queue=True, lumi_says_comet=True)),
 ]
 
 def run(flags, n=2000, seed=11, F10=None, age=None):
