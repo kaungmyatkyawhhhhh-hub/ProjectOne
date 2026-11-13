@@ -52,10 +52,13 @@ M.palette = {
 	-- place's Concrete show each triangle's own texture direction on bends; Sandstone reads as plain, slightly
 	-- stained concrete and shows no seams)
 	paverMaterial = Enum.Material.Sandstone,
-	kerb = Color3.fromRGB(242, 240, 232),
-	kerbBand = Color3.fromRGB(195, 47, 45) :: Color3?,
+	-- (owner, 13 Nov: the white bands read blue in shade. Tried on the Pyay Road straight: the place's Concrete
+	-- texture (RivConcrete2) is blue-grey, and the shade light is blue. Smooth paint and a white a touch warm
+	-- read white in shade and in sun)
+	kerb = Color3.fromRGB(255, 238, 214),
+	kerbBand = Color3.fromRGB(200, 40, 38) :: Color3?,
 	kerbSplit = 2,
-	kerbMaterial = Enum.Material.Concrete,
+	kerbMaterial = Enum.Material.SmoothPlastic,
 	paint = Color3.fromRGB(235, 235, 230),
 }
 M.centre = { solid = true } :: { [string]: any }? -- the middle line (RoadLines opts.centre): one solid white line
