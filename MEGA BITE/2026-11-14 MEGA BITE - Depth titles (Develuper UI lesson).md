@@ -27,6 +27,7 @@ The v6 kit already did most of the video's recipe:
 - **The place is not saved or published.** The owner saves.
 
 ## Still open (from the roblox-ui-pro audit, 14 Nov)
+**Update: fixed the same day.** See [[2026-11-14 MEGA BITE - HUD tap floor (phone audit fixes)]].
 - The `MB_Crew` chip is 30 px tall, too small to tap (the minimum is 44).
 - The RightCol labels (CLOWNFISH / FOSSILIZE / PVP) are 13.6 px; the minimum is 14.
 - On phones, the Trench (PVP) button sits where the jump button is, and Settings sits in the thumbstick area.
