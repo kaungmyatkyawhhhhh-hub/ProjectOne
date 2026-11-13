@@ -1,0 +1,1 @@
+{"dir": "mosa", "name": "Mosasaurus", "ver": "hse", "length": 6.4, "jaw": true, "mouth_nohull": 1, "view_k": 1.15, "relief": {"x_from": -2.6, "cuts": 1, "amp": 0.01, "wide": 16, "contrast": 0.11, "up": 0.4, "soft": 3.5, "fade": 0.15, "jaw_k": 0.35, "end_fade": 0.04, "belly_rows": 0.2, "side_only": [0.35, 0.75], "skip_px": [[1315, 186, 24]]}, "x0": -0.1536, "x1": -6.0736}
