@@ -6,7 +6,7 @@ tags: [galaxy, kid-sim, overstimulated, ui, popups, phone]
 
 Owner: "do the simulator on my galaxy incremental", then "fix the forge window and supernova card too".
 Method: [[Brain/Methods/Overstimulated kid simulation]] (skill overstimulated-kid-sim). Research: [[2026-11-13 Research - Overstimulated kids (UI overload, stacked popups)]].
-**Studio: built, tested in Play at phone size (750 x 381), saved (versions 292 + 293). NOT published.**
+**Studio: built, tested in Play at phone size (750 x 381), saved (versions 292, 293, 294). NOT published.**
 Checklist rows updated: #147, #164, #222, #392.
 
 ## How the kid works (model, estimates)
@@ -104,6 +104,15 @@ After (built):
 ![[screens/2026-11-13 forge reveal AFTER fix (phone).jpg]]
 ![[screens/2026-11-13 overstim supernova card text cut off.jpg]]
 ![[screens/2026-11-13 supernova card AFTER fix (phone).jpg]]
+
+## Owner feedback after the build (13 Nov): "the star thing overstimulates me"
+- What: the star moment "NEW: GAS GIANT!", "NEW: IRON ASTEROID!"... came back every run. A Supernova resets the bodies, so Moon / Planet / Gas Giant fired "NEW" again each run, plus a star moment for every named tier (every 10 levels). The fix above had also made each one longer (2.6 s).
+- Built (Studio version 294, not published):
+  - the star moment ONLY for a body that is really new: Asteroid..Gas Giant in your first run, STAR / BINARY STAR the first time (early Supernovas), at most once a session;
+  - a body you re-buy after a Supernova: just its chime;
+  - a named tier (x2 income): one small toast "TIER UP: IRON GAS GIANT x2", merged while several come at once.
+- Sim v9b (= what is built now): star moments ~17 -> ~2 per 10 min; key messages missed at 7 y 1.3% (was 1.0%: the tier toasts now queue with the rest); overload 0.2 / 0.3 s per 10 min.
+- Play test (your Studio save, 12 Supernovas): 4 tier-ups in a row = one toast, no star cutscene.
 
 ## Open / for the owner
 - **The HUD has the same top-bar double count:** on phones the LVL / GALAXY chips sit ~58 px lower than meant (empty space under Roblox's buttons). Nothing overlaps; not changed.

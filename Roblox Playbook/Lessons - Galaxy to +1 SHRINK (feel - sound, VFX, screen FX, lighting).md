@@ -391,3 +391,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - Never mix TopbarInset (screen px) with AbsolutePosition (inset px): convert with GuiService:GetGuiInset() first.
   - Never cache Kit.phone() / screen size at script start; read it when you lay out.
   - Test UI in Play at a real phone size, not only in the audit's fake device.
+
+## "NEW" moments every run (13 Nov, Galaxy)
+- What felt bad: owner: "the star thing overstimulates me like NEW GAS GIANT or something and NEW {something}".
+- Cause: the NEW moment fired whenever a body went from 0 to 1, and a prestige (Supernova) puts every body back to 0, so the same "NEW" played every run; named tiers (every 10 levels) had the same big moment. "New" meant "new this run", not "new to the player".
+- Fix: the big moment only for a body new to the player; re-buys = their chime; tier ups = one small merged toast.
+- Rule for every game with a reset / prestige / rebirth: a "NEW" celebration is for things the PLAYER has never had, never for things the reset took away. Repeats get a sound or a small toast, never a card or cutscene.
