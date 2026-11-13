@@ -33,6 +33,7 @@
 	    the middle of the bigger one for a long way: the bigger road keeps its line).
 	The road under each end is looked for 0.05 inside the piece (a ray exactly on the seam between two
 	road pieces can miss: a missing dash). Needs `rank` on the roads (the lower the bigger).
+	edgeSkip = function(position) -> true where the edge lines must not be (only the two edge lines).
 ]]
 
 local RoadLines = {}
@@ -284,6 +285,11 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				local d = flat(pb - pa)
 				-- (the inside of a tight bend: the side points stand still or run backwards)
 				if d:Dot(chord) < 0.35 * len * len then
+					continue
+				end
+				-- (opts.edgeSkip(position): an edge line is left out where something else paints it, e.g. a
+				-- round corner's curved edge line)
+				if opts.edgeSkip and l.solid and math.abs(l.x) > 2 and (opts.edgeSkip(pa) or opts.edgeSkip(pa:Lerp(pb, 0.5)) or opts.edgeSkip(pb)) then
 					continue
 				end
 				if opts.clearMouths then

@@ -248,6 +248,7 @@ function M.load()
 		end
 	end
 	M.findMouths(M.MAIN)
+	M.findCorners()
 	local nCut = 0
 	for _, o in M.list do
 		for _ in M.cut[o.name] do
@@ -324,6 +325,10 @@ M.polyDist = polyDist
 -- Roads.build's opts.sideZone: must this road's kerb / pavement stay out of this spot?
 function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local px, pz = pos.X, pos.Z
+	-- a round corner takes over here
+	if M.inCorner(px, pz) then
+		return true
+	end
 	-- the roundabout: an arm's kerb stops at the ring's kerb, its pavement at the ring's pavement
 	if hyp(px - C.X, pz - C.Z) < M.RING_V + (if what == "Kerb" then M.KERB_W else M.WALK) then
 		return true
@@ -653,6 +658,399 @@ function M.buildMouth(m, folder: Instance)
 end
 
 ------------------------------------------------------------------------------------------------
+-- round corners (owner, 13 Nov: "fix sharp corners ... until theyre right")
+------------------------------------------------------------------------------------------------
+-- Where a road ends on a bigger road or in the roundabout, each of its two kerb lines meets the other
+-- road's kerb line at a point P. The pavement fills the wedge between them (angle theta). A round
+-- corner is a circle of radius r inside that wedge, touching both kerb lines (at TA on this road, TB on
+-- the other): the kerb follows the arc from TA to TB, asphalt fills the space between the arc and P, the
+-- pavement follows the arc on the inside. r = T * tan(theta / 2), so every corner starts about T studs
+-- before P: a narrow nose (the New Road fork) gets a small r, a wide elbow a big one.
+M.CORNER_T = 16 -- studs from P to where the curve starts, road on road...
+M.CORNER_T_RING = 22 -- ...and on the roundabout
+M.corners = {}
+
+-- the foot of a point on a polyline { {x, z, i = index, f = fraction}... } (open): (distance, x, z, segment, t)
+local function footOn(pts, px: number, pz: number): (number, number, number, number, number)
+	local best, bx, bz, bs, bt = math.huge, 0, 0, 1, 0
+	for k = 1, #pts - 1 do
+		local a, b = pts[k], pts[k + 1]
+		local d, t = segDist(px, pz, a[1], a[2], b[1], b[2])
+		if d < best then
+			best, bs, bt = d, k, t
+			bx, bz = a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t
+		end
+	end
+	return best, bx, bz, bs, bt
+end
+
+-- where two polylines cross: (x, z, segment on a, t on a, segment on b, t on b), the first along a
+local function crossOf(a, b)
+	for k = 1, #a - 1 do
+		local p, q = Vector3.new(a[k][1], 0, a[k][2]), Vector3.new(a[k + 1][1], 0, a[k + 1][2])
+		for j = 1, #b - 1 do
+			local t, u = segX(p, q, Vector3.new(b[j][1], 0, b[j][2]), Vector3.new(b[j + 1][1], 0, b[j + 1][2]))
+			if t and u then
+				return p.X + (q.X - p.X) * t, p.Z + (q.Z - p.Z) * t, k, t, j, u
+			end
+		end
+	end
+	return nil
+end
+
+local function cross2(ax: number, az: number, bx: number, bz: number): number
+	return ax * bz - az * bx
+end
+
+function M.findCorners()
+	M.corners, M.cornerSpan = {}, {}
+	local ringPts = M.ringOuter()
+	for _, m in M.mouths do
+		local S = M.R[m.road]
+		local sideP = {}
+		for _, side in { -1, 1 } do
+			-- this road's edge, from its end outward (about 60 samples)
+			local ePts = {}
+			local i = m.i0
+			while i >= 1 and i <= S.n and math.abs(i - m.i0) <= 60 do
+				local x, z = edgeXZ(S, i, side)
+				table.insert(ePts, { x, z, i = i })
+				i += m.step
+			end
+			-- the other road's kerb line near here
+			local bPts, sb = {}, 0
+			if m.ring then
+				local s0 = S.s[m.k]
+				local a0 = math.atan2(s0[3] - C.Z, s0[1] - C.X)
+				local j0 = math.floor((a0 % TAU) / TAU * M.N + 0.5)
+				for j = j0 - 24, j0 + 24 do
+					local p = ringPts[(j % M.N) + 1]
+					table.insert(bPts, { p.X, p.Z, j = (j % M.N) + 1 })
+				end
+			else
+				local B = m.big
+				local sk = S.s[m.k]
+				local bs = B.s[m.bigI]
+				local rx, rz = rightOf(bs)
+				sb = if (sk[1] - bs[1]) * rx + (sk[3] - bs[3]) * rz > 0 then 1 else -1
+				for j = math.max(1, m.bigI - 40), math.min(B.n, m.bigI + 40) do
+					if not M.cut[B.name][j] then
+						local x, z = edgeXZ(B, j, sb)
+						table.insert(bPts, { x, z, j = j })
+					end
+				end
+			end
+			local px, pz, ka, ta, kb, tb = crossOf(ePts, bPts)
+			assert(px, "corner: " .. m.road .. " side " .. side .. " never meets " .. m.on)
+			sideP[side] = { px = px, pz = pz, ePts = ePts, bPts = bPts, ka = ka, ta = ta, kb = kb, tb = tb, sb = sb }
+		end
+		for _, side in { -1, 1 } do
+			local c = sideP[side]
+			local other = sideP[-side]
+			-- the two rays of the pavement wedge: along this road away from the other, along the other
+			-- road's kerb away from this road's other corner
+			local e1, e2 = c.ePts[c.ka], c.ePts[c.ka + 1]
+			local ux, uz = e2[1] - e1[1], e2[2] - e1[2]
+			local L = hyp(ux, uz)
+			ux, uz = ux / L, uz / L
+			local b1, b2 = c.bPts[c.kb], c.bPts[c.kb + 1]
+			local vx, vz = b2[1] - b1[1], b2[2] - b1[2]
+			L = hyp(vx, vz)
+			vx, vz = vx / L, vz / L
+			if (other.px - c.px) * vx + (other.pz - c.pz) * vz > 0 then
+				vx, vz = -vx, -vz
+			end
+			local theta = math.acos(math.clamp(ux * vx + uz * vz, -1, 1))
+			local T = if m.ring then M.CORNER_T_RING else M.CORNER_T
+			local r = T * math.tan(theta / 2)
+			-- the circle's centre on the wedge's bisector, then pulled until it is r from both kerb lines
+			-- (they are not quite straight: the ring is round, the loop bends)
+			local bx, bz = ux + vx, uz + vz
+			L = hyp(bx, bz)
+			bx, bz = bx / L, bz / L
+			local ox, oz = c.px + bx * r / math.sin(theta / 2), c.pz + bz * r / math.sin(theta / 2)
+			for _ = 1, 40 do
+				local dA, fax, faz = footOn(c.ePts, ox, oz)
+				local dB, fbx, fbz = footOn(c.bPts, ox, oz)
+				local nax, naz = (ox - fax) / math.max(dA, 1e-6), (oz - faz) / math.max(dA, 1e-6)
+				local nbx, nbz = (ox - fbx) / math.max(dB, 1e-6), (oz - fbz) / math.max(dB, 1e-6)
+				ox += nax * (r - dA) * 0.7 + nbx * (r - dB) * 0.7
+				oz += naz * (r - dA) * 0.7 + nbz * (r - dB) * 0.7
+			end
+			local dA, tax, taz, sa, sta = footOn(c.ePts, ox, oz)
+			local dB, tbx, tbz, sbb, stb = footOn(c.bPts, ox, oz)
+			-- the arc from TA to TB the way that passes P
+			local aA = math.atan2(taz - oz, tax - ox)
+			local aB = math.atan2(tbz - oz, tbx - ox)
+			local aP = math.atan2(c.pz - oz, c.px - ox)
+			local sweep = (aB - aA) % TAU
+			if ((aP - aA) % TAU) > sweep then
+				sweep -= TAU
+			end
+			local corner = {
+				road = m.road, side = side, on = m.on, ring = m.ring, big = m.big, sb = c.sb,
+				r = r, theta = theta, ox = ox, oz = oz, px = c.px, pz = c.pz,
+				tax = tax, taz = taz, tbx = tbx, tbz = tbz, aA = aA, sweep = sweep,
+				ePts = c.ePts, bPts = c.bPts, ka = c.ka, ta = c.ta, kb = c.kb, tb = c.tb, sa = sa, sta = sta, sbb = sbb, stb = stb,
+				rin = math.max(r - M.WALK, 0) - 0.3, rout = hyp(c.px - ox, c.pz - oz) + M.WALK + 2, err = math.max(math.abs(dA - r), math.abs(dB - r)),
+			}
+			table.insert(M.corners, corner)
+			if m.ring then
+				-- (the ring's own kerb and pavement stop where the round corner starts)
+				local key = m.road .. "@" .. m.i0
+				M.cornerSpan[key] = M.cornerSpan[key] or {}
+				table.insert(M.cornerSpan[key], math.atan2(tbz - C.Z, tbx - C.X))
+			end
+		end
+	end
+	return #M.corners
+end
+
+-- is a flat point inside a corner's wedge (between the rays O->TA and O->TB, on P's side), at a distance
+-- from O between lo and hi?
+local function inWedge(c, px: number, pz: number, lo: number, hi: number): boolean
+	local dx, dz = px - c.ox, pz - c.oz
+	local d = hyp(dx, dz)
+	if d < lo or d > hi then
+		return false
+	end
+	local a = math.atan2(dz, dx)
+	local f = (a - c.aA) % TAU
+	if c.sweep >= 0 then
+		return f <= c.sweep
+	end
+	return f == 0 or f >= TAU + c.sweep
+end
+M.inWedge = inWedge
+
+-- in any corner's way (for the kerbs, pavements and edge lines of the straight roads)?
+function M.inCorner(px: number, pz: number): boolean
+	for _, c in M.corners do
+		if inWedge(c, px, pz, c.rin, c.rout) then
+			return true
+		end
+	end
+	return false
+end
+
+-- a point on a corner's arc at fraction u (0 at TA, 1 at TB), radius rho, and its road height
+local function arcPoint(c, u: number, rho: number): (number, number)
+	local a = c.aA + c.sweep * u
+	return c.ox + rho * math.cos(a), c.oz + rho * math.sin(a)
+end
+
+-- the asphalt between the arc and P, the kerb and pavement along the arc, an edge line along it
+function M.buildCorners()
+	local E = M.Roads.debugEdges
+	local pal = M.palette
+	local made = 0
+	local lines = {}
+	for _, c in M.corners do
+		local S = M.R[c.road]
+		local folder = M.folder():FindFirstChild(c.road) :: Instance
+		local ES = E[c.road][if c.side < 0 then "L" else "R"]
+		local function sY(seg: number, t: number): number
+			local a, b = c.ePts[seg], c.ePts[seg + 1]
+			return ES[a.i].Y + (ES[b.i].Y - ES[a.i].Y) * t
+		end
+		local function bY(seg: number, t: number): number
+			if c.ring then
+				return C.Y
+			end
+			local EB = E[c.big.name][if c.sb < 0 then "L" else "R"]
+			local a, b = c.bPts[seg], c.bPts[seg + 1]
+			return EB[a.j].Y + (EB[b.j].Y - EB[a.j].Y) * t
+		end
+		local yA, yB = sY(c.sa, c.sta), bY(c.sbb, c.stb)
+		local yP = sY(c.ka, c.ta)
+		-- the asphalt: TA, this road's kerb line back to P, P, the other road's kerb line on to TB, the arc back
+		local poly = { Vector3.new(c.tax, yA, c.taz) }
+		for k = c.sa, c.ka + 1, -1 do -- (ePts run outward from the road's end: TA is further out than P)
+			if k ~= c.sa or c.sta < 1 then
+				local p = c.ePts[k]
+				if k <= c.sa and k > c.ka then
+					table.insert(poly, Vector3.new(p[1], ES[p.i].Y, p[2]))
+				end
+			end
+		end
+		table.insert(poly, Vector3.new(c.px, yP, c.pz))
+		-- the other road's kerb line from P to TB
+		if c.kb ~= c.sbb then
+			local stepB = if c.sbb > c.kb then 1 else -1
+			local k = if stepB > 0 then c.kb + 1 else c.kb
+			while (stepB > 0 and k <= c.sbb) or (stepB < 0 and k > c.sbb) do
+				local p = c.bPts[k]
+				local y = if c.ring then C.Y else E[c.big.name][if c.sb < 0 then "L" else "R"][p.j].Y
+				table.insert(poly, Vector3.new(p[1], y, p[2]))
+				k += stepB
+			end
+		end
+		table.insert(poly, Vector3.new(c.tbx, yB, c.tbz))
+		local n = math.max(4, math.ceil(math.abs(c.sweep) * c.r / 2))
+		for q = n - 1, 1, -1 do
+			local u = q / n
+			local x, z = arcPoint(c, u, c.r)
+			table.insert(poly, Vector3.new(x, yA + (yB - yA) * u, z))
+		end
+		local clean = {}
+		for _, p in poly do
+			local last = clean[#clean]
+			if not last or hyp(p.X - last.X, p.Z - last.Z) > 0.01 then
+				table.insert(clean, p)
+			end
+		end
+		if #clean > 1 and hyp(clean[1].X - clean[#clean].X, clean[1].Z - clean[#clean].Z) <= 0.01 then
+			table.remove(clean)
+		end
+		local road = { Name = "Road", Material = Enum.Material.Asphalt, Color = pal.asphalt, CastShadow = false }
+		for _, t in earClip(clean) do
+			if not M.Roads.sliver(t[1], t[2], t[3]) then
+				made += M.Roads.triangle(t[1], t[2], t[3], M.SLAB, road, folder)
+			end
+		end
+		-- the kerb (bands about 3.2 long) and the pavement along the arc: the kerb from 0.05 on the road
+		-- side of the arc to 0.85 inside it, the pavement from there to WALK inside (or to the centre)
+		local len = math.abs(c.sweep) * c.r
+		local nb = math.max(1, math.floor(len / 3.2 + 0.5))
+		local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
+		local pIn = math.max(c.r - M.WALK, 0)
+		for q = 0, nb - 1 do
+			local u0, u1 = q / nb, (q + 1) / nb
+			local y0, y1 = yA + (yB - yA) * u0, yA + (yB - yA) * u1
+			local function pt(u: number, rho: number, y: number): Vector3
+				local x, z = arcPoint(c, u, rho)
+				return Vector3.new(x, y, z)
+			end
+			local kTop = M.CURB_UP + 0.1
+			local kerb = { Name = "Kerb", Material = pal.kerbMaterial, Color = if q % 2 == 1 and pal.kerbBand then pal.kerbBand else pal.kerb, CastShadow = false }
+			local o0, o1 = pt(u0, c.r + 0.05, y0 + kTop), pt(u1, c.r + 0.05, y1 + kTop)
+			local i0, i1 = pt(u0, math.max(c.r - 0.85, 0), y0 + kTop), pt(u1, math.max(c.r - 0.85, 0), y1 + kTop)
+			for _, t in { { o0, o1, i1 }, { o0, i1, i0 } } do
+				if not M.Roads.sliver(t[1], t[2], t[3]) then
+					made += M.Roads.triangle(t[1], t[2], t[3], 6.04, kerb, folder)
+				end
+			end
+			if c.r - 0.85 > 0.05 then
+				local a0, a1 = pt(u0, c.r - 0.85, y0 + M.CURB_UP), pt(u1, c.r - 0.85, y1 + M.CURB_UP)
+				local b0, b1 = pt(u0, pIn, y0 + M.CURB_UP), pt(u1, pIn, y1 + M.CURB_UP)
+				for _, t in { { a0, a1, b1 }, { a0, b1, b0 } } do
+					if not M.Roads.sliver(t[1], t[2], t[3]) then
+						made += M.Roads.triangle(t[1], t[2], t[3], 6, pave, folder)
+					end
+				end
+			end
+		end
+		-- the solid edge line, 1.2 in from the kerb, joining the two roads' edge lines
+		local nl = math.max(2, math.ceil(len / 4))
+		for q = 0, nl - 1 do
+			local x0, z0 = arcPoint(c, q / nl, c.r + 1.2)
+			local x1, z1 = arcPoint(c, (q + 1) / nl, c.r + 1.2)
+			local y0 = yA + (yB - yA) * (q / nl) + M.LIFT + M.LINE_T / 2
+			local y1 = yA + (yB - yA) * ((q + 1) / nl) + M.LIFT + M.LINE_T / 2
+			local p0, p1 = Vector3.new(x0, y0, z0), Vector3.new(x1, y1, z1)
+			local p = Instance.new("Part")
+			p.Name = "Line"
+			p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+			p.Material = Enum.Material.SmoothPlastic
+			p.Color = pal.paint
+			p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+			p.Size = Vector3.new(0.6, M.LINE_T, (p1 - p0).Magnitude + 0.12)
+			p.CFrame = CFrame.lookAt((p0 + p1) / 2, p1)
+			p.Parent = folder
+			made += 1
+		end
+		table.insert(lines, string.format("%s %s side %d: theta %.0f, r %.1f (fit %.2f), %d corners in the asphalt", c.road, c.on, c.side, math.deg(c.theta), c.r, c.err, #clean))
+		task.wait()
+	end
+	return string.format("corners: %d parts\n  %s", made, table.concat(lines, "\n  "))
+end
+
+-- The grass beside the pavement up to road height (it stood 2 to 3 studs lower: the pavement's side
+-- showed as a tall wall), out to VERGE past the pavement. Never on a carriageway, the roundabout or a
+-- corner. Run after the roads, before the lines.
+M.VERGE_W = 12
+function M.verge(names: { string })
+	local made = 0
+	local function clear(x: number, z: number, self): boolean
+		if hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 1 then
+			return false
+		end
+		if M.inCorner(x, z) then
+			return false
+		end
+		for oi, b in M.near(x, z, 3) do
+			local o = M.list[oi]
+			if o.kind == "route" and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < o.half + M.WALK + (if o == self then -0.2 else 1) then
+				return false
+			end
+		end
+		return true
+	end
+	for _, name in names do
+		local o = M.R[name]
+		for i = 1, o.n - 1 do
+			if M.cut[name][i] or M.cut[name][i + 1] then
+				continue
+			end
+			local a, b = o.s[i], o.s[i + 1]
+			for _, side in { -1, 1 } do
+				local rx, rz = rightOf(a)
+				local ok = true
+				for _, f in { 0, 0.5, 1 } do
+					for _, lat in { o.half + M.WALK + 0.5, o.half + M.WALK + M.VERGE_W / 2, o.half + M.WALK + M.VERGE_W } do
+						local x = a[1] + (b[1] - a[1]) * f + rx * side * lat
+						local z = a[3] + (b[3] - a[3]) * f + rz * side * lat
+						if not clear(x, z, o) then
+							ok = false
+						end
+					end
+				end
+				if ok then
+					-- (FillBlock's top shows 2 studs higher on smooth terrain: the grass lands 0.1 under the road)
+					local y = math.min(a[2], b[2]) - 0.1 - 2
+					local len = hyp(b[1] - a[1], b[3] - a[3])
+					local mid = Vector3.new((a[1] + b[1]) / 2, (y + y - 10) / 2, (a[3] + b[3]) / 2)
+					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (o.half + M.WALK + M.VERGE_W / 2), 0, 0)
+					workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W, 10, len + 1), Enum.Material.Grass)
+					made += 1
+				end
+			end
+			if i % 150 == 0 then
+				task.wait()
+			end
+		end
+	end
+	-- round the roundabout, between the arms, and inside the round corners at the ring
+	for j = 0, M.N - 1 do
+		local a = (j + 0.5) * TAU / M.N
+		local rho = M.RING_V + M.WALK + M.VERGE_W / 2
+		local x, z = C.X + rho * math.cos(a), C.Z + rho * math.sin(a)
+		local ok = not M.inCorner(x, z)
+		for oi, b in M.near(x, z, 3) do
+			local o = M.list[oi]
+			if o.kind == "route" and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < o.half + M.WALK + M.VERGE_W / 2 + 1 then
+				ok = false
+			end
+		end
+		if ok then
+			local len = TAU * rho / M.N + 1
+			local cf = CFrame.new(x, C.Y - 0.1 - 2 - 5, z) * CFrame.Angles(0, -a, 0)
+			workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W, 10, len), Enum.Material.Grass)
+			made += 1
+		end
+	end
+	for _, c in M.corners do
+		local inner = c.r - M.WALK
+		if inner > 2 and inner < 30 then
+			local y = (if c.ring then C.Y else M.R[c.road].s[c.ePts[c.sa].i][2]) - 0.1 - 2
+			workspace.Terrain:FillCylinder(CFrame.new(c.ox, y - 5, c.oz), 10, inner, Enum.Material.Grass)
+			made += 1
+		end
+	end
+	return "verge: " .. made .. " pieces"
+end
+
+------------------------------------------------------------------------------------------------
 -- building
 ------------------------------------------------------------------------------------------------
 
@@ -841,6 +1239,10 @@ function M.step3()
 	table.insert(log, M.buildRoads(M.MAIN))
 	table.insert(log, M.mendCutEnds(M.MAIN))
 	task.wait()
+	table.insert(log, M.buildCorners())
+	task.wait()
+	table.insert(log, M.verge(M.MAIN))
+	task.wait()
 	table.insert(log, M.buildRoundabout())
 	task.wait()
 	table.insert(log, "lines " .. M.buildLines(M.MAIN))
@@ -848,7 +1250,9 @@ function M.step3()
 end
 
 function M.buildLines(names: { string })
-	return M.RoadLines.build(M.data, M.folder(), setOf(names), { cut = M.cut, paint = M.palette.paint, centre = M.centre, clearMouths = true })
+	return M.RoadLines.build(M.data, M.folder(), setOf(names), { cut = M.cut, paint = M.palette.paint, centre = M.centre, clearMouths = true, edgeSkip = function(p: Vector3): boolean
+		return M.inCorner(p.X, p.Z) -- (the round corners paint their own edge line along the curve)
+	end })
 end
 
 ------------------------------------------------------------------------------------------------
@@ -891,6 +1295,13 @@ local function armSpan(arm, rho: number): (number, number)
 			a += TAU
 		end
 		return a
+	end
+	-- (an arm with round corners: the ring's kerb and pavement stop where the corners start, the same
+	-- angle at every radius, so their ends are square to the ring)
+	local span = M.cornerSpan and M.cornerSpan[arm.road .. "@" .. arm.i0]
+	if span and #span == 2 then
+		local a, b = near(span[1]), near(span[2])
+		return math.min(a, b), math.max(a, b)
 	end
 	local a, b = near(armAngle(arm, -1, rho)), near(armAngle(arm, 1, rho))
 	return math.min(a, b), math.max(a, b)
@@ -1358,7 +1769,7 @@ function M.checkJunctions()
 									elseif ds > h + 1.2 and ds < h + 1.8 then
 										if not (mf and sidesUnder(x, qy, z, mf)) then
 											-- (another road's mouth, or the roundabout, right beside this one is no fault)
-											local other = hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 0.5
+											local other = hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 0.5 or M.inCorner(x, z)
 											for oi, bb in near do
 												local o2 = M.list[oi]
 												if o2 ~= main and o2 ~= S and polyDist(o2, bb[2], x, z) < o2.half + (if o2.rank < main.rank then M.WALK else 0.3) then
