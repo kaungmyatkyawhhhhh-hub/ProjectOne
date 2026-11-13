@@ -26,6 +26,63 @@ R_OUT = 108.0
 data = json.load(open(os.path.join(MAP, 'ygn_roads_v2.json'), encoding='utf-8'))
 cut = {k: set(v) for k, v in data['cut'].items()}
 
+# A road that ENDS on another must be the smaller (higher rank) of the two, or the builder sees the through
+# road crossing a bigger road's end. Two street pairs had it the other way round: Insein Road (4) ends on
+# Hledan Road (12), Adipati Road (24) ends on Convocation Road (28). The through roads move below them.
+RANK_FIX = {'Hledan Road': 3.5, 'Convocation Road': 23.5}
+for r in data['roads']:
+    if r['name'] in RANK_FIX:
+        r['rank'] = RANK_FIX[r['name']]
+
+# U Tun Nyein Street and Lane 1 both START at one point (the street plan cut each back to its last
+# junction and the two met there): one street, Lane 1 reversed then U Tun Nyein, bend radius 40.
+
+
+STEP = 6.4
+
+
+def merge_corner(first, second, radius):
+    """Two streets that meet end to end at one point (both START there) are one street with a bend:
+    `first` reversed, then `second`, the corner rounded with a circular arc of `radius` (streets bend
+    at 40 studs or wider). Returns the merged sample list."""
+    A = [list(p) for p in reversed(first)]
+    for p in A:
+        p[3], p[4] = -p[3], -p[4]
+    B = [list(p) for p in second]
+    P = A[-1]
+    da = (A[-1][0] - A[-2][0], A[-1][2] - A[-2][2])
+    db = (B[1][0] - B[0][0], B[1][2] - B[0][2])
+    la, lb = math.hypot(*da), math.hypot(*db)
+    ua, ub = (da[0] / la, da[1] / la), (db[0] / lb, db[1] / lb)
+    turn = math.acos(max(-1, min(1, ua[0] * ub[0] + ua[1] * ub[1])))
+    T = radius * math.tan(turn / 2)
+
+    def cut_back(pts, dist):  # drop the samples within dist of the corner (the corner is pts[-1])
+        out = [q for q in pts if math.hypot(q[0] - P[0], q[2] - P[2]) > dist + 1e-6]
+        return out
+    A2 = cut_back(A, T)
+    B2 = list(reversed(cut_back(list(reversed(B)), T)))
+    # arc from the tangent point on A's line to the one on B's line
+    ta = (P[0] - ua[0] * T, P[2] - ua[1] * T)
+    tb = (P[0] + ub[0] * T, P[2] + ub[1] * T)
+    cross = ua[0] * ub[1] - ua[1] * ub[0]
+    side = 1 if cross > 0 else -1  # centre to the left (+) or right of the way along A
+    nx, nz = -ua[1] * side, ua[0] * side
+    cx, cz = ta[0] + nx * radius, ta[1] + nz * radius
+    a0 = math.atan2(ta[1] - cz, ta[0] - cx)
+    a1 = math.atan2(tb[1] - cz, tb[0] - cx)
+    sweep = (a1 - a0 + math.pi) % (2 * math.pi) - math.pi
+    k = max(2, int(math.ceil(abs(sweep) * radius / STEP)))
+    y0, y1 = A2[-1][1], B2[0][1]
+    arc = []
+    for i in range(0, k + 1):
+        u = i / k
+        ang = a0 + sweep * u
+        x, z = cx + radius * math.cos(ang), cz + radius * math.sin(ang)
+        tx, tz = -math.sin(ang) * (1 if sweep > 0 else -1), math.cos(ang) * (1 if sweep > 0 else -1)
+        arc.append([round(x, 2), round(y0 + (y1 - y0) * u, 2), round(z, 2), round(tx, 4), round(tz, 4), 0, A[-1][6], A[-1][7]])
+    return A2 + arc + B2, math.degrees(turn), T
+
 
 def segdist(p, a, b):
     vx, vz = b[0] - a[0], b[2] - a[2]
@@ -72,6 +129,12 @@ def runs_inside(r, o):
     return runs
 
 
+RN = {r['name']: r for r in data['roads']}
+merged, turn, T = merge_corner(RN['Lane 1']['s'], RN['U Tun Nyein Street']['s'], 40.0)
+RN['U Tun Nyein Street']['s'] = merged
+data['roads'] = [r for r in data['roads'] if r['name'] != 'Lane 1']
+print('U Tun Nyein Street + Lane 1: one street, %d samples, a %.0f-degree bend rounded at radius 40 (%.0f studs off each)' % (len(merged), turn, T))
+
 out = []
 report = []
 for r in data['roads']:
@@ -84,8 +147,10 @@ for r in data['roads']:
     for o in data['roads']:
         if o is r or o['rank'] >= r['rank']:
             continue
+        # (o's own end inside r is a T of o onto r, not a crossing)
+        o_ends_here = any(dist_road(r, e)[0] < r['half'] + 2 for e in (o['s'][0], o['s'][-1]))
         for a, b in runs_inside(r, o):
-            if a > 0 and b < n - 1:
+            if a > 0 and b < n - 1 and not o_ends_here:
                 splits.append((a, b, o['name']))
     splits.sort()
     if not splits:
@@ -127,6 +192,26 @@ for r in out:
             r[key] = True
             edge.append('%s %s at (%.0f, %.0f)' % (r['name'], 'start' if key == 'edgeStart' else 'end', p[0], p[2]))
 
+# the rule above, checked for every road end that lands on another road
+bad = []
+for r in out:
+    for key, p in (('start', r['s'][0]), ('end', r['s'][-1])):
+        if r.get('edgeStart' if key == 'start' else 'edgeEnd') or r.get('startsOnEnd' if key == 'start' else 'endsOnEnd'):
+            continue
+        under = []
+        for o in out:
+            if o is r or o.get('kind') == 'deck':
+                continue
+            d, at = dist_road(o, p)
+            if at is not None and d < half_at(o, at) - 1:
+                under.append(o)
+        # (the end's mouth goes to the biggest road it lies on: that one must be bigger than this road;
+        # a crossing's pieces end on each other inside the crossed road, which is fine)
+        if under:
+            big = min(under, key=lambda o: o['rank'])
+            if big['rank'] > r['rank']:
+                bad.append('%s %s lies on %s, a smaller road (%s > %s)' % (r['name'], key, big['name'], big['rank'], r['rank']))
+print('rank rule: %s' % ('ok' if not bad else '; '.join(bad)))
 ranks = [r['rank'] for r in out]
 assert len(ranks) == len(set(ranks)), 'two roads share a rank'
 data['roads'] = out
