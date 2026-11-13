@@ -49,12 +49,19 @@ print(lms)
 # ---- write design json (plan metres) and roads.json (world studs, the format tools/riviera/Roads.luau reads)
 def world(p,h): return [round(OX+p[0]*SPM,2),round(h*VS,2),round(OZ-p[1]*SPM,2)]
 out_roads=[];rj=[]
+# Build rank for tools/riviera/Roads.luau: the LOWER rank is the bigger road (Monaco: 0 = biggest), and no two
+# roads share one (a tie makes both roads lay a slab in their junction). r['rank'] in the design is the other way
+# round (5 = main road, 4 / 3 / 2 = smaller and smaller street) and the three main roads tie, so it is not exported.
+# Order: Yangon Loop, New Road, University Avenue, then the streets from big to small (class, then length, then name).
+MAIN_ORDER=['Yangon Loop','New Road','University Avenue']
+_order=sorted(roads,key=lambda r:(0,MAIN_ORDER.index(r['name']),0,'') if r['kind']=='main' else (1,-int(r['rank']),-round(r['len']),r['name']))
+BUILD_RANK={r['name']:i for i,r in enumerate(_order)}
 for r in roads:
     P=r['P']; h=r['h']+r.get('deck',0)
     d=np.gradient(P,axis=0); d/=np.linalg.norm(d,axis=1)[:,None]+1e-9
     out_roads.append({'name':r['name'],'kind':r['kind'],'lanes':r['lanes'],'carriageway_studs':r['half']*2,'traffic':r['kind']=='main','length_m':round(r['len']),'tightest_bend_m':round(r['minR']),'steepest':round(r['maxgrade'],3),'ends_at_map_edge':[bool(r['edge'][0]),bool(r['edge'][1])],
         'pts':[[round(float(P[i,0]),1),round(float(P[i,1]),1),round(float(r['h'][i]),2),round(float(r.get('deck',np.zeros(len(P)))[i]),2)] for i in range(len(P))]})
-    rj.append({'name':r['name'],'kind':'route' if r['kind']=='main' else 'street','closed':False,'rank':int(r['rank']),
+    rj.append({'name':r['name'],'kind':'route' if r['kind']=='main' else 'street','closed':False,'rank':BUILD_RANK[r['name']],'half':r['half'],
         's':[world(P[i],h[i])+[round(float(d[i,0]),4),round(float(-d[i,1]),4),0,r['half'],r['half']] for i in range(len(P))]})
 junc=[{'pos_m':[round(float(m['p'][0]),1),round(float(m['p'][1]),1)],'arms':int(m['arms']),'roads':[roads[i]['name'] for i in sorted(m['roads'])],'on_main':bool(m['main'])} for m in J]
 import d4_heights as dh
