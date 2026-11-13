@@ -392,3 +392,24 @@ Rules for every step:
     - Studio can't show a phone's speed. **The owner should open the game on a real phone** (after publishing) and drive from Optima round the loop. If it stutters, the first fix is to switch venue lights off with distance, like the street lamps.
   - **Still to do:** a real phone test, the Monaco ties that only matter if speed cameras come back (`Police.cameraSpots`), pedestrians for Yangon (none yet), dressing for the Yangon Racing Hub.
   - Pictures: `Yangon 11 - Legends Service.jpg`.
+- 14 Nov 2026, step 11 follow-up: venue lights by distance (owner: "Yes, do it").
+  - **Change in `src/client/WorldFx.lua`:**
+    - Every light inside the venues (`Workspace.City`) and the fuel / repair forecourts (`Yangon.CarCare`) now switches off past 160 studs (128 on a phone), the same way the street lamps switch off past 300.
+    - These lights cast shadows only within 80 studs. On phones and low graphics there are no shadows at all, street lamps included (before, a lamp built with shadows kept them on phones).
+    - Exterior floods and lamps (tag `DayOff`) keep 300.
+    - A light with attribute `NoLod` is left as built.
+    - Display / showcase cars' lights are left alone (CarSkin switches their TailGlow off).
+    - The light ranges now follow the menu's Graphics choice (before, they were fixed when the game started).
+    - Lights that stream out are dropped from the list (it grew all session before).
+  - **Checked by a review workflow** (correctness + phone performance readers, a skeptic per finding). It caught that most venue lights were already on the 300 rule, so the first version missed them, and the display-car tail glow problem. Both are fixed.
+  - **Play test at the start point (test save):**
+
+    | | before | after |
+    |---|---|---|
+    | lights on by day | 234 | 77 |
+    | lights on at night | 255 | 89 |
+    | lights casting shadows | 47 | 0 by day, 5 at night |
+
+    Scripts 1.2 ms a frame. The night street still looks lit (white lamps, lit windows).
+  - **Still the owner's:** the real phone test after publishing.
+  - Picture: `Yangon 11 - night after venue light LOD.jpg`.

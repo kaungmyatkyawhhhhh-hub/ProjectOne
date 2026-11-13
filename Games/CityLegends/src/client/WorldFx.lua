@@ -121,8 +121,13 @@ end)
 -- the main menu's Graphics setting (2026-11-02): Low / Medium / High / Ultra over Roblox's own
 local qualityPick: number? = nil
 local QUALITY = { Low = 0.6, Medium = 0.8, High = 1, Ultra = 1.15 }
+-- (2026-11-14) the scale the light sweep uses; startLod sets it, a Graphics change in the menu updates it
+local lightScale: number? = nil
 function WorldFx.setQuality(name: string)
 	qualityPick = QUALITY[name]
+	if lightScale then
+		lightScale = WorldFx.qualityScale()
+	end
 	-- the costly screen effects: depth of field off on Medium (the wind blur; a player's own is LookDof)
 	local Lighting = game:GetService("Lighting")
 	for _, e in Lighting:GetChildren() do
@@ -176,6 +181,7 @@ end
 type LodEntry = { inst: Instance, parent: Instance?, center: Vector3, range: number, shown: boolean, far: boolean, real: ObjectValue? }
 
 local function startLod(scale: number)
+	lightScale = scale
 	local entries: { LodEntry } = {}
 	local known: { [Instance]: boolean } = {}
 	local function register(inst: Instance)
@@ -217,14 +223,67 @@ local function startLod(scale: number)
 	end
 	-- (lights made later: house galleries, showcase cars, anything streamed in)
 	CollectionService:GetInstanceAddedSignal("LODLight"):Connect(addLight)
-	-- wide enough that lights never visibly pop on/off block by block (560: past that a lamp's
-	-- own glowing head still shows, but its light on the street is too far to see; 900 kept ~360
-	-- lights on at once, owner 2026-10-24: optimise)
-	local lightRange = 560 * scale
-	local rivieraLightRange = 300 * scale
-	-- street lamps near the camera cast shadows (poles, cars, people across the road); far ones
-	-- don't, and none do on low graphics or phones
-	local shadowRange = if scale >= 0.85 then 170 else 0
+
+	-- (2026-11-14, phones: on Yangon every venue stands near the start, so their ~150 always-on interior lights
+	-- (showroom, palace, shops, the fuel and repair forecourts), 47 of them with shadows, were all on at once)
+	-- the venues' own lights not already managed switch off past VENUE_LIGHT_RANGE and cast shadows only within
+	-- VENUE_SHADOW_RANGE (none on phones or low graphics); a light that must stay as built sets attribute NoLod
+	local VENUE_LIGHT_RANGE = 160
+	local VENUE_SHADOW_RANGE = 80
+	local function carLight(l: Instance): boolean
+		-- (display / showcase cars keep their own lights: CarSkin switches a model's TailGlow off for good)
+		local a = l.Parent
+		while a and a ~= workspace do
+			if a:HasTag("TowerShowcase") or a:FindFirstChild("Chassis") then
+				return true
+			end
+			a = a.Parent
+		end
+		return false
+	end
+	local function venueLight(l: Instance)
+		if not l:IsA("Light") or l:GetAttribute("NoLod") or l:GetAttribute("LodRange") then
+			return
+		end
+		if l.Name == "TailGlow" or carLight(l) then
+			return
+		end
+		-- (exterior floods and lamps, DayOff: they keep the 300 of the street lamps, seen from the road at night)
+		if not l:HasTag("DayOff") then
+			l:SetAttribute("LodRange", VENUE_LIGHT_RANGE)
+		end
+		if (l :: Light).Shadows or l:HasTag("ShadowLight") then
+			l:SetAttribute("ShadowRange", VENUE_SHADOW_RANGE)
+			l:AddTag("ShadowLight")
+		end
+		if not l:HasTag("LODLight") then
+			l:AddTag("LODLight")
+		end
+	end
+	local function watchVenues(root: Instance?)
+		if not root then
+			return
+		end
+		root.DescendantAdded:Connect(venueLight)
+		task.spawn(function()
+			for i, d in root:GetDescendants() do
+				venueLight(d)
+				if i % 2000 == 0 then
+					task.wait()
+				end
+			end
+		end)
+	end
+	task.spawn(function()
+		watchVenues(workspace:WaitForChild("City", 30))
+		local y = workspace:FindFirstChild("Yangon")
+		watchVenues(y and y:WaitForChild("CarCare", 30))
+	end)
+	-- the light ranges (worked out each sweep from lightScale, which follows the menu's Graphics choice):
+	-- 560 wide enough that lights never visibly pop on/off block by block (past that a lamp's own glowing
+	-- head still shows, but its light on the street is too far to see; 900 kept ~360 lights on at once,
+	-- owner 2026-10-24: optimise), 300 for the Riviera's and Yangon's dense lamps, and street lamps near
+	-- the camera (170) cast shadows, none on low graphics or phones
 	local camera = workspace.CurrentCamera
 
 	local cursor, lightCursor = 1, 1
@@ -259,24 +318,42 @@ local function startLod(scale: number)
 				end
 			end
 		end
+		local s = lightScale or scale
+		local lightRangeNow = 560 * s
+		local rivieraLightRangeNow = 300 * s
+		local shadowRangeNow = if s >= 0.85 then 170 else 0
 		local lbudget = math.max(40, math.ceil(#lights / 20))
 		for _ = 1, math.min(lbudget, #lights) do
+			if #lights == 0 then
+				break
+			end
 			if lightCursor > #lights then
 				lightCursor = 1
 			end
 			local l = lights[lightCursor]
+			-- (a light streamed out or destroyed: off the list, or the list grows all session; a light that
+			-- streams back in is a new instance and is added again)
+			if not l:IsDescendantOf(workspace) then
+				knownLight[l] = nil
+				lights[lightCursor] = lights[#lights]
+				lights[#lights] = nil
+				continue
+			end
 			lightCursor += 1
 			local part = l.Parent
-			if part and part:IsA("BasePart") then
+			if part and part:IsA("BasePart") and not l:GetAttribute("NoLod") then
 				local dist = (part.Position - camPos).Magnitude
 				-- the Riviera's dense lamps: only those near the camera light the street (phones)
-				local range = if part.Position.X > 9000 then rivieraLightRange else lightRange
+				local own = l:GetAttribute("LodRange")
+				local range = if type(own) == "number" then own * s elseif part.Position.X > 9000 then rivieraLightRangeNow else lightRangeNow
 				local on = dist < range and (lampsLit or not l:HasTag("DayOff"))
 				if l.Enabled ~= on then
 					l.Enabled = on
 				end
-				if shadowRange > 0 and l:HasTag("ShadowLight") then
-					local shade = dist < shadowRange
+				-- (no shadows at all on phones and low graphics: shadowRange 0)
+				if l:HasTag("ShadowLight") then
+					local ownShade = l:GetAttribute("ShadowRange")
+					local shade = shadowRangeNow > 0 and dist < (if type(ownShade) == "number" then ownShade else shadowRangeNow)
 					if l.Shadows ~= shade then
 						l.Shadows = shade
 					end
