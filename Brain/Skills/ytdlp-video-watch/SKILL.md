@@ -1,6 +1,6 @@
 ---
 name: "ytdlp-video-watch"
-description: "Use when the user shares a TikTok/YouTube/Shorts/Reels link or video to watch, break down or research: download with yt-dlp, extract frames and transcript, then analyze."
+description: "Use when the user shares a TikTok/YouTube/Shorts/Reels link or video to watch, break down or research: watch it in the browser (no download) or download with yt-dlp, extract frames, sound hits and transcript, then analyze."
 ---
 
 # Watch a video with yt-dlp (frames + transcript)
@@ -22,7 +22,9 @@ Keep it current (TikTok breaks old versions often): `yt-dlp -U`
 ## 2. Download
 Pick the route based on the tools present:
 - **A device shell tool is available** (mcp__remote-devices__device_bash): run the commands yourself in a connected folder, e.g. a `Videos\\ClaudeWatch` folder.
-- **No device shell**: give the user the exact command to paste, then ask them to attach the .mp4 (and .info.json), or to connect the folder via "+" → "Add folder" and stage the files with device_stage_files.
+- **No device shell, or yt-dlp is not installed (TikTok links): watch in the built-in browser, nothing is downloaded.** Open the link with the built-in browser, then run `C:\ObsidianOne\Claude+Obsidian\Roblox Playbook\Tools\Video kit\tiktok_watch_in_browser.js` (stage it and paste it into the browser's javascript tool). It reads the page's own data (`__UNIVERSAL_DATA_FOR_REHYDRATION__` -> `itemStruct`: caption, post date, followers, views/likes/saves/comments, sound name and creator), fetches the page's own video inside the page, decodes the sound (onset times, tempo guess, band balance, level) and steps an off-screen copy frame by frame (cuts, motion, cut-to-onset distance, longest still stretch). Poll `window.__R.state` until `done` (about 12 frames/s; a 2-minute video takes about 2.5 min). Then `window.__sheet(t0, step, cols, rows)` draws a contact sheet over the page (landscape: 2x4 or 3x6; vertical: 5x3 or 6x3) and `await window.__big([times], cols)` draws a few sharp frames; take a browser screenshot of each. TikTok's own captions, when the video has them: `itemStruct.video.subtitleInfos[].Url` (WebVTT) = the transcript, no Whisper needed. For several links: `sessionStorage.setItem('__cl', <the script>)` once, then after each navigation `(0,eval)(sessionStorage.getItem('__cl'))`. Close the tab at the end. Sound is measured, not heard: say so in the report.
+- **YouTube links, no device shell: watch and MEASURE THE SOUND in the owner's Chrome, nothing is downloaded.** Open the video in Claude in Chrome (a new tab, one `navigate` per batch), click the page once, then run `C:\ObsidianOne\Claude+Obsidian\Roblox Playbook\Tools\Video kit\youtube_watch_in_browser.js` with the javascript tool (keep it in `sessionStorage` and re-run it after every navigation). `window.__yrec(start, seconds, 2)` taps the page's player into Web Audio at 2x speed with the PC silent; poll `window.__Y.state` until `done` (keep each tool call under ~50 s). Then: `window.__Y.audio` (level, band balance, sound starts per second), `window.__yevents(n)` (the biggest sound events), `await window.__ysheet(t0, t1, 8)` (frames over a spectrogram; screenshot it), `await window.__ygrid([times], cols)` (frames only). A YouTuber talking over the game: set `window.__side = true` first (left minus right cancels a centred voice). Frames only, fast: mute with `m`, seek with number keys, `zoom` on the player. Close the tab at the end. Sound is measured, not heard: say so in the report.
+- **No device shell and the browser route fails**: give the user the exact command to paste, then ask them to attach the .mp4 (and .info.json), or to connect the folder via "+" → "Add folder" and stage the files with device_stage_files.
 
 Single video:
 ```

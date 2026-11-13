@@ -20,10 +20,20 @@ Read first (vault): `Roblox Playbook\Research notes\2026-11-05 PLAYBOOK - Roblox
   - one clear hero shape, with a background that supports him instead of competing.
   Fail test: if it could pass as a Studio screenshot with effects stickered on, redo the art direction, not just the colours.
 
+## Modern style references (owner, 11 Nov: "match up to modern ui where everything is INSANE")
+Vault: `Roblox Playbook/Research notes/MEGA BITE/2026-11-11 Research - Modern UI direction (owner feedback + all TikTok UIs)`. Read it before any icon, thumbnail or logo; it holds the owner's exact words and a breakdown of every TikTok he sent.
+- **Reveal style (RNG Battlegrounds auras TikTok, @mojangopa):** a pitch-black backdrop, the subject lit dramatically by ONE hero colour, a clean bold white name label, and the game LOGO in polished chrome-metal letters with a bevel and a single gem. Use it for logos and for "dark" thumbnails (a monster or transformation reveal).
+- **Bright style (the @.6ix13 AI-made shop TikTok):** saturated themed backgrounds with diagonal energy streaks, the hero object HUGE and breaking out of its frame, sparkles. Use it for bright, happy thumbnails.
+- **Rejected by the owner:** the Shark Shop TikTok's UI and signage style (navy sign plate + marquee bulbs); only its MAP style is fine.
+- Effects style (bbstudios / Claude-cutscene TikToks): one colour + darkness + emissive glow = premium; a black core + one hot colour + crescent slashes for energy.
+
+## Watching TikTok references
+Watch in the browser, never download: seek the `<video>` element, draw N frames onto a canvas contact sheet laid over the page, and screenshot it (zoom in on single frames for UI detail). When TikTok answers "Access Denied" in the owner's Chrome (a rate limit after ~11 videos), use the built-in browser (a separate profile) instead. Save each breakdown to the vault as you go.
+
 ## Workflow
 1. Research: what the owner clicks + 10-20 live thumbnails/icons of the top games in the genre (thumbnails.roblox.com API in the browser). Save refs in the game's `Assets\...\refs\`.
 2. Render the real avatar in Blender (Cycles, white key on the face, strong coloured rim lights, dark background, DOF).
-3. ChatGPT makes the final art from a ONE-TRY prompt (templates in the recipe note): attach the render, ONE style reference, the logo for colours. Magenta/transparent rules as in the art pipeline.
+3. ChatGPT makes the final art from a ONE-TRY prompt (templates in the recipe note): attach the render, ONE style reference, the logo for colours. Magenta/transparent rules as in the art pipeline. Attachments must come from the vault (commit the render into the vault, stage it, then upload); the outputs folder is rejected. Keep follow-ups (variants, the logo, a second thumbnail) in the SAME ChatGPT chat with "same exact style".
 4. Claude adds the logo in code (never let ChatGPT draw it), keeps the original resolution, saves everything to the vault.
 5. Small fixes: "keep EXACTLY the same, only change X"; otherwise fix locally (e.g. brighten the face by masking light low-saturation pixels).
 

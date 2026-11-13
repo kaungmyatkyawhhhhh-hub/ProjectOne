@@ -32,6 +32,9 @@ Vault references (read first if available): `Roblox Playbook\Prompt for a friend
 - Start a new chat per sheet, find the composer, type the prompt (one paragraph; Enter sends), and send. If the Enter didn't send, use the Send button.
 - Poll with JS for `main img[alt^="Generated image"]` (screenshots may time out; use JS/get_page_text).
 - Download: fetch the img src blob and click an `<a download="galaxy_<sheet>.png">`. It lands in the owner's Downloads folder (a connected folder), then stage it into the workspace.
+- **No-download route (proven 11 Nov, MEGA BITE UI v5): do everything in the browser.** Fetch the generated image blob in the ChatGPT tab, key + cut it there with canvas JS (see 4b), then hand the pieces to a Roblox tab: chatgpt.com can't call apis.roblox.com (CORS) and `window.open` from script is popup-blocked, so inject a big button into the ChatGPT page whose onclick does `window.MB_child = window.open('https://create.roblox.com/dashboard/creations?activeTab=Image', '_blank')`, really click it (a user gesture), add a `message` listener in the new tab that stores blobs, then `MB_child.postMessage({name, blob}, 'https://create.roblox.com')` and upload from that tab (section 5).
+- **Attaching references to ChatGPT:** the file input only accepts files this session may read: the vault (staged into `/mnt/user-data/uploads/...`) or attachments, NOT the outputs folder. Commit the reference into the vault first (e.g. `<Game>/UI/<version>/`), stage it, then `file_upload` it.
+- **One chat per art set:** send the first prompt, then every follow-up in the SAME chat with "same exact style as the image you just made" = consistent pieces without re-describing the style.
 
 ## 4. Process (Python: Pillow, numpy, scipy)
 - **MAGENTA key:** colour distance d to (255,0,255). Background = the connected component(s) of d<70 that TOUCH THE IMAGE BORDER (flood fill). Soft edge = a 3 px band, alpha = clip((d-45)/70). Un-mix the fringe: rgb = (src-(1-a)*M)/a in the band only. NEVER key every magenta-ish pixel: purple art inside the outline gets eaten (the purple gift box bug).
@@ -56,6 +59,20 @@ Vault references (read first if available): `Roblox Playbook\Prompt for a friend
 
 ## 6. Wire in
 Give the coding Claude: ImageLabel ScaleType Slice + SliceCenter; particles use `_alpha` (or `_add` only at LightEmission 1); FlipbookLayout grid; SurfaceAppearance/MaterialVariant maps; phone rules (no overlaps, text ≥14 px).
+
+## 4b. In-browser processing (when the art never reaches the workspace)
+- `MBkey(blob)`: magenta distance per pixel → border flood fill (d < 90) = background → a 2 px soft edge with alpha = clamp((d-45)/110) and the un-mix. Returns a canvas.
+- **Then a soft GLOBAL magenta pass** for art with rings, swirls or gaps: enclosed magenta pockets (inside a star's swirl, a crown's ring) never touch the border, so the flood leaves them. alpha = min(alpha, clamp((d-40)/110)) for every pixel with d < 150, with the same un-mix.
+- `MBruns(canvas, 'x'|'y', from, to)`: coverage runs to find the pieces (rows first, then columns per row); when pieces touch, split the widest run at its lowest-coverage column.
+- `MBcut`: crop each box, trim to the alpha bbox, scale to ≤ 1024 px (Roblox stores max 1024 wide), and draw a preview strip on a dark navy background to check every piece for fringes before uploading.
+
+## Lessons (11 Nov, MEGA BITE UI v5: owner "stone-age ui" → "modern, INSANE")
+- **Objects that should break out of a frame: ask for the OBJECTS and the BACKGROUNDS as separate sheets.** One sheet of banners with the objects bursting out = the objects overlap the next banner and can't be cut. Separate = clean cuts AND the object can float, bob and tilt over its banner in-game (more alive).
+- **Shop items are illustrated images, never a 3D ViewportFrame preview** (owner: "viewport frame is bad, use image instead with chatgpt"). For skins, render the real in-game model in each skin first (Studio lineup, fog/atmosphere off, side view), crop it into a labelled reference, attach it, and say "colours EXACTLY like the attached reference, in this order".
+- Key reference for modern shop UI: the @.6ix13 "completely made by AI" Roblox shop TikTok (vault: `Research - Modern UI direction`): every product an illustrated card / banner with a saturated themed background, the product huge and breaking the frame, a patterned header band, themed corner ornaments, heavy cartoon titles (LuckiestGuy), lime price buttons, a swoosh on tab switch. Do NOT copy its fake struck-out prices.
+- Window chrome sheet that works: one wide header band (rounded top, flat bottom, a faint themed pattern; 9-slice it with SliceCenter ~ (220,40,804,152) at 1024x192) + 4 different corner ornaments that match the game's world.
+- In Roblox: preload every UI image at startup (a first-opened window showed blank pills), and give icons a self-heal retry: an image whose first fetch fails stays blank forever; re-request it once with a cache-busting suffix (`rbxassetid://ID&r=1`).
+- After upload, check `moderationResult` with the assets API: thumbnails can say "Pending" for a while even when the asset is Approved and works in game.
 
 ## Tool setup notes (the workspace is temporary)
 - The tools live in a Python venv (numpy, scipy, Pillow; optional torch + spandrel, rembg). Hugging Face needs huggingface.co + *.hf.co allowed; GitHub release downloads need github.com.

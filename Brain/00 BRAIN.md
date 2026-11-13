@@ -56,3 +56,4 @@ Use the method when its trigger fits. Each one lists its steps, its tools and an
 - After any owner correction: add a Lessons entry (what felt bad / cause / fix / rule).
 - New repeatable way of thinking from the owner → a new method note from [[Brain/Method template]], add it to the table, and offer to make it a skill.
 - Keep this index short: details live in the method notes.
+- **Skills live in the vault too:** every new or updated skill is copied to [[Brain/Skills/00 Skills index|Brain/Skills]] (`<name>/SKILL.md`) in the same turn, and the index is updated (owner, 13 Nov 2026).
