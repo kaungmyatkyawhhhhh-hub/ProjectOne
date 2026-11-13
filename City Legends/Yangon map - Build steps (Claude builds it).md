@@ -264,5 +264,5 @@ Rules for every step:
     - No street dressing yet (power poles, rain trees, lamps: step 10).
     - Optima's look is a guess: the research found no photo of the real workshop.
     - Quality-nerd kid check and phone-size pictures: with the Play test in step 11.
-  - **Owner to decide:** the real names (Novotel, Myanmar Plaza, Optima Werkz) are on the buildings as plain text because the plan names them. Say if they should be made-up names instead (trademarks).
+  - **Owner, 13 Nov 2026: "Keep real names".** Novotel, Myanmar Plaza and Optima Werkz keep their real names on the buildings, as plain text (no logo artwork). The filler shops keep made-up names.
   - Pictures: `Yangon 8 - ...jpg` in this folder.
