@@ -24,7 +24,7 @@ Rules for every step:
 - [x] **4. Flyovers** (13 Nov, version 744). Decks, ramps, piers, parapets and side lanes for the Pyay Road Flyover and the Kabar Aye Flyover, and the junctions underneath. Log entry "13 Nov 2026, step 4" below.
 - [x] **5. Streets** (13 Nov, version 750). The 30 streets, their junction mouths and round corners, and barriers at the 16 map-edge road ends. Log entry "13 Nov 2026, step 5" below.
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes. **6a done** (13 Nov, version 752): grass up to the pavements near junctions, dashed middle line on the one-way side lanes. Still to do: road meshes (part count).
-- [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). **Not yet seen in Play:** the MCP's Play start got stuck (see the log).
+- [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). Tested in Play the same day: traffic drives the loop, both flyovers, the side lanes and the roundabout.
 - [ ] **8. Buildings and landmarks.** Yangon-style blocks along the roads, Novotel, Optima and MM Plaza, far-city backdrop at the map edge.
 - [ ] **9. Move in the game.** Venues, houses, gas stations, spawn at Optima, fast travel spots, minimap.
 - [ ] **10. Night lights.** Street lamps on main roads, lit buildings, never dark.
@@ -215,3 +215,19 @@ Rules for every step:
     - **Play test:** the test save claimed its first car (Horizon Z33) through `ClaimStarter`. After the restart, the MCP's `start_stop_play` kept answering "Start play hasn't finished yet" while Studio stayed in Edit and responded. Pressing Play by hand once, or reopening Studio, should clear it. The save store is back on `CityLegends_v1`, checked before the save.
     - `Config.monacoOnly()` keys on `workspace.Riviera`. When step 11 moves Monaco out, the old city's lanes would come back: change it to look for Yangon too.
     - Pedestrians, police lanes, speed cameras, spawn spots and `BusyZones` are still Monaco-only (step 9).
+- 13 Nov 2026, step 7 Play test (owner reopened Studio, then pressed Play; test save `CityLegends_test`, put back to `CityLegends_v1` after, checked).
+  - All 28 traffic cars moved to Yangon round the player within seconds.
+    - Every car was on a lane line (0.0 studs off) with its bottom 0.2 over the road.
+    - In 3.5 s samples: 0 cars stuck at Kabar Aye, and 2 slow at the roundabout (one giving way at its entry, one on the ring).
+  - Moves seen by driving (not by re-placing):
+    - **Kabar Aye:** loop A onto the east side lane, the east side lane merging onto loop B, the west side lane back onto loop A, New Road's deck landing on loop B, loop B onto New Road's deck.
+    - **Roundabout:** loop A into it. All 28 angle samples ran anticlockwise.
+    - **Pyay:** 10 cars up on the deck at once, the east side lane merging back onto the loop, University Avenue turning onto the west side lane.
+  - Traffic drives on the right (oncoming cars on the left).
+  - **Not seen yet:** loop B turning onto the Kabar Aye west lane (its link is there).
+  - **The minimap is blank in Yangon** (step 9).
+  - **MCP trap:**
+    - After a Stop, `start_stop_play` times out and stays stuck on "Start play hasn't finished yet". Studio stays in Edit, and its memory shows nothing starting. Pressing Play by hand did not clear it.
+    - What works: the owner reopens the place and presses Play; the MCP then drives that session (Client / Server `execute_luau`, keys) and Stop works.
+    - Switch the save store to the test one BEFORE the owner presses Play. Right after the reopen, a Play started on the live save. It was stopped within 5 seconds; it loaded the save and changed nothing.
+  - Pictures: `Yangon 7 - ...jpg` in this folder.
