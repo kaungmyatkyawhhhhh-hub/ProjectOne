@@ -50,6 +50,7 @@ CarFinish.CARS = {
 	bentlee_bentayga = true,
 	nisun_gtr = true,
 	bnw_m5_f90 = true,
+	bnw_m4_f82 = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

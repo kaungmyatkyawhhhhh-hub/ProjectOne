@@ -1,0 +1,145 @@
+{
+ "src": "imports/importing cars/2018_bmw_m4_coupe_f82_lci.glb",
+ "images": {
+  "2": [
+   {
+    "replace": "tools/logo_paint/bnw_m4_f82_wheel.png"
+   }
+  ],
+  "4": [
+   {
+    "replace": "tools/logo_paint/bnw_m4_f82_wheel_n.png"
+   }
+  ],
+  "7": [
+   {
+    "replace": "tools/logo_paint/bnw_m4_f82_engine.png"
+   }
+  ],
+  "8": [
+   {
+    "replace": "tools/logo_paint/bnw_m4_f82_engine_n.png"
+   }
+  ],
+  "11": [
+   {
+    "replace": "tools/logo_paint/bnw_m4_f82_cabin.png"
+   }
+  ],
+  "12": [
+   {
+    "replace": "tools/logo_paint/bnw_m4_f82_cabin_n.png"
+   }
+  ],
+  "0": [
+   {
+    "solid": [
+     0,
+     0,
+     127,
+     31,
+     60,
+     60,
+     64
+    ]
+   }
+  ],
+  "1": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     511,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "5": [
+   {
+    "solid": [
+     0,
+     0,
+     255,
+     255,
+     60,
+     60,
+     64
+    ]
+   }
+  ],
+  "6": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     511,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "17": [
+   {
+    "solid": [
+     0,
+     0,
+     255,
+     255,
+     60,
+     60,
+     64
+    ]
+   }
+  ],
+  "18": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     511,
+     128,
+     128,
+     255
+    ]
+   }
+  ]
+ },
+ "drop": [],
+ "drop_material": [
+  "Calliper",
+  "RimBadge",
+  "M_Badge",
+  "phong8"
+ ],
+ "rename_material": {
+  "wBMW_M4Coupe_2014_Wheel2A_3D_3DWheel2A_Material1": "Tyre_Disc",
+  "bM_Rim_Main_Max_002": "Rim_Face",
+  "bM_Rim_NoTint_Max1": "Rim_Dark",
+  "bM_Glass_WindowFront_Low1": "Window_Glass",
+  "bM_Opaque_PlasticRoughBlack_Max1": "Plastic_Rough",
+  "bM_Chassis_Max1": "Chassis",
+  "bM_Engine_Max1": "Engine",
+  "bM_CarPaint_Max1": "Paint",
+  "bM_CarPaint_Trim_CarbonA_Max1": "Carbon_Weave",
+  "bM_Opaque_PlasticSmoothBlack_Max1": "Plastic_Gloss",
+  "bM_Glass_WindowSurroundFront_Low1": "Window_Surround",
+  "bM_Interior_Max1": "Interior_Main",
+  "bM_InteriorTiled_Common_Max1": "InteriorTiled",
+  "bM_LGlass_OuterClear_Low1": "Lens_Clear",
+  "bM_LBucket_Max1": "LampBucket",
+  "bM_LGlass_OuterRed_Low_002": "Lens_Red",
+  "bM_Badge_Max1": "Detail_Decal",
+  "bM_Light_SetB_Max1": "LampSet",
+  "bM_GrilleA_Max1": "Grille_Hex",
+  "bM_LightGlass_Red_SetB_Low1": "Lens_Red_Low",
+  "bM_Opaque_ChromeSmooth_Max1": "Chrome_Dark",
+  "bM_Opaque_NickelRough_Max1": "Nickel_Rough",
+  "bM_GlassOpaque_Mirror_Max_002": "Mirror_Glass"
+ }
+}
