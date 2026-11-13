@@ -20,7 +20,10 @@
 	"in a junction" is measured with the other road's half (a street mouth is as wide as the street).
 	Without `half` nothing changes. opts (all optional): cut = the same table as Roads.build's opts.cut
 	(cut samples get no lines and are no junction for anyone); paint = Color3 for every line;
-	centre = { color = Color3?, solid = boolean?, double = boolean? } for the middle line.
+	centre = { color = Color3?, solid = boolean?, double = boolean? } for the middle line;
+	clearMouths = true: a line piece is also left out when either end lies on another road's
+	carriageway (a street joining at a slant: its mouth reaches further along the edge line than the
+	"in a junction" test of the centre line sees).
 ]]
 
 local RoadLines = {}
@@ -199,6 +202,9 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				-- (the inside of a tight bend: the side points stand still or run backwards)
 				if d:Dot(chord) < 0.35 * len * len then
 					continue
+				end
+				if opts.clearMouths and (otherNear(roads, grid, pa, ri, HALF + 0.5) or otherNear(roads, grid, pb, ri, HALF + 0.5)) then
+					continue -- (in another road's mouth)
 				end
 				local ya, yb = surface(pa, r.name), surface(pb, r.name)
 				if not ya or not yb then

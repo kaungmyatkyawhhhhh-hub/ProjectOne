@@ -785,7 +785,7 @@ function M.buildRoads(names: { string })
 end
 
 function M.buildLines(names: { string })
-	return M.RoadLines.build(M.data, M.folder(), setOf(names), { cut = M.cut, paint = M.palette.paint, centre = M.centre })
+	return M.RoadLines.build(M.data, M.folder(), setOf(names), { cut = M.cut, paint = M.palette.paint, centre = M.centre, clearMouths = true })
 end
 
 ------------------------------------------------------------------------------------------------
@@ -1157,13 +1157,21 @@ local function roadTop(x: number, y: number, z: number, folder: Instance): numbe
 end
 
 -- the 28 main-road junctions of the design: at each one outside the corridors, every mouth must be
--- open (no pavement, kerb or line in it), the main road's pavement and kerb must start again right
--- beside it, and the joining road's own height there must match the main road's surface
+-- open (no pavement, kerb or line of the main road inside the joining road's carriageway), the main
+-- road's kerb and pavement must be there again right beside it, and the heights must match:
+--   a joining road that is built: its own surface just outside the main road's edge against the main
+--     road's surface just inside it;
+--   a street that is not built yet: the height Roads.build will give it there (its samples after
+--     alignJunctions) against the main road's surface. The street's raw data height is listed too.
 function M.checkJunctions()
 	local roads = M.folder()
 	local lines = {}
-	local total = { junctions = 0, corridor = 0, mouths = 0, crossing = 0, wide = 0, height = 0, lines = 0 }
-	local worstH = 0
+	local total = { junctions = 0, corridor = 0, mouths = 0, crossing = 0, missing = 0, height = 0, lines = 0 }
+	local worstH, worstRaw = 0, 0
+	local aligned = {}
+	for _, r in M.Roads.prepared(M.data, M.cut) do
+		aligned[r.name] = r.pts
+	end
 	-- the main roads' Line parts, in a 48-stud grid
 	local lineGrid = {}
 	for _, name in M.MAIN do
@@ -1207,7 +1215,7 @@ function M.checkJunctions()
 			table.insert(lines, "corridor (step 4): " .. label)
 			continue
 		end
-		local notes = {}
+		local notes, info = {}, {}
 		for _, mainName in j.roads do
 			local main = M.R[mainName]
 			if main.kind ~= "route" then
@@ -1219,7 +1227,8 @@ function M.checkJunctions()
 				if S.rank <= main.rank then
 					continue
 				end
-				-- where S crosses main's edge line, leaving it: one mouth each side it leaves on
+				local sf = roads:FindFirstChild(sName)
+				-- where S crosses main's edge line: one mouth each time
 				for i = 1, S.n - 1 do
 					local a, b = S.s[i], S.s[i + 1]
 					if hyp(a[1] - wx, a[3] - wz) > 140 or M.cut[sName][i] or M.cut[sName][i + 1] then
@@ -1243,62 +1252,65 @@ function M.checkJunctions()
 					end
 					local L = hyp(vx, vz)
 					vx, vz = vx / L, vz / L
-					local wx2, wz2 = -vz, vx
 					total.mouths += 1
 					local h = S.half
-					-- (a) nothing of main's kerb or pavement in the mouth
-					local crossing, wide = 0, 0
-					local tt = -(h - 0.4)
-					while tt <= h - 0.4 do
-						for d = -6, 14 do
-							local x, z = qx + wx2 * tt + vx * d, qz + wz2 * tt + vz * d
-							local nm = M.near(x, z, 3)[main.index]
-							if nm then
+					-- (a) a 0.8-stud grid round Q. In main's kerb and pavement band: inside S's carriageway
+					-- nothing of main's kerb or pavement; 1.2 to 1.8 past S's edge they must be there
+					local crossing, missing = 0, 0
+					local reach = h + 14
+					local x = qx - reach
+					while x <= qx + reach do
+						local z = qz - reach
+						while z <= qz + reach do
+							local near = M.near(x, z, 3)
+							local nm, ns = near[main.index], near[S.index]
+							if nm and ns then
 								local dm = polyDist(main, nm[2], x, z)
-								if dm > main.half - 0.2 and dm < main.half + M.WALK and mf and sidesUnder(x, qy, z, mf) then
-									crossing += 1
-								end
-							end
-						end
-						tt += 0.8
-					end
-					-- (b) and they are there again 1.5 past each edge of the mouth
-					for _, sgn in { -1, 1 } do
-						for _, into in { 0.4, 5 } do
-							-- a spot on main's kerb line / pavement middle, 1.5 outside the street's edge:
-							-- slide along S until it is `into` past main's edge
-							for d = -30, 30 do
-								local x, z = qx + wx2 * sgn * (h + 1.5) + vx * d * 0.5, qz + wz2 * sgn * (h + 1.5) + vz * d * 0.5
-								local nm = M.near(x, z, 3)[main.index]
-								if nm then
-									local dm = polyDist(main, nm[2], x, z)
-									if math.abs(dm - (main.half + into)) < 0.3 then
+								if dm > main.half - 0.2 and dm < main.half + M.WALK - 0.3 then
+									local ds = polyDist(S, ns[2], x, z)
+									if ds < h - 0.4 then
+										if mf and sidesUnder(x, qy, z, mf) then
+											crossing += 1
+										end
+									elseif ds > h + 1.2 and ds < h + 1.8 and dm > main.half + 0.1 then
 										if not (mf and sidesUnder(x, qy, z, mf)) then
-											-- (another mouth right beside this one is not a fault)
-											local other = false
-											for oi, bb in M.near(x, z, 3) do
+											-- (another road's mouth, or the roundabout, right beside this one is no fault)
+											local other = hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 0.5
+											for oi, bb in near do
 												local o2 = M.list[oi]
 												if o2 ~= main and o2 ~= S and polyDist(o2, bb[2], x, z) < o2.half + (if o2.rank < main.rank then M.WALK else 0.3) then
 													other = true
 												end
 											end
-											if not other and hyp(x - C.X, z - C.Z) > M.RING_V + M.WALK + 0.5 then
-												wide += 1
+											if not other then
+												missing += 1
 											end
 										end
-										break
 									end
 								end
 							end
+							z += 0.8
 						end
+						x += 0.8
 					end
-					-- (c) heights: S's own height at Q against main's surface just inside its edge
+					-- (c) heights
 					local top = mf and roadTop(qx - vx * 0.5, qy, qz - vz * 0.5, mf)
-					local dh = if top then math.abs(top - qy) else math.huge
+					local dh, how = math.huge, ""
+					local sTop = sf and roadTop(qx + vx * 0.5, qy, qz + vz * 0.5, sf)
+					if top and sTop then
+						dh, how = math.abs(top - sTop), "built"
+					elseif top then
+						local pa, pb = aligned[sName][i].pos, aligned[sName][i + 1].pos
+						dh, how = math.abs(top - (pa.Y + (pb.Y - pa.Y) * t)), "builder"
+					end
+					local raw = if top then math.abs(top - qy) else math.huge
 					if dh ~= math.huge then
 						worstH = math.max(worstH, dh)
 					end
-					-- (d) no line of main in the mouth: within S's carriageway
+					if raw ~= math.huge then
+						worstRaw = math.max(worstRaw, raw)
+					end
+					-- (d) no line of main inside S's carriageway
 					local inMouth = 0
 					local cx, cz = math.floor(qx / 48), math.floor(qz / 48)
 					for dx = -2, 2 do
@@ -1318,20 +1330,21 @@ function M.checkJunctions()
 						end
 					end
 					total.crossing += crossing
-					total.wide += wide
+					total.missing += missing
 					total.lines += inMouth
 					if dh > 0.05 then
 						total.height += 1
 					end
-					if crossing > 0 or wide > 0 or inMouth > 0 or dh > 0.05 then
-						table.insert(notes, string.format("%s into %s at %.0f, %.0f: in the mouth %d, missing beside it %d, lines %d, height off %.3f", sName, mainName, qx, qz, crossing, wide, inMouth, dh))
+					table.insert(info, string.format("%s %.3f (%s, raw %.2f)", sName, dh, how, raw))
+					if crossing > 0 or missing > 0 or inMouth > 0 or dh > 0.05 then
+						table.insert(notes, string.format("%s into %s at %.0f, %.0f: in the mouth %d, missing beside it %d, lines %d, height off %.3f (%s)", sName, mainName, qx, qz, crossing, missing, inMouth, dh, how))
 					end
 				end
 			end
 		end
-		table.insert(lines, (if #notes == 0 then "ok: " else "FAULT: ") .. label .. (if #notes > 0 then "\n    " .. table.concat(notes, "\n    ") else ""))
+		table.insert(lines, (if #notes == 0 then "ok: " else "FAULT: ") .. label .. " | heights: " .. table.concat(info, "; ") .. (if #notes > 0 then "\n    " .. table.concat(notes, "\n    ") else ""))
 	end
-	local head = string.format("junctions on main roads %d: %d in a corridor, %d checked with %d mouths. Kerb or pavement in a mouth: %d spots. Missing right beside a mouth: %d. Lines in a mouth: %d. Heights more than 0.05 off: %d (worst %.3f).", total.junctions, total.corridor, total.junctions - total.corridor, total.mouths, total.crossing, total.wide, total.lines, total.height, worstH)
+	local head = string.format("junctions on main roads %d: %d in a corridor, %d checked with %d mouths. Kerb or pavement in a mouth: %d spots. Missing right beside a mouth: %d spots. Lines in a mouth: %d. Heights more than 0.05 off: %d (worst %.3f; the streets' raw data is up to %.2f off before the builder eases them).", total.junctions, total.corridor, total.junctions - total.corridor, total.mouths, total.crossing, total.missing, total.lines, total.height, worstH, worstRaw)
 	return head .. "\n" .. table.concat(lines, "\n")
 end
 
@@ -1344,16 +1357,16 @@ function M.checkMainMain()
 	params.FilterDescendantsInstances = { roads }
 	local out = {}
 	for _, m in M.mouths do
-		if not m.poly then
-			continue
-		end
-		local x0, x1, z0, z1 = math.huge, -math.huge, math.huge, -math.huge
-		for _, p in m.poly do
-			x0, x1 = math.min(x0, p.X), math.max(x1, p.X)
-			z0, z1 = math.min(z0, p.Z), math.max(z1, p.Z)
-		end
-		x0, x1, z0, z1 = x0 - 24, x1 + 24, z0 - 24, z1 + 24
 		local o = M.R[m.road]
+		local x0, x1, z0, z1 = math.huge, -math.huge, math.huge, -math.huge
+		for i = math.min(m.i0, m.k), math.max(m.i0, m.k) do
+			for _, side in { -1, 1 } do
+				local ex, ez = edgeXZ(o, i, side)
+				x0, x1 = math.min(x0, ex), math.max(x1, ex)
+				z0, z1 = math.min(z0, ez), math.max(z1, ez)
+			end
+		end
+		x0, x1, z0, z1 = x0 - 30, x1 + 30, z0 - 30, z1 + 30
 		local spots, double, holes, worst = 0, 0, 0, 0
 		local firstBad = nil
 		local x = x0

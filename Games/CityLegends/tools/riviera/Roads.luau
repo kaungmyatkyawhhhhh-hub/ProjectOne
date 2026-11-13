@@ -460,8 +460,8 @@ end
 -- (debugging) the roads as the build sees them: samples after the junction alignment
 Roads.triangle = triangle
 
-function Roads.prepared(data)
-	local roads, grid = prepare(data)
+function Roads.prepared(data, cut)
+	local roads, grid = prepare(data, cut)
 	alignJunctions(roads, grid)
 	return roads
 end
@@ -1071,7 +1071,9 @@ function Roads.check(data, opts)
 				local d = b.pos - a.pos
 				local right = Vector3.new(-d.Z, 0, d.X).Unit
 				local steps = math.max(1, math.floor(Vector2.new(d.X, d.Z).Magnitude))
-				for k = 0, steps - 1 do
+				-- (the first point after a cut stands exactly on the slab's square end: a ray there can
+				-- slip past the edge, which is no bump)
+				for k = (if r.cut and r.cut[i - 1] then 1 else 0), steps - 1 do
 					-- consecutive points along the lane: the surface may climb at most the steepest
 					-- grade (16%) between them; more than that plus `limit` is a step (a bump)
 					local p = a.pos + d * (k / steps) + right * lane
