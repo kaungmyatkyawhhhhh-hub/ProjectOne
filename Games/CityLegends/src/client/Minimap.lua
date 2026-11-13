@@ -47,6 +47,14 @@ end)
 if not okArt then
 	Art = nil
 end
+-- the Yangon map (build step 9, 2026-11-13; tools/yangon/d12_minimap.py), drawn beside Monaco's in the
+-- same world-stud space while both maps are in the place
+local okYArt, YArt = pcall(function()
+	return if workspace:FindFirstChild("Yangon") then require(script.Parent:WaitForChild("YangonMapArt", 3)) :: any else nil
+end)
+if not okYArt then
+	YArt = nil
+end
 
 local player = Players.LocalPlayer
 local C = Config.City
@@ -124,7 +132,31 @@ local function ringRoad(parent: Instance, c: Vector3, r: number, width: number, 
 end
 
 type Tile = { label: ImageLabel, image: string, centre: Vector3 }
+-- picture tiles of a map art module (MinimapArt's format) into `list`, over its backing colour
+local function artTiles(map: Frame, art: any, back: Color3, list: { Tile })
+	local x1 = art.x0 + art.tileStuds.X * art.cols
+	local z1 = art.z0 + art.tileStuds.Y * art.rows
+	rect(map, art.x0 - 6000, art.z0 - 6000, x1 + 6000, z1 + 6000, back, 1)
+	for _, t in art.tiles do
+		local img = Instance.new("ImageLabel")
+		img.Name = "Tile"
+		img.BackgroundTransparency = 1
+		img.BorderSizePixel = 0
+		img.Position = UDim2.fromOffset(art.x0 + t.col * art.tileStuds.X, art.z0 + t.row * art.tileStuds.Y)
+		img.Size = UDim2.fromOffset(art.tileStuds.X + 1, art.tileStuds.Y + 1)
+		img.ScaleType = Enum.ScaleType.Stretch
+		img.ZIndex = 2
+		img.Parent = map
+		table.insert(list, { label = img, image = t.image, centre = Vector3.new(art.x0 + (t.col + 0.5) * art.tileStuds.X, 0, art.z0 + (t.row + 0.5) * art.tileStuds.Y) })
+	end
+end
 local function drawMap(map: Frame): { Tile }
+	-- Yangon on its own (Monaco moved out, build step 11)
+	if YArt and not workspace:FindFirstChild("Riviera") then
+		local list = {}
+		artTiles(map, YArt, YArt.back, list)
+		return list
+	end
 	-- (Monaco only: just Monaco)
 	if not Config.monacoOnly() then
 	local E = C.HalfExtent + HR -- the city's road edge
@@ -204,19 +236,10 @@ local function drawMap(map: Frame): { Tile }
 	if workspace:FindFirstChild("Riviera") and Art then
 		-- the picture tiles, in world studs (a stud of overlap hides the seams); their images are put
 		-- on by the caller (only the ones near you on the minimap: phones' memory)
-		rect(map, Art.x0 - 6000, Art.z0 - 6000, Art.x0 + Art.tileStuds.X * Art.cols + 6000, Art.z0 + Art.tileStuds.Y * Art.rows + 6000, COL.water, 1)
 		local list = {}
-		for _, t in Art.tiles do
-			local img = Instance.new("ImageLabel")
-			img.Name = "Tile"
-			img.BackgroundTransparency = 1
-			img.BorderSizePixel = 0
-			img.Position = UDim2.fromOffset(Art.x0 + t.col * Art.tileStuds.X, Art.z0 + t.row * Art.tileStuds.Y)
-			img.Size = UDim2.fromOffset(Art.tileStuds.X + 1, Art.tileStuds.Y + 1)
-			img.ScaleType = Enum.ScaleType.Stretch
-			img.ZIndex = 2
-			img.Parent = map
-			table.insert(list, { label = img, image = t.image, centre = Vector3.new(Art.x0 + (t.col + 0.5) * Art.tileStuds.X, 0, Art.z0 + (t.row + 0.5) * Art.tileStuds.Y) })
+		artTiles(map, Art, COL.water, list)
+		if YArt then
+			artTiles(map, YArt, YArt.back, list)
 		end
 		return list
 	elseif workspace:FindFirstChild("Riviera") then

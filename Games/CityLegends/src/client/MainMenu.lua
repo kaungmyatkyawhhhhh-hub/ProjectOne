@@ -667,7 +667,8 @@ end
 -- The map (drawn once, shown in the WORLD MAP tile and on the map page)
 ---------------------------------------------------------------------
 local mapDrawing: Frame? = nil
-local MAP_CENTRE = Vector2.new(14300, 250) -- Monaco's middle (world x, z)
+-- Monaco's middle (world x, z); Yangon's when it is in the place (build step 9)
+local MAP_CENTRE = if Config.activeMap() == "Yangon" then Vector2.new(30716, -2388) else Vector2.new(14300, 250)
 local function getMap(): Frame
 	if mapDrawing then
 		return mapDrawing
@@ -747,7 +748,7 @@ end
 
 local function district(): string
 	local p = here()
-	local best, bestD = "Riviera Bay", math.huge
+	local best, bestD = if Config.activeMap() == "Yangon" then "Yangon" else "Riviera Bay", math.huge
 	for _, s in TravelSpots.list() do
 		if s.icon ~= "race" and s.icon ~= "delivery" and s.icon ~= "fuel" and s.icon ~= "service" then
 			local d = (Vector3.new(s.cf.Position.X, 0, s.cf.Position.Z) - Vector3.new(p.X, 0, p.Z)).Magnitude
