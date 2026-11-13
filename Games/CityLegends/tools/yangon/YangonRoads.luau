@@ -1135,8 +1135,11 @@ function M.verge(names: { string })
 					local y = math.min(a[2], b[2]) + M.VERGE_TOP
 					local len = hyp(b[1] - a[1], b[3] - a[3])
 					local mid = Vector3.new((a[1] + b[1]) / 2, (y + y - 10) / 2, (a[3] + b[3]) / 2)
-					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (hw + M.WALK + M.VERGE_W / 2), 0, 0)
-					workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W, 10, len + 1), Enum.Material.Grass)
+					-- (from 4 studs under the pavement out: smooth terrain is 4-stud voxels, and one whose centre
+					-- lies in the road's cleared trench pulls the surface down right at the pavement's edge,
+					-- 1 to 2 studs of pavement side showing. Under the pavement the grass is hidden.)
+					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (hw + M.WALK - 4 + (M.VERGE_W + 4) / 2), 0, 0)
+					workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W + 4, 10, len + 1), Enum.Material.Grass)
 					made += 1
 				end
 			end
