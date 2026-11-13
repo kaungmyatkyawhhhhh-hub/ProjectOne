@@ -24,7 +24,7 @@ Rules for every step:
 - [x] **4. Flyovers** (13 Nov, version 744). Decks, ramps, piers, parapets and side lanes for the Pyay Road Flyover and the Kabar Aye Flyover, and the junctions underneath. Log entry "13 Nov 2026, step 4" below.
 - [x] **5. Streets** (13 Nov, version 750). The 30 streets, their junction mouths and round corners, and barriers at the 16 map-edge road ends. Log entry "13 Nov 2026, step 5" below.
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes. **6a done** (13 Nov, version 752): grass up to the pavements near junctions, dashed middle line on the one-way side lanes. Still to do: road meshes (part count).
-- [ ] **7. Traffic lanes.** Lanes for main roads, side lanes and the roundabout only. Lane checker at 0 problems. Traffic runs on main roads only.
+- [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). **Not yet seen in Play:** the MCP's Play start got stuck (see the log).
 - [ ] **8. Buildings and landmarks.** Yangon-style blocks along the roads, Novotel, Optima and MM Plaza, far-city backdrop at the map edge.
 - [ ] **9. Move in the game.** Venues, houses, gas stations, spawn at Optima, fast travel spots, minimap.
 - [ ] **10. Night lights.** Street lamps on main roads, lit buildings, never dark.
@@ -190,3 +190,28 @@ Rules for every step:
     - The Riviera mesh pipeline (`tools/road_mesh/`) exports parts from Studio a page at a time, about 80 pages for this many parts. A Blender build from the road data would be faster, but means porting the kerb and mouth rules.
     - Left for after the car-meet steps (7 traffic, 8 buildings, 9 move-in, 10 lights, 11 switch-over).
   - Pictures: `Yangon 6a - ...jpg` in this folder.
+- 13 Nov 2026, step 7 (owner: "Yes, step 7"). Version **758** = "Yangon step 7: traffic lanes".
+  - **Lanes** (`tools/yangon/d9_lanes.py` -> `src/shared/YangonLanes.lua`, in Studio as `ReplicatedStorage.Shared.YangonLanes`):
+    - The same format as `RivieraLanes`. 28 lanes numbered 189..216 (after Monaco's 144 + 44), 47 links, 4,881 points, 118k characters.
+    - Right-hand traffic. Main roads 2+2 (lanes 8 and 24 right of the middle). Side lanes are one-way, 2 lanes at half their width from their middle (the Kabar Aye lanes start exactly on the loop's own lanes).
+    - Decks carry 2+2. The roundabout has 2 closed lanes (radius 76 and 96) running anticlockwise.
+    - **No street lanes** (owner's rule: traffic on main roads only).
+    - The loop is two runs: A (roundabout to the Kabar Aye split) and B (where it resumes, over the Pyay deck, back to the roundabout).
+    - Junction links stop 18 studs clear of a junction: University Avenue and New Road at the loop, University Avenue across the Pyay east lanes, University Avenue at the west lane. Left turns use the inner lane, right turns the outer.
+    - The side lanes leave and rejoin the loop's outer lanes as lane changes over its widened ends.
+    - No dead ends: the script checks it. Plots at junctions: `--plot outdir`.
+  - **Game code:**
+    - `RivieraTraffic.build` appends `YangonLanes` like `RivieraLanesHighway` (guarded by `first == #lanes + 1`).
+    - `Traffic.lua` now turns the lane graph on when `workspace.Riviera` **or** `workspace.Yangon` is there.
+    - The graph builds in Edit: 4,823 live Yangon lane pieces and 45 turns. The 28 pruned pieces are the game's own merge rule (an outer lane that leads where the inner one does changes lane about 9 points before its end).
+  - **Lane check** (`ClaudeTools.LaneCheck`, `roads = workspace.Yangon`): 113,731 points, 0 edge, 0 block. 7 spots remain, all single rays:
+    - 2 hairline seam holes, 1 to 4 rays in 289 at 0.25-stud spacing.
+    - A 6 cm seam at the Kabar Aye split.
+    - 4 one-ray kinks on paint (nothing at 3 studs either side).
+  - **Fixed because of it:**
+    - A side lane's end cross-section must lie exactly on the loop's. `d7_flyovers.py` used the chord's direction and offset along the chord's perpendicular, which is up to 2 degrees off the sample's stored direction (the one Roads.build uses). That left a gap up to a stud wide on the east lane's side of the Kabar Aye split, now within 0.005.
+    - Yangon roads now cap how fast an edge may climb from a junction at 5% (`M.EDGE_GRADE`, Monaco used 19%). New Road climbed 1.1 studs in 6 at its fork.
+  - **Not done / for step 9 and 11:**
+    - **Play test:** the test save claimed its first car (Horizon Z33) through `ClaimStarter`. After the restart, the MCP's `start_stop_play` kept answering "Start play hasn't finished yet" while Studio stayed in Edit and responded. Pressing Play by hand once, or reopening Studio, should clear it. The save store is back on `CityLegends_v1`, checked before the save.
+    - `Config.monacoOnly()` keys on `workspace.Riviera`. When step 11 moves Monaco out, the old city's lanes would come back: change it to look for Yangon too.
+    - Pedestrians, police lanes, speed cameras, spawn spots and `BusyZones` are still Monaco-only (step 9).
