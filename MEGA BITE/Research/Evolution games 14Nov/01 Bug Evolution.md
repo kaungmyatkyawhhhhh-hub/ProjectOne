@@ -152,3 +152,19 @@ D1 50 coins (today) / D2 SUN SPIDER (bug) / D3 2x XP 30 min / D4 150 / D5 200 / 
   = classic near-miss + "claim all" upsell.
 - Economy note: the two free first spins gave 5,000 coins in the first 15 minutes (0 -> 5,194). Coins buy bugs in the tree;
   the Prehistoric pack is 250,000 coins.
+
+### Evolution unlock rules, dark patterns, events (06:09-06:16)
+- Next evolution card (Housefly / Grasshopper, T2): "TO UNLOCK: ✓ Own Garden Spider / ✗ Grow up as Garden Spider (Lv 12, best 8)
+  / ✓ 200 coins" + stats (Housefly: Speed B, Health D, Bite DMG D, Bite SPD S, Stamina C; Grasshopper: Speed A, Bite SPD B,
+  Stamina B) + "GROW UP AS GARDEN SPIDER" (grey) or green "R$19" skip + blue "TRACK QUEST" (sets the quest tracker).
+  So each evolution = a LEVEL requirement on the current bug + a coin price + owning the previous bug. Different branches have
+  different stat shapes (fly = bite speed, hopper = speed) -> a real choice.
+- PAID ORBS IN THE WORLD: some floating orbs look like rewards (rainbow dashed ring, "+30 LEVELS") but walking into one opens a
+  Roblox purchase prompt "+30 Levels [FAST] R$19" (and Roblox's "Buy Robux and item 500 R$ $6.98" sheet for 0-Robux accounts).
+  It sits in the path; touching it again re-prompts. Kids will hit it by accident. (A strong dark pattern; Roblox allows it.)
+- LEAVE-GUARD: pressing Esc (Roblox menu) shows a gold banner "You have a free reward waiting! +100 coins - claim it before you
+  go" (playtime reward used to stop you leaving).
+- Roblox menu > People: the server had 11 players (most with default avatars = young/new accounts).
+- "GIANT ENEMY 4:52" pill (red dot) appears top-centre with a countdown; on the map a white SKULL marks it (Dusty Desert border).
+- Spiders WALK ON WALLS / tree trunks automatically (no jump needed); good for exploring, confusing for the camera.
+- Movement speed at Lv 8-9 is slow vs the map size: crossing one zone takes ~30-40 s even with RUN.
