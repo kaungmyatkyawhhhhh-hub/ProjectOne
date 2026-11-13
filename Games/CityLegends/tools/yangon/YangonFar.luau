@@ -128,12 +128,27 @@ function M.skirt(): string
 end
 
 local FAR_COLS = {
-	Color3.fromRGB(214, 208, 196), Color3.fromRGB(196, 192, 184), Color3.fromRGB(226, 220, 204),
-	Color3.fromRGB(184, 190, 196), Color3.fromRGB(206, 196, 176), Color3.fromRGB(170, 178, 186),
-	Color3.fromRGB(222, 214, 190), Color3.fromRGB(150, 160, 170),
+	Color3.fromRGB(214, 206, 190), Color3.fromRGB(200, 194, 182), Color3.fromRGB(226, 218, 200),
+	Color3.fromRGB(206, 196, 172), Color3.fromRGB(222, 212, 186), Color3.fromRGB(190, 186, 178),
+	Color3.fromRGB(232, 226, 214), Color3.fromRGB(214, 200, 184),
 }
+local TREE = { Color3.fromRGB(62, 104, 52), Color3.fromRGB(74, 116, 58), Color3.fromRGB(56, 92, 50), Color3.fromRGB(86, 122, 62) }
 
--- distant buildings: 2-3 parts each (body, a darker band of windows on the top floors, a roof cap)
+-- a point `out` studs outside the map's edge on side 1..4 (N, S, W, E), anywhere along that side
+local function ringPoint(rng: Random, side: number, out: number): (number, number)
+	if side == 1 then
+		return rng:NextNumber(M.X0 - out, M.X1 + out), M.Z0 - out
+	elseif side == 2 then
+		return rng:NextNumber(M.X0 - out, M.X1 + out), M.Z1 + out
+	elseif side == 3 then
+		return M.X0 - out, rng:NextNumber(M.Z0 - out, M.Z1 + out)
+	end
+	return M.X1 + out, rng:NextNumber(M.Z0 - out, M.Z1 + out)
+end
+
+-- distant buildings in clusters (5 parts each: the body, three dark window strips wrapping it, a roof
+-- cap), from 420 studs past the edge outward, taller towards Hledan (west) and downtown (south); and a
+-- belt of trees just past the edge that hides where the real city stops
 function M.city(seed: number?): string
 	local f = M.folder()
 	local old = f:FindFirstChild("City")
@@ -143,53 +158,64 @@ function M.city(seed: number?): string
 	local city = Instance.new("Folder")
 	city.Name = "City"
 	local rng = Random.new(seed or 1311)
-	local made = 0
+	local made, trees = 0, 0
 	local cx, cz = (M.X0 + M.X1) / 2, (M.Z0 + M.Z1) / 2
 	local hw, hd = (M.X1 - M.X0) / 2, (M.Z1 - M.Z0) / 2
-	for _ = 1, 260 do
-		-- a point in the ring 180..1500 outside the edge
+	for _ = 1, 90 do
 		local side = rng:NextInteger(1, 4)
-		local out = 180 + rng:NextNumber() ^ 1.6 * 1300
-		local x, z
-		if side == 1 then
-			x, z = rng:NextNumber(M.X0 - out, M.X1 + out), M.Z0 - out
-		elseif side == 2 then
-			x, z = rng:NextNumber(M.X0 - out, M.X1 + out), M.Z1 + out
-		elseif side == 3 then
-			x, z = M.X0 - out, rng:NextNumber(M.Z0 - out, M.Z1 + out)
-		else
-			x, z = M.X1 + out, rng:NextNumber(M.Z0 - out, M.Z1 + out)
-		end
-		-- (keep clear of Shwedagon's hill)
-		if (Vector3.new(x, 0, z) - M.SHWEDAGON).Magnitude < 420 then
+		local out = 420 + rng:NextNumber() ^ 1.4 * 1400
+		local x0, z0 = ringPoint(rng, side, out)
+		if (Vector3.new(x0, 0, z0) - M.SHWEDAGON).Magnitude < 500 then
 			continue
 		end
-		local g = groundAt(x, z) or 40
-		-- taller west (Hledan, Kamayut) and south (downtown)
-		local tall = 0.35
-		if x < cx - hw * 0.4 or z > cz + hd * 0.5 then
-			tall = 0.65
+		local tall = if x0 < cx - hw * 0.4 or z0 > cz + hd * 0.5 then 0.6 else 0.3
+		local n = rng:NextInteger(3, 7)
+		for _ = 1, n do
+			local x, z = x0 + rng:NextNumber(-140, 140), z0 + rng:NextNumber(-140, 140)
+			local g = groundAt(x, z)
+			if not g then
+				continue
+			end
+			local h = if rng:NextNumber() < tall then rng:NextNumber(80, 200) else rng:NextNumber(30, 80)
+			local w, d = rng:NextNumber(36, 70), rng:NextNumber(30, 60)
+			local yaw = rng:NextNumber(-0.3, 0.3) + (if side <= 2 then 0 else math.pi / 2)
+			local cf = CFrame.new(x, g - 4, z) * CFrame.Angles(0, yaw, 0)
+			local col = FAR_COLS[rng:NextInteger(1, #FAR_COLS)]
+			local m = Instance.new("Model")
+			m.Name = "FarBuilding"
+			box("Body", Vector3.new(w, h + 4, d), cf * CFrame.new(0, (h + 4) / 2, 0), col, Enum.Material.Concrete, m)
+			-- window strips: three dark bands wrapping it at even heights (read as rows of windows)
+			local dark = col:Lerp(Color3.fromRGB(42, 48, 58), 0.7)
+			for k = 1, 3 do
+				local y = 4 + (h * k) / 4
+				local sh = math.min(h / 7, 14)
+				local strip = box("Windows", Vector3.new(w + 0.4, sh, d + 0.4), cf * CFrame.new(0, y, 0), dark, Enum.Material.SmoothPlastic, m)
+				CollectionService:AddTag(strip, "FarBand")
+			end
+			box("Cap", Vector3.new(w + 1, 2, d + 1), cf * CFrame.new(0, h + 5, 0), col:Lerp(Color3.fromRGB(120, 116, 110), 0.4), Enum.Material.Concrete, m)
+			m.Parent = city
+			made += 1
 		end
-		local h = if rng:NextNumber() < tall then rng:NextNumber(90, 230) else rng:NextNumber(36, 90)
-		local w, d = rng:NextNumber(40, 90), rng:NextNumber(40, 80)
-		local yaw = rng:NextNumber(-0.25, 0.25) + (if side <= 2 then 0 else math.pi / 2)
-		local cf = CFrame.new(x, g - 4, z) * CFrame.Angles(0, yaw, 0)
-		local col = FAR_COLS[rng:NextInteger(1, #FAR_COLS)]
+	end
+	-- the tree belt: 30..360 studs past the edge, all round
+	for _ = 1, 520 do
+		local side = rng:NextInteger(1, 4)
+		local x, z = ringPoint(rng, side, rng:NextNumber(30, 360))
+		local g = groundAt(x, z)
+		if not g then
+			continue
+		end
+		local s = rng:NextNumber(0.8, 1.5)
+		local hgt = 14 * s
 		local m = Instance.new("Model")
-		m.Name = "FarBuilding"
-		box("Body", Vector3.new(w, h + 4, d), cf * CFrame.new(0, (h + 4) / 2, 0), col, Enum.Material.Concrete, m)
-		-- a band of dark windows wrapping the upper part (reads as glazing at a distance)
-		local bh = math.min(h * 0.55, 60)
-		local band = box("Windows", Vector3.new(w + 0.4, bh, d + 0.4), cf * CFrame.new(0, h + 4 - bh / 2 - 6, 0), col:Lerp(Color3.fromRGB(40, 48, 60), 0.6), Enum.Material.SmoothPlastic, m)
-		if h > 120 then
-			box("Crown", Vector3.new(w * 0.7, 10, d * 0.7), cf * CFrame.new(0, h + 9, 0), col:Lerp(Color3.new(1, 1, 1), 0.2), Enum.Material.Concrete, m)
-		end
-		CollectionService:AddTag(band, "FarBand")
+		m.Name = "FarTree"
+		box("Trunk", Vector3.new(1.6 * s, hgt, 1.6 * s), CFrame.new(x, g + hgt / 2 - 1, z), Color3.fromRGB(90, 70, 54), Enum.Material.Wood, m)
+		box("Crown", Vector3.new(22, 14, 22) * s, CFrame.new(x, g + hgt + 3 * s, z), TREE[rng:NextInteger(1, #TREE)], Enum.Material.Grass, m, Enum.PartType.Ball)
 		m.Parent = city
-		made += 1
+		trees += 1
 	end
 	city.Parent = f
-	return "far city: " .. made .. " buildings"
+	return string.format("far city: %d buildings, %d trees", made, trees)
 end
 
 -- Shwedagon: the hill and its terrace, the gold stupa (terraces, bell, rings, lotus, banana bud, umbrella
@@ -207,10 +233,11 @@ function M.shwedagon(): string
 	-- Singuttara hill: a terrain mound, then the white terrace on top
 	workspace.Terrain:FillCylinder(CFrame.new(p.X, g + 30 - 2, p.Z), 60, 320, Enum.Material.Grass)
 	workspace.Terrain:FillCylinder(CFrame.new(p.X, g + 50 - 2, p.Z), 20, 230, Enum.Material.Grass)
+	local K = 1.4 -- (bigger than true scale: it must read from the streets 2 km away)
 	local base = g + 60
 	local GOLD = Color3.fromRGB(212, 160, 23)
 	local WHITE = Color3.fromRGB(245, 245, 240)
-	box("Terrace", Vector3.new(300, 8, 300), CFrame.new(p.X, base - 4, p.Z), WHITE, Enum.Material.Marble, m)
+	box("Terrace", Vector3.new(300, 8, 300) * K, CFrame.new(p.X, base - 4, p.Z), WHITE, Enum.Material.Marble, m)
 	local function gold(name, size, cf, shape)
 		local q = box(name, size, cf, GOLD, Enum.Material.Foil, m, shape)
 		CollectionService:AddTag(q, "LampGlow")
@@ -218,32 +245,32 @@ function M.shwedagon(): string
 	end
 	local y = base
 	-- three octagon-ish terraces (two squares at 45 degrees each)
-	for i, s in { 150, 126, 104 } do
+	for i, s in { 150 * K, 126 * K, 104 * K } do
 		for _, r in { 0, math.pi / 4 } do
-			gold("Plinth" .. i, Vector3.new(s, 10, s), CFrame.new(p.X, y + 5, p.Z) * CFrame.Angles(0, r, 0))
+			gold("Plinth" .. i, Vector3.new(s, 10 * K, s), CFrame.new(p.X, y + 5 * K, p.Z) * CFrame.Angles(0, r, 0))
 		end
-		y += 10
+		y += 10 * K
 	end
 	-- the bell
-	gold("Bell", Vector3.new(96, 110, 96), CFrame.new(p.X, y + 40, p.Z), Enum.PartType.Ball)
-	y += 90
+	gold("Bell", Vector3.new(96, 110, 96) * K, CFrame.new(p.X, y + 40 * K, p.Z), Enum.PartType.Ball)
+	y += 90 * K
 	-- the rings (turban bands) and the lotus
 	for i, r in { 60, 52, 44, 38, 32 } do
-		gold("Ring" .. i, Vector3.new(8, r, r), CFrame.new(p.X, y + 4, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
-		y += 8
+		gold("Ring" .. i, Vector3.new(8, r, r) * K, CFrame.new(p.X, y + 4 * K, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
+		y += 8 * K
 	end
 	-- the banana bud: a long tapering stack
 	local r = 28
 	for i = 1, 10 do
-		gold("Bud" .. i, Vector3.new(10, r, r), CFrame.new(p.X, y + 5, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
-		y += 10
+		gold("Bud" .. i, Vector3.new(10, r, r) * K, CFrame.new(p.X, y + 5 * K, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
+		y += 10 * K
 		r *= 0.8
 	end
 	-- the umbrella (hti) and the spire
-	gold("Hti", Vector3.new(4, 14, 14), CFrame.new(p.X, y + 2, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
-	gold("Spire", Vector3.new(30, 2.4, 2.4), CFrame.new(p.X, y + 18, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
-	gold("Orb", Vector3.new(4, 4, 4), CFrame.new(p.X, y + 34, p.Z), Enum.PartType.Ball)
-	local top = y + 36
+	gold("Hti", Vector3.new(4, 14, 14) * K, CFrame.new(p.X, y + 2 * K, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
+	gold("Spire", Vector3.new(30, 2.4, 2.4) * K, CFrame.new(p.X, y + 18 * K, p.Z) * CFrame.Angles(0, 0, math.pi / 2), Enum.PartType.Cylinder)
+	gold("Orb", Vector3.new(4, 4, 4) * K, CFrame.new(p.X, y + 34 * K, p.Z), Enum.PartType.Ball)
+	local top = y + 36 * K
 	-- small stupas round the terrace
 	for k = 0, 11 do
 		local a = k / 12 * math.pi * 2
