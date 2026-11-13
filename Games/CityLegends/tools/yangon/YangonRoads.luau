@@ -1124,8 +1124,9 @@ function M.verge(names: { string })
 	for _, c in M.corners do
 		local inner = c.r - M.WALK
 		if inner > 2 and inner < 30 then
-			local y = (if c.ring then C.Y else M.R[c.road].s[c.ePts[c.sa].i][2]) + M.VERGE_TOP
-			workspace.Terrain:FillCylinder(CFrame.new(c.ox, y - 5, c.oz), 10, inner, Enum.Material.Grass)
+			-- (a round fill sags more at its edge than a long strip: measured 13 Nov, 0.5 higher)
+			local y = (if c.ring then C.Y else M.R[c.road].s[c.ePts[c.sa].i][2]) + M.VERGE_TOP + 0.5
+			workspace.Terrain:FillCylinder(CFrame.new(c.ox, y - 5, c.oz), 10, inner + 1, Enum.Material.Grass)
 			made += 1
 		end
 	end
