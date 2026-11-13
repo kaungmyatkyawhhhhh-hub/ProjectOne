@@ -3,6 +3,12 @@
 Game: City Legends (`Games/CityLegends`). Yangon replaces the Monaco map. Owner, 13 Nov 2026: "lets use claude code", so the build steps now run in Claude Code from prompts like this one.
 Do this step only (step 3 of [[Yangon map - Build steps (Claude builds it)]]), then STOP and report. No flyovers, no streets, no traffic lanes, no buildings.
 
+## If this runs with ultracode
+Ultracode plans a workflow of parallel subagents. Studio is one place on one main thread, so:
+- **One agent only writes to Studio and to the tool files** (`Roads.luau`, `RoadLines.luau`, `YangonRoads.luau`, the road data), in the order of this prompt. Never two builds, saves or `execute_luau` writes at the same time.
+- Subagents may do the work that only reads: the Yangon photo research, reviewing the builder changes before they run, the measured checks, and looking at the pictures. A check that fails goes back to the one writing agent.
+- One save at the start and one at the end, by the writing agent.
+
 ## Read first
 1. `Brain/00 BRAIN.md`, then `Brain/Knowledge/K06` (lighting) and `K07` (performance).
 2. `City Legends/Yangon map - Build steps (Claude builds it).md`: the rules, the log and its two **Trap** lines.
@@ -34,7 +40,13 @@ All of it in `Workspace.Yangon` (a Model) > `Roads` (a Folder, one folder per ro
 
 ## What to leave out (step 4 builds it)
 - **Inside the roundabout:** no loop slab, pavement or line closer than 108 studs to the centre. The loop's two ends are cut where they meet the ring, level with it.
-- **Flyover corridors:** each flyover (`Design.flyovers`: the loop from 10,742 m to 11,934 m; New Road from 2,289 m to its end at 2,729 m) has a corridor 70 studs either side of the deck's centre line. Build nothing of any road inside a corridor. That covers the two decks and ramps, the loop where it runs under New Road's deck, and University Avenue's west end under the Pyay Road Flyover. List every road end this cuts.
+- **Flyover corridors:** each flyover (`Design.flyovers`: the loop from 10,742 m to 11,934 m; New Road from 2,289 m to its end at 2,729 m) has a corridor 70 studs either side of the deck's centre line. Build nothing of any road inside a corridor. Measured on the data on 13 Nov, this cuts:
+  - the loop from 10,742 m to 11,934 m (its own deck and ramps);
+  - the loop from about 3,164 m to 3,488 m (82 samples, where it runs under New Road's deck; New Road lands on the loop at 3,452 m);
+  - New Road from 2,289 m to its end;
+  - University Avenue's first 11 samples (its west end meets the loop at 11,284 m, 14 studs under the deck).
+  - Streets with samples in a corridor, for step 5 to know: Hledan Road, Nar Nat Taw Road, New University Avenue Road.
+  Check these numbers against your own count and list every cut end in the report.
 - Deck samples sit 14 studs above the ground. They must not count as a junction for a road passing underneath, or that road's end is lifted onto the deck.
 - Every cut end is square across the road, with no `TurningCircle`, no kerb wrapped round it and no drop: step 4 butts up to it.
 - Not in this step: `SmoothKerbs`, `PaveOverlap`, road meshes (step 6), lanes and `LaneCheck` (step 7), zebra crossings, lamps.
@@ -48,7 +60,7 @@ All of it in `Workspace.Yangon` (a Model) > `Roads` (a Folder, one folder per ro
 ## Checks (all measured, numbers in the report)
 1. `Roads.check` on the three main roads with `parent = Workspace.Yangon.Roads`: 0 bumps. Give it the per-road lanes.
 2. Junctions: at each of the 28 main-road junctions in `Design.junctions` that lies outside the corridors, the mouth gap is there, the heights match within 0.05 and no pavement, kerb or line crosses the mouth.
-3. Main road against main road (New Road's start on the loop, University Avenue's east end on the loop): one slab only where they overlap, the loop's.
+3. Main road against main road (New Road's start on the loop at 772 m; University Avenue's east end on the loop at 2,160 m): one slab only where they overlap, the loop's, and the heights match (51.4 and 42.0).
 4. `SurfaceCheck` at 10 spots (4 straights, 3 bends, the roundabout, 2 junctions): no doubled faces.
 5. Part count of `Workspace.Yangon.Roads` by name (slab, Pavement, Kerb, Line). `Workspace.Riviera` descendants unchanged.
 6. Pictures with `screen_capture`, daytime, saved as jpg in the vault's `City Legends` folder with names like `Yangon main roads - roundabout from above.jpg`: the roundabout from above and from a driver's eye, a straight on Pyay Road, the tightest bend, a street mouth, New Road joining the loop, both cut ends at the Pyay Road Flyover, Inya Lake beside the road, and one at phone size (667 x 375). Look at each picture yourself before you report: wrong colours, gaps, grass through the road or crossed lines mean fix and shoot again.
