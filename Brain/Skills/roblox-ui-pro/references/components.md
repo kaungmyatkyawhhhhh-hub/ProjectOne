@@ -120,6 +120,32 @@ root:GetPropertyChangedSignal("AbsoluteSize"):Connect(compose)
 task.defer(compose)
 ```
 
+**A phone layout for a window (tested on MEGA BITE Settings, 14 Nov)**
+- Build the window's content from a geometry table, e.g. `GEOM = { desk = {...}, phone = {...} }`, and a list of rows. `build(mode)` destroys the old content frame and rebuilds it. State lives outside (the settings table), so a rebuild loses nothing.
+- `mode = "phone"` when the input is touch, the short side is ≤ 500 and the screen is landscape. Re-check on `Camera.ViewportSize` changes, on input changes, and when the window opens.
+- The phone geometry is **wide and short**: two columns, taller rows, short labels, single-word pill labels (shorten a word that splits, e.g. NORMAL → MID). Make it as wide as the height-limited scale allows, because on a short phone the width is free.
+- The window **fills** the screen on phones instead of shrinking to the HUD's scale. In MEGA BITE that's the `FitFill` attribute read by `K.AttachScale`, and windows re-fit when their Size changes.
+- Tap areas: give each pill an invisible button the full row pitch tall; give a small X an invisible 64-unit tap area. Tablets keep the PC layout but get the taller tap areas.
+- Result on the Galaxy A06: ×0.58 → ×0.78, text 8.7 → 14 px, taps 17 → 40 px. PC was unchanged.
+- A window built once with lots of linked pieces (MEGA BITE World Map: a zoomable map disc, markers, a list) doesn't need rebuilding: an `applyLayout(mode)` function can re-size and re-place the existing pieces. Turn sizes the other code depends on (the disc size, the world→map factor) into variables it updates, then re-run the code that places markers.
+- A tall picture (a map) keeps the window's full height; a list next to it becomes a **grid of two-line cards** (name, then status underneath), not thin one-line rows.
+- Labels that pile up on a small map (region names) show only when zoomed in.
+- Small icons on a map get invisible tap areas (≥ 60 units), so they reach 44 px on the smallest phone.
+
+**A map should fill the screen (owner feedback, MEGA BITE, 14 Nov)**
+A boxed window with a map in it leaves the map tiny on phones (164 px of a 705×338 screen). Kids expect a Deepwoken-style full-screen chart:
+- A thin frame over the whole safe area, and the map as tall as the screen (cap it around 760 px on TVs: CanvasGroup textures get heavy).
+- Put the title, the X, the status and the list in a side panel with its own `UIScale`: `clamp(height / 380, 0.78, 1.25)`. Use two columns of cards when the panel is ≥ 420 units wide, else one.
+- Size and place everything from the screen in one `layout()` that runs on open and on resize. Don't build separate phone and PC layouts.
+- Labels on the map dodge the icons: if a marker sits on a label, move the label above or below it.
+
+**Other lessons from the same pass**
+- A **left- or right-anchored panel** never gets a "fit to screen" clamp, because those usually only handle centred windows. It overflows short phones silently. Fit it yourself.
+- A grid with more items than fit becomes a ScrollingFrame on phones. Count the real items (MEGA BITE has 16 fish, not the 12 the comments said).
+- Re-check a phone/PC layout when the **input type** changes, not only the viewport (Studio's device switch briefly reports mouse).
+- A 3D object used as UI (a hero card in front of the camera) must not get a `BlurEffect`. Track it being open (an attribute) and keep the window blur off while it is.
+- When the owner says a HUD piece is annoying on mobile, remove it on all devices behind one flag (`SHOW_COMING_NEXT = false`), and turn off anything that animates from it.
+
 **Reward reveal (skippable, staged)**
 1. Dim the world (backdrop to 0.4) 0.15 s.
 2. Item pops in at centre: scale 0 → 1.15 → 1 (0.35 s Back Out) with the rarity colour ring behind it.
