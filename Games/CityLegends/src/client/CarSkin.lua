@@ -48,7 +48,6 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_m8gc = "BMWLiveCockpit",
 	bnw_m3_e92 = "BMWF80",
 	bnw_m3_f80 = "BMWF80",
-	bnw_m4_f82 = "BMWF80",
 	lexis_lx700 = "LexusLX700",
 	-- supercars and hypercars: copied from the real cars (owner, 2026-10-24: "an exact 1 to 1
 	-- replica of the real one"; photos and video frames in imports/refs)
@@ -61,6 +60,7 @@ CarSkin.CLUSTER_STYLE = {
 	bentlee_bentayga = "LiveBentayga", -- the 2018 V8 model (2026-11-10), from the owner's photo
 	nisun_gtr = "LiveGTR", -- the 2013 model's own cluster, live (2026-11-10)
 	bnw_m5_f90 = "LiveG20", -- the 2022 model has no cluster picture: the G20 Sport's live cluster (owner, 2026-11-10)
+	bnw_m4_f82 = "LiveF82", -- the 2018 model (2026-11-12), redrawn from the owner's photo ("BMWF80" puts the old drawn one back, on the same rect)
 	mclaran_12c = "Live12C", -- from the owner's photo
 	bentz_sls = "LiveSLS", -- from the owner's photo
 	ferrara_599 = "LiveF141", -- from the owner's photo
@@ -157,6 +157,7 @@ CarSkin.CLUSTER_RECT = {
 	bentlee_bentayga = { at = Vector3.new(-0.0001, -0.0091, -0.2632), face = Vector3.new(0, 0.4672, 0.8841), w = 0.3168, h = 0.1327 }, -- in the model's wood hood, over both dials (tools/lambo/window_bentayga.png)
 	bnw_m5_f90 = { at = Vector3.new(0.0006, 0.0059, -0.2445), face = Vector3.new(0, 0.349, 0.9371), w = 0.3409, h = 0.1267 }, -- on the 2022 model's own screen (341 x 132 mm, the hood hides the corners; the G20 picture's shape, 4 mm up)
 	nisun_gtr = { at = Vector3.new(0.0017, 0.0253, -0.2084), face = Vector3.new(-0.002, 0.2507, 0.9681), w = 0.2597, h = 0.1202 }, -- on the model's own cluster quad (the 2013 model, 2026-11-10)
+	bnw_m4_f82 = { at = Vector3.new(0.0045, 0.0392, -0.2566), face = Vector3.new(0, 0.2396, 0.9709), w = 0.3546, h = 0.1343 }, -- the 2018 model's own cluster face (the hood's walls hide its corners)
 	audy_r8_lw = { at = Vector3.new(-0.0053, 0.0373, -0.2128), face = Vector3.new(0, 0.32, 0.9474), w = 0.3921, h = 0.1456 }, -- the same pods (its steering pieces' box sits 2 cm deeper: dials found by their picture in both models)
 	bentz_sl65bs = { at = Vector3.new(0.022, 0.0715, -0.2433), face = Vector3.new(0, 0.2, 0.98), w = 0.234, h = 0.106 }, -- in the two bowls
 	bentz_sls = { at = Vector3.new(0.0021, 0.0377, -0.2165), face = Vector3.new(0, 0.2, 0.98), w = 0.3163, h = 0.1342 }, -- in the model's hood, in front of its dials
@@ -296,7 +297,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -355,8 +356,7 @@ CarSkin.OWN_NEEDLES = {
 CarSkin.INTERIOR_DONOR = {
 	porsha_gt3 = { from = "porsha_boxster", rear = 1.8 }, -- owner (2026-10-16): the 718 cockpit, like the Panamera
 	-- owner (2026-10-13): the M3 F80 and M4 F82 files' own cabins look bad; the M3 E92's goes in
-	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 },
-	bnw_m4_f82 = { from = "bnw_m3_e92", rear = 1.8 },
+	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 }, -- (bnw_m4_f82 has its own cabin since its 2018 model, 2026-11-12)
 	-- owner (2026-10-13): the Panamera's own cluster is broken; the 718 Boxster's cockpit goes in
 	porsha_panamera = { from = "porsha_boxster", rear = 1.8 },
 	-- owner (2026-10-13): the 458 Italia keeps its body and takes the 458 Speciale's cabin (a cabin
@@ -413,7 +413,7 @@ CarSkin.STEER_MODEL = {
 	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
 	-- (nisun_gtr keeps its 2013 model's own wheel)
 	-- BMW
-	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", bnw_m4_f82 = "BMWM",
+	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", -- (bnw_m4_f82 keeps its 2018 model's own wheel)
 	bnw_m6_v10 = "BMWM", bnw_m8gc = "BMWM", bnw_x6 = "BMWM", bnw_x7 = "BMWM", bnw_750li = "BMWM",
 	bnw_m5_f10 = "BMWM", -- (bnw_m5_f90 keeps its 2022 model's own wheel)
 	-- Mercedes

@@ -47,6 +47,7 @@ CarLamps.CARS = {
 	bentlee_bentayga = true, -- (the 2018 model's own lamps, 2026-11-10)
 	nisun_gtr = true, -- (the 2013 model's own lamps, 2026-11-10)
 	bnw_m5_f90 = true, -- (the 2022 model's own lamps, 2026-11-10)
+	bnw_m4_f82 = true, -- (the 2018 model's own lamps, 2026-11-12)
 } :: { [string]: boolean }
 
 function CarLamps.has(id: string?): boolean
