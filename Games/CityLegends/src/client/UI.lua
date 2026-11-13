@@ -893,6 +893,7 @@ local function buildCashTab()
 		{ "L", "Lights on / off" },
 		{ "Z / X / C", "Left blinker · hazards · right blinker" },
 		{ "V", "First person  (SHIFT + V: other views)" },
+		{ "RIGHT MOUSE", "Hold and move: look around the car" },
 		{ "R", "Radio: next station" },
 		{ "BACKSPACE", "Reset car to road" },
 		{ "SHIFT + P", "Free camera (also O)" },

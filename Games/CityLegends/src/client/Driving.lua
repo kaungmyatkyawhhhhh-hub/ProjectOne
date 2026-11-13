@@ -46,6 +46,10 @@ local Audio = require(script.Parent:WaitForChild("Audio"))
 local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local CarLamps = require(script.Parent:WaitForChild("CarLamps"))
+local CameraLook = require(script.Parent:WaitForChild("CameraLook"))
+local lookRay = RaycastParams.new() -- (the outside camera swung round must not go through a wall)
+lookRay.FilterType = Enum.RaycastFilterType.Exclude
+lookRay.RespectCanCollide = true
 
 local camera = workspace.CurrentCamera
 
@@ -1232,6 +1236,7 @@ function Driving.toggleFirstPerson()
 end
 
 applyCamera = function()
+	CameraLook.reset()
 	UI.setCameraLabel(Driving.cameraMode)
 	local s = state
 	if s then
@@ -4402,6 +4407,33 @@ function Driving.render(dt: number)
 		sway = CFrame.new(float + buzz) * CFrame.Angles(0, 0, HS.Roll * hs * n(t * HS.Rate, 13.3))
 	end
 
+	-- (owner, 2026-11-13: "make it so that u can look around in third person camera view") the outside
+	-- cameras swing round the car: right mouse button held, a finger dragged on free screen, or the right
+	-- stick (client/CameraLook). Swung round, the camera looks at the car instead of the road ahead and
+	-- comes in before a wall or the ground; let go and drive, and it eases back behind the car.
+	CameraLook.update(dt, mphNow)
+	local lookK = if interior then 0 else CameraLook.amount()
+	local function orbit(camPos: Vector3, lookAt: Vector3): (Vector3, Vector3)
+		if interior or not CameraLook.active() then
+			return camPos, lookAt
+		end
+		local pivot = root.Position + Vector3.new(0, 1.8, 0)
+		local turnY = CFrame.Angles(0, CameraLook.yaw, 0)
+		local off = turnY:VectorToWorldSpace(camPos - pivot)
+		local flatOff = Vector3.new(off.X, 0, off.Z)
+		local dist = off.Magnitude
+		if flatOff.Magnitude > 1e-3 and dist > 1e-3 then
+			local e = math.clamp(math.atan2(off.Y, flatOff.Magnitude) + CameraLook.pitch, -0.2, 1.35)
+			off = flatOff.Unit * math.cos(e) * dist + Vector3.new(0, math.sin(e) * dist, 0)
+		end
+		local look = (pivot + turnY:VectorToWorldSpace(lookAt - pivot)):Lerp(pivot, lookK)
+		lookRay.FilterDescendantsInstances = { s.model, player.Character :: Instance }
+		local hit = workspace:Raycast(pivot, off, lookRay)
+		if hit then
+			off = (hit.Position - pivot) * 0.9
+		end
+		return pivot + off, look
+	end
 	local targetFov
 	local rootCF = root.CFrame
 	if interior then
@@ -4456,7 +4488,8 @@ function Driving.render(dt: number)
 		local lookAt = (base * CFrame.Angles(0, -s.camSwing * 0.6 + s.towTurn, 0) * ahead).Position
 		s.camPos = camPos
 		s.camLook = lookAt
-		camera.CFrame = CFrame.lookAt(camPos + shake, lookAt + shake * 0.5) * CFrame.Angles(s.camPitch, 0, s.camRoll)
+		local oPos, oLook = orbit(camPos, lookAt)
+		camera.CFrame = CFrame.lookAt(oPos + shake, oLook + shake * 0.5) * CFrame.Angles(s.camPitch, 0, s.camRoll)
 		local blurMax = if low then LC.Blur else IC.Blur
 		local blurFrom = if low then LC.BlurFrom else IC.BlurFrom
 		setBlur(math.max(blurMax * math.max(0, fx - blurFrom) ^ 1.3, s.blurPulse))
@@ -4480,7 +4513,8 @@ function Driving.render(dt: number)
 		end
 		local look = root.Position + fwd * 10 + Vector3.new(0, 1.8, 0)
 		s.camLook = s.camLook:Lerp(look, 1 - math.exp(-dt * 14))
-		camera.CFrame = CFrame.lookAt(s.camPos + shakeOffset, s.camLook) * CFrame.Angles(s.camPitch * 0.7, 0, s.camRoll * 0.8)
+		local oPos, oLook = orbit(s.camPos, s.camLook)
+		camera.CFrame = CFrame.lookAt(oPos + shakeOffset, oLook) * CFrame.Angles(s.camPitch * 0.7, 0, s.camRoll * 0.8)
 		setBlur(math.max(2 * math.max(0, fx - 0.55) ^ 1.5, s.blurPulse))
 	end
 	camera.CFrame *= sway
@@ -4544,6 +4578,10 @@ end
 -- One-time setup
 ---------------------------------------------------------------------
 function Driving.init()
+	-- (2026-11-13) look around the car in the outside cameras (not in the cockpit or a menu)
+	CameraLook.init(function(): boolean
+		return state ~= nil and Driving.cameraMode ~= "Interior" and not Driving.cameraHold and not Driving.workshopOpen and not Driving.menuHold and not UI.isGarageOpen()
+	end)
 	-- (2026-11-08) the phone's shift paddles
 	UI.onShift = function(dir: number)
 		local s = state
