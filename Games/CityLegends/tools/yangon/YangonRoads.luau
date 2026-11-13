@@ -1121,13 +1121,32 @@ function M.verge(names: { string })
 			made += 1
 		end
 	end
+	-- inside each round corner: strips along the curve, like the strips along the roads (a round fill
+	-- came out up to a stud too high or too low)
 	for _, c in M.corners do
 		local inner = c.r - M.WALK
-		if inner > 2 and inner < 30 then
-			-- (a round fill sags more at its edge than a long strip: measured 13 Nov, 0.5 higher)
-			local y = (if c.ring then C.Y else M.R[c.road].s[c.ePts[c.sa].i][2]) + M.VERGE_TOP + 0.5
-			workspace.Terrain:FillCylinder(CFrame.new(c.ox, y - 5, c.oz), 10, inner + 1, Enum.Material.Grass)
-			made += 1
+		if inner > 0.5 then
+			local w = math.min(M.VERGE_W, inner)
+			local rho = inner - w / 2
+			local S = M.R[c.road]
+			local yA = S.s[c.ePts[c.sa].i][2]
+			local yB = if c.ring then C.Y else c.big.s[c.bPts[c.sbb].j][2]
+			local n = math.max(2, math.ceil(math.abs(c.sweep) * inner / 6))
+			for q = 0, n - 1 do
+				local u0, u1 = q / n, (q + 1) / n
+				local x0, z0 = arcPoint(c, u0, rho)
+				local x1, z1 = arcPoint(c, u1, rho)
+				local y = math.min(yA + (yB - yA) * u0, yA + (yB - yA) * u1) + M.VERGE_TOP
+				local mid = Vector3.new((x0 + x1) / 2, y - 5, (z0 + z1) / 2)
+				local len = hyp(x1 - x0, z1 - z0) + 1
+				if len > 0.5 then
+					-- (air first: an earlier fill may stand too high here)
+					local cf = CFrame.lookAt(mid, Vector3.new(x1, mid.Y, z1))
+					workspace.Terrain:FillBlock(cf * CFrame.new(0, 5 - 1.3 + 12.5, 0), Vector3.new(w, 25, len), Enum.Material.Air)
+					workspace.Terrain:FillBlock(cf, Vector3.new(w, 10, len), Enum.Material.Grass)
+					made += 1
+				end
+			end
 		end
 	end
 	return "verge: " .. made .. " pieces"
