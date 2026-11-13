@@ -50,6 +50,16 @@
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
+## Look around the car (2026-11-13, owner: "make it so that u can look around in third person camera view")
+In Studio, not published. The three outside cameras (the close one, the low one and the far chase one) can now swing round the car:
+- **PC:** hold the right mouse button and move the mouse (the pointer stays put while you look). Added to the key list: "RIGHT MOUSE · Hold and move: look around the car".
+- **Phone:** drag a finger on any free part of the screen. Touches on GAS, BRAKE, the arrows and the other buttons never turn the camera.
+- **Gamepad:** the right stick.
+- The camera goes any way round the car, and from just above the road to about 60 degrees over the roof. It keeps the car in the middle and comes in closer instead of going through a wall, a tree or the ground.
+- Let go and drive, and it eases back behind the car after 0.8 s. Parked, it stays where you left it until you drive off. Changing view (V, Shift + V) snaps it back.
+- The cockpit view keeps its own right-mouse look, as before.
+- Code: `src/client/CameraLook.lua` (the numbers are at its top: `CameraLook.Settings`), hooked into `Driving.lua` (`orbit` in the camera step) and `UI.lua` (the key list). The Studio copies match the repo (same length and checksum).
+
 ## Bavarica Werkz F82, the 2018 model (2026-11-12 to 13, `Prompts/Finish the 7 waiting imports (E60, E92, F82, F90, GT3 RS, Bentayga, GT-R).md`, car 3)
 **Licence:** CC-BY-NC-SA 4.0 (non-commercial), Ddiaz Design (Sketchfab), credited in `Config.Credits`. Its part names are two racing games' (`b:..._Max` / `_Low` for the body, cabin and lamps; `BMW_M4Coupe_2014_Wheel2A...` for the wheels): most likely ripped. The owner decides.
 

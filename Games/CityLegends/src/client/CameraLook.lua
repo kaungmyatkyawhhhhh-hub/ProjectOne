@@ -89,6 +89,14 @@ function CameraLook.update(dt: number, mph: number)
 		return
 	end
 	local S = CameraLook.Settings
+	-- (Studio test hook, like Driving's TestDrive: player attributes TestLookYaw / TestLookPitch in degrees)
+	local tester = game:GetService("Players").LocalPlayer
+	if game:GetService("RunService"):IsStudio() and tester and tester:GetAttribute("TestLookYaw") ~= nil then
+		CameraLook.yaw = wrap(math.rad(tester:GetAttribute("TestLookYaw") :: number))
+		CameraLook.pitch = math.clamp(math.rad((tester:GetAttribute("TestLookPitch") or 0) :: number), S.PitchMin, S.PitchMax)
+		idle = 0
+		return
+	end
 	-- the right stick
 	local stick = false
 	if UserInputService.GamepadEnabled then
