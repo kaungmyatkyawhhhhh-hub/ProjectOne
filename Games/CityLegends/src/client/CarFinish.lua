@@ -51,6 +51,7 @@ CarFinish.CARS = {
 	nisun_gtr = true,
 	bnw_m5_f90 = true,
 	bnw_m4_f82 = true,
+	porsha_gt3 = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

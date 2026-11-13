@@ -65,7 +65,7 @@ CarSkin.CLUSTER_STYLE = {
 	bentz_sls = "LiveSLS", -- from the owner's photo
 	ferrara_599 = "LiveF141", -- from the owner's photo
 	bentz_sl65bs = "LiveSL65", -- the same dials, in the model's two bowls
-	porsha_gt3 = "Porsche991GT3", -- the 991.2 GT3's five dials, sized into the 718 cabin's hood
+	porsha_gt3 = "LiveGT3RS", -- the 2019 model (2026-11-13), redrawn from the owner's photo ("Porsche991GT3" puts the old drawn one back; that one was laid out for the 718 cabin's hood)
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "SupraTRD",
 	toyoka_camri = "Toyota",
@@ -139,8 +139,7 @@ CarSkin.CLUSTER_RECT = {
 	bnw_x6 = { at = Vector3.new(0.0101, 0.0352, -0.1909), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3494, h = 0.1211 },
 	bnw_x7 = { at = Vector3.new(-0.0025, -0.0002, -0.257), face = Vector3.new(0.034, 0.334, 0.942), w = 0.3496, h = 0.1339 },
 	lexis_lx700 = { at = Vector3.new(-0.011, 0.0755, -0.114), face = Vector3.new(-0.012, -0.069, 0.9975), w = 0.3288, h = 0.1511 },
-	-- the GT3 in the 718 cabin: the whole hood (its three dials), with the 991's five dials in it
-	porsha_gt3 = { at = Vector3.new(-0.0058, 0.0501, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), w = 0.3, h = 0.118 },
+	porsha_gt3 = { at = Vector3.new(-0.0019, 0.0302, -0.1999), face = Vector3.new(0, 0.2944, 0.9557), w = 0.4008, h = 0.1506 }, -- the 2019 model's five dial tubes (tools/lambo/window_gt3rs.png)
 	-- the LP750 and LP700 on their 2026-11-04 models (owner: "go inside like the SVJ", "numbers blurry"): the whole
 	-- screen behind each model's own frame, its ribs lying over it, cut to the openings (tools/lambo/window_*.png)
 	lambrini_lp750 = { at = Vector3.new(0.0043, 0.0403, -0.2442), face = Vector3.new(-0.002, 0.107, 0.994), w = 0.37, h = 0.1486 },
@@ -297,7 +296,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -354,7 +353,7 @@ CarSkin.OWN_NEEDLES = {
 -- cars that take another model's cabin (dash, seats, steering wheel, gauges), lined up on the
 -- driver's eye; rear: how far behind the eye the swap reaches (studs: front seats only, or rear too)
 CarSkin.INTERIOR_DONOR = {
-	porsha_gt3 = { from = "porsha_boxster", rear = 1.8 }, -- owner (2026-10-16): the 718 cockpit, like the Panamera
+	-- (porsha_gt3 has its own cabin since its 2019 model, 2026-11-13; before: the 718 cockpit, owner 2026-10-16)
 	-- owner (2026-10-13): the M3 F80 and M4 F82 files' own cabins look bad; the M3 E92's goes in
 	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 }, -- (bnw_m4_f82 has its own cabin since its 2018 model, 2026-11-12)
 	-- owner (2026-10-13): the Panamera's own cluster is broken; the 718 Boxster's cockpit goes in
@@ -410,7 +409,7 @@ CarSkin.STEER_MODEL = {
 	ferrara_458 = "Ferrari458",
 	-- the other supercars and hypercars
 	lexis_lc500 = "LexusSport", -- (audy_r8 keeps its 2010 model's own wheel, bnw_m5_e60 its 2009 model's)
-	porsha_gt3 = "Porsche", porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport",
+	porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport", -- (porsha_gt3 keeps its 2019 model's own wheel)
 	-- (nisun_gtr keeps its 2013 model's own wheel)
 	-- BMW
 	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", -- (bnw_m4_f82 keeps its 2018 model's own wheel)

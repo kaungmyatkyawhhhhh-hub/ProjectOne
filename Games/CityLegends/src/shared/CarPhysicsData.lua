@@ -144,7 +144,7 @@ local Data: { [string]: Phys } = {
 	-- Mercedes-Benz SLS AMG Black Series (C197, 6.2 V8, 7-speed DCT; 2026-11-09: 622 hp, 8,000 rpm, was the plain SLS's 563 / 7,200)
 	bentz_sls = { front = 0.47, drive = "RWD", gears = 7, box = "dct", shift = 0.1, tyreF = 265, tyreR = 295, aspectF = 35, aspectR = 30, rimF = 19, rimR = 20, tyre = "sport", brakes = "drilled", pistons = 6, caliper = "red", lugs = 5, stop = 34, z60 = 3.7, top = 197, hp = 622, nm = 650, redline = 8, cg = 0.45, downforce = 30 },
 	-- Porsche 911 GT3 (991.2, 4.0 flat-6, 7-speed PDK)
-	porsha_gt3 = { front = 0.39, drive = "RWD", gears = 7, box = "dct", shift = 0.08, tyreF = 245, tyreR = 305, aspectF = 35, aspectR = 30, rimF = 20, rimR = 20, tyre = "cup", brakes = "drilled", pistons = 6, caliper = "red", centerLock = true, lugs = 5, stop = 31, z60 = 3.2, top = 197, hp = 500, nm = 460, redline = 9, cg = 0.42, downforce = 95 },
+	porsha_gt3 = { front = 0.39, drive = "RWD", gears = 7, box = "dct", shift = 0.08, tyreF = 265, tyreR = 325, aspectF = 35, aspectR = 30, rimF = 20, rimR = 21, tyre = "cup", brakes = "ceramic", pistons = 6, caliper = "yellow", centerLock = true, lugs = 5, stop = 31, z60 = 3.0, top = 193, hp = 513, nm = 469, redline = 9, cg = 0.42, downforce = 225 },
 	-- Bentley Continental GT W12 (3rd gen, 6.0 W12 twin-turbo, 8-speed DCT)
 	bentlee_contgt = { front = 0.55, drive = "AWD", rear = 0.8, gears = 8, box = "dct", shift = 0.15, tyreF = 275, tyreR = 315, aspectF = 40, aspectR = 35, rimF = 21, rimR = 21, tyre = "sport", brakes = "drilled", pistons = 10, caliper = "grey", lugs = 5, stop = 35, z60 = 3.6, top = 207, hp = 626, nm = 900, redline = 6.5, cg = 0.5, downforce = 0 },
 	-- Bentley Bentayga W12 (1st gen, 6.0 W12 twin-turbo, 8-speed auto)

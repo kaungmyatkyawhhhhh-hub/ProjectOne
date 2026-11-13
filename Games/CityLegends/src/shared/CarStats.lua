@@ -83,7 +83,7 @@ local POWER: { [string]: number } = {
 	bentz_gt63s = 630, bnw_750li = 445, toyoka_chaser = 280, bentz_190e = 235, bentz_s65_w221 = 518,
 	maseroti_levante = 550, lexis_lc500 = 471, astin_dbx = 542, nisun_gtr = 545, astin_db9 = 568,
 	astin_vantage = 503, ferrara_f430 = 483, bentz_sl65bs = 661, lambrini_lp570 = 562, lambrini_lp560 = 552, lambrini_huracan = 631, lambrini_performante = 631, lambrini_sto = 631, lambrini_sterrato = 602, lambrini_revuelto = 1001, audy_r8 = 420, audy_r8_lw = 552, audy_r8_4s = 602,
-	mclaran_12c = 592, ferrara_599 = 611, ferrara_458 = 562, bentz_sls = 563, porsha_gt3 = 500,
+	mclaran_12c = 592, ferrara_599 = 611, ferrara_458 = 562, bentz_sls = 563, porsha_gt3 = 513,
 	bentlee_contgt = 626, bentlee_bentayga = 600, lambrini_urus = 641, lambrini_urusp = 666, lambrini_lp670 = 670, ferrara_458spider = 562, ferrara_458speciale = 597, brabos_g63 = 789, rolls_wraith = 624,
 	rolls_cullinan = 563, lambrini_lp700 = 700, lexis_lfa = 553, lexis_lfa_circuit = 563, lambrini_lp750 = 750, lambrini_svj = 770,
 	lambrini_svj63 = 770, lambrini_lp640 = 640, bentz_gls = 550, bentz_s680 = 621, lambrini_countach = 375,

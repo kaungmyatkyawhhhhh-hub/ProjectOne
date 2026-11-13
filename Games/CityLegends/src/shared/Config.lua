@@ -287,6 +287,7 @@ Config.Credits = {
 	"Horizon R35 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Bavarica Werkz F90 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Bavarica Werkz F82 model by Ddiaz Design (CC BY-NC-SA 4.0)",
+	"Stuttgart 991.2 Track model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
