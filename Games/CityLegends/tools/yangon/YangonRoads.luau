@@ -1029,7 +1029,10 @@ end
 -- The grass beside the pavement up to road height (it stood 2 to 3 studs lower: the pavement's side
 -- showed as a tall wall), out to VERGE past the pavement. Never on a carriageway, the roundabout or a
 -- corner. Run after the roads, before the lines.
-M.VERGE_W = 12
+M.VERGE_W = 16
+-- (the box's top under the road: smooth terrain shows about 2 studs over a FillBlock's top, less where
+-- lower ground pulls the surface down; -1.7 puts the grass 0.1 to 0.5 under the pavement's top)
+M.VERGE_TOP = -1.7
 function M.verge(names: { string })
 	local made = 0
 	-- (the ring's carriageway and its kerb and pavement between the arms; an arm's gap is the arm's)
@@ -1086,7 +1089,7 @@ function M.verge(names: { string })
 				end
 				if ok then
 					-- (FillBlock's top shows 2 studs higher on smooth terrain: the grass lands 0.1 under the road)
-					local y = math.min(a[2], b[2]) - 0.1 - 2
+					local y = math.min(a[2], b[2]) + M.VERGE_TOP
 					local len = hyp(b[1] - a[1], b[3] - a[3])
 					local mid = Vector3.new((a[1] + b[1]) / 2, (y + y - 10) / 2, (a[3] + b[3]) / 2)
 					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (o.half + M.WALK + M.VERGE_W / 2), 0, 0)
@@ -1113,7 +1116,7 @@ function M.verge(names: { string })
 		end
 		if ok then
 			local len = TAU * rho / M.N + 1
-			local cf = CFrame.new(x, C.Y - 0.1 - 2 - 5, z) * CFrame.Angles(0, -a, 0)
+			local cf = CFrame.new(x, C.Y + M.VERGE_TOP - 5, z) * CFrame.Angles(0, -a, 0)
 			workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W, 10, len), Enum.Material.Grass)
 			made += 1
 		end
@@ -1121,7 +1124,7 @@ function M.verge(names: { string })
 	for _, c in M.corners do
 		local inner = c.r - M.WALK
 		if inner > 2 and inner < 30 then
-			local y = (if c.ring then C.Y else M.R[c.road].s[c.ePts[c.sa].i][2]) - 0.1 - 2
+			local y = (if c.ring then C.Y else M.R[c.road].s[c.ePts[c.sa].i][2]) + M.VERGE_TOP
 			workspace.Terrain:FillCylinder(CFrame.new(c.ox, y - 5, c.oz), 10, inner, Enum.Material.Grass)
 			made += 1
 		end
