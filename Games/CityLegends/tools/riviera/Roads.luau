@@ -808,7 +808,9 @@ function Roads.build(data, opts)
 				-- 4-stud voxels by their centres, so clear from 4 studs under the top up
 				-- (2026-11-04: as wide as this road, not a full one: on the 1+1 Summit Pass the full width
 				-- carved under the next hairpin leg up)
-				local wide = math.max(a.wl, a.wr, b.wl, b.wr) + WALK
+				-- (opts.clearHalf, Yangon decks: only the deck's own width; a ramp foot must not dig under the
+				-- side lanes beside it)
+				local wide = opts.clearHalf or (math.max(a.wl, a.wr, b.wl, b.wr) + WALK)
 				workspace.Terrain:FillBlock(cf * CFrame.new(0, SLAB / 2 - 4 + 11, 0), Vector3.new(wide * 2, 22, len + grow), Enum.Material.Air)
 			end
 			-- outside the town: flush concrete shoulders (the ground under them is cleared too)

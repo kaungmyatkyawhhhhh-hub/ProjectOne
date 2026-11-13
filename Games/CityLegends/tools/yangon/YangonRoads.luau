@@ -1115,6 +1115,9 @@ function M.verge(names: { string })
 			end
 			local a, b = o.s[i], o.s[i + 1]
 			for _, side in { -1, 1 } do
+				if side < 0 and o.walkL then
+					continue -- (a flyover side lane's inner side: the deck's ramp and piers stand there)
+				end
 				local rx, rz = rightOf(a)
 				local ok = true
 				local hw = math.max(M.halfAt(o, i), M.halfAt(o, i + 1)) -- (a widened end: the verge moves out with it)
@@ -1399,6 +1402,257 @@ function M.step3()
 			end
 		end
 	end
+	return table.concat(log, "\n")
+end
+
+------------------------------------------------------------------------------------------------
+-- step 4: the flyover decks (data.decks from d7_flyovers.py)
+------------------------------------------------------------------------------------------------
+M.DECK_CLEAR = 9 -- surface this far over the ground or more: a girder on piers; less: walls down to the ground
+M.GIRDER = 3 -- the box girder's depth under the slab
+M.PIER_EVERY = 8 -- samples between piers (about 51 studs)
+M.PARAPET = 2.6 -- the parapet's top over the deck's edge
+M.deckLook = {
+	wall = { Material = Enum.Material.Sandstone, Color = Color3.fromRGB(158, 154, 146) },
+	girder = { Material = Enum.Material.Sandstone, Color = Color3.fromRGB(132, 128, 122) },
+}
+
+local function part(props: { [string]: any }, parent: Instance): BasePart
+	local p = Instance.new("Part")
+	p.Anchored = true
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	for k, v in props do
+		(p :: any)[k] = v
+	end
+	p.Parent = parent
+	return p
+end
+
+function M.decksFolder(): Instance
+	local model = M.folder().Parent :: Instance
+	local f = model:FindFirstChild("Decks")
+	if not f then
+		f = Instance.new("Folder")
+		f.Name = "Decks"
+		f.Parent = model
+	end
+	return f
+end
+
+function M.buildDecks()
+	local F = M.decksFolder()
+	for i, c in F:GetChildren() do
+		c:Destroy()
+		if i % 3000 == 0 then
+			task.wait()
+		end
+	end
+	local data = { roads = {} }
+	for k, d in M.data.decks do
+		table.insert(data.roads, { name = d.name, kind = "deck", rank = -k, half = 32, closed = false, s = d.s })
+	end
+	local count = M.Roads.build(data, {
+		parent = F,
+		noLines = true,
+		noLegWalls = true,
+		noZebra = true,
+		noTurningCircle = true,
+		surfaceOnly = true,
+		palette = M.palette,
+		live = true,
+		keepEdges = true,
+		clearHalf = 33,
+	})
+	local E = M.Roads.debugEdges
+	local log = { string.format("deck surfaces: %d parts", count) }
+	local rp = RaycastParams.new()
+	rp.FilterType = Enum.RaycastFilterType.Include
+	rp.FilterDescendantsInstances = { workspace.Terrain }
+	local function groundY(x: number, z: number, top: number): number
+		local r = workspace:Raycast(Vector3.new(x, top + 40, z), Vector3.new(0, -300, 0), rp)
+		return if r then r.Position.Y else top - 30
+	end
+	-- is a spot under the deck on a road (any road of the map, built now or later)?
+	local function onRoad(x: number, z: number, margin: number): string?
+		for oi, b in M.near(x, z, 3) do
+			local o = M.list[oi]
+			if polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + margin then
+				return o.name
+			end
+		end
+		return nil
+	end
+	for _, d in M.data.decks do
+		local folder = F:FindFirstChild(d.name) :: Instance
+		local ED = E[d.name]
+		local s = d.s
+		local n = #s
+		local made, piers, skipped, ramp = 0, 0, {}, 0
+		-- per segment: elevated or not (the ground under the middle and 2 studs past both edges)
+		local elevated = {}
+		for i = 1, n - 1 do
+			local cL = (ED.L[i] + ED.L[i + 1]) / 2
+			local cR = (ED.R[i] + ED.R[i + 1]) / 2
+			local mid = (cL + cR) / 2
+			local out = ((cR - cL) * Vector3.new(1, 0, 1)).Unit
+			local g = math.max(groundY(mid.X, mid.Z, mid.Y), groundY(cL.X - out.X * 2, cL.Z - out.Z * 2, mid.Y), groundY(cR.X + out.X * 2, cR.Z + out.Z * 2, mid.Y))
+			elevated[i] = mid.Y - g >= M.DECK_CLEAR
+		end
+		for i = 1, n - 1 do
+			-- the walls: a parapet on each edge; on a ramp it goes down into the ground (a retaining wall),
+			-- elevated it is a fascia over the slab's side
+			for _, side in { "L", "R" } do
+				local other = if side == "L" then "R" else "L"
+				local e0, e1 = ED[side][i], ED[side][i + 1]
+				local o0, o1 = ED[other][i], ED[other][i + 1]
+				local inward = (((o0 + o1) / 2 - (e0 + e1) / 2) * Vector3.new(1, 0, 1)).Unit
+				local p0, p1 = e0 + inward * 0.45, e1 + inward * 0.45 -- (outer face 0.05 past the slab's side)
+				local len = (p1 - p0).Magnitude
+				if len < 0.05 then
+					continue
+				end
+				local below
+				if elevated[i] then
+					below = M.SLAB + 1.5
+				else
+					local g = math.min(groundY(e0.X - inward.X * 2, e0.Z - inward.Z * 2, e0.Y), groundY(e1.X - inward.X * 2, e1.Z - inward.Z * 2, e1.Y))
+					below = math.max(M.SLAB + 1.5, math.max(e0.Y, e1.Y) - g + 3)
+					ramp += 1
+				end
+				local cf = CFrame.lookAt((p0 + p1) / 2, p1) * CFrame.new(0, (M.PARAPET - below) / 2, 0)
+				local props = table.clone(M.deckLook.wall)
+				props.Name = if elevated[i] then "Parapet" else "RampWall"
+				props.Size = Vector3.new(1, M.PARAPET + below, len)
+				props.CFrame = cf
+				props.CastShadow = true
+				part(props, folder)
+				made += 1
+			end
+			-- elevated: the box girder under the slab (neighbours a hair different, so overlaps never flicker)
+			if elevated[i] then
+				local a, b = s[i], s[i + 1]
+				local ya = (ED.L[i].Y + ED.R[i].Y) / 2 - M.SLAB - M.GIRDER / 2
+				local yb = (ED.L[i + 1].Y + ED.R[i + 1].Y) / 2 - M.SLAB - M.GIRDER / 2
+				local pa, pb = Vector3.new(a[1], ya, a[3]), Vector3.new(b[1], yb, b[3])
+				local alt = (i % 2) * 0.06
+				local props = table.clone(M.deckLook.girder)
+				props.Name = "Girder"
+				props.Size = Vector3.new(64 - 14 - alt * 2, M.GIRDER - alt, (pb - pa).Magnitude + 0.3)
+				props.CFrame = CFrame.lookAt((pa + pb) / 2, pb) * CFrame.new(0, alt / 2, 0)
+				part(props, folder)
+				made += 1
+			end
+			if i % 40 == 0 then
+				task.wait()
+			end
+		end
+		-- piers: every PIER_EVERY samples on the elevated part, moved along (up to 3 samples either way)
+		-- off any road below
+		local i = M.PIER_EVERY
+		while i <= n - 1 do
+			local placed = false
+			for _, di in { 0, 1, -1, 2, -2, 3, -3 } do
+				local k = i + di
+				if k < 2 or k > n - 1 or not (elevated[k - 1] and elevated[k]) then
+					continue
+				end
+				local c = s[k]
+				local rx, rz = rightOf(c)
+				local L = hyp(c[4], c[5])
+				local fx, fz = c[4] / L, c[5] / L
+				local hit = nil
+				for _, lat in { -30, -15, 0, 15, 30 } do
+					for _, along in { -4, 0, 4 } do
+						hit = hit or onRoad(c[1] + rx * lat + fx * along, c[3] + rz * lat + fz * along, 3)
+					end
+				end
+				if hit then
+					skipped[hit] = (skipped[hit] or 0) + 1
+					continue
+				end
+				local top = (ED.L[k].Y + ED.R[k].Y) / 2 - M.SLAB - M.GIRDER
+				local g = math.min(groundY(c[1], c[3], top), groundY(c[1] + rx * 6, c[3] + rz * 6, top), groundY(c[1] - rx * 6, c[3] - rz * 6, top))
+				local look = CFrame.lookAt(Vector3.zero, Vector3.new(fx, 0, fz)).Rotation
+				local cap = table.clone(M.deckLook.girder)
+				cap.Name = "PierCap"
+				cap.Size = Vector3.new(58, 2.5, 6)
+				cap.CFrame = CFrame.new(c[1], top - 1.25, c[3]) * look
+				part(cap, folder)
+				local colTop, colBot = top - 2.5, g - 4
+				local col = table.clone(M.deckLook.wall)
+				col.Name = "Pier"
+				col.Size = Vector3.new(12, colTop - colBot, 5)
+				col.CFrame = CFrame.new(c[1], (colTop + colBot) / 2, c[3]) * look
+				part(col, folder)
+				made += 2
+				piers += 1
+				placed = true
+				break
+			end
+			i += if placed then M.PIER_EVERY else 1
+		end
+		local sk = {}
+		for name, k in skipped do
+			table.insert(sk, name .. " " .. k)
+		end
+		table.insert(log, string.format("%s: %d parts, %d piers (moved off: %s), %d ramp wall pieces", d.name, made, piers, table.concat(sk, ", "), ramp))
+	end
+	-- the lines on the decks
+	local only = {}
+	for _, d in M.data.decks do
+		only[d.name] = true
+	end
+	table.insert(log, "deck lines " .. tostring(M.RoadLines.build(data, F, only, { paint = M.palette.paint, centre = M.centre })))
+	local old = SS:FindFirstChild("OldRoadLines")
+	if old then
+		for _, d in M.data.decks do
+			local f = old:FindFirstChild(d.name)
+			if f then
+				f:Destroy()
+			end
+		end
+	end
+	return table.concat(log, "\n")
+end
+
+-- the clearance under each deck (girder included) over every road that passes under it, from the data
+function M.deckClearance()
+	local out = {}
+	for _, d in M.data.decks do
+		local s = d.s
+		local worst = {}
+		for _, o in M.list do
+			for i = 1, o.n do
+				if M.cut[o.name][i] then
+					continue
+				end
+				local p = o.s[i]
+				for k = 1, #s - 1 do
+					local dd, t = segDist(p[1], p[3], s[k][1], s[k][3], s[k + 1][1], s[k + 1][3])
+					if dd < 32 then
+						local y = s[k][2] + (s[k + 1][2] - s[k][2]) * t
+						local c = y - M.SLAB - M.GIRDER - p[2]
+						if c < 30 and (not worst[o.name] or c < worst[o.name]) then
+							worst[o.name] = c
+						end
+						break
+					end
+				end
+			end
+		end
+		for name, c in worst do
+			table.insert(out, string.format("%s over %s: %.1f", d.name, name, c))
+		end
+	end
+	return table.concat(out, "; ")
+end
+
+-- the whole of step 4: step 3 again with the side lanes (and the widened loop ends), then the decks
+function M.step4()
+	local log = { M.step3() }
+	task.wait()
+	table.insert(log, M.buildDecks())
 	return table.concat(log, "\n")
 end
 
