@@ -24,10 +24,13 @@
 	clearMouths = true: lines are broken by where each line itself is, not by the old "this sample is
 	in a junction" test (which stops every line of the road, the far side's too, and at a fork leaves a
 	long sheet of bare asphalt). A line piece is left out when one of its ends lies
-	  - on a bigger road's carriageway (a road's lines never run over the road it joins), or
-	  - on a smaller road's carriageway: for a line off the middle, only the part of that road on the
-	    line's own side of this road's centre line counts. So at a T the near side's lines and the
-	    middle line stop for the mouth, and the far side's lines run on past it.
+	  - within half a stud of a bigger road's carriageway (a road's lines never run over the road it
+	    joins), or
+	  - within half a stud of a smaller road's carriageway, counting only the part of that road that
+	    lies on the line's own side of this road's centre line (4 studs or more out). So at a T the
+	    near side's lane and edge lines stop for the mouth, the far side's lines run on past it, and
+	    the middle line is never broken by a smaller road (at a fork the smaller road's width covers
+	    the middle of the bigger one for a long way: the bigger road keeps its line).
 	The road under each end is looked for 0.05 inside the piece (a ray exactly on the seam between two
 	road pieces can miss: a missing dash). Needs `rank` on the roads (the lower the bigger).
 ]]
@@ -149,19 +152,17 @@ local function inMouth(roads, grid, pos: Vector3, ri: number, centre: Vector3, l
 		local o = roads[oi]
 		local oh = o.half or HALF
 		if (o.rank or 0) < (me.rank or 0) then
-			if lineDist(o, b[2], pos.X, pos.Z) < oh - 0.25 then
+			if lineDist(o, b[2], pos.X, pos.Z) < oh + 0.5 then
 				return true
 			end
-		elseif math.abs(lat) > 0.5 then
+		elseif math.abs(lat) > 1 then
 			local side = flat(pos - centre)
 			if side.Magnitude > 1e-6 then
 				side = side.Unit
-				if lineDist(o, b[2], pos.X, pos.Z, centre.X, centre.Z, side.X, side.Z) < oh - 0.25 then
+				if lineDist(o, b[2], pos.X, pos.Z, centre.X + side.X * 4, centre.Z + side.Z * 4, side.X, side.Z) < oh + 0.5 then
 					return true
 				end
 			end
-		elseif lineDist(o, b[2], pos.X, pos.Z) < oh - 0.25 then
-			return true
 		end
 	end
 	return false
