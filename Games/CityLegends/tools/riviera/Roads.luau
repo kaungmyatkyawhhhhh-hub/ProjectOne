@@ -702,7 +702,7 @@ function Roads.build(data, opts)
 					turn = math.acos(math.clamp(d0.Unit:Dot(d1.Unit), -1, 1))
 				end
 			end
-			local grow = math.min(math.tan(turn / 2) * (HALF + WALK) * 2, 24)
+			local grow = math.min(math.tan(turn / 2) * (H + WALK) * 2, 24)
 			local len = (b.pos - a.pos).Magnitude
 			local a2 = a.pos - (b.pos - a.pos).Unit * (grow / 2)
 			local b2 = b.pos + (b.pos - a.pos).Unit * (grow / 2)
@@ -720,7 +720,10 @@ function Roads.build(data, opts)
 			if not covered then
 				local cf = stripCF(a2, b2, 0, -SLAB / 2)
 				local la, lb, rra, rrb = edgeL[i], edgeL[i + 1], edgeR[i], edgeR[i + 1]
-				local props = { Name = "Road", Material = Enum.Material.Asphalt, Color = ASPHALT }
+				local props: { [string]: any } = { Name = "Road", Material = Enum.Material.Asphalt, Color = asphalt }
+				if opts.noShadows then
+					props.CastShadow = false
+				end
 				-- a climbing bend twists the quad (its 4 corners aren't in one plane), so its 2 triangles
 				-- meet at a crease felt as a bump; split it side to side into strips until each crease
 				-- is under 0.05 studs
@@ -732,6 +735,10 @@ function Roads.build(data, opts)
 				end
 				if opts.debug then
 					Roads.debugSeg = i
+				end
+				-- (opts.noSlab: this piece of surface is a mouth built by another tool)
+				if noSlab and noSlab[i] then
+					strips = 0
 				end
 				for k = 0, strips - 1 do
 					local t0, t1 = k / strips, (k + 1) / strips
@@ -752,10 +759,10 @@ function Roads.build(data, opts)
 				for _, side in { -1, 1 } do
 					local mid = (a.pos + b.pos) / 2
 					local right = Vector3.new(-(b.pos - a.pos).Z, 0, (b.pos - a.pos).X).Unit
-					local sidePos = mid + right * side * (HALF + WALK / 2)
-					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < HALF - 0.5
-					if otherNear(roads, grid, sidePos, ri, HALF + 2) == nil and not selfNear(roads, grid, sidePos, ri, i, HALF + 1) and not narrow then
-						local cf = stripCF(a2, b2, side * (HALF + WALK / 2), -3 - 0.02)
+					local sidePos = mid + right * side * (H + WALK / 2)
+					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < H - 0.5
+					if otherNear(roads, grid, sidePos, ri, HALF + 2) == nil and not selfNear(roads, grid, sidePos, ri, i, H + 1) and not narrow then
+						local cf = stripCF(a2, b2, side * (H + WALK / 2), -3 - 0.02)
 						newPart({ Name = "Shoulder", Size = Vector3.new(WALK, 6, len + grow), CFrame = cf, Material = Enum.Material.Concrete, Color = Color3.fromRGB(150, 146, 138) }, folder)
 						count += 1
 					end
@@ -767,7 +774,7 @@ function Roads.build(data, opts)
 			for _, side in { -1, 1 } do
 				local wa = if side < 0 then a.wl else a.wr
 				local wb = if side < 0 then b.wl else b.wr
-				if wa < HALF - 0.5 and wb < HALF - 0.5 and not opts.noLegWalls then
+				if wa < H - 0.5 and wb < H - 0.5 and not opts.noLegWalls then
 					local ea = if side < 0 then edgeL[i] else edgeR[i]
 					local eb = if side < 0 then edgeL[i + 1] else edgeR[i + 1]
 					local flatLen = Vector2.new(eb.X - ea.X, eb.Z - ea.Z).Magnitude
@@ -786,11 +793,12 @@ function Roads.build(data, opts)
 				for _, side in { -1, 1 } do
 					local mid = (a.pos + b.pos) / 2
 					local right = Vector3.new(-(b.pos - a.pos).Z, 0, (b.pos - a.pos).X).Unit
-					local sidePos = mid + right * side * (HALF + WALK / 2)
-					local kerbPos = mid + right * side * (HALF + 0.45)
-					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < HALF - 0.5
-					if otherNear(roads, grid, sidePos, ri, HALF + 2) == nil and not a.tunnel and not narrow
-						and not selfNear(roads, grid, sidePos, ri, i, HALF + 1) and not selfNear(roads, grid, kerbPos, ri, i, HALF - 1) then
+					local sidePos = mid + right * side * (H + WALK / 2)
+					local kerbPos = mid + right * side * (H + 0.45)
+					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < H - 0.5
+					-- (opts.sideZone: the zone says where another road is, and cuts the pieces exactly)
+					if (zone ~= nil or otherNear(roads, grid, sidePos, ri, HALF + 2) == nil) and not a.tunnel and not narrow
+						and not selfNear(roads, grid, sidePos, ri, i, H + 1) and not selfNear(roads, grid, kerbPos, ri, i, H - 1) then
 						-- 6 studs deep: the terrain under the road is cleared 4 studs down.
 						-- (owner, 2026-11-02: "the curbs are glitching out") the kerb and pavement follow the
 						-- road's own edge (its height can differ from the centre line's at junctions now),
@@ -805,6 +813,59 @@ function Roads.build(data, opts)
 						local edgeLen = Vector2.new(eb.X - ea.X, eb.Z - ea.Z).Magnitude
 						local alt = if i % 2 == 0 then 1 else 0
 						local walkCF, kerbCF, walkLen, kerbLen
+						local paveProps: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial or Enum.Material.Pavement, Color = paver }
+						if pal.paverVariant then
+							paveProps.MaterialVariant = pal.paverVariant
+						end
+						-- (a painted kerb: every second piece in the band colour)
+						local kerbColor = if pal.kerbBand and alt == 1 then pal.kerbBand else (pal.kerb or KERB)
+						local kerbMaterial = pal.kerbMaterial or Enum.Material.Concrete
+						local wholeWalk, wholeKerb = true, true
+						if zone and edgeLen > 0.5 then
+							-- (Yangon 2026-11-13) exact mouths. The pavement is the strip from the road's edge to
+							-- WALK out; what lies in a zone (another road's mouth, a roundabout) is cut off on the
+							-- zone's own edge, so a street mouth is exactly as wide as the street. A cut piece is
+							-- made of triangles; a whole piece is the usual block.
+							local out = right * side
+							local lift = Vector3.new(0, CURB_UP + alt * 0.006, 0)
+							local quad = { ea + lift, ea + out * WALK + lift, eb + out * WALK + lift, eb + lift }
+							local poly, whole = clipPoly(quad, function(p)
+								return zone(r.name, p, "Pavement")
+							end)
+							wholeWalk = whole
+							if poly and not whole then
+								paveProps.CastShadow = false
+								for k = 2, #poly - 1 do
+									count += triangle(poly[1], poly[k], poly[k + 1], 6, paveProps, folder)
+								end
+							end
+							-- the kerb, cut where its own middle line enters a zone
+							local ka, kb = ea + out * 0.4, eb + out * 0.4
+							local ina, inb = zone(r.name, ka, "Kerb"), zone(r.name, kb, "Kerb")
+							if ina or inb then
+								wholeKerb = false
+								if ina ~= inb then
+									local lo, hi = 0, 1
+									for _ = 1, 18 do
+										local m = (lo + hi) / 2
+										if zone(r.name, ka:Lerp(kb, m), "Kerb") == ina then
+											lo = m
+										else
+											hi = m
+										end
+									end
+									local p0 = if ina then ka:Lerp(kb, hi) else ka
+									local p1 = if ina then kb else ka:Lerp(kb, lo)
+									local kl = (p1 - p0).Magnitude
+									if kl > 0.2 then
+										local up = Vector3.new(0, CURB_UP + 0.08 - 3 + alt * 0.006, 0)
+										local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kl), CFrame = CFrame.lookAt((p0 + p1) / 2 + up, p1 + up), Material = kerbMaterial, Color = kerbColor }, folder)
+										k.CastShadow = false
+										count += 1
+									end
+								end
+							end
+						end
 						if edgeLen > 0.5 then
 							local out = right * side
 							local extra = math.min(grow, 8) + 0.3
@@ -817,22 +878,33 @@ function Roads.build(data, opts)
 							walkCF, walkLen = wcf, wl2
 							kerbCF, kerbLen = along(0.4, CURB_UP + 0.08 - 3 + alt * 0.006)
 						else
-							walkCF = stripCF(a2, b2, side * (HALF + WALK / 2), CURB_UP - 3 + alt * 0.006)
-							kerbCF = stripCF(a2, b2, side * (HALF + 0.4), CURB_UP + 0.08 - 3 + alt * 0.006)
+							walkCF = stripCF(a2, b2, side * (H + WALK / 2), CURB_UP - 3 + alt * 0.006)
+							kerbCF = stripCF(a2, b2, side * (H + 0.4), CURB_UP + 0.08 - 3 + alt * 0.006)
 							walkLen = len + grow
 							kerbLen = len + grow
+							-- (a fan's pivot has no edge to cut along: the whole piece is in or out)
+							if zone and zone(r.name, sidePos, "Pavement") then
+								wholeWalk, wholeKerb = false, false
+							end
 						end
-						local pv = newPart({ Name = "Pavement", Size = Vector3.new(WALK - alt * 0.01, 6, walkLen), CFrame = walkCF, Material = Enum.Material.Pavement, Color = paver }, folder)
-						-- patterned paving in some quarters (owner 2026-11-02: "add some sidewalk
-						-- patterns"); MaterialVariants in MaterialService (Creator Store textures)
-						local pattern = PATTERNS[r.name]
-						if pattern then
-							pv.MaterialVariant = pattern[1]
-							pv.Color = pattern[2]
+						if wholeWalk then
+							paveProps.Size = Vector3.new(WALK - alt * 0.01, 6, walkLen)
+							paveProps.CFrame = walkCF
+							local pv = newPart(paveProps, folder)
+							-- patterned paving in some quarters (owner 2026-11-02: "add some sidewalk
+							-- patterns"); MaterialVariants in MaterialService (Creator Store textures)
+							local pattern = PATTERNS[r.name]
+							if pattern then
+								pv.MaterialVariant = pattern[1]
+								pv.Color = pattern[2]
+							end
+							count += 1
 						end
-						local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kerbLen), CFrame = kerbCF, Material = Enum.Material.Concrete, Color = KERB }, folder)
-						k.CastShadow = false
-						count += 2
+						if wholeKerb then
+							local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kerbLen), CFrame = kerbCF, Material = kerbMaterial, Color = kerbColor }, folder)
+							k.CastShadow = false
+							count += 1
+						end
 					end
 				end
 			end
@@ -849,11 +921,11 @@ function Roads.build(data, opts)
 				table.insert(lines, { x = -(wl - 1.2), w = 0.6, solid = true })
 				if dash % 2 == 0 then
 					table.insert(lines, { x = 0, w = 0.5 })
-					if wr > HALF / 2 + 2 then
-						table.insert(lines, { x = HALF / 2, w = 0.4 })
+					if wr > H / 2 + 2 then
+						table.insert(lines, { x = H / 2, w = 0.4 })
 					end
-					if wl > HALF / 2 + 2 then
-						table.insert(lines, { x = -HALF / 2, w = 0.4 })
+					if wl > H / 2 + 2 then
+						table.insert(lines, { x = -H / 2, w = 0.4 })
 					end
 				end
 				for _, l in lines do
@@ -904,33 +976,40 @@ function Roads.build(data, opts)
 					count += 1
 				end
 			end
-			if town and i > 1 and inJunction[i - 1] and not inJunction[i] and not zebraDone[i] and not opts.surfaceOnly then
+			if town and i > 1 and inJunction[i - 1] and not inJunction[i] and not zebraDone[i] and not opts.surfaceOnly and not opts.noZebra then
 				zebraDone[i] = true
 				-- (left / right as the road runs a -> b: the crossing's stripes run across it)
 				zebra(stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, -len / 2 + 7), { math.min(a.wl, b.wl), math.min(a.wr, b.wr) })
 			end
-			if i < n - 1 and inJunction[i + 1] and not inJunction[i] and not opts.surfaceOnly then
+			if i < n - 1 and inJunction[i + 1] and not inJunction[i] and not opts.surfaceOnly and not opts.noZebra then
 				zebra(stripCF(a.pos, b.pos, 0, LINE_T / 2 + 0.04) * CFrame.new(0, 0, len / 2 - 7), { math.min(a.wl, b.wl), math.min(a.wr, b.wr) })
 			end
 			if i % 40 == 0 then
+				flush()
 				task.wait()
 			end
 		end
 		-- a street that ends on no other road gets a round turning circle, flush with the road (no
 		-- drop off the slab's end)
-		if not r.closed then
+		if not r.closed and not opts.noTurningCircle then
 			for _, e in { { pts[1], -1 }, { pts[n], 1 } } do
 				local p = e[1]
 				if inBox(box, p.pos) and otherNear(roads, grid, p.pos, ri, HALF + WALK) == nil then
-					local r0 = HALF + WALK
-					local centre = p.pos + p.dir.Unit * e[2] * (r0 - HALF)
-					newPart({ Name = "TurningCircle", Shape = Enum.PartType.Cylinder, Size = Vector3.new(SLAB, r0 * 2, r0 * 2), CFrame = CFrame.new(centre - Vector3.new(0, SLAB / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Asphalt, Color = ASPHALT }, folder)
+					local r0 = H + WALK
+					local centre = p.pos + p.dir.Unit * e[2] * (r0 - H)
+					newPart({ Name = "TurningCircle", Shape = Enum.PartType.Cylinder, Size = Vector3.new(SLAB, r0 * 2, r0 * 2), CFrame = CFrame.new(centre - Vector3.new(0, SLAB / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Asphalt, Color = asphalt }, folder)
 					workspace.Terrain:FillBlock(CFrame.new(centre + Vector3.new(0, 11 - 4 + 0.01, 0)), Vector3.new(r0 * 2, 22, r0 * 2), Enum.Material.Air)
 					count += 1
 				end
 			end
 		end
-		if #folder:GetChildren() > 0 then
+		if live then
+			flush()
+			folder:Destroy()
+			if #live:GetChildren() == 0 then
+				live:Destroy()
+			end
+		elseif #folder:GetChildren() > 0 then
 			folder.Parent = parent
 		else
 			folder:Destroy()
@@ -945,19 +1024,24 @@ function Roads.check(data, opts)
 	opts = opts or {}
 	local box = opts.box
 	local limit = opts.limit or 0.12
-	local roads = prepare(data)
+	local roads = prepare(data, opts.cut)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
 	params.FilterDescendantsInstances = { opts.parent, workspace.Terrain }
 	local bumps = {}
 	local checked = 0
 	for _, r in roads do
+		-- (Yangon 2026-11-13: opts.only = the roads to drive; opts.lanes = { [road name] = { offsets } },
+		-- a street's lanes are not a main road's; opts.cut as in Roads.build)
+		if opts.only and not opts.only[r.name] then
+			continue
+		end
 		local pts = r.pts
-		for _, lane in { -24, -8, 8, 24 } do
+		for _, lane in (opts.lanes and opts.lanes[r.name]) or { -24, -8, 8, 24 } do
 			local last: Vector3? = nil
 			for i = 1, #pts - 1 do
 				local a, b = pts[i], pts[i + 1]
-				if not inBox(box, a.pos) then
+				if not inBox(box, a.pos) or (r.cut and (r.cut[i] or r.cut[i + 1])) then
 					last = nil
 					continue
 				end

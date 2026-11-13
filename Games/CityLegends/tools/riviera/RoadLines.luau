@@ -13,8 +13,14 @@
 	rule); an end over another road's carriageway or off the road leaves the line out, so no line
 	runs across a junction mouth.
 
-	RoadLines.build(data, roadsFolder, only?) -> lines made (only: a set of road names to redo). Old "Line" parts are moved to
+	RoadLines.build(data, roadsFolder, only?, opts?) -> lines made (only: a set of road names to redo). Old "Line" parts are moved to
 	ServerStorage.OldRoadLines first (delete that folder once the new lines are checked).
+
+	Yangon (2026-11-13): a road with its own `half` in the data gets its lane lines at half of that, and
+	"in a junction" is measured with the other road's half (a street mouth is as wide as the street).
+	Without `half` nothing changes. opts (all optional): cut = the same table as Roads.build's opts.cut
+	(cut samples get no lines and are no junction for anyone); paint = Color3 for every line;
+	centre = { color = Color3?, solid = boolean?, double = boolean? } for the middle line.
 ]]
 
 local RoadLines = {}
@@ -24,18 +30,26 @@ local LINE_T = 0.04
 local LIFT = 0.08 -- paint above the road (flicker rule: at least 0.05)
 local PAINT = Color3.fromRGB(232, 232, 226)
 
-local function prepare(data)
+local maxDh = 0 -- (the widest road's half width over HALF)
+
+local function prepare(data, cut)
 	local roads = {}
+	maxDh = 0
 	for ri, r in data.roads do
+		local half = r.half -- (Yangon: this road's own half width; nil = HALF, as before)
 		local pts = {}
 		for i, s in r.s do
-			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), wl = s[7] or HALF, wr = s[8] or HALF }
+			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), wl = s[7] or half or HALF, wr = s[8] or half or HALF }
 		end
-		roads[ri] = { name = r.name, pts = pts, route = r.kind == "route" }
+		roads[ri] = { name = r.name, pts = pts, route = r.kind == "route", half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil }
+		maxDh = math.max(maxDh, roads[ri].dh)
 	end
 	local grid = {}
 	for ri, r in roads do
 		for i, p in r.pts do
+			if r.cut and r.cut[i] then
+				continue
+			end
 			local key = math.floor(p.pos.X / 24) .. "," .. math.floor(p.pos.Z / 24)
 			grid[key] = grid[key] or {}
 			table.insert(grid[key], { ri, i })
@@ -46,7 +60,7 @@ end
 
 local function otherNear(roads, grid, pos: Vector3, self: number, radius: number): boolean
 	local cx, cz = math.floor(pos.X / 24), math.floor(pos.Z / 24)
-	local reach = math.ceil(radius / 24)
+	local reach = math.ceil((radius + maxDh) / 24)
 	for dx = -reach, reach do
 		for dz = -reach, reach do
 			local cell = grid[(cx + dx) .. "," .. (cz + dz)]
@@ -54,7 +68,7 @@ local function otherNear(roads, grid, pos: Vector3, self: number, radius: number
 				for _, e in cell do
 					if e[1] ~= self then
 						local q = roads[e[1]].pts[e[2]].pos
-						if Vector2.new(q.X - pos.X, q.Z - pos.Z).Magnitude < radius then
+						if Vector2.new(q.X - pos.X, q.Z - pos.Z).Magnitude < radius + roads[e[1]].dh then -- (dh: "that far past this road's own edge")
 							return true
 						end
 					end
@@ -69,8 +83,11 @@ local function flat(v: Vector3): Vector3
 	return Vector3.new(v.X, 0, v.Z)
 end
 
-function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean }?): number
-	local roads, grid = prepare(data)
+function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean }?, opts): number
+	opts = opts or {}
+	local paint = opts.paint or PAINT
+	local centre = opts.centre or {}
+	local roads, grid = prepare(data, opts.cut)
 	local roadParts = {}
 	for _, d in roadsFolder:GetDescendants() do
 		if d:IsA("BasePart") and (d.Name == "Road" or d.Name == "TurningCircle") then
@@ -120,6 +137,7 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 		end
 		local pts = r.pts
 		local n = #pts
+		local H = r.half or HALF
 		local inJunction = {}
 		for i, p in pts do
 			inJunction[i] = otherNear(roads, grid, p.pos, ri, HALF + 6)
@@ -130,7 +148,7 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				task.wait()
 			end
 			local a, b = pts[i], pts[i + 1]
-			if inJunction[i] or inJunction[i + 1] then
+			if inJunction[i] or inJunction[i + 1] or (r.cut and (r.cut[i] or r.cut[i + 1])) then
 				dash = 0
 				continue
 			end
@@ -148,17 +166,28 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				{ x = a.wr - 1.2, xb = b.wr - 1.2, w = 0.6, solid = true },
 				{ x = -(a.wl - 1.2), xb = -(b.wl - 1.2), w = 0.6, solid = true },
 			}
+			-- (opts.centre, Yangon: the middle line may be solid, double and its own colour)
+			if centre.solid then
+				if centre.double then
+					table.insert(lines, { x = -0.55, xb = -0.55, w = 0.5, solid = true, color = centre.color })
+					table.insert(lines, { x = 0.55, xb = 0.55, w = 0.5, solid = true, color = centre.color })
+				else
+					table.insert(lines, { x = 0, xb = 0, w = 0.5, solid = true, color = centre.color })
+				end
+			end
 			if dash % 2 == 0 then
-				table.insert(lines, { x = 0, xb = 0, w = 0.5 })
+				if not centre.solid then
+					table.insert(lines, { x = 0, xb = 0, w = 0.5, color = centre.color })
+				end
 				-- (owner, 2026-11-04: "Make the road 1+1 for the roads which isnt yellow"): only the three
 				-- yellow routes keep their lane lines; the streets are one lane each way
 				if not r.route then
 					-- (no lane lines)
 				elseif math.min(a.wr, b.wr) > 14 then
-					table.insert(lines, { x = math.min(HALF / 2, a.wr / 2), xb = math.min(HALF / 2, b.wr / 2), w = 0.4 })
+					table.insert(lines, { x = math.min(H / 2, a.wr / 2), xb = math.min(H / 2, b.wr / 2), w = 0.4 })
 				end
 				if r.route and math.min(a.wl, b.wl) > 14 then
-					table.insert(lines, { x = -math.min(HALF / 2, a.wl / 2), xb = -math.min(HALF / 2, b.wl / 2), w = 0.4 })
+					table.insert(lines, { x = -math.min(H / 2, a.wl / 2), xb = -math.min(H / 2, b.wl / 2), w = 0.4 })
 				end
 			end
 			local rightA = Vector3.new(-a.dir.Z, 0, a.dir.X).Unit
@@ -186,7 +215,7 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				p.CanTouch = false
 				p.CastShadow = false
 				p.Material = Enum.Material.SmoothPlastic
-				p.Color = PAINT
+				p.Color = l.color or paint
 				p.TopSurface = Enum.SurfaceType.Smooth
 				p.BottomSurface = Enum.SurfaceType.Smooth
 				p.Size = Vector3.new(l.w, LINE_T, if l.solid then span + 0.3 else span * 0.9)
