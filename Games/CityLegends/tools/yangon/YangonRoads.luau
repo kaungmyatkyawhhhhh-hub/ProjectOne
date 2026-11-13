@@ -55,7 +55,7 @@ M.palette = {
 	-- (owner, 13 Nov: the white bands read blue in shade. Tried on the Pyay Road straight: the place's Concrete
 	-- texture (RivConcrete2) is blue-grey, and the shade light is blue. Smooth paint and a white a touch warm
 	-- read white in shade and in sun)
-	kerb = Color3.fromRGB(255, 238, 214),
+	kerb = Color3.fromRGB(255, 228, 192), -- (reads neutral white in the blue shade, a warm white in sun)
 	kerbBand = Color3.fromRGB(200, 40, 38) :: Color3?,
 	kerbSplit = 2,
 	kerbMaterial = Enum.Material.SmoothPlastic,
