@@ -1377,14 +1377,15 @@ function M.checkJunctions()
 										local near = M.near(q.X, q.Z, 2)
 										local ns, nmq = near[S.index], near[main.index]
 										if ns and nmq then
-											-- (a line off the middle is only in the way of the part of S on its own
-											-- side of main's centre line: at a T the far side's lines run on)
+											-- (RoadLines' rule: the middle line is never broken by a smaller road, and
+											-- a line off the middle is only in the way of the part of S on its own
+											-- side of main's centre line, 4 studs or more out: at a T the far side's
+											-- lines run on)
 											local dq, fx, fz = polyDist(main, nmq[2], q.X, q.Z)
-											local dS
-											if dq > 0.5 and fx and fz then
-												dS = polyDist(S, ns[2], q.X, q.Z, fx, fz, (q.X - fx) / dq, (q.Z - fz) / dq)
-											else
-												dS = polyDist(S, ns[2], q.X, q.Z)
+											local dS = math.huge
+											if dq > 1 and fx and fz then
+												local nx, nz = (q.X - fx) / dq, (q.Z - fz) / dq
+												dS = polyDist(S, ns[2], q.X, q.Z, fx + nx * 4, fz + nz * 4, nx, nz)
 											end
 											if dS < h - 0.3 then
 												inMouth += 1
