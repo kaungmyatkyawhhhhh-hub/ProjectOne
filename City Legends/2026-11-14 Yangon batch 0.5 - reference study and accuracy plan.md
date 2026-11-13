@@ -53,7 +53,7 @@ The game's rule from step 0 ("main roads 2+2, streets 1+1") made most of the big
 - Yangon is **very green**: big trees everywhere, inside compounds and along roads. The game's ground is bare grass.
 - The **university** is a large red-roofed campus by Pyay Road.
 
-## Accuracy plan (proposed, not started)
+## Accuracy plan (done 14 Nov 2026, version 799; what was built and what wasn't: the build-steps log, "batch 0.5 accuracy pass")
 1. **Roads by real lane counts.** Widths and traffic lanes from OSM: divided roads as two carriageways where they really are (Pyay, Kabar Aye, Industrial, Insein). This rebuilds the roads, lanes, lamps and the lots beside them (everything is placed from the road edges).
 2. **Real buildings.** Every OSM outline extruded to its floors (or an estimate from its type and size), roofs in the real colours, towers at real heights with rounded outlines where drawn round. Built as meshes in Blender to keep the part count down (owner allowed Blender for map pieces).
 3. **Inya Lake banks and park.** Both Kan Baung embankments (edge, walkway, tree row, park strip, benches, lamps), trees on the islands, the Boat Club pier.

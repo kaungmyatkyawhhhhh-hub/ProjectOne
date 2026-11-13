@@ -45,6 +45,7 @@ Rules for every step:
 - [x] **9. Move in the game** (14 Nov, the essentials). Players start by Optima Werkz; Legends Motors, Legends Customs and a gas station in Yangon; fast travel spots; the Yangon minimap and world map. Then (owner: "Move more venues") every venue moved: bank, heist drop-off, gem showcase, Legends Rewards, the hotel, the three towers, Legends Realty (version 781). Then (owner: "Move houses and races") house lots, races, the Racing Hub, delivery jobs and chips moved too (version 784). Legends Service, speed traps and the leaderboard stay in Monaco for now. Log entries "14 Nov 2026, step 9", "step 9b" and "step 9c" below.
 - [x] **10. Night lights** (14 Nov, version 786). 678 white street lamps (main roads both sides, streets, flyover parapets, the roundabout), every building's windows lit at night, the far city's windows too. Log entry "14 Nov 2026, step 10" below.
 - [x] **11. Switch over** (14 Nov, version 788). Monaco is in ServerStorage (kept whole), Yangon is the only map; Legends Service built in Yangon; playtest clean. The real phone check is still the owner's (see the log). Log entry "14 Nov 2026, step 11" below.
+- [x] **12. Batch 0.5 accuracy pass** (14 Nov, version 799). Owner: "it dont look like the google maps one". Roads at real lane counts (16 roads now 2 + 2, No.1 Industrial among them), 3,249 real buildings from OpenStreetMap (round towers too), Inya Lake embankments, parks and 7,100 trees, lots refit, minimap redrawn, playtest clean. Log entry "14 Nov 2026, batch 0.5 accuracy pass" below.
 
 ## Log
 - 13 Nov 2026: step 0 done in chat. Data and pictures in `Games/CityLegends/imports/refs/map/`.
@@ -429,3 +430,21 @@ Rules for every step:
     Scripts 1.2 ms a frame. The night street still looks lit (white lamps, lit windows).
   - **Still the owner's:** the real phone test after publishing.
   - Picture: `Yangon 11 - night after venue light LOD.jpg`.
+- 14 Nov 2026, batch 0.5 accuracy pass (owner: "this is batch 0.5 also it dont look like the google maps one ...", then "do everything, im going now so dont ask me any more questions"). Plan and reference study: [[2026-11-14 Yangon batch 0.5 - reference study and accuracy plan]]. **Saved: Roblox version 799** (restore point before it: version 791).
+  - **Roads at real lane counts** (`tools/yangon/d18_widen.py` -> `ygn_roads_v4.json`): 16 roads that are 2 + 2 in real life are now main roads (half 32, like the loop): Saya San, Insein, New University Avenue, **No.1 Industrial** (the owner's "its 2 lane in real life"), Kanbe, Pyay Road North / South, Parami Road West / East, Hledan, Kabar Aye Pagoda Road South / North, Inya Road (all three pieces), Hanthawaddy. Roads rebuilt (143k road parts, 10 scraps moved out). They are one wide carriageway with a centre line, not two carriageways with a divider.
+  - **Traffic lanes** (`d9_lanes.py` on v4): 92 lanes, 145 links, no errors. The widened roads have traffic now; a lane end that would climb (New University Avenue's T at the loop's ramp) turns round instead. Play: all 28 traffic cars moving.
+  - **Real buildings** (`d19_buildings.py` from OpenStreetMap, ODbL; `YangonRealBuildings.luau`): 3,249 buildings on their real outlines: 2,833 houses / blocks, 281 walk-ups, 83 shophouse rows, 33 towers, 13 villas, **3 round towers**, the 3 landmarks. Floors from OSM where given, else an estimate. 65,900 parts (the made-up step 8 buildings had 138,000; they are kept in `ServerStorage.YangonBuildings_step8`).
+  - **Inya Lake embankments and parks** (`d20_green.py`, `YangonGreen.luau`): concrete edge + parapet + light walkway along the shore where it runs beside the main roads (145 pieces), 87 benches facing the water, 87 white walkway lamps, 242 trees by the lake and in the parks, 6,865 trees in the city (rain trees, mango trees, palms). **Playtest found every walkway buried** under the grass fill (terrain is 4-stud cells): each walkway is now raised just over the ground with its parapet and edge, benches stood back on it (the tool does this itself now: `M.lift`).
+  - **Lamps** re-run on the new roads: 786.
+  - **Venues and lots refit** (`d21_refit.py`): 35 house lots pushed back from the wider roads (24 on Inya Road, about 16 studs), 8 job / chip points moved off the carriageway; lots re-laid in Studio. The venues themselves did not move to new sites.
+  - **Minimap** redrawn from the real roads, buildings and trees (27 new tiles).
+  - **Playtest (test save, put back to `CityLegends_v1`):** start by Optima on the 2 + 2 road; all 21 fast-travel spots land on road / forecourt; all 4 races' 93 checkpoints on road; traffic all moving; white walkway lamps at night; no new script errors.
+  - **Side by side:** `Yangon 0.5 - Google, before, after (top view).jpg` (Google, the owner's top view, now). The built area now reads like the Google picture: the Hledan / Kamayut house blocks, the university's big buildings, trees everywhere.
+  - **Not done / still rough:**
+    - Real divided carriageways (two roads with a median) are not built: the 2 + 2 roads are single wide roads.
+    - Buildings are boxes (and a few cylinders) from parts, not Blender meshes; roof colours are not the real ones.
+    - The Boat Club pier and the islands' paths are not built.
+    - The night road between Rewards and Customs is darker (the lamps keep off the venues' fronts; the venues light it).
+    - The venue lot plates show as big grey squares from above.
+    - The far north (past the lake) is still batch 1.
+  - Pictures: `Yangon 0.5 - start, 2+2 road and real buildings.jpg`, `Yangon 0.5 - lake embankment and trees (before the walkway fix).jpg`, `Yangon 0.5 - embankment lamp at night.jpg`, `Yangon 0.5 - Rewards and Customs at night.jpg`, `Yangon 0.5 - Google, before, after (top view).jpg`.

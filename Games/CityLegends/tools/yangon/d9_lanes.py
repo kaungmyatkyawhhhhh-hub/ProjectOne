@@ -40,7 +40,8 @@ R_OUT, FLAT, EASE = 108.0, 12.0, 128.0  # (YangonRoads: the arms are eased onto 
 RING_EXIT = 114.0  # loop lanes stop / start this far from the roundabout's centre
 RING_LANES = {1: 76.0, 2: 96.0}
 
-data = json.load(open(os.path.join(MAP, 'ygn_roads_v3.json'), encoding='utf-8'))
+# (14 Nov 2026: v4 = the real 4+ lane roads widened to 2+2 routes, tools/yangon/d18_widen.py; they get traffic too)
+data = json.load(open(os.path.join(MAP, 'ygn_roads_v4.json'), encoding='utf-8'))
 R = {r['name']: r for r in data['roads']}
 CUT = {k: set(v) for k, v in data['cut'].items()}
 
@@ -99,6 +100,10 @@ centres = {
 SIDES = ['Pyay Flyover West Lane', 'Pyay Flyover East Lane 1', 'Pyay Flyover East Lane 2', 'Kabar Aye East Lane', 'Kabar Aye West Lane']
 for n_ in SIDES:
     centres[n_] = R[n_]['s']
+# the widened roads (v4): every route that isn't one of the three originals
+EXTRA = [r['name'] for r in data['roads'] if r.get('kind') == 'route' and r['name'] not in ('Yangon Loop', 'New Road', 'University Avenue')]
+for n_ in EXTRA:
+    centres[n_] = ease_arms(R[n_]['s'])
 
 
 # ---------------------------------------------------------------- geometry helpers
@@ -224,6 +229,45 @@ make_lanes('Pyay Flyover East Lane 1', e1, 0.0, first_clear(e1, ua, None, 32 + 1
 make_lanes('Pyay Flyover East Lane 2', e2, first_clear(e2, ua, None, 32 + 12), chain(e2)[-1], side_lane=True)
 make_lanes('Kabar Aye East Lane', kae, 0.0, chain(kae)[-1], side_lane=True)
 make_lanes('Kabar Aye West Lane', kaw, 0.0, chain(kaw)[-1], side_lane=True)
+# the widened roads (v4): each end either in the roundabout, on a road that has lanes, or at the map edge
+LANE_ROADS = ['Yangon Loop A', 'Yangon Loop B', 'New Road', 'University Avenue']
+extra_ends = {}  # name -> {start: (kind, big), end: (kind, big)}
+
+
+def end_kind(name, p, other_names):
+    if rad(p) < R_OUT + FLAT:
+        return ('ring', None)
+    best = None
+    for o in other_names:
+        if o == name:
+            continue
+        dd = seg_dist(p[0], p[2], centres[o])
+        if dd < H.get(o, 32) + 24 and (best is None or dd < best[0]):
+            best = (dd, o)
+    return ('road', best[1]) if best else ('edge', None)
+
+
+for n_ in EXTRA:
+    H[n_] = 32
+for n_ in EXTRA:
+    s_ = centres[n_]
+    others = LANE_ROADS + EXTRA
+    ks, ke = end_kind(n_, s_[0], others), end_kind(n_, s_[-1], others)
+    c_ = chain(s_)
+    def clear_from(kind, big, from_end):
+        if kind == 'ring':
+            return ring_clear(s_, from_end=from_end)
+        if kind == 'road':
+            return first_clear(s_, centres[big], None, H[big] + 12, from_end=from_end)
+        return (c_[-1] - 30) if from_end else 30.0
+    d0 = clear_from(ks[0], ks[1], False)
+    d1 = clear_from(ke[0], ke[1], True)
+    if d1 - d0 < 60:
+        print('skipped (too short between its ends):', n_, round(d0), round(d1))
+        continue
+    make_lanes(n_, s_, d0, d1)
+    extra_ends[n_] = {'start': ks, 'end': ke}
+
 # the roundabout: anticlockwise = the angle atan2(z - Cz, x - Cx) falling
 for lane_no, rho in RING_LANES.items():
     n = max(12, int(round(2 * math.pi * rho / STEP)))
@@ -379,6 +423,26 @@ def t_junction(minor, minor_s, big_run, at_end):
 t_junction('University Avenue', ua, ua_end_run, at_end=True)
 t_junction('New Road', nrc, nr_start_run, at_end=False)
 
+# the widened roads' ends: T junctions with a lane road, turn-rounds at the map edge (the roundabout below)
+for n_, ends in extra_ends.items():
+    for which, (kind, big) in ends.items():
+        at_end = which == 'end'
+        # (a junction only where both roads are at one height: New University Avenue Road meets the loop where it
+        # climbs to the Kabar Aye deck, 15 studs up; there it turns round instead)
+        level = False
+        if kind == 'road' and (big, 1, 1) in index:
+            mine = lanes[L(n_, 1, 1)]['pts'][-1 if at_end else 0]
+            theirs = lanes[L(big, 1, 1)]['pts']
+            q = theirs[nearest(L(big, 1, 1), mine[0], mine[2])]
+            level = abs(q[1] - mine[1]) < 4
+        if level:
+            t_junction(n_, centres[n_], (big, centres[big]), at_end)
+        elif kind in ('edge', 'road'):
+            # turn round: the way arriving at this end onto the way leaving it (outer to outer, inner to inner)
+            arrive, leave = (1, -1) if at_end else (-1, 1)
+            for ln in (1, 2):
+                link(L(n_, arrive, ln), npts(L(n_, arrive, ln)), L(n_, leave, ln), 1, n_ + ' turns round at the map edge')
+
 # the roundabout
 ring = {ln: L('Hanthawaddy Roundabout', 1, ln) for ln in (1, 2)}
 for ln in (1, 2):
@@ -407,7 +471,13 @@ def ring_k(ln, ang, studs):
     return best[1] + 1
 
 
-for run, way_in, way_out in (('Yangon Loop A', -1, 1), ('Yangon Loop B', 1, -1)):
+ring_arms = [('Yangon Loop A', -1, 1), ('Yangon Loop B', 1, -1)]
+for n_, ends in extra_ends.items():
+    if ends['start'][0] == 'ring':
+        ring_arms.append((n_, -1, 1))  # (starts in the ring: its backward way arrives, its forward way leaves)
+    if ends['end'][0] == 'ring':
+        ring_arms.append((n_, 1, -1))
+for run, way_in, way_out in ring_arms:
     for ln in (1, 2):
         a = L(run, way_in, ln)  # arrives at the ring
         pa = lanes[a]['pts'][-1]

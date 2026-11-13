@@ -25,6 +25,10 @@ src = open(os.path.join(HERE, 'd10_plots.py'), encoding='utf-8').read()
 ns = {'__file__': os.path.join(HERE, 'd10_plots.py')}
 exec(compile(src[:src.index('# the landmarks first')], 'd10', 'exec'), ns)
 roads, CUT, RING, data, WALK, in_poly = ns['roads'], ns['CUT'], ns['RING'], ns['data'], ns['WALK'], ns['in_poly']
+# (14 Nov 2026: the roads as built now, v4 = the real big roads widened to 2+2, tools/yangon/d18_widen.py)
+data = json.load(open(os.path.join(ROOT, 'imports', 'refs', 'map', 'ygn_roads_v4.json'), encoding='utf-8'))
+roads = data['roads']
+CUT = {k: set(v) for k, v in data['cut'].items()}
 
 # the lots (venues, fuel, hub, house lots) whose fronts take drive-ins: rectangles grown 16 (covers the pavement)
 SITES = [
