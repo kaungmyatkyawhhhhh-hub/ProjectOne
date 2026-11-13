@@ -1,0 +1,15 @@
+C=dict(dir='hamhR', length=3.9773, open_r=4, open_r_top=4, env_px=150, body_x0_px=335, top_x0_px=200, front_box=(1085,640,1310,880), WSC=0.95, FN_ranges=[(1150,1215,6.0)],
+  bridge_top=[(462,608,2),(695,1010,3)], bridge_bot=[(430,542,0),(715,985,2)], stalk_env=False, cap_px=70, lip_pad=6, mouth_wall=1, jaw_FN=2.1, tail_t=13, fin_atlas=1, fin_follow_exact=1,
+  tw_fill=1, tw_interp_ranges=[(450,562),(752,1100)], tw_bulge=0.03, HS=1.0, WY=0.9, FN=2.1, taper_start=0.5, taper=0.0, back_amt=0.04, fin_step=10, fin_grid=11,
+  palette=dict(back=(90,160,155), belly=(235,240,245)), belly_class='belly', colour_mode='sample', sample_blur=1.5, sample_mix=0.97,
+  ignore={}, ignore_boxes=[], ignore_circles=[], eye_ignore_k=1.3, ignore_top={}, ignore_top_rule='(B>R+110)|((R>195)&(G>195)&(B>195))|(R+G+B<110)', fill_blur=12, top_w=0.75, front_w=0.0, bot_w=1.0, edge_px=8, top_inset_px=20, bot_inset_px=10, exact_place=1, cap_clamp_px=8,
+  ignore_polys=[[(992,340),(860,336),(800,370),(770,412),(960,430),(1000,385)]],
+  back_tint=(20,40,45), fin_edge=(50,95,95), fin_root=(85,145,140), fin_t=8, mouth_col=(140,38,56), brow_col=(95,150,145), tooth_col=(246,246,244),
+  look_fwd=0.3, lid=(-0.78,-0.15), lid_col=(84,140,134), eye_dome=0.10, eye=dict(x_px=1293, y_px=250, r_px=33, fwd_deg=4), sclera=True, iris_top=(0,150,220), iris_bot=(90,230,255),
+  brows=[],
+  mouth=dict(corner_px=1125, corner_row=302, front_px=1236, front_up_row=311, front_lo_row=373, jaw_front_px=1228, blend_px=70, jaw_w=0.97, jaw_w_max_px=78, tooth_w_max_px=70, inner_w_max_px=74,
+     n_up=5, n_lo=4, tooth_px=30, lo_tooth_k=0.95, tooth_fit=0.6, tooth_start=0.14, tooth_inset=0.86, tooth_inset_lo=0.8, tooth_w=0.58,
+     up_pts=[(1125,302),(1140,302),(1173,305),(1207,310),(1236,311)], lo_pts=[(1125,302),(1128,318),(1136,338),(1150,357),(1173,370),(1200,375),(1222,373),(1228,366)],
+     jaw_back_px=100, round_k=99, snout_frac=0.0, snout_cap_px=10, round_from=0.8, wall_back_px=6, inner_fwd_px=-4),
+  pect_top=dict(box=(465,540,650,665), droop=30, z_frac=0.55), fin_min_px=500, scale_px=12, NR=56, NA=32)
+C.update(NR=34, NA=26, fin_step=14, fin_grid=18)   # 13 Nov relief build: a lighter base mesh pays for the finer head (owner: 'dont use lots of triangles')
