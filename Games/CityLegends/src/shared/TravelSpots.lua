@@ -52,7 +52,7 @@ local function iconFor(id: string): string
 	if string.sub(id, 1, 6) == "tower_" then
 		return "tower"
 	end
-	local map = { ygn_optima = "race", ygn_novotel = "hotel", ygn_mmplaza = "gems", ygn_roundabout = "lookout", ygn_newroad = "lookout", ygn_university = "lookout", old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", rewards = "rewards", gems = "gems", beach = "beach" }
+	local map = { ygn_optima = "race", ygn_novotel = "hotel", ygn_mmplaza = "harbour", ygn_roundabout = "lookout", ygn_newroad = "lookout", ygn_university = "lookout", old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", rewards = "rewards", gems = "gems", beach = "beach" }
 	return map[id] or "harbour"
 end
 
@@ -70,7 +70,7 @@ function TravelSpots.list(): { Spot }
 	local realty = WestLayout.rivieraSite("realty")
 	if realty then
 		-- (the pavilion's own lot is smaller than a venue's: its size from the site)
-		local site = (Config.RivieraVenues.Sites :: any).realty
+		local site = WestLayout.siteData("realty")
 		local depth = if site and type(site.size) == "number" then site.size else WestLayout.Lot
 		table.insert(list, { id = "realty", name = "Legends Realty", icon = "realty", info = INFO.realty, cf = WestLayout.kerbFor(realty, depth) })
 	end

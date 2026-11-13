@@ -8,7 +8,7 @@
 	fills it below, and lays a flat pad (Workspace.Yangon.Sites/<name>).
 
 	local S = require(ServerStorage.ClaudeTools.YangonSites:Clone())
-	S.prepare(sites, names?)      sites: { [name] = { x, z, fx, fz, y, size? } } (Config.YangonVenues.Sites)
+	S.prepare(sites, names?)      sites: { [name] = { x, z, fx, fz, y, size?, w? } } (Config.YangonVenues.Sites; w = width when wider)
 	S.fuel(id, name, site, CareVenues, litre, kwh) -> the station's pumps / chargers / arrive for Config.Fuel.Stations
 	S.undo(name)
 ]]
@@ -25,9 +25,10 @@ local function frameOf(s): CFrame
 	return CFrame.lookAt(c, c + Vector3.new(s.fx, 0, s.fz).Unit)
 end
 
-local function inside(cf: CFrame, p: Vector3, grow: number, lot: number): boolean
+-- (w: the lot's width across the front, when wider than deep: Legends Rewards' car courts)
+local function inside(cf: CFrame, p: Vector3, grow: number, lot: number, w: number?): boolean
 	local l = cf:PointToObjectSpace(p)
-	return math.abs(l.X) < lot / 2 + grow and l.Z > -lot / 2 - 2 and l.Z < lot / 2 + grow
+	return math.abs(l.X) < (w or lot) / 2 + grow and l.Z > -lot / 2 - 2 and l.Z < lot / 2 + grow
 end
 
 local function hidden(name: string): Folder
@@ -53,6 +54,7 @@ function S.prepare(sites: { [string]: any }, names: { string }?): string
 		end
 		local cf = frameOf(s)
 		local lot = s.size or LOT
+		local w = s.w or lot
 		-- buildings with any corner (or middle) of their box in the lot
 		local moved = 0
 		local keep = hidden(name)
@@ -64,7 +66,7 @@ function S.prepare(sites: { [string]: any }, names: { string }?): string
 			local hit = false
 			for _, ox in { -0.5, 0, 0.5 } do
 				for _, oz in { -0.5, 0, 0.5 } do
-					if inside(cf, (bcf * CFrame.new(bsz.X * ox, 0, bsz.Z * oz)).Position, MARGIN, lot) then
+					if inside(cf, (bcf * CFrame.new(bsz.X * ox, 0, bsz.Z * oz)).Position, MARGIN, lot, w) then
 						hit = true
 					end
 				end
@@ -75,7 +77,7 @@ function S.prepare(sites: { [string]: any }, names: { string }?): string
 			end
 		end
 		-- terrain: air above the floor, ground below it
-		local span = Vector3.new(lot + MARGIN * 2, 0, lot + MARGIN + 2)
+		local span = Vector3.new(w + MARGIN * 2, 0, lot + MARGIN + 2)
 		local mid = cf * CFrame.new(0, 0, (MARGIN - 2) / 2)
 		T:FillBlock(mid * CFrame.new(0, 80, 0), Vector3.new(span.X, 160, span.Z), Enum.Material.Air)
 		T:FillBlock(mid * CFrame.new(0, -26, 0), Vector3.new(span.X, 40, span.Z), Enum.Material.Ground)

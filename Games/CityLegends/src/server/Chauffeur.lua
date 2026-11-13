@@ -257,6 +257,10 @@ handlers.call = function(player, carId, placeId)
 	end
 	local pickPos = CityLayout.sample(pickups[1].seg, pickups[1].s)
 	local destPos = CityLayout.sample(dests[1].seg, dests[1].s)
+	-- (Yangon and Monaco aren't joined by road while both are in the place, 2026-11-14)
+	if (pickPos.X > 25000) ~= (destPos.X > 25000) then
+		return { ok = false, message = "That's in the other city: use fast travel" }
+	end
 	if (pickPos - destPos).Magnitude < 60 then
 		return { ok = false, message = "You're already there" }
 	end

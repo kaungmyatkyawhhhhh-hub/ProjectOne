@@ -26,7 +26,7 @@ Rules for every step:
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes. **6a done** (13 Nov, version 752): grass up to the pavements near junctions, dashed middle line on the one-way side lanes. Still to do: road meshes (part count).
 - [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). Tested in Play the same day: traffic drives the loop, both flyovers, the side lanes and the roundabout.
 - [x] **8. Buildings and landmarks** (13 Nov, version 764). 1,267 Yangon-style buildings along every road, Optima Werkz, Novotel and Myanmar Plaza, the far city with Shwedagon on the horizon. Log entry "13 Nov 2026, step 8" below.
-- [x] **9. Move in the game** (14 Nov, the essentials). Players start by Optima Werkz; Legends Motors, Legends Customs and a gas station in Yangon; fast travel spots; the Yangon minimap and world map. The other venues, houses, races and jobs stay in Monaco for now (fast travel). Log entry "14 Nov 2026, step 9" below.
+- [x] **9. Move in the game** (14 Nov, the essentials). Players start by Optima Werkz; Legends Motors, Legends Customs and a gas station in Yangon; fast travel spots; the Yangon minimap and world map. Then (owner: "Move more venues") every venue moved: bank, heist drop-off, gem showcase, Legends Rewards, the hotel, the three towers, Legends Realty (version 781). Houses, races, jobs and Legends Service stay in Monaco for now (fast travel). Log entries "14 Nov 2026, step 9" and "step 9b" below.
 - [ ] **10. Night lights.** Street lamps on main roads, lit buildings, never dark.
 - [ ] **11. Switch over.** Move Monaco to ServerStorage (kept, not deleted), playtest, phone performance check.
 
@@ -277,3 +277,30 @@ Rules for every step:
   - **Play test (test save):** the car came out on the loop by Optima, the Yangon map showed in the menu and minimap, Legends Motors and Customs were built in Yangon, fast travel to the gas station and Novotel landed right.
   - **Not done yet:** the bank, hotel, towers, Legends Rewards, gem showcase, houses, races, jobs and Legends Service are still in Monaco (fast travel takes players there). Backspace reset only knows the main roads' lanes (on a street it goes to the nearest main road). The big pad round the gas station is plain concrete.
   - Pictures: `Yangon 9 - ...jpg` in this folder.
+- 14 Nov 2026, step 9b (owner: "Move more venues"). Version **781**.
+  - **Code check first:** a workflow read each venue's code for Monaco ties, and a second reader re-checked each list. It found:
+    - The bank, the heist drop-off and the gem showcase have to move together, because gem loot is cashed in at the bank's drop-off.
+    - The hotel and the towers are built square to the world axes, so they need lots that are too.
+    - Legends Rewards' car courts make it 304 wide.
+    - Drive-in ramps (`EntranceRamp`) looked for kerbs only in Monaco's roads.
+    - Smaller ones: the realty size was read from Monaco's table, the tower telescope aimed at the old city, the Myanmar Plaza spot used the gem icon, and a chauffeur booked across the two cities said "No road there yet".
+    - All fixed. `WestLayout.siteData`. The ramp now picks the roads of the map it stands on. The chauffeur says "That's in the other city: use fast travel". The client police lanes also start for Yangon.
+  - **Lots:**
+    - `tools/yangon/d13_more_sites.py` finds the lots left over, plus lots square to the axes facing north (for the towers).
+    - `tools/yangon/d14_wide_lot.py` finds a wide lot on a straight stretch (for Rewards).
+    - No two lots overlap (checked with an 8-stud margin). `YangonSites.prepare` takes a width `w`.
+    - Every lot's height matches the pavement within 0.05. 34 Yangon buildings were moved to `ServerStorage.YangonSiteHidden`.
+  - **Where they are:**
+    - The bank and the gem showcase are on the loop south of Optima.
+    - Legends Rewards is on the loop 316 studs from Optima.
+    - The hotel is on the loop's south-west side.
+    - Tower Aurum, Tower Skyline and Tower Crown stand in a row along New Road and the loop.
+    - Legends Realty is by the loop west of Optima.
+    - The heist drop-off is by Myanmar Plaza.
+  - **Play test (test save):**
+    - Every venue was built in Yangon, with no script errors in the Output.
+    - The drop-off marker is at its Yangon lot.
+    - Seen from above, the venues sit flat on their lots. The hotel front from the street looks right.
+  - **Not tested yet:** a full bank heist or gem run to the drop-off, a penthouse visit, the hotel's valet and ramps.
+  - **Still in Monaco:** houses (lots and the realty catalogue's house plots), races, delivery jobs, chips, Legends Service, the Racing Hub.
+  - Pictures: `Yangon 9b - ...jpg` in this folder.

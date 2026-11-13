@@ -60,7 +60,7 @@ local units: { Unit } = {}
 local graph = CityLayout.buildGraph()
 -- (owner, 2026-11-02: everything moved to Monaco) the Riviera's lanes too, when it is in the place,
 -- so police patrol and chase there
-if workspace:FindFirstChild("Riviera") then
+if workspace:FindFirstChild("Riviera") or workspace:FindFirstChild("Yangon") then
 	local ok, riv = pcall(function()
 		return require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RivieraTraffic")).build()
 	end)

@@ -164,6 +164,18 @@ Config.YangonVenues = {
 	Sites = {
 		dealership = { x = 30836.8, z = 957.4, fx = -0.560, fz = -0.829, y = 46.57 }, -- on the loop, 176 from Optima Werkz
 		customs = { x = 31025.7, z = 646.7, fx = -0.990, fz = -0.144, y = 47.53 }, -- on the loop, 188 from Optima Werkz
+		-- (owner, 2026-11-14: "Move more venues"; lots from tools/yangon/d13_more_sites.py and d14_wide_lot.py)
+		-- the bank, its heist drop-off and the gem showcase move together: gem loot is cashed in at the bank's drop-off
+		bank = { x = 31074.1, z = 394.2, fx = -0.991, fz = -0.136, y = 49.51 }, -- on the loop south of Optima Werkz
+		dropoff = { x = 32358.8, z = -1833.6, fx = 0.992, fz = 0.127, y = 32.15 }, -- on the loop by Myanmar Plaza
+		gems = { x = 30742.3, z = 223.9, fx = 0.969, fz = -0.249, y = 50.23 }, -- on the loop south of Optima Werkz
+		rewards = { x = 30730.5, z = 552.9, fx = 0.987, fz = 0.159, y = 47.93, w = 304 }, -- its car courts make it 304 wide
+		-- square to the world axes (their towers and facade tiers are)
+		hotel = { x = 29745.3, z = 1089.0, fx = 0, fz = 1, y = 54.97 }, -- on the loop's south-west side
+		tower_aurum = { x = 30655.1, z = 1303.2, fx = 0, fz = -1, y = 45.16 }, -- a row of three towers along New Road
+		tower_skyline = { x = 30911.0, z = 1306.4, fx = 0, fz = -1, y = 44.07 },
+		tower_crown = { x = 29867.2, z = 1398.6, fx = 0, fz = -1, y = 55.5 },
+		realty = { x = 30465.2, z = 921.7, fx = 0.560, fz = 0.829, y = 48.83, size = 80 }, -- by the loop west of Optima Werkz
 	},
 }
 

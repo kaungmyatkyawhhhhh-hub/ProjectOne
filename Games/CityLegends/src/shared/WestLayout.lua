@@ -49,6 +49,17 @@ function WestLayout.blockCenter(bi: number, bj: number): Vector3
 end
 
 -- a venue's site in Monaco (Config.RivieraVenues), when the Riviera is in the place
+-- the site table rivieraSite uses for a venue (Yangon's while Yangon is in the place and lists it)
+function WestLayout.siteData(name: string): { [string]: any }?
+	local yv = Config.YangonVenues
+	local s = yv and yv.On and yv.Sites[name]
+	if s and workspace and workspace:FindFirstChild("Yangon") then
+		return s
+	end
+	local rv = Config.RivieraVenues
+	return rv and rv.On and rv.Sites[name] or nil
+end
+
 -- (Yangon first: a venue with a Yangon site stands there while Yangon is in the place)
 function WestLayout.rivieraSite(name: string): CFrame?
 	local yv = Config.YangonVenues

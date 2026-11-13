@@ -972,7 +972,8 @@ local function buildTower(kit: any, parent: Instance, t: TowerSpec, cx: number, 
 		scopePrompt.Triggered:Connect(function(player: Player)
 			-- out over the corner of the roof, towards the city centre
 			local eye = at(scopeX, yR + 5.4, scopeZ).Position
-			local dir = (Vector3.new(0, eye.Y - 120, 0) - eye)
+			local centre = if Config.activeMap() == "Yangon" and eye.X > 25000 then Vector3.new(30716, 0, -2388) else Vector3.zero
+			local dir = (Vector3.new(centre.X, eye.Y - 120, centre.Z) - eye)
 			dir = Vector3.new(dir.X, math.min(dir.Y * 0.15, 0), dir.Z).Unit
 			send(player, { kind = "scope", eye = eye, dir = dir })
 		end)

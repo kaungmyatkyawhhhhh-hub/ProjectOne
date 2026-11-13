@@ -93,7 +93,8 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 	end
 	params.FilterDescendantsInstances = skip
 
-	local riv = workspace:FindFirstChild("Riviera")
+	-- (the roads of the map the ramp stands on: Yangon lies east of x 25000, 2026-11-14)
+	local riv = workspace:FindFirstChild(if p0.X > 25000 then "Yangon" else "Riviera")
 	local roads = riv and riv:FindFirstChild("Roads")
 
 	local function cast(at: Vector3): RaycastResult?

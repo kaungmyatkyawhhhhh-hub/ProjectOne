@@ -441,7 +441,8 @@ function Realty.init(ctx: any)
 			pavilion(folder, riv)
 			-- (owner, 2026-11-04: every venue you can drive onto) a drive from the road over the trench
 			-- between the pavement and the lot
-			local size = (Config.RivieraVenues.Sites :: any).realty.size or 80
+			local site = WestLayout.siteData("realty")
+			local size = (site and site.size) or 80
 			local inner = riv * CFrame.new(0, 0.2, -size / 2 - 1.5)
 			task.defer(function()
 				EntranceRamp.build(folder, inner, { width = 26, reach = 50, keep = { folder } })
