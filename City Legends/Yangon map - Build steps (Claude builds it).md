@@ -22,7 +22,7 @@ Rules for every step:
 - [x] **3. Main roads** (13 Nov, version 722). The Yangon Loop, New Road and University Avenue, the Hanthawaddy Roundabout and the lines are built. Prompt: [[Yangon map - Step 3 - main roads, roundabout, lines]]. What was done: the log entry "13 Nov 2026, step 3" below.
 - [x] **3b. Round corners, kerbs in shade** (13 Nov, version 741). Owner: "dark asphalt is okay. fix sharp corners and kerbs in shade until theyre right". Log entry "13 Nov 2026, step 3b" below.
 - [x] **4. Flyovers** (13 Nov, version 744). Decks, ramps, piers, parapets and side lanes for the Pyay Road Flyover and the Kabar Aye Flyover, and the junctions underneath. Log entry "13 Nov 2026, step 4" below.
-- [ ] **5. Streets.** The 30 streets, their junction mouths, and the barriers at the 16 map-edge road ends.
+- [x] **5. Streets** (13 Nov, version 750). The 30 streets, their junction mouths and round corners, and barriers at the 16 map-edge road ends. Log entry "13 Nov 2026, step 5" below.
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes.
 - [ ] **7. Traffic lanes.** Lanes for main roads, side lanes and the roundabout only. Lane checker at 0 problems. Traffic runs on main roads only.
 - [ ] **8. Buildings and landmarks.** Yangon-style blocks along the roads, Novotel, Optima and MM Plaza, far-city backdrop at the map edge.
@@ -140,3 +140,37 @@ Rules for every step:
   - **Checks:** clearance under the girders 8.4 (Pyay over University Avenue) to 9.4 studs; 0 ground through the road, 0 floating (200 points); 25 junctions, 0 faults, heights within 0.015; main-road joins 0 doubled slabs, 2 holes (a seam spot at University Avenue's start; the check now looks through decks and not past a road's end); bump check: 8 single points at lane starts, but rays there show a smooth surface (under 0.02 between neighbours), so they are the checker. 90,837 road parts + 2,899 deck parts. Monaco unchanged (388,029).
   - **Not right yet:** the deck is plain light concrete (no colour bands or lamp posts yet: step 10 lamps); pier spacing is uneven where piers moved off University Avenue; the parapet ends stand square at the ramp feet; side lanes have a solid centre line like the main roads (they carry one direction: dashed would be right, step 7); a pavement edge still stands proud near the University Avenue / east lane corners (step 6 smooth pass).
   - Pictures: `Yangon 4 - ...jpg` in this folder.
+- 13 Nov 2026, step 5 (owner: "continue"). Version **750** = "Yangon step 5: streets".
+  - **Data** (`tools/yangon/d8_streets.py` -> `ygn_roads_v3.json`, in Studio as `YangonData.Roads3_1..3`; `Y.load()` takes the newest):
+    - Only one street really crosses a bigger road: Inya Road (the Yangon Loop and University Avenue). It is now three pieces, each ending inside the road it crosses: Inya Road West, Inya Road, Inya Road East (ranks 15, 15.1, 15.2). The other 14 "crossings" in the scan were T-junctions.
+    - **Rule:** a road that ends on another must be the smaller one. Two pairs were the wrong way round. Insein Road ends on Hledan Road, so Hledan goes to rank 3.5. Adipati Road ends on Convocation Road, so Convocation goes to 23.5. d8 checks this rule on every road end.
+    - U Tun Nyein Street and Lane 1 started at the same point at a 102-degree corner. They are now one street, with the corner rounded at radius 40.
+    - 16 map-edge ends are marked `edgeStart` / `edgeEnd`.
+  - **Build:** `Y.step5()` = step 4 with every road, then `Y.buildBarriers()`, then `Y.scrub(true)`. It takes about 150 s. Load first: `Y.spawn("step 5", function() Y.load() return Y.step5() end)`.
+    - 53 junction mouths, 106 round corners, 16 barriers. Each barrier is a red and white wall of 2.8-stud blocks across the road and both pavements.
+    - 184,874 road parts. Step 6 meshes must bring this down.
+  - **Fixed on the way:**
+    - **A road's own kerb past a round corner did not stop at a smaller road's mouth.** Parami Road West and Parami Road East meet a road right where that road's corner onto the loop starts, and 360 kerb and pavement scraps lay on their carriageways.
+    - **The kerb rule used a side lane's nominal 12-stud half width.** At its split the lane is 16 wide, so New University Avenue Road's corner kerb sat on the lane. Edges, mouths and the kerb rule now use each sample's own width (`edgeXZ`, `M.halfAt`).
+    - Nothing of a road counts behind one of its cut ends (`polyDist`, and `RoadLines` for the lines: the Kabar Aye side lanes had lost their lines for about 30 studs).
+  - **Independent review (8 agents, every finding checked by a second one):** it found 5 real bugs, all fixed:
+    - The barrier blocks were turned 90 degrees: a row of fins with car-wide gaps.
+    - Two round corners overlapped on a 24-stud kerb at Pyay Road North / Parami Road West. A corner now shrinks when another junction's corner point is closer than 2T + 4.
+    - The terrain trench was cut to the full 10-stud pavement width beside a side lane's 3.5-stud walk, leaving a ditch. It is now cut per side.
+    - The lines at the Kabar Aye lanes (see above).
+    - The polyDist cut-end hole.
+  - **The safety net:** `Y.scrub(true)` moves any kerb or pavement piece whose middle lies on another road's carriageway to `ServerStorage.YangonScraps` (kept, not deleted). Last build: 10 specks 0.2 studs across, where the Pyay west lane's inner pavement ends at the loop's widened start.
+  - **Checks:**
+    - `Y.checkMouths()` (new): 53 mouths, 15,268 spots, 0 with kerb or pavement on the joining road.
+    - 400 random points: 0 grass through the road, 0 floating, 0 wrong height.
+    - Main-road joins: 0 doubled slabs, 4 holes (seam spots).
+    - Junction heights within 0.015. The old junction check still names "Inya Road" and "Lane 1" from the design, so those two show as "no mouth found". `checkMouths` covers them.
+    - Bump check: the 16 barriers (the checker drives into them), the lane starts already proven smooth, and rays on seams (exact 2.00 steps).
+    - Grass through the pavement: 5 spots of 24,649, 0 of 8,693 on corners.
+    - Monaco unchanged (388,029).
+  - **Not right yet (step 6):**
+    - Near junctions there is no grass verge, so where the ground is lower (the Inya Road crossing) the pavement's side stands up to 1.5 studs proud. `checkPoints` says the highest is 4.5.
+    - Side lanes have a solid centre line (they are one-way).
+    - The road part count.
+  - **Edit-mode trap:** right after a big build, Studio draws roads in pieces and grass over pavement for a minute. Judge by raycast, or wait and take the picture again.
+  - Pictures: `Yangon 5 - ...jpg` in this folder.
