@@ -1,0 +1,101 @@
+{
+ "src": "imports/importing cars/2011_bmw_e92_m3_gts.glb",
+ "images": {
+  "0": [
+   {
+    "replace": "tools/logo_paint/bnw_m3_e92_tyre_n.png"
+   }
+  ],
+  "3": [
+   {
+    "solid": [
+     0,
+     0,
+     1023,
+     1023,
+     60,
+     60,
+     64
+    ]
+   }
+  ],
+  "4": [
+   {
+    "solid": [
+     0,
+     0,
+     255,
+     255,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "8": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     255,
+     40,
+     40,
+     44
+    ]
+   }
+  ],
+  "9": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     255,
+     128,
+     128,
+     128
+    ]
+   }
+  ],
+  "10": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     255,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "11": [
+   {
+    "replace": "tools/logo_paint/bnw_m3_e92_grille.png"
+   }
+  ],
+  "21": [
+   {
+    "replace": "tools/logo_paint/bnw_m3_e92_cabin.png"
+   }
+  ],
+  "22": [
+   {
+    "replace": "tools/logo_paint/bnw_m3_e92_cabin_n.png"
+   }
+  ]
+ },
+ "drop": [
+  "car_bmw_m3e92gts_2012_Mesh:M_Badges_High_badges_0",
+  "car_bmw_m3e92gts_2012_Mesh:M_Caliper_High_car_bmw_m3e92gts_2012_Mesh:caliper_0"
+ ],
+ "rename_material": {
+  "phong11": "Tyre_Rubber",
+  "car_bmw_m3e92gts_2012_Meshdisk": "Disc1",
+  "car_bmw_m3e92gts_2012_Meshcaliper": "Caliper1",
+  "car_bmw_m3e92gts_2012_Meshphong4": "ExhaustTips1",
+  "car_bmw_m3e92gts_2012_Meshrims": "Rims1"
+ }
+}

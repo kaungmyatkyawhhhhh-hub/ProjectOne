@@ -64,7 +64,7 @@ local Data: { [string]: Phys } = {
 	-- BMW 330i M Sport (G20, 2.0 turbo, 8-speed auto, M Sport brakes)
 	bnw_330i_g20 = { front = 0.5, drive = "RWD", gears = 8, box = "auto", shift = 0.2, tyreF = 225, tyreR = 255, aspectF = 45, aspectR = 40, rimF = 18, rimR = 18, tyre = "sport", brakes = "steel", pistons = 4, caliper = "blue", lugs = 5, stop = 34, z60 = 5.3, top = 155, hp = 255, nm = 400, redline = 6.5, cg = 0.48, downforce = 0 },
 	-- BMW M3 (E92, 4.0 V8, 6-speed manual)
-	bnw_m3_e92 = { front = 0.52, drive = "RWD", gears = 6, box = "manual", shift = 0.45, tyreF = 245, tyreR = 265, aspectF = 35, aspectR = 35, rimF = 19, rimR = 19, tyre = "sport", brakes = "drilled", pistons = 1, caliper = "grey", lugs = 5, stop = 34, z60 = 4.6, top = 155, hp = 414, nm = 400, redline = 8.4, cg = 0.47, downforce = 0 },
+	bnw_m3_e92 = { front = 0.52, drive = "RWD", gears = 7, box = "dct", shift = 0.1, tyreF = 255, tyreR = 285, aspectF = 35, aspectR = 30, rimF = 19, rimR = 19, tyre = "sport", brakes = "drilled", pistons = 6, caliper = "grey", lugs = 5, stop = 34, z60 = 4.4, top = 165, hp = 444, nm = 440, redline = 8.3, cg = 0.47, downforce = 0 },
 	-- BMW M3 (F80, 3.0 twin-turbo, 7-speed M-DCT, M Driver's Package)
 	bnw_m3_f80 = { front = 0.52, drive = "RWD", gears = 7, box = "dct", shift = 0.1, tyreF = 255, tyreR = 275, aspectF = 35, aspectR = 35, rimF = 19, rimR = 19, tyre = "sport", brakes = "drilled", pistons = 4, caliper = "blue", lugs = 5, stop = 33, z60 = 3.9, top = 174, hp = 425, nm = 550, redline = 7.6, cg = 0.47, downforce = 0 },
 	-- BMW M4 (F82, 3.0 twin-turbo, 7-speed M-DCT, M Driver's Package)

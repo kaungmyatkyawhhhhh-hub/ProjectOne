@@ -46,7 +46,8 @@ CarSkin.CLUSTER_STYLE = {
 	bnw_x6 = "BMWLiveCockpit",
 	bnw_x7 = "BMWLiveCockpit",
 	bnw_m8gc = "BMWLiveCockpit",
-	bnw_m3_e92 = "BMWF80",
+	bnw_m3_e92 = "LiveE92", -- the 2011 model (2026-11-13), redrawn from the owner's photo ("BMWF80" puts the old drawn one back; that one was laid out for the old model's hood)
+	bnw_m3_e92_cabin = "BMWF80", -- (not a car: the old E92 model, kept as the F80's cabin donor; its own needle parts stay hidden as before)
 	bnw_m3_f80 = "BMWF80",
 	lexis_lx700 = "LexusLX700",
 	-- supercars and hypercars: copied from the real cars (owner, 2026-10-24: "an exact 1 to 1
@@ -127,7 +128,8 @@ CarSkin.CLUSTER_STYLE = {
 -- driver) and its width and height in metres. A cluster style is drawn right there, covering it
 -- (owner, 2026-10-13: "place them right above the dashboard where it covers the old cluster")
 CarSkin.CLUSTER_RECT = {
-	bnw_m3_e92 = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- its cluster hood (from the model)
+	bnw_m3_e92 = { at = Vector3.new(0.0055, 0.0324, -0.2623), face = Vector3.new(0, 0.3074, 0.9516), w = 0.274, h = 0.114 }, -- the 2011 model's hood opening (tools/lambo/window_e92.png); measured from the E60 wheel's box it wears (with the model's own wheel back: 0.0056, 0.0310, -0.2649)
+	bnw_m3_e92_cabin = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- the old E92 cabin's cluster hood (the F80's donor)
 	-- the Land Cruzer 200 and the Alfard: over their models' own dial panels (owner, 2026-10-22: the
 	-- LC200's sat too high, above the dash; "bring it down and match it exactly")
 	toyoka_lc200 = { at = Vector3.new(0, 0.02, -0.247), face = Vector3.new(0, 0.12, 0.993), w = 0.267, h = 0.112 },
@@ -296,7 +298,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bnw_m3_e92 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -355,7 +357,9 @@ CarSkin.OWN_NEEDLES = {
 CarSkin.INTERIOR_DONOR = {
 	-- (porsha_gt3 has its own cabin since its 2019 model, 2026-11-13; before: the 718 cockpit, owner 2026-10-16)
 	-- owner (2026-10-13): the M3 F80 and M4 F82 files' own cabins look bad; the M3 E92's goes in
-	bnw_m3_f80 = { from = "bnw_m3_e92", rear = 1.8 }, -- (bnw_m4_f82 has its own cabin since its 2018 model, 2026-11-12)
+	-- (2026-11-13: the E92 got its 2011 model with a cage and bucket seats; the F80 keeps the OLD E92 cabin,
+	-- kept in CarModels as bnw_m3_e92_cabin, a cabin donor only, not a car in the roster)
+	bnw_m3_f80 = { from = "bnw_m3_e92_cabin", rear = 1.8 }, -- (bnw_m4_f82 has its own cabin since its 2018 model, 2026-11-12)
 	-- owner (2026-10-13): the Panamera's own cluster is broken; the 718 Boxster's cockpit goes in
 	porsha_panamera = { from = "porsha_boxster", rear = 1.8 },
 	-- owner (2026-10-13): the 458 Italia keeps its body and takes the 458 Speciale's cabin (a cabin
@@ -412,7 +416,7 @@ CarSkin.STEER_MODEL = {
 	porsha_boxster = "Porsche", porsha_panamera = "Porsche", maseroti_levante = "LexusSport", -- (porsha_gt3 keeps its 2019 model's own wheel)
 	-- (nisun_gtr keeps its 2013 model's own wheel)
 	-- BMW
-	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_e92 = "BMWM", bnw_m3_f80 = "BMWM", -- (bnw_m4_f82 keeps its 2018 model's own wheel)
+	bnw_530i = "BMWM", bnw_540i = "BMWM", bnw_m3_f80 = "BMWM", -- (bnw_m4_f82 keeps its 2018 model's own wheel; bnw_m3_e92 wears the 2009 E60 model's wheel, owner 2026-11-13: parts SteeringWheel_t20 in its own model)
 	bnw_m6_v10 = "BMWM", bnw_m8gc = "BMWM", bnw_x6 = "BMWM", bnw_x7 = "BMWM", bnw_750li = "BMWM",
 	bnw_m5_f10 = "BMWM", -- (bnw_m5_f90 keeps its 2022 model's own wheel)
 	-- Mercedes

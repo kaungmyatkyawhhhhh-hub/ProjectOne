@@ -2020,8 +2020,15 @@ def gt3rs():
     return m.gt3rs(Spec, needle_sprite, add_needle, glyph, solid_gear)
 
 
-BUILDERS = {"gt3rs": gt3rs, "f82": f82, "gtr": gtr, "gtrte": gtrte, "bentayga": bentayga, "e60": e60, "r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def e92():
+    import cluster_imports as m
+
+    return m.e92(Spec, needle_sprite, add_needle, glyph, solid_gear)
+
+
+BUILDERS = {"e92": e92, "gt3rs": gt3rs, "f82": f82, "gtr": gtr, "gtrte": gtrte, "bentayga": bentayga, "e60": e60, "r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "e92": ("e92_m3_cluster_owner.png", (138, 316, 1754, 988), None, dict(v=0.0, gear="N", mph=0, manual=False, clock="10:57", odo="067528", distUnit="km", kmh=True, trip="200.2", fuel=0.0)),
     "gt3rs": ("gt3rs_9912_cluster_owner.png", (287, 397, 1732, 940), None, dict(v=0.0, gear="N", mph=0, manual=False, clock="09:58", odo="014848", distUnit="km", kmh=True, trip="182.3", fuel=0.0)),
     "f82": ("f82_m4_cluster_owner.png", (0, 7, 627, 271), (0, 7, 627, 271), dict(v=0.9, gear="N", mph=0, manual=False, clock="10:57", odo="003230", distUnit="km", kmh=True, trip="525.3", fuel=0.27, date="02.05.2014", lights=True)),
     "gtr": ("gtr_model_cluster.png", (0, 0, 694, 321), None, dict(v=0.9, gear="N", mph=0, manual=False, clock="10:57", odo="011972", distUnit="mi", kmh=False, fuel=0.8)),

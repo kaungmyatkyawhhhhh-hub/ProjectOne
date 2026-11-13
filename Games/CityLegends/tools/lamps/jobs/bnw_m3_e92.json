@@ -1,0 +1,164 @@
+{
+ "HeadCore": [
+  {
+   "node": "M_LightCluster_High_ligth",
+   "uv": [
+    0,
+    1024,
+    985,
+    1024
+   ],
+   "box": [
+    0.35,
+    -2.15,
+    0.5,
+    0.9,
+    -1.6,
+    0.8
+   ],
+   "off": 0.004
+  },
+  {
+   "node": "M_LightCluster_High_ligth",
+   "uv": [
+    876,
+    1000,
+    290,
+    412
+   ],
+   "box": [
+    0.35,
+    -2.15,
+    0.5,
+    0.9,
+    -1.6,
+    0.8
+   ],
+   "off": 0.003
+  },
+  {
+   "node": "M_LightCluster_High_ligth",
+   "uv": [
+    586,
+    700,
+    18,
+    134
+   ],
+   "box": [
+    0.35,
+    -2.15,
+    0.5,
+    0.9,
+    -1.6,
+    0.8
+   ],
+   "off": 0.003
+  },
+  {
+   "node": "M_LightRefracted_High_light_R",
+   "box": [
+    0.45,
+    -2.0,
+    0.55,
+    0.57,
+    -1.85,
+    0.7
+   ],
+   "off": 0.003
+  }
+ ],
+ "HeadGlass": [
+  {
+   "node": "M_Glass_Window_High_glass_light",
+   "box": [
+    0.35,
+    -2.15,
+    0.5,
+    0.69,
+    -1.6,
+    0.8
+   ],
+   "off": 0.006
+  }
+ ],
+ "TurnF": [
+  {
+   "node": "M_LightRefracted_High_light_R",
+   "box": [
+    0.67,
+    -1.95,
+    0.5,
+    0.82,
+    -1.65,
+    0.75
+   ],
+   "off": 0.004
+  },
+  {
+   "node": "M_Glass_Window_High_glass_light",
+   "box": [
+    0.84,
+    -0.95,
+    0.65,
+    0.92,
+    -0.74,
+    0.74
+   ],
+   "off": 0.003
+  },
+  {
+   "node": "M_LightCluster_High_ligth",
+   "box": [
+    0.84,
+    -0.95,
+    0.65,
+    0.92,
+    -0.74,
+    0.74
+   ],
+   "off": 0.002
+  }
+ ],
+ "Tail": [
+  {
+   "node": "M_LightRefracted_High_light_R",
+   "box": [
+    0.45,
+    1.9,
+    0.6,
+    0.85,
+    2.4,
+    1.0
+   ],
+   "off": 0.004
+  }
+ ],
+ "TurnR": [
+  {
+   "node": "M_LightCluster_High_ligth",
+   "box": [
+    0.55,
+    2.2,
+    0.79,
+    0.68,
+    2.3,
+    0.822
+   ],
+   "off": 0.004
+  }
+ ],
+ "Rev": [
+  {
+   "node": "M_LightCluster_High_ligth",
+   "box": [
+    0.41,
+    2.22,
+    0.885,
+    0.515,
+    2.3,
+    0.925
+   ],
+   "off": 0.004
+  }
+ ]
+}

@@ -46,7 +46,7 @@ local AWD = {
 local FWD = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true }
 local MANUAL = {
 	nisun_350z = true, nisun_r34 = true, mazdo_rx7 = true, mazdo_rx8 = true, toyoka_supra_mk4 = true,
-	toyoka_chaser = true, bnw_m3_e92 = true, bnw_m5_e60 = true, bnw_m6_v10 = true, chevo_c6 = true,
+	toyoka_chaser = true, bnw_m5_e60 = true, bnw_m6_v10 = true, chevo_c6 = true,
 	chevo_camaro = true, dodger_challenger = true, porsha_boxster = true, porsha_gt3 = true,
 	ferrara_f430 = true, lambrini_lp570 = true, lambrini_countach = true, lexis_lfa = false,
 	bentz_190e = true, suzaki_swift = true, dearb_focus_rs = true,
@@ -55,7 +55,7 @@ local KERB: { [string]: number } = {
 	suzaki_swift = 900, toyoka_belta = 1080, kio_ev6 = 2000, byt_seal = 2150, toyoka_camri = 1550, toyoka_crown = 1800,
 	toyoka_alfard = 2200, toyoka_lc200 = 2600, toyoka_lc300 = 2500, lexis_lx700 = 2600, nisun_350z = 1450, mazdo_rx7 = 1280,
 	mazdo_rx8 = 1310, bnw_530i = 1650, bnw_540i = 1750, bentz_e300 = 1700, bentz_e400 = 1800, bnw_330i_g20 = 1550,
-	bnw_m3_e92 = 1600, bnw_m3_f80 = 1550, bnw_m4_f82 = 1537, bnw_m5_e60 = 1830, bnw_m6_v10 = 1785, bnw_m8gc = 1950,
+	bnw_m3_e92 = 1530, bnw_m3_f80 = 1550, bnw_m4_f82 = 1537, bnw_m5_e60 = 1830, bnw_m6_v10 = 1785, bnw_m8gc = 1950,
 	bentz_cla45 = 1650, bentz_cls63s = 1950, toyoka_supra_mk4 = 1570, nisun_r34 = 1560, dodger_challenger = 1950,
 	xiaomo_su7 = 2200, bnw_x6 = 2250, bnw_x7 = 2450, bentz_gle53 = 2300, bentz_g63 = 2560, byt_u8 = 3460,
 	porsha_panamera = 2050, chevo_camaro = 1700, chevo_c6 = 1480, porsha_boxster = 1400, chevo_c7 = 1500,
@@ -76,7 +76,7 @@ local KERB: { [string]: number } = {
 local POWER: { [string]: number } = {
 	toyoka_camri = 203, toyoka_alfard = 250, toyoka_lc200 = 381, toyoka_lc300 = 409, lexis_lx700 = 409,
 	kio_ev6 = 225, nisun_350z = 306, mazdo_rx7 = 276, bnw_540i = 335, bentz_e400 = 329,
-	bnw_m3_e92 = 414, bnw_m3_f80 = 425, bnw_m4_f82 = 425, bnw_m5_e60 = 500, bnw_m6_v10 = 500,
+	bnw_m3_e92 = 444, bnw_m3_f80 = 425, bnw_m4_f82 = 425, bnw_m5_e60 = 500, bnw_m6_v10 = 500,
 	bnw_m8gc = 617, bentz_cls63s = 603, toyoka_supra_mk4 = 320, nisun_r34 = 330, dodger_challenger = 485,
 	xiaomo_su7 = 673, bnw_x6 = 335, bnw_x7 = 523, bentz_gle53 = 429, bentz_g63 = 577, byt_u8 = 1180,
 	porsha_panamera = 621, chevo_camaro = 650, porsha_boxster = 394, chevo_c7 = 460, bentz_s63 = 621,

@@ -87,7 +87,7 @@ local REAL_WB: { [string]: number } = {
 	maseroti_levante = 3.004,
 	lexis_lc500 = 2.87, astin_dbx = 3.06, bentz_190e = 2.665, bentz_s65_w221 = 3.165, toyoka_chaser = 2.73,
 	-- cabin donors only (not in the roster): their cabins keep their own size
-	ferrara_458s = 2.65, bentz_c63c = 2.84,
+	ferrara_458s = 2.65, bentz_c63c = 2.84, bnw_m3_e92_cabin = 2.761, -- (cabin donors, not cars; the last is the old E92 model, the F80's cabin)
 	-- trims on another car's model (owner, 2026-10-22)
 	bnw_m5_f10 = 2.964, bnw_m5_f90 = 2.982, bentz_e63s = 2.939,
 }
