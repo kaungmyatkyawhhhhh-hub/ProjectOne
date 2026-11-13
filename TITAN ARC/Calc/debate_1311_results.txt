@@ -1,0 +1,41 @@
+CALIBRATION (each rival as 'our game' against the others): everyone agrees / 1st pick
+  Escape Tsunami For Brainrots      17%   29%
+  Grow a Garden 2                   33%   58%
+  Brookhaven RP                     34%   32%
+  Steal a Brainrot                  17%   21%
+  Animal Hospital (horror)          19%   15%
+  Fish It!                          33%   28%
+  99 Nights in the Forest           35%   20%
+  Blox Fruits                       18%   25%
+  +1 Venom Evolution                33%   42%
+  Bug Evolution                     16%   10%
+  Muscle Legends                    33%   26%
+  Grow And Build Giants             33%   37%
+  +1 Titan Evolution                 4%    7%
+  Titanus Simulator (dying)          1%    3%
+
+version                                                                              agree  1st pick  top objections (groups out of 3,000)
+L0  LIVE build 13 Nov (city v2, landmarks, 1 s evolve, phone UI)                       34%    48%    crowd: "nobody plays it, it's dead" 1239; pvp_thrill: "there's no real fighting" 1160
+L1  + SUMO RING (size brackets) + Rampage: the crown holder vs the server              59%    62%    crowd: "nobody plays it, it's dead" 1239
+L2  + full servers: fill the fullest first, NPC stompers in the city when empty       100%    85%    none
+L3  + Smash Index + golden 1/80 + city event every ~90 s                              100%    89%    none
+L4  + silly squeaky props + funny ragdoll pedestrians                                 100%    90%    none
+L5  + visible weekly updates: board, countdown, a code                                100%    92%    none
+L6  + launch push (marketing, not design): ads + code + Saturday event                100%    94%    none
+
+robustness (every score of ours +-1, 60 tries): agree median 100% (worst 100%), 1st pick median 93%
+  objections that came back (tries out of 60): none
+if the launch crowd is only 2/10: agree 59%, 1st pick 70%, top: [('crowd: "nobody plays it, it\'s dead"', 1239)]
+if the launch crowd is only 3/10: agree 59%, 1st pick 72%, top: [('crowd: "nobody plays it, it\'s dead"', 1239)]
+
+GROUP 1: Trend chaser, Grinder, Little sister (7), Bored-fast kid, Giant fan (8)  |  on the table: STOMP EVOLUTION, +1 Venom Evolution, Steal a Brainrot, +1 Titan Evolution
+   BEFORE  Trend chaser: "nobody plays it, it's dead"  -> they play +1 Venom Evolution
+   AFTER   nobody says no to STOMP EVOLUTION  -> they play STOMP EVOLUTION
+
+GROUP 2: Little sister (7), Giant fan (8), Trend chaser, Cheap-phone kid  |  on the table: STOMP EVOLUTION, Escape Tsunami For Brainrots, 99 Nights in the Forest, Steal a Brainrot
+   BEFORE  Trend chaser: "nobody plays it, it's dead"  -> they play Escape Tsunami For Brainrots
+   AFTER   nobody says no to STOMP EVOLUTION  -> they play STOMP EVOLUTION
+
+GROUP 3: PvP sweat, Bored-fast kid, No-Robux kid, Social kid, Cheap-phone kid  |  on the table: STOMP EVOLUTION, Animal Hospital (horror), Brookhaven RP, 99 Nights in the Forest
+   BEFORE  PvP sweat: "there's no real fighting"  -> they play Brookhaven RP
+   AFTER   nobody says no to STOMP EVOLUTION  -> they play STOMP EVOLUTION

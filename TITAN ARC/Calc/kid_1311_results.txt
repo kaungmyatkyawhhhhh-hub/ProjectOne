@@ -1,0 +1,14 @@
+IMPATIENT KID on the LIVE build 13 Nov 09:50 (2,000 kids per version, patience median 11 s)
+version                                                                                60s  2min 3min 5min | 5m@7s 5m@16s | 1st buy 1st evo | gap min1 gap 5min | forms
+A  LIVE 12 Nov evening (arrow, spam stomp, screen upgrades, 3.2 s evolve)              100% 100% 100%  78% |  47%   94%  |   8.3s  18.1s |  12.2s   61.1s |   6
+B  LIVE now: 1.0 s evolve + landmarks as goals (playground 2.6 m, school 7 m, mall 14 m) 100% 100% 100%  87% |  56%   97%  |   8.0s  16.1s |  15.6s   59.0s |   6
+C  + 'NEW!' smash index (first smash of each kind)                                     100% 100% 100%  91% |  63%   99%  |   8.1s  16.2s |  13.1s   53.9s |   6
+D  + playtime gifts at 1, 3, 5 min                                                     100% 100% 100%  90% |  63%   98%  |   8.7s  16.4s |  13.3s   52.0s |   6
+E  + golden props 1 in 80 (was 1 in 200)                                               100% 100% 100%  92% |  69%   98%  |   8.0s  16.0s |  13.5s   49.4s |   6
+F  + a city event every ~90 s (x5 for 20 s)                                            100% 100% 100%  97% |  81%  100%  |   8.5s  16.0s |  13.4s   44.0s |   6
+
+B  one median kid, NEW things in 5 min:
+  0s gift  1s new upgrade  2s ground pound  4s evolve  6s card  11s card  16s card  20s card  20s new upgrade  27s golden  28s evolve  34s quest  45s landmark Playground  45s giant seen  57s evolve  57s quest  69s quest  69s new upgrade  73s quest  102s evolve  102s quest  106s quest  150s landmark School  159s evolve  159s quest  165s quest  216s golden  238s evolve  238s quest  245s quest  268s landmark Mall  282s golden
+
+F  one median kid, NEW things in 5 min:
+  0s gift  1s NEW smash  2s new upgrade  2s ground pound  3s evolve  9s card  12s card  16s card  21s card  21s giant seen  22s NEW smash  23s new upgrade  28s golden  29s evolve  37s quest  46s landmark Playground  48s evolve  48s quest  59s quest  59s new upgrade  60s playtime gift  64s quest  76s golden  80s event  87s NEW smash  89s evolve  89s quest  95s quest  103s NEW smash  123s NEW smash  152s landmark School  160s NEW smash  171s evolve  171s quest  176s event  178s quest  181s playtime gift  185s NEW smash  216s evolve  216s quest  220s quest  253s landmark Mall  261s event  263s golden  264s evolve  280s golden  280s NEW smash
