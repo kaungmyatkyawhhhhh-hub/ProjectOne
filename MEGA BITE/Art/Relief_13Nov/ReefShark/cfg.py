@@ -1,0 +1,12 @@
+C=dict(dir='reefhR', length=4.4195, open_r=4, open_r_top=4, env_px=150, body_x0_px=335, top_x0_px=195, front_box=(1075,652,1370,901),
+  bridge_top=[(455,576,2),(722,975,3)], bridge_bot=[(362,465,0),(492,612,0),(690,1005,2)], cap_px=70, stalk_env=False, lip_pad=6, mouth_wall=1, jaw_FN=2.1, env_top=[(455,575),(725,1010)], env_bot=[(360,460),(490,620),(690,1000)],
+  tw_fill=1, tw_interp_ranges=[(478,612),(740,1100)], tw_bulge=0.03, HS=1.0, WY=0.9, FN=2.1, taper_start=0.5, taper=0.0, back_amt=0.05, fin_step=10, fin_grid=10,
+  palette=dict(back=(85,133,179), belly=(223,226,228)), belly_class='belly', colour_mode='sample', sample_blur=1.5, sample_mix=0.97,
+  ignore=dict(tooth=(248,248,250), mouth=(93,22,34), mouth2=(175,74,92), mouth3=(129,36,53), gum=(185,119,142)), ignore_tol=25,
+  ignore_circles=[], eye_ignore_k=0, fill_blur=7, ignore_polys=[[(992,283),(800,281),(772,366),(1004,369)]], ignore_circles_front=[(1143,746,38),(1288,746,38)], ignore_boxes=[(1185,280,1365,385)], ignore_boxes_front=[(1090,770,1350,880)], top_w=0.0, front_w=0.0, edge_px=8, top_inset_px=24, exact_place=1, fin_tips=1, fin_atlas=1, fin_follow_exact=1,
+  back_tint=(20,40,75), fin_edge=(52,92,136), fin_root=(84,132,178), fin_t=8, mouth_col=(132,36,52), brow_col=(70,112,158),
+  look_fwd=0.25, lid=(-0.98,-0.5), lid_col=(48,84,124), eye_dome=0.07, eye=dict(x_px=1260, y_px=243, r_px=28, fwd_deg=12), orb_r=0.8, tip_blur=5, eye_style='orb', iris_top=(0,170,235), iris_bot=(70,232,255),
+  brows=[],
+  mouth=dict(corner_px=1207, corner_row=298, front_px=1352, front_up_row=322, front_lo_row=375, jaw_front_px=1341, up_pts=[(1207,298),(1222,304),(1248,313),(1274,320),(1300,324),(1326,327),(1345,330)], lo_pts=[(1207,298),(1214,316),(1230,335),(1256,356),(1285,368),(1311,374),(1333,374),(1343,368)], wall_back_px=10, blend_px=80, jaw_w=0.97, inner_fwd_px=-10, n_up=7, n_lo=6, tooth_px=24, lo_tooth_k=0.85, tooth_fit=0.75, tooth_start=0.24, tooth_inset_lo=0.8, jaw_back_px=110, round_k=1.8, snout_frac=0.12, snout_cap_px=30, round_from=0.8),
+  skip_comp_boxes=[(700,330,1000,525)], pect_top=dict(box=(440,540,700,750), droop=32, z_frac=0.55), fin_min_px=500, scale_px=12, NR=44, NA=32)
+C.update(NR=34, NA=26, fin_step=14, fin_grid=18)   # 13 Nov relief build: a lighter base mesh pays for the finer head (owner: 'dont use lots of triangles')

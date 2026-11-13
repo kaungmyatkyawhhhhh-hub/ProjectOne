@@ -1,0 +1,1 @@
+{"dir": "barhR", "name": "Barracuda", "ver": "hse_relief", "length": 4.8797, "x0": -0.12132, "x1": -4.67092, "jaw": true, "mouth_nohull": 1, "relief": {"x_from": -1.952, "cuts": 1, "amp": 0.01, "wide": 16, "contrast": 0.11, "up": 0.4, "soft": 3.5, "fade": 0.15, "jaw_k": 0.35, "end_fade": 0.04, "belly_rows": 0.2, "side_only": [0.35, 0.75], "skip_px": [[1203, 265, 63]]}}
