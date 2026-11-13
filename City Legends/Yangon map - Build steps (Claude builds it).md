@@ -23,7 +23,7 @@ Rules for every step:
 - [x] **3b. Round corners, kerbs in shade** (13 Nov, version 741). Owner: "dark asphalt is okay. fix sharp corners and kerbs in shade until theyre right". Log entry "13 Nov 2026, step 3b" below.
 - [x] **4. Flyovers** (13 Nov, version 744). Decks, ramps, piers, parapets and side lanes for the Pyay Road Flyover and the Kabar Aye Flyover, and the junctions underneath. Log entry "13 Nov 2026, step 4" below.
 - [x] **5. Streets** (13 Nov, version 750). The 30 streets, their junction mouths and round corners, and barriers at the 16 map-edge road ends. Log entry "13 Nov 2026, step 5" below.
-- [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes.
+- [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes. **6a done** (13 Nov, version 752): grass up to the pavements near junctions, dashed middle line on the one-way side lanes. Still to do: road meshes (part count).
 - [ ] **7. Traffic lanes.** Lanes for main roads, side lanes and the roundabout only. Lane checker at 0 problems. Traffic runs on main roads only.
 - [ ] **8. Buildings and landmarks.** Yangon-style blocks along the roads, Novotel, Optima and MM Plaza, far-city backdrop at the map edge.
 - [ ] **9. Move in the game.** Venues, houses, gas stations, spawn at Optima, fast travel spots, minimap.
@@ -174,3 +174,19 @@ Rules for every step:
     - The road part count.
   - **Edit-mode trap:** right after a big build, Studio draws roads in pieces and grass over pavement for a minute. Judge by raycast, or wait and take the picture again.
   - Pictures: `Yangon 5 - ...jpg` in this folder.
+- 13 Nov 2026, step 6a (owner: "continue", rushing for the car meet). Version **752** = "Yangon step 6a: grass up to pavements, dashed side lanes".
+  - **Grass up to the pavement** (`Y.edgeFill`, now part of `Y.step5`):
+    - Every 6.4-stud piece of pavement edge is tested on its own. Where the ground just outside is more than 0.8 under the pavement's top and nothing of another road lies there, it fills grass from 2 under the pavement to 6 past it.
+    - 163 of 17,041 pieces needed it.
+    - Pavement standing more than 1.5 over whatever is beside it: 16 of 8,156 edges (worst 2.8), all tight against junction corners.
+    - Measure with parts counted: another road's pavement beside it is no gap. Counting terrain only gave 161.
+  - **Side lanes are one-way:** their middle line is dashed. `Y.buildLines` draws them in a second `RoadLines` call with `centre = {}`.
+  - **Checks after the rebuild (266 s):**
+    - 53 mouths, 0 with kerb or pavement on the joining road.
+    - 400 points: 0 grass through the road, 0 floating, 0 wrong height.
+    - The scrub moved the same 10 specks.
+  - **Road meshes (the rest of step 6) are not done:** 184,874 road parts plus 2,899 deck parts.
+    - With StreamingEnabled a player only loads what is near, so the game runs. The meshes are for memory and phones.
+    - The Riviera mesh pipeline (`tools/road_mesh/`) exports parts from Studio a page at a time, about 80 pages for this many parts. A Blender build from the road data would be faster, but means porting the kerb and mouth rules.
+    - Left for after the car-meet steps (7 traffic, 8 buildings, 9 move-in, 10 lights, 11 switch-over).
+  - Pictures: `Yangon 6a - ...jpg` in this folder.
