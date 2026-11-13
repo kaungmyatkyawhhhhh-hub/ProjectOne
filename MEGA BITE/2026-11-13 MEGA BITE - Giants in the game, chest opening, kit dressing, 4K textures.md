@@ -32,8 +32,8 @@ Scripts: `ServerScriptService.MB_GiantsServer` (rules), `StarterPlayerScripts.MB
 | Giant | Where | What it does |
 |---|---|---|
 | Giant Sea Turtle | circles the Kelp Lighthouse (N), 9 studs/s, low over the seabed | friendly. Bubble trail behind it = slipstream: speed x1.5 and (1 + evolution) EXP a second. Mackerel schools appear near it. Two little fish live on its shell. |
-| Blue Whale | one loop round the Open Sea at r 620, 4 minutes, high in the water | friendly. Sardine schools appear along its way when a player is near. Song: waits for Roblox's review. |
-| Colossal Eel | a real burrow in the seabed beside the Ocean King's chest (738, 48) | sees a shark within 120 studs: gold outline + growl (1.0 s), red wind-up (1.2 s), lunge up to 92 studs. DART dodges. Hurts at most 45% of your HP; at 0 HP you go back to the reef and lose nothing. Ignores Great White and Megalodon, Gold Rush and spawn safety. 8 s rest. |
+| Blue Whale | one loop round the Open Sea at r 620, 4 minutes, high in the water | friendly. Sardine schools appear along its way when a player is near. It sings (WhaleSong) when you are within 300 studs. |
+| Colossal Eel | a real burrow in the seabed beside the Ocean King's chest (738, 48) | sees a shark within 120 studs: gold outline + growl (1.0 s), red wind-up (1.2 s), lunge up to 92 studs. DART dodges. Hurts at most 45% of your HP; at 0 HP you go back to the reef and lose nothing. Leaves alone: Great White and Megalodon, sharks in a Gold Rush, sharks that just spawned. 8 s rest. |
 | THE KRAKEN | its pit in the Glow Gardens (-790, 180): a real hole with a stone ring | event: first 6 min after the server starts, then every 10 min, 90 s. Toast for everyone, red light pillar, red dot on the minimap, a bar with a clock. Bite its body or arms: EXP on every bite (0.5% of your evolution's EXP span). Arms slam on red circles (1.6 s warning): 20% HP, never a kill. Each fighter adds 60 of their own bites to its HP, so every shark counts the same. Beaten: everyone with 3+ bites gets 20% of their span + a 12 s Gold Rush. Hunters leave fighters alone. Not beaten in time: it sinks, you keep the bite EXP. |
 - How they move: the server makes the turtle and whale paths once from the baked world (a search for the clearest ring: the
   whale path has no blocked point), publishes them as text; server and clients walk the same path by server time. Nothing is
@@ -43,11 +43,11 @@ Scripts: `ServerScriptService.MB_GiantsServer` (rules), `StarterPlayerScripts.MB
   y -52 (r 105, blended to r 175) + the pit; the eel burrow. `workspace.MB_Map.Lairs` holds the dark discs and rim stones.
   `MB_WorldBake` was re-run.
 - Test hook (Studio only): `ServerStorage.MB_GiantDev:Invoke("kraken" | "krakenhp", frac | "krakenend" | "eel" | "pos")`.
-- Tested: turtle slipstream pays EXP; eel warn -> wind-up -> strike took 222/372 HP at 78 studs; Kraken rise, bites (+36 a
+- Tested: turtle slipstream pays EXP; eel warn -> wind-up -> strike took 150 HP (372 -> 222) from 78 studs away; Kraken rise, bites (+36 a
   bite at evolution 4 with x4 boosts), slam (-75 HP), kill ("KRAKEN BEATEN! +1,424 EXP", Gold Rush x3), sink. No script errors.
-- Sounds (our own synth, `MEGA BITE\Audio\giants\`): EelGrowl 98583576558033 (Approved, in MB_Sounds). WhaleSong
-  118006360788733 and KrakenRise 118505351629475 were still "Reviewing": add them to `MB_Sounds.List` when Approved
-  (the code already plays them when they are in the list; until then the Kraken uses TidalRoar and the whale is silent).
+- Sounds (our own synth, `MEGA BITE\Audio\giants\`): EelGrowl 98583576558033, WhaleSong 118006360788733 and
+  KrakenRise 118505351629475 are all Approved and in `MB_Sounds.List` (the last two were added later on 13 Nov).
+  Not heard in a Play test yet.
 - Known limits: the Kraken's arms curl (the model's far arm parts have no bones), so they reach about 85 studs; the bite
   zone and the slam circles were shortened to match. The eel's burrow is half hidden behind the statue's moustache.
 
@@ -78,6 +78,6 @@ Scripts: `ServerScriptService.MB_GiantsServer` (rules), `StarterPlayerScripts.MB
 
 ## Still open
 - Owner: test on a phone and with 2+ players (Kraken HP sharing, the "other player opened a chest" burst), then publish.
-- Add WhaleSong + KrakenRise when Approved. Kill feed with portraits (Trench PvP), tier rooms in the Shop/Index,
+- (WhaleSong + KrakenRise: added.) Kill feed with portraits (Trench PvP), tier rooms in the Shop/Index,
   landmark uses (lighthouse lamp), biome sounds, hunters for big sharks: not started.
 - Kit models are simpler than the sheet (the rock pillar has no hole, the mushrooms no glowing gills): a v3 would fix that.
