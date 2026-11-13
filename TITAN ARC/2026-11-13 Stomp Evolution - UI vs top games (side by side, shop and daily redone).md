@@ -126,3 +126,13 @@ It's a model: the numbers are rough, and the real check is the owner's eye and p
 - ~~The "Mass Frenzy!" event banner covers the "TAP STOMP TO SMASH!" hint~~ FIXED v147: while any top-slot banner (event / Rogue / Sumo) is up, `SE_Modes` sets `SE_SlotOpen` and the hint fades out; it comes back when the banner ends (only while still needed: Mass <= 3, no window open). Checked on the iPhone 17 Pro emulator with a test event.
 - Roblox's image server returned 502 / Failure for several icons during this session: icons came in late or not at all in Studio. Re-check icons when it's healthy.
 - Backups: `*_preNerdUI_13Nov`, `*_prePhone_13Nov` in ServerStorage.
+
+## NEXT (waiting): phone HUD clean-up
+Owner (13 Nov): "optimize the mobile ui, it looks like a mess, imagine ur the player u wont even be able to see anything", then: do it later, after the City Legends and Galaxy Incremental work is finished (Studio crashed on Play: City Legends' Studio uses ~9.4 GB of 16 GB, so close it first).
+Plan (phones only, `SMALL` / touch; desktop unchanged):
+- Left: a 2x2 group of small buttons (Talents, Upgrades, Index, Sumo) instead of a long row (TalentUI 166, SE_Upgrades 136, SE_Modes 143 / 225).
+- Quest card: a slim one-line version (StompClient ~202).
+- Hide the COMING NEXT column (Brawler / Awaken / Crown) on phones (the NEXT bar already says it).
+- Top-right row and the Height counter a bit smaller (SE_Meta `layout()`, StompClient 168-185).
+- Bottom-right: only STOMP with Auto above it, clear of the joystick and jump.
+- Check on 3 phone sizes in the emulator (iPhone 17 Pro, a small Android 800x360, iPhone SE), screenshot before / after.
