@@ -1032,8 +1032,26 @@ end
 M.VERGE_W = 12
 function M.verge(names: { string })
 	local made = 0
+	-- (the ring's carriageway and its kerb and pavement between the arms; an arm's gap is the arm's)
+	local ringSecs = M._sectors(M.RING_V)
+	local function onRing(x: number, z: number): boolean
+		local d = hyp(x - C.X, z - C.Z)
+		if d < M.RING_V + 0.5 then
+			return true
+		elseif d > M.RING_V + M.WALK + 1 then
+			return false
+		end
+		local a = math.atan2(z - C.Z, x - C.X)
+		for _, sec in ringSecs do
+			local f = (a - sec[1]) % TAU
+			if f <= sec[2] - sec[1] + 0.01 then
+				return true
+			end
+		end
+		return false
+	end
 	local function clear(x: number, z: number, self): boolean
-		if hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 1 then
+		if onRing(x, z) then
 			return false
 		end
 		if M.inCorner(x, z) then
@@ -1399,6 +1417,8 @@ local function sectors(rho: number): { { number } }
 	end
 	return out
 end
+
+M._sectors = sectors
 
 local function ringPoint(rho: number, a: number, y: number): Vector3
 	return Vector3.new(C.X + rho * math.cos(a), y, C.Z + rho * math.sin(a))
@@ -1839,7 +1859,8 @@ function M.checkJunctions()
 											crossing += 1
 										end
 									elseif ds > h + 1.2 and ds < h + 1.8 then
-										if not (mf and sidesUnder(x, qy, z, mf)) then
+										-- (any road's kerb or pavement: past a round corner the joining road's own)
+										if not sidesUnder(x, qy, z, roads) then
 											-- (another road's mouth, or the roundabout, right beside this one is no fault)
 											local other = hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 0.5 or M.inCorner(x, z)
 											for oi, bb in near do
