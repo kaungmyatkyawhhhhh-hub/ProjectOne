@@ -1,0 +1,141 @@
+{
+ "src": "imports/importing cars/2019_porsche_911_991.2_gt3_rs_weissach_package.glb",
+ "images": {
+  "0": [
+   {
+    "solid": [
+     0,
+     0,
+     255,
+     63,
+     30,
+     30,
+     32
+    ]
+   }
+  ],
+  "8": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     255,
+     20,
+     20,
+     22
+    ]
+   }
+  ],
+  "20": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     511,
+     0,
+     0,
+     0
+    ]
+   }
+  ],
+  "22": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     511,
+     104,
+     106,
+     110
+    ]
+   }
+  ],
+  "23": [
+   {
+    "solid": [
+     0,
+     0,
+     1023,
+     1023,
+     40,
+     40,
+     44
+    ]
+   }
+  ],
+  "24": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     511,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "4": [
+   {
+    "replace": "tools/logo_paint/porsha_gt3_wheel.png"
+   }
+  ],
+  "5": [
+   {
+    "replace": "tools/logo_paint/porsha_gt3_wheel_n.png"
+   }
+  ],
+  "25": [
+   {
+    "replace": "tools/logo_paint/porsha_gt3_mesh.png"
+   }
+  ],
+  "27": [
+   {
+    "replace": "tools/logo_paint/porsha_gt3_fins.png"
+   }
+  ],
+  "19": [
+   {
+    "replace": "tools/logo_paint/porsha_gt3_cabin.png"
+   }
+  ],
+  "21": [
+   {
+    "replace": "tools/logo_paint/porsha_gt3_cabin_n.png"
+   }
+  ]
+ },
+ "drop": [],
+ "drop_material": [
+  "Calliper",
+  "Color_Caliper"
+ ],
+ "rename_material": {
+  "WPPorsche_911GT3RSReward_2018CalliperBadgeA_Material1": "CalliperBadgeA_Material1",
+  "WPPorsche_911GT3RSReward_2018CalliperGloss_Material1": "CalliperGloss_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018_Wheel1A_3D_3DWheel1_da6f00f1": "Wheel_Rim",
+  "WPPorsche_911GT3RSRewardRecycled_2018LightA_Material1": "LightA_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018ManufacturerPlateA_Material1": "Plate_Rear",
+  "WPPorsche_911GT3RSRewardRecycled_2018Grille6A_Material1": "Grille6A_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018InteriorTillingColou_19f71c1": "Seat_Centre",
+  "WPPorsche_911GT3RSRewardRecycled_2018Carbon1_Material1": "Carbon1_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018Base_Material1": "Base_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018Coloured_Material1": "Coloured_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018Grille2A_Material1": "Grille2A_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018Grille4A_Material1": "SpeakerA_Mesh",
+  "WPPorsche_911GT3RSRewardRecycled_2018Paint_Material1": "Paint_Material1",
+  "B_Paint": "Black_Gloss",
+  "WPPorsche_911GT3RSRewardRecycled_2018Window_Material1": "Window_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018InteriorA_Material1": "InteriorA_Material1",
+  "Int_Color": "Interior_Piping",
+  "WPPorsche_911GT3RSRewardRecycled_2018BadgeA_Material1": "BadgeA_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018Grille1A_Material1": "Grille1A_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018Grille5A_Material1": "Grille5A_Material1",
+  "WPPorsche_911GT3RSRewardRecycled_2018Grille3A_Material1": "SpeakerB_Mesh"
+ }
+}
