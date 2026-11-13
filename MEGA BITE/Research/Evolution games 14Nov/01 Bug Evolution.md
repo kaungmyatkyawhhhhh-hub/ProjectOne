@@ -130,3 +130,25 @@ D1 50 coins (today) / D2 SUN SPIDER (bug) / D3 2x XP 30 min / D4 150 / D5 200 / 
   two greyed "ADULT ONLY" ability slots (abilities unlock at adult stage).
 - Layout = the classic simulator layout: currency top, leaderboard + quests right, menu buttons left, actions bottom-right.
   BUSY: 5 Robux buttons visible at once (2x Coins, 2x XP, Evolve R$29, +50 levels R$9, and the coin "+").
+
+### Map, spinners, rewards (06:03-06:08)
+- AUTO (R) is ON by default after the tutorial (green); it does not walk for you (probably auto-bite / auto-attack in range).
+- MAP (button top right): a circular PIXEL-ART map, 7 zones, each with a LEVEL GATE in its label: SUNNY MEADOW Lv 1+ (centre),
+  MUDDY LAKE Lv 8+, MUSHROOM GROVE Lv 10+, WHISPERING WOODS Lv 15+, DUSTY DESERT Lv 25+, STONY RIDGE Lv 30+, WEB CAVES Lv 40+.
+  Legend: ▲ you / teammates / other bugs (red dots) / 👑 king. The king's position is shown to everyone (= a bounty target).
+- Leaderboard churn: the KING changes often (ikyong7894 -> Shaq). Evolving resets your level (ikyong LV 41 Swallowtail ->
+  LV 29 Larva T5): the leaderboard = level within your current bug, so tier (T1-T5) and level both show.
+- VOID SPINNER (purple gem button, red "1" + "READY!"): full-screen purple panel, "ENDS IN 4 DAYS", big glowing purple crystal
+  centre, 7 prize cards in a ring with % shown (Void Mosquito 1.5% JACKPOT in a circle at top, Giant Huntsman Legendary 3.5%,
+  Dragonfly Epic 5%, Garden Spider (skin) Epic 7%, 2,500 coins Rare 14%, 1,000 Uncommon 30%, 500 Common 39%) + a PRIZES list
+  right. Big green SPIN! (500 void credits; free first spin), "3 Spins R$199", "10 Spins R$499". Spin = a highlight frame
+  hops card to card, slows, lands; "YOU WON! 2,500 COINS" banner drops from the top. After: the SPIN button TILTS/WIGGLES
+  (even at 0 credits -> pushes the Robux packs).
+- PLAYTIME REWARD toast (gold border, gift icon): "+100 coins, thanks for playing!" + CLAIM! after ~12 min.
+- SAND CHESTS (orange gem): "ENDS IN 12 DAYS", jackpot card left (GOLDEN DEATHWORM Legendary 1.5%), 4 chests (gold, blue, black
+  spiked, purple), PRIZES list right (Sand Scorpion 3.5%, Sand Dragonfly 5%, Sand Tarantula 7%, coins 14/30/39%). PLAY FREE ->
+  "PICK A CHEST!" (each chest shows PICK!) -> yours opens (RARE 2,500 coins, green "YOURS!" tag) -> then the other 3 flip open
+  ("what you missed": 1,000 / 500 / 1,000) -> CLAIM ONE (green) or CLAIM ALL R$199 (gold). 3 Plays R$199, 10 Plays R$499.
+  = classic near-miss + "claim all" upsell.
+- Economy note: the two free first spins gave 5,000 coins in the first 15 minutes (0 -> 5,194). Coins buy bugs in the tree;
+  the Prehistoric pack is 250,000 coins.
