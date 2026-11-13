@@ -155,11 +155,22 @@ D0, D1 = 2686, 2985
 dA, dB = L.c[D0], L.c[D1]
 FORK = 128.0  # studs over which a side lane leaves (or joins) the loop
 
+# (13 Nov, second design) the loop widens to the lanes' outer edges over FORK before the deck (and narrows
+# after it): the deck and both side lanes then all start square on the loop's last cross-section, like a
+# real gore. No lane runs inside another road's carriageway (no clipped slabs, no kerb rules for a fork).
+WIDE = SIDE_OFF + SIDE_HALF  # the loop's half width where the lanes leave it
+def widen(road_s, chainv, d_from, d_to):
+    """half widths of the samples between chain d_from and d_to eased from 32 to WIDE (d_to the wide end)"""
+    for i, p in enumerate(road_s):
+        d = chainv[i]
+        lo, hi = min(d_from, d_to), max(d_from, d_to)
+        if lo - 1e-6 <= d <= hi + 1e-6:
+            u = (d - d_from) / (d_to - d_from)
+            w = round(32 + (WIDE - 32) * smooth(u), 2)
+            p[6] = max(p[6], w)
+            p[7] = max(p[7], w)
+
 def pyay_off(d):
-    if d < dA:
-        return SIDE_START + (SIDE_OFF - SIDE_START) * smooth((d - (dA - FORK)) / FORK)
-    if d > dB:
-        return SIDE_START + (SIDE_OFF - SIDE_START) * smooth(((dB + FORK) - d) / FORK)
     return SIDE_OFF
 
 def pyay_h(x, z, d):
@@ -169,9 +180,13 @@ def pyay_h(x, z, d):
 
 decks.append({'name': 'Pyay Road Flyover', 'of': 'Yangon Loop', 'from': D0, 'to': D1, 's': loop[D0:D1 + 1]})
 cut['Yangon Loop'] = list(range(D0 + 1, D1))
+loop[:] = [list(p) for p in loop]
+R['Yangon Loop']['s'] = loop
+widen(loop, L.c, dA - FORK, dA)
+widen(loop, L.c, dB + FORK, dB)
 # loop heading south here: its right (+1) is west
-pw = lane(L, dA - FORK, dB + FORK, pyay_off, lambda d: SIDE_HALF, pyay_h, 'Pyay W', +1)
-pe = lane(L, dA - FORK, dB + FORK, pyay_off, lambda d: SIDE_HALF, pyay_h, 'Pyay E', -1)
+pw = lane(L, dA, dB, pyay_off, lambda d: SIDE_HALF, pyay_h, 'Pyay W', +1)
+pe = lane(L, dA, dB, pyay_off, lambda d: SIDE_HALF, pyay_h, 'Pyay E', -1)
 
 # University Avenue carried on under the deck to the west side lane, along Hledan Road
 ua, hl = R['University Avenue']['s'], R['Hledan Road']['s']
@@ -195,9 +210,9 @@ kn = min(i for i in range(len(nn)) if lateral_from_loop(nn[i]) > SIDE_OFF)
 R['Nar Nat Taw Road']['s'] = [list(p) for p in nn[kn - 1:]]
 
 new_roads += [
-    {'name': 'Pyay Flyover West Lane', 'kind': 'side', 'closed': False, 'rank': 1.5, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 's': pw},
-    {'name': 'Pyay Flyover East Lane 1', 'kind': 'side', 'closed': False, 'rank': 2.5, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 's': pe1},
-    {'name': 'Pyay Flyover East Lane 2', 'kind': 'side', 'closed': False, 'rank': 2.6, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 's': pe2},
+    {'name': 'Pyay Flyover West Lane', 'kind': 'side', 'closed': False, 'rank': 1.5, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 'startsOnEnd': 'Yangon Loop', 'endsOnEnd': 'Yangon Loop', 's': pw},
+    {'name': 'Pyay Flyover East Lane 1', 'kind': 'side', 'closed': False, 'rank': 2.5, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 'startsOnEnd': 'Yangon Loop', 's': pe1},
+    {'name': 'Pyay Flyover East Lane 2', 'kind': 'side', 'closed': False, 'rank': 2.6, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 'endsOnEnd': 'Yangon Loop', 's': pe2},
 ]
 
 # ---------------------------------------------------------------- Kabar Aye Flyover (New Road)
@@ -217,8 +232,6 @@ JOIN_AFTER, JOIN = 40.0, 140.0
 def ka_off(d):
     if d < dK0 + SPLIT:
         return 16 + (SIDE_OFF - 16) * smooth((d - dK0) / SPLIT)
-    if d > dK1 + JOIN_AFTER:
-        return SIDE_START + (SIDE_OFF - SIDE_START) * smooth(((dK1 + JOIN_AFTER + JOIN) - d) / JOIN)
     return SIDE_OFF
 
 def ka_half(d):
@@ -230,11 +243,12 @@ def ka_h(x, z, d):
     return ground(x, z)
 
 # loop heading north here: its right (+1) is east
-ke = lane(L, dK0, dK1 + JOIN_AFTER + JOIN, ka_off, ka_half, ka_h, 'Kabar Aye E', +1)
-kw = lane(L, dK0, dK1 + JOIN_AFTER + JOIN, ka_off, ka_half, ka_h, 'Kabar Aye W', -1)
+widen(loop, L.c, dK1 + JOIN, dK1)
+ke = lane(L, dK0, dK1, ka_off, ka_half, ka_h, 'Kabar Aye E', +1)
+kw = lane(L, dK0, dK1, ka_off, ka_half, ka_h, 'Kabar Aye W', -1)
 new_roads += [
-    {'name': 'Kabar Aye East Lane', 'kind': 'side', 'closed': False, 'rank': 0.6, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 'startsOnEnd': 'Yangon Loop', 's': ke},
-    {'name': 'Kabar Aye West Lane', 'kind': 'side', 'closed': False, 'rank': 0.7, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 'endsOnEnd': 'Yangon Loop', 's': kw},
+    {'name': 'Kabar Aye East Lane', 'kind': 'side', 'closed': False, 'rank': 0.6, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 'startsOnEnd': 'Yangon Loop', 'endsOnEnd': 'Yangon Loop', 's': ke},
+    {'name': 'Kabar Aye West Lane', 'kind': 'side', 'closed': False, 'rank': 0.7, 'half': SIDE_HALF, 'walkL': SIDE_INNER_WALK, 'startsOnEnd': 'Yangon Loop', 'endsOnEnd': 'Yangon Loop', 's': kw},
 ]
 # New University Avenue Road ends on the east lane
 nu = R['New University Avenue Road']['s']

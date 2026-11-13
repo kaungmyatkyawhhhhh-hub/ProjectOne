@@ -235,7 +235,7 @@ local function prepare(data, cut)
 			-- s[7], s[8]: left and right half widths (narrower where a hairpin's legs run side by side)
 			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1, wl = s[7] or half or HALF, wr = s[8] or half or HALF }
 		end
-		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts, aligned = r.aligned, half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil }
+		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts, aligned = r.aligned, half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil, walkL = r.walkL, walkR = r.walkR }
 		maxDh = math.max(maxDh, roads[ri].dh)
 	end
 	-- a 24-stud grid of every sample, for "is this point on another road?"
@@ -848,9 +848,12 @@ function Roads.build(data, opts)
 			end
 			if town and not opts.surfaceOnly then
 				for _, side in { -1, 1 } do
+					-- (r.walkL / r.walkR, Yangon 2026-11-13: a narrower pavement on that side, e.g. a flyover side
+					-- lane's walk beside the ramp wall)
+					local SW = (if side < 0 then r.walkL else r.walkR) or WALK
 					local mid = (a.pos + b.pos) / 2
 					local right = Vector3.new(-(b.pos - a.pos).Z, 0, (b.pos - a.pos).X).Unit
-					local sidePos = mid + right * side * (H + WALK / 2)
+					local sidePos = mid + right * side * (H + SW / 2)
 					local kerbPos = mid + right * side * (H + 0.45)
 					local narrow = math.min(if side < 0 then a.wl else a.wr, if side < 0 then b.wl else b.wr) < H - 0.5
 					-- (opts.sideZone: the zone says where another road is, and cuts the pieces exactly)
@@ -893,7 +896,7 @@ function Roads.build(data, opts)
 							-- a cut end the two end faces would lie in one plane over each other and flicker)
 							local lift = Vector3.new(0, CURB_UP, 0)
 							local inner = 0.85
-							local quad = { ea + outA * inner + lift, ea + outA * WALK + lift, eb + outB * WALK + lift, eb + outB * inner + lift }
+							local quad = { ea + outA * inner + lift, ea + outA * SW + lift, eb + outB * SW + lift, eb + outB * inner + lift }
 							local pieces, whole = clipPieces(quad, function(p)
 								return zone(r.name, p, "Pavement")
 							end, 7)
@@ -902,8 +905,8 @@ function Roads.build(data, opts)
 							local run = (eb - ea) * Vector3.new(1, 0, 1)
 							if whole and (outA - outB).Magnitude < 2e-3 and math.abs(run.Unit:Dot(outA)) < 2e-3 then -- (off square by under 0.02 studs over the pavement's width)
 								local drop = Vector3.new(0, CURB_UP - 3, 0)
-								local pa, pb = ea + outA * ((WALK + inner) / 2) + drop, eb + outB * ((WALK + inner) / 2) + drop
-								paveProps.Size = Vector3.new(WALK - inner, 6, (pb - pa).Magnitude)
+								local pa, pb = ea + outA * ((SW + inner) / 2) + drop, eb + outB * ((SW + inner) / 2) + drop
+								paveProps.Size = Vector3.new(SW - inner, 6, (pb - pa).Magnitude)
 								paveProps.CFrame = CFrame.lookAt((pa + pb) / 2, pb)
 								newPart(paveProps, folder)
 								count += 1
@@ -963,11 +966,11 @@ function Roads.build(data, opts)
 								local pb = eb + out * offset + Vector3.new(0, y, 0)
 								return CFrame.lookAt((pa + pb) / 2, pb), (pb - pa).Magnitude + extra
 							end
-							local wcf, wl2 = along(WALK / 2, CURB_UP - 3 + alt * 0.006)
+							local wcf, wl2 = along(SW / 2, CURB_UP - 3 + alt * 0.006)
 							walkCF, walkLen = wcf, wl2
 							kerbCF, kerbLen = along(0.4, CURB_UP + 0.08 - 3 + alt * 0.006)
 						else
-							walkCF = stripCF(a2, b2, side * (H + WALK / 2), CURB_UP - 3 + alt * 0.006)
+							walkCF = stripCF(a2, b2, side * (H + SW / 2), CURB_UP - 3 + alt * 0.006)
 							kerbCF = stripCF(a2, b2, side * (H + 0.4), CURB_UP + 0.08 - 3 + alt * 0.006)
 							walkLen = len + grow
 							kerbLen = len + grow
@@ -977,7 +980,7 @@ function Roads.build(data, opts)
 							end
 						end
 						if wholeWalk then
-							paveProps.Size = Vector3.new(WALK - alt * 0.01, 6, walkLen)
+							paveProps.Size = Vector3.new(SW - alt * 0.01, 6, walkLen)
 							paveProps.CFrame = walkCF
 							local pv = newPart(paveProps, folder)
 							-- patterned paving in some quarters (owner 2026-11-02: "add some sidewalk
