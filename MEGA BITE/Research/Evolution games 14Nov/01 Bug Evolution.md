@@ -79,3 +79,54 @@ D1 50 coins (today) / D2 SUN SPIDER (bug) / D3 2x XP 30 min / D4 150 / D5 200 / 
 - PREHISTORIC BUG PACK: R$299 OR 250,000 coins: 6 giant ancient bugs in a chain - Trilobite (yours instantly, "as strong as a
   tier 4-5 bug") -> Mongolarachne -> Pulmonoscorpius -> Meganeura -> Arthropleura -> JAEKELOPTERUS ("the strongest bug in the
   game", stats A/S/S/A/S). Each next one unlocks by growing the previous = paid shortcut that still needs play.
+
+### First minutes in the world (05:52 -> 06:05, PC)
+- PLAY drops you as a SPIDER EGG (white ball, red dots) in the forest at NIGHT ("NIGHT HUNT · 1.5x XP" pill top-centre = a
+  day/night cycle with an XP bonus at night). Lighting: dark blue night sky, glowing cyan fireflies/orbs, red toadstools as big
+  as houses, giant grass blades (scale = "you are a bug"). Shadows + fog on. Feels premium, a bit dark at night.
+- TUTORIAL card top-centre (dark panel, icon left, "TUTORIAL · 1/6", title, one line, yellow progress bar), 6 steps:
+  1 Eat 5 orbs ("Walk into the glowing orbs") -> 2 Hatch your egg ("You're ready! Press EVOLVE (F) to hatch") -> 3 Attack a Bug
+  ("Walk up to it to attack") -> (4 skipped/merged) -> 5 Eat some food ("Bite an acorn or cocoon until it breaks") -> 6 Reach
+  level 10 ("Keep eating to grow"). Took me ~13 min with keyboard camera (a real kid with a mouse ~4-5 min).
+- GUIDE = a trail of big chunky YELLOW 3D ARROWS on the ground from your bug to the target + a yellow ▼ marker over it.
+  Very readable, but the arrows sit ON the bug and block the view of your own body; with a low camera they fill the screen.
+- During the tutorial the HUD is MINIMAL: coins, event pill, tutorial card, bottom XP/HP bar, RUN (Shift) + big red BITE (LMB),
+  "BOSS every hour" bottom left. Everything else hidden until the tutorial ends (good for new kids - one thing at a time).
+- Orbs: glowing yellow/cyan/purple balls with a tail; walking in = XP (+2..+5). Pickups fly to you in a cyan arc (VFX).
+- LEVEL UP: big mint-green "LEVEL UP!" + white "Level 3 - you grew bigger!" centre-top, coin pop "+9" next to the counter. Body
+  scales up a little each level. Levels come fast (Lv 1 -> 8 in ~10 min of orbs + 1 ant + 1 acorn).
+- EVOLVE: at Lv 5 the screen DIMS, centre "LEVEL UP! You can EVOLVE!" + a big green button "EVOLVE -> SPIDERLING  PRESS F"
+  with a hand pointer icon. Pressing F: a green dome/burst + green sparkles around the bug, gold "EVOLVED!" + "You're a
+  Spiderling now!", the egg becomes a white spider (red marks). Short (~1 s), no cutscene, no camera move. Satisfying but small.
+- XP bar label tells the next goal: "SPIDER EGG · Spiderling at Lv 5", "SPIDERLING · Garden Spider at Lv 12". HP "99/99" in
+  green, a thin yellow STAMINA line, a blue XP line, "XP 1/51" right. Lv number in its own box left.
+- COMBAT: walk into a bug + LMB. AI ANT: has "Ant" name + ORANGE health bar, gets an orange OUTLINE when targeted, RUNS AWAY when
+  hurt (you must chase). Kill = +10 coins (+5 from the acorn). Damage feedback: a white "slash" line under the target.
+- FOOD: acorns / striped silk cocoons on the ground have their own green HP bar; bite until they break = XP + coins, "+2 XP"
+  floating text per bite. ANOTHER PLAYER can steal it (Dolly broke my first acorn: my progress reset to 0 - frustrating).
+- SERVER BROADCASTS (gold-outlined pill, centre): "👑 ikyong7894 is the new KING BUG!", "wildlifezild06 unlocked the Monarch!",
+  "ONHG0496 unlocked the Housefly!" - every unlock + the king change is announced to everyone (FOMO + social proof).
+- ZONES: crossing into an area shows a cyan-outlined banner "BONUS XP ZONE - MUDDY LAKE" and the top pill becomes a COUNTDOWN
+  ("BONUS XP ZONE 2:30" ticking down) = rotating bonus zones pull players around the map.
+- Other players: name plate "Lv 15 🛡 Dolly" + green HP bar. The blue SHIELD = newbie protection.
+- Movement: spiders WALL-CLIMB (I got stuck on a rock face and inside a crevice; the camera clips into the ground/walls). Camera
+  is free (mouse); arrow keys turn the camera only, not the body. Top-down zoomed-out view is the easiest way to play.
+
+### Full HUD after the tutorial (Lv 8)
+- TOP: coins 94 [+]; "2x Coins R$199" gamepass pill (rainbow border) right next to the coins; map button + sound top right.
+  Pills under the coins: "🛡 Newbie shield: safe from players" and "Bonus XP (new player) 9:48" (a 10-minute new-player XP boost
+  countdown).
+- RIGHT: PLAYERS leaderboard (crown + gold name for the KING: "ikyong7894 Swallowtail LV 41 T4", Shaq Locust LV 40 T3, ...
+  Garden spiders LV 32/25/22, Spiderling, Young Fly, columns: name / bug / LV / tier). Under it "+500" gold tag + a heart/gift
+  icon (likely a group/like reward) and "FREE" thumbs-up button with a red dot. "▲ HIDE" button.
+  QUESTS panel with tabs QUICK / HOURLY / TRACKING: "Use your abilities 4 times +24 coins 0/4", "Break 6 objects +28 1/6",
+  "Tear open 3 Silk Cocoons +28 0/3" (blue progress bars).
+- LEFT: square bracket-framed buttons BUGS (T), TEAM (G), TITLE; "2x XP R$299" gamepass tile; bottom-left two GEMS with red
+  "1" badges and green "READY!" (a purple VOID gem and an orange SAND gem = the two event spinners / free spins waiting).
+  "BOSS every hour" stays bottom-left.
+- BOTTOM CENTRE: purple pill "⚡ Evolve -> Garden Spider  R$29" = PAY TO SKIP to the next evolution right over the XP bar;
+  "+50 LEVELS R$9" tile next to the XP bar (cheap level skip).
+- BOTTOM RIGHT action cluster: big red BITE (LMB), RUN (Shift), green AUTO (R) = AUTO-PLAY/auto-eat toggle, POUNCE (Q) ability,
+  two greyed "ADULT ONLY" ability slots (abilities unlock at adult stage).
+- Layout = the classic simulator layout: currency top, leaderboard + quests right, menu buttons left, actions bottom-right.
+  BUSY: 5 Robux buttons visible at once (2x Coins, 2x XP, Evolve R$29, +50 levels R$9, and the coin "+").
