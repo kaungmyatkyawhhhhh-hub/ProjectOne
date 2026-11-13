@@ -93,7 +93,7 @@ function TravelSpots.list(): { Spot }
 		table.insert(list, { id = "highway", name = "Riviera Highway", icon = "lookout", info = INFO.highway, cf = CFrame.lookAt(hw.spot.at + Vector3.new(0, 3, 0), hw.spot.at + Vector3.new(0, 3, 0) + hw.spot.dir) })
 	end
 	-- (2026-11-06) all the races start from the Racing Hub
-	table.insert(list, { id = "racing_hub", name = Config.Activities.Hub.Name, icon = "race", info = INFO.race, cf = Config.Activities.Hub.Spot })
+	table.insert(list, { id = "racing_hub", name = Config.Activities.Hub.Name, icon = "race", info = INFO.race, cf = ActivityData.hubSpot or Config.Activities.Hub.Spot })
 	-- (2026-11-07) Legends Service and the Riviera Fuel stations
 	table.insert(list, { id = "service", name = "Legends Service", icon = "service", info = INFO.service, cf = (Config :: any).Service.Arrive })
 	for _, st in (Config :: any).Fuel.Stations do

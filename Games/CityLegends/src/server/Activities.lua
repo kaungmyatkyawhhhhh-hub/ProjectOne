@@ -83,11 +83,13 @@ end
 
 local function snapshot(player: Player): { [string]: any }
 	local act = data(player) or { races = {}, chips = {} }
+	-- (the map's own chips only: Yangon's are saved from 1001 on, ActivityData.chipBase)
 	local chips = {}
+	local base = ActivityData.chipBase or 0
 	for k in act.chips do
 		local n = tonumber(k)
-		if n then
-			table.insert(chips, n)
+		if n and n > base and n <= base + #ActivityData.chips then
+			table.insert(chips, n - base)
 		end
 	end
 	return { races = act.races, chips = chips }
@@ -528,13 +530,19 @@ handlers.chip = function(player, index)
 	if not (pos and here and act) or (pos - here).Magnitude > 40 then
 		return { ok = false }
 	end
-	if act.chips[tostring(k)] then
+	local base = ActivityData.chipBase or 0
+	local key = tostring(k + base)
+	if act.chips[key] then
 		return { ok = false, have = true }
 	end
-	act.chips[tostring(k)] = true
+	act.chips[key] = true
+	-- (this map's chips only, 2026-11-14)
 	local count = 0
-	for _ in act.chips do
-		count += 1
+	for kk in act.chips do
+		local n = tonumber(kk)
+		if n and n > base and n <= base + #ActivityData.chips then
+			count += 1
+		end
 	end
 	local cash = A.ChipCash + (if count >= #ActivityData.chips then A.ChipAllBonus else 0)
 	PlayerData.addCash(player, cash)

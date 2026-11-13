@@ -444,7 +444,8 @@ end
 -- switched off and strips of it take its place round the two holes (HouseBuilder's info.holes)
 local function cutPlate(rec: Rec)
 	local info = rec.info
-	local riv = workspace:FindFirstChild("Riviera")
+	-- (Yangon's plates are in Yangon.Sites, east of x 25000, 2026-11-14)
+	local riv = workspace:FindFirstChild(if rec.lot.frame.X > 25000 then "Yangon" else "Riviera")
 	local sites = riv and riv:FindFirstChild("Sites")
 	local plate = sites and sites:FindFirstChild("lot_" .. rec.lot.id)
 	if not (info and rec.model and plate and plate:IsA("BasePart")) then

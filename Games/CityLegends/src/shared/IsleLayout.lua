@@ -342,11 +342,15 @@ function IsleLayout.lots(): { Lot }
 		return lotsCache
 	end
 	local out: { Lot } = {}
-	-- Monaco only: the lots on its hillside lanes (RivieraWorld)
+	-- Monaco: the lots on its hillside lanes (RivieraWorld); Yangon: along its streets (YangonWorld, 2026-11-14)
 	if Config.monacoOnly() then
+		local moduleName = if Config.activeMap() == "Yangon" then "YangonWorld" else "RivieraWorld"
 		local ok, world = pcall(function()
-			return require(script.Parent:WaitForChild("RivieraWorld", 5))
+			return require(script.Parent:WaitForChild(moduleName, 5))
 		end)
+		if not (ok and type(world) == "table") then
+			warn("[CityLegends] " .. moduleName .. " didn't load: " .. tostring(world))
+		end
 		if ok and type(world) == "table" then
 			for _, l in world.lots do
 				local c = Vector3.new(l.x, l.y, l.z)

@@ -129,19 +129,35 @@ do
 	end
 end
 
--- Monaco only: its own races, deliveries and chips (RivieraWorld)
+-- the map's own Racing Hub (Monaco's in Config; Yangon's in YangonWorld.hub) and the save key base of its
+-- chips: chips are saved by number, so Yangon's are kept apart from Monaco's (2026-11-14)
+ActivityData.hubSpot = A.Hub.Spot
+ActivityData.chipBase = 0
+
+-- Monaco or Yangon: the map's own races, deliveries and chips (RivieraWorld / YangonWorld, the same shape;
+-- owner, 2026-11-14: "Move houses and races")
 if Config.monacoOnly() then
+	local yangon = Config.activeMap() == "Yangon"
+	local moduleName = if yangon then "YangonWorld" else "RivieraWorld"
 	local ok, world = pcall(function()
-		return require(script.Parent:WaitForChild("RivieraWorld", 5))
+		return require(script.Parent:WaitForChild(moduleName, 5))
 	end)
+	if not (ok and type(world) == "table") then
+		warn("[CityLegends] " .. moduleName .. " didn't load: " .. tostring(world))
+	end
 	if ok and type(world) == "table" then
+		local bays = if yangon and world.hub then world.hub.bays else A.Hub.Bays
+		if yangon and world.hub then
+			ActivityData.hubSpot = world.hub.spot
+			ActivityData.chipBase = 1000
+		end
 		ActivityData.races = {}
 		ActivityData.raceById = {}
 		for _, r in world.races do
 			local race: Race = {
 				id = r.id,
 				name = r.name,
-				ring = A.Hub.Bays[r.id] or r.start,
+				ring = bays[r.id] or r.start,
 				start = r.start,
 				startDir = r.dir.Unit,
 				checkpoints = r.checkpoints,
@@ -155,7 +171,8 @@ if Config.monacoOnly() then
 		end
 		-- (2026-11-04) the Riviera Highway's race (tools/map_plan/highway.py)
 		local okH, hw = pcall(function()
-			return require(script.Parent:WaitForChild("RivieraHighway", 2))
+			-- (Monaco's own: not in Yangon's list)
+			return if yangon then nil else require(script.Parent:WaitForChild("RivieraHighway", 2))
 		end)
 		if okH and type(hw) == "table" and hw.race then
 			local r = hw.race

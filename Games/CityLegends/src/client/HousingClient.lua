@@ -577,7 +577,7 @@ function HousingClient.openMenu(lotId: string?)
 		for _ in owned do
 			n += 1
 		end
-		label({ Text = if n == 0 then "Buy a house at Legends Realty (by the harbour, on the Coast Road), then claim a FOR SALE lot of its tier." else "Put your last house back on its lot, or walk up to any FOR SALE sign of its tier to claim a new lot.", TextWrapped = true, TextSize = 15, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 64), ZIndex = 73, Parent = body })
+		label({ Text = if n == 0 then "Buy a house at Legends Realty (fast travel: Legends Realty), then claim a FOR SALE lot of its tier." else "Put your last house back on its lot, or walk up to any FOR SALE sign of its tier to claim a new lot.", TextWrapped = true, TextSize = 15, Font = Enum.Font.GothamMedium, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, 0, 0, 64), ZIndex = 73, Parent = body })
 		local place = button("PLACE MY LAST HOUSE", Theme.Money, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 50), TextSize = 16, ZIndex = 73, Parent = body })
 		place.Visible = n > 0
 		place.Activated:Connect(function()

@@ -26,7 +26,7 @@ Rules for every step:
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes. **6a done** (13 Nov, version 752): grass up to the pavements near junctions, dashed middle line on the one-way side lanes. Still to do: road meshes (part count).
 - [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). Tested in Play the same day: traffic drives the loop, both flyovers, the side lanes and the roundabout.
 - [x] **8. Buildings and landmarks** (13 Nov, version 764). 1,267 Yangon-style buildings along every road, Optima Werkz, Novotel and Myanmar Plaza, the far city with Shwedagon on the horizon. Log entry "13 Nov 2026, step 8" below.
-- [x] **9. Move in the game** (14 Nov, the essentials). Players start by Optima Werkz; Legends Motors, Legends Customs and a gas station in Yangon; fast travel spots; the Yangon minimap and world map. Then (owner: "Move more venues") every venue moved: bank, heist drop-off, gem showcase, Legends Rewards, the hotel, the three towers, Legends Realty (version 781). Houses, races, jobs and Legends Service stay in Monaco for now (fast travel). Log entries "14 Nov 2026, step 9" and "step 9b" below.
+- [x] **9. Move in the game** (14 Nov, the essentials). Players start by Optima Werkz; Legends Motors, Legends Customs and a gas station in Yangon; fast travel spots; the Yangon minimap and world map. Then (owner: "Move more venues") every venue moved: bank, heist drop-off, gem showcase, Legends Rewards, the hotel, the three towers, Legends Realty (version 781). Then (owner: "Move houses and races") house lots, races, the Racing Hub, delivery jobs and chips moved too (version 784). Legends Service, speed traps and the leaderboard stay in Monaco for now. Log entries "14 Nov 2026, step 9", "step 9b" and "step 9c" below.
 - [ ] **10. Night lights.** Street lamps on main roads, lit buildings, never dark.
 - [ ] **11. Switch over.** Move Monaco to ServerStorage (kept, not deleted), playtest, phone performance check.
 
@@ -304,3 +304,41 @@ Rules for every step:
   - **Not tested yet:** a full bank heist or gem run to the drop-off, a penthouse visit, the hotel's valet and ramps.
   - **Still in Monaco:** houses (lots and the realty catalogue's house plots), races, delivery jobs, chips, Legends Service, the Racing Hub.
   - Pictures: `Yangon 9b - ...jpg` in this folder.
+- 14 Nov 2026, step 9c (owner: "Move houses and races"). Version **784**.
+  - **Code check first:** a workflow read how houses, races, jobs and chips work. In Monaco they all come from one generated file, `RivieraWorld.lua`.
+  - **New data file:** `src/shared/YangonWorld.lua` has the same shape. `ActivityData` and `IsleLayout` load it when Yangon is the active map, and warn in the Output if it fails to load (before, a failed load quietly brought back the old city's races).
+  - **The generator:** `tools/yangon/d15_world.py`.
+    - It runs in two passes, because the heights must be the ones Studio built.
+    - `probe` writes the points to measure. The probe tool goes to Studio as a module (the points as one string; a 4,800-row table didn't load).
+    - `build` reads the measured heights and writes the file, the lot pads (`build/yangon_world/pads.json`) and a plan picture.
+  - **House lots (45, as many as Monaco):**
+    - 10 high (120 x 130), 13 mid (104 x 100) and 22 low (60 x 72).
+    - They're on the streets south of the loop near Optima Werkz, the big ones on the leafy streets.
+    - Each faces its street 3 studs behind the pavement, at the pavement's measured height. They're clear of roads, decks, water, landmarks, venues and each other (with the pad's margin).
+    - `YangonSites.prepare` levelled them as `lot_<id>` pads. 102 Yangon buildings were moved to `ServerStorage.YangonSiteHidden`.
+    - At start the game builds 45 FOR SALE signs and drive-in ramps. `Houses.cutPlate` now finds Yangon plates, so the underground garages work there.
+  - **Saved houses:** a player whose house was on a Monaco lot keeps the house (design, bays). On joining they're told "Your old lot is gone but your house is safe: claim any FOR SALE lot", and they claim a Yangon lot. Nothing is lost or refunded.
+  - **Races (4, on the main roads' traffic lanes):**
+    - Optima Run: 4,836 studs, from the roundabout past Optima Werkz.
+    - New Road Flyover: 4,366 studs, over the Kabar Aye deck.
+    - University Avenue: 2,312 studs.
+    - Pyay Road Flyover: 5,200 studs, the west loop over the Pyay deck to the roundabout.
+    - Checkpoints are every 180 studs. No start or finish is next to a flyover or in the roundabout.
+    - Monaco's highway race isn't in the Yangon list.
+  - **Racing Hub:**
+    - A lot on New Road about 530 studs from Optima, with a ring per race (`YangonWorld.hub`).
+    - The fast travel "Racing Hub" goes there. Stopping in a ring forms the lobby, then the race takes you to its start line.
+  - **Jobs and chips:**
+    - 2 dispatches (by Optima Werkz and by Myanmar Plaza).
+    - 12 drop points with made-up names. Each is at least 900 from both dispatches, with no lake between (job times are straight-line).
+    - 25 chips on pavements.
+    - Yangon chips are saved from number 1001 on (`ActivityData.chipBase`), so Monaco pickups don't count and the all-chips bonus counts only this map's chips.
+  - **Play test (test save):**
+    - Lots, signs and ramps loaded with no errors.
+    - Fast travel to the hub. Stopping in the Optima Run ring formed the lobby ("RACE FORMING · OPTIMA RUN · 15 s"), and after it the car was taken to the start line by the roundabout.
+    - Driving forward passed checkpoint 2 of 27 (gold 0:47).
+    - From above, the house street showed flat lots, signs and ramps.
+  - **Not tested yet:** claiming a lot and placing a house, an underground garage on a Yangon High lot, a full race to the finish, a delivery job, picking up a chip, a duel.
+  - **Still in Monaco:** Legends Service (the repair shop), the speed traps and the leaderboard board (Challenges), the old Monaco hub's dressing.
+  - **The Yangon hub is a plain pad with rings:** Monaco's `RacingHub.luau` dressing (arch, flags, signs) has fixed heights and would need changing to dress it.
+  - Pictures: `Yangon 9c - ...` in this folder.
