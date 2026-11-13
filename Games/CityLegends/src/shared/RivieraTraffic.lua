@@ -275,6 +275,21 @@ function RivieraTraffic.build()
 		end
 		data = { lanes = lanesAll, links = linksAll }
 	end
+	-- (2026-11-13) the Yangon map's lanes (tools/yangon/d9_lanes.py), numbered on from the two above in
+	-- the same way. The two maps lie far apart, so one graph holds both; cars spawn near the player.
+	local okY, ygn = pcall(function()
+		return require(script.Parent:WaitForChild("YangonLanes", 2))
+	end)
+	if okY and type(ygn) == "table" and ygn.first == #data.lanes + 1 then
+		local lanesAll, linksAll = table.clone(data.lanes), table.clone(data.links)
+		for _, l in ygn.lanes do
+			table.insert(lanesAll, l)
+		end
+		for _, k in ygn.links do
+			table.insert(linksAll, k)
+		end
+		data = { lanes = lanesAll, links = linksAll }
+	end
 	local dataLanes, dataLinks = oneLaneStreets(data)
 	dataLinks = mergeRouteEnds(dataLanes, dataLinks)
 	local all, lanes = {}, {}

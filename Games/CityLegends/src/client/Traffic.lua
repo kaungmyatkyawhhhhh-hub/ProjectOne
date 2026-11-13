@@ -236,7 +236,8 @@ if Config.monacoOnly() then
 	table.clear(cityLanes)
 	table.clear(highwayLanes)
 end
-if workspace:FindFirstChild("Riviera") then
+-- (2026-11-13: the Yangon map's lanes come in the same graph, so either map in the place turns it on)
+if workspace:FindFirstChild("Riviera") or workspace:FindFirstChild("Yangon") then
 	local riv = RivieraTraffic.build()
 	if riv then
 		for _, seg in riv.lanes do

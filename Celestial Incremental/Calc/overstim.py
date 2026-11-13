@@ -21,11 +21,13 @@ BIG_STINGS = {'milestone', 'boom', 'cometAppear', 'buyBody', 'rescue', 'windup'}
 # ------------------------------------------------------------------ timelines (triggers)
 def first10_timelines(n=120, seed=3):
     rng = random.Random(seed); out = []
-    kidsim.PAT[0] = 30            # patient enough to play 10 min: we want the triggers, not the quits
+    # a kid who stays 10 min: we want the triggers, not the quits (big_pop only changes the boredom meter,
+    # never the economy)
+    P = dict(ECON, big_pop=50)
     tries = 0
-    while len(out) < n and tries < n * 30:
+    while len(out) < n and tries < n * 5:
         tries += 1
-        q, ev, _ = kidsim.run_kid(ECON, rng, T=600, log=True)
+        q, ev, _ = kidsim.run_kid(P, rng, T=600, log=True)
         if q >= 600: out.append([(t, w) for t, w, *_ in ev])
     return out
 
@@ -206,6 +208,8 @@ def build(flags, events, rng, kid, phase):
                 S.add(name='comet +N float', region='float', t0=t + 2, t1=t + 3.2)
         elif w.startswith('TUT STEP'):
             S.add(name='+ESSENCE floats', region='float', t0=t, t1=t + 1.2)
+            for o in S.els:                      # the card shows ONE step: the new text replaces the old
+                if o['name'] == 'LUMI card new step' and o['t1'] > t: o['t1'] = t
             S.add(name='LUMI card new step', region='lumi', t0=t, t1=t + 30, key=True, words=5, stays=True, w=0)
             S.sting(t, 'buy')
         elif w == 'GIFT 2x':
@@ -260,16 +264,24 @@ def score(S, kid):
     keys = [e for e in els if e['key']]
     for e in keys: e['read'] = 0.0
     over_run = 0.0; overload = 0.0; worst = []
+    live = [e for e in els if not e.get('dropped') and e['t1'] > e['t0']]
+    live.sort(key=lambda e: e['t0'])
+    stings = sorted(S.stings); flashes = sorted(S.flashes)
+    for e in live:
+        if e.get('hidden_from') is not None: e['hid_to'] = S.cine_end(e['hidden_from'])
+    active = []; nxt = 0
     for i in range(n):
         t = i * DT
+        while nxt < len(live) and live[nxt]['t0'] <= t: active.append(live[nxt]); nxt += 1
+        active = [e for e in active if e['t1'] > t]
+        if not active and not stings and not flashes: continue
         cine = S.in_cine(t)
-        vis = [e for e in els if e['t0'] <= t < e['t1'] and not e.get('dropped')
-               and not (e.get('hidden_from') is not None and e['hidden_from'] <= t < S.cine_end(e['hidden_from']))]
+        vis = [e for e in active if not (e.get('hidden_from') is not None and e['hidden_from'] <= t < e['hid_to'])]
         if cine:  # the cutscene owns the screen: everything else is hidden
             vis = [e for e in vis if e.get('cine')]
         load = sum(e['w'] for e in vis)
-        load += 0.5 * sum(1 for st in S.stings if st <= t < st + 0.5)
-        load += 1.0 * sum(1 for fl in S.flashes if fl <= t < fl + 0.3)
+        load += 0.5 * sum(1 for st in stings if st <= t < st + 0.5)
+        load += 1.0 * sum(1 for fl in flashes if fl <= t < fl + 0.3)
         if load > kid['slots']:
             over_run += DT
         else:
