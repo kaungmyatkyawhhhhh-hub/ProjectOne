@@ -286,6 +286,12 @@ function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 		l.ZIndex = 8
 		l.Parent = frame
 	end
+	-- Yangon (build step 9): its own frame
+	if YArt and Config.activeMap() == "Yangon" then
+		local m = YArt.map
+		name("INYA LAKE", 30780, -3250)
+		return Vector2.new((m.x0 + m.x1) / 2, (m.z0 + m.z1) / 2), Vector2.new(m.x1 - m.x0, m.z1 - m.z0)
+	end
 	local z0 = CityLayout.roadCoord(0)
 	local above = z0 - 400
 	name("THE CITY", (CityLayout.roadCoord(0) + CityLayout.roadCoord(N)) / 2, above)

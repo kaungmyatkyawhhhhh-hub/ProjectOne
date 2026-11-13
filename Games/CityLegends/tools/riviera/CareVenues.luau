@@ -16,6 +16,20 @@ local CollectionService = game:GetService("CollectionService")
 local ServerStorage = game:GetService("ServerStorage")
 
 local M = {}
+-- the map it builds on (2026-11-13, Yangon step 9): M.root = workspace.Yangon, M.clearIn = what may move aside
+-- (default: the Riviera and its Dressing), M.brand = { "LEGENDS", "FUEL" } for the signs
+M.root = nil :: Instance?
+M.clearIn = nil :: Instance?
+M.brand = nil :: { string }?
+local function root(): Instance
+	return M.root or workspace.Riviera
+end
+local function zone(): Instance
+	return M.clearIn or workspace.Riviera.Dressing
+end
+local function brand(): string
+	return if M.brand then M.brand[1] .. " " .. M.brand[2] else "RIVIERA FUEL"
+end
 
 local rgb = Color3.fromRGB
 local Mat = Enum.Material
@@ -181,14 +195,14 @@ end
 local function clearBox(id: string, cf: CFrame, size: Vector3, only: { [string]: boolean }?)
 	local params = OverlapParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
-	params.FilterDescendantsInstances = { workspace.Riviera.Dressing }
+	params.FilterDescendantsInstances = { zone() }
 	local folder = hiddenFolder(id)
 	local moved = 0
 	for _, p in workspace:GetPartBoundsInBox(cf, size, params) do
 		local top: Instance = p
 		local a: Instance? = p.Parent
 		local named = only == nil
-		while a and a ~= workspace.Riviera.Dressing do
+		while a and a ~= zone() do
 			if a:IsA("Model") and KEEP_WHOLE[a.Name] then
 				top = a
 			end
@@ -207,7 +221,7 @@ local function clearBox(id: string, cf: CFrame, size: Vector3, only: { [string]:
 end
 
 function M.undo(id: string)
-	local holder = workspace.Riviera:FindFirstChild("CarCare")
+	local holder = root():FindFirstChild("CarCare")
 	local model = holder and holder:FindFirstChild(id)
 	if model then
 		model:Destroy()
@@ -231,9 +245,9 @@ function M.undo(id: string)
 end
 
 local function holder(id: string): Model
-	local h = workspace.Riviera:FindFirstChild("CarCare") or Instance.new("Folder")
+	local h = root():FindFirstChild("CarCare") or Instance.new("Folder")
 	h.Name = "CarCare"
-	h.Parent = workspace.Riviera
+	h.Parent = root()
 	local m = Instance.new("Model")
 	m.Name = id
 	m.Parent = h
@@ -274,7 +288,7 @@ end
 local function drive(K: Kit, id: string, frame: CFrame, x: number, w: number, _len: number, parent: Instance)
 	local ray = RaycastParams.new()
 	ray.FilterType = Enum.RaycastFilterType.Include
-	ray.FilterDescendantsInstances = { workspace.Riviera.Roads }
+	ray.FilterDescendantsInstances = { root():FindFirstChild("Roads") or root() }
 	local roadY, kerbTop, reach = frame.Y - 0.4, frame.Y - 0.3, 24
 	for d = 1, 60 do
 		local hit = workspace:Raycast(frame:PointToWorldSpace(Vector3.new(x, 40, -d)), Vector3.new(0, -120, 0), ray)
@@ -327,8 +341,8 @@ local function dispenser(K: Kit, m: Model, x: number, z: number, litre: number)
 	K.bit("PumpEdge", x + 1.42, 0.9, z - 0.5, x + 1.5, 5.3, z + 0.5, C.steel, Mat.Metal)
 	local head = K.box("PumpHead", x - 1.55, 5.3, z - 0.72, x + 1.55, 6.9, z + 0.72, C.navy, Mat.SmoothPlastic)
 	K.bit("PumpLine", x - 1.56, 5.3, z - 0.73, x + 1.56, 5.4, z + 0.73, C.gold, Mat.Metal)
-	K.sign(head, Enum.NormalId.Front, Vector2.new(220, 90), { { text = "RIVIERA FUEL", color = C.white, font = Enum.Font.GothamBlack, y = 0.2, h = 0.6 } }, true)
-	K.sign(head, Enum.NormalId.Back, Vector2.new(220, 90), { { text = "RIVIERA FUEL", color = C.white, font = Enum.Font.GothamBlack, y = 0.2, h = 0.6 } }, true)
+	K.sign(head, Enum.NormalId.Front, Vector2.new(220, 90), { { text = brand(), color = C.white, font = Enum.Font.GothamBlack, y = 0.2, h = 0.6 } }, true)
+	K.sign(head, Enum.NormalId.Back, Vector2.new(220, 90), { { text = brand(), color = C.white, font = Enum.Font.GothamBlack, y = 0.2, h = 0.6 } }, true)
 	for _, face in { -1, 1 } do
 		local zz = z + face * 0.66
 		local screen = K.bit("PumpScreen", x - 1.05, 3.2, zz, x + 1.05, 4.9, zz + face * 0.04, rgb(10, 12, 14), Mat.Glass)
@@ -419,8 +433,8 @@ function M.station(site: { [string]: any }): { [string]: any }
 	K.bit("CanopyLine", -28.02, cy, cz + 18, 28.02, cy + 0.16, cz + 18.04, C.gold, Mat.Metal)
 	K.bit("CanopyLine", -28.04, cy, cz - 18.02, -28, cy + 0.16, cz + 18.02, C.gold, Mat.Metal)
 	K.bit("CanopyLine", 28, cy, cz - 18.02, 28.04, cy + 0.16, cz + 18.02, C.gold, Mat.Metal)
-	K.sign(fascia, Enum.NormalId.Front, Vector2.new(1120, 40), { { text = "RIVIERA FUEL", color = C.white, font = Enum.Font.GothamBlack, y = 0.08, h = 0.84 } }, true)
-	K.sign(fasciaB, Enum.NormalId.Back, Vector2.new(1120, 40), { { text = "RIVIERA FUEL", color = C.white, font = Enum.Font.GothamBlack, y = 0.08, h = 0.84 } }, true)
+	K.sign(fascia, Enum.NormalId.Front, Vector2.new(1120, 40), { { text = brand(), color = C.white, font = Enum.Font.GothamBlack, y = 0.08, h = 0.84 } }, true)
+	K.sign(fasciaB, Enum.NormalId.Back, Vector2.new(1120, 40), { { text = brand(), color = C.white, font = Enum.Font.GothamBlack, y = 0.08, h = 0.84 } }, true)
 	K.box("CanopyCeiling", -27, cy + 0.8, cz - 17, 27, cy + 1.2, cz + 17, rgb(226, 226, 222), Mat.SmoothPlastic)
 	for _, x in { -18, -6, 6, 18 } do
 		for _, z in { 12, 21.5, 31 } do
@@ -452,7 +466,7 @@ function M.station(site: { [string]: any }): { [string]: any }
 	K.box("ShopSide", bx2 - 0.8, 0.3, bz1, bx2, H, bz2, C.stone, Mat.Limestone)
 	K.box("ShopRoof", bx1 - 2, H, bz1 - 3, bx2 + 2, H + 0.7, bz2 + 0.6, C.white, Mat.Metal)
 	local shopSign = K.box("ShopFascia", bx1 - 2.1, H - 0.3, bz1 - 3.1, bx2 + 2.1, H + 1.5, bz1 - 2.9, C.navy, Mat.SmoothPlastic)
-	K.sign(shopSign, Enum.NormalId.Front, Vector2.new(840, 40), { { text = "RIVIERA FUEL   ·   SHOP", color = C.white, font = Enum.Font.GothamBlack, y = 0.1, h = 0.8 } }, true)
+	K.sign(shopSign, Enum.NormalId.Front, Vector2.new(840, 40), { { text = brand() .. "   ·   SHOP", color = C.white, font = Enum.Font.GothamBlack, y = 0.1, h = 0.8 } }, true)
 	for x = bx1 + 0.8, bx2 - 1, (bx2 - bx1 - 1.6) / 6 do
 		K.box("Mullion", x - 0.12, 0.3, bz1, x + 0.12, H, bz1 + 0.3, C.alu, Mat.Metal)
 	end
@@ -503,8 +517,8 @@ function M.station(site: { [string]: any }): { [string]: any }
 	K.box("TotemBase", tx - 3.6, 0, 2.4, tx + 3.6, 0.8, 5.6, C.stone, Mat.Limestone)
 	local totem = K.box("Totem", tx - 2.9, 0.8, 3.3, tx + 2.9, 24, 4.7, C.navy, Mat.SmoothPlastic)
 	local rows = {
-		{ text = "RIVIERA", color = C.white, font = Enum.Font.GothamBlack, y = 0.04, h = 0.09 },
-		{ text = "FUEL", color = C.gold, font = Enum.Font.GothamBlack, y = 0.14, h = 0.1 },
+		{ text = if M.brand then M.brand[1] else "RIVIERA", color = C.white, font = Enum.Font.GothamBlack, y = 0.04, h = 0.09 },
+		{ text = if M.brand then M.brand[2] else "FUEL", color = C.gold, font = Enum.Font.GothamBlack, y = 0.14, h = 0.1 },
 		{ text = "98", color = C.gold, font = Enum.Font.GothamBold, x = 0.08, w = 0.3, y = 0.34, h = 0.08, align = Enum.TextXAlignment.Left },
 		{ text = string.format("%.2f", site.litre), color = rgb(255, 214, 120), font = Enum.Font.Code, x = 0.4, w = 0.54, y = 0.33, h = 0.1, align = Enum.TextXAlignment.Right },
 		{ text = "95", color = C.gold, font = Enum.Font.GothamBold, x = 0.08, w = 0.3, y = 0.47, h = 0.08, align = Enum.TextXAlignment.Left },
@@ -518,7 +532,8 @@ function M.station(site: { [string]: any }): { [string]: any }
 	K.sign(totem, Enum.NormalId.Back, Vector2.new(230, 930), rows, true)
 
 	-- planting along the road between the drives
-	local palm = workspace.Riviera.Dressing:FindFirstChild("Palm", true)
+	local dressing = root():FindFirstChild("Dressing")
+	local palm = dressing and dressing:FindFirstChild("Palm", true)
 	local dx1, dx2 = -hw + 12, hw - 6
 	local drives = site.drives or { { -18, 22, 22 }, { 22, 22, 22 } }
 	local edges: { number } = { dx1 }
@@ -741,7 +756,8 @@ function M.service(frame: CFrame): { [string]: any }
 	end
 
 	-- the side yard, palms and the lamps
-	local palm = workspace.Riviera.Dressing:FindFirstChild("Palm", true)
+	local dressing = root():FindFirstChild("Dressing")
+	local palm = dressing and dressing:FindFirstChild("Palm", true)
 	for _, at in { { -70, 32 }, { 70, 32 }, { -68, 96 }, { 68, 96 } } do
 		K.box("Planter", at[1] - 3, 0, at[2] - 3, at[1] + 3, 1.4, at[2] + 3, C.stone, Mat.Limestone)
 		if palm then
