@@ -8,6 +8,7 @@
 	  Y.spawn("roads", function() return Y.buildRoads(Y.MAIN) end)   -- long jobs run in the background:
 	  Y.status()                     -- ... and this reads how far they are
 	  Y.buildRoundabout()
+	  Y.buildMedians(Y.MAIN)         -- (v5 data: the raised medians of the divided roads; step3 runs it before the lines)
 	  Y.buildLines(Y.MAIN)
 	  Y.checkBumps(), Y.checkPoints(200), Y.checkJunctions(), Y.checkMainMain(), Y.partCount(), Y.surfaceCheck(spots)
 
@@ -139,7 +140,11 @@ function M.load()
 		end
 		local o = { index = ri, name = r.name, kind = r.kind, rank = r.rank, half = r.half, s = r.s, n = #r.s, chain = chain,
 			startsOnEnd = r.startsOnEnd, endsOnEnd = r.endsOnEnd, walkL = r.walkL, walkR = r.walkR,
-			edgeStart = r.edgeStart, edgeEnd = r.edgeEnd }
+			edgeStart = r.edgeStart, edgeEnd = r.edgeEnd,
+			-- (v5, d23_lanes_v5.py: the real lane counts. Road level: lanes = most lanes a side, median = the
+			-- median half where divided, laneW; per sample s[9] built median half, s[10] lanes a side, s[11]
+			-- lane width, s[12] the lanes' median half. All nil before v5)
+			lanes = r.lanes, median = r.median, laneW = r.laneW, lanesV5 = r.s[1] ~= nil and r.s[1][10] ~= nil }
 		M.R[r.name] = o
 		M.list[ri] = o
 	end
@@ -938,7 +943,8 @@ function M.ownedBy(px: number, pz: number): (string?, any)
 				local d, fx, fz = polyDist(S, b[2], px, pz)
 				local s = S.s[b[2]]
 				local rx, rz = rightOf(s)
-				if fx and fz and d > S.half - 0.3 and d < S.half + M.WALK + 0.5 and ((px - fx) * rx + (pz - fz) * rz) * c.side > 0 then
+				local h = M.halfAt(S, b[2]) -- (v5: a road's width changes along it)
+				if fx and fz and d > h - 0.3 and d < h + M.WALK + 0.5 and ((px - fx) * rx + (pz - fz) * rz) * c.side > 0 then
 					return c.road, c
 				end
 			end
@@ -1332,11 +1338,11 @@ function M.bank(names: { string })
 	for _, name in names do
 		local o = M.R[name]
 		local cut = M.cut[name]
-		local reach = o.half + M.WALK + M.VERGE
 		for i = 1, o.n - 1 do
 			if cut[i] or cut[i + 1] then
 				continue
 			end
+			local reach = math.max(M.halfAt(o, i), M.halfAt(o, i + 1)) + M.WALK + M.VERGE -- (v5: each sample's own width)
 			local a, b = o.s[i], o.s[i + 1]
 			for _, side in { -1, 1 } do
 				local wet = false
@@ -1430,7 +1436,7 @@ function M.mendCutEnds(names: { string })
 			local top, bottom = s[2] - 1 - 2, s[2] - 12
 			local len = 24
 			local mid = Vector3.new(s[1] + dx * len / 2, (top + bottom) / 2, s[3] + dz * len / 2)
-			workspace.Terrain:FillBlock(CFrame.lookAt(mid, mid + Vector3.new(dx, 0, dz)), Vector3.new((o.half + M.WALK + 4) * 2, top - bottom, len), Enum.Material.Grass)
+			workspace.Terrain:FillBlock(CFrame.lookAt(mid, mid + Vector3.new(dx, 0, dz)), Vector3.new((M.halfAt(o, e.sample) + M.WALK + 4) * 2, top - bottom, len), Enum.Material.Grass)
 			n += 1
 		end
 	end
@@ -1453,6 +1459,9 @@ function M.step3()
 	table.insert(log, M.verge(M.MAIN))
 	task.wait()
 	table.insert(log, M.buildRoundabout())
+	task.wait()
+	-- (v5: the raised medians of the divided roads, before the lines and the scrub)
+	table.insert(log, M.buildMedians(M.MAIN))
 	task.wait()
 	table.insert(log, "lines " .. M.buildLines(M.MAIN))
 	table.insert(log, M.cornerLines())
@@ -1879,8 +1888,9 @@ function M.checkMouths()
 		for i = lo, hi - 1 do
 			local a, b = o.s[i], o.s[i + 1]
 			local rx, rz = rightOf(a)
+			local oh = math.min(M.halfAt(o, i), M.halfAt(o, i + 1))
 			for _, u in { 0.27, 0.73 } do
-				for lat = -(o.half - 1.3), o.half - 1.3, 1.9 do
+				for lat = -(oh - 1.3), oh - 1.3, 1.9 do
 					local x = a[1] + (b[1] - a[1]) * u + rx * lat
 					local z = a[3] + (b[3] - a[3]) * u + rz * lat
 					if m.ring and hyp(x - C.X, z - C.Z) < M.R_OUT then
@@ -2008,6 +2018,168 @@ function M.step5()
 	table.insert(log, M.edgeFill(M.MAIN))
 	table.insert(log, M.scrub(true))
 	return table.concat(log, "\n")
+end
+
+------------------------------------------------------------------------------------------------
+-- v5: raised medians (tools/yangon/d23_lanes_v5.py, build/plan/roads.md section 2)
+------------------------------------------------------------------------------------------------
+-- A divided road's median lies inside its own record: s[9] is the built median's half width at each sample,
+-- kerbs included (0 where it is open: junctions with routes, the roundabout, cuts, gores; d23 eases it to a
+-- nose). Two kerbs (the Yangon red and white bands, 0.9 wide, top CURB_UP + 0.1 over the road, the road face at
+-- the median's edge) and a fill between them (grass, top CURB_UP - 0.05: room for lamps or trees later), into the
+-- road's folder as "MedianKerb" / "Median" (RoadLines raycasts only "Road", scrub looks at Kerb / Pavement only).
+-- A piece of constant width is laid as blocks along the chord, shortened at each end by what a bend would
+-- overlap; a piece whose width changes (a nose) is laid exactly (triangles), as one kerb-coloured nose where it
+-- is too narrow for two kerbs. The asphalt runs on under the median.
+M.MEDIAN_KERB_W = 0.9
+M.medianLook = {
+	fill = { Material = Enum.Material.Grass, Color = Color3.fromRGB(84, 108, 56) },
+}
+function M.buildMedians(names: { string })
+	local pal = M.palette
+	local made, roadsWith, pieces = 0, 0, 0
+	for _, name in names do
+		local o = M.R[name]
+		local folder = M.folder():FindFirstChild(name)
+		if not o or not folder or not o.lanesV5 then
+			continue
+		end
+		for _, c in folder:GetChildren() do
+			if c.Name == "Median" or c.Name == "MedianKerb" then
+				c:Destroy()
+			end
+		end
+		local s, cut = o.s, M.cut[name]
+		local roadParts = {}
+		for _, c in folder:GetChildren() do
+			if c.Name == "Road" and c:IsA("BasePart") then
+				table.insert(roadParts, c)
+			end
+		end
+		local rp = RaycastParams.new()
+		rp.FilterType = Enum.RaycastFilterType.Include
+		rp.FilterDescendantsInstances = roadParts
+		local yAt = {}
+		local function surf(i: number): number
+			local y = yAt[i]
+			if y then
+				return y
+			end
+			local p = s[i]
+			local hit = workspace:Raycast(Vector3.new(p[1], p[2] + 6, p[3]), Vector3.new(0, -14, 0), rp)
+			y = if hit then hit.Position.Y else p[2]
+			yAt[i] = y
+			return y
+		end
+		local any = false
+		local function block(props: { [string]: any }, pa: Vector3, pb: Vector3, width: number, top: number, depth: number)
+			local d = pb - pa
+			if Vector2.new(d.X, d.Z).Magnitude < 0.1 then
+				return
+			end
+			local mid = (pa + pb) / 2
+			local p = Instance.new("Part")
+			p.Anchored = true
+			p.TopSurface = Enum.SurfaceType.Smooth
+			p.BottomSurface = Enum.SurfaceType.Smooth
+			p.CastShadow = false
+			for k, v in props do
+				(p :: any)[k] = v
+			end
+			p.Size = Vector3.new(width, top + depth, d.Magnitude)
+			p.CFrame = CFrame.lookAt(mid, pb) * CFrame.new(0, (top - depth) / 2, 0)
+			p.Parent = folder
+			made += 1
+		end
+		local function quad(props: { [string]: any }, q1: Vector3, q2: Vector3, q3: Vector3, q4: Vector3, th: number)
+			for _, t in { { q1, q2, q3 }, { q1, q3, q4 } } do
+				if not M.Roads.sliver(t[1], t[2], t[3]) then
+					made += M.Roads.triangle(t[1], t[2], t[3], th, props, folder)
+				end
+			end
+		end
+		local KW = M.MEDIAN_KERB_W
+		local kTop, fTop = M.CURB_UP + 0.1, M.CURB_UP - 0.05
+		for i = 1, o.n - 1 do
+			local a, b = s[i], s[i + 1]
+			local ma, mb = a[9] or 0, b[9] or 0
+			if cut[i] or cut[i + 1] or (ma < 0.15 and mb < 0.15) or M.inCorner((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) then
+				continue
+			end
+			any = true
+			pieces += 1
+			local ya, yb = surf(i), surf(i + 1)
+			local A, B = Vector3.new(a[1], ya, a[3]), Vector3.new(b[1], yb, b[3])
+			local rax, raz = rightOf(a)
+			local rbx, rbz = rightOf(b)
+			local rA, rB = Vector3.new(rax, 0, raz), Vector3.new(rbx, 0, rbz)
+			local band = if i % 2 == 0 then pal.kerbBand or pal.kerb else pal.kerb
+			if math.abs(ma - mb) < 0.02 and math.min(ma, mb) >= KW + 0.1 then
+				-- constant width: blocks along the chord. (Shortened at each end by what the bend to the next
+				-- piece would overlap at the median's edge, plus a hair: neighbours never overlap, so never flicker)
+				local m = (ma + mb) / 2
+				local function trimAt(j: number): number
+					local p0, p1 = s[math.max(1, j - 1)], s[math.min(o.n, j + 1)]
+					local d0 = Vector3.new(s[j][1] - p0[1], 0, s[j][3] - p0[3])
+					local d1 = Vector3.new(p1[1] - s[j][1], 0, p1[3] - s[j][3])
+					if d0.Magnitude < 1e-3 or d1.Magnitude < 1e-3 then
+						return 0.02
+					end
+					local cosv = math.clamp(d0.Unit:Dot(d1.Unit), -1, 1)
+					return m * math.tan(math.acos(cosv) / 2) + 0.02
+				end
+				local ta, tb = trimAt(i), trimAt(i + 1)
+				local len = (B - A).Magnitude
+				if len <= ta + tb + 0.2 then
+					continue
+				end
+				local dir = (B - A) / len
+				local P, Q = A + dir * ta, B - dir * tb
+				local r = ((rA + rB) / 2).Unit
+				-- the two kerbs, two bands each (the kerbs' 3.2-stud rhythm)
+				for _, side in { -1, 1 } do
+					local off = r * side * (m - KW / 2 + 0.05)
+					for kb = 0, 1 do
+						local u0, u1 = kb / 2, (kb + 1) / 2
+						local props = { Name = "MedianKerb", Material = pal.kerbMaterial, Color = if ((i * 2 + kb) % 2 == 1) then (pal.kerbBand or pal.kerb) else pal.kerb }
+						block(props, P:Lerp(Q, u0) + off, P:Lerp(Q, u1) + off - dir * (if kb == 0 then 0.02 else 0), KW, kTop, 3)
+					end
+				end
+				local fw = 2 * (m - KW + 0.1) -- (its sides 0.05 under the kerbs)
+				if fw > 0.3 then
+					local props = table.clone(M.medianLook.fill)
+					props.Name = "Median"
+					block(props, P, Q, fw, fTop, 3)
+				end
+			else
+				-- a nose: exact, its width changing from ma to mb
+				local function at(P: Vector3, r: Vector3, lat: number, up: number): Vector3
+					return P + r * lat + Vector3.new(0, up, 0)
+				end
+				if math.min(ma, mb) < KW + 0.05 then
+					local props = { Name = "MedianKerb", Material = pal.kerbMaterial, Color = band, CastShadow = false }
+					quad(props, at(A, rA, -ma, kTop), at(A, rA, ma, kTop), at(B, rB, mb, kTop), at(B, rB, -mb, kTop), kTop + 3)
+				else
+					for _, side in { -1, 1 } do
+						local props = { Name = "MedianKerb", Material = pal.kerbMaterial, Color = band, CastShadow = false }
+						quad(props, at(A, rA, side * (ma - KW + 0.05), kTop), at(A, rA, side * ma, kTop), at(B, rB, side * mb, kTop), at(B, rB, side * (mb - KW + 0.05), kTop), kTop + 3)
+					end
+					local props = table.clone(M.medianLook.fill)
+					props.Name = "Median"
+					props.CastShadow = false
+					local fa, fb = ma - KW + 0.1, mb - KW + 0.1
+					quad(props, at(A, rA, -fa, fTop), at(A, rA, fa, fTop), at(B, rB, fb, fTop), at(B, rB, -fb, fTop), fTop + 3)
+				end
+			end
+			if pieces % 60 == 0 then
+				task.wait()
+			end
+		end
+		if any then
+			roadsWith += 1
+		end
+	end
+	return string.format("medians: %d parts on %d roads (%d pieces of 6.4 studs)", made, roadsWith, pieces)
 end
 
 function M.buildLines(names: { string })
@@ -2291,7 +2463,77 @@ function M.checkBumps()
 	for _, o in M.list do
 		lanes[o.name] = if o.half >= 32 then { -24, -8, 8, 24 } else { -8, 8 }
 	end
-	local bumps, checked = M.Roads.check(M.data, { parent = M.folder(), only = setOf(M.MAIN), cut = M.cut, lanes = lanes })
+	-- (v5: a road with per-sample lanes is driven here, each lane at its own offset at each sample:
+	-- lane k of n at mL + w(k - 0.5), w = min(lane width, (half - mL) / n), as d9_lanes.py lays the traffic lanes)
+	local v5, rest = {}, {}
+	for _, name in M.MAIN do
+		local o = M.R[name]
+		if o and o.lanesV5 then
+			table.insert(v5, o)
+		else
+			table.insert(rest, name)
+		end
+	end
+	local bumps, checked = M.Roads.check(M.data, { parent = M.folder(), only = setOf(rest), cut = M.cut, lanes = lanes })
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { M.folder(), workspace.Terrain }
+	local limit = 0.12
+	local function offset(p, side: number, k: number): number?
+		local n = p[10]
+		if k > n then
+			return nil
+		end
+		local h = if side > 0 then p[8] else p[7]
+		local w = math.min(p[11], (h - p[12]) / n)
+		return side * (p[12] + w * (k - 0.5))
+	end
+	for oi, o in v5 do
+		local cut = M.cut[o.name]
+		for _, side in { -1, 1 } do
+			for k = 1, (o.lanes or 2) do
+				local last: Vector3? = nil
+				for i = 1, o.n - 1 do
+					local a, b = o.s[i], o.s[i + 1]
+					local oa, ob = offset(a, side, k), offset(b, side, k)
+					if cut[i] or cut[i + 1] or not oa or not ob then
+						last = nil
+						continue
+					end
+					local A, Bv = Vector3.new(a[1], a[2], a[3]), Vector3.new(b[1], b[2], b[3])
+					local rax, raz = rightOf(a)
+					local rbx, rbz = rightOf(b)
+					local steps = math.max(1, math.floor(hyp(b[1] - a[1], b[3] - a[3])))
+					for q = (if cut[i - 1] then 1 else 0), steps - 1 do
+						local u = q / steps
+						local off = oa + (ob - oa) * u
+						local rx, rz = rax + (rbx - rax) * u, raz + (rbz - raz) * u
+						local p = A:Lerp(Bv, u) + Vector3.new(rx, 0, rz) * off
+						local hit = workspace:Raycast(p + Vector3.new(0, 6, 0), Vector3.new(0, -14, 0), params)
+						checked += 1
+						if hit then
+							local here = hit.Position
+							if last then
+								local dd = Vector2.new(here.X - last.X, here.Z - last.Z).Magnitude
+								if dd < 2.5 and math.abs(here.Y - last.Y) > 0.17 * dd + limit then
+									table.insert(bumps, { road = o.name, lane = side * k, at = p, step = here.Y - last.Y })
+								end
+							end
+							last = here
+						else
+							last = nil
+						end
+					end
+					if i % 50 == 0 then
+						task.wait()
+					end
+				end
+			end
+		end
+		if oi % 2 == 0 then
+			task.wait()
+		end
+	end
 	local lines = { string.format("Roads.check: %d bumps in %d points", #bumps, checked) }
 	for i = 1, math.min(#bumps, 25) do
 		local b = bumps[i]
@@ -2331,7 +2573,8 @@ function M.checkPoints(n: number, seed: number?)
 		local a, b = o.s[i], o.s[i + 1]
 		local t = rng:NextNumber()
 		local rx, rz = rightOf(a)
-		local lat = rng:NextNumber(-(o.half - 1), o.half - 1)
+		local oh = math.min(M.halfAt(o, i), M.halfAt(o, i + 1))
+		local lat = rng:NextNumber(-(oh - 1), oh - 1)
 		local x, z = a[1] + (b[1] - a[1]) * t + rx * lat, a[3] + (b[3] - a[3]) * t + rz * lat
 		local want = a[2] + (b[2] - a[2]) * t
 		local hit = workspace:Raycast(Vector3.new(x, want + 40, z), Vector3.new(0, -80, 0), onRoad)
@@ -2343,16 +2586,20 @@ function M.checkPoints(n: number, seed: number?)
 			table.insert(bad, string.format("ground on top at %.0f, %.0f (%s) %.2f over the road", x, z, o.name, hit.Position.Y - want))
 		else
 			local d = math.abs(hit.Position.Y - want)
-			worstOff = math.max(worstOff, d)
-			if hit.Instance.Name ~= "Road" or d > 0.6 then
+			-- (v5: a divided road's raised median is part of the road)
+			local median = hit.Instance.Name == "Median" or hit.Instance.Name == "MedianKerb"
+			if not median then
+				worstOff = math.max(worstOff, d)
+			end
+			if not median and (hit.Instance.Name ~= "Road" or d > 0.6) then
 				off += 1
 				table.insert(bad, string.format("%s %.2f off at %.0f, %.0f (%s)", hit.Instance.Name, hit.Position.Y - want, x, z, o.name))
 			end
 		end
 		-- the ground 1.5 studs past the pavement, on a random side
 		local side = if rng:NextNumber() < 0.5 then -1 else 1
-		local gx = a[1] + (b[1] - a[1]) * t + rx * side * (o.half + M.WALK + 1.5)
-		local gz = a[3] + (b[3] - a[3]) * t + rz * side * (o.half + M.WALK + 1.5)
+		local gx = a[1] + (b[1] - a[1]) * t + rx * side * (oh + M.WALK + 1.5)
+		local gz = a[3] + (b[3] - a[3]) * t + rz * side * (oh + M.WALK + 1.5)
 		local g = workspace:Raycast(Vector3.new(gx, want + 40, gz), Vector3.new(0, -120, 0), ground)
 		if g then
 			local gap = (want + M.CURB_UP) - g.Position.Y -- the pavement's top over the ground beside it

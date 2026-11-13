@@ -41,14 +41,37 @@ roads, near_water, in_poly, grid, seg, BLOCKED, overlap, rect, CELL = (ns[k] for
 water = ns['ns']['water']
 X0, X1, Z0, Z1, RING = ns['X0'], ns['X1'], ns['Z0'], ns['Z1'], ns['RING']
 
-# the buildings as built (d19)
-plots = json.load(open(os.path.join(MAP, 'ygn_plots_real.json'), encoding='utf-8'))['plots']
+# the buildings as built: the mesh city's plots (tools/yangon/city/plots.py, real density; 14 Nov 2026), else d19's
 bgrid = {}
-for p in plots:
-    r = rect(p['x'], p['z'], p['fx'], p['fz'], p['w'], p['d'], grow=4)
-    for cx in range(int(min(q[0] for q in r) // 100), int(max(q[0] for q in r) // 100) + 1):
-        for cz in range(int(min(q[1] for q in r) // 100), int(max(q[1] for q in r) // 100) + 1):
-            bgrid.setdefault((cx, cz), []).append(r)
+_city = os.path.join(ROOT, 'build', 'city', 'plots_05.json')
+if os.path.exists(_city):
+    from shapely.geometry import Polygon as _Poly
+    for p in json.load(open(_city, encoding='utf-8'))['plots']:
+        try:
+            g = _Poly(p['poly']).buffer(4, join_style=2)
+        except Exception:
+            continue
+        if g.geom_type != 'Polygon':
+            continue
+        r = list(g.exterior.coords)[:-1]
+        for cx in range(int(min(q[0] for q in r) // 100), int(max(q[0] for q in r) // 100) + 1):
+            for cz in range(int(min(q[1] for q in r) // 100), int(max(q[1] for q in r) // 100) + 1):
+                bgrid.setdefault((cx, cz), []).append(r)
+    # the new mesh streets keep their trees off too (carriageway + pavement + 1)
+    for st in json.load(open(os.path.join(ROOT, 'build', 'city', 'streets_05.json'), encoding='utf-8'))['streets']:
+        pts = st['pts']
+        need = st['half'] + st['walk'] + 1
+        for a, b in zip(pts, pts[1:]):
+            for cx in range(int((min(a[0], b[0]) - need) // CELL) - 1, int((max(a[0], b[0]) + need) // CELL) + 2):
+                for cz in range(int((min(a[1], b[1]) - need) // CELL) - 1, int((max(a[1], b[1]) + need) // CELL) + 2):
+                    grid.setdefault((cx, cz), []).append((a[0], a[1], b[0], b[1], need, st['name'], 'street'))
+else:
+    plots = json.load(open(os.path.join(MAP, 'ygn_plots_real.json'), encoding='utf-8'))['plots']
+    for p in plots:
+        r = rect(p['x'], p['z'], p['fx'], p['fz'], p['w'], p['d'], grow=4)
+        for cx in range(int(min(q[0] for q in r) // 100), int(max(q[0] for q in r) // 100) + 1):
+            for cz in range(int(min(q[1] for q in r) // 100), int(max(q[1] for q in r) // 100) + 1):
+                bgrid.setdefault((cx, cz), []).append(r)
 
 
 def in_building(x, z):

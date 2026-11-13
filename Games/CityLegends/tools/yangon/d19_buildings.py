@@ -32,7 +32,7 @@ def world(lon, lat):
 
 
 # ---------------------------------------------------------------- the map's own data
-roads = json.load(open(os.path.join(MAP, 'ygn_roads_v4.json'), encoding='utf-8'))
+roads = json.load(open(os.path.join(MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
 CUT = {k: set(v) for k, v in roads['cut'].items()}
 design = json.load(open(os.path.join(MAP, 'ygn_road_design.json'), encoding='utf-8'))
 G = design['ground']

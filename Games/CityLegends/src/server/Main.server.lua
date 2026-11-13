@@ -215,8 +215,10 @@ local function rivieraStartSpots(): { CFrame }
 		local radius = if yangon then Config.Spawn.YangonRadius else Config.Spawn.RivieraRadius
 		for _, seg in (if g then g.lanes else {}) do
 			local s = seg :: any
-			-- (the outer lane; a street's one lane since the streets went 1+1, 2026-11-04)
-			if (s.lane == 2 or not s.route) and roads[s.road] and seg.length > 12 then
+			-- (the outer lane; a street's one lane since the streets went 1+1, 2026-11-04. Yangon v5: its roads
+			-- have 2 or 3 lanes a side, so the lane graph marks the outer one, `outer`; Monaco's lanes have no mark)
+			local outer = if s.outer ~= nil then s.outer == true else s.lane == 2
+			if (outer or not s.route) and roads[s.road] and seg.length > 12 then
 				local pos, dir = CityLayout.sample(seg, seg.length / 2)
 				if Vector2.new(pos.X - near.X, pos.Z - near.Z).Magnitude < radius and math.abs(dir.Y) < 0.08 then
 					table.insert(list, CFrame.lookAt(pos, pos + Vector3.new(dir.X, 0, dir.Z)))

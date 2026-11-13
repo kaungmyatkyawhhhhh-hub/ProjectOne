@@ -25,10 +25,14 @@ roads, water, CUT, RING, MAP = ns['roads'], ns['water'], ns['CUT'], ns['RING'], 
 MX0, MX1, MZ0, MZ1 = ns['X0'] - 40, ns['X1'] + 40, ns['Z0'] - 40, ns['Z1'] + 40
 # (14 Nov 2026, the accuracy pass: the roads as built (v4, the real big roads 2+2), the REAL buildings (d19_buildings.py),
 # the trees and the lake walkways (d20_green.py))
-data = json.load(open(os.path.join(MAP, 'ygn_roads_v4.json'), encoding='utf-8'))
+data = json.load(open(os.path.join(MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
 roads = data['roads']
 CUT = {k: set(v) for k, v in data['cut'].items()}
 plots = json.load(open(os.path.join(MAP, 'ygn_plots_real.json'), encoding='utf-8'))['plots']
+# (whole-Yangon city, 14 Nov 2026: the real-density plots as outlines, and the new mesh streets)
+_CITY = os.path.join(ROOT, 'build', 'city')
+CITY_PLOTS = json.load(open(os.path.join(_CITY, 'plots_05.json'), encoding='utf-8'))['plots'] if os.path.exists(os.path.join(_CITY, 'plots_05.json')) else None
+CITY_STREETS = json.load(open(os.path.join(_CITY, 'streets_05.json'), encoding='utf-8'))['streets'] if os.path.exists(os.path.join(_CITY, 'streets_05.json')) else []
 GREEN = []
 _g = os.path.join(ROOT, 'build', 'yangon_green', 'YangonGreenData.luau')
 if os.path.exists(_g):
@@ -137,15 +141,30 @@ def render():
     # building plots: a soft shadow, then the roof with a lighter edge
     sh = Image.new('L', im.size, 0)
     sd = ImageDraw.Draw(sh)
-    for p in plots:
-        sd.polygon([(x + 5, y + 7) for x, y in plot_poly(p)], fill=150)
+    polys = [[px(x, z) for x, z in p['poly']] for p in CITY_PLOTS] if CITY_PLOTS else [plot_poly(p) for p in plots]
+    for pp in polys:
+        sd.polygon([(x + 5, y + 7) for x, y in pp], fill=150)
     sh = sh.filter(ImageFilter.GaussianBlur(5))
     im.paste(Image.new('RGB', im.size, SHADOW), (0, 0), sh)
     d = ImageDraw.Draw(im)
-    for p in plots:
-        lm = p.get('landmark')
-        d.polygon(plot_poly(p), fill=LANDMARK_EDGE if lm else BUILDING_EDGE)
-        d.polygon(plot_poly(p, -2.5), fill=LANDMARK if lm else BUILDING)
+    if CITY_PLOTS:
+        for p, pp in zip(CITY_PLOTS, polys):
+            named = bool(p.get('name'))
+            d.polygon(pp, fill=LANDMARK_EDGE if named else BUILDING_EDGE)
+            if len(pp) >= 3:
+                cx = sum(q[0] for q in pp) / len(pp)
+                cy = sum(q[1] for q in pp) / len(pp)
+                inner = [(cx + (x - cx) * 0.8, cy + (y - cy) * 0.8) for x, y in pp]
+                d.polygon(inner, fill=LANDMARK if named else BUILDING)
+        for p in plots:
+            if p.get('landmark'):
+                d.polygon(plot_poly(p), fill=LANDMARK_EDGE)
+                d.polygon(plot_poly(p, -2.5), fill=LANDMARK)
+    else:
+        for p in plots:
+            lm = p.get('landmark')
+            d.polygon(plot_poly(p), fill=LANDMARK_EDGE if lm else BUILDING_EDGE)
+            d.polygon(plot_poly(p, -2.5), fill=LANDMARK if lm else BUILDING)
     # trees: soft dark green dots (under the roads); the lake walkways: light strips
     for g in GREEN:
         if g[0] == 'S':
@@ -159,6 +178,15 @@ def render():
             d.ellipse((c_[0] - r_, c_[1] - r_, c_[0] + r_, c_[1] + r_), fill=(40, 70, 46))
     # roads: dark edge, pavement, carriageway; streets first, the main roads over them
     order = sorted(roads, key=lambda r: -r.get('rank', 99))
+    for layer in ('edge', 'walk', 'road'):
+        for st in CITY_STREETS:
+            run = [[x, 0, z] for x, z in st['pts']]
+            if layer == 'edge':
+                stroke(d, run, 2 * (st['half'] + st['walk']) + 3, EDGE)
+            elif layer == 'walk':
+                stroke(d, run, 2 * (st['half'] + st['walk']), PAVEMENT)
+            else:
+                stroke(d, run, 2 * st['half'] - 2, STREET)
     for layer in ('edge', 'walk', 'road'):
         for r in order:
             half = r.get('half', 16)

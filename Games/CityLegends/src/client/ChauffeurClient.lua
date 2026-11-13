@@ -964,7 +964,12 @@ local function splitTarget(r: Ride, k: number, pos: Vector3, dir: Vector3): numb
 		end
 	end
 	local sides = if seg.lane > 1 then { -half, half } else { half, -half }
+	-- (Yangon v5: the inner lane of a divided road has the raised median on its left: never split onto it)
+	local medianLeft = seg.lane == 1 and (seg :: any).median == true
 	for _, off in sides do
+		if off < 0 and medianLeft then
+			continue
+		end
 		if (off < 0 or hasRight) and not carOnLine(pos, fwd, right, off, -12, 60, halfW) then
 			return off
 		end

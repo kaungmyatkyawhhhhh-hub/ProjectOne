@@ -44,8 +44,35 @@ function WorldFx.setDaylight(d: number)
 				task.wait()
 			end
 		end
+		for i, p in CollectionService:GetTagged("FacadeNight") do
+			WorldFx.setFacadeNight(p)
+			if i % 200 == 0 then
+				task.wait()
+			end
+		end
 	end)
 end
+
+-- (whole-Yangon mesh buildings, 14 Nov 2026) each 256-stud cell's night layer: a copy of its window walls just in front
+-- (MeshPart tag "FacadeNight") with a SurfaceAppearance whose emissive mask lights some windows (tag "FacadeGlow").
+-- Shown with the street lamps at night, hidden by day (tools/yangon/YangonBuildingMeshes.luau, glow(3) looked right).
+local FACADE_GLOW = 3
+function WorldFx.setFacadeNight(p: Instance)
+	if not p:IsA("BasePart") then
+		return
+	end
+	p.Transparency = if lampsLit then 0 else 1
+	for _, sa in p:GetChildren() do
+		if sa:IsA("SurfaceAppearance") then
+			pcall(function()
+				(sa :: any).EmissiveStrength = if lampsLit then FACADE_GLOW else 0
+			end)
+		end
+	end
+end
+CollectionService:GetInstanceAddedSignal("FacadeNight"):Connect(function(p)
+	WorldFx.setFacadeNight(p)
+end)
 
 -- (a lamp that streams in or is built by day must not glow: only a change of the light used to set it)
 CollectionService:GetInstanceAddedSignal("LampGlow"):Connect(function(p)
