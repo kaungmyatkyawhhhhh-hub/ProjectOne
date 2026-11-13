@@ -79,3 +79,50 @@ Backups: `ServerStorage.UIKit_preStudTile_13Nov` (plus the `_preTopUI_13Nov` one
 Checked in Play on PC: Daily, Shop, Index (with test finds set on my screen only), Top (test scores on my screen only), Codes. Console clean.
 Not checked: phone sizes on the emulator, the upgrade price pills and the Auto toggle after the recolour change, the evolve card / Talents windows.
 The gift icon (120035029588768) failed to download once in Studio and showed on the next run: an asset fetch hiccup, not code.
+
+## Part 3 (v146, saved, not published): phone check + picky-kid check
+Owner: "Yes, phone check", then "do picky kid check on the new screens".
+
+### Phone check (Studio device emulator, iPhone 17 Pro landscape: 750x381, 750x323 under the top bar)
+Found, then fixed:
+- **Daily:**
+  - The header line ran under the "Big Prize!" sticker: now shorter ("Day 1 is ready! Come back every day.") and left-aligned.
+  - "+2m" was cut off: now a small label on the potion.
+  - The Claim button covered the footnote: the footnote is gone on phones.
+- **Quest card:** "Smash 5 things for COINS" ran past the card: the card is wider (300).
+- **Auto button:** it sat on the centre event banner, then (beside Stomp) on the "TAP STOMP TO SMASH!" hint. Now right above the STOMP button, placed from the button's real position.
+- **Shop:** the "3/3 owned" chip showed "3/3" only: wider on phones.
+- **Index:** "Not smashed" became "Not": now "0 / 10" (short, and says how many).
+- **Codes:** the top line lost its end: shorter line on phones.
+
+Checked: Auto recolours on/off on the coded plate, and the 9 upgrade plates use the new plates (no errors).
+Test switch (Studio only, never live): `plr:SetAttribute("SE_DevOpen", "shop" | "daily" | "index" | "top" | "codes")` opens that window (clicks by name land in the wrong place in the emulator).
+
+### Picky-kid check (`Calc/nerd_ui_v144.py`, results in `nerd_ui_v144_results.txt`)
+A UI version of the map kid: glances every 2 s for 10 min (the HUD 1 glance in 4), opens Daily, Shop x2, Index x1-2, Top, Codes; 60% on phones. The tells are the ones seen in this session's screenshots.
+
+| version | tells/10 min | top tells |
+|---|---|---|
+| U0 v144 + phone fixes | 17.7 | title over HUD 3.9, empty coin plate 3.4, studs everywhere 2.8 |
+| U1 + windows show once their images are in | 16.2 | |
+| U2 + phones: Height/NEXT hide under a window | 12.1 | |
+| U3 + coin plate fits the number | 9.0 | |
+| U4 + NEXT bar on a violet plate, Title Case labels | 4.2 | studs everywhere 2.8 |
+| U5 + studs only on cards/tiles/buttons | 1.5 | empty board 1.2 |
+| **U6 + Top boards shrink to their rows (ALL BUILT)** | **0.3** | blank icon 0.3 |
+
+Built:
+- `openWin` waits up to 0.8 s for the window's images.
+- `K.NoStuds` is used on the Height/NEXT/coin/quest/upgrades panels, the Top boards and the Codes card.
+- Coin plate = text width + 46.
+- "Next: Brawler at 1.90 m".
+- Lock captions "Brawler / Awaken / Crown".
+- Top boards size to their rows.
+
+Kept on purpose: quest lines keep their capitalised key word ("Stomp a CAR"): a kid-game emphasis, not a style slip.
+It's a model: the numbers are rough, and the real check is the owner's eye and players' likes.
+
+### Still open
+- The "Mass Frenzy!" event banner covers the "TAP STOMP TO SMASH!" hint during the first seconds (seen on the phone). Fix with the overstimulated-kid check.
+- Roblox's image server returned 502 / Failure for several icons during this session: icons came in late or not at all in Studio. Re-check icons when it's healthy.
+- Backups: `*_preNerdUI_13Nov`, `*_prePhone_13Nov` in ServerStorage.

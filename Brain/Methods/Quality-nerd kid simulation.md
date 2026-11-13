@@ -32,3 +32,6 @@ created: 2026-11-09
 - Open each window once fresh after joining: assets that load on first sight look broken the first time, which is the time a new player sees them.
 - 2026-11-11 Stomp Evolution, on the plan: 115 → under 1 tells per 10 min. A game where you break the same kind of prop again and again needs look-alike VARIANTS first (115 → 50), then crumbles by material and a visible rebuild → [[TITAN ARC/2026-11-11 Stomp Evolution - Three kid simulations (impatient, quality nerd, debate)]]
 - Learned 11 Nov: where the design doc is silent, score the cheap default; that is how missing specs show up before the build. Add game-specific tells (here: same crumble, buildings pop back).
+- 2026-11-13 Stomp Evolution UI (screens, not a map): 17.7 → 0.3 tells per 10 min (preload before showing, hide centre HUD under windows on phones, coin plate fits, kit plate + one letter case, studs only on small pieces, boards fit their rows) → `TITAN ARC/Calc/nerd_ui_v144.py`
+  - Learned: for UI, glances at the HUD + window opens replace the walk; list tells ONLY from real screenshots (PC + phone emulator), then model.
+  - Learned: run the phone emulator FIRST. Most of the window tells only showed on a phone.
