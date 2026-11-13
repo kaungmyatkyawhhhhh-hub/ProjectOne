@@ -17,6 +17,23 @@
 	  (opts.noLines: no chord lines, RoadLines draws them; opts.noLegWalls: no walls on narrowed edges,
 	  tools/riviera/Parapets.luau builds them; opts.surfaceOnly: only the road's slabs)
 	Roads.check(data, opts) -> list of bumps found by raycasting each lane every stud
+
+	Yangon (2026-11-13). A road may carry its own half width: `half` on the road in the data (streets
+	16, a true 1+1 road with kerbs and pavements). Every distance that was HALF is then that road's own
+	half, and "near another road" is measured with the other road's half. Without `half` nothing
+	changes (Monaco: every road is HALF). Options added for it, all off unless given:
+	  opts.pave = true or { [road name] = true }: kerbs and pavements on a "route" (not grey shoulders)
+	  opts.palette = { asphalt, paver, paverMaterial, paverVariant, kerb, kerbBand, kerbMaterial, paint }
+	  opts.cut = { [road name] = { [sample] = true } }: those samples are not built and are not seen by
+	    any other road (a flyover corridor, the inside of a roundabout). A cut end is square.
+	  opts.noSlab = { [road name] = { [i] = true } }: no slab between samples i and i + 1 (a mouth some
+	    other tool builds); kerbs and pavements are still made there
+	  opts.sideZone = function(road name, position, "Kerb" | "Pavement") -> true where this road's kerb
+	    or pavement must not be. Pieces are cut exactly on the zone's edge.
+	  opts.noZebra, opts.noTurningCircle, opts.noShadows (slabs cast no shadow)
+	  opts.live: the road's folder is parented first and filled a chunk at a time
+	  opts.keepEdges: Roads.debugEdges[road name] = { L, R } (edge points with their final heights);
+	    opts.edgesFor = { [road name] = true }: also for roads that are not built in this call
 ]]
 
 local Roads = {}
@@ -107,21 +124,73 @@ local function triangle(a: Vector3, b: Vector3, c: Vector3, th: number, props, p
 	return 2
 end
 
+-- (Yangon 2026-11-13) the widest road's half width over HALF: how much further "near" can reach
+local maxDh = 0
+
+-- the part of a polygon outside a zone (inside(p) -> boolean): every corner outside comes back as it
+-- is, and each side that crosses the zone's edge is cut on the edge (found by halving).
+-- Returns (polygon or nil, untouched)
+local function clipPoly(c: { Vector3 }, inside: (Vector3) -> boolean): ({ Vector3 }?, boolean)
+	local flag, nIn = {}, 0
+	for k = 1, #c do
+		flag[k] = inside(c[k])
+		if flag[k] then
+			nIn += 1
+		end
+	end
+	if nIn == 0 then
+		return c, true
+	elseif nIn == #c then
+		return nil, false
+	end
+	local out = {}
+	for k = 1, #c do
+		local k2 = k % #c + 1
+		local p, q = c[k], c[k2]
+		if not flag[k] then
+			table.insert(out, p)
+		end
+		if flag[k] ~= flag[k2] then
+			local lo, hi = 0, 1 -- (lo: still on p's side of the zone's edge)
+			for _ = 1, 18 do
+				local mid = (lo + hi) / 2
+				if inside(p:Lerp(q, mid)) == flag[k] then
+					lo = mid
+				else
+					hi = mid
+				end
+			end
+			table.insert(out, p:Lerp(q, if flag[k] then hi else lo))
+		end
+	end
+	return out, false
+end
+Roads.clipPoly = clipPoly
+
 -- samples as vectors, per road
-local function prepare(data)
+local function prepare(data, cut)
 	local roads = {}
+	maxDh = 0
 	for ri, r in data.roads do
+		-- (r.half: this road's own half carriageway, Yangon; without it every road is HALF wide)
+		local half = r.half
 		local pts = {}
 		for i, s in r.s do
 			-- s[7], s[8]: left and right half widths (narrower where a hairpin's legs run side by side)
-			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1, wl = s[7] or HALF, wr = s[8] or HALF }
+			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), tunnel = s[6] == 1, wl = s[7] or half or HALF, wr = s[8] or half or HALF }
 		end
-		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts, aligned = r.aligned }
+		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts, aligned = r.aligned, half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil }
+		maxDh = math.max(maxDh, roads[ri].dh)
 	end
 	-- a 24-stud grid of every sample, for "is this point on another road?"
 	local grid = {}
 	for ri, r in roads do
 		for i, p in r.pts do
+			-- (a cut sample is not there for any other road: a flyover deck 14 studs up is no junction
+			-- for the road passing under it)
+			if r.cut and r.cut[i] then
+				continue
+			end
 			local key = math.floor(p.pos.X / 24) .. "," .. math.floor(p.pos.Z / 24)
 			local cell = grid[key]
 			if not cell then
@@ -134,11 +203,13 @@ local function prepare(data)
 	return roads, grid
 end
 
--- nearest sample of another road (optionally only bigger roads) within radius of a point
+-- nearest sample of another road (optionally only bigger roads) within radius of a point.
+-- (the radius is written for a road HALF wide: for a road with its own half it is that much less or
+-- more, `dh`, so "HALF + 6" always means "6 past that road's edge")
 local function otherNear(roads, grid, pos: Vector3, self: number, radius: number, biggerThan: number?): (number?, number?)
-	local best, bestD = nil, radius
+	local best, bestD = nil, math.huge
 	local cx, cz = math.floor(pos.X / 24), math.floor(pos.Z / 24)
-	local reach = math.ceil(radius / 24)
+	local reach = math.ceil((radius + maxDh) / 24)
 	for dx = -reach, reach do
 		for dz = -reach, reach do
 			local cell = grid[(cx + dx) .. "," .. (cz + dz)]
@@ -148,7 +219,7 @@ local function otherNear(roads, grid, pos: Vector3, self: number, radius: number
 					if rj ~= self and (biggerThan == nil or roads[rj].rank < biggerThan) then
 						local q = roads[rj].pts[e[2]].pos
 						local d = Vector2.new(q.X - pos.X, q.Z - pos.Z).Magnitude
-						if d < bestD then
+						if d < radius + roads[rj].dh and d < bestD then
 							best, bestD = rj, d
 						end
 					end
@@ -255,6 +326,7 @@ local function alignJunctions(roads, grid)
 		end
 		local pts = r.pts
 		local n = #pts
+		local H = r.half or HALF -- (this road's own half width)
 		local arc = { 0 }
 		for i = 2, n do
 			local d = pts[i].pos - pts[i - 1].pos
@@ -275,7 +347,7 @@ local function alignJunctions(roads, grid)
 					cur = { rj = rj, first = i, last = i, wide = false }
 					table.insert(events, cur)
 				end
-				if pts[i].wl >= HALF - 0.5 and pts[i].wr >= HALF - 0.5 then
+				if pts[i].wl >= H - 0.5 and pts[i].wr >= H - 0.5 then
 					cur.wide = true
 				end
 			else
@@ -338,10 +410,10 @@ local function alignJunctions(roads, grid)
 			end
 			for i = 1, n do
 				local hit = nil
-				if not target[i] and pts[i].wl >= HALF - 0.5 and pts[i].wr >= HALF - 0.5 then
+				if not target[i] and pts[i].wl >= H - 0.5 and pts[i].wr >= H - 0.5 then
 					local cx, cz = math.floor(pts[i].pos.X / 24), math.floor(pts[i].pos.Z / 24)
 					-- (the two parts' carriageways overlap once their centres are under two half widths apart)
-					local bestD = 2 * HALF - 2
+					local bestD = 2 * H - 2
 					for dx = -3, 3 do
 						for dz = -3, 3 do
 							for _, e in grid[(cx + dx) .. "," .. (cz + dz)] or {} do
@@ -395,20 +467,51 @@ function Roads.build(data, opts)
 	opts = opts or {}
 	local box = opts.box
 	local parent = opts.parent
-	local roads, grid = prepare(data)
+	local roads, grid = prepare(data, opts.cut)
 	alignJunctions(roads, grid)
 	local count = 0
 	local zebraSpots: { Vector3 } = {}
+	-- (Yangon 2026-11-13) colours and options that are nil for Monaco
+	local pal = opts.palette or {}
+	local asphalt = pal.asphalt or ASPHALT
+	local zone = opts.sideZone
+	if opts.keepEdges then
+		Roads.debugEdges = {}
+	end
 	for ri, r in roads do
-		if opts.only and not opts.only[r.name] then
+		local buildIt = not (opts.only and not opts.only[r.name])
+		if not buildIt and not (opts.keepEdges and opts.edgesFor and opts.edgesFor[r.name]) then
 			continue
 		end
 		local folder = Instance.new("Folder")
 		folder.Name = r.name
+		-- (opts.live: the real folder is in the place from the start and gets each chunk as it is made;
+		-- `folder` is then only the chunk being built)
+		local live: Instance? = nil
+		if opts.live and buildIt then
+			live = (parent :: Instance):FindFirstChild(r.name)
+			if not live then
+				local f = Instance.new("Folder")
+				f.Name = r.name
+				f.Parent = parent
+				live = f
+			end
+		end
+		local function flush()
+			if live then
+				for _, c in folder:GetChildren() do
+					c.Parent = live
+				end
+			end
+		end
 		local pts = r.pts
 		local n = #pts
+		local H = r.half or HALF -- (this road's own half width)
+		local cutSet = r.cut
+		local noSlab = if opts.noSlab then opts.noSlab[r.name] else nil
 		local town = r.kind == "street" or r.name == "Town Road" or r.name == "Coast Road"
-		local paver = if string.find(r.name, "Casino") then STONE_PAVER else PAVER
+			or (opts.pave ~= nil and (opts.pave == true or (type(opts.pave) == "table" and opts.pave[r.name] == true)))
+		local paver = pal.paver or (if string.find(r.name, "Casino") then STONE_PAVER else PAVER)
 		-- per sample: is it inside a bigger road (slab skipped), in a junction (lines skipped)?
 		local insideBig, inJunction = {}, {}
 		for i, p in pts do
@@ -478,7 +581,7 @@ function Roads.build(data, opts)
 		local pinL, pinR = {}, {}
 		for i = 1, n do
 			for side, edge in { edgeL, edgeR } do
-				if (if side == 1 then pts[i].wl else pts[i].wr) < HALF - 0.5 then
+				if (if side == 1 then pts[i].wl else pts[i].wr) < H - 0.5 then
 					continue -- a narrowed edge stops at the wall between this road and the next
 				end
 				local y = bigSurface(roads, grid, edge[i], ri, r.rank, if r.aligned then HALF + 1 else HALF + 8) -- (a little past its edge: the joint stays level)
@@ -567,15 +670,23 @@ function Roads.build(data, opts)
 				end
 			end
 		end
-		if opts.debug then
+		if opts.debug or opts.keepEdges then
 			Roads.debugEdges = Roads.debugEdges or {}
 			Roads.debugEdges[r.name] = { L = edgeL, R = edgeR, waitL = waitL, waitR = waitR, pinL = pinL, pinR = pinR }
+		end
+		if not buildIt then
+			folder:Destroy()
+			continue -- (opts.edgesFor: only its edges were wanted)
 		end
 		local dash = 0
 		local zebraDone = {}
 		for i = 1, n - 1 do
 			local a, b = pts[i], pts[i + 1]
 			if not (inBox(box, a.pos) or inBox(box, b.pos)) then
+				continue
+			end
+			-- (opts.cut: nothing at all between cut samples; the last piece before a cut ends square)
+			if cutSet and (cutSet[i] or cutSet[i + 1]) then
 				continue
 			end
 			local flat = Vector2.new(b.pos.X - a.pos.X, b.pos.Z - a.pos.Z).Magnitude
