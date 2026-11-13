@@ -47,3 +47,13 @@ Vault: `Art\Relief_13Nov\<Shark>\` (fbx, tex, skins, cfg.py, rig.json, views, sk
 ## Seen while testing (for the polish pass)
 - A newly evolved shark is pitch black for a moment while its texture loads (Great White, Clownfish) -> preload all shark
   textures when a player joins.
+
+## 14 Nov: the Minnow's nose (owner: "the nose just needed to stick out a bit", "C shape from the side, not <", "eyes stick out a bit less")
+- After three full redesigns (v4-v6, `art/minnow` in the session folder) the owner chose to KEEP this Minnow and only fix the nose.
+- Edit of `front_v3\Minnow_hse_front_eyes.fbx` in Blender (same verts, UVs, weights, bones):
+  - the whole head front moved forward evenly top to bottom (0.19 kit units = ~0.4 studs), so the side profile stays a round C;
+  - eye domes pressed 35% back into the head;
+  - the kit's flat nose-cap disc with its sunken rim (looked like a hole at the tip) smoothed into one round tip.
+- File `Art\Minnow_hse\nose_14Nov\Minnow_hse_nose_v3.fbx` -> model asset **117387754280623** (Approved), mesh **90209228481490**,
+  same texture 95082541061776 and the same 4 skins. Installed with MB_Reinstall; backup `ServerStorage.MB_Minnow_preNose_backup_14Nov`.
+- Checked in Play as a fresh Minnow: new mesh on the player, swim bones bend, no new errors. Place saved (v284), not published.
