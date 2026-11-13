@@ -161,21 +161,6 @@ function M.load()
 			end
 		end
 	end
-	-- every cut end: the last sample that is built, next to one that is not
-	M.cutEnds = {}
-	for _, o in M.list do
-		local cut = M.cut[o.name]
-		for i = 1, o.n do
-			if not cut[i] then
-				local why = (i > 1 and cut[i - 1]) or (i < o.n and cut[i + 1])
-				if why then
-					local s = o.s[i]
-					table.insert(M.cutEnds, { road = o.name, sample = i, m = o.chain[i] / M.SPM, x = s[1], y = s[2], z = s[3], why = why, cutIs = if i > 1 and cut[i - 1] then "before" else "after" })
-				end
-			end
-		end
-	end
-
 	-- roads that end in the roundabout: eased onto the ring's height (the ring is flat at C.Y)
 	M.arms = {}
 	for _, o in M.list do
@@ -204,6 +189,21 @@ function M.load()
 					j += step
 				end
 				table.insert(M.arms, { road = o.name, o = o, i0 = i0, step = step, first = i, shift = shift })
+			end
+		end
+	end
+
+	-- every cut end: the last sample that is built, next to one that is not (heights after the easing)
+	M.cutEnds = {}
+	for _, o in M.list do
+		local cut = M.cut[o.name]
+		for i = 1, o.n do
+			if not cut[i] then
+				local why = (i > 1 and cut[i - 1]) or (i < o.n and cut[i + 1])
+				if why then
+					local s = o.s[i]
+					table.insert(M.cutEnds, { road = o.name, sample = i, m = o.chain[i] / M.SPM, x = s[1], y = s[2], z = s[3], why = why, cutIs = if i > 1 and cut[i - 1] then "before" else "after" })
+				end
 			end
 		end
 	end
