@@ -211,8 +211,15 @@ Roads.clipPieces = clipPieces
 -- a triangle under 0.03 studs across is not worth a part: its plane is set by rounding, so its wedges
 -- (as thick as the slab, along that plane's normal) can lean any way at all and stick out sideways
 local function sliver(a: Vector3, b: Vector3, c: Vector3): boolean
-	local long = math.max((b - a).Magnitude, (c - a).Magnitude, (c - b).Magnitude)
-	return long < 1e-6 or (b - a):Cross(c - a).Magnitude / long < 0.03
+	-- (measured flat: a triangle thin seen from above but with a height step in it stands on edge, and its
+	-- wedges then stick out sideways by the slab's thickness. Road surfaces never tilt more than ~10 degrees)
+	local fa, fb, fc = a * Vector3.new(1, 0, 1), b * Vector3.new(1, 0, 1), c * Vector3.new(1, 0, 1)
+	local long = math.max((fb - fa).Magnitude, (fc - fa).Magnitude, (fc - fb).Magnitude)
+	if long < 1e-6 or (fb - fa):Cross(fc - fa).Magnitude / long < 0.03 then
+		return true
+	end
+	local n = (b - a):Cross(c - a)
+	return n.Magnitude < 1e-9 or math.abs(n.Unit.Y) < 0.7
 end
 Roads.sliver = sliver
 
