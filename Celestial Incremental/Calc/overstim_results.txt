@@ -1,0 +1,84 @@
+44 live first-10-min timelines; 2000 kids x 2 windows per version
+
+v0 LIVE
+  overload s/10min: first10 0.8  mid 6.1 | KEY missed: all ages 67.4%  7 y 78.1%  6 y 82.7% | noise 5.91/kid  flash fails 0  comets blocked 3.09/kid | news delay p95 0.0s max 0.0s
+  missed by type (7 y): {'WELCOME GIFT toast': 100.0, 'LUMI comet': 100.0, 'NEW tier mini': 100.0, 'LEVEL': 100.0, 'x2 GIFT toast': 100.0, 'TUTORIAL COMPLETE card': 100.0, 'GIFT': 100.0, 'FORGE window (gift roll)': 100.0, 'PATH card (choose)': 49.2, 'SUPERNOVA card': 7.0}
+  top collisions: [('LEVEL UP toast x BADGE island complete toast (toast replaced)', 2000), ("LEVEL UP toast x LUMI'S GIFT toast (toast replaced)", 2000), ('LUMI tap-the-comet toast x LEVEL UP toast (toast replaced)', 1050), ('LEVEL UP toast x LUMI tap-the-comet toast (toast replaced)', 937), ('quest / tip toast x LEVEL UP toast (toast replaced)', 576)]
+
+v1 + toast queue (no replace, KEY read time)
+  overload s/10min: first10 1.0  mid 6.7 | KEY missed: all ages 55.6%  7 y 58.5%  6 y 83.1% | noise 5.91/kid  flash fails 0  comets blocked 3.09/kid | news delay p95 3.9s max 15.9s
+  missed by type (7 y): {'NEW tier mini': 100.0, 'TUTORIAL COMPLETE card': 100.0, 'GIFT': 100.0, 'FORGE window (gift roll)': 100.0, 'WELCOME GIFT toast': 82.6, 'LUMI comet': 52.5, 'PATH card (choose)': 49.2, 'x2 GIFT toast': 38.2, 'LEVEL': 26.8, 'SUPERNOVA card': 7.1}
+  top collisions: [("someone's FIRST SUPERNOVA banner x LEVEL UP toast (top band)", 934), ("someone's FIRST SUPERNOVA banner x LUMI tap-the-comet toast (top band)", 232), ("someone's FIRST SUPERNOVA banner x quest / tip toast (top band)", 134), ("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 127), ("someone's FIRST SUPERNOVA banner x LUMI play-with-friends toast (top band)", 73)]
+
+v2 + hold HUD news during cutscenes
+  overload s/10min: first10 1.0  mid 6.9 | KEY missed: all ages 55.1%  7 y 57.9%  6 y 83.1% | noise 5.90/kid  flash fails 0  comets blocked 3.09/kid | news delay p95 6.4s max 19.1s
+  missed by type (7 y): {'NEW tier mini': 100.0, 'TUTORIAL COMPLETE card': 100.0, 'GIFT': 100.0, 'FORGE window (gift roll)': 100.0, 'WELCOME GIFT toast': 82.6, 'LUMI comet': 51.3, 'PATH card (choose)': 49.2, 'LEVEL': 24.8, 'x2 GIFT toast': 23.4, 'SUPERNOVA card': 7.1}
+  top collisions: [("someone's FIRST SUPERNOVA banner x LEVEL UP toast (top band)", 897), ("someone's FIRST SUPERNOVA banner x LUMI tap-the-comet toast (top band)", 239), ("someone's FIRST SUPERNOVA banner x quest / tip toast (top band)", 144), ("someone's FIRST SUPERNOVA banner x LUMI'S GIFT toast (top band)", 138), ("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 129)]
+
+v3 + one centre queue (cards wait, cutscene closes cards, minis merge)
+  overload s/10min: first10 1.4  mid 1.7 | KEY missed: all ages 20.8%  7 y 22.8%  6 y 80.0% | noise 5.30/kid  flash fails 0  comets blocked 3.34/kid | news delay p95 4.7s max 40.6s
+  missed by type (7 y): {'GIFT': 100.0, 'WELCOME GIFT toast': 83.0, 'LUMI comet': 55.1, 'x2 GIFT toast': 35.6, 'LEVEL': 31.2, 'NEW tier mini': 24.2, 'SUPERNOVA card': 1.9, 'TUTORIAL COMPLETE card': 1.0, 'FORGE window (gift roll)': 1.0}
+  top collisions: [("someone's FIRST SUPERNOVA banner x LEVEL UP toast (top band)", 883), ("someone's FIRST SUPERNOVA banner x LUMI tap-the-comet toast (top band)", 207), ("someone's FIRST SUPERNOVA banner x quest / tip toast (top band)", 143), ("someone's FIRST SUPERNOVA banner x BADGE first Supernova toast (top band)", 130), ("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 130)]
+
+v4 + one big sting per second
+  overload s/10min: first10 1.4  mid 1.5 | KEY missed: all ages 20.7%  7 y 22.7%  6 y 79.5% | noise 0.00/kid  flash fails 0  comets blocked 3.34/kid | news delay p95 4.7s max 40.6s
+  missed by type (7 y): {'GIFT': 100.0, 'WELCOME GIFT toast': 83.0, 'LUMI comet': 55.1, 'x2 GIFT toast': 35.6, 'LEVEL': 31.2, 'NEW tier mini': 24.0, 'SUPERNOVA card': 1.5, 'FORGE window (gift roll)': 1.0, 'TUTORIAL COMPLETE card': 0.6}
+  top collisions: [("someone's FIRST SUPERNOVA banner x LEVEL UP toast (top band)", 883), ("someone's FIRST SUPERNOVA banner x LUMI tap-the-comet toast (top band)", 207), ("someone's FIRST SUPERNOVA banner x quest / tip toast (top band)", 143), ("someone's FIRST SUPERNOVA banner x BADGE first Supernova toast (top band)", 130), ("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 130)]
+
+v5 + merge same toasts, demote minor news
+  overload s/10min: first10 1.1  mid 1.3 | KEY missed: all ages 20.6%  7 y 23.2%  6 y 79.4% | noise 0.00/kid  flash fails 0  comets blocked 3.34/kid | news delay p95 2.8s max 40.6s
+  missed by type (7 y): {'GIFT': 100.0, 'WELCOME GIFT toast': 83.0, 'LUMI comet': 59.9, 'x2 GIFT toast': 44.6, 'LEVEL': 30.2, 'NEW tier mini': 25.1, 'SUPERNOVA card': 0.6, 'FORGE window (gift roll)': 0.4, 'TUTORIAL COMPLETE card': 0.2}
+  top collisions: [("someone's FIRST SUPERNOVA banner x LEVEL UP toast (top band)", 102), ("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 9), ("someone's FIRST SUPERNOVA banner x quest / tip toast (top band)", 9), ("someone's FIRST SUPERNOVA banner x LUMI'S GIFT toast (top band)", 6)]
+
+v6 + banner gets its own band
+  overload s/10min: first10 1.1  mid 1.3 | KEY missed: all ages 20.5%  7 y 23.2%  6 y 79.4% | noise 0.00/kid  flash fails 0  comets blocked 3.34/kid | news delay p95 2.8s max 40.6s
+  missed by type (7 y): {'GIFT': 100.0, 'WELCOME GIFT toast': 83.0, 'LUMI comet': 59.9, 'x2 GIFT toast': 44.6, 'LEVEL': 30.1, 'NEW tier mini': 25.1, 'SUPERNOVA card': 0.6, 'FORGE window (gift roll)': 0.4, 'TUTORIAL COMPLETE card': 0.2}
+  top collisions: [("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 9)]
+
+v7 + KEY news waits for calm (no card / window up)
+  overload s/10min: first10 1.0  mid 0.6 | KEY missed: all ages 17.8%  7 y 18.7%  6 y 77.4% | noise 0.00/kid  flash fails 0  comets blocked 3.36/kid | news delay p95 3.3s max 43.9s
+  missed by type (7 y): {'WELCOME GIFT toast': 83.0, 'LUMI comet': 54.9, 'x2 GIFT toast': 42.2, 'LEVEL': 26.1, 'NEW tier mini': 19.1, 'TUTORIAL COMPLETE card': 0.8, 'SUPERNOVA card': 0.6}
+  top collisions: [("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 16)]
+
+v8 + shorter KEY texts
+  overload s/10min: first10 0.8  mid 0.6 | KEY missed: all ages 17.5%  7 y 17.9%  6 y 77.5% | noise 0.00/kid  flash fails 0  comets blocked 3.32/kid | news delay p95 3.3s max 43.2s
+  missed by type (7 y): {'LUMI comet': 55.2, 'WELCOME GIFT toast': 52.8, 'x2 GIFT toast': 44.4, 'LEVEL': 25.7, 'NEW tier mini': 18.1, 'TUTORIAL COMPLETE card': 1.4, 'SUPERNOVA card': 0.6}
+  top collisions: [("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 12)]
+
+v9 + ONE queue for every KEY message (toast, mini, LUMI step)
+  overload s/10min: first10 0.3  mid 0.2 | KEY missed: all ages 7.4%  7 y 1.0%  6 y 74.7% | noise 0.00/kid  flash fails 0  comets blocked 3.27/kid | news delay p95 10.4s max 37.5s
+  missed by type (7 y): {'NEW tier mini': 1.7, 'LEVEL': 1.2, 'SUPERNOVA card': 0.6, 'TUTORIAL COMPLETE card': 0.4, 'LUMI comet': 0.2}
+  top collisions: [("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 8)]
+
+v10 + "tap the comet" lives on the LUMI card (no toast)
+  overload s/10min: first10 0.2  mid 0.2 | KEY missed: all ages 7.2%  7 y 1.0%  6 y 73.9% | noise 0.00/kid  flash fails 0  comets blocked 3.31/kid | news delay p95 7.2s max 37.9s
+  missed by type (7 y): {'NEW tier mini': 1.5, 'LEVEL': 1.3, 'SUPERNOVA card': 0.6, 'x2 GIFT toast': 0.6, 'TUTORIAL COMPLETE card': 0.2}
+  top collisions: [("someone's FIRST SUPERNOVA banner x someone's FIRST SUPERNOVA banner (banner replaced)", 15)]
+
+WORST MOMENT (Ignition 1, card left open, age 8): v0 LIVE
+    -2.0s ->   30.0s  modal  SUPERNOVA card (left open)
+     0.0s ->    1.2s  centre NEW tier mini
+     0.0s ->    0.5s  toast  LEVEL UP toast
+     0.4s ->    3.5s  centre TUTORIAL COMPLETE card  (hidden by cutscene)
+     0.5s ->    3.0s  toast  LUMI'S GIFT toast
+     0.9s ->    3.5s  toast  BADGE island complete toast
+     1.1s ->    7.1s  modal  FORGE window (gift roll)
+     1.1s ->    4.4s  banner someone's FIRST SUPERNOVA banner
+     1.4s ->    9.4s  modal  IGNITION cutscene
+     4.1s ->    5.4s  toast  LUMI play-with-friends toast
+     5.4s ->    7.9s  toast  quest / tip toast
+     9.4s ->   17.2s  modal  PATH card (choose)
+    26.4s ->   29.0s  toast  quest / tip toast
+    26.4s ->   29.7s  banner someone's FIRST SUPERNOVA banner
+  big stings at: [0.0, 0.0, 0.9, 0.91, 0.92, 0.93, 0.94, 1.4, 7.8, 1.15, 26.43]
+
+WORST MOMENT (Ignition 1, card left open, age 8): v10 + "tap the comet" lives on the LUMI card (no toast)
+    -2.0s ->    0.4s  modal  SUPERNOVA card (left open)
+     0.4s ->    8.4s  modal  IGNITION cutscene
+     8.8s ->   15.1s  centre TUTORIAL COMPLETE card
+    15.3s ->   23.1s  modal  PATH card (choose)
+    23.4s ->   29.4s  modal  FORGE window (LUMI'S GIFT roll)
+    29.7s ->   32.7s  centre NEW tier mini
+    32.9s ->   37.6s  toast  LEVEL UP toast
+  big stings at: [0.0, 6.8]
+
