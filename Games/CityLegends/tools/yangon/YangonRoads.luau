@@ -48,7 +48,7 @@ M.MAIN = { "Yangon Loop", "New Road", "University Avenue" }
 M.palette = {
 	asphalt = Color3.fromRGB(46, 47, 50),
 	paver = Color3.fromRGB(150, 146, 136),
-	paverMaterial = Enum.Material.Pavement,
+	paverMaterial = Enum.Material.Concrete, -- (poured concrete: Roblox's Pavement material draws small pavers)
 	kerb = Color3.fromRGB(232, 228, 218),
 	kerbBand = Color3.fromRGB(195, 47, 45) :: Color3?,
 	kerbSplit = 2,
@@ -1292,7 +1292,7 @@ function M.checkJunctions()
 						local r0x, r0z = rightOf(p0)
 						local r1x, r1z = rightOf(p1)
 						for sub = 0, 7 do
-							local u = sub / 8
+							local u = (sub + 0.5) / 8 -- (never on a sample's own cross-section: pieces meet there, and a ray on a seam proves nothing)
 							local axx, azz = p0[1] + (p1[1] - p0[1]) * u, p0[3] + (p1[3] - p0[3]) * u
 							local rx, rz = r0x + (r1x - r0x) * u, r0z + (r1z - r0z) * u
 							local lat = main.half + 0.3

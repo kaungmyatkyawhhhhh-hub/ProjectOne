@@ -868,7 +868,7 @@ function Roads.build(data, opts)
 							wholeWalk = false -- (laid here)
 							paveProps.CastShadow = false
 							local run = (eb - ea) * Vector3.new(1, 0, 1)
-							if poly and whole and (outA - outB).Magnitude < 1e-3 and math.abs(run.Unit:Dot(outA)) < 1e-3 then
+							if poly and whole and (outA - outB).Magnitude < 2e-3 and math.abs(run.Unit:Dot(outA)) < 2e-3 then -- (off square by under 0.02 studs over the pavement's width)
 								local drop = Vector3.new(0, CURB_UP - 3, 0)
 								local pa, pb = ea + outA * (WALK / 2) + drop, eb + outB * (WALK / 2) + drop
 								paveProps.Size = Vector3.new(WALK, 6, (pb - pa).Magnitude)
