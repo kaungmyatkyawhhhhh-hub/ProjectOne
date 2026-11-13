@@ -845,15 +845,29 @@ function Roads.build(data, opts)
 							-- WALK out; what lies in a zone (another road's mouth, a roundabout) is cut off on the
 							-- zone's own edge, so a street mouth is exactly as wide as the street. A cut piece is
 							-- made of triangles; a whole piece is the usual block.
+							-- Each piece reaches out along its own two samples' right vectors, so neighbours share
+							-- their ends exactly, bend or not: nothing overlaps (the old blocks overlap on bends
+							-- with tops 0.006 apart, which is under the flicker rule's 0.05) and nothing is longer
+							-- than its slab at a cut end. A straight whole piece is one block, any other triangles.
 							local out = right * side
-							local lift = Vector3.new(0, CURB_UP + alt * 0.006, 0)
-							local quad = { ea + lift, ea + out * WALK + lift, eb + out * WALK + lift, eb + lift }
+							local outA = Vector3.new(-a.dir.Z, 0, a.dir.X).Unit * side
+							local outB = Vector3.new(-b.dir.Z, 0, b.dir.X).Unit * side
+							local lift = Vector3.new(0, CURB_UP, 0)
+							local quad = { ea + lift, ea + outA * WALK + lift, eb + outB * WALK + lift, eb + lift }
 							local poly, whole = clipPoly(quad, function(p)
 								return zone(r.name, p, "Pavement")
 							end)
-							wholeWalk = whole
-							if poly and not whole then
-								paveProps.CastShadow = false
+							wholeWalk = false -- (laid here)
+							paveProps.CastShadow = false
+							local run = (eb - ea) * Vector3.new(1, 0, 1)
+							if poly and whole and (outA - outB).Magnitude < 1e-3 and math.abs(run.Unit:Dot(outA)) < 1e-3 then
+								local drop = Vector3.new(0, CURB_UP - 3, 0)
+								local pa, pb = ea + outA * (WALK / 2) + drop, eb + outB * (WALK / 2) + drop
+								paveProps.Size = Vector3.new(WALK, 6, (pb - pa).Magnitude)
+								paveProps.CFrame = CFrame.lookAt((pa + pb) / 2, pb)
+								newPart(paveProps, folder)
+								count += 1
+							elseif poly then
 								for k = 2, #poly - 1 do
 									count += triangle(poly[1], poly[k], poly[k + 1], 6, paveProps, folder)
 								end

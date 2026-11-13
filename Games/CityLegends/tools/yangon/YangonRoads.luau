@@ -36,7 +36,8 @@ M.N = 96 -- sides of the ring
 M.R_CUT = 94 -- samples nearer the centre than this are cut (not built, not seen by other roads)
 M.WALK, M.KERB_W, M.CURB_UP, M.SLAB = 10, 0.9, 0.5, 2 -- as in Roads.luau
 M.CORRIDOR = 70 -- flyover corridor: this far either side of the deck's centre line
-M.EASE = 128 -- an arm reaches the ring's height over this many studs
+M.EASE = 128 -- an arm reaches the ring's height over this many studs ...
+M.FLAT = 12 -- ... and is already flat at it this far outside the ring (its pavement meets the ring's pavement level)
 M.LINE_T, M.LIFT = 0.04, 0.08 -- paint: thickness, and how far over the road (flicker rule)
 M.MAIN = { "Yangon Loop", "New Road", "University Avenue" }
 
@@ -143,13 +144,23 @@ function M.load()
 		end
 		for _, o in M.list do
 			if o ~= r then
+				-- (a sample is in the corridor when any of its cross-section is: the carriageway and both
+				-- pavements, not only its middle; a road meeting the corridor at a slant would poke in)
+				local reach = o.half + M.WALK
 				for i = 1, o.n do
 					local px, pz = o.s[i][1], o.s[i][3]
-					if px > x0 - W and px < x1 + W and pz > z0 - W and pz < z1 + W and not M.cut[o.name][i] then
-						for d = 1, #deck - 1 do
-							local a, b = r.s[deck[d]], r.s[deck[d + 1]]
-							if segDist(px, pz, a[1], a[3], b[1], b[3]) < W then
-								M.cut[o.name][i] = f.name
+					if px > x0 - W - reach and px < x1 + W + reach and pz > z0 - W - reach and pz < z1 + W + reach and not M.cut[o.name][i] then
+						local rx, rz = rightOf(o.s[i])
+						for _, lat in { 0, -reach, reach, -reach / 2, reach / 2 } do
+							local qx, qz = px + rx * lat, pz + rz * lat
+							for d = 1, #deck - 1 do
+								local a, b = r.s[deck[d]], r.s[deck[d + 1]]
+								if segDist(qx, qz, a[1], a[3], b[1], b[3]) < W then
+									M.cut[o.name][i] = f.name
+									break
+								end
+							end
+							if M.cut[o.name][i] then
 								break
 							end
 						end
@@ -171,21 +182,23 @@ function M.load()
 		for _, e in { { 1, 1 }, { o.n, -1 } } do
 			local i0, step = e[1], e[2]
 			if radius(o.s[i0]) < M.R_OUT then
+				-- flat at the ring's height out to R0 (past the ring's own pavement), eased from there
+				local R0 = M.R_OUT + M.FLAT
 				local i = i0
-				while radius(o.s[i]) < M.R_OUT do
+				while radius(o.s[i]) < R0 do
 					i += step
 				end
 				local a, b = o.s[i - step], o.s[i]
 				local ra, rb = radius(a), radius(b)
-				local yRing = a[2] + (b[2] - a[2]) * (M.R_OUT - ra) / (rb - ra)
+				local yRing = a[2] + (b[2] - a[2]) * (R0 - ra) / (rb - ra)
 				local shift = C.Y - yRing
 				local j = i0
 				while j >= 1 and j <= o.n do
 					local rr = radius(o.s[j])
-					if rr < M.R_OUT then
+					if rr < R0 then
 						o.s[j][2] = C.Y
-					elseif rr - M.R_OUT < M.EASE then
-						local u = (rr - M.R_OUT) / M.EASE
+					elseif rr - R0 < M.EASE then
+						local u = (rr - R0) / M.EASE
 						o.s[j][2] += shift * (1 - u * u * (3 - 2 * u))
 					else
 						break
@@ -204,7 +217,7 @@ function M.load()
 		for i = 1, o.n do
 			if not cut[i] then
 				local why = (i > 1 and cut[i - 1]) or (i < o.n and cut[i + 1])
-				if why then
+				if why and why ~= "Hanthawaddy Roundabout" then
 					local s = o.s[i]
 					table.insert(M.cutEnds, { road = o.name, sample = i, m = o.chain[i] / M.SPM, x = s[1], y = s[2], z = s[3], why = why, cutIs = if i > 1 and cut[i - 1] then "before" else "after" })
 				end
@@ -908,7 +921,7 @@ function M.buildRoundabout()
 	local road = { Name = "Road", Material = Enum.Material.Asphalt, Color = pal.asphalt, CastShadow = false }
 	for j = 0, M.N - 1 do
 		local a0, a1 = j * step, (j + 1) * step
-		local i0, i1 = ringPoint(M.R_IN, a0, Y0), ringPoint(M.R_IN, a1, Y0)
+		local i0, i1 = ringPoint(M.R_IN - 0.6, a0, Y0), ringPoint(M.R_IN - 0.6, a1, Y0) -- (runs on under the island's kerb)
 		local o0, o1 = ringPoint(M.RING_V, a0, Y0), ringPoint(M.RING_V, a1, Y0)
 		count += T(i0, o0, o1, M.SLAB, road, folder)
 		count += T(i0, o1, i1, M.SLAB, road, folder)
@@ -916,13 +929,13 @@ function M.buildRoundabout()
 
 	-- the island: a kerb ring, a grass disc and a low dome on it (nothing tall: cars across the ring stay in view)
 	local grass = workspace.Terrain:GetMaterialColor(Enum.Material.Grass)
-	local NK = 48
+	local NK = M.N -- (one kerb piece per side of the ring: it covers the slab's inner edge all the way)
 	for j = 0, NK - 1 do
 		kerb(ringPoint(M.R_IN - 0.4, j * TAU / NK, Y0), ringPoint(M.R_IN - 0.4, (j + 1) * TAU / NK, Y0), j % 2)
 	end
 	part({ Name = "Island", Shape = Enum.PartType.Cylinder, Size = Vector3.new(3, (M.R_IN - 0.1) * 2, (M.R_IN - 0.1) * 2), CFrame = CFrame.new(C.X, Y0 + 0.45 - 1.5, C.Z) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Grass, Color = grass })
 	local dome = part({ Name = "IslandMound", Size = Vector3.new(112, 4, 112), CFrame = CFrame.new(C.X, Y0 + 0.45, C.Z), Material = Enum.Material.Grass, Color = grass })
-	dome.CanCollide = false
+	dome.CanCollide, dome.CanQuery, dome.CanTouch = false, false, false -- (its box is wider than the dome: no ray may stop on it)
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.Sphere
 	mesh.Parent = dome
@@ -961,7 +974,7 @@ function M.buildRoundabout()
 		for q = 1, #cuts - 1 do
 			piece += 1
 			local alt = piece % 2
-			local y = Y0 + M.CURB_UP + alt * 0.006
+			local y = Y0 + M.CURB_UP -- (the pieces share their ends exactly: one height, nothing overlaps)
 			local a, b = cuts[q], cuts[q + 1]
 			local pi0, po0 = ringPoint(RHO_I, a[1], y), ringPoint(RHO_O, a[2], y)
 			local pi1, po1 = ringPoint(RHO_I, b[1], y), ringPoint(RHO_O, b[2], y)
@@ -1257,7 +1270,10 @@ function M.checkJunctions()
 					-- (a) a 0.8-stud grid round Q. In main's kerb and pavement band: inside S's carriageway
 					-- nothing of main's kerb or pavement; 1.2 to 1.8 past S's edge they must be there
 					local crossing, missing = 0, 0
-					local reach = h + 14
+					-- (a slanted mouth is longer along the main road: h / sin of the angle between the two)
+					local ms = main.s[na[2]]
+					local sinA = math.abs(vx * ms[5] - vz * ms[4]) / hyp(ms[4], ms[5])
+					local reach = math.min(h / math.max(sinA, 0.2) + 14, 180)
 					local x = qx - reach
 					while x <= qx + reach do
 						local z = qz - reach
@@ -1342,19 +1358,41 @@ function M.checkJunctions()
 				end
 			end
 		end
+		if #info == 0 then
+			table.insert(notes, "no mouth found")
+			total.missing += 1
+		end
 		table.insert(lines, (if #notes == 0 then "ok: " else "FAULT: ") .. label .. " | heights: " .. table.concat(info, "; ") .. (if #notes > 0 then "\n    " .. table.concat(notes, "\n    ") else ""))
 	end
 	local head = string.format("junctions on main roads %d: %d in a corridor, %d checked with %d mouths. Kerb or pavement in a mouth: %d spots. Missing right beside a mouth: %d spots. Lines in a mouth: %d. Heights more than 0.05 off: %d (worst %.3f; the streets' raw data is up to %.2f off before the builder eases them).", total.junctions, total.corridor, total.junctions - total.corridor, total.mouths, total.crossing, total.missing, total.lines, total.height, worstH, worstRaw)
 	return head .. "\n" .. table.concat(lines, "\n")
 end
 
+-- every road slab under a spot, top first: { { road folder's name, height, the part } }. Looks through
+-- kerbs and pavements, and sees two slabs lying in one plane (each hit is taken out and the ray cast again).
+local function roadTops(x: number, y: number, z: number, roads: Instance)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	local skip = {}
+	local tops = {}
+	for _ = 1, 10 do
+		params.FilterDescendantsInstances = skip
+		local hit = workspace:Raycast(Vector3.new(x, y + 30, z), Vector3.new(0, -60, 0), params)
+		if not hit or not hit.Instance:IsDescendantOf(roads) then
+			break
+		end
+		if hit.Instance.Name == "Road" then
+			table.insert(tops, { hit.Instance.Parent.Name, hit.Position.Y, hit.Instance })
+		end
+		table.insert(skip, hit.Instance)
+	end
+	return tops
+end
+
 -- main road on main road: over each mouth, every spot on either road has one slab (never two roads'
 -- slabs on one spot, never none), and the two roads' heights match
 function M.checkMainMain()
 	local roads = M.folder()
-	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Include
-	params.FilterDescendantsInstances = { roads }
 	local out = {}
 	for _, m in M.mouths do
 		local o = M.R[m.road]
@@ -1369,9 +1407,9 @@ function M.checkMainMain()
 		x0, x1, z0, z1 = x0 - 30, x1 + 30, z0 - 30, z1 + 30
 		local spots, double, holes, worst = 0, 0, 0, 0
 		local firstBad = nil
-		local x = x0
+		local x = x0 + 0.37 -- (off the 6.4-stud sample grid: a ray on a seam between two wedges proves nothing)
 		while x <= x1 do
-			local z = z0
+			local z = z0 + 0.37
 			while z <= z1 do
 				-- on either road's carriageway (or the ring)?
 				local on = false
@@ -1395,18 +1433,7 @@ function M.checkMainMain()
 				end
 				if on then
 					spots += 1
-					local tops = {}
-					local from = Vector3.new(x, o.s[m.k][2] + 30, z)
-					for _ = 1, 8 do
-						local hit = workspace:Raycast(from, Vector3.new(0, -60, 0), params)
-						if not hit then
-							break
-						end
-						if hit.Instance.Name == "Road" then
-							table.insert(tops, { hit.Instance.Parent.Name, hit.Position.Y })
-						end
-						from = hit.Position - Vector3.new(0, 0.01, 0)
-					end
+					local tops = roadTops(x, o.s[m.k][2], z, roads)
 					if #tops == 0 then
 						holes += 1
 						firstBad = firstBad or string.format("hole at %.0f, %.0f", x, z)
@@ -1465,25 +1492,65 @@ function M.partCount()
 	return string.format("Yangon.Roads: %d parts. By name: %s. By road: %s. Riviera descendants: %d", total, table.concat(a, ", "), table.concat(b, ", "), if riv then #riv:GetDescendants() else -1)
 end
 
--- SurfaceCheck (doubled or fighting faces) within `reach` studs of each spot
+-- Doubled faces within `reach` studs of each spot.
+--   blocks (pavement, kerb, line): SurfaceCheck's "fight" (two faces looking the same way, under 0.05
+--     apart, lying over each other). Its "step" (under 0.3 apart) is listed apart: a kerb standing 0.1
+--     over its own pavement is one by design, so kerb-on-pavement pairs are not counted.
+--   road slabs (wedges, which SurfaceCheck does not read): a 2-stud grid of rays; two slab tops under
+--     0.05 apart on one spot is a doubled face.
 function M.surfaceCheck(spots: { { any } }, reach: number?)
 	local SC = require(SS.ClaudeTools.SurfaceCheck:Clone())
 	local roads = M.folder()
+	local R = reach or 120
 	local out = {}
-	local sum = 0
+	local fights, steps, slabs = 0, 0, 0
 	for _, s in spots do
 		local at = s[2] :: Vector3
-		local found, text = SC.run(roads, {
-			rows = 4,
+		local found = SC.run(roads, {
+			rows = 0,
 			skip = function(p: BasePart)
-				return hyp(p.Position.X - at.X, p.Position.Z - at.Z) > (reach or 120)
+				return hyp(p.Position.X - at.X, p.Position.Z - at.Z) > R
 			end,
 		})
-		sum += #found
-		table.insert(out, string.format("%s: %d | %s", s[1], #found, string.gsub(text, "\n", " / ")))
+		local f, st, eg = 0, 0, nil
+		for _, e in found do
+			if e.kind == "fight" then
+				f += 1
+				eg = eg or string.format("%s on %s at %.0f, %.0f gap %.3f", e.a.Name, e.b.Name, e.at.X, e.at.Z, e.gap)
+			elseif not ((e.a.Name == "Kerb" and e.b.Name == "Pavement") or (e.a.Name == "Pavement" and e.b.Name == "Kerb")) then
+				st += 1
+				eg = eg or string.format("step: %s on %s at %.0f, %.0f gap %.3f", e.a.Name, e.b.Name, e.at.X, e.at.Z, e.gap)
+			end
+		end
+		local dbl, rays = 0, 0
+		local x = at.X - R + 0.37
+		while x <= at.X + R do
+			local z = at.Z - R + 0.37
+			while z <= at.Z + R do
+				if hyp(x - at.X, z - at.Z) <= R then
+					local tops = roadTops(x, at.Y, z, roads)
+					if #tops > 0 then
+						rays += 1
+					end
+					for q = 2, #tops do
+						if math.abs(tops[q][2] - tops[1][2]) < 0.05 then
+							dbl += 1
+							eg = eg or string.format("two slabs at %.1f, %.1f (%s, %s)", x, z, tops[1][1], tops[q][1])
+							break
+						end
+					end
+				end
+				z += 2
+			end
+			x += 2
+		end
+		fights += f
+		steps += st
+		slabs += dbl
+		table.insert(out, string.format("%s: blocks fighting %d, other thin steps %d, doubled slab spots %d of %d%s", s[1], f, st, dbl, rays, if eg then " | " .. eg else ""))
 		task.wait()
 	end
-	return string.format("SurfaceCheck at %d spots: %d faces doubled or fighting\n%s", #spots, sum, table.concat(out, "\n"))
+	return string.format("doubled faces at %d spots: blocks fighting %d, thin steps %d, doubled slab spots %d\n%s", #spots, fights, steps, slabs, table.concat(out, "\n"))
 end
 
 return M
