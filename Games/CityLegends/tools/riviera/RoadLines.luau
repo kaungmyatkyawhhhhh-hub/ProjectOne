@@ -23,7 +23,8 @@
 	centre = { color = Color3?, solid = boolean?, double = boolean? } for the middle line;
 	clearMouths = true: a line piece is also left out when either end lies on another road's
 	carriageway (a street joining at a slant: its mouth reaches further along the edge line than the
-	"in a junction" test of the centre line sees).
+	"in a junction" test of the centre line sees), and the road under each end is looked for 0.05
+	inside the piece (a ray exactly on the seam between two road pieces can miss: a missing dash).
 ]]
 
 local RoadLines = {}
@@ -206,7 +207,15 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				if opts.clearMouths and (otherNear(roads, grid, pa, ri, HALF + 0.5) or otherNear(roads, grid, pb, ri, HALF + 0.5)) then
 					continue -- (in another road's mouth)
 				end
-				local ya, yb = surface(pa, r.name), surface(pb, r.name)
+				local ya, yb
+				if opts.clearMouths then
+					-- (the two ends stand exactly on the cross-sections where the road's pieces meet, and a
+					-- ray on a seam can slip between two pieces: look a hair inside this piece instead)
+					local inset = d.Unit * 0.05
+					ya, yb = surface(pa + inset, r.name), surface(pb - inset, r.name)
+				else
+					ya, yb = surface(pa, r.name), surface(pb, r.name)
+				end
 				if not ya or not yb then
 					continue -- off the road, or over another road's carriageway (a junction)
 				end
