@@ -68,6 +68,17 @@ class Screen:
         for a, b in s.cines:
             if a <= t < b: return b
         return t
+    def after_calm(s, t):
+        moved = True
+        while moved:
+            moved = False
+            for e in s.els:
+                if e['region'] in ('centre', 'modal') and e['t0'] <= t < e['t1'] and not e.get('stays'):
+                    t = e['t1'] + 0.3; moved = True
+            if s.in_cine(t): t = s.cine_end(t) + 0.4; moved = True
+        return t
+    def W(s, words, short):   # v8: the KEY texts rewritten shorter (the live text's words -> the new one's)
+        return short if s.f.get('short_text') else words
     def visible_at(s, t, region):
         return [e for e in s.els if e['region'] == region and e['t0'] <= t < e['t1']]
     def need(s, words):  # reading time for a SLOW 7-year-old (1.2 words/s) + 0.5 s to notice
@@ -102,6 +113,9 @@ class Screen:
         if key: hold = max(hold, s.need(words))
         start = max(t, s.toast_free)
         if s.f.get('hold_cine') and s.in_cine(start): start = s.cine_end(start) + 0.4
+        if key and s.f.get('calm_wait'):                            # KEY news waits until no card / window is up
+            start = s.after_calm(start)
+            if s.toast_free > start: start = s.toast_free
         if not key and start - t > 4: return                        # stale minor news is dropped
         s.delays.append(start - t)
         s.toast_free = start + hold + 0.15
@@ -190,7 +204,7 @@ def build(flags, events, rng, kid, phase):
     for t, w in items:
         kid['tut'] = tut_on
         if w == 'WELCOME GIFT':
-            S.toast(t, 'WELCOME GIFT toast', 8, True); S.sting(t, 'buyBody')
+            S.toast(t, 'WELCOME GIFT toast', S.W(8, 5), True); S.sting(t, 'buyBody')
             S.add(name='+30 float', region='float', t0=t, t1=t + 1.2)
         elif w.startswith('BUY up TIER') or w.startswith('BUY unlock'):
             S.mini(t, 3)
@@ -203,17 +217,18 @@ def build(flags, events, rng, kid, phase):
             blocked = any(e['region'] == 'modal' and e['t0'] <= t < e['t1'] for e in S.els) or S.in_cine(t)
             if blocked: S.blocked += 1
             if phase == 'first10' and tut_on and t < 150:
-                S.toast(t, 'LUMI tap-the-comet toast', 4, True, kind='LUMI comet')
+                S.toast(t, 'LUMI tap-the-comet toast', S.W(4, 3), True, kind='LUMI comet')
             if not blocked and rng.random() < 0.7:
                 S.add(name='comet +N float', region='float', t0=t + 2, t1=t + 3.2)
         elif w.startswith('TUT STEP'):
             S.add(name='+ESSENCE floats', region='float', t0=t, t1=t + 1.2)
+            t_l = S.after_calm(t) if flags.get('calm_wait') else t
             for o in S.els:                      # the card shows ONE step: the new text replaces the old
-                if o['name'] == 'LUMI card new step' and o['t1'] > t: o['t1'] = t
-            S.add(name='LUMI card new step', region='lumi', t0=t, t1=t + 30, key=True, words=5, stays=True, w=0)
+                if o['name'] == 'LUMI card new step' and o['t1'] > t_l: o['t1'] = t_l; o['superseded'] = True
+            S.add(name='LUMI card new step', region='lumi', t0=t_l, t1=t_l + 30, key=True, words=5, stays=True, w=0)
             S.sting(t, 'buy')
         elif w == 'GIFT 2x':
-            S.toast(t, 'x2 GIFT toast', 7, True); S.sting(t, 'buyBody')
+            S.toast(t, 'x2 GIFT toast', S.W(7, 5), True); S.sting(t, 'buyBody')
         elif w.startswith('SUPERNOVA'):
             first = w == 'SUPERNOVA 1'
             # the kid opens the card and presses GO when done reading: kid-paced
@@ -232,19 +247,23 @@ def build(flags, events, rng, kid, phase):
             if sn_open:
                 e = S.add(name='SUPERNOVA card (left open)', region='modal', t0=t - 2, t1=t + 30, key=False, words=0)
                 if not flags.get('centre_queue'): e['stays'] = True
-            tc = S.card(t + 0.4, 'TUTORIAL COMPLETE card', 3.05, True, 10)
+            tc = S.card(t + 0.4, 'TUTORIAL COMPLETE card', 3.05, True, S.W(10, 7))
             end = S.cutscene(t + 1.4, 'IGNITION cutscene', 8, 9)
             if not flags.get('centre_queue'):
                 tc['hidden_from'] = t + 1.4        # the cutscene hides the HUD 1 s after the card appeared
             else:
                 # queued: the card comes back after the cutscene, then the path card, then the gift
-                tc['t0'], tc['t1'] = end + 0.4, end + 0.4 + max(3.05, S.need(10)); S.centre_free = tc['t1'] + 0.2
+                tc['t0'], tc['t1'] = end + 0.4, end + 0.4 + max(3.05, S.need(tc['words'])); S.centre_free = tc['t1'] + 0.2
             S.toast(t + 4.1, 'LUMI play-with-friends toast', 10, False, kind='TIP')
             pc = S.card(end, 'PATH card (choose)', max(6, 8 / kid['speed'] + 4), True, 8, region='modal', choice=True)
             gift_t = t + 0.5
             if flags.get('centre_queue'): gift_t = pc['t1'] + 0.3
-            S.toast(gift_t, "LUMI'S GIFT toast", 6, True, kind='GIFT')
-            fw = S.card(gift_t + 0.6, 'FORGE window (gift roll)', 6, True, 4, region='modal')
+            if flags.get('calm_wait'):
+                # the gift's own window says it (title "LUMI'S GIFT!"): no toast racing the window
+                fw = S.card(gift_t, "FORGE window (LUMI'S GIFT roll)", max(6, 6 / kid['speed'] + 2), True, 6, region='modal')
+            else:
+                S.toast(gift_t, "LUMI'S GIFT toast", 6, True, kind='GIFT')
+                fw = S.card(gift_t + 0.6, 'FORGE window (gift roll)', 6, True, 4, region='modal')
             if not flags.get('centre_queue') and S.in_cine(gift_t + 0.6):
                 fw['hidden_from'] = gift_t + 0.6; fw['t1'] = end + 6     # opened under the cutscene, shows after it
             tut_on = False
@@ -306,6 +325,7 @@ def score(S, kid):
     for e in keys:
         need = e['words'] / kid['speed'] + 0.5
         if e['t1'] <= e['t0'] and not e.get('dropped'): continue      # replaced in the same frame: never shown
+        if e.get('superseded'): continue      # a step already DONE: only the current instruction matters
         k = e['kind'] if e['kind'] in ('LEVEL', 'NEW tier mini', 'LUMI comet', 'GIFT') else e['name']
         shown[k] += 1
         if e.get('cine'): continue
@@ -329,6 +349,8 @@ VERSIONS = [
     ('v4 + one big sting per second', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True)),
     ('v5 + merge same toasts, demote minor news', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True)),
     ('v6 + banner gets its own band', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True)),
+    ('v7 + KEY news waits for calm (no card / window up)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True)),
+    ('v8 + shorter KEY texts', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True)),
 ]
 
 def run(flags, n=2000, seed=11, F10=None, age=None):

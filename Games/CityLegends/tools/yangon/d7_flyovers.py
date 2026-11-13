@@ -110,6 +110,19 @@ def lane(line, d0, d1, offset, half_fn, height_fn, name, side):
             dx, dz = -dx, -dz
         h = half_fn(p[2])
         out.append([round(p[0], 2), round(height_fn(p[0], p[1], p[2]), 2), round(p[1], 2), round(dx, 4), round(dz, 4), 0, h, h])
+    # (step 7, LaneCheck: a lane's end cross-section must lie exactly on the loop's own cross-section where
+    # it leaves or joins the loop's end. The chord to the next point turned it a few degrees on the
+    # Kabar Aye split, leaving a gap up to a stud wide on one side. Both ends take the line's direction.)
+    for k, d in ((0, d0), (n - 1, d1)):
+        _, _, _, tx, tz = line.at(d)
+        # (on a sample of the line: that sample's own stored direction, which Roads.build lays its
+        # cross-section by; Line.at's tangent differs from it by up to 2 degrees)
+        j = min(range(len(line.c)), key=lambda q: abs(line.c[q] - d))
+        if abs(line.c[j] - d) < 1e-6:
+            tx, tz = line.s[j][3], line.s[j][4]
+        Lt = math.hypot(tx, tz)
+        sgn = -1 if side < 0 else 1
+        out[k][3], out[k][4] = round(sgn * tx / Lt, 4), round(sgn * tz / Lt, 4)
     if side < 0:
         out.reverse()
     return out
