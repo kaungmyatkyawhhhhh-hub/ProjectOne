@@ -225,11 +225,20 @@ def build(flags, events, rng, kid, phase):
     if phase == 'first10': items.append((rng.uniform(60, 400), 'FRIENDS TIP'))
     items.sort()
     pill_until = None
+    novas_seen = 0 if phase == 'first10' else 6
     for t, w in items:
+        if w.startswith('SUPERNOVA'): novas_seen += 1
         kid['tut'] = tut_on
         if w == 'WELCOME GIFT':
             S.toast(t, 'WELCOME GIFT toast', S.W(8, 5), True); S.sting(t, 'buyBody')
             S.add(name='+30 float', region='float', t0=t, t1=t + 1.2)
+        elif flags.get('demote_new') and (w.startswith('BUY up TIER') or w.startswith('BUY unlock')):
+            # v11 (owner 13 Nov: "the star thing overstimulates me"): the star moment only for a body that is really new
+            # (first run); a re-bought body = its chime; a named tier = one small merged toast
+            if w.startswith('BUY unlock') and phase == 'first10' and novas_seen == 0:
+                S.mini(t, 3)
+            elif 'TIER' in w:
+                S.toast(t, 'TIER UP toast', 5, True, kind='TIER')
         elif w.startswith('BUY up TIER') or w.startswith('BUY unlock'):
             S.mini(t, 3)
         elif w.startswith('BUY'):
@@ -382,6 +391,7 @@ VERSIONS = [
     ('v7 + KEY news waits for calm (no card / window up)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True)),
     ('v8 + shorter KEY texts', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True)),
     ('v9 + ONE queue for every KEY message (toast, mini, LUMI step)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True, key_queue=True)),
+    ('v9b = BUILT: v9 + star moment only for really new bodies, tier ups = merged toast (owner 13 Nov)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True, key_queue=True, demote_new=True)),
     ('v10 + "tap the comet" lives on the LUMI card (no toast)', dict(toast_queue=True, hold_cine=True, centre_queue=True, sting_cap=True, merge=True, demote=True, banner_band=True, calm_wait=True, short_text=True, key_queue=True, lumi_says_comet=True)),
 ]
 

@@ -38,7 +38,7 @@ W, H = TILE_W * COLS, TILE_H * ROWS
 SS = 2
 
 # Monaco's night palette
-OUTSIDE = (30, 36, 42)
+OUTSIDE = (34, 44, 42)  # (= GROUND: the grass skirt goes on past the edge in the game)
 GROUND = (34, 44, 42)
 WATER = (14, 36, 64)
 WATER_EDGE = (30, 70, 108)
@@ -163,9 +163,20 @@ def render():
         stroke(d, s, 2 * half + 6, EDGE)
         stroke(d, s, 2 * half - 4, ROUTE)
     final = im.resize((W, H), Image.LANCZOS)
+    kept = []
     for c in range(COLS):
         for r in range(ROWS):
-            final.crop((c * TILE_W, r * TILE_H, (c + 1) * TILE_W, (r + 1) * TILE_H)).save(os.path.join(OUT, f'tile_{c}_{r}.png'))
+            t = final.crop((c * TILE_W, r * TILE_H, (c + 1) * TILE_W, (r + 1) * TILE_H))
+            path = os.path.join(OUT, f'tile_{c}_{r}.png')
+            lo, hi = zip(*t.getextrema())
+            if max(hi) - min(lo) <= 2:  # plain ground: not drawn (the minimap's backing is that colour)
+                if os.path.exists(path):
+                    os.remove(path)
+                continue
+            t.save(path)
+            kept.append(f'tile_{c}_{r}')
+    json.dump(kept, open(os.path.join(OUT, 'kept.json'), 'w'))
+    print(len(kept), 'tiles with something on them')
     final.resize((W // 4, H // 4), Image.LANCZOS).save(os.path.join(OUT, 'preview.png'))
     print('x0', X0, 'z0', Z0, 'cols', COLS, 'rows', ROWS, '->', OUT)
 
@@ -182,6 +193,8 @@ def write_lua(ids_path):
     ]
     for c in range(COLS):
         for r in range(ROWS):
+            if f'tile_{c}_{r}' not in ids:
+                continue
             lines.append(f'\t\t{{ col = {c}, row = {r}, image = "{ids[f"tile_{c}_{r}"]}" }},')
     lines += ['\t},', '}']
     path = os.path.join(ROOT, 'src', 'client', 'YangonMapArt.lua')
