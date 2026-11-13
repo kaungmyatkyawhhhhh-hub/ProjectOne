@@ -170,6 +170,14 @@ local function clipPoly(c: { Vector3 }, inside: (Vector3) -> boolean): ({ Vector
 end
 Roads.clipPoly = clipPoly
 
+-- a triangle under 0.03 studs across is not worth a part: its plane is set by rounding, so its wedges
+-- (as thick as the slab, along that plane's normal) can lean any way at all and stick out sideways
+local function sliver(a: Vector3, b: Vector3, c: Vector3): boolean
+	local long = math.max((b - a).Magnitude, (c - a).Magnitude, (c - b).Magnitude)
+	return long < 1e-6 or (b - a):Cross(c - a).Magnitude / long < 0.03
+end
+Roads.sliver = sliver
+
 -- samples as vectors, per road
 local function prepare(data, cut)
 	local roads = {}
@@ -869,7 +877,9 @@ function Roads.build(data, opts)
 								count += 1
 							elseif poly then
 								for k = 2, #poly - 1 do
-									count += triangle(poly[1], poly[k], poly[k + 1], 6, paveProps, folder)
+									if not sliver(poly[1], poly[k], poly[k + 1]) then
+										count += triangle(poly[1], poly[k], poly[k + 1], 6, paveProps, folder)
+									end
 								end
 							end
 							-- the kerb, cut where its own middle line enters a zone

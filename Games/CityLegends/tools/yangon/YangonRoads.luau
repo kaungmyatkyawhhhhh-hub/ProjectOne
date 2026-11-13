@@ -635,7 +635,10 @@ function M.buildMouth(m, folder: Instance)
 	local props = { Name = "Road", Material = Enum.Material.Asphalt, Color = M.palette.asphalt, CastShadow = false }
 	local made, area = 0, 0
 	for _, t in earClip(clean) do
-		made += M.Roads.triangle(t[1], t[2], t[3], M.SLAB, props, folder)
+		-- (a hair-thin triangle along the bigger road's edge would lean under that road's surface)
+		if not M.Roads.sliver(t[1], t[2], t[3]) then
+			made += M.Roads.triangle(t[1], t[2], t[3], M.SLAB, props, folder)
+		end
 		area += math.abs((t[2].X - t[1].X) * (t[3].Z - t[1].Z) - (t[2].Z - t[1].Z) * (t[3].X - t[1].X)) / 2
 	end
 	m.corners, m.area, m.outline, m.parts = #clean, area, outline, made
@@ -880,7 +883,9 @@ function M.buildRoundabout()
 	local folder = Instance.new("Folder")
 	folder.Name = "Hanthawaddy Roundabout"
 	local pal = M.palette
-	local T = M.Roads.triangle
+	local function T(a: Vector3, b: Vector3, c: Vector3, th: number, props, parent: Instance): number
+		return if M.Roads.sliver(a, b, c) then 0 else M.Roads.triangle(a, b, c, th, props, parent)
+	end
 	local Y0 = C.Y
 	local step = TAU / M.N
 	local count = 0
@@ -1267,28 +1272,41 @@ function M.checkJunctions()
 					vx, vz = vx / L, vz / L
 					total.mouths += 1
 					local h = S.half
-					-- (a) a 0.8-stud grid round Q. In main's kerb and pavement band: inside S's carriageway
-					-- nothing of main's kerb or pavement; 1.2 to 1.8 past S's edge they must be there
+					-- (a) the main road's kerb and pavement band on this side, 0.8 studs apart, as far along
+					-- the main road as the mouth can reach (a slanted mouth is longer: h / sin of the angle).
+					-- Inside S's carriageway: nothing of main's kerb or pavement. 1.2 to 1.8 past S's edge:
+					-- they must be there again.
 					local crossing, missing = 0, 0
-					-- (a slanted mouth is longer along the main road: h / sin of the angle between the two)
-					local ms = main.s[na[2]]
+					local iq = if da < db then nb[2] else na[2]
+					local ms = main.s[iq]
+					local mrx, mrz = rightOf(ms)
+					local side = if (qx - ms[1]) * mrx + (qz - ms[3]) * mrz > 0 then 1 else -1
 					local sinA = math.abs(vx * ms[5] - vz * ms[4]) / hyp(ms[4], ms[5])
 					local reach = math.min(h / math.max(sinA, 0.2) + 14, 180)
-					local x = qx - reach
-					while x <= qx + reach do
-						local z = qz - reach
-						while z <= qz + reach do
-							local near = M.near(x, z, 3)
-							local nm, ns = near[main.index], near[S.index]
-							if nm and ns then
-								local dm = polyDist(main, nm[2], x, z)
-								if dm > main.half - 0.2 and dm < main.half + M.WALK - 0.3 then
+					local span = math.ceil(reach / 6.4)
+					for idx = math.max(1, iq - span), math.min(main.n - 1, iq + span) do
+						if M.cut[mainName][idx] or M.cut[mainName][idx + 1] then
+							continue
+						end
+						local p0, p1 = main.s[idx], main.s[idx + 1]
+						local r0x, r0z = rightOf(p0)
+						local r1x, r1z = rightOf(p1)
+						for sub = 0, 7 do
+							local u = sub / 8
+							local axx, azz = p0[1] + (p1[1] - p0[1]) * u, p0[3] + (p1[3] - p0[3]) * u
+							local rx, rz = r0x + (r1x - r0x) * u, r0z + (r1z - r0z) * u
+							local lat = main.half + 0.3
+							while lat < main.half + M.WALK - 0.3 do
+								local x, z = axx + rx * side * lat, azz + rz * side * lat
+								local near = M.near(x, z, 2)
+								local ns = near[S.index]
+								if ns then
 									local ds = polyDist(S, ns[2], x, z)
 									if ds < h - 0.4 then
 										if mf and sidesUnder(x, qy, z, mf) then
 											crossing += 1
 										end
-									elseif ds > h + 1.2 and ds < h + 1.8 and dm > main.half + 0.1 then
+									elseif ds > h + 1.2 and ds < h + 1.8 then
 										if not (mf and sidesUnder(x, qy, z, mf)) then
 											-- (another road's mouth, or the roundabout, right beside this one is no fault)
 											local other = hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 0.5
@@ -1304,11 +1322,11 @@ function M.checkJunctions()
 										end
 									end
 								end
+								lat += 0.8
 							end
-							z += 0.8
 						end
-						x += 0.8
 					end
+					task.wait()
 					-- (c) heights
 					local top = mf and roadTop(qx - vx * 0.5, qy, qz - vz * 0.5, mf)
 					local dh, how = math.huge, ""
