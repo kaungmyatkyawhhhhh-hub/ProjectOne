@@ -58,3 +58,12 @@ Nothing is published. Studio only. Tested in Studio Play with one player on PC u
 - VFX (only while the Index is open): 3 bubbles rise in every found tile; twinkles blink at new spots, more for rarer fish
   (Uncommon 1, Rare 2, Epic 3, Legendary 5); the old foil sheen stays. No rays.
 - Seen in Studio Play at 1220 x 730. Not checked on a phone. The fish pictures take a few seconds to appear the first time.
+
+### Fish Index tiles, pass 2 (owner 10:52: "it still look unattractive, it should be better")
+- Pass 1 was too pale (white tops + a big white glow washed the tiles out). Pass 2 was rebuilt from the backup as a
+  collectible-sticker tile: rich rarity colours (Rare is indigo now), a bright spot in the middle, a darker floor, a white
+  bevelled inner rim, a top shine; every fish has a dark ink outline + drop shadow (a second all-dark picture of it behind,
+  7.5% bigger and 2 px lower, same camera), is bigger and tilted 6 degrees. Bubbles and twinkles as in pass 1.
+- Two pictures per tile now, redrawn 20 times a second instead of every frame. Not measured on a phone.
+- Lesson for UI tiles: keep the background saturated to the edge and put the light only behind the subject; an outline on
+  the subject does more than any glow.
