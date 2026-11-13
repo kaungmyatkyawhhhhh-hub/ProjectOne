@@ -422,3 +422,21 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - Use real data where it exists (building outlines and levels, lane counts) instead of generating stand-ins.
   - Check the result side by side with the satellite view from the same angle before calling a step done.
 
+## In-game Yangon is too clean and empty (14 Nov, City Legends, owner's correction)
+- What felt bad: after the batch 0.5 accuracy pass the owner said "the ingame yangon is too clean compared to real life yangon because in real life its compact and in game theres like barely any compared to real life".
+- Cause: only the buildings drawn in OpenStreetMap were built (OSM misses most of Yangon's small buildings, sheds, shophouse infill and compound buildings), plots that touched a road were dropped or pushed back, and nothing else was placed: no walls, no clutter, no street life. The 1.6 studs a metre ground scale with car-scale roads also leaves more open grass between buildings than in the real city. "Real data" was treated as complete when it is only a floor.
+- Fix: fill every block to the real density (count the real buildings per block on the satellite view and build to that, filling OSM's gaps with buildings of the area's own type), and add the lived-in layer: compound walls and gates, shop signs and awnings, roof water tanks, power poles and wires, parked cars and motorbikes, stalls and umbrellas, bus stops.
+- Rules for every map of a real place:
+  - Real data is a floor, not the answer: compare the built density with the satellite picture block by block, and fill what the data misses.
+  - A real city is never clean: plan the clutter layer (walls, signs, wires, parked vehicles, stalls) as part of every district, not as a later polish.
+  - Judge the density from the street, at a player's eye height, as well as from above.
+## Yangon's overhead bridges are too low, and Fusan Basketball Court is missing (14 Nov, City Legends, owner's correction)
+- What felt bad: "i think the overhead bridges are too low and also wheres the fusan basketball court, u need to add EVERY single detail".
+- Cause:
+  - The flyover decks were designed for road grades, not for the clearance under them, and nobody measured the gap from the road below to the deck's underside against a real flyover (about 5.5-6 m, which at the game's car scale of 3 studs a metre is about 17-18 studs).
+  - Named real places were not treated as places. Fusan Basketball Court is in OSM (a big grey metal-roofed hall on Kabar Aye Pagoda Road); the generator saw only "a building, 3 floors" and made it a plain walk-up block with no name. Sports pitches, courts, pools and the like were not built at all.
+- Fix: raise the decks to real clearance; every named OSM building and place gets its real kind (hall, court, pool, pagoda, school, market ...) and its name as plain text; every pitch, court, pool, playground and track is built with its markings, fences and goals.
+- Rules for every map of a real place:
+  - Measure clearances (bridges, flyovers, footbridges, tunnels) against the real ones, at the game's vehicle scale, and check them from a driver's eye.
+  - Every named place in the data is a landmark to someone: list them all, give each its real kind and look, and check the list is empty of "plain boxes" before calling a district done.
+  - "Every detail" means every feature type the data has (courts, pitches, pools, walls, gates, pagodas, bus stops, footbridges), not just roads and buildings.

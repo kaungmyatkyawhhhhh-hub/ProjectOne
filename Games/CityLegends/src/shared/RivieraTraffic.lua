@@ -249,6 +249,21 @@ do
 	end
 end
 
+-- is piece k (from point k to k + 1) inside a lane's point ranges? (true = all of it, nil = none)
+local function inRanges(r: any, k: number): boolean
+	if r == true then
+		return true
+	elseif type(r) ~= "table" then
+		return false
+	end
+	for i = 1, #r - 1, 2 do
+		if k >= r[i] and k < r[i + 1] then
+			return true
+		end
+	end
+	return false
+end
+
 local cached = nil
 function RivieraTraffic.build()
 	if cached then
@@ -288,6 +303,23 @@ function RivieraTraffic.build()
 		for _, k in ygn.links do
 			table.insert(linksAll, k)
 		end
+		-- (2026-11-14, Yangon v5: real lane counts made the module too big for one script: the rest of its
+		-- lanes, numbered on from YangonLanes', and more links, in YangonLanes2)
+		if ygn.more then
+			local ok2, ygn2 = pcall(function()
+				return require(script.Parent:WaitForChild("YangonLanes2", 2))
+			end)
+			if ok2 and type(ygn2) == "table" and ygn2.first == ygn.first + #ygn.lanes then
+				for _, l in ygn2.lanes do
+					table.insert(lanesAll, l)
+				end
+				for _, k in ygn2.links do
+					table.insert(linksAll, k)
+				end
+			else
+				warn("RivieraTraffic: YangonLanes2 is missing or out of step with YangonLanes; Yangon's traffic is incomplete")
+			end
+		end
 		data = { lanes = lanesAll, links = linksAll }
 	end
 	local dataLanes, dataLinks = oneLaneStreets(data)
@@ -313,6 +345,14 @@ function RivieraTraffic.build()
 			seg.route = l.kind == "route" -- the three long routes (yellow on the map)
 			seg.rivHighway = l.highway == true -- the Riviera Highway (Traffic keeps few cars on it)
 			seg.speedK = speedK
+			if l.yangon then
+				-- (Yangon v5, d9_lanes.py: `outer` / `median` = point ranges { from, to, ... } where this lane is a
+				-- road's outermost (the start spots) and where a raised median runs beside it (no lane
+				-- splitting onto it), or true for the whole lane)
+				local s = seg :: any
+				s.outer = inRanges(l.outer, k)
+				s.median = inRanges(l.median, k)
+			end
 			row[k] = seg
 			table.insert(lanes, seg)
 			if k > 1 then

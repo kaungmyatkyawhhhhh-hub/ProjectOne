@@ -18,7 +18,7 @@ WORLD = os.path.join(ROOT, 'src', 'shared', 'YangonWorld.lua')
 PADS = os.path.join(ROOT, 'build', 'yangon_world', 'pads.json')
 WALK, SETBACK = 10.0, 3.0
 
-d = json.load(open(os.path.join(MAP, 'ygn_roads_v4.json'), encoding='utf-8'))
+d = json.load(open(os.path.join(MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
 CUT = {k: set(v) for k, v in d['cut'].items()}
 
 
