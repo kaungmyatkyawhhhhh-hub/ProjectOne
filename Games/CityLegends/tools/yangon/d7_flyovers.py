@@ -240,16 +240,70 @@ new_roads += [
 nu = R['New University Avenue Road']['s']
 def dist_to(s_list, p):
     return min(math.hypot(q[0] - p[0], q[2] - p[2]) for q in s_list)
-# (it ends under New Road's deck, on New Road's line: carried on straight under the deck until it is
-# inside the east lane, at ground height)
-nu = [list(p) for p in nu]
-while dist_to(ke, nu[-1]) > SIDE_HALF - 3:
-    a = nu[-1]
-    Lh = math.hypot(a[3], a[4])
-    x, z = a[0] + a[3] / Lh * STEP, a[2] + a[4] / Lh * STEP
-    nu.append([round(x, 2), round(ground(x, z), 2), round(z, 2), a[3], a[4], 0, a[6], a[7]])
-    if len(nu) > 200:
-        raise SystemExit('New University Avenue Road never reaches the east lane')
+# (it ends under New Road's deck, heading west, about 50 studs north of the east lane: a bend carries it
+# on until it meets the east lane square on, at ground height. The bend is a cubic Hermite from its end
+# to an east-lane sample, entering along that sample's normal; the sample whose bend is gentlest wins.)
+def hermite(A, ta, B, tb, n):
+    D = math.hypot(B[0] - A[0], B[1] - A[1])
+    out = []
+    for i in range(n + 1):
+        u = i / n
+        h00, h10, h01, h11 = 2*u**3 - 3*u**2 + 1, u**3 - 2*u**2 + u, -2*u**3 + 3*u**2, u**3 - u**2
+        out.append((h00 * A[0] + h10 * D * ta[0] + h01 * B[0] + h11 * D * tb[0],
+                    h00 * A[1] + h10 * D * ta[1] + h01 * B[1] + h11 * D * tb[1]))
+    return out
+def bend_cost(pts):  # 1 / the tightest radius
+    worst = 0.0
+    for i in range(1, len(pts) - 1):
+        ax, az = pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]
+        bx, bz = pts[i+1][0] - pts[i][0], pts[i+1][1] - pts[i][1]
+        la, lb = math.hypot(ax, az), math.hypot(bx, bz)
+        ang = math.acos(max(-1, min(1, (ax*bx + az*bz) / (la * lb))))
+        worst = max(worst, ang / ((la + lb) / 2))
+    return worst
+nu0 = [list(p) for p in nu]
+best = None
+for m in range(0, 30):  # (samples taken off its end first, so the bend can meet the lane past the fork)
+    P0 = nu0[len(nu0) - 1 - m]
+    L0 = math.hypot(P0[3], P0[4])
+    t0 = (P0[3] / L0, P0[4] / L0)
+    for k in range(14, len(ke) - 1):  # (from 14 on the two lanes stand apart: no T at the fork's nose)
+        q = ke[k]
+        tx, tz = ke[k+1][0] - ke[k-1][0], ke[k+1][2] - ke[k-1][2]
+        Lt = math.hypot(tx, tz); tx, tz = tx / Lt, tz / Lt
+        nx, nz = -tz, tx  # a normal; point it from P0's side into the lane
+        if (P0[0] - q[0]) * nx + (P0[2] - q[2]) * nz > 0:
+            nx, nz = -nx, -nz
+        D = math.hypot(q[0] - P0[0], q[2] - P0[2])
+        if D < 30 or D > 160:
+            continue
+        pts = hermite((P0[0], P0[2]), t0, (q[0], q[2]), (nx, nz), 40)
+        c = bend_cost(pts) + 0.0004 * m
+        if best is None or c < best[0]:
+            best = (c, k, pts, m)
+c, kq, pts, mcut = best
+nu = nu0[:len(nu0) - mcut]
+P0 = nu[-1]
+print('New University Avenue Road: %d samples off its end, then a bend' % mcut)
+print('New University Avenue Road bends onto east-lane sample %d: tightest radius %.0f studs' % (kq, 1 / bend_cost(pts)))
+# resample the bend every STEP, stop at the first sample well inside the east lane
+dense = []
+for i in range(1, len(pts)):
+    a2, b2 = pts[i-1], pts[i]
+    for j in range(1, 21):
+        u = j / 20
+        dense.append((a2[0] + (b2[0] - a2[0]) * u, a2[1] + (b2[1] - a2[1]) * u))
+prev = (P0[0], P0[2])
+run = 0.0
+for i, (x, z) in enumerate(dense):
+    run += math.hypot(x - prev[0], z - prev[1]); prev = (x, z)
+    if run >= STEP or i == len(dense) - 1:
+        nx_, nz_ = dense[min(i + 1, len(dense) - 1)][0] - dense[max(i - 1, 0)][0], dense[min(i + 1, len(dense) - 1)][1] - dense[max(i - 1, 0)][1]
+        Ln = math.hypot(nx_, nz_)
+        nu.append([round(x, 2), round(ground(x, z), 2), round(z, 2), round(nx_ / Ln, 4), round(nz_ / Ln, 4), 0, P0[6], P0[7]])
+        run = 0.0
+        if dist_to(ke, nu[-1]) <= SIDE_HALF - 3:
+            break
 R['New University Avenue Road']['s'] = nu
 ku = len(nu) - 1
 print('New University Avenue Road carried on to the east lane: %d samples' % len(nu))
