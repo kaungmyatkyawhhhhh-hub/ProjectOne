@@ -29,3 +29,11 @@ Saved in Studio, not published.
   pressed further (0.10, wider falloff so no crater ring). Nose, tip smoothing, texture, bones unchanged.
 - `Art\Minnow_hse\nose_14Nov\Minnow_hse_nose_v4_topfix.fbx` -> model 122404387336994 (Approved), mesh 93435944642225, texture
   95082541061776. Backup `MB_Minnow_preTopFix_backup_14Nov`.
+
+## Minnow: smooth outline from above (owner, with a real fish photo: "its suppose to be like this ... all bumpy. keep our width")
+- The body's half-width was measured every 0.05 units along its length and replaced by ONE smooth hump (widest at x -1.25,
+  never widening again toward the nose or tail, same max width). The surface bumps (old relief) were smoothed (10 passes), and the
+  side-view height per slice kept. All of this fades out toward the nose (x -0.45 -> -0.05), so the round C nose stays.
+- The dark outline shell follows its body point; the fins slide with the body side they touch (nothing detaches).
+- `Art\Minnow_hse\nose_14Nov\Minnow_hse_v5_smooth.fbx` -> model 94647907639448 (Approved), mesh 108043282655363, same texture
+  and skins. Backup `MB_Minnow_preSmooth_backup_14Nov`. Checked in Studio from above and 3/4.
