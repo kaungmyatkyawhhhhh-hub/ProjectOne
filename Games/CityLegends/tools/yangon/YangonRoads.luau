@@ -1839,7 +1839,8 @@ function M.checkJunctions()
 											crossing += 1
 										end
 									elseif ds > h + 1.2 and ds < h + 1.8 then
-										if not (mf and sidesUnder(x, qy, z, mf)) then
+										-- (any road's kerb or pavement: past a round corner the joining road's own)
+										if not sidesUnder(x, qy, z, roads) then
 											-- (another road's mouth, or the roundabout, right beside this one is no fault)
 											local other = hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 0.5 or M.inCorner(x, z)
 											for oi, bb in near do

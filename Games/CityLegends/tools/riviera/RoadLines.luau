@@ -289,8 +289,33 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				end
 				-- (opts.edgeSkip(position): an edge line is left out where something else paints it, e.g. a
 				-- round corner's curved edge line)
-				if opts.edgeSkip and l.solid and math.abs(l.x) > 2 and (opts.edgeSkip(pa) or opts.edgeSkip(pa:Lerp(pb, 0.5)) or opts.edgeSkip(pb)) then
-					continue
+				if opts.edgeSkip and l.solid and math.abs(l.x) > 2 then
+					-- (a piece half in the zone is shortened to the zone's edge, so the edge line meets the
+					-- curved one with no gap)
+					local sa, sb = opts.edgeSkip(pa), opts.edgeSkip(pb)
+					if sa and sb then
+						continue
+					elseif sa ~= sb then
+						local lo, hi = 0, 1 -- (lo stays on pa's side)
+						for _ = 1, 20 do
+							local m = (lo + hi) / 2
+							if opts.edgeSkip(pa:Lerp(pb, m)) == sa then
+								lo = m
+							else
+								hi = m
+							end
+						end
+						if sa then
+							pa = pa:Lerp(pb, hi)
+						else
+							pb = pa:Lerp(pb, lo)
+						end
+						if flat(pb - pa).Magnitude < 0.3 then
+							continue
+						end
+					elseif opts.edgeSkip(pa:Lerp(pb, 0.5)) then
+						continue
+					end
 				end
 				if opts.clearMouths then
 					-- (five spots along the piece: a mouth's corner can cut into its middle)
