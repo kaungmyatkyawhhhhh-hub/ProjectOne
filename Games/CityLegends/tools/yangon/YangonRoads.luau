@@ -1902,6 +1902,98 @@ function M.checkMouths()
 	return string.format("mouths: %d, %d spots, %d with kerb or pavement on the joining road%s", #M.mouths, spots, bad, if #per > 0 then ": " .. table.concat(per, "; ") else "")
 end
 
+
+-- Step 6: grass right up to every pavement's outer edge. The verge (M.verge) leaves out whole strips near
+-- junctions, so where the ground is lower than the road (the Inya Road crossing) the pavement's side
+-- stood up to 1.5 studs proud. Here every 6.4-stud piece of outer edge is tested on its own: when the
+-- ground just outside is more than 0.8 under the pavement's top and nothing of another road lies there,
+-- a grass block is filled from 2 studs under the pavement out to 6 past it, its top where the verge's is.
+function M.edgeFill(names: { string })
+	local tp = RaycastParams.new()
+	tp.FilterType = Enum.RaycastFilterType.Include
+	tp.FilterDescendantsInstances = { workspace.Terrain }
+	local pp = RaycastParams.new()
+	pp.FilterType = Enum.RaycastFilterType.Include
+	pp.FilterDescendantsInstances = { M.folder() }
+	-- is a point clear of every road but `self` (carriageway, its pavement band, corners, the ring)?
+	local function clear(x: number, z: number, self): boolean
+		if M.inCorner(x, z) or hyp(x - C.X, z - C.Z) < M.RING_V + M.WALK + 1 then
+			return false
+		end
+		for oi, b in M.near(x, z, 2) do
+			local o = M.list[oi]
+			if o ~= self and not M.cut[o.name][b[2]] then
+				local walk = math.max(o.walkL or M.WALK, o.walkR or M.WALK)
+				if polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + walk + 0.5 then
+					return false
+				end
+			end
+		end
+		return true
+	end
+	local filled, tested = 0, 0
+	for _, name in names do
+		local o = M.R[name]
+		for i = 1, o.n - 1 do
+			if M.cut[name][i] or M.cut[name][i + 1] then
+				continue
+			end
+			local a, b = o.s[i], o.s[i + 1]
+			local rx, rz = rightOf(a)
+			local len = hyp(b[1] - a[1], b[3] - a[3])
+			if len < 0.5 then
+				continue
+			end
+			local fx, fz = (b[1] - a[1]) / len, (b[3] - a[3]) / len
+			for _, side in { -1, 1 } do
+				if side < 0 and o.walkL then
+					continue -- (a side lane's inner side: the deck stands there)
+				end
+				local W = (if side < 0 then o.walkL else o.walkR) or M.WALK
+				local edge = math.max(M.halfAt(o, i), M.halfAt(o, i + 1)) + W
+				local mx, mz = (a[1] + b[1]) / 2, (a[3] + b[3]) / 2
+				local ox, oz = mx + rx * side * (edge + 1.5), mz + rz * side * (edge + 1.5)
+				tested += 1
+				-- the pavement's real top just inside its edge (none: a mouth or a corner, leave it)
+				local ix, iz = mx + rx * side * (edge - 1), mz + rz * side * (edge - 1)
+				local top = workspace:Raycast(Vector3.new(ix, a[2] + 20, iz), Vector3.new(0, -40, 0), pp)
+				if not top or top.Instance.Name ~= "Pavement" then
+					continue
+				end
+				local g = workspace:Raycast(Vector3.new(ox, top.Position.Y + 10, oz), Vector3.new(0, -60, 0), tp)
+				if g and g.Position.Y > top.Position.Y - 0.8 then
+					continue
+				end
+				-- the block's far corners and middle must be clear of every other road
+				local ok = true
+				for _, f in { -0.5, 0, 0.5 } do
+					for _, lat in { edge + 1.5, edge + 6 } do
+						local x = mx + fx * len * f + rx * side * lat
+						local z = mz + fz * len * f + rz * side * lat
+						if not clear(x, z, o) then
+							ok = false
+						end
+					end
+				end
+				if not ok then
+					continue
+				end
+				-- (FillBlock's top shows about 2 studs higher on smooth terrain: as the verge, 0.2 under the
+				-- pavement's top. Air above first: nothing may stand over the pavement's level there.)
+				local y = top.Position.Y - M.CURB_UP + M.VERGE_TOP
+				local w = 8 -- from 2 under the pavement to 6 past its edge
+				local cf = CFrame.lookAt(Vector3.new(mx, y - 5, mz), Vector3.new(mx + fx, y - 5, mz + fz)) * CFrame.new(side * (edge - 2 + w / 2), 0, 0)
+				workspace.Terrain:FillBlock(cf, Vector3.new(w, 10, len + 1), Enum.Material.Grass)
+				filled += 1
+			end
+			if i % 100 == 0 then
+				task.wait()
+			end
+		end
+	end
+	return string.format("edge fill: %d of %d pavement edge pieces filled up to the pavement", filled, tested)
+end
+
 -- the whole of step 5: every road (steps 3 and 4 with the streets), the decks, the barriers, then the
 -- scrub (it moves the few specks left where junction zones meet to ServerStorage.YangonScraps and says
 -- what it took)
@@ -1909,14 +2001,33 @@ function M.step5()
 	local log = { M.step4() }
 	task.wait()
 	table.insert(log, M.buildBarriers())
+	table.insert(log, M.edgeFill(M.MAIN))
 	table.insert(log, M.scrub(true))
 	return table.concat(log, "\n")
 end
 
 function M.buildLines(names: { string })
-	return M.RoadLines.build(M.data, M.folder(), setOf(names), { cut = M.cut, paint = M.palette.paint, centre = M.centre, clearMouths = true, edgeSkip = function(p: Vector3): boolean
-		return M.inCorner(p.X, p.Z) -- (the round corners paint their own edge line along the curve)
-	end })
+	-- (step 6: the side lanes are one-way, two lanes the same way: their middle line is dashed. Every
+	-- other road keeps the one solid white centre line)
+	local two, one = {}, {}
+	for _, n in names do
+		if M.R[n] and M.R[n].kind == "side" then
+			table.insert(one, n)
+		else
+			table.insert(two, n)
+		end
+	end
+	local function lines(set, centre)
+		if #set == 0 then
+			return 0
+		end
+		return M.RoadLines.build(M.data, M.folder(), setOf(set), { cut = M.cut, paint = M.palette.paint, centre = centre, clearMouths = true, edgeSkip = function(p: Vector3): boolean
+			return M.inCorner(p.X, p.Z) -- (the round corners paint their own edge line along the curve)
+		end })
+	end
+	local a = lines(two, M.centre)
+	local b = lines(one, {})
+	return if type(a) == "number" and type(b) == "number" then a + b else tostring(a) .. " + " .. tostring(b)
 end
 
 ------------------------------------------------------------------------------------------------
