@@ -803,8 +803,32 @@ function M.buildRoads(names: { string })
 	return table.concat(lines, "; ")
 end
 
+-- The ground just past each cut end of a built road, back to 1 stud under the road. The builder's trench
+-- (and any earlier build that reached further) leaves a dip of a stud or two right at the end; step 4 butts
+-- up to these ends, and until then there must be no drop. Only ever adds ground, never above the road.
+function M.mendCutEnds(names: { string })
+	local built = setOf(names)
+	local n = 0
+	for _, e in M.cutEnds do
+		if built[e.road] then
+			local o = M.R[e.road]
+			local s = o.s[e.sample]
+			local L = hyp(s[4], s[5])
+			local sign = if e.cutIs == "after" then 1 else -1
+			local dx, dz = s[4] / L * sign, s[5] / L * sign
+			-- (FillBlock's top shows 2 studs higher on smooth terrain: measured on the bank, 13 Nov)
+			local top, bottom = s[2] - 1 - 2, s[2] - 12
+			local len = 24
+			local mid = Vector3.new(s[1] + dx * len / 2, (top + bottom) / 2, s[3] + dz * len / 2)
+			workspace.Terrain:FillBlock(CFrame.lookAt(mid, mid + Vector3.new(dx, 0, dz)), Vector3.new((o.half + M.WALK + 4) * 2, top - bottom, len), Enum.Material.Grass)
+			n += 1
+		end
+	end
+	return "cut ends mended: " .. n
+end
+
 -- The whole of step 3 in one go (run it through M.spawn, it takes about half a minute):
--- the bank, the three main roads with their mouths, the roundabout, the lines.
+-- the bank, the three main roads with their mouths, the ground at the cut ends, the roundabout, the lines.
 function M.step3()
 	local log = {}
 	table.insert(log, "cleared " .. M.clear(M.MAIN))
@@ -812,6 +836,7 @@ function M.step3()
 	table.insert(log, M.bank(M.MAIN))
 	task.wait()
 	table.insert(log, M.buildRoads(M.MAIN))
+	table.insert(log, M.mendCutEnds(M.MAIN))
 	task.wait()
 	table.insert(log, M.buildRoundabout())
 	task.wait()
