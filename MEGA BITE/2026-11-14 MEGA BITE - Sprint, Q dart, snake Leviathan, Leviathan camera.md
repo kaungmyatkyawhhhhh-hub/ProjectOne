@@ -18,3 +18,15 @@ BonePlayer_preSnake_14Nov.
 | SNAKE Leviathan: the head's path (from the swim root, not the rocking Spine0) is recorded; each spine bone turns so its piece of body lies on that path (BonePlayer `snake` per-bone turns, on top of the clip). Caps: 0.22 rad per bone, 1.6 rad whole body (else the 210-stud body folds into a U on its ~45-stud turning circle); eased; one-frame snaps carry the path along | GameConfig `snake = true`; MB_Swim snakeAngles; BonePlayer | Play: turning, the bend grows head -> tail (tail out ~67 studs), straightens down the body after |
 
 Not checked: on a real phone (holding SPRINT with the right thumb), with a gamepad.
+
+## Check pass (owner: "check them for me")
+| Test | Result |
+|---|---|
+| Q dart / Space dart | OK |
+| SPRINT button held (mouse in Studio) | OK: sprints while held, stops on release (also when released off the button) |
+| Shift until empty, refill | OK: 0 -> stops, ~3 s refill |
+| Gamepad L2 | FAILED first (handler only read L2 as gamepad input) -> fixed: L2 read from any input type. Retest OK |
+| Holding after the bar empties | restarted in short bursts at 25% -> fixed: an emptied bar needs a fresh press (`c.tired`). Retest OK |
+| Phone layout 844x390 (scale 0.9; ~0.77 with the top bar) | FOUND (older layout): the 3-tile right column (next ability / FOSSILIZE / PVP) ran ~58 px into DART. Fixed: on short screens the tiles go in a ROW under the minimap (`layoutRC`, RightCol attribute RowLayout). The stamina bar moved INSIDE the SPRINT button and the button is 66 tall, so the row's labels clear it (~9 px) |
+Studio-only test readout: player attributes DbgStamina / DbgSprint (MB_Swim, IsStudio only).
+Still not possible here: a real phone thumb test and a real gamepad.
