@@ -127,6 +127,10 @@ task.defer(compose)
 - The window **fills** the screen on phones instead of shrinking to the HUD's scale. In MEGA BITE that's the `FitFill` attribute read by `K.AttachScale`, and windows re-fit when their Size changes.
 - Tap areas: give each pill an invisible button the full row pitch tall; give a small X an invisible 64-unit tap area. Tablets keep the PC layout but get the taller tap areas.
 - Result on the Galaxy A06: ×0.58 → ×0.78, text 8.7 → 14 px, taps 17 → 40 px. PC was unchanged.
+- A window built once with lots of linked pieces (MEGA BITE World Map: a zoomable map disc, markers, a list) doesn't need rebuilding: an `applyLayout(mode)` function can re-size and re-place the existing pieces. Turn sizes the other code depends on (the disc size, the world→map factor) into variables it updates, then re-run the code that places markers.
+- A tall picture (a map) keeps the window's full height; a list next to it becomes a **grid of two-line cards** (name, then status underneath), not thin one-line rows.
+- Labels that pile up on a small map (region names) show only when zoomed in.
+- Small icons on a map get invisible tap areas (≥ 60 units), so they reach 44 px on the smallest phone.
 
 **Reward reveal (skippable, staged)**
 1. Dim the world (backdrop to 0.4) 0.15 s.
