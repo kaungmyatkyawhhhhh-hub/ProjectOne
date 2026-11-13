@@ -121,7 +121,8 @@ end
 
 -- the map's own palm (a real-looking tree), its foot at pos, h tall; the built one if the map has none
 function RewardsPalace.palm(kit: any, parent: Instance, pos: Vector3, h: number, seed: number)
-	local riv = workspace:FindFirstChild("Riviera")
+	-- (Monaco kept in ServerStorage since Yangon step 11: its palms and pieces are still copied from there)
+	local riv = workspace:FindFirstChild("Riviera") or game:GetService("ServerStorage"):FindFirstChild("Riviera")
 	local dressing = riv and riv:FindFirstChild("Dressing")
 	local m = dressing and dressing:FindFirstChild("Palm", true)
 	if not (m and m:IsA("Model")) then
