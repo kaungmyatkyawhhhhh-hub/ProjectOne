@@ -4,6 +4,8 @@ tags: [mega-bite, ui, world-map, phone, change-log]
 ---
 # MEGA BITE: World Map gets a phone layout
 
+> **Replaced the same day** by the full-screen sea chart (owner: "make map like fits screen like deepwoken map"). See [[2026-11-14 MEGA BITE - Fish Index phone layout, full-screen map, right column removed]].
+
 Step 2 of the plan in [[2026-11-14 MEGA BITE - UI pro pass (windows on phones, audit + plan)]], after [[2026-11-14 MEGA BITE - Settings phone layout]].
 
 ## Before → after (phones)
