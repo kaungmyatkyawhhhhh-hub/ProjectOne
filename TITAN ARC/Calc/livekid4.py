@@ -1,0 +1,203 @@
+"""STOMP EVOLUTION impatient-kid simulation on the LIVE build (13 Nov 2026, after the city grid + calm pass).
+Live numbers read from ReplicatedStorage.StompEvolution.Config (props, forms, upgrades, combo, golden, quests, POWER cards).
+Kid model = the owner's method (boredom meter, lognormal patience median 11 s, rewards wear off, NEW things count most).
+Live-build specifics:
+ * hold = auto stomp (cooldown 0.28 s); time per stomp = finding/aiming the next prop of the kind he goes for
+ * POWER hand: every third of a form the card hand opens (picking takes 2-5 s, it is a NEW thing the first few times)
+ * evolve cutscene 3.2 s (controls off, no boredom)
+ * calm pass: a stomp is a bit less juicy than before (no flash/shake, fewer flying coins)
+ * pads only on the main road at x = 40 / 330 / 800 (the city spreads props over 6 streets: a pad can be far away)
+Run: python livekid.py
+"""
+import math, random, statistics as st
+
+PROPS = [  # kind, need (m), mass, coins, seconds per stomp when this is what he goes for (live density)
+    ("Flower", 0, 1, 1, 0.75), ("Mailbox", 0, 1.5, 1, 0.75), ("Bin", 0, 2, 2, 0.75),
+    ("Bike", 2.05, 4, 3, 1.1), ("Car", 3.5, 14, 8, 1.4), ("Bus", 6, 45, 22, 2.6),
+    ("House", 10, 150, 60, 2.2), ("ShopRow", 18, 520, 180, 3.5), ("Tower", 32, 1900, 550, 3.8)]
+FORMS = [1.9, 2.4, 3.0, 4.5, 8.0, 13.0, 21.0]
+UPG = dict(power=(8, 2.1, 99), shock=(20, 2.6, 4), speed=(12, 1.7, 6))
+QUESTS = [("stomp", 5, None, 10), ("form", 2, None, 15), ("upgrade", 1, None, 20), ("stomp", 3, "Bike", 30), ("form", 3, None, 50),
+          ("stomp", 1, "Car", 60), ("form", 4, None, 100), ("stomp", 1, "Bus", 150), ("form", 5, None, 250), ("stomp", 1, "House", 400)]
+def height(m): return 1.7 * (1 + m / 40.0) ** 0.24
+def power(h):
+    p = 0; lo = 1.7
+    for k, hi in enumerate(FORMS):
+        for f in (1 / 3, 2 / 3, 1):
+            if h >= lo + (hi - lo) * f: p += 1
+        lo = hi
+    return p
+
+BASE = dict(name="A  LIVE 13 Nov (city + calm pass + kid cards)", welcome=10, stomp_juice=1.3, pad_detour=(4, 12), pad_notice=0.55,
+            arrow=False, playtime=None, hand_time=(2.0, 5.0), hand_reward=12, golden_first=(22, 32), combo_first=6, combo_every=15,
+            first_quest_pad=True, event_every=None, cheap_power=False, smash_index=False)
+V = [BASE]
+def add(name, **kw):
+    v = dict(V[-1]); v.update(kw); v["name"] = name; V.append(v)
+add("B  + guide arrow: always points to the nearest NEW/bigger prop or the pad you can afford", arrow=True, pad_detour=(2, 5), pad_notice=0.85)
+add("C  + 'NEW!' smash index popup the first time each prop kind is smashed (9 kinds)", smash_index=True)
+add("D  + playtime gifts at 1, 3, 5 min (a gift box ticks down on the HUD)", playtime=[60, 180, 300])
+add("E  + city event every ~3 min: a giant toy robot walks in, everyone stomps it (x5 mass for 20 s)", event_every=180)
+
+def kid(v, rng, patience, T=300):
+    slow = rng.uniform(1.15, 1.6)
+    t = 0.0; mass = 0.0; coins = v["welcome"]; lv = dict(power=0, shock=0, speed=0)
+    boredom = 0.0; seen = {}; S = dict(last_new=0.0); news = [0.0]; tl = []
+    stomps = 0; first_buy = None; forms_done = 0; pw = 0; q = 0; qprog = 0; kinds_hit = set(); bought = set()
+    golden_at = rng.uniform(*v["golden_first"]); gifts = list(v["playtime"] or [])
+    next_event = rng.uniform(60, v["event_every"]) if v["event_every"] else None; event_until = -1
+    giant_at = rng.uniform(5, 60)
+    def reward(kind, base, new=False):
+        nonlocal boredom
+        n = seen.get(kind, 0); seen[kind] = n + 1
+        wear = 0.02 if kind == "stomp" else 0.06
+        boredom = max(0.0, boredom - base / (1 + wear * n) / (1 + 0.002 * sum(seen.values())))
+        if new: S["last_new"] = t; news.append(t); tl.append((round(t, 1), kind))
+    def advance(dt, rate, frozen=False):
+        nonlocal t, boredom
+        if t - S["last_new"] > 25: rate *= 1.3
+        t += dt
+        if not frozen: boredom += rate * dt
+        return boredom > patience
+    reward("gift", 6, new=True)
+    def quest_check(kind, prop=None, n=1):
+        nonlocal q, qprog, coins
+        if q >= len(QUESTS): return
+        qk, qn, qp, qr = QUESTS[q]
+        if kind == qk and (qp is None or qp == prop):
+            qprog = n if qk in ("form", "upgrade") else qprog + 1
+            if qprog >= qn: coins += qr; q += 1; qprog = 0; reward("quest", 9, new=True)
+    grow = [1.0]
+    def gates():
+        nonlocal forms_done, pw
+        h = height(mass)
+        sc = max(1, (h / 1.7) ** 0.85)
+        if sc > grow[0] * 1.04:            # the live body grows in 4% steps: you SEE yourself get bigger
+            grow[0] = sc; reward("size up", 4)
+        while forms_done < len(FORMS) and h >= FORMS[forms_done]:
+            forms_done += 1
+            if advance(v.get("evolve_time", 3.2), 0, frozen=True): pass
+            reward("evolve", 28, new=True); quest_check("form", n=forms_done + 1)
+        for gate in list(v.get("areas", [])):
+            if h >= gate and gate not in S.setdefault("areas_done", set()):
+                S["areas_done"].add(gate); reward("area unlocked", 16, new=True)
+        while power(h) > pw:
+            pw += 1
+            # the hand opens: reading + picking
+            advance(rng.uniform(*v["hand_time"]) * slow, 0.15)
+            reward("card", v["hand_reward"], new=(seen.get("card", 0) < v.get("card_new", 4)))
+    lms = list(v.get("landmarks", []))
+    while t < T:
+        if lms and height(mass) >= lms[0][1]:
+            nm, need, lmass, lcoins = lms.pop(0)
+            if advance(rng.uniform(4, 9) * slow, 0.35): return False, t, tl, first_buy, news, forms_done, pw
+            mass += lmass * (1 + 0.35 * lv["power"]); coins += lcoins; reward("landmark " + nm, 20, new=True); gates()
+            continue
+        if t >= giant_at: giant_at = 1e9; reward("giant seen", 6, new=True)
+        if v.get("rogue_at") and t >= v["rogue_at"] and not S.get("rogue"):
+            S["rogue"] = True; reward("ROGUE ALERT", 26, new=True); S["rogue_until"] = t + rng.uniform(25, 45)
+        if S.get("rogue_until") and t >= S["rogue_until"]:
+            S["rogue_until"] = None
+            best = max((p for p in PROPS if height(mass) >= p[1]), key=lambda p: p[2])
+            mass += best[2] * 60 * v.get('bare_mass', 0.8); coins += best[3] * 30; reward("titan down", 20, new=True); gates()
+        if golden_at and t >= golden_at:
+            golden_at = None; best = max((p for p in PROPS if height(mass) >= p[1]), key=lambda p: p[2])
+            coins += 25 * best[3]; mass += (0 if v.get('click') else 25 * best[2]); reward("golden", 12, new=True); gates()
+        if gifts and t >= gifts[0]:
+            gifts.pop(0); coins += 30 + 10 * forms_done; reward("playtime gift", 10, new=True)
+        if next_event and t >= next_event:
+            next_event += v["event_every"]; event_until = t + 20; reward("event", 22, new=True)
+        # buy at a pad?
+        opts = [(UPG[k][0] * UPG[k][1] ** lv[k], k) for k in UPG if lv[k] < UPG[k][2]]
+        cost, k = min(opts)
+        notice = v["pad_notice"] + (0.3 if (q < len(QUESTS) and QUESTS[q][0] == "upgrade") else 0)
+        if coins >= cost and rng.random() < notice * 0.25:
+            if advance(rng.uniform(*v["pad_detour"]) * slow, 0.6): return False, t, tl, first_buy, news, forms_done, pw
+            coins -= cost; lv[k] += 1; quest_check("upgrade", n=sum(lv.values()))
+            if first_buy is None: first_buy = t
+            if k not in bought: bought.add(k); reward("new upgrade", 9, new=True)
+            else: reward("buy", 3.5)
+            continue
+        # pick a target kind: the biggest he can smash (if he has found it), else small stuff
+        h = height(mass)
+        avail = [p for p in PROPS if h >= p[1]]
+        best = avail[-1]
+        go_big = rng.random() < (0.85 if v["arrow"] else 0.55)
+        tgt = best if go_big else rng.choice(avail[:3])
+        dt = max(0.28, tgt[4] * slow * (1 - 0.08 * lv["speed"]) * rng.uniform(0.7, 1.3))
+        if not v["arrow"] and tgt is best and best[0] not in kinds_hit and best[1] > 0:
+            dt += rng.uniform(3, 12)    # looking for the new, bigger thing somewhere in the city
+        if advance(dt, 0.5): return False, t, tl, first_buy, news, forms_done, pw
+        if v.get("spam"):
+            nb = int(dt / 0.35)
+            bm = max(p[2] for p in avail) * v.get('bare_mass', 0.3) * (1 + 0.35 * lv["power"])
+            for _ in range(nb):
+                stomps += 1
+                m2 = 6 if (stomps == v["combo_first"] or (stomps > v["combo_first"] and (stomps - v["combo_first"]) % v["combo_every"] == 0)) else 1
+                if m2 > 1: reward("ground pound", 6, new=(seen.get("ground pound", 0) == 0))
+                mass += bm * m2 * (v.get('event_mult', 5) if t < event_until else 1)
+                coins += max(p[3] for p in avail) * v.get('bare_coins', 0.15)
+                reward("spam", 0.35)
+            gates()
+        stomps += 1
+        mult = (1 + 0.35 * lv["power"])
+        n_hit = 1 + lv["shock"]
+        if stomps == v["combo_first"] or (stomps > v["combo_first"] and (stomps - v["combo_first"]) % v["combo_every"] == 0):
+            mult *= 6; n_hit += 3; reward("ground pound", 6, new=(seen.get("ground pound", 0) == 0))
+        if t < event_until: mult *= v.get('event_mult', 5)
+        gm = 1
+        if rng.random() < v.get("golden_rate", 1 / 200): gm = 25; reward("golden", 12, new=True)
+        if v.get("click"):     # 13 Nov owner: the click gives Mass, props only coins
+            mass += max(p[2] for p in avail) * v.get('bare_mass', 0.8) * mult
+            coins += tgt[3] * n_hit * gm * (3 if (t < event_until and v.get('coin_event')) else 1)
+        else:
+            mass += tgt[2] * mult * n_hit * gm; coins += tgt[3] * n_hit
+        reward("stomp", v["stomp_juice"])
+        if S.get("rogue_until") and t < S["rogue_until"]: reward("rogue hit", 1.2)   # HIT -x popups on the titan's feet
+        quest_check("stomp", tgt[0])
+        if tgt[0] not in kinds_hit:
+            kinds_hit.add(tgt[0])
+            if v["smash_index"]: reward("NEW smash", 9, new=True)
+        gates()
+    return True, T, tl, first_buy, news, forms_done, pw
+
+def run(v, n=2000, med=11, seed=1):
+    rng = random.Random(seed); quits = []; fb = []; e1 = []; dead = []; evs = []; pws = []; dead5 = []
+    for _ in range(n):
+        pat = med * math.exp(rng.gauss(0, 0.35))
+        ok, t, tl, first_buy, news, fd, pw = kid(v, rng, pat)
+        quits.append(300 if ok else t)
+        if first_buy is not None: fb.append(first_buy)
+        e = [x for x, k in tl if k == "evolve"]
+        if e: e1.append(e[0])
+        m1 = [x for x in news if x <= 60] + [min(60, quits[-1])]
+        dead.append(max(b - a for a, b in zip(m1, m1[1:])) if len(m1) > 1 else 60)
+        if ok:
+            evs.append(fd); pws.append(pw); m5 = news + [300]; dead5.append(max(b - a for a, b in zip(m5, m5[1:])))
+    stay = lambda s: 100 * sum(q >= s for q in quits) / n
+    md = lambda x: st.median(x) if x else float("nan")
+    return dict(s15=stay(15), s30=stay(30), s60=stay(60), s120=stay(120), s180=stay(180), s300=stay(300),
+                fb=md(fb), e1=md(e1), dead=md(dead), dead5=md(dead5), evs=md(evs), pws=md(pws))
+
+if False:
+    print("IMPATIENT KID on the LIVE build 13 Nov (2,000 kids per version, patience median 11 s)")
+    print(f"{'version':92} 15s  30s  60s  2min 3min 5min | 5min@7s | 1st buy 1st evo | no-NEW gap min1  5min | forms cards @5min")
+    for v in V:
+        r = run(v); r7 = run(v, med=7)
+        print(f"{v['name']:92} {r['s15']:3.0f}% {r['s30']:3.0f}% {r['s60']:3.0f}% {r['s120']:3.0f}% {r['s180']:3.0f}% {r['s300']:3.0f}% |  {r7['s300']:3.0f}%   | {r['fb']:5.1f}s {r['e1']:5.1f}s  |  {r['dead']:5.1f}s {r['dead5']:5.1f}s  |  {r['evs']:3.0f}  {r['pws']:3.0f}")
+    print()
+    for med in (7, 16):
+        a, f = run(V[0], med=med), run(V[-1], med=med)
+        print(f"sensitivity patience {med:2d}s: A 60s {a['s60']:.0f}% / 5min {a['s300']:.0f}%  ->  last 60s {f['s60']:.0f}% / 5min {f['s300']:.0f}%")
+    rng = random.Random(7)
+    ok, t, tl, fb, news, fd, pw = kid(V[0], rng, 11)
+    print("\nA (live), one median kid, NEW things in the first 90 s:")
+    print("  " + "  ".join(f"{x:.0f}s {k}" for x, k in tl if x <= 90))
+    rng = random.Random(7)
+    ok, t, tl, fb, news, fd, pw = kid(V[-1], rng, 11)
+    print("last version, same kid:")
+    print("  " + "  ".join(f"{x:.0f}s {k}" for x, k in tl if x <= 90))
+
+# ---- round 2 (the hole between IRON 3.0 m and MAGMA 4.5 m: 386 -> 2,270 mass, most quitters are stuck there)
+def _with(props=None, forms=None):
+    pass

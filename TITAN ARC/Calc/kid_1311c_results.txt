@@ -1,0 +1,9 @@
+IMPATIENT KID on LIVE v127 (2,000 kids per version, patience median 11 s)
+version                                                                                30s  60s  2min 5min | 5m@7s 5m@16s | 1st buy 1st evo | gap min1 | forms
+A  v126 + clicks 1.2 (last run's winner, no areas / rogue counted)                     100% 100% 100%  99% |  89%  100%  |  17.4s   8.4s |  15.5s |   6
+B  LIVE v127: + AREA UNLOCKED moments (2.4 / 4.5 / 8 m) + Rogue Alert at ~3.5 min      100% 100% 100%  99% |  89%  100%  |  16.9s   8.5s |  15.4s |   6
+C  + welcome coins 10 -> 20 (first upgrade sooner)                                     100% 100% 100% 100% |  89%  100%  |  16.7s   8.5s |  15.6s |   6
+D  + first Rogue Alert earlier for a new server (~2 min)                               100% 100% 100%  99% |  86%  100%  |  17.5s   8.5s |  15.5s |   6
+
+B  median kid, first 30 s: 0s gift  1s NEW smash  4s card  4s ground pound  5s evolve  11s card  14s card  14s giant seen  15s new upgrade  17s new upgrade  22s card  22s quest  23s NEW smash  26s golden  29s evolve  29s quest  29s area unlocked
+   later NEW: 35s quest  35s new upgrade  52s landmark Playground  56s quest  60s evolve  60s quest  82s event  84s quest  84s NEW smash  99s evolve  99s quest  99s area unlocked  116s NEW smash  138s quest  138s NEW smash  150s NEW smash  162s landmark School  171s event  176s evolve  176s quest  176s area unlocked  212s ROGUE ALERT  224s quest  224s NEW smash  233s golden  249s titan down  260s event  262s evolve  290s landmark Mall

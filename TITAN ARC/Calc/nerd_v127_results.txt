@@ -1,0 +1,7 @@
+QUALITY-NERD KID on LIVE v127 (2,000 kids, 10-minute walk starting in the spawn park; trust tells per 10 min)
+version                                                                                      likes  tells/10min  wows/10min  top tells
+P0 v120 (before the park redo): sparse spawn park, playground the only set piece there         97%     5.1        30.2      empty field 5.1, same prop again 0.0
+P1 v124 park v3: plaza, paths, pond, garden, 545 trees, 73 props                              100%     0.0        34.9      same prop again 0.0
+P2 LIVE v127: + wild titans (plain heads), Rogue Alert, area walls, pond grass patch           99%     3.5        39.3      wall in the way 1.5, plain NPC heads 1.5, grass patch 0.5
+P3 + NPC giants get a face + hair look (helmet from their armour set)                          99%     2.0        39.4      wall in the way 1.5, grass patch 0.5, same prop again 0.0
+P4 + pond terrain recoloured / blended to the slab green                                       99%     1.5        39.4      wall in the way 1.5, same prop again 0.0

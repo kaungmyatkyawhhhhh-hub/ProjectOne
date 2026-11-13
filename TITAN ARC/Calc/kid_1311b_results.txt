@@ -1,0 +1,16 @@
+IMPATIENT KID, click-for-Mass change (2,000 kids per version, patience median 11 s)
+version                                                                        60s  2min 3min 5min | 5m@7s 5m@16s | 1st buy 1st evo | gap min1 | forms
+A  v124 (before): props give Mass, bare clicks 30%                             100% 100% 100%  96% |  81%  100%  |   8.4s  15.8s |  13.6s |   6
+B  LIVE v126: every click 80% Mass, props coins only, no coins from clicks     100% 100% 100%  92% |  64%   99%  |  12.2s  13.0s |  13.9s |   5
+C  B + clicks 100%                                                             100% 100% 100%  97% |  78%  100%  |  15.9s   9.9s |  15.1s |   5
+D  B + clicks 120%                                                             100% 100% 100%  99% |  89%  100%  |  17.4s   8.4s |  15.5s |   6
+E  D + Shockwave hits give a coin popup per prop (no change in numbers, more juice) 100% 100% 100%  99% |  91%  100%  |  16.8s   8.4s |  15.5s |   6
+
+A  one median kid, NEW things in 5 min (6 forms):
+  0s gift  1s NEW smash  2s new upgrade  2s ground pound  3s evolve  9s card  12s card  16s card  21s card  21s giant seen  22s NEW smash  23s new upgrade  28s golden  29s evolve  37s quest  46s landmark Playground  48s evolve  48s quest  59s quest  59s new upgrade  64s quest  82s event  84s NEW smash  97s evolve  97s quest  102s quest  104s NEW smash  110s NEW smash  133s NEW smash  159s landmark School
+
+B  one median kid, NEW things in 5 min (5 forms):
+  0s gift  1s NEW smash  2s new upgrade  6s card  6s ground pound  10s card  10s giant seen  10s new upgrade  12s evolve  15s card  17s quest  24s card  29s NEW smash  29s golden  31s new upgrade  33s evolve  33s quest  55s landmark Playground  56s quest  64s quest  70s evolve  70s quest  80s event  91s quest  91s NEW smash  108s NEW smash  110s NEW smash  111s evolve  111s quest  168s quest
+
+D  one median kid, NEW things in 5 min (6 forms):
+  0s gift  1s NEW smash  4s card  4s ground pound  5s evolve  11s card  14s card  14s giant seen  15s new upgrade  17s new upgrade  22s card  22s quest  23s NEW smash  26s golden  29s evolve  29s quest  35s quest  35s new upgrade  52s landmark Playground  56s quest  60s evolve  60s quest  82s event  84s quest  84s NEW smash  99s evolve  99s quest  116s NEW smash  138s quest  138s NEW smash
