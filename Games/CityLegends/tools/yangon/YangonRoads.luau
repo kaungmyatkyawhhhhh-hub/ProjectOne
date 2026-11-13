@@ -903,7 +903,18 @@ function M.buildCorners()
 			table.remove(clean)
 		end
 		local road = { Name = "Road", Material = Enum.Material.Asphalt, Color = pal.asphalt, CastShadow = false }
-		for _, t in earClip(clean) do
+		-- (corner points on a straight run of kerb line make hair-thin triangles that lean: drop the
+		-- middle ones first)
+		local kept = {}
+		for k = 1, #clean do
+			local a, b, d = clean[(k - 2) % #clean + 1], clean[k], clean[k % #clean + 1]
+			local ab = Vector3.new(d.X - a.X, 0, d.Z - a.Z)
+			local off = if ab.Magnitude > 1e-6 then math.abs((b.X - a.X) * ab.Z - (b.Z - a.Z) * ab.X) / ab.Magnitude else 0
+			if off > 0.02 then
+				table.insert(kept, b)
+			end
+		end
+		for _, t in earClip(kept) do
 			if not M.Roads.sliver(t[1], t[2], t[3]) then
 				made += M.Roads.triangle(t[1], t[2], t[3], M.SLAB, road, folder)
 			end
@@ -940,6 +951,30 @@ function M.buildCorners()
 				end
 			end
 		end
+		table.insert(lines, string.format("%s %s side %d: theta %.0f, r %.1f (fit %.2f), %d corners in the asphalt", c.road, c.on, c.side, math.deg(c.theta), c.r, c.err, #clean))
+		task.wait()
+	end
+	return string.format("corners: %d parts\n  %s", made, table.concat(lines, "\n  "))
+end
+
+-- each round corner's solid edge line, 1.2 in from the kerb, joining the two roads' edge lines (after
+-- RoadLines: it moves every "Line" in the road folders away first)
+function M.cornerLines()
+	local E = M.Roads.debugEdges
+	local pal = M.palette
+	local made = 0
+	for _, c in M.corners do
+		local folder = M.folder():FindFirstChild(c.road) :: Instance
+		local ES = E[c.road][if c.side < 0 then "L" else "R"]
+		local a1, a2 = c.ePts[c.sa], c.ePts[math.min(c.sa + 1, #c.ePts)]
+		local yA = ES[a1.i].Y + (ES[a2.i].Y - ES[a1.i].Y) * c.sta
+		local yB = C.Y
+		if not c.ring then
+			local EB = E[c.big.name][if c.sb < 0 then "L" else "R"]
+			local b1, b2 = c.bPts[c.sbb], c.bPts[math.min(c.sbb + 1, #c.bPts)]
+			yB = EB[b1.j].Y + (EB[b2.j].Y - EB[b1.j].Y) * c.stb
+		end
+		local len = math.abs(c.sweep) * c.r
 		-- the solid edge line, 1.2 in from the kerb, joining the two roads' edge lines
 		local nl = math.max(2, math.ceil(len / 4))
 		for q = 0, nl - 1 do
@@ -959,10 +994,8 @@ function M.buildCorners()
 			p.Parent = folder
 			made += 1
 		end
-		table.insert(lines, string.format("%s %s side %d: theta %.0f, r %.1f (fit %.2f), %d corners in the asphalt", c.road, c.on, c.side, math.deg(c.theta), c.r, c.err, #clean))
-		task.wait()
 	end
-	return string.format("corners: %d parts\n  %s", made, table.concat(lines, "\n  "))
+	return "corner lines: " .. made
 end
 
 -- The grass beside the pavement up to road height (it stood 2 to 3 studs lower: the pavement's side
@@ -1246,6 +1279,17 @@ function M.step3()
 	table.insert(log, M.buildRoundabout())
 	task.wait()
 	table.insert(log, "lines " .. M.buildLines(M.MAIN))
+	table.insert(log, M.cornerLines())
+	-- (RoadLines keeps the lines it replaced in ServerStorage.OldRoadLines: Yangon's are not wanted)
+	local old = SS:FindFirstChild("OldRoadLines")
+	if old then
+		for _, name in M.MAIN do
+			local f = old:FindFirstChild(name)
+			if f then
+				f:Destroy()
+			end
+		end
+	end
 	return table.concat(log, "\n")
 end
 

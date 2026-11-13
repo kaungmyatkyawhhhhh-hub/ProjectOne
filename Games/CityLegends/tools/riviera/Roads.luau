@@ -170,6 +170,36 @@ local function clipPoly(c: { Vector3 }, inside: (Vector3) -> boolean): ({ Vector
 end
 Roads.clipPoly = clipPoly
 
+-- (13 Nov) a quad { in0, out0, out1, in1 } cut by a zone, as a list of polygons. clipPoly cuts each side
+-- where it crosses the zone's edge and joins the cuts with a straight line, so where the zone's own edge
+-- bends inside the quad (two zones meeting: a mouth and a round corner) it takes a triangle too much: a
+-- V-shaped gap. A quad that is only partly cut is halved along its length and each half cut again, down to
+-- `depth` halvings, so the straight joins become short. Returns (pieces, whole) where whole means the quad
+-- came through untouched as the one piece.
+local function clipPieces(q: { Vector3 }, inside: (Vector3) -> boolean, depth: number): ({ { Vector3 } }, boolean)
+	local poly, whole = clipPoly(q, inside)
+	if whole then
+		return { q }, true
+	end
+	if poly == nil and depth <= 0 then
+		return {}, false
+	end
+	if depth <= 0 or (q[1] - q[4]).Magnitude < 0.3 then
+		return if poly then { poly } else {}, false
+	end
+	-- (a quad wholly inside at its corners can still be partly outside in its middle: halve it too)
+	local m1, m2 = q[1]:Lerp(q[4], 0.5), q[2]:Lerp(q[3], 0.5)
+	local out = {}
+	for _, half in { { q[1], q[2], m2, m1 }, { m1, m2, q[3], q[4] } } do
+		local pieces = clipPieces(half, inside, depth - 1)
+		for _, piece in pieces do
+			table.insert(out, piece)
+		end
+	end
+	return out, false
+end
+Roads.clipPieces = clipPieces
+
 -- a triangle under 0.03 studs across is not worth a part: its plane is set by rounding, so its wedges
 -- (as thick as the slab, along that plane's normal) can lean any way at all and stick out sideways
 local function sliver(a: Vector3, b: Vector3, c: Vector3): boolean
@@ -849,23 +879,25 @@ function Roads.build(data, opts)
 							local lift = Vector3.new(0, CURB_UP, 0)
 							local inner = 0.85
 							local quad = { ea + outA * inner + lift, ea + outA * WALK + lift, eb + outB * WALK + lift, eb + outB * inner + lift }
-							local poly, whole = clipPoly(quad, function(p)
+							local pieces, whole = clipPieces(quad, function(p)
 								return zone(r.name, p, "Pavement")
-							end)
+							end, 5)
 							wholeWalk = false -- (laid here)
 							paveProps.CastShadow = false
 							local run = (eb - ea) * Vector3.new(1, 0, 1)
-							if poly and whole and (outA - outB).Magnitude < 2e-3 and math.abs(run.Unit:Dot(outA)) < 2e-3 then -- (off square by under 0.02 studs over the pavement's width)
+							if whole and (outA - outB).Magnitude < 2e-3 and math.abs(run.Unit:Dot(outA)) < 2e-3 then -- (off square by under 0.02 studs over the pavement's width)
 								local drop = Vector3.new(0, CURB_UP - 3, 0)
 								local pa, pb = ea + outA * ((WALK + inner) / 2) + drop, eb + outB * ((WALK + inner) / 2) + drop
 								paveProps.Size = Vector3.new(WALK - inner, 6, (pb - pa).Magnitude)
 								paveProps.CFrame = CFrame.lookAt((pa + pb) / 2, pb)
 								newPart(paveProps, folder)
 								count += 1
-							elseif poly then
-								for k = 2, #poly - 1 do
-									if not sliver(poly[1], poly[k], poly[k + 1]) then
-										count += triangle(poly[1], poly[k], poly[k + 1], 6, paveProps, folder)
+							else
+								for _, poly in pieces do
+									for k = 2, #poly - 1 do
+										if not sliver(poly[1], poly[k], poly[k + 1]) then
+											count += triangle(poly[1], poly[k], poly[k + 1], 6, paveProps, folder)
+										end
 									end
 								end
 							end
@@ -887,20 +919,22 @@ function Roads.build(data, opts)
 								local second = if nb > 1 then kb % 2 == 1 else alt == 1
 								local kerbProps: { [string]: any } = { Name = "Kerb", Material = kerbMaterial, Color = if second and pal.kerbBand then pal.kerbBand else (pal.kerb or KERB), CastShadow = false }
 								local kq = { kIn0:Lerp(kIn1, t0), kOut0:Lerp(kOut1, t0), kOut0:Lerp(kOut1, t1), kIn0:Lerp(kIn1, t1) }
-								local kpoly, kwhole = clipPoly(kq, function(p)
+								local kpieces, kwhole = clipPieces(kq, function(p)
 									return zone(r.name, p, "Kerb")
-								end)
-								if kpoly and kwhole and kSquare then
+								end, 4)
+								if kwhole and kSquare then
 									local c0, c1 = (kq[1] + kq[2]) / 2, (kq[4] + kq[3]) / 2
 									local down = Vector3.new(0, -3.02, 0)
 									kerbProps.Size = Vector3.new(0.9, 6.04, (c1 - c0).Magnitude)
 									kerbProps.CFrame = CFrame.lookAt((c0 + c1) / 2 + down, c1 + down)
 									newPart(kerbProps, folder)
 									count += 1
-								elseif kpoly then
-									for k = 2, #kpoly - 1 do
-										if not sliver(kpoly[1], kpoly[k], kpoly[k + 1]) then
-											count += triangle(kpoly[1], kpoly[k], kpoly[k + 1], 6.04, kerbProps, folder)
+								else
+									for _, kpoly in kpieces do
+										for k = 2, #kpoly - 1 do
+											if not sliver(kpoly[1], kpoly[k], kpoly[k + 1]) then
+												count += triangle(kpoly[1], kpoly[k], kpoly[k + 1], 6.04, kerbProps, folder)
+											end
 										end
 									end
 								end
