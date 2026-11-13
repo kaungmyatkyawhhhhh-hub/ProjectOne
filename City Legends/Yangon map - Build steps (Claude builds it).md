@@ -27,7 +27,7 @@ Rules for every step:
 - [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). Tested in Play the same day: traffic drives the loop, both flyovers, the side lanes and the roundabout.
 - [x] **8. Buildings and landmarks** (13 Nov, version 764). 1,267 Yangon-style buildings along every road, Optima Werkz, Novotel and Myanmar Plaza, the far city with Shwedagon on the horizon. Log entry "13 Nov 2026, step 8" below.
 - [x] **9. Move in the game** (14 Nov, the essentials). Players start by Optima Werkz; Legends Motors, Legends Customs and a gas station in Yangon; fast travel spots; the Yangon minimap and world map. Then (owner: "Move more venues") every venue moved: bank, heist drop-off, gem showcase, Legends Rewards, the hotel, the three towers, Legends Realty (version 781). Then (owner: "Move houses and races") house lots, races, the Racing Hub, delivery jobs and chips moved too (version 784). Legends Service, speed traps and the leaderboard stay in Monaco for now. Log entries "14 Nov 2026, step 9", "step 9b" and "step 9c" below.
-- [ ] **10. Night lights.** Street lamps on main roads, lit buildings, never dark.
+- [x] **10. Night lights** (14 Nov, version 786). 678 white street lamps (main roads both sides, streets, flyover parapets, the roundabout), every building's windows lit at night, the far city's windows too. Log entry "14 Nov 2026, step 10" below.
 - [ ] **11. Switch over.** Move Monaco to ServerStorage (kept, not deleted), playtest, phone performance check.
 
 ## Log
@@ -342,3 +342,20 @@ Rules for every step:
   - **Still in Monaco:** Legends Service (the repair shop), the speed traps and the leaderboard board (Challenges), the old Monaco hub's dressing.
   - **The Yangon hub is a plain pad with rings:** Monaco's `RacingHub.luau` dressing (arch, flags, signs) has fixed heights and would need changing to dress it.
   - Pictures: `Yangon 9c - ...` in this folder.
+- 14 Nov 2026, step 10 (owner: "Step 10 night lights"). Version **786**.
+  - **How night works (WorldFx, nothing new in code):**
+    - Lamp heads tagged `LampGlow` glow at night.
+    - Lights tagged `LODLight` / `DayOff` switch on within about 300 studs of the camera (the phone limit Monaco uses; it applies east of x 9000, so Yangon too).
+    - Parts tagged `Window` light up at night, about 4 in 10, shops more.
+    - Yangon's buildings already had their window panes tagged (step 8), so they light up on their own.
+  - **Street lamps:**
+    - `tools/yangon/d16_lamps.py` picks the spots: main roads both sides every 96 studs (staggered), streets one side every 120 (the side swaps every 600), both flyover parapets every 96, round the roundabout's outer pavement every 20 degrees.
+    - It keeps lamps out of junctions, cut road, flyover footprints, venue / hub / house-lot fronts (their drive-ins) and away from race starts, job rings and chips.
+    - It writes the spots as one string, packed as `ClaudeTools.YangonLampSpots`.
+    - `tools/yangon/YangonLamps.luau` clones the lamp kit onto each spot after a ray proves the ground (pavement, or a deck parapet; a pavement miss is tried 1 and 2 studs further out). 678 lamps placed (7 spots skipped), in `Workspace.Yangon.Lamps`. No pole touches a building, pad or barrier.
+    - The kit is a copy of Monaco's StreetLamp, kept in `ServerStorage.YangonData.LampKit` so the lamps can be rebuilt after Monaco moves out.
+  - **Owner, 14 Nov 2026: "yangon lights are white, not dimmed lights".** Yangon's lamps are white LED: head (236, 244, 255), SpotLight (232, 240, 255), brightness 7, where Monaco's are amber. Applied to the kit and all 678 lamps (the tool makes new kits white).
+  - **Far city:** its window bands (`FarBand`) now carry `Window` + `FarWindow`, so they light at night (1,293 bands).
+  - **Play test at night (test save, `PreviewHour` 22):** the loop by Optima Werkz has white pools of light on the road and lit shop and flat windows. From high above, streets further than ~300 studs look dark (lights switch off with distance, as in Monaco).
+  - **Not done:** power poles and rain trees (street dressing), coloured lights on the decks, a phone-size night check (step 11).
+  - Pictures: `Yangon 10 - ...jpg` in this folder.
