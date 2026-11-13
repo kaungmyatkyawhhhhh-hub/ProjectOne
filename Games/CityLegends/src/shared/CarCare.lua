@@ -169,7 +169,7 @@ function CarCare.effects(c: Care): { power: number, grip: number, brake: number,
 	end
 	return {
 		power = power,
-		grip = 1 - W.GripLoss * (100 - c.t) / 100,
+		grip = 1 - W.GripLoss * (math.clamp(100 - c.t, 0, 100) / 100) ^ (W.GripCurve or 1),
 		brake = 1 - W.BrakeLoss * (100 - c.b) / 100,
 		handling = handling,
 		limp = c.e < W.EngineLimp,

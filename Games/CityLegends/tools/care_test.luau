@@ -135,7 +135,7 @@ check(CarCare.checkEngine(w) == 1, "amber when the service is overdue")
 w = CarCare.fresh(newId)
 w.t, w.b, w.h = 0, 0, 0
 fx = CarCare.effects(w)
-check(near(fx.grip, 1 - W.GripLoss, 1e-6) and near(fx.brake, 1 - W.BrakeLoss, 1e-6) and near(fx.handling, 1 - W.BodyLoss, 1e-6), "worn parts stay within -10% / -10% / -3%")
+check(near(fx.grip, 1 - W.GripLoss, 1e-6) and near(fx.brake, 1 - W.BrakeLoss, 1e-6) and near(fx.handling, 1 - W.BodyLoss, 1e-6), "worn parts lose what Config.Wear says (tyres a lot, since 2026-11-13)")
 
 -- a full interval of normal driving must not reach the flashing light
 local afterService = 100 - W.Engine.PerMile * W.ServiceEvery

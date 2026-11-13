@@ -176,6 +176,16 @@ local function reminders(player: Player, s: Session, c: CarCare.Care)
 		s.warned.flash = true
 		note(player, "Engine misfiring: get to Legends Service", "service")
 	end
+	-- (owner, 2026-11-13) worn tyres lose a lot of grip: say so, and where to get new ones
+	if c.t < W.TyreBald and not s.warned.bald then
+		s.warned.bald, s.warned.tyre = true, true
+		note(player, "Tyres bald, very little grip: new tyres at Legends Service", "service")
+	elseif c.t < W.TyreWarn and not s.warned.tyre then
+		s.warned.tyre = true
+		note(player, "Tyres worn, less grip: new tyres at Legends Service", "service")
+	elseif c.t > W.TyreWarn + 5 then
+		s.warned.tyre, s.warned.bald = nil, nil
+	end
 	if c.f <= F.Low and not s.warned.low then
 		s.warned.low = true
 		Push:FireClient(player, { kind = "lowfuel" })

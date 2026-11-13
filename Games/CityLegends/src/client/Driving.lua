@@ -3572,7 +3572,8 @@ function Driving.step(dt: number)
 				s.smokeF, s.smokeR = 0, 0
 			end
 		end
-		if throttle > 0.8 and math.abs(fwdSpeed) < 14 and brake > 0.3 then
+		-- (2026-11-13: a donut or any hard wheelspin burns the tyres like a burnout does)
+		if (throttle > 0.8 and math.abs(fwdSpeed) < 14 and brake > 0.3) or (s.axleOut ~= nil and throttle > 0.6 and s.axleOut.spin >= Config.DrivingFeel.Axle.SpinRedline) then
 			s.report.burn += dt
 		end
 		if s.drifting then

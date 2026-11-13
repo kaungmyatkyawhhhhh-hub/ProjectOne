@@ -2597,7 +2597,10 @@ Config.Wear = {
 	OldSaveDueIn = 400, -- old saves: the first service is due this many miles on
 	-- percent lost
 	Engine = { PerMile = 0.002, Overdue = 4, RedlineAfter = 3, RedlinePerSecond = 0.1, Launch = 0.03, Crash = 0.5 },
-	Tyres = { PerMile = 0.03, DriftPerSecond = 0.2, BurnPerSecond = 0.5 },
+	-- (owner, 2026-11-13: "the more u drive or do burnout or drift the tires wore out and lose alot of traction
+	-- causing u to replace tires at the repair shop") about 4 times faster than before: a set lasts about 3.5 hours
+	-- of normal driving, 2 minutes of drifting, or 50 seconds of burnouts and donuts (was 0.03, 0.2, 0.5)
+	Tyres = { PerMile = 0.12, DriftPerSecond = 0.8, BurnPerSecond = 2 },
 	Brakes = { PerMile = 0.015, HardPerSecond = 0.04 },
 	Tow = 1.25, -- a trailer on: wear and fuel times this (fuel: Config.Fuel.Tow)
 	-- what it does to the car
@@ -2607,7 +2610,10 @@ Config.Wear = {
 	PowerAtWarn = 0.08, -- power lost by EngineFlash, from EngineWarn down
 	PowerAtFlash = 0.15, -- power lost by 0, from EngineFlash down
 	LimpMph = 45,
-	GripLoss = 0.1, -- at 0% tyres
+	GripLoss = 0.45, -- at 0% tyres (owner, 2026-11-13: worn tyres "lose alot of traction"; was 0.1)...
+	GripCurve = 2, -- ...little of it while the tyres are fresh, most of it at the end: 50% tyres lose 11%, 25% lose 25%
+	TyreWarn = 30, -- "Tyres worn" under this many percent...
+	TyreBald = 10, -- ...and "Tyres bald" under this
 	BrakeLoss = 0.1, -- at 0% brakes
 	BodyLoss = 0.03, -- at 0% body (only under 40%)
 }
