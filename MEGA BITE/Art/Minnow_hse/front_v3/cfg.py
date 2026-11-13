@@ -1,0 +1,8 @@
+import sys; sys.path.insert(0,'/tmp/claude-0/fish'); from fishtpl import fish_cfg
+C=fish_cfg('f_minnow2', 3.4, 440, 218, (968,600,1238,925), [(610,894,10)], [(522,622,0),(686,802,2)], [(258,340),(420,556)],
+  [(749,346),(751,365),(766,391),(790,413),(816,423),(834,422),(859,413),(881,399),(889,388),(904,380),(915,367),(912,356),(900,344),(830,321),(795,319),(788,326),(769,330),(761,336)], (250,200,25), (250,250,245), (1031,260,58),
+  ignore_top_rule='(G<150)|((R>200)&(G>200)&(B>170))|(B>R)|(R+G+B<230)', cap_px=60, tail_t=18, pect_w_k=1.1, cap_clamp_px=None, skin_eye=1)
+C.update(fin_step=13, fin_grid=18)   # 13 Nov relief build: lighter fins pay for the finer body
+# 13 Nov owner: "the first evolution fish front looks funny too": the real front-view body box (the old box was off to the
+# left and too narrow -> a pinched face), and the front view paints the face (muzzle + ONE smile), its eyes left out.
+C.update(front_box=(1035,615,1360,927), front_w=1.4)
