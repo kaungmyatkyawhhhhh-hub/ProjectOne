@@ -1372,6 +1372,7 @@ function M.bank(names: { string })
 	return string.format("bank: %d pieces (samples %s..%s)", made, tostring(where[1]), tostring(where[#where]))
 end
 
+M.EDGE_GRADE = 0.05 -- (main roads climb at most 2.3%, streets 2.8%, in the design)
 function M.buildRoads(names: { string })
 	local only = setOf(names)
 	local parent = M.folder()
@@ -1397,6 +1398,9 @@ function M.buildRoads(names: { string })
 		live = true,
 		keepEdges = true,
 		edgesFor = edgesFor,
+		-- (step 7, LaneCheck: Yangon is flat. Monaco's 19% cap on how fast a road's edge may climb from a
+		-- junction onto its own height left New Road climbing 1.1 studs in 6 at its fork off the loop)
+		edgeGrade = M.EDGE_GRADE,
 	})
 	local lines = { string.format("Roads.build: %d parts", count) }
 	for _, m in M.mouths do
