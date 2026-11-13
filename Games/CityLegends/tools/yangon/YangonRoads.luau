@@ -110,8 +110,11 @@ function M.load()
 	local YD = SS.YangonData
 	-- (step 4: Roads2_* = ygn_roads_v2.json from tools/yangon/d7_flyovers.py: the side lanes, explicit cuts,
 	-- the decks; without it the step 3 data and its flyover corridors)
-	local pre = if YD:FindFirstChild("Roads2_1") then "Roads2_" else "Roads_"
-	M.v2 = pre == "Roads2_"
+	-- (step 5: Roads3_* = ygn_roads_v3.json from tools/yangon/d8_streets.py: every road is built, Inya Road
+	-- in three pieces at its crossings, the map-edge ends marked)
+	local pre = if YD:FindFirstChild("Roads3_1") then "Roads3_" elseif YD:FindFirstChild("Roads2_1") then "Roads2_" else "Roads_"
+	M.v2 = pre ~= "Roads_"
+	M.v3 = pre == "Roads3_"
 	local parts, k = {}, 1
 	while YD:FindFirstChild(pre .. k) do
 		parts[k] = require(YD[pre .. k]:Clone())
@@ -130,7 +133,8 @@ function M.load()
 			chain[i] = chain[i - 1] + hyp(r.s[i][1] - r.s[i - 1][1], r.s[i][3] - r.s[i - 1][3])
 		end
 		local o = { index = ri, name = r.name, kind = r.kind, rank = r.rank, half = r.half, s = r.s, n = #r.s, chain = chain,
-			startsOnEnd = r.startsOnEnd, endsOnEnd = r.endsOnEnd, walkL = r.walkL, walkR = r.walkR }
+			startsOnEnd = r.startsOnEnd, endsOnEnd = r.endsOnEnd, walkL = r.walkL, walkR = r.walkR,
+			edgeStart = r.edgeStart, edgeEnd = r.edgeEnd }
 		M.R[r.name] = o
 		M.list[ri] = o
 	end
@@ -149,6 +153,13 @@ function M.load()
 		for road, list in M.data.cut do
 			for _, i in list do
 				M.cut[road][i + 1] = "flyover"
+			end
+		end
+		if M.v3 then
+			-- (step 5: every road, the streets too)
+			M.MAIN = {}
+			for _, o in M.list do
+				table.insert(M.MAIN, o.name)
 			end
 		end
 	end
@@ -1101,7 +1112,7 @@ function M.verge(names: { string })
 		end
 		for oi, b in M.near(x, z, 3) do
 			local o = M.list[oi]
-			if (o.kind == "route" or o.kind == "side") and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + M.WALK + (if o == self then -0.2 else 1) then
+			if not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + M.WALK + (if o == self then -0.2 else 1) then
 				return false
 			end
 		end
@@ -1156,7 +1167,7 @@ function M.verge(names: { string })
 		local ok = not M.inCorner(x, z)
 		for oi, b in M.near(x, z, 3) do
 			local o = M.list[oi]
-			if (o.kind == "route" or o.kind == "side") and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + M.WALK + M.VERGE_W / 2 + 1 then
+			if not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + M.WALK + M.VERGE_W / 2 + 1 then
 				ok = false
 			end
 		end
@@ -1656,6 +1667,71 @@ function M.step4()
 	local log = { M.step3() }
 	task.wait()
 	table.insert(log, M.buildDecks())
+	return table.concat(log, "\n")
+end
+
+------------------------------------------------------------------------------------------------
+-- step 5: barriers across the map-edge road ends (edgeStart / edgeEnd in the v3 data). The far-city
+-- backdrop behind them is step 8.
+------------------------------------------------------------------------------------------------
+M.BARRIER_H = 2.8 -- a jersey barrier's height over the road
+M.BARRIER_SEG = 6.4 -- one block's length (alternating red and white, like the kerbs)
+
+function M.buildBarriers()
+	local model = M.folder().Parent :: Instance
+	local old = model:FindFirstChild("Barriers")
+	if old then
+		old:Destroy()
+	end
+	local F = Instance.new("Folder")
+	F.Name = "Barriers"
+	local made, ends = 0, {}
+	for _, o in M.list do
+		for _, e in { { o.edgeStart, 1, 1 }, { o.edgeEnd, o.n, -1 } } do
+			if not e[1] then
+				continue
+			end
+			local i, step = e[2], e[3]
+			local s = o.s[i]
+			-- the road's own heading at its end, pointing out of the road
+			local L = hyp(s[4], s[5])
+			local fx, fz = -s[4] / L * step, -s[5] / L * step
+			local rx, rz = -fz, fx
+			-- 1.5 studs in from the slab's end, across the carriageway and both pavements
+			local cx, cz = s[1] - fx * 1.5, s[3] - fz * 1.5
+			local half = M.halfAt(o, i) + M.WALK
+			local n = math.max(1, math.floor(half * 2 / M.BARRIER_SEG + 0.5))
+			local seg = half * 2 / n
+			local look = CFrame.lookAt(Vector3.zero, Vector3.new(rx, 0, rz)).Rotation
+			for k = 0, n - 1 do
+				local lat = -half + seg * (k + 0.5)
+				local onWalk = math.abs(lat) > M.halfAt(o, i)
+				local y = s[2] + (if onWalk then M.CURB_UP else 0)
+				local p = Instance.new("Part")
+				p.Name = "Barrier"
+				p.Anchored = true
+				p.TopSurface = Enum.SurfaceType.Smooth
+				p.BottomSurface = Enum.SurfaceType.Smooth
+				p.Material = Enum.Material.SmoothPlastic
+				p.Color = if k % 2 == 0 then M.palette.kerbBand :: Color3 else M.palette.kerb
+				-- (0.04 shorter than its slot: neighbours never share an end face, which would flicker)
+				p.Size = Vector3.new(seg - 0.04, M.BARRIER_H + 1, 1.6)
+				p.CFrame = CFrame.new(cx + rx * lat, y + (M.BARRIER_H - 1) / 2, cz + rz * lat) * look
+				p.Parent = F
+				made += 1
+			end
+			table.insert(ends, string.format("%s %s", o.name, if step == 1 then "start" else "end"))
+		end
+	end
+	F.Parent = model
+	return string.format("barriers: %d blocks at %d map-edge ends (%s)", made, #ends, table.concat(ends, ", "))
+end
+
+-- the whole of step 5: every road (steps 3 and 4 with the streets), the decks, the barriers
+function M.step5()
+	local log = { M.step4() }
+	task.wait()
+	table.insert(log, M.buildBarriers())
 	return table.concat(log, "\n")
 end
 
