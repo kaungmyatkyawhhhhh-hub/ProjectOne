@@ -32,6 +32,12 @@ HP = length squared, like every fish. EXP per HP is the same as the tuna (0.055)
 | Script errors | none |
 | Fish Index with 12 tiles | fits, colours right, unfound = dark shape with a padlock |
 
+## Feat words and the big multiplier (same pass)
+From the Hungry Shark video study ([[2026-11-13 Video watch - HSE all sharks + Astaroth (NextGen Gaming)]], items 2 and 5). Mechanics only; the words are our own. Code: the end of `MB_GrindFx` (backup `MB_GrindFx_preWords_13Nov`).
+- **Feat words:** a short funny word pops by your shark: always for a kind you eat for the first time and for the giant prey (gold: "TITANIC BITE!", "CALAMARI PARTY!", "BALLOON POPPED!", "ROYAL FEAST!"), about 1 bite in 7 otherwise ("HOLY MACKEREL!", "INK-REDIBLE!"), for 6 bites in 2.5 s ("WHOLE SCHOOL!"), for beating a hunter ("HUNTER HUNTED!") and in a Gold Rush ("GOLDEN GULP!"). At most one every 1.6 s.
+- **Big multiplier:** while a Gold Rush runs, "x3" (or "x6" with a Feeding Frenzy) is the biggest text on screen, top centre under the quest card and the toast line; every bite kicks it.
+- Tested in Play: both show, no script errors. Not done from that study: kill feed with portraits (Trench PvP), tier rooms in the Shop, hunters that come only for big sharks.
+
 ## Where the numbers live
 `GameConfig.Fish.Species` (the four rows), `Fish.Order` (appended), `Fish.Bands.giant`, `Fish.Pop.Tiers` (how often per ring), `Trench.Fish`.
 
@@ -40,4 +46,4 @@ HP = length squared, like every fish. EXP per HP is the same as the tuna (0.055)
 - Phones (real devices).
 
 ## Next (needs the uploads)
-The real giants: blue whale, giant turtle, colossal eel and the Kraken. See [[2026-11-13 MEGA BITE - Giants (whale, turtle, eel, Kraken) models and plan]].
+The giant creatures (friendly turtle and blue whale, the eel ambush, the Kraken event). See [[2026-11-13 MEGA BITE - Giants (whale, turtle, eel, Kraken) models and plan]].

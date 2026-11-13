@@ -32,12 +32,16 @@ All four: one mesh, one 1024 texture, at most 2 bones per vertex, 100 studs long
 Pose tests: `*_poses.jpg` (tail beat, flipper flap, eel wave, Kraken arms open).
 
 ## Gameplay plan (to build after the upload)
-| Giant | Role | Where | Idea |
+The plan is the one in [[2026-11-13 MEGA BITE - Bigger sea, landmarks and giant creatures (plan)]] (owner: "huge creatures that are violent and some friendly too"). Sizes in the game are set in Studio (the files are 100 studs long).
+
+| Giant | Size | Where | Behaviour (from the plan) |
 |---|---|---|---|
-| Blue whale | gentle, very tanky prey for Great White and Megalodon | Deep Sea, Far Deep | slow cruise; EXP on every bite; dives away when hurt |
-| Giant turtle | armoured tank | The Wilds, Deep Sea | tucks in after a few bites (no damage for 2 s): bite between tucks |
-| Colossal eel | ambush hunter | by landmarks and ruins in the far rings | hides, glows, lunges out; can be fought |
-| Kraken | world boss event | Far Deep / Trench edge | announced to the server; arm slams with a warning; everyone who bites shares the EXP by damage |
+| Giant Sea Turtle | about 90 studs | N, Kelp Lighthouse | friendly, slow loop through the kelp. Swimming in its wake = x1.5 speed and a small EXP trickle. The coral patch on its shell has fish to eat (bones Fish1, Fish2 are the two little fish). Never hurts. |
+| Blue Whale | about 220 studs | the whole Open Sea ring | friendly, a 4-minute loop. Sings (our synth) within about 300 studs. A cloud of sardines follows it = easy food. Never hurts. |
+| Colossal Eel | about 160 studs | E, in a crack under the Ocean King | violent. Glowing eyes + a growl first, red wind-up 1.2 s, then a lunge of about 70 studs; DART dodges. A hit works like the live predators (damage, no blood). Ignores Great White and Megalodon. |
+| KRAKEN event | about 250 studs | W, Glow Gardens | every 10 min or so (first after about 6). Toast, red minimap marker, red light pillar. 90 s: arms slam on red warning circles (knockback, no kill); everyone bites the arms and body; HP scales with the players nearby; EXP shared by everyone with 3+ bites; sinks with a gold fish burst. Nothing sold. |
+
+Tanky prey for the big sharks is already in the game as the four giant fish: [[2026-11-13 MEGA BITE - Late game v1 (giant prey fish)]].
 
 ## Upload and import notes
 - Upload each FBX as a Model to the group (33151111) and wait for Approved.

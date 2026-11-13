@@ -14,7 +14,7 @@ Nothing is published. The owner tests and publishes.
 | Biome moods | `MB_BiomeMood`: green kelp hills, golden east, pale south, violet west; darker further out and deeper |
 | Phone controls | Roblox's own stick and JUMP button are off; MEGA BITE's floating stick + DART / ability buttons only |
 | Phone performance (Megalodon camera, Studio) | reef 656K triangles, open sea 350-390K, trench 284K (target under 1M) |
-| Late game v1: four giant prey fish for the far rings, Fish Index 12 species | [[2026-11-13 MEGA BITE - Late game v1 (giant prey fish)]] |
+| Late game v1: four giant prey fish for the far rings, Fish Index 12 species, feat words, big Gold Rush multiplier | [[2026-11-13 MEGA BITE - Late game v1 (giant prey fish)]] |
 
 ## Models built, WAITING FOR UPLOAD (files in `MEGA BITE/Art/Expansion/`)
 Uploading stopped on 13 Nov: two Chrome browsers are connected to the account and the owner must say which one to use. Studio's own upload refuses the vault folder (it is not an approved upload folder).
@@ -43,6 +43,6 @@ After upload (each must say Approved first):
 - Uploads (blocked, see above), then: place the 3 landmarks + chests, mix the 8 kit props into `MB_WorldDress`, import the 4 giants.
 - Giants gameplay (whale and turtle as tanky prey, eel ambush, Kraken event): needs the models in Studio.
 - Sounds of their own for the chest and the biomes (code-synthesized; they need uploading too).
-- Video ideas: pun pop-ups, big multiplier, kill feed, tier rooms.
+- Video ideas left: kill feed with portraits (Trench PvP), tier rooms in the Shop, landmark uses (lighthouse lamp).
 - Both kid simulations again on the new world (and the Great White to Megalodon time with the giant prey).
 - Real-device checks (phones).
