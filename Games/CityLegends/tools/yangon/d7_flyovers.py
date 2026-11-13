@@ -173,10 +173,26 @@ def widen(road_s, chainv, d_from, d_to):
 def pyay_off(d):
     return SIDE_OFF
 
+EASE_H = 64.0  # studs over which a side lane goes from the loop end's height to the ground's
+
+def eased(x, z, d, d0, d1):
+    """the ground's height, eased onto the loop's own height at both ends (d0, d1): no step where a
+    lane starts square on a loop end"""
+    if d <= d0:
+        return L.at(d0)[1]
+    if d >= d1:
+        return L.at(d1)[1]
+    g = ground(x, z)
+    if d - d0 < EASE_H:
+        w = smooth((d - d0) / EASE_H)
+        return L.at(d0)[1] * (1 - w) + g * w
+    if d1 - d < EASE_H:
+        w = smooth((d1 - d) / EASE_H)
+        return L.at(d1)[1] * (1 - w) + g * w
+    return g
+
 def pyay_h(x, z, d):
-    if d <= dA or d >= dB:  # (on the ground part of the loop: the loop's own height)
-        return L.at(d)[1]
-    return ground(x, z)
+    return eased(x, z, d, dA, dB)
 
 decks.append({'name': 'Pyay Road Flyover', 'of': 'Yangon Loop', 'from': D0, 'to': D1, 's': loop[D0:D1 + 1]})
 cut['Yangon Loop'] = list(range(D0 + 1, D1))
@@ -238,9 +254,7 @@ def ka_half(d):
     return 16 - 4 * smooth((d - dK0) / SPLIT)
 
 def ka_h(x, z, d):
-    if d <= dK0 + 1 or d >= dK1:
-        return L.at(d)[1]
-    return ground(x, z)
+    return eased(x, z, d, dK0, dK1)
 
 # loop heading north here: its right (+1) is east
 widen(loop, L.c, dK1 + JOIN, dK1)
