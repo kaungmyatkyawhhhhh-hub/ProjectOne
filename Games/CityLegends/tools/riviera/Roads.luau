@@ -485,6 +485,7 @@ function Roads.build(data, opts)
 	-- (Yangon 2026-11-13) colours and options that are nil for Monaco
 	local pal = opts.palette or {}
 	local asphalt = pal.asphalt or ASPHALT
+	local paint = pal.paint or PAINT
 	local zone = opts.sideZone
 	if opts.keepEdges then
 		Roads.debugEdges = {}
@@ -832,22 +833,6 @@ function Roads.build(data, opts)
 						local kerbColor = if pal.kerbBand and alt == 1 then pal.kerbBand else (pal.kerb or KERB)
 						local kerbMaterial = pal.kerbMaterial or Enum.Material.Concrete
 						local wholeWalk, wholeKerb = true, true
-						-- (a painted kerb, Yangon: pal.kerbBand is the second colour and pal.kerbSplit the bands per
-						-- piece. Bands butt end to end with no overlap and at one height: two colours lying over
-						-- each other would flicker)
-						local function bandedKerb(p0: Vector3, p1: Vector3)
-							local nb = pal.kerbSplit or 1
-							local up = Vector3.new(0, CURB_UP + 0.08 - 3, 0)
-							for kb = 0, nb - 1 do
-								local q0, q1 = p0:Lerp(p1, kb / nb), p0:Lerp(p1, (kb + 1) / nb)
-								if (q1 - q0).Magnitude > 0.05 then
-									local second = if nb > 1 then kb % 2 == 1 else alt == 1
-									local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9, 6.04, (q1 - q0).Magnitude), CFrame = CFrame.lookAt((q0 + q1) / 2 + up, q1 + up), Material = kerbMaterial, Color = if second then pal.kerbBand else (pal.kerb or KERB) }, folder)
-									k.CastShadow = false
-									count += 1
-								end
-							end
-						end
 						if zone and edgeLen > 0.5 then
 							-- (Yangon 2026-11-13) exact mouths. The pavement is the strip from the road's edge to
 							-- WALK out; what lies in a zone (another road's mouth, a roundabout) is cut off on the
@@ -857,7 +842,6 @@ function Roads.build(data, opts)
 							-- their ends exactly, bend or not: nothing overlaps (the old blocks overlap on bends
 							-- with tops 0.006 apart, which is under the flicker rule's 0.05) and nothing is longer
 							-- than its slab at a cut end. A straight whole piece is one block, any other triangles.
-							local out = right * side
 							local outA = Vector3.new(-a.dir.Z, 0, a.dir.X).Unit * side
 							local outB = Vector3.new(-b.dir.Z, 0, b.dir.X).Unit * side
 							-- (the pavement starts at the kerb's back face, 0.85 out, not under the kerb: at a mouth or
@@ -885,31 +869,39 @@ function Roads.build(data, opts)
 									end
 								end
 							end
-							-- the kerb, cut where its own middle line enters a zone
-							local ka, kb = ea + out * 0.4, eb + out * 0.4
-							local ina, inb = zone(r.name, ka, "Kerb"), zone(r.name, kb, "Kerb")
-							if ina or inb then
-								wholeKerb = false
-								if ina ~= inb then
-									local lo, hi = 0, 1
-									for _ = 1, 18 do
-										local m = (lo + hi) / 2
-										if zone(r.name, ka:Lerp(kb, m), "Kerb") == ina then
-											lo = m
-										else
-											hi = m
+							-- The kerb, exact as well: pal.kerbSplit bands to a piece (pal.kerbBand is every second
+							-- band's colour: a painted kerb). Each band's footprint runs from 0.05 inside the road's
+							-- edge to 0.85 outside it, between the two samples' own right vectors, and is cut on a
+							-- zone's edge like the pavement. So bands butt end to end with no overlap (two colours
+							-- lying over each other would flicker), a cut end follows the mouth however it slants,
+							-- and the red and white rhythm does not restart at a cut. A square whole band is a
+							-- block, any other triangles.
+							wholeKerb = false -- (laid here)
+							local nb = pal.kerbSplit or 1
+							local kTop = Vector3.new(0, CURB_UP + 0.1, 0)
+							local kIn0, kIn1 = ea - outA * 0.05 + kTop, eb - outB * 0.05 + kTop
+							local kOut0, kOut1 = ea + outA * 0.85 + kTop, eb + outB * 0.85 + kTop
+							local kSquare = (outA - outB).Magnitude < 0.02 and math.abs(run.Unit:Dot(outA)) < 0.02 -- (under 0.02 studs off over its 0.9 width)
+							for kb = 0, nb - 1 do
+								local t0, t1 = kb / nb, (kb + 1) / nb
+								local second = if nb > 1 then kb % 2 == 1 else alt == 1
+								local kerbProps: { [string]: any } = { Name = "Kerb", Material = kerbMaterial, Color = if second and pal.kerbBand then pal.kerbBand else (pal.kerb or KERB), CastShadow = false }
+								local kq = { kIn0:Lerp(kIn1, t0), kOut0:Lerp(kOut1, t0), kOut0:Lerp(kOut1, t1), kIn0:Lerp(kIn1, t1) }
+								local kpoly, kwhole = clipPoly(kq, function(p)
+									return zone(r.name, p, "Kerb")
+								end)
+								if kpoly and kwhole and kSquare then
+									local c0, c1 = (kq[1] + kq[2]) / 2, (kq[4] + kq[3]) / 2
+									local down = Vector3.new(0, -3.02, 0)
+									kerbProps.Size = Vector3.new(0.9, 6.04, (c1 - c0).Magnitude)
+									kerbProps.CFrame = CFrame.lookAt((c0 + c1) / 2 + down, c1 + down)
+									newPart(kerbProps, folder)
+									count += 1
+								elseif kpoly then
+									for k = 2, #kpoly - 1 do
+										if not sliver(kpoly[1], kpoly[k], kpoly[k + 1]) then
+											count += triangle(kpoly[1], kpoly[k], kpoly[k + 1], 6.04, kerbProps, folder)
 										end
-									end
-									local p0 = if ina then ka:Lerp(kb, hi) else ka
-									local p1 = if ina then kb else ka:Lerp(kb, lo)
-									local kl = (p1 - p0).Magnitude
-									if pal.kerbBand then
-										bandedKerb(p0, p1)
-									elseif kl > 0.2 then
-										local up = Vector3.new(0, CURB_UP + 0.08 - 3 + alt * 0.006, 0)
-										local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kl), CFrame = CFrame.lookAt((p0 + p1) / 2 + up, p1 + up), Material = kerbMaterial, Color = kerbColor }, folder)
-										k.CastShadow = false
-										count += 1
 									end
 								end
 							end
@@ -948,9 +940,7 @@ function Roads.build(data, opts)
 							end
 							count += 1
 						end
-						if wholeKerb and pal.kerbBand and edgeLen > 0.5 then
-							bandedKerb(ea + right * side * 0.4, eb + right * side * 0.4)
-						elseif wholeKerb then
+						if wholeKerb then
 							local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kerbLen), CFrame = kerbCF, Material = kerbMaterial, Color = kerbColor }, folder)
 							k.CastShadow = false
 							count += 1
@@ -980,7 +970,7 @@ function Roads.build(data, opts)
 				end
 				for _, l in lines do
 					local cf = stripCF(a.pos, b.pos, l.x, LINE_T / 2 + 0.04)
-					local p = newPart({ Name = "Line", Size = Vector3.new(l.w, LINE_T, if l.solid then len + 0.3 else len * 0.9), CFrame = cf, Material = Enum.Material.SmoothPlastic, Color = PAINT }, folder)
+					local p = newPart({ Name = "Line", Size = Vector3.new(l.w, LINE_T, if l.solid then len + 0.3 else len * 0.9), CFrame = cf, Material = Enum.Material.SmoothPlastic, Color = paint }, folder)
 					decor(p)
 					count += 1
 				end
@@ -1021,7 +1011,7 @@ function Roads.build(data, opts)
 				end
 				table.insert(zebraSpots, centre)
 				for _, sc in stripes do
-					local p = newPart({ Name = "Zebra", Size = Vector3.new(2.6, LINE_T, 10), CFrame = sc, Material = Enum.Material.SmoothPlastic, Color = PAINT }, folder)
+					local p = newPart({ Name = "Zebra", Size = Vector3.new(2.6, LINE_T, 10), CFrame = sc, Material = Enum.Material.SmoothPlastic, Color = paint }, folder)
 					decor(p)
 					count += 1
 				end
@@ -1044,7 +1034,8 @@ function Roads.build(data, opts)
 		if not r.closed and not opts.noTurningCircle then
 			for _, e in { { pts[1], -1 }, { pts[n], 1 } } do
 				local p = e[1]
-				if inBox(box, p.pos) and otherNear(roads, grid, p.pos, ri, HALF + WALK) == nil then
+				-- (a cut end is no dead end: the road goes on in another tool's hands)
+				if inBox(box, p.pos) and otherNear(roads, grid, p.pos, ri, HALF + WALK) == nil and not (cutSet and cutSet[if e[2] < 0 then 1 else n]) then
 					local r0 = H + WALK
 					local centre = p.pos + p.dir.Unit * e[2] * (r0 - H)
 					newPart({ Name = "TurningCircle", Shape = Enum.PartType.Cylinder, Size = Vector3.new(SLAB, r0 * 2, r0 * 2), CFrame = CFrame.new(centre - Vector3.new(0, SLAB / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Asphalt, Color = asphalt }, folder)

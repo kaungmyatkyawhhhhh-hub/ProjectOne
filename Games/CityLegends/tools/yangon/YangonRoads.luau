@@ -48,7 +48,10 @@ M.MAIN = { "Yangon Loop", "New Road", "University Avenue" }
 M.palette = {
 	asphalt = Color3.fromRGB(46, 47, 50),
 	paver = Color3.fromRGB(150, 146, 136),
-	paverMaterial = Enum.Material.Concrete, -- (poured concrete: Roblox's Pavement material draws small pavers)
+	-- (poured concrete. Tried on the roundabout, 13 Nov: Roblox's Pavement draws small pavers, and it and the
+	-- place's Concrete show each triangle's own texture direction on bends; Sandstone reads as plain, slightly
+	-- stained concrete and shows no seams)
+	paverMaterial = Enum.Material.Sandstone,
 	kerb = Color3.fromRGB(232, 228, 218),
 	kerbBand = Color3.fromRGB(195, 47, 45) :: Color3?,
 	kerbSplit = 2,
@@ -800,6 +803,22 @@ function M.buildRoads(names: { string })
 	return table.concat(lines, "; ")
 end
 
+-- The whole of step 3 in one go (run it through M.spawn, it takes about half a minute):
+-- the bank, the three main roads with their mouths, the roundabout, the lines.
+function M.step3()
+	local log = {}
+	table.insert(log, "cleared " .. M.clear(M.MAIN))
+	task.wait()
+	table.insert(log, M.bank(M.MAIN))
+	task.wait()
+	table.insert(log, M.buildRoads(M.MAIN))
+	task.wait()
+	table.insert(log, M.buildRoundabout())
+	task.wait()
+	table.insert(log, "lines " .. M.buildLines(M.MAIN))
+	return table.concat(log, "\n")
+end
+
 function M.buildLines(names: { string })
 	return M.RoadLines.build(M.data, M.folder(), setOf(names), { cut = M.cut, paint = M.palette.paint, centre = M.centre, clearMouths = true })
 end
@@ -1541,7 +1560,7 @@ function M.surfaceCheck(spots: { { any } }, reach: number?)
 				eg = eg or string.format("step: %s on %s at %.0f, %.0f gap %.3f", e.a.Name, e.b.Name, e.at.X, e.at.Z, e.gap)
 			end
 		end
-		local dbl, rays = 0, 0
+		local dbl, rays, seams = 0, 0, 0
 		local egSlab = nil
 		local x = at.X - R + 0.37
 		while x <= at.X + R do
@@ -1554,6 +1573,19 @@ function M.surfaceCheck(spots: { { any } }, reach: number?)
 					end
 					for q = 2, #tops do
 						if math.abs(tops[q][2] - tops[1][2]) < 0.05 then
+							-- (a ray on the seam between two triangles sees both: a real doubled face is still
+							-- double a hand's width to each side)
+							local wide = true
+							for _, d in { { 0.13, 0.07 }, { -0.07, 0.13 }, { -0.11, -0.09 } } do
+								local t2 = roadTops(x + d[1], at.Y, z + d[2], roads)
+								if not (t2[2] and math.abs(t2[2][2] - t2[1][2]) < 0.05) then
+									wide = false
+								end
+							end
+							if not wide then
+								seams += 1
+								break
+							end
 							dbl += 1
 							egSlab = egSlab or string.format("two slabs at %.2f, %.2f (%s %.3f size %s, %s %.3f size %s)", x, z, tops[1][1], tops[1][2], tostring(tops[1][3].Size), tops[q][1], tops[q][2], tostring(tops[q][3].Size))
 							break
@@ -1567,7 +1599,7 @@ function M.surfaceCheck(spots: { { any } }, reach: number?)
 		fights += f
 		steps += st
 		slabs += dbl
-		table.insert(out, string.format("%s: blocks fighting %d, other thin steps %d, doubled slab spots %d of %d%s", s[1], f, st, dbl, rays, (if eg then " | " .. eg else "") .. (if egSlab then " | " .. egSlab else "")))
+		table.insert(out, string.format("%s: blocks fighting %d, other thin steps %d, doubled slab spots %d of %d (rays on a seam: %d)%s", s[1], f, st, dbl, rays, seams, (if eg then " | " .. eg else "") .. (if egSlab then " | " .. egSlab else "")))
 		task.wait()
 	end
 	return string.format("doubled faces at %d spots: blocks fighting %d, thin steps %d, doubled slab spots %d\n%s", #spots, fights, steps, slabs, table.concat(out, "\n"))
