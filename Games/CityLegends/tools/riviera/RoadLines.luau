@@ -21,10 +21,15 @@
 	Without `half` nothing changes. opts (all optional): cut = the same table as Roads.build's opts.cut
 	(cut samples get no lines and are no junction for anyone); paint = Color3 for every line;
 	centre = { color = Color3?, solid = boolean?, double = boolean? } for the middle line;
-	clearMouths = true: a line piece is also left out when either end lies on another road's
-	carriageway (a street joining at a slant: its mouth reaches further along the edge line than the
-	"in a junction" test of the centre line sees), and the road under each end is looked for 0.05
-	inside the piece (a ray exactly on the seam between two road pieces can miss: a missing dash).
+	clearMouths = true: lines are broken by where each line itself is, not by the old "this sample is
+	in a junction" test (which stops every line of the road, the far side's too, and at a fork leaves a
+	long sheet of bare asphalt). A line piece is left out when one of its ends lies
+	  - on a bigger road's carriageway (a road's lines never run over the road it joins), or
+	  - on a smaller road's carriageway: for a line off the middle, only the part of that road on the
+	    line's own side of this road's centre line counts. So at a T the near side's lines and the
+	    middle line stop for the mouth, and the far side's lines run on past it.
+	The road under each end is looked for 0.05 inside the piece (a ray exactly on the seam between two
+	road pieces can miss: a missing dash). Needs `rank` on the roads (the lower the bigger).
 ]]
 
 local RoadLines = {}
@@ -45,7 +50,7 @@ local function prepare(data, cut)
 		for i, s in r.s do
 			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), wl = s[7] or half or HALF, wr = s[8] or half or HALF }
 		end
-		roads[ri] = { name = r.name, pts = pts, route = r.kind == "route", half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil }
+		roads[ri] = { name = r.name, pts = pts, route = r.kind == "route", half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil, rank = r.rank }
 		maxDh = math.max(maxDh, roads[ri].dh)
 	end
 	local grid = {}
@@ -85,6 +90,81 @@ end
 
 local function flat(v: Vector3): Vector3
 	return Vector3.new(v.X, 0, v.Z)
+end
+
+-- (opts.clearMouths) distance from a flat point to road o's centre line near its sample i. With
+-- (ax, az, nx, nz) only the part of the line on the n side of the point a counts.
+local function lineDist(o, i: number, px: number, pz: number, ax: number?, az: number?, nx: number?, nz: number?): number
+	local best = math.huge
+	local pts = o.pts
+	for j = math.max(1, i - 2), math.min(#pts - 1, i + 1) do
+		if o.cut and (o.cut[j] or o.cut[j + 1]) then
+			continue
+		end
+		local x1, z1, x2, z2 = pts[j].pos.X, pts[j].pos.Z, pts[j + 1].pos.X, pts[j + 1].pos.Z
+		if ax and az and nx and nz then
+			local s1 = (x1 - ax) * nx + (z1 - az) * nz
+			local s2 = (x2 - ax) * nx + (z2 - az) * nz
+			if s1 < 0 and s2 < 0 then
+				continue
+			elseif s1 < 0 then
+				local t = s1 / (s1 - s2)
+				x1, z1 = x1 + (x2 - x1) * t, z1 + (z2 - z1) * t
+			elseif s2 < 0 then
+				local t = s2 / (s2 - s1)
+				x2, z2 = x2 + (x1 - x2) * t, z2 + (z1 - z2) * t
+			end
+		end
+		local vx, vz = x2 - x1, z2 - z1
+		local L = vx * vx + vz * vz
+		local t = if L > 1e-12 then math.clamp(((px - x1) * vx + (pz - z1) * vz) / L, 0, 1) else 0
+		best = math.min(best, math.sqrt((px - x1 - t * vx) ^ 2 + (pz - z1 - t * vz) ^ 2))
+	end
+	return best
+end
+
+-- (opts.clearMouths) is this end of a line of road ri in another road's way? `centre` is the point of
+-- the road's own centre line the end was measured from, `lat` how far to the right of it the line runs.
+local function inMouth(roads, grid, pos: Vector3, ri: number, centre: Vector3, lat: number): boolean
+	local me = roads[ri]
+	local near = {}
+	local cx, cz = math.floor(pos.X / 24), math.floor(pos.Z / 24)
+	for dx = -3, 3 do
+		for dz = -3, 3 do
+			for _, e in grid[(cx + dx) .. "," .. (cz + dz)] or {} do
+				if e[1] ~= ri then
+					local q = roads[e[1]].pts[e[2]].pos
+					local d = (q.X - pos.X) ^ 2 + (q.Z - pos.Z) ^ 2
+					local b = near[e[1]]
+					if not b then
+						near[e[1]] = { d, e[2] }
+					elseif d < b[1] then
+						b[1], b[2] = d, e[2]
+					end
+				end
+			end
+		end
+	end
+	for oi, b in near do
+		local o = roads[oi]
+		local oh = o.half or HALF
+		if (o.rank or 0) < (me.rank or 0) then
+			if lineDist(o, b[2], pos.X, pos.Z) < oh - 0.25 then
+				return true
+			end
+		elseif math.abs(lat) > 0.5 then
+			local side = flat(pos - centre)
+			if side.Magnitude > 1e-6 then
+				side = side.Unit
+				if lineDist(o, b[2], pos.X, pos.Z, centre.X, centre.Z, side.X, side.Z) < oh - 0.25 then
+					return true
+				end
+			end
+		elseif lineDist(o, b[2], pos.X, pos.Z) < oh - 0.25 then
+			return true
+		end
+	end
+	return false
 end
 
 function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean }?, opts): number
@@ -152,7 +232,8 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				task.wait()
 			end
 			local a, b = pts[i], pts[i + 1]
-			if inJunction[i] or inJunction[i + 1] or (r.cut and (r.cut[i] or r.cut[i + 1])) then
+			-- (opts.clearMouths: each line piece is tested on its own, below)
+			if ((inJunction[i] or inJunction[i + 1]) and not opts.clearMouths) or (r.cut and (r.cut[i] or r.cut[i + 1])) then
 				dash = 0
 				continue
 			end
@@ -204,8 +285,19 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				if d:Dot(chord) < 0.35 * len * len then
 					continue
 				end
-				if opts.clearMouths and (otherNear(roads, grid, pa, ri, HALF + 0.5) or otherNear(roads, grid, pb, ri, HALF + 0.5)) then
-					continue -- (in another road's mouth)
+				if opts.clearMouths then
+					-- (five spots along the piece: a mouth's corner can cut into its middle)
+					local blocked = false
+					for q = 0, 4 do
+						local t = q / 4
+						if inMouth(roads, grid, pa:Lerp(pb, t), ri, a.pos:Lerp(b.pos, t), l.x + (l.xb - l.x) * t) then
+							blocked = true
+							break
+						end
+					end
+					if blocked then
+						continue -- (in another road's mouth)
+					end
 				end
 				local ya, yb
 				if opts.clearMouths then

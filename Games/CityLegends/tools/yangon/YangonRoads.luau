@@ -47,12 +47,12 @@ M.MAIN = { "Yangon Loop", "New Road", "University Avenue" }
 -- The asphalt stays the game's own dark one (the real one is a lighter warm grey: the owner's call).
 M.palette = {
 	asphalt = Color3.fromRGB(46, 47, 50),
-	paver = Color3.fromRGB(150, 146, 136),
+	paver = Color3.fromRGB(128, 124, 116), -- (the photos' mid grey, at the darker end: at 150 the white kerb bands sank into it)
 	-- (poured concrete. Tried on the roundabout, 13 Nov: Roblox's Pavement draws small pavers, and it and the
 	-- place's Concrete show each triangle's own texture direction on bends; Sandstone reads as plain, slightly
 	-- stained concrete and shows no seams)
 	paverMaterial = Enum.Material.Sandstone,
-	kerb = Color3.fromRGB(232, 228, 218),
+	kerb = Color3.fromRGB(242, 240, 232),
 	kerbBand = Color3.fromRGB(195, 47, 45) :: Color3?,
 	kerbSplit = 2,
 	kerbMaterial = Enum.Material.Concrete,
@@ -958,7 +958,8 @@ function M.buildRoundabout()
 		kerb(ringPoint(M.R_IN - 0.4, j * TAU / NK, Y0), ringPoint(M.R_IN - 0.4, (j + 1) * TAU / NK, Y0), j % 2)
 	end
 	part({ Name = "Island", Shape = Enum.PartType.Cylinder, Size = Vector3.new(3, (M.R_IN - 0.1) * 2, (M.R_IN - 0.1) * 2), CFrame = CFrame.new(C.X, Y0 + 0.45 - 1.5, C.Z) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Grass, Color = grass })
-	local dome = part({ Name = "IslandMound", Size = Vector3.new(112, 4, 112), CFrame = CFrame.new(C.X, Y0 + 0.45, C.Z), Material = Enum.Material.Grass, Color = grass })
+	-- (as wide as the disc: a smaller dome left a dark ring where it met the disc)
+	local dome = part({ Name = "IslandMound", Size = Vector3.new((M.R_IN - 0.5) * 2, 5, (M.R_IN - 0.5) * 2), CFrame = CFrame.new(C.X, Y0 + 0.45, C.Z), Material = Enum.Material.Grass, Color = grass })
 	dome.CanCollide, dome.CanQuery, dome.CanTouch = false, false, false -- (its box is wider than the dome: no ray may stop on it)
 	local mesh = Instance.new("SpecialMesh")
 	mesh.MeshType = Enum.MeshType.Sphere
@@ -1373,10 +1374,22 @@ function M.checkJunctions()
 								if p.Parent == mf then
 									for u = -2, 2 do
 										local q = p.Position + p.CFrame.LookVector * (p.Size.Z / 2 * u / 2)
-										local ns = M.near(q.X, q.Z, 2)[S.index]
-										if ns and polyDist(S, ns[2], q.X, q.Z) < h - 0.3 then
-											inMouth += 1
-											break
+										local near = M.near(q.X, q.Z, 2)
+										local ns, nmq = near[S.index], near[main.index]
+										if ns and nmq then
+											-- (a line off the middle is only in the way of the part of S on its own
+											-- side of main's centre line: at a T the far side's lines run on)
+											local dq, fx, fz = polyDist(main, nmq[2], q.X, q.Z)
+											local dS
+											if dq > 0.5 and fx and fz then
+												dS = polyDist(S, ns[2], q.X, q.Z, fx, fz, (q.X - fx) / dq, (q.Z - fz) / dq)
+											else
+												dS = polyDist(S, ns[2], q.X, q.Z)
+											end
+											if dS < h - 0.3 then
+												inMouth += 1
+												break
+											end
 										end
 									end
 								end
