@@ -34,6 +34,7 @@ Use the method when its trigger fits. Each one lists its steps, its tools and an
 | Method | Use when | Note |
 |---|---|---|
 | **Impatient kid simulation** | checking or fixing a game's first minutes, "players quit early", before any launch | [[Brain/Methods/Impatient kid simulation]] |
+| **Overstimulated kid simulation** | the screen may get too busy: stacked popups / toasts / sounds, kids miss the key message; before any launch with new popups | [[Brain/Methods/Overstimulated kid simulation]] |
 | **Quality-nerd kid simulation** | a map, world or UI judged by eye; "does it look cheap / AI-made?"; before any launch | [[Brain/Methods/Quality-nerd kid simulation]] |
 | **Debate kids simulation** | "would a group of friends pick ours over X?"; finding kids' objections; before the launch scope / ads | [[Brain/Methods/Debate kids simulation]] |
 | **Kid focus group (ChatGPT)** | what goes in an update / new game; "would kids pick ours over X?"; before ads | [[Brain/Methods/Kid focus group (ChatGPT)]] |

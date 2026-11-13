@@ -379,3 +379,15 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - Fix: plates are built in code (lip, gradient face, outline, shine, gradient glass stripes), and the studs are ONE small tile image repeated with ScaleType.Tile at a fixed pixel size, centred to whole studs.
 - Rule: any texture with a repeating pattern (studs, stripes, dots, bricks) is NEVER inside the stretched part of a 9-slice. Put the pattern in its own tile image (ScaleType.Tile, fixed TileSize) over a plain body. Check every plate at its tallest and widest real use before shipping.
 - Also: UI ClipsDescendants does not clip rotated frames. Effects inside tilted stickers must be gradient masks, not clipped children.
+
+## Stacked pop-ups and the phone window too low (13 Nov, Galaxy, overstimulated-kid sim)
+- What felt bad: the sim + Play found Ignition 1 firing TUTORIAL COMPLETE, the Ignition cutscene, the path card, LUMI's gift Forge window and 6 big sounds inside 1 s, with the Supernova card left open over the path card; toasts replaced each other in under a second. Owner then: "fix the forge window and supernova card too" (the Forge ran off the bottom of a phone, the SUPERNOVA! pill sat on it, the card's last line was cut).
+- Cause 1: every emitter was built alone, each "showing itself"; there was no single queue, so the first chain that fired 4 at once stacked them.
+- Cause 2: `GuiService.TopbarInset` is in SCREEN pixels but a ScreenGui's `AbsolutePosition` is below the GUI inset (-58 for IgnoreGuiInset roots), so the top bar counted twice (116 px): every phone window was centred 29 px low with 58 px less room. The device emulator in UIAudit (`Kit.testDevice`) bypasses that code, so the audit never saw it.
+- Cause 3: `Kit.phone()` was read ONCE when a script started, before the camera had the phone's size, so "hide on phones" code never ran.
+- Fix: one NEWS queue (toasts + NEW cards + banners: one at a time, read time words/1.2 + 0.5 s, merge same kind, wait during cutscenes and kid-paced cards), cutscenes close open cards, cards in a fixed order, one big sound per second; WindowManager.safeArea measures the top bar in screen pixels; Kit.phone() checked every frame.
+- Rules for every game:
+  - Every message, card and popup goes through ONE queue from day one. Nothing replaces anything; nothing draws during a cutscene.
+  - Never mix TopbarInset (screen px) with AbsolutePosition (inset px): convert with GuiService:GetGuiInset() first.
+  - Never cache Kit.phone() / screen size at script start; read it when you lay out.
+  - Test UI in Play at a real phone size, not only in the audit's fake device.
