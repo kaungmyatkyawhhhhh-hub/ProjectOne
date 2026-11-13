@@ -168,3 +168,22 @@ D1 50 coins (today) / D2 SUN SPIDER (bug) / D3 2x XP 30 min / D4 150 / D5 200 / 
 - "GIANT ENEMY 4:52" pill (red dot) appears top-centre with a countdown; on the map a white SKULL marks it (Dusty Desert border).
 - Spiders WALK ON WALLS / tree trunks automatically (no jump needed); good for exploring, confusing for the camera.
 - Movement speed at Lv 8-9 is slow vs the map size: crossing one zone takes ~30-40 s even with RUN.
+
+### Traits, abilities, quests, death (06:10-06:20)
+- HIT FEEDBACK on food: the acorn FLASHES SOLID RED on every bite, a big chunky "+2 XP" (yellow number + cyan "XP", thick dark
+  outline, pops and floats up) and its own green HP bar above it. Your bug rears up / lunges. Very readable, very "juicy".
+- LEVEL 10 - CHOOSE A TRAIT: 3 cards appear over the bottom-centre (game keeps running): MOVEMENT "Long Legs" (▲ Move Speed +8%,
+  blue SELECT), DEFENSIVE "Leech Fangs" (▲ Heal 6% of bite damage, green), OFFENSIVE "Glass Fangs" (▲ Bite Damage +15%,
+  ▼ Max Health -8%, red). Category tag + emoji icon + name + green/red stat lines. Roguelike build choice inside an evolution
+  game (likely every 10 levels).
+- POUNCE (Q): a leap onto the nearest target that bites on landing ("+3 XP"); the button shows a big cooldown number (7..1 s).
+- QUESTS: QUICK (refill instantly: "Use your abilities 4 times +24", "Break 6 objects +28", "Tear open 3 Silk Cocoons +28",
+  then "Bite 7 Ants +26"), HOURLY ("New quests in 17:25": Reach Level 30 +150, Eat 2 players +220, Eat 10 Beetles +150),
+  TRACKING ("Next: Housefly - Grow up as Garden Spider (Lv 12) 10/12, ✓ Save 200 coins done"). Complete = green-outlined
+  centre banner "QUEST COMPLETE! Use your abilities 4 times +24 coins" and the next quest slides in.
+- Leave-guards on Esc: "Only 2 levels until Housefly! Reach Lv 12 to unlock a new bug" (with the next bug's icon).
+- DEATH SCREEN ("YOU DIED." red + red underline): 4 stat tiles KILLS / TIME SURVIVED 21:25 / LEVELS LOST -9 (red) / LEVEL REACHED,
+  green "REVIVE FOR FREE - Keep ALL your XP - back at a spawn, full health" (really free, no ad, no Robux), orange "RESPAWN
+  (LV 1)", blue "CHANGE BUG". Death normally costs levels; the free revive keeps them (maybe limited per session).
+- Respawn point: MUDDY LAKE spawn: a big centred zone title "MUDDY LAKE / Lv 8+" fades in on arrival.
+- Leaderboard ceiling: KING Simon "Dragonfly LV 200 T6" (levels go to at least 200; T6 tier reached by someone in this server).
