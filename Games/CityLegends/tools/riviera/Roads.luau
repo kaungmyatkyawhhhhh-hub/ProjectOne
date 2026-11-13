@@ -184,13 +184,21 @@ local function clipPieces(q: { Vector3 }, inside: (Vector3) -> boolean, depth: n
 	if poly == nil and depth <= 0 then
 		return {}, false
 	end
-	if depth <= 0 or (q[1] - q[4]).Magnitude < 0.3 then
+	if depth <= 0 or math.max((q[1] - q[4]).Magnitude, (q[1] - q[2]).Magnitude) < 0.3 then
 		return if poly then { poly } else {}, false
 	end
-	-- (a quad wholly inside at its corners can still be partly outside in its middle: halve it too)
-	local m1, m2 = q[1]:Lerp(q[4], 0.5), q[2]:Lerp(q[3], 0.5)
+	-- (a quad wholly inside at its corners can still be partly outside in its middle: halve it too.
+	-- Halve the longer way: a pavement piece is wider than it is long)
 	local out = {}
-	for _, half in { { q[1], q[2], m2, m1 }, { m1, m2, q[3], q[4] } } do
+	local halves
+	if (q[2] - q[1]).Magnitude > (q[4] - q[1]).Magnitude then
+		local m1, m2 = q[1]:Lerp(q[2], 0.5), q[4]:Lerp(q[3], 0.5)
+		halves = { { q[1], m1, m2, q[4] }, { m1, q[2], q[3], m2 } }
+	else
+		local m1, m2 = q[1]:Lerp(q[4], 0.5), q[2]:Lerp(q[3], 0.5)
+		halves = { { q[1], q[2], m2, m1 }, { m1, m2, q[3], q[4] } }
+	end
+	for _, half in halves do
 		local pieces = clipPieces(half, inside, depth - 1)
 		for _, piece in pieces do
 			table.insert(out, piece)
@@ -881,7 +889,7 @@ function Roads.build(data, opts)
 							local quad = { ea + outA * inner + lift, ea + outA * WALK + lift, eb + outB * WALK + lift, eb + outB * inner + lift }
 							local pieces, whole = clipPieces(quad, function(p)
 								return zone(r.name, p, "Pavement")
-							end, 5)
+							end, 7)
 							wholeWalk = false -- (laid here)
 							paveProps.CastShadow = false
 							local run = (eb - ea) * Vector3.new(1, 0, 1)
