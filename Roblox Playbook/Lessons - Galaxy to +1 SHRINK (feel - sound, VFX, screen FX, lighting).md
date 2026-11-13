@@ -397,3 +397,12 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - Cause: the NEW moment fired whenever a body went from 0 to 1, and a prestige (Supernova) puts every body back to 0, so the same "NEW" played every run; named tiers (every 10 levels) had the same big moment. "New" meant "new this run", not "new to the player".
 - Fix: the big moment only for a body new to the player; re-buys = their chime; tier ups = one small merged toast.
 - Rule for every game with a reset / prestige / rebirth: a "NEW" celebration is for things the PLAYER has never had, never for things the reset took away. Repeats get a sound or a small toast, never a card or cutscene.
+## A logo left inside an imported car (13 Nov, City Legends, owner's correction)
+- What felt bad: the owner had said "remove all logos" for every imported car model, then saw the maker's round "EB" mark on the panel between the Veyron's seats ("why did i see this?").
+- Cause 1: the logo checks looked at the outside, the steering hub and the driver's view forward. Nobody looked BACK from the dash, so the rear wall between the seats was never seen.
+- Cause 2: that mark is not a badge part or a picture: it is moulded into one big cabin part (`Body_MOTOSO`), so the part-name sweep ("badge", "logo", "emblem") and the picture repaint both missed it.
+- Cause 3: the first imports (3 to 8 Nov) were checked under a lower bar than the last 7, and were never checked again when the bar went up.
+- Rules for every game with imported models:
+  - "No logos" is checked with a FIXED list of views on every model, not by where logos usually are: outside front, rear, both sides, wheels, calipers, engine bay; inside from the driver's eye forward, from the dash looking BACK (rear wall, between the seats, headrests, parcel shelf), both door cards, sills, the hub, the pedals, the centre console from above, the headlining.
+  - A logo can be a part, a picture, a normal picture (pressed in) or moulded geometry inside a big part. Check all four.
+  - When the bar goes up, every older model is checked again under the new bar the same day. A rule that only the newest work follows is not a rule.
