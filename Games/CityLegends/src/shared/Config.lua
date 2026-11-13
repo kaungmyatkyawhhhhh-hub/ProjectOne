@@ -110,8 +110,23 @@ Config.Parking = {
 Config.World = {
 	OldCity = false,
 }
+-- Yangon (owner, 2026-11-13: "Rush Yangon", the car meet): the map players start on when
+-- Workspace.Yangon is in the place. Monaco stays in the place until build step 11, so venues with no
+-- Yangon site yet stay in Monaco (fast travel). With neither map the old city comes back.
+function Config.activeMap(): string?
+	if workspace == nil then
+		return nil
+	end
+	if workspace:FindFirstChild("Yangon") then
+		return "Yangon"
+	end
+	if workspace:FindFirstChild("Riviera") then
+		return "Riviera"
+	end
+	return nil
+end
 function Config.monacoOnly(): boolean
-	return not Config.World.OldCity and workspace ~= nil and workspace:FindFirstChild("Riviera") ~= nil
+	return not Config.World.OldCity and Config.activeMap() ~= nil
 end
 
 -- the venues in Monaco (owner, 2026-11-02: "Move the venues ... I may replace some of the venues
@@ -142,6 +157,16 @@ Config.RivieraVenues = {
 	},
 }
 
+-- the venues in Yangon (build step 9, 2026-11-13): same format as RivieraVenues; a venue named here
+-- is in Yangon, the rest stay where RivieraVenues puts them. Lots from tools/yangon/d11_sites.py.
+Config.YangonVenues = {
+	On = true,
+	Sites = {
+		dealership = { x = 30836.8, z = 957.4, fx = -0.560, fz = -0.829, y = 46.57 }, -- on the loop, 176 from Optima Werkz
+		customs = { x = 31025.7, z = 646.7, fx = -0.990, fz = -0.144, y = 47.53 }, -- on the loop, 188 from Optima Werkz
+	},
+}
+
 Config.Spawn = {
 	Block = { 3, 2 }, -- the Needle's block
 	Side = Vector3.new(0, 0, 1), -- its edge on the city's middle road
@@ -153,6 +178,10 @@ Config.Spawn = {
 	RivieraRoads = { ["Harbour Street"] = true, ["Coast Road"] = true },
 	RivieraNear = Vector3.new(13650, 0, 520), -- start within RivieraRadius of this
 	RivieraRadius = 450,
+	-- Yangon (build step 9): a first car on the Yangon Loop by Optima Werkz, on foot on its forecourt
+	YangonRoads = { ["Yangon Loop A"] = true, ["Yangon Loop B"] = true },
+	YangonNear = Vector3.new(30892, 0, 785),
+	YangonRadius = 260,
 }
 -- the east highway runs from the city's edge to the loop's inner edge
 Config.City.HighwayLength = Config.City.LoopHalf - Config.City.HighwayWidth / 2 - (Config.City.HalfExtent + Config.City.RoadWidth / 2)

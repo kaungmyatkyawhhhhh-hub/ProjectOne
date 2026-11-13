@@ -54,8 +54,18 @@ end
 do
 	-- { from, look at, drift per second, field of view }
 	local shots = {}
-	local far = if workspace:FindFirstChild("Riviera") then ReplicatedStorage:WaitForChild("RivieraFar", 3) else nil
-	if workspace:FindFirstChild("Riviera") and far then
+	local far = if workspace:FindFirstChild("Riviera") and not workspace:FindFirstChild("Yangon") then ReplicatedStorage:WaitForChild("RivieraFar", 3) else nil
+	if Config.activeMap() == "Yangon" then
+		-- Yangon (build step 9): the server streams the city in round Optima Werkz (the start), and the
+		-- far city and Shwedagon are always there (Yangon.Far is Persistent): close shots round Optima,
+		-- one across the city to the pagoda
+		shots = {
+			{ Vector3.new(30700, 110, 600), Vector3.new(30892, 50, 785), Vector3.new(8, 0, -4), 58 }, -- over Optima Werkz
+			{ Vector3.new(30985, 70, 1010), Vector3.new(30850, 48, 780), Vector3.new(-10, 0, 0), 56 }, -- along the loop
+			{ Vector3.new(30900, 170, 880), Vector3.new(31619, 140, 3821), Vector3.new(-6, 0, 0), 50 }, -- to Shwedagon
+			{ Vector3.new(31150, 230, 520), Vector3.new(30892, 40, 785), Vector3.new(0, 0, 8), 62 }, -- high over the loop
+		}
+	elseif workspace:FindFirstChild("Riviera") and far then
 		far.Parent = workspace -- (WorldFx's far-city switch picks it up from here later)
 		shots = {
 			-- (all from far off: the stand-in is made to be seen from a distance)
@@ -122,7 +132,7 @@ end
 -- player arrives over a few seconds. The loading screen stays up (the car held) until parts have
 -- stopped arriving for a moment, then the game starts. SKIP (after 5 s, Playbook) still works.
 local streamedIn = 0
-for _, root in { workspace:FindFirstChild("Riviera"), city } do
+for _, root in { workspace:FindFirstChild("Riviera"), workspace:FindFirstChild("Yangon"), city } do
 	if root then
 		root.DescendantAdded:Connect(function(d)
 			if d:IsA("BasePart") then
@@ -135,7 +145,7 @@ local MAP_QUIET_PARTS = 6 -- at most this many parts arriving per quarter second
 local MAP_QUIET_TIME = 1.5 -- ...for this long counts as loaded
 local MAP_MAX_WAIT = 30
 local function waitForMap(status: string)
-	if not workspace.StreamingEnabled or not workspace:FindFirstChild("Riviera") then
+	if not workspace.StreamingEnabled or not Config.activeMap() then
 		return
 	end
 	UI.showLoading(status)
@@ -324,6 +334,18 @@ local function startOrbit()
 			camera.CFrame = preview
 			camera.Focus = preview * CFrame.new(0, 0, -40)
 			camera.FieldOfView = 70
+			return
+		end
+		if Config.activeMap() == "Yangon" then
+			-- Yangon (build step 9): a slow circle round Optima Werkz, where players start, looking in at
+			-- it and the loop; the server streams the city in round it (MenuFocus)
+			travel += dt
+			local a = travel * (math.pi * 2 / 150)
+			local centre = Vector3.new(30892, 47, 785)
+			local off = Vector3.new(math.cos(a), 0, math.sin(a))
+			local pos = centre + off * 150 + Vector3.new(0, 70 + math.sin(travel / 9) * 6, 0)
+			camera.CFrame = CFrame.lookAt(pos, centre + Vector3.new(0, 8, 0))
+			camera.FieldOfView = 60
 			return
 		end
 		if workspace:FindFirstChild("Riviera") then

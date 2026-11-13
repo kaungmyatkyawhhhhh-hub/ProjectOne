@@ -49,11 +49,16 @@ function WestLayout.blockCenter(bi: number, bj: number): Vector3
 end
 
 -- a venue's site in Monaco (Config.RivieraVenues), when the Riviera is in the place
+-- (Yangon first: a venue with a Yangon site stands there while Yangon is in the place)
 function WestLayout.rivieraSite(name: string): CFrame?
-	local rv = Config.RivieraVenues
-	local s = rv and rv.On and rv.Sites[name]
-	if not s or not (workspace and workspace:FindFirstChild("Riviera")) then -- (Lune has no workspace)
-		return nil
+	local yv = Config.YangonVenues
+	local s = yv and yv.On and yv.Sites[name]
+	if not s or not (workspace and workspace:FindFirstChild("Yangon")) then
+		local rv = Config.RivieraVenues
+		s = rv and rv.On and rv.Sites[name]
+		if not s or not (workspace and workspace:FindFirstChild("Riviera")) then -- (Lune has no workspace)
+			return nil
+		end
 	end
 	local c = Vector3.new(s.x, s.y, s.z)
 	return CFrame.lookAt(c, c + Vector3.new(s.fx, 0, s.fz).Unit)

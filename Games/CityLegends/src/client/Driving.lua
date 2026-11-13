@@ -1260,7 +1260,7 @@ function Driving.reset()
 	end
 	-- (on the Monaco map its own lanes; CityLayout only knows the old city's)
 	local here = s.root.Position - Vector3.new(0, 2, 0)
-	local cf = (if workspace:FindFirstChild("Riviera") then RivieraTraffic.nearestCFrame(here) else nil) or CityLayout.nearestLaneCFrame(s.root.Position)
+	local cf = (if Config.activeMap() then RivieraTraffic.nearestCFrame(here) else nil) or CityLayout.nearestLaneCFrame(s.root.Position)
 	s.root.AssemblyLinearVelocity = Vector3.zero
 	s.root.AssemblyAngularVelocity = Vector3.zero
 	s.root.CFrame = cf + Vector3.new(0, s.halfHeight + 0.4, 0)

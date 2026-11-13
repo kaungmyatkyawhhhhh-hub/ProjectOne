@@ -206,15 +206,19 @@ local function rivieraStartSpots(): { CFrame }
 		return rivieraSpots
 	end
 	local list = {}
-	if Config.Spawn.Riviera and workspace:FindFirstChild("Riviera") then
+	-- (Yangon first when it is in the place: the loop by Optima Werkz, build step 9)
+	local yangon = Config.activeMap() == "Yangon"
+	if Config.Spawn.Riviera and (yangon or workspace:FindFirstChild("Riviera")) then
 		local g = RivieraTraffic.build()
-		local near = Config.Spawn.RivieraNear
+		local near = if yangon then Config.Spawn.YangonNear else Config.Spawn.RivieraNear
+		local roads = if yangon then Config.Spawn.YangonRoads else Config.Spawn.RivieraRoads
+		local radius = if yangon then Config.Spawn.YangonRadius else Config.Spawn.RivieraRadius
 		for _, seg in (if g then g.lanes else {}) do
 			local s = seg :: any
 			-- (the outer lane; a street's one lane since the streets went 1+1, 2026-11-04)
-			if (s.lane == 2 or not s.route) and Config.Spawn.RivieraRoads[s.road] and seg.length > 12 then
+			if (s.lane == 2 or not s.route) and roads[s.road] and seg.length > 12 then
 				local pos, dir = CityLayout.sample(seg, seg.length / 2)
-				if Vector2.new(pos.X - near.X, pos.Z - near.Z).Magnitude < Config.Spawn.RivieraRadius and math.abs(dir.Y) < 0.08 then
+				if Vector2.new(pos.X - near.X, pos.Z - near.Z).Magnitude < radius and math.abs(dir.Y) < 0.08 then
 					table.insert(list, CFrame.lookAt(pos, pos + Vector3.new(dir.X, 0, dir.Z)))
 				end
 			end
@@ -229,7 +233,7 @@ end
 local function startSpawnCFrame(): CFrame?
 	-- (owner, 2026-11-04: "Make it so that player actually spawn at the garden of the casino") a first
 	-- car waits on the drive in front of the casino's steps
-	for _, p in CollectionService:GetTagged("CasinoCarStart") do
+	for _, p in (if Config.activeMap() == "Yangon" then {} else CollectionService:GetTagged("CasinoCarStart")) do
 		local cf = (p :: BasePart).CFrame
 		if not carNear(cf.Position, 18) then
 			return cf
@@ -270,7 +274,7 @@ end
 -- the start block's sidewalk, by the streetscape, facing the road (OnFoot: on foot with no car)
 local function startFootCFrame(): CFrame
 	-- the casino's garden, facing the palace
-	local garden = CollectionService:GetTagged("CasinoGardenSpawn")
+	local garden = if Config.activeMap() == "Yangon" then {} else CollectionService:GetTagged("CasinoGardenSpawn")
 	if #garden > 0 then
 		local cf = (garden[spawnRng:NextInteger(1, #garden)] :: BasePart).CFrame
 		local pos = cf.Position + Vector3.new(0, 3.2, 0)
@@ -283,8 +287,9 @@ local function startFootCFrame(): CFrame
 		local at = cf.Position + cf.RightVector * 13
 		local ray = RaycastParams.new()
 		ray.FilterType = Enum.RaycastFilterType.Include
-		local roads = workspace.Riviera:FindFirstChild("Roads")
-		ray.FilterDescendantsInstances = { roads or workspace.Riviera }
+		local map = workspace:FindFirstChild(Config.activeMap() or "Riviera") or workspace.Riviera
+		local roads = map:FindFirstChild("Roads")
+		ray.FilterDescendantsInstances = { roads or map }
 		local hit = workspace:Raycast(at + Vector3.new(0, 20, 0), Vector3.new(0, -40, 0), ray)
 		local y = if hit then hit.Position.Y else at.Y + 0.5
 		local pos = Vector3.new(at.X, y + 3.2, at.Z)
@@ -1164,7 +1169,11 @@ local function menuFocus(player: Player)
 	p.Size = Vector3.one
 	-- (the menu flies over Monaco when the Riviera is in the place: owner, 2026-11-02, "switch it to
 	-- monaco now"; Main.client's startOrbit)
-	p.Position = if workspace:FindFirstChild("Riviera") then Vector3.new(13700, 40, 700) else Vector3.new(500, 30, 0)
+	-- (Yangon: over Optima Werkz, where players start, build step 9)
+	p.Position = if Config.activeMap() == "Yangon"
+		then Vector3.new(30892, 90, 785)
+		elseif workspace:FindFirstChild("Riviera") then Vector3.new(13700, 40, 700)
+		else Vector3.new(500, 30, 0)
 	p.Parent = focusFolder
 	if not player.ReplicationFocus then
 		player.ReplicationFocus = p

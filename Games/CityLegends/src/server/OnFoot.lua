@@ -255,6 +255,10 @@ function OnFoot.init(c: Ctx)
 			return false
 		end
 		if where == "garden" then
+			-- (Yangon, build step 9: players start in their car on the loop by Optima Werkz)
+			if Config.activeMap() == "Yangon" then
+				return false
+			end
 			local spot = ctx.startFootCFrame()
 			if arrived[player] or (spot.Position - root.Position).Magnitude > GARDEN_RANGE then
 				return false
