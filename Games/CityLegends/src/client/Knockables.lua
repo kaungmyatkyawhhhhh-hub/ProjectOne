@@ -388,7 +388,9 @@ function Knockables.init()
 	-- over frames so the start doesn't wait; what streams in later comes through DescendantAdded
 	task.spawn(function()
 		local riv = workspace:FindFirstChild("Riviera")
-		local dressing = if riv then riv:WaitForChild("Dressing", 20) else nil
+		-- (Yangon, 2026-11-14: its street lamps are Monaco's StreetLamp kit, in Yangon.Lamps)
+		local ygn = workspace:FindFirstChild("Yangon")
+		local dressing = if riv then riv:WaitForChild("Dressing", 20) elseif ygn then ygn:WaitForChild("Lamps", 20) else nil
 		if dressing then
 			dressing.DescendantAdded:Connect(considerDressing)
 			for k, d in dressing:GetDescendants() do

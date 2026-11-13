@@ -57,6 +57,9 @@ function WestLayout.siteData(name: string): { [string]: any }?
 		return s
 	end
 	local rv = Config.RivieraVenues
+	if not (workspace and workspace:FindFirstChild("Riviera")) then
+		return nil
+	end
 	return rv and rv.On and rv.Sites[name] or nil
 end
 
@@ -219,10 +222,13 @@ function WestLayout.places(): { Place }
 		local function onRoad(id: string, name: string, p: Vector3, dir: Vector3)
 			table.insert(keep, { id = id, name = name, cf = CFrame.lookAt(p, p + dir) })
 		end
-		onRoad("old_rock", "Old Rock Palace", Vector3.new(13028.75, 44.48, 1471.33), Vector3.new(-0.99, 0, -0.11))
-		onRoad("stadium", "Riviera Bay Stadium", Vector3.new(11822.03, 11.11, 1060.31), Vector3.new(0.02, 0, -1))
-		onRoad("harbour", "The Harbour", Vector3.new(13696.26, 6, 536.58), Vector3.new(1, 0, -0.03))
-		onRoad("mountain", "Mountain Road Lookout", Vector3.new(13598.51, 121.33, -754.69), Vector3.new(1, 0, 0))
+		-- (Monaco's own places only while Monaco is in the place: since Yangon step 11 it is kept in ServerStorage)
+		if workspace:FindFirstChild("Riviera") then
+			onRoad("old_rock", "Old Rock Palace", Vector3.new(13028.75, 44.48, 1471.33), Vector3.new(-0.99, 0, -0.11))
+			onRoad("stadium", "Riviera Bay Stadium", Vector3.new(11822.03, 11.11, 1060.31), Vector3.new(0.02, 0, -1))
+			onRoad("harbour", "The Harbour", Vector3.new(13696.26, 6, 536.58), Vector3.new(1, 0, -0.03))
+			onRoad("mountain", "Mountain Road Lookout", Vector3.new(13598.51, 121.33, -754.69), Vector3.new(1, 0, 0))
+		end
 		-- Yangon (build step 9): its landmarks, on the outer lane beside them (YangonLanes)
 		if workspace:FindFirstChild("Yangon") then
 			onRoad("ygn_optima", "Optima Werkz", Vector3.new(30866.98, 46.15, 764.83), Vector3.new(0.519, 0, -0.855))

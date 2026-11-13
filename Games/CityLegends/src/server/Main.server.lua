@@ -241,12 +241,27 @@ local function startSpawnCFrame(): CFrame?
 	end
 	local riv = rivieraStartSpots()
 	if #riv > 0 then
-		for _ = 1, #riv do
-			local cf = riv[spawnRng:NextInteger(1, #riv)]
-			if not carNear(cf.Position, 30) then
-				return cf
+		-- (every spot once, in a shuffled order; when all are taken, the least crowded one: never the
+		-- old city's start block, which isn't built on Monaco or Yangon, 2026-11-14)
+		local order = table.create(#riv, 0)
+		for i = 1, #riv do
+			order[i] = i
+		end
+		for i = #order, 2, -1 do
+			local j = spawnRng:NextInteger(1, i)
+			order[i], order[j] = order[j], order[i]
+		end
+		for _, i in order do
+			if not carNear(riv[i].Position, 30) then
+				return riv[i]
 			end
 		end
+		for _, i in order do
+			if not carNear(riv[i].Position, 12) then
+				return riv[i]
+			end
+		end
+		return riv[order[1]]
 	end
 	local c, side, inner = startBlock()
 	local edge = c + side * (inner / 2 + Config.City.RoadWidth / 2) -- the road's centre line

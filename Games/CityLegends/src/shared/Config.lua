@@ -110,9 +110,10 @@ Config.Parking = {
 Config.World = {
 	OldCity = false,
 }
--- Yangon (owner, 2026-11-13: "Rush Yangon", the car meet): the map players start on when
--- Workspace.Yangon is in the place. Monaco stays in the place until build step 11, so venues with no
--- Yangon site yet stay in Monaco (fast travel). With neither map the old city comes back.
+-- Yangon (owner, 2026-11-13: "Rush Yangon", the car meet): the map players play on when Workspace.Yangon
+-- is in the place. Since build step 11 (2026-11-14) Monaco is kept in ServerStorage.Riviera (with
+-- ServerStorage.RivieraFar): moving it back into the Workspace (and Yangon out) brings Monaco back.
+-- With neither map the old city comes back.
 function Config.activeMap(): string?
 	if workspace == nil then
 		return nil
@@ -2830,8 +2831,10 @@ Config.Value = {
 
 Config.Service = {
 	Name = "LEGENDS SERVICE",
-	Bay = Vector3.new(15244.7, 3.7, 1082.7), -- the middle of the workshop's middle bay (tools/riviera/CareVenues.luau)
-	Arrive = CFrame.lookAt(Vector3.new(15240, 4.7, 1036), Vector3.new(15244.7, 4.7, 1082.7)), -- fast travel: on the forecourt, facing the bay
+	-- (Yangon step 11, 2026-11-14: the workshop on New Road by the Racing Hub, built by CareVenues.service on a
+	-- YangonSites lot; Monaco's was Bay (15244.7, 3.7, 1082.7), Arrive from (15240, 4.7, 1036))
+	Bay = Vector3.new(31405.0, 49.7, 1156.2), -- the middle of the workshop's middle bay (tools/riviera/CareVenues.luau)
+	Arrive = CFrame.lookAt(Vector3.new(31389.3, 47.0, 1110.9), Vector3.new(31405.0, 47.0, 1156.2)), -- fast travel: on the forecourt, facing the bay
 	BayRadius = 22,
 	LiftSeconds = 4,
 	-- real-world prices; times Economy.PartPriceMult, times PriceK of the car (1 to MaxCarK)

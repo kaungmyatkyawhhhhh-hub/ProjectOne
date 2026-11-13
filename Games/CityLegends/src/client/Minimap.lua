@@ -485,11 +485,15 @@ function Minimap.start()
 	-- Legends Service and the Riviera Fuel stations
 	table.insert(fixed, { frame = makeBlip(layer, "R", Color3.fromRGB(255, 170, 90), 13, 21), pos = (Config :: any).Service.Bay, edge = false })
 	for _, st in (Config :: any).Fuel.Stations do
-		table.insert(fixed, { frame = makeBlip(layer, "F", Color3.fromRGB(120, 200, 255), 13, 21), pos = st.pumps[1], edge = false })
+		-- (a station's map must be in the place: Monaco's are kept in ServerStorage since Yangon step 11)
+		local here = if st.pumps[1].X > 25000 then workspace:FindFirstChild("Yangon") else workspace:FindFirstChild("Riviera")
+		if here then
+			table.insert(fixed, { frame = makeBlip(layer, "F", Color3.fromRGB(120, 200, 255), 13, 21), pos = st.pumps[1], edge = false })
+		end
 	end
-	-- chauffeur stands (city corners, as Chauffeur.lua places them)
+	-- chauffeur stands (city corners, as Chauffeur.lua places them; not built in Monaco or Yangon)
 	local CH = (Config :: any).Chauffeur
-	if CH and CH.Stands then
+	if CH and CH.Stands and not Config.monacoOnly() then
 		for _, st in CH.Stands do
 			if CityLayout.inGrid(st[1], st[2]) then
 				local p = ActivityData.corner(st[1], st[2], st[3], st[4]) + Vector3.new(st[3] * 34, 0, 0)

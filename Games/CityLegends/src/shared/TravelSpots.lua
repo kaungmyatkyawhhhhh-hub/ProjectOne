@@ -97,7 +97,11 @@ function TravelSpots.list(): { Spot }
 	-- (2026-11-07) Legends Service and the Riviera Fuel stations
 	table.insert(list, { id = "service", name = "Legends Service", icon = "service", info = INFO.service, cf = (Config :: any).Service.Arrive })
 	for _, st in (Config :: any).Fuel.Stations do
-		table.insert(list, { id = st.id, name = st.name, icon = "fuel", info = INFO.fuel, cf = st.arrive })
+		-- (only the stations of a map in the place: Monaco's are kept in ServerStorage since Yangon step 11)
+		local here = if st.arrive.Position.X > 25000 then workspace:FindFirstChild("Yangon") else riv
+		if here then
+			table.insert(list, { id = st.id, name = st.name, icon = "fuel", info = INFO.fuel, cf = st.arrive })
+		end
 	end
 	-- (the dispatch's own spot on the pavement: CityLayout's lane search only knows the old city)
 	for k, dsp in ActivityData.dispatch do
