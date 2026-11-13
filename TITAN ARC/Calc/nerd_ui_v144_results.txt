@@ -1,0 +1,9 @@
+QUALITY-NERD KID on the Stomp Evolution UI (2,000 kids, 10 minutes, 60% on phones; trust tells per 10 min)
+version                                                                        likes  tells/10min  wows  top tells
+U0 v144 + phone fixes (as built)                                                 13%    17.7       5.7  title over HUD 3.9, empty plate 3.4, studs everywhere 2.8
+U1 + windows open only after their images are loaded (preload + wait)            22%    16.2       5.7  title over HUD 3.9, empty plate 3.4, studs everywhere 2.8
+U2 + phones: the centre HUD (Height + NEXT) hides while a window is open         32%    12.1       5.7  empty plate 3.3, studs everywhere 2.7, style mismatch 2.7
+U3 + coin counter plate fits the number                                          53%     9.0       5.7  studs everywhere 2.7, style mismatch 2.7, caps mix 2.0
+U4 + NEXT bar on a kit plate, Title Case everywhere                              88%     4.2       5.7  studs everywhere 2.8, empty board 1.1, blank icon 0.3
+U5 + studs only on cards/buttons (plain big boards, rims, bars)                  93%     1.5       5.7  empty board 1.2, blank icon 0.3
+U6 + Top boards shrink to their rows                                             95%     0.3       5.7  blank icon 0.3
