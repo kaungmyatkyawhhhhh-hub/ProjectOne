@@ -22,7 +22,7 @@ Rules that still hold: never publish, spend, post, delete or message without a c
 | 13 | Remaining models | ALL BUILT, waiting for upload: galleon, whale skeleton, crystal arch, 8 Open Sea props, turtle, blue whale, colossal eel, Kraken |
 | 14 | Giants in the game: friendly turtle + whale, eel ambush, Kraken event | todo (needs the models in Studio) |
 | 15 | Video ideas: pun pop-ups, big multiplier, kill feed, tier rooms | feat words + big multiplier DONE; kill feed and tier rooms todo |
-| 16 | Phone performance check + both kid sims again | performance DONE (under 1M triangles); kid sims todo |
+| 16 | Phone performance check + both kid sims again | DONE: under 1M triangles; sims: [[2026-11-13 MEGA BITE - Kid simulations on World v2 (round 6)]] |
 
 Live status and the upload list: [[2026-11-13 MEGA BITE - Long work order status (13 Nov)]].
 

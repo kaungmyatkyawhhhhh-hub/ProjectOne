@@ -42,7 +42,7 @@ From the Hungry Shark video study ([[2026-11-13 Video watch - HSE all sharks + A
 `GameConfig.Fish.Species` (the four rows), `Fish.Order` (appended), `Fish.Bands.giant`, `Fish.Pop.Tiers` (how often per ring), `Trench.Fish`.
 
 ## Not checked yet
-- The time from Great White to Megalodon is shorter now if a player farms the Far Deep (a Titan Tuna is 164 EXP, a school of two is 328). The Far Deep also has the Ancient Titans and Hammer Brutes. Tune the weights in `Fish.Pop.Tiers` after a real playtest.
+- Pace, by the numbers (not played): a school in the Far Deep is worth 216 EXP on average now (108 before), so the 16 schools around a player are about 3,460 EXP (1,730 before). Great White to Megalodon (30,000 EXP) is about 9 full sweeps of the Far Deep instead of 17, with the Ancient Titans and Hammer Brutes hunting there. Tune the weights in `Fish.Pop.Tiers` after a real playtest.
 - Phones (real devices).
 
 ## Next (needs the uploads)
