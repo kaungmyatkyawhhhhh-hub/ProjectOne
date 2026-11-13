@@ -37,3 +37,23 @@ Saved in Studio, not published.
 - The dark outline shell follows its body point; the fins slide with the body side they touch (nothing detaches).
 - `Art\Minnow_hse\nose_14Nov\Minnow_hse_v5_smooth.fbx` -> model 94647907639448 (Approved), mesh 108043282655363, same texture
   and skins. Backup `MB_Minnow_preSmooth_backup_14Nov`. Checked in Studio from above and 3/4.
+
+## Faces repainted (owner: Clownfish "mouth texture weird" + "differences in texture based on the face direction"; Minnow "texture needs redesigning after the model change", "eyes not at the eye bump", "now its blurry", "eye should face a bit forward, ~10 deg")
+Method (Blender, numpy): every texel of the body is rasterised to its 3D point + normal, then painted in 3D:
+- the front of the head blends (by how much it faces forward, no hard edge) into a top-to-bottom colour gradient sampled from the
+  SIDE skin near the head; eyes protected (Clownfish) or repainted (Minnow); ONE centred smile; island edges padded (no black bleed).
+- Gotchas: Blender image rows run bottom-up (row = v*H); half the mesh is the inverted outline SHELL (render with backface culling
+  ON or it hides the body); new Open Cloud "Image" uploads can take 5+ min to serve and Studio caches an early failed load for the
+  session -> wait ~5 min before the first request; check by putting the texture on a preview model (PreloadAsync lies).
+### Clownfish (Piranha key)
+- Body: smooth outline from above (same width). Model 122196184207784. Texture 116819693430896.
+  Skins: Coral 121644393185718, Lantern 80301870440702, Ghost 108005810031726, Ember 108714310651768.
+  Backups: MB_Piranha_preFaceFix_backup_14Nov, GameConfig_preClownFace_14Nov / _preFaces2_14Nov.
+### Minnow
+- Body: smooth from above, ORIGINAL nose (owner: "keep the nose flat like before"), eyes smoothed round the bumps.
+- The front of the head got its OWN texture area (UV re-map): side paint squeezed into the left 62.5% (640 px), front faces
+  (normal.x > 0.5) projected from the front into a 370x370 px area -> ~5x sharper face. Eyes centred on the eye bumps
+  (-0.421, +-0.536, 0.124), turned ~10 deg more forward, R 0.30. Old skins do NOT fit this layout.
+- Model 96937410372696 (mesh 105120204506808), texture 127487180193418. Skins: Coral 76198960170888, Lantern 113431312755378,
+  Ghost 101365112110899, Ember 90992075977855. Backup MB_Minnow_preFaceUV_backup_14Nov.
+- Files: Art\Minnow_hse\face_14Nov\, Art\Relief_13Nov\Piranha\face_fix_14Nov\.
