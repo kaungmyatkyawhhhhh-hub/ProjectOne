@@ -329,6 +329,11 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	if M.inCorner(px, pz) then
 		return true
 	end
+	-- just past a round corner, the joining road's own kerb and pavement (the other road's go)
+	local owner = M.ownedBy(px, pz)
+	if owner then
+		return owner ~= name
+	end
 	-- the roundabout: an arm's kerb stops at the ring's kerb, its pavement at the ring's pavement
 	if hyp(px - C.X, pz - C.Z) < M.RING_V + (if what == "Kerb" then M.KERB_W else M.WALK) then
 		return true
@@ -822,6 +827,29 @@ local function inWedge(c, px: number, pz: number, lo: number, hi: number): boole
 	return f == 0 or f >= TAU + c.sweep
 end
 M.inWedge = inWedge
+
+-- Past a corner's TA (on the far side of the ray O->TA, up to 60 studs on), in the joining road's own
+-- kerb and pavement band on that side: that road owns it. (At a slanting join the bigger road's pavement
+-- band overlaps it there: its pavement would bury the joining road's kerb.)
+function M.ownedBy(px: number, pz: number): (string?, any)
+	for _, c in M.corners do
+		local tx, tz = c.tax - c.px, c.taz - c.pz
+		local L = hyp(tx, tz)
+		if L > 1e-6 and hyp(px - c.tax, pz - c.taz) < 60 and (px - c.tax) * tx + (pz - c.taz) * tz > 0 then
+			local S = M.R[c.road]
+			local b = M.near(px, pz, 3)[S.index]
+			if b then
+				local d, fx, fz = polyDist(S, b[2], px, pz)
+				local s = S.s[b[2]]
+				local rx, rz = rightOf(s)
+				if fx and fz and d > S.half - 0.3 and d < S.half + M.WALK + 0.5 and ((px - fx) * rx + (pz - fz) * rz) * c.side > 0 then
+					return c.road, c
+				end
+			end
+		end
+	end
+	return nil
+end
 
 -- in any corner's way (for the kerbs, pavements and edge lines of the straight roads)?
 function M.inCorner(px: number, pz: number): boolean
