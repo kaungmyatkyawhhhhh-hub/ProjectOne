@@ -14,7 +14,7 @@ def simp(pts,tol=1.5):
         return rec(a,a+1+i)+[a+1+i]+rec(a+1+i,b) if dist[i]>tol else []
     idx=[0]+rec(0,len(pts)-1)+[len(pts)-1]
     return pts[idx]
-rings=[]
+water=[]
 def stitch(parts):
     parts=[list(map(tuple,p)) for p in parts]; out=[]
     while parts:
@@ -28,16 +28,20 @@ def stitch(parts):
     return out
 for r in A:
     if r['tags'].get('natural')!='water': continue
+    body=[]
     for role in ('outer','inner'):
         for ring in stitch([[xy(p) for p in m['pts']] for m in r['members'] if m['role']==role]):
-            if ring[0]==ring[-1] and len(ring)>=4: rings.append(simp(ring[:-1]))
+            if ring[0]==ring[-1] and len(ring)>=4: body.append(simp(ring[:-1]))
+            else: print('open ring skipped',r['tags'],role,len(ring))
+    water.append(body)
 for w in O['ways']:
     if w['tags'].get('natural')=='water':
         p=[xy(q) for q in w['geometry']]
-        if p[0]==p[-1] and len(p)>=4: rings.append(simp(p[:-1]))
-print('rings',len(rings),'points',sum(len(r) for r in rings))
+        if p[0]==p[-1] and len(p)>=4: water.append([simp(p[:-1])])
+rings=[r for b_ in water for r in b_]
+print('water bodies',len(water),[len(b_) for b_ in water],'rings',len(rings),'points',sum(len(r) for r in rings))
 terrain={'x0':g['west_m'],'y0':g['south_m'],'dx':(g['east_m']-g['west_m'])/(g['nx']-1),'dy':(g['north_m']-g['south_m'])/(g['ny']-1),'nx':g['nx'],'ny':g['ny'],
-         'h':[v for row in g['height_m'] for v in row],'rings':[[round(float(v),1) for p in r for v in p] for r in rings]}
+         'h':[v for row in g['height_m'] for v in row],'water':[[[round(float(v),1) for p in r for v in p] for r in b_] for b_ in water]}
 tj=json.dumps(terrain,separators=(',',':'))
 def esc(s): return s.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 items=[]; ref=[0]
@@ -61,6 +65,6 @@ tools=module('YangonTerrain',open('studio/YangonTerrain.luau').read())
 body+=folder('Tools',tools)
 x='<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4">'+folder('YangonData',body)+'</roblox>'
 os.makedirs('/mnt/user-data/outputs/ygn3',exist_ok=True)
-open('/mnt/user-data/outputs/ygn3/yangon_data_1.rbxmx','w',encoding='utf-8').write(x)
+open('/mnt/user-data/outputs/ygn3/yangon_data_2.rbxmx','w',encoding='utf-8').write(x)
 print('terrain json',len(tj),'chunks',n1,n2,n3,'rbxmx bytes',len(x.encode()))
 import xml.dom.minidom; xml.dom.minidom.parseString(x.encode()); print('xml ok')

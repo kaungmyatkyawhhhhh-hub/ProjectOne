@@ -17,6 +17,7 @@ M.TILE = 256
 M.LAKE_Y = 16 * 1.6 -- water surface
 M.BED_DROP = 10 -- lake bed below the water surface
 M.UNDER = 1.0 -- ground sits this far under the road height, so road slabs stand proud of it
+M.SOLID_LIFT = 2 -- measured 13 Nov 2026: smooth solid terrain shows 2 studs (half a voxel) above bottom + occupancy x 4; water does not
 M.NX = (M.X1 - M.X0) / M.TILE
 M.NZ = (M.Z1 - M.Z0) / M.TILE
 
@@ -24,31 +25,41 @@ local D, rows
 
 function M.prepare()
 	D = Http:JSONDecode(require(SS.YangonData.Terrain:Clone()))
-	-- water: for every 4-stud row (z), the sorted x where a water outline is crossed (even-odd)
+	-- water: D.water is a list of water bodies, each a list of outlines (the shore first, then its islands).
+	-- For every 4-stud row (z) and every water body: the sorted x where its outlines are crossed.
+	-- A column is water when it is inside any one body (odd number of crossings to its left).
 	rows = {}
 	local nrow = (M.Z1 - M.Z0) / 4
 	for i = 1, nrow do rows[i] = {} end
-	for _, ring in ipairs(D.rings) do
-		local n = #ring / 2
-		for k = 1, n do
-			local k2 = k % n + 1
-			local ax, az = M.OX + ring[2 * k - 1] * M.SPM, M.OZ - ring[2 * k] * M.SPM
-			local bx, bz = M.OX + ring[2 * k2 - 1] * M.SPM, M.OZ - ring[2 * k2] * M.SPM
-			if az ~= bz then
-				if az > bz then ax, az, bx, bz = bx, bz, ax, az end
-				-- rows whose centre z lies in [az, bz)
-				local i0 = math.ceil((az - M.Z0 - 2) / 4) + 1
-				local i1 = math.ceil((bz - M.Z0 - 2) / 4)
-				for i = math.max(i0, 1), math.min(i1, nrow) do
-					local zc = M.Z0 + (i - 1) * 4 + 2
-					table.insert(rows[i], ax + (bx - ax) * (zc - az) / (bz - az))
+	local crossings = 0
+	for bi, body in ipairs(D.water) do
+		for _, ring in ipairs(body) do
+			local n = #ring / 2
+			for k = 1, n do
+				local k2 = k % n + 1
+				local ax, az = M.OX + ring[2 * k - 1] * M.SPM, M.OZ - ring[2 * k] * M.SPM
+				local bx, bz = M.OX + ring[2 * k2 - 1] * M.SPM, M.OZ - ring[2 * k2] * M.SPM
+				if az ~= bz then
+					if az > bz then ax, az, bx, bz = bx, bz, ax, az end
+					local i0 = math.ceil((az - M.Z0 - 2) / 4) + 1
+					local i1 = math.ceil((bz - M.Z0 - 2) / 4)
+					for i = math.max(i0, 1), math.min(i1, nrow) do
+						local zc = M.Z0 + (i - 1) * 4 + 2
+						local list = rows[i][bi]
+						if not list then list = {}; rows[i][bi] = list end
+						table.insert(list, ax + (bx - ax) * (zc - az) / (bz - az))
+						crossings += 1
+					end
 				end
 			end
 		end
 	end
-	local crossings = 0
-	for i = 1, nrow do table.sort(rows[i]); crossings += #rows[i] end
-	return string.format("grid %d x %d, %d water outlines, %d row crossings, %d tiles", D.nx, D.ny, #D.rings, crossings, M.NX * M.NZ)
+	for i = 1, nrow do
+		local packed = {}
+		for _, list in pairs(rows[i]) do table.sort(list); table.insert(packed, list) end
+		rows[i] = packed
+	end
+	return string.format("grid %d x %d, %d water bodies, %d row crossings, %d tiles", D.nx, D.ny, #D.water, crossings, M.NX * M.NZ)
 end
 
 -- ground height in studs at a world position (the same bilinear grid the road heights come from)
@@ -64,11 +75,16 @@ function M.height(X, Z)
 end
 
 local function wet(row, X)
-	local c = 0
-	for _, x in ipairs(row) do
-		if x <= X then c += 1 else break end
+	for _, list in ipairs(row) do
+		if list[1] <= X and list[#list] > X then
+			local c = 0
+			for _, x in ipairs(list) do
+				if x <= X then c += 1 else break end
+			end
+			if c % 2 == 1 then return true end
+		end
 	end
-	return c % 2 == 1
+	return false
 end
 M.isWater = function(X, Z)
 	local i = math.floor((Z - M.Z0) / 4) + 1
@@ -93,7 +109,7 @@ function M.tile(tx, tz)
 				waterCols += 1
 				for iy = 1, ny do
 					local yb = (iy - 1) * 4
-					local s = math.clamp((bed - yb) / 4, 0, 1)
+					local s = math.clamp((bed - M.SOLID_LIFT - yb) / 4, 0, 1)
 					if s > 0 then
 						mx[iy][iz] = SAND; ox[iy][iz] = s
 					else
@@ -102,7 +118,7 @@ function M.tile(tx, tz)
 					end
 				end
 			else
-				local top = M.height(X, Z) - M.UNDER
+				local top = M.height(X, Z) - M.UNDER - M.SOLID_LIFT
 				for iy = 1, ny do
 					local g = math.clamp((top - (iy - 1) * 4) / 4, 0, 1)
 					if g <= 0 then break end
