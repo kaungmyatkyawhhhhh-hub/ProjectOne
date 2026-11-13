@@ -37,7 +37,8 @@ The HUD tap floor doesn't help windows: a window has to fit.
   - Store mini-cards: "EQUIP" price buttons are 24 px tall with 11 px words; the banner's ‹ › arrows are 18×21 and dark on dark.
 - **Wows (keep these):** the depth titles, the consistent v6 kit (navy ink, lime/red/blue 3D buttons, white paper slab), the Shop's featured banner, the Index cards.
 
-## Plan: phone layouts for the windows (not done yet; waiting for the owner's go)
+## Plan: phone layouts for the windows
+> **Status 14 Nov: steps 1–4 done.** See [[2026-11-14 MEGA BITE - Settings phone layout]], [[2026-11-14 MEGA BITE - Fish Index phone layout, full-screen map, right column removed]] (World Map + Index) and [[2026-11-14 MEGA BITE - Shop phone layout]]. Step 5 (Fossilize, x2 EXP offer, 3D reveal) is still open. The place is not saved.
 A phone layout for each window, used when the screen's short side is ≤ 500 and the input is touch. The PC, tablet and console layouts stay as they are. The goal is that each window fills the phone's width at ≥ ×0.82, with all words ≥ 14 px and every tap ≥ 44 px.
 1. **Settings:** two columns of rows (3 + 4) and a wide, short window. That's about ×0.85 on the A06 instead of ×0.58. Toggles 44 px tall.
 2. **World Map:** the map disc on the left, filling the height; the landmark list on the right; ring labels outside the ring or on tap; pins 44 px tap areas.

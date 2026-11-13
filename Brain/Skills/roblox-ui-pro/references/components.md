@@ -146,6 +146,14 @@ A boxed window with a map in it leaves the map tiny on phones (164 px of a 705×
 - A 3D object used as UI (a hero card in front of the camera) must not get a `BlurEffect`. Track it being open (an attribute) and keep the window blur off while it is.
 - When the owner says a HUD piece is annoying on mobile, remove it on all devices behind one flag (`SHOW_COMING_NEXT = false`), and turn off anything that animates from it.
 
+**A scrolling shop on phones (tested on MEGA BITE Shop, 14 Nov)**
+- A window whose body **scrolls** should be fitted by **width** on phones, not by the short height (`min(v.X / 820, v.Y / 300)`). The list holds the rest. On a Galaxy A06 that's ×0.86 instead of ×0.72, and every word and tap grows with it.
+- Grow small buttons with the button's own `UIScale` (anchored at the bottom centre it grows up and out). Check it still fits the card's width, and make the card taller so it clears the line above.
+- **One button, not two.** When a card and its price pill do the same thing (buy), on phones make the pill a picture (`Interactable = false`) so the whole card takes the tap. Keep separate buttons only when they do different things (pick vs buy).
+- Phone wording: give stat lines and hints a short form ("Glows like a lure" → "Glows bright") instead of shrinking the text below 14 px. On desktop, fall back to the short form when `TextFits` is false.
+- Carousel arrows are tap targets too: 54 units on **every touch screen**, including tablets (an iPad had 34 px arrows).
+- Use one `applyMode("phone" | "touch" | "desk")` that only runs when the mode changes, called from the window's fit function, plus a forward-declared stub, because the fit runs before the cards exist.
+
 **Reward reveal (skippable, staged)**
 1. Dim the world (backdrop to 0.4) 0.15 s.
 2. Item pops in at centre: scale 0 → 1.15 → 1 (0.35 s Back Out) with the rarity colour ring behind it.

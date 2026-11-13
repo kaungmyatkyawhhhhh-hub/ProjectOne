@@ -59,6 +59,8 @@ The structure is a `UIAnimations` ModuleScript plus a `UIController` LocalScript
 
 ## 3. Lighting (the most-viewed video, and the shortest)
 
+> **Turned into a skill (14 Nov):** [[Skills/roblox-game-lighting/SKILL|roblox-game-lighting]]. It has his exact panel values as the `stylized_day` preset, plus 7 more presets (incl. MEGA BITE's reef), backup-first apply/restore, the random-texture and retro-outline scripts, and a look check. Tested in MEGA BITE Play: his land preset makes the reef pale and milky, and random textures barely show on low-poly MeshParts.
+
 ![[2026-11-14 Develuper lighting video - contact sheet.jpg]]
 
 The hook is the default grey baseplate against his styled scene, plus an "RTX ON" meme, in the first 5 seconds. His order of operations:
