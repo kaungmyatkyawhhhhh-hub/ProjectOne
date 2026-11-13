@@ -8,8 +8,9 @@
 local CONFIG = {
 	only = nil :: { string }?, -- e.g. { "MB_Store", "MB_HUD" } to audit just those ScreenGuis
 	root = nil :: Instance?,   -- override where ScreenGuis live (e.g. game.CoreGui for an Edit-mode preview)
-	minTouch = 44,             -- px, smallest comfortable tap target
+	minTouch = 44,             -- px, smallest comfortable tap target (touch / gamepad)
 	hardMinTouch = 36,         -- below this it's an ERROR, not a WARN
+	minMouse = 24,             -- px, when the player uses a mouse (WCAG 2.5.8); 20 = ERROR
 	minText = 14,              -- px, smallest readable text on a phone
 	minContrast = 3.0,         -- text vs its plate (WCAG large-text level; body text should reach 4.5)
 	maxExamples = 6,           -- examples printed per rule
@@ -32,6 +33,10 @@ local cam = workspace.CurrentCamera
 local vp = cam.ViewportSize
 local inset = (GuiService:GetGuiInset()) -- top-left inset (topbar)
 -- (zones for Roblox's touch controls are set up below, after the geometry helpers)
+-- a mouse pointer is precise: smaller targets are fine on PC
+if UserInputService.PreferredInput == Enum.PreferredInput.KeyboardAndMouse then
+	CONFIG.minTouch, CONFIG.hardMinTouch = CONFIG.minMouse, CONFIG.minMouse - 4
+end
 
 local findings: { [string]: { level: string, items: { string }, seen: { [string]: number }, total: number } } = {}
 local order: { string } = {}
@@ -136,14 +141,25 @@ local function hasOutline(t: GuiObject): (boolean, Color3?)
 	return false, nil
 end
 
--- nearest drawn background behind a text object (itself or an ancestor), or nil if it sits on the 3D world
+-- nearest drawn background behind a text object, or nil if it sits on the 3D world. Looks at the text itself, its
+-- ancestors, and at each level the siblings drawn under it (kits often put a "Body" plate next to the "Face" content).
 local function backdropColour(t: GuiObject, sg: Instance): Color3?
+	local centre = t.AbsolutePosition + t.AbsoluteSize / 2
+	local function covers(g: GuiObject)
+		local p, s = g.AbsolutePosition, g.AbsoluteSize
+		return g.Visible and g.BackgroundTransparency < 0.3 and s.X > 0
+			and centre.X >= p.X and centre.X <= p.X + s.X and centre.Y >= p.Y and centre.Y <= p.Y + s.Y
+	end
 	local o: Instance? = t
 	while o and o ~= sg do
-		if o:IsA("GuiObject") and o.BackgroundTransparency < 0.3 and o.AbsoluteSize.X > 0 then
-			return o.BackgroundColor3
+		if o:IsA("GuiObject") and covers(o) then return o.BackgroundColor3 end
+		local parent = o.Parent
+		if parent and o:IsA("GuiObject") then
+			for _, sib in parent:GetChildren() do
+				if sib ~= o and sib:IsA("GuiObject") and sib.ZIndex <= o.ZIndex and covers(sib) then return sib.BackgroundColor3 end
+			end
 		end
-		o = o.Parent
+		o = parent
 	end
 	return nil
 end
@@ -165,7 +181,8 @@ local function walk(o: Instance, sg: LayerCollector, clip, uiScale: number, hidd
 				if table.find(CONFIG.reserve, c.Name) then table.insert(reserved, { rect = vis, obj = c }) end
 				-- off screen
 				local over = math.max(0 - vis[1], 0 - vis[2], vis[3] - vp.X, vis[4] - vp.Y)
-				if over > 2 and (textObj(c) or c:IsA("GuiButton") or c:IsA("ImageLabel")) then
+				local fullScreen = sizeX >= vp.X * 0.9 and sizeY >= vp.Y * 0.8 -- dim layers / backdrops bleed on purpose
+				if over > 2 and not fullScreen and (textObj(c) or c:IsA("GuiButton") or c:IsA("ImageLabel")) then
 					add("ERROR", "OFF_SCREEN", ("%s sticks out %dpx"):format(rel(c), math.floor(over)))
 				end
 				-- fixed sizes that can't fit small phones (~705x338, ~280 usable height).
@@ -267,7 +284,7 @@ local function walk(o: Instance, sg: LayerCollector, clip, uiScale: number, hidd
 			end
 
 			local childClip = clip
-			if c.ClipsDescendants or c:IsA("ScrollingFrame") then
+			if c.ClipsDescendants or c:IsA("ScrollingFrame") or c:IsA("CanvasGroup") then -- a CanvasGroup clips too
 				childClip = if clip then intersect(r, clip) else r
 				if not childClip then continue end -- everything inside is clipped away
 			end

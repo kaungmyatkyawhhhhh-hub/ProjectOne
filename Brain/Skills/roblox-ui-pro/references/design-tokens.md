@@ -16,6 +16,8 @@ All sizes are Roblox GUI pixels. On phones these are roughly points (an iPhone 1
 
 Design for the ~340 px-tall phone first. A menu with a 60 px header, 3 rows of 90 px tiles and a 56 px button row is already 386 px: it will not fit. Plan scrolling or a two-column layout.
 
+**Phone windows are wide and short.** A window that fits by shrinking is the usual phone bug: a 560×380 window on a 705×280 safe area becomes ×0.58 and uses under half the width (MEGA BITE Settings, 14 Nov). On phones, give each window a landscape layout instead: two columns, a side list, a scrolling body, so it fills the width at ≥ ×0.82 and its text stays ≥ 14 px.
+
 ## Spacing
 
 Scale: **4 · 8 · 12 · 16 · 24 · 32** (48 only for big PC section breaks).

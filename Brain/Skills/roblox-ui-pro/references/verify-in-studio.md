@@ -5,7 +5,9 @@ The loop that proves a UI works before you say it does. Uses the Roblox Studio M
 ## Things learned the hard way (tested 14 Nov 2026)
 
 - **`execute_luau` with `datamodel_type = "Client"` works during Play** and sees the live `PlayerGui`, `AbsoluteSize`, `GuiService.SelectedObject`. Use it. (Some docs say it can't; it can.)
-- **Device Simulator setters fail during Play** (server side). Pick the device in Edit, then start Play. To change device: stop Play, switch, start again.
+- **Device Simulator setters fail from the Server datamodel during Play, but work from the `Client` datamodel.** You can sweep the whole matrix in one Play session: `StudioDeviceSimulatorService:SetDeviceAsync(id)` from `Client`, wait ~1 s, audit, next device; `StopSimulationAsync()` gives the plain PC window.
+- **Opening windows from a test:** `execute_luau` runs in its own Lua context, so `require` gives it a fresh copy of the game's modules, and firing *that* copy's BindableEvents reaches nobody. Mouse clicks through `user_mouse_input` often don't land either. Fix it once per game with a **Studio-only test hook** in the client event bus: `if RunService:IsStudio() and RunService:IsClient() then` parent each BindableEvent under the module by name. Then the test fires `ClientBus.StoreOpen:Fire()` exactly like the real button. MEGA BITE has this in `ReplicatedStorage.MegaBite.ClientBus`. Keep helpers in `_G` (e.g. `_G.UIAudit`, `_G.OpenWin`) for the rest of the Play session.
+- **Windows shrink on phones even when the HUD is fixed:** a centred window is scaled until it fits the usable height (~280 px on a small phone), so a tall window drops to ×0.6. Check every window on a phone, not just the HUD.
 - **The simulator can silently fall back to the default viewport** (after mode switches or captures). Right before every capture/audit, check `StudioDeviceSimulatorService:GetDeviceAsync()` and `workspace.CurrentCamera.ViewportSize`; re-set the device if needed.
 - **`screen_capture` shows StarterGui (Edit) and PlayerGui (Play) UI, not CoreGui.**
 - **In Edit with the simulator on, `Players.LocalPlayer` exists but has no PlayerGui.** The audit handles it.
