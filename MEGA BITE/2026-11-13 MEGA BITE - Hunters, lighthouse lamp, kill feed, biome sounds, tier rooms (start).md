@@ -48,3 +48,13 @@ Nothing is published. Studio only. Tested in Studio Play with one player on PC u
   OPEN SEA: Reef Shark, Hammerhead / APEX: Great White, Megalodon); owned = full colour, next = its EXP need, later ones =
   silhouettes with the need; the window colour follows the chosen shark's tier (teal / blue / gold, always bright); the hero
   card shows the shark. Needs `MB_Index` (tabs) and `HeroCard` (a shark view).
+
+## 6. Fish Index tiles (owner 10:48: "make these colors better and the pictures brighter and look better and more vfx") - done
+- `StarterPlayerScripts.MB_Index` (backup `ServerStorage.MB_Index_preTileFx_13Nov`).
+- Colours: three-stop glossy gradients, light at the top. Common = sky blue, Rare = deep royal blue (they looked the same
+  before), Uncommon green, Epic purple, Legendary gold.
+- Pictures: brighter viewport light (ambient 170 -> about 235), every fish fills its tile (camera distance per fish instead of
+  one distance for all), a soft white light behind the fish (the kit's own glow image), a gentle bob.
+- VFX (only while the Index is open): 3 bubbles rise in every found tile; twinkles blink at new spots, more for rarer fish
+  (Uncommon 1, Rare 2, Epic 3, Legendary 5); the old foil sheen stays. No rays.
+- Seen in Studio Play at 1220 x 730. Not checked on a phone. The fish pictures take a few seconds to appear the first time.
