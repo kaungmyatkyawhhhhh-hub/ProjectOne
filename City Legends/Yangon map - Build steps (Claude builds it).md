@@ -26,7 +26,7 @@ Rules for every step:
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes. **6a done** (13 Nov, version 752): grass up to the pavements near junctions, dashed middle line on the one-way side lanes. Still to do: road meshes (part count).
 - [x] **7. Traffic lanes** (13 Nov, version 758). Lanes for main roads, side lanes, decks and the roundabout only; lane check clean (7 single-ray spots, all seams or paint). Tested in Play the same day: traffic drives the loop, both flyovers, the side lanes and the roundabout.
 - [x] **8. Buildings and landmarks** (13 Nov, version 764). 1,267 Yangon-style buildings along every road, Optima Werkz, Novotel and Myanmar Plaza, the far city with Shwedagon on the horizon. Log entry "13 Nov 2026, step 8" below.
-- [ ] **9. Move in the game.** Venues, houses, gas stations, spawn at Optima, fast travel spots, minimap.
+- [x] **9. Move in the game** (14 Nov, the essentials). Players start by Optima Werkz; Legends Motors, Legends Customs and a gas station in Yangon; fast travel spots; the Yangon minimap and world map. The other venues, houses, races and jobs stay in Monaco for now (fast travel). Log entry "14 Nov 2026, step 9" below.
 - [ ] **10. Night lights.** Street lamps on main roads, lit buildings, never dark.
 - [ ] **11. Switch over.** Move Monaco to ServerStorage (kept, not deleted), playtest, phone performance check.
 
@@ -266,3 +266,14 @@ Rules for every step:
     - Quality-nerd kid check and phone-size pictures: with the Play test in step 11.
   - **Owner, 13 Nov 2026: "Keep real names".** Novotel, Myanmar Plaza and Optima Werkz keep their real names on the buildings, as plain text (no logo artwork). The filler shops keep made-up names.
   - Pictures: `Yangon 8 - ...jpg` in this folder.
+- 14 Nov 2026, step 9 (owner: "Rush Yangon", then "Try again" for the Play test). Saved in Studio (Team Create).
+  - **Map switch:** `Config.activeMap()` is "Yangon" when `Workspace.Yangon` is in the place, else "Riviera". `Config.monacoOnly()` is now true with either map, so taking Monaco out in step 11 no longer brings the old city back.
+  - **Venues:** `Config.YangonVenues.Sites` (same format as Monaco's). A venue named there is built in Yangon; the rest stay in Monaco. Now: Legends Motors on the loop 176 studs from Optima, Legends Customs 188 studs away (lots from `tools/yangon/d11_sites.py`).
+  - **Lots:** `tools/yangon/YangonSites.luau` (`prepare`, `undo`, `fuel`) takes the Yangon buildings off each lot (kept in `ServerStorage.YangonSiteHidden`), levels the ground and lays a pad in `Workspace.Yangon.Sites`. 11 buildings moved for 3 lots.
+  - **Gas station:** Legends Fuel Yangon on New Road, 257 studs from Optima: Monaco's station (`tools/riviera/CareVenues.luau`, which can now build on any map and with any brand), pumps and chargers in `Config.Fuel.Stations`. Fuel works in Play (the FUEL button shows at the pump).
+  - **Start:** the first car comes out on the Yangon Loop's outer lane within 260 studs of Optima (`Config.Spawn.YangonRoads / YangonNear / YangonRadius`). In Yangon the casino garden start is off: players start in their car. The menu circles Optima; the loading shots are over Optima, along the loop and across to Shwedagon; Backspace reset finds the Yangon lanes.
+  - **Fast travel:** Optima Werkz, Novotel, Myanmar Plaza, Hanthawaddy Roundabout, New Road, University Avenue (on the outer lane beside each), plus Legends Motors, Legends Customs and Legends Fuel Yangon.
+  - **Minimap:** `tools/yangon/d12_minimap.py` draws Yangon in Monaco's night style (lake, every building, roads, flyovers, roundabout): 27 picture tiles in `src/client/YangonMapArt.lua`. The minimap and the menu's world map draw it beside Monaco.
+  - **Play test (test save):** the car came out on the loop by Optima, the Yangon map showed in the menu and minimap, Legends Motors and Customs were built in Yangon, fast travel to the gas station and Novotel landed right.
+  - **Not done yet:** the bank, hotel, towers, Legends Rewards, gem showcase, houses, races, jobs and Legends Service are still in Monaco (fast travel takes players there). Backspace reset only knows the main roads' lanes (on a street it goes to the nearest main road). The big pad round the gas station is plain concrete.
+  - Pictures: `Yangon 9 - ...jpg` in this folder.
