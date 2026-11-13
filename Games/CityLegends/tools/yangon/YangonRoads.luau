@@ -2277,7 +2277,9 @@ end
 local function roadTops(x: number, y: number, z: number, roads: Instance)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
-	local skip = {}
+	-- (step 4: a deck over the junction is not the junction's surface)
+	local decks = (roads.Parent :: Instance):FindFirstChild("Decks")
+	local skip = if decks then { decks } else {}
 	local tops = {}
 	for _ = 1, 10 do
 		params.FilterDescendantsInstances = skip
@@ -2319,7 +2321,10 @@ function M.checkMainMain()
 				local on = false
 				local near = M.near(x, z, 3)
 				local nMe = near[o.index]
-				if nMe and polyDist(o, nMe[2], x, z) < o.half - 0.4 then
+				-- (and not past the road's own end: polyDist would round its end off)
+				local e = o.s[m.i0]
+				local past = ((x - e[1]) * e[4] + (z - e[3]) * e[5]) * m.step < 0
+				if nMe and not past and polyDist(o, nMe[2], x, z) < o.half - 0.4 then
 					on = true
 				end
 				if m.big then
