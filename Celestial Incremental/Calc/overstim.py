@@ -70,8 +70,8 @@ class Screen:
         return t
     def visible_at(s, t, region):
         return [e for e in s.els if e['region'] == region and e['t0'] <= t < e['t1']]
-    def need(s, words):  # reading time for a 7-year-old (1.5 words/s) + 0.5 s to notice
-        return words / 1.5 + 0.5
+    def need(s, words):  # reading time for a SLOW 7-year-old (1.2 words/s) + 0.5 s to notice
+        return words / 1.2 + 0.5
     def add(s, **e):
         e.setdefault('key', False); e.setdefault('words', 0); e.setdefault('kind', e['name'])
         e['w'] = W[e['region']] if 'w' not in e else e['w']
@@ -193,7 +193,7 @@ def build(flags, events, rng, kid, phase):
             S.toast(t, 'WELCOME GIFT toast', 8, True); S.sting(t, 'buyBody')
             S.add(name='+30 float', region='float', t0=t, t1=t + 1.2)
         elif w.startswith('BUY up TIER') or w.startswith('BUY unlock'):
-            S.mini(t, 5)
+            S.mini(t, 3)
         elif w.startswith('BUY'):
             pass                                   # the body chime / buy click: small sounds, no UI
         elif w.startswith('LEVEL'):
@@ -216,7 +216,8 @@ def build(flags, events, rng, kid, phase):
             S.toast(t, 'x2 GIFT toast', 7, True); S.sting(t, 'buyBody')
         elif w.startswith('SUPERNOVA'):
             first = w == 'SUPERNOVA 1'
-            c = S.card(t - 3.0, 'SUPERNOVA card', 3.0, True, 7, region='modal')
+            # the kid opens the card and presses GO when done reading: kid-paced
+            c = S.card(t - 3.0, 'SUPERNOVA card', max(3.0, 7 / kid['speed'] + 1.0), True, 7, region='modal')
             end = S.cutscene(max(t, c['t1']), 'SUPERNOVA cutscene', 10 if first else 4.5, 1)
             S.add(name='shards float', region='float', t0=end, t1=end + 1.2)
             if first:
@@ -224,7 +225,7 @@ def build(flags, events, rng, kid, phase):
         elif w == 'IGNITION':
             # the LIVE chain (fired in Play 13 Nov): last step's tier mini + LEVEL UP + BADGE toasts + 5 stings in 1 s,
             # TUTORIAL COMPLETE at +0.4 s, the 8 s Ignition cutscene, the PATH card (a choice), the free Forge roll
-            S.mini(t, 5); S.toast(t, 'LEVEL UP toast', 5, True, kind='LEVEL'); S.sting(t, 'milestone')
+            S.mini(t, 3); S.toast(t, 'LEVEL UP toast', 5, True, kind='LEVEL'); S.sting(t, 'milestone')
             for k in range(5): S.sting(t + 0.9 + 0.01 * k, 'milestone')
             S.toast(t + 0.9, 'BADGE island complete toast', 5, False, kind='BADGE')
             sn_open = rng.random() < 0.35            # the kid had the Supernova card / a window open
@@ -239,7 +240,7 @@ def build(flags, events, rng, kid, phase):
                 # queued: the card comes back after the cutscene, then the path card, then the gift
                 tc['t0'], tc['t1'] = end + 0.4, end + 0.4 + max(3.05, S.need(10)); S.centre_free = tc['t1'] + 0.2
             S.toast(t + 4.1, 'LUMI play-with-friends toast', 10, False, kind='TIP')
-            pc = S.card(end, 'PATH card (choose)', 12, True, 8, region='modal', choice=True)
+            pc = S.card(end, 'PATH card (choose)', max(6, 8 / kid['speed'] + 4), True, 8, region='modal', choice=True)
             gift_t = t + 0.5
             if flags.get('centre_queue'): gift_t = pc['t1'] + 0.3
             S.toast(gift_t, "LUMI'S GIFT toast", 6, True, kind='GIFT')
@@ -290,7 +291,8 @@ def score(S, kid):
         # reading: the newest KEY in a region covers older ones; banners over toasts cover them
         reading = []
         for e in vis:
-            if not e['key']: continue
+            if not e['key'] or e.get('cine'): continue
+            if e['read'] >= e['words'] / kid['speed'] + 0.5: continue     # already read: stops competing
             if any(a <= t < b for a, b in e.get('covered', [])): continue
             same = [o for o in vis if o['region'] == e['region'] and o is not e and o['t0'] > e['t0']]
             if same: continue
@@ -303,6 +305,7 @@ def score(S, kid):
     missed = Counter(); shown = Counter()
     for e in keys:
         need = e['words'] / kid['speed'] + 0.5
+        if e['t1'] <= e['t0'] and not e.get('dropped'): continue      # replaced in the same frame: never shown
         k = e['kind'] if e['kind'] in ('LEVEL', 'NEW tier mini', 'LUMI comet', 'GIFT') else e['name']
         shown[k] += 1
         if e.get('cine'): continue
