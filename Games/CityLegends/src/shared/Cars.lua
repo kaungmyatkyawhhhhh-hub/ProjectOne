@@ -243,7 +243,10 @@ end
 ---------------------------------------------------------------------
 -- (TrimBase: a line of several cars whose first car keeps the SPORT / TOP trims it had as a one-car
 -- line, so their owners keep them: the Type 42 V10 when the Lightweight joined, 2026-11-09)
-export type Series = { Name: string, Ids: { string }, Brand: string?, Hidden: boolean?, NoTrims: boolean?, TrimBase: string? }
+-- (OldTrims: owner, 2026-11-13, "remove the 2 high trims of the lambo contach and gt3rs": the line's
+-- SPORT / TOP trims are off sale; they still exist, retired, in a line of their own, so a player who
+-- bought one keeps it and it still drives)
+export type Series = { Name: string, Ids: { string }, Brand: string?, Hidden: boolean?, NoTrims: boolean?, TrimBase: string?, OldTrims: boolean? }
 
 Cars.TrimSteps = {
 	{ Key = "sport", Trim = "SPORT", Label = "Sport", Price = 1.3, Speed = 1.05, Accel = 0.92, Grip = 0.03, FreePrice = 8000 },
@@ -291,7 +294,7 @@ Cars.Series = {
 	{ Name = "TRIDENT MOTORS MAESTRALE", Ids = { "maseroti_levante" } },
 	{ Name = "STUTTGART 982", Ids = { "porsha_boxster" } },
 	{ Name = "STUTTGART 971", Ids = { "porsha_panamera" } },
-	{ Name = "STUTTGART 991.2", Ids = { "porsha_gt3" } },
+	{ Name = "STUTTGART 991.2", Ids = { "porsha_gt3" }, OldTrims = true },
 	{ Name = "BRITISH VANGUARD HIGHLAND", Ids = { "astin_dbx" } },
 	{ Name = "BRITISH VANGUARD VANTA", Ids = { "astin_db9" } },
 	{ Name = "BRITISH VANGUARD VELA", Ids = { "astin_vantage" } },
@@ -308,7 +311,7 @@ Cars.Series = {
 	{ Name = "ENFURECIDO LB834", Ids = { "lambrini_lp700", "lambrini_lp750", "lambrini_svj", "lambrini_svj63" } },
 	{ Name = "ENFURECIDO LB744", Ids = { "lambrini_revuelto" } },
 	{ Name = "ENFURECIDO BRAVA", Ids = { "lambrini_urusp" }, NoTrims = true },
-	{ Name = "ENFURECIDO CLASSICO", Ids = { "lambrini_countach" } },
+	{ Name = "ENFURECIDO CLASSICO", Ids = { "lambrini_countach" }, OldTrims = true },
 	{ Name = "SPEEDMARK P11", Ids = { "mclaran_12c" } },
 	{ Name = "SOVEREIGN GRAND TOURER", Ids = { "bentlee_contgt" } },
 	{ Name = "SOVEREIGN HIGHLANDS", Ids = { "bentlee_bentayga" } },
@@ -358,13 +361,17 @@ end
 local function round(n: number, step: number): number
 	return math.floor(n / step + 0.5) * step
 end
+local oldTrimSeries: { Series } = {}
 for _, series in allSeries do
 	if (#series.Ids ~= 1 and not series.TrimBase) or series.NoTrims then
 		continue
 	end
 	local base = Cars.ById[series.TrimBase or series.Ids[1]]
 	local at = table.find(series.Ids, base.Id) :: number -- (the trims go right after their base car)
-	base.Trim = "BASE"
+	local oldIds: { string }? = if series.OldTrims then {} else nil
+	if not oldIds then
+		base.Trim = "BASE"
+	end
 	for i, step in Cars.TrimSteps do
 		local spec: CarSpec = {
 			Id = base.Id .. "_" .. step.Key,
@@ -384,13 +391,23 @@ for _, series in allSeries do
 			Model = base.Model or base.Id,
 			Trim = step.Trim,
 			BaseId = base.Id,
-			Retired = base.Retired,
+			Retired = base.Retired or series.OldTrims,
 			Pending = base.Pending,
 		}
 		table.insert(list, spec)
 		Cars.ById[spec.Id] = spec
-		table.insert(series.Ids, at + i, spec.Id)
+		if oldIds then
+			table.insert(oldIds, spec.Id)
+		else
+			table.insert(series.Ids, at + i, spec.Id)
+		end
 	end
+	if oldIds then
+		table.insert(oldTrimSeries, { Name = series.Name .. " OLD TRIMS", Ids = oldIds, NoTrims = true })
+	end
+end
+for _, series in oldTrimSeries do
+	table.insert(allSeries, series)
 end
 
 -- trims that land in class S2 or R on a cheap base car (owner, 2026-11-07, see PriceSource above)

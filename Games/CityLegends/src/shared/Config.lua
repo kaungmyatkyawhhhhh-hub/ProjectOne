@@ -633,6 +633,12 @@ Config.DrivingFeel = {
 		-- rear tyres for 1 + (hp per tonne / this - 1) x their grip...
 		RwdReserveMax = 2.8, -- ...up to this much (more = spins up easier: donuts, power slides)
 		RwdSlideOn = 1.12, -- On: a few degrees, then caught
+		-- (owner, 2026-11-13: "fix some cars losing too much traction even when its not tuned") traction control On
+		-- in a corner: a driven tyre keeps this share of the side grip it is using (the engine is held back for it);
+		-- 0 = the old way (floored mid-corner, the driven tyres had almost no side grip left). Floor: the least share
+		-- of its drive grip the engine always gets (so the car still pulls out of a corner)
+		TcCornerKeep = 1,
+		TcCornerFloor = 0.3,
 		RwdSpinOn = 0.35,
 		RwdSlideSport = 1.8, -- Sport: a clear slide, donuts
 		RwdSpinSport = 1,
@@ -694,6 +700,7 @@ Config.DrivingFeel = {
 		-- feel
 		KeyThrottleRamp = 6, -- keyboard throttle: 0 -> full in about a sixth of a second (per second)
 		RevBounce = 0.06, -- the rev limiter: the cut's depth (share of the revs)
+		SpinRedline = 0.45, -- driven tyres spinning this much (0..1) with the throttle down: the revs run to the limiter (donuts, burnouts)
 		TorqueSteer = 0.012, -- front-drive: a gentle pull (radians) on a hard launch
 	},
 }

@@ -3835,8 +3835,22 @@ function Driving.step(dt: number)
 		elseif s.launchReady then
 			target = s.launchRev -- launch control holds the revs, steady
 			s.rpm = target
-		elseif s.burnout then
-			target = math.min(0.6 + 0.37 * throttle, 0.97) -- the tyres spinning free: the revs high
+		elseif s.burnout or (s.axle and throttle > 0.6 and fs > -1 and s.axleOut ~= nil and s.axleOut.spin >= Config.DrivingFeel.Axle.SpinRedline) then
+			-- (owner, 2026-11-13: "when doing donuts or burnout it redline") the driven tyres spinning free (a burnout,
+			-- a donut, a power slide with the tyres lit): the engine runs up to its limiter and bounces off it, heard
+			-- and on the dials
+			if throttle > 0.6 then
+				if s.rpm >= 0.96 then
+					s.limitT += dt
+					target = 1 - Config.DrivingFeel.Axle.RevBounce * (0.5 + 0.5 * math.sin(s.limitT * math.pi * 2 * 9))
+					s.rpm = target
+				else
+					target = 1.02 -- (on its way up to the limiter)
+				end
+			else
+				target = 0.6 + 0.4 * throttle -- a burnout on part throttle: the revs high, off the limiter
+				s.limitT = 0
+			end
 		elseif s.gear == "N" then
 			target = 0.12
 		else

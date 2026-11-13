@@ -288,11 +288,27 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	local spin, lock, tcCut = 0, 0, 0
 	local dF, dR = fDrive * (1 - p.rear), fDrive * p.rear
 	local rwd = p.drive == "RWD"
+	-- (owner, 2026-11-13: "fix some cars losing too much traction even when its not tuned") traction control On
+	-- holds the engine back in a corner: a driven tyre that is already cornering keeps the side grip it is using, so
+	-- flooring it mid-corner no longer takes the grip away from under the car (straight ahead nothing changes: the
+	-- 0-60 times stay). keepF / keepR: the share of its drive grip each axle may still use (1 = all, going straight)
+	local keepF, keepR = 1, 1
+	if s.tc == 2 and (P.TcCornerKeep or 0) > 0 and speed > P.KinFrom then
+		local ux0 = math.max(speed, 0.5)
+		local xF0 = math.abs(math.atan2(vy + p.a * r, ux0) - delta * sign(vx)) / p.peakF
+		local xR0 = math.abs(math.atan2(vy - p.b * r, ux0)) / p.peakR
+		local function keep(x: number): number
+			local uy = math.min(x, 1) * P.TcCornerKeep
+			return math.max(math.sqrt(math.max(1 - uy * uy, 0)), P.TcCornerFloor or 0.3)
+		end
+		keepF, keepR = keep(xF0), keep(xR0)
+	end
 	local function limitDrive(f: number, c: number, rear: boolean): (number, number)
 		if f <= 0 then
 			return f, 0
 		end
 		local lim = c * longK
+		local keep = if rear then keepR else keepF
 		-- a powerful rear-drive car floored in a low gear asks more of its rear tyres than they have (its engine's
 		-- real pull, hp per tonne: Params.reserve); traction control On never lets it
 		if rwd and rear and s.tc < 2 and (s.throttle or 0) > 0.4 and p.reserve > 1 then
@@ -303,12 +319,14 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 		-- power: with traction control on a few degrees, then it's caught; in Sport a clear slide; off, it spins up
 		if rwd and rear then
 			if s.tc == 2 then
-				local top = lim * P.RwdSlideOn
+				local top = math.min(lim * P.RwdSlideOn, lim * keep)
 				if f > top then
 					tcCut = math.max(tcCut, 1 - top / f)
 				end
 				local fx = math.min(f, top)
-				return math.min(fx, lim), math.clamp((fx / lim - 1) / math.max(P.RwdSlideOn - 1, 0.01), 0, 1) * P.RwdSpinOn
+				-- (the few degrees of wheelspin stay for a straight-line launch only: none once the tyre is cornering)
+				local straight = math.clamp((keep - 0.95) / 0.05, 0, 1)
+				return math.min(fx, lim), math.clamp((fx / lim - 1) / math.max(P.RwdSlideOn - 1, 0.01), 0, 1) * P.RwdSpinOn * straight
 			elseif s.tc == 1 then
 				local top = lim * P.RwdSlideSport
 				if f > top then
@@ -335,9 +353,10 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 			return f, 0
 		end
 		if s.tc == 2 then
-			if f > lim * 0.97 then
-				tcCut = math.max(tcCut, 1 - lim * 0.97 / f)
-				return lim * 0.97, 0
+			local top = lim * math.min(0.97, keep)
+			if f > top then
+				tcCut = math.max(tcCut, 1 - top / f)
+				return top, 0
 			end
 			return f, 0
 		elseif s.tc == 1 then
