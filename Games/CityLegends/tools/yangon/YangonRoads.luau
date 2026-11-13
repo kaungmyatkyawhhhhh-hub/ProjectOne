@@ -94,6 +94,12 @@ local function edgeXZ(o, i: number, side: number): (number, number)
 	return s[1] + rx * o.half * side, s[3] + rz * o.half * side
 end
 
+-- a road's half width at sample i (the wider side: step 4 widens the loop where side lanes leave it)
+function M.halfAt(o, i: number): number
+	local s = o.s[i]
+	return math.max(s[7] or o.half, s[8] or o.half)
+end
+
 ------------------------------------------------------------------------------------------------
 -- data
 ------------------------------------------------------------------------------------------------
@@ -102,9 +108,13 @@ function M.load()
 	M.Roads = require(SS.ClaudeTools.Roads:Clone())
 	M.RoadLines = require(SS.ClaudeTools.RoadLines:Clone())
 	local YD = SS.YangonData
+	-- (step 4: Roads2_* = ygn_roads_v2.json from tools/yangon/d7_flyovers.py: the side lanes, explicit cuts,
+	-- the decks; without it the step 3 data and its flyover corridors)
+	local pre = if YD:FindFirstChild("Roads2_1") then "Roads2_" else "Roads_"
+	M.v2 = pre == "Roads2_"
 	local parts, k = {}, 1
-	while YD:FindFirstChild("Roads_" .. k) do
-		parts[k] = require(YD["Roads_" .. k]:Clone())
+	while YD:FindFirstChild(pre .. k) do
+		parts[k] = require(YD[pre .. k]:Clone())
 		k += 1
 	end
 	M.data = Http:JSONDecode(table.concat(parts))
@@ -119,7 +129,8 @@ function M.load()
 		for i = 2, #r.s do
 			chain[i] = chain[i - 1] + hyp(r.s[i][1] - r.s[i - 1][1], r.s[i][3] - r.s[i - 1][3])
 		end
-		local o = { index = ri, name = r.name, kind = r.kind, rank = r.rank, half = r.half, s = r.s, n = #r.s, chain = chain }
+		local o = { index = ri, name = r.name, kind = r.kind, rank = r.rank, half = r.half, s = r.s, n = #r.s, chain = chain,
+			startsOnEnd = r.startsOnEnd, endsOnEnd = r.endsOnEnd, walkL = r.walkL, walkR = r.walkR }
 		M.R[r.name] = o
 		M.list[ri] = o
 	end
@@ -130,7 +141,18 @@ function M.load()
 		M.cut[o.name] = {}
 	end
 	local W = M.CORRIDOR
-	for _, f in M.design.flyovers do
+	if M.v2 then
+		-- (explicit: the decks' own samples and the loop between a side lanes' split and where it resumes;
+		-- the lists are 0-based sample numbers from Python)
+		M.MAIN = { "Yangon Loop", "New Road", "University Avenue", "Pyay Flyover West Lane", "Pyay Flyover East Lane 1",
+			"Pyay Flyover East Lane 2", "Kabar Aye East Lane", "Kabar Aye West Lane" }
+		for road, list in M.data.cut do
+			for _, i in list do
+				M.cut[road][i + 1] = "flyover"
+			end
+		end
+	end
+	for _, f in (if M.v2 then {} else M.design.flyovers) do
 		local r = M.R[f.road]
 		local from, to = f.from_m * M.SPM, f.to_m * M.SPM
 		-- (Kabar Aye: the deck ends at 2,729 m, then New Road runs 92 m more on the loop's own line down
@@ -288,6 +310,7 @@ end
 local function polyDist(o, i: number, px, pz, ax: number?, az: number?, nx: number?, nz: number?): (number, number?, number?)
 	local best, fx, fz = math.huge, nil, nil
 	local cut = M.cut[o.name]
+	local skipped = false
 	for j = math.max(1, i - 2), math.min(o.n - 1, i + 1) do
 		if not cut[j] and not cut[j + 1] then
 			local a, b = o.s[j], o.s[j + 1]
@@ -308,13 +331,19 @@ local function polyDist(o, i: number, px, pz, ax: number?, az: number?, nx: numb
 			end
 			if ok then
 				local d, t = segDist(px, pz, x1, z1, x2, z2)
+				-- (a road ends square at a cut: nothing of it lies past that end. Step 4's side lanes start
+				-- right there, beside it)
+				if (t >= 1 - 1e-9 and j + 2 <= o.n and cut[j + 2]) or (t <= 1e-9 and j - 1 >= 1 and cut[j - 1]) then
+					skipped = true
+					d = math.huge
+				end
 				if d < best then
 					best, fx, fz = d, x1 + (x2 - x1) * t, z1 + (z2 - z1) * t
 				end
 			end
 		end
 	end
-	if best == math.huge and not nx then
+	if best == math.huge and not nx and not skipped then
 		local a = o.s[i]
 		best, fx, fz = hyp(px - a[1], pz - a[3]), a[1], a[3]
 	end
@@ -347,6 +376,13 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 			continue
 		end
 		local o = M.list[oi]
+		if me.kind == "side" and o.kind == "side" then
+			-- (step 4: two side lanes splitting from one road end: neither's kerb or pavement on the other)
+			if polyDist(o, b[2], px, pz) < o.half + 1 then
+				return true
+			end
+			continue
+		end
 		if o.rank < me.rank then
 			-- a bigger road: my kerb stops at its kerb, my pavement at its pavement's far edge
 			if polyDist(o, b[2], px, pz) < o.half + (if what == "Kerb" then M.KERB_W else M.WALK) then
@@ -385,6 +421,9 @@ function M.findMouths(names: { string })
 		M.noSlab[name] = {}
 		for _, e in { { 1, 1 }, { o.n, -1 } } do
 			local i0, step = e[1], e[2]
+			if (i0 == 1 and o.startsOnEnd) or (i0 == o.n and o.endsOnEnd) then
+				continue -- (step 4: it carries on from that road's cut end, square on, no junction)
+			end
 			local s0 = o.s[i0]
 			local m = nil
 			if radius(s0) < M.R_OUT then
@@ -1062,7 +1101,7 @@ function M.verge(names: { string })
 		end
 		for oi, b in M.near(x, z, 3) do
 			local o = M.list[oi]
-			if o.kind == "route" and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < o.half + M.WALK + (if o == self then -0.2 else 1) then
+			if (o.kind == "route" or o.kind == "side") and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + M.WALK + (if o == self then -0.2 else 1) then
 				return false
 			end
 		end
@@ -1078,8 +1117,9 @@ function M.verge(names: { string })
 			for _, side in { -1, 1 } do
 				local rx, rz = rightOf(a)
 				local ok = true
+				local hw = math.max(M.halfAt(o, i), M.halfAt(o, i + 1)) -- (a widened end: the verge moves out with it)
 				for _, f in { 0, 0.5, 1 } do
-					for _, lat in { o.half + M.WALK + 0.5, o.half + M.WALK + M.VERGE_W / 2, o.half + M.WALK + M.VERGE_W } do
+					for _, lat in { hw + M.WALK + 0.5, hw + M.WALK + M.VERGE_W / 2, hw + M.WALK + M.VERGE_W } do
 						local x = a[1] + (b[1] - a[1]) * f + rx * side * lat
 						local z = a[3] + (b[3] - a[3]) * f + rz * side * lat
 						if not clear(x, z, o) then
@@ -1092,7 +1132,7 @@ function M.verge(names: { string })
 					local y = math.min(a[2], b[2]) + M.VERGE_TOP
 					local len = hyp(b[1] - a[1], b[3] - a[3])
 					local mid = Vector3.new((a[1] + b[1]) / 2, (y + y - 10) / 2, (a[3] + b[3]) / 2)
-					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (o.half + M.WALK + M.VERGE_W / 2), 0, 0)
+					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (hw + M.WALK + M.VERGE_W / 2), 0, 0)
 					workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W, 10, len + 1), Enum.Material.Grass)
 					made += 1
 				end
@@ -1110,7 +1150,7 @@ function M.verge(names: { string })
 		local ok = not M.inCorner(x, z)
 		for oi, b in M.near(x, z, 3) do
 			local o = M.list[oi]
-			if o.kind == "route" and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < o.half + M.WALK + M.VERGE_W / 2 + 1 then
+			if (o.kind == "route" or o.kind == "side") and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + M.WALK + M.VERGE_W / 2 + 1 then
 				ok = false
 			end
 		end
