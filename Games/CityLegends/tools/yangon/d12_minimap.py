@@ -23,8 +23,21 @@ ns = {'__file__': os.path.join(HERE, 'd10_plots.py')}
 exec(compile(src[:src.index('# the landmarks first')], 'd10', 'exec'), ns)
 roads, water, CUT, RING, MAP = ns['roads'], ns['water'], ns['CUT'], ns['RING'], ns['MAP']
 MX0, MX1, MZ0, MZ1 = ns['X0'] - 40, ns['X1'] + 40, ns['Z0'] - 40, ns['Z1'] + 40
-data = json.load(open(os.path.join(MAP, 'ygn_roads_v3.json'), encoding='utf-8'))
-plots = json.load(open(os.path.join(MAP, 'ygn_plots.json'), encoding='utf-8'))['plots']
+# (14 Nov 2026, the accuracy pass: the roads as built (v4, the real big roads 2+2), the REAL buildings (d19_buildings.py),
+# the trees and the lake walkways (d20_green.py))
+data = json.load(open(os.path.join(MAP, 'ygn_roads_v4.json'), encoding='utf-8'))
+roads = data['roads']
+CUT = {k: set(v) for k, v in data['cut'].items()}
+plots = json.load(open(os.path.join(MAP, 'ygn_plots_real.json'), encoding='utf-8'))['plots']
+GREEN = []
+_g = os.path.join(ROOT, 'build', 'yangon_green', 'YangonGreenData.luau')
+if os.path.exists(_g):
+    for line in open(_g, encoding='utf-8'):
+        a = line.split()
+        if a and a[0] in ('P', 'T'):
+            GREEN.append((float(a[1]), float(a[2]), float(a[3]) if a[0] == 'T' else 1.0))
+        elif a and a[0] == 'S':
+            GREEN.append(('S',) + tuple(float(v) for v in a[1:7]))
 
 SPP = 2.0
 TILE_W, TILE_H = 1024, 512
@@ -133,6 +146,17 @@ def render():
         lm = p.get('landmark')
         d.polygon(plot_poly(p), fill=LANDMARK_EDGE if lm else BUILDING_EDGE)
         d.polygon(plot_poly(p, -2.5), fill=LANDMARK if lm else BUILDING)
+    # trees: soft dark green dots (under the roads); the lake walkways: light strips
+    for g in GREEN:
+        if g[0] == 'S':
+            x1, z1, x2, z2, nx, nz = g[1:]
+            a_, b_ = px(x1 + nx * 5, z1 + nz * 5), px(x2 + nx * 5, z2 + nz * 5)
+            d.line([a_, b_], fill=(150, 146, 138), width=max(1, int(8 / SPP * SS)))
+        else:
+            x, z, sc = g
+            r_ = 10 * sc / SPP * SS
+            c_ = px(x, z)
+            d.ellipse((c_[0] - r_, c_[1] - r_, c_[0] + r_, c_[1] + r_), fill=(40, 70, 46))
     # roads: dark edge, pavement, carriageway; streets first, the main roads over them
     order = sorted(roads, key=lambda r: -r.get('rank', 99))
     for layer in ('edge', 'walk', 'road'):
