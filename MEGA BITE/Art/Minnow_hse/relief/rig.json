@@ -1,0 +1,1 @@
+{"dir": "f_minnow", "name": "Minnow", "ver": "hse_relief", "length": 3.4, "x0": -0.1067, "x1": -3.3255, "root_x": 0.0, "nb": 8, "jaw": false, "view_k": 1.4, "relief": {"x_from": -9, "cuts": 1, "amp": 0.01, "wide": 14, "contrast": 0.12, "up": 0.45, "soft": 3.5, "fade": 0.0001, "end_fade": 0.09, "belly_rows": 0.2, "dome_px": [[1031, 260, 68, 0.04]]}}
