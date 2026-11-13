@@ -617,6 +617,10 @@ Config.DrivingFeel = {
 		WidthPow = 0.12,
 		SlipPeak = 0.12, -- slip angle (radians, ~7 degrees) where the rear tyres grip hardest...
 		FrontPeakK = 1.12, -- ...the fronts a little later (a touch of understeer: stable at speed)
+		-- (owner, 2026-11-13: "fix cars understeering too much") with the steering help on, the front wheels turn no
+		-- further past the car's path than this x the angle where they grip best (full lock used to scrub them at 2.4 x).
+		-- 0 = off (the old way); more = the fronts scrub more at full lock (more understeer)
+		SteerSlipMax = 1.1,
 		SlideGrip = 0.72, -- grip left well past the peak (falls off smoothly, never ice)
 		LoadSens = 0.12, -- a tyre with more load grips a little less per kg (weight transfer matters)
 		LongGrip = 1.15, -- drive and braking grip over cornering grip (a tyre grips a little more straight ahead)

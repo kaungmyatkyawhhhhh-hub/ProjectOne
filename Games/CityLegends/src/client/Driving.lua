@@ -2965,7 +2965,8 @@ function Driving.step(dt: number)
 	if s.burnArmed and not s.burnout and (throttle < 0.3 or not s.engineOn or Config.spsToMph(s.vel.Magnitude) > DF.BurnArmMph) then
 		s.burnArmed = false
 	end
-	s.burnout = s.burnArmed and s.engineOn and throttle > 0.5 and brake > 0.3 and not s.electric and (not s.manual or (s.mgear >= 1 and not s.clutch))
+	-- (owner, 2026-11-13: "make it so that AWD cars cant do burnouts": all four wheels drive, the brakes can't hold it)
+	s.burnout = s.burnArmed and s.engineOn and throttle > 0.5 and brake > 0.3 and not s.electric and s.drive ~= "AWD" and (not s.manual or (s.mgear >= 1 and not s.clutch))
 	if s.burnout then
 		holding = false -- (the pedals are the burnout's, not launch control's)
 	end
@@ -3573,7 +3574,8 @@ function Driving.step(dt: number)
 			end
 		end
 		-- (2026-11-13: a donut or any hard wheelspin burns the tyres like a burnout does)
-		if (throttle > 0.8 and math.abs(fwdSpeed) < 14 and brake > 0.3) or (s.axleOut ~= nil and throttle > 0.6 and s.axleOut.spin >= Config.DrivingFeel.Axle.SpinRedline) then
+		-- (holding launch control is not a burnout: only tyres that really spin wear)
+		if s.burnout or (s.axleOut ~= nil and throttle > 0.6 and s.axleOut.spin >= Config.DrivingFeel.Axle.SpinRedline) then
 			s.report.burn += dt
 		end
 		if s.drifting then

@@ -449,8 +449,26 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 	-- (2026-11-10: off on ordinary tyres keeps Sport stability control; off on drift tyres frees the car)
 	local esc = if rwd then math.min(s.esc, if s.tc == 0 and not s.drift then 1 else s.tc) else s.esc
 	local escFrom = if esc == 1 and rwd then P.EscSportFrom else 8
+	-- (owner, 2026-11-13: "fix cars understeering too much") at full lock the front wheels were turned far past the
+	-- angle where their tyres grip best (2.4 times it at 60 mph), so the fronts scrubbed and the car ran wide on 78%
+	-- of its grip. With the steering help on (everyone but "Pro") the front wheels turn no further past the car's path
+	-- than SteerSlipMax x that angle: the fronts stay at their best grip and the car turns as tight as its tyres can.
+	-- It only ever turns the wheels less than asked, never more
+	local slipMax = if (s.help or 0) > 0 and (P.SteerSlipMax or 0) > 0 then p.peakF * P.SteerSlipMax else 0
+	local dAsk = delta
 	for _ = 1, n do
 		local ux = math.max(speed, 0.5)
+		if slipMax > 0 and blend > 0 then
+			local base = math.atan2(vy + p.a * r, ux)
+			local want = dAsk * sv
+			local held = math.clamp(want, base - slipMax, base + slipMax)
+			if math.abs(held) < math.abs(want) then
+				delta = (want + (held - want) * blend) * sv
+			else
+				delta = dAsk
+			end
+			cosd = math.cos(delta)
+		end
 		local aF = math.atan2(vy + p.a * r, ux) - delta * sv
 		local aR = math.atan2(vy - p.b * r, ux)
 		local xF, xR = math.abs(aF) / p.peakF, math.abs(aR) / p.peakR
@@ -470,7 +488,7 @@ function CarPhysics.step(p: Params, s: StepIn, dt: number): StepOut
 		-- stability control: the yaw the driver asks for (within the tyres' grip); it brakes a wheel to hold it, and
 		-- holds the body's slip angle
 		if esc > 0 and speed > escFrom then
-			local ref = vx * math.tan(delta) / (p.L * (1 + P.EscUnder * vx * vx))
+			local ref = vx * math.tan(dAsk) / (p.L * (1 + P.EscUnder * vx * vx))
 			-- (what the tyres can turn the car with: both axles together)
 			local lim = (capF + capR) * 1.05 / math.max(speed, 1)
 			ref = math.clamp(ref, -lim, lim)
