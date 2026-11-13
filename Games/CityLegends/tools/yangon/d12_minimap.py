@@ -168,8 +168,7 @@ def render():
         for r in range(ROWS):
             t = final.crop((c * TILE_W, r * TILE_H, (c + 1) * TILE_W, (r + 1) * TILE_H))
             path = os.path.join(OUT, f'tile_{c}_{r}.png')
-            lo, hi = zip(*t.getextrema())
-            if max(hi) - min(lo) <= 2:  # plain ground: not drawn (the minimap's backing is that colour)
+            if all(h - l <= 2 for l, h in t.getextrema()):  # plain ground: not drawn (the minimap's backing is that colour)
                 if os.path.exists(path):
                     os.remove(path)
                 continue
@@ -188,6 +187,7 @@ def write_lua(ids_path):
         '-- the Yangon map as picture tiles (world studs); the rim and the arrow are MinimapArt\'s',
         'return {',
         f'\tx0 = {X0}, z0 = {Z0}, tileStuds = Vector2.new({TS_X:g}, {TS_Z:g}), cols = {COLS}, rows = {ROWS},',
+        '\tback = Color3.fromRGB(%d, %d, %d),' % OUTSIDE,
         f'\tmap = {{ x0 = {MX0:.0f}, z0 = {MZ0:.0f}, x1 = {MX1:.0f}, z1 = {MZ1:.0f} }},',
         '\ttiles = {',
     ]
