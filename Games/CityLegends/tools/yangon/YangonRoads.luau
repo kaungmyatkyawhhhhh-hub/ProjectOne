@@ -41,16 +41,20 @@ M.LINE_T, M.LIFT = 0.04, 0.08 -- paint: thickness, and how far over the road (fl
 M.MAIN = { "Yangon Loop", "New Road", "University Avenue" }
 
 -- the Yangon look (Roblox Playbook/2026-11-13 Research - Yangon road look.md)
+-- 43 street photos: plain grey concrete pavement, red and white kerb bands of about 1 m (a quarter of a
+-- car: 3.2 studs for our 3-studs-a-metre cars), every line white, one solid centre line.
+-- The asphalt stays the game's own dark one (the real one is a lighter warm grey: the owner's call).
 M.palette = {
 	asphalt = Color3.fromRGB(46, 47, 50),
-	paver = Color3.fromRGB(150, 148, 142),
+	paver = Color3.fromRGB(150, 146, 136),
 	paverMaterial = Enum.Material.Pavement,
-	kerb = Color3.fromRGB(205, 202, 194),
-	kerbBand = nil :: Color3?,
+	kerb = Color3.fromRGB(232, 228, 218),
+	kerbBand = Color3.fromRGB(195, 47, 45) :: Color3?,
+	kerbSplit = 2,
 	kerbMaterial = Enum.Material.Concrete,
-	paint = Color3.fromRGB(232, 232, 226),
+	paint = Color3.fromRGB(235, 235, 230),
 }
-M.centre = nil :: { [string]: any }? -- the middle line (RoadLines opts.centre); nil = dashed, the paint colour
+M.centre = { solid = true } :: { [string]: any }? -- the middle line (RoadLines opts.centre): one solid white line
 
 local C = M.C
 local TAU = 2 * math.pi
@@ -880,6 +884,18 @@ function M.buildRoundabout()
 		count += 1
 		return p
 	end
+	-- a kerb piece from p0 to p1 (its middle line, at the road's height), in pal.kerbSplit bands
+	local function kerb(p0: Vector3, p1: Vector3, alt: number)
+		local nb = if pal.kerbBand then ((pal :: any).kerbSplit or 1) else 1
+		local up = Vector3.new(0, M.CURB_UP + 0.08 - 3, 0)
+		for kb = 0, nb - 1 do
+			local q0, q1 = p0:Lerp(p1, kb / nb), p0:Lerp(p1, (kb + 1) / nb)
+			if (q1 - q0).Magnitude > 0.05 then
+				local second = if nb > 1 then kb % 2 == 1 else alt == 1
+				part({ Name = "Kerb", Size = Vector3.new(M.KERB_W, 6.04, (q1 - q0).Magnitude), CFrame = CFrame.lookAt((q0 + q1) / 2 + up, q1 + up), Material = pal.kerbMaterial, Color = if second and pal.kerbBand then pal.kerbBand else pal.kerb })
+			end
+		end
+	end
 	local function line(p0: Vector3, p1: Vector3, w: number)
 		local up = Vector3.new(0, M.LIFT + M.LINE_T / 2, 0)
 		local p = part({ Name = "Line", Size = Vector3.new(w, M.LINE_T, (p1 - p0).Magnitude), CFrame = CFrame.lookAt((p0 + p1) / 2 + up, p1 + up), Material = Enum.Material.SmoothPlastic, Color = pal.paint })
@@ -900,13 +916,9 @@ function M.buildRoundabout()
 
 	-- the island: a kerb ring, a grass disc and a low dome on it (nothing tall: cars across the ring stay in view)
 	local grass = workspace.Terrain:GetMaterialColor(Enum.Material.Grass)
-	local kerbUp = M.CURB_UP + 0.08 - 3
 	local NK = 48
 	for j = 0, NK - 1 do
-		local alt = j % 2
-		local up = Vector3.new(0, kerbUp + alt * 0.006, 0)
-		local p0, p1 = ringPoint(M.R_IN - 0.4, j * TAU / NK, Y0) + up, ringPoint(M.R_IN - 0.4, (j + 1) * TAU / NK, Y0) + up
-		part({ Name = "Kerb", Size = Vector3.new(M.KERB_W - alt * 0.01, 6.04, (p1 - p0).Magnitude + 0.06), CFrame = CFrame.lookAt((p0 + p1) / 2, p1), Material = pal.kerbMaterial, Color = if pal.kerbBand and alt == 1 then pal.kerbBand else pal.kerb })
+		kerb(ringPoint(M.R_IN - 0.4, j * TAU / NK, Y0), ringPoint(M.R_IN - 0.4, (j + 1) * TAU / NK, Y0), j % 2)
 	end
 	part({ Name = "Island", Shape = Enum.PartType.Cylinder, Size = Vector3.new(3, (M.R_IN - 0.1) * 2, (M.R_IN - 0.1) * 2), CFrame = CFrame.new(C.X, Y0 + 0.45 - 1.5, C.Z) * CFrame.Angles(0, 0, math.pi / 2), Material = Enum.Material.Grass, Color = grass })
 	local dome = part({ Name = "IslandMound", Size = Vector3.new(112, 4, 112), CFrame = CFrame.new(C.X, Y0 + 0.45, C.Z), Material = Enum.Material.Grass, Color = grass })
@@ -955,11 +967,7 @@ function M.buildRoundabout()
 			local pi1, po1 = ringPoint(RHO_I, b[1], y), ringPoint(RHO_O, b[2], y)
 			count += T(pi0, po0, po1, 6, pave, folder)
 			count += T(pi0, po1, pi1, 6, pave, folder)
-			local up = Vector3.new(0, kerbUp + alt * 0.006, 0)
-			local k0p, k1p = ringPoint(RHO_K, a[3], Y0) + up, ringPoint(RHO_K, b[3], Y0) + up
-			if (k1p - k0p).Magnitude > 0.2 then
-				part({ Name = "Kerb", Size = Vector3.new(M.KERB_W - alt * 0.01, 6.04, (k1p - k0p).Magnitude + 0.04), CFrame = CFrame.lookAt((k0p + k1p) / 2, k1p), Material = pal.kerbMaterial, Color = if pal.kerbBand and alt == 1 then pal.kerbBand else pal.kerb })
-			end
+			kerb(ringPoint(RHO_K, a[3], Y0), ringPoint(RHO_K, b[3], Y0), alt)
 		end
 	end
 

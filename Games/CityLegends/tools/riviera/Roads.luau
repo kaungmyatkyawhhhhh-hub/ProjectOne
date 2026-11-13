@@ -23,7 +23,8 @@
 	half, and "near another road" is measured with the other road's half. Without `half` nothing
 	changes (Monaco: every road is HALF). Options added for it, all off unless given:
 	  opts.pave = true or { [road name] = true }: kerbs and pavements on a "route" (not grey shoulders)
-	  opts.palette = { asphalt, paver, paverMaterial, paverVariant, kerb, kerbBand, kerbMaterial, paint }
+	  opts.palette = { asphalt, paver, paverMaterial, paverVariant, kerb, kerbBand, kerbSplit, kerbMaterial, paint }
+	    (kerbBand: a painted kerb's second colour; kerbSplit: bands per 6.4-stud piece)
 	  opts.cut = { [road name] = { [sample] = true } }: those samples are not built and are not seen by
 	    any other road (a flyover corridor, the inside of a roundabout). A cut end is square.
 	  opts.noSlab = { [road name] = { [i] = true } }: no slab between samples i and i + 1 (a mouth some
@@ -823,6 +824,22 @@ function Roads.build(data, opts)
 						local kerbColor = if pal.kerbBand and alt == 1 then pal.kerbBand else (pal.kerb or KERB)
 						local kerbMaterial = pal.kerbMaterial or Enum.Material.Concrete
 						local wholeWalk, wholeKerb = true, true
+						-- (a painted kerb, Yangon: pal.kerbBand is the second colour and pal.kerbSplit the bands per
+						-- piece. Bands butt end to end with no overlap and at one height: two colours lying over
+						-- each other would flicker)
+						local function bandedKerb(p0: Vector3, p1: Vector3)
+							local nb = pal.kerbSplit or 1
+							local up = Vector3.new(0, CURB_UP + 0.08 - 3, 0)
+							for kb = 0, nb - 1 do
+								local q0, q1 = p0:Lerp(p1, kb / nb), p0:Lerp(p1, (kb + 1) / nb)
+								if (q1 - q0).Magnitude > 0.05 then
+									local second = if nb > 1 then kb % 2 == 1 else alt == 1
+									local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9, 6.04, (q1 - q0).Magnitude), CFrame = CFrame.lookAt((q0 + q1) / 2 + up, q1 + up), Material = kerbMaterial, Color = if second then pal.kerbBand else (pal.kerb or KERB) }, folder)
+									k.CastShadow = false
+									count += 1
+								end
+							end
+						end
 						if zone and edgeLen > 0.5 then
 							-- (Yangon 2026-11-13) exact mouths. The pavement is the strip from the road's edge to
 							-- WALK out; what lies in a zone (another road's mouth, a roundabout) is cut off on the
@@ -859,7 +876,9 @@ function Roads.build(data, opts)
 									local p0 = if ina then ka:Lerp(kb, hi) else ka
 									local p1 = if ina then kb else ka:Lerp(kb, lo)
 									local kl = (p1 - p0).Magnitude
-									if kl > 0.2 then
+									if pal.kerbBand then
+										bandedKerb(p0, p1)
+									elseif kl > 0.2 then
 										local up = Vector3.new(0, CURB_UP + 0.08 - 3 + alt * 0.006, 0)
 										local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kl), CFrame = CFrame.lookAt((p0 + p1) / 2 + up, p1 + up), Material = kerbMaterial, Color = kerbColor }, folder)
 										k.CastShadow = false
@@ -902,7 +921,9 @@ function Roads.build(data, opts)
 							end
 							count += 1
 						end
-						if wholeKerb then
+						if wholeKerb and pal.kerbBand and edgeLen > 0.5 then
+							bandedKerb(ea + right * side * 0.4, eb + right * side * 0.4)
+						elseif wholeKerb then
 							local k = newPart({ Name = "Kerb", Size = Vector3.new(0.9 - alt * 0.01, 6.04, kerbLen), CFrame = kerbCF, Material = kerbMaterial, Color = kerbColor }, folder)
 							k.CastShadow = false
 							count += 1
