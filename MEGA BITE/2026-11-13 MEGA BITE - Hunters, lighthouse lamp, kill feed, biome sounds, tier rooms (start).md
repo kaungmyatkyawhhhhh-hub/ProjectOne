@@ -34,11 +34,13 @@ Nothing is published. Studio only. Tested in Studio Play with one player on PC u
 - Not tested with a real Trench kill (needs 2 players or a Trench fight); the first headshot can take a second to load.
 - Not done: the big gold words for the eater (the PvP reward pop already exists).
 
-## 4. Biome sounds (made, waiting for Roblox's review)
+## 4. Biome sounds (done: all four Approved and switched on, 13 Nov about 11:05)
 - Four seamless 12 s loops, our own synth (`MEGA BITE\Audio\biomes\biome_sfx.py`): AmbKelp 82819656154882 (N),
   AmbRuins 85305714102375 (E), AmbBones 113734425326839 (S), AmbGlow 108497907949793 (W). About -24 LUFS, energy in 250-4000 Hz.
-- `StarterPlayerScripts.MB_BiomeSound` fades them in outside the reef and cross-fades at biome borders. It only plays a loop
-  that is in `MB_Sounds.List`: add each as `{ids = {id}, vol = 0.22, loop = true}` when Approved. Not heard in game yet.
+- `StarterPlayerScripts.MB_BiomeSound` fades them in outside the reef and cross-fades at biome borders. All four are in
+  `MB_Sounds.List` (vol 0.22, loop). Checked in Studio Play in the Glow Gardens: AmbGlow playing at 0.22, the other three
+  silent, all four loaded (12.0 s), no script errors. Nobody has LISTENED to them yet (measured, not heard): the owner should
+  judge the mix against the reef ambience and the effects.
 - WhaleSong 118006360788733 and KrakenRise 118505351629475 are Approved and in `MB_Sounds.List` now.
 
 ## 5. Tier rooms in the Shop/Index (checked, not built)
