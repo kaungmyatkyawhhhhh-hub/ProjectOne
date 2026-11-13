@@ -120,6 +120,14 @@ root:GetPropertyChangedSignal("AbsoluteSize"):Connect(compose)
 task.defer(compose)
 ```
 
+**A phone layout for a window (tested on MEGA BITE Settings, 14 Nov)**
+- Build the window's content from a geometry table, e.g. `GEOM = { desk = {...}, phone = {...} }`, and a list of rows. `build(mode)` destroys the old content frame and rebuilds it. State lives outside (the settings table), so a rebuild loses nothing.
+- `mode = "phone"` when the input is touch, the short side is ≤ 500 and the screen is landscape. Re-check on `Camera.ViewportSize` changes, on input changes, and when the window opens.
+- The phone geometry is **wide and short**: two columns, taller rows, short labels, single-word pill labels (shorten a word that splits, e.g. NORMAL → MID). Make it as wide as the height-limited scale allows, because on a short phone the width is free.
+- The window **fills** the screen on phones instead of shrinking to the HUD's scale. In MEGA BITE that's the `FitFill` attribute read by `K.AttachScale`, and windows re-fit when their Size changes.
+- Tap areas: give each pill an invisible button the full row pitch tall; give a small X an invisible 64-unit tap area. Tablets keep the PC layout but get the taller tap areas.
+- Result on the Galaxy A06: ×0.58 → ×0.78, text 8.7 → 14 px, taps 17 → 40 px. PC was unchanged.
+
 **Reward reveal (skippable, staged)**
 1. Dim the world (backdrop to 0.4) 0.15 s.
 2. Item pops in at centre: scale 0 → 1.15 → 1 (0.35 s Back Out) with the rarity colour ring behind it.
