@@ -20,6 +20,14 @@ Rules for every step:
 - **Batch 1 (west):** from Lotte Hotel and the Pyay Road / Kabar Aye Pagoda Road junction in the north, down Kabar Aye Pagoda Road on the east, to Shwedagon Pagoda and Chaukhtatgyi in the south, and west to the Hlaing River. Inya Lake is in it.
 - **Batch 2 (south):** downtown: Yangon Zoo, Chinatown, Pazundaung, down to the river.
 - **Batch 3 (east):** the area east of Kabar Aye Pagoda Road, out to the Thaketa industrial zone.
+- **Batch 0.5 (owner, 14 Nov 2026: "this is batch 0.5"):** the area built in steps 0 to 11 (Inya Lake, Hledan, University Avenue, Myanmar Plaza, the Kabar Aye flyover).
+- **Owner's verdict on batch 0.5 (14 Nov 2026):**
+  - It doesn't look like Google Maps.
+  - Use Google Earth in 3D to see even the smallest details of Yangon.
+  - The buildings are not accurate. Some real ones are tall and round; in the game they are short squares.
+  - Inya Lake has borders (its banks and walls) and a park in real life.
+  - The industrial road is 2 lanes in real life; in the game it is 1.
+  - Pictures: `Yangon batch 0.5 - game top view (owner, 14 Nov).webp` and `Yangon batch 0.5 - Google Maps (owner, 14 Nov).png`.
 - **What the built map covers (steps 0 to 11):** about 96.128 to 96.161 E and 16.810 to 16.857 N: Inya Lake, Hledan, University Avenue, Myanmar Plaza and the Kabar Aye flyover. That is the middle of batch 1.
 - **Batch 1 still needs:** the strip west to the river (Kamayut, the riverside, Lotte Hotel), the north edge up to the Pyay / Kabar Aye junction, and the south part down to Shwedagon and Chaukhtatgyi. Shwedagon is only a far-city backdrop today.
 

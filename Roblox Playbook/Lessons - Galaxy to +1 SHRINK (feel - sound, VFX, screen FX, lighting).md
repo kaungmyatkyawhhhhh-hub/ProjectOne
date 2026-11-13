@@ -413,4 +413,12 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - Rules for every game set in a real place:
   - Light colour is part of the reference study: street lights, shop signs and window light differ by city. Check the real place's photos at night before reusing another map's lights.
   - Copying a piece from another map is fine for its shape; its colours and materials must still match the new place.
+## The Yangon map doesn't look like Yangon (14 Nov, City Legends, owner's correction)
+- What felt bad: the owner put the game's top view next to Google Maps: "it dont look like the google maps one". The buildings are not accurate (real tall round towers came out as short squares), Inya Lake has no banks or park, and the industrial road is one lane each way where the real one has two.
+- Cause: the map was built from road centre lines (OSM) and a generic building generator (plots along every road, made-up walk-ups, shophouses and villas). Nobody looked at the real place from above or in 3D before building, and no real building outlines or heights were used.
+- Fix: a reference study first (Google Earth 3D, satellite), then real building outlines and heights, real lane counts, and the lake's banks and park.
+- Rules for every map of a real place:
+  - Before building, study the real place in Google Earth 3D (every district and landmark) and write down what makes it recognisable: landmark shapes and heights, building rhythm, park and water edges, road widths.
+  - Use real data where it exists (building outlines and levels, lane counts) instead of generating stand-ins.
+  - Check the result side by side with the satellite view from the same angle before calling a step done.
 
