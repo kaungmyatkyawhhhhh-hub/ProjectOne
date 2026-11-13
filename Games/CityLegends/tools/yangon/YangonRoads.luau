@@ -691,6 +691,58 @@ function M.clear(names: { string })
 	return n
 end
 
+-- Where the lake or a pond comes under a road's pavement there is no ground (step 2 wrote water
+-- wherever the map has water, and the game's roads are twice as wide as the real ones): the pavement
+-- would hang over the water. Run this BEFORE buildRoads: on each such side it fills a grass bank from
+-- the lake bed up to 1 stud under the road, out to VERGE studs past the pavement.
+M.VERGE = 12
+function M.bank(names: { string })
+	local T = require(SS.YangonData.Tools.YangonTerrain:Clone())
+	T.prepare()
+	local made, where = 0, {}
+	for _, name in names do
+		local o = M.R[name]
+		local cut = M.cut[name]
+		local reach = o.half + M.WALK + M.VERGE
+		for i = 1, o.n - 1 do
+			if cut[i] or cut[i + 1] then
+				continue
+			end
+			local a, b = o.s[i], o.s[i + 1]
+			for _, side in { -1, 1 } do
+				local wet = false
+				for _, s in { a, b } do
+					local rx, rz = rightOf(s)
+					for lat = 0, reach + 4, 2 do
+						if T.isWater(s[1] + rx * lat * side, s[3] + rz * lat * side) then
+							wet = true
+							break
+						end
+					end
+					if wet then
+						break
+					end
+				end
+				if wet then
+					-- (FillBlock's top shows 2 studs higher on smooth terrain: YangonTerrain's SOLID_LIFT)
+					local top = math.min(a[2], b[2]) - 1 - 2
+					local bottom = 8
+					local len = hyp(b[1] - a[1], b[3] - a[3])
+					local mx, mz = (a[1] + b[1]) / 2, (a[3] + b[3]) / 2
+					local cf = CFrame.lookAt(Vector3.new(mx, (top + bottom) / 2, mz), Vector3.new(b[1], (top + bottom) / 2, b[3])) * CFrame.new(side * reach / 2, 0, 0)
+					workspace.Terrain:FillBlock(cf, Vector3.new(reach, top - bottom, len + 4), Enum.Material.Grass)
+					made += 1
+					table.insert(where, i)
+				end
+			end
+			if i % 200 == 0 then
+				task.wait()
+			end
+		end
+	end
+	return string.format("bank: %d pieces (samples %s..%s)", made, tostring(where[1]), tostring(where[#where]))
+end
+
 function M.buildRoads(names: { string })
 	local only = setOf(names)
 	local parent = M.folder()

@@ -34,6 +34,8 @@
 	  opts.live: the road's folder is parented first and filled a chunk at a time
 	  opts.keepEdges: Roads.debugEdges[road name] = { L, R } (edge points with their final heights);
 	    opts.edgesFor = { [road name] = true }: also for roads that are not built in this call
+	Roads.check also takes opts.only = { [road name] = true } (drive only those roads), opts.lanes =
+	  { [road name] = { offsets } } (a street's lanes are not a main road's) and opts.cut as above.
 ]]
 
 local Roads = {}
