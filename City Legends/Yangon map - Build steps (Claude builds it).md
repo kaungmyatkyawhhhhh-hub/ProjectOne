@@ -15,6 +15,14 @@ Rules for every step:
 - Studio tools go in `ServerStorage.ClaudeTools` as ModuleScripts; `require` a `:Clone()`.
 - **Blender is allowed (owner, 13 Nov 2026, 13:40):** "u can model with blender and not build in roblox studio if it saves lag and time". Map pieces may be made in Blender and brought in as meshes when that means fewer parts or less time. First place it pays: step 6, the road meshes.
 
+## Batches (owner, 14 Nov 2026: "here i labeled what batches we are doing. first batch is 1 and 2nd is 2 and 3rd is 3")
+![[Yangon map - batches (owner, 14 Nov).webp]]
+- **Batch 1 (west):** from Lotte Hotel and the Pyay Road / Kabar Aye Pagoda Road junction in the north, down Kabar Aye Pagoda Road on the east, to Shwedagon Pagoda and Chaukhtatgyi in the south, and west to the Hlaing River. Inya Lake is in it.
+- **Batch 2 (south):** downtown: Yangon Zoo, Chinatown, Pazundaung, down to the river.
+- **Batch 3 (east):** the area east of Kabar Aye Pagoda Road, out to the Thaketa industrial zone.
+- **What the built map covers (steps 0 to 11):** about 96.128 to 96.161 E and 16.810 to 16.857 N: Inya Lake, Hledan, University Avenue, Myanmar Plaza and the Kabar Aye flyover. That is the middle of batch 1.
+- **Batch 1 still needs:** the strip west to the river (Kamayut, the riverside, Lotte Hotel), the north edge up to the Pyay / Kabar Aye junction, and the south part down to Shwedagon and Chaukhtatgyi. Shwedagon is only a far-city backdrop today.
+
 ## Steps
 - [x] **0. Street plan and road design** (13 Nov). Roblox version at the time: 688.
 - [x] **1. Backup and setup** (13 Nov, version 708). Save the live place with the note "Monaco backup before Yangon". Check what sits near X 30000 and fix the map's place in the world. Get `ygn_roads.json` and the ground grid into Studio (the repo is public: Studio can fetch committed files from GitHub by commit id).
