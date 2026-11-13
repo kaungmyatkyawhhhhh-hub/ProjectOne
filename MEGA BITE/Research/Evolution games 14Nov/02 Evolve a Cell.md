@@ -67,3 +67,40 @@ thumbnail: "BUILD YOUR SPECIES" text, cells + an arrow. Spore-like creature edit
   weekly +150, login gift +40, pond events +25, playing +15.
 - UI style: the best UI of the batch so far: one frosted-glass style everywhere, consistent lowercase voice, soft colours,
   icons in a flat 2-tone style. Calm, "indie" feel (matches the ambient drone music list).
+
+### Systems (06:27-06:40)
+- GOLDEN CELL event: top pill turns gold "GOLDEN CELL 1:15 / catch the golden cell for a jackpot + a free roll", a glowing
+  yellow cell flees, big gold "golden cell!" title. Other events (off-screen arrows with names): "red tide", "frostbloom",
+  "feeding frenzy", "coconut the colossus". Event rotation every ~5-8 min ("next event 7:21").
+- DEATH = NEW GENERATION: I was eaten (by a "leviathan") -> straight back to the egg ("hatch / push your way out") as
+  "zinadrop gen 2", same species, no death screen, no levels lost menu. Lineage UI "family": "the zinadrop line - gen 1 stage 1
+  eaten by a leviathan / gen 2 stage 1 alive now", "1 generations lived · longest line 2 · era 1". Death becomes story.
+- After the first life, the left menu expands: index (tab), CUSTOMIZE (e) "edit your cell", EVOLUTION (g) "upgrades", MUTATE
+  "roll traits", gifts, pass, SHOP (bag), settings.
+- CUSTOMIZE = a real Spore-like CREATURE EDITOR, full screen over the pond:
+  * "127 dna to spend - parts 3/6"; tabs build 1 / shape 2 / paint 3; species name field ("zinadrop");
+  * BUILD: a grid of parts on bubble pedestals: eye 8 dna, jaws 15 dna, "??? plant eaters", "??? rebirth", the rest "??? from a
+    card" (unlocked by cards); drag a part onto the body, it snaps to the surface; "symmetry on (t)" mirrors it; info card right
+    ("eye - see more of the pond around you - costs 8 dna");
+  * SHAPE: "drag the edge to stretch, scroll over it to puff up / scroll for width, shift+scroll for height" - the body is a
+    soft blob that deforms live (I made it a wide heart/peanut shape);
+  * PAINT: color (16 swatches), pattern color (16), skin (9 patterned balls: speckle, stripes, swirl ...), aura (2+ glows:
+    "mint aura"). Instant preview; gold "done" bottom-right, "enter - hatch fresh as an egg".
+  -> Kids design THEIR OWN creature and see it in the world in seconds. The best "my creature" system I've seen on Roblox.
+- INDEX MILESTONES give cosmetics: "new color - ice - index milestone · use it in customize", "new skin - tiger".
+- EVOLUTION (g) = an animated RADIAL skill tree around your 3D creature: 4 branches speed / size / growth / hunt, each a
+  branching vine of round nodes with gold rings at milestones; "0 points", "drag to spin. click an upgrade"; "rebirth at stage
+  4" button. Points (helix icon) come from gifts/pass/quests.
+- MUTATIONS ("change how your cell plays. keep the new one or your old one"): slot 1 empty (roll), slot 2 locked ("grow mutant
+  genes in the growth tree"); "lucky roll in 10 · legendary+ in 100" (pity counters), "next free mutagen in 27:27 of play";
+  collection 0/19 with rarity dots (grey/blue/purple/gold/red); "details + odds"; 1 roll R$29, 10 rolls R$249, lucky roll R$79,
+  20 evo points 0/20 (earn).
+- FRUIT: purple berry clusters "bump it 3 times to break it open" (a dash-able objective food).
+- SHOP (bag button / B): "first purchase bonus: +3 points and 30 min of 2x dna". Featured VIP R$299 (gold glittery blob model:
+  25% more dna forever, royal aura that follows you, gold/void/galaxy looks, gold name on the board); 2x DNA forever R$199
+  ("every plant, bite and bounty counts double. stacks with boosts"); RARE LOOK R$79 gacha with odds shown ("color 60% skin 13%
+  aura 27%. never a repeat"); 2x dna boost 15 min R$39; "BECOME THE COLOSSUS" (a crown; "taken by coconut" = a SINGLE-HOLDER
+  PAID ROLE per server - someone bought being the boss!); rare looks collection 6/22 (hover = how to get); DNA packs 850 R$149
+  ("a jar"), 2500 R$399 ("a whole tank"), 5000 R$999 (+15 points, 1h 2x). Same glass style, product art = 3D renders.
+- ZONE MOOD: the pond changes colour by region - teal/cyan shallows, brown murky middle, DARK PURPLE deep (black background,
+  sparse glowing particles). Bigger, scarier creatures in the dark.
