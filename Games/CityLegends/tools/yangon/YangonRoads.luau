@@ -947,7 +947,8 @@ function M.buildRoundabout()
 
 	-- outside: kerb and pavement between the arms. Each stretch ends on the arms' own edge lines, so the
 	-- gap at an arm is exactly as wide as that road.
-	local RHO_I, RHO_O, RHO_K = M.RING_V, M.RING_V + M.WALK, M.RING_V + 0.4
+	-- (the pavement starts at the kerb's back face, as on the roads)
+	local RHO_I, RHO_O, RHO_K = M.RING_V + 0.85, M.RING_V + M.WALK, M.RING_V + 0.4
 	local secI, secO, secK = sectors(RHO_I), sectors(RHO_O), sectors(RHO_K)
 	local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
 	if (pal :: any).paverVariant then
@@ -1541,6 +1542,7 @@ function M.surfaceCheck(spots: { { any } }, reach: number?)
 			end
 		end
 		local dbl, rays = 0, 0
+		local egSlab = nil
 		local x = at.X - R + 0.37
 		while x <= at.X + R do
 			local z = at.Z - R + 0.37
@@ -1553,7 +1555,7 @@ function M.surfaceCheck(spots: { { any } }, reach: number?)
 					for q = 2, #tops do
 						if math.abs(tops[q][2] - tops[1][2]) < 0.05 then
 							dbl += 1
-							eg = eg or string.format("two slabs at %.1f, %.1f (%s, %s)", x, z, tops[1][1], tops[q][1])
+							egSlab = egSlab or string.format("two slabs at %.2f, %.2f (%s %.3f size %s, %s %.3f size %s)", x, z, tops[1][1], tops[1][2], tostring(tops[1][3].Size), tops[q][1], tops[q][2], tostring(tops[q][3].Size))
 							break
 						end
 					end
@@ -1565,7 +1567,7 @@ function M.surfaceCheck(spots: { { any } }, reach: number?)
 		fights += f
 		steps += st
 		slabs += dbl
-		table.insert(out, string.format("%s: blocks fighting %d, other thin steps %d, doubled slab spots %d of %d%s", s[1], f, st, dbl, rays, if eg then " | " .. eg else ""))
+		table.insert(out, string.format("%s: blocks fighting %d, other thin steps %d, doubled slab spots %d of %d%s", s[1], f, st, dbl, rays, (if eg then " | " .. eg else "") .. (if egSlab then " | " .. egSlab else "")))
 		task.wait()
 	end
 	return string.format("doubled faces at %d spots: blocks fighting %d, thin steps %d, doubled slab spots %d\n%s", #spots, fights, steps, slabs, table.concat(out, "\n"))

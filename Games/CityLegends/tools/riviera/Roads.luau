@@ -860,8 +860,11 @@ function Roads.build(data, opts)
 							local out = right * side
 							local outA = Vector3.new(-a.dir.Z, 0, a.dir.X).Unit * side
 							local outB = Vector3.new(-b.dir.Z, 0, b.dir.X).Unit * side
+							-- (the pavement starts at the kerb's back face, 0.85 out, not under the kerb: at a mouth or
+							-- a cut end the two end faces would lie in one plane over each other and flicker)
 							local lift = Vector3.new(0, CURB_UP, 0)
-							local quad = { ea + lift, ea + outA * WALK + lift, eb + outB * WALK + lift, eb + lift }
+							local inner = 0.85
+							local quad = { ea + outA * inner + lift, ea + outA * WALK + lift, eb + outB * WALK + lift, eb + outB * inner + lift }
 							local poly, whole = clipPoly(quad, function(p)
 								return zone(r.name, p, "Pavement")
 							end)
@@ -870,8 +873,8 @@ function Roads.build(data, opts)
 							local run = (eb - ea) * Vector3.new(1, 0, 1)
 							if poly and whole and (outA - outB).Magnitude < 2e-3 and math.abs(run.Unit:Dot(outA)) < 2e-3 then -- (off square by under 0.02 studs over the pavement's width)
 								local drop = Vector3.new(0, CURB_UP - 3, 0)
-								local pa, pb = ea + outA * (WALK / 2) + drop, eb + outB * (WALK / 2) + drop
-								paveProps.Size = Vector3.new(WALK, 6, (pb - pa).Magnitude)
+								local pa, pb = ea + outA * ((WALK + inner) / 2) + drop, eb + outB * ((WALK + inner) / 2) + drop
+								paveProps.Size = Vector3.new(WALK - inner, 6, (pb - pa).Magnitude)
 								paveProps.CFrame = CFrame.lookAt((pa + pb) / 2, pb)
 								newPart(paveProps, folder)
 								count += 1
