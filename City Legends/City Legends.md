@@ -65,6 +65,45 @@
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
+## Exhaust sounds for the last 9 imports (2026-11-13, owner: "also insert good exhaust sounds for all of the new imports model cars")
+Same system and same method as the two exhaust jobs before (sections "Exhaust sounds for the 7 imports" and "Supercar exhaust sounds"). Nine imported cars still played the shared engine sound. Each now has a set for its real engine. **Not heard by ear. Not played in the game:** tonight was Edit mode only (Play was never started). Owner to listen. In Studio, not published.
+
+| Game car | Real engine | Sound set (rpm measured) | New or reused | True match? |
+|---|---|---|---|---|
+| British Vanguard Highland (`astin_dbx`) | 4.0 twin-turbo V8 (AMG M177) | AMG GT idle 1,394, AMG GT loop 3,985, E 63 S loop 6,040, M177 start-up (from a G 63); turbo whine, pops when you lift; louder and deeper | new: `V8_M177` | true: same engine family (AMG GT / E 63 S / G 63) |
+| Tri-Star Silber X167 Royale (`bentz_gls`) | 4.0 twin-turbo V8 (M177) | the same set, 40% quieter, softer, no pops | new: `V8_M177` | true |
+| Enfurecido Brava (`lambrini_urusp`) | 4.0 twin-turbo V8 (VW group) | the Highlands' Audi RS7 set (idle 1,050, loops 2,999 / 5,494, limiter loop 6,994) with a real Urus start-up; 10% louder, sharper, a little raw, crackles when you lift | reused: `V8_VW40` (same engine as the Highlands) | loops borrowed from the RS7 (same engine), start-up is a Urus |
+| Tri-Star Silber R230 V12 Track (`bentz_sl65bs`) | 6.0 twin-turbo V12 (AMG M275) | SL 65 idle ~1,190 and SL 65 start-up; **rev loops 3,638 and 6,450 from an Aston Martin DB11 (5.2 twin-turbo V12)**; louder, harder | new: `V12_BITURBO` | **stand-in for the revs** (another maker's twin-turbo V12: same layout and firing, not the same voice); idle and start are real |
+| Tri-Star Silber Z223 Royale V12 (`bentz_s680`) | 6.0 twin-turbo V12 (M279) | the same set with an S 600's quiet start-up; 45% quieter, much softer | new: `V12_BITURBO` | **stand-in for the revs**, as above |
+| Sovereign Grand Tourer (`bentlee_contgt`) | 6.0 twin-turbo W12 | W12 start-up (from a 2019 Continental GT), W12 idle 1,100, **DB11 V12 loop 3,638 in the middle**, Bentley W12 loop 6,776 on top; a bit quieter, deeper, muffled | new: `W12_BITURBO` | start, idle and top loop are a real W12; **the middle loop is a stand-in** (a twin-turbo V12: 12 cylinders, same firing note) |
+| Bavarica Werkz G20 Sport (`bnw_330i_g20`) | 2.0 turbo four (B48) | B48 idle 1,178, B48 loops 5,520 and 6,940, 330i cold start; 15% quieter, quiet turbo whine, no pops | new: `I4_B48` | true |
+| Dearborn C346 Rallye (`dearb_focus_rs`) | 2.3 turbo four (EcoBoost) | Focus RS idle 1,200, Focus RS loop 6,050, limiter loop 6,880, a 2016 RS start-up; turbo whine, pops when you lift, a bit raspy | new: `I4_ECOBOOST` | true |
+| Horizon Z33 (`nisun_350z`) | 3.5 V6, no turbo (VQ35) | 350Z idle ~1,090, 350Z loops 3,712 / 5,015 / 6,340, 350Z start-up; no pops | new: `V6_VQ` | true |
+
+- **Checked by numbers, in Edit (no ears here):**
+  - Every id is public Creator Store audio (found through the store's own search, 26 new ids). All 33 ids these nine cars use load in this place in Studio.
+  - Each loop's engine speed measured from its sound. The method was checked on clips that state their rpm (an M177 bank 3,000 / 4,000 / 6,600: read 2,981 / 3,948 / 6,674; a Huayra clip 5,533: read 5,539). Each engine's firing pattern checked too (V8: 4th order with the 1.5 burble; V12 and W12: 6th; fours: 2nd; V6: 3rd).
+  - Loudness levelled with the same targets as before. Loop points checked for clicks.
+  - The hand-over between loops worked out for every rpm from idle to the limit: no jump in the note. Worst spots in the new sets: Focus RS 10% off for about 180 rpm near 2,500; G20 6% near 2,400; the others under 6%. The Brava's borrowed set has the spot it already had on the Highlands (12% near 1,700; that set was driven in Play on 10 Nov).
+  - The game's tables load with the new sets (in Lune and in Studio). Lune tests pass, type check clean.
+- **Not checked:** the sound by ear; nothing was played in the game (no start-up, no drive, no second player, no phone).
+- **Weak spots (honest):**
+  - **R230 and Z223 (V12):** no clean Mercedes twin-turbo V12 rev loops in the store. The clips named "M275" there are really a V8 (measured), so not used. The DB11 loops are a real twin-turbo V12 but an Aston Martin.
+  - **Sovereign Grand Tourer (W12):** only one W12 rev loop exists in the store. Its speed reads 6,776 rpm; 3,388 also fits its sound. If the car sounds an octave too low at high revs, that is the cause (fix: one number in `Config.lua`, the comment says how). The W12 idle loop is short (1.6 s).
+  - **G20 and Focus RS:** nothing is recorded between idle and about 5,500 / 6,000 rpm. Around 2,500 rpm the idle loop is played fast and the high loop slow: it may sound thin there. The Focus RS loop is short (1.2 s).
+  - **Highland / X167:** the top loop is from an E 63 S, the others from an AMG GT (same engine family, two recordings).
+  - **Z33:** the idle loop has a small jump at its loop point (may tick once every 5 to 7 s). The 5,015 loop was uploaded on 12 Nov and the 6,340 loop on 10 Nov (new uploads can still be taken down).
+- **Engine numbers in the game that don't match (not changed: not asked):** the Highland drives with the base DBX's numbers (542 hp, 181 mph), not the 707's. The Sovereign Grand Tourer has the 2019 W12's numbers (626 hp, 8 gears). The rev limit the sound uses (`CarStats`) differs from the driving data for the X167 (6,000 against 6,500), the Z223 (6,500 against 6,000) and the Z33 (7,000 against 7,500).
+- **The 9 cars left alone (owner's earlier choices), what they play today:** all have their own set, none plays the shared sound.
+  - Velocité Noir Origine and its two trims (`bugotti_veyron`, `_sport`, `_top`): the W16 set of 3 Nov (Veyron start-up, W16 idle, one 3,500 rpm loop, turbo whine, blow-off).
+  - Éclair and Éclair Super Sport (`bugotti_chiron`, `_supersport`): the Chiron W16 set (idle, 3,500 and 6,500 loops with coast loops, two-stage turbo whine, blow-off).
+  - Éclair Pure (`bugotti_chiron_pursport`): the same with its own start-up.
+  - ZVX and ZVX 63 (`lambrini_svj`, `lambrini_svj63`): the SVJ's own set (start-up, idle, three loops, launch and limiter loops, shift and downshift sounds, pops).
+  - ZV (`lambrini_lp750`): the SVJ set at half volume.
+- **Left out:** clips that look cut from a racing game (rpm banks like `m177 4000`, `SL65_onhigh`, `VQ37_on_5000`, `i4GTI_4899`, `Pagani_Huayra_EXH_Accel_5533`): used only to check the measuring. Clips with the wrong engine under the name: "M275 RevA / RevB" (a V8), "s650_rev" (a V8), "RevA ST" sets (5 and 6 cylinders), "s63rev" (BMW). A Focus RS start "taken from a video": not used.
+- **Old sound (to go back):** the shared engine sound for all nine. Set `Config.SupercarExhaust.Off.<car id> = true` (for example `Config.SupercarExhaust.Off.bentz_s680 = true`).
+- **Credits (Creator Store audio):** VeryWideSupra (Mercedes M177 Startup G63 S63 C63 E63 GT63 V8); cezuuya (Mercedes AMG GT Idle, Mercedes AMG GT OnRev); llIIlIlIIlIIIllIllI (e63s - rev); Karazu56 (Urus Start Up); XXXEDGARZXXX (sl65start, sl65idle); Hack_apocalypse (DB11 REV, DB11 High REV); FreeIsaacbolarini (S600Startup); Scidelistia (W12 Startup); 3M0B (w12 idle); Bayview County, USA (Bentley W12_1); aboba_rblx22 (330i-cold-start); bobthebreadeater45 (b48idle); Iconicc_Sam (B48); cat1425 (BMW B48); bburneddd (RS 2016 Resonator Startup); irrelevantspacee (focusrs idle, exhausthighrev focusrs, ecoboost 4cylinder redline); Orcasauruss (VQ35 350z Startup, VQ35 350z Rev); FoxZachkFan (350z idle); Yakimo_H (350Z Rev); kennu_hdgamer (Nissan 350Z Rev1). The Brava also uses FinanceTrend's Audi RS7 set (credited on 10 Nov). The ids are next to each name in `Config.lua` (search "the nine").
+
 ## Look around the car (2026-11-13, owner: "make it so that u can look around in third person camera view")
 In Studio, not published. The three outside cameras (the close one, the low one and the far chase one) can now swing round the car:
 - **PC:** hold the right mouse button and move the mouse (the pointer stays put while you look). Added to the key list: "RIGHT MOUSE · Hold and move: look around the car".

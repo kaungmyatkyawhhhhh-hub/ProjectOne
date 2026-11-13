@@ -1318,6 +1318,135 @@ local function supercarExhaust()
 			},
 			start = { idleAt = 1.9, fade = 0.5, out = 2.2, ends = 2.9, settleFrom = 1290, settle = 0.5, gain = 1.2 },
 		},
+		-- (owner, 2026-11-13: "also insert good exhaust sounds for all of the new imports model cars": the nine
+		-- imports that still had no set; found, measured and levelled the same way as the sets above. Not
+		-- heard by ear and not played in the game: checked in Edit only. Where the store has no clean loop of
+		-- the engine itself the comment says STAND-IN and what was taken instead.)
+		-- Mercedes-AMG M177 4.0 twin-turbo V8, cross-plane, turbos in the V (DBX707, Maybach GLS 600): a deep
+		-- burble, its 1.5 order as strong as the firing 4th. The loops are an AMG GT's and an E 63 S's (M178 /
+		-- M177: one engine family)
+		V8_M177 = {
+			sounds = {
+				Start = id(122992068282919), -- "Mercedes M177 Startup G63 S63 C63 E63 GT63 V8" (VeryWideSupra): catches at 0.35 s, ~1,200 at its end
+				Idle = id(111360463876410), -- "Mercedes AMG GT Idle" (cezuuya), 1,394 rpm
+				Low = id(119346653900828), -- "Mercedes AMG GT OnRev" (cezuuya), 3,985 rpm
+				High = id(122177474643880), -- "e63s - rev" (llIIlIlIIlIIIllIllI), 6,040 rpm
+				Turbo = Config.Sounds.SharedTurbo,
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1394, Low = 3985, High = 6040 },
+				gains = { Idle = 0.32, Low = 0.52, High = 0.97 },
+				width = 0.42, reachDown = { Low = 0.5 }, idleReach = 0.3, idleTop = 1.7,
+				whine = 0.5, turbo = 0.3,
+				coast = COAST, shiftCut = 0.08, shiftPops = false,
+				shots = { Pops = 0.7 },
+			},
+			start = { idleAt = 2.6, fade = 0.6, out = 3.0, ends = 3.9, settleFrom = 1200, settle = 1.5, gain = 0.96 },
+		},
+		-- Mercedes-AMG M275 / M279 6.0 twin-turbo V12 (SL 65 Black Series, Maybach S 680). The start-up and the
+		-- idle are an SL 65's. STAND-IN for the revs: the store's clips named "M275" fire like a V8 (4th order),
+		-- so the two rev loops are an Aston Martin DB11's 5.2 twin-turbo V12 (the same layout: a 60-degree
+		-- V12 with two turbos, firing at the 6th order)
+		V12_BITURBO = {
+			sounds = {
+				Start = id(129810580933923), -- "sl65start" (XXXEDGARZXXX): catches at 0.6 s, ~1,170 at its end
+				Idle = id(90248945881277), -- "sl65idle" (XXXEDGARZXXX), ~1,190 rpm
+				Low = id(123472507046073), -- "DB11 REV" (Hack_apocalypse), 3,638 rpm
+				High = id(125662546814285), -- "DB11 High REV" (Hack_apocalypse), 6,450 rpm
+				Turbo = Config.Sounds.SharedTurbo,
+			},
+			bands = {
+				bands = { Idle = 1190, Low = 3638, High = 6450 },
+				gains = { Idle = 0.32, Low = 0.31, High = 0.39 },
+				width = 0.42, reachDown = { Low = 0.5 }, idleReach = 0.35, idleTop = 1.9,
+				whine = 0.5, turbo = 0.3,
+				coast = COAST, shiftCut = 0.15, liftPops = false, shiftPops = false, -- (the old 5-speed automatic)
+			},
+			start = { idleAt = 1.0, fade = 0.4, out = 1.2, ends = 1.7, settleFrom = 1170, settle = 0.5, gain = 0.71 },
+		},
+		-- Bentley 6.0 twin-turbo W12 (Continental): low, smooth, a muffled roar. The start-up, the idle and the
+		-- top loop are a W12's (the top loop's 1.5 and 4.5 orders are its four rows of three; read as 6,776 rpm,
+		-- half of that also fits its lines: if it sounds an octave low, make it `Low = 3388`). STAND-IN for
+		-- the middle, where the store has nothing: the DB11's twin-turbo V12 loop (12 cylinders firing evenly)
+		W12_BITURBO = {
+			sounds = {
+				Start = id(4524973661), -- "W12 Startup" (Scidelistia, "from a 2019 Bentley Continental GT"): catches at 0.45 s, fades from 1.5 s
+				Idle = id(107118476589810), -- "w12 idle" (3M0B), 1,100 rpm
+				Low = id(123472507046073), -- "DB11 REV" (Hack_apocalypse), 3,638 rpm: the stand-in
+				High = id(101979518471250), -- "Bentley W12_1" (Bayview County, USA), 6,776 rpm
+				Turbo = Config.Sounds.SharedTurbo,
+			},
+			bands = {
+				bands = { Idle = 1100, Low = 3638, High = 6776 },
+				gains = { Idle = 0.37, Low = 0.31, High = 0.48 },
+				width = 0.42, reachDown = { Low = 0.5 }, idleReach = 0.4, idleTop = 2.0,
+				whine = 0.5, turbo = 0.25,
+				coast = COAST, shiftCut = 0.06, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 1.0, fade = 0.5, out = 1.3, ends = 2.0, settleFrom = 1100, settle = 0.5, gain = 1.43 },
+		},
+		-- BMW B48 2.0 turbo four (G20 330i): firing at the 2nd order, a quiet turbo
+		I4_B48 = {
+			sounds = {
+				Start = id(124759903946683), -- "330i-cold-start" (aboba_rblx22): catches at 0.45 s, ~1,250 at its end
+				Idle = id(72682157866475), -- "b48idle" (bobthebreadeater45), 1,178 rpm
+				Mid = id(101713305935312), -- "B48" (Iconicc_Sam), 5,520 rpm
+				High = id(2101020049), -- "BMW B48" (cat1425), 6,940 rpm
+				Turbo = Config.Sounds.SharedTurbo,
+			},
+			bands = {
+				bands = { Idle = 1178, Mid = 5520, High = 6940 },
+				gains = { Idle = 0.41, Mid = 0.38, High = 1.26 },
+				-- (nothing is recorded between 1,178 and 5,520 rpm: Mid reaches down and the idle reaches up, they
+				-- meet near 2,550, each at the end of its pitch; narrow reaches so neither is heard off its note)
+				width = 0.42, reachDown = { Mid = 0.36, High = 0.3 }, idleReach = 0.36, idleTop = 2.25,
+				whine = 0.6, turbo = 0.4,
+				coast = COAST, shiftCut = 0.06, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 3.3, fade = 0.6, out = 3.7, ends = 4.5, settleFrom = 1250, settle = 0.8, gain = 0.68 },
+		},
+		-- Ford 2.3 EcoBoost turbo four (Focus RS): raspy, pops on the overrun
+		I4_ECOBOOST = {
+			sounds = {
+				Start = id(126813484338369), -- "RS 2016 Resonator Startup" (bburneddd): ~1,470 at its end
+				Idle = id(104051998441716), -- "focusrs idle" (irrelevantspacee), 1,200 rpm
+				High = id(129854379340123), -- "exhausthighrev focusrs" (irrelevantspacee), 6,050 rpm
+				Redline = id(97881098917023), -- "ecoboost 4cylinder redline" (irrelevantspacee): held at the limit, 6,880
+				Turbo = Config.Sounds.SharedTurbo,
+				Pops = SVJ_POPS,
+				Crackle = SVJ_CRACKLE,
+			},
+			bands = {
+				bands = { Idle = 1200, High = 6050 },
+				gains = { Idle = 0.31, High = 0.76, Redline = 1.01 },
+				loopRpm = { Redline = 6880 },
+				-- (nothing is recorded between 1,200 and 6,050 rpm: as the B48 above, they meet near 2,700)
+				width = 0.42, reachDown = { High = 0.36 }, idleReach = 0.36, idleTop = 2.4,
+				whine = 0.6, turbo = 0.5,
+				coast = COAST, shiftCut = 0.12, -- (a manual gearbox: the lift between gears)
+				shots = { Pops = 0.9 },
+			},
+			start = { idleAt = 2.6, fade = 0.6, out = 3.0, ends = 3.8, settleFrom = 1470, settle = 1.5, gain = 0.98 },
+		},
+		-- Nissan VQ35 3.5 V6, NA (350Z): the VQ's trumpet, firing at the 3rd order with the 1.5 of its two banks
+		V6_VQ = {
+			sounds = {
+				Start = id(79112988867667), -- "VQ35 350z Startup" (Orcasauruss): catches at 0.9 s, ~1,720 at its end
+				Idle = id(119503765090845), -- "350z idle" (FoxZachkFan), ~1,090 rpm
+				Low = id(95217919058169), -- "VQ35 350z Rev" (Orcasauruss), 3,712 rpm
+				Mid = id(111830038089152), -- "350Z Rev" (Yakimo_H), 5,015 rpm
+				High = id(96383283439833), -- "Nissan 350Z Rev1" (kennu_hdgamer), 6,340 rpm
+			},
+			bands = {
+				bands = { Idle = 1090, Low = 3712, Mid = 5015, High = 6340 },
+				gains = { Idle = 0.19, Low = 0.59, Mid = 0.47, High = 0.81 },
+				width = 0.36, reachDown = { Low = 0.5 }, idleReach = 0.4, idleTop = 2.0,
+				coast = COAST, shiftCut = 0.12, liftPops = false, shiftPops = false, -- (a manual gearbox)
+			},
+			start = { idleAt = 2.9, fade = 0.6, out = 3.3, ends = 4.0, settleFrom = 1720, settle = 2.0, gain = 1.05 },
+		},
 	}
 	local GALLARDO = {
 		sounds = {
@@ -1334,6 +1463,21 @@ local function supercarExhaust()
 	local F430_START = {
 		sounds = { Start = id(133124486022122) }, -- "F430ScudStart" (FreeIsaacbolarini), ~1,750 at its end
 		start = { idleAt = 2.9, fade = 0.6, out = 3.2, ends = 3.8, settleFrom = 1750, settle = 2.0, gain = 0.62 },
+	}
+	-- (2026-11-13) the Brava: the VW group V8 set with its own start-up, and the crackles it makes when you lift
+	local URUS = {
+		sounds = {
+			Start = id(131425032768106), -- "Urus Start Up" (Karazu56): catches at 0.45 s, ~1,150 at its end
+			Pops = SVJ_POPS,
+			Crackle = SVJ_CRACKLE,
+		},
+		bands = { liftPops = true, shots = { Pops = 0.8 } },
+		start = { idleAt = 2.0, fade = 0.5, out = 2.3, ends = 3.2, settleFrom = 1150, settle = 1.0, gain = 1.13 },
+	}
+	-- (2026-11-13) the Z223 Royale V12: a V12 S-class's own quiet start-up
+	local S600_START = {
+		sounds = { Start = id(91901380785370) }, -- "S600Startup" (FreeIsaacbolarini): catches at 0.75 s, ~1,350 at its end
+		start = { idleAt = 3.0, fade = 0.6, out = 3.4, ends = 4.3, settleFrom = 1350, settle = 0.5, gain = 2.1 },
 	}
 	-- each car: its family, then its own changes (`with`: shared extra parts, `volume`, `tone`, `bands`)
 	local CARS: { [string]: any } = {
@@ -1372,6 +1516,17 @@ local function supercarExhaust()
 		bnw_m5_f90 = { family = "V8_S63" },
 		bentlee_bentayga = { family = "V8_VW40", volume = 0.8, tone = { high = -4 } }, -- quieter and softer than the tuned RS7
 		nisun_gtr = { family = "V6_TWINTURBO" },
+		-- (2026-11-13) the last nine imports with no set
+		astin_dbx = { family = "V8_M177", volume = 1.1, tone = { low = 2, drive = 0.06 }, bands = { shots = { Pops = 1.0 } } }, -- loud, a deep burble
+		bentz_gls = { family = "V8_M177", volume = 0.6, tone = { high = -5 }, bands = { turbo = 0.2, liftPops = false, coast = { mid = -5, high = -14 } } }, -- quiet, smooth, no pops
+		-- (the same VW group 4.0 V8 as the Highlands: its set, sharper and louder)
+		lambrini_urusp = { family = "V8_VW40", with = URUS, volume = 1.1, tone = { high = 1.5, drive = 0.08 }, bands = { turbo = 0.4 } },
+		bentz_sl65bs = { family = "V12_BITURBO", volume = 1.15, tone = { drive = 0.1, high = 2 } }, -- loud, hard-edged
+		bentz_s680 = { family = "V12_BITURBO", with = S600_START, volume = 0.55, tone = { high = -6 }, bands = { turbo = 0.15, shiftCut = 0.05, coast = { mid = -5, high = -14 } } }, -- very quiet, silky
+		bentlee_contgt = { family = "W12_BITURBO", volume = 0.9, tone = { low = 2, high = -4 } }, -- low, smooth, muffled
+		bnw_330i_g20 = { family = "I4_B48", volume = 0.85 },
+		dearb_focus_rs = { family = "I4_ECOBOOST", tone = { drive = 0.08, high = 1 } }, -- raspy
+		nisun_350z = { family = "V6_VQ" },
 	}
 	local PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2", "BlowOff", "EWhine" }
 	local function merged(a: any, b: any): any
