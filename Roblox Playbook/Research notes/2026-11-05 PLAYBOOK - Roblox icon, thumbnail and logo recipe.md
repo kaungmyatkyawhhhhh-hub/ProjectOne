@@ -108,3 +108,9 @@ Saturation itself isn't the problem; too many hues is.
 - "Planet in hand" with the face lit by the planet = pink face. Keep the face lit by a white key; the glowing object must not be the face's light source.
 - Letter icons ("NI", "RI") only work for incrementals that already have fans. A new game leads with bacon + a story.
 - Workflow note: the ChatGPT image can't come back into the workspace (tool output is too small). Grade it in the ChatGPT tab with canvas JS, then download to the owner's Downloads folder.
+
+## Lessons 13 Nov (Stomp Evolution icon + thumbnails)
+- **Check the live genre BEFORE choosing light or dark.** The +1/evolution leaders (Venom 16.7K, Sukuna 13.8K) pair a DARK split-face icon with BRIGHT sky-blue thumbnails that carry "+1" stickers. My first dark-lime thumbnails broke the genre; the owner said "dont just reference from that" = run the whole skill.
+- **Show the real in-game armour:** spawn the forms with NPCKit on a temp baseplate in Studio, use screen_capture, commit the image to the vault refs, stage it, then attach it. ChatGPT reproduced the Stone/Magma armour faithfully.
+- **Icon grade fix, reusable:** SE_fix (face-mask protect, gamma 1.25, radial vignette, green x0.7), then SE_face (push the face 55% to white). It took 0.44/30%/4.7x to 0.315/47%/22x.
+- Blender can't copy from Downloads (blocked), so the art stays in Downloads unless the owner moves it.

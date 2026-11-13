@@ -41,6 +41,12 @@ Raw ChatGPT grade: mean 0.44, 30% black, face/corners 4.7x (failed). Fixed in co
 
 Result at 64 px: mean 0.315, 47% black, 10% white, 7.5% clip, face 22x the corners. It reads at 60 px next to Venom and Sukuna.
 
+## Thumbnails v2 (bright, genre style)
+- **thumb1 before/after** (`stomp_thumb1_beforeafter_v2`): the small nervous bacon next to "+1" stickers, then a white line, then the colossal STONE titan stomping a house, with "+1M" stickers. Measured at 384x216: mean 0.57, 8.5% black (bright style, like Venom and Sukuna). Reads at 384.
+- **thumb2 boss** (`stomp_thumb2_boss_v2`): the MAGMA-armour bacon lunging a punch at the camera, the Rogue Titan smashing a tower behind him, avatars fleeing, "+1M" stickers. Mean 0.52. Reads at 384.
+- Both used one chat: the icon first, then "same exact style" plus the forms lineup attached.
+- Suggested home page set (2-3 active): thumb1 + thumb2, plus v1 dark stomp (`stomp_thumb1_stomp_v1`) as a contrast test.
+
 ## Files
 In the owner's Downloads (the copy into the vault was blocked):
 - stomp_icon_v2_graded.png, stomp_icon_v2_raw.png;
