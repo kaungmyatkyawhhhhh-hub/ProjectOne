@@ -1,0 +1,28 @@
+{
+ "group": {
+  "Bone": "Bones",
+  "BoneDark": "Bones",
+  "AnemPurple": "Anemones",
+  "AnemTeal": "Anemones",
+  "AnemPink": "Anemones",
+  "Crystal": "Crystals",
+  "CoralOrange": "Corals",
+  "CoralPink": "Corals",
+  "CoralYellow": "Corals",
+  "Rock": "Rocks",
+  "Kelp": "Kelp"
+ },
+ "flat": [
+  "Crystal",
+  "Rock"
+ ],
+ "default": "Bones",
+ "floor_z": -0.6,
+ "tone": {
+  "lo": 0.42,
+  "gamma": 0.85,
+  "pct": 90,
+  "tint": 0.5
+ },
+ "gain": 1.0
+}

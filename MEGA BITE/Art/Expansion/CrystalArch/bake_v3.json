@@ -1,0 +1,34 @@
+{
+ "group": {
+  "Rock": "Rock",
+  "RockDark": "Rock",
+  "CryCyan": "Crystals",
+  "CryPurple": "Crystals",
+  "CryPink": "Crystals",
+  "Mush": "Glow",
+  "Spot": "Glow",
+  "Star": "Glow",
+  "Flower": "Glow",
+  "Stem": "Decor",
+  "CoralY": "Decor",
+  "Shelf": "Decor",
+  "CoralP": "Decor"
+ },
+ "flat": [
+  "Rock",
+  "RockDark",
+  "CryCyan",
+  "CryPurple",
+  "CryPink",
+  "Star"
+ ],
+ "default": "Rock",
+ "floor_z": -0.4,
+ "tone": {
+  "lo": 0.52,
+  "gamma": 0.85,
+  "pct": 90,
+  "tint": 0.5
+ },
+ "gain": 1.0
+}
