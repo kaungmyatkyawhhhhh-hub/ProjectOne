@@ -1,0 +1,1 @@
+{"name": "Galleon", "sheet": "/tmp/claude-0/lm2/ship/sheet.png", "out": "/tmp/claude-0/lm2/ship/hull2", "length": 200, "res": 320, "tris": 9000, "tex": 1024, "colours": 16, "mode_r": 1, "blur": 0.75, "taubin": 10, "painterly": true, "front_neg": true, "edge_px": 3, "front_xmax": 34}
