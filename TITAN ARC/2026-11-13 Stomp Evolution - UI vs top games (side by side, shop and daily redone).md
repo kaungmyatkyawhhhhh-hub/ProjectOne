@@ -123,6 +123,6 @@ Kept on purpose: quest lines keep their capitalised key word ("Stomp a CAR"): a 
 It's a model: the numbers are rough, and the real check is the owner's eye and players' likes.
 
 ### Still open
-- The "Mass Frenzy!" event banner covers the "TAP STOMP TO SMASH!" hint during the first seconds (seen on the phone). Fix with the overstimulated-kid check.
+- ~~The "Mass Frenzy!" event banner covers the "TAP STOMP TO SMASH!" hint~~ FIXED v147: while any top-slot banner (event / Rogue / Sumo) is up, `SE_Modes` sets `SE_SlotOpen` and the hint fades out; it comes back when the banner ends (only while still needed: Mass <= 3, no window open). Checked on the iPhone 17 Pro emulator with a test event.
 - Roblox's image server returned 502 / Failure for several icons during this session: icons came in late or not at all in Studio. Re-check icons when it's healthy.
 - Backups: `*_preNerdUI_13Nov`, `*_prePhone_13Nov` in ServerStorage.
