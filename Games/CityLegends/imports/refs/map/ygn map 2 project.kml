@@ -3,7 +3,7 @@
 <Document id="18KywcQ33stU98Ckti1HbEnwWTPfbGfBq">
 	<ex:extension>base64;Co4BCoEBCn8KAggBEnkKdwokCiAKAwjQDxoHCNLtZRD_ASEAAAAAAADwPykAAAAAAAAAABgAEg8KCAitgO8HEP8BEKAfGAAaGgoHCP___wcQQBIICK2A7wcQ_wEYoB8gACgAIgkIARIFCP___wcqFwgBEggI____BxD_ARkAAAAAAADwPyAAEgQIARAAGgIIAA</ex:extension>
 	<name>ygn map project</name>
-	<gx:CascadingStyle kml:id="__managed_style_1E4D1E5FE64308003B4E_normal">
+	<gx:CascadingStyle kml:id="__managed_style_003292A9FC43082C2998_normal">
 		<ex:extension>base64;EgIYAQ</ex:extension>
 		<Style>
 			<IconStyle>
@@ -22,9 +22,20 @@
 				<color>40ffffff</color>
 			</PolyStyle>
 			<BalloonStyle>
+				<displayMode>hide</displayMode>
 			</BalloonStyle>
 		</Style>
 	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_003292A9FC43082C2998">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_003292A9FC43082C2998_normal</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_003292A9FC43082C2998_highlight</styleUrl>
+		</Pair>
+	</StyleMap>
 	<gx:CascadingStyle kml:id="__managed_style_056EC5E07D4308003B4B_highlight">
 		<ex:extension>base64;Eq4BGAEiqQEKpgEKT2h0dHBzOi8vZWFydGguZ29vZ2xlLmNvbS9iYWxsb29uX2NvbXBvbmVudHMvYmFzZS8xLjEuMC4wL2NhcmRfdGVtcGxhdGUua21sI21haW4SUwpPaHR0cHM6Ly9lYXJ0aC5nb29nbGUuY29tL2JhbGxvb25fY29tcG9uZW50cy9iYXNlL2N1cnJlbnQvY2FyZF90ZW1wbGF0ZS5rbWwjbWFpbhgA</ex:extension>
 		<styleUrl>https://earth.google.com/balloon_components/base/1.1.0.0/card_template.kml#main</styleUrl>
@@ -36,8 +47,6 @@
 				</Icon>
 				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
 			</IconStyle>
-			<LabelStyle>
-			</LabelStyle>
 			<LineStyle>
 				<color>ff2dc0fb</color>
 				<width>6</width>
@@ -45,20 +54,8 @@
 			<PolyStyle>
 				<color>40ffffff</color>
 			</PolyStyle>
-			<BalloonStyle>
-			</BalloonStyle>
 		</Style>
 	</gx:CascadingStyle>
-	<StyleMap id="__managed_style_1E4D1E5FE64308003B4E">
-		<Pair>
-			<key>normal</key>
-			<styleUrl>#__managed_style_1E4D1E5FE64308003B4E_normal</styleUrl>
-		</Pair>
-		<Pair>
-			<key>highlight</key>
-			<styleUrl>#__managed_style_1E4D1E5FE64308003B4E_highlight</styleUrl>
-		</Pair>
-	</StyleMap>
 	<gx:CascadingStyle kml:id="__managed_style_056EC5E07D4308003B4B_normal">
 		<ex:extension>base64;Eq4BGAEiqQEKpgEKT2h0dHBzOi8vZWFydGguZ29vZ2xlLmNvbS9iYWxsb29uX2NvbXBvbmVudHMvYmFzZS8xLjEuMC4wL2NhcmRfdGVtcGxhdGUua21sI21haW4SUwpPaHR0cHM6Ly9lYXJ0aC5nb29nbGUuY29tL2JhbGxvb25fY29tcG9uZW50cy9iYXNlL2N1cnJlbnQvY2FyZF90ZW1wbGF0ZS5rbWwjbWFpbhgA</ex:extension>
 		<styleUrl>https://earth.google.com/balloon_components/base/1.1.0.0/card_template.kml#main</styleUrl>
@@ -69,8 +66,6 @@
 				</Icon>
 				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
 			</IconStyle>
-			<LabelStyle>
-			</LabelStyle>
 			<LineStyle>
 				<color>ff2dc0fb</color>
 				<width>4</width>
@@ -78,8 +73,6 @@
 			<PolyStyle>
 				<color>40ffffff</color>
 			</PolyStyle>
-			<BalloonStyle>
-			</BalloonStyle>
 		</Style>
 	</gx:CascadingStyle>
 	<StyleMap id="__managed_style_056EC5E07D4308003B4B">
@@ -92,7 +85,7 @@
 			<styleUrl>#__managed_style_056EC5E07D4308003B4B_highlight</styleUrl>
 		</Pair>
 	</StyleMap>
-	<gx:CascadingStyle kml:id="__managed_style_0DF0A5F5424308003B4E_highlight">
+	<gx:CascadingStyle kml:id="__managed_style_003292A9FC43082C2998_highlight">
 		<ex:extension>base64;EgIYAQ</ex:extension>
 		<Style>
 			<IconStyle>
@@ -112,7 +105,27 @@
 				<color>40ffffff</color>
 			</PolyStyle>
 			<BalloonStyle>
+				<displayMode>hide</displayMode>
 			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_0DF0A5F5424308003B4E_highlight">
+		<ex:extension>base64;EgIYAQ</ex:extension>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
 		</Style>
 	</gx:CascadingStyle>
 	<gx:CascadingStyle kml:id="__managed_style_0DF0A5F5424308003B4E_normal">
@@ -124,8 +137,6 @@
 				</Icon>
 				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
 			</IconStyle>
-			<LabelStyle>
-			</LabelStyle>
 			<LineStyle>
 				<color>ff2dc0fb</color>
 				<width>4</width>
@@ -133,31 +144,6 @@
 			<PolyStyle>
 				<color>40ffffff</color>
 			</PolyStyle>
-			<BalloonStyle>
-			</BalloonStyle>
-		</Style>
-	</gx:CascadingStyle>
-	<gx:CascadingStyle kml:id="__managed_style_1E4D1E5FE64308003B4E_highlight">
-		<ex:extension>base64;EgIYAQ</ex:extension>
-		<Style>
-			<IconStyle>
-				<scale>1.2</scale>
-				<Icon>
-					<href>https://earth.google.com/earth/document/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
-				</Icon>
-				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
-			</IconStyle>
-			<LabelStyle>
-			</LabelStyle>
-			<LineStyle>
-				<color>ff2dc0fb</color>
-				<width>6</width>
-			</LineStyle>
-			<PolyStyle>
-				<color>40ffffff</color>
-			</PolyStyle>
-			<BalloonStyle>
-			</BalloonStyle>
 		</Style>
 	</gx:CascadingStyle>
 	<StyleMap id="__managed_style_0DF0A5F5424308003B4E">
@@ -236,10 +222,29 @@
 			<range>709.0489805484686</range>
 			<altitudeMode>absolute</altitudeMode>
 		</LookAt>
-		<styleUrl>#__managed_style_1E4D1E5FE64308003B4E</styleUrl>
+		<styleUrl>#__managed_style_0DF0A5F5424308003B4E</styleUrl>
 		<Point>
 			<coordinates>96.15447353474561,16.82735548171665,15.07234232110005</coordinates>
 		</Point>
+	</Placemark>
+	<Placemark id="0B3D60ED3043082C2960">
+		<name>new roasd</name>
+		<LookAt>
+			<longitude>96.148183414062</longitude>
+			<latitude>16.81237006739517</latitude>
+			<altitude>23.2649797977549</altitude>
+			<heading>0</heading>
+			<tilt>0</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>3824.218229954713</range>
+			<altitudeMode>absolute</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_003292A9FC43082C2998</styleUrl>
+		<LineString>
+			<coordinates>
+				96.15396011578441,16.82317468363827,0 96.15631334043412,16.81883809448437,0 96.15642046725189,16.81857492213713,0 96.15634783238465,16.81771203625838,0 96.15609076597198,16.81662013930509,0 96.15583056747039,16.81524817799545,0 96.1558178486906,16.81495660705024,0 96.15208631847426,16.81527389494974,0 96.15000387421316,16.81478657537411,0 96.1460545902487,16.81346979572845,0 96.14164095728168,16.81352300880807,0 
+			</coordinates>
+		</LineString>
 	</Placemark>
 </Document>
 </kml>
