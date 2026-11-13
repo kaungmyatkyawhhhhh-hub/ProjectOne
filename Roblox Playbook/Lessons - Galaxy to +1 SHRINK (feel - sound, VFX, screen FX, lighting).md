@@ -372,3 +372,10 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - What felt bad: owner, after the "Claude UI method" TikToks: "our ui is worse than the top game uis".
 - Cause: our UI research looked at button packs (BuiltByBit) and a few gameplay pictures per game, never at every screen of the real top games side by side with ours. Bing image search for "<game> shop ui" mostly returns fan-made remakes and script ads, not the real game.
 - Rule: before judging or redoing a game's UI, get REAL screens (HUD, shop, daily, inventory, popups) of ~20 top games: frames from gameplay videos or the owner's own screenshots, never Bing "shop ui" results. Put each of our screens next to the same screen from 3+ top games, write the gaps as numbers (text size, icon size, empty space, colours), then fix.
+
+## Stretched studs on 9-sliced plates (13 Nov, Stomp Evolution)
+- What felt bad: owner: "the stud texture that ur using rn is being stretched out".
+- Cause: the button plates were ONE wide ChatGPT picture (studs + glass streaks baked into the middle). 9-slice only protects the corners; the middle stretches. On tall cards (1:1.3) and big windows the studs became tall rectangles.
+- Fix: plates are built in code (lip, gradient face, outline, shine, gradient glass stripes), and the studs are ONE small tile image repeated with ScaleType.Tile at a fixed pixel size, centred to whole studs.
+- Rule: any texture with a repeating pattern (studs, stripes, dots, bricks) is NEVER inside the stretched part of a 9-slice. Put the pattern in its own tile image (ScaleType.Tile, fixed TileSize) over a plain body. Check every plate at its tallest and widest real use before shipping.
+- Also: UI ClipsDescendants does not clip rotated frames. Effects inside tilted stickers must be gradient masks, not clipped children.

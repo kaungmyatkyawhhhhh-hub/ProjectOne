@@ -52,3 +52,30 @@ Backups: `ServerStorage.UIKit_preTopUI_13Nov`, `TalentUI_preTopUI_13Nov`, `SE_Me
 - Phone sizes are worked out by numbers only (SMALL = 0.8 scale): the Shop is 592 px wide, which fits 667 px (SE) and 800x360. Small-screen shop cards made taller so the line doesn't touch the button. **Not seen on a real phone or the emulator.**
 - Quality-nerd kid sim not run on the new screens.
 - Still below the top games: the Index has no progress bar or rarity colours; the Top and Codes windows are plain boxes; there's no shop tab bar.
+
+## Part 2 (v144, saved, not published): Index, Top, Codes + studs no longer stretched
+Owner: "Yes, do those", then mid-way: "also the stud texture that ur using rn is being stretched out".
+
+- **Studs fixed (UIKit `K.PlateBody`):**
+  - The ChatGPT plates were one wide picture with the studs and streaks baked in. 9-slicing it onto tall cards and big windows stretched the studs into tall rectangles.
+  - Now every plate is built in code: a darker lip behind, a gradient face, a black outline, a top shine, and two glass stripes (a gradient mask, so nothing pokes out of tilted stickers).
+  - ONE stud picture repeats at a fixed size (ScaleType.Tile, a stud every 14-24 px depending on plate size, centred so no stud is cut). Same look at any size.
+  - The stud tile was made in Python (`TITAN ARC/Art/UI/studs_v1/make_stud_tile.py`, `se_stud_tile_64.png`: white/black alpha only, so it takes any plate colour) and uploaded through the Studio MCP: id **119399151178327** (`K.Img.StudTile`).
+  - Used by `K.Card` (cards, stickers, HUD squares, toasts), `K.Btn3D` buttons (the sheen is now a white rounded layer) and the window rim (rim without studs).
+  - "White" plates paint near-white (238, 242, 250), not grey.
+  - `K.SetPlate` recolours coded plates; the new `K.SetPlateExact` takes colours outside the 6-colour palette (bronze).
+- **Index:**
+  - Header: index icon, a **Found x / 23** bar and a stars chip ("0 / 69 stars = +0% Mass").
+  - Tiles are colour plates: small props sky, mid props lime, big props gold, landmarks violet (+ a "Landmark" sticker), all 3 stars = gold + a "Done!" sticker.
+  - Not found = a white tile with a black silhouette and "???".
+  - The stars sit above the plate (they were hidden under it).
+- **Top:** two colour boards ("Tallest Ever" sky, "Sumo Wins" coral) with an icon. #1 gold, #2 silver, #3 bronze plates, your own row lime, the rest plain white rows. "No scores yet. Be the first!" when a board is empty.
+- **Codes:**
+  - A white code box with the ticket icon and a green Redeem pill.
+  - "Next Update: Harbour Giants" is a gold plate with the gift icon and outlined text.
+  - The window is shorter.
+
+Backups: `ServerStorage.UIKit_preStudTile_13Nov` (plus the `_preTopUI_13Nov` ones).
+Checked in Play on PC: Daily, Shop, Index (with test finds set on my screen only), Top (test scores on my screen only), Codes. Console clean.
+Not checked: phone sizes on the emulator, the upgrade price pills and the Auto toggle after the recolour change, the evolve card / Talents windows.
+The gift icon (120035029588768) failed to download once in Studio and showed on the next run: an asset fetch hiccup, not code.
