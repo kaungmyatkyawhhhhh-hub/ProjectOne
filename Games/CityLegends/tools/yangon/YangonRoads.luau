@@ -322,6 +322,21 @@ local function polyDist(o, i: number, px, pz, ax: number?, az: number?, nx: numb
 	local best, fx, fz = math.huge, nil, nil
 	local cut = M.cut[o.name]
 	local skipped = false
+	-- (a road ends square at a cut: nothing of it lies behind that end. Step 4's side lanes start right
+	-- there, beside it. A point behind a cut end in reach is not near this road at all.)
+	for j = math.max(1, i - 2), math.min(o.n - 1, i + 1) do
+		if not cut[j] and not cut[j + 1] then
+			local a, b = o.s[j], o.s[j + 1]
+			local vx, vz = b[1] - a[1], b[3] - a[3]
+			local L2 = vx * vx + vz * vz
+			if L2 > 1e-9 then
+				local t = ((px - a[1]) * vx + (pz - a[3]) * vz) / L2
+				if (j > 1 and cut[j - 1] and t < 0) or (j + 2 <= o.n and cut[j + 2] and t > 1) then
+					return math.huge, nil, nil
+				end
+			end
+		end
+	end
 	for j = math.max(1, i - 2), math.min(o.n - 1, i + 1) do
 		if not cut[j] and not cut[j + 1] then
 			local a, b = o.s[j], o.s[j + 1]
@@ -369,13 +384,16 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	if M.inCorner(px, pz) then
 		return true
 	end
-	-- just past a round corner, the joining road's own kerb and pavement (the other road's go)
+	-- just past a round corner, the joining road's own kerb and pavement (the other road's go). Its own
+	-- band still stops at a smaller road's mouth (step 5: Parami Road West joins Pyay Road North right
+	-- where Pyay Road North's corner onto the loop hands it its band)
 	local owner = M.ownedBy(px, pz)
-	if owner then
-		return owner ~= name
+	if owner and owner ~= name then
+		return true
 	end
+	local mineOnly = owner == name
 	-- the roundabout: an arm's kerb stops at the ring's kerb, its pavement at the ring's pavement
-	if hyp(px - C.X, pz - C.Z) < M.RING_V + (if what == "Kerb" then M.KERB_W else M.WALK) then
+	if not mineOnly and hyp(px - C.X, pz - C.Z) < M.RING_V + (if what == "Kerb" then M.KERB_W else M.WALK) then
 		return true
 	end
 	local me = M.R[name]
@@ -387,16 +405,17 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 			continue
 		end
 		local o = M.list[oi]
+		local oh = M.halfAt(o, b[2])
 		if me.kind == "side" and o.kind == "side" then
 			-- (step 4: two side lanes splitting from one road end: neither's kerb or pavement on the other)
-			if polyDist(o, b[2], px, pz) < o.half + 1 then
+			if not mineOnly and polyDist(o, b[2], px, pz) < oh + 1 then
 				return true
 			end
 			continue
 		end
 		if o.rank < me.rank then
 			-- a bigger road: my kerb stops at its kerb, my pavement at its pavement's far edge
-			if polyDist(o, b[2], px, pz) < o.half + (if what == "Kerb" then M.KERB_W else M.WALK) then
+			if not mineOnly and polyDist(o, b[2], px, pz) < oh + (if what == "Kerb" then M.KERB_W else M.WALK) then
 				return true
 			end
 		else
@@ -411,7 +430,7 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 					end
 				end
 			end
-			if polyDist(o, b[2], px, pz, ax, az, nx, nz) < o.half - 0.01 then
+			if polyDist(o, b[2], px, pz, ax, az, nx, nz) < oh - 0.01 then
 				return true
 			end
 		end
@@ -1727,11 +1746,140 @@ function M.buildBarriers()
 	return string.format("barriers: %d blocks at %d map-edge ends (%s)", made, #ends, table.concat(ends, ", "))
 end
 
--- the whole of step 5: every road (steps 3 and 4 with the streets), the decks, the barriers
+-- Is a point on road o's carriageway (its real width at each sample), square at its own ends and at
+-- cut ends? (polyDist rounds a road's natural ends off; this does not.)
+function M.onCarriageway(o, i: number, px: number, pz: number, margin: number): boolean
+	local cut = M.cut[o.name]
+	local j0, j1 = math.max(1, i - 2), math.min(o.n - 1, i + 1)
+	for j = j0, j1 do
+		if not cut[j] and not cut[j + 1] then
+			local a, b = o.s[j], o.s[j + 1]
+			local vx, vz = b[1] - a[1], b[3] - a[3]
+			local L2 = vx * vx + vz * vz
+			if L2 > 1e-9 then
+				local t = ((px - a[1]) * vx + (pz - a[3]) * vz) / L2
+				if (j == 1 or cut[j - 1]) and t < 0 then
+					return false
+				end
+				if (j + 1 == o.n or cut[j + 2]) and t > 1 then
+					return false
+				end
+			end
+		end
+	end
+	for j = j0, j1 do
+		if not cut[j] and not cut[j + 1] then
+			local a, b = o.s[j], o.s[j + 1]
+			local vx, vz = b[1] - a[1], b[3] - a[3]
+			local L2 = vx * vx + vz * vz
+			if L2 > 1e-9 then
+				local tc = math.clamp(((px - a[1]) * vx + (pz - a[3]) * vz) / L2, 0, 1)
+				local d = hyp(px - a[1] - tc * vx, pz - a[3] - tc * vz)
+				local h = M.halfAt(o, j) + (M.halfAt(o, j + 1) - M.halfAt(o, j)) * tc
+				if d < h - margin then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+-- The safety net (step 5): a kerb or pavement piece whose middle lies on ANOTHER road's carriageway
+-- (0.6 in from its edge) is a scrap left where junction zones meet. remove = false only counts them.
+-- Scraps go to ServerStorage.YangonScraps (kept, not deleted), so nothing is lost.
+function M.scrub(remove: boolean)
+	local found, byRoad, n = 0, {}, 0
+	local keep = SS:FindFirstChild("YangonScraps")
+	if remove and not keep then
+		keep = Instance.new("Folder")
+		keep.Name = "YangonScraps"
+		keep.Parent = SS
+	end
+	for _, f in M.folder():GetChildren() do
+		for _, p in f:GetChildren() do
+			if (p.Name == "Kerb" or p.Name == "Pavement") and p:IsA("BasePart") then
+				n += 1
+				local pos = p.Position
+				for oi, b in M.near(pos.X, pos.Z, 2) do
+					local o = M.list[oi]
+					if o.name ~= f.Name and M.onCarriageway(o, b[2], pos.X, pos.Z, 0.6) then
+						found += 1
+						local key = f.Name .. " on " .. o.name
+						byRoad[key] = (byRoad[key] or 0) + 1
+						if remove then
+							p:SetAttribute("FromRoad", f.Name)
+							p.Parent = keep
+						end
+						break
+					end
+				end
+				if n % 4000 == 0 then
+					task.wait()
+				end
+			end
+		end
+	end
+	local t = {}
+	for k, v in byRoad do
+		table.insert(t, k .. " " .. v)
+	end
+	return string.format("scrub: %d kerb / pavement pieces, %d on another road's carriageway%s%s", n, found, if remove then " (moved to ServerStorage.YangonScraps)" else "", if #t > 0 then ": " .. table.concat(t, "; ") else "")
+end
+
+-- every mouth: nothing of a kerb or pavement on the joining road's carriageway from its end to 3
+-- samples past where it leaves the bigger road (inside the ring only the ring's carriageway counts)
+function M.checkMouths()
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { M.folder() }
+	local bad, spots, per = 0, 0, {}
+	for mi, m in M.mouths do
+		local o = M.R[m.road]
+		local lo, hi = math.min(m.i0, m.k), math.max(m.i0, m.k)
+		if m.step == 1 then
+			hi = math.min(o.n - 1, hi + 3)
+		else
+			lo = math.max(1, lo - 3)
+		end
+		local nb = 0
+		for i = lo, hi - 1 do
+			local a, b = o.s[i], o.s[i + 1]
+			local rx, rz = rightOf(a)
+			for _, u in { 0.27, 0.73 } do
+				for lat = -(o.half - 1.3), o.half - 1.3, 1.9 do
+					local x = a[1] + (b[1] - a[1]) * u + rx * lat
+					local z = a[3] + (b[3] - a[3]) * u + rz * lat
+					if m.ring and hyp(x - C.X, z - C.Z) < M.R_OUT then
+						continue -- (the island's kerb is the ring's own)
+					end
+					local y = a[2] + (b[2] - a[2]) * u
+					local h = workspace:Raycast(Vector3.new(x, y + 20, z), Vector3.new(0, -40, 0), params)
+					spots += 1
+					if h and (h.Instance.Name == "Kerb" or h.Instance.Name == "Pavement") and h.Position.Y > y + 0.15 then
+						bad += 1
+						nb += 1
+					end
+				end
+			end
+		end
+		if nb > 0 then
+			table.insert(per, m.road .. " on " .. m.on .. " " .. nb)
+		end
+		if mi % 5 == 0 then
+			task.wait()
+		end
+	end
+	return string.format("mouths: %d, %d spots, %d with kerb or pavement on the joining road%s", #M.mouths, spots, bad, if #per > 0 then ": " .. table.concat(per, "; ") else "")
+end
+
+-- the whole of step 5: every road (steps 3 and 4 with the streets), the decks, the barriers, then the
+-- scrub (it should find nothing; it says what it took)
 function M.step5()
 	local log = { M.step4() }
 	task.wait()
 	table.insert(log, M.buildBarriers())
+	table.insert(log, M.scrub(false))
 	return table.concat(log, "\n")
 end
 
@@ -2163,7 +2311,7 @@ function M.checkJunctions()
 		local corridor = false
 		for _, name in j.roads do
 			local o = M.R[name]
-			if o.kind == "route" then
+			if o and o.kind == "route" then
 				local bi, bd = 1, math.huge
 				for i = 1, o.n do
 					local d = hyp(o.s[i][1] - wx, o.s[i][3] - wz)
@@ -2184,13 +2332,14 @@ function M.checkJunctions()
 		local notes, info = {}, {}
 		for _, mainName in j.roads do
 			local main = M.R[mainName]
-			if main.kind ~= "route" then
+			if not main or main.kind ~= "route" then
 				continue
 			end
 			local mf = roads:FindFirstChild(mainName)
 			for _, sName in j.roads do
 				local S = M.R[sName]
-				if S.rank <= main.rank then
+				-- (step 5 split Inya Road and merged Lane 1 into U Tun Nyein Street: those names are gone)
+				if not S or S.rank <= main.rank then
 					continue
 				end
 				local sf = roads:FindFirstChild(sName)
