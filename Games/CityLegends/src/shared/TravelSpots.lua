@@ -35,6 +35,12 @@ local INFO = {
 	stadium = "The bay's stadium",
 	harbour = "The harbour front",
 	marina = "Park by the yachts",
+	ygn_optima = "The car meet: tuners and supercars",
+	ygn_novotel = "The hotel by the Pyay Road flyover",
+	ygn_mmplaza = "The big mall and its towers",
+	ygn_roundabout = "Round the Hanthawaddy Roundabout",
+	ygn_newroad = "The flyover on New Road",
+	ygn_university = "Down University Avenue",
 	highway = "Mountain bends and long straights",
 	lookout = "A view over the whole bay",
 	home = "Your house",
@@ -46,7 +52,7 @@ local function iconFor(id: string): string
 	if string.sub(id, 1, 6) == "tower_" then
 		return "tower"
 	end
-	local map = { old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", rewards = "rewards", gems = "gems", beach = "beach" }
+	local map = { ygn_optima = "race", ygn_novotel = "hotel", ygn_mmplaza = "gems", ygn_roundabout = "lookout", ygn_newroad = "lookout", ygn_university = "lookout", old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", rewards = "rewards", gems = "gems", beach = "beach" }
 	return map[id] or "harbour"
 end
 
@@ -59,7 +65,7 @@ function TravelSpots.list(): { Spot }
 	local list: { Spot } = {}
 	for _, pl in WestLayout.places() do
 		local icon = iconFor(pl.id)
-		table.insert(list, { id = pl.id, name = pl.name, icon = icon, info = INFO[icon] or "", cf = pl.cf })
+		table.insert(list, { id = pl.id, name = pl.name, icon = icon, info = INFO[pl.id] or INFO[icon] or "", cf = pl.cf })
 	end
 	local realty = WestLayout.rivieraSite("realty")
 	if realty then

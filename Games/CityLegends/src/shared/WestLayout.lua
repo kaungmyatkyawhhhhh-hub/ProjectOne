@@ -212,6 +212,15 @@ function WestLayout.places(): { Place }
 		onRoad("stadium", "Riviera Bay Stadium", Vector3.new(11822.03, 11.11, 1060.31), Vector3.new(0.02, 0, -1))
 		onRoad("harbour", "The Harbour", Vector3.new(13696.26, 6, 536.58), Vector3.new(1, 0, -0.03))
 		onRoad("mountain", "Mountain Road Lookout", Vector3.new(13598.51, 121.33, -754.69), Vector3.new(1, 0, 0))
+		-- Yangon (build step 9): its landmarks, on the outer lane beside them (YangonLanes)
+		if workspace:FindFirstChild("Yangon") then
+			onRoad("ygn_optima", "Optima Werkz", Vector3.new(30866.98, 46.15, 764.83), Vector3.new(0.519, 0, -0.855))
+			onRoad("ygn_novotel", "Novotel", Vector3.new(28637.73, 40.34, -137.68), Vector3.new(0.253, 0, 0.967))
+			onRoad("ygn_mmplaza", "Myanmar Plaza", Vector3.new(32471.71, 28.96, -1305.15), Vector3.new(0.134, 0, -0.991))
+			onRoad("ygn_roundabout", "Hanthawaddy Roundabout", Vector3.new(28976.76, 47.42, 1184.83), Vector3.new(0.125, 0, 0.992))
+			onRoad("ygn_newroad", "New Road", Vector3.new(32450.83, 59.4, 894.39), Vector3.new(0.996, 0, 0.088))
+			onRoad("ygn_university", "University Avenue", Vector3.new(29652.39, 52.59, -1013.03), Vector3.new(0.996, 0, 0.091))
+		end
 		return keep
 	end
 	return list
