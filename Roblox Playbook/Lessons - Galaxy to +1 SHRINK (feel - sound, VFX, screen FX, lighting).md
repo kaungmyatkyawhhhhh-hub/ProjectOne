@@ -406,3 +406,11 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - "No logos" is checked with a FIXED list of views on every model, not by where logos usually are: outside front, rear, both sides, wheels, calipers, engine bay; inside from the driver's eye forward, from the dash looking BACK (rear wall, between the seats, headrests, parcel shelf), both door cards, sills, the hub, the pedals, the centre console from above, the headlining.
   - A logo can be a part, a picture, a normal picture (pressed in) or moulded geometry inside a big part. Check all four.
   - When the bar goes up, every older model is checked again under the new bar the same day. A rule that only the newest work follows is not a rule.
+## Yangon's street lamps came out amber (14 Nov, City Legends, owner's correction)
+- What felt bad: the owner saw the new Yangon street lamps and said "yangon lights are white, not dimmed lights".
+- Cause: the lamps were copied from Monaco's (warm amber, sodium-style) to save time. Nobody checked what street lights in the REAL place look like, though the map is a real city that players from that city will know.
+- Fix: white LED heads and light, a little brighter (head 236, 244, 255; SpotLight 232, 240, 255, brightness 7), applied to all 678 lamps and to the lamp kit.
+- Rules for every game set in a real place:
+  - Light colour is part of the reference study: street lights, shop signs and window light differ by city. Check the real place's photos at night before reusing another map's lights.
+  - Copying a piece from another map is fine for its shape; its colours and materials must still match the new place.
+
