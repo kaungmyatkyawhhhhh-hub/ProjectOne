@@ -1,0 +1,43 @@
+# MEGA BITE - Late game v1: giant prey fish (13 Nov 2026)
+
+Owner (work order 03:40): "when u become great white / megalodon, the game becomes easy because theres not much to eat afterwards" and "if its tanky ... the exp must be equal to the effort".
+Status: built and tested in Studio (Play). Not published. Backups in ServerStorage end in `_preGiantFish_13Nov`.
+
+## What was wrong (read from the live game)
+- Every fish in the sea was 12 studs or shorter (the tuna). The "size" of the far rings only made the schools bigger, not the fish.
+- A Megalodon swallows anything up to 32 studs, so everything was one bite for 16 EXP (tuna 8 x Open Sea x2).
+- Only the hunters were worth a fight (Ancient Titan 5,684 EXP).
+
+## What was added
+Four giant prey fish for the far rings. They are the approved fish models, bigger and tinted (scaled copies in `ReplicatedStorage.MegaBite.Fish`), so nothing had to be uploaded.
+HP = length squared, like every fish. EXP per HP is the same as the tuna (0.055), so more bites = that much more EXP, paid on every bite (Combat v1).
+
+| Fish | Model | Length | HP | EXP (x2 in the Open Sea, x4 in the Trench) | Swallowed whole by | Bites: Hammerhead / Great White / Megalodon | Lives in |
+|---|---|---|---|---|---|---|---|
+| King Mackerel (gold tint) | Mackerel x2.3 | 19.6 | 384 | 21 | Great White | 2 / 1 / 1 | The Wilds, Deep Sea, Far Deep |
+| Colossal Squid (crimson, inks) | Squid x4.8 | 26.7 | 713 | 39 | Megalodon | 3 / 2 / 1 | Deep Sea, Far Deep, Trench |
+| Monster Puffer (slow tank) | Puffer x8.5 | 35.6 | 1,267 | 70 | nobody | 5 / 3 / 2 | Far Deep |
+| Titan Tuna (fast, dark steel) | Tuna x3.3 | 38.6 | 1,490 | 82 | nobody | 5 / 3 / 2 | Far Deep, Trench |
+
+- Fish Index: 12 species now (three rows of four). New rarities: King Mackerel Rare, Colossal Squid and Monster Puffer Epic, Titan Tuna Legendary.
+- The giants swim higher over the seabed and stay under the surface (new band `giant` and a `clear` value per species). Their HP bar is bigger and sits above the body.
+
+## Test (Studio Play, Megalodon in the Far Deep)
+| Check | Result |
+|---|---|
+| Giants appear around the player | yes: Titan Tuna 8, Colossal Squid 7, Monster Puffer 2, King Mackerel 21 (second spot) |
+| Titan Tuna eaten (2 bites), EXP paid per bite | yes (164 EXP before boosts; the test account had x8 boosts on: 1,312) |
+| Monster Puffer (2 bites), Colossal Squid (1 bite) | yes |
+| Movement audit, 2 spots, 16 s | giants never under 5 studs from the seabed or props; 0 fish under the seabed; 1 old tuna touching a spire in 8,840 samples |
+| Script errors | none |
+| Fish Index with 12 tiles | fits, colours right, unfound = dark shape with a padlock |
+
+## Where the numbers live
+`GameConfig.Fish.Species` (the four rows), `Fish.Order` (appended), `Fish.Bands.giant`, `Fish.Pop.Tiers` (how often per ring), `Trench.Fish`.
+
+## Not checked yet
+- The time from Great White to Megalodon is shorter now if a player farms the Far Deep (a Titan Tuna is 164 EXP, a school of two is 328). The Far Deep also has the Ancient Titans and Hammer Brutes. Tune the weights in `Fish.Pop.Tiers` after a real playtest.
+- Phones (real devices).
+
+## Next (needs the uploads)
+The real giants: blue whale, giant turtle, colossal eel and the Kraken. See [[2026-11-13 MEGA BITE - Giants (whale, turtle, eel, Kraken) models and plan]].
