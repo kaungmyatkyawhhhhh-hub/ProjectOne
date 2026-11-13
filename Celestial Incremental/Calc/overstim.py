@@ -186,6 +186,7 @@ class Screen:
         if s.f.get('centre_queue'):
             for e in s.els:     # windows / cards close first (LIVE: the Supernova card stays open under it)
                 if e['region'] in ('centre', 'modal') and e['t0'] <= start < e['t1'] and not e.get('stays'):
+                    if s.f.get('key_queue') and e['key'] and e['region'] == 'centre': continue   # requeued below
                     e['t1'] = start
             start = max(start, s.centre_free)
         s.cines.append((start, start + length))
@@ -272,13 +273,15 @@ def build(flags, events, rng, kid, phase):
             if sn_open:
                 e = S.add(name='SUPERNOVA card (left open)', region='modal', t0=t - 2, t1=t + 30, key=False, words=0)
                 if not flags.get('centre_queue'): e['stays'] = True
-            tc = S.card(t + 0.4, 'TUTORIAL COMPLETE card', 3.05, True, S.W(10, 7))
-            end = S.cutscene(t + 1.4, 'IGNITION cutscene', 8, 9)
             if not flags.get('centre_queue'):
+                tc = S.card(t + 0.4, 'TUTORIAL COMPLETE card', 3.05, True, S.W(10, 7))
+                end = S.cutscene(t + 1.4, 'IGNITION cutscene', 8, 9)
                 tc['hidden_from'] = t + 1.4        # the cutscene hides the HUD 1 s after the card appeared
             else:
-                # queued: the card comes back after the cutscene, then the path card, then the gift
-                tc['t0'], tc['t1'] = end + 0.4, end + 0.4 + max(3.05, S.need(tc['words'])); S.centre_free = tc['t1'] + 0.2
+                # queued: the cutscene first (it is the big moment), then TUTORIAL COMPLETE, the path card, the gift
+                S.centre_free = t + 0.4
+                end = S.cutscene(t + 0.4, 'IGNITION cutscene', 8, 9)
+                tc = S.card(end + 0.4, 'TUTORIAL COMPLETE card', max(3.05, S.need(S.W(10, 7))), True, S.W(10, 7))
             S.toast(t + 4.1, 'LUMI play-with-friends toast', 10, False, kind='TIP')
             pc = S.card(end, 'PATH card (choose)', max(6, 8 / kid['speed'] + 4), True, 8, region='modal', choice=True)
             gift_t = t + 0.5
@@ -425,8 +428,9 @@ if __name__ == '__main__':
     for name, fl in VERSIONS:
         r = run(fl, n=n, F10=F10)
         r7 = run(fl, n=max(300, n // 4), F10=F10, age=7, seed=99)
+        r6 = run(fl, n=max(100, n // 10), F10=F10, age=6, seed=98)
         print(f"{name}\n  overload s/10min: first10 {r['over10']:.1f}  mid {r['over_mid']:.1f} | KEY missed: all ages {r['missed_pct']:.1f}%  "
-              f"7 y {r7['missed_pct']:.1f}% | noise {r['noise']:.2f}/kid  flash fails {r['flash']}  comets blocked {r['blocked']:.2f}/kid"
+              f"7 y {r7['missed_pct']:.1f}%  6 y {r6['missed_pct']:.1f}% | noise {r['noise']:.2f}/kid  flash fails {r['flash']}  comets blocked {r['blocked']:.2f}/kid"
               f" | news delay p95 {r['p95_delay']:.1f}s max {r['max_delay']:.1f}s")
         print("  missed by type (7 y):", {k: v for k, v in sorted(r7['by_type'].items(), key=lambda x: -x[1]) if v > 0})
         print("  top collisions:", r['top'])
