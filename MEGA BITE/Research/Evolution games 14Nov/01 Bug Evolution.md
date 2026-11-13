@@ -187,3 +187,14 @@ D1 50 coins (today) / D2 SUN SPIDER (bug) / D3 2x XP 30 min / D4 150 / D5 200 / 
   (LV 1)", blue "CHANGE BUG". Death normally costs levels; the free revive keeps them (maybe limited per session).
 - Respawn point: MUDDY LAKE spawn: a big centred zone title "MUDDY LAKE / Lv 8+" fades in on arrival.
 - Leaderboard ceiling: KING Simon "Dragonfly LV 200 T6" (levels go to at least 200; T6 tier reached by someone in this server).
+
+### World details (06:20-06:24)
+- DAY/NIGHT cycle is quick (~5-8 min each); NIGHT HUNT 1.5x XP comes back every night (a reason to keep playing).
+- VOID BOSS cave (Muddy Lake): huge 3D billboard text "VOID BOSS / Ends in 4 days" floating over the cave mouth; neon-purple
+  crystal pillars (SmoothPlastic neon blocks on grey stone), a dashed GLOWING PURPLE PATH leading into the dark portal. Next to
+  it a floating label "VOID MOTH / can turn invisible" (the Robux bug's stand). Labels are BillboardGuis with the title in
+  bold colour + a tiny grey subtitle.
+- Wildlife around: brown beetles, blue ground beetles (big), white striped silk cocoons (food), orange cocoons on stalks.
+- Social: a player invited me to their team ("Aoooooooo26 invited you to their team!" toast right side, green ACCEPT / red
+  DECLINE). After accepting, nothing visibly changed on the HUD (TEAM button left, G key).
+- Name plates: "Lv 24 yfcxhcx7891" in small text + a thin green HP bar; another player's bug is ~2x my size at Lv 24.
