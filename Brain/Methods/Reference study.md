@@ -19,9 +19,12 @@ created: 2026-11-09
 
 - 2026-11-11 Titan Simulator clips + Venom's sound measured in the browser → [[Roblox Playbook/Research notes/2026-11-11 Watch study - Titan Simulator clips + Venom sound measured (YouTube in the browser)]]
 
+- 2026-11-13 Stomp Evolution UI vs the top games (Tap Sim REBORN shop/index, Throw Food, Venom, Steal An Egg) → [[TITAN ARC/2026-11-13 Stomp Evolution - UI vs top games (side by side, shop and daily redone)]]
+
 ## Learned
 - 11 Nov: do the reference study BEFORE choosing a design. I picked a creature family from a scoreboard, changed it twice, and the owner's favourite game answered the question in ten minutes of frames.
 - Stills from a muted video show art, UI and layout, but not sound or timing. Say so, and get audio another way.
 - 11 Nov: sound CAN be studied without a download: `Video kit\youtube_watch_in_browser.js` measures it in the owner's Chrome (sound starts per second, band balance, the biggest events lined up with frames). Left minus right removes a YouTuber's voice. It is measured, not heard: say so.
 - 11 Nov: when the owner says "the gameplay was addicting", find the ONE thing every tap does. In Titan Simulator every click paid with no target; our draft made the player walk to a prop first.
 - 11 Nov (third miss the same night): when the owner names a reference GAME, look at that game's actual models before drawing anything. I drew a new creature species; Titan Simulator's evolutions were armour sets on the normal Roblox avatar. "Looks Roblox" means the avatar.
+- 13 Nov: for UI, pick "guide" / "ultimate guide" videos (they open every window); "noob to pro" videos hide the UI under facecams and edits. In the built-in browser: set the viewport to 1280x760, sample ~20 frames as a 5x4 sheet, then draw 1-2 frames full-size. Wait for each seek (readyState >= 2), or the frames come out black.
