@@ -13,12 +13,13 @@ Rules for every step:
 - Save the place with a version note at the end of each step. Write the version number here.
 - Lighting is never dark. Models stay light on triangles. Check on phone size.
 - Studio tools go in `ServerStorage.ClaudeTools` as ModuleScripts; `require` a `:Clone()`.
+- **Blender is allowed (owner, 13 Nov 2026, 13:40):** "u can model with blender and not build in roblox studio if it saves lag and time". Map pieces may be made in Blender and brought in as meshes when that means fewer parts or less time. First place it pays: step 6, the road meshes.
 
 ## Steps
 - [x] **0. Street plan and road design** (13 Nov). Roblox version at the time: 688.
 - [x] **1. Backup and setup** (13 Nov, version 708). Save the live place with the note "Monaco backup before Yangon". Check what sits near X 30000 and fix the map's place in the world. Get `ygn_roads.json` and the ground grid into Studio (the repo is public: Studio can fetch committed files from GitHub by commit id).
-- [x] **2. Ground** (13 Nov). Terrain from the smoothed ground grid in 4-stud cells: land, Inya Lake's water at 16 m, the lake bed.
-- [ ] **3. Main roads.** Give `Roads.luau` a half width per road (streets 16, with kerbs and pavements). Build the Yangon Loop, New Road and University Avenue. Build the roundabout ring. Paint the lines. Prompt written 13 Nov: [[Yangon map - Step 3 - main roads, roundabout, lines]]. Not run yet.
+- [x] **2. Ground** (13 Nov, version 711). Terrain from the smoothed ground grid in 4-stud cells: land, Inya Lake's water at 16 m, the lake bed.
+- [x] **3. Main roads** (13 Nov, version 722). The Yangon Loop, New Road and University Avenue, the Hanthawaddy Roundabout and the lines are built. Prompt: [[Yangon map - Step 3 - main roads, roundabout, lines]]. What was done: the log entry "13 Nov 2026, step 3" below.
 - [ ] **4. Flyovers.** Decks, ramps, pillars, railings and side lanes for the Pyay Road Flyover and the Kabar Aye Flyover. Build the two junctions underneath.
 - [ ] **5. Streets.** The 30 streets, their junction mouths, and the barriers at the 16 map-edge road ends.
 - [ ] **6. Smooth pass.** Kerbs on bends, surface check (no steps, holes or flicker), then road meshes.
@@ -54,3 +55,64 @@ Rules for every step:
   - Measured on the road data: New Road starts on the loop at 772 m and lands on it at 3,452 m; University Avenue's east end is on the loop at 2,160 m and its west end at 11,284 m (under the Pyay Road Flyover). The loop has 82 samples (3,164 m to 3,488 m) inside New Road's flyover corridor and 36 samples inside the roundabout. Streets with samples in a flyover corridor: Hledan Road, Nar Nat Taw Road, New University Avenue Road.
   - The design chain's `.pkl` files are not in `imports/refs/map`, so `d6_export.py` cannot simply be re-run: patch the ranks in the json and in Studio.
   - 12:37, owner: "im using ultracode". The prompt now says that one agent only writes to Studio and the tool files; subagents do the reading work (photo research, code review, checks, pictures).
+- 13 Nov 2026, step 3 (main roads, roundabout, lines) done in Claude Code with ultracode (agents did the photo research, the code review and the picture review; one agent wrote to Studio):
+  - **Saves:** version **711** = "Yangon step 2: ground and Inya Lake" (saved first, before any change). Version **722** = "Yangon step 3: main roads and roundabout".
+  - **Built** in `Workspace.Yangon.Roads` (one folder per road): `Yangon Loop`, `New Road`, `University Avenue`, `Hanthawaddy Roundabout`. 66,061 parts: 15,504 road slab wedges, 15,438 pavement, 20,289 kerb, 14,828 line, 2 island. `Workspace.Riviera` has 388,029 descendants before and after. The two loose probes in Workspace (`ZProbe`, `Part`: invisible, 0.1 studs, at Monaco roads) were ours and are gone.
+  - **The five traps, how each was fixed:**
+    1. Rank: unique build ranks, the lower the bigger (0 Yangon Loop, 1 New Road, 2 University Avenue, 3 to 32 the streets by class, length, name). `d6_export.py` writes them now; `tools/yangon/patch_ranks.py` patched `ygn_roads.json`, and the same header replacements were made in `ServerStorage.YangonData.Roads_1..3`. All agree: 418,581 characters, checksum 1458396754. No sample moved (the `.pkl` files are gone, the design chain was not re-run).
+    2. Half widths: each road carries `half` in the data (32 or 16). `Roads.luau` and `RoadLines.luau` use the road's own half; "near another road" uses the other road's half. With no `half` they do what they did (two review agents compared old and new line by line: no difference for Monaco).
+    3. Pavements on a `route`: `opts.pave`.
+    4. Colours: `opts.palette`. From 43 street photos ([[2026-11-13 Research - Yangon road look]]): plain grey concrete pavement (Sandstone material, 128, 124, 116), red and white kerb bands (3.2 studs; 195, 47, 45 and 242, 240, 232), all lines white, one solid centre line. Asphalt stays the game's dark one (the real one is a lighter warm grey: owner's call).
+    5. Loop ends and turning circles: the loop's two arms are flat at the ring's height (47.27) out to 12 studs past the ring, then eased over 128 studs (arm 1 comes down 1.31, arm 2 up 0.25), and their slabs end exactly on the ring's edge. `noTurningCircle`, and a cut end never gets one.
+  - **The builder's new parts** (`tools/riviera/Roads.luau`, `RoadLines.luau`, new `tools/yangon/YangonRoads.luau`; options listed in `Games/CityLegends/CLAUDE.md` under "Yangon roads"):
+    - Kerb and pavement pieces tile exactly (each piece runs between its two samples' own right vectors), so nothing overlaps on bends and nothing is longer than its slab at a cut end. The pavement starts at the kerb's back face (0.85 out). Where another road's zone begins the pieces are cut on the zone's edge, so a street mouth is exactly as wide as the street, however it slants.
+    - Mouths: where New Road and University Avenue end on the loop, and where the loop ends in the ring, the slab is a polygon cut on the bigger road's own edge (one slab in the junction, no overlap, no hole).
+    - Lines (`RoadLines` with `clearMouths`): each line piece is tested on its own. It is left out within half a stud of a bigger road's carriageway, or of a smaller road's carriageway on the line's own side of the centre line. So at a street mouth the near side's lane and edge lines stop, the far side's lines run on, and the middle line is never broken by a smaller road. (The old rule stopped every line near a junction: at the New Road fork that left 150 studs of bare asphalt, which all three picture reviewers called unfinished.)
+    - Cut ends: `Y.mendCutEnds` puts the ground just past each cut end back to 1 stud under the road (the builder's trench left a dip of 2 studs there).
+    - Roundabout: a 96-sided flat ring from radius 60 to 108.06 (so nothing of an arm is nearer than 108), island kerb, grass disc and a low dome (2.9 studs over the road at its middle), outer kerb and pavement with a gap at each of the 4 arms cut on the arms' own edge lines, two dashed lane circles, solid edges (the outer one broken at the arms), 14 give-way dashes across the ENTRY lanes of the two loop arms (traffic keeps right, so the ring runs anticlockwise).
+    - Bank: at 85 loop samples (2,270 to 2,320 m, 8,075 to 8,520 m, 12,120 to 12,155 m) a pond or the lake reached under the pavement (step 2 wrote water wherever the map has water; our roads are twice as wide as the real ones). `Y.bank` fills a grass bank there first (124 pieces), out to 12 studs past the pavement.
+  - **Cut ends (nothing of any road is built inside a corridor; each end is square, no turning circle, no kerb round it):**
+
+    | Road | Last built sample | At | Position (X, Y, Z) | Cut by |
+    |---|---|---|---|---|
+    | Yangon Loop | 789 | 3,151.5 m | 32287.6, 35.49, -623.3 | Kabar Aye Flyover (cut runs to 3,491 m) |
+    | Yangon Loop | 875 | 3,495.4 m | 32424.7, 29.15, -1132.3 | Kabar Aye Flyover |
+    | Yangon Loop | 2686 | 10,738.3 m | 28678.8, 32.15, -1976.4 | Pyay Road Flyover (its own deck, 10,742 to 11,930 m) |
+    | Yangon Loop | 2985 | 11,934.2 m | 28694.4, 40.47, -134.4 | Pyay Road Flyover |
+    | New Road | 572 | 2,285.2 m | 32532.9, 40.39, -242.5 | Kabar Aye Flyover (cut runs to the road's end) |
+    | University Avenue | 13 | 48.0 m | 28510.9, 34.85, -1138.3 | Pyay Road Flyover (its first 12 samples) |
+
+    Streets with samples in a corridor, for step 5: New University Avenue Road (last built sample 80), Hledan Road (64), Nar Nat Taw Road (first built sample 12).
+    Against the prompt's numbers: the loop under New Road's deck is cut over 85 samples (3,155 to 3,491 m), not 82, and University Avenue loses 12 samples, not 11, because a sample counts as in the corridor when any of its width (carriageway and pavements) is, not only its middle. **New Road is 2,821 m long in the data, not 2,729 m:** the deck ends at 2,729 m and the road runs 92 m more on the loop's own line. That tail is cut too.
+  - **Checks (all measured on the final build):**
+    1. `Roads.check` on the three main roads, per-road lanes: **0 bumps** in 89,600 points.
+    2. Junctions: 28 on main roads, 3 in a corridor (step 4), **25 checked with 28 mouths: 0 spots of kerb or pavement in a mouth, 0 missing right beside one, 0 lines in a mouth, heights within 0.015**. The two built joins are measured surface against surface. For the streets (not built yet) the height is the one the builder will give them. The streets' raw data is up to 0.77 off at the main road's kerb line (the ground slopes across the main road): `alignJunctions` eases that when they are built.
+    3. Main road on main road: New Road on the loop 3,697 spots, University Avenue on the loop 2,742 spots (2-stud grid): **0 spots with two roads' slabs, 0 holes**. Heights 51.46 against 51.47, and 42.02 against 42.02.
+    4. Doubled faces at 10 spots (4 straights, 3 bends, the roundabout, 2 junctions): **0 block faces fighting, 0 doubled slab spots** in 45,000 rays (`SurfaceCheck` reads only blocks, so the slab wedges get their own ray test).
+    5. 200 random points on the main roads: **0 with ground through the road, 0 with nothing under, 0 floating**. The pavement's top stands 2.3 studs over the ground beside it on average (4.7 at most).
+    6. Pictures in the `City Legends` folder: `Yangon main roads - ...jpg` (10 of them, one at 667 x 375). Three review agents looked at the first set: roads, bends, cut ends and roundabout clean; one must-fix (no lines through the New Road fork), fixed with the new line rule; white kerb bands sinking into the pavement (pavement made darker) and a dark ring on the island (dome made as wide as the disc), both fixed. All ten were shot again on the final build.
+  - **New traps:**
+    - **Pictures:** after a build, or after the camera jumps far, Studio needs 10 to 15 s to draw the parts. Set the real camera first (`CurrentCamera.CFrame` and `.Focus`), wait, then `screen_capture` from the same spot. Otherwise the picture shows grass where the road is.
+    - **Rays on seams:** a ray exactly on a sample's cross-section (where two road pieces meet) can slip between them. It made false "holes" in the checks and 49 missing line dashes. Checks and `RoadLines` now look a hair off the seam.
+    - **Hair-thin triangles lean:** `Roads.triangle` makes its wedges as thick as the slab along the triangle's own normal, and a triangle under 0.03 studs across has a normal set by rounding. `Roads.sliver` skips them.
+    - **"Target is not reachable" can come back after the code ran.** Look at the state before running it again. Long jobs go through `Y.spawn` and are read with `Y.status()` or an attribute on `ServerStorage.YangonData`.
+    - **Materials:** Roblox's `Pavement` draws small pavers; `Concrete` is overridden in this place (`RivConcrete2`) and shows each triangle's texture direction. `Sandstone` reads as plain concrete with no seams. `Asphalt` is overridden too (`RivAsphalt`), so Yangon's roads get Monaco's asphalt texture by themselves.
+    - **Upload:** an `.rbxmx` needs content type `model/x-rbxm` (without it: "not supported yet"). PATCH on `/assets/v1/assets/133014134133489` makes a new version of the same asset, so tool updates do not pile up as new assets.
+    - `ServerStorage.OldRoadLines` holds Monaco's old lines (24,048 parts). `RoadLines.build` makes a folder per road in it; the three empty Yangon ones were removed.
+  - **Not right yet / for the owner to judge:**
+    - The pavement stands 2 to 3 studs proud of the grass in places (the ground is 1 stud under the road and the builder's trench lowers the edge). Step 8's blocks stand against it; if it looks wrong before then, the verge can be raised.
+    - Corners are sharp where the arms meet the ring and where New Road's kerb meets the loop's (no rounded kerb returns): that is step 6 (kerbs on bends).
+    - In shade the white kerb bands read pale blue and the pavement's side face teal: that is the place's sky light. Lighting was not touched in this step.
+    - Far away the red and white bands break into a speckled strip that may shimmer when driving. Road meshes with a banded texture (step 6) would cure it.
+    - The pavement's material (Sandstone) reads a little like rock from very close: no paving joints.
+    - The roundabout's kerbs are straight blocks along the ring's 96 sides: a hairline (0.03 studs) can show at the joints from very close.
+    - Turn arrows and stop lines are not designed yet. In the New Road fork the mouth-side lane and edge lines stop for about 150 studs (the mouth), the rest runs through.
+    - Asphalt colour: kept dark. The photos show a lighter warm grey.
+    - 66,061 parts for 17 km of main road. Step 6 (road meshes, Blender allowed) is where that comes down.
+  - **What step 4 must know:**
+    - Load and rebuild: `local Y = require(game.ServerStorage.ClaudeTools.YangonRoads:Clone()); Y.load(); Y.spawn("step 3", Y.step3)` then `Y.status()` (about 28 s: it clears the three road folders, fills the bank, builds roads and mouths, mends the ground at the cut ends, builds the roundabout and the lines). Checks: `Y.checkBumps()`, `Y.checkPoints(200)`, `Y.checkJunctions()` (slow: spawn it), `Y.checkMainMain()`, `Y.surfaceCheck(spots)`, `Y.partCount()`.
+    - `Y.cut[road][sample]` says what is cut and by which flyover; `Y.cutEnds` is the table above with exact positions. `Y.design.flyovers` holds the decks. Deck samples in the data are 14 studs above the ground and are cut, so no road passing under is lifted onto them.
+    - The flyovers' own slabs can be built with `Roads.build` and its own `cut` table (the inverse: everything except the deck), or by a new tool. The cut ends are the cross-sections at the samples in the table: butt up to them at the same height.
+    - Under the Kabar Aye Flyover the loop is cut from 3,155 to 3,491 m: New Road's ramp comes down on the loop's own line there. Under the Pyay Road Flyover: University Avenue's first 12 samples, Hledan Road's last 12, Nar Nat Taw Road's first 11.
+    - `Y.findMouths` handles a road that ENDS on a bigger road or in the ring. A street that CROSSES a main road (Inya Road crosses the loop and University Avenue) needs the same cut on both sides: for step 5.
+    - Pyay Road South and Hanthawaddy Road end inside the roundabout: `Y.load()` already eases their heights onto the ring and cuts their samples inside radius 94. The ring's kerb and pavement already have their two gaps.
