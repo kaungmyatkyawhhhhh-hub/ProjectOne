@@ -422,8 +422,9 @@ def write(lanes, links, tag, outdir):
     lane_lines = []
     for l in lanes:
         pts = ','.join('%s,%s,%s' % (fmt(p[0]), fmt(p[1]), fmt(p[2])) for p in l['pts'])
-        lane_lines.append('\t\t{ road = "%s", way = %d, lane = %d, kind = "%s", closed = false, yangon = true, pts = { %s } },' % (
-            l['road'], l['way'], l['lane'], l['kind'], pts))
+        outer = ', outer = true' if l['n'] >= 2 and l['lane'] == l['n'] else ''   # (v5's flag: the spawn's lane)
+        lane_lines.append('\t\t{ road = "%s", way = %d, lane = %d, kind = "%s", closed = false, yangon = true%s, pts = { %s } },' % (
+            l['road'], l['way'], l['lane'], l['kind'], outer, pts))
     link_lines = {}
     for a, fk, b, tk, why in links:
         ga = a[1] if isinstance(a, tuple) else a + first

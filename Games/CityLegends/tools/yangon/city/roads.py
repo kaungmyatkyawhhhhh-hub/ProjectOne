@@ -180,16 +180,35 @@ def collision(B, net):
             c = c + R * off
         d = p1 - p0
         rows.append('%.2f %.2f %.2f %.2f %.2f %.2f %.2f 0 %s' % (c[0], (y0 + y1) / 2, c[1], d[0], y1 - y0, d[1], width, kind))
+    def runs_of(e, lo, hi, r):
+        """sample runs that one straight box can cover: <= 64 studs, heading within 4 degrees, height within 0.12 of a
+        straight line, the same cross-section and raised state"""
+        n = len(e.P)
+        out = []
+        i = 0
+        while i < n - 1:
+            j = i + 1
+            while j + 1 < n and j + 1 - i <= 8:
+                k = j + 1
+                if r[k] != r[i] or abs(lo[k] - lo[i]) > 0.5 or abs(hi[k] - hi[i]) > 0.5:
+                    break
+                if float(e.D[k] @ e.D[i]) < math.cos(math.radians(4)):
+                    break
+                c = rn.chain(e.P[i:k + 1])
+                lin = e.y[i] + (e.y[k] - e.y[i]) * c / max(c[-1], 1e-6)
+                if np.abs(e.y[i:k + 1] - lin).max() > 0.12:
+                    break
+                j = k
+            out.append((i, j))
+            i = j
+        return out
+
     for e in net.edges:
         lo, hi = B.lohi[e.id]
         r, rr = B.raised[e.id]
-        n = len(e.P)
-        i = 0
-        while i < n - 1:
-            j = min(n - 1, i + 2)
+        for i, j in runs_of(e, lo, hi, r):
             p0, p1 = e.P[i], e.P[j]
             if np.linalg.norm(p1 - p0) < 0.5:
-                i = j
                 continue
             Rm = e.D[(i + j) // 2]
             Rv = np.array([-Rm[1], Rm[0]])
@@ -202,21 +221,24 @@ def collision(B, net):
                 row(p0, p1, y0 + rm.PARAPET_H, y1 + rm.PARAPET_H, rm.PARAPET_W, 'W', h_ + rm.PARAPET_W / 2, Rv)
                 if not paired:
                     row(p0, p1, y0 + rm.PARAPET_H, y1 + rm.PARAPET_H, rm.PARAPET_W, 'W', l_ - rm.PARAPET_W / 2, Rv)
-            else:
-                row(p0, p1, y0, y1, h_ - l_, 'R', (l_ + h_) / 2, Rv)
-                # pavements, unless another carriageway lies there (a junction mouth)
-                for side, a_, b_ in ((1, h_, h_ + e.walk), (-1, l_ - e.walk, l_)):
-                    if side == -1 and paired:
-                        continue
-                    q = Polygon([p0 + Rv * a_, p1 + Rv * a_, p1 + Rv * b_, p0 + Rv * b_])
-                    if _blocked(B, q, e):
-                        continue
-                    row(p0, p1, y0 + rm.PAVE_UP, y1 + rm.PAVE_UP, b_ - a_, 'P', (a_ + b_) / 2, Rv)
-                if paired and l_ > 0.5:
-                    q = Polygon([p0, p1, p1 + Rv * l_, p0 + Rv * l_])
-                    if not _blocked(B, q, e):
-                        row(p0, p1, y0 + rm.PAVE_UP, y1 + rm.PAVE_UP, l_, 'M', l_ / 2, Rv)
-            i = j
+                continue
+            row(p0, p1, y0, y1, h_ - l_, 'R', (l_ + h_) / 2, Rv)
+            # pavements and medians, unless another carriageway lies there (a junction mouth): then in 2-sample pieces
+            for side, a_, b_, kind in ((1, h_, h_ + e.walk, 'P'), (-1, l_ - e.walk, l_, 'P'), (0, 0.0, l_, 'M')):
+                if side == -1 and paired:
+                    continue
+                if kind == 'M' and not (paired and l_ > 0.5):
+                    continue
+                q = Polygon([p0 + Rv * a_, p1 + Rv * a_, p1 + Rv * b_, p0 + Rv * b_])
+                if not _blocked(B, q, e):
+                    row(p0, p1, y0 + rm.PAVE_UP, y1 + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
+                    continue
+                for k in range(i, j, 2):
+                    k2 = min(j, k + 2)
+                    q0, q1 = e.P[k], e.P[k2]
+                    qq = Polygon([q0 + Rv * a_, q1 + Rv * a_, q1 + Rv * b_, q0 + Rv * b_])
+                    if not _blocked(B, qq, e):
+                        row(q0, q1, e.y[k] + rm.PAVE_UP, e.y[k2] + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
     # junction squares
     inc = {}
     for e in net.edges:
@@ -338,6 +360,8 @@ def run(tag, glb=True, cells=None, log=print, jobs=1):
     else:
         meshes = B.build(log=log)
     log('  meshes done %.0f s' % (time.time() - t0))
+    if '--dump' in sys.argv:
+        pickle.dump(dict(meshes=meshes), open(os.path.join(OUT, 'roads_%s_meshes.pkl' % tag), 'wb'))
     manifest = write_meshes(meshes, tag, log=log) if glb else None
     rows = collision(B, net)
     nmods = write_collision(rows, tag)
@@ -389,6 +413,7 @@ def stats(net, B, structs, lanes, links, lstats, rows, nmods, files, first, mani
                 km_total=round(sum(km.values()), 1), km_by_cross_section={k: round(v, 2) for k, v in sorted(lane_km.items(), key=lambda kv: -kv[1])},
                 divided_pairs_km=round(net.stats_pair['paired_len'] / geo.SPM / 1000, 1), pushed_beside_flyovers=net.pushed,
                 bridges=br, bridge_families=fams, spill_studs=round(net.spill), seams=net.seam_report,
+                seam_ends_inside_box=getattr(net, 'inside_ends', []),
                 triangles=tris, meshes=manifest['meshes'] if manifest else None, glb_files=len(manifest['files']) if manifest else None,
                 collision_boxes=len(rows), collision_modules=nmods,
                 lanes=len(lanes), lane_links=len(links), lane_stats=lstats, lane_modules=[dict(file=os.path.basename(p), chars=c, lanes=n, first=f) for p, c, n, f in files],
@@ -412,6 +437,8 @@ def print_stats(st, log=print):
     for s in st['seams']:
         log('  %-28s %-9s %s %s' % (s['road'], s['flag'], s['status'], '' if s['status'] != 'joined' else
                                     'OSM %s (%s) moved %.1f, game %s, OSM %s' % (s['osm'], 'one-way' if s['oneway'] else 'two-way', s['moved'], s['game_xs'], s['osm_xs'])))
+    for s in st.get('seam_ends_inside_box', []):
+        log('  %-28s %-9s inside BOX_05 (%d studs from its edge): batch 0.5 / streets.py continues it' % (s['road'], s['flag'], s['to_box_edge']))
     log('triangles: ' + ', '.join('%s %d' % kv for kv in st['triangles'].items()) + ' | meshes %s in %s files' % (st['meshes'], st['glb_files']))
     log('collision boxes %d in %d modules' % (st['collision_boxes'], st['collision_modules']))
     log('lanes %d, links %d, %s; first = %d; modules %s' % (st['lanes'], st['lane_links'], st['lane_stats'], st['lanes_first'],

@@ -748,7 +748,21 @@ def build(tag, margin=400.0):
         q = Point(E['x'] + E['out'][0] * 150, E['z'] + E['out'][1] * 150)
         E['batch'] = min(polys, key=lambda t: polys[t].distance(q))
         E['batch_dist'] = round(polys[E['batch']].distance(q))
-    mine = [E for E in ends if E['batch'] == tag and E['batch_dist'] < 300]
+    # (an end deep inside BOX_05 continues inside batch 0.5's own ground: streets.py's job, not a batch seam)
+    x0, z0, x1, z1 = geo.BOX_05
+    for E in ends:
+        d = E['out']
+        ts = []
+        for c, lo, hi in ((0, x0, x1), (1, z0, z1)):
+            v = (E['x'], E['z'])[c]
+            if d[c] > 1e-6:
+                ts.append((hi - v) / d[c])
+            elif d[c] < -1e-6:
+                ts.append((lo - v) / d[c])
+        E['to_box_edge'] = round(max(0.0, min(ts))) if ts else 0
+    net.inside_ends = [dict(road=E['road'], flag=E['flag'], to_box_edge=E['to_box_edge']) for E in ends
+                       if E['batch'] == tag and E['to_box_edge'] > 300]
+    mine = [E for E in ends if E['batch'] == tag and E['batch_dist'] < 300 and E['to_box_edge'] <= 300]
     net.seam_report = match_seams(edges, mine, poly)
     net.seam_ends = ends
     # seam edges may reach into the 0.5 box up to the game road's end, never over a game road

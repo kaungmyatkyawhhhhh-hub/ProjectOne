@@ -108,7 +108,8 @@ class Builder:
             self.carr.append(rn.strip_poly(sub, lo_, hi_))
             self.outer.append(rn.strip_poly(sub, lo_ - wl, hi_ + e.walk))
             if e.oneway and paired.any():
-                m = rn.strip_poly(sub, np.where(paired, 0.0, lo_), np.where(paired, np.maximum(lo_, 0.0), lo_))
+                # (from 1.5 past the midline: the partner's strip overlaps it, so no sliver opens between the two)
+                m = rn.strip_poly(sub, np.where(paired, -1.5, lo_), np.where(paired, np.maximum(lo_, 0.0), lo_))
                 self.med.append(m)
             else:
                 self.med.append(None)
@@ -405,13 +406,21 @@ class Builder:
                         opens.append(self.carr[k])
                 if opens:
                     M = M.difference(unary_union(opens).buffer(2.0))
-                M = M.buffer(-0.01).buffer(0.01)
+                M = M.buffer(1.0, join_style=2).buffer(-1.0, join_style=2).buffer(-0.4).buffer(0.4)
         raised = Polygon()
         if self.rtree is not None:
             rk = [int(k) for k in self.rtree.query(cbm)]
             if rk:
                 raised = unary_union([self.rfoot[k] for k in rk])
-        R = Rc.difference(M).difference(raised)
+        R0 = Rc.difference(M).difference(raised)
+        R = R0.buffer(-0.6, join_style=2).buffer(0.6, join_style=2).intersection(R0)
+        sl = R0.difference(R)                      # asphalt slivers: into the median beside them, else kept
+        if not sl.is_empty and not M.is_empty:
+            into = sl.intersection(M.buffer(1.5))
+            M = M.union(into)
+            R = R.union(sl.difference(into))
+        else:
+            R = R0
         Pv = Po.difference(Rc).difference(raised)
         Mv = M.difference(raised)
         strip = R.buffer(KERB_W, join_style=2, mitre_limit=2.0)
@@ -435,7 +444,7 @@ class Builder:
         return R
 
     def _kerb_ring(self, ring, cb, nextto, medp, out):
-        cs = np.array(shapely.segmentize(LineString(ring.coords), BAND / 2).coords)
+        cs = np.array(shapely.segmentize(LineString(ring.coords), BAND).coords)
         if len(cs) < 3:
             return
         if np.allclose(cs[0], cs[-1]):
@@ -491,14 +500,16 @@ class Builder:
         return best is not None and best[1].look == 'main'
 
     def _flat(self, pg, out, kind, up, own=None):
-        """triangulate a flat-ish polygon, split into GRID pieces, heights from the field"""
+        """triangulate a flat-ish polygon, split into grid pieces (GRID under paint, 2 GRID elsewhere), heights from
+        the field"""
         o = out.setdefault(kind, [])
         x0, z0, x1, z1 = pg.bounds
-        if x1 - x0 > GRID * 1.5 or z1 - z0 > GRID * 1.5:
+        GR = GRID if kind in ('R', 'L') else 2 * GRID
+        if x1 - x0 > GR * 1.5 or z1 - z0 > GR * 1.5:
             parts = []
-            gx = np.arange(math.floor(x0 / GRID) * GRID, x1 + GRID, GRID)
-            gz = np.arange(math.floor(z0 / GRID) * GRID, z1 + GRID, GRID)
-            grid = [sbox(a, b, a + GRID, b + GRID) for a in gx[:-1] for b in gz[:-1]]
+            gx = np.arange(math.floor(x0 / GR) * GR, x1 + GR, GR)
+            gz = np.arange(math.floor(z0 / GR) * GR, z1 + GR, GR)
+            grid = [sbox(a, b, a + GR, b + GR) for a in gx[:-1] for b in gz[:-1]]
             gi = shapely.intersection(np.array(grid, dtype=object), pg)
             for g in gi:
                 parts += _polys(g)
@@ -507,7 +518,7 @@ class Builder:
         for q in parts:
             if q.area < 0.02:
                 continue
-            q = shapely.segmentize(q, 6.0)
+            q = shapely.segmentize(q, 6.0 if kind in ('R', 'L') else 10.0)
             try:
                 tr = shapely.constrained_delaunay_triangles(q)
             except Exception:

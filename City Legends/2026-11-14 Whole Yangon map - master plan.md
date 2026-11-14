@@ -36,12 +36,12 @@ Batches: [[Yangon map - Build steps (Claude builds it)]] (0.5 = built area, 1 = 
 
 ## Phases (tick as done; each ends with a save and a log entry in the build-steps note)
 ### A. Batch 0.5 to "1:1"
-- [ ] A1 Lane survey: every main road's lanes, divided or not, median, from OSM + satellite / Google Earth checks (table below).
-- [ ] A2 Main roads v5: real lane counts and medians (d18 -> v5, RoadLines N lanes, `buildMedians`, d7 gores, d9 lanes with lane 3, spawn on the outer lane, chauffeur guard).
-- [ ] A3 City generator core (`tools/yangon/city/`): projection, heights, OSM loaders, glb writer, atlas.
-- [ ] A4 The missing streets as mesh roads (about 150 km) + mouths cut into the part roads + collision + terrain beds.
-- [ ] A5 Buildings as meshes: OSM outlines + infill to real density, Yangon types, roof colours, night windows; part buildings retired.
-- [ ] A6 Lived-in layer: compound walls and gates, power poles and wires, painted kerb trees, signs and awnings, bus stops, parked cars, tea shops, stalls, trishaws, road patches.
+- [x] A1 Lane survey: every main road's lanes, divided or not, median, from OSM + satellite / Google Earth checks (table below).
+- [x] A2 Main roads v5: real lane counts and medians (d18 -> v5, RoadLines N lanes, `buildMedians`, d7 gores, d9 lanes with lane 3, spawn on the outer lane, chauffeur guard).
+- [x] A3 City generator core (`tools/yangon/city/`): projection, heights, OSM loaders, glb writer, atlas.
+- [x] A4 The missing streets as mesh roads (about 150 km) + mouths cut into the part roads + collision + terrain beds.
+- [x] A5 Buildings as meshes: OSM outlines + infill to real density, Yangon types, roof colours, night windows; part buildings retired.
+- [x] A6 Lived-in layer (parked cars, people, stalls still to come): compound walls and gates, power poles and wires, painted kerb trees, signs and awnings, bus stops, parked cars, tea shops, stalls, trishaws, road patches.
 - [ ] A7 Lake details (Boat Club pier, island paths), median lamps, venue lot ground.
 - [ ] A8 Test (Play, phone size, night, performance), quality-nerd check, side by side with the satellite, save, notes.
 ### B. Batch 1 (west to the Hlaing River, south to Shwedagon)
