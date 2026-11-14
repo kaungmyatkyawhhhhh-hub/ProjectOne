@@ -147,7 +147,10 @@ def main():
     E = Polygon(lay["E"]).buffer(6.0, join_style=2)
     builds = unary_union([pod_fit, mel, E] + [Polygon(lay[k]).buffer(0) for k in ("whiteroof",)])
     site = unary_union([builds, Point(px, py).buffer(PR + 12)]).buffer(30, join_style=2)
-    pave = lot0.buffer(-0.3).intersection(site).difference(builds.buffer(-0.5)).difference(garden.buffer(-0.5))
+    # the paving reaches the real pavement edge: a 2-stud raycast grid of the road surfaces (lot_fine.json) when there is one
+    fine_p = os.path.join(ROOT, "lot_fine.json")
+    lot_pave = Polygon(json.load(open(fine_p))).buffer(0) if os.path.exists(fine_p) else lot0
+    pave = lot_pave.buffer(-0.3).intersection(site).difference(builds.buffer(-0.5)).difference(garden.buffer(-0.5))
     tiles = []
     TW, TH = 12.0, 18.0
     bx0, by0, bx1, by1 = pave.bounds

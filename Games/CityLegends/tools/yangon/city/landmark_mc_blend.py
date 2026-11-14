@@ -318,14 +318,32 @@ def build_podium():
     pod = ccw([tuple(p) for p in LAY["podium"]])
     F = mesh("pod")
     R = mesh("podR", "R")
-    inner = offset_poly(pod, -2.0)
-    # skirt, ground-floor shops set 2 back under the first floor, four mall storeys of beige granite + glass
+    inner = offset_poly(pod, -3.5)
+    # skirt, ground-floor shops set 3.5 back under the first floor, four mall storeys of warm granite + glass
     ring(F, pod, SKIRT, 0.0, "concrete", ustuds=40.0, col=(0.5, 0.48, 0.46), glow=False)
     ring(F, inner, 0.0, 14.0, "shop", ustuds=64.0)
     annulus(R, pod, inner, 14.0, "soffit", down=True)
-    z = storeys(F, pod, 14.0, [12.0, 12.0, 12.0, 12.0], "podium", ustuds=76.8)
-    ring(F, pod, z, z + 4.0, "crown", ustuds=76.8, glow=False)
+    z = storeys(F, pod, 14.0, [12.0, 12.0, 12.0, 12.0], "podium", ustuds=76.8, col=(1.0, 0.96, 0.88))
+    ring(F, pod, z, z + 4.0, "crown", ustuds=76.8, glow=False, col=(1.0, 0.96, 0.88))
     top = z + 4.0
+    # white-framed ad boards on the long street faces (not the corner front): the real mall is covered in them
+    face = Vector(LAY["face"]).normalized()
+    regs = ["bill0", "bill1", "bill2"]
+    k = 0
+    for i in range(len(pod)):
+        a, b = V2(pod[i]), V2(pod[(i + 1) % len(pod)])
+        Ln = (b - a).length
+        nn = outward(pod, i)
+        if Ln < 40 or nn.dot(face) > 0.9:
+            continue
+        cnt = 2 if Ln < 80 else 3
+        for j in range(cnt):
+            c = a.lerp(b, (j + 1) / (cnt + 1)) + nn * 0.12
+            yaw = math.atan2(nn.y, nn.x)
+            panel(F, (c.x, c.y), 15.2, 10.2, yaw, "white", 27.4, col=(0.85, 0.85, 0.84), glow=False)
+            c2 = c + nn * 0.08
+            panel(F, (c2.x, c2.y), 14.0, 9.0, yaw, regs[k % 3], 28.0)
+            k += 1
     roof_in = offset_poly(pod, -1.2)
     annulus(R, pod, roof_in, top, "white", col=(0.8, 0.78, 0.74))
     ring(R, list(reversed(roof_in)), top - 1.0, top, "white", ustuds=1e6, col=(0.72, 0.7, 0.66), glow=False)
@@ -350,19 +368,19 @@ def build_front(pod, top):
     bd = 6.0
     # the screen wall
     c = mid + n * (bd / 2)
-    box(F, (c.x, c.y, 26.0), (bd, bw, 38.0), yaw, region="darkglass", col=(1, 1, 1), top="concrete")
-    fc = mid + n * (bd + 0.08)
-    led_w = min(36.0, bw - 30.0)
-    panel(F, (fc.x, fc.y), led_w, 20.0, yaw, "screen", 36.0)
+    box(F, (c.x, c.y, 28.0), (bd, bw, 32.0), yaw, region="white", col=(0.2, 0.2, 0.21), top="concrete")
+    fc = mid + n * (bd + 0.25)
+    led_w = min(42.0, bw - 32.0)
+    # silver frames (0.8 wide, all four sides) behind each panel, then the panels just in front
+    for xc, w, h, z0 in ((0.0, led_w, 24.0, 33.0), (-(led_w / 2 + 8.5), 14.0, 24.0, 33.0), (led_w / 2 + 8.5, 14.0, 24.0, 33.0)):
+        pc = fc + t * xc - n * 0.06
+        panel(F, (pc.x, pc.y), w + 1.6, h + 1.6, yaw, "white", z0 - 0.8, col=(0.82, 0.82, 0.82), glow=False)
+    panel(F, (fc.x, fc.y), led_w, 24.0, yaw, "screen", 33.0)
     for k, reg in ((-1, "bill0"), (1, "bill2")):
-        pc = fc + t * (k * (led_w / 2 + 7.5))
-        panel(F, (pc.x, pc.y), 12.0, 22.0, yaw, reg, 35.0)
-    # silver frames round the three panels and a light line at the top of the wall
-    fr = fc + n * 0.04
-    for x0, w, z0, h in ((-(led_w / 2 + 14.0), led_w + 28.0, 34.4, 0.6), (-(led_w / 2 + 14.0), led_w + 28.0, 57.0, 0.6)):
-        pc = fr + t * (x0 + w / 2)
-        panel(F, (pc.x, pc.y), w, h, yaw, "white", z0, col=(0.78, 0.78, 0.78), glow=False)
-    panel(F, (fr.x, fr.y), bw, 1.0, yaw, "lamp", 62.6, glow=True)
+        pc = fc + t * (k * (led_w / 2 + 8.5))
+        panel(F, (pc.x, pc.y), 14.0, 24.0, yaw, reg, 33.0)
+    fr = mid + n * (bd + 0.1)
+    panel(F, (fr.x, fr.y), bw, 1.0, yaw, "lamp", 59.0, glow=True)
     # entrance canopy on three columns at the ground floor, and the bollards come from the fit
     canopy(F, R, p, q, 9.0, 13.0, 1.6, columns=3, extend=-6.0)
     # the roof canopy: a solid plate, tilted up toward the street, white fascia, glowing ribbed soffit
@@ -410,12 +428,12 @@ def build_front(pod, top):
     bal = mid - n * 0.6
     panel(F, (bal.x, bal.y), bw - 6.0, 3.2, yaw, "darkglass", top, col=(1, 1, 1), glow=False)
     # ad boards on the roof at both ends of the front (the red one on the right seen from the plinth)
-    for side, reg, w, h, bcol in ((1, "bill1", 17.0, 11.0, (0.55, 0.1, 0.1)), (-1, "screen", 18.0, 9.0, (0.86, 0.86, 0.86))):
+    for side, reg, w, h, bcol in ((1, "bill1", 17.0, 11.0, (0.3, 0.3, 0.32)), (-1, "screen", 18.0, 9.0, (0.3, 0.3, 0.32))):
         bc = mid + t * side * (L / 2 - w / 2 - 2.0) - n * 2.0
         box(F, (bc.x, bc.y, top), (1.4, w + 1.0, h + 1.0), yaw, col=bcol, bottom=True)
         pc = bc + n * 0.78
         panel(F, (pc.x, pc.y), w, h, yaw, reg, top + 0.5)
-        if side < 0:
+        if True:
             for k in range(4):
                 a = bc + t * (-w / 2 + (k + 0.5) * w / 4)
                 strut(R, Vector((a.x, a.y, top + h + 1.0)), Vector((a.x + n.x * 3, a.y + n.y * 3, top + h + 2.2)), 0.35,
@@ -427,14 +445,18 @@ def build_front(pod, top):
         wm = (wp + wq) / 2
         we = (wq - wp).normalized()
         half = min(26.0, wl / 2 - 1.0)
-        canopy(F, R, wm - we * half, wm + we * half, 11.0, 13.0, 2.0, fascia_col=(0.55, 0.53, 0.5), columns=2)
-        tp = wm + wn * 10.9
-        panel(F, (tp.x, tp.y), min(46.0, 2 * half - 4.0), 5.5, math.atan2(wn.y, wn.x), "txt_plaza", 15.0)
+        canopy(F, R, wm - we * half, wm + we * half, 11.0, 13.0, 2.0, fascia_col=(0.15, 0.17, 0.2), columns=2)
+        tp = wm + wn * 11.06
+        panel(F, (tp.x, tp.y), 2 * half - 2.0, 4.6, math.atan2(wn.y, wn.x), "txt_plaza", 12.8)
+        # the entrance bay: dark glass 1.5 behind the shop line, full canopy width, up to the first floor
+        bay = wm - wn * 3.4
+        panel(F, (bay.x, bay.y), 2 * half - 6.0, 12.8, math.atan2(wn.y, wn.x), "darkglass", 0.2, glow=False)
     return mid, n, t
 
 
 def build_tower(name, poly, z0, n_office, region, crown_rows=2, roof="roof", notch=None, slots=False, ground=False,
-                bulge=None, end_region=None, end_col=(1, 1, 1)):
+                bulge=None, end_region=None, end_col=(1, 1, 1), col=(1, 1, 1), crown_region="crown", crown_col=(1, 1, 1),
+                lip=None):
     """A slab tower. notch: recess the SW half of both short ends by notch studs (tower A); slots: a 2 x 2 slot down the
     middle of each short end (tower B); bulge: (edge index, sagitta) bows that long face outward (tower B's north face);
     ground: start at the street with a shop storey; end_region: a different picture on the short ends (the Melia)."""
@@ -505,9 +527,27 @@ def build_tower(name, poly, z0, n_office, region, crown_rows=2, roof="roof", not
             pc = m + nn * 0.1
             panel(F, (pc.x, pc.y), 2.6, z - zstart - 6.0, math.atan2(nn.y, nn.x), "darkglass", zstart + 3.0, glow=False)
     else:
-        z = storeys(F, poly, zstart, [FLOOR] * n_office, region)
-    z = storeys(F, poly, z, [8.0] * crown_rows, "crown", glow=False)
+        z = storeys(F, poly, zstart, [FLOOR] * n_office, region, col=col)
+    if crown_region == "crown":
+        z = storeys(F, poly, z, [8.0] * crown_rows, "crown", glow=False, col=crown_col)
+    else:
+        ring(F, poly, z, z + 8.0 * crown_rows, crown_region, ustuds=1e6, col=crown_col, glow=False)
+        z += 8.0 * crown_rows
     top = z
+    if lip:
+        # a roof lip 1.2 thick, lip studs out: a white fascia, a top, an underside (glowing for B's lit roof edge)
+        out_, glow_ = lip
+        lp = offset_poly(poly, out_)
+        ring(R, lp, top - 1.2, top, "white", ustuds=1e6, col=(0.92, 0.91, 0.88), glow=False)
+        annulus(R, lp, poly, top, "white", col=(0.9, 0.89, 0.86))
+        if glow_:
+            for i in range(len(poly)):
+                a, b = lp[i], lp[(i + 1) % len(lp)]
+                c_, d_ = poly[(i + 1) % len(poly)], poly[i]
+                R.poly([(a[0], a[1], top - 1.2), (d_[0], d_[1], top - 1.2), (c_[0], c_[1], top - 1.2), (b[0], b[1], top - 1.2)],
+                       [flat("lamp")] * 4, (1, 1, 1), True)
+        else:
+            annulus(R, lp, poly, top - 1.2, "white", col=(0.7, 0.7, 0.68), down=True)
     deck = offset_poly(poly, -1.6)
     annulus(R, poly, deck, top, "white", col=(0.84, 0.8, 0.74))
     ring(R, list(reversed(deck)), top - 2.0, top, "white", ustuds=1e6, col=(0.78, 0.75, 0.7), glow=False)
@@ -566,8 +606,8 @@ def build_plinth():
     face = math.atan2(LAY["face"][1], LAY["face"][0])
     a0 = face - span / 2
     nb = 40
-    zg, zt = 7.2, 11.6
-    band_k = int(round(nb * 0.85))
+    zg, zt = 7.6, 12.4
+    band_k = int(round(nb * 0.88))
 
     def P(b, rr):
         return (cx + rr * math.cos(b), cy + rr * math.sin(b))
@@ -657,7 +697,11 @@ def build_plinth():
                (0.9, 0.95, 0.85), False)
     # the flat lawn garden behind the wall (inside the arc, closed by its chord)
     garden = [P(a0 + span * k / 24, r - 1.1) for k in range(25)]
-    cap(R, garden, 0.14, "hedge", col=(0.72, 0.92, 0.52), flatuv=True)
+    cap(R, garden, 1.2, "hedge", col=(0.72, 0.92, 0.52), flatuv=True)
+    # the bed's open side (the chord): a low granite kerb up to the lawn
+    ga, gb = garden[-1], garden[0]
+    F.poly([(ga[0], ga[1], SKIRT), (gb[0], gb[1], SKIRT), (gb[0], gb[1], 1.2), (ga[0], ga[1], 1.2)],
+           [uvr("granite", 0.1, 0), uvr("granite", 0.9, 0), uvr("granite", 0.9, 0.2), uvr("granite", 0.1, 0.2)], (1, 1, 1), False)
 
 
 def build_melia():
@@ -778,6 +822,17 @@ def build_props():
             bc = c + side * s * 0.9
             fyaw = math.atan2(side.y, side.x) + math.pi / 2
             panel(R, (bc.x, bc.y), 1.7, 5.0, fyaw, "banner", 9.0, glow=False, both=True)
+    # granite planters on the front plaza, between the entrance canopy and the plinth garden (no cafe: the real corner has none)
+    fv2 = Vector(LAY["face"]).normalized()
+    tv = Vector((fv2.y, -fv2.x))
+    fc0 = Vector(LAY["front_c"])
+    for along in (-30.0, -19.0, 19.0, 30.0):
+        c = fc0 + tv * along + fv2 * 11.5
+        box(R, (c.x, c.y, 0.0), (4.0, 2.0, 1.6), math.atan2(tv.y, tv.x), region="granite", col=(1, 1, 1))
+        cap(R, [(c.x - 1.7 * tv.x - 0.7 * fv2.x, c.y - 1.7 * tv.y - 0.7 * fv2.y), (c.x + 1.7 * tv.x - 0.7 * fv2.x, c.y + 1.7 * tv.y - 0.7 * fv2.y),
+                (c.x + 1.7 * tv.x + 0.7 * fv2.x, c.y + 1.7 * tv.y + 0.7 * fv2.y), (c.x - 1.7 * tv.x + 0.7 * fv2.x, c.y - 1.7 * tv.y + 0.7 * fv2.y)],
+            1.65, "hedge", flatuv=True)
+        COLL.append((c.x, c.y, 0.0, 4.0, 2.0, 1.6, math.atan2(tv.y, tv.x)))
     for x, y in LAY.get("bollards", []):
         box(R, (x, y, 0.0), (0.5, 0.5, 2.4), 0.0, col=(0.94, 0.94, 0.92))
         COLL.append((x, y, 0.0, 0.5, 0.5, 2.4, 0.0))
@@ -791,9 +846,11 @@ def build(opts=None):
     build_front(pod, top)
     build_dome(top)
     build_whiteroof()
-    tA, _ = build_tower("towerA", LAY["A"], 0.0, 26, "officeA", crown_rows=3, ground=True, notch=5.0)
+    tA, _ = build_tower("towerA", LAY["A"], 0.0, 26, "officeA", crown_rows=3, ground=True, notch=5.0, col=(1.0, 0.96, 0.88),
+                        crown_region="white", crown_col=(0.93, 0.91, 0.86), lip=(1.0, False))
     # tower B: its north face (edge 0 -> 1 of the layout outline, the larger y) bows out 6 studs; slots in both ends
-    tB, _ = build_tower("towerB", LAY["B"], top - 1.0, 20, "officeB", crown_rows=3, slots=True, bulge=(0, 6.0))
+    tB, _ = build_tower("towerB", LAY["B"], top - 1.0, 20, "officeB", crown_rows=3, slots=True, bulge=(0, 10.0),
+                        lip=(1.5, True))
     build_melia()
     build_suites()
     build_plinth()
