@@ -2056,8 +2056,15 @@ def evo6():
     return m.evo6(Spec, needle_sprite, add_needle, glyph, solid_gear)
 
 
-BUILDERS = {"evo6": evo6, "evo6c": evo6c, "ae86": ae86, "supra": supra, "chaser": chaser, "e92": e92, "gt3rs": gt3rs, "f82": f82, "gtr": gtr, "gtrte": gtrte, "bentayga": bentayga, "e60": e60, "r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def gc8():
+    import cluster_imports as m
+
+    return m.gc8(Spec, needle_sprite, add_needle, glyph, solid_gear)
+
+
+BUILDERS = {"gc8": gc8, "evo6": evo6, "evo6c": evo6c, "ae86": ae86, "supra": supra, "chaser": chaser, "e92": e92, "gt3rs": gt3rs, "f82": f82, "gtr": gtr, "gtrte": gtrte, "bentayga": bentayga, "e60": e60, "r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "gc8": ("pleiad_gc8_model_cluster.png", (-12, -20, 1411, 484), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="087065", distUnit="km", kmh=True, trip="0.0", fuel=0.75)),
     "evo6": ("evo_vi_gsr_evo_ix_cluster_owner.png", (9, 48, 537, 257), None, dict(v=0.85, gear="N", mph=0, manual=True, clock="10:57", odo="048213", distUnit="km", kmh=True, trip="12.4", fuel=0.1)),
     "evo6c": ("ronin_cp9a_champ_model_cluster.png", (-7, 0, 1300, 536), None, dict(v=0.85, gear="N", mph=0, manual=True, clock="10:57", odo="012480", distUnit="km", kmh=True, trip="0.0", fuel=0.8)),
     "ae86": ("toyoka_ae86_model_cluster.png", (12, 17, 1048, 364), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="000000", distUnit="km", kmh=True, trip="0.0", fuel=1.0)),

@@ -208,7 +208,7 @@ local list: { CarSpec } = {
 	-- CZ4A: 2015 Lancer Evolution X Final Edition, 4B11T (303 hp, 1,560 kg)
 	{ Id = "ronin_cz4a", Name = "Ronin CZ4A Final", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.9, Handling = 0.84, Price = 50000, PriceSource = "collector", Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 25.5, Pending = true },
 	-- GC8 Wide: 1998 Impreza 22B STi (2-door wide body, EJ22T, 276 hp, 1,270 kg; 424 built)
-	{ Id = "pleiad_gc8", Name = "Pleiad GC8 Wide", Class = "Coupe", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.86, Price = 350000, PriceSource = "collector", Color = Color3.fromRGB(28, 50, 140), Order = 26.5, Pending = true },
+	{ Id = "pleiad_gc8", Name = "Pleiad GC8 Wide", Class = "Coupe", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.86, Price = 350000, PriceSource = "collector", Color = Color3.fromRGB(28, 50, 140), Order = 26.5 },
 	-- GDB: 2006 Impreza WRX STI, EJ257 (300 hp, 1,495 kg)
 	{ Id = "pleiad_gdb", Name = "Pleiad GDB", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 4.6, Handling = 0.84, Price = 27500, PriceSource = "used", Color = Color3.fromRGB(30, 56, 140), Order = 16.5, Pending = true },
 	-- ZC6: 2013 BRZ, FA20 (200 hp, 1,250 kg), rear drive

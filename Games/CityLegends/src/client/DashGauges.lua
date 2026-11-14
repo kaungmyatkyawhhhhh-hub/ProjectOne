@@ -3658,6 +3658,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	LiveEvo6 = function(gui)
 		return liveCluster(gui, "evo6")
 	end,
+	LiveGC8 = function(gui)
+		return liveCluster(gui, "gc8")
+	end,
 	LiveSovereign = function(gui)
 		return liveCluster(gui, "sovereign")
 	end,

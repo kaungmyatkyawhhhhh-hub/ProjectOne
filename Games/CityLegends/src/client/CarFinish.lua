@@ -58,6 +58,7 @@ CarFinish.CARS = {
 	toyoka_ae86 = true,
 	ronin_cp9a_champ = true,
 	ronin_cp9a = true,
+	pleiad_gc8 = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

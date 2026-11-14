@@ -1,0 +1,134 @@
+{
+ "src": "imports/importing cars/subaru/1998_subaru_impreza_22b_sti.glb",
+ "images": {
+  "0": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_badges.png"
+   }
+  ],
+  "1": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_ext.png"
+   },
+   {
+    "rect": [
+     256,
+     546,
+     344,
+     739
+    ]
+   },
+   {
+    "rect": [
+     412,
+     472,
+     543,
+     553
+    ]
+   },
+   {
+    "rect": [
+     92,
+     272,
+     188,
+     348
+    ]
+   },
+   {
+    "rect": [
+     787,
+     337,
+     903,
+     398
+    ]
+   },
+   {
+    "rect": [
+     890,
+     84,
+     941,
+     120
+    ]
+   },
+   {
+    "rect": [
+     78,
+     923,
+     202,
+     982
+    ]
+   },
+   {
+    "rect": [
+     583,
+     908,
+     687,
+     1023
+    ]
+   },
+   {
+    "solid": [
+     0,
+     0,
+     96,
+     56,
+     43,
+     43,
+     45
+    ]
+   }
+  ],
+  "3": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_misc.png"
+   }
+  ],
+  "6": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_cab.png"
+   }
+  ],
+  "9": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_wheel.png"
+   }
+  ],
+  "10": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_int.png"
+   }
+  ],
+  "12": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_trim.png"
+   }
+  ],
+  "20": [
+   {
+    "replace": "tools/logo_paint/pleiad_gc8_hub.png"
+   }
+  ]
+ },
+ "drop": [
+  "impreza_sti_22b:LOD_A_BODY_mm_badges",
+  "impreza_sti_22b:LOD_A_BOOT_mm_badges",
+  "impreza_sti_22b:LOD_A_BONNETCAM_BODY_mm_ext",
+  "impreza_sti_22b:LOD_A_BONNETCAM_BODY_mm_lights",
+  "impreza_sti_22b:LOD_A_BONNETCAM_BODY_mm_misc",
+  "impreza_sti_22b:LOD_A_BONNETCAM_HOOD_mm_chassis",
+  "impreza_sti_22b:LOD_A_BONNETCAM_HOOD_mm_ext",
+  "impreza_sti_22b:LOD_A_BONNETCAM_HOOD_mm_misc",
+  "impreza_sti_22b_int:LOD_A_INT_NEEDLE_RPM_mm_int",
+  "impreza_sti_22b_int:LOD_A_INT_NEEDLE_SPEED_mm_int"
+ ],
+ "drop_material": [],
+ "rename_material": {
+  "material": "gc8_ext",
+  "badges": "gc8_grid",
+  "material_9": "gc8_cab",
+  "material_21": "gc8_hub",
+  "glass_suu": "gc8_glassedge",
+  "light_glass": "gc8_lens",
+  "Emiss_light": "gc8_brakelamp"
+ }
+}

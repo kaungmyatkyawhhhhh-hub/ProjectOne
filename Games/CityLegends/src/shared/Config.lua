@@ -336,6 +336,7 @@ Config.Credits = {
 	"Apex AE86 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Ronin CP9A Champion model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Ronin CP9A model by Ddiaz Design (CC BY-NC-SA 4.0)",
+	"Pleiad GC8 Wide model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
@@ -3061,6 +3062,7 @@ Config.Doors = {
 	toyoka_ae86 = true, -- the model's own two doors and door mirrors (normal front-hinged doors, 2026-11-14)
 	toyoka_chaser = true, -- the model's own four doors (front L / R, rear L2 / R2) and door mirrors (front-hinged, 2026-11-14)
 	ronin_cp9a = false, -- doors built (ronin_cp9a@doors: four doors, door shuts built) but OFF (2026-11-14): the front shuts' lower flange shows as two body-colour wedges in the front footwells from the seats, doors shut. true puts them on
+	pleiad_gc8 = true, -- the model's own two doors and door mirrors; the body's own painted shuts, no jamb built (front-hinged, 2026-11-15)
 } :: { [string]: boolean }
 Config.DoorFeel = {
 	Seconds = 0.7, -- to open or close
