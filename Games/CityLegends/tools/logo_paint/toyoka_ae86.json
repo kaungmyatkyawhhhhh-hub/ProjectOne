@@ -1,0 +1,134 @@
+{
+ "src": "imports/importing cars/Toyota/1985_toyota_sprinter_trueno_ae86.glb",
+ "images": {
+  "0": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_cabin.png"
+   }
+  ],
+  "1": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_cabin_n1.png"
+   }
+  ],
+  "2": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_cabin_n2.png"
+   }
+  ],
+  "3": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_cabin_decals.png"
+   }
+  ],
+  "4": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_cabin_glow.png"
+   }
+  ],
+  "15": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_engine.png"
+   }
+  ],
+  "16": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_engine_n.png"
+   }
+  ],
+  "17": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_engine_decals.png"
+   }
+  ],
+  "18": [
+   {
+    "replace": "tools/logo_paint/toyoka_ae86_engine_decals_n.png"
+   }
+  ],
+  "19": [
+   {
+    "rect": [
+     22,
+     95,
+     60,
+     122
+    ]
+   }
+  ],
+  "20": [
+   {
+    "solid": [
+     22,
+     95,
+     60,
+     122,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "21": [
+   {
+    "ring": [
+     256,
+     256,
+     209,
+     251
+    ]
+   }
+  ],
+  "22": [
+   {
+    "ring": [
+     256,
+     256,
+     209,
+     251
+    ]
+   }
+  ],
+  "23": [
+   {
+    "ring": [
+     256,
+     256,
+     209,
+     249
+    ]
+   }
+  ],
+  "24": [
+   {
+    "solid": [
+     100,
+     20,
+     255,
+     175,
+     222,
+     222,
+     222
+    ]
+   }
+  ],
+  "25": [
+   {
+    "solid": [
+     0,
+     0,
+     255,
+     255,
+     128,
+     128,
+     255
+    ]
+   }
+  ]
+ },
+ "drop": [],
+ "drop_material": [],
+ "rename_material": {
+  "AE86MI_1163010001_002": "AE86MI_BodyPaint1"
+ }
+}

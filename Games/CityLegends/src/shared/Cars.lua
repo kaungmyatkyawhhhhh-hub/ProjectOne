@@ -199,7 +199,7 @@ local list: { CarSpec } = {
 	-- the JDM imports (owner, 2026-11-14, Prompts/New imports - JDM ...): real numbers and real US market prices (old
 	-- cars: used or collector value, 2026). Each is Pending until its model is in the game (then take Pending off).
 	-- AE86: 1985 Sprinter Trueno GT-APEX 3-door, 4A-GE 1.6 (128 hp, 940 kg)
-	{ Id = "toyoka_ae86", Name = "Apex AE86", Class = "Coupe", Tier = "Starter", TopSpeed = 118, ZeroToSixty = 8.5, Handling = 0.78, Price = 35000, PriceSource = "collector", Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 9.5, Pending = true },
+	{ Id = "toyoka_ae86", Name = "Apex AE86", Class = "Coupe", Tier = "Starter", TopSpeed = 118, ZeroToSixty = 8.5, Handling = 0.78, Price = 35000, PriceSource = "collector", Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 9.5 },
 	-- CP9A: 1999 Lancer Evolution VI GSR, 4G63T (276 hp, 1,360 kg); Champion: the 1999 rally champion's edition
 	{ Id = "ronin_cp9a", Name = "Ronin CP9A", Class = "Sedan", Tier = "Mid", TopSpeed = 150, ZeroToSixty = 4.4, Handling = 0.84, Price = 50000, PriceSource = "collector", Color = Color3.fromRGB(26, 60, 150), Order = 25.2, Pending = true },
 	{ Id = "ronin_cp9a_champ", Name = "Ronin CP9A Champion", Class = "Sedan", Tier = "Mid", TopSpeed = 150, ZeroToSixty = 4.3, Handling = 0.86, Price = 80000, PriceSource = "collector", Color = Color3.fromRGB(196, 18, 28), Order = 25.3, Pending = true },

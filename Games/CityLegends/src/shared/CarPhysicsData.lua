@@ -201,7 +201,7 @@ local Data: { [string]: Phys } = {
 	lambrini_countach = { front = 0.42, drive = "RWD", gears = 5, box = "manual", shift = 0.5, tyreF = 225, tyreR = 345, aspectF = 50, aspectR = 35, rimF = 15, rimR = 15, tyre = "sport", brakes = "steel", pistons = 4, caliper = "silver", lugs = 5, stop = 40, z60 = 4.9, top = 183, hp = 449, nm = 500, redline = 7.3, cg = 0.47, downforce = 0 },
 	-- Toyota Chaser Tourer V (JZX100, 2.5 1JZ-GTE turbo, 5-speed manual, JDM 180 km/h limit)
 	-- the JDM imports (2026-11-14). Toyota Sprinter Trueno GT-APEX 3-door (AE86, 4A-GE 1.6, 5-speed manual)
-	toyoka_ae86 = { front = 0.53, drive = "RWD", gears = 5, box = "manual", shift = 0.45, tyreF = 185, tyreR = 185, aspectF = 60, aspectR = 60, rimF = 14, rimR = 14, tyre = "touring", brakes = "steel", pistons = 1, caliper = "black", lugs = 4, stop = 44, z60 = 8.5, top = 118, hp = 128, nm = 149, redline = 7.6, cg = 0.5, downforce = 0 },
+	toyoka_ae86 = { front = 0.53, drive = "RWD", gears = 5, box = "manual", shift = 0.45, tyreF = 185, tyreR = 185, aspectF = 70, aspectR = 70, rimF = 13, rimR = 13, tyre = "touring", brakes = "steel", pistons = 1, caliper = "black", lugs = 4, stop = 44, z60 = 8.5, top = 118, hp = 128, nm = 149, redline = 7.6, cg = 0.5, downforce = 0 },
 	-- Mitsubishi Lancer Evolution VI GSR (CP9A, 4G63T, 5-speed manual, AYC)
 	ronin_cp9a = { front = 0.6, drive = "AWD", rear = 0.5, gears = 5, box = "manual", shift = 0.45, tyreF = 225, tyreR = 225, aspectF = 45, aspectR = 45, rimF = 17, rimR = 17, tyre = "sport", brakes = "steel", pistons = 4, caliper = "red", lugs = 5, stop = 37, z60 = 4.4, top = 150, hp = 276, nm = 373, redline = 7.5, cg = 0.5, downforce = 0 },
 	-- Lancer Evolution VI, the 1999 rally champion's edition (titanium turbine wheel, quicker spool)

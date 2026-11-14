@@ -1,0 +1,100 @@
+{
+ "id": "toyoka_ae86",
+ "roles": {
+  "^ae86mi_bodypaint1($|[.])": [
+   "Paint",
+   0.1,
+   0.0
+  ],
+  "^ae86mi_decals_paint1($|[.])": [
+   "Paint2",
+   0.1,
+   0.0
+  ],
+  "^ae86mi_rough_plastic1($|[.])": [
+   "Trim",
+   0.6,
+   0.0
+  ],
+  "^ae86mi_exhaust1($|[.])": [
+   "Chrome",
+   0.22,
+   0.85
+  ],
+  "^ae86mi_mirror1($|[.])": [
+   "Mirror",
+   0.06,
+   1.0
+  ],
+  "^ae86mi_grid_a1($|[.])": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "^ae86mi_light1($|[.])": [
+   "Lamp",
+   0.2,
+   0.4
+  ],
+  "^ae86mi_engine1($|[.])": [
+   "Engine",
+   0.5,
+   0.3
+  ],
+  "^ae86mi_engine_a1($|[.])": [
+   "BayLabel",
+   0.6,
+   0.0
+  ],
+  "^ae86mi_dashboard1($|[.])": [
+   "Screen",
+   0.4,
+   0.0
+  ],
+  "^ae86mi_cabin_leather_[a-d]1($|[.])": [
+   "Leather",
+   0.6,
+   0.0
+  ],
+  "^ae86mi_cabin_suede_a1($|[.])": [
+   "Suede",
+   0.85,
+   0.0
+  ],
+  "^ae86mi_cabin_cloth_a1($|[.])": [
+   "CabinCloth",
+   0.85,
+   0.0
+  ],
+  "^ae86mi_cabin1($|[.])": [
+   "Cabin",
+   0.6,
+   0.0
+  ],
+  "^ae86mi_cabin_a1($|[.])": [
+   "CabinLabel",
+   0.6,
+   0.0
+  ],
+  "^ae86mi_change_brake1($|[.])": [
+   "Brake",
+   0.35,
+   0.5
+  ],
+  "^ae86mi_thick_tire1($|[.])": [
+   "Tyre",
+   0.85,
+   0.0
+  ],
+  "^ae86mi_changea_rim1($|[.])": [
+   "Rim",
+   0.3,
+   0.75
+  ]
+ },
+ "cut_islands": [],
+ "cut_uv": [],
+ "thin": {
+  "Engine": 0.4
+ }
+}

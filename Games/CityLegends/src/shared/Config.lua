@@ -333,6 +333,7 @@ Config.Credits = {
 	"Bavarica Werkz E92 V8 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Apex JZX100 Tourer model by GT Cars: Hyperspeed (CC BY 4.0)",
 	"Apex JZA80 model by Ddiaz Design (CC BY-NC-SA 4.0)",
+	"Apex AE86 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
@@ -3055,6 +3056,7 @@ Config.Doors = {
 	lambrini_svj63 = true,
 	lambrini_lp700 = true,
 	lambrini_lp750 = true,
+	toyoka_ae86 = true, -- the model's own two doors and door mirrors (normal front-hinged doors, 2026-11-14)
 } :: { [string]: boolean }
 Config.DoorFeel = {
 	Seconds = 0.7, -- to open or close
