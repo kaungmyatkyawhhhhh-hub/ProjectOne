@@ -27,16 +27,17 @@ GROUPS = {
     "GLA": ("Glass", (46, 60, 76), 0.0, 0.12, False, True),        # office glass (dark blue-grey, opaque)
     "GLB": ("Glass", (40, 62, 86), 0.0, 0.18, False, True),        # tower B glass (bluer)
     "GLP": ("Glass", (52, 62, 70), 0.0, 0.08, True, True),         # podium ribbon glass (seen from inside too)
+    "GLL": ("Glass", (150, 146, 132), 0.0, 0.12, False, True),     # lobby glass with no interior behind (opaque, warm)
     "GLS": ("Glass", (176, 196, 204), 0.55, 0.05, True, False),     # see-through glass: shopfronts, entrances, skylight
     "SPA": ("Metal", (198, 170, 124), 0.0, 0.0, False, True),      # tower A spandrels (champagne)
     "SPB": ("Metal", (206, 208, 212), 0.0, 0.0, False, True),      # tower B spandrels (silver)
     "MUL": ("Metal", (84, 88, 94), 0.0, 0.0, False, True),         # dark mullions / frames
     "MUW": ("SmoothPlastic", (236, 234, 228), 0.0, 0.0, False, True),  # white frames, fascias, struts
-    "GRN": ("Granite", (176, 158, 134), 0.0, 0.0, False, True),     # podium granite
+    "GRN": ("Sandstone", (196, 178, 150), 0.0, 0.0, False, True),  # podium granite (Granite rendered near-black in game)
     "CRN": ("SmoothPlastic", (226, 214, 190), 0.0, 0.0, False, True),  # tower A crown (cream)
     "DRK": ("SmoothPlastic", (38, 40, 44), 0.0, 0.0, False, True),    # dark panels, skirts, reveals
     "CHR": ("SmoothPlastic", (58, 60, 64), 0.0, 0.0, False, True),    # charcoal screen wall
-    "PGR": ("Marble", (92, 40, 36), 0.0, 0.0, False, True),          # plinth maroon granite
+    "PGR": ("SmoothPlastic", (112, 46, 40), 0.0, 0.0, False, True),  # plinth maroon granite (Marble went black)
     "PBD": ("SmoothPlastic", (216, 206, 186), 0.0, 0.0, False, True),  # plinth cream band
     "ORG": ("SmoothPlastic", (246, 112, 30), 0.0, 0.0, False, True),   # orange letters
     "GLD": ("SmoothPlastic", (214, 186, 120), 0.0, 0.0, False, True),  # gold / cream small letters
@@ -53,16 +54,17 @@ GROUPS = {
     "STL": ("Metal", (160, 162, 166), 0.0, 0.0, False, True),       # steel
     "STP": ("DiamondPlate", (96, 98, 104), 0.0, 0.0, False, True),  # escalator steps
     "MAR": ("Marble", (205, 198, 185), 0.0, 0.0, False, False),     # mall floors (cream speckled granite tiles)
-    "CAR": ("Granite", (165, 120, 70), 0.0, 0.0, False, False),     # caramel floor border at the shop fronts
+    "CAR": ("SmoothPlastic", (165, 120, 70), 0.0, 0.0, False, False),  # caramel floor border at the shop fronts
     "GRD": ("Metal", (170, 150, 115), 0.0, 0.0, False, False),      # the atrium's beige-gold grid ceiling
     "CEL": ("SmoothPlastic", (240, 240, 236), 0.0, 0.0, False, False),  # ceilings, inner walls, partitions
-    "LIT": ("Neon", (255, 240, 214), 0.0, 0.0, False, False),       # light panels / strips
+    "LIT": ("Neon", (196, 182, 156), 0.0, 0.0, False, False),       # light panels / strips (toned down: full white bloomed in game)
     "SGN": ("SmoothPlastic", (30, 32, 36), 0.0, 0.0, False, True),   # shop sign bands
     "SH1": ("SmoothPlastic", (236, 206, 166), 0.0, 0.0, False, False),  # shop interiors (warm)
     "SH2": ("SmoothPlastic", (206, 218, 228), 0.0, 0.0, False, False),  # shop interiors (cool)
     "RED": ("SmoothPlastic", (196, 30, 36), 0.0, 0.0, False, True),  # red banners / boards
     "WAT": ("Glass", (64, 170, 210), 0.25, 0.1, False, False),      # pool water
-    "TER": ("ClayRoofTiles", (128, 70, 50), 0.0, 0.0, False, True),  # dark terracotta hip roofs (Sedona)
+    "EAV": ("SmoothPlastic", (88, 60, 46), 0.0, 0.0, False, True),  # dark brown eaves / fascias (Sedona)
+    "TER": ("SmoothPlastic", (134, 86, 66), 0.0, 0.0, False, True),  # terracotta hip roofs (ClayRoofTiles rendered black: the map's override)
     "SED": ("SmoothPlastic", (236, 236, 230), 0.0, 0.0, False, True),  # Sedona Garden Wing white walls
     "SEW": ("Glass", (88, 124, 110), 0.0, 0.1, False, True),        # Sedona green-tinted windows
     "CRT": ("SmoothPlastic", (56, 120, 92), 0.0, 0.0, False, False),  # tennis court

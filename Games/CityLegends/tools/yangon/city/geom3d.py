@@ -282,16 +282,17 @@ def _mul(a, k):
 
 
 def raster_boxes(shape, z0, z1, cell=4.0):
-    """Collision for a flat slab of any shape: row-merged axis boxes inside the shape -> [(cx, cy, z0, sx, sy, sz, 0)]."""
+    """Collision for a flat slab of any shape: axis boxes inside the shape (row runs, then runs with the same span in
+    consecutive rows merged) -> [(cx, cy, z0, sx, sy, sz, 0)]."""
     if shape.is_empty:
         return []
-    x0, y0, x1, y1 = shape.bounds
-    out = []
-    prep = shapely.prepared.prep(shape) if hasattr(shapely, "prepared") else None
     from shapely.prepared import prep as _prep
     pp = _prep(shape)
+    x0, y0, x1, y1 = shape.bounds
+    rows = []
     y = math.floor(y0 / cell) * cell
     while y < y1:
+        runs = []
         x = math.floor(x0 / cell) * cell
         run = None
         while x <= x1 + cell:
@@ -299,8 +300,23 @@ def raster_boxes(shape, z0, z1, cell=4.0):
             if inside and run is None:
                 run = x
             if (not inside or x > x1) and run is not None:
-                out.append(((run + x) / 2, y + cell / 2, z0, x - run, cell, z1 - z0, 0.0))
+                runs.append((run, x))
                 run = None
             x += cell
+        rows.append((y, runs))
         y += cell
+    out = []
+    open_ = {}  # (xa, xb) -> start y
+    prev_y = None
+    for y, runs in rows + [(None, [])]:
+        cur = set(runs)
+        for span in list(open_):
+            if span not in cur:
+                ys = open_.pop(span)
+                ye = prev_y + cell
+                out.append(((span[0] + span[1]) / 2, (ys + ye) / 2, z0, span[1] - span[0], ye - ys, z1 - z0, 0.0))
+        for span in cur:
+            if span not in open_:
+                open_[span] = y
+        prev_y = y
     return out

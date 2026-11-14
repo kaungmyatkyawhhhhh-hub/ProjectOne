@@ -172,7 +172,7 @@ def office_tower(poly, z0, nfl, spand, glass, mull_step, band_h=2.9, band_out=0.
         # the street storey: a lobby of see-through glass set 1.5 back, dark mullions, a band on top
         inner = offset_poly(poly, -1.5)
         g.ring("DRK", poly, SKIRT, 0.0)
-        g.ring("GLS", inner, 0.3, 12.5)
+        g.ring("GLL", inner, 0.3, 12.5)
         mullions(inner, 0.3, 12.5, 6.0, 0.5, 0.4, "MUL")
         g.ring("DRK", inner, 0.0, 0.3)
         g.ring("DRK", inner, 12.5, 14.0)
@@ -370,7 +370,7 @@ def corner_front():
     def up(pts, want_up):
         a_ = (pts[1][0] - pts[0][0]) * (pts[2][1] - pts[0][1]) - (pts[1][1] - pts[0][1]) * (pts[2][0] - pts[0][0])
         return pts if (a_ > 0) == want_up else pts[::-1]
-    g.poly3("LIT", up(P, False))
+    g.poly3("CEL", up(P, False))
     g.poly3("CHR", up(Pt, True))
     cc = ((front[0] + back[0]) / 2, (front[1] + back[1]) / 2)
     for i in range(4):
@@ -533,7 +533,7 @@ def melia():
     base = ccw([V(p) for p in LAY["melia_osm"][:-1]])
     inner = offset_poly(base, -2.5)
     g.ring("DRK", base, SKIRT, 0.0)
-    g.ring("GLS", inner, 0.3, 12.0)
+    g.ring("GLL", inner, 0.3, 12.0)
     mullions(inner, 0.3, 12.0, 7.0, 0.5, 0.35, "MUL")
     g.ring("MEL", inner, 12.0, 14.0)
     g.annulus("CEL", base, inner, 14.0, down=True)
@@ -615,7 +615,7 @@ def lake_suites():
     base = offset_poly(E, 6.0)
     g.ring("DRK", base, SKIRT, 0.0)
     inner = offset_poly(base, -2.0)
-    g.ring("GLS", inner, 0.3, 12.0)
+    g.ring("GLL", inner, 0.3, 12.0)
     mullions(inner, 0.3, 12.0, 7.0, 0.5, 0.35, "MUL")
     g.ring("RES", inner, 12.0, 14.0)
     g.annulus("CEL", base, inner, 14.0, down=True)
@@ -651,7 +651,7 @@ def lake_suites():
 def whiteroof():
     W = ccw([V(p) for p in LAY["whiteroof"]])
     g.ring("DRK", W, SKIRT, 0.0)
-    g.ring("GLS", offset_poly(W, -2.0), 0.3, 12.0)
+    g.ring("GLL", offset_poly(W, -2.0), 0.3, 12.0)
     g.annulus("CEL", W, offset_poly(W, -2.0), 14.0, down=True)
     g.ring("GRN", W, 14.0, 66.0)
     for z in (14.0, 27.0, 40.0, 53.0):

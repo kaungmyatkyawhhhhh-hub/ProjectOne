@@ -81,7 +81,7 @@ def mrr(shape):
     return ccw(list(r.exterior.coords)[:-1])
 
 
-def hip_roof(rect, z, pitch, overhang, roof_grp="TER", fascia_grp="DRK", peak=None):
+def hip_roof(rect, z, pitch, overhang, roof_grp="TER", fascia_grp="EAV", peak=None):
     """A hip roof on a rectangle (4 CCW points) with eaves `overhang` out, slope rise/run = pitch."""
     R = offset_poly(rect, overhang)
     L01, L12 = math.dist(R[0], R[1]), math.dist(R[1], R[2])
@@ -112,7 +112,7 @@ def ribbon_wing(poly, z0, nfl, ground=True):
     if ground:
         inner = offset_poly(poly, -1.5)
         g.ring("DRK", poly, SKIRT, 0.0)
-        g.ring("GLS", inner, 0.3, 11.0)
+        g.ring("GLL", inner, 0.3, 11.0)
         fins(inner, 0.3, 11.0, 6.0, 0.5, 0.4, "MUL")
         g.ring("SED", inner, 11.0, 12.0)
         g.annulus("CEL", poly, inner, 12.0, down=True)
@@ -166,7 +166,7 @@ def build():
     bow_c = (wx, cyj)
     arc = [(bow_c[0] + 7.0 * math.cos(a), bow_c[1] + 7.0 * math.sin(a)) for a in [math.pi / 2 + k * math.pi / 8 for k in range(9)]]
     for i in range(8):
-        g.wall("GLS", arc[i], arc[i + 1], topJ - 18.0, topJ - 1.0)
+        g.wall("GLL", arc[i], arc[i + 1], topJ - 18.0, topJ - 1.0)
         g.tube("MUW", (arc[i][0], arc[i][1], topJ - 18.0), (arc[i][0], arc[i][1], topJ - 1.0), 0.3)
     g.cap("SED", arc + [arc[0]][:0], topJ - 1.0)
     g.cap("SED", arc, topJ - 18.0, down=True)
@@ -192,7 +192,7 @@ def build():
     for poly in (sw, md, ne):
         inner = offset_poly(poly, -1.5)
         g.ring("DRK", poly, SKIRT, 0.0)
-        g.ring("GLS", inner, 0.3, 12.0)
+        g.ring("GLL", inner, 0.3, 12.0)
         fins(inner, 0.3, 12.0, 6.0, 0.5, 0.4, "MUL")
         g.annulus("CEL", poly, inner, 12.0, down=True)
         coll_poly(poly, 0.0, 40.0)
@@ -287,7 +287,7 @@ def build():
     zd = 12.0 + 2 * FLOOR
     g.ring("DRK", dp, SKIRT, 0.0)
     inner = offset_poly(dp, -1.5)
-    g.ring("GLS", inner, 0.3, 11.0)
+    g.ring("GLL", inner, 0.3, 11.0)
     g.annulus("CEL", dp, inner, 12.0, down=True)
     g.ring("SED", inner, 11.0, 12.0)
     g.ring("SEW", offset_poly(dp, -0.4), 12.0, zd)
