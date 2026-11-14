@@ -1,0 +1,5 @@
+chaser_jzx100_cluster_owner_level.png: the owner's photo chaser_jzx100_cluster_owner.webp (1280 x 853, 2026-11-14) stretched
+to 1280 x 907 (height / 0.94, PIL LANCZOS), nothing else changed. The camera looks down on the cluster, so the dials are
+squashed upright in the photo; with the stretch the tick ends of both dials fit circles (b/a 0.993 speedometer, 1.010 rev
+counter). Made 2026-11-14 for the live cluster redraw (tools/lambo/pending_clusters/cluster_chaser.py) as its coordinate
+space and preview photo.

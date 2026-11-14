@@ -151,3 +151,116 @@ ratio 2.71, bg 1384 x 512). On the converted model measure, as for the R8s / E92
 - F82: merged on 2026-11-12 into `tools/lambo/cluster_imports.py` / `cluster_live.py` with the model's measured `box = (-38, 7, 659, 271)` and `bg_scale 1.93` (`PREVIEW` boxes `(0, 7, 627, 271)`); live on `bnw_m4_f82` as `LiveF82`. The E92 and the GT3 RS are still pending.
 - GT3 RS: merged on 2026-11-13 into `tools/lambo/cluster_imports.py` / `cluster_live.py` with the model's measured `box = (287, 397, 1732, 940)` and `bg_scale 0.94` (`PREVIEW` box the same; window `tools/lambo/window_gt3rs.png`, so the Lua has `clear = true`); live on `porsha_gt3` as `LiveGT3RS`. Only the E92 is still pending.
 - E92: merged on 2026-11-13 into `tools/lambo/cluster_imports.py` / `cluster_live.py` as it was, box `(138, 316, 1754, 988)`, `bg_scale 0.76` (window `tools/lambo/window_e92.png`, so the Lua has `clear = true`); live on `bnw_m3_e92` as `LiveE92`. `CLUSTER_RECT` `at`: the prep's `(0.0056, 0.0310, -0.2649)` for the model's own steering wheel; `(0.0055, 0.0324, -0.2623)` with the E60 wheel the car wears (the same place in the car). Nothing is pending now; this folder can go when the owner says so.
+
+## JDM clusters (2026-11-14)
+
+Offline job (no Studio, nothing in `src/` or the real `tools/lambo/*.py` changed). Nine builders for the ten new JDM cars,
+drawn in the style of the three above (Spec, blocks / shows / readouts / needles / gear sprites, photo-pixel coordinates,
+the signature `(Spec, needle_sprite, add_needle, glyph, solid_gear)`). Each `cluster_<name>.py` also has a module-level
+`PREVIEW_INFO` (game name, photo, standing / driving states) that `run.py` reads, so `run.py <name> [overlay|assets|lua]`
+works for every new name without editing run.py; previews are written straight to `City Legends/`.
+Checked like the earlier ones: each function pasted into scratch copies of today's `cluster_imports.py` /
+`cluster_live.py` with the wrapper, the BUILDERS key and the PREVIEW line below, then `cluster_live.py <out> preview <name>`
+and `cluster_live.py <out> lua` (the Lua got a block for each).
+
+| builder (Spec name) | car id | game name | photo (`imports/refs/`) | photo box | A | bg_scale -> bg | style | preview JPG (`City Legends/`) |
+|---|---|---|---|---|---|---|---|---|
+| `supra` | `toyoka_supra_mk4` | Apex JZA80 | `supra_mk4_cluster_owner_photo5.webp` (owner) | `(6, 318, 1150, 772)` | 1.1 | 1.12 -> 1281 x 508 | `LiveSupra` | `Apex JZA80 cluster - photo and redraw.jpg` |
+| `chaser` | `toyoka_chaser` | Apex JZX100 Tourer | `chaser_jzx100_cluster_owner_level.png` (the owner's `chaser_jzx100_cluster_owner.webp` stretched height / 0.94 to level it) | `(-4, 232, 1284, 612)` | 1.3 | 1.34 -> 1726 x 509 | `LiveChaser` | `Apex JZX100 Tourer cluster - photo and redraw.jpg` |
+| `evo6` | `ronin_cp9a` AND `ronin_ct9a` (one drawing) | Ronin CP9A, Ronin CT9A | `evo_vi_gsr_evo_ix_cluster_owner.png` (owner) | `(0, 42, 512, 252)` | 3.0 | 2.4 -> 1229 x 504 | `LiveEvo6` (both cars) | `Ronin CP9A and CT9A cluster - photo and redraw.jpg` |
+| `evox` | `ronin_cz4a` | Ronin CZ4A Final | `evo_x_cluster_owner.webp` (owner) | `(60, 240, 1880, 1060)` | 0.7 | 0.62 -> 1128 x 508 | `LiveEvoX` | `Ronin CZ4A Final cluster - photo and redraw.jpg` |
+| `brz` | `pleiad_zc6` | Pleiad ZC6 | `brz_cluster_owner.png` (owner) | `(2, 20, 598, 282)` | 2.5 | 1.95 -> 1162 x 511 | `LiveBRZ` | `Pleiad ZC6 cluster - photo and redraw.jpg` |
+| `gdb` | `pleiad_gdb` | Pleiad GDB | `impreza_gdb_sti_cluster_owner_level.png` (the owner's photo made straight on, see its .txt) | `(120, 480, 2050, 1330)` | 0.8 | 0.6 -> 1158 x 510 | `LiveGDB` | `Pleiad GDB cluster - photo and redraw.jpg` |
+| `ae86` | `toyoka_ae86` | Apex AE86 | `toyoka_ae86_model_cluster.png` (the model's own picture) | `(0, 0, 1029, 364)` (whole picture) | 1.4 | 1.4 -> 1441 x 510 | `LiveAE86` | `Apex AE86 cluster - photo and redraw.jpg` |
+| `evo6c` | `ronin_cp9a_champ` | Ronin CP9A Champion | `ronin_cp9a_champ_model_cluster.png` (the model's own picture) | `(0, 0, 1278, 557)` (whole picture) | 1.0 | 0.919 -> 1174 x 512 | `LiveEvo6c` | `Ronin CP9A Champion cluster - photo and redraw.jpg` |
+| `gc8` | `pleiad_gc8` | Pleiad GC8 Wide | `pleiad_gc8_model_cluster.png` (the model's own picture) | `(0, 0, 1414, 484)` (whole picture) | 1.05 | 1.05 -> 1485 x 508 | `LiveGC8` | `Pleiad GC8 Wide cluster - photo and redraw.jpg` |
+
+No window picture: none of the nine is cut to a hood opening (no `window_<name>.png`, no `clear = true` in the Lua).
+`CarSkin.CLUSTER_STYLE` per id: `toyoka_supra_mk4 = "LiveSupra"`, `toyoka_chaser = "LiveChaser"`, `ronin_cp9a = "LiveEvo6"`,
+`ronin_ct9a = "LiveEvo6"`, `ronin_cz4a = "LiveEvoX"`, `pleiad_zc6 = "LiveBRZ"`, `pleiad_gdb = "LiveGDB"`,
+`toyoka_ae86 = "LiveAE86"`, `ronin_cp9a_champ = "LiveEvo6c"`, `pleiad_gc8 = "LiveGC8"`.
+
+**Every photo box above is a guess** (the models were being prepped at the same time; the three model-picture ones just
+take the whole picture). None is final until each model's prep gives its `CLUSTER_RECT`: then redo step 5.
+
+`PREVIEW` lines for `cluster_live.py` (the first state of each `PREVIEW_INFO`; photos are read from `imports/refs/`):
+
+```python
+    "supra": ("supra_mk4_cluster_owner_photo5.webp", (6, 318, 1150, 772), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="129355", distUnit="km", kmh=True, trip="304.9", fuel=0.12)),
+    "chaser": ("chaser_jzx100_cluster_owner_level.png", (-4, 232, 1284, 612), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="025192", distUnit="km", kmh=True, trip="0.0", fuel=0.0)),
+    "evo6": ("evo_vi_gsr_evo_ix_cluster_owner.png", (0, 42, 512, 252), None, dict(v=0.85, gear="N", mph=0, manual=True, clock="10:57", odo="048213", distUnit="km", kmh=True, trip="12.4", fuel=0.1)),
+    "evox": ("evo_x_cluster_owner.webp", (60, 240, 1880, 1060), None, dict(v=0.75, gear="N", mph=0, manual=False, clock="10:57", odo="031106", distUnit="km", kmh=True, trip="111.5", fuel=0.59)),
+    "brz": ("brz_cluster_owner.png", (2, 20, 598, 282), None, dict(v=0.0, gear="N", mph=0, manual=True, clock="10:57", odo="012345", distUnit="mi", kmh=False, trip="12.4", fuel=0.0)),
+    "gdb": ("impreza_gdb_sti_cluster_owner_level.png", (120, 480, 2050, 1330), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="217892", distUnit="mi", kmh=False, trip="241.1", fuel=0.5)),
+    "ae86": ("toyoka_ae86_model_cluster.png", (0, 0, 1029, 364), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="000000", distUnit="km", kmh=True, trip="0.0", fuel=1.0)),
+    "evo6c": ("ronin_cp9a_champ_model_cluster.png", (0, 0, 1278, 557), None, dict(v=0.85, gear="N", mph=0, manual=True, clock="10:57", odo="012480", distUnit="km", kmh=True, trip="0.0", fuel=0.8)),
+    "gc8": ("pleiad_gc8_model_cluster.png", (0, 0, 1414, 484), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="087065", distUnit="km", kmh=True, trip="0.0", fuel=0.75)),
+```
+
+Upload pictures already made: `assets/<name>/` (`<name>_bg_1`, `_bg_2`, `_sheet_1` (`_sheet_2` where there is one);
+every picture <= 1024 x 512).
+
+### Steps (as 1-3 above, with these differences)
+1. Paste each function (from `def <name>(` to the end of `cluster_<name>.py`) at the end of `tools/lambo/cluster_imports.py`.
+   They need only that file's imports; anything else is imported inside the function (`ImageChops`, `ImageFont`).
+   Some use Windows' Bahnschrift (`C:/Windows/Fonts/bahnschrift.ttf`, a variable font: the weight is set on the cached
+   `font()` object with `set_variation_by_name` right before each use; only these builders use that file).
+2. In `cluster_live.py`: a wrapper per name like `e92()` above, the BUILDERS keys and the PREVIEW lines from the table.
+3. `cluster_live.py <out> assets <name>`, upload, ids into `cluster_ids.json` as `<name>_bg_1` ..., `cluster_live.py <out> lua`.
+4. DashGauges STYLES: `Live<Name> = function(gui) return liveCluster(gui, "<name>") end` for each style in the table;
+   `CarSkin.CLUSTER_STYLE` per car id as in the table, plus each car's `CLUSTER_RECT` from its prep.
+5. **The boxes are guesses** (the models were being prepped at the same time): on each converted model, lay the box on the
+   photo so the photo's dial centres sit on the model's (same w / h as `CLUSTER_RECT`), then set `bg_scale` so that
+   `H * bg_scale <= 512` (section 4 above). Dial centres in photo pixels are in each function's first lines.
+6. `ronin_cp9a` and `ronin_ct9a` share `evo6` (one drawing, the owner's photo shows the cluster both cars use). If their
+   two models' openings differ in ratio, copy the function as `evo6b` with the second box (one Spec has one box).
+7. Every live cluster's rev needle stands a little high at idle (`liveCluster`: idle + share x (redline - idle), the
+   car 6 note): shared code, not these builders. The previews' standing state uses `v = sp.idle` (what `liveCluster`
+   shows at a share of 0).
+
+### What is live, what is drawn still
+Gear sprites and glyph readouts are the game's (P standing = the game's N). Every builder has live rev, speed and fuel
+needles; the water needle is drawn still at running heat on every one (the game has no engine temperature); turn arrows
+are drawn dark / dim (no indicator state for a cluster).
+
+| builder | live | drawn still (why) |
+|---|---|---|
+| supra | rev needle, speed needle (km/h), fuel needle; odometer (the car's miles in the player's unit); trip | boost needle at idle (no boost in the game); water needle (the photo's engine is cold); turn arrows |
+| chaser | rev needle, speed needle (km/h), fuel needle; odometer in the ODO window (no leading zeros, as the photo); lit gear letter (P for the game's N, R, any forward gear lights D; 3 / 2 / L stay dim) | water needle |
+| evo6 (cp9a + ct9a) | rev needle, speed needle (km/h), fuel needle; odometer in the photo's blank LCD (dark segment digits); belt lamp (lit standing) | water needle; turn arrows (dim teal) |
+| evox | rev needle, speed needle (km/h), fuel needle; gear (big; P standing = N, R, the number); shift mode text (NORMAL with the automatic box, SPORT with the manual one); trip (TRIP A) and ODO, in the player's unit | drive mode "TARMAC"; outside temperature (28 C / 82 F by unit: the game has none); the water and fuel bars (drawn at the photo's levels: a vertical bar can't follow a value); the amber brake lamp (lit standing, as the photo) and the dark red lamp over it |
+| brz | rev needle, speed needle (mph as printed), fuel needle; digital speed + unit in the right screen; odometer + unit in the low screen | water needle; all warning lights dark |
+| gdb | rev needle, speed needle (mph as printed), fuel needle; trip (A) and odometer in the red window (segment digits); seat-belt light (standing); OUT TEMP unit | water needle; the OUT TEMP value (46 F / 8 C by unit: no weather temperature in the game); the DCCD panel ("AUTO" lit as on the photo, LOCK / triangle boxes unlit); the stalk labels and the warning-light row (dark) |
+| ae86 | rev needle, speed needle (km/h), fuel needle; odometer; trip | the oil-pressure and water-temperature needles (the game has neither); teal turn arrows; the model's own printed needles are painted out |
+| evo6c | rev needle, speed needle (km/h), fuel needle; odometer in the LCD | water needle; the inner mph ring; teal turn arrows; the empty warning-light window |
+| gc8 | rev needle, speed needle (km/h), fuel needle; odometer in its window | water needle; the warning-light panel in the rev counter (door, BRAKE, ABS, oil, belt, battery: dark as on the model); the maker's logo spot, left blank |
+
+### Doubts / choices to confirm
+- **brz**: the owner's photo has two dark, unlit screens. A digital speed + unit (right screen) and the odometer + unit
+  (low screen) are drawn into them, as the real car's screens would show (the owner asked for speed in the player's
+  units). To leave them blank like the photo, remove the `spd` / `unit` / `odo` / `du` readouts of `brz`.
+  The speedometer scale is mph (0-160), as printed.
+- **evo6**: the odometer is live in the photo's blank LCD window (the real window shows dark segment digits); the
+  belt lamp is lit standing (as in the E92 / R8 builders), though the photo shows it dark. The photo is small (512 x 210
+  in the box), so everything is drawn fresh at 2-3 picture pixels a photo pixel. The same drawing serves both cars; copy
+  it as `evo6b` if their two openings differ in ratio (step 6).
+- **evox**: the gear and the shift mode are live (NORMAL with the automatic gearbox, SPORT with the manual one); the
+  photo only shows "NORMAL". "TARMAC", the outside temperature and the two bars are drawn still.
+- **gdb**: the photo is angled and sunlit; `impreza_gdb_sti_cluster_owner_level.png` is a straight-on copy (turn,
+  stretch, side pods widened; see its .txt). Some angle is left, so the speedo's left half is compressed in the photo;
+  the redraw keeps the linear scale. OUT TEMP shows a fixed value; DCCD stays "AUTO".
+- **supra / evox / gdb**: the photos look down on deep dials, so each face sits off its chrome ring there. They are
+  drawn straight on, face and ring on one centre, so a photo-versus-redraw overlay is a few px off by design.
+- **chaser**: the camera squashes the photo upright, so the redraw uses the stretched, levelled copy. The fuel needle's
+  pivot is left of the picture (x = -8): `run.py`'s preview was extended to draw such sprites; `cluster_live.compose`
+  clamps them to 0 in its own preview (the game doesn't), so the real `cluster_live.py` preview of `chaser` may show
+  that needle cut. Check in the game.
+- **ae86 / evo6c / gc8**: made from the models' own pictures, not owner photos (the prompt allowed it); the model's design
+  is kept, drawn fresh and sharp. The boxes are the whole picture (not measured at all). The faces' lower parts are
+  hidden by the hood (ae86) or cut where the mesh ends (gc8). evo6c's plate is the model's own picture with its markings
+  painted out; the model's printed needles are not drawn (ae86, evo6c, gc8).
+- **speed scale units**: needles are printed as the photos: km/h for supra, chaser, evo6, evox, ae86, evo6c, gc8;
+  mph for brz and gdb. The player's unit setting changes only the digital readouts and the odometer / trip unit.
+- **supra** uses Windows' Bahnschrift (SemiBold) for its numbers; other builders may too (see step 1).
+- Logos left out everywhere: "DIDO TUNING" (supra), "TRD" and "TRD Sportivo" (chaser), "ABEL | ART" (evo6, outside the
+  box), "REV LIMITER" (brz), "STI" (gdb), the gc8 rev-counter logo, all maker marks.

@@ -1,0 +1,11 @@
+pleiad_gc8_model_cluster.png (1414 x 484), 2026-11-14: the Pleiad GC8 Wide's own cluster, the reference for the live
+redraw tools/lambo/pending_clusters/cluster_gc8.py.
+Source: Games/CityLegends/imports/importing cars/subaru/1998_subaru_impreza_22b_sti.glb, image 10 (1024 x 1024, the
+baseColor of material "int1"). Its lower half holds the dials twice: on the left white faces with grey numbers (day),
+on the right grey faces with pale green lit numbers; the model's dial faces (node 168, LOD_A_INT_LED_EMISSIVE, 198
+triangles) wear only the RIGHT (lit) half, texture pixels about x 512..1024, y 512..1024, stored upside down. Made in
+pure Python (scratch unwrap.py, UV box 0.5..1 x 0.5..1): laid onto the faces' best-fit plane (normal 0, 0.302, -0.953),
+seen from the driver's side, up = the .glb's +Y, 500 px per .glb unit/1000 (about 1.1 picture pixels a texture pixel).
+Upright, not mirrored, except the small odometer window, whose digits are drawn mirrored in the texture. The faces'
+bottoms are cut where the model's mesh ends. The maker's logo printed in the rev counter is in this picture; the
+redraw leaves it out. No needles in the picture (the model's needle parts are nodes 172 / 174).

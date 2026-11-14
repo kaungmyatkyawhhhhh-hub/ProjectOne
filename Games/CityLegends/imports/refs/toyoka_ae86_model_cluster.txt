@@ -1,0 +1,9 @@
+toyoka_ae86_model_cluster.png (1029 x 364), 2026-11-14: the Apex AE86's own cluster, the reference for the live redraw
+tools/lambo/pending_clusters/cluster_ae86.py.
+Source: Games/CityLegends/imports/importing cars/Toyota/1985_toyota_sprinter_trueno_ae86.glb, image 5 (512 x 512, the
+baseColor of material "AE86MI_Dashboard1"; stored upside down in the file), worn by node 49 (the cluster faces, 118
+triangles). Made in pure Python (scratch unwrap.py): every triangle of that material laid onto the faces' best-fit plane
+(normal 0, 0.615, -0.788 in the .glb's frame), seen from the driver's side, up = the .glb's +Y, the picture copied
+triangle by triangle (farther faces first), 300 px per .glb unit/1000 (about 1.1 picture pixel a texture pixel), then
+cropped to x 760..1789 of the 1789 px wide unwrap (the plate's left part is plain black). Upright, not mirrored (the
+numbers read normally). The model's printed needles (cream) are in this picture; the redraw leaves them out.

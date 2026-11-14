@@ -48,3 +48,10 @@ Photos from Wikimedia Commons (licence in brackets), frames from YouTube videos 
 - `f82_m4_cluster_owner.png` (627 x 279): F8x M4 cluster, lit, READY, gear D, 0 km/h, date 02.05.14, odometer 03230, range 525.3; for the F82 (`bnw_m4_f82`).
 - `gt3rs_9912_cluster_owner.png` (1920 x 1280): 991.2 GT3 RS cluster, lit, 0 km/h, odometer 14848, trip 182.3, clock 09:58 on the right screen with the car picture; for the Stuttgart 991.2 Track (`porsha_gt3`).
 - F90 (`bnw_m5_f90`): no photo; owner: it gets the same cluster as the G20 Sport (`bnw_330i_g20`, `g20()` in `tools/lambo/cluster_imports.py`).
+
+## JDM clusters, 2026-11-14 (made for the live redraws in `tools/lambo/pending_clusters/`; each has a `.txt` saying how)
+- `chaser_jzx100_cluster_owner_level.png`: the owner's Chaser photo (`chaser_jzx100_cluster_owner.webp`) stretched height / 0.94 so the dials are round; coordinate space of `cluster_chaser.py` (`toyoka_chaser`).
+- `impreza_gdb_sti_cluster_owner_level.png`: the owner's 2006 GD photo turned into a straight-on view (affine + side pods widened); coordinate space of `cluster_gdb.py` (`pleiad_gdb`).
+- `toyoka_ae86_model_cluster.png`: the AE86 model's own dashboard picture laid on its cluster plane, upright; reference of `cluster_ae86.py` (`toyoka_ae86`).
+- `ronin_cp9a_champ_model_cluster.png`: the Evo VI Tommi Makinen model's own cluster plate (interior picture laid on the plate), upright; reference of `cluster_evo6c.py` (`ronin_cp9a_champ`).
+- `pleiad_gc8_model_cluster.png`: the 22B model's lit dial faces (right half of its dial picture), upright; reference of `cluster_gc8.py` (`pleiad_gc8`).

@@ -1,0 +1,10 @@
+impreza_gdb_sti_cluster_owner_level.png (2100 x 1500): the owner's photo impreza_gdb_sti_cluster_owner.png (2006 GD cluster,
+2026-11-14, taken from above at an angle in sunlight) turned into a straight-on view, as the coordinate space of the Pleiad GDB
+live cluster (tools/lambo/pending_clusters/cluster_gdb.py). Made 2026-11-14 in pure numpy (inverse mapping, bilinear):
+1. a homography (here affine) about the rev counter ring's middle (1041, 830) of the photo: turned 1.2 degrees so the side
+   dials' middles are level, then stretched 1.049x vertically so the rev counter ring (686 x 654 in the photo) is round:
+   H = [[0.99978, -0.02094, 17.61052], [0.02197, 1.04877, -63.34836], [0, 0, 1]];
+2. each side pod widened from its joint with the rev counter (they are angled toward the driver): x < 700 by 1.077 leftwards,
+   x > 1360 by 1.058 rightwards; 3. shifted 60 px right on a 2100 px canvas.
+Not cleaned: glare, dust and the "STI" print are still in this picture (the redraw leaves them out). The deep rings make each
+face sit a little off its ring here (seen from above); the redraw centres them.
