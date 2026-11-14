@@ -65,6 +65,41 @@
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
+## Exhaust sounds for the 10 JDM imports (2026-11-14, `Prompts/New imports - JDM (Evos, Imprezas, BRZ, AE86, Supra, Chaser).md`)
+Same system and method as the two exhaust jobs before. Each of the 10 cars now has a set for its real engine. **Not heard by ear: owner to listen.** Edit mode only (Play never started), in Studio, not published. The 8 new cars are still Pending (no model yet), so nobody can drive them until their models are in; the JZA80 and JZX100 Tourer play their new sets now (on their old models).
+
+| Game car | Real engine | Sound set (rpm measured) | New or reused | True match? |
+|---|---|---|---|---|
+| Apex JZA80 (`toyoka_supra_mk4`) | 3.0 straight-six, no turbo (2JZ-GE) | Supra MK4 start-up, Supra idle 1,043, 2JZ loops 5,149 / 6,275; no turbo, no pops | new: `I6_2JZ` | **partly**: the 2JZ loops in the store are mostly of the turbo 2JZ (same engine block, same firing). **The 2,712 loop is a 1JZ's (stand-in)**: no clean 2JZ loop there. The idle is named "TRD Supra" (a straight-six, but it may be the newer Supra) |
+| Apex JZX100 Tourer (`toyoka_chaser`) | 2.5 turbo straight-six (1JZ-GTE) | 1JZ start-up, 1JZ idle ~1,360, 1JZ loop 2,712, JZX90 loops 5,196 / 6,506 (the Chaser before it, same engine); turbo whistle, blow-off when you lift | new: `I6_1JZ` | true |
+| Apex AE86 (`toyoka_ae86`) | 1.6 four, no turbo (4A-GE) | AE86 start-up, one 4A-G's idle 831 and loops 3,529 / 6,117 / 8,330; a bit raspy, no pops | new: `I4_4AGE` | true engine; that 4A-G has carburettors (FCR), so a little rawer than a stock AE86 |
+| Ronin CP9A (`ronin_cp9a`) | 2.0 turbo four (4G63T) | Evo 6 start-up, 4G63 idle 1,251, 4G63 loop 4,000, Evo loop 6,130, 4G63 limiter loop ~7,685; turbo whine, chattering blow-off; no pops | new: `I4_4G63` | true |
+| Ronin CP9A Champion (`ronin_cp9a_champ`) | 4G63T | the CP9A set, 20% louder, rawer, **rally bangs and crackles when you lift and on upshifts** (a rally car's anti-lag clip) | reused `I4_4G63` + `RALLY` | true |
+| Ronin CT9A (`ronin_ct9a`) | 4G63T MIVEC | the CP9A set, a bit sharper, with an Evo IX start-up and a fluttering blow-off | reused `I4_4G63` + `CT9A` | true |
+| Ronin CZ4A Final (`ronin_cz4a`) | 2.0 turbo four (4B11T) | an Evo X start-up and a soft flutter; **the loops are the 4G63 set made deeper and smoother (stand-in)** | reused `I4_4G63` + `CZ4A` | **stand-in for the loops**: no clean 4B11 loops in the store (the "Evo X" clips there start in silence and come from an uploader of game rips). Start-up is a real Evo X |
+| Pleiad GC8 Wide (`pleiad_gc8`) | 2.2 turbo flat-4 (EJ22) | 22B start-up, GC8 idle 990 (the lumpy boxer idle), EJ22 loop 3,432, 22B loop 5,584, STI loop 7,439, GC8 limiter loop ~6,950; turbo spool, 22B blow-off, **rally bangs when you lift**; louder | new: `B4_EJ` + `RALLY` | true (EJ family: 22B, GC8, STI recordings) |
+| Pleiad GDB (`pleiad_gdb`) | 2.5 turbo flat-4 (EJ257) | the same EJ set (22B start-up), with a Subaru turbo flutter; no pops | reused `B4_EJ` + `GDB` | EJ family; the loops are EJ22 / EJ20 / STI recordings, not all a 2.5 |
+| Pleiad ZC6 (`pleiad_zc6`) | 2.0 flat-4, no turbo (FA20) | FA20 start-up, 86 idle 1,351, FA20 loop 5,543; no pops | new: `B4_FA20` | true; **only one clean rev loop**: nothing recorded between idle and 5,543 rpm |
+
+- **Checked by numbers, in Edit (no ears here):**
+  - Every id is public Creator Store audio, found through the store's own search; all 39 ids these 10 cars use load in this place (Studio, Edit).
+  - Each loop's engine speed measured from its sound and its firing pattern checked (straight-six: 3rd order, the 1JZ with its 1.5 / 4.5; fours: 2nd; the EJ boxer: strong half orders round the 2nd = the burble; the FA20: even orders only). The method was checked on clips that state their rpm (2JZ, 1JZ, 4A-GE, FA20 and EJ25 rpm sets): right to 1.5% above ~3,000 rpm; below that the old method read 2 to 4 times too high, so low clips were read from their firing note instead (right to 1%).
+  - The "2 times" test on every rev loop: none is really at half its speed.
+  - Loudness levelled to the same targets as before; loop points checked for clicks; start-ups timed (when they catch, the rpm they end at).
+  - Hand-over between loops worked out for every rpm from idle to the limit: no loop heard more than 3% off its note for any of the 10.
+  - Lune tests pass, type check clean (only the old CameraLook / WorldFx / YangonStreetLife errors).
+- **Not checked:** the sound by ear; nothing played in the game (no start-up, drive, limiter, second player, phone). The cars have no models yet.
+- **Weak spots (honest):**
+  - **CZ4A:** 4G63 loops, not a 4B11 (see table).
+  - **JZA80:** turbo-2JZ loops on the non-turbo car (no whine added), one 1JZ loop in the middle; no limiter loop (the revs still bounce at the limit, the bands follow them).
+  - **ZC6:** one rev loop only; around 2,500-3,000 rpm the idle is played fast and the loop slow (may sound thin). The idle is a "86" recording (the BRZ's twin).
+  - **AE86, Chaser, ZC6, JZA80:** no limiter loop (no clean one in the store). **GC8:** its limiter loop is ~6,950, played at most 10% higher (its limit is 7,900): 3% flat.
+  - **Chaser:** the 1JZ idle wanders a little (±3%); the 5,196 / 6,506 loops are short (1.0 / 1.7 s).
+  - The start-ups are 2 to 6 s; touching the throttle cuts them short.
+- **Left out:** rpm sets that look cut from a racing game (`fa20d_XXXX_on/off`, `1jz on XXXX`, `AE86 brave exhaust on XXXX RPM`, `2jz_XXXXrpm`, `EJ25_REV_XXXX`, `XXXX fa20`, `coiloverz 2jz ext on/off`, `ks_toyota_ae86`, `bw_toyota_chaser`, `tidy_wrx_sti`, `veh_fi_turbo_*`): used only to check the measuring. "Initial D" and "from ac" clips. Clips that start in silence or click hard at the loop point. Two clips that would not load ("STI Idle" xVlbez, "4g63" Selfmade869).
+- **Old sound (to go back):** the shared engine sound. Set `Config.SupercarExhaust.Off.<car id> = true` (for example `Config.SupercarExhaust.Off.ronin_cz4a = true`).
+- **Credits (Creator Store audio):** playermathislam (Supra Mk4 Startup); maronseo (TRD SUPRA IDLE); Schzercro (1JZ REV 8K); imkn32 (2jz high); OHM555_TH3 (2JZ rev); xVlbez (1JZ Startup, 1JZ Idle, STI Rev C, 86 Idle); FoxZachkFan (jzx90 higher rev, jzx90 rev high, Citroen r5 antilag 2); Doda_66 (toyota altezza 2jz turbo BOV); EfiniRX (Toyota Sprinter Trueno AE86 4AGE Startup, Subaru 22B EJ22G H4 Startup); Easton00023 (AE86_4AG_FCR_Idle, RevA, RevB, RevC); ShaddiSFM (evo 6 start); satdun20990 (4G63 Idle, 4G63 Rev); Jaskka221 (evo low rev); oatm1ilk (4g63 redline); Chhil (4G63T BOV); Clxbsport (Mitsubishi Lancer Evolution IX startup); Kwerke_Individual (Turbo Flutter); Truenus (Lancer Evolution X GSR Startup); lontanyl (turbo flutter 1, rpm_3,7k_ej22, GC8 Exhaust Redline); Keytoff (Subaru GC8 Idle); kennu_hdgamer (Subaru 22b Rev1); zx8129l (22B Turbo Bov); mzz_123456 (Turbo flutter Subaru); offtracke (FA20start, FA20rev). The ids are next to each name in `Config.lua` (search "the 10 JDM cars").
+
 ## Exhaust sounds for the last 9 imports (2026-11-13, owner: "also insert good exhaust sounds for all of the new imports model cars")
 Same system and same method as the two exhaust jobs before (sections "Exhaust sounds for the 7 imports" and "Supercar exhaust sounds"). Nine imported cars still played the shared engine sound. Each now has a set for its real engine. **Not heard by ear. Not played in the game:** tonight was Edit mode only (Play was never started). Owner to listen. In Studio, not published.
 
