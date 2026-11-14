@@ -191,6 +191,14 @@ def seam_pins(tag, st):
     E = np.array(ends)
     fill = []
     pinned = 0
+    # every street end on the box's edge with its own (un-eased) height, for heights.py's street pins
+    edge_ends = []
+    for s in st:
+        for end in (0, -1):
+            x, z = s['pts'][end]
+            if min(abs(x - box[0]), abs(x - box[2]), abs(z - box[1]), abs(z - box[3])) <= 1.0:
+                edge_ends.append([round(x, 2), round(z, 2), round(s['y0'][end], 2), s['name']])
+    json.dump({'ends': edge_ends}, open(os.path.join(geo.BUILD, 'city', f'streets_{tag}_edgeends.json'), 'w'))
     for s in st:
         pts = s['pts']
         y = s['y0']

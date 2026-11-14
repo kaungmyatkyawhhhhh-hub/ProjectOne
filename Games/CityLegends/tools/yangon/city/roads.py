@@ -229,10 +229,20 @@ def collision(B, net):
                 if not paired:
                     row(p0, p1, y0 + rm.PARAPET_H, y1 + rm.PARAPET_H, rm.PARAPET_W, 'W', l_ - rm.PARAPET_W / 2, Rv)
                 continue
+            # (2026-11-14) ground boxes take the meshes' own surface (Builder.h, the blend of every road's samples near
+            # them), not the edge's: where two carriageways overlap at different heights the box lay on the higher one,
+            # up to 4.5 studs over the drawn road
+            def hy(off, k0=None, k1=None):
+                a_ = (e.P[i] if k0 is None else e.P[k0]) + Rv * off
+                b_ = (e.P[j] if k1 is None else e.P[k1]) + Rv * off
+                hh = B.h(np.array([a_, b_]))
+                return float(hh[0]), float(hh[1])
             if rm.flush(e):
                 # a street with flush edge strips: one box over the whole width
+                y0, y1 = hy((l_ + h_) / 2)
                 row(p0, p1, y0, y1, h_ - l_ + 2 * e.walk, 'R', (l_ + h_) / 2, Rv)
                 continue
+            y0, y1 = hy((l_ + h_) / 2)
             row(p0, p1, y0, y1, h_ - l_, 'R', (l_ + h_) / 2, Rv)
             # pavements and medians, unless another carriageway lies there (a junction mouth): then in 2-sample pieces
             for side, a_, b_, kind in ((1, h_, h_ + e.walk, 'P'), (-1, l_ - e.walk, l_, 'P'), (0, 0.0, l_, 'M')):
@@ -242,14 +252,16 @@ def collision(B, net):
                     continue
                 q = Polygon([p0 + Rv * a_, p1 + Rv * a_, p1 + Rv * b_, p0 + Rv * b_])
                 if not _blocked(B, q, e):
-                    row(p0, p1, y0 + rm.PAVE_UP, y1 + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
+                    ya, yb = hy((a_ + b_) / 2)
+                    row(p0, p1, ya + rm.PAVE_UP, yb + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
                     continue
                 for k in range(i, j, 2):
                     k2 = min(j, k + 2)
                     q0, q1 = e.P[k], e.P[k2]
                     qq = Polygon([q0 + Rv * a_, q1 + Rv * a_, q1 + Rv * b_, q0 + Rv * b_])
                     if not _blocked(B, qq, e):
-                        row(q0, q1, e.y[k] + rm.PAVE_UP, e.y[k2] + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
+                        ya, yb = hy((a_ + b_) / 2, k, k2)
+                        row(q0, q1, ya + rm.PAVE_UP, yb + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
     # junction squares
     inc = {}
     for e in net.edges:
@@ -264,7 +276,8 @@ def collision(B, net):
         reach = max(max(abs(B.lohi[f.id][0][k]), abs(B.lohi[f.id][1][k])) for f, k in lst) + 4
         p = e.P[end]
         d = e.D[end]
-        row(p - d * reach, p + d * reach, e.y[end], e.y[end], 2 * reach, 'J')
+        yj = float(B.h(p[None, :])[0])
+        row(p - d * reach, p + d * reach, yj, yj, 2 * reach, 'J')
     return rows
 
 

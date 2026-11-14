@@ -42,6 +42,7 @@ import geo
 import ground
 import heights as hts
 import roadnet as rn
+import roadmesh as rm
 
 OUT = os.path.join(geo.BUILD, 'city')
 RES = 4.0
@@ -102,7 +103,7 @@ def segments(net):
     S = []
     raised_len = 0.0
     for e in net.edges:
-        r = (e.y - e.g > hts.RAISE) & (net.fam_of.get(e.id) in net.fam_grade)
+        r = rm.raised_samples(net, e)
         lo, hi = rn.offsets(e)
         paired = e.oneway and bool((e.w > 0.5).any())
         for i in range(len(e.P) - 1):
@@ -147,8 +148,9 @@ def _smin(a, b, k=SOFT):
 
 
 def landmark_ground(nat, xs, zs, inR, log=print):
+    protect = np.zeros(nat.shape, bool)       # under a stairway / on its foot pad: road banks keep off (beds still win)
     if not USE_LANDMARKS:
-        return nat
+        return nat, protect
     from shapely.geometry import Polygon
     from shapely import contains_xy, distance as sdist, points
     out = nat.copy()
@@ -165,7 +167,7 @@ def landmark_ground(nat, xs, zs, inR, log=print):
             continue
         XX, ZZ = np.meshgrid(xs[i0:i1], zs[j0:j1], indexing='ij')
         sub = (slice(i0, i1), slice(j0, j1))
-        n0 = out[sub]
+        n0 = out[sub].copy()
         d = sdist(pg, points(XX.ravel(), ZZ.ravel())).reshape(XX.shape)   # 0 inside
         T = L['top'] - L['slope'] * d
         H = _smax(n0, T)
@@ -182,21 +184,32 @@ def landmark_ground(nat, xs, zs, inR, log=print):
             surf = ay + t * (by - ay) - RAMP_UNDER
             e = np.maximum(dp - (w / 2 + 2), 0)
             Tr = surf - L['slope'] * e
-            H = np.where(e <= 0, surf, _smax(H, Tr))
-            # the foot pad
+            H = np.where(e <= 0, surf, _smax(H, Tr, 2.0))
+            # the foot pad (gates, chinthe) at the foot's level
             df = np.hypot(XX - bx, ZZ - bz)
             ef = np.maximum(df - FOOT_PAD, 0)
             foot = by - RAMP_UNDER
             Tf = foot - L['slope'] * ef
-            H = np.where((ef <= 0) & (e > 0), np.maximum(H, foot) if False else foot, np.where(ef > 0, _smax(H, Tf), H))
-            H = np.where(e <= 0, surf, H)
+            H = np.where(ef <= 0, foot, _smax(H, Tf, 2.0))
+            # under the ramp: exactly under its surface; beside it (6 studs) never over it
+            H = np.where(e <= 0, surf, np.where(e < 6, np.minimum(H, surf), H))
+        H = np.where(d <= 0, L['top'], H)
+        pr = np.zeros(H.shape, bool)
+        for (a, b, w) in L['ramps']:
+            ax, ay, az = a
+            bx, by, bz = b
+            dx, dz = bx - ax, bz - az
+            t = np.clip(((XX - ax) * dx + (ZZ - az) * dz) / (dx * dx + dz * dz), 0, 1)
+            dp = np.hypot(ax + t * dx - XX, az + t * dz - ZZ)
+            pr |= (dp <= w / 2 + 2) | (np.hypot(XX - bx, ZZ - bz) <= FOOT_PAD)
+        protect[sub] |= pr & inR[sub]
         # only inside the region, and only where it changes something
         changed = inR[sub] & (np.abs(H - n0) > 0.02)
         out[sub] = np.where(changed, H, n0)
         log('  landmark ground %s: %d columns, raised up to %.1f, cut up to %.1f' % (
             L['name'], changed.sum(), float((H - n0)[changed].max()) if changed.any() else 0,
             float((n0 - H)[changed].max()) if changed.any() else 0))
-    return out
+    return out, protect
 
 
 def build(tag, log=print, diff=False):
@@ -269,9 +282,24 @@ def build(tag, log=print, diff=False):
             continue
         best[sub] = np.where(better, exc, best[sub])
         bedv[sub] = np.where(better, bed, bedv[sub])
-    # overlapping footprints at different heights (a carriageway held up by the grade cap beside a lower one): the lower
-    # bed wins when they differ by up to OVERLAP_LOW (no grass through the lower road); a big step keeps the nearest road's
-    bedv = np.where(np.isfinite(lowb) & (bedv - lowb <= OVERLAP_LOW), lowb, bedv)
+    # (2026-11-14) the bed follows the road meshes' own surface: roadmesh.Builder.h, the inverse-distance blend of every
+    # road's ground-level samples (6 nearest), so where two carriageways overlap the ground meets the ONE drawn surface
+    from scipy.spatial import cKDTree
+    HP, HH = [], []
+    for e in net.edges:
+        r = rm.raised_samples(net, e)
+        HP.append(e.P[~r])
+        HH.append(e.y[~r])
+    HP, HH = np.concatenate(HP), np.concatenate(HH)
+    htree = cKDTree(HP)
+    near_any = np.isfinite(best) & (best <= BED_EXTRA + BANK_MAX)
+    ii, jj = np.nonzero(near_any)
+    for k0 in range(0, len(ii), 500000):
+        sl = slice(k0, k0 + 500000)
+        Q = np.column_stack([xs[ii[sl]], zs[jj[sl]]])
+        d, ix = htree.query(Q, k=6)
+        w = 1.0 / np.maximum(d, 0.5) ** 2
+        bedv[ii[sl], jj[sl]] = (HH[ix] * w).sum(1) / w.sum(1) - UNDER
     log('  road loop done (%.0f s)' % (time.time() - t0))
     # ---- region mask (the outline + river / cut lakes + every road footprint and its first BED_EXTRA + 12 studs, never
     # batch 0.5's ground) and natural ground (rows along z)
@@ -287,16 +315,21 @@ def build(tag, log=print, diff=False):
         if inR[i].any():
             nat[i] = G.ys(np.column_stack([X, zs])) - UNDER
     log('  region %d columns (%.0f s)' % (inR.sum(), time.time() - t0))
-    nat = landmark_ground(nat, xs, zs, inR, log)
+    nat, protect = landmark_ground(nat, xs, zs, inR, log)
     H = nat.copy()
     code = np.where(inR, 1, 0).astype(np.int8)   # 0 keep, 1 grass, 2 mud, 3 water mud bed, 4 water sand bed
     level = np.zeros((nx, nz), np.float32)
     # ---- water
     wet = np.zeros((nx, nz), bool)
     nwb = 0
+    from shapely.geometry import Polygon as _Poly
+    lm_polys = [_Poly(L['poly']).buffer(20) for L in LANDMARK_GROUND] if USE_LANDMARKS else []
     for w in sorted(G.water, key=lambda w: w['level_m']):
         pg = w['poly']
         if not pg.intersects(region):
+            continue
+        if any(lp.contains(pg.representative_point()) for lp in lm_polys):
+            log('  water %s (%.1f m) dropped: it lies on a landmark platform' % (w['name'] or w['id'], w['level_m']))
             continue
         bx0, bz0, bx1, bz1 = pg.bounds
         i0 = max(0, int((bx0 - X0) / RES) - 2)
@@ -311,6 +344,11 @@ def build(tag, log=print, diff=False):
             continue
         nwb += 1
         L = w['level_m'] * ground.VS
+        # (SRTM over a small pond can read roofs or trees: a level over the ground round it would stand as a block of water)
+        if not (w in rivers):
+            Lg = float(np.median(H[i0:i1, j0:j1][ins])) + UNDER - 0.6
+            if L > Lg:
+                L = Lg
         pad = np.pad(ins, 1)
         d = distance_transform_edt(pad)[1:-1, 1:-1] * RES
         river = w in rivers
@@ -334,7 +372,7 @@ def build(tag, log=print, diff=False):
         del d, idx, Lnear
     near = inR & np.isfinite(best) & (best <= BED_EXTRA + BANK_MAX)
     onbed = near & (best <= BED_EXTRA)
-    bank = near & ~onbed & ~wet
+    bank = near & ~onbed & ~wet & ~protect
     e_ = np.where(bank, best - BED_EXTRA, 0.0)
     Hb = np.clip(H, bedv - BANK_S * e_, bedv + BANK_S * e_)
     H = np.where(onbed, bedv, np.where(bank, Hb, H))

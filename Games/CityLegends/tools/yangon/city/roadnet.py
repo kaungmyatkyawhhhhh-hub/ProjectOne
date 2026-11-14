@@ -355,7 +355,7 @@ def push_beside(edges, fam, gap=3.0, reach=80.0):
 
 
 # ---------------------------------------------------------------- dual carriageways
-def pair_edges(edges, fam=frozenset()):
+def pair_edges(edges, fam=frozenset(), unpair_near=None):
     """per one-way main edge: own move (N x 2) and pair weight w (N), before node blending. Never across a flyover or
     its ramps (fam): the ground carriageways either side of a flyover stay apart."""
     cand = [e for e in edges if e.oneway and e.hw in MAIN]
@@ -433,6 +433,8 @@ def pair_edges(edges, fam=frozenset()):
         fs = full.copy()
         for c in (0, 1):
             fs[:, c] = np.convolve(np.pad(full[:, c], 3, mode='edge'), np.ones(7) / 7, mode='valid')
+        if unpair_near is not None:
+            ws = ws * unpair_near(e.P0)
         e.w = ws
         e.own = fs * ws[:, None]
         stats['paired_len'] += float((ws > 0.5).sum() * STEP)
@@ -440,6 +442,32 @@ def pair_edges(edges, fam=frozenset()):
         if getattr(e, 'push', None) is not None:
             e.own = e.own + e.push
     return stats
+
+
+UNPAIR_REACH = 120.0     # studs from batch 0.5's box edge over which a divided pair splits back onto its OSM lines
+UNPAIR_KEEP = 300.0      # ... except within this of a v5 game road's map-edge end (those seams follow the game road)
+
+
+def seam_unpair(game):
+    """(2026-11-14) batch 0.5's mesh streets keep the OSM one-way lines of a divided road; a batch road merged onto the
+    midline met them 12-27 studs off (U Wisara, Kabar Aye Pagoda, Insein). Returns f(P) -> pairing weight factor: 0 on the
+    box's edge, 1 from UNPAIR_REACH out, 1 everywhere near a v5 game road's map-edge end."""
+    x0, z0, x1, z1 = geo.BOX_05
+    gends = np.array([[E['x'], E['z']] for E in seam_ends(game)]) if game else np.zeros((0, 2))
+
+    def f(P):
+        P = np.asarray(P)
+        dx = np.maximum(np.maximum(x0 - P[:, 0], P[:, 0] - x1), 0)
+        dz = np.maximum(np.maximum(z0 - P[:, 1], P[:, 1] - z1), 0)
+        d = np.hypot(dx, dz)
+        inside = (dx == 0) & (dz == 0)
+        d = np.where(inside, 0.0, d)
+        fac = np.clip(d / UNPAIR_REACH, 0, 1)
+        if len(gends):
+            dg = np.min(np.hypot(P[:, None, 0] - gends[None, :, 0], P[:, None, 1] - gends[None, :, 1]), axis=1)
+            fac = np.where(dg < UNPAIR_KEEP, 1.0, fac)
+        return fac
+    return f
 
 
 def blend_nodes(edges):
@@ -739,7 +767,7 @@ def build(tag, margin=400.0):
     for e in edges:
         e.push = None
     net.pushed = push_beside(edges, fam)
-    net.stats_pair = pair_edges(edges, fam)
+    net.stats_pair = pair_edges(edges, fam, unpair_near=seam_unpair(game))
     blend_nodes(edges)
     ends = seam_ends(game)
     # each game map-edge end belongs to the batch its outward side lies in

@@ -453,6 +453,11 @@ def solve(net, G, iters=2, log=print):
         for end, sm in ((0, e.seam[0]), (-1, e.seam[1])):
             if sm:
                 pins[int(e._ids[end])] = sm['y']
+    # (2026-11-14) an end on batch 0.5's box edge where a batch 0.5 mesh street continues it, more than STREET_PIN_STEP
+    # off that street's height (Nar Nat Taw's ramp left the box 10.6 studs over its street): pinned to the street
+    # (streets.py writes the street ends' own heights, streets_05_edgeends.json); smaller steps are eased by streets.py
+    for v, yy in street_pins(edges, y).items():
+        pins.setdefault(v, yy)
     if pins:
         floor = np.full(len(y), -1e9)
         for (eid, i), (need, what) in req_info.items():
@@ -472,6 +477,34 @@ def solve(net, G, iters=2, log=print):
     net.spill = spill
     log('  raised outside the bridge families: %.0f studs of road' % spill)
     return y
+
+
+STREET_PIN_STEP = 1.5
+
+
+def street_pins(edges, y):
+    import json, os
+    p = os.path.join(geo.BUILD, 'city', 'streets_05_edgeends.json')
+    if not os.path.exists(p):
+        return {}
+    ends = json.load(open(p))['ends']
+    if not ends:
+        return {}
+    E = np.array([[q[0], q[1]] for q in ends])
+    Y = np.array([q[2] for q in ends])
+    x0, z0, x1, z1 = geo.BOX_05
+    out = {}
+    for e in edges:
+        for end in (0, -1):
+            px, pz = e.P[end]
+            if min(abs(px - x0), abs(px - x1), abs(pz - z0), abs(pz - z1)) > 1.0:
+                continue
+            d = np.hypot(E[:, 0] - px, E[:, 1] - pz)
+            k = int(d.argmin())
+            v = int(e._ids[end])
+            if d[k] < 3.0 and abs(y[v] - Y[k]) > STREET_PIN_STEP:
+                out[v] = float(Y[k])
+    return out
 
 
 def structures(net):

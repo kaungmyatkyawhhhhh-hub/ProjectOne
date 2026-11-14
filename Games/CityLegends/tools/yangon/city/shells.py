@@ -651,6 +651,56 @@ def collision(poly, y0, ytop):
                     cost += 4 * pc[2] * pc[3] - g.area
                 if ok and pieces and cost + 40 * (len(pieces) - 1) < best_cost:
                     best, best_cost = pieces, cost + 40 * (len(pieces) - 1)
+    # (batch 1 check, 14 Nov 2026: a U-shaped plot's boxes covered the dead-end road inside the U, an invisible wall on a
+    # road; 116 boxes were 16%+ over a carriageway.) Every box whose rectangle still overshoots its piece of the outline by
+    # more than 12% is split again (recursively, longer axis, best of 1/3, 1/2, 2/3), up to 8 boxes a building.
+    def overshoot(g):
+        cen2, e12, hl2, hw2, rect2 = rect_frame(g)
+        return rect2.area - g.area, (cen2, e12, hl2, hw2)
+
+    def fit(g, depth):
+        over, box = overshoot(g)
+        if depth == 0 or over <= 0.12 * (g.area + over) or g.area < 40:
+            return [box]
+        cen2, e12, hl2, hw2 = box
+        e22 = (-e12[1], e12[0])
+        axis, half, other = (e12, hl2, hw2) if hl2 >= hw2 else (e22, hw2, hl2)
+        oth = (-axis[1], axis[0])
+        best_split, best_over = None, over
+        for k in (1 / 3.0, 0.5, 2 / 3.0):
+            parts = []
+            for s0, s1 in ((-half - 1, -half + 2 * half * k), (-half + 2 * half * k, half + 1)):
+                corners = [(cen2[0] + axis[0] * s + oth[0] * t, cen2[1] + axis[1] * s + oth[1] * t)
+                           for s, t in ((s0, -other - 1), (s1, -other - 1), (s1, other + 1), (s0, other + 1))]
+                q = g.intersection(Polygon(corners))
+                if q.geom_type == 'MultiPolygon':
+                    q = max(q.geoms, key=lambda x: x.area)
+                if q.geom_type == 'Polygon' and q.area >= 1:
+                    parts.append(q)
+            if len(parts) == 2:
+                o = sum(overshoot(q)[0] for q in parts)
+                if o < best_over * 0.8:
+                    best_split, best_over = parts, o
+        if not best_split:
+            return [box]
+        return fit(best_split[0], depth - 1) + fit(best_split[1], depth - 1)
+
+    refined = []
+    for b in best:
+        cen2, e12, hl2, hw2 = b
+        rect2 = Polygon([(cen2[0] + e12[0] * s * hl2 - e12[1] * t * hw2, cen2[1] + e12[1] * s * hl2 + e12[0] * t * hw2)
+                         for s, t in ((-1, -1), (1, -1), (1, 1), (-1, 1))])
+        piece = poly.intersection(rect2)
+        if piece.geom_type == 'MultiPolygon':
+            for q in piece.geoms:
+                if q.area >= 1:
+                    refined += fit(q, 3)
+        elif piece.geom_type == 'Polygon' and piece.area >= 1:
+            refined += fit(piece, 3)
+        else:
+            refined.append(b)
+    if refined:
+        best = refined[:8]
     out = []
     h = ytop - y0 + 1.0
     for (c, e, a, b) in best:

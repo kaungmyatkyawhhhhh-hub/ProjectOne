@@ -52,6 +52,16 @@ COL = dict(R=(46, 47, 50), P=(128, 124, 116), KR=(186, 34, 34), KW=(232, 230, 22
 SKIRT = 1.6         # outer edges of the road footprint go this far down into the ground (no see-through gap)
 
 
+SPILL_RAISE = 4.0   # (2026-11-14) a road the grade cap holds more than this over the ground is built raised (ramp walls,
+                    # piers over VIADUCT) like a bridge's ramp, not left on a 12-32 stud earth embankment
+
+
+def raised_samples(net, e):
+    """the samples built raised: a bridge family's over RAISE, and any road held over SPILL_RAISE"""
+    h = e.y - e.g
+    return ((h > RAISE) & (net.fam_of.get(e.id) in net.fam_grade)) | (h > SPILL_RAISE)
+
+
 def flush(e):
     """residential streets and lanes (no traffic): no raised pavement, a flush concrete edge strip (lead, 14 Nov:
     Studio memory: one collision box covers the whole width)"""
@@ -79,7 +89,7 @@ class Builder:
             h = e.y - e.g
             # only bridges and their ramps are built raised; a road held above steep ground by the grade cap stays a
             # ground road (the terrain is filled up to it: roads_<tag>_profile.json)
-            r = (h > RAISE) & (net.fam_of.get(e.id) in net.fam_grade)
+            r = raised_samples(net, e)
             # a raised run includes one ground sample either side (its foot)
             rr = r.copy()
             rr[1:] |= r[:-1]
