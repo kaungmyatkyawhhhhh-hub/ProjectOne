@@ -3652,6 +3652,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	LiveAE86 = function(gui)
 		return liveCluster(gui, "ae86")
 	end,
+	LiveEvo6c = function(gui)
+		return liveCluster(gui, "evo6c")
+	end,
 	LiveSovereign = function(gui)
 		return liveCluster(gui, "sovereign")
 	end,

@@ -321,6 +321,18 @@ local function seriesOf(id: string): Cars.Series?
 	return if at then at.series else nil
 end
 
+-- a line's cars on sale (2026-11-14: a line can hold a car still waiting for its model, Pending, next to one on
+-- sale: the Ronin CP9A Champion is sold before the CP9A; the waiting one is never shown)
+local function idsOf(series: Cars.Series): { string }
+	local out = {}
+	for _, id in series.Ids do
+		if Cars.forSale(id) then
+			table.insert(out, id)
+		end
+	end
+	return out
+end
+
 local function modelName(series: Cars.Series): string
 	local name = series.Name
 	local brand = series.Brand or ""
@@ -832,7 +844,7 @@ local function build(root: Frame)
 		s.series = nil
 		for _, ser in Cars.Series do
 			if ser.Brand == b then
-				s.id = ser.Ids[1]
+				s.id = idsOf(ser)[1]
 				break
 			end
 		end
@@ -955,7 +967,7 @@ local function build(root: Frame)
 				s.series = nil
 				refreshAll()
 			end)
-			for i, id in ser.Ids do
+			for i, id in idsOf(ser) do
 				local row = rowBase(i, L.rowH, id == s.id)
 				thumb(row, id, Vector2.new(thumbW, thumbH), UDim2.fromOffset(8, (L.rowH - thumbH) // 2))
 				text({ Text = Cars.trimLabel(id), FontFace = HEAVY, TextSize = 16, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(tx, 9), Size = UDim2.new(1, -tx - 8, 0, fs(19)), Parent = row })
@@ -988,14 +1000,14 @@ local function build(root: Frame)
 					continue
 				end
 				i += 1
-				local baseId = ser.Ids[1]
+				local baseId = idsOf(ser)[1]
 				local row = rowBase(i, L.rowH, seriesOf(s.id) == ser)
 				thumb(row, baseId, Vector2.new(thumbW, thumbH), UDim2.fromOffset(8, (L.rowH - thumbH) // 2))
 				text({ Text = modelName(ser), FontFace = HEAVY, TextSize = 16, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(tx, 9), Size = UDim2.new(1, -tx - 8, 0, fs(19)), Parent = row })
 				text({ Text = "from " .. money(Cars.get(baseId).Price), FontFace = BOLD, TextSize = 13, TextColor3 = GREEN, Position = UDim2.fromOffset(tx, 9 + fs(20)), Size = UDim2.new(1, -tx - 8, 0, fs(16)), Parent = row })
 				UI.classBadgeFor(baseId, nil, { Height = fs(17), Position = UDim2.new(0, tx, 1, -fs(17) - 9), Parent = row })
 				local sx = tx + math.floor(fs(17) * 2.9) + 8
-				text({ Text = #ser.Ids .. " trim" .. (if #ser.Ids == 1 then "" else "s"), FontFace = BOLD, TextSize = 12, TextColor3 = GREY, Position = UDim2.new(0, sx, 1, -fs(16) - 9), Size = UDim2.new(1, -sx - 24, 0, fs(15)), Parent = row })
+				text({ Text = #idsOf(ser) .. " trim" .. (if #idsOf(ser) == 1 then "" else "s"), FontFace = BOLD, TextSize = 12, TextColor3 = GREY, Position = UDim2.new(0, sx, 1, -fs(16) - 9), Size = UDim2.new(1, -sx - 24, 0, fs(15)), Parent = row })
 				glyph("next", fs(14), DIM, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Parent = row })
 				row.Activated:Connect(function()
 					Audio.click()
@@ -1070,8 +1082,8 @@ local function build(root: Frame)
 		end
 		-- trim selector
 		trimText.Text = string.upper(Cars.trimLabel(id))
-		local count = if ser then #ser.Ids else 1
-		local idx = if ser then (table.find(ser.Ids, id) or 1) else 1
+		local count = if ser then #idsOf(ser) else 1
+		local idx = if ser then (table.find(idsOf(ser), id) or 1) else 1
 		prevTrim.b.Visible = idx > 1
 		nextTrim.b.Visible = idx < count
 		trimNote.Text = if owned then "OWNED" elseif locked then "CLASS " .. letter .. " · REACH LEVEL " .. need else "TRIM " .. idx .. " OF " .. count
@@ -1105,7 +1117,7 @@ local function build(root: Frame)
 			end
 		end
 		if ser then
-			for i, tid in ser.Ids do
+			for i, tid in idsOf(ser) do
 				local on = tid == id
 				local chip: TextButton = new("TextButton", {
 					Text = string.upper(Cars.trimLabel(tid)),
@@ -1182,8 +1194,9 @@ local function build(root: Frame)
 		if not ser then
 			return
 		end
-		local idx = (table.find(ser.Ids, s.id) or 1) + d
-		local tid = ser.Ids[idx]
+		local ids = idsOf(ser)
+		local idx = (table.find(ids, s.id) or 1) + d
+		local tid = ids[idx]
 		if tid then
 			s.id = tid
 			if s.series ~= nil then

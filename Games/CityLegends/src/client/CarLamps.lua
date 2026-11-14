@@ -53,6 +53,7 @@ CarLamps.CARS = {
 	toyoka_chaser = true, -- (the JZX100 model's own lamps, re-converted 2026-11-14)
 	toyoka_supra_mk4 = true, -- (the 1994 SZ-R model's own lamps, 2026-11-14)
 	toyoka_ae86 = true, -- (the 1985 model's own lamps, the pop-ups raised for good, 2026-11-14)
+	ronin_cp9a_champ = true, -- (the 1999 champion's edition model's own lamps, 2026-11-14)
 } :: { [string]: boolean }
 
 function CarLamps.has(id: string?): boolean

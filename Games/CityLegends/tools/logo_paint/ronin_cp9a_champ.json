@@ -1,0 +1,182 @@
+{
+ "src": "imports/importing cars/Missubibi/1999_mitsubishi_lancer_evolution_6_tommi_makinen.glb",
+ "images": {
+  "0": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_champ_badges.png"
+   }
+  ],
+  "1": [
+   {
+    "rect": [
+     556,
+     390,
+     640,
+     470
+    ]
+   },
+   {
+    "rect": [
+     716,
+     512,
+     768,
+     700
+    ]
+   },
+   {
+    "rect": [
+     556,
+     762,
+     680,
+     818
+    ]
+   },
+   {
+    "rect": [
+     216,
+     390,
+     262,
+     432
+    ]
+   },
+   {
+    "rect": [
+     216,
+     770,
+     262,
+     812
+    ]
+   }
+  ],
+  "3": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_champ_misc.png"
+   },
+   {
+    "solid": [
+     316,
+     344,
+     511,
+     511,
+     46,
+     46,
+     46
+    ]
+   },
+   {
+    "rect": [
+     131,
+     39,
+     205,
+     56
+    ]
+   }
+  ],
+  "4": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_champ_cab.png"
+   },
+   {
+    "ellipse": [
+     422,
+     167,
+     12,
+     12,
+     26,
+     26,
+     28
+    ]
+   },
+   {
+    "rect": [
+     412,
+     194,
+     440,
+     208
+    ]
+   }
+  ],
+  "11": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_champ_fabric.png"
+   }
+  ],
+  "7": [
+   {
+    "ellipse": [
+     70,
+     70,
+     60,
+     60,
+     114,
+     114,
+     114
+    ]
+   },
+   {
+    "rect": [
+     142,
+     1,
+     371,
+     56
+    ]
+   },
+   {
+    "ellipse": [
+     256,
+     256,
+     22,
+     22,
+     110,
+     110,
+     110
+    ]
+   },
+   {
+    "rect": [
+     324,
+     216,
+     367,
+     240
+    ]
+   }
+  ],
+  "8": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_champ_cabin.png"
+   }
+  ],
+  "18": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_champ_hub.png"
+   }
+  ],
+  "19": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_champ_hub_mr.png"
+   }
+  ]
+ },
+ "drop": [
+  "evo_6:LOD_A_BODY_mm_badges",
+  "evo_6:LOD_A_BOOT_mm_badges",
+  "evo_6:LOD_A_BONNETCAM_BODY_mm_ext",
+  "evo_6:LOD_A_BONNETCAM_BODY_mm_lights",
+  "evo_6:LOD_A_BONNETCAM_BODY_mm_misc",
+  "evo_6:LOD_A_BONNETCAM_HOOD_mm_badges",
+  "evo_6:LOD_A_BONNETCAM_HOOD_mm_ext",
+  "evo_6:LOD_A_BONNETCAM_HOOD_mm_misc",
+  "evo_6_int:LOD_A_INT_NEEDLE_RPM_EMISSIVE_mm_int",
+  "evo_6_int:LOD_A_INT_NEEDLE_RPM_mm_int",
+  "evo_6_int:LOD_A_INT_NEEDLE_SPEED_EMISSIVE_mm_int",
+  "evo_6_int:LOD_A_INT_NEEDLE_SPEED_mm_int"
+ ],
+ "drop_material": [],
+ "rename_material": {
+  "material": "champ_ext",
+  "material_7": "champ_cab",
+  "material_19": "champ_hub",
+  "phong1": "champ_grid",
+  "standardSurface1": "champ_under"
+ }
+}

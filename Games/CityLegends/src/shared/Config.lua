@@ -334,6 +334,7 @@ Config.Credits = {
 	"Apex JZX100 Tourer model by GT Cars: Hyperspeed (CC BY 4.0)",
 	"Apex JZA80 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Apex AE86 model by Ddiaz Design (CC BY-NC-SA 4.0)",
+	"Ronin CP9A Champion model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }
