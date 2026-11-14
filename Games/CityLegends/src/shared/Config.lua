@@ -3057,6 +3057,7 @@ Config.Doors = {
 	lambrini_lp700 = true,
 	lambrini_lp750 = true,
 	toyoka_ae86 = true, -- the model's own two doors and door mirrors (normal front-hinged doors, 2026-11-14)
+	toyoka_chaser = true, -- the model's own four doors (front L / R, rear L2 / R2) and door mirrors (front-hinged, 2026-11-14)
 } :: { [string]: boolean }
 Config.DoorFeel = {
 	Seconds = 0.7, -- to open or close
