@@ -111,8 +111,8 @@ Config.World = {
 	OldCity = false,
 }
 -- Yangon (owner, 2026-11-13: "Rush Yangon", the car meet): the map players play on when Workspace.Yangon
--- is in the place. Since build step 11 (2026-11-14) Monaco is kept in ServerStorage.Riviera (with
--- ServerStorage.RivieraFar): moving it back into the Workspace (and Yangon out) brings Monaco back.
+-- is in the place. Since build step 11 (2026-11-14) Monaco is out of the place: saved by the owner to
+-- D:/RobloxStudioGameFiles/Riviera.rbxm and RivieraFar.rbxm (Insert from File brings it back).
 -- With neither map the old city comes back.
 function Config.activeMap(): string?
 	if workspace == nil then
