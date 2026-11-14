@@ -5,9 +5,11 @@
 	(client/CarDoors). They open only when the car is (nearly) stopped, and close as it drives off.
 
 	Doors.has(car)                    does this car have doors
-	Doors.open(car, side, seconds?)   opens that door ("L" driver, "R" passenger); closes it again after `seconds`
-	Doors.close(car)                  closes both
-	The CarDoors remote: the owner toggles both doors while parked (Shift + F, the phone's DOORS button).
+	Doors.open(car, side, seconds?)   opens that door ("L" driver, "R" passenger, "L2" / "R2" the rear doors of a
+	                                  four-door car); closes it again after `seconds`
+	Doors.close(car)                  closes them all
+	Doors.sideFor(car, x, behind)     the door beside a seat
+	The CarDoors remote: the owner toggles all the doors while parked (Shift + F, the phone's DOORS button).
 ]]
 
 local Players = game:GetService("Players")
@@ -21,7 +23,7 @@ local Cars = require(Shared:WaitForChild("Cars"))
 local Doors = {}
 
 local ctx: any = nil
-local SIDES = { "L", "R" }
+local SIDES = { "L", "R", "L2", "R2" } -- (2026-11-14: L2 / R2 = the rear doors of four-door cars)
 
 local function speedOf(car: Model): number
 	local root = car.PrimaryPart
@@ -46,6 +48,38 @@ function Doors.has(car: Model?): boolean
 	end
 	local folder = ReplicatedStorage:FindFirstChild("CarModels", true)
 	return folder ~= nil and folder:FindFirstChild(modelId .. "@doors", true) ~= nil
+end
+
+-- (2026-11-14) does the car's doors model have rear doors (Doors/Door_L2, tools/doors.py "doors" list)?
+local rearCache: { [string]: boolean } = {}
+function Doors.hasRear(car: Model): boolean
+	local id = car:GetAttribute("CarId")
+	if type(id) ~= "string" then
+		return false
+	end
+	local modelId = Cars.modelOf(id)
+	local known = rearCache[modelId]
+	if known ~= nil then
+		return known
+	end
+	local folder = ReplicatedStorage:FindFirstChild("CarModels", true)
+	local m = if folder then folder:FindFirstChild(modelId .. "@doors", true) else nil
+	local node = if m then m:FindFirstChild("Doors") else nil
+	local yes = node ~= nil and node:FindFirstChild("Door_L2") ~= nil
+	if m then
+		rearCache[modelId] = yes
+	end
+	return yes
+end
+
+-- the door beside a seat: x > 0 the passenger's side; `behind` = studs the seat sits behind the driver's eye (a rear
+-- seat opens its rear door on a car that has them)
+function Doors.sideFor(car: Model, x: number, behind: number): string
+	local side = if x >= 0 then "R" else "L"
+	if behind > 1.5 and Doors.hasRear(car) then
+		side ..= "2"
+	end
+	return side
 end
 
 -- a door's next close is cancelled when it is opened again meanwhile
@@ -84,7 +118,12 @@ function Doors.close(car: Model)
 end
 
 local function anyOpen(car: Model): boolean
-	return car:GetAttribute("DoorOpenL") == true or car:GetAttribute("DoorOpenR") == true
+	for _, side in SIDES do
+		if car:GetAttribute("DoorOpen" .. side) == true then
+			return true
+		end
+	end
+	return false
 end
 
 function Doors.init(c: any)

@@ -754,7 +754,13 @@ local function optionCard(order: number, def: PartData.Part?, slot: string)
 	rarityBack(t, rarity, 7)
 	icon(if def then def.icon else slotDef.icon, t, 34)
 	label({ Text = if def then rinfo.name else "STOCK", TextSize = 9, Font = Enum.Font.GothamBlack, TextColor3 = rinfo.text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(55, 4), Size = UDim2.fromOffset(100, 11), Parent = b })
-	label({ Text = if def then def.name else "Stock " .. slotDef.name, TextSize = 11, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(55, 15), Size = UDim2.fromOffset(100, 14), Parent = b })
+	-- (2026-11-14: the stock engine card names the car's own engine where it is known, PartData.StockEngines)
+	local stockName = nil
+	if not def and slot == "swap" then
+		local spec = Cars.get(st.carId)
+		stockName = PartData.stockEngine(if spec and spec.BaseId then spec.BaseId else st.carId)
+	end
+	label({ Text = if def then def.name else (stockName or "Stock " .. slotDef.name), TextSize = 11, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(55, 15), Size = UDim2.fromOffset(100, 14), Parent = b })
 	label({ Text = if def then def.brand else "Factory", TextSize = 9, Font = Enum.Font.GothamMedium, TextColor3 = GREY, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(55, 29), Size = UDim2.fromOffset(100, 11), Parent = b })
 	b.Activated:Connect(function()
 		Audio.click()

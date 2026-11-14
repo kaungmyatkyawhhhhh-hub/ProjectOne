@@ -58,6 +58,7 @@ Cars.Makes = {
 	"Orient", "Dream-Build Volt", "HyperSpeed Tech", "Golden", "Ironclad", "Stuttgart", "Precision",
 	"British Vanguard", "Rosso Rampante", "Enfurecido", "Trident Motors", "Speedmark", "Sovereign",
 	"Ecstasy", "Velocité Noir", "Dearborn",
+	"Ronin", "Pleiad", -- (2026-11-14, the JDM imports: the Mitsubishis and the Subarus)
 }
 
 -- string.upper that also does the accented letters in the makes (it only knows a-z)
@@ -195,6 +196,23 @@ local list: { CarSpec } = {
 	-- (`RearBias`)
 	{ Id = "dearb_focus_rs", Name = "Dearborn C346 Rallye", Class = "Sedan", Tier = "Starter", TopSpeed = 165, ZeroToSixty = 4.5, Handling = 0.76, Price = 30000, PriceSource = "used", StatPrice = 42000, Color = Color3.fromRGB(60, 120, 200), Order = 7, RearBias = true },
 	{ Id = "bentz_a45s", Name = "Tri-Star Silber W177 Turbo S", Class = "Sedan", Tier = "Starter", TopSpeed = 168, ZeroToSixty = 3.9, Handling = 0.79, Price = 86000, PriceSource = "new", StatPrice = 38000, Color = Color3.fromRGB(238, 190, 20), Order = 88, Pending = true },
+	-- the JDM imports (owner, 2026-11-14, Prompts/New imports - JDM ...): real numbers and real US market prices (old
+	-- cars: used or collector value, 2026). Each is Pending until its model is in the game (then take Pending off).
+	-- AE86: 1985 Sprinter Trueno GT-APEX 3-door, 4A-GE 1.6 (128 hp, 940 kg)
+	{ Id = "toyoka_ae86", Name = "Apex AE86", Class = "Coupe", Tier = "Starter", TopSpeed = 118, ZeroToSixty = 8.5, Handling = 0.78, Price = 35000, PriceSource = "collector", Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 9.5, Pending = true },
+	-- CP9A: 1999 Lancer Evolution VI GSR, 4G63T (276 hp, 1,360 kg); Champion: the 1999 rally champion's edition
+	{ Id = "ronin_cp9a", Name = "Ronin CP9A", Class = "Sedan", Tier = "Mid", TopSpeed = 150, ZeroToSixty = 4.4, Handling = 0.84, Price = 50000, PriceSource = "collector", Color = Color3.fromRGB(26, 60, 150), Order = 25.2, Pending = true },
+	{ Id = "ronin_cp9a_champ", Name = "Ronin CP9A Champion", Class = "Sedan", Tier = "Mid", TopSpeed = 150, ZeroToSixty = 4.3, Handling = 0.86, Price = 80000, PriceSource = "collector", Color = Color3.fromRGB(196, 18, 28), Order = 25.3, Pending = true },
+	-- CT9A: 2006 Lancer Evolution IX MR, 4G63T MIVEC (286 hp, 1,410 kg)
+	{ Id = "ronin_ct9a", Name = "Ronin CT9A", Class = "Sedan", Tier = "Mid", TopSpeed = 157, ZeroToSixty = 4.5, Handling = 0.86, Price = 55000, PriceSource = "collector", Color = Color3.fromRGB(88, 92, 98), Order = 25.4, Pending = true },
+	-- CZ4A: 2015 Lancer Evolution X Final Edition, 4B11T (303 hp, 1,560 kg)
+	{ Id = "ronin_cz4a", Name = "Ronin CZ4A Final", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.9, Handling = 0.84, Price = 50000, PriceSource = "collector", Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 25.5, Pending = true },
+	-- GC8 Wide: 1998 Impreza 22B STi (2-door wide body, EJ22T, 276 hp, 1,270 kg; 424 built)
+	{ Id = "pleiad_gc8", Name = "Pleiad GC8 Wide", Class = "Coupe", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.86, Price = 350000, PriceSource = "collector", Color = Color3.fromRGB(28, 50, 140), Order = 26.5, Pending = true },
+	-- GDB: 2006 Impreza WRX STI, EJ257 (300 hp, 1,495 kg)
+	{ Id = "pleiad_gdb", Name = "Pleiad GDB", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 4.6, Handling = 0.84, Price = 27500, PriceSource = "used", Color = Color3.fromRGB(30, 56, 140), Order = 16.5, Pending = true },
+	-- ZC6: 2013 BRZ, FA20 (200 hp, 1,250 kg), rear drive
+	{ Id = "pleiad_zc6", Name = "Pleiad ZC6", Class = "Coupe", Tier = "Starter", TopSpeed = 140, ZeroToSixty = 6.4, Handling = 0.82, Price = 13000, PriceSource = "used", Color = Color3.fromRGB(200, 30, 36), Order = 9.6, Pending = true },
 }
 
 -- the ten cars taken out of the game (owner, 2026-11-03): no longer sold anywhere, but a player who
@@ -259,6 +277,15 @@ Cars.Series = {
 	{ Name = "APEX J-SERIES", Ids = { "toyoka_lc200", "toyoka_lc300" } },
 	{ Name = "APEX JZX100", Ids = { "toyoka_chaser" } },
 	{ Name = "APEX JZA80", Ids = { "toyoka_supra_mk4" } },
+	-- (2026-11-14, the JDM imports: real models, so no made-up SPORT / TOP trims, as the owner took off the
+	-- Countach's and the 991.2's on 2026-11-13)
+	{ Name = "APEX AE86", Ids = { "toyoka_ae86" }, NoTrims = true },
+	{ Name = "RONIN CP9A", Ids = { "ronin_cp9a", "ronin_cp9a_champ" } },
+	{ Name = "RONIN CT9A", Ids = { "ronin_ct9a" }, NoTrims = true },
+	{ Name = "RONIN CZ4A", Ids = { "ronin_cz4a" }, NoTrims = true },
+	{ Name = "PLEIAD GC8", Ids = { "pleiad_gc8" }, NoTrims = true },
+	{ Name = "PLEIAD GDB", Ids = { "pleiad_gdb" }, NoTrims = true },
+	{ Name = "PLEIAD ZC6", Ids = { "pleiad_zc6" }, NoTrims = true },
 	{ Name = "ORIENT VOLTRA", Ids = { "kio_ev6" } },
 	{ Name = "DREAM-BUILD VOLT TITAN", Ids = { "byt_u8" } },
 	{ Name = "HORIZON Z33", Ids = { "nisun_350z" } },

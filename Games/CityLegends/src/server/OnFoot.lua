@@ -188,9 +188,13 @@ local function ride(player: Player, car: any): boolean
 		return false
 	end
 	local seat = rideSeat(car, root, bestI, best)
-	-- (2026-11-08) a car with scissor doors: the passenger's door goes up first
+	-- (2026-11-08) a car with scissor doors: the passenger's door goes up first (2026-11-14: a rear seat opens its rear
+	-- door on a four-door car)
+	local eye = car:GetAttribute("Eye")
+	local behind = best.Position.Z - (if typeof(eye) == "Vector3" then eye.Z else best.Position.Z)
+	local doorSide = Doors.sideFor(car, best.Position.X, behind)
 	if Doors.has(car) then
-		Doors.open(car, if best.Position.X >= 0 then "R" else "L", 1.3)
+		Doors.open(car, doorSide, 1.3)
 		task.wait(0.45)
 		if not (car.Parent and player.Character == character and humanoid.Health > 0) or seat.Occupant then
 			return false
@@ -211,7 +215,7 @@ local function ride(player: Player, car: any): boolean
 		end
 		setMassless(character, false)
 		if car.Parent then
-			Doors.open(car, if sx > 0 then "R" else "L", 1.3)
+			Doors.open(car, doorSide, 1.3)
 			character:PivotTo(doorSpot(car, sx, z))
 		end
 	end)

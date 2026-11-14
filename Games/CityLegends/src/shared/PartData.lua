@@ -487,6 +487,38 @@ for _, s in SWAPS do
 	table.insert(PartData.SwapList, PartData.Parts["sw_" .. s[1]])
 end
 
+-- each car's own engine (owner's JDM prompt, 2026-11-14: "the Workshop should know each car's stock engine"): a swap
+-- code from SWAPS above, or { name, curve } for an engine that is not sold as a swap. The Workshop shows it on the stock
+-- engine card, and the stock dyno curve takes its shape. Keyed by the base car's id (a trim reads its base car's).
+PartData.StockEngines = {
+	toyoka_supra_mk4 = { name = "2JZ-GE 3.0 I6", curve = "na" }, -- (the model is the SZ-R, the non-turbo one)
+	toyoka_chaser = "1jz",
+	toyoka_ae86 = { name = "4A-GE 1.6 I4 High-Rev", curve = "highrev" },
+	ronin_cp9a = "4g63",
+	ronin_cp9a_champ = "4g63",
+	ronin_ct9a = "4g63",
+	ronin_cz4a = "4b11",
+	pleiad_gc8 = { name = "EJ22 2.2 Flat-4 Turbo", curve = "turbo" },
+	pleiad_gdb = "ej25",
+	pleiad_zc6 = { name = "FA20 2.0 Flat-4", curve = "na" },
+} :: { [string]: string | { name: string, curve: string } }
+
+-- the stock engine's name and dyno curve (nil for cars not listed)
+function PartData.stockEngine(baseId: string): (string?, string?)
+	local e = PartData.StockEngines[baseId]
+	if type(e) == "string" then
+		local def = PartData.Parts["sw_" .. e]
+		local eng = def and def.engine
+		if def and eng then
+			return def.name, eng.curve
+		end
+		return nil, nil
+	elseif type(e) == "table" then
+		return e.name, e.curve
+	end
+	return nil, nil
+end
+
 -- each car's old Street / Sport / Race part (the 12 parts before 2026-11-06) as the new part
 -- (Uncommon, Rare, Epic), installed, in the same slot it now lives in. The exhaust goes to the
 -- mid-pipe: same numbers, and a car doesn't get louder by itself

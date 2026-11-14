@@ -1943,7 +1943,7 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	local doorsNode = src:FindFirstChild("Doors")
 	if doorsNode then
 		for _, dm in doorsNode:GetChildren() do
-			local side = dm.Name:match("^Door_(%a)$")
+			local side = dm.Name:match("^Door_(%a%d?)$") -- (2026-11-14: Door_L2 / Door_R2, the rear doors)
 			local hinge = dm:FindFirstChild("Hinge")
 			if side and hinge and hinge:IsA("BasePart") then
 				doorHinges[side] = hinge
