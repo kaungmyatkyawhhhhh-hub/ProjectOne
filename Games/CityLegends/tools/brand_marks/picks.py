@@ -54,7 +54,7 @@ PICKS = {
  "bentz_190e": [("F", 400, 243, 30, 30, "stand"), ("R", 397, 205, 30, 30, "emblem"), ("R", 230, 213, 66, 16, "blank"), ("R", 565, 213, 68, 16, "blank")],
  "bentz_gls": [("F", 400, 205, 18, 18, "stand"), ("R", 398, 148, 30, 26, "emblem")],
  "bentz_s65_w221": [("F", 400, 220, 28, 28, "stand"), ("F", 400, 252, 18, 14, "blank"), ("R", 400, 185, 30, 30, "emblem"), ("R", 252, 195, 74, 18, "blank"), ("R", 555, 195, 52, 14, "blank"), ("S", 470, 332, 56, 14, "blank")],
- "toyoka_chaser": [("F", 400, 268, 22, 22, "blank"), ("R", 397, 172, 30, 20, "blank"), ("R", 215, 178, 58, 14, "blank"), ("R", 575, 178, 66, 14, "blank")],
+ # (toyoka_chaser: no covers since its 2026-11-14 conversion: the badges are out of the model itself)
 }
 # badge-named parts that are more than badges: left as they are
 KEEP = {"bentz_sls": ["Body_SLSLogos"]}

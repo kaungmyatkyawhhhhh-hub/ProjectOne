@@ -299,10 +299,6 @@ return {
 		shells = { { name = "SeeThrough_glass_018__native_UV_glT" } },
 		spots = {},
 	},
-	toyoka_chaser = {
-		shells = { { name = "SeeThrough_Meshesredtrasnpar1Mtl" } },
-		spots = {},
-	},
 	toyoka_lc300 = {
 		shells = { { name = "Body_Light_Red_Back" }, { name = "Body_Light_Red_Back_Lower" } },
 		spots = {},

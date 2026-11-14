@@ -110,7 +110,7 @@ CarSkin.CLUSTER_STYLE = {
 	ferrara_458speciale = "Live458",
 	bentz_s65_w221 = "Maybach57", -- W221: round chrome dials
 	bentz_190e = "Maybach57",
-	toyoka_chaser = "Toyota",
+	toyoka_chaser = "LiveChaser", -- the JZX100 model re-converted (2026-11-14): the model has no cluster, drawn from the owner's photo ("Toyota" puts the old drawn one back)
 	lexis_lc500 = "LFA", -- the LC takes the LFA's moving-ring screen
 	astin_dbx = "LiveDBX", -- from the owner's photo
 	bentlee_contgt = "LiveSovereign", -- the model's own dials, redrawn sharp and live
@@ -130,6 +130,7 @@ CarSkin.CLUSTER_STYLE = {
 CarSkin.CLUSTER_RECT = {
 	bnw_m3_e92 = { at = Vector3.new(0.0055, 0.0324, -0.2623), face = Vector3.new(0, 0.3074, 0.9516), w = 0.274, h = 0.114 }, -- the 2011 model's hood opening (tools/lambo/window_e92.png); measured from the E60 wheel's box it wears (with the model's own wheel back: 0.0056, 0.0310, -0.2649)
 	bnw_m3_e92_cabin = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- the old E92 cabin's cluster hood (the F80's donor)
+	toyoka_chaser = { at = Vector3.new(-0.0082, 0.0490, -0.2638), face = Vector3.new(0.0081, 0.3344, 0.9424), w = 0.386, h = 0.092 }, -- the model's dash hood (tools/lambo/window_chaser.png), 2026-11-14
 	-- the Land Cruzer 200 and the Alfard: over their models' own dial panels (owner, 2026-10-22: the
 	-- LC200's sat too high, above the dash; "bring it down and match it exactly")
 	toyoka_lc200 = { at = Vector3.new(0, 0.02, -0.247), face = Vector3.new(0, 0.12, 0.993), w = 0.267, h = 0.112 },
@@ -298,7 +299,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bnw_m3_e92 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bnw_m3_e92 = true, toyoka_chaser = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -430,7 +431,7 @@ CarSkin.STEER_MODEL = {
 	-- American
 	chevo_c6 = "AmericanFlat", chevo_c7 = "AmericanFlat", chevo_camaro = "AmericanFlat", dodger_challenger = "Dodge", bentz_gt63s = "Dodge",
 	-- Japanese and the rest
-	toyoka_supra_mk4 = "JDM90s", toyoka_chaser = "JDM90s", nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s",
+	toyoka_supra_mk4 = "JDM90s", nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s", -- (toyoka_chaser keeps its model's own wheel since its 2026-11-14 conversion)
 	mazdo_rx8 = "RX8",
 	-- (bugotti_veyron had the generated "Veyron" wheel; the new Veyrun models of 2026-11-03 keep their
 	-- own, owner: "use the steering wheel which came from the model")

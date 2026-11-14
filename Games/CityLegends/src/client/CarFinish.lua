@@ -53,6 +53,7 @@ CarFinish.CARS = {
 	bnw_m4_f82 = true,
 	porsha_gt3 = true,
 	bnw_m3_e92 = true,
+	toyoka_chaser = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

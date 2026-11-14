@@ -1,0 +1,8 @@
+{
+ "src": "imports/importing cars/Toyota/toyota_chaser_tourer_v_jzx100.glb",
+ "images": {
+  "6": [ {"solid": [370, 758, 422, 828, 21, 20, 21]} ]
+ },
+ "drop": [],
+ "rename_material": {}
+}

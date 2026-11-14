@@ -652,23 +652,6 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0045, -0.0108, 0.0617), face = Vector3.new(0.0001, -0.008, 0.9999), r = 0.03, color = Color3.fromRGB(0, 0, 0) },
 	},
-	toyoka_chaser = {
-		wb = 2.73,
-		hide = {},
-		covers = {
-			{ emblem = false, disc = false, at = Vector3.new(0.0003, 0.3122, -2.0782), face = Vector3.new(-0.1174, 0.2062, -0.9714), w = 0.0718, h = 0.0718, color = Color3.fromRGB(176, 176, 176) },
-			{ emblem = false, disc = false, at = Vector3.new(-0.0081, 0.5824, 2.4157), face = Vector3.new(0.0247, -0.0363, 0.999), w = 0.0973, h = 0.0648, color = Color3.fromRGB(176, 176, 176) },
-			{ emblem = false, disc = false, at = Vector3.new(-0.5208, 0.5659, 2.4077), face = Vector3.new(-0.1313, 0.1032, 0.986), w = 0.1899, h = 0.0458, color = Color3.fromRGB(176, 176, 176) },
-			{ emblem = false, disc = false, at = Vector3.new(0.4928, 0.5657, 2.4122), face = Vector3.new(0.1063, 0.1251, 0.9864), w = 0.2156, h = 0.0457, color = Color3.fromRGB(176, 176, 176) },
-		},
-		caps = {
-			FL = { r = 0.033, surface = 0.1187, color = Color3.fromRGB(225, 224, 225) },
-			FR = { r = 0.033, surface = 0.1185, color = Color3.fromRGB(222, 223, 222) },
-			RL = { r = 0.033, surface = 0.1183, color = Color3.fromRGB(222, 223, 222) },
-			RR = { r = 0.033, surface = 0.1183, color = Color3.fromRGB(225, 227, 225) },
-		},
-		hub = { at = Vector3.new(0.0006, -0.0143, 0.0205), face = Vector3.new(0.0108, -0.1079, 0.9942), r = 0.03, color = Color3.fromRGB(19, 20, 19) },
-	},
 	toyoka_lc300 = {
 		wb = 2.85,
 		hide = {},
