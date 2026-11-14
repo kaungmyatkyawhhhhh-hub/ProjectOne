@@ -104,3 +104,78 @@ thumbnail: "BUILD YOUR SPECIES" text, cells + an arrow. Spore-like creature edit
   ("a jar"), 2500 R$399 ("a whole tank"), 5000 R$999 (+15 points, 1h 2x). Same glass style, product art = 3D renders.
 - ZONE MOOD: the pond changes colour by region - teal/cyan shallows, brown murky middle, DARK PURPLE deep (black background,
   sparse glowing particles). Bigger, scarier creatures in the dark.
+
+### Deaths, diets and cards (06:28-06:38)
+- I died 5 times in about 15 minutes at stage 1-2: eaten by an "arclash", a "leviathan" and, 3 times, by "swarmers" (packs of 3-4
+  big striped NPC shrimp that hunt together). Meat diet at stage 1 = almost nothing you can bite and everything bites you.
+  The plant diet is MUCH easier: 0 -> 28/35 in ~2 min during a feeding frenzy.
+- DEATH SCREEN: big coral "eaten" + "by a swarmer", two choices: DESCENDANT ("generation 4 of zinadrop - same design, keep 80% of
+  this stage") vs START OVER ("a brand new cell - you keep your unlocked parts", or at stage 2 "back to stage 1 as a new cell, you
+  lose this stage's progress"). Auto-picks descendant after a 16-23 s countdown. Tiny loss = you never rage-quit.
+- START OVER AS... plants (filter mouth) / meat (jaws) / INDEX "hatch as something you found": a "hatch as..." panel with tabs
+  pond / players / yours, every indexed creature in a glass bubble with its stage range ("leviathan stage 1-7", "mauler stage 3-7",
+  "burr stage 2-4"), unknown ones as black silhouettes "???". Detail: 3D turntable, "lives in any part of the pond", "stage 4 hunter
+  - jaws, 2 eyes, 6 spikes, 2 zappers, flagellum". => The index is not just a collection, it is a CHARACTER SELECT. Hatching as a
+  leviathan gave me its look but at stage 1 with 0 dna (it still died to swarmers in 30 s).
+- NAME YOUR SPECIES: big editable random name ("oraobud"), "3 to 16 letters. everyone in the pond will see it", shuffle / hatch.
+- Hatching = an egg + "space to push" (5-6 taps).
+- OBJECTIVE LINE (top-left) changes with your state: "hatch / push your way out" -> "eat plants / swim into the green bits" or
+  "hunt / bite anything smaller than you" -> "grow / every half stage you get to pick a card" -> "pick a card / choose one" ->
+  "evolve / spend dna on new parts". Always ONE next step. Great onboarding without a tutorial.
+- FEEDING FRENZY event: gold pill "FEEDING FRENZY 0:40 / food everywhere, 2x dna. eat fast to build a combo", then "you've eaten
+  6 dna. top eater gets a free roll", ends with a big "frenzy over" gold title.
+- WHIRLPOOL event: "the water is spinning. golden sugar in the eye" + a huge animated spiral vortex VFX in the water.
+- "bloom - fresh plant" mini markers; "shiny" markers (a sparkly shiny variant NPC); "shiny found - shiny nipper +25 dna".
+- CARD PICK (half stage + each stage): 3 glass cards slide up from the bottom (numbered 1/2/3, "hide h"), each a 3D part render:
+  tentacle "a long arm that whips everything next to you every few seconds", jet "your dash goes further and comes back faster",
+  drill "swim into cells to drill them. hurts the whole time you push", ink sac "when you get hurt, ink hides you from hunters",
+  shell "take half damage while you swim slowly". All "new part". Above them a gold "new cards R$19" REROLL button (paid).
+  Picking = big gold "new part / tentacle" title; the cards for the next pick fly in as a stack.
+- STAGE UP: scale bar 20 µm -> 50 µm, "ready to evolve 13/85", a bouncing arrow over a big "E evolve" button.
+- Editor at stage 2: parts 3/9 (slots grow with stage). Card parts appear in the grid with a dna price (tentacle 30, shell 32).
+  Symmetry places a PAIR of tentacles for one price. When you are short: a gold "+60 dna R$12" button under the info card
+  (an upsell exactly at the moment of want). After hatching you KEEP stage 2 (13/85 to stage 3).
+- Tentacle auto-whips nearby cells (kill feed: "daat20050 whipped ukuhukuhok").
+- Bumping a cell with no jaws: big coral "you can't bite / your cell has no biting mouth. add [jaws]" = teaching by failure.
+- EVOLUTION tree: click a node -> bottom card "rich broth +5% dna from everything per level - costs 1 point" with a "HOLD TO GROW
+  (hold click or space)" button that fills left to right while a ring of petals fills around the node; then "dna x1.1" appears
+  bottom-left. "need points" when empty. Points: day-2 gift, playtime gifts.
+- GIFTS day 2 claimed ("come back in 23h 53m for day 3"), playtime gift "+60 dna" claimed.
+- "pond pass tier 2! claim it with the pass button. premium adds 2 rolls" toast.
+- MONETIZATION POP-INS after ~15 min: a "starter pack" card mid-right (400 dna, 30 min 2x dna, pearl color, "one time only",
+  "ends in 23:51:36", R$99, X to close); two permanent buttons stacked above dash: gold "grow now R$19" and white "2x dna R$39";
+  then a "having fun? leave a like on the game page, then claim +2 evolution points" card ("i liked it" button = honour system).
+- STACKING: at 06:37 the screen had an aura toast centre + "+ indexed" toast + like card + 2 Robux buttons + the giant
+  creature = overload moment (overstimulated-kid risk), but every toast fades in ~2 s.
+- Family tab still showed the old "zinadrop line" after I changed species (looks like a bug/stale view).
+
+## Sound (not heard: visible only)
+- Music list = ambient drones/underwater reading music: calm, lo-fi, "study" mood. The game page's soundtrack is the opposite of
+  Bug Evolution's hype; fits the soft glass UI.
+
+## Ratings (no bias)
+| | /10 | why |
+|---|---|---|
+| Impatient kid (first 60 s) | 7 | No lobby, choose diet, hatch, eat in 20 s. BUT meat diet = die in 2 min with no idea why. |
+| Nerd / quality | 9 | Best UI and art direction of the batch; real creature editor; index = character select; consistent voice. |
+| Gameplay | 7 | Agar.io/Spore loop is fun and readable, events every ~5-8 min; NPC swarmers too strong for stage 1; slow 38/85 at stage 2. |
+| Visual (VFX/GFX) | 9 | Caustic light, depth bubbles, vortex, glows, 3D glossy googly creatures, letter-by-letter titles. |
+| Monetization | 7 | Many products (pass, VIP, 2x, rerolls, gacha mutations, colossus role, starter pack, grow now) but mostly soft and well-timed; pity counters + odds shown. |
+| Retention hooks | 8.5 | Daily 7-day gifts, playtime gifts, quests daily/weekly, pond pass, index 320+, lineage/generations. |
+| Overall | 8 | Small (209 CCU) but the most "designed" game so far. |
+
+## Steal for MEGA BITE
+1. ONE objective line top-left that always says the next step (hatch -> eat -> grow -> pick a card -> evolve).
+2. Death = "descendant keeps 80%" or "start over", auto-continue in 20 s. No punishing loss screen.
+3. Index as character select ("hatch as something you found") - our fish index could let players respawn as any found fish skin.
+4. Card pick every half evolution (3 random perks, numbered keys 1/2/3). Big variety per run with few systems.
+5. Server events on a visible countdown pill ("next event 3:08") with off-screen arrows + big animated titles.
+6. Hold-to-confirm upgrades with a ring fill (feels premium, prevents misclicks).
+7. "You can't bite - add jaws" style failure hints.
+8. Biggest player becomes the server boss with a bar; everybody teams up.
+9. A contextual "+60 dna R$12" when you can't afford something (small, at the moment of want).
+
+## Avoid
+- Stage-1 NPC packs that can one-shot new players again and again (5 deaths in 15 min).
+- Stacking a starter pack + like card + toasts + paid buttons at once.
+- Rewards for likes/group joins (we don't do these).
