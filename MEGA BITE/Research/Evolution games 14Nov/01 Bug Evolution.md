@@ -198,3 +198,34 @@ D1 50 coins (today) / D2 SUN SPIDER (bug) / D3 2x XP 30 min / D4 150 / D5 200 / 
 - Social: a player invited me to their team ("Aoooooooo26 invited you to their team!" toast right side, green ACCEPT / red
   DECLINE). After accepting, nothing visibly changed on the HUD (TEAM button left, G key).
 - Name plates: "Lv 24 yfcxhcx7891" in small text + a thin green HP bar; another player's bug is ~2x my size at Lv 24.
+
+### Evolving to a new bug (06:16-06:21)
+- Lv 12 = "Garden Spider" ADULT (bigger body, name changes on the XP bar), and at once: gold-bordered card top-left
+  "★ NEW BUG READY! [3D fly render] HOUSEFLY  UNLOCK (200 coins)  later", red "2" badge on BUGS, a gold bar under the quests
+  "★ HOUSEFLY READY · OPEN TREE", the two locked ability slots change to "NEST LV 30" and "LV 100" (abilities unlock at levels).
+  "Newbie shield ends in 4:56" countdown starts.
+- Unlock in the tree: pay 200 coins -> "PURCHASED! HOUSEFLY UNLOCKED" panel pops in (scale-in), the card gets a green "LV 0"
+  tag, the next tier's silhouettes are REVEALED by name (LOCUST, BLACK WIDOW = NEXT) while the rest stay "???".
+  "Your current run stays saved when you switch." -> green PLAY.
+- SWITCHING = START OVER at Lv 1 as that bug's BABY STAGE ("MAGGOT · Housefly at Lv 6"). Each bug has its own stages
+  (egg/spiderling/adult; maggot/young fly/housefly). So "evolving" here is really unlocking a new character and re-growing it
+  (a roguelite-ish restart with a new moveset). Level-ups at Lv 1-6 take ~20-40 s each, so the restart doesn't feel bad.
+- Auto-evolve within a bug: at Lv 6 a green bar "EVOLVING IN 5 -> YOUNG FLY  PRESS F" counts down and evolves by itself.
+- Each bug has its own abilities: spider POUNCE (Q); housefly BUZZ OFF (Q) + FLY (Space) - the "▲ FLY SPACE" button appears
+  when the bug can fly. Flying = free 3D movement over the map, the yellow stamina line drains while flying.
+
+## Ratings and takeaways (Claude, after ~37 min, no bias)
+| Lens | Score | Why |
+|---|---|---|
+| Impatient kid (first 5 min) | 8/10 | Instant spawn, a 6-step tutorial with big 3D arrows, a level-up every ~30 s, evolve at 5 min, free 2,500-coin spins. Loses points for the ugly arrows covering the bug and the camera fighting wall-climbing. |
+| Quality nerd | 7.5/10 | Gorgeous giant-forest scale + lighting, clean modern UI kit (consistent fonts, panels, rarity colours), juicy hit numbers. But the bug models are simple (smooth white primitives for the spider/fly), the camera clips into walls and ground, and the HUD is crowded with 5 Robux buttons. |
+| Gameplay depth | 8/10 | Branching tree with stat shapes, per-bug mastery, Lv-10 trait choices, abilities per bug, flying vs climbing, zones with level gates, bosses every hour, PvP king. |
+| Monetization aggression | 9/10 (very aggressive) | 2x Coins R$199, 2x XP R$299, Evolve R$29 skip, +50 levels R$9, paid "+30 LEVELS" orbs in the world that open a purchase prompt, daily Robux spider rotation, R$299 prehistoric pack, R$399 event bugs, R$199/R$499 spin packs, CLAIM ALL R$99/R$199. |
+| Retention hooks | 9/10 | 7-day streak with bugs, playtime rewards every ~10 min, quests (quick/hourly), 2 limited events with gacha + countdowns, hourly boss, server king, leave-guards on Esc. |
+
+What MEGA BITE should steal: (1) the TRAIT CHOICE every 10 levels (3 cards, one with a trade-off); (2) per-creature MASTERY
+stars; (3) the server-wide "unlocked X / new KING" broadcasts; (4) map with LEVEL-GATED zones and the king shown; (5) the
+"choose a branch" evolution tree with SILHOUETTES + "???" and revealed names one tier ahead; (6) free REVIVE that keeps XP;
+(7) bonus XP zones that rotate with a countdown; (8) tutorial that hides the full HUD until it's done.
+What NOT to copy: paid orbs placed in the world (kids hit them by accident), 5 Robux buttons on the HUD, the big arrows
+covering the player's own body, wall-climb camera clipping.
