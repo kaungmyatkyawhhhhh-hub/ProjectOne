@@ -21,10 +21,18 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
 
 - **Two new fictional brands** (add to `Cars.Makes`, garage / dealer brand lists): **"Ronin"** for the Mitsubishis and **"Pleiad"** for the Subarus (Subaru's name means the Pleiades star cluster). Never "Mitsubishi", "Lancer", "Evo", "Subaru", "Impreza", "WRX", "STI", "BRZ", "GSR", "Tommi Mäkinen", "Toyota", "Supra", "Sprinter Trueno" or "Chaser" in any name or on the car. (If the owner later picks other brand names, rename them then.)
 - New cars: real prices (`Real car prices and harder cash.md`: old = used / collector value; the 22B, the Champion edition, the AE86 and the Supra are collector cars now), class / PI from real numbers, real wheelbases in `CarBuilder.REAL_WB`, drive types (AWD Evos / Imprezas, RWD AE86 / BRZ / Supra / Chaser), gear counts. Series: "RONIN CP9A" (#4, #5), "RONIN CT9A", "RONIN CZ4A", "PLEIAD GC8", "PLEIAD GDB", "PLEIAD ZC6", "APEX AE86". Note them all.
-- Add all 10 to `CarFinish.NEW` and every new-model system (lamps, doors, the wheels standard, design-change rules).
+- Add all 10 to `CarFinish.NEW` and the new-model systems (lamps, doors). **No wheel swap and no extra design changes** for these cars (owner, 2026-11-14).
 - Their engines are already engine swaps (4G63, 4B11, EJ25, 1JZ, 2JZ...): the Workshop should know each car's stock engine.
 - **Licence warnings** at the top of the notes: #1, #3–#10 are Ddiaz Design **CC-BY-NC-SA (non-commercial)**. #2 is **CC-BY** by "GT Cars: Hyperspeed": the uploader's name looks like a game's name, so it **may be ripped from a game**: check its part names and write what you find.
-- **No logos anywhere:** no Mitsubishi diamonds, "LANCER" / "Evolution" lettering, Ralliart, Subaru stars, STI / WRX / "22B" badges, Toyota emblems, "TRUENO", tyre brands (Advan, Bridgestone...), BBS / Prodrive / Recaro / Momo / Nardi / Enkei logos on wheels, seats, steering wheels, stickers and clusters (all in these models' textures: paint them out like the other cars, `tools/paint_glb.py`).
+- **No logos anywhere:** no Mitsubishi diamonds, "LANCER" / "Evolution" lettering, Ralliart, Subaru stars, STI / WRX / "22B" badges, Toyota emblems, "TRUENO", tyre brands (Advan, Bridgestone...), BBS / Prodrive / Recaro / Momo / Nardi / Enkei logos on wheels, seats, steering wheels, stickers and clusters (all in these models' textures and meshes: **remove** them, never cover them; see the owner's rule below).
+
+## Wheels and logos: the owner's rule (2026-11-14)
+- **Don't make our own wheels.** Keep **each model's own wheels and rims** (saves time). Only take the names and logos off them (centre caps, rim lettering, tyre sidewall text, caliper lettering) and make sure they look good (no grey parts, proper materials). No wheel library swap, no `RimSwap`, for these cars.
+- **REMOVE names, badges and logos, never cover them.** No plates, patches, stickers or blank discs put over a badge. Instead:
+  - **in the textures:** paint the logo or lettering out so the spot looks like the material around it (paint, carbon, plastic, rubber, leather) (`tools/paint_glb.py`);
+  - **raised letters / badge shapes in the mesh:** cut them out and close the hole in the part's own surface so it's smooth, in the right paint or material (`tools/retext.py` `drop` + `fill`, `tools/details.py`); a badge that's its own loose piece is deleted;
+  - **steering wheel hubs:** remove the moulded badge (cut the piece, fill the surface) instead of a plate (`HUB_PLATES` is not used for these cars).
+- Check close up from every angle: no logo, no letters, no plate, no hole where a badge was.
 
 ## Clusters (checked from each model's textures, 2026-11-14: confirm with close-up renders)
 | Car | What the model has | Verdict |
@@ -56,7 +64,7 @@ Working doors on **all 10** (`tools/doors.py`, the SVJ method, a `Config.Doors` 
 - **Exterior:** no grey / untextured parts (arches, under the bumpers, engine bays, door shuts, boots, mirrors, grilles, wings, the rally lights / mudflaps where real); glossy paint with real reflections; dark glass you can see through; grilles and vents with depth; clean panel gaps; no floating / clipping / z-fighting / stretched textures.
 - **Headlights / tail lights:** real lenses and housings (the AE86's pop-up headlights: keep them up or working if the model allows, note it; the Evo / Impreza lamps); tail lights glow, brighter when braking, white reverse, indicators, all **in their proper place**.
 - **Interior:** real materials (cloth / leather / Alcantara, the bucket seats, carbon, metal), lit and readable screens and dials, a proper steering wheel (no logo on the hub), pedals, belts, door cards, a roll cage where the model has one; nothing grey or see-through.
-- **Wheels:** to the standard of `A million times better wheels (new models).md` (no BBS / Enkei / tyre-brand logos).
+- **Wheels:** **the model's own wheels and rims** (see the owner's rule above), logos removed, materials and tyres looking good (depth, proper finishes, tyres with sidewalls); no wheel swap.
 
 ## No bugs at all
 - No console errors or warnings (server and client, 2 players, PC and phone size), no physics glitches, no visual errors, saves and rejoin fine, the dealer / garage / Workshop / Customs / races all working with the new cars and brands.
