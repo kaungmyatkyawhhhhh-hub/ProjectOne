@@ -91,7 +91,7 @@ def game_corridors(game_roads, grow=6.0):
     return unary_union(polys)
 
 
-def network(box, game_roads, min_len=24.0, margin=200.0, clip=True, plots=None):
+def network(box, game_roads, min_len=24.0, margin=200.0, clip=True, plots=None, drop_plots=False, skip_tails=()):
     """the streets of `box` (x0, z0, x1, z1). Which OSM pieces are new streets (length, covered by a game road) is decided on
     the box grown by `margin`; with `clip` every new street is then cut exactly on the box's edge (2026-11-14: batch 0.5's
     streets reached 200 studs past BOX_05 and overlapped batch 1's roads, which start on that edge), so the streets inside
@@ -99,7 +99,7 @@ def network(box, game_roads, min_len=24.0, margin=200.0, clip=True, plots=None):
     area = sbox(box[0] - margin, box[1] - margin, box[2] + margin, box[3] + margin)
     inner = sbox(*box)
     covered_poly = game_corridors(game_roads) if game_roads else None
-    new, covered, tails = [], [], []
+    new, covered, tails, dropped = [], [], [], []
     for r in load('roads'):
         t = r['t']
         hw = t.get('highway')
@@ -155,8 +155,11 @@ def network(box, game_roads, min_len=24.0, margin=200.0, clip=True, plots=None):
         ptree = None
         if plots:
             from shapely.geometry import Polygon
-            ppolys = [Polygon(q['poly']) for q in plots if len(q['poly']) >= 3]
+            pl = [q for q in plots if len(q['poly']) >= 3]
+            ppolys = [Polygon(q['poly']) for q in pl]
+            plot_ids = [q['id'] for q in pl]
             ptree = STRtree(ppolys)
+        carrs = neighbour_carriageways()
         for r, t, hw, x in tails:
             if others is not None and x.intersection(others).length > 0.5 * x.length:
                 continue        # a neighbouring batch's road already runs here (its seam edge reaches the game road's end)
@@ -165,14 +168,61 @@ def network(box, game_roads, min_len=24.0, margin=200.0, clip=True, plots=None):
                 at_edge = edge.distance(q_) < 1.5 and nends is not None and nends.distance(q_) < 3.0
                 if covered_poly.distance(p_) < 0.5 and (at_edge or (lead is not None and lead.distance(q_) < 1.5)):
                     _, half, walk, _ = classify(t)
-                    foot = x.buffer(half + walk)
-                    if ptree is not None and any(ppolys[int(i)].intersects(foot) for i in ptree.query(foot)):
+                    # (2026-11-14, batch 1 leftovers) the part a neighbouring batch's road already lays (its seam piece from
+                    # the game road's end to the first junction, Inya Road / Nar Nat Taw) is cut off the tail: the tail
+                    # starts exactly on that piece's square end; it takes that road's width where it joins one
+                    y_ = x
+                    jh = []
+                    if carrs is not None:
+                        for cp, h_ in carrs:
+                            if y_.intersects(cp.buffer(0.5)):
+                                jh.append(h_)
+                                y_ = y_.difference(cp)
+                        if y_.geom_type != 'LineString':
+                            ps = [g for g in getattr(y_, 'geoms', []) if g.geom_type == 'LineString']
+                            y_ = max(ps, key=lambda g: g.length) if ps else None
+                    if y_ is None or y_.is_empty or y_.length < CLIP_MIN:
+                        break
+                    if jh:
+                        half = max([half] + jh)
+                    else:
+                        # straight off a game road's map-edge end: that road's own width (it widens at the next junction)
+                        for gr_ in game_roads['roads']:
+                            for q in (gr_['s'][0], gr_['s'][-1]):
+                                if Point(q[0], q[2]).distance(p_) < 3.0:
+                                    half = min(half, max(q[6], q[7]))
+                    foot = y_.buffer(half + walk)
+                    hit = [int(i) for i in ptree.query(foot) if ppolys[int(i)].intersects(foot)] if ptree is not None else []
+                    if hit and not drop_plots:
                         blocked.append({'id': r['id'], 'name': t.get('name:en') or t.get('name'), 'from': [round(v) for v in x.coords[0]],
                                         'to': [round(v) for v in x.coords[-1]], 'length': round(x.length)})
                         break   # batch 0.5's buildings stand on it: the plots must be rebuilt first (reported, not built)
-                    new_tails += add(new, r, t, hw, x, clip, inner)
+                    if r['id'] in skip_tails:
+                        break
+                    for i in hit:
+                        dropped.append(plot_ids[i])
+                    k0 = len(new)
+                    new_tails += add(new, r, t, hw, y_, clip, inner)
+                    for s_ in new[k0:]:
+                        s_['half'] = half
+                        s_['tail'] = True
                     break
-    return {'new': new, 'covered': covered, 'tails': new_tails, 'tails_blocked': blocked}
+    return {'new': new, 'covered': covered, 'tails': new_tails, 'tails_blocked': blocked, 'dropped_plots': sorted(set(dropped))}
+
+
+def neighbour_carriageways():
+    """(2026-11-14) the batch 1-3 roads' carriageways + pavements (flat ends) with their half, from the roads.py profiles"""
+    import json, os
+    from geo import BUILD
+    out = []
+    for tag in ('1', '2', '3'):
+        p = os.path.join(BUILD, 'city', 'roads_%s_profile.json' % tag)
+        if os.path.exists(p):
+            for e in json.load(open(p)):
+                if len(e['pts']) > 1:
+                    h = max(abs(e['half'][0]), abs(e['half'][1]))
+                    out.append((LineString([(q[0], q[2]) for q in e['pts']]).buffer(h + (e.get('walk') or 0), cap_style=2), h))
+    return out or None
 
 
 def neighbour_roads():
@@ -218,9 +268,14 @@ if __name__ == '__main__':
     from geo import MAP, BOX_05, BUILD
     sys.stdout.reconfigure(encoding='utf-8')
     gr = json.load(open(os.path.join(MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
-    pp = os.path.join(BUILD, 'city', 'plots_05.json')
-    net = network(BOX_05, gr, plots=json.load(open(pp, encoding='utf-8'))['plots'] if os.path.exists(pp) else None)
-    print('seam tails added:', net['tails'], '| blocked by batch 0.5 buildings:', net['tails_blocked'])
+    pp = os.path.join(BUILD, 'city', 'plots_05_list.json')   # (the plots placed in Studio; plots_05.json is a later run, other infill ids)
+    # (2026-11-14, batch 1 leftovers) the seam tails are built; the batch 0.5 plots on them are listed in 'dropped_plots'
+    # (taken out of plots_05_list.json and Studio by the caller). Pyay Road's tail is skipped: batch 1 does not continue
+    # Pyay Road North (its end keeps its barrier)
+    net = network(BOX_05, gr, plots=json.load(open(pp, encoding='utf-8')) if os.path.exists(pp) else None,
+                  drop_plots=True, skip_tails={619144396})
+    print('seam tails added:', net['tails'], '| blocked by batch 0.5 buildings:', net['tails_blocked'],
+          '| plots dropped:', net['dropped_plots'])
     by = {}
     for s in net['new']:
         L = LineString(s['pts']).length

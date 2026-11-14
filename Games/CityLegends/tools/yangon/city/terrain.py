@@ -27,7 +27,8 @@ Outputs (build/city/):
         the 4096 columns in order ix * 64 + iz; explicit: 2 chars a column for every 'h' / 'n' column (its top) and 4 for
         every 'w' / 'v' column (bed top, water level), in column order.
         Codes: '.' keep, 'g' grass on the base grid, 'm' mud on the base grid, 'h' grass at an explicit top, 'n' mud at an
-        explicit top, 'w' water over a mud bed, 'v' water over a sand bed. Heights: 2 base-64 chars (A-Za-z0-9+/), value
+        explicit top, 'w' water over a mud bed, 'v' water over a sand bed,
+        'c' / 'k' concrete on the base grid / at an explicit top (batch 2: the riverfront quay edge and the piers). Heights: 2 base-64 chars (A-Za-z0-9+/), value
         = round((h + 40) * 10), h in studs (the top the terrain SHOWS at).
   terrain_<tag>.png                      preview (heights, water, beds)
   terrain_<tag>_stats.json
@@ -58,6 +59,19 @@ WATER_LAND_MIN = 0.6
 WATER_NEAR = 40.0
 MUD_NEAR = 24.0
 OVERLAP_LOW = 6.0
+# (2026-11-14, batch 2) the river outside the outline per batch: how far out (studs from the outline), the far-bank strip
+# kept (studs from the water), and the land round a bridge landing built past the outline (roadnet.REACH_OUT: the
+# Yangon-Dala Bridge lands on Dala-Twante Road). Batch 1 keeps its own rule (west of batch 0.5, EXT, a 600-stud bank).
+RIVER_EXT = {'2': dict(reach=2700.0, bank=320.0, landings=[(30391.0, 11066.0, 420.0)], ways=(1219935185,), way_bank=220.0)}
+# batches written after another one: shared lakes keep the earlier batch's columns and level, the earlier batch's road
+# banks reach over the seam, and the earlier batch's state file is read for both (terrain_<u>_state.npz)
+LATER_BATCH_BLEND = {'2': ('1',), '3': ('1', '2')}
+# riverfront (batch 2): docks (OSM waterway=dock) are river water; piers (man_made=pier touching the river) are solid
+# concrete at the quay's level; land within QUAY_W of the river inside the outline is a concrete quay edge
+QUAY_W = 10.0
+FAR_SHORE = 120.0          # studs of low far shore where a river runs out of the region into the void
+FAR_UP = 1.2
+PIER_UP_MIN = 3.0          # a pier's top at least this over the river level
 
 
 def enc(h):
@@ -131,6 +145,12 @@ LANDMARK_GROUND = [
                 ((31871.0, 93.58, 3779.5), (32129.0, 51.51, 3725.0), 22.0), ((31401.0, 93.58, 3893.5), (31191.0, 63.39, 3948.0), 22.0)]),
     dict(name='Maha Wizaya terrace', top=62.5, slope=0.4, poly=[(32013, 4366), (32153, 4366), (32153, 4506), (32013, 4506)], ramps=[]),
     dict(name='Chaukhtatgyi', top=38.3, slope=0.4, poly=[(33982, 1396), (34162, 1396), (34162, 1552), (33982, 1552)], ramps=[]),
+    # (batch 2, 14 Nov 2026) the downtown landmarks' ground: their pads (build/landmarks/YangonLandmarkData_<id>.luau), the
+    # terrain 0.6 under each structure's base (the models' gy), roads keep their beds
+    dict(name='Sule Pagoda (roundabout island)', top=19.2, slope=0.4, poly=[(33280.0, 8066.0), (33273.9, 8096.6), (33256.6, 8122.6), (33230.6, 8139.9), (33200.0, 8146.0), (33169.4, 8139.9), (33143.4, 8122.6), (33126.1, 8096.6), (33120.0, 8066.0), (33126.1, 8035.4), (33143.4, 8009.4), (33169.4, 7992.1), (33200.0, 7986.0), (33230.6, 7992.1), (33256.6, 8009.4), (33273.9, 8035.4)], ramps=[]),
+    dict(name='Yangon City Hall', top=19.5, slope=0.4, poly=[(33258.0, 7981.0), (33287.0, 8008.0), (33337.0, 8009.0), (33337.0, 8013.0), (33340.0, 8013.0), (33340.0, 8019.0), (33387.0, 8021.0), (33387.0, 8014.0), (33390.0, 8014.0), (33390.0, 8011.0), (33437.0, 8013.0), (33448.0, 8002.0), (33451.0, 7887.0), (33270.0, 7881.0), (33261.0, 7881.0), (33261.0, 7888.0)], ramps=[]),
+    dict(name='Independence Monument', top=19.6, slope=0.4, poly=[(33361.0, 8294.0), (33358.0, 8309.3), (33349.3, 8322.3), (33336.3, 8331.0), (33321.0, 8334.0), (33305.7, 8331.0), (33292.7, 8322.3), (33284.0, 8309.3), (33281.0, 8294.0), (33284.0, 8278.7), (33292.7, 8265.7), (33305.7, 8257.0), (33321.0, 8254.0), (33336.3, 8257.0), (33349.3, 8265.7), (33358.0, 8278.7)], ramps=[]),
+    dict(name='Botataung Pagoda', top=12.5, slope=0.4, poly=[(35546.0, 9186.0), (35546.0, 9046.0), (35516.0, 9016.0), (35396.0, 9016.0), (35366.0, 9046.0), (35366.0, 9186.0), (35396.0, 9216.0), (35516.0, 9216.0)], ramps=[]),
 ]
 RAMP_UNDER = 1.2
 FOOT_PAD = 34.0
@@ -212,28 +232,131 @@ def landmark_ground(nat, xs, zs, inR, log=print):
     return out, protect
 
 
+def profile_segments(u, bounds, pad=200.0):
+    """(2026-11-14, batch 2) batch u's ground-level road segments near bounds (x0, z0, x1, z1), from roads_<u>_profile.json
+    (as segments() makes them; the reach per edge is its widest), and its ground samples (P, y) for the bed blend"""
+    p = os.path.join(OUT, 'roads_%s_profile.json' % u)
+    if not os.path.exists(p):
+        return [], None, None
+    x0, z0, x1, z1 = bounds
+    S, P, Y = [], [], []
+    for e in json.load(open(p)):
+        pts = e['pts']
+        xs_ = [q[0] for q in pts]
+        zs_ = [q[2] for q in pts]
+        if max(xs_) < x0 - pad or min(xs_) > x1 + pad or max(zs_) < z0 - pad or min(zs_) > z1 + pad:
+            continue
+        hl_, hr_ = e['half']
+        hr = hr_ + e['walk']
+        hl = (hl_ + e['walk']) if hl_ >= -0.5 else 0.0
+        low = [(q[1] - q[3]) <= hts.RAISE for q in pts]
+        for i in range(len(pts) - 1):
+            if not (low[i] and low[i + 1]):
+                continue
+            a, b = pts[i], pts[i + 1]
+            S.append((a[0], a[2], b[0], b[2], a[1], b[1], max(hr, 0.0), max(hl, 0.0)))
+        for q, lo_ in zip(pts, low):
+            if lo_:
+                P.append((q[0], q[2]))
+                Y.append(q[1])
+    if not P:
+        return S, None, None
+    return S, np.array(P), np.array(Y)
+
+
+_EARLIER = {}
+
+
+def earlier_level(tag, pg):
+    """(2026-11-14, batch 2) the water level an earlier batch wrote inside polygon pg (median of its water columns), or None"""
+    from shapely import contains_xy
+    vals = []
+    for u in LATER_BATCH_BLEND.get(tag, ()):
+        if u not in _EARLIER:
+            sp = os.path.join(OUT, 'terrain_%s_state.npz' % u)
+            _EARLIER[u] = dict(np.load(sp)) if os.path.exists(sp) else None
+        st = _EARLIER[u]
+        if st is None:
+            continue
+        ox, oz = st['origin']
+        nx_, nz_ = st['code'].shape
+        bx0, bz0, bx1, bz1 = pg.bounds
+        i0, i1 = max(0, int((bx0 - ox) / RES)), min(nx_, int((bx1 - ox) / RES) + 1)
+        j0, j1 = max(0, int((bz0 - oz) / RES)), min(nz_, int((bz1 - oz) / RES) + 1)
+        if i1 <= i0 or j1 <= j0:
+            continue
+        XX, ZZ = np.meshgrid(ox + RES * np.arange(i0, i1) + RES / 2, oz + RES * np.arange(j0, j1) + RES / 2, indexing='ij')
+        ins = contains_xy(pg, XX, ZZ) & (st['code'][i0:i1, j0:j1] >= 3)
+        if ins.any():
+            vals.append(st['level'][i0:i1, j0:j1][ins])
+    if not vals:
+        return None
+    return float(np.median(np.concatenate(vals)))
+
+
 def build(tag, log=print, diff=False):
     t0 = time.time()
     from shapely import contains_xy
-    from shapely.geometry import box as sbox
+    from shapely.geometry import box as sbox, Point
     from shapely.ops import unary_union
     G = ground.Ground()
     poly, core, others, ex = regions(tag)
     rivers = [w for w in G.water if w['kind'] in ('river', 'riverbank', 'canal') or w['name'] == 'Simmalaik Dockyard']
+    piers = []
+    if tag in RIVER_EXT and rivers:
+        rv_all = unary_union([w['poly'] for w in rivers])
+        lvl = min(w['level_m'] for w in rivers)
+        from shapely.geometry import Polygon as _P
+        for a in geo.load('areas'):
+            t = a['t']
+            if len(a['p']) < 4:
+                continue
+            if t.get('waterway') == 'dock' or t.get('man_made') == 'pier':
+                pg = _P(geo.proj(a['p'])).buffer(0)
+                if pg.is_empty or pg.distance(rv_all) > 30.0:
+                    continue
+                if t.get('waterway') == 'dock':
+                    d_ = dict(id=a['id'], name='dock', kind='dock', level_m=lvl, area_ha=pg.area / 2.56 / 1e4, poly=pg, big=False)
+                    G.water.append(d_)
+                    rivers.append(d_)
+                else:
+                    piers.append(pg)
+        log('  riverfront: %d docks, %d piers' % (sum(1 for w in rivers if w['kind'] == 'dock'), len(piers)))
     riv_u = unary_union([w['poly'] for w in rivers]) if rivers else None
     # outside the outline: the river and its far bank west of batch 0.5 (no other batch there), and every water body the
     # outline cuts, whole, with a 60-stud bank (a lake cut by the outline would end in a wall of water)
-    ext = poly.buffer(EXT).difference(poly).difference(others).intersection(sbox(-1e9, -1e9, geo.BOX_05[0], 1e9))
+    xr = RIVER_EXT.get(tag)
+    if xr is None:
+        ext = poly.buffer(EXT).difference(poly).difference(others).intersection(sbox(-1e9, -1e9, geo.BOX_05[0], 1e9))
+        bank_ = 600
+    else:
+        # (batch 2) the Yangon River to its far (Dala) bank and Pazundaung Creek: every side, a narrower far-bank strip
+        ext = poly.buffer(xr['reach']).difference(poly).difference(others)
+        bank_ = xr['bank']
     if riv_u is not None:
-        ext = ext.intersection(riv_u.buffer(600))
+        ext = ext.intersection(riv_u.buffer(bank_))
     else:
         ext = ext.intersection(poly.buffer(-1e9))
     cut = [w['poly'] for w in G.water if w not in rivers and w['area_ha'] < 100 and w['poly'].intersects(core) and not w['poly'].within(core)]
     if cut:
-        ext = ext.union(unary_union(cut).buffer(60).difference(poly).difference(sbox(*geo.BOX_05)).difference(ex))
+        cu = unary_union(cut).buffer(60).difference(poly).difference(sbox(*geo.BOX_05)).difference(ex)
+        if tag in LATER_BATCH_BLEND:
+            # (batch 2) a lake an earlier batch already wrote (Kandawgyi's north part in batch 1) keeps that batch's
+            # columns: only its own part is written here, at the earlier batch's level (water_levels_written)
+            cu = cu.difference(others)
+        ext = ext.union(cu)
     # (only pieces that touch the batch: a stray bit of bank far off would float in the void)
     near_core = core.buffer(16)
     ext = unary_union([g for g in getattr(ext, 'geoms', [ext]) if g.geom_type == 'Polygon' and g.intersects(near_core)])
+    if xr is not None and xr.get('landings'):
+        # the landing of a bridge built on past the outline (roadnet.REACH_OUT): its far bank round it
+        for lx, lz, r_ in xr['landings']:
+            ext = ext.union(Point(lx, lz).buffer(r_).difference(others))
+        # and the far bank along the bridge out to that landing (no void between the river's bank strip and the landing)
+        from shapely.geometry import LineString as _LS
+        ways = [r['p'] for r in geo.load('roads') if r['id'] in xr.get('ways', ())]
+        for w_ in ways:
+            ext = ext.union(_LS(geo.proj(w_)).buffer(xr.get('way_bank', 220.0)).difference(poly).difference(others))
     region = core.union(ext)
     x0, z0, x1, z1 = region.buffer(64).bounds
     X0 = math.floor(x0 / TILE) * TILE
@@ -282,10 +405,48 @@ def build(tag, log=print, diff=False):
             continue
         best[sub] = np.where(better, exc, best[sub])
         bedv[sub] = np.where(better, bed, bedv[sub])
+    best_own = best.copy()
+    # (2026-11-14, batch 2) the earlier batches' ground roads by the seam (from their roads_<u>_profile.json): their banks
+    # reach over the seam into this batch's ground (never widening this batch's region)
+    oHP, oHH = [], []
+    for u in LATER_BATCH_BLEND.get(tag, ()):
+        S2, P2, Y2 = profile_segments(u, (X0, Z0, X0 + nx * RES, Z0 + nz * RES))
+        if P2 is not None:
+            oHP.append(P2)
+            oHH.append(Y2)
+        nb_ = 0
+        for (ax, az, bx, bz, ya, yb, hr, hl) in S2:
+            reach = max(hr, hl) + BED_EXTRA + BANK_MAX
+            i0 = max(0, int((min(ax, bx) - reach - X0) / RES))
+            i1 = min(nx, int((max(ax, bx) + reach - X0) / RES) + 1)
+            j0 = max(0, int((min(az, bz) - reach - Z0) / RES))
+            j1 = min(nz, int((max(az, bz) + reach - Z0) / RES) + 1)
+            if i1 <= i0 or j1 <= j0:
+                continue
+            px = xs[i0:i1][:, None]
+            pz = zs[j0:j1][None, :]
+            dx, dz = bx - ax, bz - az
+            L2 = dx * dx + dz * dz
+            if L2 < 1e-6:
+                continue
+            t = np.clip(((px - ax) * dx + (pz - az) * dz) / L2, 0.0, 1.0)
+            qx = ax + t * dx - px
+            qz = az + t * dz - pz
+            dist = np.sqrt(qx * qx + qz * qz)
+            u_ = (px - ax) * (-dz) + (pz - az) * dx
+            exc = dist - np.where(u_ >= 0, hr, hl)
+            bed = ya + t * (yb - ya) - UNDER
+            sub = (slice(i0, i1), slice(j0, j1))
+            better = exc < best[sub]
+            if better.any():
+                nb_ += 1
+                best[sub] = np.where(better, exc, best[sub])
+                bedv[sub] = np.where(better, bed, bedv[sub])
+        log('  batch %s roads by the seam: %d segments near this grid, %d reach it' % (u, len(S2), nb_))
     # (2026-11-14) the bed follows the road meshes' own surface: roadmesh.Builder.h, the inverse-distance blend of every
     # road's ground-level samples (6 nearest), so where two carriageways overlap the ground meets the ONE drawn surface
     from scipy.spatial import cKDTree
-    HP, HH = [], []
+    HP, HH = list(oHP), list(oHH)
     for e in net.edges:
         r = rm.raised_samples(net, e)
         HP.append(e.P[~r])
@@ -305,15 +466,38 @@ def build(tag, log=print, diff=False):
     # batch 0.5's ground) and natural ground (rows along z)
     inR = np.zeros((nx, nz), bool)
     nat = np.zeros((nx, nz), np.float32)
-    nearR = np.isfinite(best) & (best <= BED_EXTRA + 12)
+    nearR = np.isfinite(best_own) & (best_own <= BED_EXTRA + 12)
+    inP = np.zeros((nx, nz), bool)
+    inO = np.zeros((nx, nz), bool)
     for i in range(nx):
         X = np.full(nz, xs[i])
         inR[i] = contains_xy(region, X, zs)
+        inP[i] = contains_xy(poly, X, zs)
+        if tag in RIVER_EXT:
+            inO[i] = contains_xy(others, X, zs)
         extra = nearR[i] & ~inR[i]
         if extra.any():
             inR[i] |= extra & ~contains_xy(ex, X, zs)
         if inR[i].any():
             nat[i] = G.ys(np.column_stack([X, zs])) - UNDER
+    # (2026-11-14, batch 2) outside this batch's own outline, never rewrite a column an earlier batch wrote (batch 1's
+    # Hlaing River ext, its lake banks): the owner of a column is the batch whose outline holds it
+    for u in LATER_BATCH_BLEND.get(tag, ()):
+        sp = os.path.join(OUT, 'terrain_%s_state.npz' % u)
+        if not os.path.exists(sp):
+            continue
+        with np.load(sp) as st:
+            c_u, (ox, oz) = st['code'], st['origin']
+        I = ((xs - RES / 2 - ox) / RES).round().astype(int)
+        J = ((zs - RES / 2 - oz) / RES).round().astype(int)
+        vi = (I >= 0) & (I < c_u.shape[0])
+        vj = (J >= 0) & (J < c_u.shape[1])
+        wr = np.zeros((nx, nz), bool)
+        wr[np.ix_(vi, vj)] = c_u[np.ix_(I[vi], J[vj])] > 0
+        drop = inR & wr & ~inP
+        inR &= ~drop
+        inO |= wr
+        log('  %d columns batch %s wrote outside this outline left as they are' % (drop.sum(), u))
     log('  region %d columns (%.0f s)' % (inR.sum(), time.time() - t0))
     nat, protect = landmark_ground(nat, xs, zs, inR, log)
     H = nat.copy()
@@ -321,6 +505,7 @@ def build(tag, log=print, diff=False):
     level = np.zeros((nx, nz), np.float32)
     # ---- water
     wet = np.zeros((nx, nz), bool)
+    bigriv = np.zeros((nx, nz), bool)    # the Yangon River and its docks (not Pazundaung Creek): the quay edge
     nwb = 0
     from shapely.geometry import Polygon as _Poly
     lm_polys = [_Poly(L['poly']).buffer(20) for L in LANDMARK_GROUND] if USE_LANDMARKS else []
@@ -349,6 +534,12 @@ def build(tag, log=print, diff=False):
             Lg = float(np.median(H[i0:i1, j0:j1][ins])) + UNDER - 0.6
             if L > Lg:
                 L = Lg
+            # (batch 2) a lake an earlier batch already wrote keeps that batch's level (Kandawgyi: 25.02)
+            Le = earlier_level(tag, pg)
+            if Le is not None:
+                if abs(Le - L) > 0.05:
+                    log('  water %s: level %.2f -> %.2f (as written by an earlier batch)' % (w['name'] or w['id'], L, Le))
+                L = Le
         pad = np.pad(ins, 1)
         d = distance_transform_edt(pad)[1:-1, 1:-1] * RES
         river = w in rivers
@@ -359,6 +550,8 @@ def build(tag, log=print, diff=False):
         level[sub] = np.where(ins, L, level[sub])
         code[sub] = np.where(ins, 3 if river else 4, code[sub])
         wet[sub] |= ins
+        if river and (w['area_ha'] > 300 or w['kind'] == 'dock'):
+            bigriv[sub] |= ins
     log('  %d water bodies, %d water columns (%.0f s)' % (nwb, wet.sum(), time.time() - t0))
     # land near water: at least WATER_LAND_MIN over the nearest water's level; mud on river banks
     if wet.any():
@@ -368,8 +561,53 @@ def build(tag, log=print, diff=False):
         near = (~wet) & inR & (d <= WATER_NEAR)
         H = np.where(near, np.maximum(H, Lnear + WATER_LAND_MIN), H)
         rnear = (~wet) & inR & (d <= MUD_NEAR) & (code[idx[0], idx[1]] == 3)
+        if tag in RIVER_EXT:
+            # (batch 2) downtown's riverfront is a built quay, not a mud bank: concrete within QUAY_W of the river inside
+            # the outline (the far bank keeps its mud)
+            quay = rnear & inP & (d <= QUAY_W) & bigriv[idx[0], idx[1]]
+            rnear &= ~(inP & bigriv[idx[0], idx[1]])
+            code = np.where(quay, 5, code)
+            log('  quay edge: %d columns' % quay.sum())
         code = np.where(rnear, 2, code)
         del d, idx, Lnear
+    if tag in RIVER_EXT and wet.any():
+        # (batch 2) where the river runs out of the region into the void (the OSM extract's edge, the reach limit), a low
+        # far shore closes it: water within FAR_SHORE of such an edge becomes grass FAR_UP over the water, rising gently
+        void = ~inR & ~inO
+        dv = distance_transform_edt(~void) * RES
+        shore = wet & ~inP & (dv <= FAR_SHORE)
+        if shore.any():
+            H = np.where(shore, level + FAR_UP + 0.03 * (FAR_SHORE - dv), H)
+            code = np.where(shore, 1, code)
+            level = np.where(shore, 0.0, level)
+            wet &= ~shore
+        log('  far shore where the river meets the void: %d columns' % shore.sum())
+        del dv, void
+    if piers:
+        # piers / jetties: solid concrete from the riverbed up to the quay's level (the land behind them)
+        npc = 0
+        for pg in piers:
+            bx0, bz0, bx1, bz1 = pg.buffer(40).bounds
+            i0 = max(0, int((bx0 - X0) / RES))
+            i1 = min(nx, int((bx1 - X0) / RES) + 1)
+            j0 = max(0, int((bz0 - Z0) / RES))
+            j1 = min(nz, int((bz1 - Z0) / RES) + 1)
+            if i1 <= i0 or j1 <= j0:
+                continue
+            XX, ZZ = np.meshgrid(xs[i0:i1], zs[j0:j1], indexing='ij')
+            sub = (slice(i0, i1), slice(j0, j1))
+            ins = contains_xy(pg, XX, ZZ) & inR[sub]
+            if not ins.any():
+                continue
+            ring = contains_xy(pg.buffer(40), XX, ZZ) & ~ins & inR[sub] & ~wet[sub]
+            lv = float(level[sub][wet[sub]].max()) if wet[sub].any() else float(min(w['level_m'] for w in rivers) * ground.VS)
+            top = max(lv + PIER_UP_MIN, float(np.median(H[sub][ring])) if ring.any() else lv + PIER_UP_MIN)
+            H[sub] = np.where(ins, top, H[sub])
+            code[sub] = np.where(ins, 5, code[sub])
+            level[sub] = np.where(ins, 0.0, level[sub])
+            wet[sub] &= ~ins
+            npc += int(ins.sum())
+        log('  piers: %d columns' % npc)
     near = inR & np.isfinite(best) & (best <= BED_EXTRA + BANK_MAX)
     onbed = near & (best <= BED_EXTRA)
     bank = near & ~onbed & ~wet & ~protect
@@ -423,7 +661,7 @@ def build(tag, log=print, diff=False):
                   base[i_][:, i_ + 1] * (1 - a_)[:, None] * a_[None, :] + base[i_ + 1][:, i_ + 1] * a_[:, None] * a_[None, :])
             h = H[sub]
             lv = level[sub]
-            land = (c == 1) | (c == 2)
+            land = (c == 1) | (c == 2) | (c == 5)
             err = np.abs(h - Bq)
             maxerr = max(maxerr, float(err[land & (err < 0.08)].max()) if (land & (err < 0.08)).any() else 0.0)
             chars = np.full((64, 64), '.', dtype='<U1')
@@ -433,6 +671,8 @@ def build(tag, log=print, diff=False):
             chars[(c == 2) & (err >= 0.08)] = 'n'
             chars[c == 3] = 'w'
             chars[c == 4] = 'v'
+            chars[(c == 5) & (err < 0.08)] = 'c'
+            chars[(c == 5) & (err >= 0.08)] = 'k'
             flat = chars.ravel()
             hf = h.ravel()
             lf = lv.ravel()
@@ -448,7 +688,7 @@ def build(tag, log=print, diff=False):
             ex_ = []
             for k in range(4096):
                 ch = flat[k]
-                if ch in 'hn':
+                if ch in 'hnk':
                     ex_.append(enc(hf[k]))
                 elif ch in 'wv':
                     ex_.append(enc(hf[k]) + enc(lf[k]))

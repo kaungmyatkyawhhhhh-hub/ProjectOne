@@ -52,7 +52,10 @@ local function prepare(data, cut)
 		local half = r.half -- (Yangon: this road's own half width; nil = HALF, as before)
 		local pts = {}
 		for i, s in r.s do
-			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), wl = s[7] or half or HALF, wr = s[8] or half or HALF }
+			pts[i] = { pos = Vector3.new(s[1], s[2], s[3]), dir = Vector3.new(s[4], 0, s[5]), wl = s[7] or half or HALF, wr = s[8] or half or HALF,
+				-- (Yangon v5, d23_lanes_v5.py: s[9] the built median's half, s[10] lanes per side, s[11] the lane
+				-- width, s[12] the lanes' median half; nil on every other road)
+				mP = s[9], nl = s[10], lw = s[11], mL = s[12] }
 		end
 		roads[ri] = { name = r.name, pts = pts, route = r.kind == "route", half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil, rank = r.rank }
 		maxDh = math.max(maxDh, roads[ri].dh)
@@ -165,6 +168,10 @@ local function inMouth(roads, grid, pos: Vector3, ri: number, centre: Vector3, l
 	for oi, b in near do
 		local o = roads[oi]
 		local oh = o.half or HALF
+		local op = o.pts[b[2]]
+		if op.nl ~= nil then
+			oh = math.max(op.wl, op.wr) -- (Yangon v5: a road's width changes along it)
+		end
 		if (o.rank or 0) < (me.rank or 0) then
 			if lineDist(o, b[2], pos.X, pos.Z) < oh + 0.5 then
 				return true
@@ -266,8 +273,17 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				{ x = a.wr - 1.2, xb = b.wr - 1.2, w = 0.6, solid = true },
 				{ x = -(a.wl - 1.2), xb = -(b.wl - 1.2), w = 0.6, solid = true },
 			}
+			-- (Yangon v5: a divided road has no centre line; a solid line runs 0.6 out from each median kerb)
+			local lanesV5 = a.nl ~= nil and b.nl ~= nil
+			local divided = lanesV5 and (a.mL > 0.5 or b.mL > 0.5)
+			if lanesV5 and a.mP >= 1 and b.mP >= 1 then
+				table.insert(lines, { x = a.mP + 0.6, xb = b.mP + 0.6, w = 0.4, solid = true })
+				table.insert(lines, { x = -(a.mP + 0.6), xb = -(b.mP + 0.6), w = 0.4, solid = true })
+			end
 			-- (opts.centre, Yangon: the middle line may be solid, double and its own colour)
-			if centre.solid then
+			if divided then
+				-- (no centre line)
+			elseif centre.solid then
 				if centre.double then
 					table.insert(lines, { x = -0.55, xb = -0.55, w = 0.5, solid = true, color = centre.color })
 					table.insert(lines, { x = 0.55, xb = 0.55, w = 0.5, solid = true, color = centre.color })
@@ -276,17 +292,33 @@ function RoadLines.build(data, roadsFolder: Instance, only: { [string]: boolean 
 				end
 			end
 			if dash % 2 == 0 then
-				if not centre.solid then
+				if not centre.solid and not divided then
 					table.insert(lines, { x = 0, xb = 0, w = 0.5, color = centre.color })
 				end
 				-- (owner, 2026-11-04: "Make the road 1+1 for the roads which isnt yellow"): only the three
 				-- yellow routes keep their lane lines; the streets are one lane each way
-				if not r.route then
+				if lanesV5 and r.route then
+					-- (Yangon v5: n lanes a side, lane k from mL + w(k-1) to mL + wk, w = the lane width, or less
+					-- where the side is narrower than its lanes: then they share what there is evenly. Two-lane
+					-- undivided sides give min(16, w/2), the old rule)
+					for _, side in { 1, -1 } do
+						local wa = if side > 0 then a.wr else a.wl
+						local wb = if side > 0 then b.wr else b.wl
+						local na, nb = a.nl :: number, b.nl :: number
+						if math.min(wa - a.mL, wb - b.mL) > 14 then
+							local ea = math.min(a.lw, (wa - a.mL) / na)
+							local eb = math.min(b.lw, (wb - b.mL) / nb)
+							for k = 1, math.min(na, nb) - 1 do
+								table.insert(lines, { x = side * (a.mL + ea * k), xb = side * (b.mL + eb * k), w = 0.4 })
+							end
+						end
+					end
+				elseif not r.route then
 					-- (no lane lines)
 				elseif math.min(a.wr, b.wr) > 14 then
 					table.insert(lines, { x = math.min(H / 2, a.wr / 2), xb = math.min(H / 2, b.wr / 2), w = 0.4 })
 				end
-				if r.route and math.min(a.wl, b.wl) > 14 then
+				if r.route and not lanesV5 and math.min(a.wl, b.wl) > 14 then
 					table.insert(lines, { x = -math.min(H / 2, a.wl / 2), xb = -math.min(H / 2, b.wl / 2), w = 0.4 })
 				end
 			end

@@ -44,6 +44,7 @@ from glb import Mesh, write_glb, check_glb, code
 
 OUT = os.path.join(geo.BUILD, 'city')
 COLLIDE_CHARS = 189000
+SEAM_COLLIDE_EXT = 12.0
 BOX_LEN = 40.0      # a collision box covers at most this much road (lead, 14 Nov: Studio memory)
 FILE_TRIS, FILE_MESHES = 90000, 100
 
@@ -174,7 +175,9 @@ def write_meshes(meshes, tag, log=print):
 
 def collision(B, net):
     """invisible boxes: carriageways, pavements, medians, junction squares, decks and parapets"""
-    from shapely.geometry import Polygon
+    from shapely.geometry import Polygon, box as _sbox
+    global _BOX05
+    _BOX05 = _sbox(*geo.BOX_05)
     rows = []
 
     def row(p0, p1, y0, y1, width, kind, off=0.0, R=None):
@@ -213,10 +216,26 @@ def collision(B, net):
     for e in net.edges:
         lo, hi = B.lohi[e.id]
         r, rr = B.raised[e.id]
+        cut_ = getattr(e, 'cut', None) or [False, False]
+        cut_ = [cut_[k] and _street_end_near(e.P[0 if k == 0 else -1]) for k in (0, 1)]
         for i, j in runs_of(e, lo, hi, r):
             p0, p1 = e.P[i], e.P[j]
             if np.linalg.norm(p1 - p0) < 0.5:
                 continue
+            # (2026-11-14) a run ending on a cut at batch 0.5's box edge gets a box _seam_ext studs on past it, from 0.15
+            # under the cut's height (the edge is often oblique to the road: a square box end left a wedge with no road
+            # under one wheel; the 0.5 street's own box, at the same height there, stays the top surface where both are)
+            for kk, at, sg in ((0, 0, -1.0), (1, len(e.P) - 1, 1.0)):
+                if (i if kk == 0 else j) == at and cut_[kk] and rm._on_box_edge(e.P[at]) and not (r[i] or r[j]):
+                    lo_k, hi_k = lo[at], hi[at]
+                    Rk = np.array([-e.D[at][1], e.D[at][0]])
+                    a_ = e.P[at]
+                    ext_ = _seam_ext(e.P[at], e.D[at], (hi[at] - lo[at]) / 2 + e.walk)
+                    b_ = e.P[at] + e.D[at] * sg * ext_
+                    yk = float(B.h((e.P[at] + Rk * (lo_k + hi_k) / 2)[None, :])[0]) - 0.15
+                    wk = hi_k - lo_k + (2 * e.walk if rm.flush(e) else 0.0)
+                    # (it dips 8 % away from the cut, so past the wedge it stays under the 0.5 street's own surface)
+                    row(a_, b_, yk, yk - 0.08 * ext_, wk, 'R', (lo_k + hi_k) / 2, Rk)
             Rm = e.D[(i + j) // 2]
             Rv = np.array([-Rm[1], Rm[0]])
             l_, h_ = (lo[i] + lo[j]) / 2, (hi[i] + hi[j]) / 2
@@ -251,7 +270,10 @@ def collision(B, net):
                 if kind == 'M' and not (paired and l_ > 0.5):
                     continue
                 q = Polygon([p0 + Rv * a_, p1 + Rv * a_, p1 + Rv * b_, p0 + Rv * b_])
-                if not _blocked(B, q, e):
+                # (2026-11-14) a pavement / median box mostly inside batch 0.5's box (a road running obliquely along the
+                # edge: its mesh is clipped there) lay on the 0.5 street's carriageway, 0.5 over it
+                inbox = not (e.seam[0] or e.seam[1]) and q.intersection(_BOX05).area > 0.05 * q.area
+                if not inbox and not _blocked(B, q, e):
                     ya, yb = hy((a_ + b_) / 2)
                     row(p0, p1, ya + rm.PAVE_UP, yb + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
                     continue
@@ -259,6 +281,8 @@ def collision(B, net):
                     k2 = min(j, k + 2)
                     q0, q1 = e.P[k], e.P[k2]
                     qq = Polygon([q0 + Rv * a_, q1 + Rv * a_, q1 + Rv * b_, q0 + Rv * b_])
+                    if inbox and _BOX05.contains(qq.centroid):
+                        continue
                     if not _blocked(B, qq, e):
                         ya, yb = hy((a_ + b_) / 2, k, k2)
                         row(q0, q1, ya + rm.PAVE_UP, yb + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
@@ -279,6 +303,33 @@ def collision(B, net):
         yj = float(B.h(p[None, :])[0])
         row(p - d * reach, p + d * reach, yj, yj, 2 * reach, 'J')
     return rows
+
+
+_S05 = None
+
+
+def _seam_ext(p, d, half):
+    """(2026-11-14) how far a flat seam box must run past a cut on the box edge to cover the wedge an oblique edge leaves:
+    half * tan(the angle between the road and the edge's normal) + 4, at least SEAM_COLLIDE_EXT, at most 80"""
+    x0, z0, x1, z1 = geo.BOX_05
+    dist = [abs(p[0] - x0), abs(p[0] - x1), abs(p[1] - z0), abs(p[1] - z1)]
+    k = int(np.argmin(dist))
+    c = abs(float(d[0])) if k < 2 else abs(float(d[1]))
+    c = max(c, 1e-3)
+    t = math.sqrt(max(0.0, 1 - c * c)) / c
+    return float(min(80.0, max(SEAM_COLLIDE_EXT, half * t + 4.0)))
+_BOX05 = None
+
+
+def _street_end_near(p):
+    """(2026-11-14) a batch 0.5 street ends within 3 studs of p (streets.py's streets_05_edgeends.json)"""
+    global _S05
+    if _S05 is None:
+        from scipy.spatial import cKDTree
+        pth = os.path.join(OUT, 'streets_05_edgeends.json')
+        ends = [(q[0], q[1]) for q in json.load(open(pth))['ends']] if os.path.exists(pth) else []
+        _S05 = cKDTree(np.array(ends)) if ends else False
+    return bool(_S05) and _S05.query((float(p[0]), float(p[1])))[0] < 3.0
 
 
 def _blocked(B, q, e):

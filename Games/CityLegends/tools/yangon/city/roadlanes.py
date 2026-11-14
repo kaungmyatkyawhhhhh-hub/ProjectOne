@@ -273,6 +273,12 @@ def build(net, tag, log=print):
     # the batch 0.5 seam
     seam_links, seam_first = _seam(net, lanes, index, link)
     stats['seam'] = seam_links
+    # (2026-11-14, batch 2) the seam with an earlier batch: a lane that ends on its border runs on into that batch's lane
+    # there (and that batch's lanes ending there run on into ours), instead of turning round
+    cont, nb = _seam_batches(net, lanes, link, tag)
+    if cont:
+        links[:] = [x for x in links if not (not isinstance(x[0], tuple) and x[0] in cont and x[4].startswith('turns round'))]
+    stats['seam_batches'] = nb
     # dead-end check: drop lanes whose end leads nowhere, repeatedly
     lanes, links, dropped = _prune(lanes, links)
     stats['dropped'] = dropped
@@ -359,6 +365,86 @@ def _seam(net, lanes, index, link):
                 link(('g', best[1]['g']), len(best[1]['pts']), i, 1, 'from batch 0.5: ' + best[1]['road'])
                 n += 1
     return n, None
+
+
+def _batch_lanes(u):
+    """batch u's lanes from build/city/YangonLanesB<u>_<k>.lua with their global numbers"""
+    res = []
+    k = 1
+    while True:
+        p = os.path.join(geo.BUILD, 'city', 'YangonLanesB%s_%d.lua' % (u, k))
+        if not os.path.exists(p):
+            break
+        src = open(p, encoding='utf-8').read()
+        first = int(re.search(r'first\s*=\s*(\d+)', src).group(1))
+        j = 0
+        for m in re.finditer(r'\{ road = "([^"]*)", way = (-?\d+), lane = (\d+), kind = "(\w+)", closed = (\w+)[^}]*?pts = \{ ([^}]*) \}', src):
+            v = [float(x) for x in m.group(6).split(',')]
+            res.append(dict(g=first + j, road=m.group(1), way=int(m.group(2)), lane=int(m.group(3)), pts=np.array(v).reshape(-1, 3)))
+            j += 1
+        k += 1
+    return res
+
+
+BATCH_ORDER = ('1', '2', '3')
+
+
+def _seam_batches(net, lanes, link, tag):
+    """(2026-11-14, batch 2) join the lanes that end / start on an earlier batch's border (a cut end) to that batch's lanes
+    starting / ending there (the same spot within 4.5 studs across, 0..12 along, the same heading). Returns (the set of
+    our lanes whose end now runs on, the number of links)."""
+    if tag not in BATCH_ORDER:
+        return set(), 0
+    from shapely.geometry import Point
+    cont, n = set(), 0
+    for u in BATCH_ORDER[:BATCH_ORDER.index(tag)]:
+        old = _batch_lanes(u)
+        if not old:
+            continue
+        poly = geo.batch_poly(u)
+        S0 = np.array([[o['pts'][0][0], o['pts'][0][2]] for o in old])
+        S1 = np.array([[o['pts'][-1][0], o['pts'][-1][2]] for o in old])
+
+        def best_of(p, d, ends, ahead):
+            dl = math.hypot(d[0], d[2])
+            if dl < 1e-6:
+                return None
+            ux, uz = d[0] / dl, d[2] / dl
+            dd = np.hypot(ends[:, 0] - p[0], ends[:, 1] - p[2])
+            best = None
+            for j in np.nonzero(dd < 14.0)[0]:
+                o = old[int(j)]
+                q = o['pts'][0] if ahead else o['pts'][-1]
+                dq = (o['pts'][1] - o['pts'][0]) if ahead else (o['pts'][-1] - o['pts'][-2])
+                ql = math.hypot(dq[0], dq[2])
+                if ql < 1e-6 or (dq[0] * ux + dq[2] * uz) / ql < 0.85:
+                    continue
+                vx, vz = q[0] - p[0], q[2] - p[2]
+                along = (vx * ux + vz * uz) * (1 if ahead else -1)
+                lat = abs(vx * uz - vz * ux)
+                if -4 <= along <= 12 and lat < 4.5 and (best is None or lat < best[0]):
+                    best = (lat, o)
+            return best
+        for i, l in enumerate(lanes):
+            e = l['edge']
+            cut = getattr(e, 'cut', None) or [False, False]
+            end_i, start_i = (1, 0) if l['way'] == 1 else (0, 1)
+            if cut[end_i]:
+                p = l['pts'][-1]
+                if poly.distance(Point(p[0], p[2])) < 6.0:
+                    b = best_of(p, l['pts'][-1] - l['pts'][-2], S0, True)
+                    if b:
+                        link(i, len(l['pts']), ('g', b[1]['g']), 1, 'onto batch %s: %s' % (u, b[1]['road']))
+                        cont.add(i)
+                        n += 1
+            if cut[start_i]:
+                p = l['pts'][0]
+                if poly.distance(Point(p[0], p[2])) < 6.0:
+                    b = best_of(p, l['pts'][1] - l['pts'][0], S1, False)
+                    if b:
+                        link(('g', b[1]['g']), len(b[1]['pts']), i, 1, 'from batch %s: %s' % (u, b[1]['road']))
+                        n += 1
+    return cont, n
 
 
 def _prune(lanes, links):

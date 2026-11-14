@@ -58,16 +58,131 @@ OVERRIDES = [
     (r'lotte hotel', 23, 'tower'),
     (r'hledan cent', 9, 'mass'),
     (r'junction square$', 4, 'hall'),
+    # batch 2, downtown (15 Nov 2026): the colonial landmarks without a model of their own (landmarks.json facts), as
+    # buildings on their real outlines with their real floors and colours. Optional 4th item: wall / roof colour, roof.
+    (r'^the strand hotel$', 3, 'mass', {'wall': (236, 228, 206)}),
+    (r"ministers' building|secretariat", 3, 'mass', {'wall': (170, 78, 56)}),
+    (r'^high court$', 3, 'mass', {'wall': (176, 84, 62)}),
+    (r'^customs house$', 4, 'mass', {'wall': (168, 82, 64)}),
+    (r'yangon central railway station', 3, 'hall', {'wall': (230, 214, 170), 'roof': 'gable', 'roof_colour': (150, 60, 46)}),
+    (r'lokanat', 3, 'mass', {'wall': (232, 222, 196)}),
+    (r'yangon central post office', 4, 'mass', {'wall': (226, 210, 176)}),
+    (r'myanma port authority$|^myanmar port authority$', 4, 'mass', {'wall': (230, 222, 200)}),
+    (r'holy trinity cathedral|saint mary.s cathedral|st\.? mary.s cathedral', 3, 'hall',
+     {'wall': (172, 80, 60), 'roof': 'gable', 'roof_colour': (110, 70, 60)}),
+    (r'^junction city$', 7, 'mass', {'wall': (214, 208, 196)}),
+    (r'^sakura tower$', 20, 'tower', None),
+    (r'sule shangri', 22, 'tower', None),
+    (r'^sule square$', 22, 'tower', None),
 ]
 
 
 def override(name):
     if not name:
         return None
-    for pat, fl, st in OVERRIDES:
-        if _re.search(pat, name, _re.I):
-            return fl, st
+    for ov in OVERRIDES:
+        if _re.search(ov[0], name, _re.I):
+            return ov[1], ov[2]
     return None
+
+
+def override_look(name):
+    """the optional colours / roof of an override (or None)"""
+    if not name:
+        return None
+    for ov in OVERRIDES:
+        if _re.search(ov[0], name, _re.I):
+            return ov[3] if len(ov) > 3 else None
+    return None
+
+
+# landmarks.json id -> the model tools/yangon/city/landmarks.py builds (build/landmarks/<model>.json). Only these grounds
+# are kept free of generic buildings; a landmark with no model yet (Bogyoke Market, the Strand, the Secretariat, the
+# station, the towers) is built from its real OSM outlines with the OVERRIDES above, so downtown has no empty holes.
+LANDMARK_MODEL = {'shwedagon': 'shw', 'sule': 'sule', 'city_hall': 'ch', 'independence_monument': 'indep',
+                  'botataung': 'bota', 'karaweik': 'kara', 'chaukhtatgyi': 'chauk', 'kaba_aye': 'kaba',
+                  'maha_wizaya': 'wiz'}
+LANDMARK_GROUND_KINDS = {'pagoda', 'pagoda_roundabout', 'zoo', 'park'}
+# Bogyoke Aung San Market (1926): long two-storey colonial market halls, ochre and cream walls, red and green pitched
+# roofs (landmarks.json facts); every plot inside its OSM marketplace ground gets that look.
+# towers standing on a podium whose OSM outline is the whole complex: name regex -> [(floors, width, depth, where along the
+# podium's long axis -1..1, name)]. Junction City (2017): a 25-floor office tower and the 23-floor Pan Pacific Yangon on a
+# 7-floor mall (landmarks.json facts).
+PODIUM_TOWERS = {r'^junction city$': [(25, 64, 52, -0.62, 'Junction City Tower'), (23, 70, 46, 0.62, 'Pan Pacific Yangon')]}
+MARKET_LOOK = {'name_re': r'bogyoke aung san market', 'floors': 2, 'style': 'hall', 'roof': 'gable',
+               'walls': [(226, 196, 120), (232, 222, 196), (220, 186, 112)], 'roofs': [(150, 62, 46), (70, 110, 80)]}
+
+
+def podium_towers(allp):
+    """towers on a podium (OSM has one outline for the whole complex, PODIUM_TOWERS): each tower is cut out of the podium's
+    street-side edge as its own plot (a notch, never a hole: the plot schema has no holes). Returns the towers added."""
+    extra = []
+    for pl in allp:
+        spec = next((v for k, v in PODIUM_TOWERS.items() if _re.search(k, pl.get('name') or '', _re.I)), None)
+        if not spec or any(q['id'].startswith(pl['id'] + 't') for q in allp):
+            continue
+        g = Polygon(pl['poly']).buffer(0)
+        mrr = list(g.minimum_rotated_rectangle.exterior.coords)[:4]
+        e0 = (mrr[1][0] - mrr[0][0], mrr[1][1] - mrr[0][1])
+        e1 = (mrr[2][0] - mrr[1][0], mrr[2][1] - mrr[1][1])
+        ax, cross = (e0, e1) if math.hypot(*e0) >= math.hypot(*e1) else (e1, e0)
+        L, W = math.hypot(*ax), math.hypot(*cross)
+        ux, uz = ax[0] / L, ax[1] / L
+        px, pz = -uz, ux
+        c = g.centroid
+        cuts = []
+        for k, (fl, w, dep, at, name) in enumerate(spec):
+            off = W / 2 - dep / 2 + 3  # (pushed out past the street-side edge, so the cut is a notch)
+            tx, tz = c.x + ux * at * L / 2 + px * off, c.y + uz * at * L / 2 + pz * off
+            tp = Polygon(rect_poly(tx, tz, px, pz, w, dep)).intersection(g)
+            if tp.geom_type != 'Polygon' or tp.area < 0.5 * w * dep:
+                continue
+            cuts.append(tp)
+            pts = ccw(list(tp.exterior.coords)[:-1])
+            extra.append(dict(pl, id=f"{pl['id']}t{k}", poly=[[round(x, 2), round(z, 2)] for x, z in pts], floors=fl,
+                              style='tower', roof='flat', front=None, shop=False, name=name, wall_colour=[196, 206, 214]))
+        if cuts:
+            rest = g.difference(unary_union(cuts).buffer(1.0))
+            if rest.geom_type != 'Polygon':
+                rest = max(rest.geoms, key=lambda t: t.area)
+            if len(rest.interiors):
+                raise ValueError('podium towers left a hole in ' + pl['id'])
+            pl['poly'] = [[round(x, 2), round(z, 2)] for x, z in ccw(list(rest.simplify(0.4).exterior.coords)[:-1])]
+            pl['front'] = None
+    allp += extra
+    return len(extra)
+
+
+def landmark_models(tag):
+    """footprints of this batch's landmark MODELS (build/landmarks/<model>.json: every mesh's box and the pads), grown 6"""
+    lms = json.load(open(os.path.join(HERE, 'landmarks.json'), encoding='utf-8'))['landmarks']
+    out = []
+    for l in lms:
+        mid = LANDMARK_MODEL.get(l['id'])
+        if l.get('batch') != tag or not mid:
+            continue
+        path = os.path.join(geo.BUILD, 'landmarks', f'{mid}.json')
+        if not os.path.exists(path):
+            continue
+        d = json.load(open(path, encoding='utf-8'))
+        meshes = d['meshes']
+        if isinstance(meshes, str):
+            import ast
+            meshes = ast.literal_eval(meshes)
+        for m in meshes:
+            (cx, _, cz), (sx, _, sz) = m['centre'], m['size']
+            if sx * sz > 2.5e5:  # (a hill / ground mesh: its pads say where the buildings are)
+                continue
+            out.append(sbox(cx - sx / 2, cz - sz / 2, cx + sx / 2, cz + sz / 2))
+        for row in (d.get('pads') or '').split('|'):
+            pts = row.split(' ')[-1] if row.strip() else ''
+            try:
+                q = [tuple(float(v) for v in s.split(',')) for s in pts.split(';') if ',' in s]
+                if len(q) >= 3:
+                    out.append(Polygon(q).buffer(0))
+            except ValueError:
+                pass
+    return unary_union(out).buffer(6) if out else Polygon()
 
 
 def rng_for(*k):
@@ -288,7 +403,7 @@ def batch_road_geoms(tag):
 def landmark_areas(tag):
     """the OSM grounds of this batch's landmarks (tools/yangon/city/landmarks.json): no generic buildings or infill there"""
     lms = json.load(open(os.path.join(HERE, 'landmarks.json'), encoding='utf-8'))['landmarks']
-    names = [l['name'].lower() for l in lms if l.get('batch') == tag]
+    names = [l['name'].lower() for l in lms if l.get('batch') == tag and (l['id'] in LANDMARK_MODEL or l.get('kind') in LANDMARK_GROUND_KINDS)]
     out = []
     for a in load('areas'):
         nm = ((a['t'].get('name:en') or '') + ' ' + (a['t'].get('name') or '')).lower()
@@ -369,10 +484,14 @@ def build(tag, box):
         roads_poly, segs = batch_road_geoms(tag)
         region = geo.batch_poly(tag).difference(sbox(*geo.BOX_05))
         landmarks = []
-        blocked = unary_union([sbox(*box).buffer(400).difference(region), landmark_areas(tag)])
+        lm_models = landmark_models(tag)
+        blocked = unary_union([sbox(*box).buffer(400).difference(region), landmark_areas(tag), lm_models])
     segs_tree = STRtree([s[0] for s in segs])
     water = water_polys(box)
     lm_polys = [Polygon(rect_poly(p['x'], p['z'], p['fx'], p['fz'], p['w'] + 16, p['d'] + 16)) for p in landmarks]
+    if tag != '05' and not lm_models.is_empty:
+        # (a landmark model stands there: an OSM building over a sixth of it under the model goes, e.g. City Hall's own outline)
+        lm_polys += list(lm_models.geoms) if hasattr(lm_models, 'geoms') else [lm_models]
     # (the step 8 landmark models with real names: never a second copy from the OSM outline)
     LM_NAME = {'novotel': 'novotel', 'mmplaza': 'myanmar plaza', 'optima': 'optima'}
     lm_names = [(LM_NAME.get(p.get('landmark'), '?'), p['x'], p['z']) for p in landmarks]
@@ -451,8 +570,14 @@ def build(tag, box):
         roof, rc = roof_for(style, r)
         if kind == 'hall' and HALL_WORDS.search((t.get('name:en') or '') + ' ' + (t.get('name') or '')):
             roof, rc = 'gable', (146, 148, 150)
+        wc = pick(r, WALLS, WALL_W)
+        look = override_look(t.get('name:en') or t.get('name'))
+        if look:
+            wc = look.get('wall', wc)
+            roof = look.get('roof', roof)
+            rc = look.get('roof_colour', rc)
         plots.append({'id': f"o{b['id']}", 'poly': [[round(x, 2), round(z, 2)] for x, z in coords], 'floors': int(fl),
-                      'style': style, 'roof': roof, 'roof_colour': list(rc), 'wall_colour': list(pick(r, WALLS, WALL_W)),
+                      'style': style, 'roof': roof, 'roof_colour': list(rc), 'wall_colour': list(wc),
                       'front': fi if fd < 30 else None, 'shop': bool(style == 'shophouse' or (near_big and fl <= 6 and r.random() < 0.6)),
                       'name': t.get('name:en') or t.get('name'), 'src': 'osm', 'use': None, 'kind': kind,
                       'sign': bool(t.get('name:en') or t.get('name'))})
@@ -673,6 +798,32 @@ def build(tag, box):
     print('interior', len(infill), 'tries', tries, round(__import__('time').time() - t0), 's')
 
     allp = plots + infill
+    if tag != '05':
+        # the market grounds with a look of their own (Bogyoke Aung San Market's halls)
+        mk = []
+        for a in load('areas'):
+            nm = ((a['t'].get('name:en') or '') + ' ' + (a['t'].get('name') or '')).lower()
+            if _re.search(MARKET_LOOK['name_re'], nm):
+                try:
+                    pg = Polygon(proj(a['p'])).buffer(0)
+                except Exception:
+                    continue
+                if pg.area > 400 and region.intersects(pg):
+                    mk.append(pg.buffer(2))
+        n_mk = 0
+        if mk:
+            mku = unary_union(mk)
+            for pl in allp:
+                c = Polygon(pl['poly']).centroid
+                if mku.contains(c):
+                    r = rng_for('market', pl['id'])
+                    pl.update({'floors': MARKET_LOOK['floors'], 'style': MARKET_LOOK['style'], 'roof': MARKET_LOOK['roof'],
+                               'roof_colour': list(r.choice(MARKET_LOOK['roofs'])), 'wall_colour': list(r.choice(MARKET_LOOK['walls'])),
+                               'shop': True, 'kind': 'market'})
+                    n_mk += 1
+        print('market look on', n_mk, 'plots')
+        n_tw = podium_towers(allp)
+        print('podium towers', n_tw)
     out = {'box': list(box), 'note': 'tools/yangon/city/plots.py (OSM outlines + infill to the real density), 14 Nov 2026',
            'landmarks_kept': [p.get('name') for p in landmarks], 'plots': allp}
     path = os.path.join(geo.BUILD, 'city', f'plots_{tag}.json')

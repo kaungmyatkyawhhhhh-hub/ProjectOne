@@ -391,7 +391,14 @@ def solve(net, G, iters=2, log=print):
     for e in edges:
         vkey[e.a] = int(e._ids[0])
         vkey[e.b] = int(e._ids[-1])
-    y0 = maxprop(gr.copy(), adj)        # the ground-following profile (grades capped), no bridges
+    # (2026-11-14, batch 2) ends on the border of a batch built before this one take that batch's end heights; a pin over
+    # the ground goes into the base (the road climbs to it at its grade), one under it is eased by minprop_from below
+    bpins = batch_pins(net)
+    gb = gr.copy()
+    for v, yy in bpins.items():
+        gb[v] = max(gb[v], yy)
+    net.batch_pins = bpins
+    y0 = maxprop(gb.copy(), adj)        # the ground-following profile (grades capped), no bridges
     net.y0 = y0
     y = y0.copy()
     fam_grade, fam_status = {}, {}
@@ -402,7 +409,7 @@ def solve(net, G, iters=2, log=print):
         reqs_by_fam = {}
         for (eid, i), (need, what) in req_info.items():
             reqs_by_fam.setdefault(fam_of.get(eid), []).append((int(edges[eid]._ids[i]), need))
-        base = gr.copy()
+        base = gb.copy()
         cost = {}
         fam_grade, fam_status = {}, {}
         for k, (ids, land) in enumerate(fams):
@@ -458,6 +465,8 @@ def solve(net, G, iters=2, log=print):
     # (streets.py writes the street ends' own heights, streets_05_edgeends.json); smaller steps are eased by streets.py
     for v, yy in street_pins(edges, y).items():
         pins.setdefault(v, yy)
+    for v, yy in bpins.items():
+        pins.setdefault(v, yy)
     if pins:
         floor = np.full(len(y), -1e9)
         for (eid, i), (need, what) in req_info.items():
@@ -480,6 +489,40 @@ def solve(net, G, iters=2, log=print):
 
 
 STREET_PIN_STEP = 1.5
+BATCH_ORDER = ('1', '2', '3')
+BATCH_PIN_D = 1.5        # an end this close to an earlier batch's road end (on the shared border) takes its height
+BATCH_PIN_LIFT = 8.0     # ... unless that end stands more than this over its ground (a deck the earlier batch holds up over
+                         # the seam, like batch 1's Baho Road bridge junction 31 over Minye Kyaw Swa Road: pinning it lifts
+                         # half of the next batch's streets and still leaves a step; that is the earlier batch's to fix)
+
+
+def batch_pins(net):
+    """(2026-11-14, batch 2) the seam between two batches: every end of this batch's network that lies on the border of a
+    batch built before it (BATCH_ORDER) within BATCH_PIN_D of one of that batch's road ends (roads_<u>_profile.json) is
+    pinned to that end's height (batch 1's U Wisara ramp left batch 1 5 studs over batch 2's road)."""
+    import json, os
+    tag = getattr(net, 'tag', None)
+    if tag not in BATCH_ORDER:
+        return {}
+    from shapely.geometry import Point
+    out = {}
+    for u in BATCH_ORDER[:BATCH_ORDER.index(tag)]:
+        p = os.path.join(geo.BUILD, 'city', 'roads_%s_profile.json' % u)
+        if not os.path.exists(p):
+            continue
+        prof = json.load(open(p))
+        E = np.array([[e['pts'][k][0], e['pts'][k][2], e['pts'][k][1], e['pts'][k][3]] for e in prof for k in (0, -1)])
+        poly = geo.batch_poly(u)
+        for e in net.edges:
+            for end in (0, -1):
+                px, pz = e.P[end]
+                if poly.distance(Point(px, pz)) > 3.0:
+                    continue
+                d = np.hypot(E[:, 0] - px, E[:, 1] - pz)
+                k = int(d.argmin())
+                if d[k] <= BATCH_PIN_D and E[k, 2] - E[k, 3] <= BATCH_PIN_LIFT:
+                    out[int(e._ids[end])] = float(E[k, 2])
+    return out
 
 
 def street_pins(edges, y):

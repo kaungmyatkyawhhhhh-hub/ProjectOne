@@ -33,6 +33,16 @@ def main(tag):
         for k, l in enumerate(lanes_of(src)):
             glob[first + k] = l
         total = max(total, first + n - 1)
+    # (2026-11-14) the earlier batches' lanes too: a batch's seam links run into them (roadlanes._seam_batches)
+    for t in ('1', '2', '3'):
+        if t == tag:
+            break
+        for f in sorted((f for f in os.listdir(OUT) if re.match(r'YangonLanesB%s_\d+\.lua$' % t, f)),
+                        key=lambda f: int(re.search(r'_(\d+)\.lua$', f).group(1))):
+            src = open(os.path.join(OUT, f), encoding='utf-8').read()
+            first = int(re.search(r'first\s*=\s*(\d+)', src).group(1))
+            for k, l in enumerate(lanes_of(src)):
+                glob[first + k] = l
     files = sorted((f for f in os.listdir(OUT) if re.match(r'YangonLanesB%s_\d+\.lua$' % tag, f)),
                    key=lambda f: int(re.search(r'_(\d+)\.lua$', f).group(1)))
     expect = rl.first_index(tag)

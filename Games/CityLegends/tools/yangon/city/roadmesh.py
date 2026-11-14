@@ -125,6 +125,7 @@ class Builder:
             sub = _sub(e, a, b)
             lo_, hi_ = lo[a:b + 1], hi[a:b + 1]
             paired = (e.w[a:b + 1] > 0.5) & bool(e.oneway)
+            sub, lo_, hi_, paired = _seam_extend(e, a, b, sub, lo_, hi_, paired)
             wl = np.where(paired, 0.0, e.walk)
             self.carr.append(rn.strip_poly(sub, lo_, hi_))
             self.outer.append(rn.strip_poly(sub, lo_ - wl, hi_ + e.walk))
@@ -166,6 +167,9 @@ class Builder:
         if seam_patch:
             excl = excl.difference(unary_union(seam_patch).difference(_game_roads_only(net)))
         self.allowed = net.outline.difference(excl)
+        if getattr(net, 'reach_area', None) is not None:
+            # (2026-11-14, batch 2) a bridge built on past the outline (roadnet.REACH_OUT): its meshes too
+            self.allowed = self.allowed.union(net.reach_area)
         self.allowed_p = prep(self.allowed)
         self.zebras = []
 
@@ -738,6 +742,37 @@ def _game_roads_only(net):
 
 class _Sub:
     pass
+
+
+SEAM_EXT = 40.0     # (2026-11-14) a road cut on batch 0.5's box edge: its strips run on this far past the cut, the allowed
+                    # area clips them ON the edge (a square cut end met an oblique edge with a gap on one side)
+
+
+def _on_box_edge(p):
+    x0, z0, x1, z1 = geo.BOX_05
+    return min(abs(p[0] - x0), abs(p[0] - x1), abs(p[1] - z0), abs(p[1] - z1)) <= 1.0
+
+
+def _seam_extend(e, a, b, sub, lo_, hi_, paired):
+    cut = getattr(e, 'cut', None) or [False, False]
+    n = len(e.P)
+    pre = a == 0 and cut[0] and _on_box_edge(e.P[0])
+    post = b == n - 1 and cut[1] and _on_box_edge(e.P[-1])
+    if not (pre or post):
+        return sub, lo_, hi_, paired
+    s = _Sub()
+    P, D = sub.P, sub.D
+    lo_, hi_, paired = np.asarray(lo_, float), np.asarray(hi_, float), np.asarray(paired, bool)
+    if pre:
+        P = np.vstack([P[:1] - D[:1] * SEAM_EXT, P])
+        D = np.vstack([D[:1], D])
+        lo_, hi_, paired = np.r_[lo_[0], lo_], np.r_[hi_[0], hi_], np.r_[paired[0], paired]
+    if post:
+        P = np.vstack([P, P[-1:] + D[-1:] * SEAM_EXT])
+        D = np.vstack([D, D[-1:]])
+        lo_, hi_, paired = np.r_[lo_, lo_[-1]], np.r_[hi_, hi_[-1]], np.r_[paired, paired[-1]]
+    s.P, s.D = P, D
+    return s, lo_, hi_, paired
 
 
 def _sub(e, a, b):

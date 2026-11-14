@@ -44,6 +44,8 @@ local MAT = {
 	n = Enum.Material.Mud,
 	w = Enum.Material.Mud,
 	v = Enum.Material.Sand,
+	c = Enum.Material.Concrete, -- (batch 2) the riverfront quay edge and the piers, on the base grid
+	k = Enum.Material.Concrete, -- ... at an explicit top
 }
 local AIR, WATER = Enum.Material.Air, Enum.Material.Water
 
@@ -87,14 +89,14 @@ function M.decode(line: string)
 	local ep = 1
 	for k = 0, 4095 do
 		local c = codes[k + 1]
-		if c == "g" or c == "m" then
+		if c == "g" or c == "m" or c == "c" then
 			local ix, iz = k // 64, k % 64
 			local fx, fz = (ix * 4 + 2) / 16, (iz * 4 + 2) / 16
 			local i, j = math.min(math.floor(fx), 15), math.min(math.floor(fz), 15)
 			local a, b = fx - i, fz - j
 			tops[k + 1] = B[i * 17 + j + 1] * (1 - a) * (1 - b) + B[(i + 1) * 17 + j + 1] * a * (1 - b)
 				+ B[i * 17 + j + 2] * (1 - a) * b + B[(i + 1) * 17 + j + 2] * a * b
-		elseif c == "h" or c == "n" then
+		elseif c == "h" or c == "n" or c == "k" then
 			tops[k + 1] = h2(ex, ep)
 			ep += 2
 		elseif c == "w" or c == "v" then

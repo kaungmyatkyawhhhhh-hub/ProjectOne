@@ -44,6 +44,45 @@ RANK = {'motorway': 0, 'trunk': 0, 'primary': 1, 'secondary': 2, 'tertiary': 3, 
         'primary_link': 4, 'secondary_link': 4, 'tertiary_link': 5, 'unclassified': 6, 'residential': 6, 'road': 6,
         'living_street': 7, 'service': 8}
 LANE_W = {1: 10.0, 2: 16.0, 3: 13.0}
+# OSM way ids built whole past the batch outline (a bridge leaving over a river to land where no batch lies)
+REACH_OUT = {'2': (1219935185,)}
+# (2026-11-14, batch 2) a roundabout round a landmark: its centre line pushed out radially to at least rmin from the
+# landmark's centre (the game's wider lanes ran the inner lane through Sule Pagoda's ring of shops, radius 66 + its gates:
+# OSM's ring is 73-94 from the stupa, the carriageway 19.5 a side), and its lanes narrowed to lane_w (City Hall stands
+# 103 studs from Sule at the roundabout's north-east: 3 lanes of 13 plus pavements could not fit between them); the roads
+# meeting it move their end with it
+ROUND_FIT = {'2': [dict(name='Sule Roundabout', centre=(33200.0, 8066.0), rmin=87.0, lane_w=10.0)]}
+
+
+def round_fit(edges, tag):
+    for R in ROUND_FIT.get(tag, ()):
+        cx, cz = R['centre']
+        rmin = R['rmin']
+        ring = [e for e in edges if e.name == R['name']]
+        keys = {e.a for e in ring} | {e.b for e in ring}
+
+        def push(P):
+            d = P - np.array([cx, cz])
+            r = np.hypot(d[:, 0], d[:, 1])
+            k = (r < rmin) & (r > 1e-6)
+            P = P.copy()
+            P[k] = np.array([cx, cz]) + d[k] * (rmin / r[k])[:, None]
+            return P
+        for e in ring:
+            e.P0 = densify(push(e.P0))
+            if R.get('lane_w'):
+                e.Wf = R['lane_w']
+                if not e.oneway:
+                    e.Wb = R['lane_w']
+        for e in edges:
+            if e in ring:
+                continue
+            if e.a in keys:
+                e.P0 = e.P0.copy()
+                e.P0[0] = push(e.P0[:1])[0]
+            if e.b in keys:
+                e.P0 = e.P0.copy()
+                e.P0[-1] = push(e.P0[-1:])[0]
 
 
 def _num(t, k):
@@ -763,6 +802,7 @@ def build(tag, margin=400.0):
     big = poly.buffer(margin)
     area_ll = Polygon([geo.lonlat(x, z) for x, z in big.exterior.coords])
     edges = load_edges(area_ll)
+    round_fit(edges, tag)
     fam = family_ids(edges, node_map(edges))
     for e in edges:
         e.push = None
@@ -797,7 +837,29 @@ def build(tag, margin=400.0):
     road_only = unary_union([LineString([(q[0], q[2]) for q in r['s']]).buffer(max(max(q[6], q[7]) for q in r['s']) + 10.5, cap_style=2)
                              for r in game['roads']])
     net.seam_region = poly.difference(road_only)
-    edges = clip_edges(edges, region, net.seam_region)
+    # (2026-11-14, batch 2) a river bridge that leaves the batch over open water (the Yangon-Dala Bridge left the outline in
+    # mid-river and ended in the air) runs on whole to its far landing, where no other batch lies
+    ext_ways = REACH_OUT.get(tag, ())
+    if ext_ways:
+        others = unary_union([geo.batch_poly(t) for t in ('1', '2', '3') if t != tag] + [sbox(*geo.BOX_05)])
+        lines = [LineString(geo.proj(r['p'])) for r in geo.load('roads') if r['id'] in ext_ways]
+        if lines:
+            reach = unary_union(lines).buffer(4.0, cap_style=2).difference(others).difference(excl)
+            whole = region.union(reach)
+            # (the meshes' allowed area: the bridge's whole width and walls past the outline)
+            net.reach_area = unary_union(lines).buffer(60.0, cap_style=2).difference(poly).difference(others).difference(excl)
+            ext_e = [e for e in edges if e.wid in ext_ways]
+            rest_e = [e for e in edges if e.wid not in ext_ways]
+            rest = clip_edges(rest_e, region, net.seam_region)
+            out = clip_edges(ext_e, whole, net.seam_region)
+            edges = rest + out
+            for i, e in enumerate(edges):
+                e.id = i
+            net.reach_out = sum(LineString(e.P).length for e in out)
+        else:
+            edges = clip_edges(edges, region, net.seam_region)
+    else:
+        edges = clip_edges(edges, region, net.seam_region)
     net.edges = edges
     # nodes
     nodes = {}

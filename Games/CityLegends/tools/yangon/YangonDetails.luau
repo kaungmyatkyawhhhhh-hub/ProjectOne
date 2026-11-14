@@ -267,10 +267,26 @@ function M.build(opts: { [string]: any }?): string
 		root:SetAttribute("Tag", tag)
 		root.Parent = Y
 	end
+	-- (2026-11-14) opts.cells = { "109_-1", ... } with opts.only: rebuild just those 256-stud cells of those kinds (the
+	-- cell Models are replaced, the rest of each kind folder stays)
+	local cellSet: { [string]: boolean }? = nil
+	if o.cells then
+		cellSet = {}
+		for _, c in o.cells do
+			(cellSet :: any)[c] = true
+		end
+	end
 	if only then
 		for k in only do
 			local f = root:FindFirstChild(k)
-			if f then
+			if f and cellSet then
+				for c in cellSet :: any do
+					local m = f:FindFirstChild(c)
+					if m then
+						m:Destroy()
+					end
+				end
+			elseif f then
 				f:Destroy()
 			end
 		end
@@ -471,7 +487,12 @@ function M.build(opts: { [string]: any }?): string
 				place(cur)
 			end
 			cur = nil
-			if not only or (only :: any)[w[2]] then
+			local inCell = true
+			if cellSet then
+				local x_, z_ = tonumber(w[3]) or 0, tonumber(w[4]) or 0
+				inCell = (cellSet :: any)[math.floor(x_ / CELL) .. "_" .. math.floor(z_ / CELL)] == true
+			end
+			if (not only or (only :: any)[w[2]]) and inCell then
 				cur = {
 					kind = w[2], x = tonumber(w[3]), z = tonumber(w[4]), yh = tonumber(w[5]), yaw = tonumber(w[6]),
 					ex = tonumber(w[7]), ez = tonumber(w[8]), mode = w[9], chain = tonumber(w[10]) or 0,

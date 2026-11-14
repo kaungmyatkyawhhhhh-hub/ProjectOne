@@ -70,7 +70,9 @@ def prep(tag):
         for end in (0, -1):
             p = Point(pts[end])
             d = gpave.distance(p)
-            if 0.01 < d < 22:
+            # (2026-11-14) a seam tail (network.py) already ends exactly where it should: on a game road's end or on a
+            # neighbouring batch's seam piece (pushing it on would lay it over that piece)
+            if 0.01 < d < 22 and not s.get('tail'):
                 q = pts[1] if end == 0 else pts[-2]
                 dx, dz = p.x - q[0], p.y - q[1]
                 L = math.hypot(dx, dz) or 1
@@ -165,6 +167,32 @@ def heights(tag):
 
 SEAM_GRADE = {'big': 0.06}      # a street eased onto a neighbouring batch's road end climbs at most this (else 0.10)
 SEAM_EASE_MIN = 24.0
+SEAM_EASE_BIG = 90.0
+SEAM_EXT = 40.0
+SEAM_COLLIDE_EXT = 12.0
+EDGE_TOL = 1.5        # (an OSM way can stop a stud or so short of the box edge: Insein Road 1.2)
+
+
+_B1_ENDS = None
+
+
+def _edge_end(p):
+    """an end on batch 0.5's box edge where a batch 1-3 road continues it"""
+    global _B1_ENDS
+    x, z = p
+    if min(abs(x - geo.BOX_05[0]), abs(x - geo.BOX_05[2]), abs(z - geo.BOX_05[1]), abs(z - geo.BOX_05[3])) > EDGE_TOL:
+        return False
+    if _B1_ENDS is None:
+        ends = []
+        for t in ('1', '2', '3'):
+            pp = os.path.join(geo.BUILD, 'city', f'roads_{t}_profile.json')
+            if os.path.exists(pp):
+                for e in json.load(open(pp)):
+                    ends += [(e['pts'][0][0], e['pts'][0][2]), (e['pts'][-1][0], e['pts'][-1][2])]
+        _B1_ENDS = cKDTree(np.array(ends)) if ends else False
+    return bool(_B1_ENDS) and _B1_ENDS.query((x, z))[0] < 3.0
+
+
 SEAM_MAX_STEP = 1.5    # a bigger step is a design fault (the neighbour's ramp ends in the air), not eased: reported
 
 
@@ -196,7 +224,7 @@ def seam_pins(tag, st):
     for s in st:
         for end in (0, -1):
             x, z = s['pts'][end]
-            if min(abs(x - box[0]), abs(x - box[2]), abs(z - box[1]), abs(z - box[3])) <= 1.0:
+            if min(abs(x - box[0]), abs(x - box[2]), abs(z - box[1]), abs(z - box[3])) <= EDGE_TOL:
                 edge_ends.append([round(x, 2), round(z, 2), round(s['y0'][end], 2), s['name']])
     json.dump({'ends': edge_ends}, open(os.path.join(geo.BUILD, 'city', f'streets_{tag}_edgeends.json'), 'w'))
     for s in st:
@@ -205,11 +233,16 @@ def seam_pins(tag, st):
         old = list(y)
         for end in (0, -1):
             x, z = pts[end]
-            if min(abs(x - box[0]), abs(x - box[2]), abs(z - box[1]), abs(z - box[3])) > 1.0:
-                continue
             d = np.hypot(E[:, 0] - x, E[:, 1] - z)
             i = int(d.argmin())
-            if d[i] > 3.0:
+            # (2026-11-14) also a street end inside the box on a neighbouring batch's seam piece (the piece from a game
+            # road's map-edge end to its first junction: Inya Road / Chindwin, Nar Nat Taw), not only ends on the edge
+            on_edge = min(abs(x - box[0]), abs(x - box[2]), abs(z - box[1]), abs(z - box[3])) <= EDGE_TOL
+            if not on_edge and d[i] > 1.5:
+                continue
+            # (an end on the edge takes a neighbouring end up to 6 studs along it: a divided pair split back onto its OSM
+            # lines over the last 120 studs can end a few studs off the street's own end, Insein Road 4)
+            if d[i] > (6.0 if on_edge else 3.0):
                 continue
             pin = float(E[i, 2])
             dy = pin - y[end]
@@ -219,7 +252,9 @@ def seam_pins(tag, st):
                 print(f'  seam step NOT eased: {s["name"]} at {x:.0f}, {z:.0f}: the neighbouring road is {dy:+.1f} studs off')
                 continue
             g = SEAM_GRADE.get(s['cls'], 0.10)
-            L = max(SEAM_EASE_MIN, abs(dy) / g)
+            # (2026-11-14) eased over at least SEAM_EASE_BIG studs on big streets: a divided pair's two one-way streets
+            # overlap near the edge, and one eased over 24 studs stood 0.75 over its partner there (Insein Road)
+            L = max(SEAM_EASE_BIG if s['cls'] == 'big' else SEAM_EASE_MIN, abs(dy) / g)
             idx = range(len(pts)) if end == 0 else range(len(pts) - 1, -1, -1)
             run = 0.0
             prev = None
@@ -233,6 +268,14 @@ def seam_pins(tag, st):
                 y[j] = y[j] + dy * w
                 prev = j
             pinned += 1
+        # (2026-11-14) a seam tail (network.py) joins two neighbouring-batch / game road ends: one straight grade between
+        # its two ends (eased only near each end it dipped 0.75 to the 0.5 streets' ground level in the middle)
+        if s.get('tail') and len(pts) > 1:
+            c = [0.0]
+            for j in range(1, len(pts)):
+                c.append(c[-1] + math.hypot(pts[j][0] - pts[j - 1][0], pts[j][1] - pts[j - 1][1]))
+            for j in range(len(pts)):
+                y[j] = y[0] + (y[-1] - y[0]) * c[j] / c[-1]
         for j in range(len(pts)):
             if y[j] - old[j] > 0.3:
                 fill.append([round(pts[j][0], 2), round(pts[j][1], 2), round(y[j], 2), s['half'] + s['walk']])
@@ -270,8 +313,49 @@ def build(tag):
         w = 1.0 / np.maximum(d, 0.5) ** 2
         return float((H[i] * w).sum() / w.sum())
 
-    carr = unary_union([LineString(s['pts']).buffer(s['half'], cap_style=2, join_style=1) for s in st])
-    outer = unary_union([LineString(s['pts']).buffer(s['half'] + s['walk'], cap_style=2, join_style=1) for s in st])
+    # (2026-11-14) a street cut on its box's edge runs on SEAM_EXT studs past it and every surface is clipped ON the edge
+    # (its square end met the oblique edge with a gap on one side and an overlap on the neighbouring batch's road on the
+    # other); the neighbouring batch's roads do the same from their side (roadmesh._seam_extend)
+    clipbox = sbox(*geo.BOX_05) if tag == '05' else None
+
+    def ext(s):
+        pts = [tuple(p) for p in s['pts']]
+        if clipbox is None or len(pts) < 2:
+            return LineString(pts)
+        for end in (0, -1):
+            x, z = pts[end]
+            if min(abs(x - geo.BOX_05[0]), abs(x - geo.BOX_05[2]), abs(z - geo.BOX_05[1]), abs(z - geo.BOX_05[3])) <= EDGE_TOL:
+                q = pts[1] if end == 0 else pts[-2]
+                dx, dz = x - q[0], z - q[1]
+                L = math.hypot(dx, dz) or 1.0
+                np_ = (x + dx / L * SEAM_EXT, z + dz / L * SEAM_EXT)
+                if end == 0:
+                    pts.insert(0, np_)
+                else:
+                    pts.append(np_)
+        return LineString(pts)
+
+    def clip(g):
+        return g.intersection(clipbox) if clipbox is not None else g
+
+    carr = clip(unary_union([ext(s).buffer(s['half'], cap_style=2, join_style=1) for s in st]))
+    outer = clip(unary_union([ext(s).buffer(s['half'] + s['walk'], cap_style=2, join_style=1) for s in st]))
+    # (2026-11-14) a neighbouring batch's seam piece reaching into the box (from a game road's map-edge end to its first
+    # junction: Inya Road, Nar Nat Taw) lays its own carriageway: the streets keep off it (the same height: they flickered)
+    if clipbox is not None:
+        inb = sbox(geo.BOX_05[0] + 1, geo.BOX_05[1] + 1, geo.BOX_05[2] - 1, geo.BOX_05[3] - 1)
+        seam = []
+        for t in ('1', '2', '3'):
+            pp = os.path.join(geo.BUILD, 'city', f'roads_{t}_profile.json')
+            if os.path.exists(pp):
+                for e in json.load(open(pp)):
+                    L = LineString([(q[0], q[2]) for q in e['pts']])
+                    if len(e['pts']) > 1 and L.intersects(inb):
+                        seam.append(L.buffer(max(abs(e['half'][0]), abs(e['half'][1])), cap_style=2))
+        if seam:
+            sp = unary_union(seam)
+            carr = carr.difference(sp)
+            outer = outer.difference(sp)
     # the streets' surfaces never go over a game road's carriageway or pavement (the parts are there)
     carr = carr.difference(gpave)
     pave = outer.difference(carr).difference(gpave)
@@ -282,7 +366,7 @@ def build(tag):
         ls = LineString(s['pts'])
         for off in ([0.0] if not s['oneway'] else []):
             lines_geo.append(ls.buffer(0.25, cap_style=2))
-    lines_poly = unary_union(lines_geo).difference(gpave) if lines_geo else Polygon()
+    lines_poly = clip(unary_union(lines_geo).difference(gpave)) if lines_geo else Polygon()
     xs, zs = P[:, 0], P[:, 1]
     cx0, cz0 = math.floor(xs.min() / CELL), math.floor(zs.min() / CELL)
     cx1, cz1 = math.floor(xs.max() / CELL), math.floor(zs.max() / CELL)
@@ -323,6 +407,22 @@ def build(tag):
     pickle.dump(meshes, open(os.path.join(geo.BUILD, 'city', f'streets_{tag}_meshes.pkl'), 'wb'))
     # collision: boxes along every street, at most 16 studs long: the carriageway, and each pavement 0.5 higher
     rows = []
+    from shapely.strtree import STRtree
+    cpolys, cowner = [], []
+    for s_ in st:
+        cpolys.append(LineString(s_['pts']).buffer(s_['half'], cap_style=2))
+        cowner.append(s_)
+    for g_ in getattr(gcarr, 'geoms', [gcarr]):
+        cpolys.append(g_)
+        cowner.append(None)
+    for t_ in ('1', '2', '3'):
+        pp_ = os.path.join(geo.BUILD, 'city', f'roads_{t_}_profile.json')
+        if os.path.exists(pp_):
+            for e_ in json.load(open(pp_)):
+                if len(e_['pts']) > 1:
+                    cpolys.append(LineString([(q[0], q[2]) for q in e_['pts']]).buffer(max(abs(e_['half'][0]), abs(e_['half'][1])), cap_style=2))
+                    cowner.append(None)
+    ctree = STRtree(cpolys)
     for s in st:
         pts, ys = s['pts'], s['y0']
         i = 0
@@ -330,10 +430,44 @@ def build(tag):
             j = min(len(pts) - 1, i + 2)
             (x1, z1), (x2, z2) = pts[i], pts[j]
             y1, y2 = ys[i], ys[j]
+            # (2026-11-14) an end on the box's edge: a flat box SEAM_COLLIDE_EXT on past it, 0.15 under the end's height (an
+            # oblique edge left a wedge with no road; where the neighbouring batch's box is there too, that one is on top)
+            if clipbox is not None:
+                Lc = math.hypot(x2 - x1, z2 - z1) or 1.0
+                ux, uz = (x2 - x1) / Lc, (z2 - z1) / Lc
+                for at, sg in ((0, -1.0), (len(pts) - 1, 1.0)):
+                    if (i if at == 0 else j) == at and _edge_end(pts[at]):
+                        xa, za = pts[at]
+                        dist_ = [abs(xa - geo.BOX_05[0]), abs(xa - geo.BOX_05[2]), abs(za - geo.BOX_05[1]), abs(za - geo.BOX_05[3])]
+                        c_ = max(abs(ux) if dist_.index(min(dist_)) < 2 else abs(uz), 1e-3)
+                        ext_ = min(80.0, max(SEAM_COLLIDE_EXT, (s['half'] + s['walk']) * math.sqrt(max(0.0, 1 - c_ * c_)) / c_ + 4.0))
+                        xb, zb = xa + ux * sg * ext_, za + uz * sg * ext_
+                        ye = ys[at] - 0.15
+                        # (dipping 8 % away from the edge: past the wedge it stays under the neighbouring road's surface)
+                        dye = -0.08 * ext_
+                        rows.append('%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f 0 0' % ((xa + xb) / 2, ye + dye / 2, (za + zb) / 2, xb - xa, dye, zb - za,
+                                                                              2 * s['half'], 0.0))
             L = math.hypot(x2 - x1, z2 - z1)
             if L > 0.5:
-                rows.append('%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f' % ((x1 + x2) / 2, (y1 + y2) / 2, (z1 + z2) / 2, x2 - x1, y2 - y1, z2 - z1,
-                                                                          2 * s['half'], s['walk']))
+                # (2026-11-14) a pavement box lying on another street's or road's carriageway (a junction mouth) is left out:
+                # it stood 0.5 over the asphalt across the mouth (a kerb-high bump on the driving line)
+                vx, vz = (x2 - x1) / L, (z2 - z1) / L
+                rx, rz = -vz, vx
+                fl = []
+                for sd in (1.0, -1.0):
+                    o0, o1 = s['half'] * sd, (s['half'] + s['walk']) * sd
+                    q = Polygon([(x1 + rx * o0, z1 + rz * o0), (x2 + rx * o0, z2 + rz * o0), (x2 + rx * o1, z2 + rz * o1), (x1 + rx * o1, z1 + rz * o1)])
+                    blocked = False
+                    for k_ in ctree.query(q):
+                        if cowner[int(k_)] is s:
+                            continue
+                        if cpolys[int(k_)].intersection(q).area > 0.2 * q.area:
+                            blocked = True
+                            break
+                    fl.append('0' if blocked else '1')
+                # (rows: "cx cy cz dx dy dz width walk wr wl": wr / wl = the pavement box right / left of the direction)
+                rows.append('%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %s %s' % ((x1 + x2) / 2, (y1 + y2) / 2, (z1 + z2) / 2, x2 - x1, y2 - y1, z2 - z1,
+                                                                               2 * s['half'], s['walk'], fl[0], fl[1]))
             i = j
     chunk = 3500
     files = 0

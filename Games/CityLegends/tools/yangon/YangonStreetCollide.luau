@@ -3,8 +3,8 @@
 
 	The new mesh streets (tools/yangon/city/streets.py) are drawn by MeshParts with no collision; this lays their invisible
 	collision boxes and beds them into the terrain. Data: ServerStorage.ClaudeTools.StreetCollide_<tag>_<n> (one string, lines
-	"cx cy cz dx dy dz width walk": a street piece's middle at road level, its direction and length (dx, dy, dz), the
-	carriageway width and the pavement width each side).
+	"cx cy cz dx dy dz width walk [wr wl]": a street piece's middle at road level, its direction and length (dx, dy, dz),
+	the carriageway width and the pavement width each side; wr / wl 0 = no pavement box on that side, 2026-11-14).
 	  * a carriageway box (width x 2 x length + 1), its top at road level, tilted with the street;
 	  * a box under each pavement, 0.5 higher (the kerb);
 	  * the terrain: air from 0.3 under the road up 14 studs over the whole width (no grass through the street).
@@ -59,9 +59,16 @@ function M.build(names: { string }, noTerrain: boolean?): string
 					local cf = CFrame.lookAt(c, c + d)
 					local L = len + 1.5
 					box("Street", Vector3.new(width, 2, L), cf * CFrame.new(0, -1, 0), folder)
-					box("Walk", Vector3.new(walk, 2, L), cf * CFrame.new(width / 2 + walk / 2, -0.5, 0), folder)
-					box("Walk", Vector3.new(walk, 2, L), cf * CFrame.new(-(width / 2 + walk / 2), -0.5, 0), folder)
-					if not noTerrain then
+					-- (2026-11-14) optional 9th / 10th values: 0 = no pavement box on the right / left (it would lie on
+					-- another street's carriageway at a junction mouth)
+					if walk > 0 and v[9] ~= 0 then
+						box("Walk", Vector3.new(walk, 2, L), cf * CFrame.new(width / 2 + walk / 2, -0.5, 0), folder)
+					end
+					if walk > 0 and v[10] ~= 0 then
+						box("Walk", Vector3.new(walk, 2, L), cf * CFrame.new(-(width / 2 + walk / 2), -0.5, 0), folder)
+					end
+					-- (a seam box, walk 0, lies on the neighbouring batch's ground past the box edge: it never digs)
+					if not noTerrain and walk > 0 then
 						workspace.Terrain:FillBlock(cf * CFrame.new(0, 6.7, 0), Vector3.new(width + 2 * walk, 14, L), Enum.Material.Air)
 					end
 					n += 3
