@@ -179,3 +179,12 @@ thumbnail: "BUILD YOUR SPECIES" text, cells + an arrow. Spore-like creature edit
 - Stage-1 NPC packs that can one-shot new players again and again (5 deaths in 15 min).
 - Stacking a starter pack + like card + toasts + paid buttons at once.
 - Rewards for likes/group joins (we don't do these).
+
+### Last notes (06:40-06:42)
+- RARE CARD: gold-bordered card with a big "gulp" word instead of a render: "big mouth - swallow bigger cells. a bit slower - rare
+  - one per run". Other new cards: flagellum "a whip tail. you swim faster".
+- Giant creatures swim in a blurred DEPTH LAYER behind the play plane (a huge ghostly leviathan) and then come up and eat you.
+- 6th death (stage 2, by a leviathan): the death screen now adds a gold "SECOND CHANCE - R$25 - keep everything, right here"
+  (paid revive appears only once you have progress to lose).
+- "new player" tag above new players' names.
+- Played 06:22-06:42 (~20 min; reached stage 2, 155 dna, 35/320 indexed).
