@@ -83,3 +83,63 @@ butterfly wings, DNA helix, magnet, golden clover).
 - BREEDS (skins, same panel): CYBER "Black chrome and living neon" LIMITED, ANT GOD "A body of living light" LIMITED, WILD "your
   species' own colours" (wearing), BRONZE rebirth 1, JADE ..., PHANTOM rebirth 7 "ghostly see-through ant with glowing horns",
   PLATINUM rebirth 10 "white metal, a crown and a halo", NEBULA rebirth 15, DIVINE rebirth 20 "ivory and gold, crowned and haloed".
+- REWARDS panel (tabs DAILY / PLAYTIME / QUESTS / RECORDS / CODES / GROUP, red "!" badges): daily 7-day streak (+150 dna, +300,
+  +1 roll, +700 + 2x power 10m, +2 rolls, +1,800, day 7 +3,000 dna +3 rolls + 2x luck 15m); playtime 3/5/10/15/20/30 min;
+  daily quests easy/medium/hard + "FINISH ALL 3: BONUS" (+2 rolls, 2x power 10 min), "new quests in 23:40:05"; RECORDS 0/70
+  achievements "every tier pays once" (Food Lover eat 100 food, Growing Up reach worker ant, Evolver evolve 5 times...); CODES;
+  GROUP = join group + like for +1,000 dna +2 rolls (skipped).
+- PETS: Colony Egg 400 dna (common 60 / uncommon 28 / rare 9.5 / epic 2.2 / legendary 0.27 / mythic 0.03%), Royal Egg 3,000 dna;
+  3 equip slots, "EQUIP BEST". Hatch anim: screen dims, egg glows with god-rays, then the pet on a coloured ray burst ("EMBER - RARE
+  +14% POWER", NEW! tag, "AGAIN 400" / OK). Pets = power % multipliers.
+- STORE (tabs FEATURED / PASSES / POWER / DNA / ROLLS): LIMITED PACKS with stock bars: CYBER PACK R$499 674/800 left (cyber
+  skin every stage, +100% power cyber dragon pet, overdrive max 5 stars, 1.5x power forever, +15,000 dna, NAME TAG "your copy's
+  number"); ANT GOD PACK R$4,499 278/300 left (ant god skin, +250% power mini ant god pet, god mode). STARTER PACK R$49 one time
+  (+2,500 dna, +3 rolls, 2x power 30 min); INSTANT EVOLVE R$25 ("become a Carpenter Ant right now!"); FLYING WINGS R$299.
+  POWER packs +110 R$29 / +330 R$79 / +880 R$179 (best value); 2x POWER 15 min R$39. DNA packs vial +600 R$19 / flask +3,000
+  R$69 / barrel +9,000 R$179 / vault +28,000 R$449; 2X DNA forever R$179.
+- Time check: 06:48-07:05 played; reached Worker Ant 4/16 in ~8 minutes.
+
+### Second session (12:30-12:40)
+- The game ICON now says "12 HOURS" (was "24 HOURS" at 06:46): the icon is a LIVE COUNTDOWN to the Saturday admin-abuse event,
+  re-uploaded during the day. Rating 84%, 8K active.
+- Search: wrong click joined "Ant Wars" (sponsored, Christopher Stuff, 78%, 4.1K active): a pixel-art top-down ant colony RTS
+  (match time + peace timer, 4 colonies on a leaderboard, workers/soldiers/hatch eggs, food/wood jobs, upgrade/nest/shop/attack/
+  defend, 22-step tutorial). Different genre; noted as a competitor in the ant niche.
+- REJOIN = STAGE RESETS TO ANT EGG 1/16 (only DNA, rolls, pets, mutations, rebirths persist). Each session is a run; the
+  "permanent" progress is power multipliers. Power without the new-player 3x boost: 1.14x (pet) -> egg needs ~45 s instead of 20 s.
+- BUG: after rejoining, the egg reached 20/20 but NO free "HATCH" button appeared while the paid "HATCH NOW R$25" stayed on the
+  shelf. Respawning (Esc > R) fixed it (33/20 + HATCH). A soft-lock that only offers the paid button looks bad.
+- Speed: egg -> worker ant in ~4 min on a second session.
+- DEATH (killed by a player + red NPC ants on a rock): you DROP ONE STAGE (worker 4/16 -> baby ant 3/16, 17/100), keep your
+  timers, respawn in a different zone (FLOWER FIELD: huge tulips, sunflowers, tall grass, butterflies). A red skull "REVENGE"
+  marker floats over your killer (go get them back).
+- CYBER PACK stock 674 -> 639 left between 06:50 and 12:30 = 35 sold in ~6 h (~R$17K) for one limited pack.
+- TOP ANTS leaderboard (podium 1-2-3 with avatar heads, crown on #1): tabs POWER / KILLS / REBIRTHS; #1 = 198T power, #4 13.7T;
+  me "NOT RANKED YET 699". Trillions = simulator number inflation.
+- Zones seen: Dusty Dunes (desert, cacti), Flower Field (grass, giant flowers). Events: Spider Nest (timer), Queen's Feast, Orb Rain
+  (in the page video).
+
+## Ratings (no bias)
+| | /10 | why |
+|---|---|---|
+| Impatient kid (first 60 s) | 9.5 | No menu, evolve in 20 s, a new form every minute, a new move every evolve, chevron trail. |
+| Nerd / quality | 7.5 | Pretty Pixar-ish world and clean wood UI; but simulator number inflation, generic ant models, a hatch soft-lock bug. |
+| Gameplay | 7 | Eat orbs + bite NPCs + PvP; shallow but fast; losing a stage on death keeps tension. |
+| Visual (VFX/GFX) | 8 | Huge plants scale fantasy, glowing orbs, god-ray hatch, bright saturated colours. |
+| Monetization | 9.5 (very aggressive) | 6-button Robux shelf always visible, limited stock packs with counters + global buy banners, R$4,499 pack, gacha + pets. |
+| Retention hooks | 9 | Daily 7-day, playtime, 3 daily quests + bonus, 70 records, rebirth tiers to stage 20 and breed skins, leaderboards. |
+| Overall | 8 | The fastest-growing of the batch (8K CCU at 17 days) because the first 5 minutes are pure dopamine. |
+
+## Steal for MEGA BITE
+1. 20-second first evolution + an always-visible "current -> next" portrait bar.
+2. A new move per evolution with a toast and key hint.
+3. A glowing chevron trail to the next objective.
+4. Server goal bar (Feed the Queen) that buffs everyone.
+5. Death drops one evolution (not all) + a REVENGE marker on your killer.
+6. Limited packs with a stock counter and "#126/800" copy numbers (only if we're comfortable with it).
+7. Live countdown icon before an update event.
+
+## Avoid
+- A permanent 6-button Robux wall on the gameplay screen.
+- Showing a paid "hatch now" when the free hatch is bugged.
+- Trillion-number inflation that makes power meaningless.
