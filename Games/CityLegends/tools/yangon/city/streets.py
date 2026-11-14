@@ -159,7 +159,77 @@ def heights(tag):
             v = fixed[0] if fixed else sum(s['y0'][e] for s, e in ends) / len(ends)
             for s, e in ends:
                 s['y0'][e] = v
+    seam_pins(tag, st)
     return st
+
+
+SEAM_GRADE = {'big': 0.06}      # a street eased onto a neighbouring batch's road end climbs at most this (else 0.10)
+SEAM_EASE_MIN = 24.0
+SEAM_MAX_STEP = 1.5    # a bigger step is a design fault (the neighbour's ramp ends in the air), not eased: reported
+
+
+def seam_pins(tag, st):
+    """(14 Nov 2026) a street that stops on its box's edge where a neighbouring batch's road continues (roads.py's
+    roads_<t>_profile.json) ends at THAT road's surface height and is eased back along itself at SEAM_GRADE, so the two meet
+    with no step (batch 0.5's streets sit at the probed ground + 0.25, batch 1's roads on the field: 0.75 apart; Nar Nat
+    Taw's ramp leaves the box 10 studs up). Writes build/city/streets_<tag>_seamfill.json: the samples raised more than
+    0.3 over their old height, for the terrain under them (terrain.py fill)."""
+    if tag != '05':
+        return
+    box = geo.BOX_05
+    ends = []
+    for t in ('1', '2', '3'):
+        p = os.path.join(geo.BUILD, 'city', f'roads_{t}_profile.json')
+        if not os.path.exists(p):
+            continue
+        for e in json.load(open(p)):
+            for k in (0, -1):
+                q = e['pts'][k]
+                ends.append((q[0], q[2], q[1]))
+    if not ends:
+        return
+    E = np.array(ends)
+    fill = []
+    pinned = 0
+    for s in st:
+        pts = s['pts']
+        y = s['y0']
+        old = list(y)
+        for end in (0, -1):
+            x, z = pts[end]
+            if min(abs(x - box[0]), abs(x - box[2]), abs(z - box[1]), abs(z - box[3])) > 1.0:
+                continue
+            d = np.hypot(E[:, 0] - x, E[:, 1] - z)
+            i = int(d.argmin())
+            if d[i] > 3.0:
+                continue
+            pin = float(E[i, 2])
+            dy = pin - y[end]
+            if abs(dy) < 0.02:
+                continue
+            if abs(dy) > SEAM_MAX_STEP:
+                print(f'  seam step NOT eased: {s["name"]} at {x:.0f}, {z:.0f}: the neighbouring road is {dy:+.1f} studs off')
+                continue
+            g = SEAM_GRADE.get(s['cls'], 0.10)
+            L = max(SEAM_EASE_MIN, abs(dy) / g)
+            idx = range(len(pts)) if end == 0 else range(len(pts) - 1, -1, -1)
+            run = 0.0
+            prev = None
+            for j in idx:
+                if prev is not None:
+                    run += math.hypot(pts[j][0] - pts[prev][0], pts[j][1] - pts[prev][1])
+                if run >= L:
+                    break
+                w = 1.0 - run / L
+                w = w * w * (3 - 2 * w)
+                y[j] = y[j] + dy * w
+                prev = j
+            pinned += 1
+        for j in range(len(pts)):
+            if y[j] - old[j] > 0.3:
+                fill.append([round(pts[j][0], 2), round(pts[j][1], 2), round(y[j], 2), s['half'] + s['walk']])
+    json.dump({'samples': fill}, open(os.path.join(geo.BUILD, 'city', f'streets_{tag}_seamfill.json'), 'w'))
+    print(f'seam pins: {pinned} street ends eased onto a neighbouring batch road; {len(fill)} samples raised > 0.3')
 
 
 def tri_poly(poly, maxseg=6.0):

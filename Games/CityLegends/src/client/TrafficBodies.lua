@@ -159,9 +159,7 @@ local function prepare(template: Model): Model
 	return m
 end
 
--- a new traffic car (nil when there are no TrafficModels)
-function TrafficBodies.build(rng: Random): Model?
-	local list = templates()
+local function buildFrom(list: { Model }, rng: Random): Model?
 	if #list == 0 then
 		return nil
 	end
@@ -177,6 +175,24 @@ function TrafficBodies.build(rng: Random): Model?
 		ready[template] = done
 	end
 	return done:Clone()
+end
+
+-- a new traffic car (nil when there are no TrafficModels)
+function TrafficBodies.build(rng: Random): Model?
+	return buildFrom(templates(), rng)
+end
+
+-- (2026-11-14, YangonStreetLife's parked cars) a car of one type letter (Config.Traffic.ModelLengths: A hatch,
+-- B people carrier, C small van, D minibus, E saloon, F pickup); any type when the place has none of that one
+function TrafficBodies.buildType(kind: string, rng: Random): Model?
+	local all = templates()
+	local list = {}
+	for _, m in all do
+		if (string.match(m.Name, "_(%a)") or "A") == kind then
+			table.insert(list, m)
+		end
+	end
+	return buildFrom(if #list > 0 then list else all, rng)
 end
 
 return TrafficBodies

@@ -13,7 +13,8 @@ Steps (modules beside this one):
   ground.py    the ground field (SRTM smoothed like d4_heights, blended onto batch 0.5's ground at the seam), water levels
   heights.py   one height per junction, grades 6 % (main) / 10 % (streets), bridges / flyovers with 17 studs under the
                girders (water: 10), ramps along the road they continue, long ramps carried past junctions
-  roadmesh.py  R / P / KR / KW / KG / L / MG / B triangles per 256-stud cell, zebras at signals
+  roadmesh.py  R / P / F / KR / KW / KG / L / MG / B triangles per 256-stud cell, zebras at signals (residential
+               streets and lanes without traffic: no raised pavement, a flush concrete edge strip F, one box wide)
   roadlanes.py the traffic lanes (RivieraLanes format) and the dead-end check
 Outputs in build/city/:
   roads_<tag>/roads_<tag>_<n>.glb   meshes named KIND_CELL_cx_cy_cz_sx_sy_sz (glb.code; <= 100 meshes / 90,000 triangles a
@@ -21,7 +22,8 @@ Outputs in build/city/:
   RoadCollide_<tag>_<n>.luau        collision boxes, one string each (< 190,000 characters), a line per box:
                                     "cx cy cz dx dy dz width walk kind"  (streets.py's StreetCollide line + a kind; cy is the
                                     TOP of the box, (dx, dy, dz) its length and slope, walk always 0):
-                                    R carriageway (2 thick), P pavement (top +0.5, 2.5 thick), M median (like P),
+                                    R carriageway (2 thick; on a flush street the whole width incl. its edge strips),
+                                    P pavement (top +0.5, 2.5 thick), M median (like P),
                                     J junction square (2 thick), D bridge deck (DECK 3 thick), W parapet (1 wide, 5.5 thick)
   YangonLanesB<tag>_<n>.lua         traffic lane modules (src-ready, NOT copied into src)
   roads_<tag>.png                   preview: roads by class, bridges red, lanes overlay
@@ -42,6 +44,7 @@ from glb import Mesh, write_glb, check_glb, code
 
 OUT = os.path.join(geo.BUILD, 'city')
 COLLIDE_CHARS = 189000
+BOX_LEN = 40.0      # a collision box covers at most this much road (lead, 14 Nov: Studio memory)
 FILE_TRIS, FILE_MESHES = 90000, 100
 
 
@@ -188,11 +191,15 @@ def collision(B, net):
         i = 0
         while i < n - 1:
             j = i + 1
-            while j + 1 < n and j + 1 - i <= 8:
+            g0 = (e.y[i + 1] - e.y[i]) / max(float(np.linalg.norm(e.P[i + 1] - e.P[i])), 1e-6)
+            while j + 1 < n and float(rn.chain(e.P[i:j + 2])[-1]) <= BOX_LEN:
                 k = j + 1
                 if r[k] != r[i] or abs(lo[k] - lo[i]) > 0.5 or abs(hi[k] - hi[i]) > 0.5:
                     break
                 if float(e.D[k] @ e.D[i]) < math.cos(math.radians(4)):
+                    break
+                gk = (e.y[k] - e.y[k - 1]) / max(float(np.linalg.norm(e.P[k] - e.P[k - 1])), 1e-6)
+                if abs(gk - g0) > 0.01:
                     break
                 c = rn.chain(e.P[i:k + 1])
                 lin = e.y[i] + (e.y[k] - e.y[i]) * c / max(c[-1], 1e-6)
@@ -221,6 +228,10 @@ def collision(B, net):
                 row(p0, p1, y0 + rm.PARAPET_H, y1 + rm.PARAPET_H, rm.PARAPET_W, 'W', h_ + rm.PARAPET_W / 2, Rv)
                 if not paired:
                     row(p0, p1, y0 + rm.PARAPET_H, y1 + rm.PARAPET_H, rm.PARAPET_W, 'W', l_ - rm.PARAPET_W / 2, Rv)
+                continue
+            if rm.flush(e):
+                # a street with flush edge strips: one box over the whole width
+                row(p0, p1, y0, y1, h_ - l_ + 2 * e.walk, 'R', (l_ + h_) / 2, Rv)
                 continue
             row(p0, p1, y0, y1, h_ - l_, 'R', (l_ + h_) / 2, Rv)
             # pavements and medians, unless another carriageway lies there (a junction mouth): then in 2-sample pieces
@@ -452,7 +463,22 @@ if __name__ == '__main__':
     cells = None
     if '--cells' in sys.argv:
         cells = [float(v) for v in sys.argv[sys.argv.index('--cells') + 1].split(',')]
-    if '--part' in sys.argv:
+    if '--lanes-only' in sys.argv:
+        net = rn.build(tag)
+        G = ground.Ground()
+        hts.solve(net, G)
+        if hts.extend_short(net, G):
+            hts.solve(net, G)
+        lanes, links, lstats, _ = rl.build(net, tag)
+        files, first = rl.write(lanes, links, tag, OUT)
+        print('lanes %d, links %d, %s, first %d, %d modules' % (len(lanes), len(links), lstats, first, len(files)))
+        st_path = os.path.join(OUT, 'roads_%s_stats.json' % tag)
+        if os.path.exists(st_path):
+            st = json.load(open(st_path, encoding='utf-8'))
+            st.update(lanes=len(lanes), lane_links=len(links), lane_stats=lstats, lanes_first=first,
+                      lane_modules=[dict(file=os.path.basename(p), chars=c, lanes=n, first=f) for p, c, n, f in files])
+            json.dump(st, open(st_path, 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
+    elif '--part' in sys.argv:
         k, n = [int(v) for v in sys.argv[sys.argv.index('--part') + 1].split('/')]
         mesh_part(tag, k, n, cells)
     else:

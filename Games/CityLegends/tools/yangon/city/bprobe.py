@@ -25,7 +25,7 @@ def prep(tag):
         lines += [f'{x:.1f} {z:.1f}' for x, z in mine]
     json.dump(index, open(os.path.join(geo.BUILD, 'city', f'bprobe_{tag}_index.json'), 'w'))
     for f in os.listdir(os.path.join(geo.BUILD, 'city')):
-        if f.startswith('BProbe_'):
+        if f.startswith('BProbe_') and f.endswith('.luau'):
             os.remove(os.path.join(geo.BUILD, 'city', f))
     chunk, n = 11000, 0
     for k in range(0, len(lines), chunk):

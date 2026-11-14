@@ -30,6 +30,7 @@ STEP = 24.0
 LIFT = 0.15
 CLEAR = 6.0
 CHARS = 189000
+MAX_LINK = 180.0    # no junction link longer than this (studs, end to start)
 
 
 def lane_offsets(e, way):
@@ -192,6 +193,9 @@ def build(net, tag, log=print):
                 dout = np.array([dout[0], dout[2]])
                 dout /= max(np.linalg.norm(dout), 1e-9)
                 ang = math.degrees(math.atan2(float(dout @ right_in), float(dout @ din)))
+                gap = math.hypot(b_pts[0][0] - a_last[-1][0], b_pts[0][2] - a_last[-1][2])
+                if gap > MAX_LINK:
+                    continue  # (a turn across a whole cluster of junctions: too long a curve)
                 options.append((ang, fid, fway, lout))
             n_in = max(lin)
             fed = {k: 0 for k in lin}

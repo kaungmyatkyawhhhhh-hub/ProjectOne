@@ -19,6 +19,14 @@
 	client/WorldFx.lua hides them far away. Only poles, walls, fences, hedges, gates, shelters, stupas / churches,
 	footbridges and signal poles collide; CastShadow only on walls, buildings, shelters, footbridges, gates.
 
+	BATCHES (14 Nov 2026): every call takes a tag ("05" = batch 0.5, the default; "1", "2", "3"). Batch t's data modules are
+	ClaudeTools.Details_<t>_1 .. n and its layer goes into Workspace.Yangon.Details_<t> (batch 0.5 keeps Workspace.Yangon.Details),
+	status attribute DetailsStatus_<t> (0.5: DetailsStatus). A batch's roads are meshes with invisible collision boxes in
+	Workspace.Yangon.RoadCollideB<t> (attribute RoadBox = R / P / M / J / D / W): the rays take them too, and mode R accepts
+	a box with RoadBox "R" as well as a part named "Road". Lamps on every second power pole come with the data now (a part
+	line followed by "L range brightness": the part is tagged LampGlow and gets a white PointLight tagged LODLight + DayOff),
+	so YangonPoleLights is no longer needed after a rebuild from this data (running it again would add a second lamp).
+
 	THE EXACT STEPS (Studio, Edit, the Yangon place; nothing else may be running a build):
 	  1. From Games/CityLegends:
 	       python tools/yangon/city/details.py
@@ -28,7 +36,8 @@
 	     then move YangonToolsIn.Tools' ModuleScripts into ServerStorage.ClaudeTools (replace the old ones).
 	  2. In the command bar (or execute_luau):
 	       local D = require(game.ServerStorage.ClaudeTools.YangonDetails:Clone())
-	       D.spawn()                                   -- builds everything (clears Workspace.Yangon.Details first)
+	       D.spawn({ tag = "1" })                      -- batch 1 (clears Workspace.Yangon.Details_1 first); D.status("1")
+	       D.spawn()                                   -- batch 0.5: builds everything (clears Workspace.Yangon.Details first)
 	       D.spawn({ only = { "pole", "compound" } })  -- or rebuild some kinds only (clears only those folders)
 	     then poll  require(game.ServerStorage.ClaudeTools.YangonDetails:Clone()).status()  (or ServerStorage.YangonData's
 	     attribute DetailsStatus) until it says "done".  D.undo() removes the whole layer.
@@ -46,7 +55,7 @@ local COLLIDE = {
 	worship = true, gate = true, footbridge = true, signal = true,
 }
 local SHADOW = { wall = true, compound = true, worship = true, footbridge = true, busstop = true, gate = true }
-local LODK = { teashop = true, trishaw = true, patch = true, shopsign = true }
+local LODK = { teashop = true, trishaw = true, patch = true, shopsign = true, vendor = true }
 local LOD_RANGE = 340
 local CELL = 256
 local WIRE_MAX = 95
@@ -57,17 +66,30 @@ local function holder(): Instance
 	return SS:FindFirstChild("YangonData") or SS
 end
 
-function M.data(): string
+local function tagOf(t: any): string
+	return if t == nil or t == "05" or t == "0.5" then "05" else tostring(t)
+end
+
+local function folderName(tag: string): string
+	return if tag == "05" then "Details" else "Details_" .. tag
+end
+
+local function statusName(tag: string): string
+	return if tag == "05" then "DetailsStatus" else "DetailsStatus_" .. tag
+end
+
+function M.data(tagArg: string?): string
+	local tag = tagOf(tagArg)
 	local parts = {}
 	for i = 1, 99 do
-		local name = "Details_05_" .. i
+		local name = "Details_" .. tag .. "_" .. i
 		local src = SS.ClaudeTools:FindFirstChild(name) or (SS:FindFirstChild("YangonData") and SS.YangonData:FindFirstChild(name))
 		if not src then
 			break
 		end
 		table.insert(parts, require((src :: ModuleScript):Clone()))
 	end
-	assert(#parts > 0, "no Details_05_1 in ServerStorage.ClaudeTools")
+	assert(#parts > 0, "no Details_" .. tag .. "_1 in ServerStorage.ClaudeTools")
 	return table.concat(parts, "\n")
 end
 
@@ -187,6 +209,17 @@ local function makePart(spec: { any }, itemCF: CFrame, kind: string, pal: { any 
 	p.CanTouch = false
 	p.CastShadow = SHADOW[kind] == true and sy >= 3
 	p.Parent = parent
+	if spec.light then
+		CollectionService:AddTag(p, "LampGlow")
+		local l = Instance.new("PointLight")
+		l.Color = Color3.fromRGB(232, 240, 255)
+		l.Range = spec.light[1]
+		l.Brightness = spec.light[2]
+		l.Shadows = false
+		l.Parent = p
+		CollectionService:AddTag(l, "LODLight")
+		CollectionService:AddTag(l, "DayOff")
+	end
 	if spec.text then
 		local gui = Instance.new("SurfaceGui")
 		gui.Face = Enum.NormalId.Front
@@ -222,14 +255,16 @@ function M.build(opts: { [string]: any }?): string
 		end
 	end
 	local Y = workspace.Yangon
-	local root = Y:FindFirstChild("Details")
+	local tag = tagOf(o.tag)
+	local root = Y:FindFirstChild(folderName(tag))
 	if root and not only then
 		root:Destroy()
 		root = nil
 	end
 	if not root then
 		root = Instance.new("Folder")
-		root.Name = "Details"
+		root.Name = folderName(tag)
+		root:SetAttribute("Tag", tag)
 		root.Parent = Y
 	end
 	if only then
@@ -242,9 +277,12 @@ function M.build(opts: { [string]: any }?): string
 	end
 	local kit = SS:FindFirstChild("YangonData") and SS.YangonData:FindFirstChild("GreenKit")
 
-	local include = { workspace.Terrain, Y:FindFirstChild("Roads") }
-	if Y:FindFirstChild("StreetCollide") then
-		table.insert(include, Y.StreetCollide)
+	local include = { workspace.Terrain }
+	for _, name in { "Roads", "StreetCollide", "RoadCollideB1", "RoadCollideB2", "RoadCollideB3" } do
+		local f = Y:FindFirstChild(name)
+		if f then
+			table.insert(include, f)
+		end
 	end
 	local rp = RaycastParams.new()
 	rp.FilterType = Enum.RaycastFilterType.Include
@@ -252,7 +290,7 @@ function M.build(opts: { [string]: any }?): string
 	rp.IgnoreWater = true
 	local op = OverlapParams.new()
 	op.FilterType = Enum.RaycastFilterType.Include
-	op.FilterDescendantsInstances = { Y:FindFirstChild("Roads") }
+	op.FilterDescendantsInstances = { Y:FindFirstChild("Roads") or Y }
 
 	local function ray(x: number, z: number, yh: number?): RaycastResult?
 		local top = if yh then yh + 40 else 900
@@ -350,7 +388,7 @@ function M.build(opts: { [string]: any }?): string
 		local terrainHit = false
 		for _, q in pts do
 			local h = ray(q[1], q[2], it.yh)
-			if mode == "R" and (not h or h.Instance.Name ~= "Road") then
+			if mode == "R" and (not h or (h.Instance.Name ~= "Road" and h.Instance:GetAttribute("RoadBox") ~= "R")) then
 				stat(kind, false)
 				return
 			end
@@ -368,7 +406,7 @@ function M.build(opts: { [string]: any }?): string
 			gy += STREET_LIFT
 		end
 		local cf = CFrame.new(it.x, gy, it.z) * CFrame.Angles(0, math.rad(it.yaw), 0)
-		if kind == "patch" then
+		if kind == "patch" and tag == "05" then
 			local spec = it.parts[1]
 			if spec then
 				local pcf = cf * CFrame.new(spec[5], spec[6], spec[7]) * CFrame.fromEulerAnglesYXZ(0, math.rad(spec[8]), 0)
@@ -421,7 +459,7 @@ function M.build(opts: { [string]: any }?): string
 		end
 	end
 
-	local data = M.data()
+	local data = M.data(tag)
 	local cur: { any }? = nil
 	local protoName: string? = nil
 	local lastSpec: { any }? = nil
@@ -459,6 +497,10 @@ function M.build(opts: { [string]: any }?): string
 					(cur :: any).name = (cur :: any).name or string.sub(line, 5)
 				end
 			end
+		elseif c == "L" then
+			if lastSpec then
+				(lastSpec :: any).light = { tonumber(w[2]) or 30, tonumber(w[3]) or 1.6 }
+			end
 		elseif c == "U" then
 			if cur then
 				table.insert((cur :: any).uses, w[2])
@@ -490,21 +532,22 @@ function M.build(opts: { [string]: any }?): string
 	return string.format("details: %d items, %d parts, %d wire beams; placed/tried: %s", made, partsMade, wires, table.concat(out, ", "))
 end
 
-function M.undo()
-	local d = workspace.Yangon:FindFirstChild("Details")
+function M.undo(tagArg: string?)
+	local d = workspace.Yangon:FindFirstChild(folderName(tagOf(tagArg)))
 	if d then
 		d:Destroy()
 	end
 end
 
-function M.status(): string
-	return tostring(holder():GetAttribute("DetailsStatus"))
+function M.status(tagArg: string?): string
+	return tostring(holder():GetAttribute(statusName(tagOf(tagArg))))
 end
 
--- spawn()  /  spawn({ only = { "pole" } })  /  spawn(function() return ... end)
+-- spawn()  /  spawn({ tag = "1" })  /  spawn({ tag = "1", only = { "pole" } })  /  spawn(function() return ... end)
 function M.spawn(arg: any)
 	local h = holder()
-	h:SetAttribute("DetailsStatus", "running")
+	local sname = statusName(tagOf(if type(arg) == "table" then arg.tag else nil))
+	h:SetAttribute(sname, "running")
 	task.spawn(function()
 		local t0 = os.clock()
 		local ok, res = pcall(function()
@@ -513,7 +556,7 @@ function M.spawn(arg: any)
 			end
 			return M.build(arg)
 		end)
-		h:SetAttribute("DetailsStatus", string.format("%s after %.1f s: %s", if ok then "done" else "ERROR", os.clock() - t0, tostring(res)))
+		h:SetAttribute(sname, string.format("%s after %.1f s: %s", if ok then "done" else "ERROR", os.clock() - t0, tostring(res)))
 	end)
 end
 

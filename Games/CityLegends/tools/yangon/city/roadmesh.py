@@ -3,7 +3,10 @@
 Per 256-stud cell, triangle meshes in world studs (written to .glb by glb.py):
   R   asphalt: the union of every ground-level carriageway, junction corners rounded (a closing of RC studs), the medians
       and raised parts left out; raised parts (ramps, decks) are their own strips along the road
-  P   pavement (+0.5) and the median's concrete tops, without the kerb strip
+  P   pavement (+0.5) on main roads (and the faces where it steps down to a flush strip), without the kerb strip
+  F   flush concrete edge strips of residential streets and lanes (no traffic): at the asphalt's height, no kerb
+      (lead, 14 Nov: Studio memory, one collision box covers the street)
+  skirts: every outer edge of the road footprint goes SKIRT down into the ground (same kind as the surface above)
   KR / KW / KG   kerb tops (+0.6, 1 stud wide) and the kerb faces (road -> +0.6): red and white bands 3.2 long on main
       roads and their medians (CLAUDE.md "Yangon look"), plain grey (KG) on streets
   L   white paint (+0.08): main roads' edge lines, dashed lane dividers, a solid centre line on undivided roads (none on
@@ -19,6 +22,7 @@ import math
 
 import numpy as np
 import shapely
+import shapely.errors
 from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Point, Polygon, MultiPolygon, box as sbox
 from shapely.ops import unary_union
@@ -44,7 +48,14 @@ VIADUCT = 7.0       # raised more than this: a deck on piers; less: solid ramp w
 MAX_TRIS = 17000
 
 COL = dict(R=(46, 47, 50), P=(128, 124, 116), KR=(186, 34, 34), KW=(232, 230, 224), KG=(150, 146, 138),
-           L=(232, 232, 226), MG=(84, 116, 58), B=(150, 146, 138))
+           L=(232, 232, 226), MG=(84, 116, 58), B=(150, 146, 138), F=(104, 102, 98))
+SKIRT = 1.6         # outer edges of the road footprint go this far down into the ground (no see-through gap)
+
+
+def flush(e):
+    """residential streets and lanes (no traffic): no raised pavement, a flush concrete edge strip (lead, 14 Nov:
+    Studio memory: one collision box covers the whole width)"""
+    return e.look in ('street', 'narrow') and not e.traffic
 
 
 def _polys(g):
@@ -341,7 +352,17 @@ class Builder:
             out = {}
             Rg = Polygon()
             if ks:
-                Rg = self._ground_cell(cb, cbm, ks, out) or Polygon()
+                try:
+                    Rg = self._ground_cell(cb, cbm, ks, out) or Polygon()
+                except shapely.errors.GEOSException:
+                    # a robustness failure in GEOS's overlay: again on a 0.01-stud grid
+                    out = {}
+                    self._snap = True
+                    try:
+                        Rg = self._ground_cell(cb, cbm, ks, out) or Polygon()
+                    finally:
+                        self._snap = False
+                    self.snapped = getattr(self, 'snapped', 0) + 1
             Rg = Rg.buffer(-0.3, join_style=2)   # paint stays clear of the kerb faces
             rz = Polygon()
             if self.rtree is not None:
@@ -387,10 +408,16 @@ class Builder:
         carr = unary_union([self.carr[k] for k in ks]).intersection(cbm)
         if carr.is_empty:
             return None
-        Rc = carr.buffer(RC, join_style=1).buffer(-RC, join_style=1)
+        sn = (lambda g: shapely.set_precision(g, 0.01)) if getattr(self, '_snap', False) else (lambda g: g)
+        Rc = sn(carr.buffer(RC, join_style=1).buffer(-RC, join_style=1))
         ko = [int(k) for k in self.otree.query(cbm)]
-        outer = unary_union([self.outer[k] for k in ko]).intersection(cbm)
-        Po = outer.buffer(RC * 0.75, join_style=1).buffer(-RC * 0.75, join_style=1).union(Rc)
+        oo_r = [self.outer[k] for k in ko if not flush(self.meta[k])]
+        oo_f = [self.outer[k] for k in ko if flush(self.meta[k])]
+        Po = unary_union(oo_r).intersection(cbm) if oo_r else Polygon()
+        Po = Po.buffer(RC * 0.75, join_style=1).buffer(-RC * 0.75, join_style=1)
+        Fo = unary_union(oo_f).intersection(cbm) if oo_f else Polygon()
+        Fo = sn(Fo.buffer(RC * 0.75, join_style=1).buffer(-RC * 0.75, join_style=1))
+        Po = sn(Po)
         M = Polygon()
         if self.mtree is not None:
             mk = [int(k) for k in self.mtree.query(cbm)]
@@ -406,33 +433,43 @@ class Builder:
                         opens.append(self.carr[k])
                 if opens:
                     M = M.difference(unary_union(opens).buffer(2.0))
-                M = M.buffer(1.0, join_style=2).buffer(-1.0, join_style=2).buffer(-0.4).buffer(0.4)
+                M = sn(M.buffer(1.0, join_style=2).buffer(-1.0, join_style=2).buffer(-0.4).buffer(0.4))
         raised = Polygon()
         if self.rtree is not None:
             rk = [int(k) for k in self.rtree.query(cbm)]
             if rk:
-                raised = unary_union([self.rfoot[k] for k in rk])
-        R0 = Rc.difference(M).difference(raised)
+                raised = sn(unary_union([self.rfoot[k] for k in rk]))
+        R0 = dif(dif(Rc, M), raised)
         R = R0.buffer(-0.6, join_style=2).buffer(0.6, join_style=2).intersection(R0)
-        sl = R0.difference(R)                      # asphalt slivers: into the median beside them, else kept
+        sl = dif(R0, R)                      # asphalt slivers: into the median beside them, else kept
         if not sl.is_empty and not M.is_empty:
             into = sl.intersection(M.buffer(1.5))
             M = M.union(into)
-            R = R.union(sl.difference(into))
+            R = R.union(dif(sl, into))
         else:
             R = R0
-        Pv = Po.difference(Rc).difference(raised)
-        Mv = M.difference(raised)
+        Pv = dif(dif(Po, Rc), raised)
+        Fv = dif(dif(dif(Fo, Rc), Pv), raised)
+        Mv = dif(M, raised)
         strip = R.buffer(KERB_W, join_style=2, mitre_limit=2.0)
         R_cell = R.intersection(cb).intersection(self.allowed)
-        P_cell = Pv.difference(strip).intersection(cb).intersection(self.allowed)
-        M_cell = Mv.difference(strip).intersection(cb).intersection(self.allowed)
+        P_cell = dif(Pv, strip).intersection(cb).intersection(self.allowed)
+        F_cell = Fv.intersection(cb).intersection(self.allowed)
+        M_cell = dif(Mv, strip).intersection(cb).intersection(self.allowed)
         for pg in _polys(R_cell):
             self._flat(pg, out, 'R', 0.0)
         for pg in _polys(P_cell):
             self._flat(pg, out, 'P', PAVE_UP)
+        for pg in _polys(F_cell):
+            self._flat(pg, out, 'F', 0.0)
         for pg in _polys(M_cell):
             self._flat(pg, out, 'MG', PAVE_UP)
+        # vertical faces: a raised pavement's edge over a flush strip (0.5 step), and skirts down into the ground on
+        # every outer edge of the footprint (raised pavement, flush strip, asphalt at dead ends)
+        foot = R.union(Pv).union(Fv).union(Mv)
+        self._edges(Pv, cb, prep(Fv), prep(foot), out)
+        self._edges(Fv, cb, None, prep(foot), out, kind='F', up=0.0)
+        self._edges(R, cb, None, prep(foot), out, kind='R', up=0.0)
         # kerbs along R's boundary where pavement or median lies outside it
         nextto = prep(Pv.union(Mv))
         medp = prep(Mv) if not Mv.is_empty else None
@@ -442,6 +479,46 @@ class Builder:
             for ring in [pg.exterior] + list(pg.interiors):
                 self._kerb_ring(ring, cb, nextto, medp, out)
         return R
+
+    def _edges(self, area, cb, step_to, foot, out, kind='P', up=PAVE_UP):
+        """faces along an area's boundary: where the flush strip lies outside (step_to) a 0.5 step face; where nothing of
+        the road lies outside, a skirt from the top SKIRT down (never along the batch outline: the next batch joins it)"""
+        if area.is_empty:
+            return
+        o = out.setdefault(kind, [])
+        for pg in _polys(area):
+            pg = shapely.geometry.polygon.orient(pg, 1.0)
+            for ring in [pg.exterior] + list(pg.interiors):
+                cs = np.array(shapely.segmentize(LineString(ring.coords), 6.0).coords)
+                if len(cs) < 3:
+                    continue
+                mids = (cs[:-1] + cs[1:]) / 2
+                seg = cs[1:] - cs[:-1]
+                L = np.linalg.norm(seg, axis=1)
+                ok = L > 1e-6
+                if not ok.any():
+                    continue
+                nrm = np.zeros_like(seg)
+                nrm[ok] = np.stack([seg[ok, 1], -seg[ok, 0]], axis=1) / L[ok, None]
+                hs = self.h(cs)
+                for k in range(len(mids)):
+                    if not ok[k] or not cb.contains(Point(mids[k])):
+                        continue
+                    probe = Point(mids[k] + nrm[k] * 0.4)
+                    if not self.allowed_p.contains(Point(mids[k] - nrm[k] * 0.4)):
+                        continue
+                    if not self.allowed_p.contains(probe):
+                        continue
+                    a, b = cs[k], cs[k + 1]
+                    top_a, top_b = hs[k] + up, hs[k + 1] + up
+                    if step_to is not None and step_to.contains(probe):
+                        lo_a, lo_b = hs[k], hs[k + 1]
+                    elif foot.contains(probe):
+                        continue
+                    else:
+                        lo_a, lo_b = top_a - SKIRT, top_b - SKIRT
+                    _quad(o, (a[0], lo_a, a[1]), (b[0], lo_b, b[1]), (b[0], top_b, b[1]), (a[0], top_a, a[1]),
+                          (nrm[k][0], 0, nrm[k][1]))
 
     def _kerb_ring(self, ring, cb, nextto, medp, out):
         cs = np.array(shapely.segmentize(LineString(ring.coords), BAND).coords)
@@ -504,7 +581,7 @@ class Builder:
         the field"""
         o = out.setdefault(kind, [])
         x0, z0, x1, z1 = pg.bounds
-        GR = GRID if kind in ('R', 'L') else 2 * GRID
+        GR = GRID if kind in ('R', 'L') else (4 * GRID if kind == 'F' else 2 * GRID)
         if x1 - x0 > GR * 1.5 or z1 - z0 > GR * 1.5:
             parts = []
             gx = np.arange(math.floor(x0 / GR) * GR, x1 + GR, GR)
@@ -518,7 +595,7 @@ class Builder:
         for q in parts:
             if q.area < 0.02:
                 continue
-            q = shapely.segmentize(q, 6.0 if kind in ('R', 'L') else 10.0)
+            q = shapely.segmentize(q, 6.0 if kind in ('R', 'L') else (16.0 if kind == 'F' else 10.0))
             try:
                 tr = shapely.constrained_delaunay_triangles(q)
             except Exception:
@@ -630,6 +707,17 @@ class Builder:
             if g.intersects(foot):
                 return True
         return False
+
+
+def dif(a, b):
+    """a - b, retried on a 0.01 / 0.05-stud grid when GEOS's overlay fails (it did on two cells of batch 2)"""
+    try:
+        return a.difference(b)
+    except shapely.errors.GEOSException:
+        try:
+            return shapely.difference(a, b, grid_size=0.01)
+        except shapely.errors.GEOSException:
+            return shapely.difference(a, b, grid_size=0.05)
 
 
 def _game_roads_only(net):

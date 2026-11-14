@@ -12,7 +12,13 @@ Checks, from the files alone (it does not import details.py's geometry):
   3. the data modules: each under 190,000 bytes, `return [==[ ... ]==]`, and they hold exactly the JSON's items and parts.
 Prints the counts and the parts per kind (prototypes and kit trees included).
 
-Run from Games/CityLegends/tools/yangon/city:  python details_test.py
+A batch (1, 2, 3): python details_test.py <tag>. Carriageways are then the batch roads' collision boxes R / J / D (every
+batch built so far, read from RoadCollide_<t>_<n>.luau), every traffic lane of the batch (4 either side: nothing may stand
+in a lane), batch 0.5's roads; plots are plots_<tag>.json plus the other batches' near it. It also checks that every item
+stands inside the batch outline minus batch 0.5, and the street lamp spots (YangonLampSpots_<tag>_<n>.luau): a P spot on a
+pavement or median box and off every carriageway, a D spot on a parapet box.
+
+Run from Games/CityLegends/tools/yangon/city:  python details_test.py [tag]
 """
 import glob, json, math, os, re, sys
 
@@ -81,13 +87,34 @@ def carriageways():
 
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
-    D = json.load(open(os.path.join(geo.BUILD, 'city', 'details_05.json'), encoding='utf-8'))
+    tag = sys.argv[1] if len(sys.argv) > 1 else '05'
+    D = json.load(open(os.path.join(geo.BUILD, 'city', 'details_%s.json' % tag), encoding='utf-8'))
     items, protos = D['items'], D['protos']
     carr = carriageways()
+    region = None
+    boxes = []
+    if tag != '05':
+        import batchgeo
+        from shapely.geometry import box as sbox
+        region = geo.batch_poly(tag).difference(sbox(*geo.BOX_05))
+        near = region.buffer(250)
+        carr = [c for c in carr if c[1].intersects(near)]
+        boxes = batchgeo.read_boxes(('1', '2', '3'), within=near)
+        carr += [('box %s (batch %s)' % (k, t), pg) for k, pg, y, t in boxes if k in ('R', 'J', 'D')]
+        for l in batchgeo.read_lanes(tag):
+            if len(l['pts']) >= 2:
+                carr.append(('lane ' + l['road'], LineString([(q[0], q[2]) for q in l['pts']]).buffer(4.0, cap_style=2)))
     ctree = STRtree([g for _, g in carr])
-    plots = json.load(open(os.path.join(geo.BUILD, 'city', 'plots_05.json'), encoding='utf-8'))['plots']
+    plots = []
+    for t in (('05',) if tag == '05' else ('05', '1', '2', '3')):
+        f = os.path.join(geo.BUILD, 'city', 'plots_%s.json' % t)
+        if os.path.exists(f):
+            for p_ in json.load(open(f, encoding='utf-8'))['plots']:
+                if t == tag or region is None or near.contains(Point(p_['poly'][0])):
+                    plots.append(p_)
     ppoly = [Polygon(p['poly']).buffer(0) for p in plots]
     ptree = STRtree(ppoly)
+    outside = 0
     per = {}
     bad = {}
     examples = []
@@ -98,6 +125,8 @@ def main():
         for u in it['uses']:
             parts += protos[u]
         k[1] += len(parts) + sum(3 + (1 if kit[2] else 0) for kit in it['kits'])
+        if region is not None and not region.contains(Point(it['x'], it['z'])):
+            outside += 1
         if it['kind'] == 'patch':
             continue
         geoms = []
@@ -139,7 +168,7 @@ def main():
                 low = min(low, lo)
         fb.append((it['name'], it['x'], it['z'], low))
     # the data modules
-    mods = sorted(glob.glob(os.path.join(geo.BUILD, 'city', 'Details_05_*.luau')), key=lambda p: int(re.findall(r'_(\d+)\.luau$', p)[0]))
+    mods = sorted(glob.glob(os.path.join(geo.BUILD, 'city', 'Details_%s_*.luau' % tag)), key=lambda p: int(re.findall(r'_(\d+)\.luau$', p)[0]))
     n_items = n_parts = 0
     ok_mods = True
     for m in mods:
@@ -181,8 +210,41 @@ def main():
         fails.append('a footbridge under 17 studs')
     if not ok_mods or n_items != len(items) or n_parts != json_parts:
         fails.append('modules do not match the JSON')
-    if total > 25000:
-        fails.append('over the 25,000-part budget')
+    budget = 25000
+    if region is not None:
+        own = sum(1 for p_ in plots if p_.get('id') is not None) if False else len(json.load(open(os.path.join(geo.BUILD, 'city', 'plots_%s.json' % tag), encoding='utf-8'))['plots'])
+        from shapely.geometry import box as sbox
+        budget = int(25000 * max(region.area / sbox(*geo.BOX_05).area, own / 19143.0))
+        print('items outside the batch outline: %d' % outside)
+        if outside:
+            fails.append('%d items outside the batch outline' % outside)
+        # the street lamps
+        lp = sorted(glob.glob(os.path.join(geo.BUILD, 'city', 'YangonLampSpots_%s_*.luau' % tag)))
+        pv = [pg for k, pg, y, t in boxes if k in ('P', 'M')]
+        rr = [pg for k, pg, y, t in boxes if k in ('R', 'J', 'D')]
+        ww = [pg for k, pg, y, t in boxes if k == 'W']
+        pvt, rrt, wwt = STRtree(pv), STRtree(rr), STRtree(ww) if ww else None
+        nP = nD = badl = 0
+        for f in lp:
+            for line in open(f, encoding='utf-8'):
+                w = line.split()
+                if len(w) != 6 or w[5] not in ('P', 'D'):
+                    continue
+                pt = Point(float(w[0]), float(w[1]))
+                if w[5] == 'P':
+                    nP += 1
+                    if not len(pvt.query(pt, predicate='intersects')) or len(rrt.query(pt.buffer(0.5), predicate='intersects')):
+                        badl += 1
+                else:
+                    nD += 1
+                    if wwt is None or not len(wwt.query(pt, predicate='intersects')):
+                        badl += 1
+        print('street lamps: %d on pavements, %d on parapets, %d not on the right box' % (nP, nD, badl))
+        if badl:
+            fails.append('%d lamp spots off their box' % badl)
+    print('part budget %d' % budget)
+    if total > budget:
+        fails.append('over the %d-part budget' % budget)
     print('RESULT:', 'PASS' if not fails else 'FAIL: ' + '; '.join(fails))
     return 0 if not fails else 1
 

@@ -34,6 +34,7 @@ from shapely import affinity
 import geo
 from geo import load, proj, floors_from_tags
 
+HERE = os.path.dirname(os.path.abspath(__file__))
 RES = 2.0  # studs a raster cell
 ROW_SETBACK = 2.5  # studs between the pavement and a frontage row
 
@@ -43,7 +44,7 @@ WALL_W = [10, 12, 6, 5, 4, 4, 6, 3, 8, 2, 8, 2]
 ROOF_METAL = [(150, 72, 52), (168, 62, 46), (146, 148, 150), (112, 122, 136), (124, 96, 70), (96, 104, 92)]
 ROOF_FLAT = (166, 160, 150)
 
-TARGET = {'lakeside': 0.16, 'residential': 0.45, 'untagged': 0.45, 'commercial': 0.60, 'retail': 0.60, 'industrial': 0.45, 'school': 0.25,
+TARGET = {'lakeside': 0.16, 'residential': 0.45, 'untagged': 0.40, 'commercial': 0.60, 'retail': 0.60, 'industrial': 0.45, 'school': 0.25,
           'college': 0.2, 'university': 0.15, 'hospital': 0.35, 'military': 0.12, 'construction': 0.30, 'religious': 0.15,
           'place_of_worship': 0.10, 'government': 0.30, 'railway': 0.10}
 GREEN_USES = {'park', 'pitch', 'garden', 'golf_course', 'cemetery', 'grave_yard', 'forest', 'wood', 'grass', 'recreation_ground',
@@ -104,14 +105,24 @@ class Raster:
         return [((x - self.x0) / RES, (z - self.z0) / RES) for x, z in pts]
 
     def draw_geom(self, im, g, val=255):
-        d = ImageDraw.Draw(im)
+        # (each polygon is drawn on its own mask first: a hole must not erase what earlier layers drew there)
         geoms = [g] if g.geom_type == 'Polygon' else list(getattr(g, 'geoms', []))
         for p in geoms:
             if p.geom_type != 'Polygon' or p.is_empty:
                 continue
-            d.polygon(self.px(p.exterior.coords), fill=val)
+            ext = self.px(p.exterior.coords)
+            i0 = max(0, int(min(q[0] for q in ext)) - 1)
+            j0 = max(0, int(min(q[1] for q in ext)) - 1)
+            i1 = min(im.size[0], int(max(q[0] for q in ext)) + 2)
+            j1 = min(im.size[1], int(max(q[1] for q in ext)) + 2)
+            if i1 <= i0 or j1 <= j0:
+                continue
+            mask = Image.new('L', (i1 - i0, j1 - j0), 0)
+            d = ImageDraw.Draw(mask)
+            d.polygon([(x - i0, y - j0) for x, y in ext], fill=255)
             for h in p.interiors:
-                d.polygon(self.px(h.coords), fill=0)
+                d.polygon([(x - i0, y - j0) for x, y in self.px(h.coords)], fill=0)
+            im.paste(val, (i0, j0, i1, j1), mask)
 
     def cells(self, poly):
         """raster rows / cols covered by a small polygon (for the free test)"""
@@ -256,6 +267,43 @@ def kind_for(t):
     return None
 
 
+def batch_road_geoms(tag):
+    """batches 1-3: every road roads.py built (build/city/roads_<tag>_profile.json: pts [x, surface y, z, ground y],
+    half [left, right], walk), as carriageway+pavement polygons and centre segments"""
+    prof = json.load(open(os.path.join(geo.BUILD, 'city', f'roads_{tag}_profile.json'), encoding='utf-8'))
+    polys, segs = [], []
+    for r in prof:
+        pts = [(q[0], q[2]) for q in r['pts']]
+        if len(pts) < 2:
+            continue
+        ls = LineString(pts)
+        half = max(r['half']) if isinstance(r['half'], list) else r['half']
+        edge = half + (r.get('walk') or 0)
+        polys.append(ls.buffer(edge + 1.0, cap_style=1))
+        kind = 'big' if half >= 20 else 'street'
+        segs.append((ls, edge, kind, r.get('name')))
+    return unary_union(polys), segs
+
+
+def landmark_areas(tag):
+    """the OSM grounds of this batch's landmarks (tools/yangon/city/landmarks.json): no generic buildings or infill there"""
+    lms = json.load(open(os.path.join(HERE, 'landmarks.json'), encoding='utf-8'))['landmarks']
+    names = [l['name'].lower() for l in lms if l.get('batch') == tag]
+    out = []
+    for a in load('areas'):
+        nm = ((a['t'].get('name:en') or '') + ' ' + (a['t'].get('name') or '')).lower()
+        if any(n in nm for n in names):
+            try:
+                pg = Polygon(proj(a['p']))
+            except Exception:
+                continue
+            if not pg.is_valid:
+                pg = pg.buffer(0)
+            if pg.area > 400:
+                out.append(pg.buffer(8))
+    return unary_union(out) if out else Polygon()
+
+
 def style_for(t, area_m2, floors, circ, near_big):
     k = kind_for(t)
     if k == 'hall':
@@ -309,19 +357,27 @@ def front_edge(coords, segs_tree, segs):
 
 def build(tag, box):
     t0 = __import__('time').time()
-    game_roads = json.load(open(os.path.join(geo.MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
-    net = json.load(open(os.path.join(geo.BUILD, 'city', f'network_{tag}.json'), encoding='utf-8'))
-    streets = net['new']
-    roads_poly, segs = road_geoms(game_roads, streets)
+    if tag == '05':
+        game_roads = json.load(open(os.path.join(geo.MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
+        net = json.load(open(os.path.join(geo.BUILD, 'city', f'network_{tag}.json'), encoding='utf-8'))
+        streets = net['new']
+        roads_poly, segs = road_geoms(game_roads, streets)
+        blocked, landmarks = blocked_polys()
+        region = sbox(*box)
+    else:
+        # (batches 1-3: the batch's outline minus the built 0.5 box; the batch's own roads; the landmark grounds)
+        roads_poly, segs = batch_road_geoms(tag)
+        region = geo.batch_poly(tag).difference(sbox(*geo.BOX_05))
+        landmarks = []
+        blocked = unary_union([sbox(*box).buffer(400).difference(region), landmark_areas(tag)])
     segs_tree = STRtree([s[0] for s in segs])
     water = water_polys(box)
-    blocked, landmarks = blocked_polys()
     lm_polys = [Polygon(rect_poly(p['x'], p['z'], p['fx'], p['fz'], p['w'] + 16, p['d'] + 16)) for p in landmarks]
     # (the step 8 landmark models with real names: never a second copy from the OSM outline)
     LM_NAME = {'novotel': 'novotel', 'mmplaza': 'myanmar plaza', 'optima': 'optima'}
     lm_names = [(LM_NAME.get(p.get('landmark'), '?'), p['x'], p['z']) for p in landmarks]
     uses = landuse_polys(box)
-    bb = sbox(*box)
+    bb = region
     print('inputs ready', round(__import__('time').time() - t0), 's')
 
     # ---------------------------------------------------------------- 1. the OSM buildings
@@ -405,9 +461,10 @@ def build(tag, box):
     # ---------------------------------------------------------------- 2. the raster of free land
     R = Raster(box)
     occ = R.img()
-    R.draw_geom(occ, roads_poly.intersection(bb.buffer(50)))
-    R.draw_geom(occ, water.buffer(4).intersection(bb.buffer(50)))
-    R.draw_geom(occ, blocked.intersection(bb.buffer(50)))
+    rbox = sbox(*box).buffer(50)
+    R.draw_geom(occ, roads_poly.intersection(rbox))
+    R.draw_geom(occ, water.buffer(4).intersection(rbox))
+    R.draw_geom(occ, blocked.intersection(rbox))
     green = R.img()
     use_img = Image.new('L', (R.nx, R.nz), 0)
     use_codes = {'untagged': 0}
@@ -418,9 +475,10 @@ def build(tag, box):
             code = use_codes.setdefault(use, len(use_codes))
             R.draw_geom(use_img, p.intersection(bb), code)
     # Inya Lake's shore and peninsulas are villa compounds in big gardens (Google Earth): land within 260 studs of the big water
-    big_water = max(list(water.geoms) if hasattr(water, 'geoms') else [water], key=lambda g: g.area)
     lake_code = use_codes.setdefault('lakeside', len(use_codes))
-    R.draw_geom(use_img, big_water.buffer(260).difference(big_water).intersection(bb), lake_code)
+    if tag == '05':
+        big_water = max(list(water.geoms) if hasattr(water, 'geoms') else [water], key=lambda g: g.area)
+        R.draw_geom(use_img, big_water.buffer(260).difference(big_water).intersection(bb), lake_code)
     for use, p, t in uses:
         if use in TARGET and use != 'residential' and use in use_codes:
             R.draw_geom(use_img, p.intersection(bb), use_codes[use])
@@ -457,6 +515,8 @@ def build(tag, box):
             continue
         use = inv.get(use_major.get(bi, (0, 0))[1], 'untagged')
         tgt = TARGET.get(use, 0.45)
+        if tag == '2' and use in ('untagged', 'residential', 'commercial', 'retail'):
+            tgt = 0.72  # (downtown Yangon: 70-85% built, continuous 4-7 floor shophouse blocks)
         need = tgt * land_n[bi] - built_n[bi]
         if need > 20:
             target_cells[bi] = [need, use]
@@ -535,6 +595,8 @@ def build(tag, box):
                     need[0] -= got
                     if need[1] == 'lakeside':
                         style, fl, shop = ('villa' if r.random() < 0.5 else 'house'), r.choice([2, 2, 3]), False
+                    elif tag == '2':
+                        style, fl, shop = 'shophouse', r.choice([4, 4, 5, 5, 6, 6, 7]), True
                     elif busy:
                         style, fl, shop = 'shophouse', r.choice([3, 3, 4, 4, 5, 5, 6]), True
                     else:
@@ -582,12 +644,13 @@ def build(tag, box):
             style, w, dep, fl = 'mass', r.uniform(18, 36), r.uniform(18, 32), r.choice([4, 5, 6, 7, 8, 10])
         elif use == 'industrial':
             style, w, dep, fl = 'hall', r.uniform(24, 48), r.uniform(20, 40), r.choice([1, 1, 2])
-        elif roll < 0.5:
-            style, w, dep, fl = 'walkup', r.uniform(22, 34), r.uniform(18, 28), r.choice([4, 4, 5, 5, 6, 6, 7, 8])
-        elif roll < 0.88:
-            style, w, dep, fl = 'house', r.uniform(12, 20), r.uniform(12, 20), r.choice([2, 2, 3])
+        elif roll < 0.62:
+            # (Yangon's townships are mostly 4-8 floor walk-up blocks, often two or three units joined)
+            style, w, dep, fl = 'walkup', r.uniform(24, 40), r.uniform(20, 30), r.choice([4, 4, 5, 5, 6, 6, 7, 8])
+        elif roll < 0.9:
+            style, w, dep, fl = 'house', r.uniform(14, 22), r.uniform(14, 22), r.choice([2, 2, 3])
         else:
-            style, w, dep, fl = 'shed', r.uniform(8, 14), r.uniform(10, 18), 1
+            style, w, dep, fl = 'shed', r.uniform(10, 16), r.uniform(12, 20), 1
         # face the nearest road
         best = None
         for jj in segs_tree.query(Point(x, z).buffer(220)):
@@ -678,5 +741,5 @@ def est_floors(t, area_m2, r):
 if __name__ == '__main__':
     sys.stdout.reconfigure(encoding='utf-8')
     tag = sys.argv[1] if len(sys.argv) > 1 else '05'
-    box = {'05': geo.BOX_05}[tag]
+    box = geo.BOX_05 if tag == '05' else tuple(geo.batch_poly(tag).bounds)
     build(tag, box)

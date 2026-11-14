@@ -50,8 +50,33 @@ function WorldFx.setDaylight(d: number)
 				task.wait()
 			end
 		end
+		for _, p in CollectionService:GetTagged("LandmarkGlow") do
+			WorldFx.setLandmarkGlow(p)
+		end
 	end)
 end
+
+-- (whole-Yangon landmarks, 14 Nov 2026) the gold of Shwedagon, Sule and the other pagodas (tag "LandmarkGlow", set by
+-- tools/yangon/YangonLandmarks.luau): Metal gold by day, a dark-gold Neon at night (a bright Neon blooms into a yellow blob)
+function WorldFx.setLandmarkGlow(p: Instance)
+	if not p:IsA("BasePart") then
+		return
+	end
+	if lampsLit then
+		p.Material = Enum.Material.Neon
+		p.Color = p:GetAttribute("NightColor") or Color3.fromRGB(164, 102, 26)
+	else
+		local m = p:GetAttribute("DayMaterial")
+		local ok, mat = pcall(function()
+			return (Enum.Material :: any)[m]
+		end)
+		p.Material = if typeof(m) == "string" and ok and mat then mat else Enum.Material.Metal
+		p.Color = p:GetAttribute("DayColor") or Color3.fromRGB(246, 176, 52)
+	end
+end
+CollectionService:GetInstanceAddedSignal("LandmarkGlow"):Connect(function(p)
+	WorldFx.setLandmarkGlow(p)
+end)
 
 -- (whole-Yangon mesh buildings, 14 Nov 2026) each 256-stud cell's night layer: a copy of its window walls just in front
 -- (MeshPart tag "FacadeNight") with a SurfaceAppearance whose emissive mask lights some windows (tag "FacadeGlow").

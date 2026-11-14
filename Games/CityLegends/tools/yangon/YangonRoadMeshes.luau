@@ -55,6 +55,7 @@ M.LOOK = {
 	L = { Enum.Material.SmoothPlastic, Color3.fromRGB(232, 232, 226) },
 	MG = { Enum.Material.Grass, Color3.fromRGB(84, 116, 58) },
 	B = { Enum.Material.Concrete, Color3.fromRGB(150, 146, 138) },
+	F = { Enum.Material.Concrete, Color3.fromRGB(104, 102, 98) }, -- flush edge strips of residential streets
 }
 
 -- box thickness under the top, and the extra lift of the top over the line's cy, per collision kind

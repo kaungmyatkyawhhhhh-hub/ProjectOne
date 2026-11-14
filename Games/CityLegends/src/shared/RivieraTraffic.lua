@@ -322,6 +322,30 @@ function RivieraTraffic.build()
 		end
 		data = { lanes = lanesAll, links = linksAll }
 	end
+	-- (2026-11-14, whole-Yangon batches 1-3: tools/yangon/city/roads.py) each batch's main-road lanes in
+	-- modules YangonLanesB<batch>_<k>, numbered on from everything before them, appended in order
+	for _, tag in { "1", "2", "3" } do
+		for k = 1, 30 do
+			local m = script.Parent:FindFirstChild("YangonLanesB" .. tag .. "_" .. k)
+			if not m then
+				break
+			end
+			local okB, mod = pcall(require, m)
+			if okB and type(mod) == "table" and mod.first == #data.lanes + 1 then
+				local la, li = table.clone(data.lanes), table.clone(data.links)
+				for _, l in mod.lanes do
+					table.insert(la, l)
+				end
+				for _, x in mod.links do
+					table.insert(li, x)
+				end
+				data = { lanes = la, links = li }
+			else
+				warn("RivieraTraffic: YangonLanesB" .. tag .. "_" .. k .. " is out of step; that batch's traffic is incomplete")
+				break
+			end
+		end
+	end
 	local dataLanes, dataLinks = oneLaneStreets(data)
 	dataLinks = mergeRouteEnds(dataLanes, dataLinks)
 	local all, lanes = {}, {}

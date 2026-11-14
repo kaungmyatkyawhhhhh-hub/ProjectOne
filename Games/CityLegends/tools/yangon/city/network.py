@@ -27,6 +27,8 @@ from geo import load, proj, in_box
 PUBLIC = {'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'living_street', 'trunk_link',
           'primary_link', 'secondary_link', 'tertiary_link'}
 BIG = {'trunk', 'primary', 'secondary', 'trunk_link', 'primary_link', 'secondary_link'}
+CLIP_MIN = 4.0     # a street cut on the box edge shorter than this is dropped
+TAIL_MAX = 300.0   # seam tails (network()) at most this long
 
 
 def lanes_each_way(t):
@@ -89,10 +91,15 @@ def game_corridors(game_roads, grow=6.0):
     return unary_union(polys)
 
 
-def network(box, game_roads, min_len=24.0):
-    area = sbox(box[0] - 200, box[1] - 200, box[2] + 200, box[3] + 200)
+def network(box, game_roads, min_len=24.0, margin=200.0, clip=True, plots=None):
+    """the streets of `box` (x0, z0, x1, z1). Which OSM pieces are new streets (length, covered by a game road) is decided on
+    the box grown by `margin`; with `clip` every new street is then cut exactly on the box's edge (2026-11-14: batch 0.5's
+    streets reached 200 studs past BOX_05 and overlapped batch 1's roads, which start on that edge), so the streets inside
+    are the same ones as before and a street crossing the edge stops on it (pieces under CLIP_MIN studs dropped)."""
+    area = sbox(box[0] - margin, box[1] - margin, box[2] + margin, box[3] + margin)
+    inner = sbox(*box)
     covered_poly = game_corridors(game_roads) if game_roads else None
-    new, covered = [], []
+    new, covered, tails = [], [], []
     for r in load('roads'):
         t = r['t']
         hw = t.get('highway')
@@ -115,21 +122,95 @@ def network(box, game_roads, min_len=24.0):
                 continue
             if covered_poly is not None:
                 inside = g.intersection(covered_poly).length
-                if inside > 0.6 * g.length:
-                    covered.append(r['id'])
-                    continue
                 g2 = g.difference(covered_poly)
                 pieces = [g2] if g2.geom_type == 'LineString' else [x for x in getattr(g2, 'geoms', []) if x.geom_type == 'LineString']
+                if inside > 0.6 * g.length:
+                    covered.append(r['id'])
+                    # (2026-11-14) seam tails: a mostly-covered way's uncovered end can be the only link from a game road's end
+                    # to the box's edge or to the street that leads there (Nar Nat Taw: ~150 studs between the v5 end and its
+                    # junction with the street to the edge were lost). Kept below when it links up.
+                    if clip:
+                        for x in pieces:
+                            xi = x if x.within(inner) else x.intersection(inner)
+                            for y in ([xi] if xi.geom_type == 'LineString' else [z for z in getattr(xi, 'geoms', []) if z.geom_type == 'LineString']):
+                                if min_len <= y.length <= TAIL_MAX:
+                                    tails.append((r, t, hw, y))
+                    continue
             else:
                 pieces = [g]
             for p in pieces:
                 if p.length < min_len:
                     continue
-                new.append({'id': r['id'], 'name': t.get('name:en') or t.get('name'), 'hw': hw, 'cls': cls, 'half': half,
-                            'walk': walk, 'lanes': n, 'oneway': one, 'bridge': bool(t.get('bridge')),
-                            'layer': int(t.get('layer', 0) or 0) if str(t.get('layer', '0')).lstrip('-').isdigit() else 0,
-                            'pts': [[round(x, 2), round(z, 2)] for x, z in p.coords]})
-    return {'new': new, 'covered': covered}
+                add(new, r, t, hw, p, clip, inner)
+    # seam tails that link up: one end on a game road's corridor, the other on the box's edge or on a street kept above
+    new_tails = 0
+    blocked = []
+    if tails:
+        from shapely.geometry import MultiPoint
+        edge = inner.exterior
+        # ends of kept streets that run on to the box's edge
+        lead = [Point(s_['pts'][k]) for s_ in new for k, o in ((0, -1), (-1, 0)) if edge.distance(Point(s_['pts'][o])) < 1.5]
+        lead = MultiPoint(lead) if lead else None
+        others, nends = neighbour_roads()
+        ptree = None
+        if plots:
+            from shapely.geometry import Polygon
+            ppolys = [Polygon(q['poly']) for q in plots if len(q['poly']) >= 3]
+            ptree = STRtree(ppolys)
+        for r, t, hw, x in tails:
+            if others is not None and x.intersection(others).length > 0.5 * x.length:
+                continue        # a neighbouring batch's road already runs here (its seam edge reaches the game road's end)
+            a, b = Point(x.coords[0]), Point(x.coords[-1])
+            for p_, q_ in ((a, b), (b, a)):
+                at_edge = edge.distance(q_) < 1.5 and nends is not None and nends.distance(q_) < 3.0
+                if covered_poly.distance(p_) < 0.5 and (at_edge or (lead is not None and lead.distance(q_) < 1.5)):
+                    _, half, walk, _ = classify(t)
+                    foot = x.buffer(half + walk)
+                    if ptree is not None and any(ppolys[int(i)].intersects(foot) for i in ptree.query(foot)):
+                        blocked.append({'id': r['id'], 'name': t.get('name:en') or t.get('name'), 'from': [round(v) for v in x.coords[0]],
+                                        'to': [round(v) for v in x.coords[-1]], 'length': round(x.length)})
+                        break   # batch 0.5's buildings stand on it: the plots must be rebuilt first (reported, not built)
+                    new_tails += add(new, r, t, hw, x, clip, inner)
+                    break
+    return {'new': new, 'covered': covered, 'tails': new_tails, 'tails_blocked': blocked}
+
+
+def neighbour_roads():
+    """the batch 1-3 roads built so far (roads.py profiles): their centre lines buffered 8 studs, and their end points
+    (or None, None)"""
+    import json, os
+    from geo import BUILD
+    lines, ends = [], []
+    for tag in ('1', '2', '3'):
+        p = os.path.join(BUILD, 'city', 'roads_%s_profile.json' % tag)
+        if os.path.exists(p):
+            for e in json.load(open(p)):
+                if len(e['pts']) > 1:
+                    lines.append(LineString([(q[0], q[2]) for q in e['pts']]).buffer(8))
+                    ends += [(e['pts'][0][0], e['pts'][0][2]), (e['pts'][-1][0], e['pts'][-1][2])]
+    if not lines:
+        return None, None
+    from shapely.geometry import MultiPoint
+    return unary_union(lines), MultiPoint(ends)
+
+
+def add(new, r, t, hw, p, clip, inner):
+    cls, half, walk, n = classify(t)
+    one, _ = lanes_each_way(t)
+    cut = [p]
+    if clip and not p.within(inner):
+        q = p.intersection(inner)
+        cut = [q] if q.geom_type == 'LineString' else [x for x in getattr(q, 'geoms', []) if x.geom_type == 'LineString']
+    k = 0
+    for p in cut:
+        if p.is_empty or p.length < CLIP_MIN:
+            continue
+        new.append({'id': r['id'], 'name': t.get('name:en') or t.get('name'), 'hw': hw, 'cls': cls, 'half': half,
+                    'walk': walk, 'lanes': n, 'oneway': one, 'bridge': bool(t.get('bridge')),
+                    'layer': int(t.get('layer', 0) or 0) if str(t.get('layer', '0')).lstrip('-').isdigit() else 0,
+                    'pts': [[round(x, 2), round(z, 2)] for x, z in p.coords]})
+        k += 1
+    return k
 
 
 if __name__ == '__main__':
@@ -137,7 +218,9 @@ if __name__ == '__main__':
     from geo import MAP, BOX_05, BUILD
     sys.stdout.reconfigure(encoding='utf-8')
     gr = json.load(open(os.path.join(MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
-    net = network(BOX_05, gr)
+    pp = os.path.join(BUILD, 'city', 'plots_05.json')
+    net = network(BOX_05, gr, plots=json.load(open(pp, encoding='utf-8'))['plots'] if os.path.exists(pp) else None)
+    print('seam tails added:', net['tails'], '| blocked by batch 0.5 buildings:', net['tails_blocked'])
     by = {}
     for s in net['new']:
         L = LineString(s['pts']).length

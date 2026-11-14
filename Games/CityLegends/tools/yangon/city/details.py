@@ -43,7 +43,26 @@ bytes) for tools/yangon/YangonDetails.luau. Data line format (see the placer's h
   T w|k text                    a SurfaceGui text on the last part's front (-Z) face (white or black letters)
   K kit wide band               a GreenKit tree at the item (band 1 = white trunk band, 2 = red and white)
 
-Run from Games/CityLegends/tools/yangon/city:  python details.py   (then python details_test.py)
+BATCHES 1, 2, 3 (14 Nov 2026):  python details.py <tag>   (or run_batch.py <tag>: details, its test, the trees)
+  The ground comes from batchgeo.py: the batch outline minus batch 0.5, its road edges (roads_<tag>_profile.json: per side
+  carriageway offsets, raised pavements on main roads, FLUSH residential streets whose edge strip is part of the carriageway
+  box), the collision boxes R / P / M / J / D / W of every batch built, the traffic lanes (nothing stands in a lane), plots,
+  water, landmark grounds, decks. Differences from batch 0.5:
+    * street lamps: lamps_batch() -> YangonLampSpots_<tag>_<n>.luau (YangonLamps' format) for YangonLampsBatch.luau: main
+      roads of 2+ lanes each way, both sides every 96 (staggered), parapets of raised roads every 64;
+    * power poles: every 96 on streets, 72 on main roads; every second pole carries a white lamp (in the data: a part line
+      followed by "L range brightness"; YangonPoleLights' look); 0.5 keeps 80 / 64 and gets the lamps the same way;
+    * a divided road's carriageway has no kerb on its median side (signals one way only, on the right-hand kerb);
+    * batch 2 (VENDOR_TAGS): street vendors' umbrella stalls on main-road pavements with a shop front within 40;
+    * worship: a Chinese temple builder (red columns, double-eaved roof, gold ridge) beside the stupas, monasteries,
+      churches, mosques and Hindu temples;
+    * the OSM natural=tree trees go to the batch's green data (green.py), not here;
+    * road patches sit in the middle of lane 1 of each traffic lane chain (clear of the lines), on an R box;
+    * the part budget is batch 0.5's density: 25,000 x max(area ratio, plot-count ratio);
+    * guard() drops any item that would still break the test's rules (printed per kind) before writing.
+  Outputs: details_<tag>.json, Details_<tag>_<n>.luau (YangonDetails.spawn({ tag = "<tag>" }) -> Workspace.Yangon.Details_<tag>).
+
+Run from Games/CityLegends/tools/yangon/city:  python details.py [tag]   (then python details_test.py [tag])
 """
 import hashlib, json, math, os, random, re, sys
 
@@ -62,9 +81,11 @@ import streets as streets_mod
 YT = os.path.dirname(HERE)
 OUT = os.path.join(geo.BUILD, 'city')
 NL = chr(10)
-TAG = '05'
+TAG = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('-') else '05'
+BATCH = TAG != '05'
 MAX_BYTES = 185000
-PART_BUDGET = 25000
+PART_BUDGET = 25000   # batch 0.5; a batch gets the same density: 25,000 x its area / batch 0.5's (set after loading)
+VENDOR_TAGS = {'2'}   # street vendors' umbrellas: downtown
 
 # ---------------------------------------------------------------- the lots, landmarks, ring (d19's top, read only)
 _src = open(os.path.join(YT, 'd19_buildings.py'), encoding='utf-8').read()
@@ -83,6 +104,8 @@ def R(*k):
 
 
 def inside_box(x, z, m=10.0):
+    if BATCH:
+        return BG.inside(x, z, m)
     return X0 + m < x < X1 - m and Z0 + m < z < Z1 - m
 
 
@@ -139,6 +162,12 @@ SIGN_COLS = {
 for _k, (_c, _t) in SIGN_COLS.items():
     pal('sign_' + _k, _c)
 pal('sign_default', (240, 240, 236))
+pal('lamp_white', (236, 244, 255))
+for _n, _c, _m in [('cn_red', (176, 36, 28), 'SmoothPlastic'), ('cn_roof', (46, 112, 82), 'SmoothPlastic'),
+                   ('cn_tile', (206, 112, 40), 'SmoothPlastic'), ('cn_wall', (226, 200, 150), 'Plaster'),
+                   ('umb_red', (200, 44, 40), 'Fabric'), ('umb_blue', (40, 90, 170), 'Fabric'), ('umb_green', (44, 140, 70), 'Fabric'),
+                   ('umb_yellow', (232, 184, 40), 'Fabric'), ('umb_orange', (226, 110, 30), 'Fabric'), ('cart', (150, 110, 70), 'WoodPlanks')]:
+    pal(_n, _c, _m)
 GOPURAM = [(220, 80, 60), (240, 190, 60), (70, 140, 200), (120, 190, 90), (230, 120, 180)]
 for _i, _c in enumerate(GOPURAM):
     pal('gop%d' % _i, _c)
@@ -170,12 +199,12 @@ class Item:
         self.yh = None
         self.street = False
 
-    def add(self, shape, size, off, p, ry=0.0, rx=0.0, rz=0.0, text=None):
-        self.parts.append([shape, size[0], size[1], size[2], off[0], off[1], off[2], ry, rx, rz, p, text])
+    def add(self, shape, size, off, p, ry=0.0, rx=0.0, rz=0.0, text=None, light=None):
+        self.parts.append([shape, size[0], size[1], size[2], off[0], off[1], off[2], ry, rx, rz, p, text, light])
         return self
 
-    def box(self, size, off, p, ry=0.0, rx=0.0, rz=0.0, text=None):
-        return self.add('B', size, off, p, ry, rx, rz, text)
+    def box(self, size, off, p, ry=0.0, rx=0.0, rz=0.0, text=None, light=None):
+        return self.add('B', size, off, p, ry, rx, rz, text, light)
 
     def span(self, lo, hi, size_xz, off_xz, p, shape='B', ry=0.0):
         """a part from height lo to hi"""
@@ -249,71 +278,108 @@ def unit(dx, dz):
 
 
 # ---------------------------------------------------------------- the map's geometry
-print('loading ...')
-GAME = json.load(open(os.path.join(geo.MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
-GPAVE, GCARR = streets_mod.game_pave(GAME)
-ST = streets_mod.heights(TAG)
-PLOTS = json.load(open(os.path.join(OUT, f'plots_{TAG}.json'), encoding='utf-8'))['plots']
-PPOLY = [Polygon(p['poly']).buffer(0) for p in PLOTS]
-PTREE = STRtree(PPOLY)
+print('loading ...', TAG)
+BG = None
+if not BATCH:
+    GAME = json.load(open(os.path.join(geo.MAP, 'ygn_roads_v5.json'), encoding='utf-8'))
+    GPAVE, GCARR = streets_mod.game_pave(GAME)
+    ST = streets_mod.heights(TAG)
+    PLOTS = json.load(open(os.path.join(OUT, f'plots_{TAG}.json'), encoding='utf-8'))['plots']
+    PPOLY = [Polygon(p['poly']).buffer(0) for p in PLOTS]
+    PTREE = STRtree(PPOLY)
 
-# every road as one record: the game's part roads (each run of samples between cuts) and the new mesh streets
-RD = []
-for r in GAME['roads']:
-    cs = set(GAME.get('cut', {}).get(r['name'], []))
-    walk = r.get('walkL') or 10.0
-    run = []
-    for k, s in enumerate(r['s'] + [None]):
-        if s is None or k in cs:
-            if len(run) > 3:
-                RD.append({'id': 'g:%s:%d' % (r['name'], len(RD)), 'name': r['name'], 'src': 'game', 'kind': r.get('kind'),
-                           'half': max(max(q[6], q[7]) for q in run), 'walk': walk, 'pts': [(q[0], q[2]) for q in run],
-                           'ys': [q[1] for q in run], 'mouth': (False, False)})
-            run = []
-            continue
-        run.append(s)
-for s in ST:
-    RD.append({'id': 's:%s' % s['id'], 'name': s['name'], 'src': 'street', 'kind': s['cls'], 'half': s['half'], 'walk': s['walk'],
-               'pts': [tuple(p) for p in s['pts']], 'ys': s['y0'], 'mouth': tuple(s['mouth'])})
-for rd in RD:
-    rd['line'] = LineString(rd['pts'])
-    rd['carr'] = rd['line'].buffer(rd['half'], cap_style=2, join_style=1)
-    rd['outer'] = rd['line'].buffer(rd['half'] + rd['walk'], cap_style=2, join_style=1)
-RD_LINES = [rd['line'] for rd in RD]
-RD_TREE = STRtree(RD_LINES)
-RD_CARR_TREE = STRtree([rd['carr'] for rd in RD])
+    # every road as one record: the game's part roads (each run of samples between cuts) and the new mesh streets
+    RD = []
+    for r in GAME['roads']:
+        cs = set(GAME.get('cut', {}).get(r['name'], []))
+        walk = r.get('walkL') or 10.0
+        run = []
+        for k, s in enumerate(r['s'] + [None]):
+            if s is None or k in cs:
+                if len(run) > 3:
+                    RD.append({'id': 'g:%s:%d' % (r['name'], len(RD)), 'name': r['name'], 'src': 'game', 'kind': r.get('kind'),
+                               'half': max(max(q[6], q[7]) for q in run), 'walk': walk, 'pts': [(q[0], q[2]) for q in run],
+                               'ys': [q[1] for q in run], 'mouth': (False, False)})
+                run = []
+                continue
+            run.append(s)
+    for s in ST:
+        RD.append({'id': 's:%s' % s['id'], 'name': s['name'], 'src': 'street', 'kind': s['cls'], 'half': s['half'], 'walk': s['walk'],
+                   'pts': [tuple(p) for p in s['pts']], 'ys': s['y0'], 'mouth': tuple(s['mouth'])})
+    for rd in RD:
+        rd['line'] = LineString(rd['pts'])
+        rd['carr'] = rd['line'].buffer(rd['half'], cap_style=2, join_style=1)
+        rd['outer'] = rd['line'].buffer(rd['half'] + rd['walk'], cap_style=2, join_style=1)
+    RD_LINES = [rd['line'] for rd in RD]
+    RD_TREE = STRtree(RD_LINES)
+    RD_CARR_TREE = STRtree([rd['carr'] for rd in RD])
 
-DECK_CARR = unary_union([LineString([(q[0], q[2]) for q in d['s']]).buffer(32, cap_style=2) for d in GAME['decks']])
-DECK_ZONE = unary_union([LineString([(q[0], q[2]) for q in d['s']]).buffer(44) for d in GAME['decks']])
-RING_CARR = Point(RING[0], RING[1]).buffer(108)
-RING_ZONE = Point(RING[0], RING[1]).buffer(RING[2])
-SCARR = unary_union([rd['carr'] for rd in RD if rd['src'] == 'street'])
-SOUTER = unary_union([rd['outer'] for rd in RD if rd['src'] == 'street'])
-CARR = unary_union([GCARR, SCARR, DECK_CARR, RING_CARR])
-PAVE = unary_union([GPAVE, SOUTER, RING_ZONE])
-SPAVE_ONLY = SOUTER.difference(SCARR).difference(GPAVE)
+    DECK_CARR = unary_union([LineString([(q[0], q[2]) for q in d['s']]).buffer(32, cap_style=2) for d in GAME['decks']])
+    DECK_ZONE = unary_union([LineString([(q[0], q[2]) for q in d['s']]).buffer(44) for d in GAME['decks']])
+    RING_CARR = Point(RING[0], RING[1]).buffer(108)
+    RING_ZONE = Point(RING[0], RING[1]).buffer(RING[2])
+    SCARR = unary_union([rd['carr'] for rd in RD if rd['src'] == 'street'])
+    SOUTER = unary_union([rd['outer'] for rd in RD if rd['src'] == 'street'])
+    CARR = unary_union([GCARR, SCARR, DECK_CARR, RING_CARR])
+    PAVE = unary_union([GPAVE, SOUTER, RING_ZONE])
+    SPAVE_ONLY = SOUTER.difference(SCARR).difference(GPAVE)
 
-water = []
-for a in geo.load('areas'):
-    t = a['t']
-    if t.get('natural') == 'water' or t.get('water') or t.get('landuse') in ('reservoir', 'basin'):
-        pp = geo.proj(a['p'])
-        if len(pp) >= 3 and any(X0 - 300 < x < X1 + 300 and Z0 - 300 < z < Z1 + 300 for x, z in pp):
-            water.append(Polygon(pp).buffer(0))
-WATER = unary_union(water).buffer(2) if water else Polygon()
-BLK = unary_union([Polygon(rect(*s, grow=10)) for s in SITES] +
-                  [Polygon(rect(p['x'], p['z'], p['fx'], p['fz'], p['w'], p['d'], grow=8)) for p in LANDMARKS])
-NOGO = unary_union([CARR, WATER, BLK, DECK_ZONE, RING_ZONE])
-for g in (CARR, PAVE, NOGO, WATER, SPAVE_ONLY, DECK_ZONE, BLK):
-    shapely.prepare(g)
+    water = []
+    for a in geo.load('areas'):
+        t = a['t']
+        if t.get('natural') == 'water' or t.get('water') or t.get('landuse') in ('reservoir', 'basin'):
+            pp = geo.proj(a['p'])
+            if len(pp) >= 3 and any(X0 - 300 < x < X1 + 300 and Z0 - 300 < z < Z1 + 300 for x, z in pp):
+                water.append(Polygon(pp).buffer(0))
+    WATER = unary_union(water).buffer(2) if water else Polygon()
+    BLK = unary_union([Polygon(rect(*s, grow=10)) for s in SITES] +
+                      [Polygon(rect(p['x'], p['z'], p['fx'], p['fz'], p['w'], p['d'], grow=8)) for p in LANDMARKS])
+    NOGO = unary_union([CARR, WATER, BLK, DECK_ZONE, RING_ZONE])
+    for g in (CARR, PAVE, NOGO, WATER, SPAVE_ONLY, DECK_ZONE, BLK):
+        shapely.prepare(g)
 
-# height hints: the game road samples and the streets' heights
-_hp = [(q[0], q[2], q[1]) for r in GAME['roads'] for q in r['s']] + [(p[0], p[1], y) for s in ST for p, y in zip(s['pts'], s['y0'])]
-HP = np.array(_hp)
-HTREE = cKDTree(HP[:, :2])
+    # height hints: the game road samples and the streets' heights
+    _hp = [(q[0], q[2], q[1]) for r in GAME['roads'] for q in r['s']] + [(p[0], p[1], y) for s in ST for p, y in zip(s['pts'], s['y0'])]
+    HP = np.array(_hp)
+    HTREE = cKDTree(HP[:, :2])
+
+
+    for rd in RD:
+        rd['hs'] = {1: rd['half'], -1: rd['half']}
+        rd['sides'] = [1, -1]
+        rd['main'] = rd['src'] == 'game'
+        rd['flush'] = False
+    LMZ = Polygon()
+    shapely.prepare(LMZ)
+else:
+    import batchgeo
+    BG = batchgeo.load(TAG)
+    RD = BG.EDGES
+    for rd in RD:
+        rd['half'] = max(rd['hs'][1], rd['hs'][-1])
+    RD_LINES = [rd['line'] for rd in RD]
+    RD_TREE = STRtree(RD_LINES)
+    RD_CARR_TREE = STRtree([rd['carr'] for rd in RD])
+    PLOTS, PPOLY, PTREE = BG.PLOTS, BG.PPOLY, BG.PTREE
+    CARR, PAVE, DECK_ZONE, WATER, LMZ = BG.CARR, BG.PAVE, BG.DECK_ZONE, BG.WATER, BG.LMZ
+    RING_CARR = Point(RING[0], RING[1]).buffer(108)
+    RING_ZONE = Point(RING[0], RING[1]).buffer(RING[2])
+    SPAVE_ONLY = Polygon()
+    BLK = unary_union([Polygon(rect(*s_, grow=10)) for s_ in SITES] +
+                      [Polygon(rect(p_['x'], p_['z'], p_['fx'], p_['fz'], p_['w'], p_['d'], grow=8)) for p_ in LANDMARKS])
+    NOGO = unary_union([CARR, WATER, BLK, DECK_ZONE, RING_ZONE, LMZ])
+    for g in (NOGO, SPAVE_ONLY, BLK, RING_ZONE):
+        shapely.prepare(g)
+    # the same density as batch 0.5 (25,000 parts for 19,143 plots on 44.7M square studs): scaled by the batch's plots or
+    # its area, whichever is more (a real-density batch has more buildings, fronts and streets per square stud)
+    _own = sum(1 for p_ in PLOTS if p_['tag'] == TAG)
+    PART_BUDGET = int(25000 * max(BG.REGION.area / sbox(*geo.BOX_05).area, _own / 19143.0))
+    PLOT_OWN = [p_['tag'] == TAG for p_ in PLOTS]
 
 
 def yhint(x, z):
+    if BATCH:
+        return BG.yhint(x, z)
     d, i = HTREE.query((x, z))
     return float(HP[i, 2]) if d < 160 else None
 
@@ -358,11 +424,13 @@ for line in open(os.path.join(geo.BUILD, 'yangon_lamps', 'YangonLampSpots.luau')
     if m:
         LAMPS.append((float(m.group(1)), float(m.group(2))))
         occ_add(float(m.group(1)), float(m.group(2)), 3.0)
+if not BATCH:
+    for line in open(os.path.join(geo.BUILD, 'yangon_green', 'YangonGreenData.luau'), encoding='utf-8'):
+        m = re.match(r'^[TP] ([-\d.]+) ([-\d.]+)', line)
+        if m:
+            occ_add(float(m.group(1)), float(m.group(2)), 1.2)
+LAMP_SPOTS = []   # a batch's own street lamps (lamps_batch)
 LTREE = cKDTree(np.array(LAMPS))
-for line in open(os.path.join(geo.BUILD, 'yangon_green', 'YangonGreenData.luau'), encoding='utf-8'):
-    m = re.match(r'^[TP] ([-\d.]+) ([-\d.]+)', line)
-    if m:
-        occ_add(float(m.group(1)), float(m.group(2)), 1.2)
 
 
 def frame(poly):
@@ -651,7 +719,7 @@ def sports():
             cnt['track'] = cnt.get('track', 0) + 1
             for h in free.interiors:
                 hp = Polygon(h.coords)
-                if hp.area > 400:
+                if hp.area > 400 and not plots_hit(hp.minimum_rotated_rectangle) and not CARR.intersects(hp.minimum_rotated_rectangle):
                     hx, hz, hax, haz, hL, hW, _ = frame(hp)
                     it2 = Item('sport', hx, hz, yaw_x(hax, haz), 'M', hL / 2 - 1, hW / 2 - 1)
                     soccer(it2, hL - 1.0, hW - 1.0, r, grass='grass')
@@ -681,7 +749,8 @@ def sports():
                 else:
                     L, W = L * 0.55, W * 0.55
             L, W = L - 0.8, W - 0.8
-            blockers = unary_union([loc_carr.buffer(0.3)] + [PPOLY[i].buffer(0.3) for i in plots_hit(poly)])
+            _mrr = free.minimum_rotated_rectangle.buffer(3)
+            blockers = unary_union([CARR.intersection(_mrr).buffer(0.3)] + [PPOLY[i].buffer(0.3) for i in plots_hit(_mrr)])
             for k in range(14):
                 rc = Polygon([(cx + u * ax - v * az, cz + u * az + v * ax) for u, v in ((-L / 2, -W / 2), (L / 2, -W / 2), (L / 2, W / 2), (-L / 2, W / 2))])
                 if not rc.intersects(blockers):
@@ -894,6 +963,11 @@ def religion_of(name, tag):
         return 'hindu'
     if 'chabad' in n or 'synagogue' in n:
         return 'jewish'
+    if any(k in n for k in ('chinese', 'keong', 'kheng', 'guan yin', 'kuan yin', 'kwan yin', 'kwan im', 'guanyin', 'tian hou',
+                            'tien hou', 'taoist', 'hokkien', 'cantonese', 'kong miao', ' kong ', 'long shan', 'si temple')):
+        return 'chinese'
+    if tag in ('taoist', 'chinese_folk', 'confucian'):
+        return 'chinese'
     if tag in ('christian', 'muslim', 'hindu', 'jewish'):
         return tag
     return 'buddhist'
@@ -985,7 +1059,28 @@ def hindu(it, r):
     it.box((2.2, 3.4, 0.2), (0, 1.7, -7.6), 'door')
 
 
-FOOT = {'stupa_big': (14 + 2, 14 + 2), 'stupa': (9, 9), 'monastery': (24, 18), 'christian': (13, 28), 'muslim': (18, 20), 'hindu': (11, 15)}
+FOOT = {'stupa_big': (14 + 2, 14 + 2), 'stupa': (9, 9), 'monastery': (24, 18), 'christian': (13, 28), 'muslim': (18, 20), 'hindu': (11, 15),
+        'chinese': (18, 20)}
+
+
+def chinese(it, r):
+    """a Chinese temple (downtown's Kheng Hock Keong, Guan Yin temples): red columns, cream walls, a double-eaved roof in
+    green glaze or orange tile with a gold ridge and upturned ends, a red door and a plain name board"""
+    roof = r.choice(['cn_roof', 'cn_tile'])
+    it.span(-1.0, 1.0, (17, 19), (0, 0), 'plinth')
+    it.span(1.0, 8.6, (13, 15), (0, 0.6), 'cn_wall')
+    for u in (-5.6, -1.9, 1.9, 5.6):
+        it.add('C', (0.8, 7.6, 0.8), (u, 4.8, -7.6), 'cn_red')
+    it.span(8.6, 9.4, (16.5, 18.5), (0, 0), roof)
+    for sg in (-1, 1):
+        it.add('W', (16.0, 2.6, 4.2), (sg * 2.1, 10.7, 0), roof, -sg * math.pi / 2)
+    it.span(10.0, 10.5, (10.5, 12.5), (0, 0), roof)
+    for sg in (-1, 1):
+        it.add('W', (11.5, 2.8, 4.0), (sg * 2.0, 11.9, 0), roof, -sg * math.pi / 2)
+    it.box((0.6, 0.6, 12.4), (0, 13.6, 0), 'gold')
+    for sg in (-1, 1):
+        it.box((0.6, 1.4, 0.8), (0, 14.2, sg * 6.0), 'gold')
+    it.box((3.4, 5.0, 0.2), (0, 3.5, -6.95), 'cn_red')
 
 
 def find_spot(x, z, w, d, yaw0=None, reach=50, inside=None):
@@ -1057,6 +1152,8 @@ def worship():
             continue
         pt = Point(pl['x'], pl['z'])
         in_plot = len(PTREE.query(pt.buffer(1.5), predicate='intersects')) > 0
+        if BATCH and not inside_box(pl['x'], pl['z'], 0):
+            continue
         zedi = any(k in low for k in ('pagoda', 'zedi', 'stupa', 'paya', 'ceti', 'cetiya')) or 'စေတီ' in name
         if in_plot and pl['area'] is None and not zedi:
             note('the building itself (a plot)')
@@ -1095,6 +1192,8 @@ def worship():
             church(it)
         elif kind == 'muslim':
             mosque(it, r)
+        elif kind == 'chinese':
+            chinese(it, r)
         else:
             hindu(it, r)
         keep(it)
@@ -1163,83 +1262,115 @@ def footbridges():
     bad_ends = 0
     CLEAR = 18.0
     DT = CLEAR + 1.2
+    # OSM draws one overpass as several ways (its stairs as highway=steps, the deck in one or more footways): the stairs
+    # are ours, and a deck piece within 30 of a longer one already taken is the same bridge
+    cands = []
     for r in geo.load('roads'):
         t = r['t']
-        if not (t.get('bridge') and t.get('highway') in ('footway', 'path', 'pedestrian', 'steps', 'cycleway')):
+        if not (t.get('bridge') and t.get('highway') in ('footway', 'path', 'pedestrian', 'cycleway')):
             continue
         pp = geo.proj(r['p'])
-        if not any(inside_box(x, z) for x, z in pp):
-            continue
+        if len(pp) >= 2 and any(inside_box(x, z) for x, z in pp):
+            cands.append((LineString(pp).length, r, pp))
+    cands.sort(key=lambda c: -c[0])
+    taken = []
+    for _, r, pp in cands:
+        t = r['t']
         ls = LineString(pp)
-        (ax, az), (bx, bz) = pp[0], pp[-1]
-        ux, uz = unit(bx - ax, bz - az)
-        mid = ls.interpolate(0.5, normalized=True)
-        ts = np.arange(-110.0, 110.01, 0.5)
-        inside = shapely.contains_xy(CARR, mid.x + ux * ts, mid.y + uz * ts)
-        # carriageway intervals along the line, then the cluster round the middle (gaps under 26: medians, pavements)
-        ivs = []
-        k = 0
-        while k < len(ts):
-            if inside[k]:
-                j = k
-                while j + 1 < len(ts) and inside[j + 1]:
-                    j += 1
-                ivs.append([ts[k], ts[j]])
-                k = j + 1
-            else:
-                k += 1
-        if not ivs or min(min(abs(a), abs(b)) if a * b > 0 else 0 for a, b in ivs) > 30:
-            L = ls.length
-            it = Item('footbridge', mid.x, mid.y, yaw_x(ux, uz), 'M', L / 2, 1.5, name='footbridge (no road)')
-            it.box((L + 2, 0.8, 4.0), (0, 1.0, 0), 'concrete')
-            for sg in (-1, 1):
-                it.box((L + 2, 0.25, 0.25), (0, 4.2, sg * 1.9), 'steel')
-                for k in range(int(L // 5) + 2):
-                    it.add('C', (0.2, 2.8, 0.2), (-L / 2 - 1 + k * (L + 2) / (int(L // 5) + 1), 2.8, sg * 1.9), 'steel')
-            keep(it)
+        if any(ls.distance(o) < 30 for o in taken):
             continue
-        main = min(range(len(ivs)), key=lambda i: 0 if ivs[i][0] <= 0 <= ivs[i][1] else min(abs(ivs[i][0]), abs(ivs[i][1])))
-        lo_i = hi_i = main
-        while lo_i > 0 and ivs[lo_i][0] - ivs[lo_i - 1][1] < 26:
-            lo_i -= 1
-        while hi_i < len(ivs) - 1 and ivs[hi_i + 1][0] - ivs[hi_i][1] < 26:
-            hi_i += 1
-        tmin, tmax = ivs[lo_i][0], ivs[hi_i][1]
-        t0 = (ivs[main][0] + ivs[main][1]) / 2
-        cx0, cz0 = mid.x + ux * t0, mid.y + uz * t0
-        nb = nearest_rd(cx0, cz0, 80)
-        walk = nb[1]['walk'] if nb else 4.0
-        wst = min(4.5, max(2.6, walk - 1.0))
-        wl = wst + 0.8
-        run = (DT + 1.4) / 0.74
-        it = Item('footbridge', cx0, cz0, yaw_x(ux, uz), 'G', 0, 0, name=ascii_name(t.get('name:en') or t.get('name'), 'footbridge'))
-        it.yh = yhint(cx0, cz0)
-        ends = []
-        for end in (-1, 1):
-            edge = (tmin if end < 0 else tmax) - t0
-            found = None
-            for push in np.arange(wl / 2 + 0.6, wl / 2 + 16, 1.0):
-                xl = edge + end * push
-                land = Polygon([it.world(xl + du, dv) for du, dv in ((-wl / 2, -wl / 2), (wl / 2, -wl / 2), (wl / 2, wl / 2), (-wl / 2, wl / 2))])
-                if CARR.intersects(land) or plots_hit(land) or WATER.intersects(land):
+        taken.append(ls)
+        (ax, az), (bx, bz) = pp[0], pp[-1]
+        mid = ls.interpolate(0.5, normalized=True)
+        # first along the real line; if its landings are blocked (a deck drawn along the road at a big junction), straight
+        # across the nearest main road at the same spot
+        dirs = [unit(bx - ax, bz - az)]
+        nbm = nearest_rd(mid.x, mid.y, 90, pred=lambda q: q['main'])
+        if nbm:
+            _, _c, _t, _ = rd_at(nbm[1], mid.x, mid.y)
+            dirs.append((-_t[1], _t[0]))
+        ends = [None, None]
+        mid0 = mid
+        tries = [(di, d_, sh) for di, d_ in enumerate(dirs) for sh in (0, 8, -8, 16, -16, 24, -24)]
+        for di, (ux, uz), sh in tries:
+            # (a bridge may move up to 24 along the road to find room for its landings: a junction's corner, a building)
+            mid = Point(mid0.x - uz * sh, mid0.y + ux * sh)
+            ts = np.arange(-110.0, 110.01, 0.5)
+            inside = shapely.contains_xy(CARR, mid.x + ux * ts, mid.y + uz * ts)
+            # carriageway intervals along the line, then the cluster round the middle (gaps under 26: medians, pavements)
+            ivs = []
+            k = 0
+            while k < len(ts):
+                if inside[k]:
+                    j = k
+                    while j + 1 < len(ts) and inside[j + 1]:
+                        j += 1
+                    ivs.append([ts[k], ts[j]])
+                    k = j + 1
+                else:
+                    k += 1
+            if not ivs or min(min(abs(a), abs(b)) if a * b > 0 else 0 for a, b in ivs) > 30:
+                if di > 0 or sh != 0:
                     continue
-                for opt in ('z+', 'z-', 'x'):
-                    if opt == 'x':
-                        x0, x1 = xl + end * wl / 2, xl + end * (wl / 2 + run)
-                        corners = ((x0, -wst / 2), (x1, -wst / 2), (x1, wst / 2), (x0, wst / 2))
-                    else:
-                        dz_ = 1 if opt == 'z+' else -1
-                        z0, z1 = dz_ * wl / 2, dz_ * (wl / 2 + run)
-                        corners = ((xl - wst / 2, z0), (xl + wst / 2, z0), (xl + wst / 2, z1), (xl - wst / 2, z1))
-                    fp = Polygon([it.world(u, v) for u, v in corners])
-                    if not CARR.intersects(fp) and not plots_hit(fp) and not WATER.intersects(fp):
-                        found = (xl, opt)
-                        break
-                if found:
+                L = ls.length
+                fpb = ls.buffer(2.4, cap_style=3)
+                if NOGO.intersects(fpb) or LMZ.intersects(fpb) or plots_hit(fpb) or not inside_box(mid.x, mid.y, 4):
                     break
-            if not found:
-                bad_ends += 1
-            ends.append(found)
+                it = Item('footbridge', mid.x, mid.y, yaw_x(ux, uz), 'M', L / 2, 1.5, name='footbridge (no road)')
+                it.box((L + 2, 0.8, 4.0), (0, 1.0, 0), 'concrete')
+                for sg in (-1, 1):
+                    it.box((L + 2, 0.25, 0.25), (0, 4.2, sg * 1.9), 'steel')
+                    for k in range(int(L // 5) + 2):
+                        it.add('C', (0.2, 2.8, 0.2), (-L / 2 - 1 + k * (L + 2) / (int(L // 5) + 1), 2.8, sg * 1.9), 'steel')
+                keep(it)
+                ends = 'done'
+                break
+            main = min(range(len(ivs)), key=lambda i: 0 if ivs[i][0] <= 0 <= ivs[i][1] else min(abs(ivs[i][0]), abs(ivs[i][1])))
+            lo_i = hi_i = main
+            while lo_i > 0 and ivs[lo_i][0] - ivs[lo_i - 1][1] < 26:
+                lo_i -= 1
+            while hi_i < len(ivs) - 1 and ivs[hi_i + 1][0] - ivs[hi_i][1] < 26:
+                hi_i += 1
+            tmin, tmax = ivs[lo_i][0], ivs[hi_i][1]
+            t0 = (ivs[main][0] + ivs[main][1]) / 2
+            cx0, cz0 = mid.x + ux * t0, mid.y + uz * t0
+            nb = nearest_rd(cx0, cz0, 80)
+            walk = nb[1]['walk'] if nb else 4.0
+            wst = min(4.5, max(2.6, walk - 1.0))
+            wl = wst + 0.8
+            run = (DT + 1.4) / 0.74
+            it = Item('footbridge', cx0, cz0, yaw_x(ux, uz), 'G', 0, 0, name=ascii_name(t.get('name:en') or t.get('name'), 'footbridge'))
+            it.yh = yhint(cx0, cz0)
+            ends = []
+            for end in (-1, 1):
+                edge = (tmin if end < 0 else tmax) - t0
+                found = None
+                for push in np.arange(wl / 2 + 0.6, wl / 2 + 16, 1.0):
+                    xl = edge + end * push
+                    land = Polygon([it.world(xl + du, dv) for du, dv in ((-wl / 2, -wl / 2), (wl / 2, -wl / 2), (wl / 2, wl / 2), (-wl / 2, wl / 2))])
+                    if CARR.intersects(land) or plots_hit(land) or WATER.intersects(land):
+                        continue
+                    for opt in ('z+', 'z-', 'x'):
+                        if opt == 'x':
+                            x0, x1 = xl + end * wl / 2, xl + end * (wl / 2 + run)
+                            corners = ((x0, -wst / 2), (x1, -wst / 2), (x1, wst / 2), (x0, wst / 2))
+                        else:
+                            dz_ = 1 if opt == 'z+' else -1
+                            z0, z1 = dz_ * wl / 2, dz_ * (wl / 2 + run)
+                            corners = ((xl - wst / 2, z0), (xl + wst / 2, z0), (xl + wst / 2, z1), (xl - wst / 2, z1))
+                        fp = Polygon([it.world(u, v) for u, v in corners])
+                        if not CARR.intersects(fp) and not plots_hit(fp) and not WATER.intersects(fp):
+                            found = (xl, opt)
+                            break
+                    if found:
+                        break
+                if not found:
+                    bad_ends += 1
+                ends.append(found)
+            if all(ends):
+                break
+        if ends == 'done':
+            continue
         if not all(ends):
             print('  footbridge %s: no clear landing for its stairs, left out' % r['id'])
             continue
@@ -1276,6 +1407,8 @@ def footbridges():
             occ_add(*it.world(xl, 0), 3.5)
             occ_add(*it.world(*foot), 4.0)
         it.clearance = CLEAR
+        if any(math.hypot(it.x - o.x, it.z - o.z) < 45 for o in ITEMS[n0:] if o.kind == 'footbridge'):
+            continue   # (two OSM pieces of one bridge moved to the same place)
         keep(it)
     print('footbridges', len(ITEMS) - n0, 'stair ends with no clear way', bad_ends)
 
@@ -1302,20 +1435,23 @@ def signals():
         near = []
         for i in RD_TREE.query(Point(x, z).buffer(60)):
             rd = RD[int(i)]
-            if rd['src'] != 'game':
+            if not rd['main']:
                 continue
-            if rd['line'].distance(Point(x, z)) <= rd['half'] + 14:
+            if rd['line'].distance(Point(x, z)) <= max(rd['hs'][1], rd['hs'][-1]) + 14:
                 near.append(rd)
         if not near:
             continue
         used += 1
         for k, rd in enumerate(near):
-            others = [o['half'] for o in near if o is not rd]
+            others = [max(o['hs'][1], o['hs'][-1]) for o in near if o is not rd]
             gap = (max(others) if others else 0) + 9
             s0, c0, t0, _ = rd_at(rd, x, z)
             lit = 'G' if k % 2 == 0 else 'R'
-            for dirn in (1, -1):
+            # one way only on a divided road's carriageway (its median side has no kerb): traffic keeps right
+            for dirn in ((1,) if rd['hs'][-1] < 0 else (1, -1)):
                 placed = False
+                eo = rd['hs'][dirn]
+                arm = min(18.0, max(6.0, (rd['hs'][1] + rd['hs'][-1] if rd['hs'][-1] < 0 else eo) - 4))
                 for extra in (0, 4, 8, 12, 16):
                     sa = s0 - dirn * (gap + extra)
                     if sa < 2 or sa > rd['line'].length - 2:
@@ -1323,11 +1459,10 @@ def signals():
                     c, t = rd_point(rd, sa)
                     vx, vz = t[0] * dirn, t[1] * dirn
                     rx_, rz_ = -vz, vx  # right of travel (Myanmar drives on the right)
-                    px, pz = c[0] + rx_ * (rd['half'] + 1.6), c[1] + rz_ * (rd['half'] + 1.6)
+                    px, pz = c[0] + rx_ * (eo + 1.6), c[1] + rz_ * (eo + 1.6)
                     if CARR.intersects(Point(px, pz).buffer(0.6)) or plots_hit(Point(px, pz).buffer(0.6)) or not occ_free(px, pz, 1.2):
                         continue
                     it = Item('signal', px, pz, yaw_face(-vx, -vz), 'G')
-                    arm = min(rd['half'] - 4, 18.0)
                     it.add('C', (0.6, 22.5, 0.6), (0, 10.25, 0), 'darksteel')
                     it.box((arm + 0.6, 0.45, 0.45), (arm / 2, 20.6, 0), 'darksteel')
                     it.box((1.4, 3.6, 1.0), (arm, 18.6, 0), 'black')
@@ -1354,15 +1489,20 @@ def bus_stops():
         if not nb:
             continue
         d, rd = nb
-        if d > rd['half'] + rd['walk'] + 25:
+        if d > max(rd['hs'][1], rd['hs'][-1]) + rd['walk'] + 25:
             continue
         s0, c0, t0, side = rd_at(rd, x, z)
-        half, walk = rd['half'], rd['walk']
+        if side not in rd['sides']:
+            side = 1
+        half, walk = rd['hs'][side], rd['walk']
         name = ascii_name(p['name'], 'Bus Stop')
         done = False
         for ds in (0, 8, -8, 16, -16, 24, -24, 32, -32):
             c, t = rd_point(rd, s0 + ds)
-            if walk >= 6:
+            if rd['flush']:
+                D, Ls = 3.0, 9.0
+                off = half + walk + 0.5 + D / 2
+            elif walk >= 6:
                 D, Ls = 3.6, 11.0
                 off = half + 1.2 + D / 2 + 0.8
             else:
@@ -1371,7 +1511,7 @@ def bus_stops():
             px, pz = lateral(c, t, side, off)
             fx, fz = unit(c[0] - px, c[1] - pz)
             it = Item('busstop', px, pz, yaw_face(fx, fz), 'G', name=name)
-            fp = Polygon([it.world(u, v) for u, v in ((-Ls / 2 - 1.6, -D / 2), (Ls / 2 + 1.6, -D / 2), (Ls / 2 + 1.6, D / 2), (-Ls / 2 - 1.6, D / 2))])
+            fp = Polygon([it.world(u, v) for u, v in ((-Ls / 2 - 1.6, -D / 2 - 0.7), (Ls / 2 + 1.6, -D / 2 - 0.7), (Ls / 2 + 1.6, D / 2 + 0.2), (-Ls / 2 - 1.6, D / 2 + 0.2))])
             if CARR.intersects(fp) or plots_hit(fp) or WATER.intersects(fp) or not occ_free(px, pz, 4.0):
                 continue
             # posts, roof, back panel, bench, sign pole (YBS-style: blue frame, white panel)
@@ -1392,7 +1532,7 @@ def bus_stops():
             break
         if not done:
             c, t = rd_point(rd, s0)
-            px, pz = lateral(c, t, side, half + min(walk - 0.6, 1.4))
+            px, pz = lateral(c, t, side, half + (walk + 0.6 if rd['flush'] else min(walk - 0.6, 1.4)))
             if not CARR.intersects(Point(px, pz).buffer(0.5)) and occ_free(px, pz, 1.0):
                 fx, fz = unit(c[0] - px, c[1] - pz)
                 it = Item('busstop', px, pz, yaw_face(fx, fz), 'G', name=name)
@@ -1486,6 +1626,8 @@ def gate_item(x, z, ax, az, w, seed):
 def gates_out():
     n0 = len(ITEMS)
     for x, z, ax, az, w, gid, snapped in GATES:
+        if w <= 0:
+            continue
         it = gate_item(x, z, ax, az, w, gid)
         ok = None
         for k in range(0, 21, 2):
@@ -1504,7 +1646,7 @@ def gates_out():
         it.yh = yhint(*ok)
         keep(it)
         occ_add(ok[0], ok[1], w / 2 + 1.5)
-    print('gates', len(ITEMS) - n0, 'of', len(GATES))
+    print('gates', len(ITEMS) - n0, 'of', sum(1 for g in GATES if g[4] > 0))
 
 
 # ---------------------------------------------------------------- 5. walls
@@ -1580,7 +1722,7 @@ def osm_walls():
         ls = LineString(pp)
         OSM_WALL_LINES.append(ls)
         hit = plots_hit(ls.buffer(2))
-        cut = unary_union([nogo.intersection(ls.buffer(3))] + [PPOLY[i].buffer(0.9) for i in hit])
+        cut = unary_union([nogo.intersection(ls.buffer(4)).buffer(1.0)] + [PPOLY[i].buffer(0.9) for i in hit])
         rest = ls.difference(cut)
         kind = {'fence': 'fence', 'hedge': 'hedge'}.get(bt, 'wall')
         colour = 'wall%d' % (H('w', l['id']) % len(WALL_COLS))
@@ -1618,8 +1760,8 @@ def compound_walls():
         tx, tz = shapely.get_x(pb) - shapely.get_x(pa), shapely.get_y(pb) - shapely.get_y(pa)
         tl = np.hypot(tx, tz) + 1e-9
         tx, tz = tx / tl, tz / tl
-        off = rd['half'] + rd['walk'] + 0.6
-        for side in (1, -1):
+        for side in rd['sides']:
+            off = rd['hs'][side] + rd['walk'] + (1.1 if rd.get('flush') else 0.6)
             ex, ez = cx - tz * off * side, cz + tx * off * side
             E.append(np.stack([ex, ez], 1))
             P2.append(np.stack([ex - tz * 40 * side, ez + tx * 40 * side], 1))
@@ -1629,7 +1771,12 @@ def compound_walls():
     N = len(E)
     ok = ~shapely.contains_xy(PAVE, E[:, 0], E[:, 1])
     ok &= ~shapely.contains_xy(NOGO, E[:, 0], E[:, 1])
-    ok &= (E[:, 0] > X0 + 10) & (E[:, 0] < X1 - 10) & (E[:, 1] > Z0 + 10) & (E[:, 1] < Z1 - 10)
+    if BATCH:
+        _rg = BG.REGION.buffer(-4)
+        shapely.prepare(_rg)
+        ok &= shapely.contains_xy(_rg, E[:, 0], E[:, 1])
+    else:
+        ok &= (E[:, 0] > X0 + 10) & (E[:, 0] < X1 - 10) & (E[:, 1] > Z0 + 10) & (E[:, 1] < Z1 - 10)
     epts = shapely.points(E)
     if OSM_WALL_LINES:
         wt = STRtree(OSM_WALL_LINES)
@@ -1689,6 +1836,8 @@ def compound_walls():
     for run in runs:
         drop = set()
         owners = {}
+        g_first = len(GATES)
+        placed_segs = []
         for i in run:
             owners.setdefault(int(owner[i]), []).append(i)
         # OSM gates on this run: snap them onto the wall
@@ -1796,8 +1945,15 @@ def compound_walls():
                     if it:
                         keep(it)
                         pieces += 1
+                        placed_segs.append(LineString([a, b]))
                 total += Ls
                 k = k2
+        # a compound gate only where a wall was built beside it (an OSM gate stays wherever it is)
+        for gi in range(g_first, len(GATES)):
+            g = GATES[gi]
+            if not any(sg.distance(Point(g[0], g[1])) < g[4] / 2 + 2.5 for sg in placed_segs):
+                g[4] = 0.0
+                gates_made -= 1
     print('compound walls: %d runs, %d pieces, %d gates (%.1f s)' % (len(runs), pieces, gates_made, __import__('time').time() - t0))
 
 
@@ -1821,7 +1977,7 @@ def shops():
         for i in PTREE.query(Point(x, z).buffer(42)):
             i = int(i)
             pl = PLOTS[i]
-            if pl.get('front') is None:
+            if pl.get('front') is None or (BATCH and not PLOT_OWN[i]):
                 continue
             poly = pl['poly']
             a, b = poly[pl['front']], poly[(pl['front'] + 1) % len(poly)]
@@ -1875,7 +2031,7 @@ def shops():
         if kind in ('restaurant', 'cafe') or (p['k'] == 'shop' and kind in ('tea', 'coffee')):
             # tea-shop spill: low tables and plastic stools on the pavement in front (never on a carriageway)
             nb = nearest_rd(sx, sz, 40)
-            if nb and nb[1]['src'] == 'game' and nb[1]['walk'] < 6:
+            if nb and nb[1]['main'] and nb[1]['walk'] < 6:
                 continue
             made = 0
             for du in (-2.8, 2.8, 0, -5.6, 5.6):
@@ -1924,33 +2080,47 @@ def make_protos():
         it.box((0.3, 1.5, 1.8), (-1.5, 2.6, 1.0), 'seat')
         proto('trishaw%d' % k, it)
     for name, extra in (('pole', None), ('pole_b', 'bundle'), ('pole_t', 'transformer')):
+        for lamp in (False, True):
+            it = Item('proto', 0, 0)
+            it.add('C', (0.9, 25.4, 0.9), (0, 11.2, 0), 'poleconc')
+            it.box((0.3, 0.3, 4.2), (0, 22.4, 0), 'poleconc')
+            if extra == 'bundle':
+                it.box((0.8, 1.8, 0.8), (0.55, 18.2, 0.2), 'cable')
+            elif extra == 'transformer':
+                it.box((1.4, 2.2, 1.2), (0, 15.6, 0.95), 'transformer')
+            if lamp:
+                # (YangonPoleLights, batch 0.5 playtest: the side streets were dark) a white head under the crossarm, on the
+                # road side (local -Z), tag LampGlow, PointLight range 30 brightness 1.6 tagged LODLight + DayOff
+                it.box((1.3, 0.45, 0.7), (0, 18.4, -0.9), 'lamp_white', light=(30, 1.6))
+            proto(name + ('_l' if lamp else ''), it)
+    # a street vendor's umbrella stall (downtown): pole, canopy, cart, stool
+    for k, col in enumerate(('umb_red', 'umb_blue', 'umb_green', 'umb_yellow', 'umb_orange')):
         it = Item('proto', 0, 0)
-        it.add('C', (0.9, 25.4, 0.9), (0, 11.2, 0), 'poleconc')
-        it.box((0.3, 0.3, 4.2), (0, 22.4, 0), 'poleconc')
-        if extra == 'bundle':
-            it.box((0.8, 1.8, 0.8), (0.55, 18.2, 0.2), 'cable')
-        elif extra == 'transformer':
-            it.box((1.4, 2.2, 1.2), (0, 15.6, 0.95), 'transformer')
-        proto(name, it)
+        it.add('C', (0.2, 7.6, 0.2), (0.6, 3.6, 0), 'darksteel')
+        it.add('C', (5.0, 0.35, 5.0), (0.6, 7.3, 0), col)
+        it.add('C', (1.6, 0.6, 1.6), (0.6, 7.75, 0), col)
+        it.box((3.0, 2.2, 1.8), (0.6, 1.1, 0.2), 'cart')
+        it.add('C', (0.95, 0.85, 0.95), (-1.6, 0.425, -0.6), 'stool_blue' if k % 2 else 'stool_red')
+        proto('vendor%d' % k, it)
 
 
 # ---------------------------------------------------------------- 8. clutter along the streets
 def kerb_trees():
     n0 = len(ITEMS)
     for rd in RD:
-        if rd['src'] != 'game' or rd['kind'] != 'route':
+        if not rd['main'] or rd['kind'] != 'route' or rd.get('raised'):
             continue
         L = rd['line'].length
-        for side in (1, -1):
+        for side in rd['sides']:
             w = 0
             while w < L:
                 if R('kt', rd['id'], side, w).random() < 0.3:
                     s = w + 12
                     while s < min(L - 8, w + 200):
                         c, t = rd_point(rd, s)
-                        px, pz = lateral(c, t, side, rd['half'] + rd['walk'] - 2.5)
+                        px, pz = lateral(c, t, side, rd['hs'][side] + rd['walk'] - 2.5)
                         g = Point(px, pz).buffer(1.5)
-                        if not NOGO.intersects(g) and not plots_hit(g) and occ_free(px, pz, 1.5) and not LTREE.query_ball_point((px, pz), 9.0):
+                        if inside_box(px, pz, 2) and not NOGO.intersects(g) and not plots_hit(g) and occ_free(px, pz, 1.5) and not LTREE.query_ball_point((px, pz), 9.0):
                             # only where this road's own pavement is (not a junction mouth)
                             if rd['outer'].contains(Point(px, pz)) and not any(
                                     o is not rd and o['carr'].intersects(g) for o in (RD[int(i)] for i in RD_CARR_TREE.query(g))):
@@ -1972,8 +2142,14 @@ def poles():
         L = rd['line'].length
         if L < 60 or rd['kind'] in ('side', 'lane'):
             continue
-        every = 80.0 if rd['kind'] == 'street' else 64.0
+        if rd.get('raised'):
+            continue
+        every = (96.0 if rd['kind'] == 'street' else 72.0) if BATCH else (80.0 if rd['kind'] == 'street' else 64.0)
         side = 1 if H('pside', rd['id']) % 2 else -1
+        if side not in rd['sides']:
+            side = 1
+        poff = rd['hs'][side] + rd['walk'] + (0.9 if rd['flush'] else -0.7)
+        nth = 0
         s = 10 + H('pstart', rd['id']) % 24
         chain += 1
         last_t = None
@@ -1982,16 +2158,18 @@ def poles():
             placed = False
             for ds in (0, 6, -6, 12, -12):
                 c, t = rd_point(rd, s + ds)
-                px, pz = lateral(c, t, side, rd['half'] + rd['walk'] - 0.7)
+                px, pz = lateral(c, t, side, poff)
                 g = Point(px, pz).buffer(0.8)
-                if NOGO.intersects(g) or plots_hit(g) or not occ_free(px, pz, 1.0) or LTREE.query_ball_point((px, pz), 6.0):
+                if not inside_box(px, pz, 2) or NOGO.intersects(g) or plots_hit(g) or not occ_free(px, pz, 1.0) or LTREE.query_ball_point((px, pz), 6.0):
                     continue
                 if last_t is not None and (t[0] * last_t[0] + t[1] * last_t[1]) < math.cos(math.radians(22)):
                     chain += 1
                 r = R('pole', rd['id'], s)
-                it = Item('pole', px, pz, yaw_x(*t), 'G', chain=chain)
+                # local -Z faces the road (the lamp head's side); the crossarm (local Z) runs across the road
+                it = Item('pole', px, pz, yaw_x(*t) if side == 1 else yaw_x(-t[0], -t[1]), 'G', chain=chain)
                 k = r.random()
-                it.uses.append('pole_t' if k < 0.07 else ('pole_b' if k < 0.24 else 'pole'))
+                nth += 1
+                it.uses.append(('pole_t' if k < 0.07 else ('pole_b' if k < 0.24 else 'pole')) + ('_l' if nth % 2 == 1 else ''))
                 it.street = SPAVE_ONLY.contains(Point(px, pz))
                 it.yh = yhint(px, pz)
                 keep(it)
@@ -2010,12 +2188,13 @@ def poles():
 
 def trishaws():
     n0 = len(ITEMS)
+    TRISHAW_SITES = 40 if not BATCH else int(40 * BG.REGION.area / sbox(*geo.BOX_05).area)
     sites = 0
     for rd in RD:
-        if rd['src'] != 'street':
+        if rd['main'] or rd['src'] == 'game':
             continue
         for end in (0, 1):
-            if not rd['mouth'][end] or sites >= 40:
+            if not rd['mouth'][end] or sites >= TRISHAW_SITES:
                 continue
             if R('trim', rd['id'], end).random() > 0.45:
                 continue
@@ -2023,17 +2202,20 @@ def trishaws():
             if L < 30:
                 continue
             side = 1 if H('tside', rd['id'], end) % 2 else -1
+            if side not in rd['sides']:
+                side = 1
+            toff = rd['hs'][side] + (rd['walk'] + 2.2 if rd['flush'] else rd['walk'] * 0.5 + 0.9)
             made = 0
             for k in range(2):
                 s = (12 + 6.8 * k) if end == 0 else (L - 12 - 6.8 * k)
                 c, t = rd_point(rd, s)
-                px, pz = lateral(c, t, side, rd['half'] + rd['walk'] * 0.5 + 0.9)
+                px, pz = lateral(c, t, side, toff)
                 fx, fz = (t if end == 0 else (-t[0], -t[1]))  # facing the main road
                 r = R('trishaw', rd['id'], end, k)
                 it = Item('trishaw', px, pz, yaw_x(-fx, -fz), 'G')
                 it.uses.append('trishaw%d' % r.randrange(4))
                 fp = unary_union([it.part_geo(q)[0] for q in PROTOS[it.uses[0]]])
-                if CARR.intersects(fp) or plots_hit(fp) or NOGO.intersects(fp) or not occ_free(px, pz, 2.8):
+                if not inside_box(px, pz, 4) or CARR.intersects(fp) or plots_hit(fp) or NOGO.intersects(fp) or not occ_free(px, pz, 2.8):
                     continue
                 it.street = SPAVE_ONLY.contains(Point(px, pz))
                 it.yh = yhint(px, pz)
@@ -2070,6 +2252,163 @@ def patches():
             s += every
     print('patches', len(ITEMS) - n0)
 
+# ---------------------------------------------------------------- a batch's street lamps (YangonLamps' data format)
+def lamps_batch():
+    """main roads of 2+ lanes each way: both sides, a lamp every 96 studs (the far side staggered half a step), the pole 1.5
+    in from the kerb on the pavement (a P box under it), the head reaching over the road; raised edges (flyovers, bridges):
+    on the parapet (a W box) every 64. None in a junction (another road's carriageway within 6), under a deck, on a
+    landmark's ground, a lot or a building. Spots: (x, z, yHint, towards-road x, z, kind P | D)."""
+    pboxes = [pg for k, pg, y, t in BG.BOXES if k in ('P', 'M')]
+    wboxes = [pg for k, pg, y, t in BG.BOXES if k == 'W']
+    ptree = STRtree(pboxes) if pboxes else None
+    wtree = STRtree(wboxes) if wboxes else None
+    nP = nD = 0
+    for rd in RD:
+        if rd['kind'] != 'route':
+            continue
+        L = rd['line'].length
+        for side in rd['sides']:
+            if rd['raised']:
+                d = 20.0 + (32 if side < 0 else 0)
+                step = 64.0
+            else:
+                d = 30.0 + (48 if side < 0 else 0)
+                step = 96.0
+            while d < L - 20:
+                c, t = rd_point(rd, d)
+                d += step
+                eo = rd['hs'][side]
+                nx, nz = -t[1] * side, t[0] * side   # away from the road on this side
+                if wtree is not None and rd['raised']:
+                    q = Point(c[0] + nx * (eo + 0.5), c[1] + nz * (eo + 0.5))
+                    hit = [int(i) for i in wtree.query(q.buffer(1.5), predicate='intersects')]
+                    if hit:
+                        w = wboxes[hit[0]]
+                        cen = w.centroid
+                        # a point inside the parapet box, nearest the wanted spot
+                        px, pz = q.x, q.y
+                        if not w.contains(q):
+                            a = nearest_points(w, q)[0]
+                            for f_ in (0.02, 0.05, 0.1, 0.2, 0.4, 0.7, 1.0):
+                                px, pz = a.x + (cen.x - a.x) * f_, a.y + (cen.y - a.y) * f_
+                                if w.buffer(-0.05).contains(Point(px, pz)):
+                                    break
+                        if inside_box(px, pz, 0) and occ_free(px, pz, 3.0):
+                            LAMP_SPOTS.append((px, pz, yhint(px, pz), -nx, -nz, 'D'))
+                            occ_add(px, pz, 3.0)
+                            nD += 1
+                        continue
+                px, pz = c[0] + nx * (eo + 1.5), c[1] + nz * (eo + 1.5)
+                pt = Point(px, pz)
+                if not inside_box(px, pz, 0) or DECK_ZONE.contains(pt) or LMZ.contains(pt) or BLK.contains(pt):
+                    continue
+                if ptree is None or not any(pboxes[int(i)].contains(pt.buffer(0.3)) for i in ptree.query(pt, predicate='intersects')):
+                    continue
+                g = pt.buffer(0.7)
+                if CARR.intersects(g) or plots_hit(g) or not occ_free(px, pz, 3.0):
+                    continue
+                if any(o is not rd and o['carr'].distance(pt) < 6 for o in (RD[int(i)] for i in RD_CARR_TREE.query(pt.buffer(6)))):
+                    continue
+                LAMP_SPOTS.append((px, pz, yhint(px, pz), -nx, -nz, 'P'))
+                occ_add(px, pz, 3.0)
+                nP += 1
+    for (x, z, *_r) in LAMP_SPOTS:
+        LAMPS.append((x, z))
+    global LTREE
+    LTREE = cKDTree(np.array(LAMPS))
+    print('street lamps: %d on pavements, %d on parapets' % (nP, nD))
+
+
+def write_lamps():
+    rows = ['%.1f %.1f %.1f %.3f %.3f %s' % (x, z, y if y is not None else 0.0, fx, fz, k) for x, z, y, fx, fz, k in LAMP_SPOTS]
+    head = ('-- generated by tools/yangon/city/details.py %s: batch %s street lamp spots ("x z yHint towardsRoadX towardsRoadZ kind";' % (TAG, TAG)
+            + NL + '-- kind P = pavement (a P box under it), D = a deck parapet (a W box)) for tools/yangon/YangonLampsBatch.luau' + NL)
+    chunks, cur = [], []
+    for r in rows:
+        if sum(len(x) + 1 for x in cur) + len(r) > MAX_BYTES - 400:
+            chunks.append(cur)
+            cur = []
+        cur.append(r)
+    chunks.append(cur)
+    for f in os.listdir(OUT):
+        if re.match(r'YangonLampSpots_%s(_\d+)?\.luau$' % TAG, f):
+            os.remove(os.path.join(OUT, f))
+    for k, c in enumerate(chunks, 1):
+        path = os.path.join(OUT, 'YangonLampSpots_%s_%d.luau' % (TAG, k))
+        open(path, 'w', encoding='utf-8', newline=NL).write(head + 'return [==[' + NL + NL.join(c) + NL + ']==]' + NL)
+        print('%s %d spots' % (os.path.relpath(path, geo.ROOT), len(c)))
+
+
+# ---------------------------------------------------------------- downtown: street vendors' umbrellas on the busy streets
+def vendors():
+    """on the busy shopping streets only (a main road side with a shop front within 40), in stretches: 20% of the
+    100-stud windows, a stall every 20"""
+    n0 = len(ITEMS)
+    shop_fronts = []
+    for i, pl in enumerate(PLOTS):
+        if pl.get('shop') and pl.get('front') is not None and PLOT_OWN[i]:
+            a, b = pl['poly'][pl['front']], pl['poly'][(pl['front'] + 1) % len(pl['poly'])]
+            shop_fronts.append(((a[0] + b[0]) / 2, (a[1] + b[1]) / 2))
+    stree = cKDTree(np.array(shop_fronts)) if shop_fronts else None
+    for rd in RD:
+        if not rd['main'] or rd.get('raised') or rd['walk'] < 5.5:
+            continue
+        L = rd['line'].length
+        for side in rd['sides']:
+            w = 0.0
+            while w < L:
+                if R('vend', rd['id'], side, w).random() < 0.2:
+                    s_ = w + 10
+                    while s_ < min(L - 10, w + 100):
+                        c, t = rd_point(rd, s_)
+                        off = rd['hs'][side] + rd['walk'] * 0.55
+                        px, pz = lateral(c, t, side, off)
+                        s_ += 20
+                        if stree is None or not stree.query_ball_point((px, pz), 40.0):
+                            continue
+                        if not inside_box(px, pz, 2) or not occ_free(px, pz, 3.0) or LTREE.query_ball_point((px, pz), 4.0):
+                            continue
+                        r = R('vendor', rd['id'], side, s_)
+                        fx, fz = unit(c[0] - px, c[1] - pz)
+                        it = Item('vendor', px, pz, yaw_face(fx, fz) + r.uniform(-0.25, 0.25), 'G')
+                        it.uses.append('vendor%d' % r.randrange(5))
+                        g = unary_union([it.part_geo(q)[0] for q in PROTOS[it.uses[0]]]).buffer(0.3)
+                        if NOGO.intersects(g) or plots_hit(g):
+                            continue
+                        it.yh = yhint(px, pz)
+                        keep(it)
+                        occ_add(px, pz, 3.0)
+                w += 100
+    print('vendors', len(ITEMS) - n0)
+
+
+def patches_batch():
+    """road patches on the batch's traffic lanes, in the middle of a lane (clear of the lane lines): every 160 on main
+    lanes, 90 on street lanes; the ray must land on an R box (a mesh road's carriageway collision)"""
+    n0 = len(ITEMS)
+    for l in BG.LANES:
+        P = [(q[0], q[2]) for q in l['pts']]
+        if len(P) < 2 or l['lane'] != 1:
+            continue
+        ln = LineString(P)
+        L = ln.length
+        every = 220 if l['kind'] == 'route' else 140
+        s_ = 30 + H('patch', l['road'], l['way'], l['lane']) % 60
+        while s_ < L - 30:
+            r = R('patch', l['road'], l['way'], l['lane'], s_)
+            a, b = ln.interpolate(s_ - 1), ln.interpolate(s_ + 1)
+            t = unit(b.x - a.x, b.y - a.y)
+            q = ln.interpolate(s_)
+            pl, pw = r.uniform(3.5, 7.0), r.uniform(2.2, 3.0)
+            it = Item('patch', q.x, q.y, yaw_x(*t) + r.uniform(-0.1, 0.1), 'R', pl / 2 - 0.3, pw / 2 - 0.3)
+            it.box((pl, 0.1, pw), (0, 0.06 - 0.05, 0), 'patchdark' if r.random() < 0.6 else 'patchgrey')
+            fp = it.part_geo(it.parts[0])[0]
+            if inside_box(q.x, q.y, 4) and not DECK_ZONE.intersects(fp) and not LMZ.intersects(fp):
+                it.yh = yhint(q.x, q.y)
+                keep(it)
+            s_ += every
+    print('patches', len(ITEMS) - n0)
+
 
 # ---------------------------------------------------------------- output
 def fmt(v):
@@ -2080,12 +2419,15 @@ def fmt(v):
 
 def part_line(prt):
     shape, sx, sy, sz, ox, oy, oz, ry, rx, rz, p, text = prt[:12]
+    light = prt[12] if len(prt) > 12 else None
     ln = '%s %s %s %s %s %s %s %s %s %s %d' % (shape, fmt(sx), fmt(sy), fmt(sz), fmt(ox), fmt(oy), fmt(oz),
                                                fmt(math.degrees(ry)), fmt(math.degrees(rx)), fmt(math.degrees(rz)), PAL[p][0])
     if text:
         ink, tx = text
         tx = re.sub(r'[^ -~]', '', tx).replace(']', ')').strip()
         ln += NL + 'T %s %s' % (ink, tx)
+    if light:
+        ln += NL + 'L %s %s' % (fmt(light[0]), fmt(light[1]))
     return ln
 
 
@@ -2147,9 +2489,44 @@ def write():
     return paths
 
 
+# ---------------------------------------------------------------- the last check (the same rules as details_test.py)
+def guard():
+    """drops (and counts) any item whose ground-level parts lie on a carriageway (or a lane) or in a building plot by more
+    than 0.05 square studs, or whose anchor is outside the batch; overhead parts (14+ up), road patches and tree crowns
+    are allowed, as in the test"""
+    out, dropped = [], {}
+    for it in ITEMS:
+        why = None
+        if BATCH and not BG.REGION.contains(Point(it.x, it.z)):
+            why = 'outside'
+        elif it.kind != 'patch':
+            geoms = []
+            for q in it.all_parts():
+                g, lo, hi = it.part_geo(q)
+                if lo < 14.0:
+                    geoms.append(g)
+            for k in it.kits:
+                geoms.append(Point(it.x, it.z).buffer(1.2))
+            if geoms:
+                fp = unary_union(geoms)
+                if CARR.intersects(fp) and CARR.intersection(fp).area > 0.05:
+                    why = 'carriageway'
+                elif any(PPOLY[i].intersection(fp).area > 0.05 for i in plots_hit(fp)):
+                    why = 'plot'
+        if why:
+            d = dropped.setdefault(it.kind, {})
+            d[why] = d.get(why, 0) + 1
+        else:
+            out.append(it)
+    ITEMS[:] = out
+    print('guard: dropped', dropped if dropped else 'nothing')
+
+
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
     make_protos()
+    if BATCH:
+        lamps_batch()
     footbridges()
     signals()
     bus_stops()
@@ -2161,12 +2538,19 @@ def main():
     osm_walls()
     compound_walls()
     gates_out()
-    osm_trees()
+    if not BATCH:
+        osm_trees()   # (a batch's real trees go into its green data: green.py)
     shops()
     kerb_trees()
+    if TAG in VENDOR_TAGS:
+        vendors()
     poles()
     trishaws()
-    patches()
+    if BATCH:
+        patches_batch()
+    else:
+        patches()
+    guard()
     per = {}
     for it in ITEMS:
         k = per.setdefault(it.kind, [0, 0])
@@ -2181,6 +2565,8 @@ def main():
     paths = write()
     for p, n in paths:
         print('%s %d bytes' % (os.path.relpath(p, geo.ROOT), n))
+    if BATCH:
+        write_lamps()
 
 
 if __name__ == '__main__':

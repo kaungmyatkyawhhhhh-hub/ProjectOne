@@ -1967,6 +1967,30 @@ Config.Pedestrians = {
 	CrossChance = 0.35, -- at a corner: wait for the light and cross
 }
 
+-- Yangon street life (client, 2026-11-14, owner: "the ingame yangon is too clean"): parked cars on the kerbs and
+-- people on the pavements, from src/shared/YangonStreetLife*.lua (tools/yangon/city/streetlife.py), built by
+-- client/YangonStreetLife round the camera. Counts are for High; Low graphics (qualityScale <= LowScale) halves them.
+-- (a function: Config's main chunk is at its constant limit)
+Config.YangonStreetLife = (function()
+	return {
+		Enabled = true,
+		CarRadius = 260, -- parked cars are filled within this of the camera...
+		CarKeep = 285, -- ...and kept until this far
+		CarMax = 60,
+		CarCheck = 0.5, -- seconds between fills
+		CarBuildsPerTick = 6, -- new bodies made per fill at most
+		Repaint = true, -- white / silver / grey / dark paints on the bodies (false: the models' own colours)
+		PedRadius = 200,
+		PedKeep = 230,
+		PedMinGap = 55, -- never pop in nearer than this
+		PedMax = 40,
+		PedCheck = 0.5,
+		WalkSpeed = { 3, 5 }, -- studs a second
+		SpotShare = 0.3, -- of the people, this share stand at bus stops, tea shops and shop fronts
+		LowScale = 0.65,
+	}
+end)()
+
 ---------------------------------------------------------------------
 -- The Legends Grand Hotel Downtown (owner, 2026-10-22: "a large skyscraper hotel with valets",
 -- penthouse suites on the hotel that "pay out money every minute to their owners"). The suites
