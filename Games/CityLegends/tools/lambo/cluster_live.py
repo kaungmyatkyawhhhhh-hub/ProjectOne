@@ -2032,8 +2032,15 @@ def chaser():
     return m.chaser(Spec, needle_sprite, add_needle, glyph, solid_gear)
 
 
-BUILDERS = {"chaser": chaser, "e92": e92, "gt3rs": gt3rs, "f82": f82, "gtr": gtr, "gtrte": gtrte, "bentayga": bentayga, "e60": e60, "r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
+def supra():
+    import cluster_imports as m
+
+    return m.supra(Spec, needle_sprite, add_needle, glyph, solid_gear)
+
+
+BUILDERS = {"supra": supra, "chaser": chaser, "e92": e92, "gt3rs": gt3rs, "f82": f82, "gtr": gtr, "gtrte": gtrte, "bentayga": bentayga, "e60": e60, "r8g1": r8g1, "r8gt": r8gt, "r8g2": r8g2, "mc12c": mc12c, "sls": sls, "sl65": sl65, "f599": f599, "dbx": dbx, "sovereign": sovereign, "z33": z33, "g20": g20, "revuelto": revuelto, "sv": sv, "huracan": huracan, "lp700": lp700, "urus": urus, "f458": f458, "california": california, "murcielago": murcielago, "lfa": lfa, "maybach": maybach}
 PREVIEW = {
+    "supra": ("supra_mk4_cluster_owner_photo5.webp", (21, 324, 1169, 783), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="129355", distUnit="km", kmh=True, trip="304.9", fuel=0.12)),
     "chaser": ("chaser_jzx100_cluster_owner_level.png", (-274, 225, 1530, 655), None, dict(v=0.8, gear="N", mph=0, manual=True, clock="10:57", odo="025192", distUnit="km", kmh=True, trip="0.0", fuel=0.0)),
     "e92": ("e92_m3_cluster_owner.png", (138, 316, 1754, 988), None, dict(v=0.0, gear="N", mph=0, manual=False, clock="10:57", odo="067528", distUnit="km", kmh=True, trip="200.2", fuel=0.0)),
     "gt3rs": ("gt3rs_9912_cluster_owner.png", (287, 397, 1732, 940), None, dict(v=0.0, gear="N", mph=0, manual=False, clock="09:58", odo="014848", distUnit="km", kmh=True, trip="182.3", fuel=0.0)),

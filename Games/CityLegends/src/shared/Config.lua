@@ -332,6 +332,7 @@ Config.Credits = {
 	"Stuttgart 991.2 Track model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Bavarica Werkz E92 V8 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Apex JZX100 Tourer model by GT Cars: Hyperspeed (CC BY 4.0)",
+	"Apex JZA80 model by Ddiaz Design (CC BY-NC-SA 4.0)",
 	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
 	"Map shape: © OpenStreetMap contributors (ODbL)",
 }

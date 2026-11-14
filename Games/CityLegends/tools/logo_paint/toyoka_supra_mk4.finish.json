@@ -1,0 +1,236 @@
+{
+ "id": "toyoka_supra_mk4",
+ "roles": {
+  "^paint_material": [
+   "Paint",
+   0.1,
+   0.0
+  ],
+  "^coloured_material": [
+   "Trim",
+   0.45,
+   0.0
+  ],
+  "^glass_surround": [
+   "Trim3",
+   0.25,
+   0.0
+  ],
+  "^base_material": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "^carbon1m": [
+   "CabinCarbon",
+   0.62,
+   0.0
+  ],
+  "^lighta_material": [
+   "Lamp",
+   0.16,
+   0.4
+  ],
+  "^interiora_material": [
+   "Cabin",
+   0.62,
+   0.0
+  ],
+  "^platea_material": [
+   "Plate",
+   0.5,
+   0.0
+  ],
+  "^enginea": [
+   "Engine",
+   0.6,
+   0.0
+  ],
+  "^grille": [
+   "Grille",
+   0.6,
+   0.0
+  ],
+  "^textureda": [
+   "Trim2",
+   0.55,
+   0.0
+  ],
+  "^tyre_rubber": [
+   "Tyre",
+   0.85,
+   0.0
+  ],
+  "^rims1": [
+   "Rim",
+   0.3,
+   0.75
+  ],
+  "^disc1": [
+   "Disc",
+   0.4,
+   0.8
+  ],
+  "^caliper1": [
+   "Caliper",
+   0.35,
+   0.2
+  ]
+ },
+ "cut_islands": [
+  {
+   "mat": "coloured",
+   "box": [
+    -0.06,
+    -2.16,
+    0.6,
+    0.06,
+    -2.08,
+    0.66
+   ],
+   "limit": 0.12,
+   "_what": "nose emblem (the maker's mark, 1238 tris)"
+  },
+  {
+   "mat": "paint_material",
+   "box": [
+    -0.06,
+    -2.16,
+    0.6,
+    0.06,
+    -2.08,
+    0.66
+   ],
+   "limit": 0.12,
+   "_what": "the nose emblem's paint plinth (76 tris)"
+  },
+  {
+   "mat": "coloured",
+   "box": [
+    -0.06,
+    2.15,
+    0.85,
+    0.06,
+    2.2,
+    0.93
+   ],
+   "limit": 0.12,
+   "_what": "hatch emblem (the maker's mark, 1238 tris)"
+  },
+  {
+   "mat": "paint_material",
+   "box": [
+    -0.06,
+    2.15,
+    0.85,
+    0.06,
+    2.2,
+    0.93
+   ],
+   "limit": 0.12,
+   "_what": "the hatch emblem's paint plinth (76 tris)"
+  }
+ ],
+ "cut_uv": [
+  {
+   "image": "Image_18",
+   "rect": [
+    68,
+    244,
+    143,
+    262
+   ],
+   "_what": "momo"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    3,
+    262,
+    140,
+    297
+   ],
+   "_what": "sparco"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    286,
+    210,
+    422,
+    223
+   ],
+   "_what": "hks_injector"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    286,
+    223,
+    335,
+    236
+   ],
+   "_what": "vrx"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    286,
+    237,
+    428,
+    250
+   ],
+   "_what": "hks_electronics"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    405,
+    250,
+    458,
+    263
+   ],
+   "_what": "vma_a"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    477,
+    10,
+    508,
+    21
+   ],
+   "_what": "vma_b"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    409,
+    66,
+    475,
+    91
+   ],
+   "_what": "magicgate"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    213,
+    265,
+    263,
+    278
+   ],
+   "_what": "script_lo_boost"
+  },
+  {
+   "image": "Image_18",
+   "rect": [
+    213,
+    304,
+    263,
+    315
+   ],
+   "_what": "script_power"
+  }
+ ]
+}

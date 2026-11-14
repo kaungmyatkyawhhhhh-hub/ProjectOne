@@ -1,0 +1,181 @@
+{
+ "src": "imports/importing cars/Toyota/1994_toyota_supra_sz-r_mk_iv.glb",
+ "images": {
+  "1": [
+   {
+    "clear": true
+   }
+  ],
+  "2": [
+   {
+    "ring": [
+     256,
+     256,
+     188,
+     244
+    ]
+   }
+  ],
+  "4": [
+   {
+    "ring": [
+     256,
+     256,
+     188,
+     244
+    ]
+   }
+  ],
+  "5": [
+   {
+    "solid": [
+     0,
+     13,
+     255,
+     255,
+     174,
+     174,
+     174
+    ]
+   },
+   {
+    "solid": [
+     0,
+     0,
+     217,
+     12,
+     174,
+     174,
+     174
+    ]
+   }
+  ],
+  "6": [
+   {
+    "solid": [
+     0,
+     0,
+     255,
+     255,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "10": [
+   {
+    "replace": "tools/logo_paint/toyoka_supra_mk4_engine.png"
+   },
+   {
+    "solid": [
+     300,
+     14,
+     505,
+     80,
+     47,
+     47,
+     47
+    ]
+   },
+   {
+    "solid": [
+     300,
+     148,
+     505,
+     212,
+     47,
+     47,
+     47
+    ]
+   }
+  ],
+  "11": [
+   {
+    "solid": [
+     300,
+     14,
+     505,
+     80,
+     126,
+     128,
+     255
+    ]
+   },
+   {
+    "solid": [
+     300,
+     148,
+     505,
+     212,
+     126,
+     128,
+     255
+    ]
+   }
+  ],
+  "18": [
+   {
+    "replace": "tools/logo_paint/toyoka_supra_mk4_interior.png"
+   }
+  ],
+  "19": [
+   {
+    "clear": true
+   }
+  ],
+  "20": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     511,
+     128,
+     128,
+     255
+    ]
+   }
+  ],
+  "29": [
+   {
+    "solid": [
+     0,
+     0,
+     511,
+     255,
+     232,
+     232,
+     232
+    ]
+   }
+  ]
+ },
+ "drop": [],
+ "drop_material": [
+  "CalliperBadgeA",
+  "1994BadgeA"
+ ],
+ "rename_material": {
+  "SupraToyota_SupraMK4TNR0_1994_CallipersCalliperGloss_Material1": "Caliper1",
+  "Supra_TNRRims_85A18NaTireBlur_Material1": "Tyre_Rubber",
+  "Supra_TNRRims_85A18NaTNR_Rim85A_Material1": "Rims1",
+  "Supra_TNRRims_85A18NaBrakeDisc_ForgedDrilled_Material1": "Disc1",
+  "SupraToyota_SupraMK4TNR0_1994EngineA_Material1": "EngineA_Material",
+  "SupraToyota_SupraMK4TNR0_1994Grille6A_Material1": "Grille6A_Material",
+  "SupraToyota_SupraMK4TNR0_1994Grille7A_Material1": "Grille7A_Material",
+  "SupraToyota_SupraMK4TNR0_1994Grille8A_Material1": "Grille8A_Material",
+  "SupraToyota_SupraMK4TNR0_1994Grille9A_Material1": "Grille9A_Material",
+  "SupraToyota_SupraMK4TNR0_1994InteriorA_Material1": "InteriorA_Material",
+  "SupraToyota_SupraMK4TNR0_1994BadgeA_Material1": "BadgeA_Material",
+  "SupraToyota_SupraMK4TNR0_1994Base_Material1": "Base_Material",
+  "SupraToyota_SupraMK4TNR0_1994Carbon1M_Material1": "Carbon1M_Material",
+  "SupraToyota_SupraMK4TNR0_1994Coloured_Material1": "Coloured_Material",
+  "SupraToyota_SupraMK4TNR0_1994LightA_Material1": "LightA_Material",
+  "SupraToyota_SupraMK4TNR0_1994ManufacturerPlateA_Material1": "PlateA_Material",
+  "SupraToyota_SupraMK4TNR0_1994PaintTNR_Material1": "Paint_Material",
+  "SupraToyota_SupraMK4TNR0_1994TexturedA_Material1": "TexturedA_Material",
+  "SupraToyota_SupraMK4TNR0_1994WindowInside_Material1": "Window_Material",
+  "GLASS_SURR": "Glass_Surround"
+ }
+}
