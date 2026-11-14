@@ -201,7 +201,7 @@ local list: { CarSpec } = {
 	-- AE86: 1985 Sprinter Trueno GT-APEX 3-door, 4A-GE 1.6 (128 hp, 940 kg)
 	{ Id = "toyoka_ae86", Name = "Apex AE86", Class = "Coupe", Tier = "Starter", TopSpeed = 118, ZeroToSixty = 8.5, Handling = 0.78, Price = 35000, PriceSource = "collector", Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 9.5 },
 	-- CP9A: 1999 Lancer Evolution VI GSR, 4G63T (276 hp, 1,360 kg); Champion: the 1999 rally champion's edition
-	{ Id = "ronin_cp9a", Name = "Ronin CP9A", Class = "Sedan", Tier = "Mid", TopSpeed = 150, ZeroToSixty = 4.4, Handling = 0.84, Price = 50000, PriceSource = "collector", Color = Color3.fromRGB(26, 60, 150), Order = 25.2, Pending = true },
+	{ Id = "ronin_cp9a", Name = "Ronin CP9A", Class = "Sedan", Tier = "Mid", TopSpeed = 150, ZeroToSixty = 4.4, Handling = 0.84, Price = 50000, PriceSource = "collector", Color = Color3.fromRGB(26, 60, 150), Order = 25.2 },
 	{ Id = "ronin_cp9a_champ", Name = "Ronin CP9A Champion", Class = "Sedan", Tier = "Mid", TopSpeed = 150, ZeroToSixty = 4.3, Handling = 0.86, Price = 80000, PriceSource = "collector", Color = Color3.fromRGB(196, 18, 28), Order = 25.3 },
 	-- CT9A: 2006 Lancer Evolution IX MR, 4G63T MIVEC (286 hp, 1,410 kg)
 	{ Id = "ronin_ct9a", Name = "Ronin CT9A", Class = "Sedan", Tier = "Mid", TopSpeed = 157, ZeroToSixty = 4.5, Handling = 0.86, Price = 55000, PriceSource = "collector", Color = Color3.fromRGB(88, 92, 98), Order = 25.4, Pending = true },

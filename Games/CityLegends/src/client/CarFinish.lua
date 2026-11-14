@@ -57,6 +57,7 @@ CarFinish.CARS = {
 	toyoka_supra_mk4 = true,
 	toyoka_ae86 = true,
 	ronin_cp9a_champ = true,
+	ronin_cp9a = true,
 } :: { [string]: boolean }
 
 -- Legends Customs' finishes on these cars

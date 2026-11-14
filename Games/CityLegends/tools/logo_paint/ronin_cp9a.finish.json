@@ -1,0 +1,121 @@
+{
+ "id": "ronin_cp9a",
+ "roles": {
+  "^carpaint": [
+   "Paint",
+   0.1,
+   0.0
+  ],
+  "^ext_plastic": [
+   "Trim",
+   0.45,
+   0.0
+  ],
+  "^glass_surr": [
+   "Trim3",
+   0.25,
+   0.0
+  ],
+  "^ext_misc": [
+   "Trim2",
+   0.5,
+   0.0
+  ],
+  "^ext_chrome": [
+   "Chrome",
+   0.18,
+   0.8
+  ],
+  "^ext_chassis": [
+   "Base",
+   0.7,
+   0.0
+  ],
+  "^light_map": [
+   "Lamp",
+   0.16,
+   0.4
+  ],
+  "^ext_rubber": [
+   "Rubber",
+   0.85,
+   0.0
+  ],
+  "^bumper_frame": [
+   "Frame",
+   0.7,
+   0.0
+  ],
+  "^under($|[.])": [
+   "Under",
+   0.85,
+   0.0
+  ],
+  "^int_metal": [
+   "CabinMetal",
+   0.55,
+   0.45
+  ],
+  "^int_plastic": [
+   "Cabin",
+   0.62,
+   0.0
+  ],
+  "^int_transp": [
+   "CabinDecal",
+   0.62,
+   0.0
+  ],
+  "^int_leather": [
+   "Leather",
+   0.55,
+   0.0
+  ],
+  "^int_cl($|[.])": [
+   "CabinCloth",
+   0.85,
+   0.0
+  ],
+  "^gauge_emissive1": [
+   "Gauge",
+   0.45,
+   0.0
+  ],
+  "^mirror($|[.])": [
+   "Mirror",
+   0.06,
+   1.0
+  ],
+  "^rubber($|[.])": [
+   "CabinRubber",
+   0.85,
+   0.0
+  ],
+  "^tire($|[.])": [
+   "Tyre",
+   0.85,
+   0.0
+  ],
+  "^material($|[.])": [
+   "Rim",
+   0.3,
+   0.75
+  ],
+  "^brake_disc": [
+   "Disc",
+   0.4,
+   0.8
+  ],
+  "^brake_caliper": [
+   "Caliper",
+   0.35,
+   0.2
+  ]
+ },
+ "lens": [
+  [
+   "light_glass",
+   "Lens_Clear"
+  ]
+ ]
+}

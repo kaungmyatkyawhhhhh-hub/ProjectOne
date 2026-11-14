@@ -1,0 +1,295 @@
+{
+ "src": "imports/importing cars/Missubibi/1999_mitsubishi_lancer_evo_vi_gsr.glb",
+ "images": {
+  "0": [
+   {
+    "rect": [
+     734,
+     1670,
+     797,
+     1688
+    ]
+   },
+   {
+    "rect": [
+     622,
+     1779,
+     818,
+     1833
+    ]
+   },
+   {
+    "rect": [
+     1104,
+     1768,
+     1231,
+     1804
+    ]
+   },
+   {
+    "rect": [
+     835,
+     551,
+     842,
+     594
+    ]
+   },
+   {
+    "rect": [
+     854,
+     553,
+     862,
+     601
+    ]
+   },
+   {
+    "solid": [
+     1384,
+     1826,
+     1724,
+     1962,
+     255,
+     255,
+     255
+    ]
+   }
+  ],
+  "1": [
+   {
+    "rect": [
+     734,
+     1670,
+     797,
+     1688
+    ]
+   },
+   {
+    "rect": [
+     622,
+     1779,
+     818,
+     1833
+    ]
+   },
+   {
+    "rect": [
+     1104,
+     1768,
+     1231,
+     1804
+    ]
+   },
+   {
+    "rect": [
+     835,
+     551,
+     842,
+     594
+    ]
+   },
+   {
+    "rect": [
+     854,
+     553,
+     862,
+     601
+    ]
+   },
+   {
+    "solid": [
+     1384,
+     1826,
+     1724,
+     1962,
+     255,
+     255,
+     255
+    ]
+   }
+  ],
+  "5": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_cabin.png"
+   },
+   {
+    "rect": [
+     390,
+     223,
+     460,
+     318
+    ]
+   },
+   {
+    "solid": [
+     4,
+     57,
+     96,
+     65,
+     28,
+     28,
+     28
+    ]
+   },
+   {
+    "solid": [
+     54,
+     50,
+     96,
+     56,
+     28,
+     28,
+     28
+    ]
+   },
+   {
+    "solid": [
+     99,
+     57,
+     119,
+     68,
+     28,
+     28,
+     28
+    ]
+   },
+   {
+    "rect": [
+     477,
+     106,
+     508,
+     127
+    ]
+   },
+   {
+    "rect": [
+     380,
+     497,
+     435,
+     511
+    ]
+   },
+   {
+    "rect": [
+     213,
+     486,
+     242,
+     511
+    ]
+   }
+  ],
+  "6": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_decals.png"
+   },
+   {
+    "rect": [
+     390,
+     223,
+     460,
+     318
+    ]
+   },
+   {
+    "solid": [
+     4,
+     57,
+     96,
+     65,
+     28,
+     28,
+     28
+    ]
+   },
+   {
+    "solid": [
+     54,
+     50,
+     96,
+     56,
+     28,
+     28,
+     28
+    ]
+   },
+   {
+    "solid": [
+     99,
+     57,
+     119,
+     68,
+     28,
+     28,
+     28
+    ]
+   },
+   {
+    "rect": [
+     477,
+     106,
+     508,
+     127
+    ]
+   },
+   {
+    "rect": [
+     380,
+     497,
+     435,
+     511
+    ]
+   },
+   {
+    "rect": [
+     213,
+     486,
+     242,
+     511
+    ]
+   },
+   {
+    "rect": [
+     339,
+     205,
+     383,
+     220
+    ]
+   }
+  ],
+  "9": [
+   {
+    "replace": "tools/logo_paint/ronin_cp9a_rim.png"
+   }
+  ]
+ },
+ "drop": [
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_bumperFa_emblem_337vertices528faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_trunk_badge_10vertices10faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_seatL_badge_6vertices5faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_seatR_badge_6vertices5faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_fuel_min_gauge_needle_20vertices10faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_fuel_min_plastic_48vertices78faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_speed_min_gauge_emissive_20vertices10faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_speed_min_plastic_48vertices78faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_tach_max_gauge_emissive_20vertices10faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_tach_max_plastic_48vertices78faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_tach_mid_gauge_emissive_20vertices10faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_tach_mid_plastic_48vertices78faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_tach_min_gauge_emissive_20vertices10faces",
+  "MIT_LancerEVOVIGSR_99_cockpit:mit_lancerevovigsr_99_cockpit_tach_min_plastic_48vertices78faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtLb_body_748vertices1396faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtLb_frame_102vertices126faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtLh_body_678vertices1442faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtLh_frame_104vertices125faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtLk_body_870vertices1785faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtLk_frame_104vertices127faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtRb_body_748vertices1396faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtRb_frame_102vertices132faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtRh_body_678vertices1373faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtRh_frame_104vertices125faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtRk_body_882vertices1773faces",
+  "MIT_LancerEVOVIGSR_99_lod0:mit_lancerevovigsr_99_lod0_skirtRk_frame_104vertices123faces"
+ ],
+ "rename_material": {
+  "MIT_LancerEVOVIGSR_99_cockpitgauge_emissive1": "gauge_emissive1"
+ }
+}
