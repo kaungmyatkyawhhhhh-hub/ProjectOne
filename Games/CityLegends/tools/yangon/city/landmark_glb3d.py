@@ -76,6 +76,13 @@ GROUPS = {
     "DRV": ("Asphalt", (64, 64, 66), 0.0, 0.0, False, False),       # site drives
     "BLU": ("SmoothPlastic", (40, 62, 150), 0.0, 0.0, False, True),  # blue sign board
     "WOD": ("WoodPlanks", (150, 104, 70), 0.0, 0.0, True, True),    # timber (escalator cladding, the atrium cove)
+    # shop stock (clothes, boxes, packets): a few plain colours mixed by shop
+    "PRA": ("SmoothPlastic", (186, 62, 64), 0.0, 0.0, False, False),
+    "PRB": ("SmoothPlastic", (58, 96, 160), 0.0, 0.0, False, False),
+    "PRC": ("SmoothPlastic", (226, 210, 180), 0.0, 0.0, False, False),
+    "PRD": ("SmoothPlastic", (40, 42, 48), 0.0, 0.0, False, False),
+    "PRE": ("SmoothPlastic", (78, 140, 96), 0.0, 0.0, False, False),
+    "PRF": ("SmoothPlastic", (236, 178, 58), 0.0, 0.0, False, False),
 }
 
 

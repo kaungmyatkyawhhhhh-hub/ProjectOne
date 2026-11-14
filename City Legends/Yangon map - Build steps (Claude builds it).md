@@ -474,3 +474,19 @@ Rules for every step:
   - 78 generated buildings on the two sites are parked in `ServerStorage.YangonReplaced_MC` / `_SD`; 7 cells rebuilt without them. Saved (Team Create).
   - Pictures: `Yangon landmarks - Myanmar Centre 3D vs real (corner).jpg`, `... mall interior vs real (atrium).jpg`, `... Sedona 3D vs real (Kaba Aye Pagoda Rd).jpg`, `... Myanmar Centre and Sedona 3D (aerial).jpg`.
   - **Not done yet:** shoppers and fuller shop interiors; the night look (a check after the lights and Neon tone); the Sedona north gate; not tested in Play (walking in, escalators).
+
+## 2026-11-14 (evening): paused by the owner, resume Monday 16 Nov, 3:30
+
+Working on the owner's "Fix these first" list and "the materials, textures, looks, colors, designs, lighting is not same as the real life myanmar plaza".
+
+Done so far (in the repo, not yet in Studio):
+- **Colour measurement.** `tools/yangon/PlayLight.luau` (also `ServerStorage.ClaudeTools.PlayLight`) sets Studio's edit lighting to what players see in Yangon at an hour (`apply(13)`, `restore()`). Swatch panels (8 materials x 10 greys) were measured at 13:00 into `build/landmarks/look_swatches_13h.json`; `tools/yangon/city/look_calib.py` gives the part colour that renders as a photo colour.
+- **Finding:** Yangon's daylight in the game is strongly blue (white plastic in sun renders (216, 228, 244), in shade (182, 208, 233)). To render a cream like the photos, a part needs an orange-ish colour, which would look wrong at sunset. The lighting itself (DayCycle's keys used for Yangon, made for Monaco) is the bigger lever: ask the owner before changing the whole game's daylight.
+- **Shop fit-outs** in `mc3d.py` (`shop_fit`): racks with clothes and mannequins, shoe walls, phone tables with a screen wall, food counters with menu boards and tables, a supermarket with aisles, glass counters, shelves. Product colour groups PRA-PRF are in `landmark_glb3d.py`. 53k triangles. Small or odd-shaped shops get only a kiosk.
+
+Next (in order):
+1. Read the look-bible results (workflow `wyvmpzs4o`, into `build/landmarks/look/`) and set the group colours and materials (part colour from look_calib, partly).
+2. Night windows (FacadeNight) and lit signs.
+3. Shoppers: `client/Pedestrians.lua` only walks Monaco's pavements. Add walk paths for Yangon (mall galleries).
+4. Sedona north gate.
+5. Rebuild, upload and re-place both landmarks, then a Play test and a day and night check against the photos.

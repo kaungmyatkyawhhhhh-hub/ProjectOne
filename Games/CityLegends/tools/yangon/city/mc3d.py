@@ -673,6 +673,253 @@ SHOP_NAMES = [
     ["FOOD COURT", "NOODLE BAR", "BBQ HOUSE", "SUSHI GO", "TEA SHOP", "DIM SUM", "BURGER JOINT", "CURRY POT",
      "ICE CREAM", "JUICE BAR", "HOT POT", "BAKERY"],
 ]
+PRODUCTS = ["PRA", "PRB", "PRC", "PRD", "PRE", "PRF"]
+SHOP_KIND = {
+    "rack": ("URBAN STYLE", "DENIM CO", "FASHION HUB", "GENERATION", "KIDS WORLD", "BABY CLUB", "SPORT ZONE", "LUXE BAGS"),
+    "shoes": ("GOLDEN SHOES", "SHOE BOX"),
+    "tech": ("MOBILE CITY", "GADGET HUB", "TECH WORLD", "PHONE PLUS", "LAPTOP LAB", "AUDIO ZONE", "GAME SPOT",
+             "CAMERA SHOP", "SMART HOME", "PRINT SHOP", "REPAIR PRO", "SIM CENTRE"),
+    "court": ("FOOD COURT",),
+    "food": ("NOODLE BAR", "BBQ HOUSE", "SUSHI GO", "TEA SHOP", "DIM SUM", "BURGER JOINT", "CURRY POT", "ICE CREAM",
+             "JUICE BAR", "HOT POT", "BAKERY", "TEA HOUSE", "PIZZA TIME", "COFFEE BEAN"),
+    "market": ("FRESH MARKET",),
+    "counter": ("BEAUTY BAR", "WATCH HOUSE", "EYE CARE", "OPTIKA", "CANDY LAND", "GIFT BOX"),
+}
+
+
+def shop_kind(name):
+    for kind, names in SHOP_KIND.items():
+        if name in names:
+            return kind
+    return "shelves"  # BOOK NOOK, HOME DECO, TOY TOWN
+
+
+def shop_fit(name, area, front, centre, z, top_z, seed):
+    """Fit out one shop (owner, 2026-11-14: fuller shop interiors). Local frame: u along the shop front, v inward from
+    the glass (away from the atrium). Every piece must sit inside the shop with a margin; big pieces collide."""
+    r = unit((front[0] - centre[0], front[1] - centre[1]))
+    t = (-r[1], r[0])
+    yaw = math.atan2(t[1], t[0])
+    inner = area.buffer(-1.2)
+
+    def W(u_, v_):
+        return (front[0] + t[0] * u_ + r[0] * v_, front[1] + t[1] * u_ + r[1] * v_)
+
+    def fits(u_, v_, su, sv):
+        return all(inner.contains(Point(W(u_ + a * su / 2, v_ + b * sv / 2))) for a in (-1, 1) for b in (-1, 1))
+
+    def bx(grp, u_, v_, z0, su, sv, sz, faces=("+x", "-x", "+y", "-y", "top"), coll=False):
+        p = W(u_, v_)
+        g.box(grp, p[0], p[1], z0, su, sv, sz, yaw, faces=faces)
+        if coll:
+            COLL.append((p[0], p[1], z0, su, sv, sz, yaw))
+
+    def prod(i):
+        return PRODUCTS[(i + seed) % len(PRODUCTS)]
+
+    # how deep the shop runs on its middle line, and how wide it is at a depth
+    D = 0.0
+    v_ = 1.0
+    while v_ < 40.0:
+        if inner.contains(Point(W(0, v_))):
+            D = v_
+        elif D > 0:
+            break
+        v_ += 0.5
+    D = min(D, 30.0)
+
+    def hw(v_):
+        u_ = 0.0
+        while u_ < 30.0 and inner.contains(Point(W(u_ + 0.5, v_))) and inner.contains(Point(W(-u_ - 0.5, v_))):
+            u_ += 0.5
+        return u_
+
+    def spread(v_, size, gap):
+        """u positions of pieces of width size across the shop at depth v_."""
+        h = hw(v_) - size / 2
+        if h < 0:
+            return []
+        n_ = min(5, max(1, int((2 * h) // (size + gap)) + 1))
+        if n_ == 1:
+            return [0.0]
+        return [-h + 2 * h * i / (n_ - 1) for i in range(n_)]
+
+    kind = shop_kind(name)
+    if D < 4.0:
+        return
+    placed = 0
+    if kind == "rack":
+        # garment rails across the shop, clothes hanging in colour blocks; two mannequins in the window
+        v_ = 4.5
+        while v_ <= D - 3.5:
+            for uu in spread(v_, 7.0, 2.0):
+                if not fits(uu, v_, 7.0, 1.6):
+                    continue
+                a, b = W(uu - 3.2, v_), W(uu + 3.2, v_)
+                for p in (a, b):
+                    g.tube("STL", (p[0], p[1], z), (p[0], p[1], z + 4.3), 0.18)
+                g.tube("STL", (a[0], a[1], z + 4.3), (b[0], b[1], z + 4.3), 0.14)
+                for i in range(16):
+                    bx(prod(i // 4 + int(v_) + int(uu)), uu - 3.0 + i * 0.4, v_, z + 1.4, 0.22, 1.3, 2.8)
+                COLL.append((*W(uu, v_), z, 6.8, 1.4, 4.4, yaw))
+                placed += 1
+            v_ += 4.0
+        for uu in (-4.5, 4.5):
+            if fits(uu, 1.8, 1.2, 1.2):
+                p = W(uu, 1.8)
+                g.box("MUW", p[0], p[1], z, 1.2, 1.2, 0.3, yaw)
+                g.tube("STL", (p[0], p[1], z + 0.3), (p[0], p[1], z + 2.2), 0.12)
+                bx(prod(seed + 2), uu, 1.8, z + 2.2, 1.0, 0.55, 2.0)
+                bx(prod(seed + 3), uu, 1.8, z + 0.8, 0.9, 0.5, 1.4)
+                bx("PRC", uu, 1.8, z + 4.2, 0.5, 0.5, 0.6)
+        for v_ in (D - 1.5, D - 3.0):
+            if fits(0, v_, 3.6, 1.4):
+                bx("WOD", 0, v_, z, 3.6, 1.4, 3.2, coll=True)
+                bx("MUW", 0, v_, z + 3.2, 3.8, 1.6, 0.12)
+                break
+    elif kind == "shoes":
+        # shelving walls at the back, rows of shoe boxes on them; benches and a low display in front
+        for v_ in (D - 1.0, D - 2.5, D - 4.0):
+            us = [uu for uu in spread(v_, 8.0, 0.5) if fits(uu, v_, 8.0, 1.0)]
+            if not us:
+                continue
+            for uu in us:
+                bx("WOD", uu, v_, z, 8.0, 1.0, 7.2, coll=True)
+                for s in range(5):
+                    for i in range(7):
+                        bx(prod(i + s), uu - 3.3 + i * 1.1, v_ - 0.75, z + 0.6 + s * 1.3, 0.8, 0.5, 0.45)
+            placed += 1
+            break
+        for uu in spread(5.0, 3.0, 2.0):
+            if 5.0 < D - 3 and fits(uu, 5.0, 3.0, 1.2):
+                bx("MUW", uu, 5.0, z, 3.0, 1.2, 1.4, coll=True)
+        if fits(0, 2.5, 3.0, 2.0):
+            bx("CHR", 0, 2.5, z, 3.0, 2.0, 1.6, coll=True)
+            for i in range(4):
+                bx(prod(i), -1.0 + (i % 2) * 2.0, 2.0 + (i // 2) * 1.0, z + 1.6, 0.9, 0.4, 0.4)
+    elif kind == "tech":
+        # display tables with handsets, a lit screen wall and a service counter at the back
+        cv, w_ = None, 7.0
+        for ww in (7.0, 3.6):
+            for v_ in (D - 1.5, D - 3.0):
+                if cv is None and fits(0, v_, ww, 1.6):
+                    cv, w_ = v_, ww
+        if cv is not None:
+            bx("WOD", 0, cv, z, w_, 1.4, 3.2, coll=True)
+            bx("MUW", 0, cv, z + 3.2, w_ + 0.2, 1.6, 0.12)
+            bx("PRD", 0, cv + 0.9, z + 4.6, w_ - 0.4, 0.25, 3.6)
+            bx("LIT", 0, cv + 0.75, z + 4.9, w_ - 0.8, 0.06, 3.0, faces=("-y",))
+            placed += 1
+        v_ = 4.5
+        while v_ <= (cv if cv is not None else D) - 4.0:
+            for uu in spread(v_, 4.4, 2.2):
+                if not fits(uu, v_, 4.4, 2.2):
+                    continue
+                bx("CHR", uu, v_, z, 3.8, 1.6, 2.9, coll=True)
+                bx("MUW", uu, v_, z + 2.9, 4.4, 2.2, 0.2)
+                for i in range(6):
+                    bx("PRD", uu - 1.6 + (i % 3) * 1.6, v_ - 0.5 + (i // 3) * 1.0, z + 3.1, 0.6, 0.35, 0.06)
+                placed += 1
+            v_ += 4.5
+    elif kind in ("food", "court"):
+        # a counter with a lit menu board at the back, tables with four chairs in front
+        cv = None
+        for v_ in (D - 1.5, D - 3.0, D - 4.5):
+            if cv is None and fits(0, v_, 7.0, 1.8):
+                cv = v_
+        if cv is not None:
+            bx("WOD", 0, cv, z, 7.0, 1.8, 3.4, coll=True)
+            bx("MUW", 0, cv, z + 3.4, 7.2, 2.0, 0.14)
+            bx("PRD", 0, cv + 1.0, z + 5.6, 6.4, 0.25, 2.6)
+            bx("LIT", 0, cv + 0.85, z + 5.8, 6.0, 0.06, 2.2, faces=("-y",))
+            for i in range(4):
+                bx(prod(i), -2.4 + i * 1.6, cv, z + 3.55, 1.0, 0.8, 0.5)
+            placed += 1
+        v_ = 4.0
+        rows = 0
+        while v_ <= (cv if cv is not None else D) - 3.5 and (kind == "court" or rows < 3):
+            for uu in spread(v_, 3.6, 1.0):
+                if not fits(uu, v_, 3.6, 3.6):
+                    continue
+                bx("MUW", uu, v_, z + 2.6, 2.2, 2.2, 0.14)
+                bx("CHR", uu, v_, z, 0.4, 0.4, 2.6)
+                COLL.append((*W(uu, v_), z, 2.2, 2.2, 2.75, yaw))
+                for du, dv in ((-1.6, 0), (1.6, 0), (0, -1.6), (0, 1.6)):
+                    bx("PRD" if (rows + seed) % 2 else "PRA", uu + du, v_ + dv, z, 0.9, 0.9, 1.5)
+                placed += 1
+            rows += 1
+            v_ += 4.4
+    elif kind == "market":
+        # a supermarket: checkouts at the front, aisles of stocked shelving running inward
+        for uu in spread(2.8, 2.6, 2.0):
+            if fits(uu, 2.8, 2.6, 1.2):
+                bx("MUW", uu, 2.8, z, 2.6, 1.2, 2.8, coll=True)
+                bx("PRD", uu - 0.6, 2.8, z + 2.8, 0.8, 0.6, 0.6)
+        v_ = 7.5
+        while v_ <= D - 3.0:
+            for uu in spread(v_, 1.6, 2.4):
+                if not fits(uu, v_, 1.6, 5.0):
+                    continue
+                bx("SH2", uu, v_, z, 1.6, 5.0, 5.4, coll=True)
+                for s in range(4):
+                    for side in (-1, 1):
+                        bx(prod(s * 2 + int(uu) + (side > 0)), uu + side * 0.85, v_, z + 0.4 + s * 1.25, 0.3, 4.6, 0.9)
+                placed += 1
+            v_ += 6.0
+    elif kind == "counter":
+        # glass counters along the sides and the back, lit cases
+        L_ = min(7.0, D - 4.0)
+        h_ = hw(D / 2)
+        pieces = []
+        for v_ in (D - 1.5, D - 3.0, D - 4.5):
+            for su in (8.0, 6.0, 4.0, 2.4):
+                if not pieces and v_ > 3 and fits(0, v_, su, 1.4):
+                    pieces.append((0.0, v_, su, 1.4))
+        for sgn in (-1, 1):
+            for LL in (L_, 5.0, 3.0):
+                for off in (1.0, 2.0, 3.0):
+                    uu = sgn * (h_ - off)
+                    if LL > 2 and h_ > 3 and len([p for p in pieces if p[0] * sgn > 0]) == 0 and fits(uu, 1.5 + LL / 2, 1.4, LL):
+                        pieces.append((uu, 1.5 + LL / 2, 1.4, LL))
+        for uu, v_, su, sv in pieces:
+            if su < 2 or not fits(uu, v_, su, sv):
+                continue
+            bx("MUW", uu, v_, z, su, sv, 2.0, coll=True)
+            bx("GLS", uu, v_, z + 2.0, su, sv, 1.4, faces=("+x", "-x", "+y", "-y", "top"))
+            bx("LIT", uu, v_, z + 2.05, su - 0.3, sv - 0.3, 0.05, faces=("top",))
+            n_ = int(max(su, sv) / 1.2)
+            for i in range(n_):
+                du = (-su / 2 + 0.6 + i * 1.2) if su > sv else 0.0
+                dv = (-sv / 2 + 0.6 + i * 1.2) if sv >= su else 0.0
+                bx(prod(i), uu + du, v_ + dv, z + 2.1, 0.5, 0.5, 0.3)
+            placed += 1
+        if fits(0, D / 2, 2.0, 2.0):
+            bx("CHR", 0, D / 2, z, 1.2, 1.2, 3.2, coll=True)
+            bx("PRF", 0, D / 2, z + 3.2, 0.9, 0.9, 0.9)
+    else:
+        # shelving units with stock and a counter
+        v_ = 6.0
+        while v_ <= D - 2.0:
+            for uu in spread(v_, 2.2, 2.6):
+                if not fits(uu, v_, 2.2, 1.2):
+                    continue
+                bx("WOD", uu, v_, z, 2.2, 1.2, 5.2, coll=True)
+                for s in range(4):
+                    for side in (-1, 1):
+                        bx(prod(s + int(uu) + side), uu, v_ + side * 0.65, z + 0.5 + s * 1.2, 2.0, 0.25, 0.8)
+                placed += 1
+            v_ += 5.0
+        for uu in (-4.0, 4.0, 0.0):
+            if fits(uu, 2.5, 3.0, 1.2):
+                bx("WOD", uu, 2.5, z, 3.0, 1.2, 3.2, coll=True)
+                bx("MUW", uu, 2.5, z + 3.2, 3.2, 1.4, 0.12)
+                break
+    if placed == 0 and fits(0, D / 2, 2.4, 1.2):
+        # a small unit: a kiosk counter
+        bx("WOD", 0, D / 2, z, 2.4, 1.2, 3.2, coll=True)
+        bx("MUW", 0, D / 2, z + 3.2, 2.6, 1.4, 0.12)
+        bx(prod(1), -0.5, D / 2, z + 3.32, 0.6, 0.5, 0.5)
+
 OPEN_FLOORS = 4          # GF, 1F, 2F, 3F open onto the atrium; the 4th (rooftop level) is closed above it
 GALLERY = 8.0            # gallery walkway between the void and the shop fronts
 
@@ -888,9 +1135,7 @@ def interior():
                     g.wall("CEL", s1, s0, z + 0.05, top_z)
                     coll_wall(s0, s1, z, top_z - z, 0.4)
             cpt = area.representative_point()
-            grp = "SH1" if (u + k) % 2 == 0 else "SH2"
-            g.box(grp, cpt.x, cpt.y, z + 0.05, 6.0, 1.5, 5.0, am + math.pi / 2)
-            g.box(grp, cpt.x + 4 * math.cos(am), cpt.y + 4 * math.sin(am), z + 0.05, 7.0, 1.5, 6.0, am + math.pi / 2)
+            shop_fit(SHOP_NAMES[k][u % 12], area, pts[2], (cx, cy), z, top_z, (u * 7 + k * 3) % 6)
             g.box("LIT", cpt.x, cpt.y, top_z - 0.15, 6.0, 4.0, 0.1, am, faces=("bottom",))
             LIGHTS.append({"p": (cpt.x, cpt.y, top_z - 1.0), "kind": "shop"})
     # the west lobby: dark granite columns, a three-ring light over a round planter
