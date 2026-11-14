@@ -17,7 +17,7 @@ _For Claude Code on the PC, with Blender (`C:/Users/USER/tools/blender-4.5.9-win
 ## Which cars
 **Only the newly imported models** (`CarFinish.NEW`: the SVJ / SVJ 63, the Bugattis, the Lamborghinis, the new Ferraris, the LFAs, the Maybachs, the Countach, the Focus RS, and every car added by the import prompts, e.g. the 12C Spider, SLS, SL65, 599, DBX, Continental, 350Z, 330i when they're in). **Old models stay exactly as they are.**
 
-If `Small design changes on famous new cars.md` has made **our own wheel library** (Furia 7, Saetta Y5, Corsa 10, Centro 6 CL...), build those designs to this standard; otherwise improve each car's own wheels (logos removed).
+**Owner, 2026-11-14: don't make our own wheels.** Improve **each model's own wheels and rims** (materials, depth, tyres, brakes) and **remove** their logos and lettering (never cover them with a cap or plate). Don't swap in a wheel library.
 
 ## Look at the cars first
 Render every new car's four wheels close up (side, 3/4, low angle, day and night, still and spinning) and list what's wrong per car: flat or blurry rims, grey parts, no depth, missing brakes, cheap tyres, wrong size or position, logos, triangles showing. Fix the worst first.

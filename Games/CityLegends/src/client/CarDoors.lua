@@ -19,7 +19,7 @@ local CarDoors = {}
 
 local player = Players.LocalPlayer
 local FEEL = Config.DoorFeel
-local SIDES = { "L", "R" }
+local SIDES = { "L", "R", "L2", "R2" } -- (2026-11-14: L2 / R2 = the rear doors of four-door cars)
 
 type State = { t: number, want: number?, sound: Sound? }
 local states: { [Motor6D]: State } = {}

@@ -607,6 +607,7 @@ Config.DrivingFeel = {
 		lambrini_lp570 = true, lambrini_lp560 = true, lambrini_huracan = true, lambrini_performante = true, lambrini_sterrato = true, lambrini_revuelto = true, lambrini_lp640 = true, lambrini_lp670 = true, lambrini_urusp = true, lambrini_lp700 = true, lambrini_lp750 = true, lambrini_svj = true, lambrini_svj63 = true, lambrini_urus = true,
 		bentlee_contgt = true, bentlee_bentayga = true, rolls_cullinan = true, astin_dbx = true, maseroti_levante = true, bugotti_veyron = true,
 		bugotti_veyron_sport = true, bugotti_veyron_top = true, bugotti_chiron = true, bugotti_chiron_pursport = true, bugotti_chiron_supersport = true,
+		ronin_cp9a = true, ronin_cp9a_champ = true, ronin_ct9a = true, ronin_cz4a = true, pleiad_gc8 = true, pleiad_gdb = true,
 	} :: { [string]: boolean },
 	FwdUndersteer = 0.3, -- front drive: flooring it in a corner pushes the nose wide
 	AwdPowerOversteer = 0.35, -- an all-wheel-drive car gets this share of rear-drive power oversteer
@@ -1460,6 +1461,130 @@ local function supercarExhaust()
 			},
 			start = { idleAt = 2.9, fade = 0.6, out = 3.3, ends = 4.0, settleFrom = 1720, settle = 2.0, gain = 1.05 },
 		},
+		-- (2026-11-14, Prompts/New imports - JDM: the 10 JDM cars; found, measured and levelled the same way as
+		-- the sets above. Not heard by ear and not played in the game: checked in Edit only. Where the store has
+		-- no clean loop of the engine itself the comment says STAND-IN and what was taken instead.)
+		-- Toyota 2JZ 3.0 straight-six (Supra JZA80; the model is the SZ-R, the 2JZ-GE without turbos): smooth,
+		-- firing at the 3rd order. The store's 2JZ loops are mostly of the turbo engine (same block, same firing);
+		-- no turbo whine on this car. STAND-IN for the 2,712 loop: a 1JZ's (the 2.5 of the same JZ family)
+		I6_2JZ = {
+			sounds = {
+				Start = id(8993055529), -- "Supra Mk4 Startup" (playermathislam): catches at 2.1 s, ~1,390 at its end
+				Idle = id(93419682840865), -- "TRD SUPRA IDLE" (maronseo), 1,043 rpm
+				Low = id(16971374937), -- "1JZ REV 8K" (Schzercro), 2,712 rpm (3rd order, its 1.5 family: a 1JZ, the stand-in)
+				Mid = id(115536253810390), -- "2jz high" (imkn32), 5,149 rpm
+				High = id(80023317803769), -- "2JZ rev" (OHM555_TH3), 6,275 rpm
+			},
+			bands = {
+				bands = { Idle = 1043, Low = 2712, Mid = 5149, High = 6275 },
+				gains = { Idle = 0.38, Low = 1.0, Mid = 0.6, High = 0.67 },
+				width = 0.36, idleReach = 0.36, idleTop = 2.0,
+				coast = COAST, shiftCut = 0.12, liftPops = false, shiftPops = false, -- (a manual gearbox)
+			},
+			start = { idleAt = 3.9, fade = 0.5, out = 4.3, ends = 4.95, settleFrom = 1400, settle = 1.5, gain = 0.54 },
+		},
+		-- Toyota 1JZ-GTE 2.5 turbo straight-six (Chaser JZX100 Tourer V): the 3rd order with the 1.5 / 4.5 of the
+		-- turbo engine, a turbo whistle and a blow-off when you lift. The middle and top loops are a JZX90's (the
+		-- Chaser before it, the same 1JZ-GTE)
+		I6_1JZ = {
+			sounds = {
+				Start = id(83092780103696), -- "1JZ Startup" (xVlbez): catches at 0.6 s, ~1,570 at its end
+				Idle = id(138396109625053), -- "1JZ Idle" (xVlbez), ~1,360 rpm (wanders a little)
+				Low = id(16971374937), -- "1JZ REV 8K" (Schzercro), 2,712 rpm
+				Mid = id(125731576761353), -- "jzx90 higher rev" (FoxZachkFan), 5,196 rpm
+				High = id(115409529133660), -- "jzx90 rev high" (FoxZachkFan), 6,506 rpm
+				Turbo = Config.Sounds.SharedTurbo,
+				BlowOff = id(81615532180604), -- "toyota altezza 2jz turbo BOV" (Doda_66)
+			},
+			bands = {
+				bands = { Idle = 1360, Low = 2712, Mid = 5196, High = 6506 },
+				gains = { Idle = 0.25, Low = 1.0, Mid = 0.49, High = 0.66 },
+				width = 0.36, idleReach = 0.34, idleTop = 1.85,
+				whine = 0.6, bov = 2.0, turbo = 0.6,
+				coast = COAST, shiftCut = 0.1, liftPops = false, shiftPops = false,
+			},
+			start = { idleAt = 4.6, fade = 0.6, out = 5.0, ends = 6.0, settleFrom = 1600, settle = 1.5, gain = 0.65 },
+		},
+		-- Toyota 4A-GE 1.6 four, no turbo (AE86): light, raspy, to 7,600, firing at the 2nd order. One 4A-G's set
+		-- (it wears FCR carburettors: a little rawer than a stock AE86); its lumpy idle has half orders
+		I4_4AGE = {
+			sounds = {
+				Start = id(111046349248842), -- "Toyota Sprinter Trueno AE86 4AGE Startup" (EfiniRX): catches at 0.9 s, ~1,270 at 2.4 s
+				Idle = id(128396095394889), -- "AE86_4AG_FCR_Idle" (Easton00023), 831 rpm
+				Low = id(111313095004466), -- "AE86_4AG_FCR_RevA" (Easton00023), 3,529 rpm
+				Mid = id(122125607047063), -- "AE86_4AG_FCR_RevB" (Easton00023), 6,117 rpm
+				High = id(92613380190086), -- "AE86_4AG_FCR_RevC" (Easton00023), 8,330 rpm
+			},
+			bands = {
+				bands = { Idle = 831, Low = 3529, Mid = 6117, High = 8330 },
+				gains = { Idle = 1.35, Low = 0.7, Mid = 0.83, High = 0.93 },
+				width = 0.36, reachDown = { Low = 0.34 }, idleReach = 0.36, idleTop = 2.5,
+				coast = COAST, shiftCut = 0.12, liftPops = false, shiftPops = false, -- (a manual gearbox)
+			},
+			start = { idleAt = 2.6, fade = 0.6, out = 3.0, ends = 3.9, settleFrom = 1300, settle = 1.0, gain = 0.45 },
+		},
+		-- Mitsubishi 4G63T 2.0 turbo four (Lancer Evolution VI / VI TME / IX): boosty, firing at the 2nd order, a
+		-- turbo whine, the blow-off's chatter when you lift, the limiter loop at the top
+		I4_4G63 = {
+			sounds = {
+				Start = id(125720177856888), -- "evo 6 start" (ShaddiSFM): catches at 1.2 s, ~1,800 at its end
+				Idle = id(92129694864788), -- "4G63 Idle" (satdun20990), 1,251 rpm
+				Low = id(71796737353158), -- "4G63 Rev" (satdun20990), 4,000 rpm
+				High = id(117609929046977), -- "evo low rev" (Jaskka221), 6,130 rpm
+				Redline = id(18659132455), -- "4g63 redline" (oatm1ilk): bouncing on the limiter, ~7,685
+				Turbo = Config.Sounds.SharedTurbo,
+				BlowOff = id(17828427222), -- "4G63T BOV" (Chhil): a chattering blow-off
+			},
+			bands = {
+				bands = { Idle = 1251, Low = 4000, High = 6130 },
+				gains = { Idle = 0.27, Low = 0.27, High = 0.92, Redline = 0.57 },
+				loopRpm = { Redline = 7685 },
+				width = 0.36, reachDown = { Low = 0.36 }, idleReach = 0.34, idleTop = 2.05,
+				whine = 0.6, bov = 0.6, turbo = 0.5,
+				coast = COAST, shiftCut = 0.12, liftPops = false, shiftPops = false, -- (a manual gearbox)
+			},
+			start = { idleAt = 3.0, fade = 0.6, out = 3.4, ends = 4.3, settleFrom = 1800, settle = 1.5, gain = 0.52 },
+		},
+		-- Subaru EJ 2.2 / 2.5 turbo flat-4, unequal-length headers (Impreza 22B, GD STI): the boxer burble (strong
+		-- half orders round the 2nd), a turbo spool, a blow-off, the limiter loop at the top
+		B4_EJ = {
+			sounds = {
+				Start = id(8173556175), -- "Subaru 22B EJ22G H4 Startup" (EfiniRX): catches at 0.45 s, ~1,150 at its end
+				Idle = id(3126352575), -- "Subaru GC8 Idle" (Keytoff), 990 rpm, lumpy (half orders)
+				Low = id(90312613549608), -- "rpm_3,7k_ej22" (lontanyl), 3,432 rpm
+				Mid = id(75777630381967), -- "Subaru 22b Rev1" (kennu_hdgamer), 5,584 rpm
+				High = id(83409057523942), -- "STI Rev C" (xVlbez), 7,439 rpm
+				Redline = id(79261274665830), -- "GC8 Exhaust Redline" (lontanyl): on the limiter, ~6,950
+				Turbo = Config.Sounds.SharedTurbo,
+				BlowOff = id(110690215236760), -- "22B Turbo Bov" (zx8129l)
+			},
+			bands = {
+				bands = { Idle = 990, Low = 3432, Mid = 5584, High = 7439 },
+				gains = { Idle = 0.2, Low = 0.32, Mid = 0.59, High = 0.35, Redline = 0.82 },
+				loopRpm = { Redline = 6949 },
+				width = 0.36, reachDown = { Low = 0.4 }, idleReach = 0.36, idleTop = 2.15,
+				whine = 0.55, bov = 0.83, turbo = 0.5,
+				coast = COAST, shiftCut = 0.12, liftPops = false, shiftPops = false, -- (a manual gearbox)
+			},
+			start = { idleAt = 1.9, fade = 0.5, out = 2.3, ends = 3.0, settleFrom = 1150, settle = 1.0, gain = 0.47 },
+		},
+		-- Subaru / Toyota FA20 2.0 flat-4, no turbo (BRZ / 86): thrummy and smooth (even orders round the 2nd).
+		-- Only one clean rev loop in the store: nothing recorded between the idle and 5,543 rpm
+		B4_FA20 = {
+			sounds = {
+				Start = id(124256013065540), -- "FA20start" (offtracke): catches at 0.9 s, ~1,700 at 2.2-3.5 s
+				Idle = id(17755587127), -- "86 Idle" (xVlbez), 1,351 rpm
+				High = id(108887066423163), -- "FA20rev" (offtracke), 5,543 rpm
+			},
+			bands = {
+				bands = { Idle = 1351, High = 5543 },
+				gains = { Idle = 0.63, High = 1.41 },
+				-- (the idle reaches up and the loop down, they meet near 2,900, each inside its pitch)
+				width = 0.42, reachDown = { High = 0.36 }, idleReach = 0.36, idleTop = 2.2,
+				coast = COAST, shiftCut = 0.12, liftPops = false, shiftPops = false, -- (a manual gearbox)
+			},
+			start = { idleAt = 2.6, fade = 0.6, out = 3.0, ends = 4.2, settleFrom = 1700, settle = 1.5, gain = 0.55 },
+		},
 	}
 	local GALLARDO = {
 		sounds = {
@@ -1491,6 +1616,40 @@ local function supercarExhaust()
 	local S600_START = {
 		sounds = { Start = id(91901380785370) }, -- "S600Startup" (FreeIsaacbolarini): catches at 0.75 s, ~1,350 at its end
 		start = { idleAt = 3.0, fade = 0.6, out = 3.4, ends = 4.3, settleFrom = 1350, settle = 0.5, gain = 2.1 },
+	}
+	-- (2026-11-14) the rally cars (CP9A Champion, GC8 Wide): anti-lag-style bangs and crackles when you lift and
+	-- on the upshifts (a rally car's anti-lag, then the shared crackle)
+	local RALLY = {
+		sounds = {
+			Pops = id(116465852621701), -- "Citroen r5 antilag 2" (FoxZachkFan)
+			Crackle = SVJ_CRACKLE,
+		},
+		bands = { liftPops = true, shiftPops = true, shots = { Pops = 1.2 } },
+	}
+	-- (2026-11-14) the CT9A: an Evo IX's own start-up and a fluttering blow-off
+	local CT9A = {
+		sounds = {
+			Start = id(4839254661), -- "Mitsubishi Lancer Evolution IX startup" (Clxbsport): catches at 1.8 s, ~1,860 at its end
+			BlowOff = id(8064513314), -- "Turbo Flutter" (Kwerke_Individual)
+		},
+		bands = { bov = 0.77 },
+		start = { idleAt = 2.6, fade = 0.5, out = 2.9, ends = 3.6, settleFrom = 1860, settle = 1.5, gain = 0.62 },
+	}
+	-- (2026-11-14) the CZ4A (Mitsubishi 4B11T 2.0 turbo four): an Evo X's own start-up and a soft flutter.
+	-- STAND-IN for the loops: the store has no clean 4B11 loops (the "Evo X" clips there start in silence and
+	-- come from an uploader of game rips), so it plays the 4G63 set, deeper and smoother (the car's `tone`)
+	local CZ4A = {
+		sounds = {
+			Start = id(651110603), -- "Lancer Evolution X GSR Startup" (Truenus): catches at 0.6 s, ~1,870 at 3 s
+			BlowOff = id(74179218220791), -- "turbo flutter 1" (lontanyl)
+		},
+		bands = { bov = 1.8, turbo = 0.35, whine = 0.5 },
+		start = { idleAt = 2.8, fade = 0.6, out = 3.2, ends = 4.0, settleFrom = 1870, settle = 1.5, gain = 1.56 },
+	}
+	-- (2026-11-14) the GDB: the GD STI's fluttering blow-off
+	local GDB = {
+		sounds = { BlowOff = id(131145970580755) }, -- "Turbo flutter Subaru" (mzz_123456)
+		bands = { bov = 0.77 },
 	}
 	-- each car: its family, then its own changes (`with`: shared extra parts, `volume`, `tone`, `bands`)
 	local CARS: { [string]: any } = {
@@ -1540,6 +1699,17 @@ local function supercarExhaust()
 		bnw_330i_g20 = { family = "I4_B48", volume = 0.85 },
 		dearb_focus_rs = { family = "I4_ECOBOOST", tone = { drive = 0.08, high = 1 } }, -- raspy
 		nisun_350z = { family = "V6_VQ" },
+		-- (2026-11-14) the 10 JDM cars
+		toyoka_supra_mk4 = { family = "I6_2JZ" },
+		toyoka_chaser = { family = "I6_1JZ" },
+		toyoka_ae86 = { family = "I4_4AGE", volume = 0.95, tone = { high = 1.5, drive = 0.06 } }, -- raspy
+		ronin_cp9a = { family = "I4_4G63" },
+		ronin_cp9a_champ = { family = "I4_4G63", with = RALLY, volume = 1.2, tone = { drive = 0.1, high = 1 } }, -- louder, rally bangs
+		ronin_ct9a = { family = "I4_4G63", with = CT9A, tone = { high = 2, drive = 0.05 } }, -- a bit sharper
+		ronin_cz4a = { family = "I4_4G63", with = CZ4A, volume = 0.9, tone = { low = 3, high = -3 } }, -- deeper, smoother (stand-in loops)
+		pleiad_gc8 = { family = "B4_EJ", with = RALLY, volume = 1.15, tone = { low = 1, drive = 0.08 }, bands = { shots = { Pops = 1.3 } } }, -- loud, rally bangs
+		pleiad_gdb = { family = "B4_EJ", with = GDB },
+		pleiad_zc6 = { family = "B4_FA20", volume = 0.95 },
 	}
 	local PARTS = { "Start", "Idle", "Low", "Mid", "High", "Launch", "Crackle", "Redline", "Shift", "Downshift", "ShiftPop", "Pops", "LowOff", "MidOff", "HighOff", "Turbo", "Turbo2", "BlowOff", "EWhine" }
 	local function merged(a: any, b: any): any

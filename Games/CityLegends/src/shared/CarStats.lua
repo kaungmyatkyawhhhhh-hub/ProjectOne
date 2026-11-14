@@ -42,6 +42,7 @@ local AWD = {
 	toyoka_lc300 = true, lexis_lx700 = true, astin_dbx = true, maseroti_levante = true, xiaomo_su7 = true,
 	byt_u8 = true, kio_ev6 = true, bentz_cla45 = true, bentz_s680 = true, rolls_cullinan = false,
 	bentz_a45s = true, dearb_focus_rs = true,
+	ronin_cp9a = true, ronin_cp9a_champ = true, ronin_ct9a = true, ronin_cz4a = true, pleiad_gc8 = true, pleiad_gdb = true,
 }
 local FWD = { suzaki_swift = true, toyoka_belta = true, toyoka_camri = true, toyoka_alfard = true }
 local MANUAL = {
@@ -50,6 +51,8 @@ local MANUAL = {
 	chevo_camaro = true, dodger_challenger = true, porsha_boxster = true, porsha_gt3 = true,
 	ferrara_f430 = true, lambrini_lp570 = true, lambrini_countach = true, lexis_lfa = false,
 	bentz_190e = true, suzaki_swift = true, dearb_focus_rs = true,
+	toyoka_ae86 = true, ronin_cp9a = true, ronin_cp9a_champ = true, ronin_ct9a = true, ronin_cz4a = true, pleiad_gc8 = true,
+	pleiad_gdb = true, pleiad_zc6 = true,
 }
 local KERB: { [string]: number } = {
 	suzaki_swift = 900, toyoka_belta = 1080, kio_ev6 = 2000, byt_seal = 2150, toyoka_camri = 1550, toyoka_crown = 1800,
@@ -69,6 +72,8 @@ local KERB: { [string]: number } = {
 	bugotti_veyron = 1890, bugotti_veyron_sport = 1838, bugotti_veyron_top = 1990, bugotti_chiron = 1995, bugotti_chiron_pursport = 1945,
 	bugotti_chiron_supersport = 1990, bnw_m5_f10 = 1870, bnw_m5_f90 = 1825, bentz_e63s = 1880,
 	bentz_a45s = 1635, dearb_focus_rs = 1530,
+	toyoka_ae86 = 940, ronin_cp9a = 1360, ronin_cp9a_champ = 1365, ronin_ct9a = 1410, ronin_cz4a = 1560, pleiad_gc8 = 1270,
+	pleiad_gdb = 1495, pleiad_zc6 = 1250,
 }
 -- (2026-11-03, the classes: the PI reads power-to-weight, owner: "from real performance") the real
 -- power (hp) of the car each one is modelled on; a SPORT / TOP trim gets its base car's, scaled by its
@@ -90,6 +95,8 @@ local POWER: { [string]: number } = {
 	ferrara_california = 453, bugotti_veyron = 1001, bugotti_veyron_sport = 1200, bugotti_veyron_top = 1200,
 	bugotti_chiron = 1500, bugotti_chiron_pursport = 1500, bugotti_chiron_supersport = 1600,
 	bnw_m5_f10 = 560, bnw_m5_f90 = 627, bentz_e63s = 603, bentz_a45s = 416, dearb_focus_rs = 350,
+	toyoka_ae86 = 128, ronin_cp9a = 276, ronin_cp9a_champ = 276, ronin_ct9a = 286, ronin_cz4a = 303, pleiad_gc8 = 276,
+	pleiad_gdb = 300, pleiad_zc6 = 200,
 	-- the retired cars
 	suzaki_swift = 90, toyoka_belta = 106, toyoka_crown = 226, byt_seal = 201, mazdo_rx8 = 231,
 	bentz_e300 = 255, bnw_530i = 248, bnw_330i_g20 = 255, bentz_cla45 = 416, chevo_c6 = 430,
@@ -199,6 +206,8 @@ local REDLINE_CAR: { [string]: number } = {
 	rolls_wraith = 5.5, rolls_cullinan = 5.0, bugotti_veyron = 6.4, maseroti_levante = 6.5,
 	bugotti_chiron = 6.7, bugotti_chiron_pursport = 6.9, bugotti_chiron_supersport = 6.9,
 	bentz_a45s = 7.2, dearb_focus_rs = 6.8,
+	toyoka_ae86 = 7.6, ronin_cp9a = 7.5, ronin_cp9a_champ = 7.5, ronin_ct9a = 7.0, ronin_cz4a = 7.0, pleiad_gc8 = 7.9,
+	pleiad_gdb = 7.0, pleiad_zc6 = 7.4,
 	-- (2026-11-09, the supercars' real engines; was: SLS 7.2 = the plain SLS, California 7.5, LP560 / Huracans
 	-- 8.0, Countach 7.0) the SLS Black Series 8,000, California 8,000, Gallardo LP560-4 and Huracan 8,500,
 	-- Countach 5000 QV 7,300 (its power peaks at 7,000)
@@ -597,7 +606,8 @@ function CarStats.dyno(id: string, parts: Parts?, n: number?): Dyno
 	local t = CarStats.tuneOf(parts)
 	local hp = CarStats.powerOf(id, parts)
 	local redline = CarStats.redlineOf(id, parts) * 1000
-	local kind = if spec.Electric then "ev" elseif t.engine then t.engine.curve elseif t.forced == "turbo" then "turbo" elseif t.forced == "super" then "bigv8" elseif spec.Class == "Supercar" or spec.Class == "Hypercar" then "highrev" elseif spec.Class == "SUV" then "bigv8" else "na"
+	local _, stockCurve = PartData.stockEngine(baseOf(spec))
+	local kind = if spec.Electric then "ev" elseif t.engine then t.engine.curve elseif t.forced == "turbo" then "turbo" elseif t.forced == "super" then "bigv8" elseif stockCurve then stockCurve elseif spec.Class == "Supercar" or spec.Class == "Hypercar" then "highrev" elseif spec.Class == "SUV" then "bigv8" else "na"
 	local count = n or 28
 	-- the shape first, then scaled so its peak is the car's power
 	local shape, peak = {}, 0
