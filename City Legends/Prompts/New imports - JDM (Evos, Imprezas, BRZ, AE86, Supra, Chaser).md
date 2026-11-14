@@ -45,11 +45,27 @@ _For Claude Code on the PC, with Roblox Studio connected (MCP) and Blender (`C:/
 | Evo X Final (#7) | dials in a 512 px picture, small | **Blurry**: rebuild from a photo |
 | BRZ (#10) | dials small in a 512 px interior picture | **Blurry**: rebuild from a photo |
 | Supra (#1) | dials tiny in a 512 px interior picture | **Bad**: rebuild from a photo |
-| Impreza GDB (#9) | the whole interior in one **256 px** picture | **Bad**: rebuild from a photo |
+| Impreza GDB (#9) | the whole interior in one **256 px** picture | **Bad**: rebuild from the owner's photo (coming); the whole interior gets the plan below |
 | Chaser JZX100 (#2) | **no cluster picture at all** (only the steering wheel) | **Missing**: build it from a photo |
+
+- **The owner's cluster photos (2026-11-14), in `Games/CityLegends/imports/refs/`:** rebuild these 1:1 from the photo (layout, numbers, needles, colours, fonts, glow), **leaving out every logo and watermark in the photos** (the "TRD" lettering, "ABEL | ART", "REV LIMITER", "DIDO TUNING" text):
+  - `evo_vi_gsr_evo_ix_cluster_owner.png` → **Evo VI GSR (#4) and Evo IX (#6)**: red-lit carbon-look panel, rev counter 0–9, speedo 0–180 km/h, small water-temp and fuel gauges, the arrows;
+  - `evo_x_cluster_owner.webp` → **Evo X (#7)**: two deep round dials with chrome rings (revs 0–9 with red from 7, speed 0–300 km/h), the centre colour screen (drive mode "TARMAC", outside temperature, TRIP, the gear "P", "NORMAL", temp and fuel bars, ODO);
+  - `brz_cluster_owner.png` → **BRZ (#10)**: the big centre rev counter 0–9 (red from 8) with a small screen, speed on the left (mph, our units setting), fuel and water temp on the right, red needles;
+  - `chaser_jzx100_cluster_owner.webp` → **Chaser (#2)**: white-lit speedo 0–320 km/h with the ODO window, the "P R N D 3 2 L" column in the middle, revs 0–8, fuel and water temp gauges (no "TRD" letters);
+  - `supra_mk4_cluster_owner_photo5.webp` → the owner labelled this one "Chaser" too, but it's the **Supra MK4's** layout (big rev counter in the middle, speedo on the left with the drum odometer, three small gauges on the right: boost, water temp, fuel). Use it for the **Supra (#1)**; note the choice at the top of the notes so the owner can correct it.
+  - The **Impreza GDB (#9)**: the owner will send a photo (`imports/refs/`, a name with "sti" or "gdb"). Until it's there, do everything else on that car and leave its cluster for last.
 
 - **For every car marked blurry / bad / missing:** use the owner's photo if one is in `Games/CityLegends/imports/refs/` (named after the car); if not, **search the web for a clear photo of that car's real cluster** (free-to-use sources where possible; save it in `imports/refs/` with a `.txt` of the source) and **rebuild it 1:1**: layout, numbers, needles, screens, colours, fonts as close as possible, warning lights, glow, sharp, live, **no logos**. Put each photo next to your rebuild in one picture for the owner.
 - If a render shows a cluster better or worse than the table says, trust the render and note it.
+
+## The Impreza GDB's interior (its whole cabin is one blurry 256 px picture)
+The cabin's **shapes are fine; only its picture is too small**, so everything inside looks blurry. Keep the model's own interior meshes and **re-texture the cabin properly**:
+1. **Split the cabin by surface** (dash top, dash face, console, door cards, seats, seat inserts, steering wheel, gear knob, pedals, carpet, roof lining, pillars, vents, switches, radio / AC panel), using the 256 px picture's colours to tell which part is which.
+2. **Give each surface a real material** from the shared premium set (`SurfaceAppearance`, 512–1024 px, shared between cars): soft-touch black plastic for the dash and console, the GD STI's real seats (black with blue / grey fabric or Alcantara inserts, contrast stitching), leather on the steering wheel and gear knob, brushed metal pedals, carpet, fabric roof lining, grey pillars.
+3. **Redraw the small details sharp** at 1024 px from photos of the real GD STI cabin (web search, free-to-use where possible, sources noted): the switch and button labels, the AC dials, the radio face, the vents' slats, the gear pattern, the hazard button. Our own text where words show; **no logos** (no STI / WRX / Subaru badges on the wheel, seats or dash).
+4. **The cluster:** rebuilt from the owner's photo (coming), sharp and live.
+5. Check from the driver's seat, the passenger side and through the windows, day and night: nothing blurry, grey or see-through.
 
 ## Doors (owner: "don't forget the door opening")
 Working doors on **all 10** (`tools/doors.py`, the SVJ method, a `Config.Doors` switch per car): normal doors; **rear doors too** on the 4-door Evos (#4–#7), the GDB (#9) and the Chaser (#2); the AE86 is a 3-door hatch (two doors, plus the hatch only if it's a separate part); the Supra, 22B and BRZ are 2-doors. Painted door jambs, door thickness and inner panels, **no holes** (check with `cull` and mode `holes`). If a car's doors can't be made perfect, leave its switch off and note it.
