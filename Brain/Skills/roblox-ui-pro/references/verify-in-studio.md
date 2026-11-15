@@ -13,6 +13,8 @@ The loop that proves a UI works before you say it does. Uses the Roblox Studio M
 - **In Edit with the simulator on, `Players.LocalPlayer` exists but has no PlayerGui.** The audit handles it.
 - **Studio's mode can change under you**: the owner may be playtesting. Call `get_studio_state` before each step. If Studio flips between Edit and Play by itself, ask the owner before continuing.
 - Most games build their UI at runtime, so Edit mode shows nothing. Test in Play.
+- **Clicking on a simulated phone (tested 16 Nov, Galaxy A06):** `user_mouse_input` with `instance_path` lands about one button to the LEFT (it ignores the device's left safe-area inset, ~54 px). Raw `x, y` works when x = `AbsolutePosition.X + AbsoluteSize.X/2 + 54` and y = `AbsolutePosition.Y + AbsoluteSize.Y/2` (no topbar inset). On PC (no simulation), `instance_path` is exact.
+- **Test every path a button opens, not just that the button exists.** A panel opened from inside a full-screen view (viewer, stage, shop) can render *behind* it (lower DisplayOrder). Screenshot after each tap in the flow.
 
 ## The loop
 

@@ -54,10 +54,36 @@ The warnings left are known false positives:
 - Sizes the viewer calculates per screen.
 - Roblox's own TouchGui.
 
-## Not done / not verified
-- The roll card on a phone was checked by size (328x132 on a 705x338 screen), not by screenshot: the simulated click landed on another button.
-- No real purchase was made (simulated from the server). Make one test purchase on a cheap item before calling it shipped.
-- Not heard on a phone speaker (sounds reuse the approved set: ui_tap, outfit_switch, ui_open, purchase_success).
+## Follow-up checks (same day, "check all these")
+
+### 1. Purchase flow, for real (Studio test purchases: "This is a test purchase. Your account will not be charged.")
+- Viewer item card → item page → **Buy item** → Roblox prompt → Buy → "Purchase completed" → OK. Then:
+  - "PURCHASED [ 1 ITEM ] Now in your inventory" plays;
+  - the card flips to **Owned**;
+  - Buy all updates (BUY 2 ITEMS 120 → BUY 1 ITEM 65).
+- Done twice (silver chain, then the hair). Roblox fires the purchase-finished signal only after **OK**.
+- **Buy all → Buy Unowned** opened Roblox's **bulk** prompt (2 items, 120 R$). That prompt does **not** say "test purchase", so Claude did **not** press Pay (it might charge real Robux) and closed it with x. A cancel shows no celebration and is cleared on the server: pressing Buy again reopened the prompt.
+- **New bugs found and fixed:**
+  6. **Every panel opened from the viewer was invisible** (item cards, Outfit actions, Buy all → Checkout). It drew behind the viewer (DisplayOrder 12 vs 15), so Buy all looked dead. ShowroomCollection now lifts to 20 while a panel is open over the viewer, and its docks stay hidden in the viewer.
+  7. After buying, the open item page still offered "Buy item". It now refreshes to **Owned**.
+  8. A disabled buy button looked active (green). Now it's grey and says "Owned" / "Not for sale".
+  9. "Preview only" tags were cut to "Preview…" in the narrow tiles. Now they say "Preview" (same as the viewer cards).
+
+### 2. Random roll on a phone (A06)
+- Screenshot taken: the card is readable and centred, sitting above the docks while it shows. It lands, the viewer opens, the card and tap-catcher are removed, the dock is hidden in the viewer, and DisplayOrder is back to 12.
+
+![[Screenshots/2026-11-16 vfx - random roll (phone A06).jpg]]
+
+### 3. Sounds
+- All 12 asset IDs load in-game with the right lengths (0.07–0.80 s).
+- In use: Next → `outfit_switch`; taps → `ui_tap` (two different variants seen, so the variety works); Wishlist → `wishlist_add`. Mute attribute off; group volume 1.
+- **Phone-speaker test** (Python: 400 Hz high-pass for a tiny speaker + 8 kHz low-pass): every sound keeps **95.6–99.8%** of its energy and loses **≤ 0.1 dB** of loudness. The main pitch of each sound sits between 516 and 2,297 Hz, which phones play well.
+- Claude still can't *hear* them: listen once on your phone.
+
+![[Screenshots/2026-11-16 vfx - real test purchase, item page Owned (PC).jpg]]
+
+## Still open
+- **The bulk "Buy Unowned" Pay step:** only you can test this. In Studio, press Pay only if the prompt says it's a test purchase; otherwise test it live with a cheap item.
 - **Not changed:** a faint text ghost behind the catalog "Outfit" heading (Codex's header layering).
 
 ![[Screenshots/2026-11-16 vfx - random roll spinning (PC).jpg]]

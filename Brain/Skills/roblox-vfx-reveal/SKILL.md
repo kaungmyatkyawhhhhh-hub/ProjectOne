@@ -85,6 +85,12 @@ Order matters. The hit lands on frame 0:
    - Over MCP, create a ModuleScript and set its `Source`. `loadstring` is disabled in the client.
    - Studio's HttpService can't fetch from localhost (the MCP allowlist blocks it), so paste the file through `multi_edit`. Then compare `#Source` with the local file's byte size.
    - To test a purchase without buying, fire the purchase RemoteEvent from the **Server** datamodel to the player (`FireClient(player, id, true, "recorded", 2, 120)`).
+   - **Real end-to-end purchase test (tested 16 Nov):**
+     - In Studio, `PromptPurchase` shows "This is a test purchase. Your account will not be charged." Pressing Buy is safe.
+     - **`PromptBulkPurchase` shows no such line: never press its Pay.** Close it with x, which also tests the cancel path.
+     - Roblox prompts live in CoreGui and **don't show in `screen_capture`**. Read their text from `game.CoreGui` descendants (`FoundationOverlay` = single purchase, `BulkPurchaseApp` = bulk) and click with `instance_path` `game.CoreGui...BuyButton`.
+     - `PromptPurchaseFinished` fires only after the player presses **OK** on "Purchase completed", so wait for that before checking the celebration.
+   - **Panels opened from a full-screen view must draw above it.** Check that a panel opened from inside a viewer/stage really shows (DisplayOrder). MM's Buy all opened its checkout *behind* the viewer, unnoticed through two passes.
    - To run the UI audit on many devices in one Play session, put it in a temporary `ReplicatedStorage.ZZ_UIAudit` module that returns a function. Switch devices mid-Play with `StudioDeviceSimulatorService:SetDeviceAsync` from the **Client** datamodel (the Edit datamodel isn't available in Play), and delete the module afterwards.
 2. To screenshot short effects, call them with long durations (impact 4 s, starburst time 6, title hold 5), then `screen_capture`. Real durations are too short to catch.
 3. Check:
