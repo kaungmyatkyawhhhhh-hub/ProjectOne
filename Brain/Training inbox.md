@@ -32,6 +32,11 @@ Format if you like: **When** ... **do** ... **because** ...
   - A "plugins every dev needs" list (about 31K likes, 25K saves) includes a Performance Heatmap plugin as number 4, shown next to a "crashes on everyone else's" (low-end devices) joke; it points to checking performance hot spots. A commenter says Forge GUI is better than the promoted tool, so these lists are partly promo. Fits [[K07 Tech, performance and tools]].
   - A "best plugins for UI designers" list (about 8.4K and 1.9K likes): creator says all are free, covering UI effects and an animation curve editor. Free plugin names were not captured, so check before using. Fits [[K06 Art, UI, VFX, sound and lighting]].
   - A viewer asks "does it work with AI" under a plugin video; plugin lists are a hot topic, but nothing here beats the Studio MCP setup we already use. Fits [[K07 Tech, performance and tools]].
+- 2026-11-16 06:40 TikTok round 2f (re-watched the "ungatekeeping organic Roblox marketing method" video, about 1 min of 1:19; unverified):
+  - The part I saw is about making your own short clips: getting good footage, editing them, and reusing the footage and style for future projects, so you don't depend on creators or ads. Matches the existing organic-marketing skill; the middle and ending (the actual method) I didn't catch. Comments ask "can Claude fully edit videos" and show a game built over 4 months with no AI. Fits [[K05 Marketing, ads and storefront]].
+- 2026-11-16 06:44 TikTok round 2g (search "roblox first time user experience onboarding", watched only; unverified):
+  - A "new Roblox game" launch diary (about 13.9K likes, 672 comments) walks through the Ads Manager setup and a launch time; a commenter says they "literally spent 20k on ads" (screenshot, unverified). Shows launch diaries get lots of engagement. Fits [[K05 Marketing, ads and storefront]].
+  - A "connect Claude to Roblox Studio" video (about 4.8K likes) shows the MCP config steps; comments say you need a Claude subscription and some people stumble on the config file step. Confirms our existing Studio MCP setup is a popular, error-prone how-to. Fits [[K07 Tech, performance and tools]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →

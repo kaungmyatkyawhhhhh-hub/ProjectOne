@@ -12,8 +12,8 @@ skill: roblox-organic-marketing
 ## 1. Gate (is MM worth sending players to?): NOT YET
 | Check | Result |
 |---|---|
-| Icon | ❌ Roblox's default grey placeholder |
-| Thumbnail | ❌ Roblox's default grey placeholder (only 1) |
+| Icon | 🟡 MADE 16 Nov (split face Midnight/Sakura), waiting for the owner's upload: `Assets/thumbs_nov/final/mm_icon_1024_upload.png` |
+| Thumbnail | 🟡 MADE 16 Nov, 3 of them (1-tap before/after, runway IDs, random roll), waiting for upload: `Assets/thumbs_nov/final/` |
 | Description | ⚠️ one line: "Aesthetic Avatar Ideas from the devs of Myanmar 💖". It doesn't say what you do. |
 | Genre | ⚠️ not set ("All") |
 | First session | ❓ no data: 9 visits, 0 votes. The impatient-kid sim hasn't been run for MM. |
@@ -104,3 +104,21 @@ Not a target: @strelitxzia (the developer of High Fashion, a competitor) and @gd
 4. Run the impatient-kid sim and read the first real D1.
 5. Re-measure the shortlist's median views.
 6. The owner messages @cammeiful (test 1) and one of @drakko.rblx / @sornbae_dti (test 2).
+
+## Icon + thumbnails (made 16 Nov, skill roblox-icon-thumbnail)
+![[Assets/thumbs_nov/final/final_test_sheet.png]]
+
+| File | Use |
+|---|---|
+| `mm_icon_1024_upload.png` | Game icon |
+| `mm_thumb1_tryon_final.png` | Home thumbnail: "1 TAP" before → after (logo top-left) |
+| `mm_thumb2_runway_final.png` | Home thumbnail: runway with ID 01/02/03 (logo top-left) |
+| `mm_thumb3_random_final.png` | Home thumbnail: random roll (no logo: the outfit cards are the hook) |
+| `mm_logo.png` | Logo with transparency, for clips and the group page |
+
+**Upload (the owner):**
+1. Creator Hub → MM Outfit Catalog → Places → Thumbnails. Add all 3 on the Home Page tab, so thumbnail personalisation can pick the winner.
+2. Experience → Icon: add `mm_icon_1024_upload.png`.
+3. Also set the genre and the new description line.
+
+Then leave them for a week before judging.
