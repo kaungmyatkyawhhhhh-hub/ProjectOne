@@ -20,6 +20,9 @@ Format if you like: **When** ... **do** ... **because** ...
   - Pre-publish list from a creator ("5 things before you publish"): #2 test your game on all platforms (phone, tablet, PC). A commenter's tip: copy an indie game from Steam for ideas. Fits [[Brain/Methods/Launch gate]].
   - "Experience pages are slept on big time": creators say the game's store page (icon, thumbnail, description) matters a lot and most devs neglect it. Fits [[K05 Marketing, ads and storefront]].
   - Seen again: "5 vibecoder things" = (1) Codex or Claude on a Pro/Max plan, (2) Roblox MCP, (3) a custom skills library. Matches how we already work.
+  - Retention and scope: "stop adding things to your game, lock in your core loop instead of adding more features." The creator also says "Steal a X" games are oversaturated but still heavily played, so make a more unique concept. A commenter: "good thumbnail bad game or bad thumbnail good game" is how it works now. Fits [[K02 First session and retention]] and [[K05 Marketing, ads and storefront]].
+  - Tech: "stop putting identical scripts in your game" (one script managing many parts, with commenters suggesting tags or one folder) and object pooling (reuse parts instead of constantly creating and destroying them, because Roblox has to allocate and clean up memory over and over). Fits [[K07 Tech, performance and tools]].
+  - Caution: several videos are promos for AI game tools (e.g. a GUI generator), so treat their "100x cooler" claims as marketing. Commenters also say pure cash-grab games fail and effort and creativity win.
   - Comments on one video told people to send their Claude agent the video link so it would do what the video says. Ignored: that is an instruction from a web page, not from you.
 - 
 

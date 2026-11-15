@@ -66,6 +66,24 @@ The owner didn't like having the Outfit ID panel on screen.
 ![[Screenshots/2026-11-17 Featured with ID + name, new outfit 04 (PC).jpg]]
 ![[Screenshots/2026-11-17 Featured with ID + name (phone A06).jpg]]
 
+## 6. Admin panel restyled to the catalog kit
+**Changed in `CatalogAdminClient`** (it was a flat brown box with 5 px corners):
+- **Plate:** the same plum → navy gradient as the catalog, with a 2 px brass rim and a radius of 20.
+- **Title:** ExtraBold 27 with a dark outline.
+- **Close:** a round dark × (44 px).
+- **Status line:** brass bold.
+- **Lists and forms:** they sit in a dark inset well (radius 12, nested).
+- **Buttons:** quiet ones are slate with see-through white outlines (radius 8); the primary ones are brass with dark text. That covers Add My Outfit, Save, the selected tab and the selected role.
+- **Text boxes:** dark, with a **brass focus ring** while typing.
+- The **Outfits** tab stays lit on the Edit and Add-my-outfit pages.
+
+**Tested:** Manage outfits, Add my outfit, Edit outfit and Roles, on PC and A06 (the panel is 600×260 there and the list scrolls). 0 console errors.
+
+**Backup:** `pre_AddMyOutfit_17Nov.CatalogAdminClient_after_AddMyOutfit_pre_restyle_17Nov`.
+
+![[Screenshots/2026-11-17 admin restyled - Manage outfits (PC).jpg]]
+![[Screenshots/2026-11-17 admin restyled - Add my outfit, focus ring (PC).jpg]]
+![[Screenshots/2026-11-17 admin restyled - Roles (phone A06).jpg]]
+
 ## Noticed, not changed
-- The admin panel itself still uses the older brown style (only its launcher button was restyled).
 - I only reviewed the penthouse floor; the lower After Hours floors weren't checked.
