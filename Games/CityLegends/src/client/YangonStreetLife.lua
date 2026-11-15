@@ -90,6 +90,17 @@ local function loadChunks(): ({ string }, number, number)
 			warn("[CityLegends] YangonStreetLife: part " .. name .. " missing or failed")
 		end
 	end
+	-- extra chunks made by other tools, in the same format and origin (optional): the Myanmar Plaza mall's shoppers
+	-- (tools/yangon/city/mall_life.py, 2026-11-16)
+	for _, name in { "YangonStreetLifeMall" } do
+		local m = Shared:FindFirstChild(name)
+		if m then
+			local ok3, s = pcall(require, m)
+			if ok3 and type(s) == "string" then
+				table.insert(chunks, s)
+			end
+		end
+	end
 	return chunks, mod.origin[1], mod.origin[2]
 end
 

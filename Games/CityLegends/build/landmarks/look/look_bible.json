@@ -1,0 +1,2236 @@
+[
+ {
+  "topic": "towers",
+  "elements": [
+   {
+    "element": "towerA_spandrel_band",
+    "median_rgb": [
+     186,
+     169,
+     142
+    ],
+    "p20_rgb": [
+     182,
+     166,
+     138
+    ],
+    "p80_rgb": [
+     190,
+     173,
+     146
+    ],
+    "lit_or_reflect_rgb": [
+     190,
+     196,
+     193
+    ],
+    "finish": "satin (matte to low sheen) flat metal-type panels, likely aluminium panels in a champagne/cream colour. There are no specular hot spots inside a band and the colour is very even (p20 to p80 is about 8 levels). It is not glossy or mirror-like.",
+    "texture": "One row of near-square panels per floor (no horizontal joint inside the band) and thin darker tan vertical joints. Joint period measured along the band on the CB face in p8 is 14.8 px against a 38 px floor pitch. The view is oblique, so the true spacing is at least 0.39 floor, about 1.55 m or more if the floor is 4.0 m (floor height is ASSUMED, not measured). A thin light lip sits along the band's bottom edge (p8 x150: row 359 = 191 vs body 180; row 437 = 193). A thin dark shadow line marks where the recessed glass starts (p8 x150 rows 361-362 = 77/53, row 381 = 54). There is a stepped, saw-tooth re-entrant notch at the corner between the two faces, which steps once per floor. Light: in diffuse late-afternoon light it reads warm beige/champagne (186,169,142), and closer up in p8 brighter (200,180,143). In the midday hazy sun of p2 it reads near-white pale grey (190,196,193; p80 208,219,213) under that photo's cool cast. At dusk it is blue-grey (51,69,86). In p3 a white kerb measured (190,186,174), so p3 is only slightly warm. The spandrel is clearly warmer than that white (R-B 38 vs 16), so the beige is real, not white balance.",
+    "samples": [
+     "p3 [350,104,400,108] med (182,167,144) p20 (178,163,138) p80 (186,172,150): late afternoon, diffuse, warm-hazy",
+     "p3 [470,154,490,159] med (186,169,140) p20 (181,166,137) p80 (189,173,146)",
+     "p5 [400,215,420,219] med (186,168,142) p20 (182,165,138) p80 (190,171,146): same session as p3",
+     "p8 [145,386,156,396] med (200,179,144) p20 (196,175,138) p80 (204,183,148): late afternoon, closer, bright overcast sky",
+     "p8 [145,424,156,435] med (199,180,142) p20 (198,178,139) p80 (202,181,146)",
+     "p2 [546,350,554,354] med (190,196,193) p20 (180,186,182) p80 (208,219,213): midday hazy sun, cool/blue cast, broad face (SUNLIT/REFLECT value)",
+     "p11 [555,457,566,476] med (51,69,86) p20 (47,66,82) p80 (55,73,90): dusk/blue hour",
+     "crops: D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/landmarks/look/crops/mctowers_towerA_spandrel_band_1..7.jpg"
+    ],
+    "photo_light": "Base value = median of the 5 late-afternoon boxes (p3, p5, p8: warm, hazy, diffuse, no hard shadows on these faces). Sunlit/midday value from p2 (hazy midday sun, cool cast)."
+   },
+   {
+    "element": "towerA_glass_band",
+    "median_rgb": [
+     71,
+     82,
+     84
+    ],
+    "p20_rgb": [
+     63,
+     73,
+     76
+    ],
+    "p80_rgb": [
+     78,
+     90,
+     93
+    ],
+    "lit_or_reflect_rgb": [
+     42,
+     60,
+     74
+    ],
+    "finish": "reflective tinted glass (mirror-like reflections of clouds and sky, with no see-through by day). Its colour depends almost entirely on what it reflects.",
+    "texture": "Continuous ribbon window between the spandrels. Mullions are barely visible by day (faint thin lines) and spaced like the spandrel joints, with one pane per spandrel panel (seen clearly at dusk in p11). Cloud patches move across the glass in p8. It is set back behind the spandrel, so a dark shadow line runs along its top edge. Shade vs sky, all measured: in diffuse late-afternoon shade it is dark blue-grey (71,82,84). Facing a bright overcast sky it is neutral grey (65,70,71). Facing a clear blue midday sky it is deep navy-blue (42,60,74). At dusk it is saturated navy (19,50,84). At a grazing angle facing bright sky (p8, far-left face) the whole face washes out to pale silver-grey (166,176,173), and spandrel and glass become nearly the same.",
+    "samples": [
+     "p3 [350,113,400,119] med (68,77,82) p20 (62,72,76) p80 (74,82,88): late afternoon diffuse",
+     "p3 [470,163,490,170] med (71,82,84) p20 (63,73,76) p80 (78,90,93)",
+     "p5 [400,223,420,229] med (76,86,92) p20 (72,81,86) p80 (86,98,103)",
+     "p8 [145,404,156,417] med (65,70,71) p20 (63,68,68) p80 (68,71,73): reflecting bright overcast clouds",
+     "p2 [546,357,554,361] med (42,60,74) p20 (33,51,63) p80 (53,70,83): midday, reflecting blue sky",
+     "p11 [555,381,566,393] med (19,50,84) p20 (14,44,77) p80 (23,54,88): dusk, unlit glass",
+     "p8 [2,330,14,420] med (166,176,173) p20 (155,166,155) p80 (172,180,180): side face at grazing angle reflecting bright sky (glass and spandrel washed together)",
+     "crops: .../look/crops/mctowers_towerA_glass_band_1..6.jpg, mctowers_towerA_sideface_sky_1.jpg"
+    ],
+    "photo_light": "Base = median of the 3 p3/p5 boxes (late afternoon, diffuse). lit_or_reflect = p2 midday clear-sky reflection."
+   },
+   {
+    "element": "towerA_crown",
+    "median_rgb": [
+     180,
+     164,
+     136
+    ],
+    "p20_rgb": [
+     172,
+     158,
+     130
+    ],
+    "p80_rgb": [
+     182,
+     166,
+     139
+    ],
+    "lit_or_reflect_rgb": [
+     186,
+     195,
+     192
+    ],
+    "finish": "satin, same material and colour as the spandrel panels (within about 6 levels). It is a solid, unglazed parapet band about 2 to 4 floors tall above the top glass band, and it carries the CB BANK / YOMA BANK signs.",
+    "texture": "An even grid of square-ish panels with thin darker joints, vertical and horizontal. On the Yoma face in p8 at x=360, a horizontal joint sits at rows 161-163 (150,130,103) between panel rows about 20 px tall (floor pitch there is about 36 px). The crown's vertical joint period in p2 is about 4.0 px against a 14 px floor pitch: an oblique view, so at least 0.28 floor. The roof line is flat. The two crown faces meet at the stepped corner notch. Midday sun makes it near-white pale grey (186,195,192). Evening light makes it warm beige.",
+    "samples": [
+     "p3 [493,67,518,79] med (180,166,141) p20 (170,159,133) p80 (184,171,146): late afternoon",
+     "p3 [390,55,415,72] med (181,166,140) p20 (175,161,135) p80 (184,169,145)",
+     "p8 [355,145,366,159] med (177,158,128) p20 (170,151,121) p80 (180,161,131)",
+     "p8 [355,166,366,180] med (179,161,131) p20 (176,158,128) p80 (181,163,133)",
+     "p2 [480,242,520,254] med (186,195,192) p20 (179,188,185) p80 (190,199,196): midday hazy sun, cool cast",
+     "crops: .../look/crops/mctowers_towerA_crown_1..5.jpg (first try of crown_1 hit sky and was re-cut)"
+    ],
+    "photo_light": "Base = median of the p3/p8 late-afternoon boxes. Lit value = p2 midday."
+   },
+   {
+    "element": "towerA_mullions",
+    "median_rgb": [
+     45,
+     75,
+     73
+    ],
+    "p20_rgb": [
+     29,
+     58,
+     56
+    ],
+    "p80_rgb": [
+     61,
+     90,
+     90
+    ],
+    "finish": "thin metal mullion and transom frames (likely the same champagne/grey metal as the spandrel, but not resolvable by day)",
+    "texture": "Only 1-2 px wide in every photo, so the boxes mix the mullion with JPEG halo (see p20/p80). The values are BACKLIT dusk silhouettes against lit interiors, not the true colour. By day the mullions show as faint lines in the glass band with almost no contrast. Spacing equals the spandrel panel joints: one vertical pane per panel, visible in p11 at dusk. Recommendation: draw them as fine lines close to the glass tone, not as bright frames.",
+    "samples": [
+     "p11 [520,478,522,488] med (45,75,73) p20 (29,58,56) p80 (61,90,90): dusk, backlit by lit office",
+     "p11 [541,478,543,488] med (44,76,75) p20 (0,24,25) p80 (105,135,135): dusk, backlit (strong halo mix)",
+     "crops: .../look/crops/mctowers_towerA_mullions_1..2.jpg"
+    ],
+    "photo_light": "dusk / blue hour (p11), cool; silhouettes only"
+   },
+   {
+    "element": "towerB_spandrel_band",
+    "median_rgb": [
+     144,
+     140,
+     123
+    ],
+    "p20_rgb": [
+     139,
+     136,
+     118
+    ],
+    "p80_rgb": [
+     148,
+     143,
+     128
+    ],
+    "lit_or_reflect_rgb": [
+     206,
+     213,
+     204
+    ],
+    "finish": "satin flat metal-type panels in a warm grey-khaki ('greige', slightly olive). It is clearly darker and less yellow than tower A's champagne in the same photos (p3: B 145,140,123 vs A 182,167,144). It is not glossy.",
+    "texture": "One row of near-square panels per floor with thin darker vertical joints. Joint period along the band in p8 is 11.6 px against a 28.5 px floor pitch, at least 0.41 floor (about 1.65 m or more at an ASSUMED 4.0 m floor). The face is bowed (convex), so the bands curve in every photo. A bright lip runs along the top and bottom edges of each band (p8 x800: edge rows 421 = 144 and 450 = 150 vs body 135; in direct sun in p13 the edges read 230-239 vs body about 200). A dark shadow line sits under each band (p8 rows 452/466-467 = 45/39). The narrow end face has a dark vertical recessed slot (p3 x about 1048). Light: in diffuse late-afternoon light it reads greige (144,140,123). In direct clear midday sun (p13, 2015, white banner measured 205,209,208, so the photo is neutral) the spandrel reads near-white (206,213,204).",
+    "samples": [
+     "p3 [800,211,820,216] med (145,140,123) p20 (139,137,118) p80 (150,148,132): late afternoon diffuse",
+     "p3 [960,335,980,341] med (147,140,124) p20 (143,136,120) p80 (151,143,128)",
+     "p5 [800,231,820,234] med (144,141,125) p20 (140,138,120) p80 (148,146,134)",
+     "p8 [795,414,806,421] med (142,136,117) p20 (138,131,113) p80 (146,139,121)",
+     "p8 [795,442,806,449] med (141,136,113) p20 (138,132,108) p80 (144,139,118)",
+     "p13 [840,473,860,479] med (206,213,204) p20 (192,199,190) p80 (215,220,214): 2015 construction, midday clear sun, east face (SUNLIT value)",
+     "crops: .../look/crops/mctowers_towerB_spandrel_band_1..6.jpg"
+    ],
+    "photo_light": "Base = median of the 5 late-afternoon boxes (p3, p5, p8). Sunlit = p13 midday."
+   },
+   {
+    "element": "towerB_glass",
+    "median_rgb": [
+     57,
+     67,
+     70
+    ],
+    "p20_rgb": [
+     51,
+     60,
+     66
+    ],
+    "p80_rgb": [
+     62,
+     72,
+     77
+    ],
+    "lit_or_reflect_rgb": [
+     82,
+     120,
+     151
+    ],
+    "finish": "reflective tinted glass, a little darker than tower A's in the same light (p3: 49,62,68 vs A 68,77,82)",
+    "texture": "A continuous ribbon window. Mullions faintly visible about every 13 px in p8 (noisy measurement; roughly 1 to 1.2 spandrel panels). Many interior lights are visible as white specks in evening photos. Cloud and sky reflections vary along the bowed face. Shade vs sky: in diffuse evening shade it is dark slate (57,67,70). Facing a clear midday sky (p13, 2015) it is bright mid-blue (82,120,151), but that glass may still have had its protective film. On the narrow end face at a grazing angle facing bright sky (p3) it washes out to pale silver (173,180,185) and (180,187,189), with only faint stripes left.",
+    "samples": [
+     "p3 [800,220,820,226] med (49,62,68) p20 (43,56,61) p80 (56,70,77): late afternoon diffuse",
+     "p5 [800,238,820,242] med (57,67,70) p20 (53,64,66) p80 (62,72,74)",
+     "p8 [795,425,806,436] med (60,70,79) p20 (51,60,68) p80 (70,83,92): includes a cloud-reflection streak",
+     "p13 [840,461,860,469] med (82,120,151) p20 (73,107,134) p80 (90,131,161): 2015 midday, reflecting clear sky (possibly protective film)",
+     "p3 [1033,200,1043,333] med (173,180,185) p20 (160,169,172) p80 (201,205,201): end face, grazing angle, sky reflection",
+     "p3 [1053,200,1061,333] med (180,187,189) p20 (167,175,178) p80 (204,210,209)",
+     "crops: .../look/crops/mctowers_towerB_glass_1..4.jpg, mctowers_towerB_sideface_sky_1..2.jpg"
+    ],
+    "photo_light": "Base = median of the 3 late-afternoon boxes. Reflect = p13 midday clear sky."
+   },
+   {
+    "element": "towerB_crown",
+    "median_rgb": [
+     143,
+     138,
+     124
+    ],
+    "p20_rgb": [
+     139,
+     134,
+     119
+    ],
+    "p80_rgb": [
+     146,
+     140,
+     127
+    ],
+    "finish": "satin, the same greige panel material as the B spandrels (within about 3 levels)",
+    "texture": "A solid, unglazed parapet band about 2 floors tall that follows the bowed plan. Its top edge reads as a slight curve in the corner views. The panel grid has thin vertical joints at the same period as the spandrels and horizontal joints; in p8 x=900 one row runs 283-300 and the next 303-319, with a darker joint at 300-302 (130,124,108), so rows are about 18 px against a 28.5 px floor pitch. A thin bright top edge shows against the sky (p8 rows 280-281 = 235,229,217). It carries the ooredoo and BIDV signs.",
+    "samples": [
+     "p3 [690,165,710,190] med (148,142,126) p20 (145,140,123) p80 (151,145,129): late afternoon",
+     "p3 [890,130,910,141] med (141,137,124) p20 (137,133,119) p80 (145,140,128)",
+     "p8 [890,285,910,299] med (145,139,123) p20 (141,135,119) p80 (147,141,126)",
+     "p8 [890,303,910,318] med (141,136,120) p20 (136,131,115) p80 (143,138,121)",
+     "crops: .../look/crops/mctowers_towerB_crown_1..4.jpg"
+    ],
+    "photo_light": "late afternoon, warm-hazy, diffuse (p3, p8). No midday crown sample (p13 crown under scaffold netting)."
+   },
+   {
+    "element": "band_height_ratio (spandrel share of one floor)",
+    "median_rgb": [
+     0,
+     0,
+     0
+    ],
+    "finish": "n/a (geometry measurement; colour fields not applicable, set to 0)",
+    "texture": "Measured in pixels with a half-max threshold on luminance along 6-px-wide vertical strips, taking the median band widths over 9-23 floors per strip. TOWER A: spandrel share 0.43 (strip values: p3 0.429/0.428/0.424, p5 0.429/0.428, p8 0.427/0.428/0.426, p2 0.412/0.431/0.427), so about 43% spandrel and 57% glass. Example p8 x=150: spandrel rows 383-399 (16-17 px), glass 400-421 (21-22 px), pitch 38 px. TOWER B: spandrel share 0.43-0.44 (p3 0.466/0.431/0.440, p5 0.441, p8 0.417/0.429/0.439, p13 0.408/0.434; p5 x700 = 0.604 is an outlier from foreshortening and lights, excluded). Example p8 x=800: spandrel 411-422 (12 px), glass 423-438 (16 px), pitch 28.5 px. With an ASSUMED 4.0 m floor that is about 1.7 m spandrel and 2.3 m glass on both towers. The dusk photo p11 was not used (lit windows break the threshold).",
+    "samples": [
+     "p3 strips x350,x380,x470 (y92-420)",
+     "p5 strips x400,x430 (y140-420)",
+     "p8 strips x100,x200,x300 (tower A), x600,x800,x1050 (tower B)",
+     "p2 strips x450,x550,x650 (y270-600)",
+     "p13 strips x600,x800 (tower B lower floors)"
+    ],
+    "photo_light": "all daylight photos; the ratio does not depend on light"
+   }
+  ],
+  "lighting": [
+   "p3: late afternoon near sunset, hazy sky with broken cloud, warm, diffuse; no hard shadows on the tower faces. A white kerb measured (190,186,174), so the white balance is only slightly warm.",
+   "p5: same session and light as p3 (same clouds), slightly further away.",
+   "p8: same late-afternoon session, close corner view under a bright overcast sky; the glass reflects the clouds as neutral grey.",
+   "p2: midday or early afternoon, strong hazy sun under a blue sky; the whole photo has a cool/blue cast. Tower A's broad face is lit and reads near-white with deep navy glass. No reliable white reference was found: the white-car box hit a window and was dropped.",
+   "p11: dusk / blue hour, deep blue sky, interior lights on (both warm and cool-white offices). It shows tower A (stepped corner notch), not tower B. Glass is navy, spandrel blue-grey.",
+   "p13: 2015 construction photo, clear midday sun, neutral white balance (white banner (205,209,208)). Only the lower finished floors of both towers can be used; the upper floors are under netting. The blue glass may still carry its protective film.",
+   "p6.jpg does not exist in the mp folder, so it was not used."
+  ],
+  "notes": [
+   "The towers' main colour difference: tower A's panels are champagne/cream beige (186,169,142 in evening light), and tower B's are a darker warm grey-khaki greige (144,140,123 in the same light). In midday sun both go near-white (A 190,196,193 in p2; B 206,213,204 in p13). So under the game's bright daylight both should read light, with A warmer and B greyer and darker.",
+   "Each crown is the same material as that tower's spandrels: a solid panel parapet with a square-ish grid of joints, 2-4 floors tall, carrying the bank and telecom signs. It is not glass.",
+   "Glass is reflective tinted glass with no colour of its own by day. It is dark blue-grey in shade (A 71,82,84; B 57,67,70), neutral grey under overcast (65,70,71), deep navy under a clear midday sky (42,60,74), and pale silver at grazing angles facing bright sky (166-180,176-187,173-189). Tower B's glass is a little darker than tower A's.",
+   "Both towers: one spandrel panel row per floor, about 43% of the floor, near-square panels with a thin bright lip on the band edges and a dark shadow line where the recessed glass starts. Panel module about 1.5-1.7 m if the floor is 4 m (floor height ASSUMED, not measured). The horizontal spacing values are lower bounds because every view is oblique.",
+   "Tower A geometry clue for the look: a stepped, saw-tooth re-entrant notch at the corner between its two faces, stepping once per floor (p3, p8, p11, p13). Tower B's narrow end has a dark vertical recessed slot (p3).",
+   "Every sample crop has the box drawn in red and is saved in D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/landmarks/look/crops/ as mctowers_<element>_<n>.jpg (plus mctowers_towerA_sideface_sky_1, mctowers_towerB_sideface_sky_1..2, mctowers_ref_white_kerb, mctowers_ref_white_banner). Raw numbers are in the scratchpad: C:/Users/kaung/AppData/Local/Temp/claude/d712860635f631b0/8dbf212d-129a-4909-ba7d-ab448f73c052/scratchpad/look/res1.json and res2.json; scripts measure.py, bands.py, speriod.py in the same folder.",
+   "The task's file names and the measured towers agree: tower A = narrow tower with the CB/Yoma crown, tower B = wide bowed tower with ooredoo/BIDV. All values are sRGB 0-255 medians from PIL on the JPGs (python -I)."
+  ]
+ },
+ {
+  "topic": "podium",
+  "elements": [
+   {
+    "element": "podium_granite_spandrel",
+    "median_rgb": [
+     161,
+     151,
+     141
+    ],
+    "p20_rgb": [
+     153,
+     144,
+     134
+    ],
+    "p80_rgb": [
+     167,
+     158,
+     149
+    ],
+    "lit_or_reflect_rgb": [
+     167,
+     161,
+     155
+    ],
+    "finish": "matte (honed or flamed granite). No sheen and no sky reflection anywhere on the bands.",
+    "texture": "Light warm-grey granite with a fine salt-and-pepper speckle: dark grey and brown grains on a pale ground, with faint vertical streaks. Thin dark vertical panel joints every 35-37 px on p7, where the glass mullions are 65-69 px apart, so there are 2 stone panels per glass module. That is about 0.6-0.75 m per panel if the glass module is 1.2-1.5 m (estimate, not measured in metres). No horizontal joints inside a band: one course per band. Each band has a smooth cream sill (podium_ledge_sill) on top, with a dark shadow line under it. In diffuse daylight the stone reads 150-170 luminance and slightly warm. On the shaded dusk side (p3 far view) it drops to about 97,90,79 and turns browner. The top face of a band picks up a little cooler sky light (167,161,155).",
+    "photo_light": "p7 (same image as entrance_kabaraye_5386): late afternoon, no direct sun on the west face, bright white hazy sky, neutral to slightly cool diffuse light. p3: dusk, shaded, warm haze.",
+    "samples": [
+     "p7 [650,405,725,440] med 161,151,141 p20 153,144,134 p80 167,158,149 -> crops/mp_podium_granite_spandrel_1.jpg",
+     "p7 [520,462,580,495] med 167,161,155 p20 161,155,149 p80 173,167,161 (more skylit, neutral) -> mp_podium_granite_spandrel_2.jpg",
+     "p7 [700,668,775,715] med 163,150,136 p20 152,139,125 p80 174,161,147 (contains one vertical joint) -> mp_podium_granite_spandrel_3.jpg",
+     "p3 [880,531,960,546] med 97,90,79 p20 95,88,77 p80 100,92,81 (far view, dusk shade, right-hand podium block) -> mp_podium_granite_spandrel_5_far.jpg"
+    ]
+   },
+   {
+    "element": "podium_ledge_sill (cream cap on top of each stone band, under each glass ribbon)",
+    "median_rgb": [
+     218,
+     207,
+     183
+    ],
+    "p20_rgb": [
+     216,
+     205,
+     180
+    ],
+    "p80_rgb": [
+     220,
+     209,
+     186
+    ],
+    "finish": "satin, smooth, like painted metal or smooth cast stone. No speckle.",
+    "texture": "A plain continuous strip with no visible texture. It is the brightest thing on the podium because its top face catches sky light. Directly under it is a dark shadow gap (35-72 luminance) before the next glass.",
+    "photo_light": "p7: late afternoon, diffuse sky light",
+    "samples": [
+     "p7 [610,636,630,643] med 218,207,183 p20 216,205,180 p80 220,209,186 -> mp_podium_ledge_1.jpg",
+     "p7 [690,609,710,617] med 214,204,181 p20 213,203,178 p80 216,206,182 -> mp_podium_ledge_2.jpg"
+    ]
+   },
+   {
+    "element": "podium_glass_ribbon",
+    "median_rgb": [
+     46,
+     66,
+     76
+    ],
+    "p20_rgb": [
+     39,
+     58,
+     55
+    ],
+    "p80_rgb": [
+     52,
+     70,
+     82
+    ],
+    "lit_or_reflect_rgb": [
+     88,
+     112,
+     136
+    ],
+    "finish": "glossy, mirror-like where it faces the sky",
+    "texture": "Continuous horizontal ribbon windows with thin dark mullions (65-69 px on p7 upper floors, 35 px on c87). On upper floors pale blue-white curtains show through (105,132,150 with curtains plus sky). The first floor above the entrance has darker glass with a frosted leaf-pattern film (56,64,66), and it reads almost black (28,32,30) under the overhang. At dusk with the lights on inside: 67,69,59.",
+    "photo_light": "Base colour from p3 far view (dusk). Reflections from p7 (bright hazy sky). c87 at dusk with interior lights on.",
+    "samples": [
+     "p3 [875,553,915,576] med 46,66,76 p20 39,58,55 p80 52,70,82 (far, dusk: base) -> mp_podium_glass_ribbon_6_far.jpg",
+     "p7 [480,335,560,395] med 88,112,136 p20 84,109,132 p80 96,116,139 (sky reflection) -> mp_podium_glass_ribbon_2.jpg",
+     "p7 [490,560,560,630] med 105,132,150 p20 92,112,127 p80 116,143,161 (sky reflection + curtains) -> mp_podium_glass_ribbon_1.jpg",
+     "c87 [960,1172,1100,1200] med 67,69,59 p20 62,65,54 p80 71,74,65 (dusk, marketplace level) -> mp_podium_glass_ribbon_5.jpg",
+     "p7 [620,885,700,945] med 56,64,66 p20 35,39,39 p80 63,69,71 (first-floor fritted glass, includes 1 mullion) -> mp_podium_glass_ribbon_3_l1dark.jpg",
+     "p7 [880,830,960,880] med 28,32,30 p20 22,28,26 p80 41,43,39 (same glass in shade under the overhang) -> mp_podium_glass_ribbon_4_l1dark.jpg"
+    ]
+   },
+   {
+    "element": "podium_mullions",
+    "median_rgb": [
+     24,
+     33,
+     35
+    ],
+    "p20_rgb": [
+     21,
+     29,
+     31
+    ],
+    "p80_rgb": [
+     27,
+     37,
+     38
+    ],
+    "lit_or_reflect_rgb": [
+     52,
+     54,
+     43
+    ],
+    "finish": "satin dark-anodised or painted aluminium",
+    "texture": "Thin vertical bars, 2-3 px wide on p7. A lighter glazing bead (73-78, 81-86, 83-88, measured in the p7 column profile at x 660-663) sits beside each bar. Mullions are 65-69 px apart on p7 (2 stone panels per module) and 35 px apart on c87. In thin samples the bars blur into the glass colour (60,72,87 on the sky-reflecting ribbon).",
+    "photo_light": "p7 late afternoon diffuse; c87 dusk",
+    "samples": [
+     "p7 [658,895,660,935] med 24,33,35 p20 21,29,31 p80 27,37,38 -> mp_podium_mullions_1.jpg",
+     "p7 [538,570,541,610] med 60,72,87 p20 44,55,69 p80 83,99,110 (blurred with the glass) -> mp_podium_mullions_2.jpg",
+     "c87 [861,1175,864,1200] med 52,54,43 p20 38,40,29 p80 66,69,58 -> mp_podium_mullions_3.jpg"
+    ]
+   },
+   {
+    "element": "ground_floor_shopfront_glass",
+    "median_rgb": [
+     26,
+     26,
+     24
+    ],
+    "p20_rgb": [
+     24,
+     24,
+     22
+    ],
+    "p80_rgb": [
+     29,
+     29,
+     26
+    ],
+    "lit_or_reflect_rgb": [
+     145,
+     103,
+     81
+    ],
+    "finish": "mirror-like clear glass (near frameless, with tall glass panels)",
+    "texture": "Large clear panes. Where nothing lit is behind them they read near black and reflect the canopy downlights as small points. Where a lit shop is behind them they show warm interiors (yellow-orange shelving, white light boxes). The interior is lit at dusk.",
+    "photo_light": "p7: late afternoon, interiors lit warm",
+    "samples": [
+     "p7 [530,1200,700,1280] med 26,26,24 p20 24,24,22 p80 29,29,26 (dark, above shop interiors) -> mp_ground_floor_shopfront_glass_1.jpg",
+     "p7 [880,1260,1000,1320] med 37,38,27 p20 28,30,20 p80 52,52,38 -> mp_ground_floor_shopfront_glass_2.jpg",
+     "p7 [820,1400,950,1470] med 145,103,81 p20 82,65,56 p80 171,134,133 (lit shop seen through the glass) -> mp_ground_floor_shopfront_glass_3_litinterior.jpg"
+    ]
+   },
+   {
+    "element": "entrance_canopy_fascia",
+    "median_rgb": [
+     157,
+     144,
+     113
+    ],
+    "p20_rgb": [
+     154,
+     140,
+     109
+    ],
+    "p80_rgb": [
+     161,
+     147,
+     116
+    ],
+    "lit_or_reflect_rgb": [
+     187,
+     180,
+     156
+    ],
+    "finish": "matte to satin smooth panels (painted metal / composite panel look). No speckle, unlike the granite.",
+    "texture": "Cream-beige flat panels with thin dark vertical joints: 89 px apart on c87 (about 2.5 glass modules; very roughly 2 m) and 225-280 px apart on the closer p7 view. On p7 a small dark shadow-gap line separates a slim lower lip from the main face. The face behind the MYANMAR PLAZA letters is the same material: it reads 187,180,156 in diffuse daylight and 150-157 / 136-144 / 109-113 at dusk.",
+    "photo_light": "c87 and p8: dusk, cool ambient. p7: late afternoon, diffuse.",
+    "samples": [
+     "c87 [960,1214,1100,1248] med 157,144,113 p20 154,140,109 p80 161,147,116 -> mp_entrance_canopy_fascia_3.jpg",
+     "p8 [880,1163,960,1193] med 152,136,109 p20 150,134,107 p80 154,139,111 -> mp_entrance_canopy_fascia_2.jpg",
+     "p7 [960,962,1003,990] med 187,180,156 p20 185,178,154 p80 189,181,158 (face behind the letters, west entrance) -> mp_entrance_canopy_fascia_1.jpg"
+    ]
+   },
+   {
+    "element": "canopy_soffit",
+    "median_rgb": [
+     114,
+     94,
+     63
+    ],
+    "p20_rgb": [
+     109,
+     92,
+     61
+    ],
+    "p80_rgb": [
+     116,
+     97,
+     65
+    ],
+    "lit_or_reflect_rgb": [
+     125,
+     110,
+     81
+    ],
+    "finish": "matte, smooth flat panels",
+    "texture": "Beige panels with diagonal and straight joints and round recessed downlights. They read warm and golden (114,94,63) because the downlights and shop light hit them. On the corner (c87, p8) a cool grey-green surface (95,97,75-79) sits just under the fascia: probably the sloping glass awning or its soffit (uncertain).",
+    "photo_light": "p7 late afternoon, downlights on; c87/p8 dusk",
+    "samples": [
+     "p7 [960,1050,1060,1078] med 114,94,63 p20 109,92,61 p80 116,97,65 -> mp_canopy_soffit_1.jpg",
+     "p7 [150,1160,260,1200] med 125,110,81 p20 102,94,68 p80 155,144,110 (includes a panel joint) -> mp_canopy_soffit_2.jpg",
+     "c87 [960,1280,1100,1292] med 95,97,75 p20 90,92,72 p80 97,99,78 (glass awning or soffit under the corner fascia) -> mp_canopy_soffit_3.jpg",
+     "p8 [880,1216,960,1226] med 95,97,79 p20 89,90,74 p80 97,98,81 -> mp_canopy_soffit_4.jpg"
+    ]
+   },
+   {
+    "element": "entrance_granite_head_beam (grey stone band over the west shopfront, under the canopy)",
+    "median_rgb": [
+     74,
+     74,
+     64
+    ],
+    "p20_rgb": [
+     64,
+     64,
+     55
+    ],
+    "p80_rgb": [
+     90,
+     86,
+     74
+    ],
+    "finish": "matte or honed",
+    "texture": "Mid-dark grey granite with a coarser salt-and-pepper speckle than the podium bands. It sits in the shade under the canopy.",
+    "photo_light": "p7 late afternoon, shade under the canopy",
+    "samples": [
+     "p7 [700,1110,850,1150] med 74,74,64 p20 64,64,55 p80 90,86,74 -> mp_canopy_granite_beam_1.jpg / mp_entrance_granite_head_beam_1.jpg",
+     "p7 [1060,1080,1200,1110] med 67,69,59 p20 59,60,51 p80 75,77,68 -> mp_canopy_granite_beam_2.jpg"
+    ]
+   },
+   {
+    "element": "screen_wall_surround",
+    "median_rgb": [
+     108,
+     98,
+     83
+    ],
+    "p20_rgb": [
+     97,
+     87,
+     75
+    ],
+    "p80_rgb": [
+     114,
+     103,
+     88
+    ],
+    "lit_or_reflect_rgb": [
+     118,
+     98,
+     80
+    ],
+    "finish": "matte",
+    "texture": "Flat warm grey-beige cladding around the LED screen and the two billboards. Flood lamps on short arms run along its top edge (they lift the band above the LED to 113,105,95). The LED screen has a thin dark frame and the billboard lightboxes have bright silver aluminium frames (too thin to measure). The LED throws a warm spill onto the wall just below it (118,98,80).",
+    "photo_light": "p8/c87 dusk, cool ambient, LED on; p3 dusk",
+    "samples": [
+     "p8 [720,1060,1000,1090] med 108,98,83 p20 97,87,75 p80 114,103,88 (below the LED) -> mp_screen_wall_surround_1.jpg",
+     "p8 [700,808,1000,835] med 113,105,95 p20 88,89,84 p80 124,111,101 (above the LED, with lamps) -> mp_screen_wall_surround_2.jpg",
+     "c87 [800,1105,1150,1140] med 105,95,75 p20 87,79,61 p80 112,102,81 -> mp_screen_wall_surround_3.jpg",
+     "p3 [600,600,700,610] med 118,98,80 p20 114,94,76 p80 122,103,85 (LED spill) -> mp_screen_wall_surround_4.jpg"
+    ]
+   },
+   {
+    "element": "roof_canopy_top_and_fascia (After 8)",
+    "median_rgb": [
+     138,
+     132,
+     113
+    ],
+    "p20_rgb": [
+     133,
+     128,
+     108
+    ],
+    "p80_rgb": [
+     141,
+     136,
+     117
+    ],
+    "lit_or_reflect_rgb": [
+     151,
+     141,
+     124
+    ],
+    "finish": "satin (painted metal)",
+    "texture": "A very thin, slightly tapering light warm-grey edge band, only 5-12 px tall in every photo. Seen from the front (p3) it has two layers: a top at about 129,120,103 (column profile) and a brighter front face at 151,141,124, with a dark joint line between them. 'After 8' is written in yellow script letters on the left end.",
+    "photo_light": "p8 dusk; p3 dusk",
+    "samples": [
+     "p8 [920,690,980,700] med 138,132,113 p20 133,128,108 p80 141,136,117 -> mp_roof_canopy_top_and_fascia_1.jpg",
+     "p3 [690,405,740,407] med 151,141,124 p20 144,133,116 p80 157,147,129 (front face) -> mp_roof_canopy_top_and_fascia_2.jpg",
+     "p3 [700,397,740,401] med 130,122,104 p20 70,74,70 p80 137,128,112 (top edge, mixed) -> mp_roof_canopy_top_and_fascia_3.jpg"
+    ]
+   },
+   {
+    "element": "roof_canopy_underside_beams (After 8)",
+    "median_rgb": [
+     49,
+     51,
+     50
+    ],
+    "p20_rgb": [
+     43,
+     45,
+     44
+    ],
+    "p80_rgb": [
+     52,
+     54,
+     53
+    ],
+    "lit_or_reflect_rgb": [
+     65,
+     59,
+     50
+    ],
+    "finish": "matte dark",
+    "texture": "A dark charcoal-brown grid of deep beams between the coffers. It runs diagonally in the photos because the canopy is seen from below at an angle.",
+    "photo_light": "p8 dusk; p3 dusk",
+    "samples": [
+     "p8 [866,753,878,759] med 49,51,50 p20 43,45,44 p80 52,54,53 -> mp_roof_canopy_underside_1.jpg",
+     "p3 [705,409,715,413] med 65,59,50 p20 63,56,48 p80 68,61,52 -> mp_roof_canopy_underside_2.jpg"
+    ]
+   },
+   {
+    "element": "roof_canopy_coffer_panels (After 8 underside)",
+    "median_rgb": [
+     111,
+     109,
+     97
+    ],
+    "p20_rgb": [
+     105,
+     101,
+     86
+    ],
+    "p80_rgb": [
+     116,
+     113,
+     101
+    ],
+    "lit_or_reflect_rgb": [
+     113,
+     108,
+     88
+    ],
+    "finish": "satin, possibly translucent or skylight panels",
+    "texture": "Light grey rectangular recessed panels (coffers) set in the dark beam grid, about 2 per strut bay. They have a lighter lip on one edge.",
+    "photo_light": "p8/c87 dusk",
+    "samples": [
+     "p8 [872,733,888,745] med 111,109,97 p20 105,101,86 p80 116,113,101 -> mp_roof_canopy_coffer_1.jpg",
+     "c87 [1045,742,1065,750] med 113,108,88 p20 109,104,85 p80 116,111,92 -> mp_roof_canopy_coffer_2.jpg"
+    ]
+   },
+   {
+    "element": "roof_canopy_struts",
+    "median_rgb": [
+     150,
+     145,
+     126
+    ],
+    "p20_rgb": [
+     137,
+     132,
+     113
+    ],
+    "p80_rgb": [
+     161,
+     155,
+     138
+    ],
+    "lit_or_reflect_rgb": [
+     159,
+     155,
+     139
+    ],
+    "finish": "satin painted steel tubes",
+    "texture": "Round tubes, 3-4 px wide, in pale warm grey or off-white. They are arranged as repeated V / inverted-V pairs: each pair meets at a point on the roof deck and fans up to the canopy underside, giving a zigzag W pattern across the front (about 10 V's on p3). Values are ridge samples, the brightest pixel per row along each tube (the lit side). The shaded side is darker but too thin to measure.",
+    "photo_light": "p8 and c87 dusk, cool ambient",
+    "samples": [
+     "c87 ridge (1010,742)->(1040,830) med 150,145,126 p20 137,132,113 p80 161,155,138",
+     "c87 ridge (1080,760)->(1052,830) med 138,133,117 p20 133,128,110 p80 145,139,124",
+     "p8 ridge (899,748)->(881,795) med 140,137,127 p20 134,130,116 p80 143,142,132 -> mp_roof_canopy_struts_1.jpg",
+     "p8 ridge (918,752)->(935,796) med 159,155,139 p20 152,149,134 p80 166,162,149 -> mp_roof_canopy_struts_2.jpg"
+    ]
+   },
+   {
+    "element": "myanmar_plaza_letters",
+    "median_rgb": [
+     207,
+     200,
+     192
+    ],
+    "p20_rgb": [
+     205,
+     198,
+     190
+    ],
+    "p80_rgb": [
+     209,
+     202,
+     194
+    ],
+    "finish": "satin painted metal channel letters",
+    "texture": "Plain off-white faces in a thin sans-serif, upright, standing along the canopy edge. Each letter has a narrow dark (near-black) return or edge 2-3 px wide plus a cast shadow, which makes it pop against the cream fascia behind (fascia 187,180,156 vs face 207,200,192, so the letters are only slightly brighter and cooler). The returns were too thin to measure.",
+    "photo_light": "p7 late afternoon, diffuse",
+    "samples": [
+     "p7 [1013,900,1023,960] med 207,200,192 p20 205,198,190 p80 209,202,194 ('L' stem) -> mp_myanmar_plaza_letters_1.jpg",
+     "p7 [898,930,912,990] med 208,201,193 p20 204,196,188 p80 210,203,196 ('P' stem) -> mp_myanmar_plaza_letters_2.jpg"
+    ]
+   },
+   {
+    "element": "west_entrance_columns",
+    "median_rgb": [
+     33,
+     34,
+     30
+    ],
+    "p20_rgb": [
+     29,
+     31,
+     27
+    ],
+    "p80_rgb": [
+     37,
+     38,
+     34
+    ],
+    "lit_or_reflect_rgb": [
+     39,
+     41,
+     36
+    ],
+    "finish": "glossy polished stone; it reflects point lights",
+    "texture": "Near-black granite with a faint greenish speckle (black galaxy / dark green type). Polished, with small mirror highlights from the downlights.",
+    "photo_light": "p7 late afternoon, in the shade under the canopy",
+    "samples": [
+     "p7 [472,1260,512,1440] med 33,34,30 p20 29,31,27 p80 37,38,34 -> mp_west_entrance_columns_1.jpg",
+     "p7 [475,1460,505,1520] med 39,41,36 p20 35,37,31 p80 44,46,40 -> mp_west_entrance_columns_2.jpg"
+    ]
+   },
+   {
+    "element": "corner_entrance_columns (corner plaza, BONIS entrance)",
+    "median_rgb": [
+     71,
+     56,
+     35
+    ],
+    "p20_rgb": [
+     54,
+     45,
+     29
+    ],
+    "p80_rgb": [
+     83,
+     66,
+     42
+    ],
+    "finish": "matte to satin stone cladding",
+    "texture": "Square columns clad in warm tan or sand stone. At dusk under the canopy they read brown. They are quite different from the black west-entrance columns.",
+    "photo_light": "c87 dusk, shade under the canopy",
+    "samples": [
+     "c87 [672,1310,695,1480] med 71,56,35 p20 54,45,29 p80 83,66,42 -> mp_corner_entrance_columns_1.jpg",
+     "c87 [903,1300,920,1440] med 65,55,37 p20 47,40,26 p80 77,63,42 -> mp_corner_entrance_columns_2.jpg"
+    ]
+   },
+   {
+    "element": "paving at the corner",
+    "median_rgb": [
+     96,
+     89,
+     77
+    ],
+    "p20_rgb": [
+     89,
+     83,
+     71
+    ],
+    "p80_rgb": [
+     103,
+     97,
+     85
+    ],
+    "finish": "matte",
+    "texture": "The corner footpath along the kerb (p3) is warm grey scored or stamped concrete with an irregular crazy-paving crack pattern and stains. The corner plaza (c87) is a grid of rectangular grey pavers with dark joints, roughly 0.5 m (scaled from a pedestrian of about 1.65 m: estimate). All samples are in dusk light.",
+    "photo_light": "p3 and c87 dusk",
+    "samples": [
+     "p3 [600,925,900,960] med 96,89,77 p20 89,83,71 p80 103,97,85 -> mp_paving_corner_2.jpg",
+     "p3 [150,905,450,935] med 92,87,75 p20 84,78,65 p80 100,95,84 -> mp_paving_corner_3.jpg",
+     "c87 [560,1560,800,1690] med 97,89,75 p20 84,78,64 p80 106,99,84 -> mp_paving_corner_1.jpg"
+    ]
+   },
+   {
+    "element": "kerb (white blocks)",
+    "median_rgb": [
+     191,
+     187,
+     174
+    ],
+    "p20_rgb": [
+     183,
+     179,
+     167
+    ],
+    "p80_rgb": [
+     199,
+     194,
+     182
+    ],
+    "finish": "matte painted concrete, grubby",
+    "texture": "Alternating red and white painted kerb blocks. Each block is about 110-125 px long against a face about 25 px tall on p3 (length to face about 4.5-5 to 1, so about 1 m blocks if the face is about 0.22 m). The white is a dirty warm off-white with dark grime along the joints and the base.",
+    "photo_light": "p3 dusk",
+    "samples": [
+     "p3 [560,1003,650,1015] med 191,187,174 p20 183,179,167 p80 199,194,182 -> mp_kerb_white_2.jpg",
+     "p3 [300,985,400,1000] med 182,177,164 p20 152,146,134 p80 192,187,174 (edge partly in the box) -> mp_kerb_white_1.jpg"
+    ]
+   },
+   {
+    "element": "kerb (red blocks)",
+    "median_rgb": [
+     111,
+     46,
+     41
+    ],
+    "p20_rgb": [
+     104,
+     41,
+     36
+    ],
+    "p80_rgb": [
+     120,
+     58,
+     51
+    ],
+    "finish": "matte painted concrete",
+    "texture": "Dull brick or oxide red (not bright red). Same block size as the white blocks, with a slightly worn and dirty face.",
+    "photo_light": "p3 dusk",
+    "samples": [
+     "p3 [690,1000,780,1015] med 111,46,41 p20 104,41,36 p80 120,58,51 -> mp_kerb_red_2.jpg",
+     "p3 [430,995,520,1012] med 99,42,38 p20 90,35,31 p80 113,59,53 -> mp_kerb_red_1.jpg"
+    ]
+   }
+  ],
+  "lighting": [
+   "p3: late afternoon going to dusk, hazy tropical sky (pale blue with warm-lit clouds), sun low and behind the camera side, soft warm-neutral light; LED screens on.",
+   "p5: same session as p3, a little later; same soft warm dusk haze (not sampled, used only to check placement).",
+   "p7 = entrance_kabaraye_5386 (byte-identical pictures): late afternoon, west entrance in diffuse light with no direct sun on the stone, bright white hazy sky above; neutral to slightly cool on the stone, warm on the lit shop interiors and canopy downlights.",
+   "p8: dusk, start of blue hour, cool ambient; neon guitar, LED screen and canopy downlights on.",
+   "entrance_cornerplaza_5387 (c87): dusk, darker and cooler than p8; warm interior and downlights; the plaza paving is dim."
+  ],
+  "notes": [
+   "All values are sRGB 0-255 from python -I + PIL: median, 20th and 80th percentile of each box. Boxes are [x0,y0,x1,y1] in the photo's own pixels. Crops are saved as D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/landmarks/look/crops/mp_<element>_<n>.jpg.",
+   "p7.jpg and entrance_kabaraye_5386.jpg are the same picture, so all west-entrance samples come from p7.",
+   "Main look of the podium (p7): strong horizontal stripes repeating per floor. A light warm-grey speckled granite band (about 161,151,141) is topped by a brighter smooth cream sill (about 218,207,183), then a thin dark shadow gap, then a blue-grey reflective glass ribbon with dark thin mullions and pale curtains behind. The stone is clearly granite (fine speckle, matte), not plain render.",
+   "Joint rhythm on p7: stone panel joints every 35-37 px and glass mullions every 65-69 px, so 2 stone panels per glass module. Entrance canopy fascia joints on c87 are 89 px apart against 35 px glass modules. Metre values are only estimates; no reference length was measured on the facade itself.",
+   "The west-entrance colour set is a cream fascia with white letters, a warm-lit soffit, a grey granite head beam, near-black polished granite columns and frameless glass. The corner plaza entrance has tan stone columns instead of black ones.",
+   "After 8 roof canopy: thin light warm-grey edge, a dark beam grid with light grey coffers underneath, and pale tube struts in V pairs. The struts and fascia read about 140-160 grey even at dusk; the underside reads about 50-65.",
+   "Struts were sampled by ridge-following (brightest pixel per row along each tube), so their values are the lit side of the tubes.",
+   "The canopy soffit next to the corner (c87 and p8, 95,97,75-79) is a cool grey-green. It may be a sloped glass awning rather than solid soffit panels (uncertain).",
+   "Dusk photos (p3, p8, c87) are about 30-40% darker than the late-afternoon p7 for the same materials (fascia 187 against 152-157 red channel; stone 161 against 97 in the p3 far view). For the game's daylight base colours, prefer the p7 values for the stone, sill, letters and fascia.",
+   "The task text had no instructions or claims embedded in the photos; nothing was acted on beyond measuring. The shared scratch folder 'look' is used by other workers, so my helper scripts are in a separate folder, scratchpad/look_mpplaza."
+  ]
+ },
+ {
+  "topic": "plinth",
+  "elements": [
+   {
+    "element": "plinth_granite",
+    "median_rgb": [
+     63,
+     43,
+     34
+    ],
+    "p20_rgb": [
+     56,
+     37,
+     27
+    ],
+    "p80_rgb": [
+     83,
+     54,
+     41
+    ],
+    "lit_or_reflect_rgb": [
+     43,
+     35,
+     31
+    ],
+    "finish": "polished red-brown granite. At dusk it reads as satin: there are no sharp mirror images, only soft sky sheens. Some panels catch more sky than others, so the tone shifts slightly from panel to panel (e.g. p3 box B is lighter right of x 687, and in 5389 the panels right of x 775 are pinker and lighter).",
+    "texture": "fine salt-and-pepper speckle: pink/grey light dots on a brown-maroon base, luminance SD 3-8 in the boxes. Panel layout from the contrast-stretched 5389 and p8 crops, with H = granite height (about 2.5-3 m estimated from the hedge, a lower bound): two short top courses about 0.13H each (about 0.35-0.4 m), then a thin light horizontal line (a lighter stone strip or polished arris), then tall panels about 0.74H high (about 1.9-2.2 m) and about 0.29H wide (about 0.75-0.9 m). The joints are hairline, only slightly lighter than the stone. The top-course slabs are longer. In shade (the p8 side wall) it drops to about 37,27,22 and turns violet-grey where it reflects sky.",
+    "samples": [
+     "p3.jpg [400,715,480,780] med 63,43,34 p20 61,40,31 p80 66,45,36 (dusk, front face)",
+     "p3.jpg [640,715,720,780] med 83,54,41 p20 75,46,35 p80 90,60,46 (two panels of different tone)",
+     "cornerplaza_sign_5389.jpg [650,1345,770,1405] med 56,36,29 p20 54,35,27 p80 59,39,31 (darker panel)",
+     "cornerplaza_sign_5389.jpg [980,1330,1200,1440] med 61,42,31 p20 56,37,27 p80 66,46,35 (lighter panels right of MELIA)",
+     "p5.jpg (= cornerplaza_pano_5390) [630,655,710,700] med 95,67,54 p20 89,60,48 p80 100,72,58 (brighter exposure)",
+     "p5.jpg [780,690,930,740] med 97,71,57 p20 93,68,53 p80 101,75,61",
+     "p8.jpg [700,1400,1170,1620] med 37,27,22 p20 32,23,18 p80 43,32,27 (side wall in deep shade, camera exposed for the sky)",
+     "reflection: p8.jpg [1188,1400,1212,1600] vertical sky streak med 41,32,27 p80 48,39,33; p8.jpg top courses [920,1262,1260,1330] med 43,35,31 (greyer, reflects sky); cornerplaza_sign_5389.jpg top course [620,1262,1000,1284] med 65,46,36"
+    ],
+    "photo_light": "dusk/late afternoon, hazy overcast, soft cool skylight with warm pink clouds; uplights and screens on. There is no sunlit photo of the plinth."
+   },
+   {
+    "element": "plinth_band",
+    "median_rgb": [
+     150,
+     129,
+     103
+    ],
+    "p20_rgb": [
+     142,
+     121,
+     96
+    ],
+    "p80_rgb": [
+     173,
+     148,
+     123
+    ],
+    "lit_or_reflect_rgb": [
+     183,
+     159,
+     134
+    ],
+    "finish": "matte to satin warm beige/greige cladding, probably painted metal or composite. A thin lighter cap edge runs along its top.",
+    "texture": "vertical flutes or narrow slats about 1/8 of the band height apart (about 15-20 px against a 135 px band in 5389; about 0.18-0.22 m if the band is about 1.5-1.8 m tall), seen as faint light/dark vertical lines. In the photos the band is about 0.6x the granite height (135 px band vs 227 px granite in 5389). It is a little lighter where it faces the sky.",
+    "samples": [
+     "cornerplaza_sign_5389.jpg [722,1160,734,1215] (gap between C and E) med 145,123,99 p20 137,113,94 p80 149,125,102",
+     "cornerplaza_sign_5389.jpg [660,1234,1040,1246] (strip under CENTRE) med 150,129,103 p20 142,121,96 p80 154,133,107",
+     "p3.jpg [592,632,614,690] (gap between R and C) med 171,146,122 p20 169,145,120 p80 173,148,123",
+     "p5.jpg [593,608,615,640] (gap between R and C) med 183,159,134 p20 180,157,132 p80 185,160,136 (brightest exposure)"
+    ],
+    "photo_light": "dusk, soft overcast skylight (all three photos from the same visit; p5 is exposed brighter)"
+   },
+   {
+    "element": "plinth_letters",
+    "median_rgb": [
+     253,
+     85,
+     36
+    ],
+    "p20_rgb": [
+     242,
+     78,
+     30
+    ],
+    "p80_rgb": [
+     255,
+     91,
+     41
+    ],
+    "lit_or_reflect_rgb": [
+     248,
+     84,
+     33
+    ],
+    "finish": "backlit/illuminated 3D channel letters (glowing at dusk, red channel clipped at 255): a saturated orange face, glossy acrylic. The returns (sides) are a darker red-brown and show as a thin dark outline on the right/bottom edges.",
+    "texture": "none (flat, even glow). The letter depth shows as a 1-3 px darker return at photo scale.",
+    "samples": [
+     "cornerplaza_sign_5389.jpg [744,1160,750,1220] E stem med 255,88,38 p20 251,83,31 p80 255,91,43",
+     "cornerplaza_sign_5389.jpg [917,1170,923,1220] T stem med 253,81,34 p20 242,77,28 p80 255,85,38",
+     "cornerplaza_sign_5389.jpg [814,1160,820,1220] N stem med 252,87,35 p20 239,82,30 p80 255,92,41",
+     "p3.jpg [560,640,600,690] R, top 15% by redness med 248,84,33 p20 232,78,26 p80 255,89,41",
+     "p5.jpg [663,600,668,635] top 50% by redness med 246,104,50 (small stroke, edges mixed in)"
+    ],
+    "photo_light": "dusk, letters lit from inside"
+   },
+   {
+    "element": "plinth_names",
+    "median_rgb": [
+     132,
+     115,
+     107
+    ],
+    "p20_rgb": [
+     115,
+     99,
+     89
+    ],
+    "p80_rgb": [
+     148,
+     131,
+     121
+    ],
+    "lit_or_reflect_rgb": [
+     100,
+     85,
+     70
+    ],
+    "finish": "small raised brushed-metal letters (satin steel/pewter grey) on the granite, except: TOWER is blue, PLAZA is dark red (low contrast), THE LAKE SUITES is olive/green-grey, and MELIA is outline letters (light metal rim, near-black face). The address line is dark bronze/steel letters that barely stand out from the granite, except the polished O.",
+    "texture": "none. The thin strokes catch the sky on their top edges.",
+    "samples": [
+     "cornerplaza_sign_5389.jpg [540,1318,660,1335] MYANMAR (Plaza), top 25% luminance med 132,115,107 p20 115,99,89 p80 148,131,121",
+     "cornerplaza_sign_5389.jpg [133,1345,215,1362] CENTRE (Tower), top 25% med 88,77,70",
+     "cornerplaza_sign_5389.jpg [133,1372,205,1390] TOWER, top 25% by blueness med 42,59,72 p20 25,40,54 p80 55,70,84",
+     "cornerplaza_sign_5389.jpg [540,1345,620,1362] PLAZA, top 25% by redness med 69,29,25",
+     "cornerplaza_sign_5389.jpg [855,1300,965,1328] MELIA rim, top 15% med 89,75,70 p80 103,89,85; same box face, bottom 20% med 27,16,12",
+     "cornerplaza_sign_5389.jpg [875,1338,950,1352] YANGON under MELIA, top 25% med 138,120,105",
+     "cornerplaza_sign_5389.jpg [725,1414,750,1442] address O, top 30% med 100,85,70 p80 121,105,91; address line [100,1428,600,1448], top 15% med 52,39,32 (letters almost granite-coloured)",
+     "p3.jpg [160,725,215,772] THE LAKE SUITES, top 20% med 91,85,50 p20 76,69,36 p80 108,107,63"
+    ],
+    "photo_light": "dusk, soft overcast skylight"
+   },
+   {
+    "element": "plinth_coping",
+    "median_rgb": [
+     71,
+     70,
+     64
+    ],
+    "p20_rgb": [
+     54,
+     54,
+     47
+    ],
+    "p80_rgb": [
+     93,
+     93,
+     85
+    ],
+    "lit_or_reflect_rgb": [
+     94,
+     84,
+     69
+    ],
+    "finish": "a thin top edge where the granite runs past the cream band (right end in p3, back wall in p8). It reads light grey: a polished/honed stone edge or a metal cap catching the sky.",
+    "texture": "speckled. Only 1-3 px tall in the photos (an estimated 3-6 cm visible lip). These values are mixed with neighbouring pixels: treat them as approximate.",
+    "samples": [
+     "p8.jpg [1000,1247,1100,1252] top 50% luminance med 71,70,64 p20 54,54,47 p80 93,93,85",
+     "p3.jpg [850,703,900,706] top 50% med 94,84,69 p20 80,76,60 p80 111,97,85"
+    ],
+    "photo_light": "dusk, edge lit by the sky"
+   },
+   {
+    "element": "hedge",
+    "median_rgb": [
+     33,
+     37,
+     15
+    ],
+    "p20_rgb": [
+     23,
+     25,
+     6
+    ],
+    "p80_rgb": [
+     49,
+     53,
+     26
+    ],
+    "lit_or_reflect_rgb": [
+     66,
+     70,
+     30
+    ],
+    "finish": "matte foliage. A neatly clipped low box hedge (flat top, straight front) running along the curve at the foot of the plinth, with a second hedge in front of the lawn in p3.",
+    "texture": "fine small-leaf speckle with strong light/dark noise (luminance SD 12-25). The flat top is lit by the sky and much lighter and yellower than the shaded front face.",
+    "samples": [
+     "p3.jpg [400,842,750,856] front face med 33,37,15 p20 25,28,6 p80 46,50,25",
+     "cornerplaza_sign_5389.jpg [350,1512,850,1540] front face med 23,25,11",
+     "p5.jpg [450,775,850,790] front face (brighter exposure) med 49,53,26 p20 37,41,16 p80 76,80,41",
+     "lit top: p3.jpg [400,833,750,839] med 66,70,30 p80 92,97,41; cornerplaza_sign_5389.jpg [500,1500,850,1508] med 51,54,17 p80 74,76,32"
+    ],
+    "photo_light": "dusk, overcast skylight; no sunlit sample"
+   },
+   {
+    "element": "lawn",
+    "median_rgb": [
+     56,
+     61,
+     29
+    ],
+    "p20_rgb": [
+     40,
+     44,
+     21
+    ],
+    "p80_rgb": [
+     72,
+     77,
+     44
+    ],
+    "lit_or_reflect_rgb": [
+     72,
+     77,
+     44
+    ],
+    "finish": "matte, fine mown turf",
+    "texture": "even fine grain (luminance SD 5-7), olive-green, no stripes. A raised grass strip between the hedge and the paved kerb.",
+    "samples": [
+     "p3.jpg [400,866,750,884] med 56,61,29 p20 52,56,25 p80 60,65,33",
+     "cornerplaza_sign_5389.jpg [350,1555,850,1595] med 40,44,21 p20 37,40,18 p80 44,47,24",
+     "p5.jpg [450,800,850,825] med 72,77,44 p20 67,72,39 p80 78,83,49 (brighter exposure)"
+    ],
+    "photo_light": "dusk, overcast skylight; no sunlit sample"
+   },
+   {
+    "element": "melia_wall",
+    "median_rgb": [
+     252,
+     255,
+     248
+    ],
+    "p20_rgb": [
+     250,
+     255,
+     244
+    ],
+    "p80_rgb": [
+     255,
+     255,
+     253
+    ],
+    "lit_or_reflect_rgb": [
+     146,
+     154,
+     150
+    ],
+    "finish": "smooth white painted or rendered spandrel bands, matte to satin. The sunlit long face is clipped at white in the photo, so its true value is somewhere at or above ~250.",
+    "texture": "horizontal ribbon facade. Each storey is one white spandrel band plus one blue glass band of about equal height (about 1.6-1.7 m each if a storey is 3.2-3.5 m). The short end faces are solid white with a vertical column of small dark slot windows. The end wall in less direct sun reads cool light grey (146,154,150).",
+    "samples": [
+     "p2.jpg (= mp_5111) [273,550,303,585] long face, top 25% luminance (white bands) med 252,255,248 p20 250,255,244 p80 255,255,253; the whole box mixed med 157,169,174",
+     "p2.jpg [331,460,341,585] end wall, 20-90% luminance band med 146,154,150 p20 141,150,146 p80 151,158,154"
+    ],
+    "photo_light": "midday/early afternoon, hazy bright tropical sun from high camera-left, clear blue sky"
+   },
+   {
+    "element": "melia_glass",
+    "median_rgb": [
+     79,
+     100,
+     111
+    ],
+    "p20_rgb": [
+     56,
+     74,
+     84
+    ],
+    "p80_rgb": [
+     88,
+     110,
+     127
+    ],
+    "lit_or_reflect_rgb": [
+     88,
+     110,
+     127
+    ],
+    "finish": "glossy, tinted reflective glass reflecting the blue sky (blue-grey). Thin vertical mullions.",
+    "texture": "continuous horizontal glass ribbons alternating with the white bands. The end-face slot windows are darker and bluer.",
+    "samples": [
+     "p2.jpg [273,550,303,585] long face, bottom 30% luminance med 79,100,111 p20 56,74,84 p80 88,110,127",
+     "p2.jpg [346,460,357,585] end-face windows, bottom 30% med 42,60,75 p20 32,50,62 p80 53,71,87"
+    ],
+    "photo_light": "midday/early afternoon, hazy sun, clear blue sky reflected"
+   },
+   {
+    "element": "sedona_inya_wing_wall (PROXY ONLY: not The Lake Suites)",
+    "median_rgb": [
+     229,
+     219,
+     197
+    ],
+    "p20_rgb": [
+     226,
+     217,
+     193
+    ],
+    "p80_rgb": [
+     236,
+     229,
+     207
+    ],
+    "lit_or_reflect_rgb": [
+     121,
+     119,
+     114
+    ],
+    "finish": "matte cream render/paint",
+    "texture": "plain cream walls. Square punched windows staggered floor to floor in deep frames. The narrow tallest slab has a full-height dark window strip, there is a pergola-frame crown, and the low slab has vertical fins. The shaded side reads neutral grey (121,119,114).",
+    "samples": [
+     "p2.jpg [1025,150,1090,180] sunlit plain wall med 229,219,197 p20 227,217,195 p80 231,220,199",
+     "p2.jpg [978,200,1000,330] sunlit slab front, top 50% luminance med 229,221,197",
+     "p2.jpg [942,180,949,320] shaded side, 30-90% luminance med 121,119,114 p20 111,113,107 p80 128,125,124"
+    ],
+    "photo_light": "midday/early afternoon, hazy sun, clear sky"
+   },
+   {
+    "element": "sedona_inya_wing_glass (PROXY ONLY: not The Lake Suites)",
+    "median_rgb": [
+     96,
+     114,
+     122
+    ],
+    "p20_rgb": [
+     78,
+     90,
+     94
+    ],
+    "p80_rgb": [
+     107,
+     125,
+     139
+    ],
+    "lit_or_reflect_rgb": [
+     107,
+     125,
+     139
+    ],
+    "finish": "glossy blue-tinted glass reflecting the sky, set back in deep frames",
+    "texture": "punched windows in a staggered checkerboard",
+    "samples": [
+     "p2.jpg [1000,250,1150,340] bottom 30% luminance med 96,114,122 p20 78,90,94 p80 107,125,139"
+    ],
+    "photo_light": "midday/early afternoon, hazy sun"
+   }
+  ],
+  "lighting": [
+   "p3.jpg: dusk/late afternoon, hazy overcast, soft cool skylight with warm pink-cream clouds near the horizon; screens and the plinth uplights on. No direct sun on the plinth.",
+   "cornerplaza_sign_5389.jpg: same dusk visit, overcast, soft skylight, slightly darker exposure; letters and uplights glowing.",
+   "p5.jpg (pixel-identical to cornerplaza_pano_5390.jpg): same dusk visit, exposed brighter (all surfaces about 1.3-1.5x p3's values); warm sky near the horizon.",
+   "p8.jpg: same dusk visit. The plinth's back/side wall is in deep shade and the camera is exposed for the bright sky, so the wall reads darker (~37,27,22) with violet-grey sky sheens.",
+   "p2.jpg (pixel-identical to refs/sedona/mp_5111.jpg): midday to early afternoon, bright hazy tropical sun high and to camera-left, clear blue sky. Sunlit whites clip at 255."
+  ],
+  "notes": [
+   "p6.jpg does not exist in the scratchpad mp folder. The sheet's p6 thumbnail is the same view as p5 / cornerplaza_pano_5390, which were measured.",
+   "THE LAKE SUITES IS NOT VISIBLE IN ANY ASSIGNED PHOTO, so no lake_suites_wall / lake_suites_glass values are given. The cream punched-window tower on the right of p2/mp_5111 matches sedona3d.py's description of the Sedona Inya Wing (pergola crown, narrow slab with a full-height dark strip, staggered windows). Its values are reported only as a labelled proxy. The landmark_atlas 'resid' row (cream 236,230,214 with punched windows) looks drawn from this Sedona tower. The Lake Suites (layout E) sits behind tower B as seen from the corner.",
+   "Per-channel percentiles: median, p20 and p80 are taken per channel on sRGB 0-255. Where a 'top/bottom N%' is given, pixels were first filtered by luminance (or by redness/blueness for coloured text) to isolate thin letters or bands from the background.",
+   "Granite vs band contrast is the main identity: granite runs about 0.37-0.5x the band's brightness in every photo, e.g. p3 63,43,34 against 171,146,122. The granite is a maroon-brown with a slight red bias (R/G about 1.45), not neutral brown.",
+   "In photo pixels the band is about 0.6x the granite height (5389: band ~135 px, granite ~227 px; p3: ~90 / ~115). The existing mc3d.py plinth uses 4.8 / 7.6 studs (0.63), which agrees.",
+   "At dusk the MYANMAR CENTRE letters are lit and clip at R=255 (about 253,85,36): use a glowing/neon-like orange face with darker red-brown returns. HAGL (green) was not measured (not requested).",
+   "Melia's sunlit white is clipped in p2, so 252,255,248 is a floor, not the true albedo. Its sun-shade end wall reads 146,154,150 (cool grey-white).",
+   "Crops are in D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/landmarks/look/crops/ as mc_<element>_<n>.jpg (mc_plinth_letters_4 is a rejected box that was replaced by mc_plinth_letters_6). Measuring script: C:/Users/kaung/AppData/Local/Temp/claude/d712860635f631b0/8dbf212d-129a-4909-ba7d-ab448f73c052/scratchpad/look_mcplinth_q7/meas.py with jobs1-3.json. Note that scratchpad/look/ is shared with other agents and its meas.py was overwritten during this run.",
+   "The joint sizes in metres are estimates. They come from proportions measured against the granite height H, with H about 2.5-3 m taken from a hedge assumed to be 0.5-0.6 m tall. The colours are all measured."
+  ]
+ },
+ {
+  "topic": "interior",
+  "elements": [
+   {
+    "element": "floor_tile",
+    "median_rgb": [
+     158,
+     142,
+     108
+    ],
+    "p20_rgb": [
+     139,
+     124,
+     91
+    ],
+    "p80_rgb": [
+     176,
+     161,
+     126
+    ],
+    "lit_or_reflect_rgb": [
+     172,
+     167,
+     166
+    ],
+    "finish": "polished/honed stone, satin-to-glossy: the corridor granite gives soft blurred reflections of the white shopfront; the atrium ground-floor stone mirrors a downlight as a sharp clipped spot (max 255, median of the spot box 172,167,166)",
+    "texture": "Corridor (shopfront_corridor): salt-and-pepper granite, beige/grey/black specks about 1-3 cm, low contrast (luminance sd 22-25). Large square tiles with thin dark hairline joints. Joints along the wall line are about 170 px apart, next to a glass door leaf of about 165 px, so tiles are roughly 0.8 m (estimate). Atrium ground floor (atrium_escalators): smoother, finer-grained pale stone. In that dusk photo it reads lilac-grey (147,137,136 / 133,119,123) because of mixed light, and it is clearly glossier than the corridor.",
+    "samples": [
+     "shopfront_corridor.jpg box (60,850,460,950): med 158,142,108 p20 139,124,91 p80 176,161,126",
+     "shopfront_corridor.jpg box (700,860,1100,950): med 164,148,111 p20 143,127,91 p80 187,170,131",
+     "atrium_escalators_191522.jpg box (50,1380,200,1470): med 133,119,123 p20 122,110,112 p80 141,128,135",
+     "atrium_escalators_191522.jpg box (80,1345,150,1400): med 147,137,136 p20 141,131,126 p80 152,142,148",
+     "atrium_escalators_191522.jpg box (212,1545,228,1557) downlight reflection: med 172,167,166 p80 253,251,248 max 255",
+     "shopfront_corridor.jpg box (1150,825,1270,880) right-hand area with blurred reflection of the shopfront: med 150,133,100 (no brighter than the base; the reflection shows as a smear, not a highlight)"
+    ],
+    "photo_light": "corridor: neutral-cool LED, flat and diffuse, time unknown; atrium: evening artificial light (photo 19:15), warm-neutral with a lilac cast"
+   },
+   {
+    "element": "floor_border",
+    "median_rgb": [
+     177,
+     141,
+     89
+    ],
+    "p20_rgb": [
+     165,
+     130,
+     79
+    ],
+    "p80_rgb": [
+     186,
+     150,
+     97
+    ],
+    "finish": "satin polished granite, the same sheen as the field tiles",
+    "texture": "Golden-yellow / tan speckled granite strip along the shopfront line, finer and warmer than the grey field granite. Joints line up with the field tiles. Its width looks like roughly 0.15-0.25 m (estimate, the strip is foreshortened). Inside the shutter line there is a separate glossy white ceramic threshold strip with joints about 120 px apart (about 0.6 m tiles).",
+    "samples": [
+     "shopfront_corridor.jpg box (20,806,480,819): med 177,141,89 p20 165,130,79 p80 186,150,97",
+     "shopfront_corridor.jpg box (700,799,940,809): med 167,132,72 p20 157,122,63 p80 176,141,81"
+    ],
+    "photo_light": "neutral-cool corridor LED"
+   },
+   {
+    "element": "gallery_fascia",
+    "median_rgb": [
+     95,
+     86,
+     75
+    ],
+    "p20_rgb": [
+     91,
+     82,
+     71
+    ],
+    "p80_rgb": [
+     99,
+     90,
+     79
+    ],
+    "lit_or_reflect_rgb": [
+     112,
+     109,
+     102
+    ],
+    "finish": "matte to eggshell painted plaster / gypsum board, smooth",
+    "texture": "Plain smooth curved bands and soffits that follow the round atrium. A dark recessed shadow-gap line runs along each edge (between the wood cove and the fascia, and at the slab edge). Small dark dots (sprinklers or speakers) are spaced along it. No panel joints are visible. In these photos most of each balcony front is covered by yellow printed promo banners (2018), so the white plaster shows only in the bands above and below them. In the evening light it reads warm greige (95,86,75), not white. Where it faces the light it reads 112,109,102.",
+    "samples": [
+     "atrium_escalators_191522.jpg box (10,120,60,160): med 95,86,75 p20 91,82,71 p80 99,90,79",
+     "atrium_escalators_191522.jpg box (150,232,230,258): med 89,85,70 p20 85,82,67 p80 92,88,73",
+     "atrium_wide_190503.jpg box (1160,15,1210,40): med 100,89,81 p20 95,84,76 p80 105,93,86",
+     "atrium_wide_190503.jpg box (335,276,385,283) lit band under the wood cove: med 112,109,102 p20 107,102,94 p80 117,115,112"
+    ],
+    "photo_light": "evening artificial light (19:05 / 19:15), warm"
+   },
+   {
+    "element": "balustrade_glass_tint",
+    "median_rgb": [
+     79,
+     101,
+     96
+    ],
+    "p20_rgb": [
+     74,
+     96,
+     92
+    ],
+    "p80_rgb": [
+     82,
+     105,
+     101
+    ],
+    "lit_or_reflect_rgb": [
+     110,
+     112,
+     94
+    ],
+    "finish": "clear glass, glossy, frameless panels",
+    "texture": "Frameless clear glass panels between slim stainless posts with small clamp fittings. The handrail runs on top. Seen face-on, the glass is almost invisible: what is behind it reads only slightly greyer or greener (110,112,94 over a pale wall; 55,51,44 over a shaded interior). The teal-green colour shows only where the glass is seen edge-on or at a steep angle, as on the escalator balustrades (79,101,96 and 78,100,98). The posts look about 1.2-1.4 m apart, judging from panel width against height with the rail at about 1.1 m (estimate).",
+    "samples": [
+     "atrium_escalators_191522.jpg box (202,965,212,971) escalator glass seen edge-on: med 79,101,96 p20 74,96,92 p80 82,105,101",
+     "atrium_escalators_191522.jpg box (226,995,236,1000) escalator glass seen edge-on: med 78,100,98 p20 76,98,97 p80 80,102,100",
+     "atrium_wide_190503.jpg box (1236,350,1254,370) gallery glass face-on over a pale wall: med 110,112,94 p20 94,92,75 p80 121,125,105",
+     "atrium_escalators_191522.jpg box (12,262,45,282) gallery glass face-on over a shaded interior: med 55,51,44 p20 50,46,38 p80 70,65,57"
+    ],
+    "photo_light": "evening artificial light"
+   },
+   {
+    "element": "handrail",
+    "median_rgb": [
+     34,
+     26,
+     16
+    ],
+    "p20_rgb": [
+     20,
+     11,
+     0
+    ],
+    "p80_rgb": [
+     46,
+     38,
+     26
+    ],
+    "lit_or_reflect_rgb": [
+     94,
+     85,
+     72
+    ],
+    "finish": "satin / brushed stainless steel round tube, reflective",
+    "texture": "A continuous round rail on top of the glass that follows the curve of the gallery. It reflects its surroundings: the underside reads as a dark bronze-brown core line (34,26,16), and the upper face mirrors the warm soffit (94,85,72). There are occasional short white specular streaks under the downlights. No joints are visible. The escalator handrails are a separate part: black rubber belts.",
+    "samples": [
+     "atrium_escalators_191522.jpg, 18 boxes of 3x3 px on the darkest row of the rail line, x = 19..192 every 10 px (for example (19,220,22,223), (99,273,102,276), (189,326,192,329)): med 34,26,16 p20 20,11,0 p80 46,38,26",
+     "the same 18 positions, a 4 px band just above the dark core (rail upper face): med 94,85,72 p20 67,60,47 p80 102,96,81"
+    ],
+    "photo_light": "evening artificial light (19:15)"
+   },
+   {
+    "element": "ceiling_grid",
+    "median_rgb": [
+     76,
+     69,
+     52
+    ],
+    "p20_rgb": [
+     70,
+     63,
+     46
+    ],
+    "p80_rgb": [
+     82,
+     75,
+     57
+    ],
+    "lit_or_reflect_rgb": [
+     147,
+     152,
+     146
+    ],
+    "finish": "metallic open-cell / perforated grid ceiling, satin champagne-bronze",
+    "texture": "A very fine regular square mesh (cells only a few px across, so a few cm). On top of it is a larger pattern of darker square coffers in a grid, which runs diagonally in the photos. The whole dome-like disc of the atrium ceiling reads dark warm bronze-khaki (71-80, 69-71, 52-54) because it is lit only indirectly. Around the big disc lights the slats catch the light and turn bright grey-white in a striped halo (120,132,116 to 147,152,146, p80 up to 246,252,244).",
+    "samples": [
+     "atrium_wide_190503.jpg box (450,20,560,60): med 71,70,54 p20 64,62,47 p80 81,79,64",
+     "atrium_escalators_191522.jpg box (480,30,620,130): med 80,71,54 p20 74,65,48 p80 86,77,60",
+     "atrium_escalators_191522.jpg box (1080,80,1250,180): med 76,69,52 p20 70,63,46 p80 82,75,57",
+     "halo atrium_wide_190503.jpg box (570,168,588,182): med 120,132,116 p20 61,71,57 p80 186,196,183",
+     "halo atrium_escalators_191522.jpg box (615,215,632,232): med 147,152,146 p20 94,100,93 p80 246,252,244"
+    ],
+    "photo_light": "evening artificial light; the ceiling itself is unlit"
+   },
+   {
+    "element": "ceiling_disc_lights",
+    "median_rgb": [
+     255,
+     255,
+     255
+    ],
+    "p20_rgb": [
+     252,
+     254,
+     253
+    ],
+    "p80_rgb": [
+     255,
+     255,
+     255
+    ],
+    "lit_or_reflect_rgb": [
+     147,
+     152,
+     146
+    ],
+    "finish": "large flush round diffuse luminaires (emissive)",
+    "texture": "Big round soft-edged glowing discs set into the grid ceiling: 5-6 of them over the atrium, each about 40-60 px across in the photos (very roughly 1-1.5 m). The cores clip to pure white with a faint cool-greenish tint at the edge. Each throws a striped halo onto the grid slats around it (see ceiling_grid). The small recessed downlights in the wood cove and the gallery soffits are separate point lights; their cores also clip to 255.",
+    "samples": [
+     "atrium_wide_190503.jpg box (605,165,645,185): med 254,255,255 p20 252,254,253 p80 255,255,255",
+     "atrium_escalators_191522.jpg box (650,213,695,235): med 255,255,255 p20 254,254,253 p80 255,255,255"
+    ],
+    "photo_light": "cool-neutral white emitters, saturated in the photo"
+   },
+   {
+    "element": "wood_cove",
+    "median_rgb": [
+     118,
+     94,
+     59
+    ],
+    "p20_rgb": [
+     79,
+     59,
+     39
+    ],
+    "p80_rgb": [
+     182,
+     149,
+     95
+    ],
+    "lit_or_reflect_rgb": [
+     167,
+     128,
+     75
+    ],
+    "finish": "satin wood veneer (or wood-look panel)",
+    "texture": "A continuous curved band about one storey tall, ringing the atrium just under the grid ceiling. Honey / orange-tan colour with fine vertical grain streaks; no panel joints are visible at this resolution. Recessed downlights along its top edge wash it in bright scalloped pools (lit 167,128,75 up to p80 205,156,96). Between the pools it falls to darker caramel brown (100,75,49). The top and bottom edges have dark reveal lines.",
+    "samples": [
+     "atrium_wide_190503.jpg box (420,230,470,260): med 118,94,59 p20 79,59,39 p80 182,149,95",
+     "atrium_escalators_191522.jpg box (700,385,860,420) inside the scallop pools: med 167,128,75 p20 123,81,44 p80 205,156,96",
+     "atrium_escalators_191522.jpg box (1150,380,1270,420) between pools: med 100,75,49 p20 84,59,35 p80 126,95,71"
+    ],
+    "photo_light": "warm downlight wash (about 3000 K look), evening"
+   },
+   {
+    "element": "columns",
+    "median_rgb": [
+     53,
+     51,
+     45
+    ],
+    "p20_rgb": [
+     47,
+     45,
+     40
+    ],
+    "p80_rgb": [
+     58,
+     57,
+     49
+    ],
+    "finish": "satin painted / metal-clad (upper galleries); honed stone (ground-floor pier)",
+    "texture": "The upper-gallery columns are plain square shafts, dark warm grey (51,50,44 / 58,57,47) with flat faces. A slightly lighter edge catches the light, and no joints are visible. The ground-floor columns are grey-brown (59,52,45 / 48,43,40). The ground-floor wall pier beside the escalator is clad in beige speckled granite (130,107,83), the same family as the corridor floor.",
+    "samples": [
+     "atrium_wide_190503.jpg box (1115,85,1135,140): med 51,50,44 p20 47,45,40 p80 56,55,49",
+     "atrium_escalators_191522.jpg box (533,455,552,500): med 58,57,47 p20 52,48,39 p80 65,66,55",
+     "atrium_wide_190503.jpg box (648,720,668,790) ground-floor column: med 59,52,45 p20 53,45,38 p80 81,71,58",
+     "atrium_wide_190503.jpg box (1150,840,1170,940) ground-floor column: med 48,43,40 p20 44,40,36 p80 52,47,44",
+     "atrium_escalators_191522.jpg box (10,1125,55,1320) beige granite pier: med 130,107,83 p20 120,98,75 p80 139,115,91"
+    ],
+    "photo_light": "evening artificial light"
+   },
+   {
+    "element": "escalator_cladding",
+    "median_rgb": [
+     61,
+     35,
+     25
+    ],
+    "p20_rgb": [
+     58,
+     32,
+     22
+    ],
+    "p80_rgb": [
+     64,
+     37,
+     27
+    ],
+    "lit_or_reflect_rgb": [
+     75,
+     46,
+     35
+    ],
+    "finish": "smooth satin painted metal or laminate",
+    "texture": "The escalator trusses (sides and underside) are clad in a smooth dark reddish-brown / mahogany: 62,38,26, 48,28,23 and 60,31,22, reaching 75,46,35 where lit. There are faint long streaks along the length, with no visible pattern or joints. A brushed-stainless strip runs along the deck edge. The inner balustrades are white panels (in these photos wrapped with printed Samsung ads) above teal-edged clear glass with black rubber handrails.",
+    "samples": [
+     "atrium_wide_190503.jpg box (1030,730,1130,795): med 62,38,26 p20 59,35,23 p80 65,41,29",
+     "atrium_escalators_191522.jpg box (20,1040,55,1110): med 48,28,23 p20 45,26,21 p80 51,31,26",
+     "atrium_escalators_191522.jpg box (880,730,940,790) lit: med 75,46,35 p20 71,42,30 p80 78,49,38",
+     "atrium_escalators_191522.jpg box (245,1320,290,1370): med 60,31,22 p20 58,29,20 p80 63,33,25"
+    ],
+    "photo_light": "evening artificial light"
+   },
+   {
+    "element": "shopfront_fascia",
+    "median_rgb": [
+     165,
+     165,
+     170
+    ],
+    "p20_rgb": [
+     154,
+     156,
+     164
+    ],
+    "p80_rgb": [
+     177,
+     176,
+     178
+    ],
+    "finish": "satin white aluminium composite panels",
+    "texture": "Flat white panels on a band about 128 px high (about 0.6-0.65 m at the scale of the 0.85 m door leaf, estimated) above the shop openings. Vertical joints sit at the panel ends (x of about 250 and 995). The shop's illuminated sign is mounted proud of the panels. The white looks cool and slightly bluish (155,156,165). A continuous bright cove-light line runs along the bulkhead just above the fascia. Below it: a full-height glass door with a thin stainless frame and a champagne-gold ribbed roller shutter.",
+    "samples": [
+     "shopfront_corridor.jpg box (20,180,240,290): med 155,156,165 p20 150,150,158 p80 166,165,175",
+     "shopfront_corridor.jpg box (1000,190,1180,290): med 174,174,175 p20 157,161,170 p80 187,186,181"
+    ],
+    "photo_light": "neutral-cool LED, flat"
+   },
+   {
+    "element": "shop_interior_light",
+    "median_rgb": [
+     141,
+     139,
+     132
+    ],
+    "p20_rgb": [
+     96,
+     97,
+     89
+    ],
+    "p80_rgb": [
+     178,
+     174,
+     165
+    ],
+    "lit_or_reflect_rgb": [
+     252,
+     246,
+     242
+    ],
+    "finish": "emissive look: brightly lit shop interiors seen through glass",
+    "texture": "Open shopfronts on every level glow brighter and whiter than the atrium: median 114-180 against 50-100 for the atrium surfaces, with many highlights clipping (p80 191-252). The light is cool-neutral (the CITY BABY CLUB shelves read slightly greenish, 114,137,132). Inside are rows of downlights and white ceilings. A closed shop's glass door reads near-black.",
+    "samples": [
+     "atrium_wide_190503.jpg box (530,590,620,620): med 114,137,132 p20 51,71,69 p80 191,218,218",
+     "atrium_wide_190503.jpg box (150,590,250,620): med 180,171,170 p20 77,67,71 p80 252,246,242",
+     "atrium_escalators_191522.jpg box (230,810,400,870): med 141,139,132 p20 96,97,89 p80 178,174,165"
+    ],
+    "photo_light": "evening; shops cool-neutral, about 1.5-2x brighter than the atrium surfaces"
+   },
+   {
+    "element": "corridor_ceiling",
+    "median_rgb": [
+     131,
+     122,
+     119
+    ],
+    "p20_rgb": [
+     126,
+     118,
+     112
+    ],
+    "p80_rgb": [
+     142,
+     131,
+     129
+    ],
+    "lit_or_reflect_rgb": [
+     147,
+     128,
+     134
+    ],
+    "finish": "matte-satin painted gypsum board, smooth",
+    "texture": "A flat, plain white ceiling (it reads light warm grey, 131,122,119) with no grid or joints visible. Round recessed LED downlights about 1 m apart along the shop line (cores clip). It drops to a bulkhead at the shopfront line, which carries a continuous linear cove light. The red sign below throws a pink spill up onto it (147,128,134, p80 174,148,166).",
+    "samples": [
+     "shopfront_corridor.jpg box (40,40,300,140): med 131,122,119 p20 126,118,112 p80 142,131,129",
+     "shopfront_corridor.jpg box (500,20,1100,140) with the red sign spill: med 147,128,134 p20 132,119,118 p80 174,148,166"
+    ],
+    "photo_light": "neutral LED"
+   },
+   {
+    "element": "sign_glow",
+    "median_rgb": [
+     229,
+     0,
+     15
+    ],
+    "p20_rgb": [
+     211,
+     0,
+     11
+    ],
+    "p80_rgb": [
+     243,
+     1,
+     17
+    ],
+    "lit_or_reflect_rgb": [
+     254,
+     254,
+     254
+    ],
+    "finish": "internally lit acrylic (emissive)",
+    "texture": "The shop sign is a row of saturated pure-red discs (229,0,15) with white letters that clip (254). It is very bright, the brightest thing on the shopfront, and it bleeds a pink glow onto the ceiling above. The atrium's hanging red 4G / brand discs and yellow banners are temporary 2018 promotions, not part of the building.",
+    "samples": [
+     "shopfront_corridor.jpg box (265,200,285,260) red face: med 229,0,15 p20 211,0,11 p80 243,1,17",
+     "shopfront_corridor.jpg box (497,205,507,255) white letter stem: med 254,254,254 p20 252,251,252 p80 255,255,255"
+    ],
+    "photo_light": "self-lit"
+   }
+  ],
+  "lighting": [
+   "atrium_wide_190503.jpg: taken at 19:05 (dusk / evening). The atrium is closed on top (a grid ceiling, no skylight seen), so all light is artificial. Look: warm-neutral (white-ish surfaces read greige, about R/B 1.25; for example the soffit at 95,86,75).",
+   "atrium_escalators_191522.jpg: 19:15, the same warm-neutral evening light, with a lilac cast on the ground-floor stone.",
+   "shopfront_corridor.jpg: time unknown, interior only. Neutral to cool LED (fascia 155,156,165, R/B about 0.94). The light is flat and diffuse; the only colour cast is the red sign's spill.",
+   "Colour temperature: the wood cove's downlight pools look warm (about 3000 K). The big disc luminaires and the shop interiors look cool-neutral (about 4000-5000 K). The wider atrium looks warm-neutral overall because of the wood band and the bronze grid.",
+   "Brightness ladder in the atrium photos (median sRGB): the grid ceiling and columns are darkest (50-80); plaster fascias 90-112; wood band 100-118 between pools and 167 in them; shop interiors 114-180, with many highlights clipping at 250+. Disc lights and downlights clip at 255. The shops are about 1.5-2x brighter than the atrium surfaces around them, so the atrium reads as a dimmer warm volume ringed by bright cool shop openings.",
+   "Signs: internally lit signs (pure red 229,0,15 with white letters at 254) are the brightest things on a shopfront and throw a visible pink glow onto the white ceiling (corridor ceiling rises from 131,122,119 to 147,128,134). Small green exit signs and the lit name signs (for example 'market place', 'CITY BABY CLUB') glow saturated against the darker fascias.",
+   "Reflections: the polished ground-floor stone mirrors the downlights as sharp white spots. The corridor granite gives only soft blurred sheen. The stainless handrail mirrors the soffit, and the glass is nearly invisible face-on (teal only edge-on)."
+  ],
+  "notes": [
+   "Crops are saved as D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/landmarks/look/crops/mall_<element>_<n>.jpg; all box numbers are in D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/landmarks/look/crops/mall_results.json. Boxes are (x0,y0,x1,y1) in the original photo pixels. p20 and p80 are per-channel percentiles.",
+   "The element medians given at the top of each entry are the median of the base (unlit / unreflected) boxes: shopfront_fascia 165,165,170 is the mid of 155,156,165 and 174,174,175; columns 53,51,45 is from the upper-gallery boxes; escalator 61,35,25 is from the AW and AE unlit boxes. Each sample line gives the exact per-box numbers.",
+   "The handrail is too thin for a normal box (about 2-7 px). It was sampled with 18 3x3 boxes centred on the darkest row of the rail line in atrium_escalators (x = 19..192), checked on an annotated crop (mall_handrail_1.jpg).",
+   "Sizes in metres are estimates from perspective: floor tiles about 0.8 m (joints about 170 px against a door leaf of about 165 px), fascia band about 0.6-0.65 m, glass panels about 1.2-1.4 m, disc lights very roughly 1-1.5 m. They are not measured to the centimetre.",
+   "Several colours in the photos are temporary 2018 promotions, not the building: the yellow printed balcony banners, the red hanging 4G / brand discs, the Samsung escalator wraps, the clear inflatable sphere with a tree, and the green artificial turf on the atrium floor. The plaster fascia shows only above and below the banners.",
+   "All atrium values come from a dim evening phone photo. The bronze grid ceiling and the grey columns really read this dark (50-80) in the photos, while the shops and lights clip. To match the look in Roblox, keep the atrium surfaces mid-dark and warm, and make the shop interiors and the disc lights the bright, cool elements."
+  ]
+ },
+ {
+  "topic": "sedona_night",
+  "elements": [
+   {
+    "element": "sedona_wall_white",
+    "median_rgb": [
+     168,
+     169,
+     174
+    ],
+    "p20_rgb": [
+     157,
+     160,
+     164
+    ],
+    "p80_rgb": [
+     173,
+     176,
+     180
+    ],
+    "lit_or_reflect_rgb": [
+     236,
+     237,
+     232
+    ],
+    "finish": "matte painted render or plaster. No sheen anywhere, it reads the same at every angle.",
+    "texture": "Smooth painted surface with no visible grain. A horizontal ledge or sill band runs at every storey, about 3.2 m apart (one floor), with a thin dark shadow line under each ledge. Between the windows are slim square piers (mullion columns). There is faint grey dirt streaking under the ledges. The colour is a cool neutral white: under an overcast sky B is about 5 higher than R. It turns pale grey on shaded faces and near pure white in hazy sun.",
+    "photo_light": "Median: kabaaye_garden_inya_2020, monsoon overcast, flat grey light, cool, underexposed (sky is white). lit_or_reflect: kv_garden_wing_south_face, bright hazy daylight, overexposed and slightly cool.",
+    "samples": [
+     "kabaaye_garden_inya_2020.jpg box (674,178,698,198), crown wall facing the camera, overcast: med [168,169,174] p20 [157,160,164] p80 [173,176,180]. Crop: crops/sedona_sedona_wall_white_1.jpg",
+     "kabaaye_garden_inya_2020.jpg box (436,186,447,214), crown side face in shade, overcast: med [139,145,152] p20 [121,121,131] p80 [150,157,161]. Crop: crops/sedona_sedona_wall_white_2.jpg",
+     "kv_garden_wing_south_face.jpg box (661,48,668,72), pier between windows, hazy bright day: med [236,237,232] p20 [231,232,228] p80 [240,241,237]. Crop: crops/sedona_sedona_wall_white_3.jpg",
+     "kv_garden_wing_south_face.jpg box (622,79,648,85), spandrel under the ledge, hazy bright day: med [232,233,229] p20 [188,191,184] p80 [239,240,235]. Crop: crops/sedona_sedona_wall_white_4.jpg"
+    ]
+   },
+   {
+    "element": "sedona_window_glass",
+    "median_rgb": [
+     68,
+     85,
+     90
+    ],
+    "p20_rgb": [
+     62,
+     79,
+     85
+    ],
+    "p80_rgb": [
+     79,
+     95,
+     99
+    ],
+    "lit_or_reflect_rgb": [
+     126,
+     161,
+     150
+    ],
+    "finish": "glossy tinted glass, not mirror-like. Light curtains show through the glass.",
+    "texture": "Clearly green or teal tinted glass. Each window is a horizontal band about 2.5 to 3 times as wide as it is tall, split by thin dark-grey aluminium mullions into 3 or 4 panes. Pale curtains show behind the glass as lighter vertical streaks. Under overcast sky or in shade the glass reads dark teal-grey. In bright haze it reads a pale sea-green, because the sky reflection adds to the green tint. It never reads blue.",
+    "photo_light": "Median: kabaaye overcast, cool and underexposed. lit_or_reflect: kv_garden_wing_south_face, bright haze.",
+    "samples": [
+     "kabaaye_garden_inya_2020.jpg box (470,190,480,210), crown bay window, overcast: med [68,85,90] p20 [62,79,85] p80 [79,95,99]. Crop: crops/sedona_sedona_window_glass_2.jpg",
+     "kabaaye_garden_inya_2020.jpg box (100,280,130,290), west wing, overcast: med [68,82,79] p20 [36,45,43] p80 [81,101,96]. Includes a little mullion. Crop: crops/sedona_sedona_window_glass_3.jpg",
+     "kv_garden_wing_south_face.jpg box (625,46,650,58), hazy bright: med [126,161,150] p20 [110,143,133] p80 [148,179,165]. Crop: crops/sedona_sedona_window_glass_1.jpg"
+    ]
+   },
+   {
+    "element": "sedona_roof_tiles",
+    "median_rgb": [
+     115,
+     90,
+     92
+    ],
+    "p20_rgb": [
+     109,
+     85,
+     88
+    ],
+    "p80_rgb": [
+     118,
+     93,
+     96
+    ],
+    "lit_or_reflect_rgb": [
+     138,
+     94,
+     71
+    ],
+    "finish": "satin clay tile. It shows a mild sheen on slopes that face the sky.",
+    "texture": "Horizontal tile courses are visible as fine parallel lines along the slope. The ridge and hip caps are lighter: a cream or pale line runs along the ridges, seen in the lake-view photo and in the satellite image. There are dark weathering streaks. From street level the roof reads mauve or maroon brown (R > B > G), much darker and less orange than a fresh terracotta roof. The spire (pyatthat) tiers read redder. Seen from above in sun the roof is orange terracotta. Facets turned away from the sun or seen against the sky go dark grey-brown, and the roof reads near-black purple in the dawn shadow.",
+    "photo_light": "Median: kv_sw_corner_garden_wing, sunny day with cumulus, roof side-lit, neutral. lit_or_reflect: sat19 (Esri satellite), direct midday sun from above.",
+    "samples": [
+     "kv_sw_corner_garden_wing.jpg box (1058,116,1098,126), main roof slope: med [115,90,92] p20 [109,85,88] p80 [118,93,96]. Crop: crops/sedona_sedona_roof_tiles_1.jpg",
+     "kv_garden_wing_south_face.jpg box (995,112,1025,115), lower garden-wing roof, hazy: med [122,92,84] p20 [108,78,73] p80 [163,133,127]. Crop: crops/sedona_sedona_roof_tiles_3.jpg",
+     "kv_industrial_nw_inya_spire.jpg box (1013,38,1025,50), spire top tier, overcast: med [132,97,100] p20 [124,87,93] p80 [140,104,108]. Crop: crops/sedona_sedona_roof_tiles_4.jpg",
+     "kabaaye_garden_inya_2020.jpg box (120,256,220,268), west wing roof, backlit overcast: med [63,55,56] p20 [53,48,49] p80 [74,66,67]. Crop: crops/sedona_sedona_roof_tiles_2.jpg",
+     "kabaaye_garden_inya_2020.jpg box (566,104,580,114), crown spire, backlit: med [79,79,85] p20 [66,69,74] p80 [117,117,122]. Crop: crops/sedona_sedona_roof_tiles_5.jpg",
+     "sat19.jpg box (468,1231,495,1240), sunlit facet from above: med [138,94,71] p20 [136,92,70] p80 [141,97,73]. Crop: crops/sedona_sedona_roof_tiles_7.jpg",
+     "sat19.jpg box (300,890,330,940), main block facet with less sun, from above: med [105,77,55] p20 [103,75,52] p80 [107,79,59]. Crop: crops/sedona_sedona_roof_tiles_6.jpg",
+     "view_from_inya_to_lake_roof.jpg box (900,662,950,690), roof seen from the Inya tower at sunrise or sunset, in shadow: med [45,32,41] p20 [44,32,40] p80 [46,34,42]. Crop: crops/sedona_sedona_roof_tiles_8.jpg",
+     "view_from_inya_to_lake_roof.jpg box (880,742,960,770), other slope, same light: med [30,23,31] p20 [26,21,28] p80 [32,26,33]. Crop: crops/sedona_sedona_roof_tiles_9.jpg"
+    ]
+   },
+   {
+    "element": "sedona_eaves",
+    "median_rgb": [
+     57,
+     59,
+     64
+    ],
+    "p20_rgb": [
+     46,
+     50,
+     56
+    ],
+    "p80_rgb": [
+     77,
+     78,
+     81
+    ],
+    "lit_or_reflect_rgb": [
+     75,
+     73,
+     70
+    ],
+    "finish": "matte. A dark soffit and fascia, timber-like in tone.",
+    "texture": "Deep overhangs, about 1 m by eye, swept up at the corners (Burmese style). The underside is always in shade and reads dark charcoal-grey with a slight brown tint. On the crown roof it is near-black. On the underside of the low garden-wing roof it is a warmer grey-brown. The tile edge above has a thin reddish line. The underside has no visible texture at this distance.",
+    "photo_light": "Median: kv_sw_corner_garden_wing, sunny day, eave underside in shade. lit_or_reflect: kv_garden_wing_south_face, hazy bright day (the lower roof's underside, lit by light bouncing off the ground).",
+    "samples": [
+     "kv_sw_corner_garden_wing.jpg box (1060,131,1100,135), main roof eave underside: med [57,59,64] p20 [46,50,56] p80 [77,78,81]. Crop: crops/sedona_sedona_eaves_1.jpg",
+     "kabaaye_garden_inya_2020.jpg box (440,163,480,168), crown eave, overcast and backlit: med [38,39,44] p20 [34,36,41] p80 [43,44,50]. Crop: crops/sedona_sedona_eaves_2.jpg",
+     "kv_garden_wing_south_face.jpg box (1000,121,1040,125), lower roof underside, hazy: med [75,73,70] p20 [67,67,65] p80 [102,100,98]. Crop: crops/sedona_sedona_eaves_3.jpg"
+    ]
+   },
+   {
+    "element": "inya_cream_cladding",
+    "median_rgb": [
+     186,
+     183,
+     166
+    ],
+    "p20_rgb": [
+     179,
+     174,
+     155
+    ],
+    "p80_rgb": [
+     191,
+     188,
+     172
+    ],
+    "lit_or_reflect_rgb": [
+     230,
+     219,
+     197
+    ],
+    "finish": "matte smooth panel (painted or composite cladding). It has no gloss, even in direct sun.",
+    "texture": "Large flat cream-beige panels with fine, barely visible joints. On the sunlit blank crown wall the faint horizontal joints line up with the storeys, about 3.2 m apart. Vertical joints on the podium wall look about 1.2 to 1.5 m apart (estimated by eye; no scale reference). Some faces carry a staggered vertical barcode pattern of slim taupe fins and inset strips. The colour is warm cream (R > G > B, B about 20 lower than R). In clear sun it reads pale sand. Under overcast sky it reads greige. On faces in shade or under an underexposed sky it reads warm grey.",
+    "photo_light": "Median: kv_industrial_inya_sw, overcast, flat and neutral. lit_or_reflect: mp_5111, clear dry-season sun with haze, slightly warm.",
+    "samples": [
+     "kv_industrial_inya_sw.jpg box (125,20,155,180), overcast: med [186,183,166] p20 [179,174,155] p80 [191,188,172]. Crop: crops/sedona_inya_cream_cladding_2.jpg",
+     "kv_industrial_inya_sw.jpg box (226,20,254,180), overcast: med [186,183,166] p20 [184,181,163] p80 [190,187,172]. Crop: crops/sedona_inya_cream_cladding_5.jpg",
+     "kv_garden_wing_south_face.jpg box (1063,20,1078,180), hazy bright: med [223,221,205] p20 [208,207,192] p80 [227,225,210]. Crop: crops/sedona_inya_cream_cladding_1.jpg",
+     "mp_5111.jpg box (1030,150,1100,200), sunlit crown wall: med [230,219,197] p20 [228,218,195] p80 [232,221,199]. Crop: crops/sedona_inya_cream_cladding_3.jpg",
+     "mp_5111.jpg box (970,180,978,300), sunlit narrow slab: med [229,222,196] p20 [224,217,191] p80 [234,225,202]. Crop: crops/sedona_inya_cream_cladding_7.jpg",
+     "kabaaye_garden_inya_2020.jpg box (1012,180,1018,260), overcast, underexposed: med [142,138,130] p20 [138,134,127] p80 [147,142,134]. Crop: crops/sedona_inya_cream_cladding_4.jpg",
+     "kabaaye_garden_inya_2020.jpg box (961,160,967,230), overcast, underexposed: med [128,127,120] p20 [117,118,112] p80 [133,132,125]. Crop: crops/sedona_inya_cream_cladding_6.jpg",
+     "kv_back_street_podium_east.jpg box (20,30,70,170), podium or tower base wall, overcast, in shade: med [140,141,129] p20 [135,135,123] p80 [144,145,134]. Crop: crops/sedona_inya_cream_cladding_8.jpg",
+     "kv_back_street_podium_east.jpg box (150,300,250,360), lower podium wall, overcast: med [134,134,116] p20 [130,131,112] p80 [137,138,122]. Crop: crops/sedona_inya_cream_cladding_9.jpg"
+    ]
+   },
+   {
+    "element": "inya_blue_glass",
+    "median_rgb": [
+     88,
+     93,
+     101
+    ],
+    "p20_rgb": [
+     84,
+     87,
+     93
+    ],
+    "p80_rgb": [
+     92,
+     98,
+     107
+    ],
+    "lit_or_reflect_rgb": [
+     115,
+     139,
+     151
+    ],
+    "finish": "glossy, close to mirror-like reflective glass",
+    "texture": "Two forms. (1) A continuous vertical curtain-wall strip on the slab edge, with thin horizontal transoms at each storey (about 3.2 m) and slim vertical mullions. (2) Punched windows in a checkerboard: each window is shifted half a bay from the floor above, with a taupe-grey spandrel panel beside or under each one. The glass has no strong tint of its own. It takes the sky: blue-grey under overcast, clear mid-blue under blue sky, and almost white-grey in bright haze.",
+    "photo_light": "Median: kabaaye overcast, cool and underexposed. lit_or_reflect: mp_5111, clear blue sky with sun, reflecting the blue sky.",
+    "samples": [
+     "kabaaye_garden_inya_2020.jpg box (975,170,983,240), vertical glass strip, overcast: med [88,93,101] p20 [84,87,93] p80 [92,98,107]. Crop: crops/sedona_inya_blue_glass_3.jpg",
+     "mp_5111.jpg box (1017,262,1027,270), checkerboard window, clear sky: med [115,139,151] p20 [92,118,130] p80 [191,199,201]. p80 includes the cream frame edge. Crop: crops/sedona_inya_blue_glass_4.jpg",
+     "kv_garden_wing_south_face.jpg box (1036,15,1054,95), glass strip, bright haze: med [172,181,181] p20 [163,175,177] p80 [189,187,184]. Crop: crops/sedona_inya_blue_glass_1.jpg",
+     "kv_industrial_inya_sw.jpg box (38,10,62,110), glass strip, overcast: med [125,139,134] p20 [92,109,77] p80 [144,145,146]. p20 is pulled down by leaves in front. Crop: crops/sedona_inya_blue_glass_2.jpg"
+    ]
+   },
+   {
+    "element": "inya_dark_glass_strip",
+    "median_rgb": [
+     39,
+     38,
+     37
+    ],
+    "p20_rgb": [
+     27,
+     26,
+     25
+    ],
+    "p80_rgb": [
+     52,
+     48,
+     48
+    ],
+    "lit_or_reflect_rgb": [
+     106,
+     108,
+     113
+    ],
+    "finish": "Varies by view. The deep slot between the two slabs reads near-black and matte (shadowed recess or dark glass). Seen lit and closer, the matching inset strips are a matte taupe panel, not glass. The podium's dark band is a matte, finely ribbed grey metal screen.",
+    "texture": "Vertical slot about one third of a bay wide, running the full height of the tower between the two slab masses, without visible joints. The narrow slab in mp_5111 has a medium-grey vertical band with small punched windows. The back-street podium has a large dark grey panel with fine vertical ribs, about 5 to 10 cm by eye. These read as one dark element from a distance.",
+    "photo_light": "Median: kabaaye overcast, cool and underexposed. lit_or_reflect: mp_5111, clear sun (grey band on the narrow slab).",
+    "samples": [
+     "kabaaye_garden_inya_2020.jpg box (1004,205,1008,240), slot between the slabs, overcast: med [39,38,37] p20 [27,26,25] p80 [52,48,48]. Crop: crops/sedona_inya_dark_glass_strip_1.jpg",
+     "mp_5111.jpg box (951,200,957,300), grey vertical band, sun: med [106,108,113] p20 [101,102,106] p80 [118,119,123]. Crop: crops/sedona_inya_dark_glass_strip_4.jpg",
+     "kv_back_street_podium_wall.jpg box (190,110,250,170), ribbed dark grey podium screen, overcast: med [81,86,83] p20 [78,84,80] p80 [84,90,87]. Crop: crops/sedona_inya_dark_glass_strip_5.jpg",
+     "kv_garden_wing_south_face.jpg box (1086,20,1098,180), inset vertical strip next to the cream panels, hazy (reads taupe, not dark): med [170,165,147] p20 [164,157,137] p80 [218,215,200]. Crop: crops/sedona_inya_dark_glass_strip_2.jpg",
+     "kv_industrial_inya_sw.jpg box (105,10,117,170), the same inset strip, overcast: med [123,117,97] p20 [116,108,89] p80 [133,128,109]. Crop: crops/sedona_inya_dark_glass_strip_3.jpg",
+     "kv_back_street_podium_east.jpg box (240,385,330,440), dark grey podium fence panel, overcast: med [50,51,46] p20 [47,48,43] p80 [53,54,50]. Crop: crops/sedona_inya_podium_dark_fence_1.jpg"
+    ]
+   },
+   {
+    "element": "mp_podium_granite (Myanmar Plaza podium spandrels, dusk)",
+    "median_rgb": [
+     174,
+     162,
+     151
+    ],
+    "p20_rgb": [
+     165,
+     154,
+     142
+    ],
+    "p80_rgb": [
+     181,
+     170,
+     158
+    ],
+    "finish": "honed or flamed granite, matte to low satin",
+    "texture": "Fine salt-and-pepper speckle in pink-beige granite. Thin vertical joints about every 0.6 to 0.8 m (estimated; the spandrel is assumed about 1.2 m tall), plus slight colour changes from panel to panel. Every storey has a cream metal sill or ledge band above it. The glass between the spandrels is blue-grey with pale curtains behind. The canopy and entrance piers are dark green-black polished granite.",
+    "photo_light": "mp_5386: late afternoon going into dusk, soft overcast light, slightly warm. The shop lights are already on.",
+    "samples": [
+     "mp_5386.jpg box (480,730,620,770): med [174,162,151] p20 [165,154,142] p80 [181,170,158]. Crop: crops/dusk_mp_podium_granite_1.jpg",
+     "mp_5386.jpg box (640,700,740,740): med [166,153,140] p20 [155,142,128] p80 [177,164,150]. Crop: crops/dusk_mp_podium_granite_2.jpg",
+     "mp_5386.jpg box (440,600,500,650), strip glass with curtains: med [109,127,137] p20 [100,118,128] p80 [117,135,145]. Crop: crops/dusk_mp_podium_glass_1.jpg",
+     "mp_5386.jpg box (150,1040,820,1150), MYANMAR PLAZA letters (silver-white metal, unlit at dusk), pixels with lum >= 170: med [189,185,171] p20 [182,174,154] p80 [204,198,190]. Crop: crops/dusk_mp_letters_1.jpg"
+    ]
+   },
+   {
+    "element": "mp_office_tower_facade (the BIDV / ooredoo office slab at Myanmar Plaza, dusk)",
+    "median_rgb": [
+     134,
+     129,
+     109
+    ],
+    "p20_rgb": [
+     129,
+     123,
+     103
+    ],
+    "p80_rgb": [
+     138,
+     132,
+     113
+    ],
+    "lit_or_reflect_rgb": [
+     61,
+     78,
+     89
+    ],
+    "finish": "Spandrels are satin metal panels in beige-khaki. The glass ribbons are glossy dark tinted glass.",
+    "texture": "Horizontal ribbon windows. The floor pitch is about 28 px in the photo. About 43% of each storey is the beige spandrel band and about 57% is dark glass. The spandrels show vertical panel joints about every 1.2 to 1.5 m (estimated by eye). Higher up the glass reflects the sky as blue-grey (61,78,89). Lower down, where it faces trees or ground, it is near-black (37,41,40). The CB Bank / Yoma tower next to it has the same banding in a lighter cream with taupe glass.",
+    "photo_light": "mp_5387: dusk, about 17:45 to 18:15 by eye, pale cloudy sky, soft and even light.",
+    "samples": [
+     "mp_5387.jpg box (640,558,680,562), beige spandrel: med [134,129,109] p20 [129,123,103] p80 [138,132,113]. Crop: crops/dusk_office_spandrel_beige_3.jpg",
+     "mp_5387.jpg box (640,586,680,590), beige spandrel: med [132,127,105] p20 [125,120,99] p80 [136,131,110]. Crop: crops/dusk_office_spandrel_beige_2.jpg",
+     "mp_5387.jpg box (575,425,600,440), top parapet panels: med [143,137,120] p20 [137,132,116] p80 [146,140,124]. Crop: crops/dusk_office_spandrel_beige_1.jpg",
+     "mp_5387.jpg box (580,505,600,515), upper glass ribbon: med [61,78,89] p20 [52,68,78] p80 [68,85,96]. Crop: crops/dusk_office_glass_1.jpg",
+     "mp_5387.jpg box (640,598,680,606), lower glass ribbon: med [37,41,40] p20 [34,38,37] p80 [41,44,44]. Crop: crops/dusk_office_glass_2.jpg",
+     "mp_5387.jpg box (240,330,280,340), CB Bank tower cream band: med [180,165,135] p20 [96,97,90] p80 [185,171,142]. The box clips the glass edge. Crop: crops/dusk_cb_cream_band_1.jpg",
+     "mp_5387.jpg box (245,347,275,357), CB Bank tower glass band: med [104,97,85] p20 [99,93,80] p80 [111,106,96]. Crop: crops/dusk_cb_glass_1.jpg",
+     "mp_5387.jpg box (900,120,1100,200), dusk sky: med [183,197,208]. Crop: crops/dusk_sky_1.jpg"
+    ]
+   },
+   {
+    "element": "night_office_windows_lit (Myanmar Plaza office tower, blue hour)",
+    "median_rgb": [
+     210,
+     169,
+     98
+    ],
+    "p20_rgb": [
+     188,
+     147,
+     80
+    ],
+    "p80_rgb": [
+     225,
+     188,
+     118
+    ],
+    "lit_or_reflect_rgb": [
+     157,
+     192,
+     191
+    ],
+    "finish": "Lit glazing. Bays are fully on or off, with no in-between glow.",
+    "texture": "At blue hour, lit bays come in clusters of 2 to 4 panes, not evenly spread. Three lit colours were measured: warm amber (about 3000 K), pale yellow (about 3500 K) and cool fluorescent white, which reads cyan under the blue-hour white balance (about 5000 to 6500 K). Ceiling panel lights show as bright dots inside some bays. The unlit glass is deep navy and the spandrel bands are slate blue-grey. Lit share, from 20 x 18 cells on the front face: about 16% of cells (58/360). By eye about 20 to 25% of the panes are lit at about 18:30. Once full night falls (inya_night_from_lake) the same tower shows lit runs along whole floors, about 31% of cells. That figure is inflated by glare. At dusk (mp_5387) only a few scattered panes are lit (5% or less, judged by eye).",
+    "photo_light": "mp_aungphone: blue hour, about 18:30. Deep blue sky (80,122,170), and artificial light dominates.",
+    "samples": [
+     "mp_aungphone.jpg box (620,398,680,430), pixels with lum >= 110 (48% of box), warm amber: med [210,169,98] p20 [188,147,80] p80 [225,188,118]. Crop: crops/night_mp_office_lit_warm_1.jpg",
+     "mp_aungphone.jpg box (705,440,722,475), pixels with lum >= 110 (77%), pale yellow: med [230,215,159] p20 [201,187,133] p80 [254,241,191]. Crop: crops/night_mp_office_lit_warm_2.jpg",
+     "mp_aungphone.jpg box (500,455,575,495), pixels with lum >= 110 (50%), cool white: med [157,192,191] p20 [135,172,174] p80 [178,210,207]. Crop: crops/night_mp_office_lit_cool_1.jpg",
+     "mp_aungphone.jpg box (740,360,780,370), unlit glass: med [12,30,56] p20 [8,26,52] p80 [17,35,61]. Crop: crops/night_mp_office_unlit_glass_1.jpg",
+     "mp_aungphone.jpg box (560,705,620,712), spandrel band at blue hour: med [46,49,69] p20 [18,38,59] p80 [56,57,73]. Crop: crops/night_mp_office_spandrel_1.jpg",
+     "mp_aungphone.jpg box (480,300,900,720), whole front face: 10.7% of pixels have lum >= 110; lit pixels med [159,174,171], unlit med [38,57,78]. Crop: crops/night_mp_office_face_share_mid.jpg",
+     "inya_night_from_lake.jpg box (540,285,620,320), BIDV tower at full night, pixels with lum >= 130: med [172,181,194] p20 [135,137,153] p80 [233,243,251]. The facade behind is lifted by glare to [111,120,137]. Crop: crops/nightlake_office_tower_lit_1.jpg"
+    ]
+   },
+   {
+    "element": "night_sedona_inya_tower (seen from Inya Lake at night)",
+    "median_rgb": [
+     184,
+     152,
+     107
+    ],
+    "p20_rgb": [
+     155,
+     125,
+     83
+    ],
+    "p80_rgb": [
+     222,
+     192,
+     145
+    ],
+    "lit_or_reflect_rgb": [
+     253,
+     252,
+     250
+    ],
+    "finish": "Lit hotel windows are warm. The crown sign is backlit white and blows out to pure white.",
+    "texture": "Unlit guest-room windows stay dark. One full-height column of windows on the right edge is lit warm on every floor (about 26 lit windows stacked, a corridor or lift-lobby column). Elsewhere about 5% of the room windows are lit, at random. Cell count over the face: 19/104 = 18% including that column; without it about 4%. At the crown, a white sign band blows out to pure white. Above it, the rooftop pergola frame is outlined in warm white lights (226,199,174). The low hotel wing below has a row of warm under-eave lights about one bay apart (200,158,104). The facade between reads dark warm grey (52,46,41), lifted by the deck floodlights.",
+    "photo_light": "inya_night_from_lake: full night, lake deck lit by very bright white LED floodlights with strong lens flare and haze over the whole frame.",
+    "samples": [
+     "inya_night_from_lake.jpg box (196,262,206,365), lit window column, pixels with lum >= 100 (55%): med [184,152,107] p20 [155,125,83] p80 [222,192,145]; unlit [64,47,29]. Crop: crops/nightlake_sedona_inya_lit_windows_1.jpg",
+     "inya_night_from_lake.jpg box (110,262,192,370), main face: 10.3% of pixels have lum >= 90, lit med [137,120,101], unlit med [52,46,41]. Crop: crops/nightlake_sedona_inya_face_share.jpg",
+     "inya_night_from_lake.jpg box (118,248,165,258), crown sign, pixels with lum >= 180: med [253,252,250] p20 [248,246,243] p80 [255,255,253]. Crop: crops/nightlake_sedona_inya_crown_sign_1.jpg",
+     "inya_night_from_lake.jpg box (120,242,165,248), crown frame lights, pixels with lum >= 150: med [226,199,174] p20 [194,162,137] p80 [255,234,208]. Crop: crops/nightlake_sedona_inya_crown_frame_1.jpg",
+     "inya_night_from_lake.jpg box (30,368,100,380), low wing eave lights, pixels with lum >= 120: med [200,158,104] p20 [170,133,83] p80 [234,188,131]. Crop: crops/nightlake_sedona_inya_low_wing_lights_1.jpg"
+    ]
+   },
+   {
+    "element": "night_crown_signs (Melia, HAGL, ooredoo, BIDV, CB Bank, Shwe Bank)",
+    "median_rgb": [
+     239,
+     221,
+     200
+    ],
+    "p20_rgb": [
+     185,
+     167,
+     138
+    ],
+    "p80_rgb": [
+     255,
+     253,
+     238
+    ],
+    "lit_or_reflect_rgb": [
+     41,
+     238,
+     77
+    ],
+    "finish": "Lit channel letters or neon. They emit light and sit on dark grey crown walls.",
+    "texture": "MELIA is warm-white halo-lit letters. HAGL is saturated green with 'Group' in yellow. ooredoo is red circles with white letters: saturated red (212,62,71) at dusk, blown to pink-white at night. BIDV is white-blue letters on a rooftop frame. The CB Bank tower crown has a continuous bright white light band (251,250,243). A single vertical line of white lights runs down the CB tower corner, about one light per floor (211,206,202). Shwe Bank is a navy box (40,48,78) with white letters. Signs read as pure light and lose any surface texture.",
+    "photo_light": "mp_aungphone: blue hour. inya_night_from_lake: night with glare. mp_5387: dusk.",
+    "samples": [
+     "mp_aungphone.jpg box (975,530,1080,600), MELIA, pixels with lum >= 150 (17%): med [239,221,200] p20 [185,167,138] p80 [255,253,238]. Crop: crops/night_melia_sign_1.jpg",
+     "mp_aungphone.jpg box (1140,598,1240,665), HAGL green (green-dominant pixels, 8%): med [41,238,77] p20 [20,182,40] p80 [62,247,103]. Same box, yellow pixels (5%): med [255,243,109] p20 [242,208,71] p80 [255,252,127]",
+     "mp_5387.jpg box (945,290,1150,340), ooredoo at dusk (red-dominant pixels, 26%): med [212,62,71] p20 [184,54,63] p80 [233,73,81]. Crop: crops/dusk_ooredoo_sign_1.jpg",
+     "inya_night_from_lake.jpg box (592,252,622,267), ooredoo at night (blown out): med [231,205,216] p20 [185,139,158] p80 [255,251,253]. Crop: crops/nightlake_ooredoo_sign_1.jpg",
+     "inya_night_from_lake.jpg box (770,314,800,327), HAGL at night, pixels with lum >= 90: med [119,184,141] p20 [61,101,97] p80 [250,247,226]. Crop: crops/nightlake_hagl_sign_1.jpg",
+     "inya_night_from_lake.jpg box (720,311,760,323), MELIA at night, pixels with lum >= 150: med [224,220,212]. Crop: crops/nightlake_melia_sign_1.jpg",
+     "inya_night_from_lake.jpg box (410,279,475,284), CB tower crown band, pixels with lum >= 150 (97%): med [251,250,243] p20 [216,212,209] p80 [255,254,254]. Crop: crops/nightlake_cb_tower_crown_band_1.jpg",
+     "inya_night_from_lake.jpg box (441,285,449,370), CB corner light line, pixels with lum >= 120 (44%): med [211,206,202]. Crop: crops/nightlake_cb_tower_vertical_light_1.jpg",
+     "mp_aungphone.jpg box (770,780,870,870), Shwe Bank letters, pixels with lum >= 150 (33%): med [252,254,254]; box panel (775,770,800,800) med [40,48,78]. Crops: crops/night_mp_bank_sign_letters_1.jpg, crops/night_mp_bank_sign_box_1.jpg"
+    ]
+   },
+   {
+    "element": "night_hotel_windows_melia",
+    "median_rgb": [
+     207,
+     197,
+     119
+    ],
+    "p20_rgb": [
+     138,
+     128,
+     86
+    ],
+    "p80_rgb": [
+     255,
+     249,
+     152
+    ],
+    "lit_or_reflect_rgb": [
+     20,
+     33,
+     54
+    ],
+    "finish": "Lit glazing in a dark banded facade",
+    "texture": "Very few rooms are lit: about 2% of cells at blue hour (4/192) and 5 to 10% at full night. Lit rooms are a pale warm yellow (about 3000 to 3500 K). The facade is dark navy and grey horizontal bands. A warm sign strip runs along the base.",
+    "photo_light": "mp_aungphone: blue hour",
+    "samples": [
+     "mp_aungphone.jpg box (1015,655,1040,675), pixels with lum >= 100 (26%): med [207,197,119] p20 [138,128,86] p80 [255,249,152]. Crop: crops/night_melia_lit_window_1.jpg",
+     "mp_aungphone.jpg box (1150,800,1200,840), unlit facade: med [20,33,54] p20 [9,22,42] p80 [50,67,86]. Crop: crops/night_melia_facade_1.jpg",
+     "inya_night_from_lake.jpg box (800,345,830,362), pixels with lum >= 140: med [198,187,173]. Crop: crops/nightlake_melia_lit_window_1.jpg",
+     "inya_night_from_lake.jpg box (765,463,865,471), base warm strip, pixels with lum >= 120: med [170,158,137] p80 [241,219,176]. Crop: crops/nightlake_melia_base_strip_1.jpg"
+    ]
+   },
+   {
+    "element": "night_led_screens_and_billboards",
+    "median_rgb": [
+     227,
+     255,
+     255
+    ],
+    "p20_rgb": [
+     153,
+     252,
+     252
+    ],
+    "p80_rgb": [
+     246,
+     255,
+     255
+    ],
+    "lit_or_reflect_rgb": [
+     253,
+     253,
+     254
+    ],
+    "finish": "Emissive screens that blow out to near-white in photos",
+    "texture": "Myanmar Plaza has a large LED screen over the podium (about 4 storeys wide, moving ad content with orange header bars and a grey number panel). Next to it hang floodlit printed billboards (Hitachi, LG) with spotlight heads on arms above them. On Shwe Bank's corner a cyan-green LED panel reads as a flat saturated cyan. All of them are the brightest objects in the scene. They light the nearby canopy and trees.",
+    "photo_light": "mp_aungphone: blue hour. mp_5387: dusk.",
+    "samples": [
+     "mp_aungphone.jpg box (885,800,945,890), cyan LED panel: med [227,255,255] p20 [153,252,252] p80 [246,255,255]. Crop: crops/night_mp_led_screen_1.jpg",
+     "mp_aungphone.jpg box (620,1100,700,1180), floodlit 'OFFICE FOR LEASE' billboard: med [253,253,254] p20 [213,205,243]. Crop: crops/night_mp_billboard_1.jpg",
+     "mp_5387.jpg box (930,900,1150,1060), big LED screen at dusk: med [249,244,202] p20 [176,173,142] p80 [255,255,255]. Crop: crops/dusk_led_screen_1.jpg",
+     "mp_aungphone.jpg box (300,915,460,990), backlit cool sign: med [160,188,207] p20 [97,126,147] p80 [248,255,255]. Crop: crops/night_mp_backlit_sign_1.jpg"
+    ]
+   },
+   {
+    "element": "night_podium_shopfronts_and_neon",
+    "median_rgb": [
+     193,
+     120,
+     32
+    ],
+    "p20_rgb": [
+     168,
+     91,
+     9
+    ],
+    "p80_rgb": [
+     225,
+     165,
+     75
+    ],
+    "lit_or_reflect_rgb": [
+     231,
+     219,
+     183
+    ],
+    "finish": "Full-height clear shop glazing with strongly lit, warm interiors behind",
+    "texture": "The ground-floor shops are lit deep amber or orange (about 2700 K) and are the warmest light in the scene. Above them the floor is dark glass with a few downlights. Inside the entrance hangs a large ring chandelier of three concentric warm-white rings (about 3500 to 4000 K). The Hard Rock neon guitar is a thin orange-red neon outline. Smaller red neon signs sit along the podium (226,145,145) and glow pink.",
+    "photo_light": "mp_aungphone: blue hour. mp_5386 and mp_5388: dusk.",
+    "samples": [
+     "mp_aungphone.jpg box (540,1260,760,1390), amber pixels (38%): med [193,120,32] p20 [168,91,9] p80 [225,165,75]",
+     "mp_aungphone.jpg box (560,1290,640,1330): med [212,139,25] p20 [168,88,5] p80 [255,246,175]. Crop: crops/night_mp_podium_shop_1.jpg",
+     "mp_aungphone.jpg box (250,1270,330,1320): med [204,138,83] p20 [190,82,42] p80 [252,226,185]. Crop: crops/night_mp_podium_shop_2.jpg",
+     "mp_aungphone.jpg box (600,840,680,880), upper podium glass: med [59,61,68] p80 [123,112,82]. Crop: crops/night_mp_podium_upper_glass_1.jpg",
+     "mp_5386.jpg box (760,1230,1170,1290), ring chandelier, pixels with lum >= 200: med [231,219,183] p20 [220,207,168] p80 [245,234,198]. Crop: crops/dusk_mp_halo_ring_light_1.jpg",
+     "mp_5386.jpg box (800,1400,1000,1470), shop interior, pixels with lum >= 150: med [252,244,180]; unlit med [139,97,74]. Crop: crops/dusk_mp_shop_warm_1.jpg",
+     "mp_5388.jpg box (655,1060,700,1200), Hard Rock neon (pixels with R > 200 and R > G+60): med [230,143,85] p20 [208,124,69] p80 [254,168,107]. Crop: crops/dusk_hardrock_neon_1.jpg",
+     "inya_night_from_lake.jpg box (395,455,440,475), red neon on the podium, pixels with lum >= 100: med [226,145,145] p20 [151,109,105] p80 [253,250,245]. Crop: crops/nightlake_red_neon_1.jpg"
+    ]
+   },
+   {
+    "element": "night_street_lamps_and_sky",
+    "median_rgb": [
+     254,
+     255,
+     247
+    ],
+    "p20_rgb": [
+     246,
+     243,
+     220
+    ],
+    "p80_rgb": [
+     255,
+     255,
+     250
+    ],
+    "lit_or_reflect_rgb": [
+     124,
+     128,
+     138
+    ],
+    "finish": "Emissive lamps",
+    "texture": "The Kabar Aye Road street lamps are white LED, close to neutral white (about 5000 K or above). Their heads blow out, and they throw a cool grey-blue glow halo into the haze (124,128,138), about two lamp-head widths. The lake deck uses globe lanterns and twin floodlights, also white, with big flares. Podium lamps are mushroom-shaped heads with a warm-white lens. The sky is mid blue at blue hour (80,122,170) and near-black neutral grey at full night (22,25,28), with no orange city glow in the photo.",
+    "photo_light": "mp_aungphone: blue hour. inya_night_from_lake: night.",
+    "samples": [
+     "mp_aungphone.jpg box (0,822,25,842), street lamp head: med [254,255,247] p20 [246,243,220] p80 [255,255,250]. Crop: crops/night_streetlamp_1.jpg",
+     "inya_night_from_lake.jpg box (685,245,715,275), lantern globe, pixels with lum >= 200: med [255,255,253]. Crop: crops/nightlake_streetlamp_globe_1.jpg",
+     "inya_night_from_lake.jpg box (722,250,740,270), glow halo next to the globe: med [124,128,138] p20 [105,114,130] p80 [152,151,151]. Crop: crops/nightlake_streetlamp_glow_1.jpg",
+     "inya_night_from_lake.jpg box (560,200,580,215), floodlight halo: med [115,124,137]. Crop: crops/nightlake_floodlamp_glow_1.jpg",
+     "mp_aungphone.jpg box (1000,330,1200,450), blue-hour sky: med [80,122,170] p20 [76,117,165] p80 [85,129,176]. Crop: crops/night_mp_sky_bluehour_1.jpg",
+     "inya_night_from_lake.jpg box (900,60,1200,180), night sky: med [22,25,28] p20 [19,22,24] p80 [25,29,32]. Crop: crops/nightlake_sky_1.jpg"
+    ]
+   }
+  ],
+  "lighting": [
+   "kabaaye_garden_inya_2020.jpg: Sedona main block and Inya Wing by day. Monsoon overcast (2020), flat cool grey light, no shadows. The camera is underexposed because the sky blows out, so every surface reads about 25-30% darker than its albedo.",
+   "kv_garden_wing_south_face.jpg: garden wing and Inya Wing. Bright hazy daylight, very high exposure (whites near 236-240), slightly cool or green cast. The best view of the Sedona glass's green tint.",
+   "kv_sw_corner_garden_wing.jpg: sunny day with cumulus. The roof slope is lit from the side and the walls are in shade or backlit. Neutral colour.",
+   "kv_industrial_inya_sw.jpg, kv_industrial_nw_inya_spire.jpg, kv_industrial_wall.jpg, kv_back_street_podium_east.jpg, kv_back_street_podium_wall.jpg: street-level views on overcast or threatening days. Flat, neutral to slightly warm, normal exposure. Best for the Inya Wing's base cream colour.",
+   "kv_kabaaye_north_gate_sun.jpg, kv_kabaaye_wall_railing.jpg, kv_kabaaye_wall_razorwire.jpg: midday sun with cumulus. kv_kabaaye_north_gate_rain.jpg: rain. These show only the Sedona compound wall and gate (white pillars, red and white kerbs), not the facades, so none was sampled.",
+   "mp_5111.jpg: clear dry-season day with haze, hard sun, slightly warm. Shows the Inya Wing (cream tower with checkerboard blue windows and a crown pergola frame) in full sun, plus the Myanmar Plaza CB Bank tower and the Melia.",
+   "sat19.jpg: Esri satellite (z19), direct midday sun from above. Sedona roofs read orange terracotta from above.",
+   "view_from_inya_to_lake_roof.jpg: sunrise or sunset taken through glass from high in the Inya Wing. Warm orange sky. The Sedona roof below is in shadow and reads deep purple-brown.",
+   "mp_5386.jpg: Myanmar Plaza podium, late afternoon going into dusk, soft and slightly warm. Shop interiors and the ring chandelier are lit.",
+   "mp_5387.jpg and mp_5388.jpg: Myanmar Plaza at dusk, about 17:45-18:15, pale cloudy sky (183,197,208). The LED screen, ooredoo and BIDV signs and the Hard Rock neon are on. Only a few office panes are lit.",
+   "mp_aungphone.jpg (same file as scratchpad/mp/p11.jpg): Myanmar Plaza office tower and the Melia at blue hour, about 18:30. Deep blue sky (80,122,170). Artificial light dominates: warm amber shops, mixed warm and cool office bays, cyan LED panel, warm-white MELIA, green and yellow HAGL.",
+   "inya_night_from_lake.jpg (same file as scratchpad/mp/p1.jpg): full night from the Inya Lake deck. Very bright white LED floodlights and lanterns in the frame cause strong flare and a veil that lifts every dark facade to grey (90-130). Lit-share numbers from this photo are inflated, and building colours are lifted toward grey-blue.",
+   "interior_inya_lobby.jpg and interior_inya_room.jpg: interior marketing photos (warm 3000 K wall washers, beige marble, dark timber slats, amber glass lamps). Not sampled because they show no exterior."
+  ],
+  "notes": [
+   "Every RGB value comes from a measured box (sRGB 0-255, per-channel median and 20th / 80th percentile, PIL, python -I). For night elements, 'LIT' values are the median of the pixels in the box above the stated luminance threshold (Rec.709 lum), or of pixels passing the stated hue test. The share of pixels kept is given with each sample. Crops are in D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/landmarks/look/crops/ (prefixes sedona_*, night_*, nightlake_*, dusk_*). Each crop shows the box in magenta with a 30 px margin, at 3x.",
+   "Rejected boxes, whose crops were deleted: a Sedona wall box in kv_sw hit palms, two satellite roof boxes hit tree shadow and pool, an eave box hit white wall, a checkerboard glass box hit the spandrel, a podium ledge box hit glass, and a podium sign box hit the deck. The surviving numbers do not use them.",
+   "Naming: every 'Myanmar Centre' photo in this folder actually shows the Myanmar Plaza complex on Kabar Aye Pagoda Road: the podium with the 'MYANMAR PLAZA' letters, the BIDV / ooredoo office slab, the CB Bank / Yoma Bank tower, and the Melia hotel next door. mp_aungphone's tower carries Shwe Bank, The Manhattan Fish Market and People Impact signs.",
+   "The Inya Wing (cream tower) is in mp_5111 (right-hand tower, identified by its checkerboard windows and the crown pergola frame it shares with kabaaye_garden_inya_2020). This identification is by matching features, not confirmed by a label.",
+   "Biggest gaps between real life and a typical model. (1) The Sedona roofs are not bright orange from street level: they read mauve or maroon brown (115,90,92) with dark charcoal eaves (57,59,64), and look orange terracotta (138,94,71) only from above in sun. (2) Sedona glass is green or teal (68,85,90 overcast; 126,161,150 in haze), not blue, with pale curtains behind. (3) The Inya cladding is warm cream (186,183,166 overcast; 230,219,197 in sun), not white. Its blue look comes only from the reflective glass picking up the sky. (4) The dark strip on the Inya Wing is a deep shadowed slot (39,38,37). The matching inset strips in close views are taupe (123,117,97 overcast).",
+   "Sedona white walls are a matte cool white: B is about 5 above R under overcast sky. They read only 168-174 in an underexposed overcast photo and 232-237 in bright haze. Pick by target exposure. Shade faces drop to about (139,145,152).",
+   "Night character: warm and cool light are mixed. Hotel rooms and the Sedona tower are warm (about 3000 K, 184,152,107). Offices mix amber (210,169,98), pale yellow (230,215,159) and cool fluorescent (157,192,191). Shops are deep amber (193,120,32). Street and deck lamps are white LED (254,255,247) with cool halos (124,128,138). Signs are saturated: HAGL green (41,238,77), yellow (255,243,109), ooredoo red (212,62,71), cyan LED (227,255,255).",
+   "Lit shares, all approximate: Myanmar Plaza office tower about 16% of facade cells at blue hour (58/360), about 20-25% of panes by eye, and about 31% of cells at full night (inflated by glare). Melia hotel 2% of cells at blue hour, about 5-10% at night. Sedona Inya tower about 4% of rooms scattered, plus one corner column lit warm on every floor. CB Bank tower: crown band and a one-light-per-floor vertical line, with few windows lit. Dusk (mp_5387): office panes 5% or less, by eye.",
+   "Joint spacings are estimates by eye, because none of the photos has a reliable scale. Sedona storey about 3.2 m (one ledge per floor). Myanmar Plaza granite joints about 0.6-0.8 m (spandrel assumed about 1.2 m). Office slab spandrel joints about 1.2-1.5 m. Inya podium panels about 1.2-1.5 m wide.",
+   "Two pairs of input files are byte-identical copies, so they were measured once: scratchpad/mp/p11.jpg = refs/sedona/mp_aungphone.jpg (md5 96002d95) and scratchpad/mp/p1.jpg = refs/sedona/inya_night_from_lake.jpg (md5 946f0efd).",
+   "Working scripts (grid, meas, lit, cells, sheet) are in C:/Users/kaung/AppData/Local/Temp/claude/d712860635f631b0/8dbf212d-129a-4909-ba7d-ab448f73c052/scratchpad/look_sedona/. Another parallel job was overwriting files in the shared scratchpad/look folder, so this work moved to its own folder."
+  ]
+ }
+]

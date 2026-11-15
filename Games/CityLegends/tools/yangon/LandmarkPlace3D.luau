@@ -17,61 +17,81 @@
 	Model coords -> world: X = 32600 + x, Z = -1350 - y, Y = base + z.
 ]]
 
+local CollectionService = game:GetService("CollectionService")
+
 local M = {}
 
 local GROUPS = {
 	BLU = { "SmoothPlastic", 40, 62, 150, 0.00, 0.00, false, true },
-	CAR = { "SmoothPlastic", 165, 120, 70, 0.00, 0.00, false, false },
-	CEL = { "SmoothPlastic", 240, 240, 236, 0.00, 0.00, false, false },
-	CHR = { "SmoothPlastic", 58, 60, 64, 0.00, 0.00, false, true },
-	CRM = { "SmoothPlastic", 216, 206, 184, 0.00, 0.00, false, true },
-	CRN = { "SmoothPlastic", 226, 214, 190, 0.00, 0.00, false, true },
+	CAR = { "SmoothPlastic", 200, 160, 102, 0.00, 0.08, false, false },
+	CEL = { "SmoothPlastic", 226, 220, 212, 0.00, 0.00, false, false },
+	CHR = { "SmoothPlastic", 92, 86, 76, 0.00, 0.00, false, true },
+	CRM = { "SmoothPlastic", 255, 238, 200, 0.00, 0.00, false, true },
+	CRN = { "SmoothPlastic", 226, 199, 154, 0.00, 0.04, false, true },
 	CRT = { "SmoothPlastic", 56, 120, 92, 0.00, 0.00, false, false },
-	DRK = { "SmoothPlastic", 38, 40, 44, 0.00, 0.00, false, true },
+	DRK = { "SmoothPlastic", 40, 36, 32, 0.00, 0.06, false, true },
 	DRV = { "Asphalt", 64, 64, 66, 0.00, 0.00, false, false },
-	EAV = { "SmoothPlastic", 88, 60, 46, 0.00, 0.00, false, true },
+	EAV = { "SmoothPlastic", 70, 64, 48, 0.00, 0.00, false, true },
+	ESC = { "SmoothPlastic", 96, 58, 42, 0.00, 0.05, false, true },
+	FAS = { "SmoothPlastic", 209, 194, 155, 0.00, 0.03, false, true },
 	FEN = { "DiamondPlate", 40, 58, 44, 0.55, 0.00, true, false },
-	GLA = { "Glass", 46, 60, 76, 0.00, 0.12, false, true },
-	GLB = { "Glass", 40, 62, 86, 0.00, 0.18, false, true },
-	GLD = { "SmoothPlastic", 214, 186, 120, 0.00, 0.00, false, true },
+	GFA = { "SmoothPlastic", 214, 204, 188, 0.00, 0.00, false, false },
+	GLA = { "Glass", 85, 90, 83, 0.00, 0.22, false, true },
+	GLB = { "Glass", 74, 75, 65, 0.00, 0.25, false, true },
+	GLD = { "SmoothPlastic", 162, 144, 125, 0.00, 0.10, false, true },
 	GLL = { "Glass", 150, 146, 132, 0.00, 0.12, false, true },
-	GLP = { "Glass", 52, 62, 70, 0.00, 0.08, true, true },
+	GLM = { "Glass", 97, 111, 113, 0.00, 0.20, false, true },
+	GLP = { "Glass", 62, 73, 71, 0.00, 0.20, true, true },
 	GLS = { "Glass", 176, 196, 204, 0.55, 0.05, true, false },
-	GLU = { "Glass", 70, 100, 140, 0.00, 0.15, false, true },
-	GRD = { "Metal", 170, 150, 115, 0.00, 0.00, false, false },
-	GRN = { "Sandstone", 196, 178, 150, 0.00, 0.00, false, true },
+	GLU = { "Glass", 102, 107, 109, 0.00, 0.22, false, true },
+	GRD = { "SmoothPlastic", 150, 134, 98, 0.00, 0.12, false, false },
+	GRN = { "SmoothPlastic", 178, 165, 146, 0.00, 0.00, false, true },
 	HDG = { "Grass", 64, 108, 44, 0.00, 0.00, false, true },
 	LAW = { "Grass", 104, 150, 66, 0.00, 0.00, false, false },
 	LIT = { "Neon", 196, 182, 156, 0.00, 0.00, false, false },
-	MAR = { "Marble", 205, 198, 185, 0.00, 0.00, false, false },
-	MEL = { "SmoothPlastic", 238, 238, 234, 0.00, 0.00, false, true },
-	MUL = { "Metal", 84, 88, 94, 0.00, 0.00, false, true },
+	MAR = { "SmoothPlastic", 204, 186, 148, 0.00, 0.08, false, false },
+	MEL = { "SmoothPlastic", 250, 252, 250, 0.00, 0.00, false, true },
+	MUL = { "SmoothPlastic", 52, 52, 44, 0.00, 0.00, false, true },
 	MUW = { "SmoothPlastic", 236, 234, 228, 0.00, 0.00, false, true },
-	ORG = { "SmoothPlastic", 246, 112, 30, 0.00, 0.00, false, true },
+	NWA = { "Neon", 196, 148, 84, 1.00, 0.00, false, false, "night" },
+	NWC = { "Neon", 146, 178, 180, 1.00, 0.00, false, false, "night" },
+	NWH = { "Neon", 204, 160, 104, 1.00, 0.00, false, false, "night" },
+	NWY = { "Neon", 206, 192, 144, 1.00, 0.00, false, false, "night" },
+	ORG = { "SmoothPlastic", 255, 91, 24, 0.00, 0.00, false, true, "glow", 236, 84, 30 },
 	PAV = { "Pavement", 124, 122, 116, 0.00, 0.00, false, false },
-	PBD = { "SmoothPlastic", 216, 206, 186, 0.00, 0.00, false, true },
-	PGR = { "SmoothPlastic", 112, 46, 40, 0.00, 0.00, false, true },
+	PBD = { "SmoothPlastic", 199, 167, 128, 0.00, 0.00, false, true },
+	PGR = { "SmoothPlastic", 100, 62, 40, 0.00, 0.08, false, true },
 	POL = { "SmoothPlastic", 150, 200, 220, 0.00, 0.00, false, false },
-	RAL = { "Glass", 200, 220, 228, 0.60, 0.05, true, false },
-	RDL = { "SmoothPlastic", 170, 120, 60, 0.00, 0.00, false, true },
+	PRA = { "SmoothPlastic", 186, 62, 64, 0.00, 0.00, false, false },
+	PRB = { "SmoothPlastic", 58, 96, 160, 0.00, 0.00, false, false },
+	PRC = { "SmoothPlastic", 226, 210, 180, 0.00, 0.00, false, false },
+	PRD = { "SmoothPlastic", 40, 42, 48, 0.00, 0.00, false, false },
+	PRE = { "SmoothPlastic", 78, 140, 96, 0.00, 0.00, false, false },
+	PRF = { "SmoothPlastic", 236, 178, 58, 0.00, 0.00, false, false },
+	RAL = { "Glass", 176, 204, 196, 0.60, 0.05, true, false },
+	RDL = { "SmoothPlastic", 170, 120, 60, 0.00, 0.00, false, true, "glow", 220, 204, 176 },
 	RED = { "SmoothPlastic", 196, 30, 36, 0.00, 0.00, false, true },
-	RES = { "SmoothPlastic", 228, 218, 198, 0.00, 0.00, false, true },
+	RES = { "SmoothPlastic", 255, 240, 204, 0.00, 0.00, false, true },
 	ROF = { "Concrete", 150, 150, 146, 0.00, 0.00, false, false },
-	SED = { "SmoothPlastic", 236, 236, 230, 0.00, 0.00, false, true },
-	SEW = { "Glass", 88, 124, 110, 0.00, 0.10, false, true },
+	RTL = { "SmoothPlastic", 190, 82, 50, 0.00, 0.03, false, true },
+	SED = { "SmoothPlastic", 249, 250, 250, 0.00, 0.00, false, true },
+	SEW = { "Glass", 95, 111, 97, 0.00, 0.12, false, true },
 	SGN = { "SmoothPlastic", 30, 32, 36, 0.00, 0.00, false, true },
 	SH1 = { "SmoothPlastic", 236, 206, 166, 0.00, 0.00, false, false },
 	SH2 = { "SmoothPlastic", 206, 218, 228, 0.00, 0.00, false, false },
+	SIL = { "SmoothPlastic", 255, 236, 193, 0.00, 0.03, false, true },
+	SOF = { "SmoothPlastic", 162, 135, 89, 0.00, 0.00, false, false },
 	SOL = { "Glass", 40, 54, 86, 0.00, 0.20, false, false },
-	SPA = { "Metal", 198, 170, 124, 0.00, 0.00, false, true },
-	SPB = { "Metal", 206, 208, 212, 0.00, 0.00, false, true },
+	SPA = { "SmoothPlastic", 234, 204, 158, 0.00, 0.04, false, true },
+	SPB = { "SmoothPlastic", 173, 166, 138, 0.00, 0.04, false, true },
 	STL = { "Metal", 160, 162, 166, 0.00, 0.00, false, true },
 	STP = { "DiamondPlate", 96, 98, 104, 0.00, 0.00, false, true },
+	STR = { "SmoothPlastic", 186, 178, 148, 0.00, 0.03, false, true },
 	TEN = { "SmoothPlastic", 164, 82, 60, 0.00, 0.00, false, false },
-	TER = { "SmoothPlastic", 134, 86, 66, 0.00, 0.00, false, true },
+	TER = { "SmoothPlastic", 138, 96, 67, 0.00, 0.00, false, true },
 	WAT = { "Glass", 64, 170, 210, 0.25, 0.10, false, false },
-	WLT = { "SmoothPlastic", 246, 246, 244, 0.00, 0.00, false, true },
-	WOD = { "WoodPlanks", 150, 104, 70, 0.00, 0.00, true, true },
+	WLT = { "SmoothPlastic", 255, 246, 232, 0.00, 0.00, false, true, "glow", 214, 206, 190 },
+	WOD = { "WoodPlanks", 166, 124, 78, 0.00, 0.00, true, true },
 }
 M.GROUPS = GROUPS
 M.BASE = 28.8
@@ -129,6 +149,17 @@ function M.place(holding: Instance, folder: Instance, modelName: string): number
 				q.Reflectance = spec[6]
 				q.DoubleSided = spec[7]
 				q.CastShadow = spec[8]
+				-- night (2026-11-16): "night" groups are lit windows (tag FacadeNight: WorldFx shows them at night only);
+				-- "glow" groups are letters that light up at night (tag LandmarkGlow, NightColor = spec 10-12)
+				if spec[9] == "night" then
+					q.Transparency = 1
+					CollectionService:AddTag(q, "FacadeNight")
+				elseif spec[9] == "glow" then
+					q:SetAttribute("NightColor", Color3.fromRGB(spec[10], spec[11], spec[12]))
+					q:SetAttribute("DayColor", q.Color)
+					q:SetAttribute("DayMaterial", spec[1])
+					CollectionService:AddTag(q, "LandmarkGlow")
+				end
 				pcall(function()
 					q.RenderFidelity = Enum.RenderFidelity.Automatic
 				end)

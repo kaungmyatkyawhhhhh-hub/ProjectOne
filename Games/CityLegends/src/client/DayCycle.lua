@@ -134,6 +134,18 @@ local function rivieraSky(hour: number): string
 end
 local SKY_FACES = { "SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp" }
 DayCycle.RIVIERA_X = 9000 -- east of this the camera is on the Riviera map
+DayCycle.YANGON_X = 25000 -- east of this, Yangon's own daylight (blended over 1500 studs)
+-- Yangon's day colours, laid over the Riviera's light from about 8:00 to 16:30 (faded in from 6:24 and out by
+-- 17:36, so dawn and the sunset keep their colours); the sky's ambient fill drops to YANGON_SKY_FILL
+local YANGON_DAY = table.freeze({
+	outdoor = Color3.fromRGB(172, 164, 150),
+	ambient = Color3.fromRGB(126, 122, 116),
+	atmo = Color3.fromRGB(214, 210, 198),
+	decay = Color3.fromRGB(186, 178, 160),
+	tint = Color3.fromRGB(255, 250, 242),
+	shiftTop = Color3.fromRGB(255, 246, 230),
+})
+local YANGON_SKY_FILL = 0.3
 
 -- the old map's grade (the place's ColorCorrection)
 local BASE_SAT, BASE_CON = 0.02, 0.12
@@ -349,6 +361,18 @@ function DayCycle.start()
 				end
 			end
 		end
+		-- Yangon's daylight (owner, 2026-11-16: "Warm the Yangon daylight"): the Riviera keys made every white
+		-- render pale blue there (sky fill and a blue haze); real Yangon is warm and hazy, whites neutral in sun
+		-- and grey in shade (tools/yangon/Swatches.luau + PlayLight.luau measured it)
+		local wy = if cam then math.clamp((cam.CFrame.Position.X - (DayCycle.YANGON_X - 1500)) / 1500, 0, 1) else 0
+		local mid = math.clamp(math.min((hour - 6.4) / 1.6, (17.6 - hour) / 1.1), 0, 1) * wy
+		if mid > 0 then
+			for key, v in YANGON_DAY do
+				(k :: any)[key] = ((k :: any)[key] :: Color3):Lerp(v, mid)
+			end
+		end
+		local diffuse = if look.Ambient == "High" then 1 else Config.Look.AmbientLow
+		Lighting.EnvironmentDiffuseScale = diffuse * (1 - (1 - YANGON_SKY_FILL) * mid)
 		if not look.Haze then
 			k.haze, k.density, k.offset = 0, k.density * 0.5, 0
 		end

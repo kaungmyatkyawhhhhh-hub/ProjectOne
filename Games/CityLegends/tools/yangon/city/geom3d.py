@@ -129,6 +129,51 @@ class Geo:
                     c = [c[0], c[2], c[1]]
                 self.tri(grp, (c[0][0], c[0][1], z), (c[1][0], c[1][1], z), (c[2][0], c[2][1], z))
 
+    def lit_bays(self, groups, poly, floors, step, share, seed=0, edges=None, out=0.06, run=(2, 4), always=None):
+        """Night windows (2026-11-16): panes just in front of a glass skin, for a share of the window bays. Offices
+        light whole bays in runs of 2-4 side by side (photos: bays fully on or off). groups: list of (group, weight);
+        floors: list of (z0, z1) of the glass on each floor; step: bay width along each edge; always(i_edge, k_bay,
+        n_bays, floor) -> True forces a bay lit (a column lit on every floor). Deterministic per seed."""
+        poly = ccw(poly)
+        op = offset_poly(poly, out)
+        tot = sum(w for _, w in groups)
+        h = seed * 2654435761 % 4294967296
+
+        def rnd():
+            nonlocal h
+            h = (h * 1103515245 + 12345) % 2147483648
+            return h / 2147483648.0
+        lit = 0
+        for i in range(len(op)):
+            if edges is not None and i not in edges:
+                continue
+            p, q = op[i], op[(i + 1) % len(op)]
+            L = math.dist(p, q)
+            nb = max(1, int(round(L / step)))
+            for f, (z0, z1) in enumerate(floors):
+                k = 0
+                while k < nb:
+                    force = always is not None and always(i, k, nb, f)
+                    r = rnd()
+                    if force or r < share / ((run[0] + run[1]) / 2):
+                        n_ = 1 if force else run[0] + int(rnd() * (run[1] - run[0] + 1))
+                        x = rnd() * tot
+                        grp = groups[-1][0]
+                        for gname, w in groups:
+                            if x < w:
+                                grp = gname
+                                break
+                            x -= w
+                        k1 = min(nb, k + n_)
+                        a = (p[0] + (q[0] - p[0]) * k / nb, p[1] + (q[1] - p[1]) * k / nb)
+                        b = (p[0] + (q[0] - p[0]) * k1 / nb, p[1] + (q[1] - p[1]) * k1 / nb)
+                        self.wall(grp, a, b, z0 + 0.15, z1 - 0.15)
+                        lit += k1 - k
+                        k = k1
+                    else:
+                        k += 1
+        return lit
+
     def wallshape(self, grp, shape, z0, z1, inward=False):
         """Walls round every ring of a shapely (Multi)Polygon (holes face into the hole)."""
         geoms = [shape] if shape.geom_type == "Polygon" else list(getattr(shape, "geoms", []))

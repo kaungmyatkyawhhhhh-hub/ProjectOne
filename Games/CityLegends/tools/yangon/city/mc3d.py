@@ -165,7 +165,7 @@ B = tower_B()
 
 # ---------------------------------------------------------------------------------------------------------------------
 def office_tower(poly, z0, nfl, spand, glass, mull_step, band_h=2.9, band_out=0.55, recess=0.35, crown_rows=3,
-                 crown_grp="CRN", lip=None, ground=False):
+                 crown_grp="CRN", lip=None, ground=False, night=None):
     """Bands per floor in front of one continuous recessed glass skin with full-height mullion fins."""
     zs = z0
     if ground:
@@ -187,6 +187,11 @@ def office_tower(poly, z0, nfl, spand, glass, mull_step, band_h=2.9, band_out=0.
     for k in range(nfl):
         z = zs + k * FLOOR
         g.band(spand, poly, z, z + band_h, band_out)
+    if night:
+        # lit offices at night: night = (share, [(group, weight)], seed, always)
+        share, groups, seed, always = night
+        g.lit_bays(groups, skin, [(zs + k * FLOOR + band_h, zs + (k + 1) * FLOOR) for k in range(nfl)], mull_step, share,
+                   seed=seed, always=always)
     z = top_glass
     for r in range(crown_rows):
         g.band(crown_grp, poly, z, z + 7.0, band_out)
@@ -259,12 +264,14 @@ def podium():
     mullions(inner, 0.3, 11.5, 8.0, 0.5, 0.35, "MUL")
     mullions(POD, 0.0, 14.0, 16.0, 1.2, 1.2, "GRN")
     g.annulus("CEL", POD, inner, 14.0, down=True)
-    # four mall storeys: granite spandrels proud of a dark glass ribbon with white mullions
+    # four mall storeys: granite spandrels topped by a cream sill, proud of a dark glass ribbon with dark mullions
+    # (photos: granite 161,151,141, sill 218,207,183, mullions 24,33,35)
     skin = offset_poly(POD, -0.2)
     g.ring("GLP", skin, 14.0, 62.0)
-    mullions(skin, 18.0, 62.0, 6.0, 0.6, 0.35, "MUW")
+    mullions(skin, 18.0, 62.0, 6.0, 0.6, 0.35, "MUL")
     for z in POD_Z[1:]:
-        g.band("GRN", POD, z, z + 4.5, 0.8)
+        g.band("GRN", POD, z, z + 4.0, 0.8, top=False)
+        g.band("SIL", POD, z + 4.0, z + 4.5, 1.05)
         g.ring("CEL", offset_poly(POD, -0.8), z, z + 4.5, inward=True)
     g.band("GRN", POD, 62.0, POD_TOP, 0.8, bottom=True)
     g.annulus("GRN", offset_poly(POD, 0.8), offset_poly(POD, -0.8), POD_TOP)
@@ -348,9 +355,9 @@ def corner_front():
     pts = [(m[0] - t[0] * (w / 2 + 12), m[1] - t[1] * (w / 2 + 12)), (m[0] + t[0] * (w / 2 + 12), m[1] + t[1] * (w / 2 + 12))]
     a, b = pts
     slab = [a, b, (b[0] + n[0] * dep, b[1] + n[1] * dep), (a[0] + n[0] * dep, a[1] + n[1] * dep)]
-    g.cap("MUW", slab, 14.6)
-    g.cap("CEL", slab, 13.0, down=True)
-    g.ring("MUW", slab, 13.0, 14.6)
+    g.cap("FAS", slab, 14.6)
+    g.cap("SOF", slab, 13.0, down=True)
+    g.ring("FAS", slab, 13.0, 14.6)
     for k in range(3):
         u = (k + 0.5) / 3
         cc = (a[0] + (b[0] - a[0]) * u + n[0] * (dep - 1.2), a[1] + (b[1] - a[1]) * u + n[1] * (dep - 1.2))
@@ -370,8 +377,8 @@ def corner_front():
     def up(pts, want_up):
         a_ = (pts[1][0] - pts[0][0]) * (pts[2][1] - pts[0][1]) - (pts[1][1] - pts[0][1]) * (pts[2][0] - pts[0][0])
         return pts if (a_ > 0) == want_up else pts[::-1]
-    g.poly3("CEL", up(P, False))
-    g.poly3("CHR", up(Pt, True))
+    g.poly3("CHR", up(P, False))
+    g.poly3("STR", up(Pt, True))
     cc = ((front[0] + back[0]) / 2, (front[1] + back[1]) / 2)
     for i in range(4):
         a_, b_ = P[i], P[(i + 1) % 4]
@@ -380,13 +387,13 @@ def corner_front():
         nn = (e[1], -e[0])
         if nn[0] * ((a_[0] + b_[0]) / 2 - cc[0]) + nn[1] * ((a_[1] + b_[1]) / 2 - cc[1]) < 0:
             q = [q[1], q[0], q[3], q[2]]
-        g.poly3("MUW" if i == 0 else "CHR", q)
+        g.poly3("STR", q)
     for k in (-2, -1, 0, 1, 2):
         base = (m[0] + t[0] * k * 11.0 - n[0] * 1.0, m[1] + t[1] * k * 11.0 - n[1] * 1.0)
         for s in (-1, 1):
             tip = (m[0] + t[0] * (k * 11.0 + s * 2.5) + n[0] * 7.0, m[1] + t[1] * (k * 11.0 + s * 2.5) + n[1] * 7.0)
             frac = ((tip[0] - back[0]) * n[0] + (tip[1] - back[1]) * n[1]) / 14.0
-            g.tube("MUW", (base[0], base[1], top), (tip[0], tip[1], zb + (zf - zb) * frac), 0.7)
+            g.tube("STR", (base[0], base[1], top), (tip[0], tip[1], zb + (zf - zb) * frac), 0.7)
     bal = (m[0] - n[0] * 0.6, m[1] - n[1] * 0.6)
     g.box("RAL", bal[0], bal[1], top, bw - 6.0, 0.2, 3.2, yaw + math.pi / 2, faces=("+y", "-y"))
     for side, img, ww, hh in ((1, "bill1", 17.0, 11.0), (-1, "screen", 18.0, 9.0)):
@@ -406,9 +413,10 @@ def west_entrance():
     a = (m[0] - t[0] * half, m[1] - t[1] * half)
     b = (m[0] + t[0] * half, m[1] + t[1] * half)
     slab = [a, b, (b[0] + n[0] * dep, b[1] + n[1] * dep), (a[0] + n[0] * dep, a[1] + n[1] * dep)]
-    g.cap("DRK", slab, z + th)
-    g.cap("CEL", slab, z, down=True)
-    g.ring("DRK", slab, z, z + th)
+    # a cream fascia over a warm-lit soffit (photos: 187,180,156 and 125,110,81), near-black polished columns
+    g.cap("FAS", slab, z + th)
+    g.cap("SOF", slab, z, down=True)
+    g.ring("FAS", slab, z, z + th)
     for k in range(2):
         u = (k + 0.5) / 2
         cc = (a[0] + (b[0] - a[0]) * u + n[0] * (dep - 1.2), a[1] + (b[1] - a[1]) * u + n[1] * (dep - 1.2))
@@ -552,11 +560,14 @@ def melia():
     shorts = [i for i in range(4) if i not in longs]
     zs, nfl = 41.0, 19
     skin = offset_poly(C, -0.35)
-    g.ring("GLA", skin, zs, zs + nfl * FLOOR, edges=longs)
+    g.ring("GLM", skin, zs, zs + nfl * FLOOR, edges=longs)
     mullions(skin, zs, zs + nfl * FLOOR, 4.0, 0.45, 0.3, "MUW", edges=longs)
     for k in range(nfl):
         z = zs + k * FLOOR
         g.band("MEL", C, z, z + 3.4, 0.5, edges=longs)
+    # hotel rooms at night: few lit (photos 5-10%), warm
+    g.lit_bays([("NWH", 1.0)], skin, [(zs + k * FLOOR + 3.4, zs + (k + 1) * FLOOR) for k in range(nfl)], 4.0, 0.08,
+               seed=31, edges=longs, run=(1, 2))
     top = zs + nfl * FLOOR
     g.band("MEL", C, zs, top, 0.5, top=False, bottom=False, edges=shorts)
     for i in shorts:
@@ -564,7 +575,7 @@ def melia():
         n = outward(C, i)
         m = ((p[0] + q[0]) / 2 + n[0] * 0.6, (p[1] + q[1]) / 2 + n[1] * 0.6)
         e = unit((q[0] - p[0], q[1] - p[1]))
-        g.box("GLA", m[0], m[1], zs + 3.0, 2.6, 0.2, top - zs - 6.0, math.atan2(e[1], e[0]), faces=("-y",))
+        g.box("GLM", m[0], m[1], zs + 3.0, 2.6, 0.2, top - zs - 6.0, math.atan2(e[1], e[0]), faces=("-y",))
     z = top
     g.band("MEL", C, z, z + 16.0, 0.5)
     top = z + 16.0
@@ -592,10 +603,12 @@ def melia():
     for k, (a, b, nf) in enumerate([(0.0, 0.34, 3), (0.34, 0.67, 6), (0.67, 1.0, 9)]):
         piece = ccw(split(D, a, b))
         sk = offset_poly(piece, -0.3)
-        g.ring("GLA", sk, 41.0, 41.0 + nf * FLOOR)
+        g.ring("GLM", sk, 41.0, 41.0 + nf * FLOOR)
         mullions(sk, 41.0, 41.0 + nf * FLOOR, 4.5, 0.4, 0.3, "MUW")
         for f in range(nf):
             g.band("MEL", piece, 41.0 + f * FLOOR, 41.0 + f * FLOOR + 3.4, 0.5)
+        g.lit_bays([("NWH", 1.0)], sk, [(41.0 + f * FLOOR + 3.4, 41.0 + (f + 1) * FLOOR) for f in range(nf)], 4.5, 0.08,
+                   seed=40 + k, run=(1, 2))
         z2 = 41.0 + nf * FLOOR
         g.band("MEL", piece, z2, z2 + 2.5, 0.5)
         g.annulus("MEL", offset_poly(piece, 0.5), offset_poly(piece, -0.8), z2 + 2.5)
@@ -624,12 +637,15 @@ def lake_suites():
     coll_poly(base, 0.0, 26.0)
     zs, nfl = 26.0, 29
     skin = offset_poly(E, -0.8)
-    g.ring("GLA", skin, zs, zs + nfl * FLOOR)
+    g.ring("GLM", skin, zs, zs + nfl * FLOOR)
     mullions(skin, zs, zs + nfl * FLOOR, 5.0, 0.5, 0.5, "RES")
     for k in range(nfl):
         z = zs + k * FLOOR
         g.band("RES", E, z, z + 1.0, 1.4)       # balcony slab
         g.ring("RAL", offset_poly(E, 1.3), z + 1.0, z + 3.4)  # glass balustrade
+    # serviced apartments at night: more rooms lit than the hotel, warm
+    g.lit_bays([("NWH", 0.8), ("NWY", 0.2)], skin, [(zs + k * FLOOR + 1.0, zs + (k + 1) * FLOOR) for k in range(nfl)], 5.0,
+               0.12, seed=57, run=(1, 3))
     z = zs + nfl * FLOOR
     c1 = offset_poly(E, -3.0)
     c2 = offset_poly(E, -9.0)
@@ -970,7 +986,7 @@ def interior():
             for h in G.interiors:
                 hh = ccw(list(h.coords)[:-1])
                 # a light-grey fascia 1.5 deep, a warm strip under it, frameless glass on top with steel posts and rail
-                g.ring("MUW", hh, z - 1.5, z, inward=True)
+                g.ring("GFA", hh, z - 1.5, z, inward=True)
                 g.ring("LIT", hh, z - 1.7, z - 1.5, inward=True)
                 g.ring("RAL", offset_poly(hh, 0.3), z, z + 1.9, inward=True)
                 perim = 0.0
@@ -1015,12 +1031,12 @@ def interior():
         g.quad("STP", *(top if a_ > 0 else top[::-1]))
         dep = 2.2
         bot = [(x, y, zz - dep) for x, y, zz in top]
-        g.quad("WOD", *(bot[::-1] if a_ > 0 else bot))
+        g.quad("ESC", *(bot[::-1] if a_ > 0 else bot))
         for (pa, pb) in ((R0, R1), (L1, L0)):
             za, zb = (z0, z1) if pa in (R0, L0) else (z1, z0)
             side = [(pa[0], pa[1], za - dep), (pb[0], pb[1], zb - dep), (pb[0], pb[1], zb + 0.1), (pa[0], pa[1], za + 0.1)]
-            g.quad("WOD", *side)
-            g.quad("WOD", *side[::-1])
+            g.quad("ESC", *side)
+            g.quad("ESC", *side[::-1])
         for (pa, pb) in ((L0, L1), (R0, R1)):
             g.quad("RAL", (pa[0], pa[1], z0 + 0.1), (pb[0], pb[1], z1 + 0.1), (pb[0], pb[1], z1 + 2.3), (pa[0], pa[1], z0 + 2.3))
             g.tube("DRK", (pa[0], pa[1], z0 + 2.4), (pb[0], pb[1], z1 + 2.4), 0.28)
@@ -1171,8 +1187,13 @@ def build():
     corner_front()
     west_entrance()
     whiteroof()
-    tA = office_tower(A, 0.0, 26, "SPA", "GLA", 4.8, ground=True, crown_grp="CRN", lip=0.5)
-    tB = office_tower(B, POD_TOP - 1.0, 20, "SPB", "GLB", 3.2, band_h=2.2, crown_grp="SPB", lip=1.0)
+    # night (photos at blue hour / night): tower B (BIDV, ooredoo) about 20% of its bays lit, amber, pale yellow and
+    # cool white mixed; tower A (CB Bank) few windows and one lit bay per floor up one column
+    office = [("NWA", 0.45), ("NWY", 0.3), ("NWC", 0.25)]
+    tA = office_tower(A, 0.0, 26, "SPA", "GLA", 4.8, ground=True, crown_grp="CRN", lip=0.5,
+                      night=(0.07, office, 11, lambda i, k, nb, f: i == 0 and k == nb // 2))
+    tB = office_tower(B, POD_TOP - 1.0, 20, "SPB", "GLB", 3.2, band_h=2.2, crown_grp="SPB", lip=1.0,
+                      night=(0.2, office, 23, None))
     melia()
     lake_suites()
     plinth()

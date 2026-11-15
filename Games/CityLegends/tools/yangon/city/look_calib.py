@@ -3,7 +3,7 @@
 Measured 2026-11-14 in Studio Edit with tools/yangon/PlayLight.luau at hour 13 (Play's Yangon light: blue sky
 ambient, haze): panels of 8 materials x 10 greys (20..245), one facing the sun's horizontal direction, one in
 shade, shot from 52 studs (build/landmarks/look_swatches_13h.json; the sun rows there are stored dark->light
-reversed, fixed on load). Each material/channel gets a monotone curve grey -> rendered; inverting it gives the
+reversed, fixed on load; since 2026-11-16 the file is look_swatches_13h_yangon.json, measured under Yangon's warmer daylight in the same order as the shade rows). Each material/channel gets a monotone curve grey -> rendered; inverting it gives the
 albedo channel that renders as the target channel.
 
     albedo(material, target_rgb, side="mix") -> ((r, g, b), clipped)
@@ -14,7 +14,7 @@ import json
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SW = os.path.normpath(os.path.join(HERE, "..", "..", "..", "build", "landmarks", "look_swatches_13h.json"))
+SW = os.path.normpath(os.path.join(HERE, "..", "..", "..", "build", "landmarks", "look_swatches_13h_yangon.json"))
 GREYS = [20, 45, 70, 95, 120, 145, 170, 195, 220, 245]
 # materials not on the panels use the closest measured one
 ALIAS = {"Neon": "SmoothPlastic", "WoodPlanks": "Concrete", "Grass": "Concrete", "Pavement": "Concrete",
@@ -27,7 +27,8 @@ def data():
     global _data
     if _data is None:
         d = json.load(open(SW))
-        d["sun"] = {m: list(reversed(rows)) for m, rows in d["sun"].items()}
+        if "yangon" not in SW:
+            d["sun"] = {m: list(reversed(rows)) for m, rows in d["sun"].items()}
         mix = {}
         for m in d["sun"]:
             mix[m] = [[0.6 * a + 0.4 * b for a, b in zip(s, h)] for s, h in zip(d["sun"][m], d["shade"][m])]

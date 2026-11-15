@@ -60,7 +60,7 @@ end
 
 local PROPS = { "Brightness", "Ambient", "OutdoorAmbient", "ExposureCompensation", "ColorShift_Top", "ShadowSoftness", "ClockTime", "EnvironmentDiffuseScale", "EnvironmentSpecularScale", "GlobalShadows" }
 
-function M.apply(hour)
+function M.apply(hour, over)
 	if not Lighting:GetAttribute("EditLight") then
 		local s = {}
 		for _, p in PROPS do
@@ -95,6 +95,20 @@ function M.apply(hour)
 	k.brightness *= REAL.brightness
 	k.ambient = k.ambient:Lerp(Color3.new(0, 0, 0), REAL.shade)
 	k.outdoor = k.outdoor:Lerp(Color3.new(0, 0, 0), REAL.shade * 0.6)
+	-- Yangon's daylight (client/DayCycle.lua YANGON_DAY, keep in step)
+	local mid = math.clamp(math.min((hour - 6.4) / 1.6, (17.6 - hour) / 1.1), 0, 1)
+	local YANGON_DAY = {
+		outdoor = rgb(172, 164, 150), ambient = rgb(126, 122, 116), atmo = rgb(214, 210, 198),
+		decay = rgb(186, 178, 160), tint = rgb(255, 250, 242), shiftTop = rgb(255, 246, 230),
+	}
+	for key, v in YANGON_DAY do
+		k[key] = k[key]:Lerp(v, mid)
+	end
+	k.envDiffuse = 1 - 0.7 * mid
+	-- trial values (a table of the same keys, plus envDiffuse) laid over the result
+	for key, v in (over or {}) do
+		k[key] = v
+	end
 	local clock = hour
 	for i = 2, #SUN_CLOCK do
 		local a, b = SUN_CLOCK[i - 1], SUN_CLOCK[i]
@@ -110,7 +124,7 @@ function M.apply(hour)
 	Lighting.ExposureCompensation = k.exposure
 	Lighting.ColorShift_Top = k.shiftTop
 	Lighting.ShadowSoftness = k.soft
-	Lighting.EnvironmentDiffuseScale = 1
+	Lighting.EnvironmentDiffuseScale = k.envDiffuse or 1
 	Lighting.EnvironmentSpecularScale = 1
 	Lighting.GlobalShadows = true
 	local atmo = Lighting:FindFirstChildOfClass("Atmosphere")

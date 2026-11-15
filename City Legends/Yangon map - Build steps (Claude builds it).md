@@ -490,3 +490,14 @@ Next (in order):
 3. Shoppers: `client/Pedestrians.lua` only walks Monaco's pavements. Add walk paths for Yangon (mall galleries).
 4. Sedona north gate.
 5. Rebuild, upload and re-place both landmarks, then a Play test and a day and night check against the photos.
+
+## 2026-11-16: Myanmar Plaza and Sedona look, night, shoppers, gate (in the place, version 936)
+
+- **Daylight (owner chose "Warm the Yangon daylight"):** Yangon's day light is now warm and hazy. Whites read neutral in sun and grey in shade instead of pale blue (DayCycle, Yangon only; Monaco unchanged).
+- **Colours:** every element's colour was measured from the real photos (towers, podium, plinth, Melia, interior, Sedona) and turned into the part colour that renders as the photo in the game's light. Tower A is champagne, tower B greige, the glass dark and reflective, the podium granite topped by a cream sill, the plinth maroon granite, Sedona's glass green and its roofs mauve-brown.
+- **Night:** lit offices about 20% on tower B, sparse on the CB Bank tower with one lit column; warm, sparse hotel rooms on the Melia, Lake Suites and Sedona; the MYANMAR CENTRE, MYANMAR PLAZA, MELIA and SEDONA letters glow.
+- **Shops:** fitted by kind (clothes racks and mannequins, shoe walls, phone tables and screens, food counters and tables, a supermarket, glass counters, shelves).
+- **Shoppers:** about 20 walk the four galleries and stand at shop windows (the Yangon street-life system).
+- **Sedona gate:** a white wall with tiered pillars, gates, the cream SEDONA sign wall, a red-roof guard hut and barriers.
+- **Play test (test save, live save put back):** walked in through the entrance, shoppers on every floor, night lights and glowing letters switch on; no new errors.
+- **Owner, same day: "the scaling measurements must be 1:1 accurate too" -> "Everything at player scale".** The whole Yangon map will be rebuilt at about 3 studs per metre (cars' and players' scale), district by district. The landmark tools carry over (they are built in metres-based plans and will be re-run at the new scale).
