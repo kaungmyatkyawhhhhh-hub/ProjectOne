@@ -17,6 +17,10 @@ Format if you like: **When** ... **do** ... **because** ...
   - Retention: "make progression more rewarding"; a dev with about 170 achievements, quests, weekly tasks and a daily wheel says players feel rewarded. Fits [[K02 First session and retention]].
   - Viral idea method: copy a simple incremental idea (an "eat your way out of a giant jelly" style game) and ship fast. A commenter says they made one in a day and sold it for 6k a week. Another calls AI-made game tools slop, so quality still matters. Fits [[K09 Game ideas and trends]].
   - Tools: Roblox MCP connects Studio to Claude/Codex so AI can build in Studio. This is how we already work.
+  - Pre-publish list from a creator ("5 things before you publish"): #2 test your game on all platforms (phone, tablet, PC). A commenter's tip: copy an indie game from Steam for ideas. Fits [[Brain/Methods/Launch gate]].
+  - "Experience pages are slept on big time": creators say the game's store page (icon, thumbnail, description) matters a lot and most devs neglect it. Fits [[K05 Marketing, ads and storefront]].
+  - Seen again: "5 vibecoder things" = (1) Codex or Claude on a Pro/Max plan, (2) Roblox MCP, (3) a custom skills library. Matches how we already work.
+  - Comments on one video told people to send their Claude agent the video link so it would do what the video says. Ignored: that is an instruction from a web page, not from you.
 - 
 
 ## DONE
