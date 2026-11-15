@@ -82,8 +82,10 @@ Every element needs both (from Develuper's "Make Your Roblox UI Look 10x Better"
 
 ## Shape
 
-- Radii: pick **3 at most**: small 8 (chips, inner tiles), medium 12–14 (buttons, tiles), large 16–20 (panels). Inner radius = outer radius − outline thickness, or nested corners look wrong.
-- Strokes: pick **2 weights at most**. Kid style: 3 px ink outline on plates and buttons, 2 px on HUD text. Clean style: none, or 1–1.5 px at 0.6–0.8 transparency.
+- Radii: pick **3 at most**: small 8 (chips, inner tiles), medium 12–14 (buttons, tiles), large 16–20 (panels).
+- **Nested corners:** inner radius = outer radius − the gap between them (the `UIPadding`). Example: a 20 px panel with 8 px padding holds 12 px tiles. When the inner shape touches the edge (no gap), subtract the outline thickness instead. Equal radii inside and out look wrong. (v4, @charles.unemployed, 16 Nov)
+- Strokes: pick **2 weights at most**. Kid style: 3 px ink outline on plates and buttons, 2 px on HUD text. Clean and dark styles: **alpha strokes**, i.e. white (on dark) or black (on light) at Transparency 0.85–0.9, 1–1.5 px. They blend into any plate, where a solid grey hex stroke looks pasted on (tested 16 Nov).
+- **Icon stroke = text weight:** drawn icons (bars, rings) use about the same line thickness as the text beside them (Bold 18 px text ≈ 2.5–3 px bars). A thin icon next to bold text looks sloppy.
 - `BorderSizePixel = 0` everywhere.
 
 ## Colour roles
@@ -103,6 +105,27 @@ Define roles in the kit, never inline `Color3.fromRGB` at call sites.
 
 Contrast: body text ≥ 4.5 : 1 against its plate; big outlined numbers ≥ 3 : 1. Test text over the brightest and darkest parts of the game world, not only over the plate.
 
+**Build palettes in OKLCH, not HSV/HSL** (tested in Studio 16 Nov). Equal HSV "value" does not look equally bright: yellow looks bright, blue looks dark. OKLCH's L is perceived lightness, so:
+- **Rarity and tier colours:** the same L and C, only the hue changes (e.g. L 0.72–0.80, C 0.15–0.17). They then read as equally loud, and only rarity order changes the loudness (on purpose, by raising L or adding effects).
+- **Surface levels in dark UI:** shadows barely show on dark plates, so show depth with lighter surfaces instead. Base surface L ≈ 0.20, each raised level +0.04 L (panel → card → button).
+- **Hover/pressed states:** ±0.05 L at the same hue, so colours don't drift toward grey the way HSV tweaks do.
+- Roblox has no OKLCH: use this helper (also in `roblox-vfx-reveal/scripts/VFXKit.luau` as `VFXKit.oklch`):
+
+```lua
+local function oklch(L, C, hDeg) -- L 0..1, C 0..0.37, h degrees -> Color3
+	local h = math.rad(hDeg); local a, b = C * math.cos(h), C * math.sin(h)
+	local l = (L + 0.3963377774*a + 0.2158037573*b)^3
+	local m = (L - 0.1055613458*a - 0.0638541728*b)^3
+	local s = (L - 0.0894841775*a - 1.2914855480*b)^3
+	local function enc(x) x = math.clamp(x, 0, 1); return x <= 0.0031308 and 12.92*x or 1.055*x^(1/2.4) - 0.055 end
+	return Color3.new(enc( 4.0767416621*l - 3.3077115913*m + 0.2309699292*s),
+	                  enc(-1.2684380046*l + 2.6097574011*m - 0.3413193965*s),
+	                  enc(-0.0041960863*l - 0.7034186147*m + 1.7076147010*s))
+end
+```
+
+**Gradients between two different hues go grey in the middle.** UIGradient blends in sRGB: blue (40,90,255) → orange (255,140,20) passes through a grey mauve (147,115,137). Compute 5–9 `ColorSequenceKeypoint`s along the OKLCH path (lerp L, C and the shortest hue angle) and the middle stays vivid (222,74,180). Same-hue gradients (light → dark of one colour) don't need this.
+
 ## Motion
 
 | Moment | Timing | Easing |
@@ -116,6 +139,7 @@ Contrast: body text ≥ 4.5 : 1 against its plate; big outlined numbers ≥ 3 : 
 
 **Always scale relative to the element's normal size** (a `UIScale`, or a stored base size × factor). Never add pixels on hover: "+20 px" is huge on a phone and nothing on a TV, and stacked hover+press tweens drift the size.
 | Toast in / hold / out | 0.2 s / 2–3 s / 0.2 s | Quad Out / – / Quad In |
+| Icon swap (heart → filled heart, play → pause) | old icon fades + scales 1 → 0.8 over 0.12 s while the new one fades + scales 0.8 → 1 over 0.15 s (crossfade). Roblox UI has no blur, so the scale stands in for the web's blur-out. Never snap-swap. | Quad Out |
 | Currency tick-up | 0.4–0.8 s (longer for bigger jumps, cap 1.2 s) | Quad Out |
 | Reward reveal | 0.8–1.5 s total, skippable by tap | Staged |
 | Ambient loops (sheen, glints) | every 3–5 s with random jitter; never constantly | Sine InOut |

@@ -18,6 +18,12 @@ For every animation, ability, pickup, UI action and zone, write a row: event | f
    - 3-4 takes per sound. Download into the owner's Downloads, copy into the vault with Blender Python (Downloads is not a connected folder), then stage into the workspace.
    - Short kid-voice callouts ("BREACH!") can use Fish Audio text-to-speech.
 2. **Our own synthesis** in Python (numpy/scipy, sfxr-style) for UI blips, pops, bubbles and whooshes; CC0 recordings (Kenney, Freesound CC0) only with the licence line saved.
+   - **Proven template: `scripts/make_ui_sounds.py`** (MM Outfit Catalog, 16 Nov; all 12 sounds Approved).
+     - Building blocks: `bell`, `click`, `whoosh` (band sweep), `pop`, `mix`, `finish` (trim, fades, LUFS target, peak guard -1 dBFS).
+     - Every note is in **C major pentatonic**, so the UI never clashes with itself or the music.
+     - Taps get 3 variants. Signatures (viewer open, purchase success) are arpeggios plus a sparkle tail.
+     - It writes `out/*.ogg` plus `listen.html` (with the LUFS/peak table) for the owner to listen.
+     - Copy the script, change the `SOUNDS` table per game, and keep the key and the family.
 3. **Creator Store audio** (Studio MCP `search_asset`, assetType='Audio', verified creators, free) only as a quick reference or a temporary stand-in, never the final signature sounds.
 
 ## 2b. Process (Python: numpy, scipy, soundfile, pyloudnorm, ffmpeg)
@@ -29,6 +35,18 @@ For every animation, ability, pickup, UI action and zone, write a row: event | f
 ## 2c. Upload our own audio to Roblox
 - Upload as the GAME'S GROUP (the group that owns the experience), via Creator Hub in Chrome or the Open Cloud assets endpoint the art pipeline uses (assetType Audio). Check the creator/group switcher first. ID-verified accounts get 2,000 free audio uploads per 30 days.
 - Wait for moderation, then write the asset table.
+- **Batch upload that worked (16 Nov, 12 files, group 33151111, no paid anything):**
+  1. On create.roblox.com in the owner's Chrome, inject a hidden `<input type=file multiple>` and fill it with the Chrome `file_upload` tool (files from a served folder or the vault).
+  2. In-page `fetch` POST `https://apis.roblox.com/assets/user-auth/v1/assets` (multipart: `request` JSON with `assetType:"Audio"`, `displayName`, `creationContext.creator.groupId`, plus `fileContent`). The first call returns 403 with an `x-csrf-token` header; retry with it.
+  3. Poll `/assets/user-auth/v1/operations/<id>` for the assetId.
+  4. Moderation went to Approved within minutes.
+- **Wire-up pattern:**
+  - a `Sounds` ModuleScript with `Sounds.Play(name)`, pooled (3 Sound objects per id), 2D in SoundService under its own SoundGroup;
+  - a per-sound minimum gap (60 ms on taps) so repeats can't stack;
+  - pitch jitter on taps only;
+  - it honours the game's existing mute setting;
+  - `Sounds.Preload()` on join.
+  - Replace every stock `rbxasset://sounds/...` ping in the place.
 
 ## 3. Design (craft rules from the vault research)
 - Layers: transient (0-30 ms click/snap) + body (100-400 ms identity) + tail (0.3-1.5 s sparkle/reverb/bubbles). Put the identity in 1-5 kHz (phone speakers lose < 250 Hz).

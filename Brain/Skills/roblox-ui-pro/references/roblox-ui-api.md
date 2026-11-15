@@ -59,12 +59,17 @@ Breakpoints: decide by the root frame's `AbsoluteSize`, where the layout stops w
 - `RichText = true` for mixed colour in one label (`<font color="#FFC93C">500</font> coins`). Escape `<`, `>` and `&` in player-provided text.
 - Measure before sizing: `TextService:GetTextSize(text, size, font, Vector2.new(maxW, math.huge))`, or let `AutomaticSize = X` do it.
 - Numbers: use tabular-looking fonts for counters that tick up, or fix the label width so the row doesn't jitter. Abbreviate big numbers (1.2K, 3.4M) consistently.
+- **Missing glyphs ✔ (MM Outfit Catalog, 16 Nov):** BuilderSans has no ✕ ✓ ★ ♥ (they render as boxes or fall back to another font at low contrast). Draw icons from rotated Frames (two bars = ✕, a short + a long bar = ✓) or use an image from the art pipeline. Never ship emoji or symbol glyphs as icons.
 
 ## Decoration
 
 - `UICorner.CornerRadius`: offset (`UDim.new(0, 12)`) keeps the same look at every size; scale (`UDim.new(0.25, 0)`) for pills and circles (`UDim.new(0.5, 0)` = circle on a square).
 - `UIStroke` ✔ props: `Thickness`, `Color`, `Transparency`, `ApplyStrokeMode` (`Border` for frames, `Contextual` for text), `LineJoinMode` (default `Round`), `StrokeSizingMode` (`FixedSize` default, `ScaledSize` scales with the object), `BorderOffset` (UDim, push the stroke in/out), `ZIndex`. Set `BorderSizePixel = 0` on every Frame and use strokes instead.
 - `UIGradient`: subtle top-to-bottom shading on plates and buttons (lighter top, darker bottom) reads as "glossy" and hand-made. Rotate 90. Animate `Offset` for a sheen sweep.
+  - **Trap ✔ (tested 16 Nov):** a UIGradient under a TextLabel/TextButton tints the **text too**, not just the background. That turns white text the colour of the plate (e.g. green-on-green "BUY ALL"). Fix: put the gradient on a separate face Frame and put the text in its own label on top.
+  - **Trap ✔:** two-hue gradients go grey in the middle (sRGB blend). Add OKLCH keypoints (`design-tokens.md` → Colour roles).
+- **Edge fade on carousels / scrolling rows ✔ (tested 16 Nov):** put the ScrollingFrame inside a `CanvasGroup` (BackgroundTransparency 1) with a `UIGradient` whose `Transparency` is `NumberSequence {0:1, 0.15:0, 0.85:0, 1:1}`. Items fade out at both edges instead of being cut. It costs one CanvasGroup texture; one per screen is fine.
+- **Children draw above their parent's text.** A child Frame (a shine, a gradient face, an icon) hides the parent button's `Text`. Put the label in a child with a higher ZIndex instead of using the parent's `Text`.
 - `UIShadow` ✔ exists (props: `Color`, `Transparency`, `Offset` UDim2, `BlurRadius` UDim, `Spread` UDim2, `ZIndex = -1`, `Enabled`). New: check it renders on phone in a screenshot before relying on it. Fallback: a darker copy of the plate offset 3–4 px down (the classic "chunky button" base).
 - `CanvasGroup` + `GroupTransparency` ✔ fades a whole panel at once. Each CanvasGroup renders to a texture: keep them few, and expect slight softness on big ones.
 
@@ -75,6 +80,9 @@ Breakpoints: decide by the root frame's `AbsoluteSize`, where the layout stops w
 - `ResampleMode = Pixelated` ✔ for pixel art.
 - `IsLoaded` tells you if an image arrived. Failed loads can stay blank; a retry with a cache-busting suffix fixes it (MEGA BITE `UIKit.HealImage`).
 - `ViewportFrame` shows a 3D model in UI (pets, sharks, skins). It's expensive: a handful on screen, not one per grid cell at 60 fps; static camera, no per-frame rotation for off-screen cells.
+  - **Full-screen ViewportFrame studios ✔ (MM Outfit Catalog viewer, 16 Nov):** a whole "photo studio" (backdrop, floor, avatar on a turntable) inside a ViewportFrame + WorldModel lights instantly. World lights after a camera jump take 4–12 s to warm up on low graphics quality. It also looks the same on every device and ignores the map's Lighting. Use its `Ambient`/`LightColor`/`LightDirection` for the studio light.
+  - **Trap ✔:** see-through parts inside a ViewportFrame blend against the frame's `BackgroundColor3` **even when BackgroundTransparency = 1**. The default grey turned a glossy floor grey. Set BackgroundColor3 to the scene's darkest colour (e.g. 5,6,8).
+- **Product shots on white:** Roblox UI has no multiply blend. Cut the white background out in the art pipeline (transparent PNG) before uploading.
 
 ## Styling (StyleSheet)
 

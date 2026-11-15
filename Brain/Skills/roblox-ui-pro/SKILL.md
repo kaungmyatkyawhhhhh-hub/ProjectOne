@@ -62,6 +62,14 @@ Numbers and presets: `references/design-tokens.md`. Ready-made pieces: `referenc
 - **Identity and depth**: every element has the game's look *and* reads as 3D. That means a darker base under plates and buttons, a gradient that's brightest at the top, a thin light edge just inside, and depth under display text. Flat looks unfinished.
 - **Hierarchy before effects**: size, weight, colour and position decide what matters. One primary button per screen; secondary and quiet buttons look different. In shops, the best deal goes first and biggest, and prices are green buttons with a currency icon.
 - **Every value from a token**: spacing scale, type scale, 2–3 radii, 1–2 stroke weights, palette roles. If you type a one-off number, it is probably wrong.
+- **Small things that read as "designed"** (all in `design-tokens.md`):
+  - nested radius = outer − padding;
+  - alpha strokes on clean/dark plates;
+  - palettes and multi-hue gradients built in OKLCH, so rarity colours are equally bright and gradients don't go grey;
+  - icon line weight = text weight;
+  - edge-faded carousels;
+  - crossfaded icon swaps;
+  - lighter surfaces for depth in dark UI.
 - **Real art beats Frames**: icons, plates and banners from the game's art pipeline (the `roblox-chatgpt-art-pipeline` skill), not emoji, not default grey Frames, not stock Roblox icons.
 - **Motion with a job**: a pop on press, a slide/scale on open, a tick-up on currency, a burst on rewards. 0.08–0.30 s, interruptible, never per-frame loops, honour `GuiService.ReducedMotionEnabled`.
 - **Sound with a job**: every tap and purchase has a short UI sound (the `roblox-game-sounds` skill makes them).

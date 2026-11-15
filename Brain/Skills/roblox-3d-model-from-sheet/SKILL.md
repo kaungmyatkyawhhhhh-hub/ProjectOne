@@ -23,6 +23,17 @@ Toolkit: roble3/cc-blender-skill (MIT) is unpacked in the vault at `Tools\cc-ble
 - Then a second **head close-up sheet**: side and front of the head only, big, the same style, so the face can be measured accurately. The head is where players judge quality.
 - Download it via fetch(blob) and an `<a download>` link into the owner's Downloads. Copy it into the vault with the Blender Python (Downloads is not a connected folder), then stage it.
 
+## 1a. Hard-surface props made of parts (guns, tools, vehicles, machines): add an EXPLODED-VIEW sheet
+From the "Exploded Diagram Method" (@oddblockstudios, 16 Nov watch study: a turkey-gun "GOBBLE RAIL" prop, Blender to in-game in ~20 min). A turnaround sheet hides parts behind each other. An exploded view shows **every part separately, at its true shape, pulled apart along its assembly axis, with a label**.
+- **One-try ChatGPT prompt:**
+  - "technical exploded-view diagram of <prop>, <style> (e.g. Roblox low-poly, flat colours, 2-4 colours per part)";
+  - "every part separated along the barrel axis with thin dashed alignment lines, each part labelled with a short name, orthographic side view";
+  - "flat MAGENTA #FF00FF background, no shadows, no perspective, 1536x1024".
+- Make it **in addition to** the normal turnaround sheet (the turnaround gives the assembled proportions; the exploded view gives each part's shape).
+- Analyse each labelled part on its own: key the magenta, take its silhouette, and use the label as the part name.
+- **Build one Blender object per part, named after its label.** Model each from its own silhouette, then slide it back along the explosion axis to the turnaround's assembled position. The part names become the Roblox MeshPart names, ready for VFX attachments (muzzle, hopper) and for animating moving parts.
+- Same owner rules: ChatGPT in Chrome for the 2D sheet. **Don't** copy the video's OpenRouter-API-key route: Claude never enters keys or spends credits. If the owner wants OpenRouter, the owner sets it up.
+
 ## 1b. Check the sheet is consistent BEFORE modelling
 - Scale the side and front views to the same head height and draw horizontal guide lines (eye centre, top of mouth, lower jaw top, chin). If the front puts features at different heights than the side, NO 3D model can match both 1:1. Show the owner the guide-line image and ask which view wins (default: split the difference).
 - ChatGPT ignores guide-line templates (tested 9 Nov), so regenerating the sheet doesn't fix a mismatch. Fix it in 3D instead.
