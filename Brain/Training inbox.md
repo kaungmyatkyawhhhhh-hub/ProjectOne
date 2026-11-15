@@ -7,7 +7,10 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
-- 
+- 2026-11-16 06:00 TikTok round 1 (search "roblox monetization tips", watched only; creator claims, unverified):
+  - A tier list of "best Roblox monetization methods" from one creator: S = permanent unlocks (Blox Fruits style), A = troll gear (Steal a Brainrot style), B = VIP items (Dress to Impress style), C = 2x money and XP boosts, D = donation buttons. His opinion, not data. Fits [[K04 Monetization and economy]].
+  - A UGC clip ("items that actually sell") drew questions about whether you need Premium or Plus to make items, and a commenter thought the UGC program is limited. Check Roblox's current UGC rules before relying on it. Fits [[K09 Game ideas and trends]].
+  - Generic "how to make money" videos say monetization should add extra value for players, not just charge; nothing new beyond what is already filed. Fits [[K04 Monetization and economy]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
