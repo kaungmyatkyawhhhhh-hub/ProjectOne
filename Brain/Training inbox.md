@@ -11,6 +11,10 @@ Format if you like: **When** ... **do** ... **because** ...
   - A tier list of "best Roblox monetization methods" from one creator: S = permanent unlocks (Blox Fruits style), A = troll gear (Steal a Brainrot style), B = VIP items (Dress to Impress style), C = 2x money and XP boosts, D = donation buttons. His opinion, not data. Fits [[K04 Monetization and economy]].
   - A UGC clip ("items that actually sell") drew questions about whether you need Premium or Plus to make items, and a commenter thought the UGC program is limited. Check Roblox's current UGC rules before relying on it. Fits [[K09 Game ideas and trends]].
   - Generic "how to make money" videos say monetization should add extra value for players, not just charge; nothing new beyond what is already filed. Fits [[K04 Monetization and economy]].
+- 2026-11-16 06:15 TikTok round 2 (search "roblox ui design tips", watched only; creator claims, unverified):
+  - A popular tutorial (about 8.3K likes, 6.4K saves) on "good looking UI buttons in Roblox Studio, stud style" builds them from an ImageButton plus styled images, which is the same "reuse designed components" idea as our UI kit rule. Fits [[K06 Art, UI, VFX, sound and lighting]].
+  - A "clean UI with Claude" video (about 11.9K likes): a top comment says screenshot a UI you like and tell the AI to make all UIs in that style. Our vault rule already is "copy the closest existing screen"; this supports it. Fits [[K06 Art, UI, VFX, sound and lighting]].
+  - A "free sauce" AI-made shop UI got comments like "the UI is NOT good" and "without AI btw", so AI-made UI is judged harshly by viewers when it looks generic. Fits the owner's "no cheap or slop" taste and [[K06 Art, UI, VFX, sound and lighting]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
