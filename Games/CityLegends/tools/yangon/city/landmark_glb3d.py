@@ -30,16 +30,16 @@ GROUPS = {
     "GLP": ("Glass", (62, 73, 71), 0.0, 0.2, True, True),  # podium ribbon glass (46,66,76 in photos; seen from inside too)
     "GLL": ("Glass", (150, 146, 132), 0.0, 0.12, False, True),     # lobby glass with no interior behind (opaque, warm)
     "GLS": ("Glass", (176, 196, 204), 0.55, 0.05, True, False),     # see-through glass: shopfronts, entrances, skylight
-    "SPA": ("SmoothPlastic", (234, 204, 158), 0.0, 0.04, False, True),  # tower A spandrels: satin champagne panels (photo 186,169,142 evening, near-white at noon)
-    "SPB": ("SmoothPlastic", (173, 166, 138), 0.0, 0.04, False, True),  # tower B spandrels: satin greige, darker than A (photo 144,140,123)
+    "SPA": ("SmoothPlastic", (248, 255, 254), 0.0, 0.04, False, True),  # tower A spandrels: WHITE panels (owner 2026-11-16; midday photos 190,196,193 - the beige was the evening light)
+    "SPB": ("SmoothPlastic", (245, 252, 255), 0.0, 0.04, False, True),  # tower B spandrels: white-silver panels (owner 2026-11-16; midday 206,213,204)
     "MUL": ("SmoothPlastic", (52, 52, 44), 0.0, 0.0, False, True),  # dark mullions / frames (podium 24,33,35)
     "MUW": ("SmoothPlastic", (236, 234, 228), 0.0, 0.0, False, True),  # white frames, fascias, struts
     "GRN": ("SmoothPlastic", (252, 255, 250), 0.0, 0.0, False, True),  # podium bands, white stone (owner 2026-11-16: the walls are white, not yellow)
-    "CRN": ("SmoothPlastic", (226, 199, 154), 0.0, 0.04, False, True),  # tower A crown: the spandrel panels' material
+    "CRN": ("SmoothPlastic", (248, 255, 254), 0.0, 0.04, False, True),  # tower A crown: the spandrels' white panels
     "DRK": ("SmoothPlastic", (40, 36, 32), 0.0, 0.06, False, True),  # dark polished stone / panels, skirts (west entrance columns 33,34,30)
     "CHR": ("SmoothPlastic", (92, 86, 76), 0.0, 0.0, False, True),  # charcoal-brown screen wall, mall columns (photos 108,98,83 / 53,51,45)
     "PGR": ("SmoothPlastic", (100, 62, 40), 0.0, 0.08, False, True),  # plinth polished maroon-brown granite (photo 63,43,34 at dusk)
-    "PBD": ("SmoothPlastic", (199, 167, 128), 0.0, 0.0, False, True),  # plinth beige band (photo 150,129,103 dusk, 183,159,134 lit)
+    "PBD": ("SmoothPlastic", (255, 254, 245), 0.0, 0.0, False, True),  # plinth band: light grey-white (the dusk photos read it beige; lesson 16 Nov)
     "ORG": ("SmoothPlastic", (255, 91, 24), 0.0, 0.0, False, True),  # orange letters (lit at night: LampGlow)
     "GLD": ("SmoothPlastic", (162, 144, 125), 0.0, 0.1, False, True),  # small brushed-metal names on the plinth
     "WLT": ("SmoothPlastic", (255, 246, 232), 0.0, 0.0, False, True),  # white letters (MYANMAR PLAZA: 207,200,192)
@@ -80,7 +80,7 @@ GROUPS = {
     "SIL": ("SmoothPlastic", (252, 255, 255), 0.0, 0.03, False, True),  # podium sill, white
     "FAS": ("SmoothPlastic", (252, 255, 254), 0.0, 0.03, False, True),  # entrance canopy fascia, white
     "SOF": ("SmoothPlastic", (162, 135, 89), 0.0, 0.0, False, False),  # canopy soffit, warm-lit (photo 125,110,81)
-    "STR": ("SmoothPlastic", (186, 178, 148), 0.0, 0.03, False, True),  # canopy struts, painted steel tubes
+    "STR": ("SmoothPlastic", (252, 255, 254), 0.0, 0.03, False, True),  # canopy struts and roof canopy: white (dusk photos read them beige; lesson 16 Nov)
     "GLM": ("Glass", (97, 111, 113), 0.0, 0.2, False, True),  # Melia glass, blue-grey (79,100,111)
     "ESC": ("SmoothPlastic", (96, 58, 42), 0.0, 0.05, False, True),  # escalator side cladding, dark red-brown (photo 61,35,25)
     "GFA": ("SmoothPlastic", (236, 236, 234), 0.0, 0.0, False, False),  # gallery edge fascias: white (owner 2026-11-16)

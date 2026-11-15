@@ -58,6 +58,7 @@ created: 2026-11-16
 - 2026-11-16, City Legends, Myanmar Plaza and Sedona: daylight warmed, colours matched, night windows, shops, shoppers, the Sedona gate. Research: [[2026-11-16 Research - Myanmar Plaza and Sedona real look (photo measurements)]].
 
 ## Learned
+- **Use midday or overcast photos for colours, never sunset or dusk** (16 Nov: Myanmar Plaza's white panels and walls came out cream from evening photos, and the owner caught it twice). When photos disagree, pick the more neutral, lighter reading, and say the colours in words first ("white bands, dark glass").
 - **Measure the light before the colours.** Under a blue-tinted light no part colour looks right.
 - **Scale is part of "real".** The owner noticed the half-scale map before any colour fix.
 - Photos at dusk read 30-40% darker than daylight. Use daylight or "lit" values for the day look.
