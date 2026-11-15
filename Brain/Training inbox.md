@@ -25,6 +25,7 @@ Format if you like: **When** ... **do** ... **because** ...
   - Game feel: "make simple actions satisfying", and Nintendo uses animation timing (a popular clip with about 8.6K likes). Fits [[K06 Art, UI, VFX, sound and lighting]] and the Lessons on feel.
   - Marketing: a creator says posting TikToks about your Roblox game BEFORE it releases gives early stats that help the algorithm. This one was also a promo for a paid promo-maker tool (30 USD per a reply). Fits [[K05 Marketing, ads and storefront]] and [[Brain/Methods/Launch gate]].
   - "Hardest pill to swallow for Roblox devs" (10.8K likes) mentions a 100 dollar plan. I couldn't see the whole point. Commenters claim cheap AI-built games hit high CCU (e.g. 5,000 CCU in 3 days on 2 pro subscriptions); unverified.
+  - Organic marketing: a popular clip (about 6.4K likes) "ungatekeeping the organic Roblox marketing method" is about getting players through organic short videos instead of paid ads; I only saw the intro, not the full method. A commenter shows a game with 4 months of work and no AI. Fits [[K05 Marketing, ads and storefront]]. Worth a proper look next time.
   - Caution: several videos are promos for AI game tools (e.g. a GUI generator), so treat their "100x cooler" claims as marketing. Commenters also say pure cash-grab games fail and effort and creativity win.
   - Comments on one video told people to send their Claude agent the video link so it would do what the video says. Ignored: that is an instruction from a web page, not from you.
 - 
