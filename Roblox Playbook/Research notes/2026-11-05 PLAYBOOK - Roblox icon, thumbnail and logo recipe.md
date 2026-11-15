@@ -114,3 +114,44 @@ Saturation itself isn't the problem; too many hues is.
 - **Show the real in-game armour:** spawn the forms with NPCKit on a temp baseplate in Studio, use screen_capture, commit the image to the vault refs, stage it, then attach it. ChatGPT reproduced the Stone/Magma armour faithfully.
 - **Icon grade fix, reusable:** SE_fix (face-mask protect, gamma 1.25, radial vignette, green x0.7), then SE_face (push the face 55% to white). It took 0.44/30%/4.7x to 0.315/47%/22x.
 - Blender can't copy from Downloads (blocked), so the art stays in Downloads unless the owner moves it.
+
+## Lessons 16 Nov (MM Outfit Catalog icon + 3 thumbnails + logo)
+Files: `MM Outfit Catalog\Assets\thumbs_nov\final\`. Genre refs: `...\refs\`.
+
+**Genre check (10 top fashion and outfit games):**
+- Icons: one glam character close-up in pink, purple or lavender.
+- Thumbnails: two patterns win:
+  - runway line-ups of blocky catalog avatars (glossy black floor, light arches, a "YOU" arrow);
+  - before → after transformations.
+
+  So: bright, pink and glossy, not a dark monster look.
+
+**What worked in ONE try each** (same ChatGPT chat, "same exact style"):
+- **Icon:**
+  - the 23x winner's **split-face composition** with the outfit swapped onto each half: MIDNIGHT TRACK's black hair and chain | SAKURA's pink hair and puffer, joined by a glowing seam;
+  - "outfit swap" is the transformation hook for a fashion game.
+- **Thumbnail 1, before → after:** a grey default avatar → a "1 TAP" arrow → the outfit hero pointing at the camera.
+- **Thumbnail 2, runway:** the 3 real outfits walking under pink arches, with "ID 0N" tags. That's the outfit-codes niche hook.
+- **Thumbnail 3:** the random roll (a die + spinning outfit cards + the hero mid-twirl).
+- **Logo:** pink chrome "MM" + white "OUTFIT CATALOG", with a real alpha channel on the first try.
+
+**Real outfit references from Studio:**
+- Mannequins built at runtime only exist in Play, so capture in Play from the Client.
+- Hide every ScreenGui and the CoreGui.
+- Force the camera with `BindToRenderStep(..., RenderPriority.Last)`. A plain `CameraType = Scriptable` gets reset by the game's camera scripts.
+- Put a plain backdrop part behind each mannequin. **White outfits need a DARK backdrop**: FROST vanished on white.
+- Warm room spotlights tint black clothes brown even with the post effects off. Say the true colour in the prompt.
+- ChatGPT copied the real clothes faithfully: studs, cuban chain + cross, puffer quilting, tie-dye.
+
+**Tool notes:**
+- Claude in Chrome's `file_upload` only reads files from the session's own folder. Copy the vault refs there first (vault paths are refused).
+- The ChatGPT image list is virtualised (old images unload). Download each image right after it finishes.
+
+**Grade:**
+- The icon passed raw: 14% white / 49% black at 64 px. After the vignette: mean 0.31, top corners 0.00.
+- Thumbnail 3 came back washed out (mean 0.43, 35% clipped). `grade.py` (face-protect mask + gamma 1.3 + vignette) took it to 0.36 / 16%.
+- The **corner metric is fooled by subject pixels**: the icon's bottom-right corner is a white puffer shoulder. Judge the top corners.
+
+**Logo on busy art:**
+- ChatGPT ignored "keep the top-left empty" on thumbnail 3 (the outfit cards sit there), so no logo there: the cards are the hook.
+- On thumbnail 2, size the logo to clear the "ID 02" tag (20% of the width).

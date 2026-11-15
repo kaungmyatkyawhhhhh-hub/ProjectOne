@@ -28,6 +28,10 @@ Format if you like: **When** ... **do** ... **because** ...
   - A "how much should I spend on Roblox ads" video (about 9.7K likes, 5.3K saves) is very popular; a top comment says a tiny 10-credit test got a 1.8 percent click rate (screenshot, unverified). Fits [[K05 Marketing, ads and storefront]].
   - A "$100 on ads, day 3" diary video: a commenter says their game hit the algorithm with no ads 5 hours after release. Suggests launch-day organic traffic can matter more than ad spend. Unverified. Fits [[K05 Marketing, ads and storefront]].
   - A creator says run ads in bursts, about 5 dollars a day for 5 days, to fill the funnel, and explains Roblox's Engagement objective (finds players likely to spend or stay, but can cost more per play). Matches the earlier "test 15 EUR over 2-3 days" claim, so ad tests of about 5 days at a small daily budget are a repeated pattern. Fits [[K05 Marketing, ads and storefront]].
+- 2026-11-16 06:36 TikTok round 2e (search "roblox studio plugins every dev needs", watched only; creator claims, unverified):
+  - A "plugins every dev needs" list (about 31K likes, 25K saves) includes a Performance Heatmap plugin as number 4, shown next to a "crashes on everyone else's" (low-end devices) joke; it points to checking performance hot spots. A commenter says Forge GUI is better than the promoted tool, so these lists are partly promo. Fits [[K07 Tech, performance and tools]].
+  - A "best plugins for UI designers" list (about 8.4K and 1.9K likes): creator says all are free, covering UI effects and an animation curve editor. Free plugin names were not captured, so check before using. Fits [[K06 Art, UI, VFX, sound and lighting]].
+  - A viewer asks "does it work with AI" under a plugin video; plugin lists are a hot topic, but nothing here beats the Studio MCP setup we already use. Fits [[K07 Tech, performance and tools]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
