@@ -37,6 +37,10 @@ Format if you like: **When** ... **do** ... **because** ...
 - 2026-11-16 06:44 TikTok round 2g (search "roblox first time user experience onboarding", watched only; unverified):
   - A "new Roblox game" launch diary (about 13.9K likes, 672 comments) walks through the Ads Manager setup and a launch time; a commenter says they "literally spent 20k on ads" (screenshot, unverified). Shows launch diaries get lots of engagement. Fits [[K05 Marketing, ads and storefront]].
   - A "connect Claude to Roblox Studio" video (about 4.8K likes) shows the MCP config steps; comments say you need a Claude subscription and some people stumble on the config file step. Confirms our existing Studio MCP setup is a popular, error-prone how-to. Fits [[K07 Tech, performance and tools]].
+- 2026-11-16 06:50 TikTok round 2h (search "roblox game idea trends what kids play", watched only; unverified):
+  - A "method for Roblox game ideas" video (about 7.4K likes, 5.1K saves) shows browsing a stats site's top and trending games list (Rotrends) to pick ideas. The list is where our own trend and dead-game research could start. Fits [[K09 Game ideas and trends]].
+  - A short "Cook the Chicken" game video (about 43.9K likes, 13K saves) shows a very short, simple game getting big attention. A top comment says "not wasting 2 hours for a Roblox game" and another says they finished it in 40 minutes, so short, finishable games are a draw for kids. Fits [[K09 Game ideas and trends]] and [[K02 First session and retention]].
+  - A "games to play with your little siblings" list (about 2K likes) leans on co-op and spooky games; comments are about playing with friends and siblings, which supports "play with friends" hooks. Fits [[K09 Game ideas and trends]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
