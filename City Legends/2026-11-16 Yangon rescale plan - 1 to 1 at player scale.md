@@ -342,3 +342,9 @@ Rules for every step:
 6. Hotel and The Crown: cut to Yangon's real skyline (about 110 m), or keep them as fantasy landmarks?
 7. Speedometer: keep STUDS_TO_MPH 0.783 (5% high at 3 studs/m), or set it to 0.7457 and re-tune every mph setting?
 8. May the parked and backup folders go to .rbxm files on disk and leave the place before the rebuild?
+## Owner's answers (16 Nov 2026)
+1. **Build place:** in the live place, at coordinates that don't overlap the old map; the old map is deleted after the switch.
+2. **Lane width:** 12 studs (about 4 m), a little wider than real so weaving through traffic stays fun.
+3. **Backups:** the parked and backup folders are saved to .rbxm files on the PC and removed from the place before the rebuild.
+4. **Main roads:** the batch 0.5 main roads, the roundabout and both flyovers become meshes like the rest of the city (this overrides master-plan decision 5).
+- Still open, asked when their step comes: the races (keep the real routes, or cut them shorter?), the hotel and The Crown heights (real skyline or fantasy?), the speedometer factor. The origin is a technical choice: the new map goes where it doesn't overlap the old one.
