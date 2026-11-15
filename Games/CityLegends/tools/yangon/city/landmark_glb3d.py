@@ -91,6 +91,43 @@ GROUPS = {
     "NWY": ("Neon", (206, 192, 144), 1.0, 0.0, False, False),  # office pale yellow
     "NWC": ("Neon", (146, 178, 180), 1.0, 0.0, False, False),  # office cool fluorescent
     "NWH": ("Neon", (204, 160, 104), 1.0, 0.0, False, False),  # hotel rooms, warm
+    # the 1:1 building kit (kit.py, 2026-11-16): colours from the kit reference pack, calibrated with look_calib.py
+    "KW0": ("SmoothPlastic", (255, 248, 228), 0.0, 0.0, False, True),  # kit: trim, ledges, cornices (photo (225, 220, 208))
+    "KW1": ("SmoothPlastic", (255, 234, 189), 0.0, 0.0, False, True),  # kit: cream render (photo (235, 222, 195))
+    "KW2": ("SmoothPlastic", (162, 237, 208), 0.0, 0.0, False, True),  # kit: mint render (walk-ups) (photo (150, 200, 185))
+    "KW3": ("SmoothPlastic", (244, 179, 82), 0.0, 0.0, False, True),  # kit: ochre render (photo (205, 165, 90))
+    "KW4": ("SmoothPlastic", (221, 242, 255), 0.0, 0.0, False, True),  # kit: pale blue-white render (photo (210, 220, 225))
+    "KW5": ("SmoothPlastic", (255, 170, 166), 0.0, 0.0, False, True),  # kit: pale pink render (photo (225, 170, 170))
+    "KW6": ("SmoothPlastic", (252, 255, 249), 0.0, 0.0, False, True),  # kit: white render, compound walls (photo (235, 235, 230))
+    "KST": ("SmoothPlastic", (90, 82, 56), 0.0, 0.0, False, True),  # kit: black rain streaks (photo (78, 76, 70))
+    "KFR": ("SmoothPlastic", (234, 233, 218), 0.0, 0.0, False, True),  # kit: window frames (photo (200, 198, 190))
+    "KGR": ("SmoothPlastic", (50, 38, 26), 0.0, 0.0, False, True),  # kit: iron grilles (photo (40, 42, 44))
+    "KSH": ("SmoothPlastic", (119, 76, 24), 0.0, 0.0, False, True),  # kit: teak shutters (photo (110, 70, 40))
+    "KCG": ("SmoothPlastic", (82, 80, 59), 0.0, 0.0, False, True),  # kit: cage steel, posts (photo (70, 74, 72))
+    "KCO": ("SmoothPlastic", (186, 180, 165), 0.0, 0.0, False, True),  # kit: bare concrete (photo (170, 166, 158))
+    "KAC": ("SmoothPlastic", (252, 255, 248), 0.0, 0.0, False, True),  # kit: air-con units (photo (225, 225, 220))
+    "KL1": ("SmoothPlastic", (234, 64, 41), 0.0, 0.0, False, True),  # kit: laundry / goods red (photo (200, 60, 60))
+    "KL2": ("SmoothPlastic", (72, 96, 155), 0.0, 0.0, False, True),  # kit: laundry / goods blue (photo (60, 90, 150))
+    "KL3": ("SmoothPlastic", (255, 205, 48), 0.0, 0.0, False, True),  # kit: laundry / goods yellow (photo (230, 200, 70))
+    "KTK": ("SmoothPlastic", (35, 18, 19), 0.0, 0.0, False, True),  # kit: black water tanks (photo (30, 30, 32))
+    "KDS": ("SmoothPlastic", (215, 217, 210), 0.0, 0.0, False, True),  # kit: satellite dishes (photo (190, 190, 186))
+    "KRS": ("SmoothPlastic", (162, 160, 153), 0.0, 0.0, False, True),  # kit: roller shutters (photo (150, 150, 148))
+    "KSI": ("SmoothPlastic", (72, 54, 26), 0.0, 0.0, False, True),  # kit: dark shop interiors (photo (60, 52, 44))
+    "KAW": ("SmoothPlastic", (50, 116, 199), 0.0, 0.0, False, True),  # kit: blue awnings (photo (40, 110, 180))
+    "KS1": ("SmoothPlastic", (234, 34, 24), 0.0, 0.0, False, True),  # kit: red signboards (photo (200, 40, 40))
+    "KS2": ("SmoothPlastic", (255, 186, 24), 0.0, 0.0, False, True),  # kit: yellow signboards (photo (235, 190, 40))
+    "KS3": ("SmoothPlastic", (35, 86, 182), 0.0, 0.0, False, True),  # kit: blue signboards (photo (30, 80, 170))
+    "KRF": ("SmoothPlastic", (140, 86, 33), 0.0, 0.0, False, True),  # kit: rusty corrugated roofs (photo (130, 80, 55))
+    "KRT": ("SmoothPlastic", (173, 76, 30), 0.0, 0.0, False, True),  # kit: red roof tiles (photo (160, 70, 50))
+    "KGT": ("SmoothPlastic", (50, 76, 33), 0.0, 0.0, False, True),  # kit: gates, dark green (photo (40, 70, 55))
+    "KPV": ("SmoothPlastic", (162, 154, 136), 0.0, 0.0, False, True),  # kit: paving (photo (150, 145, 135))
+    "KWD": ("SmoothPlastic", (151, 106, 50), 0.0, 0.0, False, True),  # kit: wood stalls (photo (140, 100, 65))
+    "KCR": ("SmoothPlastic", (249, 252, 255), 0.0, 0.0, False, True),  # kit: scale car (photo (230, 230, 230))
+    "KTY": ("SmoothPlastic", (26, 15, 15), 0.0, 0.0, False, True),  # kit: tyres (photo (25, 25, 25))
+    "KSK": ("SmoothPlastic", (215, 148, 94), 0.0, 0.0, False, True),  # kit: skin (photo (190, 140, 100))
+    "KRD": ("SmoothPlastic", (72, 64, 46), 0.0, 0.0, False, True),  # kit: road (photo (60, 60, 62))
+    "KGL": ("Glass", (40, 46, 50), 0.0, 0.15, False, True),  # kit: window glass
+    "KRL": ("Glass", (170, 200, 200), 0.6, 0.05, True, False),  # kit: glass balcony rails
     # shop stock (clothes, boxes, packets): a few plain colours mixed by shop
     "PRA": ("SmoothPlastic", (186, 62, 64), 0.0, 0.0, False, False),
     "PRB": ("SmoothPlastic", (58, 96, 160), 0.0, 0.0, False, False),
