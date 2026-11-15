@@ -294,7 +294,7 @@ def podium():
         for j in range(cnt):
             t = (j + 1) / (cnt + 1)
             c = (p[0] + (q[0] - p[0]) * t + n[0] * 0.9, p[1] + (q[1] - p[1]) * t + n[1] * 0.9)
-            BOARDS.append({"c": c, "z0": 28.0, "w": 14.0, "h": 9.0, "n": n, "img": regs[k % 3], "frame": 0.6})
+            pass  # (owner, 2026-11-16: "myanmar plaza dont have these on the walls": no ad boards)
             k += 1
 
 
@@ -341,15 +341,15 @@ def corner_front():
     bw = min(72.0, L - 4.0)
     bd = 4.0
     c = (m[0] + n[0] * bd / 2, m[1] + n[1] * bd / 2)
-    g.box("CHR", c[0], c[1], 28.0, bw, bd, 32.0, yaw + math.pi / 2)
+    # (owner, 2026-11-16: no screen wall with pictures on the corner)
     fc = (m[0] + n[0] * (bd + 0.05), m[1] + n[1] * (bd + 0.05))
     led_w = min(42.0, bw - 32.0)
     for xc, ww, img in ((0.0, led_w, "screen"), (-(led_w / 2 + 8.5), 14.0, "bill0"), (led_w / 2 + 8.5, 14.0, "bill2")):
         pc = (fc[0] + t[0] * xc, fc[1] + t[1] * xc)
-        BOARDS.append({"c": pc, "z0": 33.0, "w": ww, "h": 24.0, "n": n, "img": img, "frame": 0.8})
+        pass  # (no screen / billboard pictures: owner, 2026-11-16)
     # a light line on top of the wall
     lc = (m[0] + n[0] * (bd + 0.06), m[1] + n[1] * (bd + 0.06))
-    g.box("LIT", lc[0], lc[1], 59.0, bw, 0.12, 0.8, yaw + math.pi / 2, faces=("+y", "-y", "top"))
+    pass
     # entrance canopy (ground floor) on three columns
     dep = 9.0
     pts = [(m[0] - t[0] * (w / 2 + 12), m[1] - t[1] * (w / 2 + 12)), (m[0] + t[0] * (w / 2 + 12), m[1] + t[1] * (w / 2 + 12))]
@@ -396,14 +396,7 @@ def corner_front():
             g.tube("STR", (base[0], base[1], top), (tip[0], tip[1], zb + (zf - zb) * frac), 0.7)
     bal = (m[0] - n[0] * 0.6, m[1] - n[1] * 0.6)
     g.box("RAL", bal[0], bal[1], top, bw - 6.0, 0.2, 3.2, yaw + math.pi / 2, faces=("+y", "-y"))
-    for side, img, ww, hh in ((1, "bill1", 17.0, 11.0), (-1, "screen", 18.0, 9.0)):
-        bc = (m[0] + t[0] * side * (L / 2 - ww / 2 - 2.0) - n[0] * 2.0, m[1] + t[1] * side * (L / 2 - ww / 2 - 2.0) - n[1] * 2.0)
-        g.box("STL", bc[0], bc[1], top, ww + 1.0, 1.0, hh + 1.0, yaw + math.pi / 2)
-        BOARDS.append({"c": (bc[0] + n[0] * 0.55, bc[1] + n[1] * 0.55), "z0": top + 0.5, "w": ww, "h": hh, "n": n,
-                       "img": img, "frame": 0.0})
-        for kk in range(4):
-            a_ = (bc[0] + t[0] * (-ww / 2 + (kk + 0.5) * ww / 4), bc[1] + t[1] * (-ww / 2 + (kk + 0.5) * ww / 4))
-            g.tube("STL", (a_[0], a_[1], top + hh + 1.0), (a_[0] + n[0] * 3, a_[1] + n[1] * 3, top + hh + 2.2), 0.35)
+    # (no roof billboards: owner, 2026-11-16)
 
 
 def west_entrance():
@@ -1017,41 +1010,99 @@ def interior():
     g.annulus("WOD", offset_poly(ring_pts, 0.01), offset_poly(ring_pts, -1.2), zc - 2.8, down=True) if False else None
 
     # escalators: a side-by-side up / down pair GF-1F, then single runs crossing the void, direction alternating
-    def escalator(p_lo, p_hi, z0, z1, wdt=2.8):
-        """A truss from p_lo at z0 to p_hi at z1 (plan points just outside the void, on the galleries)."""
+    def escalator(p_lo, p_hi, z0, z1, wdt=6.0):
+        """A real escalator (owner, 2026-11-16: "its an elevator, not like that"): a truss from p_lo at z0 to p_hi at z1
+        (plan points just outside the void, on the galleries) with real steps, red-brown side cladding (photos 61,35,25)
+        under a steel deck strip, glass balustrades with black rubber handrails rounded over at both ends, a flat landing
+        run of two steps at each end, steel landing plates."""
         d = unit((p_hi[0] - p_lo[0], p_hi[1] - p_lo[1]))
+
+        def q2(grp, a, b, c, e):
+            g.quad(grp, a, b, c, e)
+            g.quad(grp, e, c, b, a)
         sdx, sdy = -d[1], d[0]
         run = math.dist(p_lo, p_hi)
-        hw = wdt / 2
-        L0, R0 = (p_lo[0] + sdx * hw, p_lo[1] + sdy * hw), (p_lo[0] - sdx * hw, p_lo[1] - sdy * hw)
-        L1, R1 = (p_hi[0] + sdx * hw, p_hi[1] + sdy * hw), (p_hi[0] - sdx * hw, p_hi[1] - sdy * hw)
-        top = [(R0[0], R0[1], z0 + 0.1), (L0[0], L0[1], z0 + 0.1), (L1[0], L1[1], z1 + 0.1), (R1[0], R1[1], z1 + 0.1)]
-        # top faces up: order so the normal points up
-        a_ = (top[1][0] - top[0][0]) * (top[2][1] - top[0][1]) - (top[1][1] - top[0][1]) * (top[2][0] - top[0][0])
-        g.quad("STP", *(top if a_ > 0 else top[::-1]))
-        dep = 2.2
-        bot = [(x, y, zz - dep) for x, y, zz in top]
-        g.quad("ESC", *(bot[::-1] if a_ > 0 else bot))
-        for (pa, pb) in ((R0, R1), (L1, L0)):
-            za, zb = (z0, z1) if pa in (R0, L0) else (z1, z0)
-            side = [(pa[0], pa[1], za - dep), (pb[0], pb[1], zb - dep), (pb[0], pb[1], zb + 0.1), (pa[0], pa[1], za + 0.1)]
-            g.quad("ESC", *side)
-            g.quad("ESC", *side[::-1])
-        for (pa, pb) in ((L0, L1), (R0, R1)):
-            g.quad("RAL", (pa[0], pa[1], z0 + 0.1), (pb[0], pb[1], z1 + 0.1), (pb[0], pb[1], z1 + 2.3), (pa[0], pa[1], z0 + 2.3))
-            g.tube("DRK", (pa[0], pa[1], z0 + 2.4), (pb[0], pb[1], z1 + 2.4), 0.28)
-        g.box("STL", p_lo[0] - d[0] * 1.5, p_lo[1] - d[1] * 1.5, z0, wdt + 0.4, 3.0, 0.12, math.atan2(d[1], d[0]) + math.pi / 2)
-        g.box("STL", p_hi[0] + d[0] * 1.5, p_hi[1] + d[1] * 1.5, z1, wdt + 0.4, 3.0, 0.12, math.atan2(d[1], d[0]) + math.pi / 2)
-        nst = int(math.ceil(z1 - z0))
         yaw = math.atan2(d[1], d[0])
-        for s in range(nst):
-            u = (s + 0.5) / nst
-            c = (p_lo[0] + d[0] * run * u, p_lo[1] + d[1] * run * u)
-            zz = z0 + (z1 - z0) * (s + 1) / nst
-            COLL.append((c[0], c[1], zz - 2.0, run / nst + 0.3, wdt, 2.0, yaw))
+        hw = wdt / 2
+        step_hw = hw - 0.9           # the step band between the two skirts
+        flat = 2.4                   # level run at each end (two flat steps)
+        slope_run = run - 2 * flat
+        rise = z1 - z0
+
+        def P(t, s, z):
+            """Along t (0 at p_lo), across s (+ = left), height z."""
+            return (p_lo[0] + d[0] * t + sdx * s, p_lo[1] + d[1] * t + sdy * s, z)
+
+        def line_z(t):
+            if t <= flat:
+                return z0
+            if t >= run - flat:
+                return z1
+            return z0 + rise * (t - flat) / slope_run
+        # the steps: treads and risers
+        nst = max(6, int(round(rise / 0.7)))
+        tread = slope_run / nst
+        q2("STP", P(0, -step_hw, z0 + 0.1), P(flat, -step_hw, z0 + 0.1), P(flat, step_hw, z0 + 0.1), P(0, step_hw, z0 + 0.1))
+        for k in range(nst):
+            t0, t1 = flat + k * tread, flat + (k + 1) * tread
+            zt = z0 + rise * (k + 1) / nst + 0.1
+            zb = z0 + rise * k / nst + 0.1
+            q2("STP", P(t0, -step_hw, zb), P(t0, step_hw, zb), P(t0, step_hw, zt), P(t0, -step_hw, zt))   # riser
+            q2("STP", P(t0, -step_hw, zt), P(t1, -step_hw, zt), P(t1, step_hw, zt), P(t0, step_hw, zt))  # tread
+        q2("STP", P(run - flat, -step_hw, z1 + 0.1), P(run, -step_hw, z1 + 0.1), P(run, step_hw, z1 + 0.1), P(run - flat, step_hw, z1 + 0.1))
+        # the truss: side cladding from under the steps to the deck, the deck strip, the underside
+        DEP, DECK = 2.6, 1.2
+        ts = [0.0, flat, run - flat, run]
+        for side in (-1, 1):
+            s_out, s_in = side * hw, side * step_hw
+            for a, b in zip(ts, ts[1:]):
+                za, zb = line_z(a), line_z(b)
+                # outer face
+                q = [P(a, s_out, za - DEP), P(b, s_out, zb - DEP), P(b, s_out, zb + DECK), P(a, s_out, za + DECK)]
+                q2("ESC", *(q if side < 0 else q[::-1]))
+                # inner skirt (faces the steps)
+                q = [P(a, s_in, za + 0.1), P(b, s_in, zb + 0.1), P(b, s_in, zb + DECK), P(a, s_in, za + DECK)]
+                q2("STL", *(q[::-1] if side < 0 else q))
+                # the deck strip on top
+                q = [P(a, s_out, za + DECK), P(b, s_out, zb + DECK), P(b, s_in, zb + DECK), P(a, s_in, za + DECK)]
+                q2("STL", *(q if side > 0 else q[::-1]))
+                q2("STL", *(q[::-1] if side > 0 else q))
+            # the glass balustrade on the deck, the black handrail on top, rounded over each end
+            sm = side * (hw - 0.45)
+            for a, b in zip(ts, ts[1:]):
+                za, zb = line_z(a), line_z(b)
+                q = [P(a, sm, za + DECK), P(b, sm, zb + DECK), P(b, sm, zb + DECK + 1.9), P(a, sm, za + DECK + 1.9)]
+                g.quad("RAL", *q)
+                g.tube("DRK", P(a, sm, za + DECK + 2.0), P(b, sm, zb + DECK + 2.0), 0.35)
+            for (t_end, z_end, dirn) in ((0.0, z0, -1), (run, z1, 1)):
+                prev = P(t_end, sm, z_end + DECK + 2.0)
+                for k in range(1, 7):
+                    ang = math.pi * k / 6
+                    cur = P(t_end + dirn * 0.9 * math.sin(ang), sm, z_end + DECK + 1.1 + 0.9 * math.cos(ang))
+                    g.tube("DRK", prev, cur, 0.35)
+                    prev = cur
+            # end caps of the truss
+            for (t_end, z_end) in ((0.0, z0), (run, z1)):
+                q = [P(t_end, s_out, z_end - DEP), P(t_end, s_in, z_end - DEP), P(t_end, s_in, z_end + DECK), P(t_end, s_out, z_end + DECK)]
+                q2("ESC", *q)
+                q2("ESC", *q[::-1])
+        for a, b in zip(ts, ts[1:]):
+            za, zb = line_z(a), line_z(b)
+            q2("ESC", P(a, hw, za - DEP), P(b, hw, zb - DEP), P(b, -hw, zb - DEP), P(a, -hw, za - DEP))
+        # landing plates on the floors
+        g.box("STL", p_lo[0] - d[0] * 1.6, p_lo[1] - d[1] * 1.6, z0, wdt, 3.2, 0.12, yaw + math.pi / 2)
+        g.box("STL", p_hi[0] + d[0] * 1.6, p_hi[1] + d[1] * 1.6, z1, wdt, 3.2, 0.12, yaw + math.pi / 2)
+        # collision: a ramp of steps and the two sides
+        for k in range(nst):
+            t = flat + (k + 0.5) * tread
+            c = P(t, 0, 0)
+            zz = z0 + rise * (k + 1) / nst
+            COLL.append((c[0], c[1], zz - 2.0, tread + 0.3, 2 * step_hw, 2.0, yaw))
         for sgn in (1, -1):
-            mid = ((p_lo[0] + p_hi[0]) / 2 + sdx * sgn * (hw + 0.2), (p_lo[1] + p_hi[1]) / 2 + sdy * sgn * (hw + 0.2))
-            COLL.append((mid[0], mid[1], z0, run, 0.3, z1 - z0 + 3.0, yaw))
+            for a, b in zip(ts, ts[1:]):
+                c = P((a + b) / 2, sgn * (hw - 0.4), 0)
+                zl = min(line_z(a), line_z(b))
+                COLL.append((c[0], c[1], zl, b - a, 0.8, abs(line_z(b) - line_z(a)) + DECK + 2.0, yaw))
 
     def chord(phi, run, off=0.0, r_out=1.8):
         """Endpoints of a chord of the void (pushed r_out outside the ellipse at each end) centred at angle phi."""
@@ -1067,15 +1118,15 @@ def interior():
         nrm = unit(((pa[0] + pb[0]) / 2 - cx, (pa[1] + pb[1]) / 2 - cy))
         return ((pa[0] - nrm[0] * off, pa[1] - nrm[1] * off), (pb[0] - nrm[0] * off, pb[1] - nrm[1] * off))
     rise1, rise = POD_Z[1] - POD_Z[0], POD_Z[2] - POD_Z[1]
-    run1, run2 = rise1 * 1.73, rise * 1.73
+    run1, run2 = rise1 * 1.73 + 4.8, rise * 1.73 + 4.8  # 30 degrees plus the two flat steps at each end
     # GF-1F pair at the void's south end (up and down, side by side)
-    for off in (2.0, 5.4):
+    for off in (3.4, 9.8):
         pa, pb = chord(-math.pi / 2, run1, off=off)
         escalator(pa, pb, POD_Z[0], POD_Z[1])
     # 1F-2F at the north end (the other way), 2F-3F back at the south end
-    pa, pb = chord(math.pi / 2, run2)
+    pa, pb = chord(math.pi / 2, run2, off=3.4)
     escalator(pb, pa, POD_Z[1], POD_Z[2])
-    pa, pb = chord(-math.pi / 2, run2, off=-0.5)
+    pa, pb = chord(-math.pi / 2, run2, off=3.4)
     escalator(pb, pa, POD_Z[2], POD_Z[3])
 
     # shops round the galleries on GF-3F: glass fronts (door in the middle), white fascia with a warm strip and a sign,
