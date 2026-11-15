@@ -30,12 +30,12 @@ GROUPS = {
     "GLP": ("Glass", (62, 73, 71), 0.0, 0.2, True, True),  # podium ribbon glass (46,66,76 in photos; seen from inside too)
     "GLL": ("Glass", (150, 146, 132), 0.0, 0.12, False, True),     # lobby glass with no interior behind (opaque, warm)
     "GLS": ("Glass", (176, 196, 204), 0.55, 0.05, True, False),     # see-through glass: shopfronts, entrances, skylight
-    "SPA": ("SmoothPlastic", (234, 204, 158), 0.0, 0.04, False, True),  # tower A spandrels: satin champagne panels (photo 186,169,142 evening, near-white at noon)
-    "SPB": ("SmoothPlastic", (173, 166, 138), 0.0, 0.04, False, True),  # tower B spandrels: satin greige, darker than A (photo 144,140,123)
+    "SPA": ("SmoothPlastic", (248, 255, 254), 0.0, 0.04, False, True),  # tower A spandrels: WHITE panels (owner 2026-11-16; midday photos 190,196,193 - the beige was the evening light)
+    "SPB": ("SmoothPlastic", (245, 252, 255), 0.0, 0.04, False, True),  # tower B spandrels: white-silver panels (owner 2026-11-16; midday 206,213,204)
     "MUL": ("SmoothPlastic", (52, 52, 44), 0.0, 0.0, False, True),  # dark mullions / frames (podium 24,33,35)
     "MUW": ("SmoothPlastic", (236, 234, 228), 0.0, 0.0, False, True),  # white frames, fascias, struts
     "GRN": ("SmoothPlastic", (252, 255, 250), 0.0, 0.0, False, True),  # podium bands, white stone (owner 2026-11-16: the walls are white, not yellow)
-    "CRN": ("SmoothPlastic", (226, 199, 154), 0.0, 0.04, False, True),  # tower A crown: the spandrel panels' material
+    "CRN": ("SmoothPlastic", (248, 255, 254), 0.0, 0.04, False, True),  # tower A crown: the spandrels' white panels
     "DRK": ("SmoothPlastic", (40, 36, 32), 0.0, 0.06, False, True),  # dark polished stone / panels, skirts (west entrance columns 33,34,30)
     "CHR": ("SmoothPlastic", (92, 86, 76), 0.0, 0.0, False, True),  # charcoal-brown screen wall, mall columns (photos 108,98,83 / 53,51,45)
     "PGR": ("SmoothPlastic", (100, 62, 40), 0.0, 0.08, False, True),  # plinth polished maroon-brown granite (photo 63,43,34 at dusk)

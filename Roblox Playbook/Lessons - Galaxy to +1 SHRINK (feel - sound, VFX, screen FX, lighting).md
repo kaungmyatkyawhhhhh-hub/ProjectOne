@@ -473,3 +473,19 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - Yangon's daylight was warmed.
   - Colours were measured from photos and calibrated to the game's light.
 - **Rule:** for any real place, lock one scale for map, buildings, cars and players first; measure the game's light; then set colours from photo measurements. Method: [[Brain/Methods/Real-world look match]].
+
+
+### 2026-11-16 - City Legends: white read as cream twice (owner correction: "why are u wrong at this, learn from ur mistakes")
+- **What felt bad:**
+  - "myanmar plaza walls are white and not yellow"
+  - then the towers' bands: "i think these are white too, and not yellow"
+- **Cause:**
+  - I set the colours from late-afternoon and dusk photos. Low sun turns white panels and white stone beige or cream.
+  - I trusted those numbers over the midday photos, which showed the same panels near-white.
+  - A slightly warm white-balance check (a kerb) did not catch it.
+- **Fix:** tower A, tower B and the crown went white, then the podium bands and the mall's insides.
+- **Rule:**
+  1. Take a surface's colour from the most neutral-light photo you have: midday or overcast, never sunset or dusk.
+  2. When photos disagree (beige at dusk, white at noon), it is white. Paint and cladding are almost always lighter and more neutral than evening photos show.
+  3. Before building, list the main colours as words ("white panels, dark glass") and check them against what people would say about the building.
+  4. If the owner names a colour, theirs wins.
