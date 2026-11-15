@@ -91,6 +91,20 @@ Make them with skill **roblox-game-video-pipeline** (record in Studio, cut on th
 - **Save** the plan and results in the game's vault folder (`<Game>\Marketing - organic <date>.md`). Add any lesson to K05.
 
 ## Known limits (16 Nov 2026)
+- **TikTok rate-limits the profile grid.** After about 2 quick profile visits it shows "Something went wrong" and the grid stays empty for the session; the header (followers, bio, contact) still loads.
+  - Visit profiles **slowly** (≥ 30 s apart) with the browser pane **showing**.
+  - Collect headers first, then measure only the shortlist's views.
+  - If the grid is blocked, mark views "not measured" and come back later.
+  - Never call TikTok's internal APIs to get around it: the safety classifier blocks that as unauthorized access, and it should.
+- **A game without promo codes:** give each creator a different thing to type or find, e.g. an outfit ID in MM, and log those lookups with AnalyticsService. Build the logging only when a test is booked.
 - `creator_stats.js` reads the profile grid, so the views are from the newest posts only. It does not see audience age or country (only the creator's analytics screenshot shows that).
 - Claude can't post, DM or pay, by rule.
 - **Not proven:** whether the two example games grew mainly organically. One commenter says big jumps usually come from paid ads. Measure our own.
+
+## Used on
+- **2026-11-16, MM Outfit Catalog:** vault `MM Outfit Catalog\Marketing - organic 2026-11-16.md`.
+  - Gate failed: placeholder icon and thumbnail, no data yet.
+  - 5 clip ideas.
+  - 20 creators read, a shortlist of 6 (test 1: @cammeiful, an adult reviewer of Roblox fashion games).
+  - The views grid was rate-limited, so views aren't measured yet.
+  - Learned: outfit games have their own TikTok niche ("outfit ideas / codes"), so a game whose items have IDs should copy that native format.
