@@ -24,10 +24,12 @@ Back to [[00 BRAIN]]. Each folder holds the CURRENT copy of one of the owner's C
 | [[Skills/roblox-ui-pro/SKILL\|roblox-ui-pro]] | Use for ANY Roblox UI work: building, fixing, restyling or reviewing a HUD, shop, inventory, index, settings, popup, reward screen or menu. Correct ScreenGui setup (respawn, safe areas, phone/tablet/console, touch and gamepad), concrete design numbers, a house-style UI kit, AI-slop checks, and a Studio MCP loop that audits (`scripts/ui_audit.luau`) and screenshots the UI on real device sizes until it passes. Pairs with the art method in [[Best UI method (skill draft)]]. |
 | [[Skills/roblox-icon-thumbnail/SKILL\|roblox-icon-thumbnail]] | Use when making or judging a Roblox game icon, thumbnail or logo: research what kids click, render the real avatar, one-try ChatGPT prompts, add the logo in code, and test at real sizes. |
 | [[Skills/roblox-vfx-reveal/SKILL\|roblox-vfx-reveal]] | Use for Roblox VFX and big moments: combat hit VFX (impact frames, shake, FOV punch, shockwave, debris, flash), RNG/egg rarity reveal ladders with a top-tier cutscene, and reward title cards. Tested client kit `scripts/VFXKit.luau`. |
+| [[Skills/what-if-animation/SKILL\|what-if-animation]] | Make a 15-25 s "What If" stick-figure animated episode from one topic line: script, free Piper voice, storyboard, Remotion/SVG animation, free synthesised sound, master to -14 LUFS. |
 | [[Skills/ytdlp-video-watch/SKILL\|ytdlp-video-watch]] | Use when the user shares a TikTok/YouTube/Shorts/Reels link or video to watch, break down or research: watch it in the browser (no download) or download with yt-dlp, extract frames, sound hits and transcript, then analyze. |
 | play-roblox | (vault-only tool, not a synced Claude skill) |
 
 ## Log
+- 2026-11-16: **New: what-if-animation**, from FreshStack's open-source What If skill (MIT, github.com/kelano86/what-if-animation). ElevenLabs was swapped for free tools: `scripts/voice.py` uses Piper TTS with Whisper word timing, and the new `scripts/synth.py` synthesises every sound effect and the music bed (sfx.py calls it). Both were tested on the copy-paste example. Setup: Node 18+, ffmpeg, Python with numpy, Pillow, piper-tts and faster-whisper; the studio needs `npm install`.
 - 2026-11-16: from the 4-TikTok watch study ([[2026-11-16 Watch study - Claude Roblox VFX, exploded-diagram 3D, RNG reveal, UI design hacks]]) and the MM Outfit Catalog fix pass:
   - **New: roblox-vfx-reveal**, with VFXKit tested in Studio Play.
   - **roblox-ui-pro:**
