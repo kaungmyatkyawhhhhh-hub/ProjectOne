@@ -27,7 +27,7 @@ Batches: [[Yangon map - Build steps (Claude builds it)]] (0.5 = built area, 1 = 
 - **Motorbikes** are banned in central Yangon: no motorbike clusters (trishaws, bicycles, e-bikes instead).
 
 ## Decisions (made by Claude, owner said no questions)
-1. **Scale stays 1.6 studs a metre.** A new scale would multiply every part count by 3-4 and throw away batch 0.5. "Compact" comes from the real streets and the real building density, not from the scale.
+1. **~~Scale stays 1.6 studs a metre~~ **Overridden 16 Nov: everything at player scale, 3 studs a metre ([[2026-11-16 Yangon rescale plan - 1 to 1 at player scale]])**.** A new scale would multiply every part count by 3-4 and throw away batch 0.5. "Compact" comes from the real streets and the real building density, not from the scale.
 2. **Lanes follow the real road:** 1 + 1, 2 + 2 or 3 + 3, divided with a raised median where the real road is. Lanes are 16 studs on 2 + 2 roads and 13 studs on 3 + 3 roads (so a 6-lane road stays near its real width), streets 1 + 1 with half 12, narrow lanes half 8.
 3. **Real data is a floor:** every block is filled to the real density (OSM outlines first, then infill buildings of the area's own type).
 4. **New streets and all buildings as meshes** generated in Python (pure Python glb writer, one facade / roof atlas), placed in Studio by a Luau placer; collision as invisible boxes.

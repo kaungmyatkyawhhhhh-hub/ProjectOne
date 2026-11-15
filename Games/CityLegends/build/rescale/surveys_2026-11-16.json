@@ -1,0 +1,921 @@
+[
+ {
+  "subsystem": "Yangon roads and traffic lanes (batch 0.5 part roads + flyovers + roundabout, batch 1-3 mesh roads/streets, NPC lane modules, shared Monaco road builders)",
+  "key_constants": [
+   "SPM = 1.6 (tools/yangon/city/geo.py:14) is the city generator's metres->studs factor: world(lon,lat) X = 30000 + dlon*KX*SPM, Z = -dlat*KY*SPM (geo.py:23-28). Every batch 1-3 road, street, plot and lane uses it.",
+   "OX = 30000.0, BOX_05 = (27977, -6469, 33455, 1693) (geo.py:17,20). The batch 0.5 box is in 1.6-scale studs, so it has to be scaled too.",
+   "SPM=1.6, VS=1.6, STEP=4.0 m, DECK=14/VS (d6_export.py:7,9). These are the design->world export: X=OX+x*1.6, Y=(ground+deck)*1.6 (d6:50). The design json records the same thing (ygn_road_design.json 'scale').",
+   "SPM=1.6, VS=1.6, STEP=4.0; main half 32 / street half 16 (d5_design.py:9,14,37). This is where 'main 2+2 half 32, street 1+1 half 16' was born.",
+   "M.SPM = 1.6 (YangonRoads.luau:32), used for design flyover chainage (178,181) and junction positions (2700).",
+   "OX,OZ,SPM = 30000,0,1.6; STEP = 6.4 (= 4 m at 1.6) (d7_flyovers.py:29-30; same in d23_lanes_v5.py:115). Also STEP = 6.4 in d8_streets.py:41.",
+   "SIDE_OFF=48, SIDE_HALF=12, SIDE_START=20, SIDE_INNER_WALK=3.5 (d7_flyovers.py:31-32; repeated in d23:116). Flyover side lanes are 24 wide, with their centre 48 from the deck line.",
+   "FORK=128, WIDE=SIDE_OFF+SIDE_HALF=60, EASE_H=64, SPLIT=160, JOIN_AFTER/JOIN=40/140 (d7:176,181,196,265-266). Gore and split lengths, in studs.",
+   "Hard-coded sample indices D0,D1 = 2686,2985 (Pyay deck), New Road deck 572..foot 680, K0 = 789 (d7:174,256-262). They depend on the 4 m / 6.4-stud sample spacing.",
+   "HALF = 32.0, WALK = 10.0 (d18_widen.py:21-22). 16 roads become 2+2 'route' at half 32.",
+   "MEDIAN=3.0, LANE_W={2:16.0, 3:13.0}, GORE_W=16.0, SEARCH=60, MIN_SEC=200, EASE=128, OPEN_R=14, NOSE=19.2, MIN_MEDIAN=40, RING_2LANE=230, OPEN_RING=108+12+30, CELL=64 (d23_lanes_v5.py:47-62). Current v5 halves: undivided 2+2 = 32, divided 2+2 = 35, divided 3+3 = 42.",
+   "DECK_NEED = 17+2+3+0.3, DECK_GRADE = 0.075, VCURVE = 48, SLAB_GIRDER = 5 (d23:110-113). Clearance is already 17 studs = 5.7 m at 3 studs/m. assert clearance >= 17 at d23:401,804. Deck footprint is '32 either side' (d23 comment l.106, p[6]=p[7]=32 at 314; loop join 32->60 at 349-357).",
+   "d23 world() uses a literal 1.6 (d23_lanes_v5.py:412). ground() returns metres*SPM (d23:118-131).",
+   "d9_lanes.py:50-58: STEP=24 (lane point spacing), LIFT=0.15, CLEAR=18, TRIM=48, MIN_PIECE=72, C=(29072, 47.27, 1172.8) (ring centre; y = metres*1.6), R_OUT/FLAT/EASE = 108/12/128, RING_EXIT=114, RING_LANES={1:76, 2:96}. The fallback for decks and side lanes is '2+2 at 16, lanes 8 and 24' (d9:139-142).",
+   "d9 thresholds: same-height T test abs(dy) < 4 (d9:495), long-link check dist > 140 or dy > 4 (787), merge-along distance 96+24*(ln-1) (560,577,589), ring entry CLEAR+6+24 (723,727), off-edge check |lat| > h-3 (780).",
+   "YangonRoads.luau:33-41: C=(29072,47.27,1172.8), R_IN/R_OUT=60/108, RING_V=108.06, R_CUT=94, WALK=10, KERB_W=0.9, CURB_UP=0.5, SLAB=2, CORRIDOR=70, EASE=128, FLAT=12. Ring lane lines at R_IN+16 and R_IN+32, dashes 12.8/5.76 (2420-2424). The roundabout is 48 wide = 3 x 16.",
+   "YangonRoads.luau: CORNER_T=16 / CORNER_T_RING=22 (753-754), VERGE_W=16 (1134), VERGE=12 (1333), EDGE_GRADE=0.05 (1381), DECK_CLEAR=9, GIRDER=3, PIER_EVERY=8 samples (~51 studs), PARAPET=2.6 (1484-1487), deck half = 32 hard-coded (1526), girder width 64-14 (1614), pier column 12 x 5 (1658), deck-zone test dd<32 (1706), BARRIER_H=2.8, BARRIER_SEG=6.4 (1736-1737), MEDIAN_KERB_W=0.9 (2034), checkBumps lanes {-24,-8,8,24} if half>=32 else {-8,8} (2464).",
+   "tools/riviera/Roads.luau:44-48: HALF=32 ('2+2 lanes of 16'), WALK=10, SLAB=2, CURB_UP=0.5. These are Monaco's defaults. A Yangon road overrides them through per-road `half` / s[7],s[8] / walkL,walkR (236-238), but some tests still use the global HALF: otherNear default HALF-0.5 (315), bigSurface reach HALF+1 / HALF+8 (644), turning-circle test HALF-4 (771), leg-wall and turning-circle tests HALF+WALK (844,1095). Other values: edgeGrade default 0.19 (656), junction ease max(40, d/0.06) (434,452), kerb 0.9 wide, 6.04 deep (951,1001), edge lines 1.2 in from the edge, 0.6 wide (1017-1018), lane lines at H/2 (1022-1025), zebra pitch 4.8 (1053), check lanes default {-24,-8,8,24} (1138).",
+   "tools/riviera/RoadLines.luau:41 HALF=32 (global). inJunction uses HALF+6, not the road's own half (249). Edge lines are 1.2 in from the edge, 0.6 wide (273-274). Median lines at mP+0.6 (280-281). The second lane line is drawn only where a side is wider than 14 studs (307,318,321). Fallback lane line at min(H/2, w/2) (319,322).",
+   "city/roadnet.py:33-37,46,54: STEP=8, MED=3.0, PAIR_MAX=45, PAIR_MIN=6, TAPER=48, LANE_W={1:10, 2:16, 3:13}, Sule ROUND_FIT centre (33200,8066), rmin 87, lane_w 10. cross_section (roadnet.py:155-162): 1-lane one-way 16 (narrow 12), two-way 1+1 lane 10 (narrow 8). walk 6 (main) / 4 (street) / 3 (narrow).",
+   "city/roadnet.py:328-331 push_beside(gap=3, reach=80) exists because 'in the game the lanes are wider than real ones'. At true lane widths it should mostly do nothing.",
+   "city/network.py:7-13,53-67 classify: big 2+2 half 26, 3+3 half 39 (halved for a one-way), walk 5. Street half 10, walk 4. Lane half 8, walk 3. Game corridor walk fallback 10 (75).",
+   "city/heights.py:26-32: DECK=3, CLEAR=17 (vertical studs, already player scale), WATER_CLEAR=10, MARGIN=0.5, RAIL_TOP=1, RAISE=1.5, GRADE_MAIN/STREET=0.06/0.10. Water level uses a literal *1.6 (heights.py:255,257).",
+   "city/ground.py:33 VS=1.6, and it converts with geo.SPM (165-166).",
+   "city/roadmesh.py:36-55: CELL=256, MARGIN=28, RC=8 (junction corner radius), PAVE_UP=0.5, KERB_UP=0.6, KERB_W=1.0, BAND=3.2 (kerb band 1 m at 3 studs/m), GRID=16, PIER=40, PARAPET_H/W=2.5/1.0, VIADUCT=7, SKIRT=1.6, SPILL_RAISE=4. Lane lines 0.4 wide, dashes '6 on, 6 off' (roadmesh.py:280-296). Zebra at rad+6 (218).",
+   "city/roadlanes.py:29-33: STEP=24, LIFT=0.15, CLEAR=6, MAX_LINK=180. Seam matching tolerance: lat < 4.5, along -2..60 (350) and -4..12 (425). The 40-stud lane change before an end is in the docstring (16).",
+   "city/streets.py:27-29,168-196: STEP=8, CELL=256, PAVE_UP=0.5, SEAM_GRADE big 0.06, SEAM_EASE_MIN/BIG 24/90, SEAM_EXT 40, SEAM_COLLIDE_EXT 12, EDGE_TOL 1.5, SEAM_MAX_STEP 1.5. Game-road walk fallback 10 (38).",
+   "city/roads.py:47-48: SEAM_COLLIDE_EXT=12, BOX_LEN=40 (studs per collision box). km stats divide by geo.SPM (464,489). roadnet.py:879 and network.py:286,291 use a literal /1.6 for real km.",
+   "d21_refit.py:19 WALK=10, SETBACK=3 (lots kept 3 studs behind the pavement).",
+   "src/shared/Config.lua:25-27: City.LaneWidth=16 ('owner 2026-10-22: the road is too small, was 12'), LanesPerSide=2, SidewalkWidth=10. Config.City.LaneWidth is used on Yangon by ChauffeurClient.lua:821 (lane-change ease over 3 lane widths) and 958 (split offset = LaneWidth/2), server/Chauffeur.lua:141 (kerb pull-over), ChauffeurRoute.lua:122,186.",
+   "src/shared/CarBuilder.lua:68 STUDS_PER_METRE = 3.0, the target scale. At 3 studs/m a real lane of 3.3-3.65 m = 10-11 studs; the game uses 16 (2-lane sides) and 13 (3-lane sides) now, which is 5.3 m and 4.3 m at player scale.",
+   "Lane module numbering: YangonLanes first=189 (after RivieraLanes + RivieraLanesHighway), YangonLanes2 first=290, B1_1..5 first=299..2848, B2_1..6 first=3477..6691 (src/shared/YangonLanes*.lua line 3-5). Any change in a lane count shifts every later module's `first`."
+  ],
+  "items": [
+   {
+    "path": "tools/yangon/city/geo.py",
+    "scale_assumption": "SPM = 1.6 (l.14), OX = 30000 (l.17), BOX_05 in 1.6-scale studs (l.20). world()/lonlat() (l.23-28). Docstring l.3 says 1.6.",
+    "change_needed": "Set SPM = 3.0 (and add VS = 3.0 if heights go 1:1 too). Rescale BOX_05 about OX: X' = 30000 + (X-30000)*1.875, Z' = Z*1.875, giving roughly (26207, -12129, 36478, 3174). Decide OX: at 3 studs/m the whole OSM box (lon 96.095-96.235, lat 16.75-16.89) spans X about 15,600-60,400 and Z about +-23,200, so Yangon would extend west of x 25000 (see the runtime item).",
+    "effort": "S",
+    "risk": "Every city tool imports geo. Changing it silently changes everything downstream, so every build/city cache must be regenerated (network_<tag>.json, probes, *_meshes.pkl, RoadCollide/StreetCollide strings)."
+   },
+   {
+    "path": "tools/yangon/d5_design.py + d6_export.py (+ d1-d4, make_design.py)",
+    "scale_assumption": "d5:9 SPM=1.6, VS=1.6, STEP=4 m. d5:14 main half 32, d5:37 street half 16. d6:7 SPM/VS 1.6. d6:9 DECK = 14 studs/VS. d6:19,23 side lanes '24 wide, centre 48'. d6:36 roundabout island 60 / ring 48 / outer 108 studs. d6:50 world() = OX + x*1.6, y = h*1.6. d6:70 cross_sections lane_studs 16, pavement 10. make_design.py:15,43,65,152 preview /1.6.",
+    "change_needed": "The original batch 0.5 centre lines exist only in plan metres (ygn_road_design.json 'roads'[].pts = [x, y, ground m, deck m]). The design pickles are gone (centre.pkl, net1/2.pkl, design.pkl, extras.pkl: no *.pkl in tools/yangon), so d6 cannot re-run as is. Write a new exporter from ygn_road_design.json (or re-run d1..d5 from the KMLs, ygn_osm_roads.json and ygn_heights.json in imports/refs/map) at SPM = VS = 3. Use real-metre halves instead of 32/16, apply patch_ranks' build ranks, and resample at 4 m (12 studs) or keep 6.4 studs (then every hard-coded sample index downstream changes).",
+    "effort": "M",
+    "risk": "d6 is where ranks, halves and deck heights start. The hand decisions in d7/d8 are tied to sample indices from this resampling."
+   },
+   {
+    "path": "tools/yangon/patch_ranks.py",
+    "scale_assumption": "Not scale-dependent itself. It writes `half` from each road's first sample (docstring l.6-7) and checks the Studio copy against length 418,581 / checksum 1458396754 (CLAUDE.md l.111).",
+    "change_needed": "No change, or fold it into the new exporter. The length/checksum pair in CLAUDE.md becomes stale.",
+    "effort": "S",
+    "risk": "Low."
+   },
+   {
+    "path": "tools/yangon/d7_flyovers.py",
+    "scale_assumption": "l.29-32 OX/OZ/SPM=1.6, STEP=6.4, SIDE_OFF=48, SIDE_HALF=12, SIDE_START=20, SIDE_INNER_WALK=3.5. l.174 D0,D1=2686,2985 (sample indices). l.176 FORK=128. l.181-191 widen() eases 32 -> WIDE=60. l.196 EASE_H=64. l.238 University Avenue p[6]=p[7]=32. l.242 cross_split(...,32). l.256-266 foot=680, deck 572.., K0=789, SPLIT=160, JOIN 40/140. l.270-274 ka_off/ka_half 16 -> 48, half 16 -> 12. l.326 bend search 30..160. l.353 SIDE_HALF-3. l.409 preview offset 32. ground() via SPM.",
+    "change_needed": "Replace every width with the new cross-section: deck half from the real flyover width (e.g. 2+2 at ~10.5 + barrier, ~22-26), side-lane half ~10.5 (2 x 3.5 m one-way) or real, side offset = deck half + barrier/gap + side half. Scale FORK/EASE_H/SPLIT/JOIN with the plan (x1.875) so gores keep their real metres. Re-derive D0/D1/572/680/789 from metres (design flyovers from_m/to_m), not fixed indices. Replace the literal 32s with the road's own half.",
+    "effort": "L",
+    "risk": "This holds the most hand-tuned geometry (gores, the Kabar Aye split, the New University Avenue bend). The LaneCheck rule 'lay along each sample's stored direction' must still hold, and d9 and YangonRoads depend on its 'walkL', 'startsOnEnd' and cut lists."
+   },
+   {
+    "path": "tools/yangon/d8_streets.py",
+    "scale_assumption": "l.23-24 roundabout centre (29072, 1172.8), R_OUT=108. l.41 STEP=6.4. merge_corner radius 40 (l.136 log). half_at()-1 tolerances (l.108-206). Ends found by 'r.half + 2' (l.151).",
+    "change_needed": "Rescale C to the new world (x1.875 about OX), R_OUT to the new ring, STEP to 4 m in studs. The bend radius 40 becomes ~75 to stay the same in metres. Tolerances in studs can stay.",
+    "effort": "S",
+    "risk": "Inya Road split and U Tun Nyein merge logic works by position and must be re-checked on new data."
+   },
+   {
+    "path": "tools/yangon/d18_widen.py",
+    "scale_assumption": "l.21-22 HALF = 32.0, WALK = 10.0. l.61 side-by-side need = HALF+WALK+ohalf+WALK-2.",
+    "change_needed": "HALF for real 2+2 undivided ~ 2 x 10.5 = 21 (+ edge), WALK ~ 6-9 (2-3 m Yangon pavements; 10 = 3.3 m is acceptable). Better: merge d18 into d23, since d23 rewrites the widths per sample anyway.",
+    "effort": "S",
+    "risk": "Its check list of side-by-side problems changes, because roads move 1.875x further apart while widths shrink, so most overlaps should vanish."
+   },
+   {
+    "path": "tools/yangon/d23_lanes_v5.py",
+    "scale_assumption": "l.47-62 SEARCH=60, MIN_SEC=200, EASE=128, MEDIAN=3, LANE_W={2:16, 3:13}, GORE_W=16, OPEN_R=14, C=(29072,1172.8), OPEN_RING=150, NOSE=19.2, MIN_MEDIAN=40, RING_2LANE=230. l.110-116 DECK_NEED 17+2+3+0.3, DECK_GRADE .075, VCURVE 48, SLAB_GIRDER 5, OX/SPM 1.6, STEP 6.4, SIDE_* copy. l.118-131 ground()*SPM. l.208 '32 + h + 30'. l.222 dd<32. l.314,351,357 deck/loop half 32 and gore 32->60. l.336 grade cap 0.08. l.363-379 split 16->48, half 16->12, ease 64. l.412 literal 1.6 in world(). l.423 CELL 64. l.540-558 32-stud grid. l.682 (wo-32)/28 gore ease. l.793-794 '+10 ... +10 - 2' pavement check. l.856-872 plot/lot/tree clearances 10/13/10.",
+    "change_needed": "LANE_W -> {2: ~10.5, 3: ~10} (3.5 / 3.3 m), GORE_W -> deck lane width, MEDIAN -> real (1-1.5 m half = 3-4.5 studs; 3 can stay). Distances along the road (SEARCH, MIN_SEC, EASE, NOSE, MIN_MEDIAN, RING_2LANE, OPEN_RING, VCURVE) x1.875 so they keep their metres. Replace the literal 1.6 at l.412 with SPM. The literal 32/60 deck and gore widths must come from the new d7 constants. DECK_NEED (vertical, 17 studs = 5.7 m) stays. DECK_GRADE stays if VS = SPM.",
+    "effort": "M",
+    "risk": "New halves: undivided 2+2 ~21-22, divided 2+2 ~24-25, divided 3+3 ~33-35 (vs 32/35/42 now). The road-level `half` must still be the narrowest section's (Roads.luau leaves out kerbs on narrower samples)."
+   },
+   {
+    "path": "tools/yangon/d9_lanes.py -> src/shared/YangonLanes.lua, YangonLanes2.lua",
+    "scale_assumption": "l.50-58 STEP=24, CLEAR=18, TRIM=48, MIN_PIECE=72, C=(29072, 47.27, 1172.8) (y = m*1.6), R_OUT/FLAT/EASE 108/12/128, RING_EXIT=114, RING_LANES {76, 96}. l.139-142 fallback '2+2 at 16 (lanes 8, 24)' for decks and side lanes. l.340-345 clears 12/24/32+12. l.361 half+24. l.495 same-height test <4. l.560-589 merge along 96+24*(ln-1). l.723-727 ring entry offsets 24. l.780 off-edge h-3. l.787 link > 140 / dy > 4. l.791-795 `first` = RivieraLanes + RivieraLanesHighway count + 1.",
+    "change_needed": "The fallback lane offsets for decks and side lanes must follow the new lane width (w/2, 3w/2 instead of 8/24). Ring lanes = R_IN + w/2 and + 3w/2 of the new ring. C, R_OUT and RING_EXIT get the new ring. TRIM, MIN_PIECE and the merge distances x1.875 if they should keep their metres (24-stud point spacing can stay). Re-run after d23.",
+    "effort": "M",
+    "risk": "The lane count may change, which shifts `first` for every batch module (B1 299.., B2 3477..), so roadlanes.py must be re-run for batches 1 and 2 after it. Config.Spawn.YangonRoads/YangonNear spawn spots use lanes' `outer` ranges."
+   },
+   {
+    "path": "tools/yangon/YangonRoads.luau",
+    "scale_assumption": "l.32 M.SPM=1.6. l.33-41 roundabout C, R_IN 60, R_OUT 108, RING_V, R_CUT 94, WALK 10, KERB_W .9, CURB_UP .5, CORRIDOR 70, EASE 128, FLAT 12. l.178-181 design flyover m*SPM, 100*SPM. l.753-754 CORNER_T 16/22. l.1055 kerb band 3.2. l.1134 VERGE_W 16. l.1333 VERGE 12. l.1381 EDGE_GRADE .05. l.1436-1437 bank 24. l.1484-1487 DECK_CLEAR 9, GIRDER 3, PIER_EVERY 8 samples, PARAPET 2.6. l.1526 deck half = 32. l.1614 girder width 64-14. l.1658 pier 12x5. l.1706 dd<32. l.1736-1737 barrier 2.8/6.4. l.2034 median kerb .9. l.2420-2424 ring lane lines at R_IN+16 and +32, dash 12.8/5.76. l.2464 checkBumps lanes +-8/+-24 when half>=32. l.2700 junction pos_m*SPM.",
+    "change_needed": "M.SPM = 3. Ring geometry from the real Hanthawaddy roundabout in metres x3 (island and outer radius), with the ring width = 2 lanes x ~10.5 (+ margins) and ring lines at the new lane width. CORRIDOR from the new deck half + side lanes. Deck half from data (not 32), girder width = 2*(deck half) - 14 ... from data. PIER_EVERY in metres (sample count changes with STEP). checkBumps must read per-sample lanes (as the v5 path does) or use +-w/2, +-3w/2. Kerb (0.9 = 0.3 m), CURB_UP 0.5, kerb band 3.2 (= 1 m), DECK_CLEAR 9, GIRDER 3, PARAPET 2.6, BARRIER 2.8 are already about right at 3 studs/m. EDGE_GRADE is a ratio: keep it if VS = SPM.",
+    "effort": "M",
+    "risk": "Rebuild cost: the part roads are 185,800 parts at a 6.4-stud step. At 1.875x the length the step-5 build would be about 350k parts (Studio memory and the place-size limit already bit at 287k). Either raise the sample step or move batch 0.5's roads to the mesh pipeline (city/roads.py)."
+   },
+   {
+    "path": "tools/riviera/Roads.luau (shared with Monaco)",
+    "scale_assumption": "l.44-48 HALF=32 ('2+2 lanes of 16'), WALK=10, SLAB 2, CURB_UP .5 are Monaco's defaults. Per-road `half`, s[7]/s[8] widths and walkL/walkR override them (l.231-238). Global HALF is still used in otherNear default HALF-0.5 (l.315), bigSurface HALF+1/HALF+8 (644), turning-circle test HALF-4 (771), leg-wall and turning-circle near HALF+WALK (844,1095). l.406/469/641/825/863 'narrow' = sample < H-0.5. l.656 edgeGrade default .19. l.762 corner grow cap 24. l.1017-1025 edge line 1.2/0.6, lane lines at H/2 (only when noLines is off). l.1053 zebra pitch 4.8. l.1138 check lanes {-24,-8,8,24}.",
+    "change_needed": "To keep Monaco unchanged, leave the defaults as they are and add per-road or opts overrides. opts.HALF / opts.WALK (or use r.half/r.walk) where the global HALF is used today (315, 644, 771, 844, 1095). Yangon already passes edgeGrade, noLines, palette and lanes for check. With roads narrower than 32, the HALF-based 'near another road' reaches (32+10) would be bigger than the new Yangon roads themselves and could catch a parallel street, so this matters at the new scale.",
+    "effort": "S",
+    "risk": "Monaco is out of the place (saved to D:/RobloxStudioGameFiles/Riviera.rbxm, already built), so these tools only matter if Monaco is ever rebuilt. Keep its path byte-for-byte (no `half` = old behaviour) and run world_test after."
+   },
+   {
+    "path": "tools/riviera/RoadLines.luau (shared with Monaco)",
+    "scale_assumption": "l.41 HALF=32. l.249 inJunction = otherNear(..., HALF+6), the global HALF, not the road's. l.273-274 edge lines 1.2 in, 0.6 wide. l.280-281 median lines mP+0.6. l.307/318/321 lane lines only where a side is > 14 studs wide. l.319/322 fallback lane line at min(H/2, w/2). l.183 mouth-side test 4 studs out. Dash = 0.9 x the sample span (l.405), so dash length follows the 6.4-stud sample step.",
+    "change_needed": "Make the HALF+6 junction reach per-road (opts or r.half) for Yangon. Check the '> 14' threshold: a 2-lane side at ~21 studs passes, a 1-lane side at ~10 does not (fine). Line widths are already plausible at 3 studs/m (0.4-0.6 = 13-20 cm). If the sample step changes, dash and gap lengths change with it. Real marking is ~3 m on, 6-9 m off = 9 on / 18-27 off studs.",
+    "effort": "S",
+    "risk": "Same Monaco rule as Roads.luau: no `half` = old behaviour."
+   },
+   {
+    "path": "tools/yangon/city/roadnet.py",
+    "scale_assumption": "l.33-37 STEP 8, MED 3, PAIR_MAX 45, PAIR_MIN 6, TAPER 48. l.46 LANE_W {1:10, 2:16, 3:13}. l.54 Sule ROUND_FIT centre (33200, 8066), rmin 87, lane_w 10. l.155-162 cross_section: one-way single lane 16 / narrow 12, 1+1 lane 10 / narrow 8, walk 6/4/3. l.328-331 push_beside(gap 3, reach 80) because 'game lanes are wider than real ones'. l.486-487 UNPAIR_REACH 120, UNPAIR_KEEP 300. l.596,626 walk fallback 10. l.879 km uses a literal /1.6.",
+    "change_needed": "LANE_W -> {1: ~9-10 (3-3.3 m), 2: ~10.5, 3: ~10}. One-way single lane ~10.5-12. PAIR_MAX 45 is a centre-to-centre distance in studs: at 3 studs/m it is 15 m, so dual carriageways up to ~24 m apart need ~72. TAPER, UNPAIR_* x1.875. Re-place the Sule ROUND_FIT centre and rmin in new world studs (rmin from the real 73-94 m ring and City Hall clearance, which now fits at real lane width). Replace /1.6 with geo.SPM. push_beside should become nearly a no-op.",
+    "effort": "M",
+    "risk": "Pairing tolerances decide which OSM one-way pairs become divided roads, so the network changes shape if they are not rescaled."
+   },
+   {
+    "path": "tools/yangon/city/network.py (new streets for batch 0.5) + streets.py + street_glb.py",
+    "scale_assumption": "network.py:7-13,53-67 classify: big 2+2 half 26, 3+3 half 39, walk 5. Street half 10, walk 4. Lane half 8, walk 3. l.30-31 CLIP_MIN 4, TAIL_MAX 300. l.70 grow 6. l.75 walk 10. l.286,291 literal /1.6. streets.py:27-29 STEP 8, CELL 256, PAVE_UP .5. l.168-196 SEAM_GRADE .06, SEAM_EASE 24/90, SEAM_EXT 40, SEAM_COLLIDE_EXT 12, EDGE_TOL 1.5, SEAM_MAX_STEP 1.5. l.245 3/6 push tolerance. street_glb.py: colours only, no scale.",
+    "change_needed": "Street half 10 (6.7 m at 3 studs/m) and lane half 8 (5.3 m) are already about real at player scale, so keep them or check them against OSM width. Big roads: 26 -> ~21 (2+2), 39 -> ~31-33 (3+3 incl. median). Walks 4/3/5 are fine (1-1.7 m). TAIL_MAX and SEAM_EASE x1.875. Replace /1.6 with geo.SPM. streets.py only needs a re-run (prep -> Studio probe -> build), then street_glb.py, upload, and placement.",
+    "effort": "M",
+    "risk": "1,192 street meshes and 43,812 collision boxes must be regenerated and re-uploaded (Open Cloud). The asset ids in build/city/streets_05_assets.json become stale."
+   },
+   {
+    "path": "tools/yangon/city/roads.py + roadmesh.py + heights.py + ground.py (batches 1-3 mesh roads)",
+    "scale_assumption": "heights.py:26-32 DECK 3, CLEAR 17, WATER_CLEAR 10, RAISE 1.5, GRADE_MAIN/STREET .06/.10 (ratios). heights.py:255,257 water level literal *1.6. ground.py:33 VS=1.6. heights.py:491-494 BATCH_PIN_* 1.5/8. roadmesh.py:36-55 CELL 256, MARGIN 28, RC 8, KERB 0.6/1.0, BAND 3.2, GRID 16, PIER 40, PARAPET 2.5/1.0, VIADUCT 7, SKIRT 1.6, SPILL_RAISE 4. roadmesh.py:280-296 lane lines 0.4 wide, dashes 6 on/6 off. roads.py:47-48 SEAM_COLLIDE_EXT 12, BOX_LEN 40. roads.py:464,489 use geo.SPM.",
+    "change_needed": "Set VS = geo.SPM (3) in ground.py and use it in heights.py instead of the literal 1.6. Vertical clearances (CLEAR 17, DECK 3, PARAPET 2.5) are already in player studs and stay. PIER 40 (13 m at 3 studs/m) is fine, or ~25-30 m real = 75-90. RC 8 junction corner radius is 2.7 m at 3 studs/m, which is tight: real kerb radii are 6-10 m = 18-30 studs. Dash pattern 6/6 -> ~9/18. Grade caps are ratios and stay. Re-run per batch.",
+    "effort": "M",
+    "risk": "Batch 1-2 mesh roads (build/city/roads_1/2_*.pkl, glb, RoadCollide strings, YangonLanesB1/B2) are all invalidated. B2 lane modules are still untracked in git."
+   },
+   {
+    "path": "tools/yangon/city/roadlanes.py -> src/shared/YangonLanesB<tag>_<n>.lua",
+    "scale_assumption": "l.29-33 STEP 24, CLEAR 6, MAX_LINK 180. l.336-350 and 394-425 seam matching to v5 lanes: lat < 4.5, along -2..60 / -4..12, '~30 studs inside'. l.486-548 first_index chains after src modules and earlier batches. Lane offsets W(k-0.5) from roadnet's LANE_W.",
+    "change_needed": "Lateral tolerance 4.5 is under half a lane at 16 wide; at ~10.5 lanes keep it at <= 4.5 (OK) or set it to w*0.4. MAX_LINK 180 and the along tolerances x1.875 if junctions grow with the plan. Re-run after d9 so `first` matches.",
+    "effort": "S",
+    "risk": "A wrong `first` makes RivieraTraffic warn 'out of step' and drop that batch's traffic."
+   },
+   {
+    "path": "tools/yangon/YangonStreetCollide.luau, YangonRoadMeshes.luau",
+    "scale_assumption": "Data-driven: widths come from the collide strings. StreetCollide: carriageway box 2 thick, L+1.5, walk boxes 0.5 higher, terrain air 14 studs over the whole width (l.53-72). RoadMeshes: kind look table only.",
+    "change_needed": "No code change. Re-run with regenerated StreetCollide_<tag>_* / RoadCollide_<tag>_* strings and the new mesh asset ids. 14 studs of terrain air (4.7 m) is fine at player scale.",
+    "effort": "S",
+    "risk": "Old StreetCollide/RoadCollide folders and terrain beds in Workspace.Yangon must be undone first (M.undo, C.undo)."
+   },
+   {
+    "path": "tools/yangon/d21_refit.py (and lot/venue consumers)",
+    "scale_assumption": "l.19 WALK=10, SETBACK=3. Reads v5 halves.",
+    "change_needed": "Not a simple refit any more: every lot, ring, chip and venue position (YangonWorld.lua, pads.json, Config.YangonVenues, WestLayout ygn_* places, Config.Spawn.Yangon*) moves 1.875x about OX. That belongs to the lots/venues area, but it must run after the roads.",
+    "effort": "L",
+    "risk": "Lots and venues are hand-prepared in Studio (YangonSites.prepare). A plain x1.875 move is not enough because the road widths change differently from the plan."
+   },
+   {
+    "path": "src/shared/Config.lua + client/ChauffeurClient.lua + server/Chauffeur.lua + shared/ChauffeurRoute.lua",
+    "scale_assumption": "Config.lua:25-27 City.LaneWidth=16, LanesPerSide=2, SidewalkWidth=10 (old city and Monaco value, also used on Yangon). ChauffeurClient.lua:821 lane-change ease = 3 x LaneWidth. :958 split offset LaneWidth/2. Chauffeur.lua:141 pull-over out = LaneWidth/2 - car half + 2.5. ChauffeurRoute.lua:122 (1.6 x LaneWidth match), :186 (0.8 x LaneWidth score).",
+    "change_needed": "Add a per-map lane width (e.g. Config.City.LaneWidthFor(map) or a field on the lane segment, which d9 already knows per sample) so Yangon uses ~10.5 while the old city and Monaco keep 16. Without it the chauffeur splits 8 studs sideways, onto the lane line, and pulls over too far out.",
+    "effort": "S",
+    "risk": "CityBuilder, West, WestLayout, IsleLayout, ActivityData and CityLayout also read Config.City.LaneWidth for the old city. Do not change the global."
+   },
+   {
+    "path": "src/shared/RivieraTraffic.lua, client/Traffic.lua, shared/CityLayout.lua (runtime lane graph)",
+    "scale_assumption": "RivieraTraffic.lua:296-345 loads YangonLanes, YangonLanes2, then YangonLanesB<tag>_<k> in order and checks `first`. :372-378 reads `outer` / `median`. Turn curves are built from link geometry (l.394-396: corner at least 6 studs from both ends). Config.Traffic (Config.lua:239-275) is in car-scale studs: HighwayGap 60, StopGap 4, StopLineMargin 1.2, BumpLook 40. CityLayout.lua:57,534,605 lane offsets = LaneWidth*(lane-0.5), old city only.",
+    "change_needed": "No code change if the lane modules are regenerated with consistent `first`. Car-scale traffic constants are already player-scale. Check that turn curves on tighter, real-size junctions still fit (6-stud end margin).",
+    "effort": "S",
+    "risk": "Pedestrians.lua:401 ('outer lane 24 right of centre, pavement 13 further') is Monaco-only (rivieraPaths), so it is unaffected."
+   },
+   {
+    "path": "Runtime 'Yangon is east of x 25000' checks (outside roads, but the new scale breaks them)",
+    "scale_assumption": "DayCycle.lua:137 YANGON_X=25000 (blend over 1500), Minimap.lua:489, Chauffeur.lua:261, EntranceRamp.lua:96-97, Houses.lua:447-448, Towers.lua:975 (centre 30716,-2388).",
+    "change_needed": "At 3 studs/m with OX = 30000 the full Yangon box reaches X ~15,600 (batch 0.5 alone ~26,200, batch 1 further west). Either move OX east (e.g. so that west edge > 25000, OX ~ 40000+) or replace the x tests with Config.activeMap(). Monaco's old area started at X 14000 (Riviera network.OX), so the two maps would overlap if Monaco came back.",
+    "effort": "S",
+    "risk": "Moving OX also moves every hard-coded Yangon world coordinate (roundabout C in d8/d9/d23/YangonRoads, Sule centre in roadnet, Towers centre, spawn/venue/site positions)."
+   }
+  ],
+  "pipeline_order": "0. One shared scale: geo.SPM (+ VS) = 3 and OX decided. Replace every local 1.6 (d5:9, d6:7, d7:29, d23:115 and the literal at d23:412, YangonRoads M.SPM l.32, ground.py VS l.33, heights.py 255/257, roadnet 879, network 286/291) with it.\n1. Batch 0.5 centre lines: new exporter (or d1..d5 re-run) reads ygn_road_design.json (plan metres, ground and deck heights) and writes ygn_roads.json at the new scale, with build ranks (patch_ranks logic) and real halves. Output: imports/refs/map/ygn_roads.json.\n2. d7_flyovers.py reads ygn_roads.json and ygn_road_design.json and writes ygn_roads_v2.json (cut lists, decks, side lanes, gores).\n3. d8_streets.py reads v2 and writes ygn_roads_v3.json (Inya split, U Tun Nyein merge, edgeStart/edgeEnd).\n4. d18_widen.py reads v3 and writes ygn_roads_v4.json and build/yangon_v4 (or fold it into d23).\n5. d23_lanes_v5.py reads v4, build/osm_ygn/roads.json and ygn_road_design.json, and writes ygn_roads_v5.json plus build/yangon_v5/Roads3_1..N.luau (deck re-profile for 17-stud clearance, real lanes and medians).\n6. d9_lanes.py reads v5, RivieraLanes.lua and RivieraLanesHighway.lua (for `first`) and writes src/shared/YangonLanes.lua and YangonLanes2.lua.\n7. Studio, batch 0.5 roads: Roads3_* into ServerStorage.YangonData, pack_tools.py with YangonRoads, Roads and RoadLines -> ClaudeTools. Then YR.load(), YR.step5() (roads, decks, roundabout, mouths, medians, lines, scrub), checkMouths and checkBumps. Terrain under the roads (YangonTerrain / terrain area) must already be at the new scale.\n8. Batch 0.5 new streets: city/network.py (reads v5 for corridors), streets.py prep 05 -> YangonProbe2 in Studio -> streets.py build 05 -> street_glb.py 05 -> Open Cloud upload -> place into Yangon.StreetMeshes -> YangonStreetCollide.spawn(StreetCollide_05_*).\n9. Batches 1, 2, 3 in BATCH_ORDER: city/roads.py <tag> (roadnet -> ground -> heights -> roadmesh -> roadlanes; it pins seams to v5 map-edge ends and earlier batches' ends) -> glb upload -> YangonRoadMeshes.place / .collide. YangonLanesB<tag>_*.lua are copied into src after d9's modules, with `first` chained (B1 after YangonLanes2, B2 after B1, ...).\n10. Runtime: per-map lane width in Config (chauffeur), x>25000 checks or OX, Config.Spawn.Yangon*.\n11. Downstream (other areas, after roads): d21_refit / lots and venues (YangonWorld, pads, YangonSites.prepare), buildings (plots.py, d24_bmesh), green (d20), lamps (d16), details, landmarks, minimap (d12). Same order as CLAUDE.md: roads -> lanes -> buildings -> green -> lamps -> lots -> minimap.\nTests: lune world_test and graph_test (lane graph not split), d9's off-edge and long-link reports, YR.checkBumps, Play test.",
+  "open_questions": [
+   "Vertical scale: should heights also be 3 studs/m (VS = 3), so terrain relief, grades and EDGE_GRADE stay true? Or keep the vertical at 1.6 (grades would halve)? Clearance 17 studs and deck/parapet sizes are already player-scale either way.",
+   "Lane width target: 10.5 studs (3.5 m) for every lane, or 11 (3.65 m) on main roads and 10 (3.3 m) on 3-lane sides? Cars are about 5.4-6 studs wide (1.8-2 m at 3 studs/m), so 10.5 leaves about 2.5 studs each side. The owner earlier widened Config.City.LaneWidth 12 -> 16 because 'the road is too small' (Config.lua:25). Real lanes will feel narrower than what he is used to.",
+   "Batch 0.5 main roads: rebuild them as part roads (YangonRoads/Roads.luau)? At 1.875x the length that is about 350k parts unless the sample step goes from 6.4 to ~12 studs. Or move them to the mesh pipeline (city/roads.py) like batches 1-3, which would also free Roads.luau/RoadLines.luau from Yangon changes and keep Monaco untouched?",
+   "World origin: keep OX = 30000 (Yangon then reaches X ~15,600 and breaks every 'x > 25000 = Yangon' check, and would overlap Monaco's old area if Monaco returns), or move Yangon east? Is Monaco ever coming back into this place?",
+   "The design pickles (centre.pkl, net1/2.pkl, design.pkl, extras.pkl) are gone. OK to regenerate batch 0.5 centre lines from ygn_road_design.json (plan metres), or re-run d1..d5 from the KMLs (may differ slightly from the built map)?",
+   "Hanthawaddy Roundabout: rebuild at its real size from OSM (island and ring radius in metres x3, 2 ring lanes)? Today it is island 60 / outer 108 studs, which is 37.5 m / 67.5 m at 1.6.",
+   "Flyover decks and side lanes: real widths from satellite/OSM (Pyay Road and Kabar Aye flyovers, 2+2 decks about 15-17 m?) instead of half 32 + side lanes 24 at offset 48?",
+   "Pavement width: keep WALK 10 studs (3.3 m, close to real at 3 studs/m) on main roads, or use per-road OSM sidewalk widths? Real Yangon pavements are often 2-3 m.",
+   "Junction corner radius in the mesh roads (roadmesh RC = 8 studs = 2.7 m) and YangonRoads CORNER_T 16: raise them to real kerb radii (6-10 m = 18-30 studs) now that the plan is real size?",
+   "Lane dash pattern: real 3 m on / 6-9 m off (9/18-27 studs) instead of 6/6 (mesh) and 0.9 x sample step (part roads)?",
+   "Will the place-size and memory limits allow a 1.875x larger batch 0.5 plus batches 1-3? Every road, street and collision box asset (streets_05_assets.json, roads_1/2 glb uploads) must be regenerated and re-uploaded."
+  ],
+  "notes": "The core finding is that the road cross-sections were never designed at 1.6 studs per metre. They were designed in 'car studs' (3/m) laid on a 1.6/m plan. Kerbs 0.9 (0.3 m), kerb bands 3.2 (1 m), curb up 0.5, lines 0.4-0.6, parapet 2.6, barrier 2.8, clearance 17 and pavement 10 (3.3 m) are already about right at 3 studs/m and can mostly stay. Street halves 10 and 8 in network.py and roadnet are also about right. What is wrong at player scale is the traffic lanes: 16 studs (5.3 m) on 2-lane sides and 13 studs (4.3 m) on 3-lane sides, against a real 3.3-3.65 m = 10-11 studs. That gives today's halves of 32 (undivided 2+2), 35 (divided 2+2) and 42 (divided 3+3); real-size targets are about 21-22, 24-25 and 33-35. Big new streets in network.py: 26 -> about 21, 39 -> about 32. Game 'street' half 16 -> about 10.\n\nMost other constants are lengths ALONG the road (eases, gores, splits, section and median minimums, ring and corridor radii, pier spacing, seam tolerances). These should grow x1.875 to keep their real metres. Lane point spacing (24) and grid cells can stay.\n\nHard-coded world coordinates have to move with the plan: roundabout C (29072, 47.27, 1172.8) in d8:23, d9:55, d23:56 and YangonRoads:33; Sule (33200, 8066) in roadnet:54; BOX_05 in geo:20; plot boxes in d7:378. So do the hard-coded sample indices in d7 (2686/2985/572/680/789), which are tied to the 4 m / 6.4-stud resample.\n\nMonaco: Roads.luau and RoadLines.luau keep Monaco's behaviour whenever a road has no `half`. The Yangon fixes needed there are only the places that still use the global HALF=32 (Roads 315/644/771/844/1095, RoadLines 249). They should become per-road or opts, leaving defaults alone. Monaco is out of the place and already built, so it is only at risk if it is rebuilt.\n\nNo files were edited. Files read include: Games/CityLegends/CLAUDE.md (l.110-138); City Legends/2026-11-14 Whole Yangon map - master plan.md (it says 'Scale stays 1.6', decision 1, l.30, which is now overridden); tools/yangon/{common,d5_design,d6_export,d7_flyovers,d8_streets,d9_lanes,d18_widen,d21_refit,d23_lanes_v5,patch_ranks}.py; YangonRoads.luau; YangonStreetCollide.luau; YangonRoadMeshes.luau; city/{geo,network,roadnet,roadmesh,roadlanes,roads,streets,street_glb,heights,ground}.py; tools/riviera/{Roads,RoadLines}.luau; src/shared/{Config,RivieraTraffic,CarBuilder,YangonLanes*}.lua; client/{ChauffeurClient,Pedestrians}.lua; server/Chauffeur.lua."
+ },
+ {
+  "subsystem": "Projection, terrain, ground heights, minimap, spawn / fast travel (Yangon map, rescale from 1.6 to 3 studs per metre)",
+  "key_constants": [
+   "LON0, LAT0, SPM = 96.14, 16.82, 1.6 (tools/yangon/city/geo.py:14). The one shared projection for batches 1-3: X = OX + (lon-LON0)*KX*SPM, Z = -(lat-LAT0)*KY*SPM (geo.py:23-28).",
+   "KX = 111320*cos(16.82 deg) = 106,558 m per degree of longitude; KY = 110540 m per degree of latitude (geo.py:15-16). These are in metres and do not change with scale.",
+   "OX = 30000.0 (geo.py:17), OZ = 0 (implicit). The world origin of Yangon's plan frame. Monaco's frame is X 14000 (map_plan/network.py OX).",
+   "BOX_05 = (27977, -6469, 33455, 1693) (geo.py:20). Batch 0.5's box written directly in 1.6-scale studs, not computed from lon/lat.",
+   "BATCH_LL / batch_poly (geo.py:74-91). Batch outlines in lon/lat, so they do not depend on scale. batch_poly('05') returns the hard-coded BOX_05.",
+   "ground.VS = 1.6 (tools/yangon/city/ground.py:33). Vertical studs per metre: Y = DEM metres x VS, with 0 m = 0 studs. To be 1:1 this must become 3 too, or grades and clearances stop being real.",
+   "ground.BLEND = 480.0 studs (ground.py:34). The fade from the new field onto batch 0.5's field. SIGMA_M 150, BANK_M 1.5 and WATER_MIN 1.0 are in metres, so they do not scale.",
+   "dem_fetch LON0,LAT0,LON1,LAT1,STEP = 96.095,16.750,96.235,16.890,0.0005 (city/dem_fetch.py:14). A 281 x 281 grid of about 53 x 55 m cells in lon/lat. It does not depend on scale and does not need to be fetched again.",
+   "terrain.py RES = 4 (the Roblox voxel), TILE = 256, UNDER = 1.0, BED_EXTRA = 2, BANK_S = 0.6, BANK_MAX = 60, EXT = 1600, CHARS = 189000, WATER_NEAR = 40, MUD_NEAR = 24, QUAY_W = 10, FAR_SHORE = 120, FAR_UP = 1.2, PIER_UP_MIN = 3, RIVER_EXT reach 2700 / bank 320 / landing (30391, 11066, r 420) / way_bank 220 (city/terrain.py:49-74). All in studs.",
+   "terrain.py height encoding: value = round((h+40)*10) in 2 base-64 characters, max 4095, so h runs from -40 to +369.5 studs (terrain.py:77-84). Ground at 3 studs/m goes up to about 174 studs, so it still fits.",
+   "terrain.py LANDMARK_GROUND (terrain.py:141-154). Hard-coded 1.6-scale world polygons, tops (Shwedagon 92.5, Maha Wizaya 62.5, Chaukhtatgyi 38.3, Sule 19.2, City Hall 19.5, Independence 19.6, Botataung 12.5) and ramp endpoints. RAMP_UNDER 1.2, FOOT_PAD 34, CAP_NEAR 60, SOFT 5 (terrain.py:155-158).",
+   "Riverbed depths 14 / 8 / 4 studs and slope 1 + 0.3 per stud (terrain.py:546-547). Dock area_ha uses /2.56 (= 1.6 squared) (terrain.py:319).",
+   "YangonTerrain2.luau YB = -24, YTOP = 200, TILE = 256, SOLID_LIFT = 2 (tools/yangon/YangonTerrain2.luau:24-27). The probe casts from Y 600, 900 down (YangonTerrain2.luau:242).",
+   "YangonTerrain.luau (batch 0.5 ground): M.OX, M.OZ, M.SPM, M.VS = 30000, 0, 1.6, 1.6; X0/X1 = 27648/33536; Z0/Z1 = -6656/2048; TOP = 64; LAKE_Y = 16*1.6; BED_DROP = 10 (tools/yangon/YangonTerrain.luau:12-20).",
+   "d4_heights / d6_export (batch 0.5's ground and road design): SPM = 1.6; VS = 1.6; OX, OZ = 30000, 0; STEP = 4.0 m; LAKE = 16.0 m (d6_export.py:7, d5_design.py:9, d4_heights.py:8). ygn_road_design.json 'scale' records this (d6_export.py:69).",
+   "heights.py DECK = 3, CLEAR = 17 (already sized for 3 studs/m, about 5.7 m), WATER_CLEAR = 10, RAISE = 1.5, GRADE_MAIN / GRADE_STREET = 0.06 / 0.10 (city/heights.py:26-32). Grades are a ratio of studs to studs, so they are only real while VS == SPM. Line 255 hard-codes level_m*1.6.",
+   "landmarks.py: DEM height x 1.6 (city/landmarks.py:1205-1219) and the Shwedagon platform Y0 = 93.0 (= 58 m x 1.6) (landmarks.py:916). The docstring says plan 1.6, buildings at 3 (landmarks.py:8).",
+   "Landmark model frames: OX, OZ = 32600.0, -1350.0 in landmark_glb3d.py:23, landmark_mc_glb.py:22, landmark_mc_fit.py:24 and mall_life.py:22. sedona3d.py:13 notes model x = world X - 32600. These are world-stud anchors at 1.6 scale.",
+   "d12_minimap.py SPP = 2.0 studs per pixel, TILE 1024 x 512 px = 2048 x 1024 studs, margin 300 studs, WALK 10, roundabout radii 60/62/68/104/110/112, deck default half 32 (tools/yangon/d12_minimap.py:46-71, 201-216). The drawn area comes from d10's X0..Z1 box (d12_minimap.py:21-25).",
+   "src/client/YangonMapArt.lua:4-6 (generated): x0 = 27584, z0 = -6848, tileStuds 2048 x 1024, cols 4, rows 9 (27 tiles uploaded), map = {27937, -6509, 33495, 1733}. It covers batch 0.5 only.",
+   "Config.Minimap ZoomNear = 0.32 px/stud, ZoomFar = 0.12, FarMph = 150 (src/shared/Config.lua:2455-2457). The radius shows about 320 studs: 200 m today, 107 m at 3 studs/m.",
+   "Config.Spawn.YangonRoads (Loop A/B), YangonNear = (30892, 0, 785), YangonRadius = 260 (src/shared/Config.lua:195-197). Read in src/server/Main.server.lua:213-215.",
+   "Map tests 'X > 25000 = Yangon': Chauffeur.lua:261, EntranceRamp.lua:97, Houses.lua:448, TravelSpots.lua:101, Minimap.lua:489, Towers.lua:975 (centre 30716,0,-2388). DayCycle.YANGON_X = 25000 with a 1500-stud blend (src/client/DayCycle.lua:137, 367).",
+   "Workspace StreamingEnabled true, StreamingTargetRadius = 640 studs, StreamOutBehavior Opportunistic (default.project.json:41-43). 640 studs is 400 m today and 213 m at 3 studs/m.",
+   "Current extents (python, geo.batch_poly). Batch 0.5: x 27977..33455, z -6469..1693 (17.5 km2). Batch 1: 22942..38115, -6726..6753 (38.7 km2). Batch 2: 26351..39138, 3410..10097 (18.1 km2). Batch 3: 32830..43401, -7678..3410 (29.1 km2). Union: x 22942..43401, z -7678..10097 = 20,459 x 17,775 studs (12.8 x 11.1 km real). Whole OSM/DEM box: x 22328..46197, z -12380..12380.",
+   "At 3 studs/m with the same OX (scale about OX, x1.875): union x 16766..55126, z -14396..18932 = 38,361 x 33,328 studs. OSM box x 15615..60369, z -23213..23213 (44,755 x 46,427). Area grows x3.52: terrain 1 goes from 1394 tiles / 5.9 M characters / 32 modules to about 4,900 tiles / 21 M characters / ~113 modules; terrain 2 from 1391 tiles / 8.75 M characters / 48 modules to about 4,900 tiles / 31 M characters / ~165 modules. Recentred on the union's middle (96.1586 E, 16.8132 N) it would be about \u00b119.2k x \u00b116.7k studs.",
+   "Roblox limits. Terrain.MaxExtents is a Region3int16 of about \u00b132,000 voxels x 4 = \u00b1128,000 studs (check in Studio), so every option fits. Float32 position step is 0.002 studs at 16k-32k and 0.004 at 32k-65k; physics and camera jitter is usually reported much further out (around 100k+). Smooth terrain stays at 4-stud voxels, which is 1.33 m at 3 studs/m (finer than today's 2.5 m). The place already hit 'File too large' (CLAUDE.md:131), and 3.5x the terrain area adds to the saved place size."
+  ],
+  "items": [
+   {
+    "path": "Games/CityLegends/tools/yangon/city/geo.py",
+    "scale_assumption": "LON0, LAT0, SPM = 96.14, 16.82, 1.6 (l.14); OX = 30000 (l.17); BOX_05 hard-coded in 1.6 studs (l.20); world()/lonlat() (l.23-28); docstring (l.3).",
+    "change_needed": "Set SPM = 3.0. Decide OX/OZ (see open questions). Compute BOX_05 from lon/lat (store its lon/lat corners and project them) so it can never drift. Add a VS here (= SPM) so ground.py, heights.py and landmarks.py read one constant. Every city/*.py tool (ground, terrain, roadnet, heights, plots, streets, details, green) goes through geo.world, so this file is the main switch.",
+    "effort": "S",
+    "risk": "Everything downstream must be rebuilt in one go. Any cached build/city/*.json (roads_<tag>_profile.json, plots_*.json, terrain_<tag>_state.npz, streets_*.json) still holds 1.6-scale studs and will silently mismatch until it is regenerated."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/ground.py",
+    "scale_assumption": "VS = 1.6 (l.33): ground studs = DEM metres x 1.6. BLEND = 480 studs (l.34). Batch 0.5's own field is read from ygn_road_design.json 'ground' in plan metres and converted with geo.OX/SPM (l.156-174). The seam blend uses geo.BOX_05 (l.191-197). water_at returns level_m*VS (l.153).",
+    "change_needed": "VS = geo.VS (3.0) and BLEND scaled (about 900). Better: drop the batch 0.5 seam blend and use the one SRTM field everywhere, since batch 0.5 is being rebuilt too. Otherwise keep _f05 (it converts with geo.SPM, so it follows), but batch 0.5's d4 field also has to be regenerated at the new VS. Fix the docstring (l.8-10).",
+    "effort": "S",
+    "risk": "With VS 3, relief doubles: Singuttara Hill / Shwedagon goes from about 93 to 174 studs, and banks and grades steepen in studs (same real percentage). Keeping VS 1.6 with SPM 3 would halve every real grade and break heights.py's grade and clearance logic."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/dem_fetch.py",
+    "scale_assumption": "None. A lon/lat grid (l.14-16), output build/city/dem_ygn.json in metres.",
+    "change_needed": "No change and no new download. Only if batches grow past lon 96.095-96.235 / lat 16.75-16.89. Note: at 3 studs/m a 53 m SRTM cell is about 160 studs, so the 150 m Gaussian smoothing is still what hides the SRTM blockiness.",
+    "effort": "S",
+    "risk": "none"
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/terrain.py",
+    "scale_assumption": "Stud constants (l.49-74): RES 4, UNDER 1, BED_EXTRA 2, BANK_MAX 60, EXT 1600, WATER_NEAR 40, MUD_NEAR 24, QUAY_W 10, FAR_SHORE 120, PIER_UP_MIN 3, RIVER_EXT reach 2700 / bank 320 / landing (30391, 11066, 420) / way_bank 220. LANDMARK_GROUND world polygons, tops and ramps in 1.6 studs (l.141-154); FOOT_PAD 34, CAP_NEAR 60 (l.155-158). Riverbed depth 14/8/4 and slope 0.3 (l.546-547). area_ha /2.56 (l.319). Excludes BOX_05 and the game roads (regions(), l.87-95). Checks against roads_<tag>_profile.json (l.104-111). Preview colour range 0-80 studs (l.741).",
+    "change_needed": "Scale every length constant by 1.875 (or redefine it in metres x geo.SPM): BED_EXTRA, BANK_MAX, EXT, WATER_NEAR, MUD_NEAR, QUAY_W, FAR_SHORE, river depths, RIVER_EXT. Keep UNDER and SOLID_LIFT (they are voxel and mesh offsets, not real sizes). Replace /2.56 with /geo.SPM**2. Recompute LANDMARK_GROUND from lon/lat or from the new landmark data (do not hand-scale the tops: they are DEM x VS plus the platform). The landing (30391, 11066) should come from lon/lat. If batch 0.5 is rebuilt, it must stop being excluded (BOX_05 / rn.game_exclusion) and get its own terrain run (tag '05'). Preview range 0-160.",
+    "effort": "M",
+    "risk": "Output is about 3.5x bigger (about 20-30 M characters per batch, 110-165 modules of 189k). Writing it in Studio takes about 3.5x longer, and the place save size grows. The tiles/state npz grid changes, so --diff runs are invalid until a full write."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/YangonTerrain2.luau",
+    "scale_assumption": "YB = -24, YTOP = 200 (l.24-25); probe from Y 600 (l.242). Tiles are written up to YTOP with an air fill above.",
+    "change_needed": "Raise YTOP to about 300-400 (ground up to about 174 at VS 3, plus the Shwedagon platform ramps, river banks and a margin). Raise the probe start to about 1200 (the Shwedagon stupa is about 157 m, or about 470 studs over datum). The format and decode do not depend on scale.",
+    "effort": "S",
+    "risk": "A taller YTOP makes each partial tile read/write bigger (ny goes from 56 to about 100 voxels): more memory per tile and a slower write."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/YangonTerrain.luau",
+    "scale_assumption": "Batch 0.5 ground writer: OX/OZ/SPM/VS 30000/0/1.6/1.6, X0..X1 27648..33536, Z0..Z1 -6656..2048, TOP 64, LAKE_Y 16*1.6, BED_DROP 10 (l.12-20). Data from YangonData.Terrain (made by mk_rbxmx.py:43 from ygn_road_design.json ground).",
+    "change_needed": "Retire it: write batch 0.5 through terrain.py + YangonTerrain2 like the other batches. Before the new write, its clear() (and a whole-extent clear for batches 1-3's 1.6-scale area: x 22272.. and z -6912..~11000) has to run, or the old 1.6 terrain stays under or beside the new map.",
+    "effort": "S",
+    "risk": "Old terrain left over outside the new extent, or overlapping the new one, shows as stray hills and lakes."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/d4_heights.py, d5_design.py, d6_export.py, common.py, mk_rbxmx.py",
+    "scale_assumption": "Batch 0.5's original ground and road design: common.xy gives metres (scale-free); d5_design SPM=1.6 VS=1.6 STEP=4 (d5:9); d6_export SPM=1.6, VS=1.6, OX,OZ=30000,0, LAKE 16 m, DECK = 14/VS, roundabout RB, widths half 32 / 16 studs (d6:7-9, 50, 64-73); ygn_road_design.json 'scale' and 'ground'.",
+    "change_needed": "Either regenerate at SPM/VS 3 (ygn_road_design.json 'ground' is read by ground.py._load05 and d10/d19 for X0..Z1), or retire the d4/d6 chain in favour of the city/ generator for batch 0.5 too. If kept: the 14-stud DECK and the half 32 / 16 car-scale widths become real metres x 3.",
+    "effort": "M",
+    "risk": "Many d7-d23 tools read ygn_roads_v*.json produced from this chain (roads area). Mixing a 3-scale ground with 1.6-scale roads breaks heights."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/heights.py",
+    "scale_assumption": "DECK 3, CLEAR 17, WATER_CLEAR 10, MARGIN 0.5, RAIL_TOP 1, RAISE 1.5 in studs (l.26-31). Grades 6% / 10% (l.32) are only real while VS == SPM. l.255 hard-codes level_m * 1.6.",
+    "change_needed": "CLEAR 17 is already player scale (about 5.7 m), so keep it. WATER_CLEAR 10 studs becomes 3.3 m real: consider about 15-20. Replace 1.6 at l.255 with geo.VS / ground.VS.",
+    "effort": "S",
+    "risk": "Missing the l.255 literal leaves bridges over water sized for the old water levels."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/landmarks.py (and landmark_glb3d.py, landmark_mc_glb.py, landmark_mc_fit.py, mall_life.py, sedona3d.py, mc3d.py frame)",
+    "scale_assumption": "DEM height x 1.6 (landmarks.py:1205-1219); the Shwedagon platform Y0 = 93.0 = 58 m x 1.6 (l.916); docstring 'plan 1.6, buildings at 3' (l.8). Landmark model frame OX, OZ = 32600, -1350 in 1.6 world studs (landmark_glb3d.py:23, landmark_mc_glb.py:22, landmark_mc_fit.py:24, mall_life.py:22). Model geometry sizes are in studs with 12 + 9 floors (mc3d.py:31 FLOOR 9, sedona3d.py:32).",
+    "change_needed": "Use geo.VS for the DEM (Y0 = 58 x 3 = 174). Move the model frame anchor to geo.world(lon, lat) of the same spot. The plan footprints, which were clipped to car-scale roads (landmark_mc_fit), get rebuilt from OSM at x3. Floor heights belong to the buildings area, but the frame and ground numbers are projection items.",
+    "effort": "M",
+    "risk": "Landmark collision / placement StringValues and uploaded meshes all carry 1.6 positions: they must be re-exported and uploaded again."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/d10_plots.py, d19_buildings.py, d20_green.py, d23_lanes_v5.py, city/pilot_plots.py, YangonRoads.luau, YangonFar.luau",
+    "scale_assumption": "Private copies of the projection. d10_plots OX,OZ,SPM = 30000,0,1.6 (l.23, 36-37, 43-44). d19_buildings SPM 1.6 and world() with a literal 30000 (l.24-40). d20_green the same (l.26-34). d23_lanes_v5 OX,OZ,SPM,STEP = 30000,0,1.6,6.4 (l.108) and W() with literals (l.411-412). pilot_plots (l.32-33). YangonRoads.luau M.SPM = 1.6 (l.32) and 30000 + pos_m*SPM (l.2700). YangonFar.luau X0/X1/Z0/Z1 = 30000 \u00b1 ... * 1.6 (l.19-21), SKIRT 2600, SHWEDAGON (31619, 0, 3821) (l.24), far landmark K 1.4 (l.236).",
+    "change_needed": "Make every copy import geo (or read 'ox/oz/spm' from the data JSON) so there is one projection. The d7/d8/d23 road chain and YangonRoads belong to the roads area, but they are projection copies and must change together. YangonFar: derive its box and Shwedagon spot from geo, and scale SKIRT (2600 to about 4900).",
+    "effort": "M",
+    "risk": "One forgotten copy puts that layer (lanes, green, far city) at half size on top of the new map. Grep for '1.6' and '30000' after the change."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/d12_minimap.py -> src/client/YangonMapArt.lua",
+    "scale_assumption": "SPP 2.0 studs per pixel, tiles 1024 x 512 px = 2048 x 1024 studs (l.46-48). Map box from d10's X0..Z1 (batch 0.5 only) plus a 300 margin (l.21-25, 50-53). Stroke widths from road 'half' / 'walk' in studs; WALK 10 (l.71); roundabout radii 60-112 studs (l.201-207); default deck half 32 (l.213). Reads ygn_roads_v5, ygn_plots_real, build/city plots_05 / streets_05, YangonGreenData. YangonMapArt.lua:4-6 has x0 27584, z0 -6848, 4 x 9 tiles, map box 27937..33495 / -6509..1733.",
+    "change_needed": "Make the map box cover the whole city (all batches: roads_<tag>, plots_<tag>, streets_<tag>, green), not only d10's box. Decide SPP: at SPP 2 the union at 3 studs/m is up to 19 x 33 = about 627 tiles (sparse but still hundreds of image uploads); SPP 3.75 keeps the same metres per pixel as today, and SPP 4-6 keeps it near 100-200 tiles. Scale the roundabout radii (or read them from the data) and run it last. Then upload and run --lua ids.json to regenerate YangonMapArt.lua.",
+    "effort": "M",
+    "risk": "Hundreds of image uploads (moderation and rate limits). Minimap.drawWhole on the loading screen draws all tiles, so check memory and load time on phones."
+   },
+   {
+    "path": "Games/CityLegends/src/shared/Config.lua (Minimap, Spawn, YangonVenues, Service)",
+    "scale_assumption": "Config.Minimap ZoomNear 0.32 / ZoomFar 0.12 px per stud (l.2455-2457), tuned for 1.6 (about 200 m across the radius). Config.Spawn YangonNear (30892,0,785), YangonRadius 260 (l.195-197). Config.YangonVenues.Sites world x/z/y/fx/fz/w/size (l.163-180), e.g. rewards w = 304, realty size 80. Config.Service Bay (31405,49.7,1156.2), Arrive, BayRadius 22 (l.3032-3037).",
+    "change_needed": "Regenerate every Sites entry from d11/d13/d14/d17 at the new scale. Building widths such as w 304 / size 80 are venue footprints: decide whether venues stay game-sized or become real-sized. YangonNear: project Optima Werkz's lon/lat again. YangonRadius 260 to about 490. Service Bay / Arrive from the new CareVenues lot. Minimap zoom: lower ZoomNear to about 0.17-0.2 to show the same real area, or keep it to show the same stud area (owner's call).",
+    "effort": "M",
+    "risk": "A stale site puts a venue in a field or on a road. activeMap logic is unaffected."
+   },
+   {
+    "path": "Games/CityLegends/src/shared/WestLayout.lua, YangonWorld.lua, ChallengeData.lua, TravelSpots.lua",
+    "scale_assumption": "WestLayout.places ygn_* fast-travel CFrames hard-coded (WestLayout.lua:234-239). YangonWorld.lua (generated by d15_world.py: 70 lots with x/y/z/w/d, races with start/checkpoints/length in studs, jobs pickups/dropPoints, chips, hub site/spot/bays) (l.6-88). ChallengeData.boardPos (31090.2, 44.77, 1254.5) (ChallengeData.lua:101). Lot sizes w/d 120x130, 104x100, 60x72 are game-sized.",
+    "change_needed": "Re-run d15_world.py probe -> Studio probe -> build after roads, terrain and lots exist. Race 'length' (4836, 4366, 2312, 5200 studs) roughly doubles: decide whether races keep their real routes (x1.875 longer, so check race time and rewards) or get shortened. Take the WestLayout places from the new lane points next to each landmark (lon/lat -> geo.world -> nearest outer lane). Regenerate ChallengeData.boardPos with the hub.",
+    "effort": "M",
+    "risk": "Race times and payouts were tuned on 1.6-scale lengths. Delivery job pay per distance does the same."
+   },
+   {
+    "path": "Games/CityLegends/src (x > 25000 map tests, DayCycle, intro cameras, Towers)",
+    "scale_assumption": "'X > 25000 = Yangon' in server/Chauffeur.lua:261, server/EntranceRamp.lua:97, server/Houses.lua:448, shared/TravelSpots.lua:101, client/Minimap.lua:489 and server/Towers.lua:975 (centre 30716,0,-2388). client/DayCycle.lua:137 YANGON_X = 25000 with a 1500 blend (l.367). client/Main.client.lua:63-66 loading or intro camera shots (30700,110,600 ... 31619,140,3821 Shwedagon) and l.344 centre (30892,47,785).",
+    "change_needed": "At 3 studs/m with OX 30000, Yangon's west reaches x \u2248 16,766 (OSM box 15,615), so every 'x > 25000' test misreads western Yangon as Monaco. Either move OX so the whole map stays east of about 27,000 (OX \u2248 40,300; east edge about 65,400), or (better) replace the threshold with Config.activeMap() / a Config.YangonMinX constant derived from the projection. Recompute the camera shots and Towers centre from lon/lat.",
+    "effort": "S",
+    "risk": "Silent bugs: wrong daylight, chauffeur refusing trips, houses / ramps looking in the wrong folder, and fuel icons, only on the western half of the city."
+   },
+   {
+    "path": "Games/CityLegends/default.project.json (Workspace streaming)",
+    "scale_assumption": "StreamingTargetRadius 640 studs (l.42) is about 400 m of real city today and 213 m at 3 studs/m.",
+    "change_needed": "Decide whether to keep 640 (less real city streams in, the same stud cost per area, but density per stud area falls since buildings are bigger) or raise it to about 900-1200 (more parts and meshes in memory). Test on a phone. Far view relies on YangonFar / Persistent models, which must be rescaled too.",
+    "effort": "S",
+    "risk": "Pop-in at speed: cars at 3 studs/m cover 1.875x more studs per real km/h than the map did. Raising the radius costs client memory (Studio was already 15.3 GB in Play)."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/bprobe.py, YangonProbe2.luau, d15_world.py probe, YangonTerrain2.probe",
+    "scale_assumption": "Ground y per plot / lot measured in Studio from the built terrain and roads (heights in studs at VS 1.6). d15_world uses d10's X0..Z1 box (l.37, 95) and RING.",
+    "change_needed": "Re-run all probes after the new terrain and roads are in Studio. Raise the probe ray start (Y 600 in YangonTerrain2) above the new maximum height.",
+    "effort": "S",
+    "risk": "Probing before the terrain write finishes gives heights from leftover 1.6-scale ground."
+   }
+  ],
+  "pipeline_order": "0) Studio prep: clear all Yangon terrain over the old 1.6 extent (YangonTerrain.clear for BOX_05, plus a clear over the batch 1-3 grids in terrain_<tag>_stats 'origin' / 'grid': batch 1 origin 22272,-6912, 4032 x 3840 cols; batch 2 origin 24064,2304, 4224 x 2688 cols). Park or delete the old map folders, minding the place-size limit.\n1) Projection: geo.py (SPM 3, VS 3, OX/OZ decision, BOX_05 from lon/lat). Every private copy is switched to import geo (d10, d19, d20, d23, pilot_plots, YangonRoads.luau SPM, YangonFar.luau, landmark frames). Reads nothing; everything reads it.\n2) DEM: no re-fetch. build/city/dem_ygn.json (metres, lon/lat) is reused as is.\n3) Ground field: ground.Ground (in memory). Reads dem_ygn.json, build/osm_ygn/areas.json and (if kept) imports/refs/map/ygn_road_design.json 'ground'. If batch 0.5's d4/d6 field is kept, re-run d4_heights -> d5_design -> d6_export at 3/3 first. Better: drop the seam and use one SRTM field.\n4) Roads and heights (roads area): roadnet/heights/roads.py per tag (and the batch 0.5 road chain d7/d8/d18/d23 or its replacement). These write build/city/roads_<tag>_profile.json, meshes and lanes. terrain.py checks against the profile, so the roads must come first.\n5) Landmark ground numbers: landmarks.py / LANDMARK_GROUND polygons, tops and ramps at the new scale (from lon/lat and DEM x VS), before terrain.\n6) Terrain: python terrain.py <tag> for 05 (new: batch 0.5 no longer excluded), 1, 2, 3 in order. LATER_BATCH_BLEND reads earlier batches' terrain_<u>_state.npz. Then 'terrain.py fill' if seams need it. Writes build/city/terrain_<tag>/Terrain<tag>_<n>.luau, the state npz, stats and preview.\n7) Studio terrain write: pack the modules into ClaudeTools, then YangonTerrain2.spawn('Terrain<tag>_') per batch (resumable). Delete the data modules afterwards (place-size rule).\n8) Road meshes / collision in Studio (roads area), then the probes: bprobe/YangonProbe2 (plot ground y), d15_world probe.\n9) Plots/buildings, streets, details, green (d20 / city green), lamps (d16): other areas, all after the probes.\n10) Lots and venues: d11/d13/d14/d17 -> Config.YangonVenues.Sites, YangonSites.prepare, Config.Service. Then d15_world build -> src/shared/YangonWorld.lua (lots, races, jobs, chips, hub) and ChallengeData.boardPos. Then WestLayout.places ygn_* and Config.Spawn.YangonNear/Radius from the new outer lanes by each landmark (lon/lat -> geo.world). Then the Main.client intro cameras and the Towers centre.\n11) Runtime constants: replace the 'X > 25000' tests and DayCycle.YANGON_X (or move OX). Retune StreamingTargetRadius and Config.Minimap zoom.\n12) Minimap last (it reads roads, plots, streets and green of every batch): d12_minimap.py render -> upload the tiles -> d12_minimap.py --lua ids.json -> src/client/YangonMapArt.lua.\n13) Far city: YangonFar.luau (skirt, city, Shwedagon) sized from geo.",
+  "notes": "I edited no files and did not run Studio or Blender. I only ran one Python script, from my scratchpad, that reads extents from geo.batch_poly and the terrain stats.\n\nMain findings:\n1) The projection itself is clean: one function, geo.world, with metres x SPM. But at least 7 private copies hard-code 30000 and 1.6: d10, d19, d20, d23, pilot_plots, YangonRoads.luau and YangonFar.luau. On top of that, d4/d6, YangonTerrain.luau, heights.py:255 and landmarks.py use 1.6 as the vertical scale.\n2) Vertical scale VS = 1.6 equals SPM today, which is why the grades in heights.py are real. Going 1:1 means VS = 3 as well. Ground relief then doubles in studs (Shwedagon platform 93 to 174 studs), so YangonTerrain2.YTOP (200) and the probe ray start need headroom.\n3) Extent: the batch union is 20,459 x 17,775 studs today (12.8 x 11.1 km). At 3 studs/m it is 38,361 x 33,328 studs, and with OX = 30000 that is x 16,766..55,126, z -14,396..18,932. That pushes western Yangon below x 25,000, which breaks six runtime 'X > 25000 = Yangon' tests and DayCycle.YANGON_X.\n4) Roblox limits are not the blocker. Terrain MaxExtents is about \u00b1128k studs, and float precision is about 0.004 studs at 55k. The real costs are terrain size (about 3.5x the tiles: roughly 20-30 M characters of tile data per batch), Studio write time, the cloud place-size limit already hit on 14 Nov, minimap tile count, and streaming radius / memory.\n5) The vault master plan still says 'Scale stays 1.6 studs a metre' (master plan line 30) and needs updating to the 2026-11-16 decision. CLAUDE.md:136 already records it.\n6) The minimap today covers batch 0.5 only (27 tiles). Rebuilt for the whole city, it should read all batches.\n7) Car-scale road widths (half 32 / 16, the 14-stud deck in d6, WALK 10) are road-area items. They become real lane widths x 3, and the terrain beds follow them automatically through the road profiles.",
+  "open_questions": [
+   "World origin: keep OX = 30000 (Yangon then spans x ~16.8k-55k and every 'X > 25000' test must become Config.activeMap()), move OX to about 40,300 so all of Yangon stays east of 27,000 (east edge about 65k), or recentre Yangon near (0,0) (smallest coordinates, \u00b119k; needs the threshold code changed and Monaco never back at X 14000 in the same place)? Is Monaco ever coming back into the same place?",
+   "Vertical scale: confirm VS = 3 as well (true 1:1 relief, Shwedagon hill about 174 studs, real grades), not a squashed relief.",
+   "Which extent is built at 3 studs/m: all of batches 0.5 + 1 + 2 + 3 (about 103 km2 real; about 38 x 33 k studs), or a smaller core first? This drives place size, terrain write time and memory.",
+   "Rebuild batch 0.5's ground with the same SRTM field as batches 1-3 (drop the d4/d6 field and the 480-stud seam blend), or keep its own field?",
+   "Minimap: show the same real area as now (ZoomNear about 0.17) or the same studs (0.32, a tighter real view)? And minimap tile resolution: SPP 2 (up to ~600 tiles to upload) vs SPP 4-6 (about 100-200)?",
+   "StreamingTargetRadius: keep 640 studs (213 m real) or raise it for the bigger world (memory on phones)?",
+   "Races and delivery jobs: keep their real routes (about 1.9x longer in studs, so race times and payouts change) or shorten them to keep today's lengths?",
+   "Venue lots (Config.YangonVenues.Sites w/size, house lot sizes 120x130 / 104x100 / 60x72): stay game-sized, or become real-sized now that the map is 1:1?",
+   "Water clearance under bridges (heights.WATER_CLEAR 10 studs is 3.3 m at 3 studs/m): raise it to a real value?"
+  ]
+ },
+ {
+  "subsystem": "Yangon buildings, plots, street detail, green, lamps and street life (1.6 -> ~3 studs/m rescale)",
+  "key_constants": [
+   "SPM = 1.6 (tools/yangon/city/geo.py:14): the ONE ground-plan constant for every tools/yangon/city/* script (world(), lonlat(), plots.py area_m2 at :532). Docstring at geo.py:3 still says 1.6 studs/m with cars at 3. OX = 30000 (geo.py:17) is lon 96.14.",
+   "BOX_05 = (27977, -6469, 33455, 1693) (geo.py:20): batch 0.5 box in 1.6 studs (5,478 x 8,162 studs). At 3 studs/m it becomes about 10,270 x 15,300 studs. Whole extract (lon 96.095-96.235, lat 16.75-16.89) at 3 studs/m spans X ~15,600..60,300 and Z ~-23,200..+23,200.",
+   "Duplicate SPM = 1.6 copies outside geo.py: d10_plots.py:23 (OX, OZ, SPM), d19_buildings.py:24, d20_green.py:26 (and tools/yangon/common.py has its own LON0/KX/KY). Literal *1.6 in tools/yangon/city/details.py:528 (tennis 23.77x10.97 m), :547 (basketball 28x15 m), :551-569 (key, arc, 3-pt line), :620-621 (baseball).",
+   "GF, FH = 12.0, 9.0 (city/shells.py:44; YangonBuildings.luau:39 M.GF/M.FH; YangonRealBuildings.luau:83,108; d24_bmesh.py:10 docstring): 12-stud ground floor, 9 per upper floor. At 3 studs/m that is 4.0 m + 3.0 m, which is already a real floor height. The floors were never the wrong part. The 1.6 footprints were, and they made buildings look about twice as tall as they are wide.",
+   "Riviera kit floors (tools/riviera/Buildings.luau): Belle Epoque GF, FH = 14, 11 (:307, = 4.7 / 3.7 m at 3); Apartment / Modern GF, FH = 12, 9 (:463); bay 8 / 9 studs (:483); depth NextNumber(38, 54) (:635). HALF, WALK = 32, 10 and FRONT = HALF + WALK + 0.5 (:45-46) are hard-coded Monaco road widths.",
+   "BAY = 12.0 studs (shells.py:46) = 4.0 m at 3 studs/m. The atlas (city/atlas.py:30-39) maps 96 studs per U repeat (8 bays), wall rows 9 studs high, ground rows 12, cornice 2.4, roofc 64 studs per U. The atlas is already drawn at 3 studs/m proportions.",
+   "PARAPET = 2.4 (shells.py:45); balcony cage depth 2.2 (shells.py ~:425); shop awning out 3.2, sign 9-16 wide x up to 3.4 high (shells.py ~:455-476); stair room 8 high, water tanks r 1.4-2.0 x 3-4.4 high (shells.py ~:510-530); eaves 1.2 (shells.py ~:533); pitched roof rise 1.5-5 / 2.5-9 (:537-539); party-wall edges < 5 studs, merge edges < 1.5 (shells.py:14-15, :119); GLOW_OUT 0.08 (:207).",
+   "CELL = 256.0, MAX_TRIS 17000, FILE_TRIS 90000, FILE_MESHES 100, COLLIDE_CHARS 190000 (city/d24_bmesh.py:45-49): one F/R/G mesh set per 256-stud cell. Batch 0.5 = 1,877 unique meshes, 19,089 buildings, 24 .glb files (build/ygn_bmesh/b05/manifest.json). At 3 studs/m the same area has about 3.5x the cells, so about 6,500 unique meshes for 0.5 alone. The throttle that stopped batches 1-2 loading hit at 15,537 (CLAUDE.md 'Unique meshes stop the map loading').",
+   "Plots (city/plots.py): RES = 2.0 studs raster cell (:38); ROW_SETBACK = 2.5 (:39); OSM drop if area_m2 < 12 (:533) and if the clipped part < 40 studs^2 or < 35% (:546); simplify 0.6 (~:552); road keep-out = carriageway half + walk + 1.0 (:336, :346, :397), deck corridor buffer 36 (:343); water +3 (:504); landmark areas buffer 8 (:418), landmark models grown 6 (:185), step-8 landmark rects +16 (~:489); lakeside villa band 260 studs and green shore strip 44 (:604-611); PODIUM_TOWERS sizes 64x52 / 70x46 studs (:111).",
+   "Infill sizes in studs (plots.py:697-718 frontage rows): unit width uniform(9,13) busy / (9,16) quiet, depth (24,30) / (20,28), gap skip 6-14, 8% gaps. Interior (plots.py:760-780): lakeside villa 20-30 x 18-26, house 14-20; institutions 20-44 x 16-30; commercial mass 18-36 x 18-32; industrial hall 24-48 x 20-40; walk-up 24-40 x 20-30; house 14-22; shed 10-16 x 12-20. All are 1.6 studs/m sizes: a 9-13 stud shophouse = 5.6-8 m now, but only 3-4.3 m at 3 studs/m.",
+   "Floors/style: plots.py est_floors (:867-893), style_for thresholds in m^2 (:422-445: tower >= 12 floors, hall > 2200 m^2 & <= 4 floors, house < 220 m^2), OVERRIDES real floors (:57-100, e.g. Lotte 23, Hledan Centre 9), MARKET_LOOK 2 floors (:112). Batch 0.5 plots: 7,050 house, 5,123 walk-up, 3,215 shophouse, 2,924 shed, 670 villa; floors mostly 1-8.",
+   "d10_plots.py (step 8, legacy): WALK 10, SETBACK 4.5, CLEAR 3, DECK_CLEAR 40, GAP 5, VACANT 0.12, CELL 48 (:24-30, :125), RING = (29072.0, 1172.8, 124) (:28), landmark plots optima 110x90, mmplaza 180x130, novotel 100x90 studs (:255), SIZES per kind (:283), landmark at_m * SPM (:261), grid X0..Z1 from design metres * SPM +-40 (:36-37).",
+   "d19_buildings.py (batch 0.5 part-building plots, legacy): WALK, GAP = 10, 1 (:27), RING (:41), SITES 216x216 / 304x216 venue lots (:52-62), BLOCKED grow 10 / 8 (:84), CELL 64 (:87), FRONT env 25 (:260), drop < 25 m^2 (:274-276), push out of roads up to 20 studs (:300-312), fill-rect shrink (:290).",
+   "YangonBuildings.luau (step-8 part kit): M.SETBACK = 4.5 (:40); walkup cols = width/8 (:229), shophouse width/6 (:264), tower width/9 (:300), villa inset 10-16 / 14-20 and floors 1-2 (:320-323), villa trees 14-22 high, crown 14x9x14 (:379-381); Optima 60x40x17 (:406). YangonRealBuildings.luau: complex if w or d > 70 -> 3-floor podium (:8-9, :222), front raycast at SETBACK + 2.5 (:183).",
+   "Green (d20_green.py:29 / city/green.py:36): SPACING 46, PARK_SPACING 24, OSM_SPACING 6 studs; embankment only within 130 of a main road (d20:115, green.py:126); shore pieces <= 24 long (d20:128); bench / lamp every 44, lamp 11 inland, tree row 17 inland, bench 4 inland (d20:141-155); keep-outs road + 3, building + 4, water + 6 (docstrings). Tree sizes in YangonGreen.luau:283-290 (and YangonGreenBatch.luau:192-201): park tree canopy 30-46 studs, palm 18-26; city tree 34*s rain / 24*s mango / 18*s palm, s 0.8-1.5 (d20:239). Embankment: walkway 8 wide, parapet 1.4, edge 2 thick, bank to water +2.5 (YangonGreen.luau:228-236); walkway lamp post 11 high, head 1.4, PointLight range 26 (:264-270); bench 5 long, seat 1.7 high (:252-255).",
+   "Lamps (d16_lamps.py): main roads every 96 studs both sides, staggered (:140-149), streets every 120 one side, decks every 96 (:167-170), roundabout every 20 degrees, pole hs + 1.5 from the kerb (:154), junction keep-out half + walk + 6 (:85), deck 40, ring + 20 (:155), keep 14 from race starts / rings (:110). Lamp kit = Monaco StreetLamp, a 26-stud pole (YangonLamps.luau:4), SpotLight brightness 7 (:41). Batches: details.py lamps_batch every 96, parapets every 64 (header :61-62).",
+   "Pole lights: YangonPoleLights.luau:46-56 head 1.3x0.45x0.7 placed 5.5 under the shaft top, PointLight range 30, brightness 1.6; details.py proto pole_l head at y 18.4 (:2098-2101).",
+   "Details props (city/details.py), authored in player studs: power pole C 0.9 x 25.4 (= 8.5 m at 3), crossarm 4.2 at y 22.4, transformer at 15.6 (:2084-2096); pole spacing 80 street / 64 main (0.5) and 96 / 72 (batches) (:2147); YangonDetails WIRE_MAX = 95 (YangonDetails.luau:61) caps a Beam wire's span; signal pole 22.5 high, arm 6-18, head 3.6 (:1454-1472); bus stop shelter 9 x 3 or 11 x 3.6, posts 8.6, roof at 7.75, bench seat 1.7, sign pole 10 (:1503-1530); footbridge CLEAR = 18 studs under girders (:1263-1264); FENCE_H 7.2 (:646); compound wall height 5.0 (:1653), YARD 5.5, MIN_RUN 8 stations (16 studs), GAP_BRIDGE 12 (:1739-1741); tea table 1.3 high, stools 0.85 (:2063-2069); trishaw 3.4 long, wheels 2.0 / 1.8 dia (:2070-2082); vendor umbrella pole 7.6, canopy 5.0 dia (:2103-2110); kerb tree canopy 15-19, every 44, 30% of 200-stud runs (:2108-2135); OSM tree 22-30 (:1561); worship footprints FOOT stupa 9x9, big 16x16, monastery 24x18 ... (:1062); trishaw sites 40 scaled by area (:2191); road patches 3.5-7.5 x 2.4-3.6, lane offsets [-24,-8,8,24] if half >= 30 else [-8,8] (:2237); PART_BUDGET 25,000 (:87); court lines 0.20/0.26/0.32 tops (:503); hoop rim at 8.6 (~:574).",
+   "YangonDetails.luau: LOD_RANGE 340, CELL 256, WIRE_MAX 95, STREET_LIFT 0.75 (:59-62).",
+   "Street life (city/streetlife.py:51-61): OX, OZ = 27900, -6500 (decimetre origin = BOX_05's corner); LENGTHS A 12 .. F 15.9 studs = Config.Traffic.ModelLengths (Config.lua:303, 4-5.3 m at 3 studs/m, correct only at 3); CAR_W 6.0, KERB_GAP 0.4, UP_IN 0.8, LANE_CLEAR 4.0, PITCH 17 (parked-car pitch), CLEAR8 8. Client src/client/YangonStreetLife.lua: CELL 128 (:28), kerb ROLL atan(0.5/5.6) (:179), R6-size people 5 studs tall (SIZES :409-414, i.e. 1.67 m at 3). Config.YangonStreetLife (Config.lua:2150-2166): CarRadius 260, CarKeep 285, CarMax 60, PedRadius 200, PedKeep 230, PedMinGap 55, PedMax 40, WalkSpeed 3-5 studs/s.",
+   "CarBuilder.STUDS_PER_METRE = 3.0 (src/shared/CarBuilder.lua:68): the target scale."
+  ],
+  "items": [
+   {
+    "path": "Games/CityLegends/tools/yangon/city/geo.py",
+    "scale_assumption": "SPM = 1.6 (:14), docstring (:3), OX 30000 (:17), BOX_05 in 1.6 studs (:20); world()/lonlat() (:23-28) multiply by SPM.",
+    "change_needed": "Set SPM = 3.0. Recompute BOX_05 as the old box's lon/lat projected at 3, or keep it in lon/lat and derive it. Decide the origin OX: at 3 studs/m the full extract runs to X ~60,000 and Z +-23,000. Then re-run every downstream script (they all import geo).",
+    "effort": "S",
+    "risk": "Hard-coded world coordinates elsewhere (x > 25000 = Yangon checks, SITES lists, RING, YangonWorld.lua, streetlife OX/OZ) silently go stale. Large distances from the origin raise float jitter."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/plots.py",
+    "scale_assumption": "Infill sizes in 1.6-studs (frontage 9-16 wide x 20-30 deep :697-718; interior 10-48 :760-780); RES 2.0 raster (:38); ROW_SETBACK 2.5 (:39); clipped-part < 40 studs^2 (:546); simplify 0.6; lakeside band 260 and shore strip 44 (:604-611); PODIUM_TOWERS 64x52 / 70x46 (:111); landmark buffers 6 / 8 / 16 (:185, :418, ~:489); road keep-out half + walk + 1 (:336-346, :397) assumes the car-scale half (main 32, street 16); docstring :7-8 'the game's roads are wider than the real ones'.",
+    "change_needed": "Express every size in metres times geo.SPM, e.g. frontage 4-6 m wide x 12-18 m deep (13-18 x 36-54 studs at 3). Scale the buffers and the 40 studs^2 limit by SPM / SPM^2. Raise RES to about 3-4, or the raster is 3.5x bigger (the interior loop is already capped at 2.5M cells, :731). Re-read the road keep-out from the new real-width roads, so OSM outlines are no longer cut back 13-23 studs. Floors, est_floors and style_for (all m^2 or floor counts) can stay.",
+    "effort": "M",
+    "risk": "Density targets (TARGET :47) are area shares and stay. Frontage-row counts change if widths are not converted the same way, and the 2.5M-try cap may stop interiors short at the bigger raster."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/shells.py + city/atlas.py + city/d24_bmesh.py",
+    "scale_assumption": "GF/FH 12/9 (shells.py:44), BAY 12 (:46), PARAPET 2.4 (:45), cage 2.2, awning 3.2, eaves 1.2, tanks, stair room (shells.py ~:410-540); atlas rows 96 studs/U, 9 / 12 stud rows (atlas.py:30-39); CELL 256 (d24_bmesh.py:45).",
+    "change_needed": "Floor heights and bays are already right at 3 studs/m (4 m ground floor, 3 m floors, 4 m bays); keep them. Raise the props to real metres: balcony cage 1.2-1.5 m (~4 studs), awning 1.5-2 m (~5-6), eaves 0.6-0.9 m (~2-2.7), parapet ~1 m (3). d24 as it stands makes one unique mesh per cell, about 6,500 for batch 0.5 alone at the new scale, which breaks the reused-kit rule. Replace it with a kit placer (see the kit item). Keep d24 only for one-off landmark cells.",
+    "effort": "L",
+    "risk": "Re-uploading d24 cells at 3 studs/m repeats the HTTP 429/503 throttle that stopped batches 1-2 loading (15,537 meshes)."
+   },
+   {
+    "path": "NEW: reused building kit (replacing d24's per-cell meshes for ordinary buildings; rule in CLAUDE.md 'Unique meshes stop the map loading', vault 'Yangon map - Build steps' line 462 'a Blender kit for ordinary buildings')",
+    "scale_assumption": "None yet. It must be built in real metres at 3 studs/m.",
+    "change_needed": "A small library of whole-building or section meshes, uploaded once and cloned many times (same MeshId). Archetypes by style (shophouse, walk-up, house, villa, shed, hall, mass, condo tower) x width in 4 m bays (1-6) x floors (1-8, with stackable middle-floor and roof sections for towers) x depth class. Sizes at 3 studs/m: shophouse frontage 4-6 m (12-18 studs), depth 12-25 m (36-75); walk-up 12-20 m wide (36-60); floors 12 + 9n. Each MeshPart may stretch only a little (about +-15%) so windows don't distort. Colour per instance: walls and roof as separate MeshParts, each with SurfaceAppearance.Color or plain Color, because vertex colours don't survive reuse and are hidden under a SurfaceAppearance. Night glow as a separate G piece per archetype (tag FacadeNight). Real OSM outlines then need snapping to the nearest archetype's rectangle, or an L/T made of two archetypes. Collision stays one or two boxes per building (d24's Collide format can be kept). Target a few hundred unique mesh ids for the whole city.",
+    "effort": "L",
+    "risk": "Concave or round real outlines lose accuracy against the owner's '1:1' wish. Instance count rises (about 3 MeshParts per building x ~19k for 0.5), but they share assets. Needs a test of the load and of SurfaceAppearance.Color tint per instance (a TextureID shows vertex colours; SurfaceAppearance hides them, per the 2026-11-14 pilot)."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/bprobe.py + tools/yangon/YangonProbe2.luau + city/join_pages.py",
+    "scale_assumption": "Probe points are plot corners scaled 0.9 toward the middle (bprobe.py:22-24); pages of 11,000 lines (bprobe.py ~:31).",
+    "change_needed": "No constants to change. Re-run after the new terrain and roads are in Studio. There are more probe pages only if the plot count rises.",
+    "effort": "S",
+    "risk": "Depends on the terrain and street collision at the new scale being built first."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/YangonBuildingMeshes.luau",
+    "scale_assumption": "Cell naming per 256-stud cell (header :4); boxes come from the mesh names, so it has no scale constant of its own.",
+    "change_needed": "Keep it for landmarks. For the kit, add a placer that clones kit MeshParts by archetype id and CFrame/size and tints them (place() expects one unique mesh per cell).",
+    "effort": "M",
+    "risk": "None for scale as such; the work is in the new kit placer."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/YangonRealBuildings.luau + YangonBuildings.luau + d19_buildings.py + d10_plots.py (part buildings, step 8 / 0.5; retired by master plan A5 but still the source of landmark plots and of d16 / d19 imports)",
+    "scale_assumption": "SPM 1.6 (d10:23, d19:24); RING (d10:28, d19:41); SETBACK 4.5 (d10:25, YangonBuildings.luau:40); landmark plot sizes 110x90 / 180x130 / 100x90 studs (d10:255); venue SITES 216x216 (d19:52-62, d16:34-46, plots.py ~:300); GF/FH 12/9 (YangonBuildings.luau:39); podium if > 70 studs (YangonRealBuildings.luau:222).",
+    "change_needed": "d16_lamps.py execs d10_plots.py for its RING / WALK / in_poly, and d19 does too; d10 loads ygn_roads_v3.json and ygn_road_design.json (1.6 studs). Cut those imports, or re-project the files. Re-project the hard-coded SITES / RING to the new venue lot positions. Retire the part buildings, or use them only as a fallback.",
+    "effort": "M",
+    "risk": "Stale v3 data quietly feeds the lamps (d16) and the old landmark plots (plots.blocked_polys reads ygn_plots.json landmarks)."
+   },
+   {
+    "path": "Games/CityLegends/tools/riviera/Buildings.luau (kit table packed into ClaudeTools.Buildings)",
+    "scale_assumption": "HALF 32, WALK 10, FRONT 42.5 (:45-46, Monaco roads); GF/FH 14/11 Belle Epoque (:307), 12/9 apartments (:463); bay 8/9 (:483); depth 38-54 (:635); window recess R 0.6 (:47).",
+    "change_needed": "Its floor heights already fit 3 studs/m. If Yangon still uses its kit parts (YangonBuildings' K.part / face / pane), only FRONT/HALF/WALK matter, and Yangon passes its own plot frames. Nothing to change unless it is used to build Yangon streets directly. It is a part kit, not a mesh kit, so it does not satisfy the kit rule for the whole city (part count).",
+    "effort": "S",
+    "risk": "The part count: 65,900 building parts for 0.5 at 1.6. A 3.5x area in parts is not viable."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/details.py + details_test.py + tools/yangon/YangonDetails.luau",
+    "scale_assumption": "Props are authored in player studs, i.e. already 3 studs/m: power pole 25.4 (:2085), signal pole 22.5 (:1466), bus shelter roof 7.75 / bench 1.7 (:1503-1530), footbridge clearance 18 (:1263), wall 5.0 (:1653), fence 7.2 (:646), stools 0.85, trishaw 3.4 long (:2063-2082), vendor 7.6 (:2103). Placement spacing in studs: poles 80/64 (0.5) and 96/72 (:2147), kerb trees every 44 (:2133), patches at lane offsets +-8 / +-24 (:2237) that assume 16-stud lanes. Court markings are hard-coded *1.6 (:528-621). FOOT worship footprints 9-28 studs (:1062). YARD 5.5 (:1739). TRISHAW_SITES and PART_BUDGET are scaled by the BOX_05 area (:87, :2191). YangonDetails: WIRE_MAX 95, CELL 256, LOD_RANGE 340 (:59-62).",
+    "change_needed": "Replace the *1.6 in the court builders with geo.SPM (courts become the right size). Re-derive the spacings in metres x SPM: poles ~30-40 m (90-120 studs), so WIRE_MAX must rise to about 130. Kerb trees ~10-15 m (30-45) are already in range. Take the patch lane offsets from the road's real lane width (s[10]) instead of +-8 / +-24. Scale the FOOT footprints and YARD (1.8 m -> ~2-3 m = 6-9 studs) by SPM / 1.6 where they stand for real sizes. Raise the trishaw to ~2 m (6 studs). PART_BUDGET grows with the area: about 3.5x for the same density. Also check the bus-stop / signal offsets from the kerb against the new pavement widths.",
+    "effort": "M",
+    "risk": "Part budget: 6,000+ items in 0.5 now; 3.5x the area at the same real density means ~3.5x the parts, unless the props become kit meshes too (poles, shelters and stalls are repeated: ideal kit pieces)."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/YangonPoleLights.luau",
+    "scale_assumption": "Head 1.3x0.45x0.7 at the shaft top - 5.5, PointLight range 30, brightness 1.6 (:46-56).",
+    "change_needed": "Sizes are fine at 3 studs/m. The range of 30 studs (10 m) may need to grow if poles end up 90-120 studs apart, or the street goes dark between them.",
+    "effort": "S",
+    "risk": "More lights in total (3.5x the street length); WorldFx LODLight limits apply."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/d20_green.py + city/green.py + YangonGreen.luau + YangonGreenBatch.luau",
+    "scale_assumption": "SPM 1.6 (d20:26); SPACING 46 / PARK 24 / OSM 6 (d20:29, green.py:36); embankment within 130 of a main road, walkway 2..10 inland, lamps / benches every 44, tree row 17 inland (d20:115-155, green.py:126-154); tree canopy widths 30-46, rain 34*s, mango 24*s, palm 18*s (YangonGreen.luau:283-290, YangonGreenBatch.luau:192-201); walkway 8 wide, parapet 1.4, lamp post 11, light range 26 (YangonGreen.luau:228-270).",
+    "change_needed": "Canopy widths in studs are roughly right at 3 studs/m: a 34-stud rain tree is ~11 m, real ones are 15-25 m, so raise them to 45-75 studs and the parks to 40-60. Tree spacing in metres x SPM: city ~15 m (46 at 3 is fine), parks ~8-10 m (24-30). The embankment walkway is 8 studs = 2.7 m (real Inya / Kandawgyi walks ~3-5 m, so 10-15). The '130 of a main road' rule and the 17 inland are 1.6-era distances: x1.875. Benches / lamps every 44 studs = 15 m (fine). M.lift stays. Tree count grows ~3.5x with the area.",
+    "effort": "M",
+    "risk": "Part count of the green kit (tree = 3 parts, d20 counts 3 x trees): x3.5. GreenKit trees are Monaco clones; ScaleTo is fine."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/d16_lamps.py + YangonLamps.luau + YangonLampsBatch.luau (+ details.py lamps_batch)",
+    "scale_assumption": "96 / 120 studs spacing (d16:140), 96 on decks, every 20 degrees on the ring, pole hs + 1.5 (:154), junction half + walk + 6 (:85), deck keep-out 40, ring + 20 (:155), keep 14 (:110); SITES list in 1.6 coordinates (:34-46); kit pole 26 studs (YangonLamps.luau:4).",
+    "change_needed": "The pole height (26 studs = 8.7 m) and the 96-120 stud spacing (32-40 m) are already real at 3 studs/m: keep them. Re-project SITES, RING and KEEP to the new positions. Drop the exec of d10_plots.py and read ygn_roads_v5 at the new scale. The deck keep-out (40) and the ring margin are fine in studs. SpotLight Range may need checking for wider real roads (3+3 at ~10 studs a lane = 33 studs per carriageway).",
+    "effort": "S",
+    "risk": "~3.5x more lamps; WorldFx's LODLight / shadow budget."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/city/streetlife.py + streetlife_test.py + mall_life.py -> src/shared/YangonStreetLife*.lua; src/client/YangonStreetLife.lua; Config.YangonStreetLife",
+    "scale_assumption": "OX, OZ = 27900, -6500 decimetre origin (streetlife.py:51); car LENGTHS 12-15.9 = Config.Traffic.ModelLengths (Config.lua:303), CAR_W 6, PITCH 17, LANE_CLEAR 4, KERB_GAP 0.4, UP_IN 0.8, CLEAR8 8 (streetlife.py:53-61); people R6 5 studs (client :409-414); kerb roll atan(0.5/5.6) (client :179); client CELL 128 (:28); radii and caps in Config.lua:2150-2166.",
+    "change_needed": "Car and people sizes are already 3 studs/m (4-5.3 m cars, 1.67 m people): keep them. That is the whole point of the change. Move OX/OZ to the new box corner. Coordinates in decimetre ints grow 1.875x (more characters, so more YangonStreetLife<n> chunks under 185k). Re-run after the roads, lanes, plots and details. PedRadius / CarRadius in studs are about camera distance and can stay. Consider CarMax / PedMax per area if the owner wants the same 'busy' feel: the density per metre of kerb is what matters, and PITCH 17 = 5.7 m is right at 3. The kerb ROLL uses a 0.5-stud kerb (17 cm at 3: fine if the roads keep it). mall_life.py follows mc3d (the landmark rebuild).",
+    "effort": "S",
+    "risk": "Many more parked-car spots and paths (3.5x the kerb length): file count and memory on the client."
+   },
+   {
+    "path": "Games/CityLegends/tools/yangon/d21_refit.py + d11/d13/d14/d15 (lots, YangonWorld.lua) [cross-area]",
+    "scale_assumption": "Lot and venue positions hard-coded in 1.6 coordinates and copied into plots.py (~:300-304), d16 (:34-46), d19 (:52-62); lots 216 x 216 studs (72 m at 3).",
+    "change_needed": "Venue lots must be re-placed on the new map before plots, lamps and green run (they are keep-out zones). One shared source (YangonWorld.lua / a JSON) should replace the three hand-copied SITES lists.",
+    "effort": "M",
+    "risk": "A missed copy puts buildings or lamps on a venue drive-in."
+   }
+  ],
+  "pipeline_order": "Prerequisites from other areas: geo.SPM = 3 and the new origin -> e0 extract (lon/lat, unchanged) -> DEM / terrain -> main roads (d23 v5 / city/roads.py at real lane widths) -> lanes (d9 / roadlanes: YangonLanes*.lua) -> new streets (network.py -> streets.py prep / probe / build -> street_glb -> upload -> YangonStreetCollide) -> venue lots / sites (d11/d13/d14/d17/d21, YangonSites.prepare, d15_world probe/build -> YangonWorld.lua) -> landmarks (landmarks.json, mc3d / sedona3d -> landmark_glb3d; their footprints feed plots.landmark_models). Then this area:\n1) plots.py <tag> (reads ygn_roads_v5 / roads_<tag>_profile.json, network_<tag>.json, osm_ygn buildings / areas, landmarks, YangonWorld lots; writes build/city/plots_<tag>.json + PNG).\n2) bprobe.py prep <tag> -> Studio YangonProbe2.spawn pages -> join_pages.py -> bprobe.py apply <tag> (writes \"y\" into plots_<tag>.json; needs terrain + street collision in Studio).\n3) atlas.py, only if the bays / rows change (build/ygn_bmesh/atlas*.png -> upload) -> the building kit: build the archetype meshes once (Blender or glb.py) -> Open Cloud upload -> kit placer (new) using plots_<tag>.json + Collide boxes (d24's Collide format). Landmark-only cells still via d24_bmesh.py -> YangonBuildingMeshes.place / collide.\n4) details.py <tag> (reads plots, streets + probe heights, v5 / profile roads, lanes, osm points / lines; writes details_<tag>.json, Details_<tag>_<n>.luau and, for batches, YangonLampSpots_<tag>_<n>.luau) -> details_test.py <tag> -> YangonDetails.spawn({tag}) -> YangonPoleLights.run() (0.5; batches carry lamps in their data).\n5) Green: d20_green.py (0.5) / green.py <tag> (reads plots, streets, details_<tag>.json, osm) -> YangonGreen / YangonGreenBatch build -> M.lift.\n6) Lamps: d16_lamps.py (0.5; reads v5, SITES, YangonWorld) / details.py lamps_batch -> YangonLamps / YangonLampsBatch (raycasts need pavements in place) -> L.farWindows.\n7) streetlife.py (reads streets, v5, YangonLanes*.lua, plots, details) -> streetlife_test.py -> src/shared/YangonStreetLife*.lua; mall_life.py after mc3d -> YangonStreetLifeMall.lua; sync the scripts.\n8) Minimap d12 (reads v5, the plots and the green data). Then delete the data modules / probe strings from the place (the place-size rule).\nThe old CLAUDE.md order 'roads -> lanes -> buildings -> green -> lamps -> lots -> minimap' had the lots after the lamps. At the new scale the lots must come BEFORE the plots, because plots, d16 and d19 use them as keep-outs.",
+  "open_questions": [
+   "Kit vs accuracy: the reused-kit rule means real OSM outlines are snapped to archetype rectangles (or two joined). Is a close-but-not-exact footprint OK for ordinary buildings, with exact outlines only for named landmarks?",
+   "How many distinct ordinary-building designs is enough for Yangon to not look repeated: about 40-80 archetypes x colour tints? Or should the owner see a first set of kit buildings (shophouse row, walk-up, house, villa) side by side with photos before the city is filled?",
+   "Shophouse widths: downtown Yangon lots are mostly ~3.7-4.5 m (12-15 ft) wide and 15-30 m deep. Use those real sizes (12-14 studs wide at 3 studs/m), even though they are narrow for a player?",
+   "Map size and origin: at 3 studs/m the whole extract is about 45 km x 46 km of studs (X ~15,600-60,300, Z +-23,000). Re-centre near 0 (code keys 'x > 25000 = Yangon' in EntranceRamp, Houses.cutPlate, DayCycle.YANGON_X), or keep X = 30000 at lon 96.14? Or cut the playable area to a smaller box?",
+   "Part / instance budget: same real density on a 3.5x larger stud area means ~3.5x the detail parts (poles, walls, trees, lamps), plus kit MeshParts. Should poles, bus stops, stalls, trishaws and trees also become kit meshes, and is it OK to thin the far-from-road clutter?",
+   "Venue lots are 216 x 216 studs (was 135 m at 1.6, now 72 m at 3). Keep the game-size lots in studs, or scale them up with the map?",
+   "Do batch 0.5's existing landmark meshes (Myanmar Centre 3D, Sedona) get rebuilt at 3 studs/m now, or after the ordinary city? Their footprints are keep-outs for the plots.",
+   "Trees: Yangon rain trees have 15-25 m canopies (45-75 studs at 3); the current kit tops out at ~51 studs. Make them that big (performance, view blocking on streets)?",
+   "Street-life density: keep CarMax 60 / PedMax 40 per camera radius (the same on screen), or raise them so kerbs look as full as before?"
+  ],
+  "notes": "Main finding: the vertical sizes and the props in this area were already authored at player scale, about 3 studs/m. The floors are 12 + 9 (4 m + 3 m), the facade bay is 12 studs (4 m), and the atlas is drawn on that grid. Lamp poles are 26 studs (8.7 m), power poles 25.4, signals 22.5. Bus shelters, tea stools, benches, parked cars (12-15.9 studs, the same as Config.Traffic.ModelLengths) and R6 people (5 studs) are also at that scale. Only the ground plan was at 1.6 studs/m. Changing it means re-projecting (geo.SPM plus three duplicate SPM constants and the *1.6 court literals in details.py) and converting every footprint, buffer and spacing written in 1.6-era studs to metres x SPM. The main ones are the infill unit sizes in plots.py, the plots.py buffers, the green spacings and embankment distances, the detail pole spacing with YangonDetails.WIRE_MAX = 95, and the patch lane offsets. Then everything is regenerated. A few prop sizes that read small at 3 studs/m should grow: balcony cages 2.2, awnings 3.2, eaves 1.2, the trishaw 3.4 long, the embankment walkway 8 wide, tree canopies 24-46.\n\nThe blocker is the building output. d24_bmesh makes one unique mesh set per 256-stud cell: 1,877 meshes for batch 0.5 today, about 6,500 at 3 studs/m. That repeats the 15,537-mesh asset throttle that stopped batches 1-2 loading (CLAUDE.md 'Unique meshes stop the map loading'; build-steps note line 462). Ordinary buildings therefore need a new reused kit at real scale. It needs:\n- archetypes in 4 m bays x 3 m floors (12 / 9 studs), with real frontages (shophouse 4-6 m, walk-up 12-20 m) and depths 12-25 m;\n- separate wall, roof and night-window MeshParts tinted per instance (vertex colours don't survive reuse, and SurfaceAppearance hides them);\n- only small stretch per instance, so windows don't distort;\n- a new placer that snaps OSM outlines to archetypes and keeps d24's Collide boxes.\n\nThe Riviera kit (tools/riviera/Buildings.luau) is a part kit with correct floors but hard-coded Monaco FRONT = 42.5. It cannot scale to the whole city in parts. Legacy step-8 / 0.5 scripts (d10, d19, YangonBuildings / YangonRealBuildings) still feed d16_lamps through `exec` of d10_plots.py and its v3 road files. The venue SITES lists are hand-copied in plots.py, d16 and d19, and must be re-projected or unified. The master plan's decision 1 ('Scale stays 1.6 studs a metre', vault master plan line 30) is now overridden by the 2026-11-16 owner decision and should be updated in the vault note."
+ },
+ {
+  "subsystem": "Landmarks, venues and gameplay distances (Yangon rebuild from 1.6 to about 3 studs per metre)",
+  "key_constants": [
+   "SPM = 1.6 (tools/yangon/city/geo.py:14, with LON0 96.14, LAT0 16.82, OX 30000 at :17): the projection for every city tool. Everything in world studs (X = 30000 + (lon-96.14)*KX*SPM) moves by (old - 30000) * 1.875 when SPM is 3",
+   "VS = 1.6 (tools/yangon/city/ground.py:33): terrain height in studs per metre. landmarks.srtm_y repeats it (landmarks.py:1219, `v * 1.6`), and heights.py:255-257 uses it for water levels. A 1:1 map needs VS = 3 as well, so the hills keep their real grade",
+   "SPM 1.6 copies in the venue and site tools: d10_plots.py:23 (OX, OZ, SPM = 30000, 0, 1.6), d19_buildings.py:24, d20_green.py:26, d23_lanes_v5.py:108 and :412, d6_export.py:7, d7_flyovers.py:29. d11, d13, d14, d15 and d17 all load roads through d10",
+   "SV = 3.0 (landmarks.py:38): the great landmarks already stand at 3 studs/m vertically. Each one uses its own horizontal SH to stay wide enough: Shwedagon SH 2.3 (:917), Maha Wizaya 2.4 (:1309), Sule 2.3 (:1341), Botataung 2.3 (:1421), Kaba Aye 2.6 (:1458). Chaukhtatgyi is '1.6 a metre' long and '2.4 a metre' up (:1709). At 3 studs/m, SH becomes SV = 3 for all of them",
+   "Hand-placed landmark centres and ground heights in world studs at 1.6: SHW centre (31636, 3830), Y0 = 93 = 58 m x 1.6 (landmarks.py:915-916); platform plat=(-235,-285,235,215,72) and the stair ends (:919-922); wiz (32083, 4436) gy 57 (:1288-1289); sule (33200, 8066) gy 19.8 (:1335-1336); bota (35456, 9116) gy 13.1 (:1411-1412); kaba (32470, -6511) gy 42.9 (:1446-1447); kara (34768, 4382) wl 25.6, L 128 (:1499-1508); city hall gy 20.1 (:1600); indep (33321, 8294) gy 20.2 (:1668-1669); chauk (34072, 1474) gy 38.6, L 150, Wd 74 (:1710-1719)",
+   "Real-geometry model origin OX, OZ = 32600, -1350, written in 5 places: landmark_mc_fit.py:24, landmark_glb3d.py:23, landmark_mc_glb.py:22, mall_life.py:22, LandmarkPlace3D.luau:17/181/188/209/243/278. At SPM 3 this point is world (34875, -2531)",
+   "Myanmar Centre: FLOOR = 9.0 (3 m a floor), SKIRT -4, POD_Z = [0,14,26,38,50], POD_H = [14,12,12,12,12], POD_TOP 66 (mc3d.py:31-35); OPEN_FLOORS 4, GALLERY 8 (:939-940); the layout plan in build/landmarks/myanmar_centre/layout.json in 1.6-scale model studs (podium 258 x 237 studs = 161 x 148 m; it becomes about 484 x 444 at 3)",
+   "Myanmar Centre lot fitting (landmark_mc_fit.py:24-30): SETBACK 3, FLUSH 1.5, PLINTH_R 20, PLAZA 12, DOME_GAP 8, CHORD_MAX 64. It reads lot_rays.json, Studio raycasts to the roads. The docstring (:4-5) says the car-scale roads eat 13-23 studs into the real outlines",
+   "Sedona: FLOOR = 9.0 (sedona3d.py:32); Inya Wing slabs 12 + 24/29/27 x FLOOR (:203, :217, :238); its lot is refs/sedona/lot_fine.json + road_grid_rle.txt from a Studio raster; the outlines come from sedona_model.json",
+   "landmark_glb3d.MAX_TRIS = 9000 (landmark_glb3d.py:24) and landmarks.MAX_TRIS = 17000 (landmarks.py:39): by triangles, so they don't depend on scale",
+   "LandmarkPlace3D M.BASE = 28.8 (LandmarkPlace3D.luau:97): Myanmar Centre's ground y, plus the --plane a,b,c paving fit measured in Studio",
+   "YangonFar: map box M.X0..Z1 as 30000 +- metres x 1.6 (YangonFar.luau:20-21), SHWEDAGON stand-in (31619, 0, 3821) (:24), K = 1.4 oversize (:236)",
+   "Venue lot: WestLayout.Lot = LOT = BlockSize 300 - RoadWidth 64 - 2 x Sidewalk 10 = 216 (WestLayout.lua:29-32). YangonSites.luau:20-21 has LOT 216 and MARGIN 8. Rewards w = 304 (Config.lua:173, d14_wide_lot.py:16). Realty size 80 (Config.lua:179)",
+   "Lot offset from the road centre: OFF = 153 = road half 32 + walk 10 + 3 + LOT/2 108 (d11_sites.py:23, d13_more_sites.py:21, d14_wide_lot.py:15). It is only right for half-32 roads",
+   "d10_plots.py:24-28: WALK 10, SETBACK 4.5, CLEAR 3, DECK_CLEAR 40, RING (29072, 1172.8, 124) = the roundabout keep-out. :33 reads ygn_roads_v3.json, already older than the v5 roads",
+   "Config.YangonVenues.Sites (Config.lua:163-181): 11 sites in world studs, for example dealership (30836.8, 957.4, y 46.57) and dropoff (32358.8, -1833.6). USED copies of them sit in d13:20, d14:18-23 and d15:44-48",
+   "House lot tiers (d15_world.py:134): low 60x72, mid 104x100, high 120x130, WANT {high 10, mid 13, low 22} (:136). Pads are w+16 by d+10. Real size at 3 studs/m: 20x24 m to 40x43 m, which is realistic",
+   "Races (d15_world.py:218-260): a checkpoint every 180 studs. Optima Run needs ring(p) > 175 and deck_dist > 110. Pyay race: st = end - 1300 samples (about 5,200 studs). Deck keep-outs 60/70/90/110/120 and roundabout 160/175 are all studs. YangonWorld.lua:53-56 has race lengths 4836, 4366, 2312 and 5200 studs",
+   "Jobs and chips: drops >= 900 from dispatch (d15_world.py:417 and Config.Activities.JobMinDistance = 900, Config.lua:1862). Chips >= 300 apart, ChipCount 25 (d15:430, Config.lua:1867). Pavement points every 24 studs (d15:265)",
+   "Config.Activities (Config.lua:1855-1888): GoldMph 80 / Silver 66 / Bronze 52 (medal times = length / speed, ActivityData.lua:65-67, :165-167, :187-189), JobMph 42, JobGrace 25, JobPayPerStud 7, JobTimeBonus 40, DuelMinDist 1100, DuelMaxDist 2200, DuelRange 120, CheckpointRadius 26",
+   "Config.STUDS_TO_MPH = 0.783 (Config.lua:9: 1 stud = 0.35 m = 2.86 studs/m) vs CarBuilder.STUDS_PER_METRE = 3.0 (CarBuilder.lua:68): the speedometer and the cars disagree by 5%",
+   "Config.Traffic (Config.lua:237-304): CarCount 28, HighwayCars 18, RivieraMax 90, RecycleDistance 700, RespawnMin 220, RespawnMax 520, StreetRecycle 260, LookAhead 70, MinSpeedMph 24, MaxSpeedMph 54. All are counted around the player (car scale). BusyZones (:278-281) use Monaco coordinates",
+   "Config.Police (Config.lua:1790-1830): SpeedCameras false, CameraRange 42, SpotRange 90, ZoneTrigger 90, ZoneRadius 70, LoseRange 300, ChaseMph 105-200. Cameras exist only on Monaco road names (Police.lua:78-99, offset right * 11.5)",
+   "Config.Chauffeur (Config.lua:2217-2224): CityMph 62, HighwayMph 125, ArriveFrom 260, PickupRange 90",
+   "The 'Yangon is east of x 25000' rule: Chauffeur.lua:261, EntranceRamp.lua:97, Houses.lua:448 (cutPlate), TravelSpots.lua:101, Minimap.lua:489, Towers.lua:975, DayCycle.lua:137 (YANGON_X 25000, blended over 1500)",
+   "Hard-coded Yangon positions in game code: Config.Spawn.YangonNear (30892,0,785) and YangonRadius 260 (Config.lua:196-197); Config.Service.Bay and Arrive (Config.lua:3036-3037); Config.Fuel fuel_yangon pumps, chargers and arrive (Config.lua:3104); WestLayout.places ygn_* (WestLayout.lua:234-239); ChallengeData.boardPos (31090.2, 44.77, 1254.5) (ChallengeData.lua:101); menu orbit (Main.client.lua:63-66, :344); MenuFocus (Main.server.lua:1191); telescope centre (30716,0,-2388) (Towers.lua:975)",
+   "StreamingTargetRadius = 640 (default.project.json:42): 400 m real today, 213 m at 3 studs/m",
+   "Venue builders in studs: Hotel CROWN_Y 435, SUITE_STEP 33.2, LH 36 (Hotel.lua:80-86). Towers heights 300/380/460 (Config.lua:2004-2006), LH 26, PH 30 (Towers.lua:100-101). Garages HALF 104 (Garages.lua:33). Plazas N 12 = 216/18 (Plazas.lua:20). House designs w 26-86 x d 40-62 (Config.lua:2082-2114)"
+  ],
+  "items": [
+   {
+    "path": "tools/yangon/city/geo.py",
+    "scale_assumption": "SPM = 1.6 (:14), OX 30000 (:17), BOX_05 (:20) in 1.6 studs, docstring (:3)",
+    "change_needed": "Set SPM to 3 (or to 2.857 to match STUDS_TO_MPH; see the open questions). BOX_05 becomes about (26207, -12129, 36478, 3174). Decide OX: with OX 30000, the whole-city box (lon 96.095-96.235) runs x 15,600-60,400 and z +-23,200. The west part falls below the x 25000 line, and over Monaco's old x range (11k-17.5k).",
+    "effort": "S",
+    "risk": "Every downstream tool reads geo.world. The x > 25000 checks below break for batches 1-3 unless OX moves east or the checks change."
+   },
+   {
+    "path": "tools/yangon/city/ground.py / heights.py / landmarks.py srtm_y",
+    "scale_assumption": "VS = 1.6 (ground.py:33); heights.py:255-257 level_m * 1.6; landmarks.py:1205-1219 srtm_y returns v * 1.6",
+    "change_needed": "One shared VS constant (3 for 1:1) in geo.py, used everywhere. Shwedagon's platform Y0 = 93 (58 m x 1.6) becomes 174.",
+    "effort": "S",
+    "risk": "If VS stays 1.6 while the plan goes to 3, the hills flatten to half their grade, and the landmarks' SV = 3 bodies stand on a squashed hill."
+   },
+   {
+    "path": "tools/yangon/city/landmarks.py",
+    "scale_assumption": "SV 3 with a per-landmark SH 2.0-2.6 (:8-10, :38, :917, :1309, :1341, :1421, :1458), Chaukhtatgyi '1.6 a metre' long (:1709). Centres and gy/y0/wl are hard-coded world studs at 1.6 (:915-922, :1288-1290, :1335-1340, :1411-1413, :1446-1448, :1499-1508, :1600, :1668-1669, :1710-1719). The Shwedagon platform and stair ends are in 1.6 studs. Small builders use 1.6-stud offsets (:446-457 and others)",
+    "change_needed": "Drop SH and use one scale (3) across and up, so the stupas take their true width. Work out each centre from landmarks.json lat/lon with geo.world instead of hard-coded numbers. Scale plat and stairs by 1.875 or rebuild them from OSM with the new SPM. Re-probe every gy/y0 from the new ground. Rebuild every landmark .glb (positions are baked into the mesh names KIND_id_cx_cy_cz_sx_sy_sz) and re-upload. Check sizes: the Shwedagon platform (about 880 x 940 studs at 3) stays under Roblox's 2048-stud MeshPart limit, but its triangle count per mesh must be checked again.",
+    "effort": "L",
+    "risk": "Hand-tuned looks (the SH 'touch taller' silhouettes) change, so each landmark needs a new critique pass against the photos. The 10 builders each have hand offsets."
+   },
+   {
+    "path": "tools/yangon/city/landmarks.json",
+    "scale_assumption": "lat/lon plus real facts (metres, floors) only",
+    "change_needed": "None. It is the scale-free source of truth; use it to place everything.",
+    "effort": "S",
+    "risk": "none"
+   },
+   {
+    "path": "tools/yangon/YangonLandmarks.luau (+ build/landmarks/*_data.luau)",
+    "scale_assumption": "Positions come from the mesh names; the data modules hold collision boxes, hill grid, pads and trees in world studs. The name plate is Size (34, 3.2, 0.2) (:429)",
+    "change_needed": "Logic unchanged. Regenerate every YangonLandmarkData_<id> from the new landmarks.py and re-place: L.build, L.collide, L.pads, L.terrain, L.trees. Retire or redo the YangonFar stand-in.",
+    "effort": "M",
+    "risk": "The hill terrain (L.terrain) may fight the batch terrain steps at the new heights. They must agree on VS."
+   },
+   {
+    "path": "tools/yangon/YangonFar.luau",
+    "scale_assumption": "Map box 30000 +- metres x 1.6 (:19-21), SHWEDAGON (31619, 0, 3821) (:24), K = 1.4 oversize 'to read from 2 km away' (:236)",
+    "change_needed": "New box from geo, new Shwedagon position. Look again at K: at real width the stupa reads larger, and the streaming radius shrinks to 213 m real, so the far stand-ins matter more.",
+    "effort": "S",
+    "risk": "low"
+   },
+   {
+    "path": "tools/yangon/city/landmark_mc_fit.py + build/landmarks/myanmar_centre/{layout.json, lot_rays.json, lot_fine.json, road_grid_rle.txt}",
+    "scale_assumption": "layout.json is a hand-made 1.6-stud plan around model origin (32600, -1350). lot_rays come from Studio raycasts against the car-scale roads; SETBACK 3, FLUSH 1.5, PLINTH_R 20, PLAZA 12, CHORD_MAX 64 (:24-30)",
+    "change_needed": "Scale layout.json by 1.875, or better, rebuild it from OSM through geo. The new origin is world (34875, -2531), or make it a parameter. Re-cast the lot rays against the new roads, or compute the lot offline from the v6 road data. With real-width roads the 'roads eat 13-23 studs' clipping should mostly disappear, so the real outline may fit unclipped. Re-tune PLINTH_R, PLAZA and CHORD_MAX in real metres x 3.",
+    "effort": "M",
+    "risk": "The podium front and plinth arc were tuned by critique. A new fit changes the corner plaza."
+   },
+   {
+    "path": "tools/yangon/city/mc3d.py",
+    "scale_assumption": "FLOOR 9 (3 m), POD_Z/POD_H 14/12 (4.7/4 m) (:31-35), GALLERY 8, coll thick 1.6, shop fit-out pieces (chairs, racks) in car-scale studs (:534-879), escalators between POD_Z (:1069-1079), atrium columns h 26 (:1161)",
+    "change_needed": "The plan grows by 1.875 (more shop units, wider atrium, longer galleries). Set floor heights to real figures: mall about 5-5.5 m = 15-16.5 studs, office tower about 3.6-4 m = 11-12 studs, hotel about 3.2 m = 9.6 studs. POD_Z, POD_H, POD_TOP and every per-floor loop follow. The fit-out pieces are already at player scale; spread them by count, not by scaling. Re-export through landmark_glb3d with a new --plane.",
+    "effort": "L",
+    "risk": "The walkable interior (escalators, bridges, collision) must be checked in Play again. The look bible's colours are unaffected."
+   },
+   {
+    "path": "tools/yangon/city/sedona3d.py + refs/sedona/{sedona_model.json, lot_fine.json, road_grid_rle.txt}",
+    "scale_assumption": "FLOOR 9 (:32), 12 + n x FLOOR towers (:203, :217, :238), OSM model and lot in 1.6 model studs with the same origin (:13)",
+    "change_needed": "Re-project the OSM outlines at SPM 3, re-raster the road grid and lot, and use real floor heights. The Inya Wing is 104 m real, so 29 floors x 9 = 273 studs is already close to 312; check against the real height. Rebuild the boundary wall, gates and guard hut along the new road edge.",
+    "effort": "M",
+    "risk": "Medium: the gates were placed where the drives meet the wall, so they move with the new drives."
+   },
+   {
+    "path": "tools/yangon/city/landmark_glb3d.py, landmark_mc_glb.py, geom3d.py, preview3d_blend.py, landmark_mc_blend.py, landmark_atlas.py",
+    "scale_assumption": "OX, OZ = 32600, -1350 (glb3d :23, mc_glb :22). The Blender docstring says plan 1.6 and floors 12 + 9 (mc_blend :10-11). The atlas is one row = one storey (FLOOR). geom3d works in studs (raster cell 4) with no scale constant",
+    "change_needed": "Make the model origin a parameter (or the new world point). The atlas row height follows the new floor height. geom3d needs no change.",
+    "effort": "S",
+    "risk": "low"
+   },
+   {
+    "path": "tools/yangon/LandmarkPlace3D.luau",
+    "scale_assumption": "Origin 32600 / -1350 hard-coded (:17, :181, :188, :209, :243, :278); M.BASE 28.8 (:97); plane p1 + p2 (x - 32600) + p3 (z + 1350)",
+    "change_needed": "Read the origin and base from the placement data (StringValues) instead of literals. Re-measure the paving plane on the new pavements.",
+    "effort": "S",
+    "risk": "A missed literal puts boards, signs or lights 1.9 times off."
+   },
+   {
+    "path": "tools/yangon/city/mall_life.py -> src/shared/YangonStreetLifeMall.lua",
+    "scale_assumption": "OX, OZ 32600 / -1350 (:22); gallery paths and window spots in world studs from mc3d's walk polygons (:72)",
+    "change_needed": "Re-run after the new mc3d.",
+    "effort": "S",
+    "risk": "low"
+   },
+   {
+    "path": "tools/yangon/d10_plots.py (shared loader for d11/d13/d14/d15/d17)",
+    "scale_assumption": "SPM 1.6 (:23), WALK 10, SETBACK 4.5, CLEAR 3, DECK_CLEAR 40, RING (29072, 1172.8, 124) (:24-28); reads ygn_roads_v3.json (:33) and ygn_road_design.json ground in metres x SPM (:36-37); landmark plots from the step-8 ygn_plots.json (Optima, MM Plaza, Novotel only)",
+    "change_needed": "Stop exec-ing d10's head. Write one shared site library that reads the new road data (v6, per-sample half and walk), the roundabout from data, the new real-geometry landmark footprints (Shwedagon, Myanmar Centre, Sedona and others) and the mesh-building plots. It is already stale today: v3 roads, and the landmark list misses Myanmar Centre and Sedona as built.",
+    "effort": "M",
+    "risk": "Every venue, house lot, race and job depends on it."
+   },
+   {
+    "path": "tools/yangon/d11_sites.py / d13_more_sites.py / d14_wide_lot.py / d17_service_lot.py",
+    "scale_assumption": "LOT 216, OFF 153 = half 32 + walk 10 + 3 + 108 (d11 :23, d13 :21, d14 :15). USED lists copy Config coordinates (d13 :20, d14 :18-23). Axis lots need the road within 15 degrees of east-west, 16-stud steps; picks are 240 apart; search only on 'Yangon Loop', 'New Road', 'University Avenue'",
+    "change_needed": "Keep the lots at 216 (or 304 / 80): the venues are built in player-scale studs. Make OFF per road (that road's half + walk + 3 + LOT/2). Read USED from Config, not copies. Widen the road list to the new main roads (Pyay, Kabar Aye, Inya ...). Keep the order bank, dropoff and gems together (gem loot cashes in at the bank's drop-off). Re-pick every site and write Config.YangonVenues.",
+    "effort": "M",
+    "risk": "At 3 studs/m a 216 lot is 72 m: it fits a real Yangon block much more easily than at 1.6 (135 m). Lots that were 176-188 studs from Optima become about 330-350 if the venues should stay as close in real metres."
+   },
+   {
+    "path": "src/shared/Config.lua YangonVenues / Spawn / Service / Fuel",
+    "scale_assumption": "Sites in world studs (:163-181); YangonNear (30892,0,785), YangonRadius 260 (:195-197); Service Bay and Arrive (:3036-3037); fuel_yangon pumps, chargers and arrive (:3104)",
+    "change_needed": "Regenerate from the site tools, YangonSites.fuel and CareVenues. Add more Yangon fuel stations: the map is 1.875x wider and 3.5x larger by area while a tank lasts the same real distance (Minutes 45/30). YangonRadius 260 can stay (player scale).",
+    "effort": "S",
+    "risk": "low once the tools are rerun"
+   },
+   {
+    "path": "tools/yangon/YangonSites.luau",
+    "scale_assumption": "LOT 216, MARGIN 8 (:20-21); prepare hides only Y.Buildings models (:61), terrain cut 160 up / fill 40 down (:82-86)",
+    "change_needed": "Lot logic unchanged. But the buildings are now mesh cells (YangonBuildingMeshes), not Y.Buildings, so prepare cannot clear a lot any more. Venue lots, house lots and the hub must be reserved in the plot generator (plots.py / d24_bmesh) before meshing. Re-prepare every pad from pads.json.",
+    "effort": "M",
+    "risk": "High if missed: venues would stand inside mesh buildings and collision boxes."
+   },
+   {
+    "path": "tools/yangon/d15_world.py -> src/shared/YangonWorld.lua + build/yangon_world/{lots.json, pads.json}",
+    "scale_assumption": "USED copies (:44-48); TIERS low/mid/high 60x72, 104x100, 120x130, WANT 10/13/22 (:134-136); checkpoints every 180 (:218-232); race picks with deck_dist > 110/120, ring > 175, Pyay race end - 1300 samples (:240-260); pavement points every 24 studs, deck 60, ring 160, landmark + 30 (:265-290); drops >= 900 apart with no lake between (:417); chips >= 300 apart (:430); two-pass Studio height probe",
+    "change_needed": "Rerun both passes on the new roads. Lot tiers can stay in studs. Scale the counts up for 3.5x the area (more lots, chips spaced about 550, checkpoint step about 250-300 so long races don't get 50+ rings). Give the Pyay race a length in studs instead of '1300 samples'. Scale the deck and roundabout keep-outs by 1.875 (the ramps grow with the real geometry). New race ids are only needed if a saved best time should reset (see open questions).",
+    "effort": "M",
+    "risk": "Race lengths grow about 1.875x (Optima Run 4836 -> about 9,070 studs, the whole loop 20,458 -> about 38,400). Saved best times (act.races keyed by id) become unbeatable or meaningless unless the ids change."
+   },
+   {
+    "path": "tools/yangon/d21_refit.py",
+    "scale_assumption": "WALK 10, SETBACK 3 (:19), reads v5 roads",
+    "change_needed": "Not needed after a full rerun of d15. Point it at the new roads or retire it.",
+    "effort": "S",
+    "risk": "low"
+   },
+   {
+    "path": "src/shared/WestLayout.lua",
+    "scale_assumption": "LOT from the old city's Config.City (:29-32); kerbFor puts the car at depth/2 + SidewalkWidth 10 + LaneWidth 16 x 1.5 (:117-125); Yangon places hard-coded (:234-239)",
+    "change_needed": "kerbFor must use the actual road's half and lane width (Yangon real lanes are about 10-10.5 studs, pavements 6-12). Better: snap to the nearest YangonLanes outer lane. Regenerate the 6 ygn_* places from the new lanes. LOT can stay 216.",
+    "effort": "S",
+    "risk": "Pull-up spots in the wrong lane, which affects the chauffeur and valet."
+   },
+   {
+    "path": "src/server/EntranceRamp.lua, src/server/Houses.lua (cutPlate), src/server/Chauffeur.lua, src/shared/TravelSpots.lua, src/client/Minimap.lua, src/server/Towers.lua, src/client/DayCycle.lua",
+    "scale_assumption": "Yangon = x > 25000: EntranceRamp :97, Houses :448, Chauffeur :261, TravelSpots :101, Minimap :489, Towers :975 (plus the centre 30716,0,-2388), DayCycle.YANGON_X 25000 blended over 1500 (:137, :367); EntranceRamp finds the road within 40 of the front edge, casts 14 up and 60 down, and skips parts named Kerb / Pavement",
+    "change_needed": "Replace every x > 25000 test with Config.activeMap(), or a Config.YangonBox / isYangon(pos) helper. With OX 30000 and SPM 3, batch 1 starts at x 15,600. Move the telescope centre (Inya Lake) to its new spot. EntranceRamp needs the new road meshes to keep the Kerb / Pavement names (or tags); the 40-stud reach still works if the pavement is under about 30 studs.",
+    "effort": "S",
+    "risk": "Silent failures: plates not cut, ramps reading the wrong roads, the chauffeur refusing rides, Yangon daylight not applied."
+   },
+   {
+    "path": "src/client/Main.client.lua, src/server/Main.server.lua, src/shared/ChallengeData.lua",
+    "scale_assumption": "Menu orbit shots (Main.client :63-66), orbit centre (30892,47,785), radius 150 / height 70 (:344-347); MenuFocus (30892,90,785) (Main.server :1191); boardPos (31090.2,44.77,1254.5) (ChallengeData :101)",
+    "change_needed": "Move them to the new Optima Werkz, hub and Shwedagon positions. Better: read them from YangonWorld or Config.",
+    "effort": "S",
+    "risk": "low"
+   },
+   {
+    "path": "Venue builders: src/server/Bank.lua, Dealership.lua, Customs.lua, Hotel.lua, Casino.lua (Legends Rewards), GemShowcase.lua, Towers.lua, Houses.lua/HouseBuilder, Plazas.lua, Garages.lua, Parking; tools/riviera/CareVenues.luau (Legends Service, fuel stations)",
+    "scale_assumption": "All built in studs around the cars' 3 studs/m: 216 lot (72 m at 3), Rewards 304, Realty 80, Service 152x150. Hotel crown at 435 with 33.2 suite floors (Hotel.lua:85-86); towers 300/380/460 tall (Config.lua:2004-2006); Plazas N 12 = 216/18; Garages HALF 104; houses 26-86 wide",
+    "change_needed": "No redesign is needed for scale: they are already player-scale and look right at 3 studs/m. Re-site them only (new Config.YangonVenues, pads, CareVenues frames, EntranceRamp drives). Two optional realism checks: the Legends Grand's suites at 435+ studs (145 m+) and The Crown at 460 (153 m) would be the tallest buildings in Yangon (the real tallest are about 100-110 m), and 33-stud suite floors are 11 m.",
+    "effort": "S",
+    "risk": "Low. The venues keep live parts and build themselves at start from WestLayout.rivieraSite / siteData."
+   },
+   {
+    "path": "src/shared/Config.lua Activities + src/server/Activities.lua + src/shared/ActivityData.lua",
+    "scale_assumption": "Medal times = length / mph (ActivityData :65-67, :165-167, :187-189); too-fast check length / 260 mph (Activities :136); JobMinDistance 900, JobMph 42, JobGrace 25, JobPayPerStud 7, JobTimeBonus 40 (Config :1862-1866, Activities :487-517); Duel 1100-2200 (:1884-1885); ChipCount 25",
+    "change_needed": "Medals scale by themselves. Races get about 1.9x longer: think about whether RaceRewards (9000/5000/2500) should rise with time spent, or make the races shorter. Jobs pay per stud, so a job pays about 1.875x more but takes as long longer: cash per minute stays the same, but raise JobMinDistance to about 1700 so short jobs aren't trivially close in real metres. Raise duel distances to about 2000-4000.",
+    "effort": "S",
+    "risk": "Economy balance (cash per minute) should be re-checked with the impatient-kid sim."
+   },
+   {
+    "path": "src/shared/Config.lua STUDS_TO_MPH + src/shared/CarBuilder.lua",
+    "scale_assumption": "STUDS_TO_MPH 0.783 = 2.857 studs/m (Config :8-9, CarPhysics :16) vs STUDS_PER_METRE 3.0 (CarBuilder :68)",
+    "change_needed": "Pick one. Either build the map at 2.857 studs/m (speedometer exact, cars 5% big), or keep the map at 3 and accept a speedometer 5% high, or change STUDS_TO_MPH to 0.7457. The last re-tunes every mph setting: traffic, police, chauffeur, drift, traps, GoldMph.",
+    "effort": "S",
+    "risk": "Changing STUDS_TO_MPH shifts car feel and every mph threshold."
+   },
+   {
+    "path": "src/shared/Config.lua Traffic / Police / Chauffeur / Pedestrians / YangonStreetLife",
+    "scale_assumption": "Player-relative studs: CarCount 28, HighwayCars 18, RecycleDistance 700, RespawnMin/Max 220/520, LookAhead 70, StopGap 4, FollowGap 16 (Config :238-297); police SpotRange, ZoneTrigger 90, ZoneRadius 70, LoseRange 300; chauffeur ArriveFrom 260, PickupRange 90",
+    "change_needed": "These are car / player scale and stay valid in studs. Look again at density: at 1.6, 700 studs was 437 m of real road, at 3 it is 233 m. The same car count per stud of lane means fewer real cars per km, which the owner may like for 'compact'. BusyZones are Monaco-only. Police speed cameras are Monaco-only (Police.lua:78-99, right * 11.5 assumes Monaco lanes) and off. If the owner wants them in Yangon, add Yangon placement on the new lanes.",
+    "effort": "S",
+    "risk": "low"
+   },
+   {
+    "path": "default.project.json StreamingTargetRadius",
+    "scale_assumption": "640 studs (:42) = 400 m real today, 213 m at 3",
+    "change_needed": "Big landmarks (Shwedagon, Sule) need Persistent models or far stand-ins (YangonFar) to be seen across the city. Consider a larger radius if memory allows.",
+    "effort": "S",
+    "risk": "Memory and loading (the place-size and unique-mesh limits are already hit)."
+   },
+   {
+    "path": "tools/yangon/d12_minimap.py -> src/client/YangonMapArt.lua; Config.Minimap",
+    "scale_assumption": "Tiles of 2048x1024 studs, 4x9 grid, map box (27937..33495, -6509..1733) (YangonMapArt :4-6); ZoomNear 0.32 px/stud (Config :2452-2457)",
+    "change_needed": "Redraw: batch 0.5 alone becomes about 10.3k x 15.3k studs. That means about 3.5x the tiles (about 126 at the same studs per tile), or larger tiles at lower resolution. The zoom is player scale, so keep it.",
+    "effort": "M",
+    "risk": "Image uploads (moderation delay)."
+   },
+   {
+    "path": "tools/yangon/d16_lamps.py, d20_green.py (venue-related only)",
+    "scale_assumption": "SPM 1.6 (d20 :26); lamps keep off the drive-ins of the venue lots",
+    "change_needed": "Rerun after the lots, so lamps and trees keep clear of the new drives.",
+    "effort": "S",
+    "risk": "low"
+   },
+   {
+    "path": "tools/world_test.luau, graph_test.luau, chauffeur_test.luau (Lune)",
+    "scale_assumption": "Build the map and check lanes, roads under lanes, nothing solid in a lane, chauffeur routes",
+    "change_needed": "Rerun after the lanes, YangonWorld and venues regenerate.",
+    "effort": "S",
+    "risk": "low"
+   }
+  ],
+  "pipeline_order": "1) Settle the constants first: SPM and VS in geo.py (copied into d10, d19, d20, d23, d6, d7, ground.py, heights.py, landmarks.srtm_y); OX and the 'is this Yangon' test (replace every x > 25000); STUDS_TO_MPH vs 3.0.\n2) Roads, terrain and lanes (other area) -> the new road JSON (half, walk, lanes per sample), decks, roundabout, YangonLanes*.lua. Everything below reads them.\n3) Reservations before buildings. The new shared site library (replacing the d10 head) reads the new roads plus the real landmark footprints (Shwedagon platform, Myanmar Centre, Sedona and others from geo.world(landmarks.json)). Then d11, d13, d14 and d17 pick the venue, tower, hotel, Rewards, Service and dropoff lots -> Config.YangonVenues and Config.Service. Then d15_world.py probe -> Studio height probe -> probe_out.txt -> d15 build -> YangonWorld.lua (house lots, races, dispatch/drops, chips, hub) + build/yangon_world/pads.json.\n4) Plots and mesh buildings (plots.py -> bprobe -> d24_bmesh) with all of these reserved: venue, house, hub and landmark lots are left empty (YangonSites.prepare can no longer move mesh cells).\n5) Landmarks. (a) Great landmarks: landmarks.py (geo centres, SH = SV, re-probed gy) -> .glb + <id>_data.luau -> Open Cloud upload -> YangonLandmarks.luau build / collide / pads / trees -> YangonFar stand-in. (b) Real-geometry landmarks: re-raster the lot from the new roads (lot_rays / road_grid / lot_fine) -> landmark_mc_fit.py -> mc3d.py and sedona3d.py (real floor heights) -> landmark_glb3d export with a new --plane measured in Studio -> upload -> LandmarkPlace3D (place, boards, signs, lights) + collide -> mall_life.py -> YangonStreetLifeMall.lua. The cells under them are rebuilt with d24_bmesh minus the dropped plots.\n6) In Studio: YangonSites.prepare(Config.YangonVenues.Sites + pads.json) to level the pads; YangonSites.fuel / CareVenues for the fuel stations and Legends Service -> Config.Fuel.Stations and Config.Service. The venues (bank, dealership, customs, hotel, Rewards, gems, towers, houses, hub) build themselves at start from siteData; EntranceRamp lays the drives.\n7) Lamps (d16) and green (d20) again, so they keep off the drives. Then the minimap (d12 -> upload -> YangonMapArt.lua).\n8) Code literals: WestLayout.places ygn_*, Config.Spawn.YangonNear, ChallengeData.boardPos, menu orbit and MenuFocus, Towers telescope centre, DayCycle.YANGON_X and the other x > 25000 tests, WestLayout.kerbFor lane maths. Gameplay numbers: JobMinDistance, duel distances, chip spacing, race rewards, fuel station count.\n9) Lune tests (world_test, graph_test, chauffeur_test), luau-lsp, Play test (spawn, every venue door and ramp, a race, a job, the chauffeur, fast travel to each ygn_ place), phone-size screenshots, and the quality-nerd check on the landmarks against the photos.",
+  "open_questions": [
+   "Exactly 3.0 studs/m (cars' STUDS_PER_METRE, speedometer 5% high) or 2.857 (matches STUDS_TO_MPH 0.783, cars 5% big)? Or change STUDS_TO_MPH to 0.7457 and re-tune every mph setting?",
+   "Vertical scale: terrain also at 3 studs/m (true hills: Shwedagon's platform at 174 instead of 93)? Real 1:1 says yes.",
+   "Where should Yangon's origin go? With OX 30000 the full city spans x 15.6k-60.4k and z +-23k, over Monaco's old x range. Move Yangon east (larger coordinates), keep it and drop the x > 25000 tests for Config.activeMap(), or recentre? Is Monaco ever coming back into the same place?",
+   "Venue buildings (bank, dealership, customs, Legends Grand hotel, Rewards, gem showcase, towers, houses, service, fuel) are already player-scale and only need new lots. Keep their designs as they are? Should the hotel (suites from 435 studs, about 145 m) and The Crown tower (460 studs, about 153 m) be cut to Yangon's real skyline (tallest about 100-110 m), or kept as fantasy landmarks?",
+   "Should venues stay as close together in real metres as now (then they move about 1.9x further apart in studs, about 330-350 from Optima), or stay as close in studs (a tighter real cluster)?",
+   "Races get about 1.9x longer (Optima Run about 9,000 studs; the full loop about 38,000). Keep the same routes with bigger rewards, or cut new shorter routes? Reset saved best times (new race ids) or keep the ids?",
+   "Real floor heights for the real-geometry landmarks: offices 3.6-4 m (11-12 studs), mall floors about 5-5.5 m (15-16.5), hotel 3.2 m (9.6)? Today FLOOR is 9 and the mall floors 14/12.",
+   "Should the great landmarks drop the 'a touch taller' SH silhouettes (Shwedagon SH 2.3 under SV 3) for true proportions (SH = SV = 3)? Their critique-approved look will change.",
+   "More Yangon fuel stations (one today on a map 3.5x the area) and more jobs and chips: how many?",
+   "Speed cameras and police are off and placed only on Monaco roads. Should the rebuild add Yangon placements?",
+   "Streaming radius 640 studs is only 213 m real at 3 studs/m. Raise it (memory is already near the limit), or rely on far stand-ins for the landmarks?"
+  ],
+  "notes": "The venue site tools are already stale before the rescale. d10_plots.py:33 still reads ygn_roads_v3.json, and its landmark list comes from the step-8 ygn_plots.json (Optima, MM Plaza, Novotel), so d11, d13, d14, d15 and d17 don't know the v5 roads or the real-geometry Myanmar Centre and Sedona. YangonSites.prepare clears only Workspace.Yangon.Buildings, but the buildings are now mesh cells, so it cannot clear a lot. Both should be fixed as part of the rebuild by reserving lots in the plot generator.\n\nThe great landmarks (landmarks.py) already use 3 studs/m up (SV 3) and squeeze across with SH 2.0-2.6, so at 3 studs/m they simplify to one scale. Myanmar Centre and Sedona use FLOOR 9 (3 m), which is close to player scale but under real floor heights.\n\nAll venue and house builders are in car-scale studs (216 lot = 72 m at 3 studs/m), so they need re-siting, not redesign. Gameplay numbers that are player-relative (traffic radii, police zones, pedestrians, street life, minimap zoom) stay valid. Map-size numbers grow by about 1.875 (race lengths, job distances, duel distances, chip spacing, fuel station spacing, minimap tiles). Medal times follow route length automatically (ActivityData.lua:65-67, :165-189), and job pay is per stud (Activities.lua:517), so cash per minute stays about the same.\n\nMost important code break: the 'Yangon is east of x 25000' tests in 7 files (listed in key_constants). With OX 30000 and SPM 3, batch 1 starts at x about 15,600. Nothing was edited."
+ },
+ {
+  "subsystem": "Performance and place budget for the Yangon rebuild at 3 studs per metre (1.875x per axis, 3.52x area)",
+  "key_constants": [
+   "SPM = 1.6 (tools/yangon/city/geo.py:14): studs per metre for every world() projection. It is the master switch for the rebuild.",
+   "OX = 30000.0, LON0/LAT0 = 96.14/16.82 (geo.py:14-17): the projection origin. At 3 studs/m the batch 0.5-3 union runs x 16,766..55,126 and z -14,396..18,932, so it crosses the 'x > 25000 = Yangon' tests.",
+   "BOX_05 = (27977, -6469, 33455, 1693) (geo.py:20): batch 0.5's box, 17.5 km2 (5,478 x 8,162 studs, becoming 10,271 x 15,304). BATCH_LL (geo.py:74) gives the batch outlines. Batches 1/2/3 add 22.8/18.1/27.9 km2, 86.2 km2 in all = 220.8 M studs2 now, about 776 M studs2 at 3 studs/m.",
+   "VS = 1.6 (tools/yangon/city/ground.py:33), plus SPM=1.6; VS=1.6 in d5_design.py:9 and d6_export.py:7: the vertical scale. It must become 3 too, or every grade flattens. Land max 92.7 studs becomes about 174, and Shwedagon's platform Y0 = 93.0 (landmarks.py:916) becomes about 174.",
+   "BLEND = 480 studs (ground.py:34): the seam fade onto batch 0.5. It is in studs and becomes about 900.",
+   "M.SPM = 1.6 (tools/yangon/YangonRoads.luau:32); RING_V 108.06 / R_CUT 94 / CORRIDOR 70 / EASE 128 (YangonRoads.luau:35-40); CORNER_T 16/22 (:753-754); DECK_CLEAR 9 (:1484); PIER_EVERY 8 samples, about 51 studs (:1486); BARRIER_SEG 6.4 (:1737).",
+   "HALF = 32, WALK = 10 (tools/riviera/Roads.luau:44-45) and HALF = 32 (RoadLines.luau:41): the default carriageway half and pavement width in studs.",
+   "LANE_W = {1: 10, 2: 16, 3: 13}, MED = 3, walk 6/4/3 (tools/yangon/city/roadnet.py:46, 34, 161). In real metres at 3 studs/m a lane is about 3.3-3.5 m = 10-10.5 studs, so 2-lane roads get NARROWER in studs. ROUND_FIT (Sule rmin 87, lane_w 10) is at roadnet.py:54. TAPER 48 / PAIR_MAX 45 are at roadnet.py:35-37.",
+   "Road mesh: CELL 256, BAND 3.2 (red/white kerb band geometry), GRID 16, PIER 40, VIADUCT 7, MAX_TRIS 17000 (tools/yangon/city/roadmesh.py:36-48). Today batches 1-3 are 8.6 M triangles in 12,803 unique meshes (build/city/roads_{1,2,3}_stats.json: 2.93 M/4,467, 2.08 M/3,428, 3.58 M/4,908). Kerb bands alone (KR+KW) are 1.63 M of those triangles.",
+   "BOX_LEN = 40 studs per road collision box (tools/yangon/city/roads.py:48); COLLIDE_CHARS 189000.",
+   "Streets: STEP 8, CELL 256 (tools/yangon/city/streets.py:27-28). Batch 0.5 streets are 1,192 meshes + 43,812 collision boxes.",
+   "Buildings: CELL 256, MAX_TRIS 17000 (tools/yangon/city/d24_bmesh.py:45-46). GF, FH = 12, 9 and BAY = 12 (tools/yangon/city/shells.py:44-46). At 3 studs/m, 12 + 9 is already real (4 m + 3 m), so building heights stay and footprints grow 3.5x. 12-stud bays become 4 m instead of 7.5 m, so wall quads per building go up about 1.875x.",
+   "Plot counts (build/city/plots_*.json): 05 = 19,151 buildings / 62,817 floors; 1 = 32,332 / 115,165; 2 = 21,911 / 75,611; 3 = 42,665 / 155,797. Total 116,059 buildings, 409k floors.",
+   "Terrain: RES 4, TILE 256, EXT 1600, RIVER_EXT reach 2700 / bank 320 / landing (30391, 11066, 420), FAR_SHORE 120 (tools/yangon/city/terrain.py:49-72); M.YB = -24, M.YTOP = 200 (tools/yangon/YangonTerrain2.luau:24-25); M.TOP = 64, M.LAKE_Y = 16*1.6 (tools/yangon/YangonTerrain.luau:15-17). Batch 1 is 5.10 M 4-stud columns (0.86 M water); batch 2 is 5.06 M (1.61 M water).",
+   "Bridges: CLEAR = 17 (already 3 studs/m: 5.5-6 m), WATER_CLEAR 10, and level_m * 1.6 (tools/yangon/city/heights.py:27-28, 255-257).",
+   "Lanes: STEP 24 (tools/yangon/d9_lanes.py:50; tools/yangon/city/roadlanes.py:29); TRIM 48, MIN_PIECE 72, RING_EXIT 114 (d9_lanes.py:53-57); MAX_LINK 180 (roadlanes.py:33). The lane Lua now totals about 2.1 MB: YangonLanes 187k + YangonLanes2 23k + B1 921k + B2 1,008k chars (B2_1..6 are untracked in git).",
+   "Details: PART_BUDGET = 25000 'x its area / batch 0.5's' (tools/yangon/city/details.py:87). The area is in STUDS, so at 3 studs/m it would ask for 3.5x the parts. Court/pitch sizes are coded as metres * 1.6 (details.py:528, 547-569, 620-621). Some items are already at car scale (FENCE_H 7.2 :646, YARD 5.5 :1739).",
+   "Green: SPACING 46, PARK_SPACING 24, OSM_SPACING 6 studs (tools/yangon/city/green.py:36). Tree counts grow 3.5x unless these are scaled.",
+   "Lamps: every 96 studs on main roads, 120 on streets, side swaps every 600 (tools/yangon/d16_lamps.py:8-10, 148). Poles: every 96 on streets and 72 on main roads, 80/64 in 0.5 (details.py:31, 53).",
+   "Street life: CAR_W 6, PITCH 17 (tools/yangon/city/streetlife.py:55-59) are already car-scale and real. CarRadius 260 / PedRadius 200 (src/shared/Config.lua:2153-2159).",
+   "StreamingTargetRadius = 640 (default.project.json:42); StreamingMinRadius 64 (build/plan/meshes.md:14). 640 studs is 400 m of view now and 213 m at 3 studs/m.",
+   "Fog/far Radius = 520 (src/shared/Config.lua:2440); YangonDetails LOD_RANGE 340 / CELL 256 / WIRE_MAX 95 (tools/yangon/YangonDetails.luau:59-61); WorldFx lights LodRange 160 / ShadowRange 80 (CLAUDE.md step 10 note).",
+   "CarBuilder.STUDS_PER_METRE = 3.0 (src/shared/CarBuilder.lua:68): the target scale.",
+   "DayCycle.YANGON_X = 25000, blended over 1500 studs (src/client/DayCycle.lua:137, 367). The other 'x > 25000 = Yangon' tests are Minimap.lua:489, Chauffeur.lua:261, EntranceRamp.lua:97, Houses.lua:448 and Towers.lua:975 (centre 30716, -2388).",
+   "Known budgets and incidents: 1,247,327 instances / 8,999 MB in Studio Edit with Monaco in (build/plan/meshes.md:13). Yangon was 287,500 parts (roads 185,800, buildings 65,900). Studio hit 15.3 GB in Play after batch 0.5 (of 32 GB), and 20 -> 11 GB in Edit once Monaco (372,820 parts) left (version 845). The cloud save failed with 'File too large' after batch 1 and saved again after 21 MB of data modules were deleted (version 842). 15,537 unique building meshes caused HTTP 429/503/504 and missing map pieces; batches 1/2 were parked in ServerStorage.YangonBatchesParked (version 868). Batch 0.5 loads cleanly with about 3,070 unique meshes (1,877 building + 1,192 street) plus 19,537 + 43,812 collision boxes."
+  ],
+  "items": [
+   {
+    "path": "tools/yangon/city/geo.py",
+    "scale_assumption": "SPM = 1.6 and OX = 30000 at :14-17; world()/lonlat() at :23-28; BOX_05 at :20 in 1.6 studs; BATCH_LL / batch_poly at :74-91 (lon/lat, scale-free).",
+    "change_needed": "Set SPM = 3.0. Re-derive BOX_05 from its lon/lat (or scale it about OX by 1.875). Choose a new origin: either OX so the west edge stays > 25000 (about 38,500, which puts the east edge near 63,600 studs), or recentre on 0 and replace every 'x > 25000' test with a map flag. Every Python tool that imports geo follows automatically.",
+    "effort": "S",
+    "risk": "Moving the origin changes every hard-coded Yangon coordinate in src/ and the tools. Coordinates past about 50k studs bring float precision and physics jitter for fast cars."
+   },
+   {
+    "path": "tools/yangon/city/ground.py; tools/yangon/d5_design.py:9; tools/yangon/d6_export.py:7; tools/yangon/city/terrain_study.py:38",
+    "scale_assumption": "VS = 1.6 (ground.py:33; d5/d6/terrain_study). BLEND = 480 studs (ground.py:34). d6 also has STEP 4.0 and LAKE 16.0.",
+    "change_needed": "VS = 3.0 everywhere (or geo.SPM), so grades stay real (EDGE_GRADE 5% etc.). BLEND to about 900. Batch 0.5's field 'ygn_road_design.json ground' must be re-exported at the new scale, because ground.py keeps it exactly inside BOX_05.",
+    "effort": "S",
+    "risk": "Ground heights grow 1.875x (land max about 174 studs). This feeds terrain voxel depth and the deck clearance logic."
+   },
+   {
+    "path": "tools/yangon/YangonRoads.luau + tools/riviera/Roads.luau + tools/riviera/RoadLines.luau (batch 0.5 part roads, step 3-5 pipeline d1..d8, d18, d23)",
+    "scale_assumption": "M.SPM 1.6 (:32); RING_V 108.06, R_CUT 94, CORRIDOR 70, EASE 128 (:35-40); CORNER_T 16/22 (:753); DECK_CLEAR 9, PIER_EVERY 8 (:1484-1486); Roads.luau HALF 32 / WALK 10 (:44-45). Batch 0.5 roads are 185,800 PARTS. Kerb bands are 3.2-stud parts and the 16,273 loop pavements plus 10,944 median parts all tile by length in studs.",
+    "change_needed": "Do not rebuild batch 0.5 as part roads at 3 studs/m: part count tracks length, so 185.8k parts would become about 350k. Move batch 0.5's main roads to the roadnet/roadmesh mesh pipeline (as batches 1-3), with invisible collision boxes, and keep only the roundabout and flyover logic, ported to roadmesh. If part roads must stay for the lanes/venues, scale the ring radii and corridors by 1.875 and use real lane widths (about 10.5 studs).",
+    "effort": "L",
+    "risk": "Decision 5 of the master plan (0.5 main roads stay part roads) is reversed. The venues, races, lanes, chauffeur and EntranceRamp all read Workspace.Yangon road folders by name and need re-pointing."
+   },
+   {
+    "path": "tools/yangon/city/roadnet.py",
+    "scale_assumption": "LANE_W {1:10, 2:16, 3:13} (:46), MED 3 (:34), walk 6/4/3 (:161), PAIR_MAX 45 / PAIR_MIN 6 / TAPER 48 (:35-37), ROUND_FIT Sule centre (33200, 8066), rmin 87, lane_w 10 (:54), UNPAIR_REACH 120 / UNPAIR_KEEP 300 (:486-487), STEP 8 (:33).",
+    "change_needed": "Lane widths in metres times SPM (3.3-3.5 m, so 10-10.5 studs; median and pavement from the real measure: pavement 2-3 m = 6-9 studs). Pairing and taper distances times 1.875. Re-project ROUND_FIT centres. STEP to about 15 to keep the same sample count per real km.",
+    "effort": "M",
+    "risk": "Narrower lanes in studs make cutting up traffic tighter (an NPC is about 6.6 studs wide). That is a gameplay call for the owner."
+   },
+   {
+    "path": "tools/yangon/city/roadmesh.py + street_glb.py + YangonRoadMeshes.luau",
+    "scale_assumption": "CELL 256 (:36), GRID 16 (:44), BAND 3.2 (:43), PIER 40 (:45), VIADUCT 7, MARGIN 28, RC 8, SEAM_EXT 40 (:747), MAX_TRIS 17000 (:48). Batches 1-3 are 12,803 unique meshes / 8.6 M triangles.",
+    "change_needed": "Keep the triangle count per real km constant: GRID about 30, PIER about 75, RC about 15. Kerb red/white bands become a tiled stripe texture on one kerb strip, not 3.2-stud geometry: that removes most of KR+KW's 1.63 M triangles. Make cells larger (about 1024 studs) and pack each cell to MAX_TRIS, so unique road meshes fall from about 45k (CELL 256 at 3 studs/m) to about 600-900. Set CollisionFidelity Box on the visual MeshParts.",
+    "effort": "M",
+    "risk": "Bigger cells stream in coarser chunks. Atomic cell models of about 1 km may pop in late at 213 m view."
+   },
+   {
+    "path": "tools/yangon/city/roads.py + streets.py + YangonStreetCollide.luau",
+    "scale_assumption": "BOX_LEN 40 (roads.py:48), SEAM_COLLIDE_EXT 12 (roads.py:47; streets.py:172), streets STEP 8 / CELL 256 (streets.py:27-28), SEAM_EASE 24/90, SEAM_EXT 40 (streets.py:169-171). Batch 0.5 streets have 43,812 boxes.",
+    "change_needed": "BOX_LEN about 75 (curvature-adaptive), so the collision box count stays about the same instead of 1.875x (about 82k for 0.5 streets alone). Seam and ease distances times 1.875.",
+    "effort": "S",
+    "risk": "Long boxes on curves leave gaps or bumps under the car ground rays. Check with the lane test."
+   },
+   {
+    "path": "tools/yangon/city/plots.py + shells.py + d24_bmesh.py + YangonBuildingMeshes.luau",
+    "scale_assumption": "d24 CELL 256 / MAX_TRIS 17000 / FILE_MESHES 100 (:45-48): one unique mesh set (F, R, G) per cell, so 15,537 meshes for 0.5+1+2. shells.py GF 12 / FH 9 / BAY 12 / PARAPET 2.4 (:44-46). plots.py RES 2 (raster), ROW_SETBACK 2.5 (:38-39). Batch 0.5 is 1.9 M triangles (1,877 MeshParts in 626 cells); the whole map is about 116k buildings. YangonBuildingMeshes.place (:91-112) does not set CollisionFidelity (cloned imported MeshParts keep hull physics data in the place file).",
+    "change_needed": "Replace per-cell unique meshes with a reused kit, as the existing rule says. Build about 200-400 archetype meshes in real metres (shophouse, walk-up, condo, villa, hall, shed: by floors and bay count; separate F / R / G), placed per building as 1-3 MeshParts and stretched at most about 15% via Size. The kit's mesh ids are fetched once, so the 429 problem disappears. Wall triangles per building go up about 1.875x (4 m bays) if bays stay at 12 studs. Raster RES to about 3.75 and setback times 1.875 (or in metres). Set CollisionFidelity = Box and CanQuery false on every visual MeshPart.",
+    "effort": "L",
+    "risk": "Instance count becomes about 1-3 per building: about 116k-350k MeshParts map-wide on the server (streamed on clients). Per-building colour on a TextureID mesh is untested (vertex colours live in the mesh, so colour variants multiply kit size)."
+   },
+   {
+    "path": "Far LOD (new) replacing City.Standins / Yangon.Far (tools/yangon/YangonFar.luau; client/Standins.lua)",
+    "scale_assumption": "StreamingMesh LOD drew black (CLAUDE.md 2026-10-30), so LevelOfDetail is Disabled (YangonBuildingMeshes.luau:86). meshes.md:95 proposed one low layer per 1024-stud block.",
+    "change_needed": "One Persistent low-poly mesh per about 1 km2 district (roof plus one facade band, about 10 triangles a building): about 90 meshes for 86 km2. That gives the horizon while StreamingTargetRadius stays modest. Re-run YangonFar at 3 studs/m.",
+    "effort": "M",
+    "risk": "Persistent content counts against phone memory at all times. Keep the whole layer under about 1.5 M triangles."
+   },
+   {
+    "path": "tools/yangon/city/terrain.py + YangonTerrain2.luau + YangonTerrain.luau",
+    "scale_assumption": "RES 4 / TILE 256 / EXT 1600 / RIVER_EXT 2700, 320, landing 420 / FAR_SHORE 120 / BANK_MAX 60 / WATER_NEAR 40 / MUD_NEAR 24 (terrain.py:49-72); YB -24, YTOP 200 (YangonTerrain2.luau:24-25); TOP 64, LAKE_Y 16*1.6 (YangonTerrain.luau:15-17). Batch 1 is 5.1 M columns, batch 2 5.06 M (1.61 M water).",
+    "change_needed": "Column count times 3.52 (whole map about 13.8 M becomes about 48.5 M 4-stud columns; batch 2 water 1.6 M becomes about 5.7 M), and fill depth grows with heights times 1.875. Fill only a thin skin (YB = local surface - 12 to 16 studs, not an absolute -24), raise YTOP to about 380, and times 1.875 every distance constant. For the wide rivers (Yangon River 1-2 km becomes 3-6k studs) consider terrain water only near the banks and a flat water mesh or part beyond.",
+    "effort": "M",
+    "risk": "Terrain is the largest unknown in save size. Measure the .rbxl after each district."
+   },
+   {
+    "path": "tools/yangon/city/heights.py",
+    "scale_assumption": "CLEAR 17 (already 3 studs/m), DECK 3, WATER_CLEAR 10, RAISE 1.5 (:26-31); water level_m * 1.6 (:255-257); BATCH_PIN_* (:491-494).",
+    "change_needed": "Replace the 1.6 at :255-257 with geo.SPM. WATER_CLEAR is in studs: use about 18 for 6 m. CLEAR stays.",
+    "effort": "S"
+   },
+   {
+    "path": "tools/yangon/d9_lanes.py + tools/yangon/city/roadlanes.py -> src/shared/YangonLanes.lua, YangonLanes2.lua, YangonLanesB1_1..5, YangonLanesB2_1..6 (B3 in build/city)",
+    "scale_assumption": "STEP 24, CLEAR 18, TRIM 48, MIN_PIECE 72, RING_EXIT 114 (d9_lanes.py:50-57); roadlanes STEP 24, CLEAR 6, MAX_LINK 180 (:29-33). About 2.1 MB of lane Lua already in the place (scripts count toward save size and server memory).",
+    "change_needed": "Regenerate all lanes from the new roads. STEP about 45 and the other distances times 1.875, so point count and Lua size stay about 2 MB for 0.5-2 (about 4 MB at an unchanged STEP). Keep the 'first = 189' offset rule after RivieraLanes. Drop the untracked B2 files when regenerating.",
+    "effort": "M",
+    "risk": "graph_test / world_test need re-running. Lane-graph splits at seams."
+   },
+   {
+    "path": "tools/yangon/city/details.py + YangonDetails.luau + YangonPoleLights.luau",
+    "scale_assumption": "PART_BUDGET 25000 scaled by STUD area (:87); courts/pitches metres*1.6 (:528-569, 620-621); pole spacing 96/72 (0.5: 80/64) (:31, 53); LOD_RANGE 340, CELL 256 (YangonDetails.luau:59-60). Batch 0.5 is about 23,700 parts for 6,036 items; batches 1/2/3 have 10,025/7,668/14,002 items.",
+    "change_needed": "Budget by real area (m2), not stud area, or the details ask for 3.5x the parts. Court and pitch sizes use geo.SPM. Pole and lamp spacing times 1.875 (in metres). Repeated props (stools, trishaws, bus stops, signs) move from parts to instanced kit meshes where possible. LOD_RANGE stays in studs (it is the player's view).",
+    "effort": "M",
+    "risk": "Detail items are the biggest part-count driver after roads (about 100k parts map-wide today)."
+   },
+   {
+    "path": "tools/yangon/city/green.py + d20_green.py + YangonGreen.luau; tools/yangon/d16_lamps.py + YangonLamps.luau",
+    "scale_assumption": "SPACING 46 / PARK 24 / OSM 6 studs (green.py:36); lamps 96 / 120 / 600 studs (d16_lamps.py:8-10, 148). 4,548 + 5,605 trees and 787 + 855 lamps in 0.5 and batch 1.",
+    "change_needed": "Spacings times 1.875 (keep the real spacing). Otherwise trees go about 3.5x (area) and lamps about 1.875x (length). Tree and lamp kits keep their own size (already car-scale: check the tree models against 3 studs/m).",
+    "effort": "S"
+   },
+   {
+    "path": "Landmarks: tools/yangon/city/landmark_mc_fit.py, mc3d.py (FLOOR 9 :31), sedona3d.py (FLOOR 9 :32), landmark_mc_blend.py (FLOOR 9 :33, plan 1.6), landmarks.py (pl 1.6 :446, Y0 93 :916, v*1.6 :1205-1219, figure '1.6 a metre, up 2.4' :1709), LandmarkPlace3D.luau M.BASE 28.8 (:97)",
+    "scale_assumption": "Footprints come from geo.world at 1.6, clipped to the lot the car-scale roads leave (13-23 studs eaten). Heights use FLOOR 9 (already 3 m). Many props are hand-sized in studs.",
+    "change_needed": "Re-run fit, then the 3D script, then glb3d export, upload and place with SPM 3. Footprints grow 1.875x with real roads, so clipping should mostly vanish. Hard-coded 1.6 in landmarks.py goes to geo.SPM. Interior props (shop fit-outs, escalators) are already near 3 studs/m. Myanmar Centre is about 40-53k triangles and Sedona 28k, as group meshes (fine).",
+    "effort": "M",
+    "risk": "Shwedagon at true size (platform about 174 studs, stupa about 99 m = 297 studs) is a large Persistent or always-visible mesh."
+   },
+   {
+    "path": "src/shared/Config.lua",
+    "scale_assumption": "YangonVenues.Sites (:165-170+), Spawn.YangonNear (30892, 0, 785) / YangonRadius 260 (:196-197), Service Bay / Arrive (:3036-3037), fuel_yangon pumps (:3104), YangonStreetLife radii (:2153-2159), far/fog Radius 520 (:2440).",
+    "change_needed": "All Yangon positions are regenerated from the new lots (d11/d13/d14/d17/d21, then YangonSites.prepare), not scaled. A first guess for a point: P' = O + (P - O) * 1.875 in x/z, with y = new ground + old height over ground, then snap to the new road. Fog radius to about 900. The street-life radii can stay.",
+    "effort": "M"
+   },
+   {
+    "path": "src/shared/YangonWorld.lua (d15_world.py), src/shared/WestLayout.lua:234-238 (ygn_* fast travel), src/shared/YangonStreetLife*.lua (streetlife.py), YangonStreetLifeMall.lua (mall_life.py), src/client/YangonMapArt.lua (d12_minimap.py)",
+    "scale_assumption": "All world-stud coordinates at 1.6 studs/m (houses, races, chips, hub, fast travel, parked cars and people, minimap tiles and bounds).",
+    "change_needed": "Regenerate each from the new data: d15 probe -> Studio heights -> build; streetlife and mall_life; minimap tiles re-uploaded (27+ tiles; at 3.5x area expect about 3.5x tiles at the same pixel per stud, or keep pixels per metre).",
+    "effort": "M"
+   },
+   {
+    "path": "src/client/DayCycle.lua:137,367; src/client/Minimap.lua:489; src/server/Chauffeur.lua:261; src/server/EntranceRamp.lua:96-97; src/server/Houses.lua:447-448; src/server/Towers.lua:975",
+    "scale_assumption": "'Yangon lies east of x 25000' and Towers' centre (30716, 0, -2388).",
+    "change_needed": "At 3 studs/m about OX = 30000 the map's west edge is about x 16,800 (Monaco's sites sit at x 13,600-16,600). Either shift OX so the whole map stays east of 25000, or replace the x tests with Config.activeMap() / a map attribute. Recompute the Towers centre.",
+    "effort": "S",
+    "risk": "Silent wrong-map lookups (ramps, house plates, daylight) if missed."
+   },
+   {
+    "path": "default.project.json:41-42 (StreamingTargetRadius 640) and the place's Workspace streaming settings",
+    "scale_assumption": "640 studs = 400 m of view at 1.6 studs/m; it becomes 213 m at 3 studs/m (about 3.9 s ahead at 200 km/h).",
+    "change_needed": "Raise to about 960-1024 (320-340 m) and StreamingMinRadius to about 128. Content per stud2 falls about 3.5x, so 1024 at 3 studs/m streams about the same building and instance count as 640 does now. Pair it with the far-LOD layer.",
+    "effort": "S",
+    "risk": "Phone memory: test on a phone-class client (Studio device emulation plus Stats) at each district."
+   },
+   {
+    "path": "Place hygiene: ServerStorage.YangonBatchesParked, YangonBuildings_step8, YangonBuildings_realparts, YangonReplaced_MC/_SD, YangonScraps, YangonData_v3backup, MonacoKit, ClaudeTools data strings",
+    "scale_assumption": "Parked 1.6-scale content still sits in the place (memory and save size). The save failed until 21 MB of modules were removed.",
+    "change_needed": "Before the rebuild, save these to .rbxm files on disk (as Monaco was) and remove them from the place; this is the owner's call. Keep the rule: data modules are deleted right after use. Measure .rbxl size (File > Save to File) as the baseline.",
+    "effort": "S",
+    "risk": "Deleting backups is restructuring: ask the owner first."
+   }
+  ],
+  "pipeline_order": "0. Prep (owner OK needed): save the parked/backups (YangonBatchesParked, YangonBuildings_step8/_realparts, YangonReplaced_*, YangonScraps, YangonData_v3backup) to .rbxm on disk and remove them. Record the baseline place size, Edit/Play memory and instance count. Pick the origin (OX) and whether the new map is built in a separate dev place.\n1. geo.py SPM=3 (+ origin); ground.py / d5 / d6 / terrain_study VS=3; YangonRoads.SPM, YangonTerrain LAKE_Y; all the stud constants above changed to metres x SPM.\n2. Data that needs no re-run (lon/lat or metres): build/osm_ygn (e0_extract), build/city/dem_ygn.json (dem_fetch), lane_survey_osm.json, look_bible.json, atlases, Blender/kit sources.\n3. ground.py field (reads DEM -> heights at the new VS; re-export batch 0.5's ground in place of ygn_road_design.json).\n4. Roads: roadnet.py (all roads, batch 0.5 included, if the 0.5 part roads are retired; otherwise d18 -> d23 -> YangonData.Roads* -> YangonRoads.step5) -> heights.py (decks, clearance) -> roadmesh.py / street_glb.py -> Open Cloud upload -> YangonRoadMeshes.place + roads.py / YangonStreetCollide collision boxes. Reads: osm_ygn, ground. Writes: roads_<tag>/*.glb, *_assets.json, RoadCollide_* modules.\n5. Terrain: terrain.py (reads the road beds/decks + ground + water) -> Terrain<tag>_* modules -> YangonTerrain2.spawn (delete the modules after).\n6. Lanes: d9_lanes.py (main) + roadlanes.py (batches) -> src/shared/YangonLanes*.lua (first = 189 after RivieraLanes) -> lune graph_test / world_test.\n7. Plots: network.py -> plots.py <tag> -> bprobe (YangonProbe2 in Studio, join_pages) -> kit placer (replacing d24_bmesh per-cell meshes) -> YangonBuildingMeshes.place + collide. Reads roads (corridors) and ground.\n8. Landmarks: landmark_mc_fit (raycasts on the NEW roads) -> mc3d / sedona3d / landmarks.py -> landmark_glb3d -> upload -> LandmarkPlace3D (+ YangonBuildingMeshes.collide); rebuild the replaced cells.\n9. Green (green.py / d20 -> YangonGreen), lamps (d16 -> YangonLamps), details (details.py -> YangonDetails -> YangonPoleLights).\n10. Lots and venues: d21_refit -> d11 / d13 / d14 / d17 sites -> YangonSites.prepare / fuel -> Config.YangonVenues.Sites, Spawn, Service, fuel pumps -> d15_world probe/build -> YangonWorld.lua; WestLayout.places ygn_*; Towers centre; EntranceRamp / Houses / DayCycle x-tests.\n11. streetlife.py + mall_life.py -> YangonStreetLife*.lua.\n12. Far LOD / YangonFar (Persistent, per district).\n13. d12_minimap -> upload -> YangonMapArt.lua.\n14. Test (Play, phone emulation, night), measure place size, memory and unique-mesh count, save, notes.\nRepeat steps 3-14 per district (below), so the place saves after each.\n\nDistrict order (each step saved and measured before the next):\n(a) Pilot: the Kamayut / Hledan / Inya-south core, about 2 x 2 km real (Myanmar Centre, Sedona, Optima, spawn, venues, races). At 3 studs/m that is about 6,000 x 6,000 studs, about the size of today's whole batch 0.5 core.\n(b) Rest of batch 0.5 (Bahan, Mayangon, the lake ring).\n(c) Batch 1 (west to the Hlaing, Shwedagon at true size).\n(d) Batch 2 downtown: densest, 70-85% cover, most landmarks; heaviest per km2.\n(e) Batch 3 east: largest (27.9 km2, 427 km of 1+1 streets); it may stay far-LOD plus main roads only if the budget runs out.\n\nBudget gates per step: unique mesh assets map-wide at most about 3,000 (batch 0.5's 3,070 loaded cleanly; 15,537 did not); Studio Play at most 14 GB; the place file well under the size at which version 842 failed (measure that size first).\n\nReuse vs regenerate:\n- Reusable unchanged: OSM extract, DEM, lane survey, the look bible and atlases, the 3D landmark scripts (re-run), car / street-life / tree / lamp kit models (already car-scale), DayCycle Yangon colours, PlayLight / Swatches.\n- Reusable by scaling about the origin (P' = O + 1.875 (P - O) in x/z, y re-dropped to the new ground) only as first guesses, re-snapped after: point data (venue sites, spawn, fast travel, race checkpoints and chips, pumps, Service bay).\n- NOT valid to scale: roads (widths would double to half 60), buildings (heights already right; bays and texture rows would stretch), terrain (voxel grid), collision boxes, lanes (re-sample), or any uploaded mesh asset. All of these must be regenerated at SPM 3.",
+  "notes": "Estimates for 1.875x per axis (3.52x area), assuming constants are moved to metres x SPM unless stated:\n- Map extent: the batch 0.5-3 union grows from 20.5k x 17.8k studs to about 38.4k x 33.3k studs (x 16,766..55,126 about OX 30000). Area grows from 221 M to about 776 M studs2.\n- Road meshes: road surface per km grows only about 1.4x (real lanes make roads narrower in studs while length grows 1.875x), but every length-tiled constant (GRID 16, BAND 3.2, STEP 8) gives 1.875x triangles if left. Batches 1-3 would go from 8.6 M to about 16 M triangles and 12.8k to about 45k unique meshes at CELL 256. With metre constants, texture kerbs and about 1 km cells: about 7-8 M triangles in about 600-900 meshes.\n- Building count is unchanged (116k). Footprints in studs grow 3.5x and heights stay (12/9 per floor is already 4 m / 3 m), so 'too tall and thin' goes away. Wall triangles per building grow about 1.875x (12-stud bays become 4 m). The whole map moves from about 11.6 M to about 20 M building triangles, streamed. Unique-mesh count must come from a kit, not cells.\n- Terrain: 4-stud columns grow from about 13.8 M to about 48.5 M, and fill depth about 1.875x with an absolute YB -24: the biggest save-size unknown. Use a thin skin.\n- Collision parts: building boxes are scale-independent (about 20.5k for 0.5, 33.8k for B1). Street/road boxes grow 1.875x unless BOX_LEN goes to about 75.\n- Lanes: about 2.1 MB of Lua becomes about 4 MB at STEP 24, or stays about 2 MB at STEP 45.\n- Details and trees: 3.5x if budgets and spacings stay in studs (details.py:87, green.py:36): must be converted.\n- Memory and phones: per stud2 the map gets about 3.5x sparser, so at the same StreamingTargetRadius clients hold less. Raising it to about 1024 keeps today's real view (about 340 m) at about today's instance load. The server and Studio Play still hold the whole map: whole-map instances, not radius, are the Studio 15.3 GB problem. Converting the 185.8k batch 0.5 road parts to meshes is the largest single saving.\n- Load time on phones is driven by the number of unique asset ids requested (the 429 throttling) more than by triangles. Kit instancing plus about 1 km cells keeps it bounded.\n- Found but not fixed: YangonBuildingMeshes.place (tools/yangon/YangonBuildingMeshes.luau:91-112) and YangonRoadMeshes never set CollisionFidelity = Box on the visual MeshParts (YangonLandmarks.luau:119 does). Imported hull/physics data is then saved in the place for every visual mesh: a likely save-size lever even before the rescale.\n- The vault master plan's Decision 1 ('Scale stays 1.6 studs a metre') and Decision 5 (0.5 main roads stay part roads) are now obsolete and should be updated in the plan note.\n- All of this is read-only research. Exact Roblox limits (place file cap, server memory cap) were not verified here.",
+  "open_questions": [
+   "Origin: shift OX so the whole 3-studs/m map stays east of x 25000 (then the east edge is near 63,600 studs), or recentre Yangon near 0 and replace the six 'x > 25000' checks with a map flag? Bringing Monaco back from file would then need its own offset.",
+   "Build the new-scale Yangon in a separate dev place (or a far offset) and switch over once the pilot district plays, or replace the live 1.6 map district by district? The two overlap in coordinates, so they cannot both stand in the same Workspace.",
+   "May the parked and backup folders (YangonBatchesParked, YangonBuildings_step8 / _realparts, YangonReplaced_*, YangonScraps, YangonData_v3backup) be saved to .rbxm files on disk and removed from the place before the rebuild?",
+   "Lane width: real 3.3-3.5 m (10-10.5 studs) as asked ('1:1'), or slightly wider (for example 12 studs) so cutting up traffic stays playable? This is a gameplay versus accuracy trade.",
+   "Batch 0.5's main roads: may they move from part roads to the mesh road pipeline (as batches 1-3), reversing master-plan decision 5? That is the biggest part and memory saving.",
+   "Batch 3 (east, 28 km2): full detail, or main roads plus far-LOD only if the place budget runs out?",
+   "Wide rivers (Hlaing, Yangon River, 1-2 km = 3-6k studs): terrain water all the way across, or terrain near the banks and a flat water surface beyond?",
+   "Target devices: what is the lowest phone the game must run on (memory about 2-3 GB)? That sets StreamingTargetRadius and the Persistent far-LOD budget.",
+   "What place file size triggered 'File too large' (Save to File of the failing version)? That number is needed to set the per-district save budget."
+  ]
+ }
+]
