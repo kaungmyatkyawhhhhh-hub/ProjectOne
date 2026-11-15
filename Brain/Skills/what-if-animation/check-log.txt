@@ -1,0 +1,70 @@
+== pip install ==
+Requirement already satisfied: numpy in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (2.5.5)
+Requirement already satisfied: pillow in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (13.0.0)
+Requirement already satisfied: piper-tts in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (1.8.0)
+Requirement already satisfied: faster-whisper in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (1.2.1)
+Requirement already satisfied: onnxruntime<2,>=1 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from piper-tts) (1.32.0)
+Requirement already satisfied: pathvalidate<4,>=3 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from piper-tts) (3.3.1)
+Requirement already satisfied: flatbuffers in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from onnxruntime<2,>=1->piper-tts) (25.12.19)
+Requirement already satisfied: packaging in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from onnxruntime<2,>=1->piper-tts) (26.3)
+Requirement already satisfied: protobuf>=4.25.8 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from onnxruntime<2,>=1->piper-tts) (7.36.2)
+Requirement already satisfied: ctranslate2<5,>=4.0 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from faster-whisper) (4.9.0)
+Requirement already satisfied: huggingface-hub>=0.21 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from faster-whisper) (2.4.0)
+Requirement already satisfied: tokenizers<1,>=0.13 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from faster-whisper) (0.23.3)
+Requirement already satisfied: av>=11 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from faster-whisper) (19.0.2)
+Requirement already satisfied: tqdm in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from faster-whisper) (4.70.1)
+Requirement already satisfied: pyyaml<7,>=5.3 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from ctranslate2<5,>=4.0->faster-whisper) (6.0.3)
+Requirement already satisfied: click<9.0.0,>=8.4.2 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from huggingface-hub>=0.21->faster-whisper) (8.5.0)
+Requirement already satisfied: filelock>=3.10.0 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from huggingface-hub>=0.21->faster-whisper) (4.2.10)
+Requirement already satisfied: fsspec>=2023.5.0 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from huggingface-hub>=0.21->faster-whisper) (2026.9.0)
+Requirement already satisfied: hf-xet<2.0.0,>=1.6.0 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from huggingface-hub>=0.21->faster-whisper) (1.8.0)
+Requirement already satisfied: httpx2<3,>=2.0.0 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from huggingface-hub>=0.21->faster-whisper) (2.16.0)
+Requirement already satisfied: typing-extensions>=4.1.0 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from huggingface-hub>=0.21->faster-whisper) (4.16.0)
+Requirement already satisfied: anyio>=4.10 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from httpx2<3,>=2.0.0->huggingface-hub>=0.21->faster-whisper) (4.16.0)
+Requirement already satisfied: httpcore2==2.16.0 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from httpx2<3,>=2.0.0->huggingface-hub>=0.21->faster-whisper) (2.16.0)
+Requirement already satisfied: idna>=3.18 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from httpx2<3,>=2.0.0->huggingface-hub>=0.21->faster-whisper) (3.20)
+Requirement already satisfied: truststore>=0.10 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from httpx2<3,>=2.0.0->huggingface-hub>=0.21->faster-whisper) (0.10.5)
+Requirement already satisfied: h11>=0.16 in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from httpcore2==2.16.0->httpx2<3,>=2.0.0->huggingface-hub>=0.21->faster-whisper) (0.16.0)
+Requirement already satisfied: colorama in C:\Users\kaung\AppData\Local\Programs\Python\Python312\Lib\site-packages (from tqdm->faster-whisper) (0.4.6)
+== import check ==
+OK python packages 2.5.5 13.0.0
+== node ==
+v26.13.1
+== studio ==
+what-if-studio@1.0.0 C:\Users\kaung\what-if-studio
++-- @remotion/bundler@4.0.530
+| +-- @remotion/studio-shared@4.0.530
+| | `-- remotion@4.0.530 deduped
+| +-- @remotion/studio@4.0.530
+| | +-- @remotion/canvas@4.0.530
+| | | `-- remotion@4.0.530 deduped
+| | +-- @remotion/codemods@4.0.530
+| | | `-- remotion@4.0.530 deduped
+| | +-- @remotion/media@4.0.530
+| | | `-- remotion@4.0.530 deduped
+| | +-- @remotion/paths@4.0.530
+| | | `-- remotion@4.0.530 deduped
+| | +-- @remotion/web-renderer@4.0.530
+| | | `-- remotion@4.0.530 deduped
+| | +-- @remotion/zod-types@4.0.530
+| | | `-- remotion@4.0.530 deduped
+| | `-- remotion@4.0.530 deduped
+| +-- @remotion/timeline-utils@4.0.530
+| | `-- remotion@4.0.530 deduped
+| `-- remotion@4.0.530 deduped
++-- @remotion/cli@4.0.530
+| +-- @remotion/media-utils@4.0.530
+| | `-- remotion@4.0.530 deduped
+| +-- @remotion/player@4.0.530
+| | `-- remotion@4.0.530 deduped
+| +-- @remotion/studio-server@4.0.530
+| | `-- remotion@4.0.530 deduped
+| `-- remotion@4.0.530 deduped
++-- @remotion/fonts@4.0.530
+| `-- remotion@4.0.530 deduped
++-- @remotion/google-fonts@4.0.530
+| `-- remotion@4.0.530 deduped
++-- @remotion/renderer@4.0.530
+| `-- remotion@4.0.530 deduped
+`-- remotion@4.0.530
+

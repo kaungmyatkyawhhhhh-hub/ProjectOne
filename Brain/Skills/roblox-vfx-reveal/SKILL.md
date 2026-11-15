@@ -9,7 +9,7 @@ Big moments sell the game in play and in TikToks. The two most-watched Roblox de
 
 | File | Use |
 |---|---|
-| `scripts/VFXKit.luau` | Copy into ReplicatedStorage. Client-only effects: `impactFrame`, `shake`, `fovPunch`, `flash`, `shockwave`, `starburst`, `debris`, `titleCard`, `heavyHit`, `Tiers`, `reveal`, plus `oklch` colours. Tested 16 Nov in Studio Play. |
+| `scripts/VFXKit.luau` | Copy into ReplicatedStorage. Client-only effects: `impactFrame`, `shake`, `fovPunch`, `flash` (with a `peak` for gentle washes), `uiBurst` (UI rays over menus/ViewportFrames), `shockwave`, `starburst`, `debris`, `titleCard` (optional centre), `heavyHit`, `Tiers`, `reveal`, `overlay()`, plus `oklch` colours. Tested 16 Nov in Studio Play; live in MM Outfit Catalog. |
 
 ## 1. Plan the moment first
 Write one line per moment: **event | what the player must feel | length | who sees it (self / everyone) | how often**.
@@ -64,9 +64,28 @@ Order matters. The hit lands on frame 0:
   3–6 s, and skippable after the first view.
 - **Announce rare drops to the server:** a chat/system line plus a small toast for others. That's social proof and a reason to keep rolling.
 
+## 4b. Store and shop moments (MM Outfit Catalog, 16 Nov: shipped and tested)
+- **"Random" is a roll.** Turn a plain random pick into a ~0.85 s name spin that slows like a wheel (tick on each step), lands with `uiBurst` + the pick's ID, then goes. Tap anywhere skips it; with reduced motion it lands instantly. Keep the whole thing under ~1.4 s: it's a shortcut, not a gamble.
+- **Purchase celebration:**
+  - a gentle wash (`flash(color, 0.05, 0, 0.4, 0.84)`, so peak 0.84, not solid white);
+  - `uiBurst` over the product;
+  - `titleCard("Purchased", …)`.
+
+  In a shop the **product stays the focal point**:
+  - the card sits over the product's middle, not over its title;
+  - **size it in pixels** (height ≈ 26% of the screen, clamped 130–190 px). A scale-only card made its small lines ~11 px on a 338 px tall phone.
+- **Celebrate only real purchases.** Check the server's purchase signal:
+  - it may also fire for "already owned" taps; tag those and skip them;
+  - `PromptBulkPurchase` checkouts may not fire it at all; fire it from wherever the purchase is recorded;
+  - de-duplicate on the client (one celebration per 2 s): single purchases often arrive twice (PromptPurchaseFinished + the record step).
+- **Over UI, use UI effects.** World parts (starburst, shockwave) are hidden behind a full-screen ViewportFrame stage or a menu. Use `uiBurst` (rays + glow in the overlay ScreenGui) there.
+
 ## 5. Verify in Studio (the loop)
 1. Start Play. In the Client datamodel, put the kit in ReplicatedStorage, `require` it, and call each effect on the local character.
    - Over MCP, create a ModuleScript and set its `Source`. `loadstring` is disabled in the client.
+   - Studio's HttpService can't fetch from localhost (the MCP allowlist blocks it), so paste the file through `multi_edit`. Then compare `#Source` with the local file's byte size.
+   - To test a purchase without buying, fire the purchase RemoteEvent from the **Server** datamodel to the player (`FireClient(player, id, true, "recorded", 2, 120)`).
+   - To run the UI audit on many devices in one Play session, put it in a temporary `ReplicatedStorage.ZZ_UIAudit` module that returns a function. Switch devices mid-Play with `StudioDeviceSimulatorService:SetDeviceAsync` from the **Client** datamodel (the Edit datamodel isn't available in Play), and delete the module afterwards.
 2. To screenshot short effects, call them with long durations (impact 4 s, starburst time 6, title hold 5), then `screen_capture`. Real durations are too short to catch.
 3. Check:
    - silhouettes read;

@@ -3,22 +3,22 @@ $ErrorActionPreference = 'Continue'
 Start-Transcript -Path (Join-Path $PSScriptRoot 'setup-log.txt') -Force | Out-Null
 function Refresh { $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User') }
 function Have($c) { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
-function Winget($id) { Write-Host "Installing $id ..."; winget install --id $id -e --accept-source-agreements --accept-package-agreements --silent; Refresh }
+function Install-Pkg($id) { Write-Host "Installing $id ..."; winget.exe install --id $id -e --accept-source-agreements --accept-package-agreements --silent; Refresh }
 
 Write-Host "`n== Node.js 18+ =="
 $nodeOk = $false
 if (Have node) { $v = (node -v) -replace 'v',''; Write-Host "found node $v"; $nodeOk = ([int]($v.Split('.')[0]) -ge 18) }
-if (-not $nodeOk) { Winget 'OpenJS.NodeJS.LTS' }
+if (-not $nodeOk) { Install-Pkg 'OpenJS.NodeJS.LTS' }
 
 Write-Host "`n== ffmpeg + ffprobe =="
-if ((Have ffmpeg) -and (Have ffprobe)) { Write-Host 'found ffmpeg' } else { Winget 'Gyan.FFmpeg' }
+if ((Have ffmpeg) -and (Have ffprobe)) { Write-Host 'found ffmpeg' } else { Install-Pkg 'Gyan.FFmpeg' }
 
 Write-Host "`n== Python 3.9+ =="
 $py = $null
 foreach ($c in @('python','py')) {
   if (Have $c) { $out = & $c -c "import sys;print(sys.version_info>=(3,9))" 2>$null; if ($out -eq 'True') { $py = $c; break } }
 }
-if (-not $py) { Winget 'Python.Python.3.12'; $py = 'python' }
+if (-not $py) { Install-Pkg 'Python.Python.3.12'; $py = 'python' }
 Write-Host "using $py :" (& $py --version)
 
 Write-Host "`n== Python packages (numpy, Pillow, piper-tts, faster-whisper) =="

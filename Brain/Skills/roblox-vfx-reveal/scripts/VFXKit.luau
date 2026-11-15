@@ -101,8 +101,11 @@ function VFXKit.fovPunch(delta: number?, back: number?)
 end
 
 ------------------------------------------------------------------ screen
+VFXKit.overlay = overlayGui
+
 -- Full-screen flash. White = power, rarity colour = reveal. Short in, short hold, longer out.
-function VFXKit.flash(color: Color3?, inT: number?, hold: number?, outT: number?)
+-- peak = the most opaque it gets (0 = solid; 0.7 = a gentle wash for frequent moments like purchases).
+function VFXKit.flash(color: Color3?, inT: number?, hold: number?, outT: number?, peak: number?)
 	local f = Instance.new("Frame")
 	f.Name = "Flash"
 	f.Size = UDim2.fromScale(1, 1)
@@ -113,7 +116,7 @@ function VFXKit.flash(color: Color3?, inT: number?, hold: number?, outT: number?
 	f.Parent = overlayGui()
 	local i, h, o = inT or 0.05, hold or 0.05, outT or 0.35
 	if reduced() then i, h, o = 0.05, 0, 0.1 end
-	tween(f, i, {BackgroundTransparency = 0})
+	tween(f, i, {BackgroundTransparency = peak or 0})
 	task.delay(i + h, function() tween(f, o, {BackgroundTransparency = 1}, Enum.EasingStyle.Quad, Enum.EasingDirection.In) end)
 	Debris:AddItem(f, i + h + o + 0.1)
 end
@@ -154,6 +157,57 @@ function VFXKit.impactFrame(models: {Model}, style: string?, duration: number?)
 		cc:Destroy()
 		for _, h in hl do h:Destroy() end
 	end)
+end
+
+-- UI starburst: rays + a soft glow ring drawn in the overlay ScreenGui. Use it when the moment
+-- happens over UI (a ViewportFrame stage, a menu) where world parts would be hidden.
+-- center = screen position (UDim2), length in px.
+function VFXKit.uiBurst(center: UDim2, color: Color3?, rays: number?, length: number?, time: number?)
+	local n, len, t = rays or 14, length or 160, time or 0.55
+	local c = color or Color3.fromRGB(255, 220, 140)
+	local holder = Instance.new("Frame")
+	holder.Name = "UIBurst"
+	holder.BackgroundTransparency = 1
+	holder.Position = center
+	holder.Size = UDim2.fromOffset(0, 0)
+	holder.ZIndex = 55
+	holder.Parent = overlayGui()
+	local glow = Instance.new("Frame")
+	glow.AnchorPoint = Vector2.new(0.5, 0.5)
+	glow.Size = UDim2.fromOffset(20, 20)
+	glow.BackgroundColor3 = c
+	glow.BackgroundTransparency = 0.35
+	glow.ZIndex = 55
+	local gc = Instance.new("UICorner")
+	gc.CornerRadius = UDim.new(0.5, 0)
+	gc.Parent = glow
+	glow.Parent = holder
+	tween(glow, t, {Size = UDim2.fromOffset(len * 1.3, len * 1.3), BackgroundTransparency = 1}, Enum.EasingStyle.Quint)
+	if not reduced() then
+		for i = 1, n do
+			local a = (i / n) * math.pi * 2 + math.random() * 0.15
+			local l = len * (0.6 + math.random() * 0.4)
+			local w = 4 + math.random() * 3
+			local ray = Instance.new("Frame")
+			ray.AnchorPoint = Vector2.new(0.5, 0.5)
+			ray.Rotation = math.deg(a)
+			ray.BackgroundColor3 = c
+			ray.BorderSizePixel = 0
+			ray.Size = UDim2.fromOffset(w, 0)
+			ray.ZIndex = 56
+			local g = Instance.new("UIGradient") -- soft tips
+			g.Rotation = 90
+			g.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.35, 0), NumberSequenceKeypoint.new(1, 1)})
+			g.Parent = ray
+			ray.Parent = holder
+			local dx, dy = math.sin(a), -math.cos(a)
+			tween(ray, t * 0.5, {Size = UDim2.fromOffset(w, l), Position = UDim2.fromOffset(dx * l * 0.6, dy * l * 0.6)}, Enum.EasingStyle.Quint)
+			task.delay(t * 0.5, function()
+				tween(ray, t * 0.5, {Size = UDim2.fromOffset(1, l * 1.1), Position = UDim2.fromOffset(dx * l * 0.85, dy * l * 0.85), BackgroundTransparency = 1}, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+			end)
+		end
+	end
+	Debris:AddItem(holder, t + 0.1)
 end
 
 ------------------------------------------------------------------ world
@@ -226,12 +280,13 @@ end
 
 ------------------------------------------------------------------ reveal card
 -- Rarity title card: big tier word (depth text), a subtitle in [ brackets ], the odds line. Pops in, holds, fades.
-function VFXKit.titleCard(tier: string, color: Color3, subtitle: string?, odds: string?, hold: number?)
+-- center (optional) moves the card, e.g. over the outfit when a side panel takes the right of the screen.
+function VFXKit.titleCard(tier: string, color: Color3, subtitle: string?, odds: string?, hold: number?, center: UDim2?)
 	local root = Instance.new("CanvasGroup")
 	root.Name = "TitleCard"
 	root.BackgroundTransparency = 1
 	root.AnchorPoint = Vector2.new(0.5, 0.5)
-	root.Position = UDim2.fromScale(0.5, 0.42)
+	root.Position = center or UDim2.fromScale(0.5, 0.42)
 	root.Size = UDim2.fromScale(0.9, 0.4)
 	root.GroupTransparency = 1
 	root.ZIndex = 60
@@ -268,7 +323,7 @@ function VFXKit.titleCard(tier: string, color: Color3, subtitle: string?, odds: 
 	if odds then text(odds, 0.68, 0.14, Color3.fromRGB(255, 236, 160), Enum.FontWeight.Bold, 62) end
 	root.Parent = overlayGui()
 	local r = reduced()
-	tween(scale, r and 0.05 or 0.35, {Scale = 1}, Enum.EasingStyle.Back)
+	if r then scale.Scale = 1 else tween(scale, 0.35, {Scale = 1}, Enum.EasingStyle.Back) end
 	tween(root, 0.15, {GroupTransparency = 0})
 	local hd = hold or 2.2
 	task.delay(hd, function() tween(root, 0.3, {GroupTransparency = 1}, Enum.EasingStyle.Quad, Enum.EasingDirection.In) end)

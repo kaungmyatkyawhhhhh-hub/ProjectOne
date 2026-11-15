@@ -29,6 +29,12 @@ Back to [[00 BRAIN]]. Each folder holds the CURRENT copy of one of the owner's C
 | play-roblox | (vault-only tool, not a synced Claude skill) |
 
 ## Log
+- 2026-11-16 (later): roblox-vfx-reveal and roblox-ui-pro updated after putting them into MM Outfit Catalog ([[2026-11-16 VFX + design pass - from the watch study]]):
+  - **VFXKit:** `uiBurst`, a `flash` peak and a `titleCard` centre added; a "store and shop moments" section (roll reveal, purchase celebration sized in px, celebrate only real purchases).
+  - **roblox-ui-pro:**
+    - new `assets/UIFx.luau` (oklch, edgeFade, drawn heart, icon swap);
+    - an edgeFade re-parenting note;
+    - the async page render-token trap.
 - 2026-11-16: **New: what-if-animation**, from FreshStack's open-source What If skill (MIT, github.com/kelano86/what-if-animation). ElevenLabs was swapped for free tools: `scripts/voice.py` uses Piper TTS with Whisper word timing, and the new `scripts/synth.py` synthesises every sound effect and the music bed (sfx.py calls it). Both were tested on the copy-paste example. Setup: Node 18+, ffmpeg, Python with numpy, Pillow, piper-tts and faster-whisper; the studio needs `npm install`.
 - 2026-11-16: from the 4-TikTok watch study ([[2026-11-16 Watch study - Claude Roblox VFX, exploded-diagram 3D, RNG reveal, UI design hacks]]) and the MM Outfit Catalog fix pass:
   - **New: roblox-vfx-reveal**, with VFXKit tested in Studio Play.
