@@ -24,6 +24,10 @@ Format if you like: **When** ... **do** ... **because** ...
   - A Roblox VFX tutorial series (about 15K likes, 7K saves) shows the how-to-do-VFX topic is hot; the top comment says people prompt Claude with "make awesome VFX and make it not look like AI". Fits [[K06 Art, UI, VFX, sound and lighting]].
   - A "kill your AI slop game with these 3 skills" video (about 4K likes) pushes Claude skills for Blender character animation and Roblox cutscenes. Comments push back: "using AI for animations is so lazy". So viewers dislike obviously AI-made animation, which fits the owner's "no slop" taste. Fits [[K06 Art, UI, VFX, sound and lighting]].
   - The "make your game feel satisfying" video appeared again (animation timing, make simple actions satisfying); already filed, not repeated.
+- 2026-11-16 06:30 TikTok round 2d (search "roblox ads cost per player", watched only; creator claims, unverified):
+  - A "how much should I spend on Roblox ads" video (about 9.7K likes, 5.3K saves) is very popular; a top comment says a tiny 10-credit test got a 1.8 percent click rate (screenshot, unverified). Fits [[K05 Marketing, ads and storefront]].
+  - A "$100 on ads, day 3" diary video: a commenter says their game hit the algorithm with no ads 5 hours after release. Suggests launch-day organic traffic can matter more than ad spend. Unverified. Fits [[K05 Marketing, ads and storefront]].
+  - A creator says run ads in bursts, about 5 dollars a day for 5 days, to fill the funnel, and explains Roblox's Engagement objective (finds players likely to spend or stay, but can cost more per play). Matches the earlier "test 15 EUR over 2-3 days" claim, so ad tests of about 5 days at a small daily budget are a repeated pattern. Fits [[K05 Marketing, ads and storefront]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
