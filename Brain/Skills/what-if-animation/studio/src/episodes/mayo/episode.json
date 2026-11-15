@@ -1,0 +1,457 @@
+{
+ "id": "Mayo",
+ "slug": "mayo",
+ "topic": "What if a guy named Mayo ruled the Earth?",
+ "title": [
+  "WHAT IF MAYO",
+  "RULED THE EARTH?"
+ ],
+ "accent": "EARTH",
+ "power": {
+  "word": "Done.",
+  "rule": "whatever Mayo says becomes law, everywhere",
+  "look": "a gold DECREE chip, a warm gold flash and a gavel knock on DONE"
+ },
+ "voice": {
+  "length_scale": 0.92
+ },
+ "script": [
+  {
+   "beat": "1 cold open, demo 1 (small and selfish)",
+   "text": "Mayo says: free pizza. Done."
+  },
+  {
+   "beat": "1 cold open, demo 2 (useful)",
+   "text": "Mayo says: no school on Mondays. Done."
+  },
+  {
+   "beat": "1 cold open, demo 3 (a little uncanny)",
+   "text": "Mayo says: everyone bows. Done."
+  },
+  {
+   "beat": "2 the premise (title card)",
+   "text": "What if a guy named Mayo ruled the Earth?"
+  },
+  {
+   "beat": "4 the turn: the cost, one real fact",
+   "text": "One catch: over eight billion people want something. One second each takes Mayo over two hundred fifty years. That's real."
+  },
+  {
+   "beat": "5-7 folded into a threat",
+   "text": "And the line starts now."
+  }
+ ],
+ "science": [
+  {
+   "claim": "Over eight billion people; one second each takes over two hundred fifty years.",
+   "working": "UN World Population Prospects 2024: 8.23 billion people in mid-2025. 8.23e9 seconds / 31,557,600 seconds a year (365.25 days) = 260.8 years, non-stop with no sleep. 'Over 250 years' holds for any population above 7.89 billion. The schematic shows 8,230,000,000 and 260 years.",
+   "source": "UN DESA, World Population Prospects 2024 (8.23 billion, mid-2025)"
+  }
+ ],
+ "cast": [
+  "mayo",
+  "pipHood",
+  "mo",
+  "mom",
+  "sis",
+  "suit"
+ ],
+ "shots": [
+  {
+   "id": "S1",
+   "size": "medium, low angle",
+   "set": "rooftop",
+   "key": 24,
+   "note": "Mayo in his crown on the roof at dusk, points up: free pizza"
+  },
+  {
+   "id": "S2",
+   "size": "top-down insert",
+   "set": "tabletop",
+   "key": 14,
+   "note": "whole pizzas pop onto the table one after another, gold rings"
+  },
+  {
+   "id": "S3",
+   "size": "wide",
+   "set": "classroom",
+   "key": 40,
+   "note": "Mayo at the front of the class pointing at the board; kids from behind"
+  },
+  {
+   "id": "S4",
+   "size": "medium",
+   "set": "classroom (Pip's desk)",
+   "key": 12,
+   "note": "Pip at his desk throws both arms up, kids laugh"
+  },
+  {
+   "id": "S5",
+   "size": "medium, low angle",
+   "set": "stairwell (landing)",
+   "key": 30,
+   "note": "Mayo on the landing, arm out over the stairs: everyone bows"
+  },
+  {
+   "id": "S6",
+   "size": "wide",
+   "set": "stairwell",
+   "key": 14,
+   "note": "Mo, Mum, the sister and the suit on the steps all bow at once to Mayo"
+  },
+  {
+   "id": "S7",
+   "size": "title, wide",
+   "set": "rooftop",
+   "key": 50,
+   "note": "the premise over the city at dusk; Mayo, arms wide, on the roof"
+  },
+  {
+   "id": "S8",
+   "size": "schematic",
+   "set": "schematic",
+   "key": 70,
+   "note": "a crowd of people icons fills the grid; 8,230,000,000 counts up"
+  },
+  {
+   "id": "S9",
+   "size": "schematic",
+   "set": "schematic",
+   "key": 80,
+   "note": "1 second x 8.23 billion: a dial runs, 260 YEARS"
+  },
+  {
+   "id": "S10",
+   "size": "extreme close-up",
+   "set": "rooftop",
+   "key": 14,
+   "note": "Mayo, worried; the light turns red"
+  },
+  {
+   "id": "S11",
+   "size": "wide",
+   "set": "stairwell",
+   "key": 40,
+   "note": "a queue of people packed up the whole stairwell toward Mayo, red light"
+  }
+ ],
+ "edit": [
+  {
+   "shot": "S1",
+   "at": "Mayo"
+  },
+  {
+   "shot": "S2",
+   "at": "Done",
+   "look": "decree"
+  },
+  {
+   "shot": "S3",
+   "at": "Mayo"
+  },
+  {
+   "shot": "S4",
+   "at": "Done",
+   "look": "decree"
+  },
+  {
+   "shot": "S5",
+   "at": "Mayo"
+  },
+  {
+   "shot": "S6",
+   "at": "Done",
+   "look": "decree"
+  },
+  {
+   "shot": "S7",
+   "at": "What"
+  },
+  {
+   "shot": "S8",
+   "at": "One"
+  },
+  {
+   "shot": "S9",
+   "at": "s:13.52"
+  },
+  {
+   "shot": "S10",
+   "at": "That's"
+  },
+  {
+   "shot": "S11",
+   "at": "And"
+  }
+ ],
+ "tail": 1.2,
+ "fx": [
+  {
+   "at": "S2+3",
+   "kind": "flash",
+   "color": "#FFE3A0",
+   "o": 0.45
+  },
+  {
+   "at": "S4+3",
+   "kind": "flash",
+   "color": "#FFE3A0",
+   "o": 0.45
+  },
+  {
+   "at": "S6+3",
+   "kind": "flash",
+   "color": "#FFE3A0",
+   "o": 0.45
+  },
+  {
+   "at": "S7",
+   "kind": "flash",
+   "color": "#FFF3DC"
+  },
+  {
+   "at": "S11",
+   "kind": "flash",
+   "color": "#FF3344"
+  },
+  {
+   "at": "S11",
+   "kind": "shake",
+   "len": 10,
+   "amp": 10
+  }
+ ],
+ "sound": {
+  "clips": {
+   "roof_wind": [
+    "a gentle evening breeze on a city rooftop",
+    6.0,
+    "wind"
+   ],
+   "class_murmur": [
+    "quiet classroom murmur, no words",
+    4.0,
+    "room"
+   ],
+   "gavel": [
+    "a wooden gavel knock, the decree",
+    0.4,
+    "hit",
+    {
+     "f0": 420,
+     "f1": 160
+    }
+   ],
+   "decree_chime": [
+    "a bright royal chime after the gavel",
+    1.2,
+    "ding",
+    {
+     "f": 1046
+    }
+   ],
+   "pizza_pop": [
+    "a bright pop as a pizza appears",
+    0.4,
+    "pop"
+   ],
+   "kid_laugh": [
+    "a short burst of kids laughing, cartoon",
+    0.9,
+    "laugh"
+   ],
+   "bow_whoosh": [
+    "a soft cloth whoosh as people bow",
+    0.5,
+    "whoosh",
+    {
+     "f0": 250,
+     "f1": 1400
+    }
+   ],
+   "title_boom": [
+    "a whoosh into a deep boom for the title",
+    1.6,
+    "boom"
+   ],
+   "sparkle": [
+    "a short bright sparkle twinkle",
+    0.8,
+    "sparkle"
+   ],
+   "counter_tick": [
+    "a fast counter tick",
+    0.08,
+    "click"
+   ],
+   "drone_hit": [
+    "a dark low drone sting",
+    2.6,
+    "drone",
+    {
+     "f": 49
+    }
+   ],
+   "turn_boom": [
+    "a deep boom on the turn",
+    1.4,
+    "boom"
+   ],
+   "music": [
+    "playful pizzicato cartoon bed, 112 bpm",
+    11.0,
+    "music",
+    {
+     "bpm": 112
+    }
+   ]
+  },
+  "events": [
+   [
+    "S1",
+    "roof_wind",
+    0.12,
+    "onset",
+    "S3"
+   ],
+   [
+    "S2+11",
+    "gavel",
+    0.5,
+    "onset",
+    "S3+4"
+   ],
+   [
+    "S2+13",
+    "decree_chime",
+    0.3,
+    "onset",
+    "S3+6"
+   ],
+   [
+    "S2+12",
+    "pizza_pop",
+    0.25
+   ],
+   [
+    "S2+15",
+    "pizza_pop",
+    0.22
+   ],
+   [
+    "S3",
+    "class_murmur",
+    0.08,
+    "onset",
+    "S5"
+   ],
+   [
+    "S4+11",
+    "gavel",
+    0.5,
+    "onset",
+    "S5+4"
+   ],
+   [
+    "S4+13",
+    "decree_chime",
+    0.3,
+    "onset",
+    "S5+6"
+   ],
+   [
+    "S4+12",
+    "kid_laugh",
+    0.2,
+    "onset",
+    "S5+3"
+   ],
+   [
+    "S6+12",
+    "gavel",
+    0.5,
+    "onset",
+    "S7"
+   ],
+   [
+    "S6+13",
+    "decree_chime",
+    0.28,
+    "onset",
+    "S7+3"
+   ],
+   [
+    "S6+8",
+    "bow_whoosh",
+    0.18,
+    "peak"
+   ],
+   [
+    "S7",
+    "title_boom",
+    0.45,
+    "peak"
+   ],
+   [
+    "S7+44",
+    "sparkle",
+    0.15
+   ],
+   [
+    "S10",
+    "drone_hit",
+    0.12,
+    "onset",
+    "S11"
+   ],
+   [
+    "S11",
+    "turn_boom",
+    0.3
+   ],
+   [
+    "S11+34",
+    "drone_hit",
+    0.35
+   ]
+  ],
+  "repeats": [
+   {
+    "at": "S8+12",
+    "clip": "counter_tick",
+    "n": 22,
+    "every": 2,
+    "gain": [
+     0.12,
+     0.18
+    ],
+    "pitch": [
+     0.9,
+     1.2
+    ]
+   },
+   {
+    "at": "S9+24",
+    "clip": "counter_tick",
+    "n": 30,
+    "every": 2,
+    "gain": [
+     0.12,
+     0.18
+    ],
+    "pitch": [
+     0.9,
+     1.3
+    ]
+   }
+  ],
+  "music": {
+   "clip": "music",
+   "until": "S8"
+  },
+  "levels": {
+   "sfx_lu": -3.0,
+   "music_lu": -10.5
+  }
+ }
+}

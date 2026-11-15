@@ -29,9 +29,9 @@ export type Look = {
   shoe: string;
   face: string;
   hair: string;
-  extra?: 'hood' | 'curls' | 'bunches' | 'bob' | 'suit';
+  extra?: 'hood' | 'curls' | 'bunches' | 'bob' | 'suit' | 'crown';
 };
-export type CastName = 'pip' | 'pipHood' | 'pipInk' | 'mo' | 'sis' | 'mom' | 'suit';
+export type CastName = 'pip' | 'pipHood' | 'pipInk' | 'mo' | 'sis' | 'mom' | 'suit' | 'mayo';
 export const LOOKS: Record<CastName, Look> = {
   // A: Pip as built
   pip: { skin: C.skin, skinShade: C.skinShade, hand: C.skin, jacket: C.jacket, jacketShade: C.jacketShade, accent: C.jacketShade, limb: C.limb, line: C.ink, shoe: C.shoe, face: C.ink, hair: C.ink },
@@ -45,6 +45,8 @@ export const LOOKS: Record<CastName, Look> = {
   // and the man in a suit who notices the power. All three are ours: plain shapes, no famous silhouettes.
   sis: { skin: C.skin, skinShade: C.skinShade, hand: C.skin, jacket: '#3E8C86', jacketShade: '#2F6E69', accent: '#F28C6A', limb: '#3A3446', line: '#14121C', shoe: '#F28C6A', face: C.ink, hair: '#3A2620', extra: 'bunches' },
   mom: { skin: C.skin, skinShade: C.skinShade, hand: C.skin, jacket: '#8A5A6A', jacketShade: '#704858', accent: '#E9C46A', limb: '#3A3446', line: '#14121C', shoe: '#5A4A6A', face: C.ink, hair: '#5A3226', extra: 'bob' },
+  // Mayo, the ruler of the Earth: a royal-purple jacket, a gold collar and shoes, a plain three-point gold crown
+  mayo: { skin: '#E8C9A4', skinShade: '#D2B08A', hand: '#E8C9A4', jacket: '#5B3A86', jacketShade: '#472C6C', accent: '#F2C14E', limb: '#3A3446', line: '#140F1E', shoe: '#E0A93A', face: C.ink, hair: '#3B2418', extra: 'crown' },
   suit: { skin: '#D9C6AE', skinShade: '#C2AE96', hand: '#D9C6AE', jacket: '#2B2F3A', jacketShade: '#20232C', accent: '#A8323E', limb: '#2B2F3A', line: '#0E0F14', shoe: '#14151A', face: C.ink, hair: '#17141A', extra: 'suit' },
 };
 
@@ -397,6 +399,18 @@ export const Hero: React.FC<{ pose: Pose; shadow?: number; rimId?: string; look?
       {L.extra === 'suit' ? (
         // short combed-back hair with a hard side parting
         <path transform={`translate(${-pose.yaw * 14} 0)`} d={`M -60 ${HEAD.y - 18} Q -64 ${HEAD.y - 70} 4 ${HEAD.y - 68} Q 64 ${HEAD.y - 64} 60 ${HEAD.y - 18} Q 52 ${HEAD.y - 44} 18 ${HEAD.y - 46} L 12 ${HEAD.y - 54} L 6 ${HEAD.y - 46} Q -44 ${HEAD.y - 46} -60 ${HEAD.y - 18} Z`} fill={L.hair} />
+      ) : null}
+      {L.extra === 'crown' ? (
+        // a plain gold crown with three points and a red gem, sitting a little back on the head
+        <g transform={`translate(${-pose.yaw * 14} 0)`}>
+          <path d={`M -44 ${HEAD.y - 50} L -50 ${HEAD.y - 104} L -24 ${HEAD.y - 76} L 0 ${HEAD.y - 116} L 24 ${HEAD.y - 76} L 50 ${HEAD.y - 104} L 44 ${HEAD.y - 50} Q 0 ${HEAD.y - 40} -44 ${HEAD.y - 50} Z`} fill="#F2C14E" stroke={L.line} strokeWidth={4} strokeLinejoin="round" />
+          <path d={`M 10 ${HEAD.y - 90} L 24 ${HEAD.y - 76} L 44 ${HEAD.y - 50} Q 26 ${HEAD.y - 45} 12 ${HEAD.y - 45} Z`} fill="#C9942E" opacity={0.6} />
+          <path d={`M -42 ${HEAD.y - 62} Q 0 ${HEAD.y - 54} 42 ${HEAD.y - 62}`} stroke="#C9942E" strokeWidth={5} fill="none" />
+          <circle cx={0} cy={HEAD.y - 66} r={8} fill="#D9434F" stroke={L.line} strokeWidth={3} />
+          <circle cx={-50} cy={HEAD.y - 106} r={5} fill="#FFF1C2" />
+          <circle cx={0} cy={HEAD.y - 118} r={5} fill="#FFF1C2" />
+          <circle cx={50} cy={HEAD.y - 106} r={5} fill="#FFF1C2" />
+        </g>
       ) : null}
       <Face expr={pose.expr} blink={pose.blink} look={pose.look} glasses={pose.glasses} yaw={pose.yaw} ink={L.face} glint={pose.glint} glintColor={pose.glintColor} />
       {L.extra === 'curls'
