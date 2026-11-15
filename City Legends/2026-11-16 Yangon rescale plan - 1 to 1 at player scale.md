@@ -349,3 +349,19 @@ Rules for every step:
 4. **Main roads:** the batch 0.5 main roads, the roundabout and both flyovers become meshes like the rest of the city (this overrides master-plan decision 5).
 - Still open, asked when their step comes: the races (keep the real routes, or cut them shorter?), the hotel and The Crown heights (real skyline or fantasy?), the speedometer factor. The origin is a technical choice: the new map goes where it doesn't overlap the old one.
 - **Backups moved out (16 Nov, version 937):** `D:\RobloxStudioGameFiles\Yangon.rbxm` (the owner's Save to File, 50 MB) holds YangonBatchesParked, YangonDetails_outside05, YangonFar_b1_removed, YangonReplaced_MC, YangonReplaced_SD and YangonBarriers_b1_removed. The first five were removed from ServerStorage (249,000 objects). YangonSiteHidden was not in the file, so it is still in the place. To bring any of them back: Insert from File into ServerStorage.
+
+## Step 0 done (16 Nov 2026, place version 946)
+- **Map check by area:** `Config.isYangonAt` / `Config.mapAt` replace the seven "x > 25000" tests. `Config.laneWidth()` gives the per-map lane width (Yangon 16 for now, 12 at the new scale).
+- **One scale setting:** `tools/yangon/city/geo.py` holds `SPM`, `VS`, `OX`, `OZ` and `m()`. The city tools and `d20_green.py` read it, and give the same output as before. The old part-road tools are left as they are (they will be retired).
+- **Lighter collision:** 14,062 visual meshes (buildings, streets, trees, details, landmarks) now use box collision and are invisible to rays. The camera only sees colliding parts. The placers do the same from now on.
+- **Play test on the test save, live save put back:** clean startup, Yangon detected, fast travel and fuel fine, daylight blend fine.
+- **Baseline (Edit, after step 0):**
+
+| Measure | Value |
+|---|---|
+| Studio memory | 6.8 GB |
+| Workspace | 297,260 parts, 14,380 meshes (3,098 unique) |
+| ServerStorage | 30,616 parts, 6,531 meshes (3,986 unique) |
+| Place file size | not readable from here; the save went through |
+
+- **Next: step 1/2.** The new map's build area (no overlap with the old map) and the building kit pilot. Reference photos and measurements are being gathered in `Games/CityLegends/build/landmarks/refs/kit/`.
