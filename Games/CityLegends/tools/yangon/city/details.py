@@ -525,7 +525,7 @@ def surface(it, L, W, p):
 
 
 def tennis(it, L, W, r):
-    CL, CW, SW, SV = 23.77 * 1.6, 10.97 * 1.6, 8.23 * 1.6, 6.40 * 1.6
+    CL, CW, SW, SV = 23.77 * geo.SPM, 10.97 * geo.SPM, 8.23 * geo.SPM, 6.40 * geo.SPM
     s = max(0.5, min(1.0, (L - 3) / CL, (W - 2) / CW))
     cl, cw, sw, sv = CL * s, CW * s, SW * s, SV * s
     style = r.choice(['blue', 'blue', 'green', 'clay'])
@@ -544,17 +544,17 @@ def tennis(it, L, W, r):
 
 
 def basketball(it, L, W, r):
-    BL, BW = 28 * 1.6, 15 * 1.6
+    BL, BW = 28 * geo.SPM, 15 * geo.SPM
     s = max(0.5, min(1.0, (L - 2.6) / BL, (W - 2) / BW))
     bl, bw = BL * s, BW * s
     surface(it, L, W, r.choice(['court_conc', 'court_conc', 'court_green', 'court_blue']))
-    kd, kw = 5.8 * 1.6 * s, 4.9 * 1.6 * s
+    kd, kw = 5.8 * geo.SPM * s, 4.9 * geo.SPM * s
     for sg in (-1, 1):
         it.box((kd, 0.1, kw), (sg * (bl / 2 - kd / 2), PAINT_TOP - 0.05, 0), 'key_orange')
     segs = rect_lines(-bl / 2, -bw / 2, bl / 2, bw / 2) + [(0, -bw / 2, 0, bw / 2)]
-    segs += arc(0, 0, 1.8 * 1.6 * s, 0, 2 * math.pi, 6)
-    R3, bu = 6.75 * 1.6 * s, bl / 2 - 1.575 * 1.6 * s
-    cv = bw / 2 - 0.9 * 1.6 * s
+    segs += arc(0, 0, 1.8 * geo.SPM * s, 0, 2 * math.pi, 6)
+    R3, bu = 6.75 * geo.SPM * s, bl / 2 - 1.575 * geo.SPM * s
+    cv = bw / 2 - 0.9 * geo.SPM * s
     phi = math.asin(min(0.99, cv / R3))
     for sg in (-1, 1):
         segs += [(sg * bl / 2, -kw / 2, sg * (bl / 2 - kd), -kw / 2), (sg * bl / 2, kw / 2, sg * (bl / 2 - kd), kw / 2),
@@ -566,7 +566,7 @@ def basketball(it, L, W, r):
         segs += [(sg * bl / 2, -cv, ue, -cv), (sg * bl / 2, cv, ue, cv)]
         pu = sg * (bl / 2 + min(1.2, (L - bl) / 2 - 0.3))
         it.add('C', (0.5, 9.8, 0.5), (pu, 4.4, 0), 'darksteel')
-        bdu = sg * (bl / 2 - 1.2 * 1.6 * s)
+        bdu = sg * (bl / 2 - 1.2 * geo.SPM * s)
         it.box((abs(pu - bdu) + 0.3, 0.3, 0.3), ((pu + bdu) / 2, 9.0, 0), 'darksteel')
         it.box((0.2, 2.8, 4.4), (bdu, 9.6, 0), 'board')
         ru = sg * bu
@@ -617,8 +617,8 @@ def baseball(it, L, W, r, poly_local):
     c = poly_local.centroid
     du, dv = unit(c.x - hu, c.y - hv)
     hu, hv = hu + du * 3, hv + dv * 3
-    reach = math.hypot(c.x - hu, c.y - hv) * 1.6
-    side = max(14.0, min(27.43 * 1.6, reach * 0.55))
+    reach = math.hypot(c.x - hu, c.y - hv) * geo.SPM
+    side = max(14.0, min(27.43 * geo.SPM, reach * 0.55))
     d45 = side / math.sqrt(2)
     cu, cv = hu + du * d45, hv + dv * d45
     ry = math.atan2(-dv, du) + math.pi / 4

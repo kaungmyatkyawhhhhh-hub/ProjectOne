@@ -138,7 +138,7 @@ end
 local function kerbSpot(car: Model): CFrame
 	local cf, size = car:GetBoundingBox()
 	-- (out past the kerb lane's edge onto the sidewalk, whatever the lane width)
-	local out = math.max(4, Config.City.LaneWidth / 2 - size.X / 2 + 2.5)
+	local out = math.max(4, Config.laneWidth() / 2 - size.X / 2 + 2.5)
 	local side = cf * CFrame.new(size.X / 2 + out, 0, size.Z * 0.12)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -258,7 +258,7 @@ handlers.call = function(player, carId, placeId)
 	local pickPos = CityLayout.sample(pickups[1].seg, pickups[1].s)
 	local destPos = CityLayout.sample(dests[1].seg, dests[1].s)
 	-- (Yangon and Monaco aren't joined by road while both are in the place, 2026-11-14)
-	if (pickPos.X > 25000) ~= (destPos.X > 25000) then
+	if Config.mapAt(pickPos) ~= Config.mapAt(destPos) then
 		return { ok = false, message = "That's in the other city: use fast travel" }
 	end
 	if (pickPos - destPos).Magnitude < 60 then

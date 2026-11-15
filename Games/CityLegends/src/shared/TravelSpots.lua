@@ -98,7 +98,7 @@ function TravelSpots.list(): { Spot }
 	table.insert(list, { id = "service", name = "Legends Service", icon = "service", info = INFO.service, cf = (Config :: any).Service.Arrive })
 	for _, st in (Config :: any).Fuel.Stations do
 		-- (only the stations of a map in the place: Monaco's are kept in ServerStorage since Yangon step 11)
-		local here = if st.arrive.Position.X > 25000 then workspace:FindFirstChild("Yangon") else riv
+		local here = if Config.isYangonAt(st.arrive.Position) then workspace:FindFirstChild("Yangon") else riv
 		if here then
 			table.insert(list, { id = st.id, name = st.name, icon = "fuel", info = INFO.fuel, cf = st.arrive })
 		end

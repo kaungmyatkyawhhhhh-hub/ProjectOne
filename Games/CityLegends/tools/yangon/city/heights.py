@@ -252,9 +252,9 @@ def _requirements(net, G, y, ctx):
                 for j in wtree.query(pt):
                     w = water[int(j)]
                     if w['poly'].contains(pt):
-                        v = w['level_m'] * 1.6 + WATER_CLEAR + DECK + MARGIN
+                        v = w['level_m'] * geo.VS + WATER_CLEAR + DECK + MARGIN
                         if v > need:
-                            need, what = v, ('water', w['name'] or w['kind'], w['level_m'] * 1.6)
+                            need, what = v, ('water', w['name'] or w['kind'], w['level_m'] * geo.VS)
             if what and need > gr[int(e._ids[i])] + 0.2:
                 req_info[(e.id, i)] = (need, what)
     return req_info

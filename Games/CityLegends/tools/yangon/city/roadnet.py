@@ -876,6 +876,6 @@ if __name__ == '__main__':
     tag = sys.argv[1] if len(sys.argv) > 1 else '1'
     net = build(tag)
     L = sum(chain(e.P)[-1] for e in net.edges)
-    print('edges', len(net.edges), 'nodes', len(net.nodes), 'km %.1f' % (L / 1.6 / 1000), net.stats_pair)
+    print('edges', len(net.edges), 'nodes', len(net.nodes), 'km %.1f' % (L / geo.SPM / 1000), net.stats_pair)
     for r in net.seam_report:
         print(r)

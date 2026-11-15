@@ -1,7 +1,9 @@
 """Whole-Yangon map (14 Nov 2026): shared geography for the city generator (tools/yangon/city/).
 
-World studs: X = 30000 + (lon - 96.14) * KX * 1.6, Z = -(lat - 16.82) * KY * 1.6 (1.6 studs a metre; cars are 3 studs a
-metre). Data: build/osm_ygn/*.json from tools/yangon/e0_extract.py (OpenStreetMap contributors, ODbL).
+World studs: X = OX + (lon - 96.14) * KX * SPM, Z = OZ - (lat - 16.82) * KY * SPM. SPM (across) and VS (up) are THE scale
+setting of every Yangon tool: no tool may keep its own 1.6 or 30000 (2026-11-16, the 1:1 rescale to 3 studs a metre,
+the cars' and players' scale, is planned in the vault note '2026-11-16 Yangon rescale plan - 1 to 1 at player scale').
+Today 1.6 (the map built 13-14 Nov). Data: build/osm_ygn/*.json from tools/yangon/e0_extract.py (OpenStreetMap contributors, ODbL).
 """
 import json, math, os
 
@@ -12,20 +14,27 @@ OSM = os.path.join(ROOT, 'build', 'osm_ygn')
 BUILD = os.path.join(ROOT, 'build')
 
 LON0, LAT0, SPM = 96.14, 16.82, 1.6
+VS = SPM                 # studs per metre up (terrain, water levels, DEM heights)
 KX = 111320 * math.cos(math.radians(LAT0))
 KY = 110540
 OX = 30000.0
+OZ = 0.0
+
+
+def m(v):
+    """Metres -> studs across (sizes, spacings, distances)."""
+    return v * SPM
 
 # the batch boxes in world studs (x0, z0, x1, z1). 0.5 = the ground of steps 0-11 (d10/d19's X0..Z1).
 BOX_05 = (27977.0, -6469.0, 33455.0, 1693.0)
 
 
 def world(lon, lat):
-    return (OX + (lon - LON0) * KX * SPM, -(lat - LAT0) * KY * SPM)
+    return (OX + (lon - LON0) * KX * SPM, OZ - (lat - LAT0) * KY * SPM)
 
 
 def lonlat(x, z):
-    return (LON0 + (x - OX) / (KX * SPM), LAT0 - z / (KY * SPM))
+    return (LON0 + (x - OX) / (KX * SPM), LAT0 - (z - OZ) / (KY * SPM))
 
 
 def proj(pts):
