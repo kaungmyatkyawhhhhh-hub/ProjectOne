@@ -140,6 +140,9 @@ GROUPS = {
 }
 
 
+from groups_melia import MELIA_GROUPS  # noqa: E402  (the Meliá interior, its own file so its edits stay apart)
+GROUPS.update(MELIA_GROUPS)
+
 # groups that change at night: "night" = tag FacadeNight (WorldFx shows it at night only); ("glow", rgb) = tag
 # LandmarkGlow with that NightColor (WorldFx: Neon in that colour at night, the group's own look by day)
 NIGHT = {"NWA": "night", "NWY": "night", "NWC": "night", "NWH": "night",
