@@ -2,5 +2,6 @@
 import { rewind } from './rewind';
 import { copyPaste } from './copy-paste';
 import { mayo } from './mayo';
+import { mayoEvil } from './mayo-evil';
 
-export const EPISODES = [rewind, copyPaste, mayo];
+export const EPISODES = [rewind, copyPaste, mayo, mayoEvil];
