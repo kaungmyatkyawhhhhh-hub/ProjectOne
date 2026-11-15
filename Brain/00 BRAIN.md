@@ -40,6 +40,7 @@ Use the method when its trigger fits. Each one lists its steps, its tools and an
 | **Kid focus group (ChatGPT)** | what goes in an update / new game; "would kids pick ours over X?"; before ads | [[Brain/Methods/Kid focus group (ChatGPT)]] |
 | **Dead game method** | new game ideas, new features, "what would make this fun" | [[Brain/Methods/Dead game method]] |
 | **Launch gate** | before ANY public launch or big update | [[Brain/Methods/Launch gate]] |
+| **Real-world look match** | building a real place / building / object; "it doesn't look like the real one"; scale questions | [[Brain/Methods/Real-world look match]] |
 | **Reference study** | before making a video, UI, icon or anything the owner will judge by eye | [[Brain/Methods/Reference study]] |
 | **Data first** | any "why is X bad" question (ads, likes, playtime, money) | [[Brain/Methods/Data first]] |
 | **ChatGPT art pipeline** | any game art (icons, UI, VFX, textures, badges) | [[Roblox Playbook/Prompt for a friend's Claude - ChatGPT art pipeline for Roblox]] (skill: roblox-chatgpt-art-pipeline) |

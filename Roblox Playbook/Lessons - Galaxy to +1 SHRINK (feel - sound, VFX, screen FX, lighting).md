@@ -458,3 +458,18 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - Known places are modelled from photos, not generated.
 - (Same day, terrain) Owner: "the terrains and everything is wrong too, in real life theres hills and stuff, i think u need to try to find yangon terrain map or something". Cause: the ground came from SRTM 30 m run through a 3x3 minimum filter and a wide Gaussian blur (to take out roofs and trees), which flattened Yangon's real ridges (the Shwedagon - Bahan - Kaba Aye ridge, the slopes down to the Hlaing River and Pazundaung), and nobody compared it with a topographic map. Rule: the ground of a real place is checked against a topographic map (contours, hill shading) and photos of its slopes before roads go on it; use the best open elevation model (Copernicus GLO-30 or better) with the lightest filtering that removes buildings, and keep every hill a local would know.
 - (14 Nov 2026, City Legends Yangon, Myanmar Centre pilot) Owner: "make myanmar plaza 3d, not with textures and decals, make interior of myanmar plaza too and also sedona". What felt bad: the first landmark version was a box massing with its windows, bands and names painted on one picture atlas: it looked right in a still picture but flat up close, and the inside was empty. Cause: the atlas route was carried over from the generated buildings for speed. Fix: real geometry (bands that stand out of a recessed glass skin, real mullion fins, 3D letters, canopies on struts) with Roblox materials per part, and the public interior a player can walk into (from photos of it: atrium, galleries, escalators, shops). Rules: a named landmark is built in real geometry, not a painted facade; pictures only where the real thing is a screen or a billboard; a building people go into in real life (a mall, a station, a hotel lobby) gets its inside too; buildings without an inside get opaque lobby glass, never see-through glass onto nothing. Also: in this map Roblox's Granite, Marble and ClayRoofTiles materials render near-black and full-white Neon blooms; check every material in a Studio screenshot before calling it done.
+
+
+### 2026-11-16 - City Legends: a real place must be at real scale, under a measured light (owner correction)
+- **What felt bad:**
+  - "the materials, textures, looks, colors, designs, lighting is not same as the real life myanmar plaza"
+  - then "the scaling measurements must be 1:1 accurate too"
+- **Cause:**
+  - The Yangon map's ground plan was at 1.6 studs per metre while cars and players are at 3, and floors were player height. Buildings came out too tall and thin, and players and cars twice too big.
+  - The day light was Monaco's, so every white rendered pale blue.
+  - Colours were picked by eye, and textured materials render much darker than their colour.
+- **Fix:**
+  - Owner chose "Everything at player scale": the whole Yangon map is rebuilt at about 3 studs per metre.
+  - Yangon's daylight was warmed.
+  - Colours were measured from photos and calibrated to the game's light.
+- **Rule:** for any real place, lock one scale for map, buildings, cars and players first; measure the game's light; then set colours from photo measurements. Method: [[Brain/Methods/Real-world look match]].
