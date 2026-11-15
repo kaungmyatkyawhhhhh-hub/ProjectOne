@@ -1,0 +1,125 @@
+{
+  "note": "All files from Wikimedia Commons, CC BY-SA 4.0 (attribution + share-alike required). 1600 px thumbnails. No hotel-interior image exists on Commons; Melia interior photos are described in melia_interior.md, not downloaded.",
+  "files": [
+    {
+      "file": "Myanmar_Plaza_IMG_20180406_190503_yankin_yangon.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_20180406_190503_yankin_yangon.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Myanmar_Plaza_IMG_20180406_190503_yankin_yangon.jpg/1920px-Myanmar_Plaza_IMG_20180406_190503_yankin_yangon.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-06 19:05:03",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Mall interior: central atrium from upper level, escalators crossing the void, gallery balustrades, ceiling grid"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_20180406_191522_yangoon.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_20180406_191522_yangoon.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Myanmar_Plaza_IMG_20180406_191522_yangoon.jpg/1920px-Myanmar_Plaza_IMG_20180406_191522_yangoon.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-06 19:15:22",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Mall interior: atrium floor with paired escalators (best escalator reference), galleries, ceiling"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_5111.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_5111.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/33/Myanmar_Plaza_IMG_5111.jpg/1920px-Myanmar_Plaza_IMG_5111.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-01 10:33:03",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Exterior: Melia tower (left) and Myanmar Centre Tower from the street"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_5386.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_5386.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/Myanmar_Plaza_IMG_5386.jpg/1920px-Myanmar_Plaza_IMG_5386.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-03 18:06:57",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Exterior: Myanmar Plaza entrance facade and sign, glass shopfronts"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_5387.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_5387.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Myanmar_Plaza_IMG_5387.jpg/1920px-Myanmar_Plaza_IMG_5387.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-03 18:08:14",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Exterior: mall podium and towers"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_5388.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_5388.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Myanmar_Plaza_IMG_5388.jpg/1920px-Myanmar_Plaza_IMG_5388.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-03 18:08:35",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Exterior: mall podium with Hard Rock guitar sign"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_5389.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_5389.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Myanmar_Plaza_IMG_5389.jpg/1920px-Myanmar_Plaza_IMG_5389.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-03 18:09:04",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Exterior: Myanmar Centre sign wall (shows Melia Yangon logo on the sign)"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_5390.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_5390.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/Myanmar_Plaza_IMG_5390.jpg/1920px-Myanmar_Plaza_IMG_5390.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-03 18:09:15",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Exterior: panorama of the complex from the corner"
+    },
+    {
+      "file": "Myanmar_Plaza_IMG_5391.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_Plaza_IMG_5391.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Myanmar_Plaza_IMG_5391.jpg/1920px-Myanmar_Plaza_IMG_5391.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Bjoertvedt",
+      "date": "2018-04-03 18:09:27",
+      "commons_description": "Myanmar Plaza, a shopping and Office complex in Yangon, Myanmar",
+      "shows": "Exterior: panorama of the complex"
+    },
+    {
+      "file": "Myanmar_plaza_view.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_plaza_view.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/6/60/Myanmar_plaza_view.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Aungphone",
+      "date": "2017-06-02",
+      "commons_description": "myanmar plaza view",
+      "shows": "Not the mall interior: a lakeside wooden deck restaurant at night with the towers in the background"
+    },
+    {
+      "file": "Myanmar_plaza.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Myanmar_plaza.jpg",
+      "download_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Myanmar_plaza.jpg/1920px-Myanmar_plaza.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Aungphone",
+      "date": "17 August 2018 (according to E",
+      "commons_description": "shopping mall, melia hotel, gabar aye pagoda road",
+      "shows": "Exterior at dusk: office tower podium and Melia tower (right), Kabar Aye Pagoda Road"
+    },
+    {
+      "file": "Closed_Ooredoo_mobile_SIM_shop_at_Myanmar_Plaza.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Closed_Ooredoo_mobile_SIM_shop_at_Myanmar_Plaza.jpg",
+      "download_url": "https://upload.wikimedia.org/wikipedia/commons/5/55/Closed_Ooredoo_mobile_SIM_shop_at_Myanmar_Plaza.jpg",
+      "licence": "CC BY-SA 4.0",
+      "author": "Maung Sun",
+      "date": "2021-03-26 15:53:57",
+      "commons_description": "The photo was recorded during 2021 protest movement in Myanmar",
+      "shows": "Mall interior: shopfront, polished beige/grey granite corridor floor, white ceiling with round downlights"
+    }
+  ]
+}
