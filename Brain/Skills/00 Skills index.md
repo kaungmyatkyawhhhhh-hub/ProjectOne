@@ -21,6 +21,7 @@ Back to [[00 BRAIN]]. Each folder holds the CURRENT copy of one of the owner's C
 | [[Skills/roblox-game-lighting/SKILL\|roblox-game-lighting]] | Use for ANY Roblox lighting or 'make my game look better' work: Lighting, Atmosphere, Bloom, SunRays, ColorCorrection, DepthOfField, sky, time of day, zone/biome moods, underwater and night looks, retro player outlines (Highlight) and random surface textures. Tested presets with exact numbers (incl. the Develuper 'look 10x better' stylized day and MEGA BITE's reef), a backup-first apply script, a read-only lighting snapshot/audit and a look check. |
 | [[Skills/roblox-game-sounds/SKILL\|roblox-game-sounds]] | Use when a Roblox game needs sound effects for actions, animations, abilities, UI or ambience: generate our own in Fish Audio (owner's Chrome), process them in Python, upload them to Roblox, and wire them in. |
 | [[Skills/roblox-game-video-pipeline/SKILL\|roblox-game-video-pipeline]] | Use when making a Roblox game video (TikTok/Shorts or the Roblox game-page video), or re-editing a trend video into a shop ad: record, cut on the beat, animate in Remotion, sound-design, check, deliver fast. |
+| [[Skills/roblox-organic-marketing/SKILL\|roblox-organic-marketing]] | Use to get players without (or before) paid ads: a readiness gate (game page, thumbnail squint test, no AI-slop look), our own TikTok clip formats, a measured game-rec creator campaign (`scripts/creator_stats.js`, shortlist, brief, one code per creator), cost per new player vs ads. The owner sends and pays. |
 | [[Skills/roblox-ui-pro/SKILL\|roblox-ui-pro]] | Use for ANY Roblox UI work: building, fixing, restyling or reviewing a HUD, shop, inventory, index, settings, popup, reward screen or menu. Correct ScreenGui setup (respawn, safe areas, phone/tablet/console, touch and gamepad), concrete design numbers, a house-style UI kit, AI-slop checks, and a Studio MCP loop that audits (`scripts/ui_audit.luau`) and screenshots the UI on real device sizes until it passes. Pairs with the art method in [[Best UI method (skill draft)]]. |
 | [[Skills/roblox-icon-thumbnail/SKILL\|roblox-icon-thumbnail]] | Use when making or judging a Roblox game icon, thumbnail or logo: research what kids click, render the real avatar, one-try ChatGPT prompts, add the logo in code, and test at real sizes. |
 | [[Skills/roblox-vfx-reveal/SKILL\|roblox-vfx-reveal]] | Use for Roblox VFX and big moments: combat hit VFX (impact frames, shake, FOV punch, shockwave, debris, flash), RNG/egg rarity reveal ladders with a top-tier cutscene, and reward title cards. Tested client kit `scripts/VFXKit.luau`. |
@@ -29,6 +30,10 @@ Back to [[00 BRAIN]]. Each folder holds the CURRENT copy of one of the owner's C
 | play-roblox | (vault-only tool, not a synced Claude skill) |
 
 ## Log
+- 2026-11-16 (night): **New: roblox-organic-marketing**, from [[2026-11-16 Watch study - Organic Roblox marketing TikToks]].
+  - SKILL.md: gate, own clips, game-rec creator campaign, measuring, owner rules.
+  - `references/templates.md`.
+  - `scripts/creator_stats.js`: tested on a live TikTok profile in the built-in browser; reads the median views of the last 12 posts and the bio contact.
 - 2026-11-16 (later): roblox-vfx-reveal and roblox-ui-pro updated after putting them into MM Outfit Catalog ([[2026-11-16 VFX + design pass - from the watch study]]):
   - **VFXKit:** `uiBurst`, a `flash` peak and a `titleCard` centre added; a "store and shop moments" section (roll reveal, purchase celebration sized in px, celebrate only real purchases).
   - **roblox-ui-pro:**
