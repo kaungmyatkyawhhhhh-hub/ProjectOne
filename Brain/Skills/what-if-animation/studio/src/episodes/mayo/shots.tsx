@@ -208,9 +208,9 @@ export const S8: React.FC<ShotProps> = ({ t, len }) => (
       const on = clamp((t - 4 - p.k * 40 - (p.x / 1920) * 20) / 5);
       return on > 0 ? <Person key={i} x={p.x} y={p.y} s={0.9} o={on} /> : null;
     })}
-    <rect x={460} y={780} width={1000} height={170} rx={20} fill={SCH.ground} opacity={0.85} />
-    <CountUp x={960} y={880} t={t - 10} to={8.23e9} dur={48} size={110} />
-    <SchLabel x={960} y={935} t={t - 30} text="UN ESTIMATE, MID-2025" size={30} color={SCH.dim} />
+    <rect x={460} y={748} width={1000} height={160} rx={20} fill={SCH.ground} opacity={0.88} />
+    <CountUp x={960} y={845} t={t - 10} to={8.23e9} dur={48} size={110} />
+    <SchLabel x={960} y={892} t={t - 30} text="UN ESTIMATE, MID-2025" size={30} color={SCH.dim} />
   </g>
 );
 

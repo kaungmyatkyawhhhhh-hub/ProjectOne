@@ -1,3 +1,4 @@
+import { Captions, CaptionOpts, Word } from './captions';
 import React from 'react';
 import { AbsoluteFill, Audio, staticFile, useCurrentFrame } from 'remotion';
 import { clamp, lerp } from './anim';
@@ -108,9 +109,9 @@ export const ShotFrame: React.FC<{ children: React.ReactNode }> = ({ children })
   </svg>
 );
 
-export type EpisodeProps = { timeline: Timeline; shots: ShotMap; looks?: Record<string, LookDef>; grain?: boolean; vignette?: boolean; bg?: string };
+export type EpisodeProps = { timeline: Timeline; shots: ShotMap; looks?: Record<string, LookDef>; grain?: boolean; vignette?: boolean; bg?: string; words?: Word[]; captions?: CaptionOpts | false };
 
-export const Episode: React.FC<EpisodeProps> = ({ timeline: tl, shots, looks = {}, grain = true, vignette = true, bg = '#0E0C1E' }) => {
+export const Episode: React.FC<EpisodeProps> = ({ timeline: tl, shots, looks = {}, grain = true, vignette = true, bg = '#0E0C1E', words, captions }) => {
   const f = useCurrentFrame();
   const seg = segAt(tl, f);
   const Shot = shots[seg.shot];
@@ -133,6 +134,11 @@ export const Episode: React.FC<EpisodeProps> = ({ timeline: tl, shots, looks = {
         </svg>
       ) : null}
       {flash ? <AbsoluteFill style={{ backgroundColor: flash.color, opacity: flash.o }} /> : null}
+      {words && captions !== false ? (
+        <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: 'absolute', inset: 0 }}>
+          <Captions f={f} fps={tl.fps} words={words} shot={seg.shot} opts={captions || {}} />
+        </svg>
+      ) : null}
       {A.voice ? <Audio src={staticFile(A.voice)} volume={A.voiceVol ?? 1} /> : null}
       {A.sfx ? <Audio src={staticFile(A.sfx)} volume={A.sfxVol ?? 1} /> : null}
       {A.music ? <Audio src={staticFile(A.music)} volume={A.musicVol ?? 1} /> : null}

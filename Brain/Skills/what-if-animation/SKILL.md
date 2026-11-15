@@ -34,6 +34,7 @@ schematic for the science beat, a cliffhanger blackout). Read the one closest to
   switch to a paid service unless the person asks.
 - **Storyboard before animation.** No video render until the stills pass the self-check (step 5) and, when the person
   is in the loop, they've seen the board.
+- **Captions on by default.** The owner wants on-screen text, not just voice-over: pass `words` (the episode's `words.json`) and `captions: { hideShots: [<title shot>], yByShot: {...} }` to `defineEpisode`. Phrases of up to 3 words, big bold outlined text, the spoken word lit gold (`engine/captions.tsx`). This overrides look.md's "almost no text". Hide them on the title card and move them (`yByShot`) where a shot already has text at the bottom.
 - **Every fact is real.** A number in the script is worked out and sourced in the episode's `science` field first.
 
 ## Setup (once per machine)
