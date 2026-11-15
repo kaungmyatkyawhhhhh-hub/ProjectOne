@@ -46,5 +46,26 @@
 
 ![[Screenshots/2026-11-17 HUD matched - Admin Music Outfit ID (phone A06).jpg]]
 
+## 5. Outfit ID panel removed, Featured shows ID + name, "Add My Outfit"
+The owner didn't like having the Outfit ID panel on screen.
+- **Panel removed (`Wardrobe`):** a `HIDE_OUTFIT_ID_PANEL = true` switch at the end keeps the panel hidden. Set it to false to bring it back. "All outfits" (the WardrobeBackdrop list the same script builds) still opens from the catalog.
+- **Featured cards (`ShowroomCollection`):** each card has a brass "ID 0N" chip and the outfit name under the mannequin. Long names wrap onto 2 lines ("MIDNIGHT / TRACK"). They fit on A06 too (cards 150×175).
+- **Add My Outfit (`CatalogAdminClient` + `CatalogAdminServer`):** Admin → Outfits now leads with a brass **Add My Outfit** button. The old form is renamed "Add outfit by item IDs".
+  - **The page:** it reads your Roblox avatar on the server (new `MyAvatar` action, `GetHumanoidDescriptionFromUserId`) and shows what will be saved, e.g. "Shirt · Pants · 2 accessories (1 layered item left out)". You type the **outfit name** (required) and an optional description, then press **Save as new outfit**.
+  - **How it saves:** through the normal `Save` path, so the same checks, filtering, permissions and DataStore apply.
+  - **What gets saved:** only the classic shirt, pants and up to 10 rigid accessories. The catalog preview is classic R6, so layered clothing is counted and left out.
+- **Tested (Studio Play):**
+  - The panel stays gone.
+  - Pressing Save with no name shows "Choose a name for your outfit." and focuses the name box.
+  - Saving "Bryant Night" created **outfit 04**, which appeared in Manage outfits and in Featured.
+  - Phone A06 checked; 0 console errors.
+  - The test outfit only lived in memory: in Studio the admin server never writes the DataStore.
+- **Backup:** `ServerStorage.ScriptBackups.pre_AddMyOutfit_17Nov` (all 4 scripts).
+
+![[Screenshots/2026-11-17 Add My Outfit page (PC).jpg]]
+![[Screenshots/2026-11-17 Featured with ID + name, new outfit 04 (PC).jpg]]
+![[Screenshots/2026-11-17 Featured with ID + name (phone A06).jpg]]
+
 ## Noticed, not changed
+- The admin panel itself still uses the older brown style (only its launcher button was restyled).
 - I only reviewed the penthouse floor; the lower After Hours floors weren't checked.
