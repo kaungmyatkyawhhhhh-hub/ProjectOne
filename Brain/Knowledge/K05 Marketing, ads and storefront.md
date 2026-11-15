@@ -1,6 +1,6 @@
 ---
 tags: [brain, knowledge, marketing, ads, storefront]
-updated: 2026-11-09
+updated: 2026-11-16
 ---
 # K05 Marketing, ads and storefront
 Back to [[00 BRAIN]] · Method: [[Data first]] · Sources: [[2026-11-05 PLAYBOOK - Roblox icon, thumbnail and logo recipe]], [[Playbook notes - Thumbnails]], [[Playbook notes - Icons and titles]], [[Playbook notes - Names and descriptions]], [[2026-11-03 Research - High CTR Roblox thumbnails]], [[2026-11-07 Video edit style - what makes an edit good (reference study)]], [[2026-11-02 GYM ARC Ads - best practice and ChatGPT prompts]]
@@ -27,3 +27,10 @@ impression → click (CTR) → game page → **Play** → minute 1 → day 1 →
 ## Group and community
 - Group members are the owner's channel for every future game in that group (GYM ARC/MBC: free Members Gym drove ~1K joins/day).
 - Announcements: once per 7 days to all members; Update Announcements 60 chars, 1 per 3 days (the only notification that reaches under-13s).
+
+## From TikTok creators (16 Nov, claims, not verified; from [[Brain/Training inbox]])
+- **The game page is "slept on":** creators say the icon, thumbnail and description matter a lot and most devs neglect them. One says: "good thumbnail bad game or bad thumbnail good game" is how it works now. Matches our Galaxy leak above (the page lost ~94% of clickers).
+- **Ads testing:** one creator says spend at least about 15 EUR over 2-3 days per test for enough data (our own rule above is stricter: 3+ days, $30-50/day). Another says paying a creator with a big following 20-30 GBP can beat ads. A commenter says run ads during dev hour.
+- **Post TikToks BEFORE release:** early clips give the algorithm stats before launch. (That clip was also an ad for a paid promo tool.)
+- **Organic short-video marketing** instead of paid ads: a popular "ungatekeeping the organic Roblox marketing method" clip (about 6.4K likes). Only the intro was seen; **watch it fully next time**.
+- **Caution:** many dev-tip TikToks are ads for AI game tools ("100x cooler GUI"). Commenters say pure cash-grab games fail; effort and creativity win.

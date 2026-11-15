@@ -1,6 +1,6 @@
 ---
 tags: [brain, knowledge, ideas, trends]
-updated: 2026-11-11
+updated: 2026-11-16
 ---
 # K09 Game ideas and trends
 Back to [[00 BRAIN]] · Method: [[Dead game method]] · Sources: [[2026-11-06 Research - 20 trending Roblox games (videos watched)]], [[2026-11-06 PLAN - Trend research applied to Galaxy Incremental and +1 SHRINK]], [[2026-11-06 Research - Next game ideas from live Roblox charts]], [[2026-11-06 Research - Mogging games (next game idea)]], [[2026-11-04 Reincarnated Tycoon - next game check]], [[2026-11-09 Research - Dead game method (shut-down multiplayer games as an idea library)]], [[Playbook notes - Genres and trends]]
@@ -23,3 +23,8 @@ Back to [[00 BRAIN]] · Method: [[Dead game method]] · Sources: [[2026-11-06 Re
 - Died from: paywalls, PC-only/Flash, server + moderation costs (Roblox fixes these) and from skill barriers, needing a full team, slow updates, cosmetic-only money, empty queues (Roblox does NOT fix these).
 - Titan Simulator (Roblox 2017, 91.7M visits): loved because **the body is the leaderboard** (you grow, everyone sees it, the giant stomps). Died because its makers left to make Blox Fruits, plus a hard cap and nothing to chase. Titan Simulator X (2023): 96% likes, dead 4 months after updates stopped. **Makers leaving is the #1 killer and Roblox does not fix it.**
 - Market 11 Nov: a straight up-to-date Titan Simulator copy exists (Titanus Simulator, May 2026, weekly updates) and has 2 players and 58% likes. The same fantasy in a 2026 format works: +1 Titan Evolution 1.9K, Grow And Build Giants 2.5K, Muscle Legends 2.5K after 7 years. Rebuild the fantasy, never copy the recipe.
+
+## From TikTok creators (16 Nov, claims, not verified; from [[Brain/Training inbox]])
+- **Fast simple incremental ideas:** copy a simple incremental idea (e.g. "eat your way out of a giant jelly") and ship fast. A commenter claims they made one in a day and sold it for 6k a week. Others call AI-made games slop, so quality still matters (owner's taste: never cheap).
+- **"Steal a X" games are oversaturated but still heavily played:** make a more unique concept. Commenters claim cheap AI-built games hit 5,000 CCU in 3 days; unverified.
+- **Idea source:** copy an indie game from Steam for ideas (rebuild the fantasy, never the recipe), like the [[Dead game method]].

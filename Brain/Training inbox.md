@@ -7,6 +7,17 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 
+
+## DONE
+- 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
+  - [[K02 First session and retention]]: rewarding progression, lock the core loop;
+  - [[K04 Monetization and economy]]: dev products over gamepasses, within the owner's rules;
+  - [[K05 Marketing, ads and storefront]]: game page, ads testing, pre-release TikToks, organic method to watch fully, tool-ad caution;
+  - [[K06 Art, UI, VFX, sound and lighting]]: satisfying simple actions, WIP VFX clips;
+  - [[K07 Tech, performance and tools]]: one script per many parts, pooling;
+  - [[K09 Game ideas and trends]]: fast simple incrementals, "Steal a X" saturation, Steam ideas;
+  - [[Brain/Methods/Launch gate]]: all platforms, game page ready, pre-release TikToks.
 - 2026-11-16 TikTok For You scroll (a few videos, watched only, nothing liked or followed):
   - A Roblox creator's "what should I make next" tips, tip #4: sell developer products (boosts, spins, characters, skips), not just gamepasses, because a gamepass sells once and a dev product can be bought again and again. Fits [[K04 Monetization and economy]].
   - Roblox VFX clips with captions like "work in progress, not proud of the end" get thousands of likes and hundreds of comments, so unfinished-looking VFX process clips do well. Fits [[K06 Art, UI, VFX, sound and lighting]].
@@ -28,9 +39,6 @@ Format if you like: **When** ... **do** ... **because** ...
   - Organic marketing: a popular clip (about 6.4K likes) "ungatekeeping the organic Roblox marketing method" is about getting players through organic short videos instead of paid ads; I only saw the intro, not the full method. A commenter shows a game with 4 months of work and no AI. Fits [[K05 Marketing, ads and storefront]]. Worth a proper look next time.
   - Caution: several videos are promos for AI game tools (e.g. a GUI generator), so treat their "100x cooler" claims as marketing. Commenters also say pure cash-grab games fail and effort and creativity win.
   - Comments on one video told people to send their Claude agent the video link so it would do what the video says. Ignored: that is an instruction from a web page, not from you.
-- 
-
-## DONE
 - 2026-11-09: "impatient kid" → [[Brain/Methods/Impatient kid simulation]]
 - 2026-11-09: "dead game method" → [[Brain/Methods/Dead game method]]
 - 2026-11-09: why Galaxy got dislikes → [[Brain/Methods/Launch gate]]

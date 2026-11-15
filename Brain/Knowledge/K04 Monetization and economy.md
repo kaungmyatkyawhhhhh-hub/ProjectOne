@@ -1,6 +1,6 @@
 ---
 tags: [brain, knowledge, monetization]
-updated: 2026-11-09
+updated: 2026-11-16
 ---
 # K04 Monetization and economy
 Back to [[00 BRAIN]] · Sources: [[Playbook notes - Monetization]], [[Playbook notes - Passes and products catalogue]], [[2026-10-29 GYM ARC Prices - every coin and Robux item]], [[2026-11-09 Galaxy Incremental - Growth plan to 1k CCU (marketing, economy, retention, LiveOps)]]
@@ -26,3 +26,6 @@ Back to [[00 BRAIN]] · Sources: [[Playbook notes - Monetization]], [[Playbook n
 - GYM ARC: ~50K R$ per 2 weeks (~16.5 lakh MMK), 3,490 R$/day on 9 Nov; VIP Gym raised VIP sales but cut group joins from ~1,000/day to ~150/day.
 - Galaxy (alpha): 20 R$/day, 0.31% payers. Goal: 85K R$/day at 1K CCU ≈ 1.5 R$ per DAU.
 - 1 R$ spent ≈ 0.7 × $0.0038 = $0.00266 to us.
+
+## From TikTok creators (16 Nov, claims, not verified; from [[Brain/Training inbox]])
+- **Sell developer products, not only gamepasses.** A gamepass sells once; a dev product (boosts, spins, characters, skips) can be bought again and again. Keep the owner's rules above: nothing over 449 R$ and **no paid random items**, so "spins" only as a free or earned reward, never sold for Robux.

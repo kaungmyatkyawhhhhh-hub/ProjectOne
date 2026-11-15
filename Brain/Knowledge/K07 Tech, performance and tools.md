@@ -1,6 +1,6 @@
 ---
 tags: [brain, knowledge, tech, performance, tools]
-updated: 2026-11-09
+updated: 2026-11-16
 ---
 # K07 Tech, performance and tools
 Back to [[00 BRAIN]] · Sources: [[Playbook notes - Performance, data and security]], [[Playbook notes - Optimization deep dive]], [[Playbook notes - Game quality and QA]], [[Video editing tools (Claude workspace)]], [[2026-11-03 Blender MCP on the owner's PC vs cloud Blender]]
@@ -26,3 +26,8 @@ Back to [[00 BRAIN]] · Sources: [[Playbook notes - Performance, data and securi
 - **Blender MCP** on the owner's PC (also used for big file transfers and blocked downloads).
 - **Big files** over 400 MB: split on the PC, stage, join.
 - **Roblox Studio MCP on the new PC (12 Nov)**: it is built into Studio now (Assistant > ... > Manage MCP Servers > Enable Studio as MCP server; was already on). Quick connect there only listed Claude Code CLI, Cursor and VS Code, no Claude Desktop toggle, so the desktop app needs the manual entry in its config: `"Roblox_Studio": {"command": "cmd.exe", "args": ["/c", "cd /d %LOCALAPPDATA%\\Roblox && .\\mcp.bat"]}` inside `mcpServers`, then quit Claude from the tray and reopen. The `claude mcp add ... Roblox_Studio ...` line Studio shows is for Claude Code only. Docs: create.roblox.com/docs/studio/mcp
+
+## From TikTok creators (16 Nov, from [[Brain/Training inbox]])
+- **No copies of the same script in many parts.** One script manages all of them, found by CollectionService tags or one folder. Easier to fix, cheaper to run.
+- **Object pooling:** reuse parts (and Sounds, VFX) instead of creating and destroying them all the time; Roblox has to allocate and clean up memory each time. We already do this for sounds (pooled `Sounds` module, roblox-game-sounds) and should for frequent VFX.
+- **Our setup is the one creators recommend:** "5 vibecoder things" = Claude or Codex on a Pro/Max plan + Roblox MCP + a custom skills library.

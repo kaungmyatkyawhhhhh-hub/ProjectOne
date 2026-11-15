@@ -1,6 +1,6 @@
 ---
 tags: [brain, knowledge, art, ui, vfx, sound, lighting]
-updated: 2026-11-12
+updated: 2026-11-16
 ---
 # K06 Art, UI, VFX, sound and lighting
 Back to [[00 BRAIN]] · Lessons: [[Lessons - Galaxy to +1 SHRINK (feel - sound, VFX, screen FX, lighting)]] · Sources: [[Playbook notes - UI deep dive]], [[Playbook notes - Visual effects]], [[Playbook notes - Sound and music]], [[Playbook notes - Lighting, cameras and cutscenes]], [[Playbook notes - Top games art study (Oct 2026)]], [[Map placement rules (every game)]], [[Prompt for a friend's Claude - ChatGPT art pipeline for Roblox]]
@@ -90,3 +90,6 @@ The reference's Pets window = a flat panel on the left + ONE real 3D card on the
 - **2D that looks 3D (12 Nov, EXP stars):** render the real 3D object once in Blender (Cycles, gloss + clear coat, 3-point light) as a 16-frame spin flipbook (a symmetric object only needs a half turn), add a dark outline in Python, play it with ImageRectOffset. Each copy starts on a random frame at its own speed and direction. Same look as a ViewportFrame, none of its cost.
 - **Phones: what the fog hides is still drawn.** Measure with `Stats.SceneTriangleCount`, hide groups one at a time to find the cost, then (1) a client culler: `LocalTransparencyModifier = 1` past the distance where the fog test pillars were faint (MEGA BITE: 600 studs) or when a piece is under ~10 px on screen, never the skyline pieces; (2) lower-poly versions of meshes that repeat hundreds of times (Blender Decimate, collapse, UV seams kept; swap in place with `MeshPart:ApplyMesh`). MEGA BITE spawn reef: 2.2 M -> 0.5 M triangles, looks the same.
 - **Studio MCP:** `ScriptEditorService:UpdateSourceAsync` can hang (80 s timeouts, link drop); setting `.Source` directly works. `ContentProvider:PreloadAsync` "Failure" for an image does NOT mean it won't render: look at it in the viewport before re-uploading.
+- **From TikTok (16 Nov, creators' claims, filed from [[Brain/Training inbox]]):**
+  - "Make simple actions satisfying." A popular clip (about 8.6K likes) shows Nintendo-style animation timing on basic actions. Same rule as the Lessons on feel: every tap or jump gets timing, sound and a small reaction.
+  - Unfinished-looking VFX process clips ("work in progress, not proud of the end") get thousands of likes and hundreds of comments. "Claude + Blender makes you tuff aura" VFX clips are a trend with this audience. So: post VFX work-in-progress clips, not only polished ones (see skill roblox-vfx-reveal, section 7).

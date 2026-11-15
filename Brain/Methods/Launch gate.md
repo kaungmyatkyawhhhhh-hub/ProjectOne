@@ -20,3 +20,6 @@ created: 2026-11-09
 - [ ] Like prompt only after the first big moment, no reward.
 - [ ] No Test switches on in Workspace; File > Save done.
 - [ ] Title without [ALPHA]-style tags unless it's a real limited test.
+- [ ] Tested on **every platform**: phone, tablet, PC (and console if supported). Creators' "5 things before you publish" list puts this at #2 (16 Nov TikTok).
+- [ ] Game page ready: icon, thumbnail and description done with the icon skill, not left for later. Creators say game pages are "slept on" ([[K05 Marketing, ads and storefront]]).
+- [ ] Optional: a few TikToks posted before release, so the algorithm has early stats (creator claim, 16 Nov).

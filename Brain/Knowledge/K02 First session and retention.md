@@ -1,6 +1,6 @@
 ---
 tags: [brain, knowledge, retention, onboarding]
-updated: 2026-11-09
+updated: 2026-11-16
 ---
 # K02 First session and retention
 Back to [[00 BRAIN]] · Methods: [[Impatient kid simulation]], [[Launch gate]] · Sources: [[Playbook notes - Onboarding, retention and live ops]], [[SPEED ARC - Lessons from GYM ARC]], [[2026-10-29 GYM ARC Why players stop grinding - research]], [[2026-11-02 Research - Immortality Incremental and Regrowth, why players keep playing]]
@@ -39,3 +39,7 @@ Back to [[00 BRAIN]] · Methods: [[Impatient kid simulation]], [[Launch gate]] �
 
 ## Social
 - Co-play days are a ranking signal. Server-wide goals (Star Surge, the Great Star), island visiting + stars, "strongest in this server" crowns, a big plaza to show off.
+
+## From TikTok creators (16 Nov, claims, not verified; from [[Brain/Training inbox]])
+- **Make progression feel rewarding:** one dev with about 170 achievements, quests, weekly tasks and a daily wheel says players feel rewarded all the time. Fits point 5 above (something new often) and the come-back hooks.
+- **Lock the core loop before adding features:** "stop adding things to your game". A tight loop beats a pile of half-features. Use it as a check before every update: does this make the core loop better?
