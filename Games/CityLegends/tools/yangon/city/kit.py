@@ -48,13 +48,17 @@ def bar(grp, a, b, w=0.04):
 
 
 def stains(x0, x1, z, y, depth=1.2):
-    """Black rain streaks hanging under a ledge (the one detail that makes it Yangon)."""
-    x = x0
-    while x < x1 - 0.2:
-        w = R.uniform(0.15, 0.7)
-        L = R.uniform(0.3, depth)
-        front_quad("KST", x, min(x1, x + w), z - L, z, y - 0.012)
-        x += w + R.uniform(0.2, 1.4)
+    """Black rain streaks hanging under a ledge (the one detail that makes it Yangon): thin strips in two shades, a
+    soft wide one behind a few dark narrow ones, longest where the ledge drips most."""
+    x = x0 + R.uniform(0.0, 0.4)
+    while x < x1 - 0.15:
+        w = R.uniform(0.25, 0.9)
+        L = R.uniform(0.4, depth)
+        front_quad("KSU", x, min(x1, x + w), z - L, z, y - 0.010)
+        for _ in range(R.randint(1, 3)):
+            xs = x + R.uniform(0.0, max(0.05, w - 0.08))
+            front_quad("KST", xs, min(x1, xs + R.uniform(0.03, 0.12)), z - L * R.uniform(0.6, 1.4), z, y - 0.014)
+        x += w + R.uniform(0.1, 1.2)
 
 
 def ac_unit(x, z, y):
@@ -62,16 +66,29 @@ def ac_unit(x, z, y):
 
 
 def laundry(x0, x1, z, y):
-    x = x0
+    if R.random() < 0.45:
+        return
+    x = x0 + R.uniform(0, (x1 - x0) * 0.5)
     while x < x1 - 0.3:
         w = R.uniform(0.3, 0.6)
         front_quad(R.choice(["KL1", "KL2", "KL3"]), x, x + w, z - R.uniform(0.5, 0.9), z, y - 0.01)
         x += w + R.uniform(0.05, 0.25)
 
 
-def window(x, z, y, w, h, grille=True, shutter=False):
-    """A window set 0.12 into the wall: dark glass, a frame, an iron grille or teak louvred shutters."""
+LIT = 0.22  # share of windows lit at night (tag FacadeNight panes; the vault's night measurements: 15-25%)
+
+
+def window(x, z, y, w, h, grille=True, shutter=False, awning=None):
+    """A window set 0.12 into the wall: dark glass, a frame, an iron grille or teak louvred shutters, maybe a blue
+    plastic awning; some are lit at night (a Neon pane just in front of the glass, hidden by day)."""
     front_quad("KGL", x, x + w, z, z + h, y + 0.12)
+    if R.random() < LIT:
+        front_quad(R.choice(["NWH", "NWH", "NWA", "NWY", "NWC"]), x + 0.03, x + w - 0.03, z + 0.03, z + h - 0.03, y + 0.1)
+    if awning or (awning is None and R.random() < 0.25):
+        g.quad("KAW", (m(x - 0.15), m(y - 0.7), m(z + h + 0.05)), (m(x + w + 0.15), m(y - 0.7), m(z + h + 0.05)),
+               (m(x + w + 0.15), m(y), m(z + h + 0.45)), (m(x - 0.15), m(y), m(z + h + 0.45)))
+        g.quad("KAW", (m(x + w + 0.15), m(y - 0.7), m(z + h + 0.05)), (m(x - 0.15), m(y - 0.7), m(z + h + 0.05)),
+               (m(x - 0.15), m(y), m(z + h + 0.45)), (m(x + w + 0.15), m(y), m(z + h + 0.45)))
     for (a, b, c, d) in ((x, x + w, z - 0.06, z), (x, x + w, z + h, z + h + 0.06)):
         box("KFR", a, y - 0.02, c, b - a, 0.14, d - c)
     if grille:
@@ -122,12 +139,17 @@ def roof_clutter(x0, y0, w, d, z, n_tanks=2, dish=True):
 
 
 # ------------------------------------------------------------------------------------------------- the archetypes
-def walkup(x0, y0, bays=4, floors=6, wall="KW2"):
+WALLS = ["KW1", "KW2", "KW3", "KW4", "KW5", "KW6"]
+
+
+def walkup(x0, y0, bays=4, floors=6, wall=None):
     """Type 2: a 1960s-90s concrete walk-up. Bay 3.0, GF 3.9 (shops), upper 3.0, cages and balconies, tanks on top."""
     BAY, GF, FH, D = 3.0, 3.9, 3.0, 20.0
+    wall = wall or R.choice(WALLS)
     W = bays * BAY
     H = GF + FH * (floors - 1)
-    box(wall, x0, y0, 0, W, D, H)
+    box(wall, x0, y0, GF, W, D, H - GF)
+    box(R.choice(WALLS), x0, y0, 0, W, D, GF)
     box("KW0", x0 - 0.1, y0 - 0.1, H, W + 0.2, D + 0.2, 0.15)
     for (a, b) in ((x0, x0 + 0.15), (x0 + W - 0.15, x0 + W)):
         box(wall, a, y0, H, b - a, D, 0.9)
@@ -150,11 +172,23 @@ def walkup(x0, y0, bays=4, floors=6, wall="KW2"):
                 cage(x + 0.15, z, y0, BAY - 0.3, FH - 0.2, R.uniform(0.6, 0.9))
                 window(x + 0.6, z + 0.9, y0, 1.6, 1.3, grille=False)
                 laundry(x + 0.3, x + BAY - 0.3, z + 2.2, y0 - 0.7)
-            elif kind < 0.7:
+            elif kind < 0.55:
+                # an enclosed balcony with horizontal concrete louvres (photo balcony_grilles_grime)
+                box(wall, x + 0.1, y0 - 1.0, z, BAY - 0.2, 1.0, 0.15)
+                for k2 in range(6):
+                    zz = z + 0.3 + k2 * 0.42
+                    box(wall, x + 0.1, y0 - 1.05, zz, BAY - 0.2, 0.12, 0.12)
+                for (a, b) in ((x + 0.1, x + 0.25), (x + BAY - 0.25, x + BAY - 0.1)):
+                    box(wall, a, y0 - 1.0, z + 0.15, b - a, 1.0, FH - 0.3)
+                box(wall, x + 0.1, y0 - 1.0, z + FH - 0.3, BAY - 0.2, 1.0, 0.15)
+                stains(x + 0.1, x + BAY - 0.1, z, y0 - 1.05, 1.0)
+            elif kind < 0.75:
                 box(wall, x + 0.1, y0 - 1.1, z, BAY - 0.2, 1.1, 0.15)
                 box(wall, x + 0.1, y0 - 1.1, z + 0.15, BAY - 0.2, 0.1, 0.9)
                 stains(x + 0.1, x + BAY - 0.1, z, y0 - 1.1, 0.8)
-                window(x + 0.6, z + 0.2, y0, 1.6, 2.1, grille=True)
+                window(x + 0.6, z + 0.2, y0, 1.6, 2.1, grille=True, awning=False)
+                for k2 in range(R.randint(0, 3)):
+                    cyl("KPL", x + 0.4 + k2 * 0.7, y0 - 0.8, z + 0.15, 0.5, 0.22, 6)
             else:
                 window(x + 0.7, z + 0.9, y0, 1.5, 1.3, grille=True)
                 ac_unit(x + 1.0, z + 0.3, y0)
@@ -163,9 +197,10 @@ def walkup(x0, y0, bays=4, floors=6, wall="KW2"):
     return W, D, H
 
 
-def township_shop(x0, y0, floors=3, wall="KW4"):
+def township_shop(x0, y0, floors=3, wall=None):
     """Type 3: a township shophouse (Kamayut / Yankin): one plot 5 m wide, GF 3.6 open shop, a big signboard."""
     W, D, GF, FH = 5.0, 18.0, 3.6, 3.1
+    wall = wall or R.choice(WALLS)
     H = GF + FH * (floors - 1)
     box(wall, x0, y0, 0, W, D, H)
     box("KW0", x0 - 0.05, y0 - 0.05, H, W + 0.1, D + 0.1, 0.12)
