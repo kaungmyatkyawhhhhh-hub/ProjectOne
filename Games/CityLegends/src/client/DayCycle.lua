@@ -134,7 +134,6 @@ local function rivieraSky(hour: number): string
 end
 local SKY_FACES = { "SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp" }
 DayCycle.RIVIERA_X = 9000 -- east of this the camera is on the Riviera map
-DayCycle.YANGON_X = 25000 -- east of this, Yangon's own daylight (blended over 1500 studs)
 -- Yangon's day colours, laid over the Riviera's light from about 8:00 to 16:30 (faded in from 6:24 and out by
 -- 17:36, so dawn and the sunset keep their colours); the sky's ambient fill drops to YANGON_SKY_FILL
 local YANGON_DAY = table.freeze({
@@ -364,7 +363,7 @@ function DayCycle.start()
 		-- Yangon's daylight (owner, 2026-11-16: "Warm the Yangon daylight"): the Riviera keys made every white
 		-- render pale blue there (sky fill and a blue haze); real Yangon is warm and hazy, whites neutral in sun
 		-- and grey in shade (tools/yangon/Swatches.luau + PlayLight.luau measured it)
-		local wy = if cam then math.clamp((cam.CFrame.Position.X - (DayCycle.YANGON_X - 1500)) / 1500, 0, 1) else 0
+		local wy = if cam and Config.isYangonAt(cam.CFrame.Position) then 1 else 0
 		local mid = math.clamp(math.min((hour - 6.4) / 1.6, (17.6 - hour) / 1.1), 0, 1) * wy
 		if mid > 0 then
 			for key, v in YANGON_DAY do

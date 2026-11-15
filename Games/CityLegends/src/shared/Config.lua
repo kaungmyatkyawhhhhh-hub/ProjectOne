@@ -129,6 +129,30 @@ end
 function Config.monacoOnly(): boolean
 	return not Config.World.OldCity and Config.activeMap() ~= nil
 end
+-- (2026-11-16, the 1:1 rescale, owner: "Everything at player scale") which map a point belongs to, by area instead
+-- of the old "x > 25000" tests, so the new 3-studs-a-metre Yangon can be built beside the old one. YangonAreas: boxes
+-- { minX, maxX, minZ, maxZ }; the lane width per map (Yangon 16 now, 12 at the new scale). (A function: Config's main
+-- chunk is at its constant limit.)
+Config.Areas = (function()
+	return {
+		YangonAreas = { { 25000, math.huge, -math.huge, math.huge } },
+		LaneWidthYangon = 16,
+	}
+end)()
+function Config.isYangonAt(pos: Vector3): boolean
+	for _, b in Config.Areas.YangonAreas do
+		if pos.X >= b[1] and pos.X <= b[2] and pos.Z >= b[3] and pos.Z <= b[4] then
+			return true
+		end
+	end
+	return false
+end
+function Config.mapAt(pos: Vector3): string
+	return if Config.isYangonAt(pos) then "Yangon" else "Riviera"
+end
+function Config.laneWidth(): number
+	return if Config.activeMap() == "Yangon" then Config.Areas.LaneWidthYangon else Config.City.LaneWidth
+end
 
 -- the venues in Monaco (owner, 2026-11-02: "Move the venues ... I may replace some of the venues
 -- soon"): with the Riviera in the place, these sites replace the old city's blocks and Downtown's

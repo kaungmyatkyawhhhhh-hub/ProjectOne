@@ -102,6 +102,7 @@ function M.place(holding: Instance, folder: Instance, textureIds: { color: any, 
 				q.Anchored = true
 				q.CanCollide = false
 				q.CanQuery = false
+				pcall(function() q.CollisionFidelity = Enum.CollisionFidelity.Box end) -- visual only: no hull data (2026-11-16)
 				q.CanTouch = false
 				q.CastShadow = kind == "F"
 				q.DoubleSided = false

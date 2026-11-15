@@ -23,6 +23,7 @@ from shapely.ops import unary_union
 from shapely.strtree import STRtree
 
 from geo import load, proj, in_box
+import geo  # noqa: E402
 
 PUBLIC = {'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'living_street', 'trunk_link',
           'primary_link', 'secondary_link', 'tertiary_link'}
@@ -283,12 +284,12 @@ if __name__ == '__main__':
         by[s['cls']][0] += 1
         by[s['cls']][1] += L
     for k, (n, L) in by.items():
-        print(f'{k:7s} {n:5d} pieces {L / 1.6 / 1000:6.1f} km real')
+        print(f'{k:7s} {n:5d} pieces {L / geo.SPM / 1000:6.1f} km real')
     print('covered OSM ways:', len(set(net['covered'])))
     big = {}
     for s in net['new']:
         if s['cls'] == 'big':
-            big[s['name']] = big.get(s['name'], 0) + LineString(s['pts']).length / 1.6
+            big[s['name']] = big.get(s['name'], 0) + LineString(s['pts']).length / geo.SPM
     for k, v in sorted(big.items(), key=lambda kv: -kv[1]):
         print('  big not in game:', k, round(v), 'm')
     os.makedirs(os.path.join(BUILD, 'city'), exist_ok=True)

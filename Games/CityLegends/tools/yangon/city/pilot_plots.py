@@ -18,6 +18,8 @@ import sys
 from shapely.geometry import Polygon
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import geo  # noqa: E402
 ROOT = os.path.normpath(os.path.join(HERE, "..", "..", ".."))
 args = [a for i, a in enumerate(sys.argv) if i > 0 and not a.startswith("--") and not sys.argv[i - 1].startswith("--")]
 opts = {sys.argv[i]: sys.argv[i + 1] for i in range(1, len(sys.argv) - 1) if sys.argv[i].startswith("--")}
@@ -30,7 +32,7 @@ KY = 110540
 
 
 def world(lon, lat):
-    return (30000 + (lon - 96.14) * KX * 1.6, -(lat - 16.82) * KY * 1.6)
+    return geo.world(lon, lat)
 
 
 osm = json.load(open(os.path.join(ROOT, "build", "osm_ygn", "buildings.json"), encoding="utf-8"))["buildings"]

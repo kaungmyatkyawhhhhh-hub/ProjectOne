@@ -141,6 +141,7 @@ function M.place(holding: Instance, folder: Instance, modelName: string): number
 				q.Anchored = true
 				q.CanCollide = false
 				q.CanQuery = false
+				pcall(function() q.CollisionFidelity = Enum.CollisionFidelity.Box end) -- visual only: no hull data (2026-11-16)
 				q.CanTouch = false
 				q.TextureID = ""
 				q.Material = Enum.Material[spec[1]]

@@ -30,7 +30,7 @@ from scipy.ndimage import minimum_filter, gaussian_filter, distance_transform_ed
 
 import geo
 
-VS = 1.6
+VS = geo.VS
 BLEND = 480.0          # studs outside BOX_05 over which the new field fades onto batch 0.5's
 SIGMA_M = 150.0
 WATER_MIN = 1.0        # metres
@@ -163,7 +163,7 @@ class Ground:
     def _f05(self, X, Z):
         """batch 0.5's ground (metres) at world X, Z, clamped to its grid (d4 sampler)"""
         x = (X - geo.OX) / geo.SPM
-        y = -Z / geo.SPM
+        y = -(Z - geo.OZ) / geo.SPM
         gx, gy, F = self.g05_x, self.g05_y, self.g05
         fi = np.clip((x - gx[0]) / (gx[1] - gx[0]), 0, len(gx) - 1.001)
         fj = np.clip((y - gy[0]) / (gy[1] - gy[0]), 0, len(gy) - 1.001)

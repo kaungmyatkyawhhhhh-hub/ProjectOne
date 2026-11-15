@@ -486,7 +486,7 @@ function Minimap.start()
 	table.insert(fixed, { frame = makeBlip(layer, "R", Color3.fromRGB(255, 170, 90), 13, 21), pos = (Config :: any).Service.Bay, edge = false })
 	for _, st in (Config :: any).Fuel.Stations do
 		-- (a station's map must be in the place: Monaco's are kept in ServerStorage since Yangon step 11)
-		local here = if st.pumps[1].X > 25000 then workspace:FindFirstChild("Yangon") else workspace:FindFirstChild("Riviera")
+		local here = workspace:FindFirstChild(Config.mapAt(st.pumps[1]))
 		if here then
 			table.insert(fixed, { frame = makeBlip(layer, "F", Color3.fromRGB(120, 200, 255), 13, 21), pos = st.pumps[1], edge = false })
 		end

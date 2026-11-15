@@ -818,7 +818,7 @@ local function routePose(r: Ride, d: number): (Vector3, Vector3, number)
 	local leg = route.legs[k]
 	if leg.shift then
 		local into = d - r.legStart[k]
-		p += leg.shift * (1 - smoothstep(into / (Config.City.LaneWidth * 3)))
+		p += leg.shift * (1 - smoothstep(into / (Config.laneWidth() * 3)))
 	end
 	return p, dir, k
 end
@@ -955,7 +955,7 @@ local function splitTarget(r: Ride, k: number, pos: Vector3, dir: Vector3): numb
 	if not (blocker and blocker.speed < ChauffeurRoute.speedOf(seg) - 4) then
 		return 0
 	end
-	local half = Config.City.LaneWidth / 2
+	local half = Config.laneWidth() / 2
 	local hasRight = false
 	local beside: { CityLayout.Segment } = ChauffeurRoute.graph().lanesBeside[seg] or {}
 	for _, other in beside do

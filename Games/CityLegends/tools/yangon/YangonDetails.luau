@@ -118,6 +118,8 @@ local function kitTree(kit: Instance, name: string, x: number, g: number, z: num
 			end
 			if d.Size.Y < sz.Y * 0.6 or d.Position.Y > g + sz.Y * 0.45 then
 				d.CanCollide = false
+				d.CanQuery = false
+				pcall(function() d.CollisionFidelity = Enum.CollisionFidelity.Box end) -- visual only (2026-11-16)
 			end
 		end
 	end

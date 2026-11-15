@@ -20,6 +20,9 @@ Run from Games/CityLegends:  python tools/yangon/d20_green.py
 import glob, json, math, os, random, re, xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+import sys  # noqa: E402
+sys.path.insert(0, os.path.join(HERE, "city"))
+import geo  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(HERE))
 MAP = os.path.join(ROOT, 'imports', 'refs', 'map')
 OUT = os.path.join(ROOT, 'build', 'yangon_green')
@@ -31,7 +34,7 @@ rng = random.Random(20261114)
 
 
 def world(lon, lat):
-    return (30000 + (lon - LON0) * KX * SPM, -(lat - LAT0) * KY * SPM)
+    return geo.world(lon, lat)
 
 
 src = open(os.path.join(HERE, 'd19_buildings.py'), encoding='utf-8').read()
