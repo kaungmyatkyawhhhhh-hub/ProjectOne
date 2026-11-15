@@ -33,6 +33,18 @@
 ![[Screenshots/2026-11-17 map - top-down before (12 empty pads).jpg]]
 ![[Screenshots/2026-11-17 map - after, clear runway + restyled Outfit ID (PC).jpg]]
 
+## 4. Admin and Music buttons match too
+- **Before:** plain black boxes (Music also had two outlines stacked).
+- **Now:** the dock-button look: a gradient face, a colour rim at 0.35, an ExtraBold label with an ink outline, and 10 px corners. Admin is brass; Music is pink.
+- **Where:**
+  - `CatalogAdminClient` (Admin launcher; its text still switches to Admin / Outfits / Settings by role, mirrored onto the new label);
+  - `AfterHoursClient` (Music; the extra sand stroke was removed, and the hover/focus rim still works).
+- The label is its own layer, because a UIGradient on the button would tint the text.
+- **Tested:** 0 errors, Music still opens its player, checked on PC and A06.
+- Admin only shows for staff; normal players see Music only.
+- Backups: `*_pre_topbar_17Nov` in the same backup folder.
+
+![[Screenshots/2026-11-17 HUD matched - Admin Music Outfit ID (phone A06).jpg]]
+
 ## Noticed, not changed
-- The **Admin / Music** buttons top-right are plain black boxes, so they also don't match the kit.
 - I only reviewed the penthouse floor; the lower After Hours floors weren't checked.
