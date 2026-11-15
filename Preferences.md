@@ -22,6 +22,13 @@ _When I ask Claude to chat in it through Claude in Chrome._
 - Ragebait = playful banter about topics only (anime debates, hot takes). Back off if someone says "chill" or sounds upset. The group already had one real fight; Rong called it ragebait after a few jabs.
 - Only send when I asked in that session.
 
+**Research (read 16 Nov, Oct 30 to Nov 16, over 1,000 messages):**
+- Typical message is 2 words, and 9 in 10 are 9 words or fewer. Aim for 2-9 words. About half are fully lowercase. Many are stickers or reactions.
+- "bro" is everywhere. Other slang: "mf", "peak", "aura", "alr bet", "larp", "noob", "chill".
+- Topics: Roblox and robux, AI (Grok, Claude), larping and getting rich, dollars/money, school, anime (Naruto, Luffy), games.
+- Three members send most of the volume. The group teases and ragebaits each other, and someone says "chill" when it gets heated.
+- TikTok keeps only about 1,500 lines on the page, and loading older messages drops newer ones, so read in windows. To load history: set the chat div's scrollTop to 0, wait 4-5 seconds, repeat. Keep JS calls under 30 seconds.
+
 ## Taste
 - Quality matters: I don't want anything that looks cheap or "slop".
 - For games: realistic visuals in the style of top Roblox games (e.g. Highway Legends).
