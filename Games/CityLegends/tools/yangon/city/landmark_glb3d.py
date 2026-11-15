@@ -34,7 +34,7 @@ GROUPS = {
     "SPB": ("SmoothPlastic", (173, 166, 138), 0.0, 0.04, False, True),  # tower B spandrels: satin greige, darker than A (photo 144,140,123)
     "MUL": ("SmoothPlastic", (52, 52, 44), 0.0, 0.0, False, True),  # dark mullions / frames (podium 24,33,35)
     "MUW": ("SmoothPlastic", (236, 234, 228), 0.0, 0.0, False, True),  # white frames, fascias, struts
-    "GRN": ("SmoothPlastic", (178, 165, 146), 0.0, 0.0, False, True),  # podium granite bands, warm grey (photo 161,151,141; textured materials render too dark)
+    "GRN": ("SmoothPlastic", (252, 255, 250), 0.0, 0.0, False, True),  # podium bands, white stone (owner 2026-11-16: the walls are white, not yellow)
     "CRN": ("SmoothPlastic", (226, 199, 154), 0.0, 0.04, False, True),  # tower A crown: the spandrel panels' material
     "DRK": ("SmoothPlastic", (40, 36, 32), 0.0, 0.06, False, True),  # dark polished stone / panels, skirts (west entrance columns 33,34,30)
     "CHR": ("SmoothPlastic", (92, 86, 76), 0.0, 0.0, False, True),  # charcoal-brown screen wall, mall columns (photos 108,98,83 / 53,51,45)
@@ -54,11 +54,11 @@ GROUPS = {
     "RAL": ("Glass", (176, 204, 196), 0.6, 0.05, True, False),  # glass balustrades (teal on the edge)
     "STL": ("Metal", (160, 162, 166), 0.0, 0.0, False, True),       # steel
     "STP": ("DiamondPlate", (96, 98, 104), 0.0, 0.0, False, True),  # escalator steps
-    "MAR": ("SmoothPlastic", (204, 186, 148), 0.0, 0.08, False, False),  # mall floors: honed beige granite tiles (photo 158,142,108 in evening light)
+    "MAR": ("SmoothPlastic", (218, 212, 200), 0.0, 0.08, False, False),  # mall floors: light stone, less yellow (owner 2026-11-16)
     "CAR": ("SmoothPlastic", (200, 160, 102), 0.0, 0.08, False, False),  # caramel granite floor border (photo 177,141,89)
     "GRD": ("SmoothPlastic", (150, 134, 98), 0.0, 0.12, False, False),  # the atrium's champagne-bronze grid ceiling
-    "CEL": ("SmoothPlastic", (226, 220, 212), 0.0, 0.0, False, False),  # ceilings, inner walls, partitions (warm off-white plaster)
-    "LIT": ("Neon", (196, 182, 156), 0.0, 0.0, False, False),       # light panels / strips (toned down: full white bloomed in game)
+    "CEL": ("SmoothPlastic", (238, 238, 236), 0.0, 0.0, False, False),  # ceilings, inner walls, partitions: white (owner 2026-11-16)
+    "LIT": ("Neon", (198, 196, 188), 0.0, 0.0, False, False),       # light panels / strips (toned down: full white bloomed in game)
     "SGN": ("SmoothPlastic", (30, 32, 36), 0.0, 0.0, False, True),   # shop sign bands
     "SH1": ("SmoothPlastic", (236, 206, 166), 0.0, 0.0, False, False),  # shop interiors (warm)
     "SH2": ("SmoothPlastic", (206, 218, 228), 0.0, 0.0, False, False),  # shop interiors (cool)
@@ -77,13 +77,13 @@ GROUPS = {
     "DRV": ("Asphalt", (64, 64, 66), 0.0, 0.0, False, False),       # site drives
     "BLU": ("SmoothPlastic", (40, 62, 150), 0.0, 0.0, False, True),  # blue sign board
     "WOD": ("WoodPlanks", (166, 124, 78), 0.0, 0.0, True, True),  # timber veneer (the atrium cove)
-    "SIL": ("SmoothPlastic", (255, 236, 193), 0.0, 0.03, False, True),  # podium cream sill on each granite band (photo 218,207,183)
-    "FAS": ("SmoothPlastic", (209, 194, 155), 0.0, 0.03, False, True),  # entrance canopy fascia, cream (photo 187,180,156 lit)
+    "SIL": ("SmoothPlastic", (252, 255, 255), 0.0, 0.03, False, True),  # podium sill, white
+    "FAS": ("SmoothPlastic", (252, 255, 254), 0.0, 0.03, False, True),  # entrance canopy fascia, white
     "SOF": ("SmoothPlastic", (162, 135, 89), 0.0, 0.0, False, False),  # canopy soffit, warm-lit (photo 125,110,81)
     "STR": ("SmoothPlastic", (186, 178, 148), 0.0, 0.03, False, True),  # canopy struts, painted steel tubes
     "GLM": ("Glass", (97, 111, 113), 0.0, 0.2, False, True),  # Melia glass, blue-grey (79,100,111)
     "ESC": ("SmoothPlastic", (96, 58, 42), 0.0, 0.05, False, True),  # escalator side cladding, dark red-brown (photo 61,35,25)
-    "GFA": ("SmoothPlastic", (214, 204, 188), 0.0, 0.0, False, False),  # gallery edge fascias, warm off-white plaster
+    "GFA": ("SmoothPlastic", (236, 236, 234), 0.0, 0.0, False, False),  # gallery edge fascias: white (owner 2026-11-16)
     "RTL": ("SmoothPlastic", (190, 82, 50), 0.0, 0.03, False, True),  # red-orange clay tiles (the gate's guard hut)
     # night windows (tag FacadeNight: shown at night, hidden by day). Photos at night: offices mix amber, pale yellow and
     # cool fluorescent; hotel rooms are warm (look_bible.json sedona_night)

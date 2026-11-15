@@ -501,3 +501,10 @@ Next (in order):
 - **Sedona gate:** a white wall with tiered pillars, gates, the cream SEDONA sign wall, a red-roof guard hut and barriers.
 - **Play test (test save, live save put back):** walked in through the entrance, shoppers on every floor, night lights and glowing letters switch on; no new errors.
 - **Owner, same day: "the scaling measurements must be 1:1 accurate too" -> "Everything at player scale".** The whole Yangon map will be rebuilt at about 3 studs per metre (cars' and players' scale), district by district. The landmark tools carry over (they are built in metres-based plans and will be re-run at the new scale).
+
+## 2026-11-16 (later): owner's Myanmar Plaza fixes (place version 949)
+- **Escalators:** rebuilt as real escalators, 6 studs wide (were 2.8, thinner than a player): steps with risers, red-brown truss cladding, a steel deck strip, glass balustrades, black handrails that roll over at both ends, two flat steps and a steel plate at each end, a 30-degree slope.
+- **White walls:** the mall's inside walls, ceilings and fascias are white, the floor a light stone, and the mall lights neutral white (no yellow cast). The podium bands outside are white.
+- **No ad boards:** the made-up picture boards, the corner screen wall and the roof billboards are gone.
+- **New standing rule:** interiors only where real photos exist online (CLAUDE.md "Interiors rule"). The Meliá's interior and its link to the mall are being researched from photos, and it will be built enterable from them.
+- **Kit pilot:** in Studio on a test platform at X 36880-38260, Y 600 (`Workspace.KitPilot`) for checks; colours weathered (less saturated), rain streaks see-through.
