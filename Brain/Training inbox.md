@@ -15,6 +15,15 @@ Format if you like: **When** ... **do** ... **because** ...
   - A popular tutorial (about 8.3K likes, 6.4K saves) on "good looking UI buttons in Roblox Studio, stud style" builds them from an ImageButton plus styled images, which is the same "reuse designed components" idea as our UI kit rule. Fits [[K06 Art, UI, VFX, sound and lighting]].
   - A "clean UI with Claude" video (about 11.9K likes): a top comment says screenshot a UI you like and tell the AI to make all UIs in that style. Our vault rule already is "copy the closest existing screen"; this supports it. Fits [[K06 Art, UI, VFX, sound and lighting]].
   - A "free sauce" AI-made shop UI got comments like "the UI is NOT good" and "without AI btw", so AI-made UI is judged harshly by viewers when it looks generic. Fits the owner's "no cheap or slop" taste and [[K06 Art, UI, VFX, sound and lighting]].
+- 2026-11-16 06:20 TikTok round 2b (search "roblox game thumbnail icon tips", watched only; creator claims, unverified):
+  - A "high CTR thumbnail" workflow (about 3K likes): make a base template in Photopea, then render the characters or models in Blender and place them on it. Matches our own Blender-render approach. Fits [[K05 Marketing, ads and storefront]].
+  - Another popular thumbnail video (about 4.4K likes) and several comment threads push a paid or free-trial AI thumbnail generator ("you can generate 1 for free"). Treat as a promo. Fits [[K05 Marketing, ads and storefront]].
+  - A "viral Roblox thumbnails" video (10-step method) has comments recommending a specific thumbnail tool and others saying you don't need a browser to generate images. Mostly tool promotion, nothing new for our ChatGPT art pipeline. Fits [[K05 Marketing, ads and storefront]].
+  - A commenter on a retention-style video says they just hit 20K CCU (unverified, a screenshot only); no method given.
+- 2026-11-16 06:25 TikTok round 2c (search "roblox vfx game feel tips", watched only; creator claims, unverified):
+  - A Roblox VFX tutorial series (about 15K likes, 7K saves) shows the how-to-do-VFX topic is hot; the top comment says people prompt Claude with "make awesome VFX and make it not look like AI". Fits [[K06 Art, UI, VFX, sound and lighting]].
+  - A "kill your AI slop game with these 3 skills" video (about 4K likes) pushes Claude skills for Blender character animation and Roblox cutscenes. Comments push back: "using AI for animations is so lazy". So viewers dislike obviously AI-made animation, which fits the owner's "no slop" taste. Fits [[K06 Art, UI, VFX, sound and lighting]].
+  - The "make your game feel satisfying" video appeared again (animation timing, make simple actions satisfying); already filed, not repeated.
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
