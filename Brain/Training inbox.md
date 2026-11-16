@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 10:13 [dashboard, unverified] Test things as you go. (topic: tiktok)
+- 2026-11-16 10:12 [dashboard, unverified] Discipline is everything. (topic: tiktok)
 - 2026-11-16 10:10 [dashboard, unverified] Roblox Studio has various plugins available to save time. (topic: tiktok)
 - 2026-11-16 10:07 [dashboard, unverified] The game is titled "Throw A Bouncy Ball" and is set to release soon. (topic: tiktok)
 - 2026-11-16 10:06 [dashboard, unverified] Roblox game template is available in the creator's bio. (topic: tiktok)
