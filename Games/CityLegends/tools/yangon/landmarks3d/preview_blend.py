@@ -26,6 +26,19 @@ for grp, tris in data["tris"].items():
     me = bpy.data.meshes.new(grp)
     me.from_pydata(verts, [], faces)
     me.update()
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-4)
+    bm.to_mesh(me)
+    bm.free()
+    for p in me.polygons:
+        p.use_smooth = True
+    try:
+        me.use_auto_smooth = True
+        me.auto_smooth_angle = 0.8
+    except Exception:
+        pass
     mat = bpy.data.materials.new("M_" + grp)
     r, g, b = data["look"][grp]
     mat.diffuse_color = (r / 255.0, g / 255.0, b / 255.0, 1.0)

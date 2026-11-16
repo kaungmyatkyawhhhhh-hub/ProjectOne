@@ -126,3 +126,66 @@ v3 gave Chaukhtatgyi bigger eyes, smaller lips, nostrils, pink inner ears and a 
   - The head-to-the-south-east direction comes from one secondary source.
 - **Not built in either hall:** the bell, the small shrines, the display cases, the peacock seat and the lamps.
 - **Ground.** Both stand on flat `_TEMP` plates. The GLO-30 ground varies by about +/-4 studs across Chaukhtatgyi, so the plates will need replacing by the 1:1 terrain.
+
+## Figures v2: rebuilt in Blender from turnaround sheets (16 Nov)
+The coordinator rejected the first figures: they "read crude / cartoonish", which is disrespectful for sacred images. Both figures were rebuilt.
+
+**Turnaround sheets** (ChatGPT in the owner's Chrome, with the real photos attached, "copied exactly"; full-res capture trick):
+- `Games/CityLegends/imports/refs/exploded/chaukhtatgyi/chaukhtatgyi_turnaround_v1.png`: front, top, feet-end, head front and head side views.
+- `Games/CityLegends/imports/refs/exploded/ngahtatgyi/ngahtatgyi_turnaround_v1.png`: front, left side, back, top, head front and head side views.
+- What the sheets showed: Chaukhtatgyi's head rests on the right hand, with the forearm up from the elbow at the head end. Ngahtatgyi has a short chest, its knees are wider than its shoulders, and it has a short neck with neck rings.
+
+**Model:** `Games/CityLegends/tools/yangon/landmarks3d/buddha_figures_blender.py`, run in headless Blender 3.6 with `-- chauk|ngah <out.json>`.
+- **Forms:** smooth metaball shells for the head, neck, arms, hands, feet and lap, converted to meshes. Chaukhtatgyi's body is a smoothed loft with drapery folds and the robe flaring onto the dais.
+- **Face:** "sculpt" brushes (gaussian displacement along the normal) for the eye sockets, nose ridge and tip, lips, chin and cheeks.
+- **Paint:** eyes, liner, blue lids, brows, lips, hair, the maroon border and the jewelled bands are colour regions on the same surface.
+  - Edges where the paint changes are split until the outlines are crisp. `bmesh subdivide_edges` re-fans the faces, so there are no T-junctions.
+  - Nothing is stacked on the skin, so nothing can flicker.
+- **Extras:**
+  - Chaukhtatgyi: a crown band placed on the real head surface by ray casting, with jewels and the lashes.
+  - Ngahtatgyi: a tiered crown with a ring of jewels, and flame leaves by the head, on the shoulders and at the elbows.
+- **The soles** are cut flat at u = 65. The old gold grid and wheel sit on them.
+- **Mirror trap:** the Chaukhtatgyi frame (x = 34 - u) is a mirror, so its triangles are turned over (`MIRROR`). Without that, the first build showed the back of the head from the front.
+
+**Output:**
+- The figure is written to `build/landmarks/figures/<chauk|ngah>_fig.json`. `bahan_buddhas3d.add_figure` loads it into the hall model.
+- The .glb shares corners on the smooth figure meshes (`solid3d.DMesh`), so the files are 2.7 / 1.8 MB. At 5.8 MB, the Open Cloud upload through the MCP timed out.
+- Shape checks: `tools/yangon/landmarks3d/fig_preview.py` (Workbench renders).
+
+**Triangles:**
+
+| | Figure | Whole hall |
+|---|---|---|
+| Chaukhtatgyi | 37,872 | 50,944 |
+| Ngahtatgyi | 43,744 | 47,841 |
+
+0 flicker pairs in both halls.
+
+**Gold:** the paler satin gold of the photos, measured on the lit photo d02 (208, 185, 133).
+- Robe FGO: SmoothPlastic (204, 164, 86), reflectance 0.12.
+- Bands, crowns and flames FGB: (222, 172, 64), reflectance 0.18.
+- No YgnGoldLeaf grain on the figures.
+- Skin: (240, 238, 232), reflectance 0.15.
+- Black: reflectance 0.04 (with 0.2 the glass eyes mirrored the sky grey).
+- The figure meshes are RenderFidelity Precise.
+
+**In Studio:**
+
+| | Live asset |
+|---|---|
+| Chaukhtatgyi v5 | **102279438796873** |
+| Ngahtatgyi v4 | **135129652866498** |
+
+The Visual folders were swapped, and collision and plates are unchanged. Older ids: 106510845884457, 108986933874388.
+
+**Pictures**, in `Games/CityLegends/build/landmarks/`:
+- `chaukhtatgyi/compare_face_v2.png`, `compare_face_sheet_v2.png`, `compare_feet_v2.png`, `ingame_inside_v2.jpg`
+- `ngahtatgyi/compare_buddha_v2.png`, `compare_face_v2.png`, `compare_face_sheet_v2.png`
+
+**Still differs (honest):**
+- **Chaukhtatgyi face:** still simpler and flatter than the photo and the sheet. Studio's flat light hides the sculpted forms (nose, cheeks).
+  - The eyes read as flat black almonds with lashes. The photo has a glossy glass eye with a highlight, a thicker winged liner and a fuller blue lid.
+  - The head-on-hand pose is close, but the head is not turned three-quarters as in the sheet.
+  - Next step: a darker grey shading paint in the eye sockets and under the nose, a white highlight in each glass eye, and a stronger nose ridge.
+- **Ngahtatgyi:** the proportions and face now follow the sheet. Missing: the jewelled collar and the chest-band filigree (the bands are plain raised gold), the shoulder flaps, the crown's filigree tiers, and the carved scrolls on the flame leaves.
+- **Both:** the robe folds are procedural ripples, not the sheet's sculpted drapery.

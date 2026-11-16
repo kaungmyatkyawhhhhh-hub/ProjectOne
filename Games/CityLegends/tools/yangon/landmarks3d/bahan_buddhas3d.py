@@ -64,7 +64,27 @@ LOOK = {
     "GBL": ("SmoothPlastic", (204, 218, 212), "", 0.1),    # glass-block band
     "CLT": ("SmoothPlastic", (240, 240, 236), "", 0),      # white cloth
     "PLN": ("SmoothPlastic", (196, 190, 180), "", 0),      # plinth sides
+    # the Blender figures (buddha_figures_blender.py): satin gold measured on the lit photo d02 (208, 185, 133), no grain
+    "FSK": ("SmoothPlastic", (240, 238, 232), "", 0.15),   # glossy white skin
+    "FGO": ("SmoothPlastic", (204, 164, 86), "", 0.12),   # satin gold robe
+    "FGB": ("SmoothPlastic", (222, 172, 64), "", 0.18),   # bright gold: crown, bands, flames
+    "FMR": ("SmoothPlastic", (112, 30, 38), "", 0.05),     # maroon robe border
+    "FBK": ("SmoothPlastic", (22, 22, 26), "", 0.04),       # black: hair, liner, brows, glass eyes, lashes
+    "FLD": ("SmoothPlastic", (170, 205, 230), "", 0.05),   # pale blue lids
+    "FLP": ("SmoothPlastic", (192, 46, 56), "", 0.1),      # red lips, red jewels
+    "FPK": ("SmoothPlastic", (232, 142, 142), "", 0.05),   # pink inner ears, nails
+    "FSO": ("SmoothPlastic", (214, 128, 112), "", 0.03),   # salmon soles
 }
+
+
+FIG_DIR = os.path.join(BUILD, "figures")
+
+
+def add_figure(m, key):
+    """Triangles (with smooth normals) of a Buddha figure made by buddha_figures_blender.py, in this model's metres."""
+    d = json.load(open(os.path.join(FIG_DIR, key + "_fig.json")))["groups"]
+    for g, tris in d.items():
+        m._put(g, [(tuple(t[0][0]), tuple(t[0][1]), tuple(t[0][2]), tuple(tuple(n) for n in t[1])) for t in tris])
 
 
 # ===================================================================== Chaukhtatgyi
@@ -184,69 +204,18 @@ def chauk():
     def F(u, y, z):
         return (XH - u, y, PZ + z)
 
-    # torso / legs loft (gold robe): (u, zc, hz, hy)
-    R = [(4.2, 5.4, 1.0, 1.0), (5.0, 5.4, 2.2, 2.2), (7.0, 6.2, 5.0, 3.6), (10.0, 6.4, 6.6, 4.3), (14.0, 6.2, 6.4, 4.6),
-         (19.0, 5.6, 5.8, 4.3), (24.0, 5.5, 5.7, 4.4), (29.0, 5.4, 5.6, 4.5), (34.0, 4.7, 4.9, 3.8), (41.5, 3.9, 4.1, 3.1),
-         (49.0, 3.4, 3.6, 2.6), (56.0, 3.0, 3.2, 2.2), (60.4, 3.4, 3.6, 2.2)]
-    m.loft("ROB", [(F(u, 0, zc), (0, hy, 0), (0, 0, hz)) for u, zc, hz, hy in R], seg=40, cap0="flat", cap1="flat")
-    # head (upright, propped), face to +y
-    HC = (4.5, 0.2, 11.0)
-    m.ellipsoid("SKN", F(*HC), (2.9, 3.0, 4.0), nu=40, nv=24)
-    # neck (down into the cushion / body)
-    m.tube("SKN", [(F(4.6, 0.0, 0.9), 2.0), (F(4.6, 0.1, 8.2), 1.9)], seg=24)
-    # crown: gold band round the forehead (photo 1) and the black hair cap above and behind it
-    prof = [(12.3, 2.98), (12.9, 3.05), (13.5, 2.82), (13.9, 2.55)]
-    m.loft("GLD", [(F(HC[0], HC[1], z), (-r * 0.95, 0, 0), (0, r, 0)) for z, r in prof], seg=36, cap0="flat", cap1="flat")
-    m.ellipsoid("BLK", F(*HC), (2.98, 3.1, 4.15), nu=36, nv=10, zcut=0.4)
-    # ears (long lobes) at the sides of the head (along x)
-    for su in (-1, 1):
-        m.ellipsoid("SKN", F(HC[0] + su * 2.85, HC[1] - 0.2, 10.2), (0.5, 0.95, 2.7), nu=16, nv=10)
-    # face features
-    for su in (-1, 1):
-        ex = HC[0] + su * 1.25
-        m.ellipsoid("BLK", F(ex, 2.80, 11.55), (0.9, 0.24, 0.36), nu=18, nv=8)           # glass eye, 1.77 x 0.58 m
-        m.ellipsoid("LID", F(ex, 2.80, 11.85), (0.95, 0.26, 0.2), nu=16, nv=8)           # pale blue lid
-        m.ellipsoid("BLK", F(ex + su * 0.1, 2.68, 12.45), (1.05, 0.18, 0.12), nu=16, nv=6)  # brow
-    m.ellipsoid("SKN", F(HC[0], 2.9, 10.3), (0.38, 0.32, 0.8), nu=14, nv=8)              # nose
-    m.ellipsoid("LIP", F(HC[0], 2.66, 9.05), (0.7, 0.22, 0.24), nu=16, nv=8)             # red lips
-    for su in (-1, 1):
-        m.ellipsoid("BLK", F(HC[0] + su * 0.28, 2.98, 9.72), (0.17, 0.12, 0.12), nu=10, nv=5)  # nostrils
-        m.ellipsoid("LIP", F(HC[0] + su * 2.85, HC[1] + 0.55, 10.5), (0.3, 0.42, 1.2), nu=12, nv=8)  # pink inner ear
-    # right arm: upper arm on the dais, forearm up to the hand under the head (gold sleeve), hand white
-    m.tube("ROB", [(F(10.5, 0.0, 1.7), 1.8), (F(6.0, 0.3, 1.7), 1.65), (F(2.6, 0.5, 1.9), 1.55)], seg=24)
-    m.tube("ROB", [(F(2.3, 0.3, 1.2), 1.45), (F(2.5, -0.3, 4.5), 1.3), (F(2.9, -0.6, 6.6), 1.15)], seg=24)
-    m.ellipsoid("SKN", F(3.4, -0.8, 7.5), (1.6, 1.1, 1.3), nu=18, nv=10)
-    # cushion under the elbow (no bottom: it sits on the dais)
-    m.box("CUS", XH - 5.2, XH + 0.6, -2.6, 2.8, PZ, PZ + 1.0, skip=("-z",))
-    # left arm along the upper side of the body to the hand on the thigh
-    m.tube("ROB", [(F(10.5, 0.6, 12.0), 1.8), (F(20.0, 1.6, 11.0), 1.4), (F(29.0, 2.2, 10.0), 1.0)], seg=24)
-    m.ellipsoid("SKN", F(31.0, 2.4, 9.7), (2.2, 1.0, 0.6), nu=18, nv=10)
-    # feet (soles to -x at u 65, toes to +y), stacked: lower right foot, upper left foot
-    U0, U1 = 60.2, 65.0
-    for zc, yc, big_top in ((1.65, 1.2, True), (5.35, 1.6, False)):
-        rings = [(F(U0, yc, zc), (0, 3.6, 0), (0, 0, 1.5)), (F(61.2, yc, zc), (0, 4.4, 0), (0, 0, 1.85)),
-                 (F(64.7, yc, zc), (0, 4.4, 0), (0, 0, 1.85)), (F(U1, yc, zc), (0, 4.27, 0), (0, 0, 1.79))]
-        m.loft("SOL", rings, seg=40, cap0="flat", cap1="flat", ex=4.0)
-        radii = [0.42, 0.34, 0.31, 0.28, 0.25]
-        if big_top:
-            radii = radii
-        else:
-            radii = radii[::-1]
-        z = zc + 1.6
-        for r in radii:
-            z -= r
-            m.ellipsoid("SOL", F(63.55, yc + 4.15, z), (1.35, 0.95, r), nu=14, nv=8)
-            z -= r + 0.02
-        # gold grid of the 108 marks on the sole (x = XH - U1), raised 0.06-0.1 m
-        xs0 = XH - U1
-        for k in range(8):
-            zz = zc - 1.35 + k * 2.7 / 7
-            m.box("GLD", xs0 - 0.06, xs0, yc - 2.4, yc + 2.4 + 0.05, PZ + zz - 0.05, PZ + zz + 0.05, skip=("+x",))
-        for k in range(14):
-            yy = yc - 2.4 + k * 4.85 / 13
-            m.box("GLD", xs0 - 0.09, xs0, yy - 0.05, yy + 0.05, PZ + zc - 1.35, PZ + zc + 1.35, skip=("+x",))
-        # the wheel in the middle of the sole
-        m.loft("GLD", [((xs0, yc + 0.3, PZ + zc), (0, 0.85, 0), (0, 0, 0.85)), ((xs0 - 0.12, yc + 0.3, PZ + zc), (0, 0.85, 0), (0, 0, 0.85))],
+    # the figure itself: tools/yangon/landmarks3d/buddha_figures_blender.py (headless Blender) -> build/landmarks/figures/chauk_fig.json
+    add_figure(m, "chauk")
+    # gold grid of the 108 marks and the wheel on each flat sole (x = XH - 65), raised 0.06-0.1 m
+    for zc, yc in ((1.55, 1.0), (4.5, 1.35)):
+        xs0 = XH - 65.0
+        for k in range(7):
+            zz = zc - 0.9 + k * 1.8 / 6
+            m.box("GLD", xs0 - 0.06, xs0, yc - 2.6, yc + 2.65, PZ + zz - 0.045, PZ + zz + 0.045, skip=("+x",))
+        for k in range(15):
+            yy = yc - 2.6 + k * 5.25 / 14
+            m.box("GLD", xs0 - 0.09, xs0, yy - 0.045, yy + 0.045, PZ + zc - 0.9, PZ + zc + 0.9, skip=("+x",))
+        m.loft("GLD", [((xs0, yc + 0.3, PZ + zc), (0, 0.8, 0), (0, 0, 0.8)), ((xs0 - 0.12, yc + 0.3, PZ + zc), (0, 0.8, 0), (0, 0, 0.8))],
                seg=24, cap0="flat", cap1="flat")
     # figure collision: body + head
     boxes.append((XH - 32.5, 0.5, PZ, 66.0, 12.0, 12.0, 0))
@@ -448,39 +417,8 @@ def ngah():
     m.box("GLD", 7.4, 15.5, -7.6, 7.6, 3.1, S, skip=("-z",))
     boxes.append((11.25, 0, FL, 10.5, 18.0, S - FL, 0))
     boxes.append((11.0, 0, S, 8.0, 13.0, 14.0, 0))
-    # crossed legs (gold robe)
-    m.ellipsoid("ROB", (10.0, 0, S + 1.0), (4.0, 6.9, 1.35), nu=40, nv=16)
-    # right shin across the lap (white) and the foot sole-up on the left thigh
-    m.tube("SKN", [((8.3, 5.0, S + 1.45), 0.9), ((8.1, -0.5, S + 1.75), 0.82), ((8.0, -4.6, S + 1.85), 0.72)], seg=20)
-    m.ellipsoid("SKN", (8.8, -5.3, S + 1.85), (1.6, 1.1, 0.5), nu=16, nv=8)
-    # torso (gold robe)
-    T = [(-0.2, 3.6, 2.5), (1.5, 3.4, 2.4), (3.0, 3.2, 2.3), (4.6, 3.5, 2.35), (5.8, 3.9, 2.35), (6.6, 4.15, 2.25),
-         (7.2, 3.8, 2.1), (7.7, 3.0, 1.85), (8.1, 2.0, 1.5), (8.4, 1.2, 1.15)]
-    m.loft("ROB", [((12.2, 0, S + z), (0, hy, 0), (hx, 0, 0)) for z, hy, hx in T], seg=40)
-    # neck, head, crown, ears
-    m.tube("SKN", [((12.0, 0, S + 7.4), 1.15), ((12.0, 0, S + 9.0), 1.1)], seg=20)
-    HC = (11.9, 0, S + 9.85)
-    m.ellipsoid("SKN", HC, (1.75, 1.6, 1.45), nu=32, nv=18)
-    cp = [(S + 10.4, 1.72), (S + 10.9, 1.78), (S + 11.3, 1.6), (S + 12.0, 1.2), (S + 12.8, 0.7), (S + 13.5, 0.3), (S + 14.0, 0.0)]
-    m.loft("GLD", [((12.0, 0, z), (r, 0, 0), (0, r, 0)) for z, r in cp], seg=32, cap0="flat", cap1=None)
-    for sy in (-1, 1):
-        m.ellipsoid("SKN", (12.0, sy * 1.68, S + 9.4), (0.35, 0.3, 1.2), nu=12, nv=8)
-        # eyes, brows
-        m.ellipsoid("BLK", (10.27, sy * 0.62, S + 10.0), (0.08, 0.3, 0.09), nu=12, nv=6)
-        m.ellipsoid("BLK", (10.38, sy * 0.62, S + 10.35), (0.07, 0.42, 0.06), nu=12, nv=6)
-        # gold flame wings beside the crown
-        wing = [(1.9, 8.6), (2.4, 8.4), (3.0, 9.0), (3.5, 10.0), (3.8, 11.6), (3.3, 10.8), (2.9, 11.3), (2.6, 10.3),
-                (2.2, 10.6), (1.9, 9.6)]
-        wing = [(sy * a, S + b) for a, b in wing]
-        m.prism("GLD", wing, 0, 0.15, frame=((12.6, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0)), top=True, bottom=True)
-    m.ellipsoid("LIP", (10.33, 0, S + 9.15), (0.1, 0.38, 0.12), nu=12, nv=6)
-    m.ellipsoid("SKN", (10.2, 0, S + 9.6), (0.25, 0.22, 0.35), nu=10, nv=6)
-    # right arm (white): shoulder -> elbow -> hand over the right knee, fingers down
-    m.tube("SKN", [((12.2, 3.9, S + 7.0), 1.05), ((11.6, 4.9, S + 3.7), 0.85), ((8.0, 5.3, S + 1.6), 0.6)], seg=20)
-    m.ellipsoid("SKN", (7.0, 5.3, S + 0.9), (0.45, 0.55, 1.0), nu=14, nv=8)
-    # left arm (gold sleeve) to the hand palm-up in the lap (white)
-    m.tube("ROB", [((12.2, -3.9, S + 7.0), 1.05), ((11.8, -4.8, S + 3.8), 0.9), ((9.8, -2.4, S + 2.35), 0.6)], seg=20)
-    m.ellipsoid("SKN", (8.9, -0.9, S + 2.3), (1.2, 0.8, 0.3), nu=14, nv=8)
+    # the figure itself: tools/yangon/landmarks3d/buddha_figures_blender.py (headless Blender) -> build/landmarks/figures/ngah_fig.json
+    add_figure(m, "ngah")
     # carved teak backdrop with gold flames and relief
     bd = [(-10.5, FL), (10.5, FL), (10.5, 13.5), (9.6, 14.6), (9.9, 15.6), (8.4, 16.4), (8.2, 17.6), (6.2, 18.0), (5.4, 19.0),
           (3.0, 19.2), (1.4, 20.0), (0, 20.6), (-1.4, 20.0), (-3.0, 19.2), (-5.4, 19.0), (-6.2, 18.0), (-8.2, 17.6),
