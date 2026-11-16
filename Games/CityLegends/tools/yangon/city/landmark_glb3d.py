@@ -92,44 +92,77 @@ GROUPS = {
     "NWC": ("Neon", (146, 178, 180), 1.0, 0.0, False, False),  # office cool fluorescent
     "NWH": ("Neon", (204, 160, 104), 1.0, 0.0, False, False),  # hotel rooms, warm
     # the 1:1 building kit (kit.py, 2026-11-16): colours from the kit reference pack, calibrated with look_calib.py
-    "KW0": ("SmoothPlastic", (255, 248, 228), 0.0, 0.0, False, True),  # kit: trim, ledges, cornices (photo (225, 220, 208))
-    "KW1": ("SmoothPlastic", (255, 239, 204), 0.0, 0.0, False, True),  # kit: cream render, weathered (photo (235, 222, 195))
-    "KW2": ("SmoothPlastic", (174, 219, 203), 0.0, 0.0, False, True),  # kit: mint render (walk-ups), weathered (photo (150, 200, 185))
-    "KW3": ("SmoothPlastic", (203, 172, 115), 0.0, 0.0, False, True),  # kit: ochre render, weathered (photo (205, 165, 90))
-    "KW4": ("SmoothPlastic", (226, 244, 255), 0.0, 0.0, False, True),  # kit: pale blue-white render, weathered (photo (210, 220, 225))
-    "KW5": ("SmoothPlastic", (250, 198, 195), 0.0, 0.0, False, True),  # kit: pale pink render, weathered (photo (225, 170, 170))
-    "KW6": ("SmoothPlastic", (252, 255, 249), 0.0, 0.0, False, True),  # kit: white render, compound walls, weathered (photo (235, 235, 230))
-    "KST": ("SmoothPlastic", (30, 30, 28), 0.6, 0.0, False, True),  # kit: black rain streaks (photo (78, 76, 70))
-    "KFR": ("SmoothPlastic", (234, 233, 218), 0.0, 0.0, False, True),  # kit: window frames (photo (200, 198, 190))
-    "KGR": ("SmoothPlastic", (50, 38, 26), 0.0, 0.0, False, True),  # kit: iron grilles (photo (40, 42, 44))
-    "KSH": ("SmoothPlastic", (120, 140, 118), 0.0, 0.0, False, True),  # kit: teak shutters (photo (110, 70, 40))
-    "KCG": ("SmoothPlastic", (82, 80, 59), 0.0, 0.0, False, True),  # kit: cage steel, posts (photo (70, 74, 72))
-    "KCO": ("SmoothPlastic", (186, 180, 165), 0.0, 0.0, False, True),  # kit: bare concrete (photo (170, 166, 158))
-    "KAC": ("SmoothPlastic", (252, 255, 248), 0.0, 0.0, False, True),  # kit: air-con units (photo (225, 225, 220))
-    "KL1": ("SmoothPlastic", (182, 82, 64), 0.0, 0.0, False, True),  # kit: laundry / goods red, weathered (photo (200, 60, 60))
-    "KL2": ("SmoothPlastic", (86, 100, 133), 0.0, 0.0, False, True),  # kit: laundry / goods blue, weathered (photo (60, 90, 150))
-    "KL3": ("SmoothPlastic", (250, 214, 99), 0.0, 0.0, False, True),  # kit: laundry / goods yellow, weathered (photo (230, 200, 70))
-    "KTK": ("SmoothPlastic", (35, 18, 19), 0.0, 0.0, False, True),  # kit: black water tanks (photo (30, 30, 32))
-    "KDS": ("SmoothPlastic", (215, 217, 210), 0.0, 0.0, False, True),  # kit: satellite dishes (photo (190, 190, 186))
-    "KRS": ("SmoothPlastic", (162, 160, 153), 0.0, 0.0, False, True),  # kit: roller shutters (photo (150, 150, 148))
-    "KSI": ("SmoothPlastic", (72, 54, 26), 0.0, 0.0, False, True),  # kit: dark shop interiors (photo (60, 52, 44))
-    "KAW": ("SmoothPlastic", (73, 116, 166), 0.0, 0.0, False, True),  # kit: blue awnings, weathered (photo (40, 110, 180))
-    "KS1": ("SmoothPlastic", (190, 55, 31), 0.0, 0.0, False, True),  # kit: red signboards, weathered (photo (200, 40, 40))
-    "KS2": ("SmoothPlastic", (255, 196, 53), 0.0, 0.0, False, True),  # kit: yellow signboards, weathered (photo (235, 190, 40))
-    "KS3": ("SmoothPlastic", (57, 89, 156), 0.0, 0.0, False, True),  # kit: blue signboards, weathered (photo (30, 80, 170))
-    "KRF": ("SmoothPlastic", (140, 86, 33), 0.0, 0.0, False, True),  # kit: rusty corrugated roofs (photo (130, 80, 55))
-    "KRT": ("SmoothPlastic", (173, 76, 30), 0.0, 0.0, False, True),  # kit: red roof tiles (photo (160, 70, 50))
-    "KGT": ("SmoothPlastic", (50, 76, 33), 0.0, 0.0, False, True),  # kit: gates, dark green (photo (40, 70, 55))
-    "KPV": ("SmoothPlastic", (162, 154, 136), 0.0, 0.0, False, True),  # kit: paving (photo (150, 145, 135))
-    "KWD": ("SmoothPlastic", (151, 106, 50), 0.0, 0.0, False, True),  # kit: wood stalls (photo (140, 100, 65))
-    "KCR": ("SmoothPlastic", (249, 252, 255), 0.0, 0.0, False, True),  # kit: scale car (photo (230, 230, 230))
-    "KTY": ("SmoothPlastic", (26, 15, 15), 0.0, 0.0, False, True),  # kit: tyres (photo (25, 25, 25))
-    "KSK": ("SmoothPlastic", (215, 148, 94), 0.0, 0.0, False, True),  # kit: skin (photo (190, 140, 100))
-    "KRD": ("SmoothPlastic", (72, 64, 46), 0.0, 0.0, False, True),  # kit: road (photo (60, 60, 62))
-    "KSU": ("SmoothPlastic", (40, 40, 36), 0.8, 0.0, False, True),  # kit: soft rain stain (photo (120, 116, 106))
-    "KPL": ("SmoothPlastic", (82, 116, 30), 0.0, 0.0, False, True),  # kit: potted plants (photo (70, 110, 50))
-    "KGL": ("Glass", (40, 46, 50), 0.0, 0.15, False, True),  # kit: window glass
-    "KRL": ("Glass", (170, 200, 200), 0.6, 0.05, True, False),  # kit: glass balcony rails
+    "KW0":  ("SmoothPlastic", (252, 255, 250), 0.0, 0.0, False, True),  # kit: trim, ledges, cornices: neutral white (never cream) (photo (226, 226, 222)); Concrete reaches only 57%: SmoothPlastic
+    "KW1":  ("SmoothPlastic", (255, 215, 153), 0.0, 0.0, False, True),  # kit: cream / butter yellow (walk-up paint 225,202,159) (photo (225, 202, 159)); Concrete reaches only 57%: SmoothPlastic
+    "KW2":  ("SmoothPlastic", (178, 242, 255), 0.0, 0.0, False, True),  # kit: aqua (downtown 150,200,214 / stained 183,220,222) (photo (170, 210, 215)); Concrete reaches only 63%: SmoothPlastic
+    "KW3":  ("SmoothPlastic", (199, 168, 130), 0.0, 0.0, False, True),  # kit: stained tan / ochre (downtown paint 179,156,129) (photo (180, 157, 130)); Concrete reaches only 72%: SmoothPlastic
+    "KW4":  ("SmoothPlastic", (226, 248, 255), 0.0, 0.0, False, True),  # kit: blue-white (walk-up paint 210,221,220) (photo (210, 220, 222)); Concrete reaches only 61%: SmoothPlastic
+    "KW5":  ("SmoothPlastic", (255, 197, 187), 0.0, 0.0, False, True),  # kit: pink, corner landmark plots only (photo (225, 190, 185)); Concrete reaches only 57%: SmoothPlastic
+    "KW6":  ("SmoothPlastic", (255, 252, 243), 0.0, 0.0, False, True),  # kit: white (villa 243,238,227; downtown 222,219,215) (photo (238, 235, 228)); Concrete reaches only 54%: SmoothPlastic
+    "KW7":  ("SmoothPlastic", (208, 255, 165), 0.0, 0.0, False, True),  # kit: pale green, corner landmark plots only (Pansodan) (photo (197, 222, 168)); Concrete reaches only 60%: SmoothPlastic
+    "KWG":  ("SmoothPlastic", (162, 160, 150), 0.0, 0.0, False, True),  # kit: stained grey wall, walk-up slab edges (photo (150, 150, 146)); Concrete reaches only 86%: SmoothPlastic
+    "KWD2": ("Concrete", (181, 172, 162), 0.0, 0.0, False, True),  # kit: dark-stained colonial front (Merchant Rd seen 72,65,61) (photo (95, 90, 85))
+    "KWB":  ("SmoothPlastic", (173, 209, 250), 0.0, 0.0, False, True),  # kit: township pale blue (paint 145,169,188) (photo (160, 185, 205)); Concrete reaches only 68%: SmoothPlastic
+    "KWC":  ("SmoothPlastic", (144, 145, 136), 0.0, 0.0, False, True),  # kit: villa compound wall, stained grey (photo (134, 137, 135)); Concrete reaches only 96%: SmoothPlastic
+    "KBC":  ("Glass", (65, 92, 136), 0.0, 0.12, False, True),  # kit: condo blue cladding / glass stripe (photo (52, 86, 133))
+    "KST":  ("SmoothPlastic", (62, 60, 56), 0.45, 0.0, False, False),  # kit: dark rain streaks (stain lines 70,69,69) (photo (62, 60, 56))
+    "KSU":  ("SmoothPlastic", (100, 96, 88), 0.55, 0.0, False, False),  # kit: soft rain stain (photo (96, 92, 84))
+    "KGM1": ("SmoothPlastic", (72, 68, 62), 0.72, 0.0, False, False),  # kit: grime overlay, young building (photo (70, 66, 60))
+    "KGM2": ("SmoothPlastic", (67, 63, 58), 0.56, 0.0, False, False),  # kit: grime overlay, middle age (photo (66, 62, 57))
+    "KGM3": ("SmoothPlastic", (60, 56, 52), 0.42, 0.0, False, False),  # kit: grime overlay, old (Merchant Rd tops) (photo (60, 56, 52))
+    "KGB":  ("SmoothPlastic", (79, 73, 64), 0.4, 0.0, False, False),  # kit: dark splash band at the base (photo (76, 70, 62))
+    "KGL":  ("Glass", (45, 47, 47), 0.0, 0.15, False, True),  # kit: window glass, dark (curtain glass 50,51,48) (photo (48, 50, 50))
+    "KRL":  ("Glass", (188, 240, 243), 0.6, 0.05, True, False),  # kit: glass balcony rails (photo (170, 200, 200))
+    "KFR":  ("SmoothPlastic", (234, 233, 218), 0.0, 0.0, False, True),  # kit: window frames (photo (200, 198, 190))
+    "KGR":  ("Metal", (59, 62, 65), 0.0, 0.0, False, True),  # kit: black iron: grilles, louvre bars, cast-iron rails, mesh dishes (photo (40, 42, 44))
+    "KSH":  ("WoodPlanks", (209, 133, 76), 0.0, 0.0, False, True),  # kit: teak shutters, brown (photo (110, 70, 40)); WoodPlanks calibrated on Concrete panels
+    "KSH2": ("WoodPlanks", (182, 230, 176), 0.0, 0.0, False, True),  # kit: faded green shutters (photo (90, 120, 100)); WoodPlanks calibrated on Concrete panels
+    "KSH3": ("SmoothPlastic", (98, 160, 218), 0.0, 0.0, False, True),  # kit: faded blue shutters (26th St 86,175,219) (photo (86, 150, 190)); WoodPlanks reaches only 73%: SmoothPlastic
+    "KSH4": ("SmoothPlastic", (196, 123, 56), 0.0, 0.0, False, True),  # kit: painted orange-teak shutters / doors (photo (178, 117, 70)); WoodPlanks reaches only 73%: SmoothPlastic
+    "KCG":  ("SmoothPlastic", (73, 77, 75), 0.0, 0.0, False, True),  # kit: steel posts, stands (photo (70, 74, 72))
+    "KCB":  ("Metal", (59, 62, 65), 0.0, 0.0, False, True),  # kit: black balcony cage (photo (40, 42, 44))
+    "KCU":  ("CorrodedMetal", (177, 111, 74), 0.0, 0.0, False, True),  # kit: rust balcony cage (photo (120, 75, 50)); CorrodedMetal calibrated on Metal panels
+    "KCW":  ("SmoothPlastic", (255, 252, 239), 0.0, 0.0, False, True),  # kit: white-painted cage (Mahabandula pillars) (photo (223, 220, 212))
+    "KGT":  ("Metal", (34, 55, 48), 0.0, 0.0, False, True),  # kit: villa gate, near-black green (15,21,21) (photo (25, 40, 35))
+    "KGU":  ("CorrodedMetal", (255, 169, 101), 0.0, 0.0, False, True),  # kit: rusty steel gate (photo (166, 120, 83)); CorrodedMetal calibrated on Metal panels
+    "KCO":  ("SmoothPlastic", (186, 180, 165), 0.0, 0.0, False, True),  # kit: bare concrete, poles (photo (170, 166, 158)); Concrete reaches only 76%: SmoothPlastic
+    "KAC":  ("SmoothPlastic", (252, 255, 248), 0.0, 0.0, False, True),  # kit: air-con units (photo (225, 225, 220))
+    "KPP":  ("SmoothPlastic", (82, 137, 218), 0.0, 0.0, False, True),  # kit: blue PVC drainpipes (photo (70, 130, 190))
+    "KWI":  ("SmoothPlastic", (22, 22, 22), 0.0, 0.0, True, False),  # kit: overhead wires (photo (28, 28, 28))
+    "KL1":  ("SmoothPlastic", (197, 73, 68), 0.0, 0.0, True, False),  # kit: laundry / goods red (photo (190, 70, 65)); Fabric reaches only 68%: SmoothPlastic
+    "KL2":  ("SmoothPlastic", (72, 96, 155), 0.0, 0.0, True, False),  # kit: laundry / goods blue (photo (60, 90, 150)); Fabric reaches only 92%: SmoothPlastic
+    "KL3":  ("SmoothPlastic", (223, 194, 68), 0.0, 0.0, True, False),  # kit: laundry / goods yellow (photo (230, 200, 70)); Fabric reaches only 56%: SmoothPlastic
+    "KL4":  ("SmoothPlastic", (252, 255, 248), 0.0, 0.0, True, False),  # kit: laundry pale white (photo (225, 225, 220)); Fabric reaches only 57%: SmoothPlastic
+    "KL5":  ("SmoothPlastic", (234, 172, 182), 0.0, 0.0, True, False),  # kit: laundry pale pink (photo (200, 160, 170)); Fabric reaches only 65%: SmoothPlastic
+    "KL6":  ("SmoothPlastic", (130, 148, 168), 0.0, 0.0, True, False),  # kit: laundry grey-blue (photo (120, 140, 160)); Fabric reaches only 87%: SmoothPlastic
+    "KAW":  ("SmoothPlastic", (72, 137, 239), 0.0, 0.0, True, True),  # kit: blue plastic / corrugated awnings (30th, 47th St) (photo (60, 130, 200)); Fabric reaches only 69%: SmoothPlastic
+    "KAR":  ("SmoothPlastic", (151, 92, 69), 0.0, 0.0, True, True),  # kit: faded red canvas awning (photo (140, 86, 80)); Fabric reaches only 92%: SmoothPlastic
+    "KNT":  ("Fabric", (103, 193, 82), 0.35, 0.0, True, False),  # kit: green shade net (critique 60,140,80, darkened: it reads as a solid green panel) (photo (48, 100, 60)); Fabric calibrated on Concrete panels
+    "KTP":  ("SmoothPlastic", (61, 116, 199), 0.0, 0.0, True, True),  # kit: blue tarp (photo (50, 110, 180)); Fabric reaches only 77%: SmoothPlastic
+    "KS1":  ("SmoothPlastic", (200, 54, 47), 0.0, 0.0, False, True),  # kit: red sign (photo (192, 52, 45))
+    "KS2":  ("SmoothPlastic", (220, 172, 18), 0.0, 0.0, False, True),  # kit: yellow sign ground (photo (238, 186, 19))
+    "KS3":  ("SmoothPlastic", (35, 86, 182), 0.0, 0.0, False, True),  # kit: blue sign / logo (photo (30, 80, 170))
+    "KS4":  ("SmoothPlastic", (219, 97, 65), 0.0, 0.0, False, True),  # kit: orange sign (photo (213, 94, 63))
+    "KSW":  ("SmoothPlastic", (252, 255, 245), 0.0, 0.0, False, True),  # kit: white sign ground, lightbox (photo (235, 235, 228))
+    "KSV":  ("SmoothPlastic", (230, 204, 113), 0.0, 0.0, False, True),  # kit: pale yellow vinyl banner (photo (198, 182, 116))
+    "KSI":  ("SmoothPlastic", (58, 51, 43), 0.0, 0.0, False, True),  # kit: dark shop interiors (photo (60, 52, 44))
+    "KRS":  ("SmoothPlastic", (162, 160, 153), 0.0, 0.0, False, True),  # kit: roller shutters (photo (150, 150, 148))
+    "KRF":  ("CorrodedMetal", (156, 104, 83), 0.0, 0.0, True, True),  # kit: rusty corrugated roofs (photo (105, 70, 56)); CorrodedMetal calibrated on Metal panels
+    "KRG":  ("CorrodedMetal", (166, 166, 158), 0.0, 0.0, True, True),  # kit: faded grey corrugated roofs (photo (116, 116, 110)); CorrodedMetal calibrated on Metal panels
+    "KRB":  ("SmoothPlastic", (107, 154, 231), 0.0, 0.0, True, True),  # kit: blue metal roof (photo (96, 145, 196))
+    "KRT":  ("SmoothPlastic", (179, 101, 69), 0.0, 0.0, False, True),  # kit: villa tile roof, muted brick red (148,88,79 to 231,174,149) (photo (165, 95, 80)); ClayRoofTiles renders near black: SmoothPlastic
+    "KTK":  ("SmoothPlastic", (24, 24, 26), 0.0, 0.0, False, True),  # kit: black water tanks (photo (30, 30, 32))
+    "KDS":  ("SmoothPlastic", (215, 217, 210), 0.0, 0.0, False, True),  # kit: small satellite dishes (photo (190, 190, 186))
+    "KPV":  ("SmoothPlastic", (162, 154, 136), 0.0, 0.0, False, True),  # kit: paving (photo (150, 145, 135)); Concrete reaches only 86%: SmoothPlastic
+    "KRD":  ("SmoothPlastic", (61, 61, 63), 0.0, 0.0, False, True),  # kit: road (photo (60, 60, 62))
+    "KWD":  ("SmoothPlastic", (146, 104, 68), 0.0, 0.0, False, True),  # kit: wood stalls, crates (photo (140, 100, 65)); WoodPlanks reaches only 92%: SmoothPlastic
+    "KPL":  ("SmoothPlastic", (73, 114, 52), 0.0, 0.0, False, True),  # kit: potted plants, weed tufts (photo (70, 110, 50))
+    "KTL":  ("SmoothPlastic", (64, 95, 48), 0.0, 0.0, True, True),  # kit: tree leaves, palm fronds (photo (62, 92, 46))
+    "KTW":  ("SmoothPlastic", (99, 85, 73), 0.0, 0.0, False, True),  # kit: tree trunks (photo (95, 82, 70))
+    "KGS":  ("SmoothPlastic", (100, 125, 67), 0.0, 0.0, False, True),  # kit: villa lawn (photo (96, 120, 64))
+    "KCR":  ("SmoothPlastic", (249, 252, 255), 0.0, 0.0, False, True),  # kit: scale car (photo (230, 230, 230))
+    "KTY":  ("SmoothPlastic", (20, 20, 20), 0.0, 0.0, False, True),  # kit: tyres (photo (25, 25, 25))
+    "KSK":  ("SmoothPlastic", (215, 148, 94), 0.0, 0.0, False, True),  # kit: skin (photo (190, 140, 100))
     # shop stock (clothes, boxes, packets): a few plain colours mixed by shop
     "PRA": ("SmoothPlastic", (186, 62, 64), 0.0, 0.0, False, False),
     "PRB": ("SmoothPlastic", (58, 96, 160), 0.0, 0.0, False, False),
