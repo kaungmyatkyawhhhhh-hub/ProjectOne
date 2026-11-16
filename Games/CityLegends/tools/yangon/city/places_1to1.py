@@ -79,7 +79,8 @@ HEIGHTS = {}
 # fuel stations measured on the Esri z19 satellite (16 Nov 2026, build/city_1to1/places_P1/sat/): the canopy's middle,
 # its length along the road and depth (m), the roof colour seen from above
 SAT = {
-    "n3838315913": dict(canopy=(96.14866, 16.82578), size=(24.0, 18.6), roof=(160, 175, 148), depth=34.0),   # Myawaddy, University Ave
+    "n3838315913": dict(canopy=(96.14866, 16.82578), size=(24.0, 18.6), roof=(160, 175, 148), depth=34.0),
+    "n2578264080": dict(canopy=(96.155366, 16.836235), size=(27.0, 22.0), roof=(167, 171, 145), depth=34.0),  # New Day, P2   # Myawaddy, University Ave
 }
 
 
