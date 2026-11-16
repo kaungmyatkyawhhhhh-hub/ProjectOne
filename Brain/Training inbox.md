@@ -45,6 +45,9 @@ Format if you like: **When** ... **do** ... **because** ...
   - Retention: a dev says one change moved their retention from 4-7 percent to 13 percent after a month (a creator dashboard graph, method not shown, dev-support Discord promo). Commenters say some genres simply can't hold good retention, and one asks whether to delay a farm-style game's launch because of Roblox's reduced engaged-player limit. Fits [[K02 First session and retention]].
   - Sound: a very popular clip (about 8.7K likes, 7.4K saves) shows an AI sound-effects plugin in the Creator Store (Mirelo) that makes several SFX samples from a text prompt for a selected object, with a duration slider and Keep buttons. Comments split: "great AI plugin that assists you" vs "it's so bad" and "prove it isn't premade". The creator is likely promoting it. Fits [[K06 Art, UI, VFX, sound and lighting]].
   - Sound: a second creator's short clip (about 160 likes) pushes the same plugin the same way; the same promo pattern as the other AI tool videos. Fits [[K06 Art, UI, VFX, sound and lighting]].
+- 2026-11-16 06:48 TikTok session 2b (search "roblox studio lighting map building tips", watched only; unverified):
+  - Lighting how-tos are the most-saved dev content I've seen: one (about 60K likes, 43K saves) adds Atmosphere, Sky, Bloom, ColorCorrection, DepthOfField and SunRays, then tweaks values such as ColorCorrection saturation and Lighting style Realistic; others (about 15.6K and 6.3K likes) say "set SunRays like mine". Same toolset as our lighting skill. Fits [[K06 Art, UI, VFX, sound and lighting]].
+  - Comments show viewers judge a game by its lighting ("brainrot game ahh lighting", with 4K likes), so bad default lighting reads as cheap or slop. Fits [[K06 Art, UI, VFX, sound and lighting]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
