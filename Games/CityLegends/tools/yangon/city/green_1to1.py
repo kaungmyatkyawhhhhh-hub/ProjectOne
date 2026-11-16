@@ -439,11 +439,9 @@ def main():
     if STYLE == "clean":
         mat[:] = "."
         mat[land] = "L"
-        cl = open_ & (zn == "paved")
-        cl |= fore & (d_road <= M(9)) & ~(zn == "park")
-        gx, gz = np.gradient(H.astype(np.float32), RES)
-        cl &= np.hypot(gx, gz) < 0.12     # concrete only where the ground is flat (no sloped concrete banks)
-        mat[cl] = "C"
+        # (17 Nov, owner: grey "concrete blobs" on the grass) no terrain concrete at all: smooth terrain blends a
+        # painted patch into a blob. Real paved ground (fuel forecourts, car parks, courts) is places_1to1.py's
+        # straight-edged part slabs; everything else is plain Grass.
         mat[lmk] = "."
         mat[~land] = "."
     # (owner's two pictures, 16 Nov) the lake walk (grass bank down to the water, narrow walk, fan palms ...) and the

@@ -535,3 +535,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   - lines outside asphalt, kerbs inside a carriageway, decks with gaps, overlaps with buildings
   - plus a contact sheet of the worst spots
   - "Looks right in 3 screenshots" is not done.
+
+## City Legends 1:1 Yangon: grey "concrete blobs" on the grass (17 Nov 2026, owner's screenshots)
+- **What felt bad:** irregular grey patches all over the grass (yards, beside streets, open lots), like spills.
+- **Cause:** `green_1to1.py` painted terrain Concrete on OSM paved / commercial areas and on noise-edged "forecourts"; smooth terrain blends any painted patch into a soft blob.
+- **Fix:** every non-grass land voxel in P1-P3 repainted to plain Grass (`YangonGreen1to1.unblob`; road beds, water / mud edges and P3's quay and piers kept); the tool paints no terrain concrete any more. Note: [[City Legends/2026-11-17 Concrete blobs on the grass removed (P1-P3)]].
+- **Rule:** never show a paved surface by painting terrain. Paved ground is a part or mesh slab with straight edges at the right height; terrain stays one clean material.

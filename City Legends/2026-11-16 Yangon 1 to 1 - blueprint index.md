@@ -69,3 +69,5 @@ created: 2026-11-16
 7. **Street furniture and life:** from the street catalogue.
 8. **Lanes, venues, spawn, minimap.**
 9. **Checks:** a Play check and a critique against the photos.
+
+- 2026-11-17: [[2026-11-17 Concrete blobs on the grass removed (P1-P3)]] (no terrain concrete; paved ground = part slabs)

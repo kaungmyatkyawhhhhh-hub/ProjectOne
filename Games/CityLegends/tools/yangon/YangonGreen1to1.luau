@@ -837,6 +837,85 @@ function G.lakeBed(x0: number, z0: number, x1: number, z1: number, y0: number?, 
 	return n
 end
 
+-- (17 Nov, owner: grey "concrete blobs" on the grass) repaint every non-grass ground voxel to Grass in a box
+-- (x0, z0, x1, z1), tile by tile. Kept: road beds (a part within 12 studs over the column's top), columns with water
+-- or mud (lake / river edges), and the columns in keep: text lines "tx tz start+len,..." (runs of column index
+-- ix * 64 + iz in that 256-stud tile; terrain.py's quay edge and piers, code 5, e.g. terrain_P3/keep_quay.txt). Real
+-- paved areas are part slabs (places_1to1), never terrain. Resumable: from = tiles to skip; progress on workspace
+-- attribute Green_unblob.
+G.UNBLOB = {
+	[Enum.Material.Concrete] = true, [Enum.Material.Pavement] = true, [Enum.Material.Asphalt] = true,
+	[Enum.Material.Slate] = true, [Enum.Material.Ground] = true, [Enum.Material.Pebble] = true,
+	[Enum.Material.Salt] = true, [Enum.Material.Cobblestone] = true, [Enum.Material.LeafyGrass] = true,
+}
+function G.unblob(x0: number, z0: number, x1: number, z1: number, keep: string?, y0: number?, y1: number?, from: number?)
+	local T = workspace.Terrain
+	y0, y1 = y0 or -40, y1 or 160
+	local kept0 = {}
+	for tx, tz, runs in string.gmatch(keep or "", "(%-?%d+) (%-?%d+) (%S+)") do
+		local set = {}
+		for a, n in string.gmatch(runs, "(%d+)%+(%d+)") do
+			for q = tonumber(a), tonumber(a) + tonumber(n) - 1 do
+				set[q] = true
+			end
+		end
+		kept0[tx .. " " .. tz] = set
+	end
+	local rp = RaycastParams.new()
+	rp.FilterType = Enum.RaycastFilterType.Exclude
+	rp.FilterDescendantsInstances = { T }
+	local k, cols, kept = 0, 0, 0
+	for tx = math.floor(x0 / 256) * 256, x1 - 1, 256 do
+		for tz = math.floor(z0 / 256) * 256, z1 - 1, 256 do
+			k += 1
+			if k > (from or 0) then
+				local region = Region3.new(Vector3.new(tx, y0, tz), Vector3.new(tx + 256, y1, tz + 256))
+				local mats, occ = T:ReadVoxels(region, 4)
+				local ny, dirty = mats.Size.Y, false
+				local ks = kept0[tx .. " " .. tz] or {}
+				for ix = 1, 64 do
+					local mx, ox = mats[ix], occ[ix]
+					for iz = 1, 64 do
+						local bad, top, skip = false, nil, false
+						for iy = 1, ny do
+							local m = mx[iy][iz]
+							if m == Enum.Material.Water or m == Enum.Material.Mud then
+								skip = true
+								break
+							end
+							bad = bad or G.UNBLOB[m] == true
+							if ox[iy][iz] > 0 then
+								top = iy
+							end
+						end
+						if bad and not skip and top and not ks[(ix - 1) * 64 + iz - 1] then
+							local cx, cz = tx + ix * 4 - 2, tz + iz * 4 - 2
+							local ty = y0 + top * 4
+							if workspace:Raycast(Vector3.new(cx, ty + 12, cz), Vector3.new(0, -16, 0), rp) then
+								kept += 1
+							else
+								for iy = 1, ny do
+									if G.UNBLOB[mx[iy][iz]] then
+										mx[iy][iz] = Enum.Material.Grass
+									end
+								end
+								cols += 1
+								dirty = true
+							end
+						end
+					end
+				end
+				if dirty then
+					T:WriteVoxels(region, 4, mats, occ)
+				end
+				workspace:SetAttribute("Green_unblob", k)
+				task.wait()
+			end
+		end
+	end
+	return string.format("%d tiles, %d columns to grass, %d kept under roads", k, cols, kept)
+end
+
 function G.data(holding: Instance)
 	local kit = ReplicatedStorage:FindFirstChild("YgnKit")
 	local moved = {}
