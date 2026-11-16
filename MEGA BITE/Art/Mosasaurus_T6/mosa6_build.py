@@ -220,13 +220,10 @@ def shard(verts, faces, cx, base_z, top_z, r, tilt_deg):
     faces += [(o + k, o + (k + 1) % 6, o + 6 + (k + 1) % 6, o + 6 + k) for k in range(6)] + [(o + 6 + k, o + 6 + (k + 1) % 6, o + 12) for k in range(6)] + [(o + (k + 1) % 6, o + k, o + 13) for k in range(6)]
 CK = D.get('crystal_k', 1.0)
 for i, c in enumerate(D['crystals']):
-    # card: each spike is a cluster - a tall main shard, a smaller one leaning back, a small one leaning forward
     x = c['x']; r = c['w'] / 2 * S * CK; ht = (c['bot'] - c['top']) * S * CK
     base_z = Z(T(x)) - 12 * S; top_z = base_z + ht + 12 * S
     verts, faces = [], []
-    shard(verts, faces, X(x), base_z, top_z, r, 0)
-    shard(verts, faces, X(x) - r * 1.1, base_z, base_z + (top_z - base_z) * 0.62, r * 0.62, -18)
-    shard(verts, faces, X(x) + r * 0.9, base_z, base_z + (top_z - base_z) * 0.45, r * 0.5, 14)
+    shard(verts, faces, X(x), base_z, top_z, r, -10)   # card: separate spikes with gaps, leaning back a little
     make('M6_DorsalCrystal_%02d' % (i + 1), verts, faces, lambda p: jit(P['cyan'] if p.index % 3 else (0.55, 1, 1, 1), p.index, 0.04), glow=True)
 
 # ---------- raised hexagonal scale plates (one object) ----------

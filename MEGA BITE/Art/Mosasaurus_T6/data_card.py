@@ -8,7 +8,7 @@ d['palette'].update(green=[40, 86, 52], dark=[20, 46, 32], light=[78, 128, 74], 
                     plate=[30, 64, 42],                 # card: raised scutes are DARKER than the skin
                     eye=[255, 196, 40])                 # card: orange-yellow glowing eye
 # card: big clustered crystals, the row runs down the tail to its tip
-d['crystal_k'] = 2.0
+d['crystal_k'] = 1.6
 d['yz_k'] = 1.22                 # card body is chunkier: 22 % deeper and wider, same length
 tail = [(345, 15, 15), (305, 13, 13), (265, 11, 11), (225, 10, 9), (185, 8, 8), (148, 7, 6), (115, 6, 5)]  # x, height, width (sheet px)
 have = {round(c['x']) for c in d['crystals']}
@@ -16,8 +16,8 @@ for x, h, w in tail:
     if x not in have: d['crystals'].append(dict(x=float(x), x0=x - w // 2, w=w, top=0, bot=h, a=0))
 d['crystals'].sort(key=lambda c: c['x'])
 # card: huge paddles, the front pair sticks out to the sides
-d['flippers'] = [dict(name='Back', root=[495, 318], tip=[330, 425], spread=170, width=125, len_k=1.35, twist_deg=-20),
-                 dict(name='Front', root=[950, 318], tip=[800, 430], spread=210, width=140, len_k=1.45, twist_deg=-25)]
+d['flippers'] = [dict(name='Back', root=[495, 318], tip=[330, 425], spread=170, width=125, len_k=1.35, twist_deg=0),
+                 dict(name='Front', root=[950, 318], tip=[800, 430], spread=210, width=140, len_k=1.45, twist_deg=0)]
 # card: bigger teeth
 d['head']['up_teeth']['len'] = 24; d['head']['lo_teeth']['len'] = 20
 json.dump(d, open('mosa6_data.json', 'w'), indent=1)

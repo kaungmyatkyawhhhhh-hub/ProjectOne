@@ -108,3 +108,15 @@ From the card: a cyan glow halo on the crystals and eye, and a cloud of cyan spa
 - **Card pose:** action `CardPose` on the rig (Spine pitch [16,18,13,7,-1,-9,-15,-18] deg, yaw [5,5,3,0,-3,-5,-5,-4], Root -20, Jaw -14): the card's dive, tail up, head down-right. Camera `MosaCardCam` (portrait 768x1024). Swim loop still there: action `Swim`.
 - **One script for the whole preview:** `mosa6_preview.py` (exec in Blender with ARGS = [export/Mosasaurus_T6_rigged.blend, 'card' or 'swim']): reloads the model, glow materials, both actions, sparkle VFX, bloom, world, hero + card cameras, particle pre-roll.
 - Gates PASS (31 parts, 6,128 tris). FBX re-exported. Not uploaded (asset 104031266367399 is still v1).
+
+---
+# v4: the CARD is the target (2026-11-16, owner put card and model side by side: "it have so much difference")
+Why they differed: the ChatGPT sheets drifted from the card (yellow belly, small even crystals, small flippers, flat skin, slender body), and the Blender shot was flat (far camera, no outline). Card overrides live in **`data_card.py`** (after data_exploded.py):
+- **Green all over**: the underside is a lighter green, no yellow belly. **Mottled skin** (smooth dark/mid/light patches by position). **Darker raised scutes.**
+- **Chunkier body**: `yz_k` 1.22 (22 % deeper and wider, same 6.4 m length, so the rig and old clips still fit; the export's Jaw bone uses the same scale).
+- **Crystals**: 22 (15 + 7 down the tail to its tip), 1.6x bigger, single spikes leaning back 10 deg with gaps (a 3-shard cluster was tried and read as one solid wall).
+- **Flippers**: big paddles, front pair sticking out (spread 210, width 140, 1.45x long), no twist so the broad face shows.
+- **Eye** orange-yellow (255,196,40); **teeth** longer (24 / 20 px).
+- **Outline**: Roblox Highlight `MB_CardOutline` (cyan, fill off) in the install script. In Blender an inverted hull isn't culled by EEVEE, so the preview has no outline.
+- 38 parts, 6,296 tris, gates PASS (tail tip now counts as body for the crystal-root check). FBX re-exported. Picture: `checks/mosa6_card_vs_model.png`.
+- Still different from the card: its painted camo detail, its stronger S-curve (tail curling back over), the outline/background (card art). Not uploaded.

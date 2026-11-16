@@ -967,7 +967,7 @@
    "spread": 170,
    "width": 125,
    "len_k": 1.35,
-   "twist_deg": -20
+   "twist_deg": 0
   },
   {
    "name": "Front",
@@ -982,7 +982,7 @@
    "spread": 210,
    "width": 140,
    "len_k": 1.45,
-   "twist_deg": -25
+   "twist_deg": 0
   }
  ],
  "palette": {
@@ -1047,6 +1047,6 @@
   "r": 26,
   "th": 7
  },
- "crystal_k": 2.0,
+ "crystal_k": 1.6,
  "yz_k": 1.22
 }
