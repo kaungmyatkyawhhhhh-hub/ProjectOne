@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 09:54 [dashboard, unverified] TOAnimate offers an Ultimate Rigging Course. (topic: tiktok)
 - 2026-11-16 09:52 [dashboard, unverified] F3X Building Tools are powerful tools for quickly building and editing parts. (topic: tiktok)
 - 2026-11-16 09:49 [dashboard, unverified] Not building games right now is like not investing in bitcoin before it blew up. (topic: tiktok)
 - 2026-11-16 09:48 [dashboard, unverified] Claude Opus 5.5 used Roblox's built-in AI agent and Codex to implement stylistic changes in VFX/Effects. (topic: tiktok)
