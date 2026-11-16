@@ -93,3 +93,10 @@ Pipeline: `analyse.py sheet_v2.png` -> `crys.py` -> `data.py` -> `data_exploded.
 - Glowing eye, thin lip band kept from v2. The v2 "bigger flippers" are replaced by the sheet's flipper size.
 - 31 parts, 6,128 triangles, gates PASS. IoU vs the new contract: side 0.908, top 0.757, front 0.662 (top/front are the turnaround's views, which the exploded sheet doesn't have).
 - Picture: `checks/mosa6_side_vs_exploded_assembled.png`. Not uploaded (asset 104031266367399 is still v1).
+
+---
+# VFX (2026-11-16, owner: "vfx?")
+From the card: a cyan glow halo on the crystals and eye, and a cloud of cyan sparkles trailing behind and below the body.
+- **Blender preview** (scene Mosasaurus T6, saved in `export/Mosasaurus_T6_preview.blend`): particle systems `SparkleTrail` (body, 2,600, drift back + down, life 64 fr) and `CrystalGlints` (crystals, 260, lift up), both instancing `MosaVFX_Sparkle` (glowing octahedron); compositor group `MosaBloom` (Glare, Bloom, threshold 0.8) shown live in the rendered viewport; camera `MosaHeroCam` (3/4 hero). Particles pre-roll from frame -60 (step frames in order, or the trail won't form). Still: `checks/mosa6_vfx_hero.png`.
+- **Roblox version** (in `install_serverstorage.luau`, runs with the import, NOT run yet): `MB_SparkleTrail` ParticleEmitter on the body MeshPart (rate 70, world space so it trails, sinks slowly), `MB_CrystalGlints` on the crystals (rate 18, upward), PointLights `MB_CrystalGlow` (cyan, range 40) and `MB_EyeGlow` (yellow, range 10). Sprite: MEGA BITE's own flare 119101480444141. The halo itself comes from Neon + the game's Lighting Bloom (not changed).
+- Note: an F12 render with the `MosaBloom` compositor comes out solid white; the live rendered viewport is correct (the still above is a viewport capture). Fix the final-render bloom before using renders for thumbnails.

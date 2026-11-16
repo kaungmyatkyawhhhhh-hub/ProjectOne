@@ -189,3 +189,22 @@ The runway show scripts are in `ScriptBackups.retired_RunwayShow_16Nov` (disable
 ![[Screenshots/2026-11-16 guest looks silhouettes.jpg]]
 ![[Screenshots/2026-11-16 games room stools and table.jpg]]
 ![[Screenshots/2026-11-16 fitting rooms walnut.jpg]]
+
+## Empty spots filled (owner: "Yes, fill them")
+Everything is new models, nothing removed except the stone planter boxes I tried first.
+- **Boutique centre** (`Boutique.Boutique centre`, in the old runway lane between spawn and the stage):
+  - a plum rug with a brass border
+  - a low walnut **styling table** (1.9 tall, so the view from spawn to the mannequin stage stays clear) with a marble top
+  - 4 stacks of folded tops in the style colours and a glass vase with blossoms
+  - 2 leather poufs with Seats
+- **Sky Deck south** (`Sky Deck.South terrace`, the old elevator arrival side):
+  - **Lounge:** a raised walnut-plank platform, 3 copies of the penthouse Gallery sofa (2 invisible Seats each) around a stone **fire table** (Fire + a warm PointLight), and 2 potted trees.
+  - **Hot cocoa bar:** a walnut and marble counter with a mug shelf and a "HOT COCOA · self-serve · on the house" board. The prompt "Pour a hot cocoa" uses the `Barista` attribute, so `BaristaServer` hands out the same mug with no new code. 2 leather bar stools with Seats.
+  - **Selfie arch:** dark posts with pink neon and an "MM · SKY DECK" sign, facing north so the skyline is behind you. A neon "STAND HERE" floor mark and a soft spotlight.
+  - **4 potted trees** (the café window plant scaled 2.2) along the south railing.
+- **Tested (Studio Play, PC + Galaxy A06):** the cocoa bar gives a mug, the terrace sofa seat works, the pouf seats exist, 0 console errors.
+- **Still open from the map plan:** the city and sky (skybox, haze, more lit windows, an MM billboard) and wayfinding boards by the stairs.
+
+![[Screenshots/2026-11-16 boutique centre styling table.jpg]]
+![[Screenshots/2026-11-16 sky deck south terrace lounge.jpg]]
+![[Screenshots/2026-11-16 phone terrace sofa cocoa.jpg]]
