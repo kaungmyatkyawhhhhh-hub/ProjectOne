@@ -50,6 +50,10 @@ ARCH = {
     "condo":    dict(bay=3.6, gf=4.5, par=1.2),
     "civic":    dict(bay=3.5, gf=3.6, par=0.8),
     "shed":     dict(bay=4.5, gf=4.5, par=0.0),
+    # (2026-11-16, P3 downtown) the colonial shophouse row (kit_reference section 1: Pansodan / Mahabandoola / 19th-50th
+    # streets): bay 2.4 (window pitch 1.8-2.4), ground floor 4.6 (4.5-5.5 main roads), upper floors 3.8 (3.6-4.2), a 1.2 m
+    # parapet over a heavy cornice. Its own floor height `fh` (the other archetypes use FH)
+    "colonial": dict(bay=2.4, gf=4.6, par=1.2, fh=3.8),
 }
 
 # class of each kit group
@@ -252,7 +256,12 @@ def parapet(W, H, par, wall):
 
 def height(arch, floors):
     a = ARCH[arch]
-    return a["gf"] + FH * max(0, floors - 1)
+    return a["gf"] + a.get("fh", FH) * max(0, floors - 1)
+
+
+def fh(arch):
+    """an archetype's upper floor height (m)"""
+    return ARCH.get(arch, {}).get("fh", FH)
 
 
 # ------------------------------------------------------------------------------------------ panel builders (metres)
@@ -490,6 +499,89 @@ def p_shed(W, bays, floors, role, age, market=False):
     return H
 
 
+def p_colonial(W, bays, floors, role, shop, age):
+    """(2026-11-16, P3 downtown) a colonial shophouse front in kit panels (kit.colonial_row's details, per bay): shops
+    under a ground-floor cornice, arched windows / French doors 0.35 m deep with teak shutters, a bracketed balcony on
+    some bays (iron or concrete balustrade), pilasters between the bays and at the panel ends, a cornice at every floor
+    line and a heavy one under the parapet. The pilaster faces at the panel ends that lie on the joint are left out
+    (the next panel's pilaster butts on)."""
+    A = ARCH["colonial"]
+    BAY, GF, FC = W / bays, A["gf"], A["fh"]
+    H = height("colonial", floors)
+    holes, wall, trim = [], "KWX", "KW0"
+    front = role == "front"
+    shut = K.wpick(K.SHUTTERS)
+    iron = K.R.random() < 0.5
+    # ground floor
+    for k in range(bays):
+        x = k * BAY
+        if front and shop:
+            shop_bay(x + 0.3, BAY - 0.6, 3.3, 0.0, wall, holes, state=K.R.choice(["open", "open", "shutter", "glass"]), spill=0.4)
+            if K.R.random() < 0.55:
+                K.awning(x + 0.2, x + BAY - 0.2, 3.5, 0.0, K.R.uniform(0.8, 1.6), K.wpick({"KAW": 0.35, "KAR": 0.4, "KRF": 0.25}))
+            if K.R.random() < 0.6:
+                sw = K.R.uniform(1.2, BAY - 0.5)
+                K.sign(x + (BAY - sw) / 2, 3.62, sw, K.R.uniform(0.45, 0.6), 0.0)
+        elif front:
+            K.arch_window(x + BAY / 2 - 0.6, 0.15, 1.2, 2.6, 0.0, holes, wall, shut, "closed")
+        else:
+            window(x + BAY / 2 - 0.7, 1.0, 1.4, 1.5, 0.0, holes, wall, grille=True)
+    band(trim, W, GF - 0.3, 0.3, 0.28)
+    # upper floors
+    levels = [(0.0, GF - 0.3)]
+    for f in range(1, floors):
+        z = GF + FC * (f - 1)
+        top_z = (H - 0.35) if f == floors - 1 else (z + FC - 0.22)
+        levels.append((z, top_z))
+        if f > 1:
+            band(trim, W, z - 0.22, 0.22, 0.2)
+        pb = (0.5 if f == 1 else 0.3) if front else 0.0
+        for k in range(bays):
+            x = k * BAY
+            balc = K.R.random() < pb
+            zz, hh = (z + 0.12, 2.4) if balc else (z + 0.6, 1.9)
+            state = K.R.choices(["closed", "flat", "ajar"], [0.5, 0.3, 0.2])[0]
+            K.arch_window(x + BAY / 2 - 0.575, zz, 1.15, hh, 0.0, holes, wall, shut, state)
+            if not balc:
+                continue
+            bd, x0, x1 = 1.1, x + 0.17, x + BAY - 0.17
+            K.box(wall, x0, -bd, z, x1 - x0, bd, 0.18, faces=("-y", "+x", "-x", "top", "bottom"))
+            for bx in (x0 + 0.15, x1 - 0.27):   # brackets
+                for sx, nrm in ((bx, -1), (bx + 0.12, 1)):
+                    K.face(trim, [(sx, 0.0, z), (sx, -0.6, z), (sx, 0.0, z - 0.6)], (nrm, 0, 0))
+                K.face(trim, [(bx, -0.6, z), (bx + 0.12, -0.6, z), (bx + 0.12, 0.0, z - 0.6), (bx, 0.0, z - 0.6)], (0, -1, -0.6))
+            yr = -bd + 0.06
+            if iron:
+                n = max(4, int((x1 - x0 - 0.1) / 0.14))
+                for j in range(n + 1):
+                    xx = x0 + 0.05 + (x1 - x0 - 0.1) * j / n
+                    K.front_quad("KGR", xx - 0.015, xx + 0.015, z + 0.18, z + 1.0, yr)
+                K.box("KGR", x0 + 0.02, yr - 0.03, z + 1.0, x1 - x0 - 0.04, 0.08, 0.06)
+            else:
+                n = max(3, int((x1 - x0 - 0.1) / 0.3))
+                for j in range(n + 1):
+                    xx = x0 + 0.05 + (x1 - x0 - 0.1) * j / n
+                    K.box(trim, xx - 0.05, yr - 0.05, z + 0.18, 0.1, 0.1, 0.82, faces=("-y", "+x", "-x"))
+                K.box(trim, x0 + 0.02, yr - 0.08, z + 1.0, x1 - x0 - 0.04, 0.16, 0.08)
+            K.laundry(x0 + 0.1, x1 - 0.1, z + 1.9, yr + 0.1)
+    # pilasters: between the bays and at both panel ends (no face on the joint plane)
+    for (z0, z1) in levels:
+        if z1 - z0 < 0.3:
+            continue
+        for k in range(1, bays):
+            K.box(trim, k * BAY - 0.15, -0.15, z0, 0.3, 0.15, z1 - z0, faces=("-y", "+x", "-x"))
+        K.box(trim, 0.0, -0.15, z0, 0.15, 0.15, z1 - z0, faces=("-y", "+x"))
+        K.box(trim, W - 0.15, -0.15, z0, 0.15, 0.15, z1 - z0, faces=("-y", "-x"))
+    band(trim, W, H - 0.35, 0.35, 0.4)   # the heavy cornice
+    K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+    for f in range(1, floors):
+        stains_light(0.0, W, GF + FC * (f - 1) - 0.22, 0.0, FC * 0.8, age, holes)
+    stains_light(0.0, W, H - 0.35, 0.0, FC, age, holes)
+    K.grime(0.0, W, H - FC if floors > 1 else 0.0, H, 0.0, age, holes)
+    parapet(W, H, A["par"], wall)
+    return H
+
+
 def p_pier(arch, W, floors, role, age):
     """(2026-11-16, light pass) a half-bay pier: the archetype's wall, bands, plinth and parapet at the same heights as
     its full panels, no openings. It closes a wall whose length does not fit whole bays (no plain end strips)."""
@@ -504,6 +596,19 @@ def p_pier(arch, W, floors, role, age):
         stains_light(0.0, W, H, 0.0, FH, age, holes)
         K.grime(0.0, W, H - FH if floors > 1 else 0.0, H, 0.0, age, holes)
         parapet(W, H, ARCH["walkup"]["par"], wall)
+        return H
+    if arch == "colonial":
+        A = ARCH["colonial"]
+        GF, FC = A["gf"], A["fh"]
+        H = height("colonial", floors)
+        band("KW0", W, GF - 0.3, 0.3, 0.28)
+        for f in range(2, floors):
+            band("KW0", W, GF + FC * (f - 1) - 0.22, 0.22, 0.2)
+        band("KW0", W, H - 0.35, 0.35, 0.4)
+        K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+        stains_light(0.0, W, H - 0.35, 0.0, FC, age, holes)
+        K.grime(0.0, W, H - FC, H, 0.0, age, holes)
+        parapet(W, H, A["par"], wall)
         return H
     if arch == "township":
         GF = ARCH["township"]["gf"]
@@ -583,6 +688,8 @@ class Kit:
             H = p_walkup(W, k, floors, role, shop, age, civic=arch == "civic")
         elif arch == "township":
             H = p_township(W, k, floors, role, shop, age)
+        elif arch == "colonial":
+            H = p_colonial(W, k, floors, role, shop, age)
         elif arch in ("house", "villa"):
             H = p_house(W, k, floors, role, age, villa=arch == "villa")
         elif arch == "condo":

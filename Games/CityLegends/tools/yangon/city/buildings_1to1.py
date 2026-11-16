@@ -99,6 +99,15 @@ LANDMARK_SITES = LANDMARK_SITES_BY_TAG.get(TAG, {})
 # earlier pilots this one meets (geo.PILOT_SEAMS): their buildings by the shared edge are kept, never doubled, and no
 # compound wall is drawn along the shared edge twice
 SEAM_WITH = getattr(geo, "PILOT_SEAMS", {}).get(TAG, ())
+# (2026-11-16, real places) places_1to1.py plan writes build/city_1to1/places_<tag>/places.json: the lots of fuel
+# stations, car parks, pitches and playgrounds (generic buildings there are dropped: places_1to1 builds the real ones),
+# the real compound outlines (schools, hospitals, monasteries, embassies ...: walled on their OSM outline, the gate at the
+# OSM gate or on the street side) and per-building overrides (kind / floors / roof crown: condos at their real levels)
+PLACES = {}
+_pp = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(HERE))), "build", "city_1to1", "places_%s" % TAG,
+                   "places.json")
+if os.path.exists(_pp):
+    PLACES = json.load(open(_pp, encoding="utf-8"))
 
 # wall palettes (kit critique, measured: 55-85% neutral)
 PAL = {
@@ -448,6 +457,8 @@ def main():
     corr, road_lines = corridors()
     print("corridors ready %.1f s" % (time.time() - t0))
     zones = landmark_zones(by_id)
+    place_clear = unary_union([Polygon(p).buffer(0) for p in PLACES.get("clear", [])]) if PLACES.get("clear") else Polygon()
+    place_over = PLACES.get("bld", {})
     stats = Counter()
     edge_in = district.buffer(-M(3))
     blds = []
@@ -458,6 +469,9 @@ def main():
         stats["footprints"] += 1
         if any(z.intersects(g.centroid) or z.intersection(g).area > 0.3 * g.area for z in zones.values()):
             stats["dropped_landmark_site"] += 1
+            continue
+        if not place_clear.is_empty and (place_clear.contains(g.centroid) or place_clear.intersection(g).area > 0.3 * g.area):
+            stats["dropped_place_lot"] += 1
             continue
         a0 = g.area
         g2 = g.difference(corr)
@@ -476,8 +490,12 @@ def main():
         if gc == 4:
             stats["dropped_water"] += 1
             continue
-        blds.append(dict(id=b["id"], src=b["src"], kind=b["kind"], floors=b["floors"], area_m2=g2.area / (S * S),
-                         g=g2, name=b.get("name")))
+        ov = place_over.get(b["id"], {})
+        if ov:
+            stats["place_override"] += 1
+        blds.append(dict(id=b["id"], src=b["src"], kind=ov.get("kind", b["kind"]), floors=ov.get("floors", b["floors"]),
+                         area_m2=g2.area / (S * S), g=g2, name=b.get("name"), arch_force=ov.get("arch"),
+                         crown=ov.get("crown"), place=ov.get("place")))
     # duplicates (OSM keeps old and new ways; MS and OSM overlaps that the merge left)
     blds.sort(key=lambda q: -q["g"].area)
     kept, kp = [], []
@@ -571,7 +589,7 @@ def main():
     blocks = district.difference(corr.buffer(M(0.5)))
     blocks = [p for p in (blocks.geoms if blocks.geom_type == "MultiPolygon" else [blocks]) if p.area > M(10) * M(10)]
     btree = STRtree([q["g"] for q in blds])
-    infill_block = unary_union(list(zones.values()) + seam_polys) if (zones or seam_polys) else Polygon()
+    infill_block = unary_union(list(zones.values()) + seam_polys + [place_clear]) if (zones or seam_polys) else place_clear
     infill = 0
     for bl in blocks:
         if bl.area < M(40) * M(40):
@@ -644,6 +662,9 @@ def main():
         r = rng_for(q["id"])
         near_main = g.distance(main_u) < M(28) + M(12)
         arch, floors = archetype(q, near_main)
+        if q.get("arch_force"):
+            # (real places) a forced archetype keeps the real floor count (condos: OSM levels / height)
+            arch, floors = q["arch_force"], int(q["floors"] or floors)
         q["arch"], q["floors_b"] = arch, floors
         arch_n[arch] += 1
         floor_n[floors] += 1
@@ -774,8 +795,21 @@ def main():
                 stats["roof_parts"] += 1
             stats["roof_flat"] += 1
             shell_top = top_y + par - 0.1 - 0.25 * lv
+            if q.get("crown"):
+                # (real places) a tiled hip crown over the tower's top (Pearl Condo: terracotta pyramid roofs on the
+                # satellite), on the core rectangle inside the parapet, standing 0.3 m over it
+                gi2 = g.buffer(-M(2.0), join_style=2)
+                if gi2.geom_type == "MultiPolygon":
+                    gi2 = max(gi2.geoms, key=lambda x: x.area)
+                if gi2.geom_type == "Polygon" and not gi2.is_empty:
+                    cx, cz, e1, hl, hw = rect_of(gi2)
+                    hl, hw = hl * 0.85, hw * 0.85
+                    rise = min(hw * 0.55, M(7.0))
+                    shell.append(("R", kit.prop("hip"), 2 * hl / M(10), cx, top_y + par + M(0.3), cz, math.atan2(-e1[1], e1[0]),
+                                  wallc, rise / M(3), 2 * hw / M(6), q["crown"]))
+                    stats["roof_crowns"] += 1
             # roof props on flat roofs: tanks, dishes, a stair room
-            if arch in ("walkup", "township", "civic", "condo") and g.area > M(5) * M(5):
+            if arch in ("walkup", "township", "civic", "condo") and g.area > M(5) * M(5) and not q.get("crown"):
                 inner = g.buffer(-M(2.5))
                 if not inner.is_empty:
                     rp = inner.representative_point()
@@ -841,6 +875,43 @@ def main():
         if lot.geom_type != "Polygon" or lot.area < q["g"].area * 1.3:
             continue
         lots.append((q, lot))
+    # (real places) compounds on their real OSM outlines: one lot each (its biggest building gives the colour and gate
+    # rules), the buildings inside lose their own Voronoi lots, every other lot is cut clear of the compound
+    comp_gate = {}
+    comps = []
+    for c in PLACES.get("compounds", []):
+        cp = Polygon(c["poly"]).buffer(0)
+        lot = cp.intersection(blocks_u).buffer(0)
+        if lot.geom_type == "MultiPolygon":
+            lot = max(lot.geoms, key=lambda x: x.area)
+        if lot.geom_type != "Polygon" or lot.area < M(12) * M(12):
+            continue
+        inside = [q for q in blds if lot.contains(q["g"].representative_point())]
+        if not inside:
+            continue
+        comps.append((lot, max(inside, key=lambda q: q["g"].area), inside, c))
+    if comps:
+        in_comp = set()
+        for lot, qbig, inside, c in comps:
+            in_comp.update(id(q) for q in inside)
+        cu = unary_union([lot for lot, _, _, _ in comps])
+        kept_l = []
+        for q, l in lots:
+            if id(q) in in_comp:
+                continue
+            l2 = l.difference(cu.buffer(M(0.8)))
+            if l2.geom_type == "MultiPolygon":
+                l2 = max(l2.geoms, key=lambda x: x.area)
+            if l2.geom_type == "Polygon" and l2.area >= q["g"].area * 1.3:
+                kept_l.append((q, l2))
+        for lot, qbig, inside, c in comps:
+            kept_l.append((qbig, lot))
+            if c.get("gates"):
+                comp_gate[id(qbig)] = [tuple(p) for p in c["gates"]]
+            for q in inside:
+                q["compound"] = c.get("kind")
+        stats["compounds"] = len(comps)
+        lots = kept_l
     # the wall lines: the union of the lot outlines (shared sides once), minus the buildings, minus water
     bunion = unary_union([q["g"].buffer(M(0.3)) for q in blds])
     gates = []
@@ -860,6 +931,15 @@ def main():
                 d = mid.distance(q["g"].centroid)
                 if best is None or d < best[0]:
                     best = (d, a, b)
+        # (real places) the compound's real gate (OSM barrier=gate on its outline) wins
+        for gp in comp_gate.get(id(q), ()):
+            gpt = Point(gp)
+            if ring.distance(gpt) > M(6):
+                continue
+            ed = min(near, key=lambda ab: LineString(ab).distance(gpt))
+            if LineString(ed).length >= M(5.5):
+                best = (0.0, ed[0], ed[1])
+                break
         if best:
             _, a, b = best
             L = math.hypot(b[0] - a[0], b[1] - a[1])

@@ -580,6 +580,244 @@ function G.farOld(holding: Instance, store: Instance?)
 	return n .. " trees, " .. k .. " parts"
 end
 
+-- ===================================================================================== edges v3 (owner's pictures)
+-- Cols_<n>: "x z top wet" a 4 x 4 terrain column: grass up to `top`, air above; wet = water from `top` up to the lake
+G.LAKE = 40.5
+function G.cols(holding: Instance)
+	local T = workspace.Terrain
+	local n = 0
+	for _, text in pages(holding, "Cols") do
+		for line in string.gmatch(text, "[^\n]+") do
+			local x, z, top, wet = string.match(line, "^(%S+) (%S+) (%S+) (%d)$")
+			x, z, top = tonumber(x), tonumber(z), tonumber(top)
+			T:FillBlock(CFrame.new(x, top + 12, z), Vector3.new(4, 24, 4), Enum.Material.Air)
+			if wet == "1" and top < G.LAKE then
+				T:FillBlock(CFrame.new(x, (top + G.LAKE) / 2, z), Vector3.new(4, G.LAKE - top, 4), Enum.Material.Water)
+			end
+			T:FillBlock(CFrame.new(x, top - 5, z), Vector3.new(4, 10, 4), Enum.Material.Grass)
+			n += 1
+			if n % 150 == 0 then
+				task.wait()
+			end
+		end
+	end
+	return n
+end
+
+G.EDGE_LOOK.BRAIL = { Enum.Material.Metal, "", Color3.fromRGB(26, 27, 28) }
+G.EDGE_LOOK.BPOST = { Enum.Material.Metal, "", Color3.fromRGB(26, 27, 28) }
+
+-- the small street furniture of the lake walk, built from parts (owner's picture 2): white square planter with a
+-- flowering bush, green bin, small green bench shelter. Pivot = bottom middle, front -Z.
+local function box(parent, size, cf, color, mat, name)
+	local p = Instance.new("Part")
+	p.Name = name or "P"
+	p.Anchored = true
+	p.Size = size
+	p.CFrame = cf
+	p.Color = color
+	p.Material = mat or Enum.Material.SmoothPlastic
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.Parent = parent
+	return p
+end
+function G.makeFurniture(kit: Instance)
+	local WHITE, GREEN, DARKG = Color3.fromRGB(236, 236, 230), Color3.fromRGB(46, 120, 62), Color3.fromRGB(30, 84, 44)
+	local made = {}
+	-- planter: 1.2 x 0.6 x 1.2 m white box, soil 0.05 m under its rim
+	local pl = Instance.new("Model")
+	pl.Name = "PLANTER"
+	box(pl, Vector3.new(3.6, 1.8, 3.6), CFrame.new(0, 0.9, 0), WHITE, Enum.Material.Concrete, "Box")
+	box(pl, Vector3.new(3.0, 0.2, 3.0), CFrame.new(0, 1.72, 0), Color3.fromRGB(70, 52, 40), Enum.Material.Ground, "Soil")
+	pl.PrimaryPart = pl.Box
+	-- bin: green cylinder 0.5 m across, 0.9 m tall, lid
+	local bin = Instance.new("Model")
+	bin.Name = "BIN"
+	local c = box(bin, Vector3.new(2.7, 1.5, 1.5), CFrame.new(0, 1.35, 0) * CFrame.Angles(0, 0, math.rad(90)), GREEN, Enum.Material.SmoothPlastic, "Body")
+	c.Shape = Enum.PartType.Cylinder
+	local lid = box(bin, Vector3.new(0.25, 1.62, 1.62), CFrame.new(0, 2.82, 0) * CFrame.Angles(0, 0, math.rad(90)), DARKG, Enum.Material.SmoothPlastic, "Lid")
+	lid.Shape = Enum.PartType.Cylinder
+	bin.PrimaryPart = c
+	-- shelter: 2.4 x 1.6 m, 2.4 m tall, four green posts, a green roof, a bench
+	local sh = Instance.new("Model")
+	sh.Name = "SHELTER"
+	for _, q in { { -3.3, -2.1 }, { 3.3, -2.1 }, { -3.3, 2.1 }, { 3.3, 2.1 } } do
+		box(sh, Vector3.new(0.3, 7.2, 0.3), CFrame.new(q[1], 3.6, q[2]), GREEN, Enum.Material.Metal, "Post")
+	end
+	box(sh, Vector3.new(8.0, 0.25, 5.6), CFrame.new(0, 7.35, 0) * CFrame.Angles(math.rad(6), 0, 0), GREEN, Enum.Material.Metal, "Roof")
+	box(sh, Vector3.new(6.0, 0.3, 1.4), CFrame.new(0, 1.35, 0.9), Color3.fromRGB(150, 150, 146), Enum.Material.Concrete, "Seat")
+	for _, x in { -2.6, 2.6 } do
+		box(sh, Vector3.new(0.3, 1.2, 1.2), CFrame.new(x, 0.6, 0.9), Color3.fromRGB(150, 150, 146), Enum.Material.Concrete, "Leg")
+	end
+	box(sh, Vector3.new(7.6, 0.35, 5.2), CFrame.new(0, 0.175, 0), Color3.fromRGB(176, 174, 166), Enum.Material.Concrete, "Pad")
+	sh.PrimaryPart = sh.Pad
+	for _, m in { pl, bin, sh } do
+		local old = kit:FindFirstChild(m.Name)
+		if old then
+			old:Destroy()
+		end
+		m.Parent = kit
+		table.insert(made, m.Name)
+	end
+	return table.concat(made, ",")
+end
+
+-- Models_<n>: "NAME x y z yaw scale" (NAME = a Model in `kit`, pivot at its bottom middle) into Green.Edges
+function G.models(holding: Instance, kit: Instance)
+	local root = workspace.Yangon1to1.Green
+	local f = root:FindFirstChild("Edges") or Instance.new("Folder")
+	f.Name = "Edges"
+	f.Parent = root
+	local old = f:FindFirstChild("Props")
+	if old then
+		old:Destroy()
+	end
+	local props = Instance.new("Model")
+	props.Name = "Props"
+	props.Parent = f
+	local n, miss = 0, {}
+	for _, text in pages(holding, "Models") do
+		for line in string.gmatch(text, "[^\n]+") do
+			local name, x, y, z, yaw, s = string.match(line, "^(%u+) (%S+) (%S+) (%S+) (%S+) (%S+)$")
+			local t = kit:FindFirstChild(name)
+			if t then
+				local m = t:Clone()
+				local sc = tonumber(s) or 1
+				if sc ~= 1 then
+					m:ScaleTo(m:GetScale() * sc)
+				end
+				-- the template's pivot is its bottom middle (set in G.prepKit)
+				m:PivotTo(CFrame.new(tonumber(x), tonumber(y), tonumber(z)) * CFrame.Angles(0, tonumber(yaw), 0))
+				for _, d in m:GetDescendants() do
+					if d:IsA("BasePart") then
+						d.Anchored = true
+						d.CanTouch = false
+						if name ~= "SHELTER" and name ~= "BIN" and name ~= "PLANTER" then
+							d.CanCollide = false
+							d.CanQuery = false
+						end
+					end
+				end
+				m.Parent = props
+				n += 1
+				if n % 50 == 0 then
+					task.wait()
+				end
+			else
+				miss[name] = true
+			end
+		end
+	end
+	local ms = {}
+	for k in miss do
+		table.insert(ms, k)
+	end
+	return n .. " models" .. (#ms > 0 and (" missing " .. table.concat(ms, ",")) or "")
+end
+
+-- a store model as a kit template: scripts and sounds out, pivot at the bottom middle of its trunk / box, `height`
+-- studs tall (real size: rain-tree-like bank trees 12 m, fan palms 9 m, bushes 1.4 m)
+function G.prepKit(model: Model, name: string, height: number, kit: Instance)
+	for _, d in model:GetDescendants() do
+		if d:IsA("LuaSourceContainer") or d:IsA("Sound") or d:IsA("ClickDetector") or d:IsA("ProximityPrompt")
+			or d:IsA("BillboardGui") or d:IsA("ScreenGui") then
+			d:Destroy()
+		end
+	end
+	local cf, size = model:GetBoundingBox()
+	model:ScaleTo(model:GetScale() * (height / size.Y))
+	cf, size = model:GetBoundingBox()
+	model.WorldPivot = CFrame.new(cf.Position.X, cf.Position.Y - size.Y / 2, cf.Position.Z)
+	model.Name = name
+	local old = kit:FindFirstChild(name)
+	if old then
+		old:Destroy()
+	end
+	model.Parent = kit
+	return size
+end
+
+-- a placed bund (WALL / RAIL / POST + WALK parts, edges v2) turned into the picture's natural bank: grass sloping from
+-- the walkway's water edge down under the water, wall and railing taken away (P2's north shore)
+function G.wallToBank(folder: Instance)
+	local T = workspace.Terrain
+	local walks = {}
+	for _, q in folder:GetChildren() do
+		if q.Name == "WALK" then
+			table.insert(walks, q)
+		end
+	end
+	local n = 0
+	for _, w in folder:GetChildren() do
+		if w.Name == "WALL" then
+			-- landward = toward the nearest walkway piece
+			local best, bd = nil, math.huge
+			for _, k in walks do
+				local d = (k.Position - w.Position).Magnitude
+				if d < bd then
+					best, bd = k, d
+				end
+			end
+			if best then
+				local cf = w.CFrame
+				local nrm = cf.LookVector -- local -Z / +Z across the wall
+				local toWalk = best.Position - w.Position
+				if nrm:Dot(toWalk) < 0 then
+					nrm = -nrm
+				end
+				nrm = Vector3.new(nrm.X, 0, nrm.Z).Unit
+				local along = cf.RightVector
+				local top = best.Position.Y + best.Size.Y / 2
+				local L = w.Size.X
+				for a = -L / 2, L / 2, 2 do
+					for off = -16, 0, 2 do
+						local t = (off + 16) / 16
+						local h = (G.LAKE - 2.5) + t * (top - 0.4 - (G.LAKE - 2.5))
+						local p = w.Position + along * a + nrm * off
+						T:FillBlock(CFrame.new(p.X, h + 12, p.Z), Vector3.new(3, 24, 3), Enum.Material.Air)
+						if h < G.LAKE then
+							T:FillBlock(CFrame.new(p.X, (h + G.LAKE) / 2, p.Z), Vector3.new(3, G.LAKE - h, 3), Enum.Material.Water)
+						end
+						T:FillBlock(CFrame.new(p.X, h - 5, p.Z), Vector3.new(3, 10, 3), Enum.Material.Grass)
+					end
+				end
+				n += 1
+				if n % 4 == 0 then
+					task.wait()
+				end
+			end
+		end
+	end
+	local gone = 0
+	for _, q in folder:GetChildren() do
+		if q.Name == "WALL" or q.Name == "RAIL" or q.Name == "POST" then
+			q:Destroy()
+			gone += 1
+		end
+	end
+	return n .. " wall pieces banked, " .. gone .. " parts removed"
+end
+
+-- Inya's shallow bed: Sand reads white through the water near the shores; paint it Mud in a box (x0, z0, x1, z1)
+function G.lakeBed(x0: number, z0: number, x1: number, z1: number, y0: number?, y1: number?)
+	local T = workspace.Terrain
+	y0 = y0 or 24
+	y1 = y1 or 44
+	local n = 0
+	for x = x0, x1, 256 do
+		for z = z0, z1, 256 do
+			local r = Region3.new(Vector3.new(x, y0, z), Vector3.new(math.min(x + 256, x1), y1, math.min(z + 256, z1))):ExpandToGrid(4)
+			T:ReplaceMaterial(r, 4, Enum.Material.Sand, Enum.Material.Mud)
+			n += 1
+			if n % 10 == 0 then
+				task.wait()
+			end
+		end
+	end
+	return n
+end
+
 function G.data(holding: Instance)
 	local kit = ReplicatedStorage:FindFirstChild("YgnKit")
 	local moved = {}

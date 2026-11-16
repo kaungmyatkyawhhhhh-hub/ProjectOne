@@ -224,7 +224,26 @@ def edges(G, water, prof, H, lmk, outside, d_bld, road, d_road, bund_near=170.0,
             s_ = 0.0
             post_acc = 0.0
             tree_acc = TREE_GAP / 2
-            prev_ok = None
+            run_pts = []
+            nrail = [0]
+
+            def flush_rail(end=False):
+                if len(run_pts) >= 2:
+                    (a_, ya), (b_, yb) = run_pts[0], run_pts[-1]
+                    dd = b_ - a_
+                    Lr = float(np.hypot(*dd))
+                    if Lr > 0.5:
+                        yaw_ = math.atan2(-dd[1], dd[0])
+                        m_ = (a_ + b_) / 2
+                        alt = 0.05 * (nrail[0] % 2)
+                        nrail[0] += 1
+                        yb_ = (ya + yb) / 2
+                        parts.append("BRAIL %.2f %.2f %.2f %.2f 0.18 0.18 %.5f" % (m_[0], yb_ + 1.75 + alt, m_[1], Lr + 0.1, yaw_))
+                        parts.append("BRAIL %.2f %.2f %.2f %.2f 0.12 0.12 %.5f" % (m_[0], yb_ + 0.95 + alt, m_[1], Lr + 0.1, yaw_))
+                last = run_pts[-1] if run_pts and not end else None
+                run_pts.clear()
+                if last is not None:
+                    run_pts.append(last)
             while s_ <= cum[-1]:
                 k = max(0, min(int(np.searchsorted(cum, s_) - 1), len(L) - 1))
                 t = (s_ - cum[k]) / max(L[k], 1e-6)
@@ -254,10 +273,10 @@ def edges(G, water, prof, H, lmk, outside, d_bld, road, d_road, bund_near=170.0,
                         parts.append("BPOST %.2f %.2f %.2f 0.25 1.80 0.25 %.5f" % (rp[0], base_y + 0.9, rp[1], yaw))
                         stats["rail_posts"] += 1
                         post_acc = 0.0
-                    # rail pieces 3 studs long (one per sample), alternating heights so the joints never share planes
-                    alt = 0.04 * (int(s_ / 3.0) % 2)
-                    parts.append("BRAIL %.2f %.2f %.2f 3.02 0.18 0.18 %.5f" % (rp[0], base_y + 1.75 + alt, rp[1], yaw))
-                    parts.append("BRAIL %.2f %.2f %.2f 3.02 0.12 0.12 %.5f" % (rp[0], base_y + 0.95 + alt, rp[1], yaw))
+                    # rails: chords of up to 8 samples (24 studs); neighbours at alternating heights (no shared planes)
+                    run_pts.append((rp.copy(), base_y))
+                    if len(run_pts) >= 9:
+                        flush_rail()
                     tree_acc += 3.0
                     if tree_acc >= TREE_GAP:
                         tq = back + nrm * TREE_OFF
@@ -270,7 +289,9 @@ def edges(G, water, prof, H, lmk, outside, d_bld, road, d_road, bund_near=170.0,
                     G.poly(dr, [tuple(v) for v in poly])
                 else:
                     tree_acc = TREE_GAP / 2
+                    flush_rail(True)
                 s_ += 3.0
+            flush_rail(True)
     cols = [(G.X0 + i * RES + RES / 2, G.Z0 + j * RES + RES / 2, top, wet) for (i, j), (top, wet) in colmap.items()]
     stats["terrain_cols"] = len(cols)
     stats["walk_m"] = round(stats["walk_m"])
