@@ -7,6 +7,9 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 10:29 [dashboard, unverified] Made only in Blender, no use of AI. (topic: tiktok)
+- 2026-11-16 10:28 [dashboard, unverified] The object must have mesh islands. (topic: tiktok)
+- 2026-11-16 10:28 [dashboard, unverified] Claude Opus 5.5 created every single asset, sound, and animation from scratch using Blender with no human feedback. (topic: tiktok)
 - 2026-11-16 10:25 [dashboard, unverified] Optimizing for the algorithm's key numbers can improve game chances. (topic: tiktok)
 - 2026-11-16 10:24 [dashboard, unverified] Being a Roblox dev is a good career choice. (topic: tiktok)
 - 2026-11-16 10:24 [dashboard, unverified] Everything was made inside Blender. (topic: tiktok)
