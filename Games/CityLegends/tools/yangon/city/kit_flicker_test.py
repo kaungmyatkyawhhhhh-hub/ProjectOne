@@ -75,6 +75,8 @@ def main():
     items = []
     for n, line in enumerate(sample):
         w = line.split()
+        if w[0] == "B" and w[8] == "WCOL":
+            continue
         if w[0] == "B":
             x, y, z, sx, sy, sz, yaw = map(float, w[1:8])
             c, s_ = math.cos(yaw), math.sin(yaw)
@@ -119,7 +121,55 @@ def main():
     for i, j, g, a in cross[:25]:
         print("  ", line_of(i)[:64], "|", line_of(j)[:64], round(g, 3), round(a, 3), tris[i][1][1:], tris[j][1][1:],
               [tuple(round(v, 2) for v in q) for q in tris[i][0]], [tuple(round(v, 2) for v in q) for q in tris[j][0]])
-    sys.exit(1 if (bad_total or cross) else 0)
+    # (light pass, 2026-11-16) the shells: what the place draws from far (shell boxes in the wall colour + pitched roofs).
+    # The detail of a tile is never drawn together with its shells (the streamer hides them), so they are checked alone:
+    # every shell box and roof of the busiest area, across buildings
+    sl = []
+    for f in sorted(os.listdir(OUT)):
+        if f.startswith("Shell_"):
+            sl += [l for l in open(os.path.join(OUT, f)).read().split(chr(10)) if l and l[0] in "SR"]
+    xs = sorted(float(l.split()[2 if l[0] == "S" else 3]) for l in sl)
+    xm = xs[len(xs) // 2]
+    near = [l for l in sl if abs(float(l.split()[2 if l[0] == "S" else 3]) - xm) < 400][:4000]
+    items = []
+    for n, line in enumerate(near):
+        w = line.split()
+        if w[0] == "S":
+            x, y, z, sx, sy, sz, yaw = map(float, w[2:9])
+            c, s_ = math.cos(yaw), math.sin(yaw)
+            X, Z = (c, 0, -s_), (s_, 0, c)
+            def P(u, v, t):
+                return (x + X[0] * u + Z[0] * t, y + v, z + X[2] * u + Z[2] * t)
+            hx, hy, hz = sx / 2, sy / 2, sz / 2
+            V = [P(a * hx, b * hy, e * hz) for a in (-1, 1) for b in (-1, 1) for e in (-1, 1)]
+            # outward winding for flicker_check's normals
+            faces = [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)]
+            for fc in faces[:2] + faces[3:]:   # (the bottom face is 2 studs under the lowest ground: never seen)
+                a, b, cc, d = (V[i] for i in fc)
+                items.append(((a, b, cc), (n, w[9])))
+                items.append(((a, cc, d), (n, w[9])))
+        else:
+            pid = pid_of.get(w[1])
+            if not pid:
+                continue
+            sx, x, y, z, yaw, sy, sz = float(w[2]), float(w[3]), float(w[4]), float(w[5]), float(w[6]), float(w[8]), float(w[9])
+            c, s_ = math.cos(yaw), math.sin(yaw)
+            d = kit.data[pid]
+            for cl in "WR":
+                m = d[cl]
+                for k in range(0, len(m.T), 3):
+                    tri = []
+                    for t in (m.T[k], m.T[k + 1], m.T[k + 2]):
+                        px, py, pz = m.P[t]
+                        px, py, pz = px * sx, py * sy, pz * sz
+                        tri.append((x + c * px + s_ * pz, y + py, z - s_ * px + c * pz))
+                    items.append((tuple(tri), (n, cl)))
+    bad, tris = check(items)
+    sh = [(i, j, g, a) for i, j, g, a in bad if tris[i][1][0] != tris[j][1][0]]
+    print("shells: %d shell boxes / roofs, %d triangles, %d flickering pairs across them" % (len(near), len(items), len(sh)))
+    for i, j, g, a in sh[:15]:
+        print("  ", near[tris[i][1][0]][:70], "|", near[tris[j][1][0]][:70], round(g, 3), round(a, 3))
+    sys.exit(1 if (bad_total or cross or sh) else 0)
 
 
 if __name__ == "__main__":

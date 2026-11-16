@@ -464,3 +464,39 @@ Rules for every step:
   - One night mesh kept Default collision fidelity (no collision, visual only).
   - Kabar Aye Pagoda Rd next to Myanmar Plaza has few buildings: the real frontage there is the landmark lots and green compounds.
   - Setting CollisionFidelity on new kit templates runs at about 1.4 a second in Studio (521 s for 737).
+
+### P1 buildings made light for the whole city (16 Nov 2026, in Studio, not saved)
+- **The idea:** the place keeps only each building's **shell**: its collision boxes drawn in the wall colour (the far look and the collision in one), plus the pitched roofs. Everything else (facade panels, piers, party walls, flat roof slabs, roof props, drainpipes, AC units, compound walls and their collision, gates) is **data**, built on each player's own client within 1,000 studs of the camera from the shared kit (new `src/client/YangonKitStream.client.lua`, decoder `src/shared/YangonKitData.lua`). Near the camera it looks the same as before; the shells of built tiles are hidden on that client only.
+- **In Studio:** `Workspace.Yangon1to1.Buildings` = `Shell` (per-cell Models: shell boxes with attribute `T` = tile, roofs) + `Night` (30 meshes, unchanged). `ReplicatedStorage.YgnKit` = `Templates` (794 kit templates, Box collision fidelity) + `Data_P1` (Meta + 873 tile strings). The old folder was deleted after the Play check. `ServerStorage.YgnKitTemplates` (old kit) deleted. Store back on `CityLegends_v1`. Not saved: the coordinator saves.
+
+| Measure (P1, 7.3 km²) | Before | After |
+|---|---|---|
+| Parts in the place | 139,675 | **10,558** (7,271 shell boxes, 3,257 roof parts, 30 night): 13x fewer |
+| Parts per km² | 19,200 | 1,450 |
+| Triangles in the place | 18.4 M | 0.23 M (shells + roofs 0.11 M, night 0.12 M) |
+| Detail triangles near the camera | (all in the place) | about 1.4 M within 1,000 studs (16.5 M in the whole district's data) |
+| Unique meshes | 767 | 775 kit templates (shared by the whole city) + 33 in the place |
+| Collision boxes on the server | 23,183 | 7,271 (one set a building) + the roofs; compound walls: 10,313 boxes made on the client near the player |
+| File size of the buildings (binary rbxm) | 7.66 MB (1.05 MB/km²) | 2.32 MB (0.32 MB/km²): shells 0.58, detail data 1.65, templates 0.08 |
+| Play, dense street (31071, 30003), menu up | 7,664 building parts streamed, **15 FPS**, Studio 10.9 GB | 714 shells + 10,113 near parts (48 tiles), **47 FPS**, Studio 10.5 GB |
+
+- **Whole city (30x the area):** before about 4.2 M parts, 550 M triangles and 230 MB; light about 320 k place parts, 7 M place triangles and **about 70 MB** (50 MB of it the detail data). Unique meshes stay near 1,800 (the kit is shared: piece ids are the same in every district).
+- **Next to make it lighter:** the detail data is now the biggest part (1.65 MB a district, base64 text compresses badly). Storing each building as its outline + archetype + seed and laying the panels out on the client would make it about 4x smaller.
+
+**What changed in the tools:**
+- `city/buildings_1to1.py`: writes shell records (S / R) to `Shell_<n>.txt` and the detail per 256-stud tile; walls fit whole bays (stretch <= 15%) plus at most one **half-bay pier** (the 9,984 plain end strips are gone; 8,540 piers instead, inside the kit); **one drainpipe and 1-2 AC units a building** on its longest street face (not one a panel); compound walls: lot lines joined and simplified, pieces of 8 / 4 / 2 / 1 bays (15,115 pieces, was 21,915), one collision box per straight chain; **hip roofs only on near-rectangular outlines** (fill > 0.88, was 0.78: the "huge eaves" were the roof rectangle standing past notched outlines), eave 0.75 m on villas, rise capped; shells and roofs stepped so no two share a plane.
+- `city/kit_panels.py`: no AC / drainpipe inside panels; `p_pier`; props `pipe` (5 cm, 1 cm off the wall: the old one stood 0.45 m off), `ac`, `cwall2`, `cwall8`; the hip roof is one part (soffit in the roof class); **stable piece ids** from the piece's key (the same in every district).
+- New `city/kit_pack.py` (packed format, rbxmx writer); `city/kit_flicker_test.py` also checks shells and roofs.
+- `tools/yangon/YangonKitPlace.luau`: `templates(holding, store)`, `shells`, `preview(centre, radius)` / `unpreview` (Edit only: see what a client builds).
+- RenderFidelity: every kit mesh was already Automatic (checked 95,749 of 95,749).
+
+**Checks:** flicker test: kit 433 pieces 0; placed sample of 2,500 lines 1 pair (a 0.015 sq-stud corner of two wall copings, as before); shells and roofs 0 (fixed on the way: the new drainpipe's back face 1 cm off the wall, the AC drip next to the township bands, boxes of one building sharing a top, neighbours' eaves at one height). Grazing close-up of a walk-up with its AC: no flicker. Play: tiles build in about 1 s round the camera, shells hide, detail looks as before.
+
+**Screenshots** (same views; `C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`): before Kabar Aye `mcp-Roblox_Studio-blob-1794807184618-oda04x.jpg`, residential `...1794807209536-gg4975.jpg`, aerial `...1794807213456-wu6rjn.jpg`; after Kabar Aye `...1794808890341-mdd9ss.jpg`, residential `...1794808898221-nhw7qv.jpg`, aerial `...1794808872437-fsbugy.jpg`, shells only from the air `...1794808838325-09zd6k.jpg`, in Play `...1794811938628-ylg0x6.jpg`, grazing close-up `...1794812338807-pqje4p.jpg`.
+
+**Still to know:**
+- In Edit the owner sees the shells (plain boxes in the wall colour) away from a preview; Play shows the detail. `YangonKitPlace.preview(centre, radius)` shows it in Edit.
+- Beyond 1,000 studs a player sees shells (plain boxes): fine in the haze, but no windows on them.
+- Compound-wall collision is on the client only (the server has none; NPC traffic stays on the roads).
+- Edit memory was not comparable (other agents' work came in; Studio held 7.5 GB after the two Plays).
+- Trap: another agent's `git pull --rebase --autostash` put this job's `buildings_1to1.py` into `stash@{0}` mid-run (it ran the old code once); it was restored from the stash. The stash still holds other agents' changes: not dropped.

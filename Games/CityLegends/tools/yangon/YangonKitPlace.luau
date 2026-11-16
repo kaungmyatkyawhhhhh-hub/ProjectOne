@@ -17,6 +17,14 @@
 	P.place(instText, folder)           -> parts: lines "pid sx x y z yaw wall", "#i j" starts cell (i, j)
 	P.cells(holdingFolder, folder)      -> cell meshes placed
 	P.spawn(fn) / P.status()            -> long work in a task; result in ServerStorage attribute KitPlaceStatus
+	Light version (2026-11-16): the place keeps only the shells; the detail is data made on each client near the camera
+	(src/client/YangonKitStream.client.lua, decoder Shared.YangonKitData).
+	P.templates(holding, store)         -> templates into `store` (ReplicatedStorage.YgnKit.Templates for the light kit)
+	P.shells(text, folder)              -> Shell_<n> lines: S shell box (wall colour, collision, attribute T = tile,
+	                                       flat roofs get a concrete Texture on top), R pitched roof (kit roof, collides,
+	                                       Box), W compound-wall collision (invisible) into folder.Shell / .WallCollide
+	P.preview(centre, radius)           -> Edit only: builds the detail tiles within radius (what a client builds) into
+	                                       Workspace._KitPreview and hides their shells; P.unpreview() undoes it
 	Every visual MeshPart: Anchored, CanCollide / CanQuery / CanTouch false, CollisionFidelity Box. Collision is
 	YangonBuildingMeshes.collide on the Collide_<n> strings.
 ]]
@@ -106,13 +114,14 @@ end
 
 P.T = {} -- pid -> { {kind, template, c, size}, ... }
 
-function P.templates(holding: Instance): number
-	local store = SS:FindFirstChild("YgnKitTemplates")
+function P.templates(holding: Instance, into: Instance?): number
+	local store = into or SS:FindFirstChild("YgnKitTemplates")
 	if not store then
 		store = Instance.new("Folder")
 		store.Name = "YgnKitTemplates"
 		store.Parent = SS
 	end
+	P.store = store
 	local n = 0
 	for _, m in meshParts(holding) do
 		if m.kind == "KWX" or m.kind == "KGR" or m.kind == "KAR" or m.kind == "KRO" then
@@ -147,14 +156,14 @@ function P.templates(holding: Instance): number
 			end
 		end
 	end
-	P.index()
+	P.index(store)
 	return n
 end
 
-function P.index(): number
+function P.index(into: Instance?): number
 	P.T = {}
 	local n = 0
-	local store = SS:FindFirstChild("YgnKitTemplates")
+	local store = into or P.store or SS:FindFirstChild("YgnKitTemplates")
 	if not store then
 		return 0
 	end
@@ -296,6 +305,180 @@ function P.cells(holding: Instance, folder: Instance): number
 		end
 	end
 	return n
+end
+
+-- ------------------------------------------------------------------------------------------------ light version
+local function cellModel(folder: Instance, x: number, z: number): Instance
+	local name = "Cell_" .. math.floor(x / 1792) .. "_" .. math.floor(z / 1792)
+	local cm = folder:FindFirstChild(name)
+	if not cm then
+		cm = Instance.new("Model")
+		cm.Name = name
+		cm.Parent = folder
+	end
+	return cm
+end
+
+function P.shells(text: string, folder: Instance): number
+	if next(P.T) == nil then
+		P.index()
+	end
+	local shellF = folder:FindFirstChild("Shell") or Instance.new("Folder")
+	shellF.Name = "Shell"
+	shellF.Parent = folder
+	local wallF = folder:FindFirstChild("WallCollide") or Instance.new("Folder")
+	wallF.Name = "WallCollide"
+	wallF.Parent = folder
+	local conc = MS:FindFirstChild("YgnConcreteBare")
+	local n = 0
+	for line in string.gmatch(text, "[^\n]+") do
+		local w = string.split(line, " ")
+		if w[1] == "S" then
+			local q = Instance.new("Part")
+			q.Name = w[10]
+			q.Size = Vector3.new(tonumber(w[6]) :: number, tonumber(w[7]) :: number, tonumber(w[8]) :: number)
+			q.CFrame = CFrame.new(tonumber(w[3]) :: number, tonumber(w[4]) :: number, tonumber(w[5]) :: number)
+				* CFrame.Angles(0, tonumber(w[9]) :: number, 0)
+			q.TopSurface = Enum.SurfaceType.Smooth
+			q.BottomSurface = Enum.SurfaceType.Smooth
+			q.Anchored = true
+			q.CanCollide = true
+			q.CanQuery = true
+			q.CanTouch = false
+			q.CastShadow = true
+			look(q, w[10], P.WALL[w[10]])
+			q:SetAttribute("T", w[2])
+			if w[11] == "1" and conc then
+				-- a flat roof seen from far: the concrete slab texture on the shell top
+				local t = Instance.new("Texture")
+				t.Face = Enum.NormalId.Top
+				t.Texture = (conc :: any).ColorMap
+				t.StudsPerTileU = (conc :: any).StudsPerTile
+				t.StudsPerTileV = (conc :: any).StudsPerTile
+				t.Color3 = rgb(196, 192, 184)
+				t.Parent = q
+			end
+			q.Parent = cellModel(shellF, q.Position.X, q.Position.Z)
+			n += 1
+		elseif w[1] == "R" then
+			local parts = P.T[w[2]]
+			if parts then
+				local sx, sy, sz = tonumber(w[3]) :: number, tonumber(w[9]) :: number, tonumber(w[10]) :: number
+				local cf = CFrame.new(tonumber(w[4]) :: number, tonumber(w[5]) :: number, tonumber(w[6]) :: number)
+					* CFrame.Angles(0, tonumber(w[7]) :: number, 0)
+				for _, t in parts do
+					local q = t.part:Clone()
+					q.Size = Vector3.new(t.size.X * sx, t.size.Y * sy, t.size.Z * sz)
+					q.CFrame = cf * CFrame.new(t.c.X * sx, t.c.Y * sy, t.c.Z * sz)
+					if t.kind == "KRO" then
+						q.Name = w[11]
+						look(q, w[11])
+						q.CanCollide = true -- the roof is its own collision (CollisionFidelity Box on the template)
+						q.CanQuery = true
+					else
+						q.Name = w[8]
+						look(q, w[8], P.WALL[w[8]])
+					end
+					q.Parent = cellModel(shellF, cf.Position.X, cf.Position.Z)
+					n += 1
+				end
+			end
+		elseif w[1] == "W" then
+			local q = Instance.new("Part")
+			q.Name = "WCol"
+			q.Anchored = true
+			q.Size = Vector3.new(tonumber(w[5]) :: number, tonumber(w[6]) :: number, tonumber(w[7]) :: number)
+			q.CFrame = CFrame.new(tonumber(w[2]) :: number, tonumber(w[3]) :: number, tonumber(w[4]) :: number)
+				* CFrame.Angles(0, tonumber(w[8]) :: number, 0)
+			q.Transparency = 1
+			q.CanCollide = true
+			q.CanQuery = true
+			q.CanTouch = false
+			q.CastShadow = false
+			q.TopSurface = Enum.SurfaceType.Smooth
+			q.BottomSurface = Enum.SurfaceType.Smooth
+			q.Parent = wallF
+			n += 1
+		end
+		if n % 300 == 0 then
+			task.wait()
+		end
+	end
+	return n
+end
+
+-- Edit preview of what a client builds near the camera
+function P.preview(centre: Vector3, radius: number, shellFolder: Instance?): number
+	local RS = game:GetService("ReplicatedStorage")
+	local KD = require((RS:WaitForChild("Shared"):WaitForChild("YangonKitData") :: ModuleScript):Clone())
+	local root = RS:FindFirstChild("YgnKit")
+	assert(root, "no ReplicatedStorage.YgnKit")
+	local T = KD.index(root:FindFirstChild("Templates"))
+	local out = workspace:FindFirstChild("_KitPreview") or Instance.new("Folder")
+	out.Name = "_KitPreview"
+	out.Parent = workspace
+	local keys = {}
+	local n = 0
+	for _, f in root:GetChildren() do
+		if f:IsA("Folder") and string.sub(f.Name, 1, 5) == "Data_" then
+			local meta = KD.meta(f)
+			for _, v in f:GetChildren() do
+				local i, j = string.match(v.Name, "^(%-?%d+)_(%-?%d+)$")
+				if i then
+					local cx, cz = (tonumber(i) + 0.5) * meta.tile, (tonumber(j) + 0.5) * meta.tile
+					if math.sqrt((cx - centre.X) ^ 2 + (cz - centre.Z) ^ 2) <= radius and not out:FindFirstChild(v.Name) then
+						local tf = Instance.new("Folder")
+						tf.Name = v.Name
+						tf.Parent = out
+						local job = KD.job((v :: StringValue).Value, tonumber(i) :: number, tonumber(j) :: number, meta, T, tf)
+						while not job:step(400) do
+							task.wait()
+						end
+						n += job.parts
+						keys[v.Name] = true
+					end
+				end
+			end
+		end
+	end
+	local y = workspace:FindFirstChild("Yangon1to1")
+	local sf = shellFolder or (y and y:FindFirstChild("Buildings") and y.Buildings:FindFirstChild("Shell"))
+	if sf then
+		for _, d in sf:GetDescendants() do
+			if d:IsA("BasePart") and d:GetAttribute("T") and keys[d:GetAttribute("T")] then
+				d.Transparency = 1
+				d:SetAttribute("PreviewHidden", true)
+				for _, t in d:GetChildren() do
+					if t:IsA("Texture") then
+						t.Transparency = 1
+					end
+				end
+			end
+		end
+	end
+	return n
+end
+
+function P.unpreview(shellFolder: Instance?)
+	local out = workspace:FindFirstChild("_KitPreview")
+	if out then
+		out:Destroy()
+	end
+	local y = workspace:FindFirstChild("Yangon1to1")
+	local sf = shellFolder or (y and y:FindFirstChild("Buildings") and y.Buildings:FindFirstChild("Shell"))
+	if sf then
+		for _, d in sf:GetDescendants() do
+			if d:IsA("BasePart") and d:GetAttribute("PreviewHidden") then
+				d.Transparency = 0
+				d:SetAttribute("PreviewHidden", nil)
+				for _, t in d:GetChildren() do
+					if t:IsA("Texture") then
+						t.Transparency = 0
+					end
+				end
+			end
+		end
+	end
 end
 
 function P.spawn(fn)
