@@ -48,3 +48,14 @@ Checks (`compare.py`, `gates.py`, pictures in `checks/`):
 Not done yet: rig (8 spine bones + Jaw) and Swim clip, baking colours into one texture, FBX export, Studio import, and which game it goes in.
 
 **Owner decision (2026-11-16):** keep the flipper compromise (tips halfway between the side and top views, 35 deg twist). Top/front IoU below 0.90 is accepted for the flippers only.
+
+---
+# Rig + export v1 (2026-11-16)
+`mosa6_export.py` (run on `mosasaurus_t6.blend`): `blender -b mosasaurus_t6.blend -P mosa6_export.py -- mosa6_data.json export`
+- **`export/Mosasaurus_T6.fbx`** (237 KB, texture embedded) + `export/Mosasaurus_T6_tex.png` (512 px) + `export/Mosasaurus_T6_rigged.blend` (with a Swim action).
+- Layout = FishKit species rig: nose at x=0, body down -X, **Root + Spine0..7 (head to tail) + Jaw** under Spine0, at the old Mosasaurus' bone span (x0 -0.1536, x1 -6.0736), so the existing Mosasaurus swim/bite clips should play on it. Not tested in Studio.
+- Two skinned meshes: `Mosasaurus_T6` (body, eye, teeth, mouth, flippers, plates; 5,232 tris) and `Mosasaurus_T6_Crystals` (336 tris): set that MeshPart to **Neon** in Studio for the glow. The per-part names from the exploded sheet live on in `mosasaurus_t6.blend`; the FBX joins them (one skinned mesh is the house convention).
+- Texture = palette atlas: each face's flat colour gets an 8 px cell (242 colours), so it matches the model exactly. No light bake: Roblox lights it.
+- Weights: 3 nearest spine bones by position (Gaussian, like FishKit); LowerJaw, LowerTeethRow and MouthInterior 100% Jaw. Max 3 influences, no unweighted verts.
+- Checked: FBX re-import (`fbxcheck.py`), bite pose (Jaw -22 deg opens cleanly), static 6 deg-per-bone bend from above (smooth, flippers follow). Pictures: `checks/mosa6_poses.jpg`, `checks/mosa6_bend_test.png`.
+- Not done: Studio import + Neon setting, playing the old clips on it in Play, which game it goes in.
