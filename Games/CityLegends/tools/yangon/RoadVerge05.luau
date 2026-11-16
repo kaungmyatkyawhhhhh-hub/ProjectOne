@@ -13,7 +13,8 @@
 	(The first version filled strips along each box: they left 1-cell trenches between strips and at road edges.)
 
 	local V = require(game.ServerStorage.ClaudeTools.RoadVerge05:Clone())
-	V.spawn(x0, z0, x1, z1)   -- runs in a task; V.status() -> "done ...: n pavement boxes, c cells, f filled"
+	V.spawn(x0, z0, x1, z1)   -- runs in a task; V.status() -> "done ...: n boxes, c cells, f filled"
+	V.spawn(x0, z0, x1, z1, "trim")   -- then: carve ground that reached within 0.6 of a pavement top
 ]]
 
 local M = {}
@@ -131,11 +132,92 @@ function M.run(x0: number, z0: number, x1: number, z1: number): string
 	return string.format("%d pavement boxes, %d cells, %d filled", n, cells, filled)
 end
 
-function M.spawn(x0: number, z0: number, x1: number, z1: number)
+-- The fill's first cell beside a pavement swelled up to 0.1 under the pavement top (the grass showed through at the
+-- edge, 16 Nov): carve every cell under a pavement or within TRIM_D of its edge whose ground is within TRIM_MIN of
+-- the pavement top down to TRIM_TO under it (an Air box; smooth terrain lands near the box's bottom).
+M.TRIM_D = 6
+M.TRIM_MIN = 0.6
+M.TRIM_TO = 1.2
+M.TRIM_D_R = 9     -- beside a carriageway box (its mesh pavement + 1.5)
+function M.trim(x0: number, z0: number, x1: number, z1: number): string
+	local col = workspace.Yangon1to1.Roads.Collide
+	local rpT = RaycastParams.new()
+	rpT.FilterType = Enum.RaycastFilterType.Include
+	rpT.FilterDescendantsInstances = { workspace.Terrain }
+	local cut: { [number]: number } = {}
+	local cutR: { [number]: number } = {}   -- (from carriageway boxes: used only where no pavement box reaches)
+	local n = 0
+	for i, p in col:GetChildren() do
+		local c = p.Position
+		local kind = p:GetAttribute("RoadBox")
+		if (kind == "P" or kind == "R") and c.X >= x0 and c.X <= x1 and c.Z >= z0 and c.Z <= z1 then
+			n += 1
+			local cf, sz = p.CFrame, p.Size
+			local top = c.Y + sz.Y / 2
+			local across, w, len = cf.RightVector, sz.X, sz.Z
+			if sz.X > sz.Z then
+				across, w, len = cf.LookVector, sz.Z, sz.X
+			end
+			across = Vector3.new(across.X, 0, across.Z).Unit
+			local along = Vector3.new(-across.Z, 0, across.X)
+			local reach = M.TRIM_D
+			if kind == "R" then
+				-- (a side street's mesh pavement: kerb on the carriageway box, pavement about 7.5 wide)
+				top += M.KERB
+				reach = M.TRIM_D_R
+				local e = c + across * (w / 2 + 3)
+				local g = workspace:Raycast(Vector3.new(e.X, top + 20, e.Z), Vector3.new(0, -100, 0), rpT)
+				if g and top - g.Position.Y > M.DECK then
+					reach = -1   -- a deck: nothing to trim
+				end
+			end
+			local r = w / 2 + reach + len / 2
+			for ci = math.floor((c.X - r) / 4), math.floor((c.X + r) / 4) do
+				for cj = math.floor((c.Z - r) / 4), math.floor((c.Z + r) / 4) do
+					local dx, dz = ci * 4 + 2 - c.X, cj * 4 + 2 - c.Z
+					local u = dx * across.X + dz * across.Z
+					local v = dx * along.X + dz * along.Z
+					if reach >= 0 and math.abs(v) <= len / 2 + 2 and math.abs(u) - w / 2 <= reach then
+						local k = ci * 100000 + cj
+						local y = top - M.TRIM_TO
+						local into = if kind == "P" then cut else cutR
+						if not into[k] or y < into[k] then
+							into[k] = y
+						end
+					end
+				end
+			end
+		end
+		if i % 500 == 0 then
+			task.wait()
+		end
+	end
+	for k, y in cutR do
+		if not cut[k] then
+			cut[k] = y
+		end
+	end
+	local cells, carved = 0, 0
+	for k, y in cut do
+		cells += 1
+		local x, z = (k // 100000) * 4 + 2, (k % 100000) * 4 + 2
+		local g = workspace:Raycast(Vector3.new(x, y + 40, z), Vector3.new(0, -80, 0), rpT)
+		if g and g.Material ~= Enum.Material.Water and g.Position.Y > y + M.TRIM_TO - M.TRIM_MIN then
+			workspace.Terrain:FillBlock(CFrame.new(x, y + 10, z), Vector3.new(4, 20, 4), Enum.Material.Air)
+			carved += 1
+		end
+		if cells % 400 == 0 then
+			task.wait()
+		end
+	end
+	return string.format("trim: %d pavement boxes, %d cells, %d carved", n, cells, carved)
+end
+
+function M.spawn(x0: number, z0: number, x1: number, z1: number, fn: string?)
 	workspace:SetAttribute("RoadVerge05", "running")
 	task.spawn(function()
 		local t0 = os.clock()
-		local ok, res = pcall(M.run, x0, z0, x1, z1)
+		local ok, res = pcall(if fn == "trim" then M.trim else M.run, x0, z0, x1, z1)
 		workspace:SetAttribute("RoadVerge05", string.format("%s after %.1f s: %s", if ok then "done" else "ERROR", os.clock() - t0, tostring(res)))
 	end)
 end
