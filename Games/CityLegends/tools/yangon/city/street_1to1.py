@@ -406,7 +406,12 @@ class World:
     # ---------------------------------------------------------------------------------------- records
     def put(self, kind, pid, x, z, yaw, g, y=None, occupy=True, sx=1.0):
         if y is None:
-            y = self.G.y(x, z)[0]
+            y, kind_ = self.G.y(x, z)
+            if kind_ != "road" and g is not None:
+                # on the verge: the terrain's voxels and grass stand up to ~1 stud over its stored heights; stand on the
+                # highest corner (+0.25) so nothing sinks into the ground
+                pts = list(g.exterior.coords)[:-1]
+                y = max([y] + [self.G.y(px, pz)[0] for px, pz in pts]) + 0.25
         self.items.append(dict(kind=kind, pid=pid, x=round(x, 3), y=round(y, 3), z=round(z, 3), yaw=round(yaw % (2 * math.pi), 5), sx=sx))
         if occupy and g is not None:
             self.occ_add(g)
