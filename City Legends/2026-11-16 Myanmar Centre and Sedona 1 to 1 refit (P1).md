@@ -75,3 +75,23 @@ Owner refs: [[Owner ref - Myanmar Centre basement ramps 1.webp]], [[Owner ref - 
 - Shop sign bands are blank (no real tenant list), the fit-outs are generic.
 - Look: the podium bands are plain white (owner's rule) where the photo shows light granite; the real gate pillars are taller with a pagoda-like top, and the real Kabar Aye frontage near the gate is a solid white wall with hedges and big trees; razor wire not modelled; trees are simple low-poly shapes.
 - A thin strip of bare ground shows between the site paving and the P1 pavement (the 0.6-stud gap kept off the road meshes).
+
+## Drone-photo match (17 Nov 2026, owner: "only the myanmar plaza building is accurate and everything else is not accurate")
+Truth: [[Owner ref - Myanmar Plaza drone view (real).png]] (looks south-east from above the Inya Lake / Kabar Aye Pagoda Road corner: Sedona bottom-left, lake right). Game camera for the same view: Edit, camera (34480, 640, 26560) looking at (34860, 40, 27480).
+Pictures: [[2026-11-17 MP drone view - before (photo vs game).jpg]], [[2026-11-17 MP drone view - after (photo vs game).jpg]], [[2026-11-17 MP drone view - after, clear air (photo vs game).jpg]] (Edit haze lowered for that picture only), [[2026-11-17 MP corner canopies - before and after.jpg]].
+
+**Differences found (photo vs game, before):**
+1. Canopies: the game had a tilted roof plate on V struts reaching 19 studs out and 54 each side past the corner front (over the road edge, owner ref [[Owner ref - Myanmar Plaza canopies over the road.webp]]), and a 71-stud ground canopy longer than the 41-stud corner front. The photo has a white louvred pergola sitting ON the roof behind the facade and a porch only as wide as the corner front.
+2. Roof: photo = green roof gardens all round a big white dome; game = bare grey roof.
+3. Round plaza: photo = round fountain in the middle, ring of clipped hedges; game = a bare paved disc with the sculpture plinth.
+4. Lake side of the road: photo = a row of flame trees (red, in bloom) and green trees along the road, wide lawn, a path on the bank; game = bare grass between the road and the lake walk (the green data had a 200-stud gap facing the mall corner and no trees at the road edge).
+5. Sedona roofs: photo = bright red tiles; game = purple-brown (the clay-tile variant darkened them).
+6. Not changed (noted): the whole city in the photo is far greener (in game the street trees stream in on the client, Edit shows only the far tree cells); the corner entrance sits on the real outline's short NW edge (known, see above); the dome is a ribbed glass cap where the photo's reads as a flat white disc on a drum; the towers' heights / bands and Sedona's two towers already match; P1 shows no flyover in this view (the photo's curve top-right is off our P1 edge); the 4-floor shell on the lake side at the junction (`Buildings.Shell.Cell_19_15.KWG`) is the buildings agent's OSM building.
+
+**Fixed (Studio, saved 17 Nov 18:57 UTC):**
+- `city/mc_corner_patch.py` -> Model 80568456105370, swapped into the CHR, FAS, SOF and big DRK meshes (`ApplyMesh`; old ids / sizes / positions in attributes `OldMeshId_drone`, `OldSize_drone`, `OldPos_drone`): the roof plate's underside dropped, the ground canopy cut to 44 studs (22 each side of the door), its two outer columns dropped (collision boxes too); the STR mesh (roof plate top + V struts) deleted. `mc3d.py` itself is NOT changed yet: a full re-run would bring them back (port the cut before the next run).
+- `tools/yangon/MCDrone.luau` (Parts, in `Landmarks.MyanmarCentre.DroneMatch`, 132 parts): `Pergola` (white louvred frame on the roof behind the corner front, 44 x 14 x 9), `RoofGardens` (lawn beds from `city/mc_roof_gardens.py`, every other with a clipped hedge, plus a lawn ring round the dome with four paved paths; the podium roof cap is at y 119.86, the top floor slab under it at 104.86: never raycast the roof), `RoundPlaza` (white-rimmed fountain round the plinth, hedge ring r 26-28.5 with four diagonal paths), `LakeTrees` (24 bank trees from `GreenEdgeKit.BANKTREE` 22 studs off the road edge, z 27075-27700, 15 of them flame trees: crown texture off, LeafyGrass (200, 64, 40)).
+- Sedona's roof mesh `RTL`: SmoothPlastic (222, 72, 50), no variant (old values in attributes `*_drone`).
+- No flicker: every new part butts or sinks 0.2 into what it stands on; no coplanar visible faces.
+
+**For the roads agent (not done here):** the owner's [[Owner ref - planters on the road by Myanmar Plaza.webp]] boxes are not Myanmar Centre meshes nor Green planters (none of the 45 PLANTER models stand on a road): they look like roads05 islands in the lay-by by the mall's west front.
