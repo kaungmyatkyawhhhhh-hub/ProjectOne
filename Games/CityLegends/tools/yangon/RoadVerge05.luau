@@ -145,7 +145,7 @@ function M.trim(x0: number, z0: number, x1: number, z1: number): string
 	rpT.FilterType = Enum.RaycastFilterType.Include
 	rpT.FilterDescendantsInstances = { workspace.Terrain }
 	local cut: { [number]: number } = {}
-	local cutR: { [number]: number } = {}   -- (from carriageway boxes: used only where no pavement box reaches)
+	local cutR: { [number]: number } = {}   -- (from carriageway boxes)
 	local n = 0
 	for i, p in col:GetChildren() do
 		local c = p.Position
@@ -192,8 +192,10 @@ function M.trim(x0: number, z0: number, x1: number, z1: number): string
 			task.wait()
 		end
 	end
+	-- (the lower of the two: a side street running downhill from a main road lies under the main road's band; near a
+	-- main road the two levels differ by about 0.05)
 	for k, y in cutR do
-		if not cut[k] then
+		if not cut[k] or y < cut[k] then
 			cut[k] = y
 		end
 	end
