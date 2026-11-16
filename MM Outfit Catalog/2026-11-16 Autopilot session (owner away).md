@@ -81,7 +81,12 @@ created: 2026-11-16
 - **Accessory type cache** (DataStore `MMAssetTypes_v1`): all 30 mannequins are complete within ~5 s (were 50–85 s, with missing hats under rate limits).
   - Incomplete rigs rebuild 20–30 s later.
 - **Animation culling** for mannequins: about 18 animate instead of 52; the other floor's rigs pause.
-- **Item lookups in parallel:** `selection()` is used by Cart, Saved items, See fit and Checkout. Right after a server start they're still slow (~20 s), because Roblox's rate limit is shared with the mannequin builds.
+- **Item lookups in parallel:**
+  - `selection()` (Cart, Saved items, See fit, Checkout) and GetOutfitInfo (outfit pages) now look items up in parallel.
+  - Under the start-up rate limit an outfit page now takes ~6 s (was ~20 s).
+  - From 20 s after start, the server also warms every MM outfit's item info in the background (paced), so most pages answer in under 0.1 s after the first minute or two.
+- **Body edits survive try-ons:** your skin tone and body shape stay when you try an outfit. Before, every try-on rebuilt you from your original avatar. "My avatar" still restores everything, and the Avatar page has its own "My avatar" button now.
+- **Try whole fit** on another player copies their skin tone and body shape too.
 - **Viewer preload:** only MM's own looks preload at join. Uploads (up to 40 per theme = 240) load when opened.
   - Each upload is a ~230-instance rig replicated to every client, so 240 uploads add ~55k instances.
   - If phones struggle once the catalog is full, lower `PER_THEME` in GuestLooksServer (e.g. 25).
