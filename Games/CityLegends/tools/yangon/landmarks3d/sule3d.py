@@ -119,7 +119,20 @@ def stupa(g):
         rgt = (rgt[0] / wid, rgt[1] / wid, 0.0)
         out = (up[1] * rgt[2] - up[2] * rgt[1], up[2] * rgt[0] - up[0] * rgt[2], up[0] * rgt[1] - up[1] * rgt[0])
         topw = math.dist(C, D)
-        OK.into_geo(OK.panel_tile((wid + topw) / 2, hgt), g, KG, base, rgt, out, up)
+        # the bell face bulges out between za and zc (catmull profile): stand the tile clear of the bulge and let a
+        # backing slab of the carved field reach back into the bell so no gap shows at its ends
+        bulge = max(a_at(za + (zc - za) * f) - (a_at(za) + (a_at(zc) - a_at(za)) * f) for f in [i / 12 for i in range(13)])
+        bulge = max(0.0, bulge) * k + 0.04
+        pt_ = OK.panel_tile((wid + topw) / 2, hgt)
+        f_ = 0.09 * min((wid + topw) / 2, hgt)
+        hw_ = (wid + topw) / 4
+        OK.slab(pt_, "P", [(-hw_ + f_, f_), (hw_ - f_, f_), (hw_ - f_, hgt - f_), (-hw_ + f_, hgt - f_)], -bulge - 0.05,
+                bulge + 0.05, 0.0, back=False, band=False)
+        for grp_, ts_ in pt_.g.items():
+            if grp_ == "P":
+                # drop the backing slab's front cap (it would lie in the field's back plane, inside the field slab)
+                pt_.g[grp_] = [t for t in ts_ if not all(abs(q[1]) < 1e-6 for q in t)]
+        OK.into_geo(pt_, g, KG, tuple(base[j] + out[j] * bulge for j in range(3)), rgt, out, up)
     # round from the shoulder: 5 rings (24.3 -> 28.2), bowl, lotus, the slender bud, hti cage, spire
     z = zt
     rp = [(2.1, z)]
