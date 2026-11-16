@@ -129,3 +129,10 @@ The owner didn't like having the Outfit ID panel on screen.
 
 ![[Screenshots/2026-11-17 mannequins display pose (side ones angled out).jpg]]
 ![[Screenshots/2026-11-17 viewer round platform, no horizon bar.jpg]]
+
+## 9. Side mannequins now angle inward (16 Nov)
+- **Owner:** "why they facing outwards". The 28° outward display pose read as the side mannequins turning away.
+- **Now:** they angle **15° inward** toward the runway; the middle one faces straight.
+  - Measured with the player out of range: Midnight +15°, Frost 0°, Sakura -15°.
+  - The nearest one still turns to watch you.
+- **Change:** `DISPLAY_ANGLE` and its sign in `PenthouseExhibitClient`.
