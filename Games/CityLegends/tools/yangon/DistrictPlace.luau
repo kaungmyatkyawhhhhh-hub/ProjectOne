@@ -189,8 +189,7 @@ function M.pagodas()
 			return "none"
 		end
 		local kit, folder, out = PP.kit(), PP.folder(), {}
-		for _, row in string.split(pd.Value, "
-") do
+		for _, row in string.split(pd.Value, "\n") do
 			if row ~= "" then
 				local m = PP.placeOne(kit, folder, row)
 				table.insert(out, m.Name .. " " .. tostring(m:GetAttribute("Ground")))
