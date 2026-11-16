@@ -171,7 +171,8 @@ def main():
 
 
 # archetype (buildings_1to1.py) -> facade set; sheds / halls / markets keep their plain wall
-SET_OF = {"walkup": "walkup", "condo": "walkup", "civic": "walkup", "township": "shop", "house": "villa", "villa": "villa"}
+SET_OF = {"walkup": "walkup", "condo": "walkup", "civic": "walkup", "township": "shop", "house": "villa", "villa": "villa",
+          "colonial": "walkup"}   # (P3) downtown colonial rows: the walk-up window grid
 
 
 def b36(n):
