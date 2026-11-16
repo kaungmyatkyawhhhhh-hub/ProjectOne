@@ -2006,6 +2006,13 @@ function M.checkMouths()
 	local bad, spots, per = 0, 0, {}
 	for mi, m in M.mouths do
 		local o = M.R[m.road]
+		if m.ring then
+			M.useRing(m.ringR)
+		end
+		local e0 = o.s[m.i0]
+		if not own(e0[1], e0[3]) then
+			continue
+		end
 		local lo, hi = math.min(m.i0, m.k), math.max(m.i0, m.k)
 		if m.step == 1 then
 			hi = math.min(o.n - 1, hi + 3)

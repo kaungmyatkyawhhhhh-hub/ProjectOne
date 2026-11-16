@@ -251,7 +251,7 @@ def main(tag):
     starts = [(li, l) for li, l in enumerate(lanes) if not l['closed']]
     straight_from = set(a for a, ka, b, kb in links if lanes[b]['road'] == lanes[a]['road'] or kb == 1)
     for li, l in enumerate(lanes):
-        if l['closed'] or not l['jend'] or li in straight_from:
+        if l['closed'] or li in straight_from:
             continue
         end = np.array([l['pts'][-1][0], l['pts'][-1][2]])
         din = ldir(li, len(l['pts']) - 2)
@@ -270,6 +270,18 @@ def main(tag):
                 best = (d, ti)
         if best:
             links.append([li, len(l['pts']), best[1], 1])
+            continue
+        # else any lane passing just ahead, the same heading (a one-way piece running into its own road)
+        for ti, t in starts:
+            if ti == li:
+                continue
+            kk = nearest(ti, end[0], end[1])
+            if kk + 2 >= len(t['pts']):
+                continue
+            q = np.array([t['pts'][kk + 1][0], t['pts'][kk + 1][2]])
+            if np.linalg.norm(q - end) < 60 and float(ldir(ti, kk) @ din) > 0.7:
+                links.append([li, len(l['pts']), ti, kk + 2])
+                break
     # ring: loops, lane changes outward a few times a turn
     for (nm, k), li in ring_lanes.items():
         P = lanes[li]['pts']
