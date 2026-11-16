@@ -819,6 +819,16 @@ def run_median(v, c, L):
     return out
 
 
+def widen_rate(v, c, k=0.12):
+    """an edge never steps in faster than k studs a stud (it widens instead: no notches)"""
+    v = np.asarray(v, float).copy()
+    for i in range(1, len(v)):
+        v[i] = max(v[i], v[i - 1] - k * (c[i] - c[i - 1]))
+    for i in range(len(v) - 2, -1, -1):
+        v[i] = max(v[i], v[i + 1] - k * (c[i + 1] - c[i]))
+    return v
+
+
 def ease_steps(v, c, L=EASE_W):
     """a piecewise-constant array eased linearly over L studs at each change (centred)"""
     v = np.asarray(v, float)
@@ -876,6 +886,7 @@ def build(tags):
         wl, wr, lm, lw = (run_median(x, c, SEC_MIN) for x in (wl, wr, lm, lw))
         lanes = np.round(run_median(lanes.astype(float), c, SEC_MIN)).astype(int)
         wl, wr, lm, lw = (ease_steps(x, c) for x in (wl, wr, lm, lw))
+        wl, wr = widen_rate(wl, c), widen_rate(wr, c)
         main = hw in RN.MAIN
         look = 'main' if main else ('narrow' if any(edges[s].cs['look'] == 'narrow' for s in srcs) and not main else 'street')
         walk = WALK[look]

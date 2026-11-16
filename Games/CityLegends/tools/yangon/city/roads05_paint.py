@@ -388,6 +388,15 @@ def build(data, signals=None):
             ln = LineString(ring.coords)
             for d in dashes(ln, DASH_ON, DASH_OFF):
                 P.line('LW', d, LINE_W, 'ring lane', g['name'])
+    # decks: 2 + 2, a solid white centre line and dashed lane lines (no zebras, no boxes up there)
+    for d in data.get('decks', []):
+        s = d['s']
+        rng = range(len(s))
+        P.line('LW', offset_line(s, lambda q: 0.0, rng), CENTRE_W, 'deck centre', d['name'], None, deck=True)
+        for sg in (-1, 1):
+            ln = offset_line(s, lambda q, sg=sg: sg * q[10], rng)
+            for dd in dashes(ln, DASH_ON, DASH_OFF):
+                P.line('LW', dd, LINE_W, 'deck lane', d['name'], None, deck=True)
     # turn arrows
     for r in main:
         for t in r.get('turn', []):

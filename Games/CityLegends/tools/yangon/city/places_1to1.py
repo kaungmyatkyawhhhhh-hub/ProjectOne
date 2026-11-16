@@ -355,6 +355,7 @@ class Out:
         self.detail = defaultdict(list)
         self.stats = Counter()
         self.boxes = []      # (shapely footprint, y0, y1, code) of everything placed: the overlap check
+        self.keep = []       # ground the places cover (slabs, pads): no trees, no street props there
 
     def box(self, x, y0, z, sx, sy, sz, ux, uz, code, coll=False, check=True):
         """a box from y0 up sy, centred (x, z), its X along (ux, uz)"""
@@ -390,6 +391,7 @@ def slab(o, poly, code, coll=True, lift=0.25):
     """a ground slab on a polygon (rectangles), its top `lift` over the highest terrain under it; returns the top y"""
     hi, lo = gmax(poly)
     top = hi + lift
+    o.keep.append(poly)
     for (cx, cz, sx, sz, yw) in BK.roof_rects(poly, M(1.0)):
         ux, uz = math.cos(yw), -math.sin(yw)
         y0 = lo - 1.0
@@ -754,6 +756,17 @@ def build():
     bad_bld = sum(1 for (fpoly, _, _, _) in o.boxes if any(bpolys[j].intersection(fpoly).area > 0.05
                                                             for j in btree.query(fpoly, predicate="intersects")))
     o.stats["check_on_road"] = bad_road
+    keep = unary_union(o.keep + [b[0] for b in o.boxes]).buffer(M(0.5))
+    kl = [list(map(list, g.exterior.coords)) for g in (keep.geoms if keep.geom_type == "MultiPolygon" else [keep])]
+    json.dump(kl, open(os.path.join(OUT, "keepout.json"), "w"))
+    # what the current green / street layers have standing there (they are re-run with keepout.json)
+    try:
+        trees = json.load(open(os.path.join(B1, "green_%s" % TAG, "trees.json")))
+        o.stats["trees_in_places_before"] = sum(1 for t in trees if keep.contains(Point(t[2], t[3])))
+        its = json.load(open(os.path.join(B1, "street_%s" % TAG, "items.json")))["items"]
+        o.stats["street_items_in_places_before"] = sum(1 for t in its if keep.contains(Point(t["x"], t["z"])))
+    except Exception as e:
+        print("layer check skipped", e)
     o.stats["check_in_building"] = bad_bld
     os.makedirs(OUT, exist_ok=True)
     path = os.path.join(OUT, "ygnplaces_%s.rbxmx" % TAG.lower())

@@ -74,6 +74,12 @@ LANDMARK_BOXES = {
     # (buildings_P2/stats.json landmark_sites_empty)
     "P2": [(34450.2, 17611.6, 34809.3, 17968.6), (33404.4, 19819.3, 33813.1, 20312.8), (33367.6, 21652.7, 34232.0, 22307.1),
            (28626.6, 21641.3, 29627.6, 22102.9), (34387.5, 16092.7, 34484.7, 16189.8), (32950.0, 19775.4, 33067.5, 19892.9)],
+    # (step 6) P3 downtown: Sule, Botataung, and the lots left empty for their own landmark jobs (City Hall, Bogyoke Market,
+    # Strand Hotel, High Court, Secretariat, Central Station, Immanuel Baptist, Holy Trinity, Maha Bandula Park)
+    "P3": [(35840, 44973, 36158, 45265), (40017, 46869, 40361, 47547), (36097, 44765, 36483, 45051),
+           (34683, 42851, 35286, 43453), (37153, 46507, 37438, 46820), (36499, 45396, 36867, 45733),
+           (38008, 44484, 38514, 45055), (36486, 42630, 37118, 42836), (36496, 45191, 36617, 45292),
+           (34399, 43175, 34587, 43300), (36008, 45285, 36438, 45950)],
 }
 AVENUES = {"University Avenue Road", "Inya Road", "U Wisara Road", "New University Avenue Road", "Kan Yeiktha Road",
            "Natmauk Road", "Ahlone Road", "Zoological Garden Road", "Shwe Gone Dine Road", "Bawdi Avenue"}
@@ -257,6 +263,12 @@ def main():
     dr_l = ImageDraw.Draw(im_l)
     for (x0, z0, x1, z1) in LANDMARK_BOXES.get(TAG, []):
         G.poly(dr_l, [(x0, z0), (x1, z0), (x1, z1), (x0, z1)])
+    # (2026-11-16, real places) fuel forecourts, car parks, courts, playgrounds (places_1to1.py build): no trees, their
+    # own slab over the ground
+    kp = os.path.join(B1, "places_%s" % TAG, "keepout.json")
+    if os.path.exists(kp):
+        for pts in json.load(open(kp)):
+            G.poly(dr_l, [tuple(q) for q in pts])
     lmk = G.arr(im_l)
     log("buildings cols", bld.sum(), "wall cols", wall.sum(), "landmark cols", lmk.sum())
 

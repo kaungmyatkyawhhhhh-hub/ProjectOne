@@ -110,6 +110,13 @@ LANDMARK_SITES_BY_TAG["P3"] = {
     "holy_trinity": dict(osm=["o186939481"], pts=[], grow=5.0),
     "mahabandula_park": dict(osm=[], areas=[129485365], pts=[], grow=2.0),
 }
+# (2026-11-16, "up to batch 3") P4 west of P1 / P2 (Hledan, Kamayut): the catalogue's towers stay EMPTY for their own
+# models: Times City (towers + mall, 4 OSM outlines), M Tower (Hledan), Crystal Residences ("Crystal Tower")
+LANDMARK_SITES_BY_TAG["P4"] = {
+    "times_city": dict(osm=["o793349746", "o793349747", "o793349748", "o1557960810"], pts=[], grow=15.0),
+    "m_tower": dict(osm=["o1514269236"], pts=[], grow=10.0),
+    "crystal_residences": dict(osm=["o471327872"], pts=[], grow=12.0),
+}
 LANDMARK_SITES = LANDMARK_SITES_BY_TAG.get(TAG, {})
 # earlier pilots this one meets (geo.PILOT_SEAMS): their buildings by the shared edge are kept, never doubled, and no
 # compound wall is drawn along the shared edge twice
