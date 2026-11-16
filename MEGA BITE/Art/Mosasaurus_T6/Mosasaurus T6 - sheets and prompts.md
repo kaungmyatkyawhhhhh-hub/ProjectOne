@@ -46,3 +46,5 @@ Checks (`compare.py`, `gates.py`, pictures in `checks/`):
 - Gates PASS: zero open edges, every part faces outward (signed-volume fix for the thin flippers), every flipper and crystal rooted in the body.
 
 Not done yet: rig (8 spine bones + Jaw) and Swim clip, baking colours into one texture, FBX export, Studio import, and which game it goes in.
+
+**Owner decision (2026-11-16):** keep the flipper compromise (tips halfway between the side and top views, 35 deg twist). Top/front IoU below 0.90 is accepted for the flippers only.
