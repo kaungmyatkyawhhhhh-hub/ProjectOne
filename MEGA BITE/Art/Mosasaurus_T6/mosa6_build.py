@@ -12,7 +12,7 @@ RENDER = 'render' in argv
 D = json.load(open(DATA))
 X0, X1 = D['side_x']
 S = D['len_m'] / (X1 - X0)            # metres per sheet px
-YC = 270                               # sheet row that maps to z = 0
+YC = D.get('yc', 270)                  # sheet row that maps to z = 0
 def X(x): return (x - X0) * S - D['len_m'] / 2
 def Z(y): return (YC - y) * S
 st = D['stations']

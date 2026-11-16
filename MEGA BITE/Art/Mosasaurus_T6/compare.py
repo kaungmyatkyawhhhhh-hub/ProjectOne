@@ -1,6 +1,6 @@
 import numpy as np, cv2, sys
 from PIL import Image
-sheet=np.array(Image.open('sheet_v2.png').convert('RGB')).astype(int)
+sheet=np.array(Image.open('../mosasaurus_turnaround_v2.png').convert('RGB')).astype(int)
 m=np.load('masks.npz'); lab=m['lab']
 def fgm(a): return ~((a[...,0]>170)&(a[...,1]<110)&(a[...,2]>170))
 out=[];res={}
