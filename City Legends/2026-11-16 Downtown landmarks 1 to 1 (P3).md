@@ -61,7 +61,10 @@ The 9 lots left empty by the P3 district build, each built at real size from its
 ## In the main place (16 Nov, version 1094)
 All 9 landmarks are in `Workspace.Yangon1to1.Landmarks`, each with `Visual` (Precise render fidelity) and `Collision`. Asset ids are in `Games/CityLegends/build/landmarks/dt_assets.json`. The Independence Monument stands on a terrain pad (top 20.4, radius 88 studs: `terrain.PILOT_PADS['P3']`). Without the pad, its paving was hidden under the grass, because the smooth terrain bulges about 2 studs over its set height.
 
-## Saved in main (16 Nov, 16:11 UTC)
-The Bogyoke / Station / park swap (walkable halls, undercroft, chinthes) is saved in the main place. The High Court roof was checked in main: it renders fully. The outline in the v1094 aerial was only the parts still loading.
-- **On hold:** main-place additions are paused because the place is near its size limit (coordinator, 16 Nov).
-- **Waiting for the next main swap:** Bogyoke v3 with the brighter cloth and counters (asset 113276920011501, `dt_assets.json` key `bogyoke_market_next`). Checked in the copy only.
+## Saved in main (16 Nov)
+- **16:11 UTC:** the Bogyoke / Station / park swap (walkable halls, undercroft, chinthes).
+- **16:24 UTC (log: "Saved new changes"):** Bogyoke v4 slim and the lighter chinthe.
+  - **Bogyoke v4 (asset 131247073597606):** 52k triangles instead of 120k. The halls have 6 m bays, 4-segment arches (`kit_panels.col_arch(..., seg)`; the default 8 is unchanged for every other building) and no stains. Inside, there is one counter and one name band per stall row, and 2 cloth strips per stall. The cloth is SmoothPlastic (Fabric rendered near-black) and the counters are a lighter teak (`CTR`).
+  - **Chinthe:** bronze (112, 106, 94) on stone (128, 124, 116).
+- **High Court roof checked in main:** it renders fully. The outline in the v1094 aerial was only the parts still loading.
+- **Main-place additions are on hold** until the coordinator says so: the place is near its size limit.
