@@ -112,6 +112,29 @@ created: 2026-11-16
 - Board, See fit (server + page), Try whole fit guards, body editor (R15: skin, height, body type, undo count), upload with Korblox, search sorts.
 - Phone checks (Galaxy A06 705×338): See fit page, Avatar page.
 
+## Save status (read first)
+- The last confirmed version save is **v210 (21:01)**.
+- From ~21:04, Studio stopped answering `save_place` and script writes (`multi_edit`, `UpdateSourceAsync`), but read-only Lua still ran. That pattern usually means **a dialog is open in Studio**.
+- Everything after v210 was already written and synced before the block. That's the Headless / Korblox body-editor chips and the server check for them.
+  - All 35 scripts were checked: editor = source, nothing half-written. Team Create keeps them on the server.
+- **When you're back:**
+  1. Look for an open dialog in Studio and close it.
+  2. File › Save to Roblox once.
+  3. Check that More › Avatar shows the Head / Legs rows.
+
+## Live test checklist (needs 2+ real players)
+- [ ] Walk up to a friend: the "See fit" prompt (F / tap) opens their fit. Try a piece, then Try whole fit (skin and body come along). Undo / My avatar put you back.
+- [ ] When a friend tries a catalog outfit, you see "wearing NAME" above them (within 28 studs).
+- [ ] Friend uploads a look and you try it: they get the pink chat line and the dot on More.
+- [ ] Share a fit to a friend: they join and the outfit opens after loading.
+- [ ] Invite button opens Roblox's invite sheet.
+- [ ] Mark an upload as a Staff Pick. Check that it shows ★ and leads Featured's community slots.
+
+## Next steps I'd take
+- Swap in the "try Headless and Korblox for free" loading tip (see above).
+- If phones lag once uploads pass ~150, lower `PER_THEME` in GuestLooksServer.
+- Private "My looks" saves (a combo you built but don't want public). Needs a profile-store change, so do it with a fresh head.
+
 ## Not tested / for the owner
 - **See fit and the "wearing" tag need a second real player.** Studio Play has one, so the prompt and tag were checked in parts: the server answers for any user id, and the tag was rendered on a stand-in.
 - The first open of See fit right after joining can take ~15 s while the mannequins load (ownership checks queue). It's instant after that.
