@@ -7,6 +7,9 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 09:26 [dashboard, unverified] Using the same 3 aura prompts in Blender may have resulted in a more efficient workflow for Claude and Fable, but the outcome is not specified. (topic: tiktok)
+- 2026-11-16 09:26 [dashboard, unverified] Creating a game requires dedication and perseverance, as even a successful game can decline in popularity over time. (topic: tiktok)
+- 2026-11-16 09:24 [dashboard, unverified] Blender Trick: Use Cursor to Selected, Spin, and Merge by Distance to create an arch in seconds. (topic: tiktok)
 - 2026-11-16 09:24 [dashboard, unverified] The caption does not contain any concrete information about game development, Roblox, Blender, or AI tools. (topic: tiktok)
 - 2026-11-16 09:23 [dashboard, unverified] Roblox Studio's trend feature allows users to showcase their creations and gain visibility within the community. (topic: tiktok)
 - 2026-11-16 09:22 [dashboard, unverified] AI-powered game development tools are becoming increasingly sophisticated, enabling faster and more efficient creation of immersive gaming experiences. (topic: tiktok)
