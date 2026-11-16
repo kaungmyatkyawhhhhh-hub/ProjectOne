@@ -545,3 +545,7 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 ## City Legends 1:1 roads: "in google maps its entirely different" (17 Nov 2026)
 - **Cause:** the 1:1 rebuild skipped a step from the owner's 13 Nov plan: a street plan picture (our roads over the real map and satellite) that the owner approves **before** building.
 - **Rule:** every district's road network gets an overlay picture plus an automatic mismatch check against OSM and satellite, approved by the owner before it is built.
+
+## 2026-11-17 City Legends: a QA check that only counts what you kept hides what you dropped
+- **What happened:** the road plan overlay said "0 missing OSM roads", but the owner compared one junction with openstreetmap.org and found every slip road (`*_link`) missing. roads05 drops links on purpose, and the check only counted the roads roads05 keeps.
+- **Rule:** a "missing" check must compare against the full source (every drivable OSM way), never against your own filtered list. Show close-up crops of big junctions next to the source map before asking for approval.
