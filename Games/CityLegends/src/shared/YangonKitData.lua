@@ -133,11 +133,11 @@ local WIRE_T = NumberSequence.new(0)
 -- a sagging black cable (old YangonDetails' Beam look): attachments on the tile's invisible anchor part
 local function wire(anchor: BasePart, a: Vector3, b: Vector3, sag: number, width: number)
 	local att0 = Instance.new("Attachment")
+	att0.Parent = anchor -- (parent first: WorldCFrame on an unparented attachment is taken as local)
 	att0.WorldCFrame = CFrame.fromMatrix(a, Vector3.new(0, -1, 0), Vector3.new(1, 0, 0))
-	att0.Parent = anchor
 	local att1 = Instance.new("Attachment")
+	att1.Parent = anchor -- (parent first: WorldCFrame on an unparented attachment is taken as local)
 	att1.WorldCFrame = CFrame.fromMatrix(b, Vector3.new(0, -1, 0), Vector3.new(1, 0, 0))
-	att1.Parent = anchor
 	local beam = Instance.new("Beam")
 	beam.Attachment0 = att0
 	beam.Attachment1 = att1
