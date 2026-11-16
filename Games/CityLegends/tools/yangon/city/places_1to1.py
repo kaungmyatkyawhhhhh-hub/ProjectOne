@@ -832,6 +832,23 @@ def preview(o, items):
     for fp, y0, y1, code in o.boxes:
         dr.polygon([((x - x0) * sc + 10, (z - z0) * sc + 10) for x, z in fp.exterior.coords], fill=col.get(code, (200, 120, 60)))
     im.save(os.path.join(OUT, "preview.png"))
+    # close-ups of the fuel stations (plan view, 4 px a stud, the road corridor in blue-grey)
+    corr, _ = BK.corridors()
+    for st in items["fuel"]:
+        c = Polygon(st["lot"]).centroid
+        R, k = 75.0, 4.0
+        z = Image.new("RGB", (int(2 * R * k), int(2 * R * k)), (24, 24, 28))
+        dz = ImageDraw.Draw(z)
+        T = lambda p: ((p[0] - c.x + R) * k, (p[1] - c.y + R) * k)
+        cl = corr.intersection(c.buffer(R * 1.5))
+        for g in (cl.geoms if hasattr(cl, "geoms") else [cl]):
+            if g.geom_type == "Polygon":
+                dz.polygon([T(p) for p in g.exterior.coords], fill=(70, 74, 92))
+        dz.polygon([T(p) for p in st["lot"]], outline=(255, 80, 80))
+        for fp, y0, y1, code in sorted(o.boxes, key=lambda b: b[2]):
+            if fp.distance(c) < R * 1.4:
+                dz.polygon([T(p) for p in fp.exterior.coords], fill=col.get(code, (200, 120, 60)), outline=(0, 0, 0))
+        z.save(os.path.join(OUT, "fuel_%s.png" % st["id"]))
 
 
 if __name__ == "__main__":

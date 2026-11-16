@@ -141,6 +141,13 @@ def shutters(x, z, w, h, y, colour, state):
 _shop_bay = K.shop_bay
 
 
+def corner_shop(state, k, bays):
+    """(2026-11-16, P2 flicker test) an open shop is 2.6 m deep: in a panel's end bay (the panel can end at a building
+    corner) it met the perpendicular wall's shop (their ceilings in one plane). End bays get the roller shutter
+    (0.25 m deep) instead; the random draw is the same, so the other bays are unchanged."""
+    return "shutter" if state == "open" and (k == 0 or k == bays - 1) else state
+
+
 def shop_bay(x, w, h, y, wall, holes, state=None, spill=0.4):
     state = state or K.R.choices(["open", "shutter", "glass"], [0.4, 0.4, 0.2])[0]
     if state == "shutter":
@@ -275,7 +282,8 @@ def p_walkup(W, bays, floors, role, shop, age, civic=False):
     for k in range(bays):
         x = k * BAY
         if shop and front:
-            K.shop_bay(x + 0.35, BAY - 0.7, 2.9, 0.0, wall, holes)
+            st = K.R.choices(["open", "shutter", "glass"], [0.4, 0.4, 0.2])[0]
+            K.shop_bay(x + 0.35, BAY - 0.7, 2.9, 0.0, wall, holes, state=corner_shop(st, k, bays))
             K.awning(x + 0.15, x + BAY - 0.15, K.R.uniform(2.95, 3.3), 0.0, K.R.uniform(0.8, 1.6), K.wpick(K.AWNINGS))
             if K.R.random() < 0.7:
                 sw = K.R.uniform(1.6, BAY - 0.3)
@@ -332,7 +340,8 @@ def p_township(W, bays, floors, role, shop, age):
     for k in range(bays):
         x = k * BAY
         if front and shop:
-            st = K.shop_bay(x + 0.35, BAY - 0.7, 2.9, 0.0, wall, holes, state=K.R.choice(["open", "open", "shutter"]), spill=0.5)
+            st = K.shop_bay(x + 0.35, BAY - 0.7, 2.9, 0.0, wall, holes,
+                            state=corner_shop(K.R.choice(["open", "open", "shutter"]), k, bays), spill=0.5)
             fh = K.R.uniform(0.8, 1.15)
             K.sign(x + 0.03, 3.05, BAY - 0.06, fh, -0.1, ground=K.R.choice(["KSW", "KS2"]), stripe=K.R.choice(["KS1", "KS3", "KS4"]))
             if K.R.random() < 0.6:
@@ -481,7 +490,12 @@ def p_condo_band(W, bays, nf, role, age, stripe=False):
 def p_condo_top(W, bays, role, age, stripe=False):
     """the parapet / crown strip on top of a tower face (height 0 at the roof line)"""
     if stripe:
-        K.box("KBC", 0.0, -0.2, 0.0, W, 0.2, 1.5, faces=("-y", "+x", "-x", "top"))
+        # (2026-11-16) the crown's top falls 45 degrees to the wall (1.5 m at the front, 1.3 m at the wall): two crowns
+        # meeting at a corner cross along a steep crease instead of lying in one plane (P2 flicker test)
+        K.front_quad("KBC", 0.0, W, 0.0, 1.5, -0.2)
+        K.face("KBC", [(0.0, -0.2, 1.5), (W, -0.2, 1.5), (W, 0.0, 1.3), (0.0, 0.0, 1.3)], (0, -1, 1))
+        for xe, nx in ((0.0, -1), (W, 1)):
+            K.face("KBC", [(xe, -0.2, 0.0), (xe, 0.0, 0.0), (xe, 0.0, 1.3), (xe, -0.2, 1.5)], (nx, 0, 0))
     parapet(W, 0.0, ARCH["condo"]["par"], "KWX")
     return 0.0
 
@@ -571,7 +585,8 @@ def p_colonial(W, bays, floors, role, shop, age):
     for k in range(bays):
         x = k * BAY
         if front and shop:
-            shop_bay(x + 0.3, BAY - 0.6, 3.3, 0.0, wall, holes, state=K.R.choice(["open", "open", "shutter", "glass"]), spill=0.4)
+            shop_bay(x + 0.3, BAY - 0.6, 3.3, 0.0, wall, holes,
+                     state=corner_shop(K.R.choice(["open", "open", "shutter", "glass"]), k, bays), spill=0.4)
             if K.R.random() < 0.55:
                 K.awning(x + 0.2, x + BAY - 0.2, 3.5, 0.0, K.R.uniform(0.8, 1.6), K.wpick({"KAW": 0.35, "KAR": 0.4, "KRF": 0.25}))
             if K.R.random() < 0.6:

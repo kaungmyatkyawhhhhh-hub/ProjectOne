@@ -80,6 +80,10 @@ LANDMARK_BOXES = {
            (34683, 42851, 35286, 43453), (37153, 46507, 37438, 46820), (36499, 45396, 36867, 45733),
            (38008, 44484, 38514, 45055), (36486, 42630, 37118, 42836), (36496, 45191, 36617, 45292),
            (34399, 43175, 34587, 43300), (36008, 45285, 36438, 45950)],
+    # ("up to batch 3") P4: Times City, M Tower, Crystal Residences, the four placed pagodas (buildings_P4/stats.json)
+    "P4": [(26051.7, 30890.5, 26809.5, 31496.9), (26856.0, 27940.5, 27091.3, 28101.4), (26639.7, 30592.3, 27109.4, 30974.5),
+           (25272.6, 24165.4, 25363.6, 24256.4), (23935.8, 29204.6, 24014.4, 29283.2), (25736.5, 19941.8, 25803.1, 20008.4),
+           (24503.2, 25515.6, 24649.0, 25661.3)],
 }
 AVENUES = {"University Avenue Road", "Inya Road", "U Wisara Road", "New University Avenue Road", "Kan Yeiktha Road",
            "Natmauk Road", "Ahlone Road", "Zoological Garden Road", "Shwe Gone Dine Road", "Bawdi Avenue"}

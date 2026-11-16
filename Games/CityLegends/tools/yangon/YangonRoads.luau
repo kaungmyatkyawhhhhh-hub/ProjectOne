@@ -3240,4 +3240,49 @@ function M.surfaceCheck(spots: { { any } }, reach: number?)
 	return string.format("doubled faces at %d spots: blocks fighting %d, thin steps %d, doubled slab spots %d\n%s", #spots, fights, steps, slabs, table.concat(out, "\n"))
 end
 
+------------------------------------------------------------------------------------------------
+-- 1:1 cells (roads05, 2026-11-16): everything one cell owns, into root.Roads / root.Decks; no lines (the paint
+-- is baked from roads05_paint.py), no map-edge barriers (district edges join the next district)
+------------------------------------------------------------------------------------------------
+function M.stepCell(box: { number }, root: Instance)
+	M.box = box
+	M.ROOT = root
+	M.noLines = true
+	M.VERGE_W = 6
+	local names = {}
+	local mx = 140
+	for _, o in M.list do
+		for i = 1, o.n, 2 do
+			local s = o.s[i]
+			if s[1] > box[1] - mx and s[1] < box[3] + mx and s[3] > box[2] - mx and s[3] < box[4] + mx then
+				table.insert(names, o.name)
+				break
+			end
+		end
+	end
+	local log = { #names .. " roads near" }
+	if #names == 0 then
+		return log[1]
+	end
+	local t0 = os.clock()
+	table.insert(log, M.buildRoads(names))
+	table.insert(log, string.format("(%.0f s)", os.clock() - t0))
+	task.wait()
+	table.insert(log, M.mendCutEnds(names))
+	table.insert(log, "corners " .. tostring(M.buildCorners()))
+	task.wait()
+	table.insert(log, M.verge(names))
+	task.wait()
+	table.insert(log, M.buildRoundabout())
+	task.wait()
+	table.insert(log, M.buildMedians(names))
+	task.wait()
+	table.insert(log, M.buildDecks())
+	task.wait()
+	table.insert(log, M.scrub(true))
+	table.insert(log, string.format("(%.0f s in all)", os.clock() - t0))
+	return table.concat(log, "
+")
+end
+
 return M
