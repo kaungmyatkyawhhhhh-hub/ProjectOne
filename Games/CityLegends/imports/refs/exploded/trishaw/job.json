@@ -1,0 +1,10 @@
+{
+ "name": "trishaw_exploded_v1",
+ "model": "google/gemini-3.1-flash-image",
+ "refs": [
+  "01_Trishaw_Stand_in_Yangon_JPG.jpg",
+  "02_A_trishaw_being_repaired_in_Yangon_JPG.jpg"
+ ],
+ "prompt": "Make ONE image: a technical exploded-view diagram of the Yangon trishaw (sai kaa) shown in the attached real photos: a black roadster bicycle with a side car bolted on its right side, where two passengers sit back to back. Copy the real shapes and colours from the photos. Pull every part apart sideways along its fixing axis, labelled: 1 bicycle frame, 2 front wheel, 3 rear wheel, 4 handlebar and saddle, 5 sidecar chassis frame, 6 sidecar wheel, 7 sidecar wooden seat bench with two back-to-back seats, 8 sidecar side panels and foot board, 9 sidecar canopy/umbrella if shown in the photos. Side view plus a small top view in a corner for the back-to-back seat layout.",
+ "n": 1
+}

@@ -35,8 +35,9 @@ The method is the "Exploded Diagram Method" in [[Brain/Skills/roblox-3d-model-fr
 |---|---|---|---|---|
 | 1 | Kaba Aye Pagoda (pilot district) | `imports/refs/exploded/kaba_aye/Kaba_Aye_Paya_2/3.jpg` (Commons CC0, midday) | `imports/refs/exploded/kaba_aye/kaba_aye_exploded_v1.png` | 9 parts: hti, banana bud, lotus bands, bell, moulding rings, terrace ring of merlons, arched hall drum, entrance porch (pyatthat gable), round base. Plus an assembled view. The bell parts are reusable as the kit for the 158 bare pagodas. |
 
+| 2 | Yangon trishaw (sai kaa) | `imports/refs/exploded/trishaw/01_..., 02_....jpg` (Commons) | `imports/refs/exploded/trishaw/trishaw_exploded_v1.png` | 9 good parts: frame, wheels, handlebar, sprung saddle, red sidecar chassis with 2 mounting bars, sidecar wheel, red vinyl seat box, side panels and foot board. **WRONG in the sheet:** the assembled view puts the sidecar BEHIND the bike, like a cargo trike. Real (photo 01): the sidecar is bolted BESIDE the bicycle, with its wheel level with the bike's rear wheel and its two cushions back to back. In photo 01 the bikes face right and the sidecar is on the far side, the bike's LEFT; check more photos before modelling. Model the PARTS from the sheet and the PLACEMENT from the photos. |
+
 ## Next sheets (planned)
-- Yangon trishaw (sidecar bicycle)
 - YBS bus stop
 - Concrete power pole with transformer and wire bundle
 - White street lamp
@@ -47,3 +48,5 @@ The method is the "Exploded Diagram Method" in [[Brain/Skills/roblox-3d-model-fr
 All of them have real photos in `Games/CityLegends/build/landmarks/refs/street_kit/`.
 
 ![[kaba_aye_exploded_v1.png]]
+
+![[trishaw_exploded_v1.png]]
