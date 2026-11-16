@@ -7,6 +7,9 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 10:06 [dashboard, unverified] Roblox game "Steal A Memory" is available for all ages. (topic: tiktok)
+- 2026-11-16 10:05 [dashboard, unverified] The game Pistol Duels is not yet released and is currently in development. (topic: tiktok)
+- 2026-11-16 10:04 [dashboard, unverified] Houdini, Karma, and Nuke are used for VFX. (topic: tiktok)
 - 2026-11-16 10:02 [dashboard, unverified] The Roblox game has 200 ccu (cells) 1 hour after its release. (topic: tiktok)
 - 2026-11-16 10:01 [dashboard, unverified] Roblox is a popular online game. (topic: tiktok)
 - 2026-11-16 09:58 [dashboard, unverified] The Ultimate is a reference to a Roblox game. (topic: tiktok)
