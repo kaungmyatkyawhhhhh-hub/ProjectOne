@@ -59,3 +59,9 @@ Not done yet: rig (8 spine bones + Jaw) and Swim clip, baking colours into one t
 - Weights: 3 nearest spine bones by position (Gaussian, like FishKit); LowerJaw, LowerTeethRow and MouthInterior 100% Jaw. Max 3 influences, no unweighted verts.
 - Checked: FBX re-import (`fbxcheck.py`), bite pose (Jaw -22 deg opens cleanly), static 6 deg-per-bone bend from above (smooth, flippers follow). Pictures: `checks/mosa6_poses.jpg`, `checks/mosa6_bend_test.png`.
 - Not done: Studio import + Neon setting, playing the old clips on it in Play, which game it goes in.
+
+---
+# Uploaded (2026-11-16)
+- **Model asset 104031266367399** "MB_Mosasaurus_T6" (group 33151111, Open Cloud, moderation Approved). Its embedded texture came up as image **95389907506981**.
+- Checked by `InsertService:LoadAsset` (loaded, never parented): 2 MeshParts (`Mosasaurus_T6`, `Mosasaurus_T6_Crystals`) + bones Root, Spine0-7, Jaw. Comes in 640 studs long (FBX in cm).
+- Owner (16 Nov): **"Studio only, not in play"**: goes to `ServerStorage.MB_Mosasaurus_T6`, no game wiring. Script: `install_serverstorage.luau` (scales to 165 studs like evolution 9, crystals Neon, DoubleSided on). NOT run yet: MEGA BITE (place 131715256145044) was not open in Studio.
