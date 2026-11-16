@@ -79,7 +79,7 @@ HEIGHTS = {}
 # fuel stations measured on the Esri z19 satellite (16 Nov 2026, build/city_1to1/places_P1/sat/): the canopy's middle,
 # its length along the road and depth (m), the roof colour seen from above
 SAT = {
-    "n3838315913": dict(canopy=(96.14866, 16.82578), size=(24.0, 18.6), roof=(160, 175, 148)),   # Myawaddy, University Ave
+    "n3838315913": dict(canopy=(96.14866, 16.82578), size=(24.0, 18.6), roof=(160, 175, 148), depth=34.0),   # Myawaddy, University Ave
 }
 
 
@@ -187,7 +187,7 @@ def plan():
         else:
             # no outline: a 34 x 26 m lot (the median of the 9 Yangon stations measured on the satellite) centred on the
             # point along the road, from the pavement's back edge inward
-            Wd, Dp = M(34), M(26)
+            Wd, Dp = M(34), M((SAT.get(oid) or {}).get("depth", 26.0))
             cx = foot.x + ux * 0  # along the road: centred on the point's foot
             cz = foot.y
             sat = SAT.get(oid)
