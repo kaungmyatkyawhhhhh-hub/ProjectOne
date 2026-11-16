@@ -245,7 +245,58 @@ def entrance_spans():
             p, q, L, n = b
             m = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2)
             out.append((m, n, w, unit((q[0] - p[0], q[1] - p[1])), L))
+    if ONE and out:
+        # 1:1 (owner, 2026-11-17: "the canopies are suppose to be at middle"): the corner door sits at the middle of
+        # the whole corner front (the run of edges facing the junction), not the middle of its longest edge
+        pts, cum = front_chain()
+        m, t, n = chain_at(pts, cum, cum[-1] / 2)
+        out[0] = (m, n, 14.0, t, cum[-1])
     return out
+
+
+def front_chain(k=0.85):
+    """The corner front: the run of podium edges whose outward normal faces the junction (n . FACE > k), in order
+    along the podium -> (points, cumulative lengths)."""
+    nE = len(POD)
+    good = [outward(POD, i)[0] * FACE[0] + outward(POD, i)[1] * FACE[1] > k for i in range(nE)]
+    i0 = next(i for i in range(nE) if good[i] and not good[i - 1])
+    pts = [POD[i0]]
+    i = i0
+    while good[i % nE]:
+        pts.append(POD[(i + 1) % nE])
+        i += 1
+    cum = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        cum.append(cum[-1] + math.dist(a, b))
+    return pts, cum
+
+
+def chain_at(pts, cum, s):
+    """Point, edge direction and outward normal at arc length s along a front chain."""
+    for j in range(len(pts) - 1):
+        if s <= cum[j + 1] or j == len(pts) - 2:
+            a, b = pts[j], pts[j + 1]
+            t = unit((b[0] - a[0], b[1] - a[1]))
+            u = (s - cum[j]) / max(cum[j + 1] - cum[j], 1e-9)
+            return (a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u), t, (t[1], -t[0])
+
+
+def chain_strip(pts, cum, s0, s1, dep):
+    """The canopy slab along the front between arc lengths s0..s1: back edge on the facade (it bends with it), front
+    edge `dep` out (mitred) -> polygon."""
+    back = [chain_at(pts, cum, s0)[0]] + [pts[j] for j in range(1, len(pts) - 1) if s0 < cum[j] < s1] + [chain_at(pts, cum, s1)[0]]
+    norms = []
+    for j, p in enumerate(back):
+        s = s0 if j == 0 else (s1 if j == len(back) - 1 else cum[pts.index(p)])
+        if 0 < j < len(back) - 1:
+            n1, n2 = chain_at(pts, cum, s - 1e-6)[2], chain_at(pts, cum, s + 1e-6)[2]
+            nn = unit((n1[0] + n2[0], n1[1] + n2[1]))
+            k = 1.0 / max(nn[0] * n1[0] + nn[1] * n1[1], 0.5)
+            norms.append((nn[0] * k, nn[1] * k))
+        else:
+            norms.append(chain_at(pts, cum, s)[2])
+    front = [(p[0] + v[0] * dep, p[1] + v[1] * dep) for p, v in zip(back, norms)]
+    return back + front[::-1], front
 
 
 ENTR = entrance_spans()
@@ -364,6 +415,24 @@ def corner_front():
     pass
     # entrance canopy (ground floor) on three columns
     dep = 9.0
+    if ONE:
+        # 1:1 (owner drone photo + "the canopies are suppose to be at middle", 2026-11-17): 44 studs wide (22 each
+        # side of the door, the photo's porch) centred on the whole corner front, its back following the facade's
+        # bend, on two columns (city/mc_corner_patch.py made the same swap in Studio)
+        pts_, cum_ = front_chain()
+        hw = 22.0 / X1.S
+        slab, fr = chain_strip(pts_, cum_, cum_[-1] / 2 - hw, cum_[-1] / 2 + hw, dep)
+        g.cap("FAS", slab, 14.6)
+        g.cap("SOF", slab, 13.0, down=True)
+        g.ring("FAS", slab, 13.0, 14.6)
+        for u in (0.2, 0.8):
+            p_, _t, n_ = chain_at(pts_, cum_, cum_[-1] / 2 - hw + 2 * hw * u)
+            cc = (p_[0] + n_[0] * (dep - 1.2), p_[1] + n_[1] * (dep - 1.2))
+            g.column("DRK", cc[0], cc[1], SKIRT, 13.0, 0.8)
+            COLL.append((cc[0], cc[1], 0.0, 1.6, 1.6, 13.0, 0.0))
+            LIGHTS.append({"p": (cc[0] - n_[0] * 4, cc[1] - n_[1] * 4, 12.2), "kind": "soffit"})
+        # (no tilted roof canopy at 1:1: the drone photo shows a white pergola there, placed by tools/yangon/MCDrone.luau)
+        return
     pts = [(m[0] - t[0] * (w / 2 + 12), m[1] - t[1] * (w / 2 + 12)), (m[0] + t[0] * (w / 2 + 12), m[1] + t[1] * (w / 2 + 12))]
     a, b = pts
     slab = [a, b, (b[0] + n[0] * dep, b[1] + n[1] * dep), (a[0] + n[0] * dep, a[1] + n[1] * dep)]
@@ -440,6 +509,65 @@ def west_entrance():
 
 
 # ---------------------------------------------------------------------------------------------------------------------
+def _arc_disc(grp, centre, R, ang, zc, rad, proud, sink, n=20):
+    """A round plate on the curved sign wall (a plain shape where a logo is): true radius R of the wall face, front
+    `proud` in front of it, sides `sink` into it (true studs round the scaled centre at 1:1); zc = layout height."""
+    c, t = (math.cos(ang), math.sin(ang)), (-math.sin(ang), math.cos(ang))
+
+    def ring(rr):
+        return [(centre[0] + c[0] * rr + t[0] * rad * math.cos(2 * math.pi * k / n),
+                 centre[1] + c[1] * rr + t[1] * rad * math.cos(2 * math.pi * k / n),
+                 zc + rad * math.sin(2 * math.pi * k / n)) for k in range(n)]
+    with (g.keep(centre[0], centre[1], zc) if ONE else _null()):
+        f, b = ring(R + proud), ring(R - sink)
+        _qf(grp, f, (c[0], c[1], 0.0))
+        for k in range(n):
+            j = (k + 1) % n
+            mid = (math.cos(2 * math.pi * (k + 0.5) / n), math.sin(2 * math.pi * (k + 0.5) / n))
+            _qf(grp, [f[k], f[j], b[j], b[k]], (t[0] * mid[0], t[1] * mid[0], mid[1]))
+
+
+def sign_letters(centre, r, mid_a, zg, zt):
+    """The corner sign as it stands since ~2019 (photos 2019-2025, vault `City Legends/Owner ref - Myanmar Centre sign
+    (real) 1-4`): "HAGL" in green with a round green mark, then "MYANMAR CENTRE" in orange, on the white band; on the
+    granite four round logos (plain discs) with their names, and the address line under them. Letters sink 0.05 into
+    the wall (no gap, no flicker). Strings come from text3d_blend.py (build/landmarks/text3d.json):
+    HAGL, THE LAKE, SUITES, MYANMAR CENTRE, TOWER, MYANMAR, PLAZA, MELIA, YANGON, the address."""
+    KZ = 16.5 / 14.0 if ONE else 1.0          # layout height -> true studs (street storey)
+    KR = X1.S if ONE else 1.0                 # layout radius -> true
+    AK = g.arc_k if ONE else 1.0              # text_arc's own size factor at 1:1
+    Rw = r * KR                               # the wall face, true radius
+
+    def arc(grp, text, off, base, cap, depth):
+        # text centred `off` true studs along the wall from mid_a (+ = the viewer's right), baseline `base` (true)
+        Rf = Rw + depth - 0.05
+        g.text_arc(grp, LET, text, centre, Rf / KR, mid_a + off / Rf, base / KZ, cap / AK, depth)
+
+    # band: [disc] HAGL  MYANMAR CENTRE, 67% of the band's height, centred on the band
+    cap = 0.67 * (zt - zg) * KZ
+    base = (zg + zt) / 2 * KZ - cap / 2
+    wH, wM = LET["HAGL"]["w"], LET["MYANMAR CENTRE"]["w"]
+    T = 1.0 + 0.35 + wH + 0.75 + wM
+    _arc_disc("HGL", centre, Rw, mid_a + (-T / 2 + 0.5) * cap / (Rw + 0.3), (base + cap / 2) / KZ, 0.5 * cap, 0.3, 0.1)
+    arc("HGL", "HAGL", (-T / 2 + 1.35 + wH / 2) * cap, base, cap, 0.45)
+    arc("ORG", "MYANMAR CENTRE", (T / 2 - wM / 2) * cap, base, cap, 0.45)
+    # granite: logo disc + two-line name per tenant, the address line under them
+    gz = zg * KZ
+    zc, rad, cn = 0.62 * gz, 0.14 * gz, 0.09 * gz
+    groups = (("HGL", "THE LAKE", "SUITES"), ("BLU", "MYANMAR CENTRE", "TOWER"), ("ORG", "MYANMAR", "PLAZA"),
+              (None, "MELIA", "YANGON"))
+    step = 22.0 * (gz / 8.96)
+    for i, (dgrp, l1, l2) in enumerate(groups):
+        o = (i - 1.5) * step
+        x0 = o - 5.0 * cn
+        if dgrp:
+            _arc_disc(dgrp, centre, Rw, mid_a + (x0 + rad) / (Rw + 0.2), zc / KZ, rad, 0.2, 0.1)
+            x0 += 2 * rad + 0.7 * cn
+        for text, b in ((l1, zc + 0.25 * cn), (l2, zc - 1.25 * cn)):
+            arc("GLD", text, x0 + LET[text]["w"] * cn / 2, b, cn, 0.15)
+    arc("GLD", "192 KABA AYE PAGODA ROAD, BAHAN TOWNSHIP, YANGON", 0.0, 0.3 * gz, 0.75 * cn, 0.15)
+
+
 def plinth():
     cx, cy = V(LAY["plinth_c"])
     r = float(LAY["fit"]["plinth_r"])
@@ -487,12 +615,9 @@ def plinth():
             g.wall("PGR", i_, o, SKIRT, zt + 0.6)
         else:
             g.wall("PGR", o, i_, SKIRT, zt + 0.6)
-    # MYANMAR CENTRE in bent 3D orange letters on the band; the four names in small cream letters on the granite
     band_span = span * band_k / nb
     mid_a = a0 + band_span / 2
-    g.text_arc("ORG", LET, "MYANMAR CENTRE", (cx, cy), r + 0.45, mid_a, zg + 0.45, 3.6, 0.45, width=r * band_span * 0.9)
-    names = "THE LAKE SUITES  MYANMAR CENTRE TOWER  MYANMAR PLAZA  MELIA YANGON"
-    g.text_arc("GLD", LET, names, (cx, cy), r + 0.15, mid_a, 4.4, 1.1, 0.15, width=r * band_span * 0.86)
+    sign_letters((cx, cy), r, mid_a, zg, zt)
     for k in range(9):
         b = a0 + span * (0.06 + 0.88 * k / 8)
         pp = P(b, r + 0.05)

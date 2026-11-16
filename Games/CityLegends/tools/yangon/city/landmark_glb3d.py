@@ -38,10 +38,11 @@ GROUPS = {
     "CRN": ("SmoothPlastic", (248, 255, 254), 0.0, 0.04, False, True),  # tower A crown: the spandrels' white panels
     "DRK": ("SmoothPlastic", (40, 36, 32), 0.0, 0.06, False, True),  # dark polished stone / panels, skirts (west entrance columns 33,34,30)
     "CHR": ("SmoothPlastic", (92, 86, 76), 0.0, 0.0, False, True),  # charcoal-brown screen wall, mall columns (photos 108,98,83 / 53,51,45)
-    "PGR": ("SmoothPlastic", (100, 62, 40), 0.0, 0.08, False, True),  # plinth polished maroon-brown granite (photo 63,43,34 at dusk)
+    "PGR": ("SmoothPlastic", (170, 88, 66), 0.0, 0.0, False, True),  # plinth maroon-brown granite (photo 63,43,34 at dusk; 2026-11-17: 100,62,40 + reflectance rendered navy-black on the shaded sign wall, 170,88,66 reads maroon in shade, brick-brown in sun)
     "PBD": ("SmoothPlastic", (255, 254, 245), 0.0, 0.0, False, True),  # plinth band: light grey-white (the dusk photos read it beige; lesson 16 Nov)
     "ORG": ("SmoothPlastic", (255, 91, 24), 0.0, 0.0, False, True),  # orange letters (lit at night: LampGlow)
     "GLD": ("SmoothPlastic", (162, 144, 125), 0.0, 0.1, False, True),  # small brushed-metal names on the plinth
+    "HGL": ("SmoothPlastic", (22, 150, 64), 0.0, 0.0, False, True),  # HAGL green letters + round marks on the corner sign (lit at night)
     "WLT": ("SmoothPlastic", (255, 246, 232), 0.0, 0.0, False, True),  # white letters (MYANMAR PLAZA: 207,200,192)
     "RDL": ("SmoothPlastic", (170, 120, 60), 0.0, 0.0, False, True),   # bronze letters (Melia)
     "HDG": ("Grass", (64, 108, 44), 0.0, 0.0, False, True),         # clipped hedge
@@ -179,7 +180,7 @@ GROUPS.update(MELIA_GROUPS)
 # groups that change at night: "night" = tag FacadeNight (WorldFx shows it at night only); ("glow", rgb) = tag
 # LandmarkGlow with that NightColor (WorldFx: Neon in that colour at night, the group's own look by day)
 NIGHT = {"NWA": "night", "NWY": "night", "NWC": "night", "NWH": "night",
-         "ORG": ("glow", (236, 84, 30)), "WLT": ("glow", (214, 206, 190)), "RDL": ("glow", (220, 204, 176))}
+         "ORG": ("glow", (236, 84, 30)), "HGL": ("glow", (41, 238, 77)), "WLT": ("glow", (214, 206, 190)), "RDL": ("glow", (220, 204, 176))}
 
 
 UV_STUDS = 1.0   # 1 UV unit = this many studs (box projection), so MaterialVariant textures tile at real size on meshes

@@ -61,40 +61,44 @@ local function groundY(x: number, z: number): number?
 	return r and r.Position.Y
 end
 
--- the corner front: facade mid Mf, along T, N into the building (the facade is at depth 16.84 from the canopy edge)
+-- the corner front's MIDDLE (owner, 17 Nov: "the canopies are suppose to be at middle"; mc3d.front_chain at half its
+-- length, on the facade line): Mf, along T (east), N into the building. Until 17 Nov the pergola hung off the east
+-- chamfer's canopy (34811.05, 27180.3), 40 studs left of the middle as the owner looks at it.
 -- the podium's roof cap (ROF mesh, flat at 119.86; the top floor's walkable slab is 15 lower: never raycast it)
 local ROOF = 119.86
-local Mf = Vector3.new(34811.05, 0, 27180.3)
-local T = Vector3.new(0.7931, 0, -0.6092)
-local N = Vector3.new(0.6092, 0, 0.7931)
+local Mf = Vector3.new(34774.69, 0, 27215.37)
+local T = Vector3.new(0.9584, 0, -0.2855)
+local N = Vector3.new(0.2855, 0, 0.9584)
+local PD = 12.5 -- the pergola's middle, studs behind the facade line (posts 6.1 .. 18.9: clear of the parapet where the front bends)
 
 function M.pergola()
 	local f = sub("Pergola")
-	local c = Mf + N * 26 -- depth 19..33: the roof edge balustrade stands at ~18
+	local c = Mf + N * PD
 	local y0 = ROOF
 	local H, W, D = 9, 44, 14
 	local rot = CFrame.fromMatrix(Vector3.zero, T, Vector3.yAxis, T:Cross(Vector3.yAxis))
 	local function at(s, h, d)
-		return CFrame.new(c + T * s + N * (d - 26) + Vector3.new(0, y0 + h, 0)) * rot
+		return CFrame.new(c + T * s + N * (d - PD) + Vector3.new(0, y0 + h, 0)) * rot
 	end
 	-- four posts, two long beams on them, louvres across between the beams
+	local dA, dB = PD - 6.4, PD + 6.4
 	for _, s in { -W / 2 + 0.6, W / 2 - 0.6 } do
-		for _, d in { 19.6, 32.4 } do
+		for _, d in { dA, dB } do
 			part(f, at(s, (H - 1.2) / 2, d), Vector3.new(1.2, H - 1.2, 1.2), WHITE, nil, true)
 		end
 	end
-	for _, d in { 19.6, 32.4 } do
+	for _, d in { dA, dB } do
 		part(f, at(0, H - 0.6, d), Vector3.new(W, 1.2, 1.2), WHITE)
 	end
 	local n = 15
 	for k = 0, n - 1 do
 		local s = -W / 2 + 1.2 + (W - 2.4) * (k + 0.5) / n
-		part(f, at(s, H - 0.6, 26), Vector3.new(0.5, 1.2, 11.6), WHITE) -- butts the beams' inner faces (12.8 - 1.2)
+		part(f, at(s, H - 0.6, PD), Vector3.new(0.5, 1.2, 11.6), WHITE) -- butts the beams' inner faces (12.8 - 1.2)
 	end
 	return #f:GetChildren()
 end
 
-local BEDS = {{34794.38,27240.94,24,16},{34830.38,27240.94,30,16},{34728.38,27268.94,30,20},{34764.38,27268.94,24,20},{34872.38,27268.94,30,20},{34722.38,27292.94,24,16},{34905.38,27292.94,24,16},{34728.38,27318.94,30,16},{34911.38,27318.94,30,16},{34722.38,27346.94,24,20},{34728.38,27370.94,30,16},{34722.38,27398.94,24,20},{34758.38,27398.94,30,20},{34869.38,27398.94,30,20},{34905.38,27398.94,24,20},{34911.38,27422.94,30,16},{34947.38,27422.94,24,16},{34980.38,27448.94,30,16},{34983.38,27476.94,30,20},{35022.38,27476.94,30,20},{34980.38,27500.94,30,16},{35016.38,27500.94,24,16},{35052.38,27500.94,30,16},{34983.38,27528.94,30,20},{35022.38,27528.94,30,20},{35058.38,27528.94,24,20},{34980.38,27552.94,30,16},{35016.38,27552.94,24,16},{34947.38,27578.94,24,16}}
+local BEDS = {{34836.38,27216.94,24,20},{34830.38,27240.94,30,16},{34728.38,27268.94,30,20},{34764.38,27268.94,24,20},{34872.38,27268.94,30,20},{34722.38,27292.94,24,16},{34905.38,27292.94,24,16},{34728.38,27318.94,30,16},{34911.38,27318.94,30,16},{34722.38,27346.94,24,20},{34728.38,27370.94,30,16},{34722.38,27398.94,24,20},{34758.38,27398.94,30,20},{34869.38,27398.94,30,20},{34905.38,27398.94,24,20},{34911.38,27422.94,30,16},{34947.38,27422.94,24,16},{34980.38,27448.94,30,16},{34983.38,27476.94,30,20},{35022.38,27476.94,30,20},{34980.38,27500.94,30,16},{35016.38,27500.94,24,16},{35052.38,27500.94,30,16},{34983.38,27528.94,30,20},{35022.38,27528.94,30,20},{35058.38,27528.94,24,20},{34980.38,27552.94,30,16},{35016.38,27552.94,24,16},{34947.38,27578.94,24,16}}
 
 function M.gardens()
 	local f = sub("RoofGardens")

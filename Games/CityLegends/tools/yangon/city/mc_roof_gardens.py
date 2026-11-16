@@ -14,11 +14,12 @@ W = lambda p: (34875 + p[0] * 1.875, 27468.75 - p[1] * 1.875)
 wr = Polygon([W(p) for p in L["whiteroof"]])
 dc = W(L["dome_c"])
 dome = affinity.scale(Point(dc).buffer(1, 64), 51.6 + 7, 57.2 + 7)
-# the pergola (MCDrone.luau): facade mid M, along T 44 wide, 19..33 deep along N
-M = (34811.05, 27180.3)
-T = (0.7931, -0.6092)
+# the pergola (MCDrone.luau, centred on the corner front's middle since 17 Nov): facade mid M, along T 44 wide,
+# posts 6.1..18.9 behind the facade along N (+ 4 clear round it)
+M = (34774.69, 27215.37)
+T = (0.9584, -0.2855)
 N = (-T[1], T[0])
-perg = Polygon([(M[0] + T[0] * s + N[0] * d, M[1] + T[1] * s + N[1] * d) for s, d in ((-26, 15), (26, 15), (26, 37), (-26, 37))])
+perg = Polygon([(M[0] + T[0] * s + N[0] * d, M[1] + T[1] * s + N[1] * d) for s, d in ((-26, 0), (26, 0), (26, 23), (-26, 23))])
 ok = pod.buffer(-10).difference(A.buffer(10)).difference(B.buffer(10)).difference(mel.buffer(10)) \
     .difference(wr.buffer(8)).difference(dome).difference(perg)
 beds = []
