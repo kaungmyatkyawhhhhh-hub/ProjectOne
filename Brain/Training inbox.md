@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 10:25 [dashboard, unverified] Optimizing for the algorithm's key numbers can improve game chances. (topic: tiktok)
+- 2026-11-16 10:24 [dashboard, unverified] Being a Roblox dev is a good career choice. (topic: tiktok)
 - 2026-11-16 10:24 [dashboard, unverified] Everything was made inside Blender. (topic: tiktok)
 - 2026-11-16 10:13 [dashboard, unverified] Test things as you go. (topic: tiktok)
 - 2026-11-16 10:12 [dashboard, unverified] Discipline is everything. (topic: tiktok)
