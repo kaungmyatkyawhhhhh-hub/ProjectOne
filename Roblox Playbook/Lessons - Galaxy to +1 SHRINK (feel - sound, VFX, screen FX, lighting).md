@@ -522,3 +522,16 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Rule:**
   1. A performance trick (LOD, streaming, stand-ins) must still look like the game from far away AND in Studio Edit. Check both views before reporting.
   2. Never let a stand-in be a plain coloured box: give it at least the right texture (windows, floors) for what it stands for.
+
+## City Legends 1:1 Yangon: "so many more mistakes on the roads" (17 Nov 2026)
+- **What felt bad:** the owner found broken roads everywhere:
+  - median spikes
+  - flyover ramps built as earth banks with jagged walls, and decks ending in mid-air
+  - streets ending in grass with a line painted on beyond the end
+  - kerb shards in junctions
+  - grey concrete blobs on the grass
+- **Cause:** the agents checked a few hand-picked spots in Edit screenshots and declared the roads done. Nothing scanned every junction, road end and deck.
+- **Rule:** generated road networks get an automated QA pass over **every** junction, road end, median end and deck before anything is shown to the owner:
+  - lines outside asphalt, kerbs inside a carriageway, decks with gaps, overlaps with buildings
+  - plus a contact sheet of the worst spots
+  - "Looks right in 3 screenshots" is not done.
