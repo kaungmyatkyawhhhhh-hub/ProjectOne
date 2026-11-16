@@ -100,3 +100,11 @@ From the card: a cyan glow halo on the crystals and eye, and a cloud of cyan spa
 - **Blender preview** (scene Mosasaurus T6, saved in `export/Mosasaurus_T6_preview.blend`): particle systems `SparkleTrail` (body, 2,600, drift back + down, life 64 fr) and `CrystalGlints` (crystals, 260, lift up), both instancing `MosaVFX_Sparkle` (glowing octahedron); compositor group `MosaBloom` (Glare, Bloom, threshold 0.8) shown live in the rendered viewport; camera `MosaHeroCam` (3/4 hero). Particles pre-roll from frame -60 (step frames in order, or the trail won't form). Still: `checks/mosa6_vfx_hero.png`.
 - **Roblox version** (in `install_serverstorage.luau`, runs with the import, NOT run yet): `MB_SparkleTrail` ParticleEmitter on the body MeshPart (rate 70, world space so it trails, sinks slowly), `MB_CrystalGlints` on the crystals (rate 18, upward), PointLights `MB_CrystalGlow` (cyan, range 40) and `MB_EyeGlow` (yellow, range 10). Sprite: MEGA BITE's own flare 119101480444141. The halo itself comes from Neon + the game's Lighting Bloom (not changed).
 - Note: an F12 render with the `MosaBloom` compositor comes out solid white; the live rendered viewport is correct (the still above is a viewport capture). Fix the final-render bloom before using renders for thumbnails.
+
+---
+# Eyes + card pose (2026-11-16, owner: "Eyes", "Curved card pose")
+- **Eyes:** bigger and almond-shaped like the card / exploded EYE part (46 x 24 px, was 34 x 24), glow 3.0 in Blender (Neon in Roblox). Picture `checks/mosa6_eye_vs_sheet.png`.
+- **Upper lip** is green again: the belly band no longer applies to the skull's underside (`belly_band=False`).
+- **Card pose:** action `CardPose` on the rig (Spine pitch [16,18,13,7,-1,-9,-15,-18] deg, yaw [5,5,3,0,-3,-5,-5,-4], Root -20, Jaw -14): the card's dive, tail up, head down-right. Camera `MosaCardCam` (portrait 768x1024). Swim loop still there: action `Swim`.
+- **One script for the whole preview:** `mosa6_preview.py` (exec in Blender with ARGS = [export/Mosasaurus_T6_rigged.blend, 'card' or 'swim']): reloads the model, glow materials, both actions, sparkle VFX, bloom, world, hero + card cameras, particle pre-roll.
+- Gates PASS (31 parts, 6,128 tris). FBX re-exported. Not uploaded (asset 104031266367399 is still v1).

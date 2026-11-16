@@ -43,12 +43,12 @@ for fc in [fc for l in swim.layers for s in l.strips for cb in s.channelbags for
 rig.animation_data_create()
 card = bpy.data.actions.new('CardPose'); card.use_fake_user = True; rig.animation_data.action = card
 # local X = world +Y on these bones: + pitches the tail up. Spine0 is at the head.
-PITCH = [6, 14, 16, 12, 2, -10, -16, -14]     # S-curve: up behind the head, curling back at the tail
-YAW = [4, 4, 3, 0, -3, -4, -4, -3]            # a little sideways bend so it reads in 3/4
+PITCH = [16, 18, 13, 7, -1, -9, -15, -18]     # S-curve: up behind the head, curling back at the tail
+YAW = [5, 5, 3, 0, -3, -5, -5, -4]            # a little sideways bend so it reads in 3/4
 for i in range(8):
     pb = rig.pose.bones[f'Spine{i}']; pb.rotation_mode = 'XYZ'
     pb.rotation_euler = (math.radians(PITCH[i]), 0, math.radians(YAW[i])); pb.keyframe_insert('rotation_euler', frame=0)
-pr = rig.pose.bones['Root']; pr.rotation_mode = 'XYZ'; pr.rotation_euler = (math.radians(-28), 0, 0); pr.keyframe_insert('rotation_euler', frame=0)
+pr = rig.pose.bones['Root']; pr.rotation_mode = 'XYZ'; pr.rotation_euler = (math.radians(-20), 0, 0); pr.keyframe_insert('rotation_euler', frame=0)
 pj = rig.pose.bones['Jaw']; pj.rotation_mode = 'XYZ'; pj.rotation_euler = (math.radians(-14), 0, 0); pj.keyframe_insert('rotation_euler', frame=0)
 if MODE == 'swim':
     for pb in rig.pose.bones: pb.rotation_euler = (0, 0, 0)
@@ -96,7 +96,7 @@ def camera(name, pos, target, lens):
     if c.name not in sc.collection.objects: sc.collection.objects.link(c)
     c.location = pos; c.rotation_euler = (Vector(target) - Vector(pos)).to_track_quat('-Z', 'Y').to_euler(); c.data.lens = lens; return c
 hero = camera('MosaHeroCam', (2.2, -6.2, 1.6), (-3.0, 0, 0), 40)
-cardcam = camera('MosaCardCam', (1.4, -7.2, -0.6), (-2.2, 0, 0.9), 38)   # portrait, like the card
+cardcam = camera('MosaCardCam', (2.08, -9.11, 1.18), (-1.8, -0.5, 2.21), 38)   # portrait, like the card (framed on the posed body's bounds)
 if MODE == 'card': sc.camera = cardcam; sc.render.resolution_x, sc.render.resolution_y = 768, 1024
 else: sc.camera = hero; sc.render.resolution_x, sc.render.resolution_y = 1280, 720
 

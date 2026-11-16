@@ -208,3 +208,40 @@ Everything is new models, nothing removed except the stone planter boxes I tried
 ![[Screenshots/2026-11-16 boutique centre styling table.jpg]]
 ![[Screenshots/2026-11-16 sky deck south terrace lounge.jpg]]
 ![[Screenshots/2026-11-16 phone terrace sofa cocoa.jpg]]
+
+## City, sky and floor guides (owner: "Yes, do both")
+**Backup:** `ServerStorage.MapBackups.pre_SkylineWayfinding_16Nov`, which holds the old Atmosphere. Everything else is new and easy to remove by name.
+
+- **Night haze (the Atmosphere object, values only):**
+
+  | Setting | Old | New |
+  |---|---|---|
+  | Density | 0.24 | 0.32 |
+  | Color | 194,201,228 | 92,98,150 |
+  | Decay | 150,95,110 | 58,40,78 |
+  | Haze | 0.75 | 1.5 |
+  | Glare | 0 | 0 |
+
+  - The horizon is now a deep blue-plum instead of a pale band, and far towers fade into it.
+  - Brightness, Ambient and the grade are untouched (the interior look is tuned).
+  - `OutfitViewer` caches Density when it opens, so it still restores.
+- **423 more lit windows** ("Added lit window", Neon, the skyline's own 6 colours):
+  - Placed only on tower faces that look toward the MM tower, and only above y 140 (what the deck and windows see).
+  - Laid along each building's own glazing ribbons, ~38 % filled, never overlapping an existing window.
+  - Fixed random seed 1116.
+- **MM billboard** on South Exchange's roof, facing the deck:
+  - A 30 × 10 board with a pink neon frame, "MM OUTFIT CATALOG" and "try any fit · type its ID".
+  - It sits right behind the selfie arch, so arch photos frame it.
+- **Red roof beacons:** a mast and a blinking light on East Exchange, Northbank and The Copper Building. `BeaconBlink` script: on 0.9 s, dim 1.6 s.
+- **Floor guides** (`OutfitShowcase.Floor guides`, 4 boards):
+  - **Where:** the foot of the boutique spiral, the stairwell on the deck, and the top and bottom of the grand stairs.
+  - **Content:** "FLOOR GUIDE" with Sky Deck / Boutique & Penthouse / Media Salon.
+    - The current floor is highlighted "YOU ARE HERE".
+    - The others show how to get there ("UP · THESE STAIRS", "DOWN · THEN THE GRAND STAIRS").
+    - Each row has one line of what's there.
+- **Tested (Studio Play, PC + Galaxy A06):** the boards render and their footprints are clear, the beacons blink, the billboard reads through the arch, 0 console errors.
+- **Not checked:** the haze at the owner's max graphics. The skill says to judge glow and exposure there, so a max-graphics screenshot from the owner would confirm it. The Lighting Technology owner step is still open.
+
+![[Screenshots/2026-11-16 skyline billboard through selfie arch.jpg]]
+![[Screenshots/2026-11-16 floor guide on the deck.jpg]]
+![[Screenshots/2026-11-16 floor guide in the boutique.jpg]]
