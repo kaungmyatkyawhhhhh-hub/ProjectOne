@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 09:42 [dashboard, unverified] Blender 3D Product Animation. (topic: tiktok)
 - 2026-11-16 09:36 [dashboard, unverified] Blender3D is used for character animation. (topic: tiktok)
 - 2026-11-16 09:35 [dashboard, unverified] The creator will make a full A to Z tutorial if enough viewers want it. (topic: tiktok)
 - 2026-11-16 09:35 [dashboard, unverified] Made entirely in Blender, no AI involved. (topic: tiktok)
