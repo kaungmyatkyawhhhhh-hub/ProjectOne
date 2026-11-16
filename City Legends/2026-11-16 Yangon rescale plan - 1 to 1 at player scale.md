@@ -530,3 +530,81 @@ Rules for every step:
 - **In Studio (place 121430381830562):** 134 changed mesh groups replaced (meshes 131410308021789, 96713853552103, 84647779595498; LY needed its own pass: Studio's `YangonRoadMeshes.LOOK` has no LY), 52 collision boxes out / 13 in. Old meshes and boxes in `ServerStorage.P1RoadFixOld` (174; delete once the roads are settled).
 - **Traffic in the 1:1 frame (code synced, Play test NOT done):** `Config.Areas.Yangon1to1Areas` (x 15,000-61,000, z 14,000-54,000: the old batches 1-3 reach z ~12,400), `Config.isYangon1to1At`, `Config.laneWidth(pos?)` = 12 there (Chauffeur callers pass a point). Lanes: `tools/yangon/city/lanes_1to1.py P1` -> `src/shared/YangonLanes1to1_1..2.lua` (658 lanes, 763 links, numbered from 1 in the 1:1 set; `RivieraTraffic.build` adds them last with an offset). `Traffic.lua` marks those pieces `oneToOne` and spawns "anywhere" cars only in the player's own area. Checks: 0 lanes without a way on, 85% of lanes in one strongly connected part (4 small closed loops at the district edge); in Studio Edit the full graph builds with the old map's lanes unchanged (6,856 + 658 lanes), 3,336 live 1:1 pieces, 363 pruned by the builder's tail prune.
 - **Studio state then:** Config patched by find / replace (Studio's Config was 198 characters off git), the other 6 scripts hash-equal before the sync. Store on CityLegends_v1.
+
+## Step 5 progress: P2
+
+### District P2, north of P1 (16 Nov 2026, in Studio, not saved)
+- **Where:** lon 96.133-96.165, lat 16.834-16.862. Inya Lake's north and east shores, Kaba Aye Pagoda, the Mayangon / Yankin edge. It joins P1 along lat 16.834.
+- **In Studio (place 121430381830562):**
+  - Terrain skin: 1,572 tiles under the district. Inya Lake runs on from P1 at 40.5 (13.5 m).
+  - Kaba Aye stands on real ground: a flat concrete court (radius 157.5 studs, top 77.6) replaces `KabaAyePlate_TEMP`, which is deleted.
+  - The two P2 pagodas stand on the terrain, with no temp plates: n13601098532, and n11838369698 (new).
+  - Buildings use the light pipeline: `Buildings.Shell` (13,032 parts), `Night` (46 meshes) and `YgnKit.Data_P2` (1,090 detail tiles).
+  - Greenery: `YgnKit.Data_P2G` (38,963 trees, built on the client) and 3,084 far crowns. The ground is clean grass, with concrete only on forecourts.
+  - Inya Lake's Pyay Road bund: see below.
+  - P2 roads (`Roads.Meshes.P2Cell_*`, `Roads.Collide.P2`) are **placeholders only**. A roads agent is rebuilding all 1:1 roads with the batch 0.5 builder.
+- **How to run:** set `YANGON_SCALE=1to1`, then run `roads.py P2`, `terrain.py P2`, `buildings_1to1.py P2` and `green_1to1.py P2` (all in `tools/yangon/city`). P2 is in `geo.PILOT_LL`.
+- **The seam with P1:** `geo.PILOT_SEAMS = {'P2': ('P1',)}`.
+  - `roadnet.pilot_seams` moves each P2 road end on the shared edge onto P1's road end there: the same point, the same direction, the same cross-section, and a height pin. All 7 crossing roads matched: Pyay ×2, Kabar Aye ×2, Inya Rd, Kanbe Rd, Thukhawaddy St.
+  - `roadmesh` runs a pilot's cut ends past the edge and clips them on it. Before this, an oblique road left a wedge of grass at the seam. The P1 cells along the seam (`Cell_18/19/22/23x16`) were rebuilt the same way.
+  - `terrain.py` treats P1 as an earlier batch: P1's road banks reach over the edge, and P1's columns are kept.
+  - The lake bed now deepens from the real shore, not from the district edge. P1's 19 lake tiles at the edge were rewritten.
+  - Checks:
+    - Road height at the seam: equal (44.4 on Kabar Aye).
+    - Land across the edge: mean step 0.07 studs. The 2 bigger steps are shoreline columns.
+    - Water level: 40.5 on both sides.
+    - Seam close-up: no gap.
+- **Inya Lake's Pyay Road bund** (owner, via the coordinator), along the OSM straight shore from lat 16.8354 to 16.8414, 0.7 km:
+  - The bund top is 2 m above the lake.
+  - A 0.5 m concrete edge and a 3 m concrete walkway, then a grass strip easing back to the ground by 21 m.
+  - The water is 2 m deep at the wall.
+  - A low concrete wall 0.75 m high, `Workspace.Yangon1to1.InyaBund`, 2 Parts.
+  - This is `terrain.PILOT_BUNDS`. `green_1to1` also built its own 342 m bund with a railing on the north-west shore, plus natural banks with trees elsewhere.
+- **Landmark lots left empty:** `buildings_1to1.LANDMARK_SITES_BY_TAG['P2']`, also used by `green_1to1.LANDMARK_BOXES['P2']`.
+  - Kaba Aye: OSM compound 186911800 plus the 315-stud court.
+  - Diamond Inya Palace.
+  - Inya Lake Hotel and the Yangon Convention Center.
+  - Lotte Hotel.
+  - Both pagodas.
+- **Buildings:** 6,479, from 6,636 footprints.
+  - Dropped: 31 on landmark lots, 124 on road corridors, 0 already built in P1, 0 overlapping P1's buildings by the seam.
+  - Archetypes: house 3,209, villa 988, walk-up 754, shed 687, township 594, civic 214, condo 26, market 7.
+  - 129 km of compound wall, 1,027 gates.
+  - Buildings keep off the road corridors in `build/city_1to1/roads_P2_profile.json` (real carriageway + pavement + 0.6 m), so they still fit the new roads.
+- **Kit:** 774 templates are used. 42 were new: 22 panels × wall and grille. Only those 42 were uploaded, through the new `city/glb_subset.py`, as asset 136137118940785. Night meshes: 109886462347694.
+
+| Measure (P2, ~8.6 km² of land) | Value |
+|---|---|
+| Place parts, buildings | 13,032 shells and roofs + 46 night meshes (P1: 10,558) |
+| Detail near the camera (data) | 129,832 parts, 16.0 M triangles for the whole district; client-built within 1,000 studs |
+| Trees | 38,963 near (data) + 6,168 far-crown parts + 303 lake edge parts |
+| Roads (placeholder) | 87.4 km, 290 meshes, 659,595 triangles (7,500 a real km), 8,226 collision boxes (94 a km); junction check 0 / 0 / 0 |
+| Lanes | 643 (`YangonLanesBP2_*`, first 10,309), files only |
+| New unique meshes | 42 kit + 46 night (+ 290 placeholder road meshes) |
+| Studio memory, Edit | 11.0 GB, with all other agents' work |
+
+- **Checks:**
+  - Flicker test: kit 0, shells and roofs 0.
+  - The placed sample found **99 tiny pairs**: undersides of floor bands where two panels meet at a 90° corner, at most 0.2 sq studs each, at 5 buildings near x 27,800-27,900. They are not fixed yet. They need a corner trim in `kit_panels`.
+  - Road tops sit 1 stud over the terrain: p5 0.96, median 1.02, p95 1.07. No terrain lies above a road.
+- **Screenshots** (PlayLight 13), in `C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`:
+  - Seam, Kabar Aye from P1: `mcp-Roblox_Studio-blob-1794820538774-nabziv.jpg`.
+  - Seam close-up, before the fix: `...1794820553667-w1eaft.jpg`. After the fix: `...1794821483505-e9wh5s.jpg`.
+  - Kaba Aye on its court: `...1794821243889-v6sx9t.jpg`.
+  - Pyay Road and the bund: `...1794821393543-4rqhn7.jpg`. Bund close-up: `...1794821404035-r2j9mr.jpg`.
+  - Inya north shore: `...1794821454938-y37g4k.jpg`.
+  - Aerial: `...1794821475097-d2ai3z.jpg`.
+- **Still wrong:**
+  - The shallow lake bed is sand, so near the shore Inya Lake reads white through the water (P1 too). A mud bed would read like the real murky lake.
+  - The Kaba Aye court's Concrete renders dark blue-grey (the RivConcrete2 override).
+  - The 99 corner-band pairs.
+  - P2 street detail (`street_1to1.py P2`) has not been run.
+  - Maha Pasana Guha has no OSM outline; only the compound and the court are kept empty.
+
+
+## Owner's order (16 Nov 2026, evening)
+> "do up to batch 3 first, then start renovating every house and put interiors by every district from then. also while doing up to batch 3, make the road maker use the same as the friday's builder with real roundabouts, proper markings and all 1:1 roads. BUT FIRST, fix the current roads as the FIRST FIRST priority"
+
+1. **First:** fix the current 1:1 roads with the Friday (13 Nov, batch 0.5) builder: real roundabouts, proper markings. While this runs, `Games/CityLegends/build/studio.priority` names the roads agent, and other agents give it Studio first.
+2. **Then:** build the 1:1 map up to batch 3: batches 0.5, 1, 2 and 3 (`geo.BATCH_LL`), every road made with the same Friday builder.
+3. **After that:** renovate every house (real looks) and add interiors district by district. Interiors only where real photos exist.
