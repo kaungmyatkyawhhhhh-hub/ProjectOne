@@ -18,7 +18,9 @@ Writes imports/sync/ygn1to1_<tag>/place_<tag>_<k>.rbxmx (each < 19 MB, the Open 
   2: P3TerrainB, Roofs, PagodaData
   3: Shell (Models Cell_<i>_<j> of Parts: the shells, already named by wall code, coloured, attribute T =
      tile, flat roofs with the concrete slab Texture; Material / MaterialVariant are set in Studio from the name by the
-     same `look` as YangonKitPlace; attribute MV = the shell-facade MaterialVariant YangonShellFacades would pick)
+     same `look` as YangonKitPlace). Each Part is NAMED "<wall code>|<tile T>|<MaterialVariant>" (the variant
+     YangonShellFacades would pick): AttributesSerialized written here did NOT survive the Open Cloud upload (16 Nov
+     test), so the Studio load loop splits the name into Name, attribute T and MaterialVariant, and sets Plaster
 The shell Parts are the same as YangonKitPlace.shells makes (Anchored, CanCollide / CanQuery on, CanTouch off, smooth
 surfaces, CastShadow on).
 """
@@ -138,8 +140,8 @@ def shell_items(ref):
                     '<bool name="CanCollide">true</bool><bool name="CanQuery">true</bool><bool name="CanTouch">false</bool>'
                     '<bool name="CastShadow">true</bool><token name="TopSurface">0</token><token name="BottomSurface">0</token>'
                     '<BinaryString name="AttributesSerialized">%s</BinaryString></Properties>%s</Item>'
-                    % (ref(), code, cframe(x, y, z, yaw), sx, sy, sz, (0xFF << 24) | (r << 16) | (g << 8) | b,
-                       attrs({"T": w[1], "MV": facade_of(ptree, x, z, code, sy)}), tex))
+                    % (ref(), "%s|%s|%s" % (code, w[1], facade_of(ptree, x, z, code, sy)), cframe(x, y, z, yaw), sx, sy, sz,
+                       (0xFF << 24) | (r << 16) | (g << 8) | b, attrs({"T": w[1]}), tex))
                 n += 1
     body = "".join('<Item class="Model" referent="%s"><Properties><string name="Name">Cell_%d_%d</string></Properties>%s</Item>'
                    % (ref(), i, j, "".join(parts)) for (i, j), parts in sorted(cells.items()))
