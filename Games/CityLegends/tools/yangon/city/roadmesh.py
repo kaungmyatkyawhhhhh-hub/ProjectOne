@@ -48,12 +48,40 @@ VIADUCT = 7.0       # raised more than this: a deck on piers; less: solid ramp w
 MAX_TRIS = 17000
 
 COL = dict(R=(46, 47, 50), P=(128, 124, 116), KR=(186, 34, 34), KW=(232, 230, 224), KG=(150, 146, 138),
-           L=(232, 232, 226), MG=(84, 116, 58), B=(150, 146, 138), F=(104, 102, 98))
+           L=(232, 232, 226), MG=(84, 116, 58), B=(150, 146, 138), F=(104, 102, 98), LY=(228, 182, 40))
 SKIRT = 1.6         # outer edges of the road footprint go this far down into the ground (no see-through gap)
 
 
 SPILL_RAISE = 4.0   # (2026-11-14) a road the grade cap holds more than this over the ground is built raised (ramp walls,
                     # piers over VIADUCT) like a bridge's ramp, not left on a 12-32 stud earth embankment
+MESH_CELL = CELL    # meshes are grouped per MESH_CELL (a multiple of CELL, the geometry's work tile)
+SEG = 6.0           # boundary pieces of asphalt / paint / skirts
+DASH_ON, DASH_OFF = 6.0, 6.0
+LINE_W, DASH_W = 0.5, 0.4
+ZEBRA_HALF = 4.0    # a zebra bar runs this far either side of its middle along the road
+BARRIER_H = 1.2
+ONE_TO_ONE = geo.ONE_TO_ONE
+if ONE_TO_ONE:
+    # (2026-11-16, rescale step 3, vault "Yangon rescale plan" + "Audit - Yangon roads 1 to 1"): lengths kept in metres
+    # (geo.LK), cells about 1 km (budget rules: <= ~3,000 unique meshes for the whole city, packed to MAX_TRIS), junction
+    # corners 6 m (item 19), lines 0.15 m wide with 3 m dashes and 6 m gaps (item 9), zebras yellow and 4 m long
+    # (item 3), median-side lines yellow, no outer edge line (item 9), red-white kerbs only on trunk / primary roads and
+    # roundabouts (item 16), parapets 1.1 m high and 0.5 m thick
+    CELL = 512.0
+    MESH_CELL = 3072.0
+    MARGIN *= geo.LK
+    RC = 18.0
+    GRID *= geo.LK
+    PIER *= geo.LK
+    BAND *= geo.LK
+    SEG *= geo.LK
+    PARAPET_H, PARAPET_W = 3.3, 1.5
+    VIADUCT *= geo.LK
+    SPILL_RAISE *= geo.LK
+    DASH_ON, DASH_OFF = 9.0, 18.0
+    LINE_W = DASH_W = 0.45
+    ZEBRA_HALF = 6.0
+    BARRIER_H = 2.4
 
 
 def raised_samples(net, e):
@@ -125,7 +153,8 @@ class Builder:
             sub = _sub(e, a, b)
             lo_, hi_ = lo[a:b + 1], hi[a:b + 1]
             paired = (e.w[a:b + 1] > 0.5) & bool(e.oneway)
-            sub, lo_, hi_, paired = _seam_extend(e, a, b, sub, lo_, hi_, paired)
+            if not getattr(net, 'standalone', False):
+                sub, lo_, hi_, paired = _seam_extend(e, a, b, sub, lo_, hi_, paired)
             wl = np.where(paired, 0.0, e.walk)
             self.carr.append(rn.strip_poly(sub, lo_, hi_))
             self.outer.append(rn.strip_poly(sub, lo_ - wl, hi_ + e.walk))
@@ -203,7 +232,7 @@ class Builder:
         zeb = []
         for kind, p in pts:
             d, j = kt.query(p)
-            if kind == 'traffic_signals' and d < 40:
+            if kind == 'traffic_signals' and d < 40 * geo.LK:
                 key = keys[j]
                 if key in done:
                     continue
@@ -215,18 +244,18 @@ class Builder:
                 for e, end in inc:
                     if self.raised[e.id][0][end]:
                         continue
-                    zeb.extend(self._zebra_on(e, end, rad + 6.0))
+                    zeb.extend(self._zebra_on(e, end, rad + 6.0 * geo.LK))
             elif kind == 'crossing':
                 # a crossing on a main road away from junctions
                 best = None
-                for k in self.ctree.query(Point(p).buffer(6)):
+                for k in self.ctree.query(Point(p).buffer(6 * geo.LK)):
                     e = self.meta[int(k)]
                     if e.look != 'main':
                         continue
                     dd = LineString(e.P).distance(Point(p))
-                    if dd < 6 and (best is None or dd < best[0]):
+                    if dd < 6 * geo.LK and (best is None or dd < best[0]):
                         best = (dd, e)
-                if best and d > 60:
+                if best and d > 60 * geo.LK:
                     e = best[1]
                     s_ = LineString(e.P).project(Point(p))
                     zeb.extend(self._zebra_at(e, s_))
@@ -252,10 +281,10 @@ class Builder:
         o = lo[i] + 1.0
         while o + 1.6 <= hi[i] - 0.8:
             q = p + r * (o + 0.8)
-            a = q - d * 4 - r * 0.8
-            b = q + d * 4 - r * 0.8
-            c2 = q + d * 4 + r * 0.8
-            d2 = q - d * 4 + r * 0.8
+            a = q - d * ZEBRA_HALF - r * 0.8
+            b = q + d * ZEBRA_HALF - r * 0.8
+            c2 = q + d * ZEBRA_HALF + r * 0.8
+            d2 = q - d * ZEBRA_HALF + r * 0.8
             out.append(Polygon([a, b, c2, d2]))
             o += 3.2
         return out
@@ -272,7 +301,20 @@ class Builder:
             if n < 2:
                 continue
             specs = []   # (offset array, width, dashed, role)
-            if e.oneway:
+            if ONE_TO_ONE:
+                # no outer edge lines; a yellow line by the median; a solid white centre on undivided roads
+                if e.oneway:
+                    if getattr(e, 'paired', False):
+                        specs.append((lo + 1.2, LINE_W, False, 'median'))
+                    for k in range(1, e.nf):
+                        specs.append((lo + (hi - lo) * k / e.nf, DASH_W, True, 'lane'))
+                else:
+                    specs.append((np.zeros(n), LINE_W, False, 'centre'))
+                    for k in range(1, e.nf):
+                        specs.append((hi * k / e.nf, DASH_W, True, 'lane'))
+                    for k in range(1, e.nb):
+                        specs.append((lo * k / e.nb, DASH_W, True, 'lane'))
+            elif e.oneway:
                 nl = e.nf
                 specs.append((lo + 1.2, 0.5, False, 'edge'))
                 specs.append((hi - 1.2, 0.5, False, 'edge'))
@@ -293,15 +335,15 @@ class Builder:
                 if not dashed:
                     out.append((rn.strip_poly(e, off - wd / 2, off + wd / 2), e, role))
                 else:
-                    # dashes 6 on, 6 off
+                    # dashes DASH_ON on, DASH_OFF off (6 / 6; 1:1: 9 / 18)
                     s0 = 0.0
-                    while s0 < c[-1] - 6:
-                        a, b = s0, s0 + 6
+                    while s0 < c[-1] - DASH_ON:
+                        a, b = s0, s0 + DASH_ON
                         sub = _sub_s(e, a, b)
                         if sub is not None:
                             oo = np.interp(rn.chain(sub.P) + a, c, off)
                             out.append((rn.strip_poly(sub, oo - wd / 2, oo + wd / 2), e, role))
-                        s0 += 12
+                        s0 += DASH_ON + DASH_OFF
         # cut: lines stop where another road's carriageway lies (for the centre / lane lines only roads at least as big)
         res = []
         carr_b = {}
@@ -335,7 +377,7 @@ class Builder:
                     g = g.difference(unary_union(zz))
             for q in _polys(g):
                 if q.area > 0.05:
-                    res.append((q, e))
+                    res.append((q, e, 'LY' if role == 'median' else 'L'))
         return res
 
     # ------------------------------------------------------------ cells
@@ -351,7 +393,7 @@ class Builder:
     def build(self, log=print):
         self.make_zebras()
         lines = self.line_polys()
-        ltree = STRtree([q for q, _ in lines]) if lines else None
+        ltree = STRtree([x[0] for x in lines]) if lines else None
         meshes = {}
         tris_total = {}
         cl = self.cells()
@@ -383,18 +425,27 @@ class Builder:
                 rk = [int(k) for k in self.rtree.query(cb)]
                 if rk:
                     rz = unary_union([self.rfoot[k] for k in rk])
-            paint = []
+            paint, yellow = [], []
             if ltree is not None:
                 for k in ltree.query(cb):
-                    q, e = lines[int(k)]
-                    paint.append(q)
+                    q, e, kd = lines[int(k)]
+                    (yellow if kd == 'LY' else paint).append(q)
             if self.zebras:
                 for z in self.zebras:
                     if z.intersects(cb):
-                        paint.append(z)
+                        (yellow if ONE_TO_ONE else paint).append(z)
+            gy = None
+            if yellow:
+                gy = unary_union(yellow)
+                g = gy.intersection(cb).intersection(Rg).intersection(self.allowed)
+                for pg in _polys(g):
+                    self._flat(pg, out, 'LY', PAINT_UP)
             if paint:
                 # one union: paint pieces never overlap each other (the same height would flicker)
-                g = unary_union(paint).intersection(cb).intersection(Rg).intersection(self.allowed)
+                g = unary_union(paint)
+                if gy is not None:
+                    g = dif(g, gy.buffer(0.1, join_style=2))
+                g = g.intersection(cb).intersection(Rg).intersection(self.allowed)
                 for pg in _polys(g):
                     self._flat(pg, out, 'L', PAINT_UP)
             for kind, tris in out.items():
@@ -503,7 +554,7 @@ class Builder:
         for pg in _polys(area):
             pg = shapely.geometry.polygon.orient(pg, 1.0)
             for ring in [pg.exterior] + list(pg.interiors):
-                cs = np.array(shapely.segmentize(LineString(ring.coords), 6.0).coords)
+                cs = np.array(shapely.segmentize(LineString(ring.coords), SEG).coords)
                 if len(cs) < 3:
                     continue
                 mids = (cs[:-1] + cs[1:]) / 2
@@ -565,7 +616,7 @@ class Builder:
             if not nextto.contains(Point(probe)):
                 continue
             # the road this kerb belongs to
-            main = self._is_main(mid)
+            main = self._kerb_banded(mid) if ONE_TO_ONE else self._is_main(mid)
             band = int((s[k] + L[k] / 2) // BAND) % 2
             kind = ('KR' if band == 0 else 'KW') if main else 'KG'
             ha, hb = hs[k], hs[(k + 1) % n]
@@ -590,12 +641,25 @@ class Builder:
                 best = (dd, self.meta[int(k)])
         return best is not None and best[1].look == 'main'
 
+    def _kerb_banded(self, p):
+        """(1:1) red-white kerbs only along trunk / primary roads (their links) and roundabouts (audit item 16)"""
+        best = None
+        for k in self.ctree.query(Point(p).buffer(4)):
+            dd = self.carr[int(k)].distance(Point(p))
+            if best is None or dd < best[0]:
+                best = (dd, self.meta[int(k)])
+        if best is None:
+            return False
+        e = best[1]
+        return e.hw in ('trunk', 'primary', 'trunk_link', 'primary_link', 'motorway') or \
+            e.tags.get('junction') in ('roundabout', 'circular')
+
     def _flat(self, pg, out, kind, up, own=None):
         """triangulate a flat-ish polygon, split into grid pieces (GRID under paint, 2 GRID elsewhere), heights from
         the field"""
         o = out.setdefault(kind, [])
         x0, z0, x1, z1 = pg.bounds
-        GR = GRID if kind in ('R', 'L') else (4 * GRID if kind == 'F' else 2 * GRID)
+        GR = GRID if kind in ('R', 'L', 'LY') else (4 * GRID if kind == 'F' else 2 * GRID)
         if x1 - x0 > GR * 1.5 or z1 - z0 > GR * 1.5:
             parts = []
             gx = np.arange(math.floor(x0 / GR) * GR, x1 + GR, GR)
@@ -609,7 +673,7 @@ class Builder:
         for q in parts:
             if q.area < 0.02:
                 continue
-            q = shapely.segmentize(q, 6.0 if kind in ('R', 'L') else (16.0 if kind == 'F' else 10.0))
+            q = shapely.segmentize(q, (6.0 if kind in ('R', 'L', 'LY') else (16.0 if kind == 'F' else 10.0)) * (SEG / 6.0))
             try:
                 tr = shapely.constrained_delaunay_triangles(q)
             except Exception:
@@ -648,10 +712,9 @@ class Builder:
                 if side == -1 and paired[i]:
                     # central barrier on the midline (half of it on each carriageway)
                     w = 0.8
-                    a0, b0 = at(i, 0.0), at(i + 1, 0.0)
-                    a1, b1 = at(i, w), at(i + 1, w)
-                    _quad_l(res, 'B', at(i, 0.0, 1.2), at(i + 1, 0.0, 1.2), at(i + 1, w, 1.2), at(i, w, 1.2), (0, 1, 0))
-                    _quad_l(res, 'B', at(i, w, 0), at(i + 1, w, 0), at(i + 1, w, 1.2), at(i, w, 1.2), (R[i][0], 0, R[i][1]))
+                    bh = BARRIER_H
+                    _quad_l(res, 'B', at(i, 0.0, bh), at(i + 1, 0.0, bh), at(i + 1, w, bh), at(i, w, bh), (0, 1, 0))
+                    _quad_l(res, 'B', at(i, w, 0), at(i + 1, w, 0), at(i + 1, w, bh), at(i, w, bh), (R[i][0], 0, R[i][1]))
                     continue
                 o0, o1 = off[i], off[i + 1]
                 pw = PARAPET_W * side
@@ -674,19 +737,19 @@ class Builder:
         if e.look == 'main':
             c = rn.chain(P)
             los = lo[a:b + 1]
-            specs = [(los + 1.2, 0.5, False), (outer - 1.2, 0.5, False)]
+            specs = [(los + 1.2, LINE_W, False), (outer - 1.2, LINE_W, False)]
             if e.oneway:
                 for k in range(1, e.nf):
-                    specs.append((los + (outer - los) * k / e.nf, 0.4, True))
+                    specs.append((los + (outer - los) * k / e.nf, DASH_W, True))
             else:
-                specs.append((np.zeros(n), 0.5, False))
+                specs.append((np.zeros(n), LINE_W, False))
                 for k in range(1, e.nf):
-                    specs.append((outer * k / e.nf, 0.4, True))
+                    specs.append((outer * k / e.nf, DASH_W, True))
                 for k in range(1, e.nb):
-                    specs.append((inner * k / e.nb, 0.4, True))
+                    specs.append((inner * k / e.nb, DASH_W, True))
             for off, wd, dashed in specs:
                 for i in range(n - 1):
-                    if dashed and int(((c[i] + c[i + 1]) / 2) // 6) % 2 == 1:
+                    if dashed and ((c[i] + c[i + 1]) / 2) % (DASH_ON + DASH_OFF) >= DASH_ON:
                         continue
                     _quad_l(res, 'L', at(i, off[i] - wd / 2, PAINT_UP), at(i + 1, off[i + 1] - wd / 2, PAINT_UP),
                             at(i + 1, off[i + 1] + wd / 2, PAINT_UP), at(i, off[i] + wd / 2, PAINT_UP), (0, 1, 0))
@@ -698,8 +761,8 @@ class Builder:
             if hgt[i] > VIADUCT:
                 mid_off = (inner[i] + outer[i]) / 2
                 pc = P[i] + R[i] * mid_off
-                wa = 2.5
-                wc = min(10.0, (outer[i] - inner[i]) * 0.3)
+                wa = 2.5 * geo.LK
+                wc = min(10.0 * geo.LK, (outer[i] - inner[i]) * 0.3)
                 foot = Polygon([pc - D[i] * wa - R[i] * wc, pc + D[i] * wa - R[i] * wc, pc + D[i] * wa + R[i] * wc,
                                 pc - D[i] * wa + R[i] * wc])
                 if not self._on_carriageway(foot, e):

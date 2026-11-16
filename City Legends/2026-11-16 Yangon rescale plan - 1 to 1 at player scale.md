@@ -365,3 +365,51 @@ Rules for every step:
 | Place file size | not readable from here; the save went through |
 
 - **Next: step 1/2.** The new map's build area (no overlap with the old map) and the building kit pilot. Reference photos and measurements are being gathered in `Games/CityLegends/build/landmarks/refs/kit/`.
+
+## Step 3 progress
+
+### Roads and ground of pilot district P1 (16 Nov 2026, files only)
+- **What:** the road network and ground of the pilot district, lon 96.133-96.159, lat 16.810-16.834 (Myanmar Plaza, Kabar Aye Pagoda Road and its flyover, Hanthawaddy roundabout, Sedona, Inya Lake's east shore). Nothing went into Studio.
+- **How to run:** `YANGON_SCALE=1to1 python roads.py P1 --jobs 6`, then `YANGON_SCALE=1to1 python roads_check_1to1.py P1` (both in `Games/CityLegends/tools/yangon/city`). Outputs go to `Games/CityLegends/build/city_1to1/` (gitignored).
+- **Standalone:** P1 is a pilot tag (`geo.PILOT_LL`, `geo.standalone`). It has no batch 0.5 box, no v4/v5 game roads and no seams. The map edge is the district box.
+- **Ground:** Copernicus GLO-30 made bare (opening 270 m + blur 45 m, as the terrain research chose). Inya Lake is 13.5 m and Kandawgyi 12.0 m. Land within 30 m of a lake is 1 m above it.
+- **Old tags are unchanged:** without the variable every tool gives the same output as before. Checked on batch 3: the same network, heights, a 5 x 5 cell mesh sample and lanes.
+
+| Measure | P1 |
+|---|---|
+| Roads | 79.3 km (56 km residential) |
+| Meshes | 83 (1 km cells, at most 17,000 triangles each) |
+| Triangles | 567,262 in the meshes, about 7,300 per real km (batches 1-3: 7,000-8,600) |
+| Collision boxes | 8,350, 105 per real km (batches 1-3: 85-108) |
+| Traffic lanes | 657 lanes, 762 links, 0 dead ends (2 dropped by the prune, 18 turn round at the district edge) |
+| Kabar Aye flyover | 2+2 deck about 18 m wide, 17.5 studs under the girders over New University Avenue Road, 22 studs at most over the ground, ramps 7% |
+
+**Lanes as built (owner rule: 12 studs where they fit, never under 10):**
+
+| Road | Built | Real (road audit) |
+|---|---|---|
+| Kabar Aye Pagoda Rd | 3+3 at 10 studs, each carriageway on its own OSM line, 1 m median | 3+3, ~19.5 m. Ours is 21 m, because 3 m lanes are under the 10-stud floor. |
+| Kabar Aye flyover deck | 2+2 at 12 | 2+2, ~17 m. OSM says 4 a side. |
+| Flyover ground lanes | 1 lane of 12 a side | narrow single lanes (junc_06) |
+| Pyay Rd | 3+3 at 11.5 | 2 x 11.5 m |
+| U Wisara Rd | 2+2 at 11.25, median 8-10 m (the OSM gap) | 2 x ~7.5 m, a tree median |
+| Inya Rd | 2+2 at 10.5 (not measured) | OSM lanes=4 |
+| Hanthawaddy ring | 3 lanes at 12, island Ø about 50-55 m | 3 lanes ~14 m, island Ø 48 m |
+
+**What changed in the tools:**
+- `geo.py`: `ONE_TO_ONE`, `LK` (the old stud lengths kept in metres), `PILOT_LL['P1']`, `standalone()`.
+- `roadnet.py`: the 1:1 cross-section, which uses `REAL_XS` / `REAL_XS_SECONDARY` (measured widths), up to 4 lanes a side, and real pavements. Divided roads keep each carriageway on its OSM line with the real median (`e.med`). The pilot build is standalone. At 1:1, `push_beside` only moves real overlaps.
+- `ground.py`: the GLO-30 bare field at 1:1, with no blend into batch 0.5.
+- `heights.py`: deck 1.5 m deep, 18 studs over water, lengths in metres, no street pins for a pilot. Sags in a deck between the roads it crosses are filled. Before, the Kabar Aye deck dipped from 22 to 13 studs and got solid ramp walls in the middle of the span.
+- `roadmesh.py`: work tiles of 512 studs, meshes grouped per 3,072-stud cell, corners 6 m. Lines are 0.45 wide with 9 / 18 dashes and no outer edge line. Median lines and zebras are yellow (kind `LY`), zebras 12 studs long. Red-white kerbs only on trunk and primary roads and the ring. Parapets 1.1 m.
+- `roadlanes.py`: spacings in metres, no seam for a pilot.
+- `roads.py`: outputs to `build/city_1to1`, mesh cells regrouped, a collision box covers up to 30 m, no batch 0.5 seam.
+- New: `roads_check_1to1.py`.
+
+**Not right yet:**
+- Kabar Aye is 1.5 m wider than real (the 10-stud floor).
+- The ground lanes beside the flyover moved up to 4 m off their OSM lines. OSM draws them closer to the deck than its real width allows.
+- Inya Rd, University Ave and New University Ave have no measured width. They use 3.5 m lanes.
+- The 6 m corner closing joins the flyover's ground lanes and ramp foot into one asphalt band from above.
+- No stop lines, turn arrows, splitters or kerb parking yet (audit items 11-13).
+- Next: upload, place and collision in the new frame, then terrain (step 3.4) and graph_test.

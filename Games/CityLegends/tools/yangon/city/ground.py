@@ -36,6 +36,15 @@ SIGMA_M = 150.0
 WATER_MIN = 1.0        # metres
 BANK_M = 1.5           # land near water at least this far above the water level
 BIG_WATER_HA = 3.0     # a water body this big is "water" for bridges (clearance 10+); smaller ones are ponds / drains
+BANK_REACH_M = 60.0
+# (2026-11-16, rescale step 3) at 1:1 (YANGON_SCALE=1to1) the ground is the terrain research's pick (vault "Research - Yangon
+# terrain, water and trees"): Copernicus GLO-30 made bare (grey opening 270 m + blur 45 m, terrain_study option C), lakes
+# at GLO-30's flat water (Inya 13.5 m), land within ~30 m of a lake 1 m over it; no batch 0.5 field (not in that frame).
+# Credit: produced using Copernicus WorldDEM-30 (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018
+# provided under COPERNICUS by the European Union and ESA; all rights reserved.
+if geo.ONE_TO_ONE:
+    BANK_M = 1.0
+    BANK_REACH_M = 30.0
 
 
 def _load_dem():
@@ -56,6 +65,9 @@ def _load_dem():
 
 class Ground:
     def __init__(self):
+        if geo.ONE_TO_ONE:
+            self._init_glo()
+            return
         lon0, lat0, step, Z, self.source = _load_dem()
         self.missing = int(np.isnan(Z).sum())
         if self.missing:
@@ -82,6 +94,27 @@ class Ground:
         F = np.where(self.W, self.level_grid, F)
         self.F = F
         self._load05()
+
+    def _init_glo(self):
+        import terrain_study as ts
+        lon, lat, Z = ts.load_glo()
+        Z = np.where((Z < -100) | (Z > 1000), np.nan, Z)
+        self.source = 'Copernicus GLO-30, bare (opening 270 m + blur 45 m)'
+        self.missing = int(np.isnan(Z).sum())
+        if self.missing:
+            idx = distance_transform_edt(np.isnan(Z), return_distances=False, return_indices=True)
+            Z = Z[tuple(idx)]
+        self.Z = Z
+        ny, nx = Z.shape
+        self.nx, self.ny = nx, ny
+        self.gx = np.array([geo.world(lon[i], lat[0])[0] for i in range(nx)])
+        self.gz = np.array([geo.world(lon[0], lat[j])[1] for j in range(ny)])
+        self._water(float(lon[0]), float(lat[0]), ts.ARC)
+        land = ~self.W
+        F = ts.land_blur(ts.opening(Z, land, 4), land, 1.5)
+        F = np.maximum(F, self.bank_floor)
+        F = np.where(self.W, self.level_grid, F)
+        self.F = F
 
     # ------------------------------------------------------------ water bodies
     def _water(self, lon0, lat0, step):
@@ -125,7 +158,7 @@ class Ground:
             level = np.where(inside, np.fmin(level, lv), level)
             # bank floor within ~60 m of the body (1-2 cells)
             if inside.any():
-                near = distance_transform_edt(~inside) * step * geo.KY < 60
+                near = distance_transform_edt(~inside) * step * geo.KY < BANK_REACH_M
                 floor = np.where(near & ~inside, np.maximum(floor, lv + BANK_M), floor)
             wpoly = Polygon([geo.world(x, y) for x, y in pl.exterior.coords]) if pl.geom_type == 'Polygon' else None
             if wpoly is None:
@@ -188,6 +221,8 @@ class Ground:
         """ground height in studs at world points P (N x 2)"""
         P = np.atleast_2d(np.asarray(P, dtype=float))
         X, Z = P[:, 0], P[:, 1]
+        if geo.ONE_TO_ONE:
+            return self._fnew(X, Z) * VS
         x0, z0, x1, z1 = geo.BOX_05
         dx = np.maximum(np.maximum(x0 - X, X - x1), 0)
         dz = np.maximum(np.maximum(z0 - Z, Z - z1), 0)
