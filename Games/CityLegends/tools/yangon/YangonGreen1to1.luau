@@ -339,6 +339,66 @@ function G.far(holding: Instance, store: Instance?)
 	return n
 end
 
+-- Edit look of what a client builds near `centre` (the green data only; YangonKitPlace.preview does the buildings):
+-- workspace._GreenPreview, far looks of those tiles hidden. G.unpreview() takes it down.
+function G.preview(centre: Vector3, radius: number)
+	local KD = require((ReplicatedStorage.Shared.YangonKitData :: ModuleScript):Clone())
+	local root = ReplicatedStorage.YgnKit
+	local T = KD.index(root.Templates)
+	local out = workspace:FindFirstChild("_GreenPreview") or Instance.new("Folder")
+	out.Name = "_GreenPreview"
+	out.Parent = workspace
+	local keys, n = {}, 0
+	for _, f in root:GetChildren() do
+		if f:IsA("Folder") and string.match(f.Name, "^Data_.+G$") then
+			local meta = KD.meta(f)
+			for _, v in f:GetChildren() do
+				local i, j = string.match(v.Name, "^(%-?%d+)_(%-?%d+)$")
+				if i then
+					local cx, cz = (tonumber(i) + 0.5) * meta.tile, (tonumber(j) + 0.5) * meta.tile
+					if math.sqrt((cx - centre.X) ^ 2 + (cz - centre.Z) ^ 2) <= radius and not out:FindFirstChild(v.Name) then
+						local tf = Instance.new("Folder")
+						tf.Name = v.Name
+						tf.Parent = out
+						local job = KD.job(v.Value, tonumber(i), tonumber(j), meta, T, tf)
+						while not job:step(400) do
+							task.wait()
+						end
+						n += job.parts
+						keys[v.Name] = true
+					end
+				end
+			end
+		end
+	end
+	local far = workspace.Yangon1to1:FindFirstChild("Green") and workspace.Yangon1to1.Green:FindFirstChild("Far")
+	if far then
+		for _, d in far:GetDescendants() do
+			if d:IsA("BasePart") and keys[d:GetAttribute("T")] then
+				d.Transparency = 1
+				d:SetAttribute("PreviewHidden", true)
+			end
+		end
+	end
+	return n
+end
+
+function G.unpreview()
+	local out = workspace:FindFirstChild("_GreenPreview")
+	if out then
+		out:Destroy()
+	end
+	local far = workspace.Yangon1to1:FindFirstChild("Green") and workspace.Yangon1to1.Green:FindFirstChild("Far")
+	if far then
+		for _, d in far:GetDescendants() do
+			if d:IsA("BasePart") and d:GetAttribute("PreviewHidden") then
+				d.Transparency = 0
+				d:SetAttribute("PreviewHidden", nil)
+			end
+		end
+	end
+end
+
 function G.data(holding: Instance)
 	local kit = ReplicatedStorage:FindFirstChild("YgnKit")
 	local moved = {}

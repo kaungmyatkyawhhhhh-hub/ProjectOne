@@ -1976,14 +1976,14 @@
 "top": 18.466518166698396
 },
 "tris": {
-"site": 8025,
+"site": 10649,
 "templates": {
-"pyatthat": 582,
-"shrine": 108,
+"pyatthat": 14554,
+"shrine": 674,
 "zedi": 380,
 "zedibig": 380,
 "buddha": 904
 },
-"scene": 24529
+"scene": 87569
 }
 }

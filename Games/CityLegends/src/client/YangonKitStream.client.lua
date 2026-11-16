@@ -111,6 +111,16 @@ task.spawn(function()
 		watchShells(sh)
 	end
 end)
+-- (2026-11-16, greenery) the far looks of the big trees (Workspace.Yangon1to1.Green.Far, attribute T) hide the same way
+-- once their tile's real trees (ReplicatedStorage.YgnKit.Data_<district>G) are built
+task.spawn(function()
+	local y = workspace:WaitForChild("Yangon1to1", 120)
+	local g = y and y:WaitForChild("Green", 60)
+	local far = g and g:WaitForChild("Far", 60)
+	if far then
+		watchShells(far)
+	end
+end)
 
 local folders = {} -- key -> Folder
 local jobs = {} -- key -> { job, job, ... }, k

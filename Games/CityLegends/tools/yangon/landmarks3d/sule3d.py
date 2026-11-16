@@ -418,7 +418,7 @@ def pyatthat_tpl(base=7.0, tiers=7, spire=True):
             c, d = pts1[(i + 1) % 4], pts1[i]
             g.quad(grp, (*a, z0), (*b, z0), (*c, z1), (*d, z1))
 
-    def crest(w, z, hgt, n, lod):
+    def crest(w, z, hgt, n, lod, corners=True):
         # 2026-11-16: the ornament kit's carved crest on each eave (back board + bevelled flame fingers standing 0.05 m
         # proud; scroll leaves, bead and glass on the big tiers) and a carved corner flame (horn) at each corner
         for i in range(4):
@@ -432,6 +432,8 @@ def pyatthat_tpl(base=7.0, tiers=7, spire=True):
             for k in range(segs):
                 u = -(2 * w - 0.3) / 2 + Ls * (k + 0.5)
                 OK.into_geo(seg, g, KG, (mx + oy * u, my - ox * u, z), (oy, -ox, 0.0), (ox, oy, 0.0))
+            if not corners:
+                continue
             cx, cy = c0
             d = math.hypot(cx, cy)
             dx, dy = cx / d, cy / d
@@ -441,7 +443,7 @@ def pyatthat_tpl(base=7.0, tiers=7, spire=True):
     w0 = s + 0.35
     g.quad("GLT", (-w0, -w0, 0.0), (-w0, w0, 0.0), (w0, w0, 0.0), (w0, -w0, 0.0))     # eave soffit
     frustum("GLD", w0, s * 0.7, 0.0, 1.0)
-    crest(w0, 0.0, 0.6, 5, "lo")
+    crest(w0, 0.0, 0.6, 4, "lo")
     z = 1.0
     w = s * 0.7
     for i in range(tiers):
@@ -452,7 +454,7 @@ def pyatthat_tpl(base=7.0, tiers=7, spire=True):
         g.quad("GLT", (-wo, -wo, z), (-wo, wo, z), (wo, wo, z), (wo, -wo, z))
         w2 = w * 0.76
         frustum("GLD", wo, w2, z, z + rh)
-        crest(wo, z, 0.5 * (0.92 ** i), max(2, 5 - i // 2), "lo" if i < 2 else "xlo")
+        crest(wo, z, 0.5 * (0.92 ** i), max(2, 4 - i // 2), "xlo", corners=i < 3)
         z += rh
         w = w2
     g.cap("GLD", [(-w, -w), (w, -w), (w, w), (-w, w)], z)

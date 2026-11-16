@@ -627,16 +627,7 @@ def nearest_main(x, z, reach=M(30)):
     return best
 
 
-def plate_name(tags):
-    nm = tags.get("name", "")
-    en = tags.get("name:en", "")
-    my = "".join(ch for ch in nm if "က" <= ch <= "႟" or ch in " ()0123456789").strip()
-    my = re.sub(r"\s+", " ", my)
-    my = my if any("က" <= ch <= "႟" for ch in my) else ""
-    if not en:
-        lat = re.sub(r"[က-႟]", "", nm).strip(" -")
-        en = lat if re.search(r"[A-Za-z]", lat) else ""
-    return my, en
+from street_signs import plate_name, road_tags  # noqa: E402
 
 
 def bus_stops(items, atlas):
@@ -718,19 +709,13 @@ def add_plate(it, local, w, h, cell, back=True):
 
 # =================================================================================================== 5. street-name signs
 def street_names():
-    """edge id -> (my, en) from the OSM roads (profile names are OSM 'name')"""
-    roads = json.load(open(os.path.join(geo.OSM, "roads.json"), encoding="utf-8"))["roads"]
-    by = {}
-    for r in roads:
-        t = r.get("t", {})
-        if t.get("name"):
-            by.setdefault(t["name"], t)
+    """edge id -> (my, en) from the OSM roads (profile names are OSM 'name' or 'name:en')"""
+    by = road_tags()
     out = {}
     for e in W.edges:
         if not e["name"]:
             continue
-        t = by.get(e["name"], {"name": e["name"]})
-        my, en = plate_name(t)
+        my, en = plate_name(by.get(e["name"], {"name": e["name"]}))
         if my or en:
             out[e["id"]] = (my, en)
     return out

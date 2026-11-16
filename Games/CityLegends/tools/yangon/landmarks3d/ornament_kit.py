@@ -572,7 +572,7 @@ def gable_frame(w=6.9, h=4.5, nf=2, lod="hi"):
         cu = scroll(0.36 * h, s * hw * 0.9, 0.0, ang=-s * 25, mirror=s < 0, n=6)
         slab(P, "G", cu, 0.0, 0.16, 0.02, back=True, band=False)
     ap = move(flame_outline(0.16 * w, 0.32 * h, lobes=2, n_lobe=2, barb=0.5), dz=zt + 0.05 * h)
-    slab(P, "G", ap, 0.08, 0.1, 0.02, back=True, band=False)
+    slab(P, "G", ap, 0.1, 0.12, 0.02, back=True, band=False)      # front 0.22: clear of the band's 0.18
     return P.check()
 
 
