@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 15:43 [dashboard, unverified] The Roblox game "Steal an Egg" features a challenge to catch the Nebula Kraken. (topic: tiktok)
 - 2026-11-16 15:37 [dashboard, unverified] Roblox still hasn't patched this issue. (topic: tiktok)
 - 2026-11-16 15:35 [dashboard, unverified] The game is called "Throw to Scare Animals". (topic: tiktok)
 - 2026-11-16 15:33 [dashboard, unverified] The plugin used is called framewisp.com. (topic: tiktok)
