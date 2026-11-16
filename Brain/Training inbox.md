@@ -63,6 +63,9 @@ Format if you like: **When** ... **do** ... **because** ...
 - 2026-11-16 07:05 TikTok session 3b (search "roblox game community discord updates players keep coming back", watched only; unverified):
   - IMPORTANT to check: a video from April ("Roblox now requires you to pay to upload?", about 2K likes, 267 comments) shows Roblox's "New Publishing Requirements" page: anyone can publish for personal use; publishing to friends needs an account in good standing for a while; publishing to all ages needs ID or phone verification and may involve a Plus or Select subscription for new publishes. Commenters say the free publishing was the reason devs chose Roblox. I read only part of the page, so check Roblox's official Creator Hub rules before relying on any of it. Fits [[K01 Roblox platform and discovery]].
   - A simulator-game dev's long explainer (about 13.7K likes, 5.9K saves) shows a "system" dashboard; the top comment says "30 dollars a day is actually crazy", so a small-game revenue figure of about 30 per day is treated as impressive by viewers. I did not catch the system itself. Fits [[K04 Monetization and economy]].
+- 2026-11-16 07:08 TikTok session 3c (search "roblox simulator game design loop progression rebirth", watched only; unverified):
+  - Rebirth is its own tutorial niche: "Rebirth UI for you" clips (about 700 likes) show a Rebirth button and an "After: 1x Speed" style reward preview, and commenters ask for "level up" style UI next. A rebirth reward preview that shows the next boost is a pattern we can reuse in our own UI kit style. Fits [[K03 Incremental design and pacing]] and [[K06 Art, UI, VFX, sound and lighting]].
+  - An AI "map before vs after" clip got "soulless AI slop" as a comment, the same pattern as before: obvious AI output is called out fast. Fits [[K06 Art, UI, VFX, sound and lighting]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
