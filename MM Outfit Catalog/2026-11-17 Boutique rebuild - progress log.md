@@ -69,3 +69,47 @@
 - Lighting grade pass, and more mesh furniture (a cash wrap, plants in matching pots).
 - New outfits with 3D layered clothing (the 3 current ones are flat classic clothes).
 - Re-run the sim + a full phone audit.
+
+## Done (17 Nov, part 3). Owner: "okay do it"
+- **HUD trim (`ShowroomCollection`):**
+  - One dock of 5: Featured, Random, Cart, Wishlist, **More**.
+  - More opens a tray with Avatar, Codes, Emotes and Games.
+  - Phone: one row top-right, so the left side is clear for the thumbstick.
+  - Backup: `ScriptBackups.pre_HUDtrim_17Nov`.
+- **Readable boards:** "Most Purchases" / "Most Robux Spent" boards are 9.4×6.8 studs (were 6.2×4.8), with text that fills each line, glowing (LightInfluence 0) and a brass frame.
+- **Penthouse recolour:**
+  - 110 parts remapped: beige dividers → plum-black, olive rugs/headboard → berry, olive cushions → pink, sofas → red velvet, orange wood → darker walnut.
+  - Original colours are saved as `OrigColor` attributes.
+  - A pink neon edge runs along the gallery runner.
+- **4 new outfits with 3D layered clothing** (Config base outfits 04–07; Roblox's own free official items, found with `AvatarEditorService:SearchCatalog`, creator Roblox, best-selling):
+
+  | ID | Outfit | Pieces | Idle |
+  |---|---|---|---|
+  | 04 | LEATHER NIGHT | Leather Jacket Black, Basic Tee Gray, Cargo Pants Black, white hair | Confident |
+  | 05 | SOFT TRENCH | Trench Coat White, Knit Sweater Beige, Textured Leather Pants White, pink hair | Stylish |
+  | 06 | ZIP SEASON | Zip Hoodie Black, Casual Sweats Gray, black hair, chain | Patrol |
+  | 07 | RUFFLE BLOOM | Tie-Front Top White, Long Ruffle Skirt White, pink hair | Princess |
+
+  Exhibit pads 04–07 came back on their own, so 7 mannequins now line the runway.
+- **Fixes found on the way:**
+  - The viewer always listed empty "Shirt/Pants · Preview" rows; they now only show when the outfit has classic clothes.
+  - **`rbxthumb` Asset thumbnails at 150×150 never load for layered items; 420×420 does.** All item thumbnails switched to 420.
+  - The web catalog API rate-limits after one search (429); the in-game `AvatarEditorService:SearchCatalog` works.
+
+![[Screenshots/2026-11-17 boutique v3 - 7 mannequins, layered outfits.jpg]]
+![[Screenshots/2026-11-17 viewer - Leather Night layered items.jpg]]
+![[Screenshots/2026-11-17 HUD trimmed (phone A06).jpg]]
+
+## Sim re-score (Calc/nerdsim.py, "current build")
+| | Tells / 10 min | Wows | Like |
+|---|---|---|---|
+| Before the rebuild | 77 | 1.6 | 0% |
+| **Now** | **33** | **5.9** | **~25%** |
+
+Top tells left: blocky furniture (the penthouse rooms still use block furniture, only recoloured), some empty views, and the 3 original flat-clothing outfits.
+
+## Next
+- Replace the penthouse block furniture with mesh furniture (check every free model for hidden scripts).
+- Remake Midnight / Frost / Sakura with layered clothing (or retire them).
+- A lighting grade pass.
+- Try Lighting.Technology = ShadowMap (the owner's setting) for the warm-up.

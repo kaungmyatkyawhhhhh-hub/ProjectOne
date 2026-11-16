@@ -63,3 +63,28 @@ if __name__ == "__main__":
     for v, n in enumerate(NAMES):
         t, top, w, l = run(v)
         print(f"{n:38s} {t:11.1f} {w:5.1f} {100*l:5.0f}%  " + ", ".join(f"{k} {c:.1f}" for k, c in top))
+
+# --- 17 Nov evening: score the CURRENT rebuilt build (partial fixes weighted) ---
+_BASE_MODEL = zone_model
+def current_build():
+    route, z = _BASE_MODEL(0)
+    route = {"showroom": .45, "viewer": .30, "penthouse": .20, "tower": .05}  # tower cut; floor 18 lower level only
+    z["tower"].update({"empty_view": .25, "zones_same": .05, "same_prop": .10, "wow": .03})
+    for k in z:                                   # palette done on boutique + penthouse, lighting grade not yet: half
+        z[k]["palette_clash"] = z[k].get("palette_clash", 0) * .4
+        z[k]["dark_or_blown_light"] = z[k].get("dark_or_blown_light", 0) * .6
+        z[k]["flat_dated_outfit"] = z[k].get("flat_dated_outfit", 0) * .35   # 4 of 7 outfits layered, all R15 + idles
+        z[k]["hud_clutter"] = z[k].get("hud_clutter", 0) * .3                # 5 buttons + More, no banners
+        z[k]["placeholder_ui"] = z[k].get("placeholder_ui", 0) * .5          # boards readable; some old signs left
+        z[k]["no_reaction"] = z[k].get("no_reaction", 0) * .4                # shoppers + idles + watcher
+    z["showroom"]["blocky_furniture"] *= .35; z["showroom"]["empty_view"] *= .35  # racks, booth, fitting rooms, runway
+    z["penthouse"]["blocky_furniture"] *= .8                                     # recoloured, still block furniture
+    z["showroom"]["wow"] += .12; z["viewer"]["wow"] += .07; z["penthouse"]["wow"] += .01
+    return route, z
+if __name__ == "__main__":
+    import random as _r
+    _r.seed(17)
+    orig = zone_model
+    zone_model = lambda v: current_build()
+    t, top, w, l = run(0)
+    print(f"{'CURRENT BUILD 17 Nov (evening)':38s} {t:11.1f} {w:5.1f} {100*l:5.0f}%  " + ", ".join(f"{k} {c:.1f}" for k, c in top))
