@@ -86,5 +86,21 @@ Materials: `YgnGoldLeaf_Bell`, `YgnGoldPlate_Trim`, `YgnRenderPainted_White` (dr
 - Pictures (PlayLight 13): `build/landmarks/kaba_aye/ingame_compare.png` (photo | Studio, photo 2 camera fit), `ingame_photo_view.jpg`, `ingame_aerial.jpg`, `ingame_porch_graze.jpg`, `ingame_porch_graze2.jpg`. No flicker seen at grazing angles.
 - Looks wrong / to fix: gold reads orange and the YgnGoldPlate tile grid shows on every trim (reads like tiles, not carving); the arch niches' teal mosaic reads dark grey-green, not glittering glass; the cream bays and white drum render darker and yellower than the photo; the porch roofs and terrace (RoofRed) read salmon pink; Buddhas are plain cones from the ground.
 
+## In Studio: look pass v2 (16 Nov, against photo 2, PlayLight 13)
+Settled values (photo sample -> what renders, same camera):
+| Group | Material | Color | Rendered vs photo |
+|---|---|---|---|
+| All gold (bell, lotus, bud, hti, trims, crests, merlons, Buddhas) | Metal + **YgnGoldLeaf** (no more YgnGoldPlate grid) | 226, 222, 245 | bell 231,208,143 vs 229,210,163; merlons 204,172,109 vs 193,161,121 |
+| Glass mosaic (arch vaults, porch sides) | Foil, no variant, Reflectance 0.2 | 150, 160, 140 | 156,167,141 vs 144,148,127 (silvery green, sparkles) |
+| Cream bays | SmoothPlastic | 236, 219, 148 | 205,191,142 vs 201,191,144 |
+| White (drum, hood edges, posts) | SmoothPlastic | 255, 255, 250 | |
+| Mint panel outlines | SmoothPlastic | 196, 214, 168 | |
+| Terrace + porch roofs (RoofRed) | SmoothPlastic | 96, 42, 32 | reads muted red-brown (was salmon) |
+| Walkway roofs | Metal + YgnCorrugatedZinc | 78, 140, 140 | 105,134,127 vs teal 90,125,122 |
+Tried and dropped: gold as SmoothPlastic + Reflectance (reads flat cream, plastic) and plain Metal (khaki). Gold Color barely moves the YgnGoldLeaf texture's hue; the bluish tint is what pulls it from orange to yellow-gold. Up-facing faces render far lighter than their colour in this light (pure green rendered 120,240,120), so roofs need dark colours.
+- **Buddhas:** the 20 cone stand-ins were replaced by one figure mesh (asset **127278276050216**, `tools/yangon/landmarks3d/kaba_aye_buddha_glb.py`: octagon pedestal + lathe figure with robe, shoulders, neck, head, ushnisha; 744 tris, same 2.3 x 6.5 footprint, no bottom faces), cloned into each niche facing out. Part count unchanged (329). Place version 976.
+- Pictures: `build/landmarks/kaba_aye/ingame_compare_v2.png`, `ingame_photo_view_v2.jpg`, `ingame_buddha_v2.jpg`, `ingame_bay_graze_v2.jpg` (no flicker).
+- Still differs: crests and merlons are flat cut-outs, no relief (the photo's gold reads by its shadows); bays are flat cream with no column / panel detail; the photo camera fit sits slightly off to the left.
+
 ## Next
 - Place it in Studio (another step) with the materials JSON and `YangonMaterials.luau`.
