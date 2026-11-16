@@ -323,6 +323,9 @@ def make_transformer():
             mm.C += m.C
             mm.T += [t + k for t in m.T]
     rack(p, RACK_Y)
+    # a beam between the tops with the line crossarm in the middle (the cables run to it)
+    p.box("SMT", (0, ARM_Y - 0.45, 0), (2 * gap, 0.24, 0.24), STEEL)
+    crossarm(p, ARM_Y)
     py = 3.7 * S
     p.box("SMT", (0, py, -0.75), (2 * gap + 0.9, 0.3, 0.2), STEEL)
     p.box("SMT", (0, py, 0.75), (2 * gap + 0.9, 0.3, 0.2), STEEL)

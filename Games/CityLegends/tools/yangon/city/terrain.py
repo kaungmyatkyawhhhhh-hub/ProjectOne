@@ -77,6 +77,13 @@ LATER_BATCH_BLEND.update({t: tuple(u) for t, u in getattr(geo, 'PILOT_SEAMS', {}
 # (2026-11-16, step 5) 1:1 landmark courts (x, z, radius, top shown, blend studs): Kaba Aye's model stands with its base
 # at Y 77.30 (vault "Kaba Aye 3D model"), on a 315-stud court (the old KabaAyePlate_TEMP); the terrain shows 0.3 over the
 # base so it hides the meshes' open bottom edge
+# (2026-11-16, step 5, owner via the coordinator) Inya Lake's straight reservoir bund on the Pyay Road side (vault
+# "Research - Yangon terrain, water and trees": concrete edge + low wall / railing + 3 m walkway + 12-18 m grass strip):
+# the OSM shore line's straight run (16.8354-16.8414), the bund top 2 m over the lake, the edge 0.5 m, the walkway 3 m
+# (concrete), then grass eased back to the natural ground by 21 m; the water 2 m deep at the wall. The low wall itself
+# is Parts (tools/yangon/InyaBund.luau).
+PILOT_BUNDS = {'P2': [dict(line=[(28324.1, 24897.6), (28465.8, 23745.3), (28656.6, 22894.3)], top_m=2.0, edge_m=0.5,
+                           walk_m=3.0, grass_m=18.0, deep_m=2.0)]}
 PILOT_PADS = {'P2': [(34625.66, 17793.07, 157.5, 77.6, 60.0)]}
 QUAY_W = 10.0
 FAR_SHORE = 120.0          # studs of low far shore where a river runs out of the region into the void
@@ -592,6 +599,34 @@ def build(tag, log=print, diff=False):
             log('  quay edge: %d columns' % quay.sum())
         code = np.where(rnear, 2, code)
         del d, idx, Lnear
+    for bd in PILOT_BUNDS.get(tag, ()):
+        from shapely.geometry import LineString as _LSb
+        from shapely import distance as _sdist, points as _spts
+        line = _LSb(bd['line'])
+        bx0, bz0, bx1, bz1 = line.buffer(geo.m(bd['grass_m'] + 6)).bounds
+        i0 = max(0, int((bx0 - X0) / RES)); i1 = min(nx, int((bx1 - X0) / RES) + 1)
+        j0 = max(0, int((bz0 - Z0) / RES)); j1 = min(nz, int((bz1 - Z0) / RES) + 1)
+        sub = (slice(i0, i1), slice(j0, j1))
+        XX, ZZ = np.meshgrid(xs[i0:i1], zs[j0:j1], indexing='ij')
+        dd = _sdist(line, _spts(XX.ravel(), ZZ.ravel())).reshape(XX.shape)
+        # only beside the straight run, not past its ends
+        P_ = np.array(bd['line'])
+        u_ = P_[-1] - P_[0]
+        tt = ((XX - P_[0][0]) * u_[0] + (ZZ - P_[0][1]) * u_[1]) / (u_ @ u_)
+        along = (tt > 0.0) & (tt < 1.0)
+        Lw = float(np.median(level[sub][wet[sub]])) if wet[sub].any() else 13.5 * ground.VS
+        top = Lw + geo.m(bd['top_m'])
+        land = inR[sub] & ~wet[sub] & along
+        e_w = geo.m(bd['edge_m'] + bd['walk_m'])
+        reach = e_w + geo.m(bd['grass_m'])
+        wgt = np.clip((dd - e_w) / (reach - e_w), 0.0, 1.0)
+        Hs, Cs = H[sub], code[sub]
+        H[sub] = np.where(land & (dd <= reach), top * (1 - wgt) + np.maximum(Hs, Lw + WATER_LAND_MIN) * wgt, Hs)
+        code[sub] = np.where(land & (dd <= e_w), 5, Cs)
+        deep = wet[sub] & along & (dd <= geo.m(bd['deep_m']) + 6)
+        H[sub] = np.where(deep, np.minimum(H[sub], Lw - geo.m(bd['deep_m'])), H[sub])
+        log('  bund: %d walkway columns, %d grass strip columns, %d deep water columns at %.2f' % (
+            int((land & (dd <= e_w)).sum()), int((land & (dd > e_w) & (dd <= reach)).sum()), int(deep.sum()), top))
     if tag in RIVER_EXT and wet.any():
         # (batch 2) where the river runs out of the region into the void (the OSM extract's edge, the reach limit), a low
         # far shore closes it: water within FAR_SHORE of such an edge becomes grass FAR_UP over the water, rising gently

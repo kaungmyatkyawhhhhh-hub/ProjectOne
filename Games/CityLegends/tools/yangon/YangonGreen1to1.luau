@@ -186,6 +186,59 @@ function G.templates(holding: Instance, store: Instance?)
 	return n
 end
 
+-- the old map's tree kit (ServerStorage.YangonData.GreenKit: Monaco Tree / Palm / PalmA copies) as streamer templates
+-- (owner, 16 Nov: "the trees are so ugly ... the old map vibe was better"). Record origin = the foot of the trunk;
+-- each piece keeps its own mesh, texture, material and colour; attribute R = its turn in the model (YangonKitData
+-- applies it). Scale 1 = the model as it is (Tree 18.3 m across, Palm 12.2 m and PalmA 16.3 m tall at 3 studs a metre).
+G.OLD = { Tree = "ot1", Palm = "op1", PalmA = "op2" }
+function G.oldTemplates(kit: Instance?, store: Instance?)
+	kit = kit or game:GetService("ServerStorage").YangonData.GreenKit
+	store = store or ReplicatedStorage.YgnKit.Templates
+	local n = 0
+	for mname, pid in G.OLD do
+		local m = kit:FindFirstChild(mname)
+		if m then
+			local cf, size = m:GetBoundingBox()
+			-- the trunk: the tallest-thin piece (Trunk, or the palm's textured stem); its foot is the origin
+			local trunk
+			for _, d in m:GetDescendants() do
+				if d:IsA("MeshPart") and (d.Name == "Trunk" or d.TextureID == "rbxassetid://10562881532") then
+					trunk = d
+				end
+			end
+			local base = trunk and trunk.Position or cf.Position
+			local origin = Vector3.new(base.X, cf.Position.Y - size.Y / 2, base.Z)
+			local k = 0
+			for _, d in m:GetDescendants() do
+				if d:IsA("MeshPart") then
+					k += 1
+					local name = "OK" .. string.char(64 + k) .. "_" .. pid
+					local old = store:FindFirstChild(name)
+					if old then
+						old:Destroy()
+					end
+					local q = d:Clone()
+					q.Name = name
+					q.Anchored = true
+					q.CanCollide = false
+					q.CanQuery = false
+					q.CanTouch = false
+					q.CastShadow = true
+					q:SetAttribute("C", d.Position - origin)
+					q:SetAttribute("S", d.Size)
+					q:SetAttribute("R", d.CFrame.Rotation)
+					q.Parent = store
+					pcall(function()
+						q.CollisionFidelity = Enum.CollisionFidelity.Box
+					end)
+					n += 1
+				end
+			end
+		end
+	end
+	return n
+end
+
 function G.terrainLook(undo: boolean?)
 	local out = {}
 	for matName, variant in G.TERRAIN do
@@ -407,6 +460,61 @@ function G.unpreview()
 			end
 		end
 	end
+end
+
+-- Inya Lake bund (Edge_<n>: "CODE x y z sx sy sz yaw"): concrete wall into the water, steel railing, 3 m walkway;
+-- the ground under each walkway piece is cleared above it and filled with grass under it (no terrain through it)
+G.EDGE_LOOK = {
+	WALL = { Enum.Material.Concrete, "YgnConcreteBare", Color3.fromRGB(196, 192, 182) },
+	WALK = { Enum.Material.Pavement, "YgnPavementSlabs", Color3.fromRGB(208, 204, 196) },
+	RAIL = { Enum.Material.Metal, "YgnSteelPainted", Color3.fromRGB(226, 228, 222) },
+	POST = { Enum.Material.Metal, "YgnSteelPainted", Color3.fromRGB(226, 228, 222) },
+}
+function G.edge(holding: Instance)
+	local root = workspace.Yangon1to1
+	local green = root:FindFirstChild("Green") or Instance.new("Folder")
+	green.Name = "Green"
+	green.Parent = root
+	local old = green:FindFirstChild("LakeEdge")
+	if old then
+		old:Destroy()
+	end
+	local f = Instance.new("Model")
+	f.Name = "LakeEdge"
+	f.Parent = green
+	local T = workspace.Terrain
+	local n = 0
+	for _, text in pages(holding, "Edge") do
+		for line in string.gmatch(text, "[^\n]+") do
+			local code, x, y, z, sx, sy, sz, yaw = string.match(line, "^(%u+) (%S+) (%S+) (%S+) (%S+) (%S+) (%S+) (%S+)$")
+			x, y, z, sx, sy, sz, yaw = tonumber(x), tonumber(y), tonumber(z), tonumber(sx), tonumber(sy), tonumber(sz), tonumber(yaw)
+			local cf = CFrame.new(x, y, z) * CFrame.Angles(0, yaw, 0)
+			if code == "WALK" then
+				local top = y + sy / 2
+				T:FillBlock(CFrame.new(x, top - 1.0 + 8.5, z) * CFrame.Angles(0, yaw, 0), Vector3.new(sx + 2, 17, sz + 2), Enum.Material.Air)
+				T:FillBlock(CFrame.new(x, top - 2.6 - 3, z) * CFrame.Angles(0, yaw, 0), Vector3.new(sx + 1, 6, sz), Enum.Material.Grass)
+			end
+			local lk = G.EDGE_LOOK[code]
+			local q = Instance.new("Part")
+			q.Name = code
+			q.Anchored = true
+			q.Size = Vector3.new(sx, sy, sz)
+			q.CFrame = cf
+			q.Material = lk[1]
+			q.MaterialVariant = if game:GetService("MaterialService"):FindFirstChild(lk[2]) then lk[2] else ""
+			q.Color = lk[3]
+			q.TopSurface = Enum.SurfaceType.Smooth
+			q.BottomSurface = Enum.SurfaceType.Smooth
+			q.CanCollide = code ~= "POST" -- the rails and wall stop a car / player at the water; posts are inside the rail line
+			q.CastShadow = code ~= "POST"
+			q.Parent = f
+			n += 1
+			if n % 60 == 0 then
+				task.wait()
+			end
+		end
+	end
+	return n
 end
 
 function G.data(holding: Instance)

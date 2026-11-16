@@ -388,7 +388,7 @@ def main():
         mat[cl] = "C"
         mat[lmk] = "."
         mat[~land] = "."
-    edge_parts, edge_mask, edge_len = lake_edge(G, water, prof, H, lmk)
+    edge_parts, edge_mask, edge_len = lake_edge(G, water, prof, H, lmk, ~land & ~water)
     deck |= edge_mask
     d_deck = distance_transform_edt(~deck) * RES
     mat[edge_mask & land] = np.where(mat[edge_mask & land] == ".", ".", "L")
@@ -757,7 +757,7 @@ def main():
                                                                      t["yaw"], t["x"] // TILE, t["z"] // TILE))
             continue
         if STYLE == "clean":
-            if t["D"] >= M(11.0):
+            if t["D"] >= M(14.0):
                 Dm = 18.3 * t["s"]
                 far.append("ff1 %.2f %.2f %.2f %.2f %.2f %.2f %.4f %d_%d" % (t["x"], t["y"], t["z"], M(Dm) * 0.92,
                                                                          M(Dm) * 0.62 * t["sy"] / t["s"], M(Dm) * 0.85,
@@ -840,6 +840,128 @@ def main():
               open(os.path.join(OUT, "trees.json"), "w"))
     preview(mat, cov, trees, shrubs, G, bld, road | deck)
     print(json.dumps({k: v for k, v in st.items() if k not in ("kit_pack",)}, indent=1))
+
+
+LAKE_LEVEL = 40.5        # Inya Lake at 1:1 (13.5 m x 3)
+BUND_ROADS = ("Kabar Aye Pagoda Road", "Pyay Road")   # where the lake runs straight beside these, the edge is a bund
+BUND_NEAR = 170.0        # studs from the road's centre line (~57 m: road, pavement, grass strip, walkway)
+BUND_MIN = 120.0         # shortest bund run (studs)
+WALK_W = 9.0             # walkway 3 m
+WALL_T = 1.2             # wall 0.4 m
+WALK_UP = 3.6            # walkway top over the water (1.2 m)
+LIP = 0.6                # wall top over the walkway
+RAIL_H = 3.3             # rail top over the walkway (1.1 m)
+POST_GAP = 7.5           # a post every 2.5 m
+
+
+def lake_edge(G, water, prof, H, lmk, outside):
+    """Inya Lake's edge (research section 2 'Bank types'): where the lake runs straight beside Kabar Aye Pagoda Road /
+    Pyay Road, a bund: concrete wall straight down into the water + steel railing + a 3 m walkway on the land side
+    (the grass strip behind it is the clean terrain lawn). Elsewhere a natural bank (trees and grass to the water: no
+    parts). Returns (part lines "CODE x y z sx sy sz yaw", mask of the walkway corridor (no trees), bund length)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from scipy.ndimage import label
+    from shapely.geometry import LineString as LS, Point as Pt
+    from shapely.ops import unary_union
+    lab, n = label(water)
+    if n == 0:
+        return [], np.zeros(water.shape, bool), 0.0
+    big = int(np.argmax(np.bincount(lab.ravel())[1:]) + 1)
+    d_out = distance_transform_edt(~outside) * RES
+    lake = lab == big
+    nx, nz = lake.shape
+    xs = G.X0 + np.arange(nx) * RES + RES / 2
+    zs = G.Z0 + np.arange(nz) * RES + RES / 2
+    fig = plt.figure()
+    cs = plt.contour(xs, zs, lake.T.astype(float), [0.5])
+    segs = [np.asarray(s_) for s_ in cs.allsegs[0] if len(s_) > 20]
+    plt.close(fig)
+    roads = [LS([(q[0], q[2]) for q in e["pts"]]) for e in prof if e.get("name") in BUND_ROADS and len(e["pts"]) > 1]
+    if not roads:
+        return [], np.zeros(water.shape, bool), 0.0
+    RD = unary_union(roads)
+    boxes = LANDMARK_BOXES.get(TAG, [])
+    x_lo, x_hi = G.X0 + 8, G.X0 + nx * RES - 8
+    z_lo, z_hi = G.Z0 + 8, G.Z0 + nz * RES - 8
+
+    def is_water(x, z):
+        i, j = int((x - G.X0) / RES), int((z - G.Z0) / RES)
+        return 0 <= i < nx and 0 <= j < nz and bool(lake[i, j])
+
+    runs = []
+    for sg in segs:
+        ok = []
+        for x, z in sg:
+            ii, jj = min(max(int((x - G.X0) / RES), 0), nx - 1), min(max(int((z - G.Z0) / RES), 0), nz - 1)
+            inside = x_lo < x < x_hi and z_lo < z < z_hi and d_out[ii, jj] > 16
+            near = RD.distance(Pt(x, z)) < BUND_NEAR
+            in_l = any(b[0] - 30 < x < b[2] + 30 and b[1] - 30 < z < b[3] + 30 for b in boxes)
+            ok.append(inside and near and not in_l)
+        cur = []
+        for k, flag in enumerate(ok):
+            if flag:
+                cur.append(sg[k])
+            elif cur:
+                runs.append(cur)
+                cur = []
+        if cur:
+            runs.append(cur)
+    parts = []
+    mask_img = G.blank()
+    dr = ImageDraw.Draw(mask_img)
+    total = 0.0
+    for run in runs:
+        line = LS(run).simplify(6.0)
+        if line.length < BUND_MIN:
+            continue
+        # smooth: resample every ~24 studs along the simplified line
+        nseg = max(1, int(line.length // 24))
+        P = np.array([line.interpolate(line.length * k / nseg).coords[0] for k in range(nseg + 1)])
+        total += line.length
+        top = LAKE_LEVEL + WALK_UP
+        rail_cum = 0.0
+        for k in range(len(P) - 1):
+            a, b = P[k], P[k + 1]
+            d = b - a
+            L = float(np.hypot(*d))
+            if L < 1.0:
+                continue
+            u = d / L
+            nrm = np.array([-u[1], u[0]])
+            mid = (a + b) / 2
+            # landward = the side that is not lake
+            if is_water(*(mid + nrm * 6)) and not is_water(*(mid - nrm * 6)):
+                nrm = -nrm
+            alt = 0.06 * (k % 2)           # neighbours differ: no shared planes at the joints (flicker rule)
+            yaw = math.atan2(-u[1], u[0])  # CFrame.Angles(0, yaw, 0): local X along the segment
+            wc = mid + nrm * 1.2           # wall stands just inside the land edge
+            wt = WALL_T + 2 * alt
+            wall_bot = LAKE_LEVEL - 5.0
+            wall_top = top + LIP + alt
+            parts.append("WALL %.2f %.2f %.2f %.2f %.2f %.2f %.5f" % (wc[0], (wall_bot + wall_top) / 2, wc[1], L + wt,
+                                                                    wall_top - wall_bot, wt, yaw))
+            kc = wc + nrm * (wt / 2 - 0.1 + WALK_W / 2)
+            parts.append("WALK %.2f %.2f %.2f %.2f %.2f %.2f %.5f" % (kc[0], top - 1.0 + alt, kc[1], L + 0.4, 2.0, WALK_W,
+                                                                    yaw))
+            # rails (top + middle) on the wall, posts every POST_GAP
+            for hh, th in ((RAIL_H, 0.3), (RAIL_H * 0.55, 0.22)):
+                parts.append("RAIL %.2f %.2f %.2f %.2f %.2f %.2f %.5f" % (wc[0], top + hh - th / 2 + alt, wc[1], L, th, th,
+                                                                        yaw))
+            s_ = (POST_GAP - rail_cum) % POST_GAP
+            while s_ < L:
+                p_ = a + u * s_ + nrm * 1.2
+                parts.append("POST %.2f %.2f %.2f %.2f %.2f %.2f %.5f" % (p_[0], top + LIP + (RAIL_H - LIP) / 2 + 0.02, p_[1],
+                                                                        0.3, RAIL_H - LIP - 0.04, 0.3, yaw))
+                s_ += POST_GAP
+            rail_cum = (rail_cum + L) % POST_GAP
+            # the walkway corridor (no trees, ground fixed under it in Studio)
+            far_ = wc + nrm * (wt / 2 + WALK_W + M(1.0))
+            q = [a + nrm * 0.0, b + nrm * 0.0, b + (far_ - wc) + nrm * 1.2, a + (far_ - wc) + nrm * 1.2]
+            G.poly(dr, [tuple(v) for v in q])
+    mask = G.arr(mask_img)
+    return parts, mask, total
 
 
 def sv(ref, name, value):

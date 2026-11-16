@@ -319,11 +319,16 @@ class Builder:
             if not parts:
                 continue
             J = unary_union(parts).convex_hull.buffer(0.5)
-            mains = {road_key(e) for e in mine.values() if e.traffic and e.look == 'main'}
+            # (slip lanes and ramps, the links, get a clean box but no zebra of their own)
+            mains = {road_key(e) for e in mine.values() if e.traffic and e.look == 'main' and e.hw not in rn.LINKS}
             signal = sigt is not None and sigt.query(centre)[0] < 40.0 * geo.LK
             zebra = len(mains) >= 2 or (signal and len(mains) >= 1)
             arms = []
+            zstrips, mstrips = [], []
+            ringy = any(e.tags.get('junction') in ('roundabout', 'circular') for e in mine.values())
             for e in mine.values():
+                if e.tags.get('junction') in ('roundabout', 'circular'):
+                    continue        # never a zebra or stop line on a roundabout's ring
                 for end, key in ((0, e.a), (-1, e.b)):
                     if key not in kset:
                         continue
@@ -338,10 +343,20 @@ class Builder:
                     if t + ZEBRA_HALF + STOP_GAP + STOP_W + 12.0 > c[-1]:
                         continue
                     arms.append((e, end, t if end == 0 else c[-1] - t))
-            d_z = 1.0 + 2 * ZEBRA_HALF + STOP_GAP + STOP_W if zebra else 1.0
-            d_m = 1.0 + 2 * ZEBRA_HALF + 1.0 if zebra else 3.0
-            self.boxes.append(dict(J=J, Z=J.buffer(d_z), Zm=J.buffer(d_m), arms=arms, zebra=zebra, centre=centre,
-                                   signal=signal))
+                    # the arm from the box out to its stop line (no line paint) and to the zebra's far edge (no median)
+                    lo, hi = self.lohi[e.id]
+                    i0 = 0 if end == 0 else -1
+                    a_, b_ = float(min(lo[i0], 0.0)) - 2.0, float(hi[i0]) + 1.0
+                    for far, out in ((sx + 1.0 + 2 * ZEBRA_HALF + STOP_GAP + STOP_W + 0.5, zstrips), (sx + 2.0 + 2 * ZEBRA_HALF, mstrips)):
+                        s0, s1 = (0.0, far) if end == 0 else (c[-1] - far, c[-1])
+                        sub = _sub_s(e, max(0.0, s0), min(c[-1], s1))
+                        if sub is not None:
+                            out.append(rn.strip_poly(sub, a_, b_))
+            Jb = J.buffer(1.0)
+            Z = unary_union([Jb] + zstrips) if zebra else Jb
+            Zm = unary_union([J.buffer(3.0)] + (mstrips if zebra else []))
+            self.boxes.append(dict(J=J, Z=Z, Zm=Zm, arms=arms if zebra else [], zebra=zebra, centre=centre,
+                                   signal=signal, ring=ringy))
         # the medians, once for the whole district
         M = unary_union([m for m in self.mlist]) if self.mlist else Polygon()
         if not M.is_empty:
