@@ -18,7 +18,7 @@ created: 2026-11-16
   - When MM makes its own shirts or pants, start from Roblox's official **585×559 classic template**.
   - The last ones weren't on the template, so they couldn't be uploaded.
 
-## 2. Runway show
+## 2. Runway show (REMOVED later on 16 Nov, owner: "remove the runway"; see the Map batch note, Sky Deck v2)
 - **Start:** the pink start ring at the entry end of the runway, "Walk the runway" (E). One walker at a time.
 - **During the show:**
   - A spotlight follows the walker.

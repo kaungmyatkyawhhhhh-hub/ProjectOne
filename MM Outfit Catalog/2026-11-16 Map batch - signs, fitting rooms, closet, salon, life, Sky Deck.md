@@ -97,3 +97,56 @@ Scripts can't change `Lighting.Technology`. In Studio: Explorer → Lighting →
 ![[Screenshots/2026-11-16 phone AFTER search.jpg]]
 ![[Screenshots/2026-11-16 phone AFTER viewer Y2K title and hint.jpg]]
 ![[Screenshots/2026-11-16 phone AFTER fitting room mirror.jpg]]
+
+## Sky Deck v2: top-3 podiums, spiral stairs, runway out, wall out
+Owner asked for four changes:
+- "in every theme, dont make it like a tent, make it like top 3 of that theme's outfits"
+- "make a stairway to rooftop, not elevator"
+- "remove the runway"
+- "remove this wall"
+
+**Backup:** `ServerStorage.MapBackups.pre_StairsPodiumsRunway_16Nov`. It holds:
+- the old booths, elevator, deck and ceiling (before the cut), benches, velvet lounge and pendant
+- the runway pieces, the west entry wall and panel and its baseboard
+- the roof bits that stuck up through the deck
+- the old SkyDeckServer
+
+The runway show scripts are in `ScriptBackups.retired_RunwayShow_16Nov` (disabled).
+
+- **Podiums (7 styles):**
+  - **Layout:** the awning and posts are gone. Each style has a 3-step podium with brass numbers: **2 · 1 · 3**, with 2nd on the left as seen from the front. The taller sign behind reads the style name, its line and "TOP 3 · MOST WORN"; Guest looks reads "THE 3 NEWEST LOOKS".
+  - **Ranking:** `SkyDeckServer` ranks by the worn count. `OutfitShowcaseServer` shares it as `ServerStorage.MMWornCount`. Ties keep the Config order, and it re-ranks every 5 min.
+  - **Prompts:** each mannequin has **View outfit (E)**. The 1st-place step has **Browse <style> (F)**.
+  - **Styles widened so every podium fills:**
+    - Y2K & Baddie + Soft Pink
+    - Preppy & Classic + Varsity
+    - Grunge + Denim, Emo
+
+    Edit `Config.Styles` freely.
+  - The side mannequins turn 10° inward and the steps are spread out, so arms don't overlap.
+- **Spiral stairs:**
+  - **Where:** the boutique's west corner, where the velvet lounge and the elevator pad were. The stairwell is cut through the ceiling and the deck (both re-split into 4 pieces around a 10×10 hole).
+  - **Build:** 19 wooden steps with brass nosing, a brass column and finial, and a brass handrail. A landing at deck level sits over the first quarter turn.
+  - **Deck:** glass guard rails around the open part. One bench moved 3.5 studs so it doesn't block the landing exit.
+  - **Signs:** "STAIRS UP TO THE SKY DECK" in the boutique, "DOWN TO THE BOUTIQUE" on the deck.
+  - **Elevator removed.**
+- **Fall rescue:** anyone below y 150 (off the tower) is put back at the boutique spawn within 1 s. This came up when a test walk dropped to the street.
+- **Runway removed:** the floor strip and edge lights, the 3 pink arches, the start ring and the runway show (Cheer, hearts). The mannequin pads stay.
+- **Wall removed:** the west boutique → penthouse entry wall, its walnut panel and its baseboard. The boutique now opens onto the penthouse and the stairs.
+  - The **Most Purchases** board now stands on brass legs and shows the same rows on its back (`ShowroomBoards` copies them to `BackGui`).
+  - The matching east wall stays.
+- **Deck clean-up:** 16 old penthouse roof pieces (parapets, roof ends, a mechanical screen and its louvers) stuck 1–2 studs up through the deck. They're moved to the backup.
+- **Tested (Studio Play, PC + Galaxy A06):**
+  - Walked up all 19 steps onto the deck and back down to the boutique floor.
+  - The fall rescue works.
+  - All 6 style podiums are dressed. Guest looks is empty in Studio until someone publishes a look.
+  - E on a podium mannequin opens its outfit (Soft Pink).
+  - The board's back mirrors its front.
+  - 0 console errors.
+- **Not checked:** real phone thumb-walking up the spiral (only scripted walking), and how the podiums look in daylight lighting.
+
+![[Screenshots/2026-11-16 sky deck top 3 podium.jpg]]
+![[Screenshots/2026-11-16 spiral stairs from the boutique.jpg]]
+![[Screenshots/2026-11-16 spiral stairs top on the deck.jpg]]
+![[Screenshots/2026-11-16 west entry wall removed.jpg]]
+![[Screenshots/2026-11-16 phone podium.jpg]]
