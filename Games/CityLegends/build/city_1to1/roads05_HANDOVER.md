@@ -8,8 +8,8 @@ no scratch folders), saved v1155, lock released. Old P1-P3 road meshes still in 
   `YANGON_SCALE=1to1 python roads05.py P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12` (~10 min; slip roads kept, MERGE_TOL),
   then `roads05_fix.py NET` (~30 s). `roads_unfixed.json` = before the fix (copy it back over roads.json before
   re-running the fix). Run everything from `tools/yangon/city` with `YANGON_SCALE=1to1`.
-- `roads05_paint.py NET` was started at ~20:00 UTC on the fixed data (it is slow on 12 districts, >30 min; log
-  `NET/paint.log`). If paint.json is older than roads.json, run it again. Paint QA = `roads05_qa.py NET` (with paint).
+- `roads05_paint.py NET` on the fixed data was KILLED (exit 143, after >30 min; no paint.json exists for NET now).
+  Run it again in the background (log `NET/paint.log`); it is slow on 12 districts. Paint QA = `roads05_qa.py NET` (with paint).
 - Junction QA without paint (7 min): `python roads05_qa.py NET NET/roads.json <empty paint json {"items":[]}>`.
   Last counts (spots in `NET/qa_junctions.json`): mouth_short 81, mouth_over 35, mouth_edge 25, kerb_cross 522,
   median_cross 3, zero_width 0, overlap 12, rank_dup 0. Faster loop: run the QA on a subset dir (see roads05_subset.py)
