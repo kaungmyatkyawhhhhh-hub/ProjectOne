@@ -20,6 +20,15 @@ KY = 110540
 OX = 30000.0
 OZ = 0.0
 
+# The 1:1 rebuild (owner, 16 Nov 2026: "Everything at player scale"): run any tool with YANGON_SCALE=1to1 to work at
+# 3 studs a metre, in its own frame north of the old map (Z = 30000 - north metres x 3: the whole OSM box lands at
+# Z about 6,800 to 53,200, clear of the old map's Z -12,000 to 3,000), so both maps can sit in the place while the new
+# one is built. The old map's tools run as before without the variable.
+if os.environ.get("YANGON_SCALE") == "1to1":
+    SPM = 3.0
+    VS = 3.0
+    OZ = 30000.0
+
 
 def m(v):
     """Metres -> studs across (sizes, spacings, distances)."""
