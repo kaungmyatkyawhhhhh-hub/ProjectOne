@@ -25,6 +25,50 @@ MED_GAP = 6.0
 CHUNK = 185000
 
 
+def check(data):
+    """what YangonRoads.load needs, or it errors (17 Nov: a 3-sample leftover by Sule's ring ran its arm loop off the
+    road): unique names / ranks, decks and cuts inside their roads, every ring arm reaching past R_OUT + FLAT (12).
+    A road that breaks the ring rule goes (logged)."""
+    names = [r['name'] for r in data['roads']]
+    assert len(set(names)) == len(names), 'two roads share a name'
+    assert len(set(r['rank'] for r in data['roads'])) == len(names), 'two roads share a rank'
+    by = {r['name']: r for r in data['roads']}
+    for d in data['decks']:
+        r = by[d['of']]
+        assert 0 <= d['from'] < d['to'] < len(r['s']) and len(d['s']) == d['to'] - d['from'] + 1, d['name']
+    for n, c in data['cut'].items():
+        assert n in by and 0 <= min(c) and max(c) < len(by[n]['s']), n
+    gone = []
+    for r in data['roads']:
+        for g in data['roundabouts']:
+            rad = [math.hypot(q[0] - g['c'][0], q[2] - g['c'][2]) for q in r['s']]
+            if min(rad[0], rad[-1]) < g['r_out'] and max(rad) < g['r_out'] + 12 + 1:
+                gone.append(r['name'])
+    if gone:
+        decked = set(d['of'] for d in data['decks'])
+        gone = [n for n in gone if n not in decked]
+        data['roads'] = [r for r in data['roads'] if r['name'] not in gone]
+        for n in gone:
+            data['cut'].pop(n, None)
+    return dict(ok=True, ring_stubs_dropped=gone, duplicates_dropped=drop_dups(data))
+
+
+def drop_dups(data):
+    """a road the builder would drop as lying wholly on a bigger one (mouthsim 'dropped') goes from the data, and the
+    continuation flags naming it go too (the roads that carried on from it then get a mouth)"""
+    import roads05_mouthsim
+    dup = sorted(set(d['road'] for d in roads05_mouthsim.run(data)['dropped']) - set(d['of'] for d in data['decks']))
+    if dup:
+        data['roads'] = [r for r in data['roads'] if r['name'] not in dup]
+        for n in dup:
+            data['cut'].pop(n, None)
+        for r in data['roads']:
+            for f in ('startsOnEnd', 'endsOnEnd'):
+                if r.get(f) in dup:
+                    del r[f]
+    return dup
+
+
 def main():
     tag = sys.argv[1]
     D = os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag)
@@ -35,6 +79,9 @@ def main():
     import roads05_chain
     chained = roads05_chain.chain(data)
     chained['continuations'] = roads05_chain.continuations(data)
+    import roads05_absorb
+    chained['absorb'] = roads05_absorb.absorb(data)
+    chained['duplicates_dropped'] = drop_dups(data)
     print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}
@@ -153,6 +200,15 @@ def main():
                         dk['to'] += n
             st['ends_extended'] += 1
             st['extend_studs'] += need
+    # 1b. what the builder's edge walk still fails (mouthsim): smallest edit that passes
+    import roads05_repair
+    st['repair'] = roads05_repair.repair(data)
+    print('repair', json.dumps(dict(st['repair'], fixed=len(st['repair']['fixed']), repair_left=len(st['repair']['repair_left']))))
+    roads = data['roads']
+    names = [r['name'] for r in roads]
+    cutd = {k: set(v) for k, v in data['cut'].items()}
+    geoms = [unary_union(quads(r['s'], cutd.get(r['name'], ()))) for r in roads]
+    tree = STRtree(geoms)
     # 2. medians end before any other carriageway / ring
     for ri, r in enumerate(roads):
         s = r['s']
@@ -174,6 +230,7 @@ def main():
         for i in clear:
             s[i][8] = 0
         st['median_samples_cleared'] += len(clear)
+    st['checks'] = check(data)
     txt = json.dumps(data, separators=(',', ':'))
     open(os.path.join(D, 'roads.json'), 'w', encoding='utf-8').write(txt)
     for f in os.listdir(D):

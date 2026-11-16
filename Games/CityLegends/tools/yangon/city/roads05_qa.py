@@ -33,6 +33,9 @@ from shapely.strtree import STRtree
 
 import geo
 
+OLD = '--old' in sys.argv          # the first (approximate) mouth_* / kerb_cross rules
+PAINT_ONLY = '--paint-only' in sys.argv
+
 
 def quads(s, cut=(), lo=6, hi=7, inner=None):
     out = []
@@ -100,9 +103,9 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
             if i not in cut and q[6] + q[7] < 2:
                 issues['zero_width'].append(dict(road=n, x=round(q[0], 1), z=round(q[2], 1)))
                 break
-        # mouths: the end against the road it lands on
+        # mouths: the end against the road it lands on (OLD approximation; roads05_kerbsim is the builder's own rule)
         ends = []
-        for k in (0, -1):
+        for k in ((0, -1) if OLD else ()):
             p = Point(s[k][0], s[k][2])
             if ringU.distance(p) < 2:
                 continue
@@ -150,7 +153,7 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
                     break
         # kerb / pavement strip over a carriageway where neither road ends on the other nor crosses it
         walk = max(r.get('walkL') or 0, r.get('walkR') or 0, 1.5)
-        for side, wk in ((-1, r.get('walkL') or walk), (1, r.get('walkR') or walk)):
+        for side, wk in (((-1, r.get('walkL') or walk), (1, r.get('walkR') or walk)) if OLD else ()):
             last = -99
             for i, P in strip(s, cut, side, wk + 1.5):
                 c = np.array([s[i][0], s[i][2]])
@@ -206,10 +209,11 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
 
 
 def main():
-    tag = sys.argv[1]
+    av = [a for a in sys.argv[1:] if not a.startswith('--')]
+    tag = av[0]
     D = os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag)
-    data = json.load(open(sys.argv[2] if len(sys.argv) > 2 else os.path.join(D, 'roads.json'), encoding='utf-8'))
-    paint = json.load(open(sys.argv[3] if len(sys.argv) > 3 else os.path.join(D, 'paint.json')))['items']
+    data = json.load(open(av[1] if len(av) > 1 else os.path.join(D, 'roads.json'), encoding='utf-8'))
+    paint = json.load(open(av[2] if len(av) > 2 else os.path.join(D, 'paint.json')))['items']
     cutd = {k: set(v) for k, v in data['cut'].items()}
     cw = {}
     for r in data['roads']:
@@ -223,10 +227,17 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup')}
-    junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped')}
+    if not PAINT_ONLY:
+        junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
+        if not OLD:
+            import roads05_kerbsim
+            ks = roads05_kerbsim.run(data)
+            for k in ('kerb_cross', 'mouth_short', 'mouth_over', 'mouth_edge'):
+                issues[k] = ks[k]
+            issues['dropped'] = ks['dropped']
     # dead ends
-    for r in data['roads']:
+    for r in (data['roads'] if not PAINT_ONLY else ()):
         s = r['s']
         for end, k in (('start', 0), ('end', -1)):
             if r.get('edgeStart' if k == 0 else 'edgeEnd'):
@@ -306,7 +317,7 @@ def main():
                 dy = abs(s[k][1] - r['s'][i][1])
                 if dy > 0.3:
                     issues['deck_foot'].append(dict(deck=d['name'], dy=round(float(dy), 2), x=round(s[k][0], 1), z=round(s[k][2], 1)))
-    json.dump(issues, open(os.path.join(D, 'qa.json'), 'w'), indent=1)
+    json.dump(issues, open(os.path.join(D, 'qa_paint.json' if PAINT_ONLY else 'qa.json'), 'w'), indent=1)
     print(json.dumps({k: len(v) for k, v in issues.items()}))
     return issues
 

@@ -557,3 +557,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 ## 2026-11-17 City Legends: a slow script is usually one global operation inside a loop
 - **What happened:** roads05_paint ran over 30 min on 12 districts and was killed. Each dashed lane line was cut by a union of every junction box in the city, rebuilt for each dash. An STRtree of the box pieces (cut each line only by the pieces it touches) brought it to 73 s.
 - **Rule:** when a job gets slow as the map grows, look for a whole-map geometry (union, difference, scan of all samples) inside a per-item loop; index it once and query locally.
+
+## 2026-11-17 City Legends: "first to last" spans hide gaps; and a test must not write into the real place
+- **What happened (1):** roads05 made a flyover deck from a road's FIRST raised sample to its LAST. Lay Daungkan Road has two real bridges 12 km apart, so one 12 km deck covered every ground junction between them, and the slip roads at Waizayandar ended on nothing (the 15-20 stud gaps of the J5 Studio test). Kabar Aye's two flyovers were merged the same way.
+- **What happened (2):** YangonRoads stored each round corner's angle on the ring using the CURRENT roundabout's centre. With several roundabouts in the data that was often another ring, so the ring's kerb ran on under the corner (the loose kerbs on Sule roundabout).
+- **What happened (3):** the earlier junction tests wrote grass terrain (verge, cut ends) at ground level into the main place, outside the built map (76,583 voxels found and removed at Pyay x University Ave and the slip triangle).
+- **Rule:** split any "from first to last" run where the gap is long (one deck per raised run); set the shared state (current ring, current road) right before every calculation that reads it; a Studio test on the real place runs a copy of the builder whose terrain writes go nowhere (`workspace.Terrain:Fill...` swapped for a no-op), and leaves nothing behind.

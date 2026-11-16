@@ -1036,7 +1036,8 @@ def inside0(px, pz, o, margin=0.0):
     return None
 
 
-DECK_FLAT = 24.0     # a deck starts level off its ramp foot (owner's bug 2: the ramp rose out of the junction box)
+DECK_GAP = 400.0     # ground this long between two raised runs of one road = two decks
+DECK_FLAT = 24.0    # a deck starts level off its ramp foot (owner's bug 2: the ramp rose out of the junction box)
 DECK_GRADE = 0.05
 
 
@@ -1083,8 +1084,17 @@ def finish(net):
         if ok.sum() < 6:
             continue
         idx = np.where(ok)[0]
-        i0, i1 = idx[0], idx[-1]
-        decks.append(dict(road=r, i0=int(i0), i1=int(i1)))
+        # one deck per raised run (17 Nov: Lay Daungkan's two real bridges 12 km apart made ONE 12 km deck over every
+        # ground junction between them; the slip roads there ended on nothing): split where the ground lasts DECK_GAP
+        runs = [[idx[0], idx[0]]]
+        for i in idx[1:]:
+            if r['c'][i] - r['c'][runs[-1][1]] > DECK_GAP:
+                runs.append([i, i])
+            else:
+                runs[-1][1] = i
+        for i0, i1 in runs:
+            if i1 - i0 >= 5:
+                decks.append(dict(road=r, i0=int(i0), i1=int(i1)))
     net['decks'] = decks
     # side lanes of a deck: other roads of the deck's name running beside it
     for dk in decks:
@@ -1500,7 +1510,15 @@ def write(net):
         for q, i in enumerate(range(dk['from'], dk['to'] + 1)):
             s.append([round(float(r['P'][i][0]), 2), round(float(dk['y'][q]), 2), round(float(r['P'][i][1]), 2),
                       round(float(D[i][0]), 4), round(float(D[i][1]), 4), 0, dk['half'], dk['half'], 0, 2, DECK_LANE_W, 0])
-        out_decks.append(dict(name='%s Flyover' % (r['name'] or 'Road'), of=r['label'], half=dk['half'],
+        nm = '%s Flyover' % (r['name'] or 'Road')
+        base, kk = nm, 1
+        while any(d['name'] == nm for d in out_decks):  # (the same " #k" YangonRoads.load gives a repeated name)
+            kk += 1
+            nm = '%s #%d' % (base, kk)
+        prev = [d for d in out_decks if d['of'] == r['label'] and d['from'] <= dk['to'] and dk['from'] <= d['to']]
+        if prev:
+            print('WARNING decks overlap on', r['label'], prev[0]['from'], prev[0]['to'], dk['from'], dk['to'])
+        out_decks.append(dict(name=nm, of=r['label'], half=dk['half'],
                               sides=[o['label'] for o in dk['sides']], **{'from': dk['from'], 'to': dk['to']}, s=s))
     out_rings = []
     for k, R in enumerate(rings):

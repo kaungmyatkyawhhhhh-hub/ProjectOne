@@ -255,7 +255,60 @@ def chain(data):
     return dict(joins=joins, chains=sum(1 for g in groups if len(g) > 1), roads_before=n, roads_after=len(out), skipped=dict(skipped))
 
 
-def continuations(data, reach=12.0, opposed=-0.7):
+def butt(data, cut, A, ka, B, kb, st):
+    """A's end ka trimmed / run on to B's end line kb (a butt joint, no overlap, no gap); False if it cannot"""
+    qb = B['s'][kb]
+    ub = out_dir(B['s'], kb)  # out of B, into A
+    s = A['s']
+    n0 = len(s)
+    ca = cut.get(A['name'], set())
+    # drop A's samples behind B's end line (on B)
+    idx = list(range(n0)) if ka == 0 else list(range(n0 - 1, -1, -1))
+    drop = 0
+    for i in idx:
+        q = s[i]
+        if (q[0] - qb[0]) * ub[0] + (q[2] - qb[2]) * ub[1] < 0.5 and i not in ca:
+            drop += 1
+        else:
+            break
+    if n0 - drop < 3:
+        st['too_short'] += 1
+        return False
+    keep = s[drop:] if ka == 0 else s[:n0 - drop]
+    q = keep[0] if ka == 0 else keep[-1]
+    d = out_dir(keep, 0 if ka == 0 else -1)  # towards B
+    den = d[0] * ub[0] + d[1] * ub[1]
+    if den > -0.3:
+        st['slant'] += 1
+        return False
+    t = ((qb[0] - q[0]) * ub[0] + (qb[2] - q[2]) * ub[1]) / den
+    m = list(q)
+    m[0] = round(q[0] + d[0] * t, 2)
+    m[2] = round(q[2] + d[1] * t, 2)
+    m[1] = qb[1]
+    # the end's cross-section along B's end cross-section (B's travel direction, signed like A's)
+    tb = unit(qb[3], qb[4])
+    sg = 1 if tb[0] * q[3] + tb[1] * q[4] >= 0 else -1
+    m[3], m[4] = round(tb[0] * sg, 4), round(tb[1] * sg, 4)
+    if math.hypot(m[0] - q[0], m[2] - q[2]) < 1.0:
+        keep[0 if ka == 0 else -1] = m
+    elif ka == 0:
+        keep.insert(0, m)
+    else:
+        keep.append(m)
+    shift = len(keep) - n0 if ka == 0 else 0  # index change at the start
+    A['s'] = keep
+    if A['name'] in cut:
+        cut[A['name']] = set(i + shift for i in cut[A['name']] if 0 <= i + shift < len(keep))
+    for dk in data['decks']:
+        if dk['of'] == A['name']:
+            dk['from'] += shift
+            dk['to'] += shift
+    st['trimmed_samples'] += drop
+    return True
+
+
+def continuations(data, reach=40.0, opposed=-0.7):  # (reach 12 -> 40: May Ni Gone Overpass started 30 short of Pyay Road's end)
     """an end that carries straight on from another road's END (a dual carriageway splitting into two one-ways, a
     one-way piece on a two-way one): both ends get startsOnEnd / endsOnEnd (YangonRoads makes no mouth there) and the
     carrying-on road is trimmed to start exactly on the other's end cross-section, along its direction (a butt joint,
@@ -310,58 +363,12 @@ def continuations(data, reach=12.0, opposed=-0.7):
             a, b, ra, ka, rb, kb, A, B = b, a, rb, kb, ra, ka, B, A
         if a in used or A.get(flag(ka)):
             continue
-        qb = B['s'][kb]
-        ub = out_dir(B['s'], kb)  # out of B, into A
-        s = A['s']
-        n0 = len(s)
-        ca = cut.get(A['name'], set())
-        # drop A's samples behind B's end line (on B)
-        idx = list(range(n0)) if ka == 0 else list(range(n0 - 1, -1, -1))
-        drop = 0
-        for i in idx:
-            q = s[i]
-            if (q[0] - qb[0]) * ub[0] + (q[2] - qb[2]) * ub[1] < 0.5 and i not in ca:
-                drop += 1
-            else:
-                break
-        if n0 - drop < 3:
-            st['too_short'] += 1
+        if not butt(data, cut, A, ka, B, kb, st):
             continue
-        keep = s[drop:] if ka == 0 else s[:n0 - drop]
-        q = keep[0] if ka == 0 else keep[-1]
-        d = out_dir(keep, 0 if ka == 0 else -1)  # towards B
-        den = d[0] * ub[0] + d[1] * ub[1]
-        if den > -0.3:
-            st['slant'] += 1
-            continue
-        t = ((qb[0] - q[0]) * ub[0] + (qb[2] - q[2]) * ub[1]) / den
-        m = list(q)
-        m[0] = round(q[0] + d[0] * t, 2)
-        m[2] = round(q[2] + d[1] * t, 2)
-        m[1] = qb[1]
-        # the end's cross-section along B's end cross-section (B's travel direction, signed like A's)
-        tb = unit(qb[3], qb[4])
-        sg = 1 if tb[0] * q[3] + tb[1] * q[4] >= 0 else -1
-        m[3], m[4] = round(tb[0] * sg, 4), round(tb[1] * sg, 4)
-        if math.hypot(m[0] - q[0], m[2] - q[2]) < 1.0:
-            keep[0 if ka == 0 else -1] = m
-        elif ka == 0:
-            keep.insert(0, m)
-        else:
-            keep.append(m)
-        shift = len(keep) - n0 if ka == 0 else 0  # index change at the start
-        A['s'] = keep
-        if A['name'] in cut:
-            cut[A['name']] = set(i + shift for i in cut[A['name']] if 0 <= i + shift < len(keep))
-        for dk in data['decks']:
-            if dk['of'] == A['name']:
-                dk['from'] += shift
-                dk['to'] += shift
         A[flag(ka)] = B['name']
         B.setdefault(flag(kb), A['name'])
         used.update((a, b))
         st['joined'] += 1
-        st['trimmed_samples'] += drop
     data['cut'] = {k: sorted(v) for k, v in cut.items() if v}
     return dict(st)
 

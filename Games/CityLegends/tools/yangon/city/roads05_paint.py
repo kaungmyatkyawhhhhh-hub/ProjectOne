@@ -503,6 +503,75 @@ def arrow_shape(kind):
     return None
 
 
+ORDER = ['stop', 'zebra', 'giveway', 'centre', 'deck centre', 'median', 'lane', 'deck lane', 'ring lane', 'hatch edge',
+         'hatch', 'arrow']
+
+
+def tidy(data, items):
+    """final pass (17 Nov, paint QA: paint_off 438, zebra_median 129, stack_paint 89): every polygon clipped to its own
+    surface (ground paint to the carriageways and rings, deck paint to the decks), off the medians, and never on a
+    polygon laid before it (ORDER: stop lines and zebras first, arrows last): no paint off the asphalt, none on a
+    median, no two paint polygons on one spot (they would z-fight)"""
+    from roads05_qa import quads
+    cut = {k: set(v) for k, v in data['cut'].items()}
+    ground, med = [], []
+    for r in data['roads']:
+        c = cut.get(r['name'], ())
+        ground.extend(quads(r['s'], c))
+        if any(q[8] > 0 for q in r['s']):
+            med.extend(quads(r['s'], c, inner=8))
+    for g in data['roundabouts']:
+        ground.append(Point(g['c'][0], g['c'][2]).buffer(g['r_out'], 96))
+    deck = []
+    for d in data['decks']:
+        deck.extend(quads(d['s']))
+    G, M, D = Clip(*ground), Clip(*med), Clip(*deck)
+    rank = {w: i for i, w in enumerate(ORDER)}
+    order = sorted(range(len(items)), key=lambda i: rank.get(items[i]['w'], len(ORDER)))
+    kept = {}
+    CELL = 64.0
+    out = []
+    st = dict(clipped=0, dropped=0, split=0)
+
+    def cells(b):
+        for i in range(int(math.floor(b[0] / CELL)), int(math.floor(b[2] / CELL)) + 1):
+            for j in range(int(math.floor(b[1] / CELL)), int(math.floor(b[3] / CELL)) + 1):
+                yield (i, j)
+    for idx in order:
+        it = items[idx]
+        P = Polygon(it['p'])
+        if not P.is_valid:
+            P = P.buffer(0)
+        a0 = P.area
+        surf = D if it.get('deck') else G
+        Q = P.intersection(surf.local(P).buffer(-0.05))
+        if not it.get('deck') and not M.is_empty:
+            Q = Q.difference(M.local(Q).buffer(0.05)) if not Q.is_empty else Q
+        near = []
+        for c in cells(P.bounds):
+            near.extend(kept.get(c, ()))
+        near = [k for k in set(near) if k.intersects(Q)] if not Q.is_empty else []
+        if near:
+            Q = Q.difference(unary_union(near).buffer(0.05))
+        ps = [p for p in polys_of(Q) if p.area >= 0.3 and not p.interiors and p.area / max(p.length, 1e-6) > 0.1]
+        if abs(sum(p.area for p in ps) - a0) > 0.05:
+            st['clipped'] += 1
+        if not ps:
+            st['dropped'] += 1
+            continue
+        if len(ps) > 1:
+            st['split'] += 1
+        for p in ps:
+            p = p.simplify(0.01)
+            c = [[round(x, 2), round(z, 2)] for x, z in list(p.exterior.coords)[:-1]]
+            n = dict(it, p=c)
+            out.append(n)
+            for cc in cells(p.bounds):
+                kept.setdefault(cc, []).append(p)
+    return out, st
+
+
+
 def signals_of(region_poly):
     out = []
     for r in geo.load('points'):
@@ -520,6 +589,8 @@ if __name__ == '__main__':
     region = unary_union([geo.batch_poly(t) for t in data['tags']])
     sig = signals_of(region)
     P = build(data, sig)
+    P.items, tst = tidy(data, P.items)
+    print('tidy', tst)
     kinds = {}
     for it in P.items:
         kinds[it['w']] = kinds.get(it['w'], 0) + 1

@@ -231,7 +231,7 @@ class Net:
         return None
 
 
-SNAP = 30.0
+SNAP = 50.0  # = YangonRoads.MOUTH_SNAP
 
 
 def seg_dist(p, a, b):

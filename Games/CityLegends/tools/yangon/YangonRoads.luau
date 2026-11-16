@@ -34,7 +34,7 @@ M.C = Vector3.new(29072, 47.27, 1172.8) -- roundabout centre, at the ring's road
 M.R_IN, M.R_OUT = 60, 108 -- island radius, the ring's outer radius
 M.RING_V = 108.06 -- the outer polygon's corners (its sides then pass 108 at their middle: nothing of an arm is closer than 108)
 M.N = 96 -- sides of the ring
-M.MOUTH_SNAP = 30 -- a mouth edge that ends this near the bigger road's edge (a shallow merge) is closed onto it
+M.MOUTH_SNAP = 50 -- (17 Nov: 30 -> 50, the leftover shallow merges were 34-48 studs off) a mouth edge that ends this near the bigger road's edge (a shallow merge) is closed onto it
 M.R_CUT = 94 -- samples nearer the centre than this are cut (not built, not seen by other roads)
 M.WALK, M.KERB_W, M.CURB_UP, M.SLAB = 10, 0.9, 0.5, 2 -- as in Roads.luau
 M.CORRIDOR = 70 -- flyover corridor: this far either side of the deck's centre line
@@ -512,6 +512,11 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local mineOnly = owner == name
 	-- the roundabout: an arm's kerb stops at the ring's kerb, its pavement at the ring's pavement
 	M.nearRing(px, pz)
+	-- (17 Nov, roads05 J5 Sule roundabout "loose kerb pieces on the ring": past a round corner an arm keeps its own
+	-- band (mineOnly), but never on the ring's carriageway itself)
+	if hyp(px - C.X, pz - C.Z) < M.RING_V - 0.05 then
+		return true
+	end
 	if not mineOnly and hyp(px - C.X, pz - C.Z) < M.RING_V + (if what == "Kerb" then M.KERB_W else M.WALK) then
 		return true
 	end
@@ -1081,6 +1086,10 @@ function M.findCorners()
 			end
 			if m.ring then
 				-- (the ring's own kerb and pavement stop where the round corner starts)
+				-- (17 Nov, roads05 J5 "kerb points where the arms meet the ring": C is the CURRENT ring, which with
+				-- several roundabouts in the data was often another one: the span came out at a wrong angle and the
+				-- ring's kerb ran on under the corner)
+				M.useRing(m.ringR)
 				local key = m.road .. "@" .. m.i0
 				M.cornerSpan[key] = M.cornerSpan[key] or {}
 				table.insert(M.cornerSpan[key], math.atan2(tbz - C.Z, tbx - C.X))
