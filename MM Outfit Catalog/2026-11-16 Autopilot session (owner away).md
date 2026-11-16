@@ -44,6 +44,21 @@ created: 2026-11-16
 - **Search sort chips:** Popular (best-selling this week, paid items when no keyword), Newest, Cheapest, Priciest. Free items say "Free".
 - **Search reliability:** the first search after joining sometimes never answers. It now re-asks every 6 s, up to 3 times.
 
+- **Creator pages ("Looks by X"):** every look one player uploaded, newest first, with Try (and Remove for staff / the owner of the look). Two ways in:
+  - a pink "by X ›" pill on a community look's outfit page;
+  - a "Their looks (N)" button on See fit.
+- **Tried list:** the catalog pieces you tried this session (Search, See fit), newest first. Cart › "Tried (N)" opens it, with Buy all.
+- **Buy Outfit total fixed:** it counted items you already own (showed 262 R$ for a fully owned fit). It now totals only what you'd pay, and says "You own this fit" when that's 0.
+- **Search kinds:** + Face, Back (wings) and Waist accessories (all rigid; try-on already supported them).
+- **Body editor** lights up your current skin tone and shape, and refreshes after each change.
+
+### Community loop
+- **Podium announcement:** when a player's upload climbs onto a theme's top-3 podium, everyone gets a pink chat line ("X's look Y just made the Grunge top 3 on the Sky Deck!"). It stays silent on a server's first pass, so new servers don't spam.
+- **Top Creators board** rows show each creator's headshot.
+- **My uploads** shows your exact worn count from 0 ("Not worn yet" / "Worn by 1"). Elsewhere it stays hidden under 10.
+- **Challenge entries:** uploads made to that day's challenge theme get a "★ Challenge" pill on their cards. The Uploads page says "entries get a ★".
+- **Featured cap:** at most the 2 newest uploads, the rest MM's own looks on the daily rotation. Before, a busy server's 2-day-NEW uploads could push every curated look out of Featured.
+
 ### Growth
 - **Invite** button in the More tray: Roblox's own friend-invite sheet (SocialService). It has a drawn two-people icon.
 - **Loading tips** rotate: one-tap try-on, uploads reach the Sky Deck, theme sorting, See fit.
@@ -52,6 +67,10 @@ created: 2026-11-16
 - **Accessory type cache** (DataStore `MMAssetTypes_v1`): all 30 mannequins are complete within ~5 s (were 50–85 s, with missing hats under rate limits).
   - Incomplete rigs rebuild 20–30 s later.
 - **Animation culling** for mannequins: about 18 animate instead of 52; the other floor's rigs pause.
+- **Item lookups in parallel:** `selection()` is used by Cart, Saved items, See fit and Checkout. Right after a server start they're still slow (~20 s), because Roblox's rate limit is shared with the mannequin builds.
+- **Viewer preload:** only MM's own looks preload at join. Uploads (up to 40 per theme = 240) load when opened.
+  - Each upload is a ~230-instance rig replicated to every client, so 240 uploads add ~55k instances.
+  - If phones struggle once the catalog is full, lower `PER_THEME` in GuestLooksServer (e.g. 25).
 - **Team Create editing fix:** script edits now go through the editor document (`UpdateSourceAsync`). See the memory note: setting `.Source` didn't reach open editor tabs, so Play ran old code.
 
 ## Tested in Play
