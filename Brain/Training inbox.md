@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 12:21 [dashboard, unverified] Roblox developers can create and edit more complex 3D shapes directly within Roblox Studio using Blender-inspired modelling tools. (topic: tiktok)
 - 2026-11-16 12:19 [dashboard, unverified] Claude opus 5.5 will take over Roblox VFX. (topic: tiktok)
 - 2026-11-16 12:18 [dashboard, unverified] The plugin allows you to add a hover effect to buttons in Figma. (topic: tiktok)
 - 2026-11-16 12:13 [dashboard, unverified] Built from scratch in Figma. (topic: tiktok)

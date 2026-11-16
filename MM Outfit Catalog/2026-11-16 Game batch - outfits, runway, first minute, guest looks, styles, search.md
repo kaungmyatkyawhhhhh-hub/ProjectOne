@@ -65,3 +65,30 @@ created: 2026-11-16
   - A try-on adds to Undo / My avatar.
 - **The More tray** is now 2 columns (the 7 buttons reached the Admin button).
 - **Shutter sound:** our own synthesized one is at `Audio/camera_shutter.wav`. Snap plays "camera_shutter", which stays silent until the owner uploads the file and adds the ID to `Sounds.Defs`.
+
+## 6. Buy while trying emotes and animations (owner: "while trying on emotes or animations, put a buy button too")
+- **Backup:** `ServerStorage.ScriptBackups.pre_EmoteBuy_16Nov` (ShowroomCollection, PhotoBooth, OutfitShowcaseServer, Config).
+- **Emotes (More → Emotes → a catalog emote → Try Emote):** while it plays, **Buy N R$** (or **Get free**) sits right next to **Stop emote**.
+  - Hidden for emotes you already own, and it goes away after you buy one.
+  - It goes through the same server check as before (`BuyEmote`).
+- **Animation packs (photo booth poses):** pick a pack pose and a brass **Get the Stylish pack · 300 R$** button shows above the controls. On phones it's shorter ("Stylish pack · 300 R$"), under Exit / Hide.
+  - **Which packs:** only the 6 Roblox still sells, checked in the catalog on 16 Nov:
+    - Stylish 83
+    - Bubbly 39
+    - Cartoony 56
+    - Toy 43
+    - Ninja 75
+    - Superhero 81
+  - These are `BundleId` in `Config.IdleStyles`.
+  - Confident, Popstar, Princess, Cowboy, Sneaky and Patrol have no Roblox listing left (only UGC copies), so they get no button. MM never points players at a copy.
+  - **Server:** new actions `BuyBundle` and `OwnsBundle`. Only BundleIds in Config can be prompted (a made-up ID gets "That pack isn't sold here"). Owned packs are hidden.
+  - **Gotcha:** bundles are collectibles now. `GetProductInfo(…, Bundle)` has no `PriceInRobux`; the price comes from `AvatarEditorService:GetItemDetails` (`Price`, `IsPurchasable`, `Owned`).
+- **Tested (Studio Play, PC + Galaxy A06):**
+  - Salute (owned): no Buy.
+  - A free emote: "Get free" beside Stop.
+  - Stylish / Cartoony / Superhero show the pack button; Confident shows none.
+  - `BuyBundle 83` opens the prompt server-side.
+  - 0 console errors.
+- **Not checked:**
+  - Roblox's own purchase window (Studio's capture doesn't show it).
+  - A real purchase, on purpose (no Robux spent).
