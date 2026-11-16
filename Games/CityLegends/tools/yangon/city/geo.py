@@ -112,6 +112,11 @@ PILOT_LL = {
     'P1': (96.133, 16.810, 96.159, 16.834),
     # (2026-11-16, step 5) north of P1: Inya Lake's north / east shores, Kaba Aye Pagoda, the Mayangon / Yankin edge
     'P2': (96.133, 16.834, 96.165, 16.862),
+    # (2026-11-16, step 6) DOWNTOWN (central): the colonial grid inside batch 2, from Lanmadaw (west) to Pazundaung Creek
+    # (east), the Yangon River / Strand Road (south) to Bogyoke Aung San Road and the railway yard (north): Sule, City
+    # Hall, Maha Bandula Park, Bogyoke Market, Strand Hotel, Pansodan, the jetties, Botataung. Standalone for now (seams
+    # later); the river and the creek reach past the box (terrain.RIVER_EXT['P3'])
+    'P3': (96.140, 16.7645, 96.178, 16.787),
 }
 # a later pilot joins the earlier ones it touches: its roads that cross the shared edge end exactly on the earlier
 # district's road ends (position, direction, height: roadnet.pilot_seams), its lakes run on (terrain.py)

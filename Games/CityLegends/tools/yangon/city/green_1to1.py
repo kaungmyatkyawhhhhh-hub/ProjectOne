@@ -394,7 +394,13 @@ def main():
         mat[cl] = "C"
         mat[lmk] = "."
         mat[~land] = "."
-    edge_parts, edge_mask, edge_len = lake_edge(G, water, prof, H, lmk, ~land & ~water)
+    # (owner's two pictures, 16 Nov) the lake walk (grass bank down to the water, narrow walk, fan palms ...) and the
+    # Kabar Aye green bank (low black railing, embankment, tree row): green_edges.py; the bund wall of v2 is retired
+    import green_edges
+    ED = green_edges.edges(G, water, prof, H, lmk, ~land & ~water, d_bld, road, d_road,
+                           landmark_boxes=LANDMARK_BOXES.get(TAG, []))
+    edge_parts, edge_mask, edge_len = ED["parts"], ED["mask"], ED["stats"]["walk_m"] * 3
+    log("edges", ED["stats"])
     deck |= edge_mask
     d_deck = distance_transform_edt(~deck) * RES
     mat[edge_mask & land] = np.where(mat[edge_mask & land] == ".", ".", "L")
@@ -798,6 +804,11 @@ def main():
     for n in range(len(fpages)):
         items.append(sv(ref, "Far_%d" % (n + 1), open(os.path.join(OUT, "Far_%d.txt" % (n + 1))).read()))
         ref += 1
+    for nm_, lines_ in (("Cols", ["%.1f %.1f %.2f %d" % (c[0], c[1], c[2], 1 if c[3] else 0) for c in ED["cols"]]),
+                        ("Models", ED["models"])):
+        for n, pg in enumerate(paginate(lines_)):
+            items.append(sv(ref, "%s_%d" % (nm_, n + 1), "\n".join(pg)))
+            ref += 1
     epages = paginate(edge_parts)
     for n, pg in enumerate(epages):
         open(os.path.join(OUT, "Edge_%d.txt" % (n + 1)), "w", newline="\n").write("\n".join(pg))
@@ -829,7 +840,7 @@ def main():
         mk = land & (d_wat > M(a)) & (d_wat <= M(b))
         lakeb["%d-%d m" % (a, b)] = round(float(cov[mk].mean()), 3)
     fams = Counter(t["fam"] for t in trees)
-    st = dict(tag=TAG, style=STYLE, lake_edge_parts=len(edge_parts), bund_m=round(edge_len / 3), land_km2=round(area_km2, 2), trees=len(trees), street_trees=sum(nst.values()),
+    st = dict(tag=TAG, style=STYLE, edges=ED["stats"], lake_edge_parts=len(edge_parts), bund_m=round(edge_len / 3), land_km2=round(area_km2, 2), trees=len(trees), street_trees=sum(nst.values()),
               per_road=dict(nst), fill_trees=nfill, by_family=dict(fams), shrubs=dict(Counter(s["pid"] for s in shrubs)),
               canopy_share=round(float(canopy), 3), canopy_by_zone=by_zone, lake_bands=lakeb,
               crown_m=dict(p10=round(np.percentile([t["D"] / 3 for t in trees], 10), 1),
