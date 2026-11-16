@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 12:19 [dashboard, unverified] Claude opus 5.5 will take over Roblox VFX. (topic: tiktok)
+- 2026-11-16 12:18 [dashboard, unverified] The plugin allows you to add a hover effect to buttons in Figma. (topic: tiktok)
 - 2026-11-16 12:13 [dashboard, unverified] Built from scratch in Figma. (topic: tiktok)
 - 2026-11-16 12:12 [dashboard, unverified] Roblox uses Ropilot AI. (topic: tiktok)
 - 2026-11-16 12:10 [dashboard, unverified] You can create an animated Roblox Settings button in Figma and bring it into Roblox Studio with Framewisp. (topic: tiktok)
