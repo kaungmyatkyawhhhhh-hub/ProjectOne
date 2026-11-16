@@ -390,10 +390,6 @@ function DayCycle.start()
 		if not look.Haze then
 			k.haze, k.density, k.offset = 0, k.density * 0.5, 0
 		end
-		-- (owner, 2026-11-16: "soo foggy i cant see anything") the 1:1 Yangon is 3x further across: thinner air there
-		if cam and Config.isYangonAt(cam.CFrame.Position) then
-			k.density, k.haze = math.min(k.density, 0.15), math.min(k.haze, 0.6) -- owner: "a little fog, slight visible and unnoticable"
-		end
 		Lighting.Brightness = k.brightness
 		Lighting.Ambient = k.ambient
 		Lighting.ShadowSoftness = k.soft or BASE_SOFT
