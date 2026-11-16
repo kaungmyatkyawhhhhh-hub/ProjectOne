@@ -113,3 +113,30 @@ Top tells left: blocky furniture (the penthouse rooms still use block furniture,
 - Remake Midnight / Frost / Sakura with layered clothing (or retire them).
 - A lighting grade pass.
 - Try Lighting.Technology = ShadowMap (the owner's setting) for the warm-up.
+
+## Done (17 Nov, part 4). Owner: "okay fix all these"
+- **The 3 originals remade in 3D layered clothing.** Their flat 2D templates were dropped; the old Config is in `ScriptBackups.pre_R15_17Nov.Config_pre_layeredOriginals_17Nov`.
+  - **Midnight Track:** Leather Jacket Black, Roblox T-Shirt Black, Cargo Pants Black, its spiky hair and chain.
+  - **Frost:** Striped T-Shirt White, High Waisted Baggy Denim Jeans (75 R$), white hair and chain.
+  - **Sakura:** Off-Shoulder Jacket Pink (70 R$), Roblox T-Shirt White, Textured Leather Pants White, pink hair.
+  - Outfit 04 became **MOTO BROWN** (Leather Jacket Brown, Striped Tee Black, Motorcycle Pants Brown) so it doesn't copy Midnight. Soft Trench now has black sweats and black hair (varied).
+  - **All 7 outfits now use 2–3 layered pieces each.**
+- **Penthouse furniture** (`Workspace.OutfitShowcase.Penthouse furniture`, Persistent):
+  - Free Creator Store meshes: Modern Sofa 139213143125999 (deep red velvet) in the gallery and the library, scaled to fit; Marble/brass round table 100122443617746 ×2; Modern Bed 15035064675 in the suite.
+  - **Both the sofa and the table had hidden scripts (2 each), deleted.**
+  - The old block sofas, tables, cushions and piping, the bed parts, the old settee, the pedestal and the cantilever table went to `Removed_Boutique_17Nov`.
+  - The bedroom back wall is toned from hot magenta to plum.
+- **Lighting grade:**
+  - Bloom 0.14/28/1.65 → **0.42/22/1.15**, so the neon and lit windows glow.
+  - ColorCorrection: Contrast 0.15 → 0.12, Saturation −0.06 → 0.04, Brightness 0.02.
+  - Old values are stored in the `Lighting` attribute `Grade17Nov`; the full lighting backup is in `MapBackups.pre_Boutique_17Nov.Lighting`.
+- **Lighting.Technology → ShadowMap:** scripts can't set it, so desktop control was asked for and the owner declined. **The owner does it by hand** (steps in chat): Explorer → Lighting → Properties → Technology → ShadowMap.
+- **Tested:** Play on PC, 0 errors.
+
+![[Screenshots/2026-11-17 boutique v4 - all 7 outfits layered, graded.jpg]]
+![[Screenshots/2026-11-17 penthouse - library mesh sofa + marble table.jpg]]
+![[Screenshots/2026-11-17 penthouse - suite mesh bed.jpg]]
+
+## Left after part 4
+- Lower level (media salon, games room) furniture is still block-built (rarely visited).
+- The Floor 19 Furniture meshes (café, bookcase, media console) are the owner's earlier meshes and were kept.
