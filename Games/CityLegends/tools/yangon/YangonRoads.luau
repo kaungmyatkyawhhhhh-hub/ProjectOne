@@ -183,6 +183,16 @@ function M.load()
 	M.step("load: decoding " .. (k - 1) .. " modules")
 	M.data = Http:JSONDecode(table.concat(parts))
 	M.step("load: decoded")
+	-- (P3: two decks both named "Road Flyover"; the builder keys edges and folders by name)
+	local deckNames = {}
+	for _, d in M.data.decks or {} do
+		local base, k = d.name, 1
+		while deckNames[d.name] do
+			k += 1
+			d.name = base .. " #" .. k
+		end
+		deckNames[d.name] = true
+	end
 	M.design = if YD:FindFirstChild("Design") and not M.v05 then Http:JSONDecode(require(YD.Design:Clone())) else { flyovers = {} }
 	-- the roundabouts
 	M.RINGS, M.ringNames = {}, {}
@@ -1763,7 +1773,9 @@ function M.buildDecks()
 		local folder = F:FindFirstChild(d.name) :: Instance
 		local ED = E[d.name]
 		local s = d.s
-		local n = #s
+		-- (P3, 16 Nov: Roads.build can keep fewer edge points than the deck has samples; walls and piers
+		-- stop at the last edge point)
+		local n = math.min(#s, #ED.L, #ED.R)
 		local made, piers, skipped, ramp = 0, 0, {}, 0
 		-- per segment: elevated or not (the ground under the middle and 2 studs past both edges)
 		local elevated = {}
