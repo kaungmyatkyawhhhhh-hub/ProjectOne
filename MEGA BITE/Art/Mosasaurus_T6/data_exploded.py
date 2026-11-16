@@ -12,7 +12,7 @@ d['head'] = dict(corner=1215, upper_lip=[[1215, 295], [1300, 292], [1400, 288], 
                  jaw_bot=[[1200, 350], [1300, 362], [1420, 378], [1458, 372]],
                  mouth_top=[[1215, 295], [1330, 300], [1450, 342]],
                  up_teeth=dict(n=9, x=[1290, 1465], len=18), lo_teeth=dict(n=8, x=[1300, 1445], len=15),
-                 eye=dict(x=1308, y=245, w=34, h=24, half_sep=50))
+                 eye=dict(x=1306, y=244, w=46, h=24, half_sep=50))   # card / exploded EYE part size (owner: 'Eyes')
 # near-side flippers of the assembled view, mirrored (the sheet staggers L/R pairs ~1 m apart: not possible on a symmetric body)
 d['flippers'] = [dict(name='Back', root=[495, 318], tip=[330, 420], spread=120, width=100, len_k=1.0, twist_deg=0),
                  dict(name='Front', root=[950, 318], tip=[815, 425], spread=120, width=100, len_k=1.0, twist_deg=0)]

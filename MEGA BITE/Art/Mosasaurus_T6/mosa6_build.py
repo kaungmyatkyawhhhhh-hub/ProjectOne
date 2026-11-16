@@ -87,7 +87,7 @@ def body_colour(o_name, centres, belly_faces=()):
         return jit(base, p.index * 13 + len(o_name), 0.05)
     return f
 
-def loft(name, xs, prof, tip_start=None, tip_end=None, colour=None, glow=False):
+def loft(name, xs, prof, tip_start=None, tip_end=None, colour=None, glow=False, belly_band=True):
     rings = [ring(x, *prof(x)) for x in xs]
     verts = [v for r in rings for v in r]; faces = []
     for i in range(len(rings) - 1):
@@ -105,7 +105,7 @@ def loft(name, xs, prof, tip_start=None, tip_end=None, colour=None, glow=False):
     o = make(me_name, verts, faces, (0, 0, 0, 1), glow)
     me = o.data
     ba = D.get('belly_angle_deg', 180); step = 360 / NR
-    belly = {f for f in range(2 * NR * (len(rings) - 1)) if ba < ((f // 2) % NR + 0.5) * step < 360 - ba}
+    belly = {f for f in range(2 * NR * (len(rings) - 1)) if ba < ((f // 2) % NR + 0.5) * step < 360 - ba} if belly_band else set()
     cf = colour or body_colour(me_name, lambda p: p.center, belly)
     ca = me.color_attributes['Col']
     for p in me.polygons:
@@ -129,7 +129,7 @@ def skull(x):
     elif x < CORNER: bot = B(XB) + (line(H['upper_lip'], CORNER) - B(XB)) * (x - XB) / (CORNER - XB)
     else: bot = line(H['upper_lip'], x)
     return (T(x), bot, HW(x))
-loft('UpperSkull', xs_between(cut['head'][0], cut['head'][1], 16), skull)
+loft('UpperSkull', xs_between(cut['head'][0], cut['head'][1], 16), skull, belly_band=False)   # its underside is the green upper lip
 JX0, JX1 = 1150, H['jaw_bot'][-1][0]
 def jaw(x):
     if x < 1200:
