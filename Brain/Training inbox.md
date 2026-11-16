@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 11:25 [dashboard, unverified] Fable 5.2 is available on Pro plans for a limited time. (topic: tiktok)
+- 2026-11-16 11:25 [dashboard, unverified] Roblox game "Race The Wave" will be released on all platforms on Friday, 2nd. (topic: tiktok)
 - 2026-11-16 11:22 [dashboard, unverified] The creator finished the second shape for their microbots game in Roblox. (topic: tiktok)
 - 2026-11-16 11:20 [dashboard, unverified] Astra or Fable would have been significantly better. (topic: tiktok)
 - 2026-11-16 11:20 [dashboard, unverified] Work has been done to get the game into studio and making everything proper. (topic: tiktok)
