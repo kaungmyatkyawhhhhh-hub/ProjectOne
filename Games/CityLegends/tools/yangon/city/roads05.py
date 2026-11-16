@@ -530,7 +530,11 @@ def build_pieces(edges, rings):
                 continue
             q = (fs + ft) / 2 if (fs is not None and ft is not None) else (fs if fs is not None else ft)
             if fs is not None and ft is not None and np.linalg.norm(fs - ft) > PAIR_MAX * 1.6:
-                continue
+                # (two tails far apart: only into a roundabout, where the midpoint lies in the ring)
+                if not any(np.linalg.norm(q - R['c']) < R['r_out'] for R in rings):
+                    for R in rs + rt:
+                        R['unfold'] = True
+                    continue
             k0 = 0 if end == 0 else -1
             if np.linalg.norm(q - p.P[k0]) < 1:
                 continue
@@ -553,7 +557,7 @@ def build_pieces(edges, rings):
                 p.src = p.src + [p.src[-1]] * padn
                 p.srcT = p.srcT + [p.srcT[-1]] * padn
     for k, R in enumerate(rem):
-        if k in folded:
+        if k in folded and not R.get('unfold'):
             continue
         e = R['e']
         cs = e.cs
@@ -942,6 +946,11 @@ def finish(net):
         dk['y'] = np.array(ys)
         dk['y'][0] = r['y'][dk['from']]
         dk['y'][-1] = r['y'][dk['to']]
+    # roundabouts: an arm's samples well inside the ring are cut (Friday's R_CUT = R_OUT - 14)
+    for R in rings:
+        for r in roads:
+            d = np.linalg.norm(r['P'] - R['c'], axis=1)
+            r['cut'] |= d < R['r_out'] - 14
     # rings: heights at their centre from the arms' ends
     for R in rings:
         ys = []
@@ -1244,7 +1253,7 @@ def write(net):
     for a in range(0, len(txt), CHUNK):
         k += 1
         part = txt[a:a + CHUNK]
-        assert ']]' not in part[1:]
+        assert ']==]' not in part
         open(os.path.join(od, 'Roads05_%d.luau' % k), 'w', encoding='utf-8').write('return [==[' + part + ']==]')
     ranks = [r['rank'] for r in out_roads]
     st = dict(net['stats'])
