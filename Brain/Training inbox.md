@@ -41,6 +41,10 @@ Format if you like: **When** ... **do** ... **because** ...
   - A "method for Roblox game ideas" video (about 7.4K likes, 5.1K saves) shows browsing a stats site's top and trending games list (Rotrends) to pick ideas. The list is where our own trend and dead-game research could start. Fits [[K09 Game ideas and trends]].
   - A short "Cook the Chicken" game video (about 43.9K likes, 13K saves) shows a very short, simple game getting big attention. A top comment says "not wasting 2 hours for a Roblox game" and another says they finished it in 40 minutes, so short, finishable games are a draw for kids. Fits [[K09 Game ideas and trends]] and [[K02 First session and retention]].
   - A "games to play with your little siblings" list (about 2K likes) leans on co-op and spooky games; comments are about playing with friends and siblings, which supports "play with friends" hooks. Fits [[K09 Game ideas and trends]].
+- 2026-11-16 06:42 TikTok session 2 (searches "roblox daily rewards streak retention" and "roblox game sound effects music tips", watched only; unverified):
+  - Retention: a dev says one change moved their retention from 4-7 percent to 13 percent after a month (a creator dashboard graph, method not shown, dev-support Discord promo). Commenters say some genres simply can't hold good retention, and one asks whether to delay a farm-style game's launch because of Roblox's reduced engaged-player limit. Fits [[K02 First session and retention]].
+  - Sound: a very popular clip (about 8.7K likes, 7.4K saves) shows an AI sound-effects plugin in the Creator Store (Mirelo) that makes several SFX samples from a text prompt for a selected object, with a duration slider and Keep buttons. Comments split: "great AI plugin that assists you" vs "it's so bad" and "prove it isn't premade". The creator is likely promoting it. Fits [[K06 Art, UI, VFX, sound and lighting]].
+  - Sound: a second creator's short clip (about 160 likes) pushes the same plugin the same way; the same promo pattern as the other AI tool videos. Fits [[K06 Art, UI, VFX, sound and lighting]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
