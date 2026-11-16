@@ -182,6 +182,25 @@ NIGHT = {"NWA": "night", "NWY": "night", "NWC": "night", "NWH": "night",
          "ORG": ("glow", (236, 84, 30)), "WLT": ("glow", (214, 206, 190)), "RDL": ("glow", (220, 204, 176))}
 
 
+UV_STUDS = 1.0   # 1 UV unit = this many studs (box projection), so MaterialVariant textures tile at real size on meshes
+
+
+def box_uv(P):
+    """Box-projected UVs for one triangle in world studs: the face's main axis picks the plane
+    (walls: along x or z with y up, roofs and floors: x, z). Before 2026-11-16 every UV was (0.5, 0.5),
+    which shows a MaterialVariant as one flat colour."""
+    (ax, ay, az), (bx, by, bz), (cx, cy, cz) = P
+    ux, uy, uz = bx - ax, by - ay, bz - az
+    vx, vy, vz = cx - ax, cy - ay, cz - az
+    nx, ny, nz = abs(uy * vz - uz * vy), abs(uz * vx - ux * vz), abs(ux * vy - uy * vx)
+    k = 1.0 / UV_STUDS
+    if ny >= nx and ny >= nz:
+        return [(p[0] * k, p[2] * k) for p in P]
+    if nx >= nz:
+        return [(p[2] * k, -p[1] * k) for p in P]
+    return [(p[0] * k, -p[1] * k) for p in P]
+
+
 def export(geo, y0, out_glb, plane=None, ground_groups=(), tag="mc"):
     named = []
     k = 0
@@ -200,7 +219,7 @@ def export(geo, y0, out_glb, plane=None, ground_groups=(), tag="mc"):
                     if plane and grp in ground_groups:
                         base = plane[0] + plane[1] * (X - OX) + plane[2] * (Z - OZ)
                     P.append((X, base + z, Z))
-                m.tri(P[0], P[1], P[2], (0.5, 0.5), (0.5, 0.5), (0.5, 0.5), rgb)
+                m.tri(P[0], P[1], P[2], *box_uv(P), rgb)
             if not m.T:
                 continue
             k += 1
