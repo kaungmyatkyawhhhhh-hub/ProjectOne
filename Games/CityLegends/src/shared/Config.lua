@@ -3088,8 +3088,9 @@ Config.Service = {
 	Name = "LEGENDS SERVICE",
 	-- (Yangon step 11, 2026-11-14: the workshop on New Road by the Racing Hub, built by CareVenues.service on a
 	-- YangonSites lot; Monaco's was Bay (15244.7, 3.7, 1082.7), Arrive from (15240, 4.7, 1036))
-	Bay = Vector3.new(31405.0, 49.7, 1156.2), -- the middle of the workshop's middle bay (tools/riviera/CareVenues.luau)
-	Arrive = CFrame.lookAt(Vector3.new(31389.3, 47.0, 1110.9), Vector3.new(31405.0, 47.0, 1156.2)), -- fast travel: on the forecourt, facing the bay
+	-- (1:1, 2026-11-17: on Kabar Aye Pagoda Road's east side, the venue row; CareVenues.service on its YangonSites lot)
+	Bay = Vector3.new(35140.3, 42.7, 24410.4), -- the middle of the workshop's middle bay (tools/riviera/CareVenues.luau)
+	Arrive = CFrame.lookAt(Vector3.new(35082.8, 42.7, 24402.8), Vector3.new(35140.3, 42.7, 24410.4)), -- fast travel: on the forecourt, facing the bay
 	BayRadius = 22,
 	LiftSeconds = 4,
 	-- real-world prices; times Economy.PartPriceMult, times PriceK of the car (1 to MaxCarK)

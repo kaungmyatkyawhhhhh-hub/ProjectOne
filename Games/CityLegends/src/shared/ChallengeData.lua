@@ -97,8 +97,8 @@ end
 -- the leaderboard board: on the sidewalk corner by the city's middle junction
 ChallengeData.boardPos = ActivityData.corner(C.Blocks / 2, C.Blocks / 2, 1, -1)
 -- (in Monaco: on the Old Rock's palace square; in Yangon, 2026-11-14: in the Racing Hub's lot, front left)
-if workspace:FindFirstChild("Yangon") then
-	ChallengeData.boardPos = Vector3.new(31090.2, 44.77, 1254.5)
+if Config.mapRoot() then
+	ChallengeData.boardPos = Vector3.new(35076.3, 36.6, 23526.4) -- (1:1, 2026-11-17: the Racing Hub's lot, front left)
 elseif workspace:FindFirstChild("Riviera") then
 	ChallengeData.boardPos = Vector3.new(13088, 52, 1232)
 end

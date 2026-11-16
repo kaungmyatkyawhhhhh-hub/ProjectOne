@@ -41,6 +41,18 @@ for t in districts:
     if os.path.exists(f):
         for st in json.load(open(f, encoding='utf-8'))['fuel']:
             nogo.append(Point(*st['canopy']).buffer(geo.m(45)))
+# (--streets: house lots) the venue lots already in Config.YangonVenues (+ the Racing Hub) and their margins
+STREETS = '--streets' in args
+if STREETS:
+    import re
+    cfg = open(os.path.join(geo.ROOT, 'src', 'shared', 'Config.lua'), encoding='utf-8').read()
+    blk = cfg[cfg.index('Config.YangonVenues = {'):cfg.index('Config.Spawn = {')]
+    used = [tuple(float(v) for v in m) + (304.0 if 'w = 304' in m0 else 216.0,) for m0, *m in
+            [(mm.group(0),) + mm.groups() for mm in re.finditer(r'x = ([-\d.]+), z = ([-\d.]+), fx = ([-\d.]+), fz = ([-\d.]+)[^}]*', blk)]]
+    used.append((34977.1, 23603.9, 0.991, 0.133, 216.0))  # the Racing Hub
+    for x, z, fx, fz, w in used:
+        ax, az = -fz, fx
+        nogo.append(Polygon([(x + ax * u * w / 2 + fx * v * 108, z + az * u * w / 2 + fz * v * 108) for u, v in ((-1, -1), (1, -1), (1, 1), (-1, 1))]).buffer(30))
 nogo = unary_union(nogo)
 boxes = [geo.PILOT_LL[t] for t in districts]
 
@@ -60,10 +72,10 @@ def lot_poly(cx, cz, fx, fz):
 
 cands = []
 for r in data['roads']:
-    if r['kind'] not in ('route', 'side'):
+    if r['kind'] not in ('route', 'side') and not STREETS:
         continue
     s = r['s']
-    for i in range(0, len(s), 6):
+    for i in range(0, len(s), 3 if STREETS else 6):
         q = s[i]
         x, y, z, dx, dz = q[0], q[1], q[2], q[3], q[4]
         for side, half, walk in ((-1, q[6], r.get('walkL', 7.5)), (1, q[7], r.get('walkR', 7.5))):
@@ -88,11 +100,11 @@ for r in data['roads']:
 cands.sort()
 picked = []
 for c in cands:
-    if all(math.hypot(c[1] - p[1], c[3] - p[3]) > max(W, D) + 40 for p in picked):
+    if all(math.hypot(c[1] - p[1], c[3] - p[3]) > max(W, D) + (20 if STREETS else 40) for p in picked):
         picked.append(c)
-    if len(picked) >= 120:
+    if len(picked) >= (200 if STREETS else 120):
         break
-out = os.path.join(geo.BUILD, "city_1to1", "venue_lots_%dx%d%s.json" % (W, D, "_axis" if AXIS else ""))
+out = os.path.join(geo.BUILD, "city_1to1", "venue_lots_%dx%d%s%s.json" % (W, D, "_axis" if AXIS else "", "_streets" if STREETS else ""))
 json.dump([dict(score=c[0], x=c[1], y=c[2], z=c[3], fx=c[4], fz=c[5], road=c[6]) for c in picked], open(out, "w"))
 for c in picked[:30]:
     lon, lat = geo.lonlat(c[1], c[3])

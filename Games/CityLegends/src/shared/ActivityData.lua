@@ -149,7 +149,7 @@ if Config.monacoOnly() then
 		local bays = if yangon and world.hub then world.hub.bays else A.Hub.Bays
 		if yangon and world.hub then
 			ActivityData.hubSpot = world.hub.spot
-			ActivityData.chipBase = 1000
+			ActivityData.chipBase = world.chipBase or 1000 -- (the 1:1 map's chips are new ids: 2000+, 2026-11-17)
 		end
 		ActivityData.races = {}
 		ActivityData.raceById = {}
