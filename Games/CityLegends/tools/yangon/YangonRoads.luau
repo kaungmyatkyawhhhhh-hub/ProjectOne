@@ -2383,6 +2383,9 @@ local function armAngle(arm, side: number, rho: number): number
 	local px, pz = edgeXZ(o, i, side)
 	for _ = 1, 200 do
 		local j = i + arm.step
+		if j < 1 or j > o.n then
+			break -- (1:1: a short arm of a small roundabout ends before rho: its last point's angle)
+		end
 		local qx, qz = edgeXZ(o, j, side)
 		if hyp(px - C.X, pz - C.Z) < rho and hyp(qx - C.X, qz - C.Z) >= rho then
 			local lo, hi = 0, 1
@@ -2398,7 +2401,7 @@ local function armAngle(arm, side: number, rho: number): number
 		end
 		i, px, pz = j, qx, qz
 	end
-	error("roundabout: an edge of " .. arm.road .. " never reaches radius " .. rho)
+	return math.atan2(pz - C.Z, px - C.X)
 end
 
 -- an arm's two edge angles at rho, low then high, both within half a turn of its centre angle
