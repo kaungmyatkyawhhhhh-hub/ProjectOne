@@ -70,6 +70,10 @@ MATS = "LDPEGMCS."
 LANDMARK_BOXES = {
     "P1": [(34534.2, 27062.2, 35221.7, 28026.5), (34641.0, 26359.2, 35320.9, 27226.1),
            (31113 - 30, 30792 - 30, 31113 + 30, 30792 + 30), (31397 - 50, 33554 - 50, 31397 + 50, 33554 + 50)],
+    # (step 5) P2: Kaba Aye court, Diamond Inya Palace, Inya Lake Hotel + Convention Center, Lotte, the two pagodas
+    # (buildings_P2/stats.json landmark_sites_empty)
+    "P2": [(34450.2, 17611.6, 34809.3, 17968.6), (33404.4, 19819.3, 33813.1, 20312.8), (33367.6, 21652.7, 34232.0, 22307.1),
+           (28626.6, 21641.3, 29627.6, 22102.9), (34387.5, 16092.7, 34484.7, 16189.8), (32950.0, 19775.4, 33067.5, 19892.9)],
 }
 AVENUES = {"University Avenue Road", "Inya Road", "U Wisara Road", "New University Avenue Road", "Kan Yeiktha Road",
            "Natmauk Road", "Ahlone Road", "Zoological Garden Road", "Shwe Gone Dine Road", "Bawdi Avenue"}
