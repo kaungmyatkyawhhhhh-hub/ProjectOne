@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 10:53 [dashboard, unverified] I will soon share every trick I know (free obviously) for Roblox development. (topic: tiktok)
+- 2026-11-16 10:52 [dashboard, unverified] Claude Opus 5.5 is a 3D model. (topic: tiktok)
 - 2026-11-16 10:46 [dashboard, unverified] Blender is used for fantasy animation. (topic: tiktok)
 - 2026-11-16 10:46 [dashboard, unverified] AI is getting better now and it makes creating games much easier. (topic: tiktok)
 - 2026-11-16 10:44 [dashboard, unverified] The creator is sharing a tip on how to unlock the age limit in Roblox. (topic: tiktok)
