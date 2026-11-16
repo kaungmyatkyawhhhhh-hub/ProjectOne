@@ -27,6 +27,7 @@ TILE = 60.0            # studs
 PX = 1024
 K = PX / TILE          # px a stud
 FLOOR = 10.0           # kit_panels.FH (3.33 m)
+PHASES = 4
 WALL = 228             # neutral light grey (the part Color tints it)
 
 # archetype set -> bays across one tile and the window layout per bay (studs, from kit_panels p_walkup / p_township /
@@ -151,9 +152,15 @@ def main():
     prev = []
     for i, (name, p) in enumerate(SETS.items()):
         c, n, ro = draw(name, p, 1000 + i)
-        Image.fromarray(c, "RGB").save(os.path.join(OUT, name + "_color.png"))
-        Image.fromarray(n, "RGB").save(os.path.join(OUT, name + "_normal.png"))
-        Image.fromarray(ro, "L").save(os.path.join(OUT, name + "_rough.png"))
+        # a part's material texture hangs from its TOP edge (tested 16 Nov: V = 0 at the top face), so floor lines fall
+        # at top - 10k. PHASES shifts the picture down by 0 / 2.5 / 5 / 7.5 studs; the applier picks the phase that puts
+        # a floor line nearest the shell's base + ground floor (error <= 1.25 studs)
+        for ph in range(PHASES):
+            sh = px(ph * FLOOR / PHASES)
+            suf = "" if ph == 0 else "_p%d" % ph
+            Image.fromarray(np.roll(c, sh, 0), "RGB").save(os.path.join(OUT, name + suf + "_color.png"))
+            Image.fromarray(np.roll(n, sh, 0), "RGB").save(os.path.join(OUT, name + suf + "_normal.png"))
+            Image.fromarray(np.roll(ro, sh, 0), "L").save(os.path.join(OUT, name + suf + "_rough.png"))
         prev.append(Image.fromarray(c, "RGB").resize((384, 384)))
     sheet = Image.new("RGB", (384 * len(prev), 384))
     for i, im in enumerate(prev):
