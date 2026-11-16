@@ -806,6 +806,8 @@ def flicker(o):
             for j in tr.query(f, predicate="intersects"):
                 if j > i and fps[j].intersection(f).area > 0.01:
                     n += 1
+                    if n <= 8:
+                        print("  flicker pair at", round(f.centroid.x, 1), round(f.centroid.y, 1), "plane", k)
     print("flicker: coplanar overlapping top / bottom face pairs: %d" % n)
     o.stats["flicker_pairs"] = n
 
