@@ -42,8 +42,9 @@ def mat(name, glow):
     return m
 M_BODY, M_GLOW = mat('M6_Body', False), mat('M6_Glow', True)
 
+YZK = D.get('yz_k', 1.0)   # card: chunkier than the sheets - deeper and wider for the same length (rig span unchanged)
 def make(name, verts, faces, fcol, glow=False):
-    me = bpy.data.meshes.new(name); me.from_pydata([tuple(v) for v in verts], [], faces); me.update()
+    me = bpy.data.meshes.new(name); me.from_pydata([(v[0], v[1] * YZK, v[2] * YZK) for v in verts], [], faces); me.update()
     bm = bmesh.new(); bm.from_mesh(me)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)

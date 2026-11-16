@@ -9,7 +9,7 @@ for _, d in model:GetDescendants() do
 	if d:IsA("MeshPart") then
 		d.Anchored = true; d.CanCollide = false; d.DoubleSided = true
 		if d.Name:find("Crystals") then d.Material = Enum.Material.Neon; d.Color = Color3.fromRGB(16, 251, 253) end
-		if d.Name:find("Eyes") then d.Material = Enum.Material.Neon; d.Color = Color3.fromRGB(255, 236, 40) end
+		if d.Name:find("Eyes") then d.Material = Enum.Material.Neon; d.Color = Color3.fromRGB(255, 196, 40) end
 	end
 end
 model:ScaleTo(model:GetScale() * 165 / model:GetExtentsSize().X)   -- same length as evolution 9 (~165 studs)
@@ -43,8 +43,11 @@ if crys then
 	local l = Instance.new("PointLight"); l.Name = "MB_CrystalGlow"; l.Color = Color3.fromRGB(16, 251, 253); l.Range = 40; l.Brightness = 2; l.Shadows = false; l.Parent = crys
 end
 if eyes then
-	local l = Instance.new("PointLight"); l.Name = "MB_EyeGlow"; l.Color = Color3.fromRGB(255, 236, 40); l.Range = 10; l.Brightness = 2; l.Shadows = false; l.Parent = eyes
+	local l = Instance.new("PointLight"); l.Name = "MB_EyeGlow"; l.Color = Color3.fromRGB(255, 196, 40); l.Range = 10; l.Brightness = 2; l.Shadows = false; l.Parent = eyes
 end
+local h = Instance.new("Highlight"); h.Name = "MB_CardOutline"   -- the card's thin cyan outline
+h.FillTransparency = 1; h.OutlineColor = Color3.fromRGB(120, 255, 255); h.OutlineTransparency = 0.15
+h.DepthMode = Enum.HighlightDepthMode.Occluded; h.Parent = model
 model.Parent = SS
 if m ~= model then m:Destroy() end
 return ("MB_Mosasaurus_T6 in ServerStorage, %d studs long"):format(model:GetExtentsSize().X)

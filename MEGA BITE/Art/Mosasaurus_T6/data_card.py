@@ -8,7 +8,8 @@ d['palette'].update(green=[40, 86, 52], dark=[20, 46, 32], light=[78, 128, 74], 
                     plate=[30, 64, 42],                 # card: raised scutes are DARKER than the skin
                     eye=[255, 196, 40])                 # card: orange-yellow glowing eye
 # card: big clustered crystals, the row runs down the tail to its tip
-d['crystal_k'] = 1.3
+d['crystal_k'] = 2.0
+d['yz_k'] = 1.22                 # card body is chunkier: 22 % deeper and wider, same length
 tail = [(345, 15, 15), (305, 13, 13), (265, 11, 11), (225, 10, 9), (185, 8, 8), (148, 7, 6), (115, 6, 5)]  # x, height, width (sheet px)
 have = {round(c['x']) for c in d['crystals']}
 for x, h, w in tail:

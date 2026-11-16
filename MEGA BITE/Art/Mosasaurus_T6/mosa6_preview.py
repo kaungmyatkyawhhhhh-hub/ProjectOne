@@ -35,6 +35,7 @@ def glow(o, name, strength):          # Roblox: Neon on that MeshPart
     nt.links.new(tx.outputs['Color'], bs.inputs['Emission Color']); bs.inputs['Emission Strength'].default_value = strength
     o.data.materials[0] = m
 glow(crys, 'Mosasaurus_T6_CrystalGlow', 1.6); glow(eyes, 'Mosasaurus_T6_EyeGlow', 3.0)
+# the card's cyan outline is a Roblox Highlight (install script); an inverted hull isn't culled in EEVEE, so none here
 
 # ---------- actions: Swim (loop) and CardPose (the card's dive: tail raised, back arched, head down) ----------
 swim = dst.actions[0]
@@ -104,6 +105,11 @@ else: sc.camera = hero; sc.render.resolution_x, sc.render.resolution_y = 1280, 7
 sc.frame_start, sc.frame_end = -60, 23
 for f in range(-60, 1): sc.frame_set(f)
 sc.frame_start = 0
+if MODE == 'card':   # frame the posed body: portrait, from the front-left and a little below, like the card
+    dg = bpy.context.evaluated_depsgraph_get(); ev = body.evaluated_get(dg); vs = [ev.matrix_world @ v.co for v in ev.data.vertices]
+    lo = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs))); hi = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
+    ctr = (lo + hi) / 2; cardcam.location = ctr + Vector((0.45, -1.0, -0.12)).normalized() * 10.0
+    cardcam.rotation_euler = (ctr - cardcam.location).to_track_quat('-Z', 'Y').to_euler(); cardcam.data.lens = 38
 for win in bpy.context.window_manager.windows:
     for area in win.screen.areas:
         if area.type == 'VIEW_3D':
