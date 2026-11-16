@@ -617,10 +617,12 @@ def drives():
         for sd in (-1, 1):
             c = P(0.5, sd * (hw + 0.4), 0)
             COLL.append((c[0], c[1], -dep, Lr, 0.8, dep + 0.4, yaw))
-        # the portal: a dark opening in an end wall, a concrete slab over the last stretch, a height bar, a barrier
+        # a concrete slab over the last stretch and a height bar; at 1:1 the ramp runs on into the basement car park
+        # (tools/yangon/MCBasement.luau), so no dark end wall and no barrier there
         c = P(1.0, 0, 0)
-        g.box("DRK", c[0] + e[0] * 0.4, c[1] + e[1] * 0.4, -dep, 0.8, 2 * hw + 1.6, dep + 0.4, yaw)
-        COLL.append((c[0] + e[0] * 0.4, c[1] + e[1] * 0.4, -dep, 0.8, 2 * hw + 1.6, dep + 0.4, yaw))
+        if not ONE:
+            g.box("DRK", c[0] + e[0] * 0.4, c[1] + e[1] * 0.4, -dep, 0.8, 2 * hw + 1.6, dep + 0.4, yaw)
+            COLL.append((c[0] + e[0] * 0.4, c[1] + e[1] * 0.4, -dep, 0.8, 2 * hw + 1.6, dep + 0.4, yaw))
         slab_t0 = 1 - flat_end * 0.9
         c = P((slab_t0 + 1) / 2, 0, 0)
         sl = Lr * (1 - slab_t0)
@@ -632,9 +634,9 @@ def drives():
         for j in range(6):
             pa, pb = P(slab_t0 - 0.02, -hw + 2 * hw * j / 6, bottom - 0.4), P(slab_t0 - 0.02, -hw + 2 * hw * (j + 1) / 6, bottom - 0.4)
             g.tube("RED" if j % 2 == 0 else "MUW", pa, pb, 0.3)
-        bp = P(1 - flat_end * 0.5, 0, 0)
-        g.tube("RED", P(1 - flat_end * 0.5, -hw + 0.6, -dep + 3.0 / KZ), P(1 - flat_end * 0.5, hw * 0.2, -dep + 3.0 / KZ), 0.25)
-        g.box("DRK", *P(1 - flat_end * 0.5, -hw + 0.6, 0)[:2], -dep, 0.8, 0.8, 3.2 / KZ, yaw)
+        if not ONE:
+            g.tube("RED", P(1 - flat_end * 0.5, -hw + 0.6, -dep + 3.0 / KZ), P(1 - flat_end * 0.5, hw * 0.2, -dep + 3.0 / KZ), 0.25)
+            g.box("DRK", *P(1 - flat_end * 0.5, -hw + 0.6, 0)[:2], -dep, 0.8, 0.8, 3.2 / KZ, yaw)
         c = P(0.5, 0, 0)
         CARVE.append(X1.XGeo.box_x(g, (c[0], c[1], -dep - 1.0, Lr + 2.0, 2 * hw + 2.0, dep + 6.0, yaw)))
 

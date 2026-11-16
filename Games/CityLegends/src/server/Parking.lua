@@ -79,8 +79,18 @@ local function park(bay: Bay)
 end
 
 function Parking.init(ctx: any, Police: any, Towers: any)
+	-- the old city's garages, and the 1:1 Yangon landmarks' car parks (Myanmar Centre's basement)
+	local roots = {}
 	local city = workspace:FindFirstChild("City")
-	if not city then
+	if city then
+		table.insert(roots, city)
+	end
+	local y1 = workspace:FindFirstChild("Yangon1to1")
+	local lm = y1 and y1:FindFirstChild("Landmarks")
+	if lm then
+		table.insert(roots, lm)
+	end
+	if #roots == 0 then
 		return
 	end
 	for _, spec in Cars.List do
@@ -97,13 +107,15 @@ function Parking.init(ctx: any, Police: any, Towers: any)
 
 	-- the markers, per garage
 	local byGarage: { [Instance]: { CFrame } } = {}
-	for _, d in city:GetDescendants() do
-		if d:IsA("BasePart") and d.Name == "ParkBay" then
-			local g = d.Parent :: Instance
-			byGarage[g] = byGarage[g] or {}
-			table.insert(byGarage[g], d.CFrame)
-		elseif d:IsA("BasePart") and d.Name == "VipBay" then
-			table.insert(vipBays, d)
+	for _, root in roots do
+		for _, d in root:GetDescendants() do
+			if d:IsA("BasePart") and d.Name == "ParkBay" then
+				local g = d.Parent :: Instance
+				byGarage[g] = byGarage[g] or {}
+				table.insert(byGarage[g], d.CFrame)
+			elseif d:IsA("BasePart") and d.Name == "VipBay" then
+				table.insert(vipBays, d)
+			end
 		end
 	end
 	for _, spots in byGarage do
