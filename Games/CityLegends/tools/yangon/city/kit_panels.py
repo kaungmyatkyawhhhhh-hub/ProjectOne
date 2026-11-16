@@ -409,7 +409,13 @@ def p_condo(W, bays, floors, role, age, stripe=False):
                 K.front_quad("KGL", x + 0.3, x + BAY - 0.3, z + 0.5, z + 2.7, -0.25)
                 continue
             r = K.R.random()
-            if front and r < 0.3:
+            # (2026-11-16, P2 flicker test: 99 pairs) the end bays get no deep recess: a panel can end at a building
+            # corner, and a recess 0.6-1.2 m deep there met the perpendicular wall's recess (their floors and ceilings
+            # in one plane). The random draw stays, so the other bays are unchanged.
+            end = k == 0 or k == bays - 1
+            if end and r < 0.45:
+                window(x + BAY / 2 - 0.85, z + 0.75, 1.7, 1.8, 0.0, holes, wall, grille=False)
+            elif front and r < 0.3:
                 K.opening(holes, x + 0.3, z + 0.15, BAY - 0.6, 2.6, 0.0, wall, depth=1.2, glass="KGL")
                 K.front_quad("KRL", x + 0.3, x + BAY - 0.3, z + 0.15, z + 1.15, 0.05)
             elif r < 0.45:
@@ -423,7 +429,10 @@ def p_condo(W, bays, floors, role, age, stripe=False):
         K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
     else:
         K.facade(wall, 0.0, W, 0.0, PF + FH, 0.0, holes)
-        K.box("KBC", 0.0, -0.2, PF + FH, W, 0.2, H - PF - FH + 1.0, faces=("+x", "-x", "top"))
+        # (2026-11-16) no longer 1 m past the podium's top: the band or crown piece stacked on it carries the stripe on
+        # (the overlap put both pieces' side faces in one plane)
+        if H - PF - FH > 0.01:
+            K.box("KBC", 0.0, -0.2, PF + FH, W, 0.2, H - PF - FH, faces=("+x", "-x", "top"))
     for f in range(2, floors, 2):
         stains_light(0.0, W, PF + FH * (f - 1) - 0.15, 0.0, FH * 0.6, age, holes)
     K.grime(0.0, W, H - FH, H, 0.0, age, holes, z_base=0.0)
@@ -445,7 +454,13 @@ def p_condo_band(W, bays, nf, role, age, stripe=False):
                 K.front_quad("KGL", x + 0.3, x + BAY - 0.3, z + 0.5, z + 2.7, -0.25)
                 continue
             r = K.R.random()
-            if front and r < 0.3:
+            # (2026-11-16, P2 flicker test: 99 pairs) the end bays get no deep recess: a panel can end at a building
+            # corner, and a recess 0.6-1.2 m deep there met the perpendicular wall's recess (their floors and ceilings
+            # in one plane). The random draw stays, so the other bays are unchanged.
+            end = k == 0 or k == bays - 1
+            if end and r < 0.45:
+                window(x + BAY / 2 - 0.85, z + 0.75, 1.7, 1.8, 0.0, holes, wall, grille=False)
+            elif front and r < 0.3:
                 K.opening(holes, x + 0.3, z + 0.15, BAY - 0.6, 2.6, 0.0, wall, depth=1.2, glass="KGL")
                 K.front_quad("KRL", x + 0.3, x + BAY - 0.3, z + 0.15, z + 1.15, 0.05)
             elif r < 0.45:

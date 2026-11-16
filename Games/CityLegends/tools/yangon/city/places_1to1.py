@@ -503,7 +503,6 @@ def fuel_station(o, st, keep_off, rng):
         for b in (-chw * 0.42, chw * 0.42):
             x, z = ccx + cux * a + cfx * b, ccz + cuz * a + cfz * b
             o.box(x, top, z, M(5.0), M(0.2), M(1.2), cux, cuz, "PCN", coll=True)
-            o.box(x, top + M(0.2), z, M(5.0) - 0.6, 0.06, M(1.2) - 0.6, cux, cuz, "PLY", check=False)
             for s in (-1, 1):
                 px, pz = x + cux * s * M(1.3), z + cuz * s * M(1.3)
                 yb = top + M(0.2)
@@ -519,15 +518,22 @@ def fuel_station(o, st, keep_off, rng):
             o.stats["pump_islands"] += 1
     o.stats["pumps"] += len(pumps)
     # kiosk: a 9 x 6 m shop at the back of the lot, behind the canopy, if there is room
-    kd, kl, kh = M(6), M(9), M(3.4)
+    kd, kl, kh = M(5), M(7.5), M(3.4)
     kn = n1 - kd / 2 - M(1.0)
     kpoly = None
-    for ku in (u1 - kl / 2 - M(1.0), u0 + kl / 2 + M(1.0), um):
-        cand = Polygon([P(ku - kl / 2, kn - kd / 2), P(ku + kl / 2, kn - kd / 2), P(ku + kl / 2, kn + kd / 2),
-                        P(ku - kl / 2, kn + kd / 2)])
-        if lot.buffer(-M(0.5)).contains(cand) and not cand.intersects(Polygon(cpoly.exterior.coords).buffer(M(2))):
-            kpoly = cand
-            break
+    cbuf = Polygon(cpoly.exterior.coords).buffer(M(1.5))
+    lot_in = lot.buffer(-M(0.5))
+    cands = []
+    for kn_ in np.arange(n1 - kd / 2 - M(0.6), n0 + kd / 2 + M(5.0), -M(1.0)):
+        for ku in np.arange(u0 + kl / 2 + M(0.6), u1 - kl / 2 - M(0.6) + 1e-6, M(1.0)):
+            cand = Polygon([P(ku - kl / 2, kn_ - kd / 2), P(ku + kl / 2, kn_ - kd / 2), P(ku + kl / 2, kn_ + kd / 2),
+                            P(ku - kl / 2, kn_ + kd / 2)])
+            if lot_in.contains(cand) and not cand.intersects(cbuf):
+                # prefer the back of the lot, then the ends (away from the canopy's middle)
+                cands.append((-(kn_ - n0), -abs(ku - um), cand))
+    print("  kiosk: lot %.0f x %.0f m, %d spots" % (Lu / 3, Ln / 3, len(cands)))
+    if cands:
+        kpoly = min(cands, key=lambda c: (c[0], c[1]))[2]
     if kpoly is not None:
         kc = kpoly.centroid
         o.box(kc.x, top, kc.y, kl, kh, kd, ux, uz, "KW0", coll=True)
@@ -737,8 +743,7 @@ def build():
     for st in items["fuel"]:
         # plain colours only: the canopy fascia from the satellite roof / brand where known (Myawaddy: green, measured)
         st["colour"] = "PFG"
-        lot_keep = unary_union([corr.buffer(M(1.0)), zones and unary_union(list(zones.values())) or Polygon()])
-        res["fuel"].append(fuel_station(o, st, lot_keep, rng))
+        res["fuel"].append(fuel_station(o, st, keep_off, rng))
     for pk in items["parking"]:
         res["parking"].append(dict(id=pk["id"], bays=parking(o, pk, keep_off)))
     for pt in items["pitch"]:
