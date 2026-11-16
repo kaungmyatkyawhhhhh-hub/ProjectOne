@@ -74,7 +74,7 @@ def icosphere(level):
     return V, F
 
 
-ICO = {k: icosphere(k) for k in (1, 2)}
+ICO = {k: icosphere(k) for k in (0, 1, 2)}
 
 
 def vnoise(x, y, z, seed):
@@ -251,11 +251,11 @@ def broadleaf_tree(seed, kind, D, Hgt, fork, nlobes, pal_name, nlimbs=3, flat=0.
         lr = R * lobe_r * r.uniform(0.9, 1.15)
         lobe(crown, (top[0] + math.cos(a) * d, cy, top[2] + math.sin(a) * d),
              (lr, R * (lobe_h if flat else lobe_r * 0.9) * r.uniform(0.9, 1.1), lr), r.random() * 9, pal, ytop, ybot,
-             2 if lr > 2.2 else 1, 0.16, flat * 0.6, tint)
+             2 if lr > 4.5 else 1, 0.16, flat * 0.6, tint)
     return crown, bark
 
 
-def palm(seed, Hgt, bend, nfr=13):
+def palm(seed, Hgt, bend, nfr=11):
     r = random.Random(seed)
     crown, bark = Mesh(), Mesh()
     pal = LEAF["palm"]
@@ -283,7 +283,7 @@ def palm(seed, Hgt, bend, nfr=13):
         up_ang = r.uniform(0.15, 1.75) if k % 3 else r.uniform(0.9, 1.9)   # 0 straight up .. ~1.9 hanging
         L = r.uniform(5.0, 6.0)
         P = []
-        n = 8
+        n = 6
         for i in range(n + 1):
             t = i / n
             ang = up_ang + t * 0.9 * (0.6 + up_ang * 0.4)
@@ -323,14 +323,14 @@ def banana(seed):
         h = r.uniform(2.0, 2.9) - s * 0.2
         top = (base[0] * 1.3, h, base[2] * 1.3)
         limb(crown, base, top, 0.14, 0.09, (150, 170, 110), sides=6)
-        for k in range(5):
-            b = a + k * 1.25 + r.uniform(-0.2, 0.2)
+        for k in range(4):
+            b = a + k * 1.55 + r.uniform(-0.2, 0.2)
             L = r.uniform(2.2, 2.8)
             up_ang = r.uniform(0.5, 1.2)
             P = [top]
-            n = 6
+            n = 4
             for i in range(n):
-                ang = up_ang + i * 0.22
+                ang = up_ang + i * 0.33
                 P.append((P[-1][0] + math.cos(b) * math.sin(ang) * L / n, P[-1][1] + math.cos(ang) * L / n,
                           P[-1][2] + math.sin(b) * math.sin(ang) * L / n))
             W = [0.08] + [0.65 * math.sin(math.pi * (i / n) * 0.95 + 0.15) for i in range(1, n + 1)]
@@ -381,7 +381,7 @@ def bougainvillea(seed):
         rr = 1.3 * math.cos(el) + 0.05
         c = (math.cos(a) * rr, 1.25 + math.sin(el) * 1.25, math.sin(a) * rr)
         s = r.uniform(0.2, 0.34)
-        V0, F = ICO[1]
+        V0, F = ICO[0]
         V = [(c[0] + v[0] * s, c[1] + v[1] * s * 0.7, c[2] + v[2] * s) for v in V0]
         col = mag[k % 3]
         shaded_mesh(fl, V, F, lambda p, n, col=col: tuple(x * (0.75 + 0.25 * max(0, n[1])) for x in col))

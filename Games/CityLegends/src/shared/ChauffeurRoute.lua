@@ -119,7 +119,7 @@ local function graph(): Graph
 						if other ~= seg and other.dir == seg.dir and math.abs(other.lane - seg.lane) == 1 then
 							local om, odir = CityLayout.sample(other, other.length / 2)
 							local ratio = other.length / seg.length
-							if (om - m).Magnitude < Config.laneWidth() * 1.6 and odir:Dot(dir) > 0.97 and ratio > 0.8 and ratio < 1.25 then
+							if (om - m).Magnitude < Config.laneWidth(m) * 1.6 and odir:Dot(dir) > 0.97 and ratio > 0.8 and ratio < 1.25 then
 								table.insert(found, other)
 							end
 						end
@@ -183,7 +183,7 @@ function ChauffeurRoute.nearestList(p: Vector3, maxDist: number, heading: Vector
 			if kerb and g.lanesBeside[seg] then
 				for _, other in g.lanesBeside[seg] do
 					if other.lane > seg.lane then
-						score += Config.laneWidth() * 0.8 -- an outer lane beside it is nearer the kerb
+						score += Config.laneWidth(p) * 0.8 -- an outer lane beside it is nearer the kerb
 					end
 				end
 			end

@@ -138,7 +138,7 @@ end
 local function kerbSpot(car: Model): CFrame
 	local cf, size = car:GetBoundingBox()
 	-- (out past the kerb lane's edge onto the sidewalk, whatever the lane width)
-	local out = math.max(4, Config.laneWidth() / 2 - size.X / 2 + 2.5)
+	local out = math.max(4, Config.laneWidth(cf.Position) / 2 - size.X / 2 + 2.5)
 	local side = cf * CFrame.new(size.X / 2 + out, 0, size.Z * 0.12)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude

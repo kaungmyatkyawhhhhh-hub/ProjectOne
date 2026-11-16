@@ -237,11 +237,15 @@ if Config.monacoOnly() then
 	table.clear(highwayLanes)
 end
 -- (2026-11-13: the Yangon map's lanes come in the same graph, so either map in the place turns it on)
-if workspace:FindFirstChild("Riviera") or workspace:FindFirstChild("Yangon") then
+-- (2026-11-16: or the 1:1 Yangon frame, Workspace.Yangon1to1; its lanes are marked oneToOne)
+if workspace:FindFirstChild("Riviera") or workspace:FindFirstChild("Yangon") or workspace:FindFirstChild("Yangon1to1") then
 	local riv = RivieraTraffic.build()
 	if riv then
 		for _, seg in riv.lanes do
 			laneBox[seg] = { seg.p0:Min(seg.p1):Min(seg.p2), seg.p0:Max(seg.p1):Max(seg.p2) }
+			if Config.isYangon1to1At(seg.p0) then
+				(seg :: any).oneToOne = true
+			end
 			table.insert(cityLanes, seg)
 		end
 	end
@@ -261,11 +265,38 @@ local function lanesNear(lanes: { CityLayout.Segment }, center: Vector3, maxDist
 	return nearby
 end
 
--- Lane position near "center" (or anywhere if center == nil)
+-- (2026-11-16) "anywhere" means anywhere in the player's own area: the 1:1 Yangon frame or the rest (the maps lie
+-- tens of thousands of studs apart, so a car placed in the other one would only be recycled later)
+local areaPools: { [any]: { [boolean]: { CityLayout.Segment } } } = {}
+local function areaPool(lanes: { CityLayout.Segment }): { CityLayout.Segment }
+	local focus = if focusGetter then focusGetter() else nil
+	if not focus then
+		return lanes
+	end
+	local want = Config.isYangon1to1At(focus)
+	local byArea = areaPools[lanes]
+	if not byArea or byArea.n ~= #lanes then
+		byArea = { n = #lanes } :: any
+		areaPools[lanes] = byArea
+	end
+	local pool = byArea[want]
+	if not pool then
+		pool = {}
+		for _, seg in lanes do
+			if ((seg :: any).oneToOne == true) == want then
+				table.insert(pool, seg)
+			end
+		end
+		byArea[want] = pool
+	end
+	return if #pool > 0 then pool else lanes
+end
+
+-- Lane position near "center" (or anywhere in the player's area if center == nil)
 local function findSpot(center: Vector3?, minDist: number, maxDist: number, ignore: Npc?, avoidView: boolean?, highway: boolean?): (CityLayout.Segment?, number)
 	local camera = workspace.CurrentCamera
 	local lanes = if highway then highwayLanes else cityLanes
-	local pool = if center and maxDist < 5000 then lanesNear(lanes, center, maxDist) else lanes
+	local pool = if center and maxDist < 5000 then lanesNear(lanes, center, maxDist) else areaPool(lanes)
 	local gap = if highway then T.HighwayGap else 22
 	if #pool == 0 then
 		return nil, 0
