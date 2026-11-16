@@ -22,9 +22,20 @@ What it does
 Outputs (build/city_1to1/buildings_<tag>/; .glb in imports/sync/ygn1to1_<tag>/ for Open Cloud)
   kit_<n>.glb      the panels and props used (one mesh per panel and class, named KWX|KGR|KAR _<pid>_<box>)
   cells_<n>.glb    the cell meshes (named <GROUP>_c<i>x<j>s<k>_<box>)
-  Inst_<n>.txt     "pid sx x y z yaw wall" a line (panel origin = its bottom-left corner on the wall plane)
-  Collide_<n>.txt  YangonBuildingMeshes.collide lines (id|x y z sx sy sz yaw|...)
+  Inst_<n>.txt     the detail, readable: "pid sx x y z yaw wall [sy sz]" / "B x y z sx sy sz yaw code" a line, "#i j"
+                   starts a 256-stud tile (panel origin = its bottom-left corner on the wall plane)
   stats.json, preview.png
+
+Light version (2026-11-16, "make P1 light enough for the whole city"): the place holds only the SHELL of each building
+(its collision boxes, drawn in the wall colour: the far look and the collision in one) plus the pitched roofs and the
+compound-wall collision. Everything else (facade panels, piers, party walls, flat roof slabs, roof props, drainpipes,
+AC units, compound walls, gates) is DETAIL: packed per 256-stud tile into StringValues (ReplicatedStorage.YgnKit) and
+made on each client near the camera by src/client/YangonKitStream.client.lua from the shared kit templates, which also
+hides the shells of the tiles it has built (no z-fighting). Walls fit whole bays (stretch <= 15%) plus at most one
+half-bay pier (no plain end strips); compound walls use 1 / 2 / 4 / 8-bay pieces and one collision box per straight
+segment.
+  Shell_<n>.txt    YangonKitPlace.shells lines: S (shell box), R (pitched roof), W (wall collision)
+  ygnkit_<tag>.rbxmx  the packed detail (Folder Data_<tag>: StringValue Meta + one StringValue a tile)
 """
 import json
 import math
@@ -51,6 +62,7 @@ from glb import Mesh, write_glb, check_glb, code  # noqa: E402
 from landmark_glb3d import GROUPS, box_uv  # noqa: E402
 from kit_panels import Kit, ARCH, K_SET, FH, S  # noqa: E402
 from shells import collision  # noqa: E402
+import kit_pack  # noqa: E402
 
 assert geo.ONE_TO_ONE, "run with YANGON_SCALE=1to1"
 TAG = sys.argv[1] if len(sys.argv) > 1 else "P1"
@@ -63,6 +75,7 @@ MAX_TRIS = 17000
 FILE_MESHES = 90
 CHARS = 180000
 STRETCH = 0.15
+TILE = 256.0    # detail tiles (studs): the client streamer builds whole tiles near the camera
 M = geo.m
 
 # landmark sites built on their own (re-fitted later): the lots stay empty. Points in lon / lat round the real site
@@ -194,6 +207,31 @@ def decompose(n):
     return out
 
 
+def fit_wall(L, bay):
+    """(n full bays, stretch s, pier stretch ps or 0) for a wall of length L: whole bays stretched <= 15%, else whole
+    bays plus one half-bay pier at the wall's end (pier stretch 0.3-1.6: it has no openings); None = too short"""
+    best = None
+    n0 = int(L / bay)
+    for n in range(max(1, n0 - 1), n0 + 3):
+        s = L / (n * bay)
+        if abs(s - 1) <= STRETCH:
+            c = abs(s - 1)
+            if best is None or c < best[0]:
+                best = (c, n, s, 0.0)
+        s = min(max((L - 0.5 * bay) / (n * bay), 1 - STRETCH), 1 + STRETCH)
+        pw = L - n * bay * s
+        ps = pw / (0.5 * bay)
+        if 0.3 <= ps <= 1.6:
+            c = abs(s - 1) + 0.3 * abs(ps - 1) + 0.05
+            if best is None or c < best[0]:
+                best = (c, n, s, ps)
+    return best[1:] if best else None
+
+
+def tile_of(x, z):
+    return (math.floor(x / TILE), math.floor(z / TILE))
+
+
 # ------------------------------------------------------------------------------------------------------ geometry
 class Cells:
     """per-cell meshes by group (world studs)"""
@@ -300,7 +338,7 @@ def wall_box(p, q, y0, y1, code, k=0):
     # a thin sheet (0.02 studs): a thick Part's end face lay in the next wall's plane at every corner (flicker)
     cx, cz = (p[0] + q[0]) / 2 - nx * 0.01, (p[1] + q[1]) / 2 - nz * 0.01
     y1 -= 0.06 * k
-    return "B %.3f %.3f %.3f %.3f %.3f %.3f %.5f %s" % (cx, (y0 + y1) / 2, cz, L, y1 - y0, 0.02, math.atan2(-uz, ux), code)
+    return ("B", cx, (y0 + y1) / 2, cz, L, y1 - y0, 0.02, math.atan2(-uz, ux), code)
 
 
 def parity(i, n):
@@ -492,15 +530,48 @@ def main():
     # ------------------------------------------------------------------------------- per building: kit + cell meshes
     kit = Kit()
     cells = Cells()
-    insts = defaultdict(list)   # cell -> lines
-    collide = []
+    detail = defaultdict(list)  # tile -> detail records (client-made near the camera)
+    shell = []                  # server records: S shell boxes, R pitched roofs, W wall collision
     allg = [q["g"] for q in blds]
     gtree = STRtree(allg)
     main_lines = [l[0] for l in road_lines if l[1] in MAIN]
     main_u = unary_union(main_lines) if main_lines else LineString()
-    corr_b = corr.boundary
     arch_n, floor_n = Counter(), Counter()
     panes_lit = 0
+    # shell inset levels: touching neighbours never share one, so two shells' faces never lie in one plane
+    # (neighbours = buildings whose collision boxes overlap or nearly touch: the boxes' rectangles can stand past the
+    # outline by several studs)
+    def box_poly(bb):
+        x, _, z, sxb, _, szb, yw = bb
+        c, s_ = math.cos(yw), math.sin(yw)
+        return Polygon([(x + c * u + s_ * v, z - s_ * u + c * v) for u, v in
+                        ((-sxb / 2, -szb / 2), (sxb / 2, -szb / 2), (sxb / 2, szb / 2), (-sxb / 2, szb / 2))])
+    bpolys = [unary_union([box_poly(bb) for bb in collision(q["g"], 0.0, 1.0)]).buffer(0.5) for q in blds]
+    btree2 = STRtree(bpolys)
+    level = {}
+    for bi in range(len(blds)):
+        used = {level[j] for j in btree2.query(bpolys[bi], predicate="intersects") if j in level and j != bi}
+        level[bi] = next(k for k in range(64) if k not in used)
+    stats["shell_levels"] = max(level.values()) + 1
+
+    def stack_of(arch, role, floors, kk, var, shop, stripe, base):
+        if arch == "condo":
+            vv, st = (0, False) if kk == 0 else (var, stripe)
+            out = [(kit.panel("condo", role, 2, kk, vv, stripe=st), base)]
+            y = base + (ARCH["condo"]["gf"] + FH) * S
+            left = floors - 2
+            for nf in (8, 4, 2, 1):
+                while left >= nf:
+                    out.append((kit.panel("condo_band", role, nf, kk, vv, stripe=st), y))
+                    y += nf * FH * S
+                    left -= nf
+            out.append((kit.panel("condo_top", role, 0, kk, vv, stripe=st), y))
+            return out
+        if kk == 0:
+            return [(kit.panel(arch, role, floors, 0, 0), base)]
+        return [(kit.panel(arch, role, floors, kk, var, shop=shop, stripe=stripe), base)]
+
+    roof_polys = []   # (index in shell, the roof's plan rectangle with its eaves)
     for bi, q in enumerate(blds):
         g = q["g"]
         r = rng_for(q["id"])
@@ -514,7 +585,6 @@ def main():
         Hs = (ARCH[base_arch]["gf"] + FH * (floors - 1)) * S
         par = ARCH[base_arch]["par"] * S
         wallc = wpick(r, PAL[arch])
-        wrgb = GROUPS[wallc][1]
         q["wall"] = wallc
         # base: the lowest ground under the outline
         ring = list(g.exterior.coords)[:-1]
@@ -522,10 +592,15 @@ def main():
         base = min(ys)
         q["base"] = base
         cell = cells.cell(g.centroid.x, g.centroid.y)
+        tile = tile_of(g.centroid.x, g.centroid.y)
+        q["tile"] = tile
+        D = detail[tile]
         ccw_ring = ring if Polygon(ring).exterior.is_ccw else ring[::-1]
         # NB shapely's is_ccw is in (x, z) math orientation; outward of edge (dx, dz) is (dz, -dx)
         lit_share = 0.22
         n_edges = len(ccw_ring)
+        fronts = []
+        top = base + Hs + (par if par > 0 else 0)
         for ei in range(n_edges):
             A = ccw_ring[ei]
             Bp = ccw_ring[(ei + 1) % n_edges]
@@ -541,94 +616,97 @@ def main():
                 if j != bi:
                     party = True
                     break
-            top = base + Hs + (par if par > 0 else 0)
-            if party or L < 0.85 * bay:
-                insts[cell].append(wall_box(A, Bp, base - 1.0, top, wallc, parity(ei, n_edges)))
+            fit = None if (party or L < 0.85 * bay) else fit_wall(L, bay)
+            if fit is None:
+                D.append(wall_box(A, Bp, base - 1.0, top, wallc, parity(ei, n_edges)))
                 stats["plain_walls"] += 1
                 continue
+            n, s, ps = fit
             # street side? a ray out of the wall meets a road corridor within 30 m
             ray = LineString([(mid[0] + nx * 0.5, mid[1] + nz * 0.5), (mid[0] + nx * M(30), mid[1] + nz * M(30))])
             front = ray.intersects(corr)
             role = "front" if front else "side"
             shop = front and arch in ("walkup", "township") and (arch == "township" or LineString(
                 [(mid[0] + nx * 0.5, mid[1] + nz * 0.5), (mid[0] + nx * M(12), mid[1] + nz * M(12))]).intersects(corr))
-            n = max(1, int(round(L / bay)))
-            s = L / (n * bay)
-            if s < 1 - STRETCH and n > 1:
-                n -= 1
-                s = L / (n * bay)
-            s = min(max(s, 1 - STRETCH), 1 + STRETCH)
-            span = n * bay * s
-            rem = (L - span) / 2
             ax, az = nz, -nx  # along = up x outward: runs from B to A
             yaw = math.atan2(nx, nz)
-            if rem > 0.05:
-                # (both strips in the ring's A -> B direction, so they show outward)
-                for (p0, p1) in (((Bp[0] + ax * rem, Bp[1] + az * rem), Bp),
-                                 (A, (A[0] - ax * rem, A[1] - az * rem))):
-                    insts[cell].append(wall_box(p0, p1, base - 1.0, top, wallc, parity(ei, n_edges)))
-                    stats["plain_strips"] += 1
-            u = rem
+            if front:
+                fronts.append(dict(L=L, B=Bp, ax=ax, az=az, nx=nx, nz=nz, yaw=yaw, s=s, n=n, ps=ps))
+            u = 0.0
             var = (zlib.crc32(("%s%d" % (q["id"], ei)).encode()) % 2) if (role == "front" and arch in ("walkup", "township")) else 0
             stripe_done = False
-            for kk in decompose(n):
+            pieces = decompose(n) + ([0] if ps > 0 else [])
+            for kk in pieces:
                 stripe = False
                 if arch == "condo" and role == "front" and not stripe_done and kk == 1:
                     stripe, stripe_done = True, True
+                sx = ps if kk == 0 else s
                 ox, oz = Bp[0] + ax * u, Bp[1] + az * u
-                if arch == "condo":
-                    # a tower face is stacked: the podium panel (2 floors), bands of 8 / 4 / 2 / 1 floors, the parapet
-                    stack = [(kit.panel("condo", role, 2, kk, var, stripe=stripe), base)]
-                    y = base + (ARCH["condo"]["gf"] + FH) * S
-                    left = floors - 2
-                    for nf in (8, 4, 2, 1):
-                        while left >= nf:
-                            stack.append((kit.panel("condo_band", role, nf, kk, var, stripe=stripe), y))
-                            y += nf * FH * S
-                            left -= nf
-                    stack.append((kit.panel("condo_top", role, 0, kk, var, stripe=stripe), y))
-                else:
-                    stack = [(kit.panel(arch, role, floors, kk, var, shop=shop, stripe=stripe), base)]
-                for pid, py in stack:
-                  insts[cell].append("%s %.5f %.3f %.3f %.3f %.5f %s" % (pid, s, ox, py, oz, yaw, wallc))
-                  stats["panels"] += 1
-                  # night panes: about 22% of the windows lit
-                  for pane in kit.data[pid]["panes"]:
-                    if r.random() < lit_share:
-                        wp = []
-                        for (X, Y, Z) in pane:
-                            X *= s
-                            wp.append((ox + ax * X + nx * (Z + 0.1), py + Y, oz + az * X + nz * (Z + 0.1)))
-                        oriented(cells, cell, "NWH", wp, (nx, 0, nz), r.choice(NIGHT_RGB))
-                        panes_lit += 1
-                u += kk * bay * s
+                for pid, py in stack_of(arch, role, floors, kk, var, shop, stripe, base):
+                    D.append(("P", pid, ox, py, oz, yaw, sx, wallc))
+                    stats["piers" if kk == 0 else "panels"] += 1
+                    # night panes: about 22% of the windows lit
+                    for pane in kit.data[pid]["panes"]:
+                        if r.random() < lit_share:
+                            wp = []
+                            for (X, Y, Z) in pane:
+                                X *= sx
+                                wp.append((ox + ax * X + nx * (Z + 0.1), py + Y, oz + az * X + nz * (Z + 0.1)))
+                            oriented(cells, cell, "NWH", wp, (nx, 0, nz), r.choice(NIGHT_RGB))
+                            panes_lit += 1
+                u += (0.5 * bay * ps) if kk == 0 else kk * bay * s
+        # one drainpipe and one or two AC units a building, on its longest street face (brief 16 Nov: not one a panel)
+        if fronts and arch in ("walkup", "township", "house", "villa") and floors >= 2:
+            e = max(fronts, key=lambda f: f["L"])
+            gf = ARCH[base_arch]["gf"]
+            if arch in ("walkup", "township"):
+                u = e["L"] - M(0.07)
+                y0, y1 = base + M(gf - 0.3), top - M(0.1)
+                D.append(("Q", kit.prop("pipe"), e["B"][0] + e["ax"] * u, y0, e["B"][1] + e["az"] * u, e["yaw"], 1.0,
+                          wallc, (y1 - y0) / M(3.0), 1.0))
+                stats["pipes"] += 1
+            n_ac = 2 if (arch == "walkup" and floors >= 4) else 1
+            spots = [(b, f) for b in range(e["n"]) for f in range(1, floors)
+                     if (b * bay + M(0.16)) * e["s"] + M(0.8) < e["L"] - M(0.15)]
+            r.shuffle(spots)
+            for b, f in spots[:n_ac]:
+                u = (b * bay + M(0.16)) * e["s"]
+                yy = base + M(gf + FH * (f - 1) + 0.17)
+                D.append(("P", kit.prop("ac"), e["B"][0] + e["ax"] * u, yy, e["B"][1] + e["az"] * u, e["yaw"], 1.0, wallc))
+                stats["ac_units"] += 1
         # roofs
         top_y = base + Hs
         fill = g.area / g.minimum_rotated_rectangle.area
-        pitched = arch in ("house", "villa", "shed", "market") and fill > 0.78 and g.area < M(45) * M(45)
+        # (light pass) pitched only on near-rectangular outlines: on notched outlines the roof's rectangle stood far
+        # past the walls (the "huge eaves" on wide villas); eaves and rise capped on wide buildings
+        pitched = arch in ("house", "villa", "shed", "market") and fill > 0.88 and g.area < M(45) * M(45)
+        lv = level[bi]
         if pitched:
             rg = wpick(r, ROOFS[arch])
             gable = arch in ("shed", "market")
             slope = 0.5 if arch == "villa" else (0.38 if gable else 0.45)
-            eave = M(0.9) if arch == "villa" else M(0.6)
+            eave = M(0.75) if arch == "villa" else M(0.6)
             cx, cz, e1, hl, hw = rect_of(g)
-            rise = (hw + eave) * slope
+            rise = min((hw + eave) * slope, M(3.2) if arch == "villa" else M(2.8))
             pid = kit.prop("gable" if gable else "hip")
             # the reference roof: 10 x 6 m on plan (eaves included), 3 m rise, centred, base at 0
             sx, sz, sy = 2 * (hl + eave) / M(10), 2 * (hw + eave) / M(6), rise / M(3)
-            insts[cell].append("%s %.4f %.2f %.2f %.2f %.4f %s %.4f %.4f %s" % (pid, sx, cx, top_y, cz, math.atan2(-e1[1], e1[0]),
-                                                                                  wallc, sy, sz, rg))
-            ytop = top_y + rise
+            e2_ = (-e1[1], e1[0])
+            roof_polys.append((len(shell), Polygon([(cx + e1[0] * a_ * (hl + eave) + e2_[0] * b_ * (hw + eave),
+                                                     cz + e1[1] * a_ * (hl + eave) + e2_[1] * b_ * (hw + eave))
+                                                    for a_, b_ in ((-1, -1), (1, -1), (1, 1), (-1, 1))])))
+            shell.append(("R", pid, sx, cx, top_y, cz, math.atan2(-e1[1], e1[0]), wallc, sy, sz, rg))
             stats["roof_" + rg] += 1
+            shell_top = top_y - 0.1 - 0.25 * lv
         else:
             gi = g.buffer(-0.75, join_style=2)
             if gi.geom_type == "MultiPolygon":
                 gi = max(gi.geoms, key=lambda x: x.area)
             for (cx, cz, sx, sz, yw) in (roof_rects(gi) if gi.geom_type == "Polygon" and not gi.is_empty else []):
-                insts[cell].append("B %.3f %.3f %.3f %.3f %.3f %.3f %.5f KCO" % (cx, top_y + 0.15 - 0.4, cz, sx, 0.8, sz, yw))
+                D.append(("B", cx, top_y + 0.15 - 0.4, cz, sx, 0.8, sz, yw, "KCO"))
                 stats["roof_parts"] += 1
-            ytop = top_y + par
             stats["roof_flat"] += 1
+            shell_top = top_y + par - 0.1 - 0.25 * lv
             # roof props on flat roofs: tanks, dishes, a stair room
             if arch in ("walkup", "township", "civic", "condo") and g.area > M(5) * M(5):
                 inner = g.buffer(-M(2.5))
@@ -645,14 +723,36 @@ def main():
                         pz = rp.y + off[0] * math.sin(ya) + off[1] * math.cos(ya)
                         if not inner.contains(Point(px, pz)):
                             continue
-                        pid = kit.prop(name)
-                        insts[cell].append("%s 1 %.2f %.2f %.2f %.4f %s" % (pid, px, top_y + 0.15, pz, -ya, wallc))
+                        D.append(("P", kit.prop(name), px, top_y + 0.15, pz, -ya, 1.0, wallc))
                         stats["props"] += 1
-        # collision
-        boxes = collision(g, base, ytop)
-        collide.append(str(q["id"]) + "|" + "|".join(" ".join(("%g" % v) for v in bb) for bb in boxes))
-        stats["collide_boxes"] += len(boxes)
-    print("kit panels %d (%d unique)  %.1f s" % (stats["panels"], len(kit.data), time.time() - t0))
+        # the shell: the collision boxes drawn in the wall colour, a little inside the walls (inset and top by level:
+        # touching shells never share a plane)
+        # (each box of one building steps 0.05 down and in too: the boxes of an L / U building overlap a little and their
+        # tops and sides must not share a plane either)
+        boxes = collision(g, base - 1.0, shell_top)
+        for k, bb in enumerate(boxes):
+            x, y, z, sxb, syb, szb, yw = bb
+            ins = 0.2 + 0.25 * lv + 0.08 * k
+            syk = syb - 0.08 * k
+            shell.append(("S", "%d_%d" % tile, x, y - 0.04 * k, z, max(1.0, sxb - 2 * ins), syk, max(1.0, szb - 2 * ins), yw,
+                          wallc, 0 if pitched else 1))
+        stats["shell_boxes"] += len(boxes)
+    # roofs whose eaves overlap a neighbour's: each a little lower (0.08 studs a step, at least 0.06 from every
+    # overlapping neighbour's final height), so two soffits / eave sheets
+    # never lie in one plane (the walls' tops end inside the roof)
+    rtree = STRtree([pg for _, pg in roof_polys])
+    rlev = {}
+    for k, (si, pg) in enumerate(roof_polys):
+        ys = [shell[roof_polys[j][0]][4] for j in rtree.query(pg.buffer(0.3), predicate="intersects") if j in rlev and j != k]
+        y0 = shell[si][4]
+        v = next(v for v in range(64) if all(abs(y0 - 0.08 * v - yy) >= 0.06 for yy in ys))
+        rlev[k] = v
+        if v:
+            rec = list(shell[si])
+            rec[4] = y0 - 0.08 * v
+            shell[si] = tuple(rec)
+    stats["roof_levels"] = (max(rlev.values()) + 1) if rlev else 0
+    print("kit panels %d, piers %d (%d unique)  %.1f s" % (stats["panels"], stats["piers"], len(kit.data), time.time() - t0))
 
     # ------------------------------------------------------------------------------------ compound walls and gates
     walled = [q for q in blds if q["arch"] in WALL_ARCH or q["kind"] in ("religious", "school", "hospital")]
@@ -714,7 +814,7 @@ def main():
             gy = ground(gx, gz)[0]
             r = rng_for("gate", q["id"])
             pid = kit.prop("gate_green" if r.random() < 0.7 else "gate_rust")
-            gates.append((cells.cell(gx, gz), "%s 1 %.2f %.2f %.2f %.4f KWC" % (pid, ox, gy, oz, math.atan2(nx, nz))))
+            gates.append((tile_of(gx, gz), ("P", pid, ox, gy, oz, math.atan2(nx, nz), 1.0, "KWC")))
     full, street = [], []
     corr35 = corr.buffer(M(3.5))
     for q, l in lots:
@@ -738,16 +838,30 @@ def main():
         stats["osm_walls"] = len(extra)
     cut = unary_union([bunion, corr.buffer(M(0.3))] + gate_cut + list(zones.values()))
     lines = lines.difference(cut)
-    segs, runs = [], []
+    # straight runs: consecutive segments of a line that turn less than 3 degrees are one run (one collision box)
+    runs = []
+    # (light pass) the union cut the lot outlines at every node: join the pieces end to end, drop the tiny kinks
+    from shapely.ops import linemerge
+    if lines.geom_type == "MultiLineString":
+        lines = linemerge(lines)
+    lines = lines.simplify(M(0.25))
     for ls in (lines.geoms if hasattr(lines, "geoms") else [lines]):
         if ls.geom_type != "LineString" or ls.length < M(0.8):
             continue
         cs = list(ls.coords)
-        for a, b in zip(cs[:-1], cs[1:]):
-            L = math.hypot(b[0] - a[0], b[1] - a[1])
-            runs.append((a, b))
-    # compound walls from the kit: each straight run cut into 4-bay (14 m) and 1-bay (3.5 m) pieces, stretched <= 15%,
-    # each piece stood on the lower ground of its two ends (0.3 m of it goes into the ground)
+        cur = [cs[0], cs[1]]
+        for c in cs[2:]:
+            d0 = (cur[-1][0] - cur[0][0], cur[-1][1] - cur[0][1])
+            d1 = (c[0] - cur[-1][0], c[1] - cur[-1][1])
+            l0, l1 = math.hypot(*d0), math.hypot(*d1)
+            if l0 > 1e-6 and l1 > 1e-6 and (d0[0] * d1[0] + d0[1] * d1[1]) / (l0 * l1) > math.cos(math.radians(4.0)):
+                cur.append(c)
+            else:
+                runs.append((cur[0], cur[-1]))
+                cur = [cur[-1], c]
+        runs.append((cur[0], cur[-1]))
+    # compound walls from the kit: each straight run cut into 8 / 4 / 2 / 1-bay pieces (28 / 14 / 7 / 3.5 m), stretched to
+    # its exact length, each piece stood on the lower ground of its two ends (0.3 m of it goes into the ground)
     BAYW = M(3.5)
     wall_cols = {"KWC": 0.55, "KW6": 0.25, "KW1": 0.1, "KWG": 0.1}
     wall_len = 0.0
@@ -766,23 +880,21 @@ def main():
         def add(self, p):
             self.g[(int(p[0] // 4), int(p[1] // 4))].append(p)
     pillars = _Near()
-    key = lambda p: p
     for (a, b) in runs:
         L = math.hypot(b[0] - a[0], b[1] - a[1])
         if L < M(0.8) or ground((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)[1] == 4:
             continue
-        if key(a) in pillars and key(b) not in pillars:
+        if a in pillars and b not in pillars:
             a, b = b, a
-        elif key(a) in pillars:
+        elif a in pillars:
             # both ends taken: start just past the other pillar (0.45 m on)
             t = M(0.45) / L
             a = (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
             L = math.hypot(b[0] - a[0], b[1] - a[1])
             if L < M(0.8):
                 continue
-        pillars.add(key(a))
+        pillars.add(a)
         ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-        # exactly the run's length (a clamped stretch overshot the run's end into a building)
         n = max(1, int(round(L / BAYW)))
         sw = L / (n * BAYW)
         col = wpick(rng_for("wc", round(a[0] / 60), round(a[1] / 60)), wall_cols)
@@ -790,40 +902,63 @@ def main():
         nx, nz = -uz, ux
         yaw = math.atan2(nx, nz)
         u = 0.0
-        for kk in ([4] * (n // 4) + [1] * (n % 4)):
-            if u >= L - 0.3:
-                break
+        ks = [8] * (n // 8) + [4] * ((n % 8) // 4) + [2] * ((n % 4) // 2) + [1] * (n % 2)
+        gys = []
+        for kk in ks:
             ln = kk * BAYW * sw
             p = (a[0] + ux * u, a[1] + uz * u)
             p2 = (a[0] + ux * (u + ln), a[1] + uz * (u + ln))
-            gy = min(ground(*p)[0], ground(*p2)[0])
-            pid = kit.prop("cwall4" if kk == 4 else "cwall1")
-            insts[cells.cell(*p)].append("%s %.4f %.2f %.2f %.2f %.4f %s" % (pid, ln / (kk * BAYW), p[0], gy, p[1], yaw, col))
+            # long pieces on sloping ground: the lowest of five points along it
+            gy = min(ground(a[0] + ux * (u + ln * t), a[1] + uz * (u + ln * t))[0] for t in (0, 0.25, 0.5, 0.75, 1.0))
+            gys.append(gy)
+            detail[tile_of(*p)].append(("P", kit.prop("cwall%d" % kk), p[0], gy, p[1], yaw, sw, col))
+            stats["wall_pieces_%d" % kk] += 1
             n_pieces += 1
             u += ln
         wall_len += L
-        nb = max(1, int(math.ceil(L / M(20))))
-        for k in range(nb):
-            p = (a[0] + ux * L * k / nb, a[1] + uz * L * k / nb)
-            p2 = (a[0] + ux * L * (k + 1) / nb, a[1] + uz * L * (k + 1) / nb)
-            wall_boxes.append((p, p2, max(ground(*p)[0], ground(*p2)[0])))
+    # collision: one box per chain of the wall line whose points all lie within 1 stud of the chain's chord (gentle
+    # kinks of the lot outlines share a box, thickened to cover them); stubs under 1.5 m get none
+    for ls in (lines.geoms if hasattr(lines, "geoms") else [lines]):
+        if ls.geom_type != "LineString" or ls.length < M(1.5):
+            continue
+        cs = list(ls.coords)
+        i0 = 0
+        while i0 < len(cs) - 1:
+            i1 = i0 + 1
+            dev = 0.0
+            while i1 + 1 < len(cs):
+                a, b = cs[i0], cs[i1 + 1]
+                Lc = math.hypot(b[0] - a[0], b[1] - a[1])
+                if Lc < 1e-6 or Lc > 600.0:
+                    break
+                dd = max(abs((c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0])) / Lc for c in cs[i0 + 1:i1 + 1])
+                if dd > 1.0:
+                    break
+                i1 += 1
+                dev = dd
+            a, b = cs[i0], cs[i1]
+            L = math.hypot(b[0] - a[0], b[1] - a[1])
+            if L >= M(1.5) and ground((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)[1] != 4:
+                hs = [ground(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)[0] for t in (0, 0.25, 0.5, 0.75, 1.0)]
+                wall_boxes.append((a, b, min(hs), max(hs), dev))
+            i0 = i1
     WH, WT = M(2.1), M(0.22)
     stats["wall_km"] = round(wall_len / S / 1000, 2)
+    stats["wall_runs"] = len(runs)
     stats["wall_pieces"] = n_pieces
     stats["lots_walled"] = len(lots)
     stats["gates"] = len(gates)
-    for c, line in gates:
-        insts[c].append(line)
-    # wall collision: one box per straight run (merge consecutive pieces of a segment)
-    wcol = []
-    for (p, p2, yc) in wall_boxes:
+    for t, rec in gates:
+        detail[t].append(rec)
+    for (p, p2, lo, hi, dev) in wall_boxes:
         L = math.hypot(p2[0] - p[0], p2[1] - p[1])
         yaw = math.atan2(-(p2[1] - p[1]), p2[0] - p[0])
-        wcol.append("%.2f %.2f %.2f %.2f %.2f %.2f %.4f" % ((p[0] + p2[0]) / 2, yc + WH / 2 - 0.5, (p[1] + p2[1]) / 2, L, WH + 1.0, WT, yaw))
-    for k in range(0, len(wcol), 40):
-        collide.append("wall%d|" % (k // 40) + "|".join(wcol[k:k + 40]))
-    stats["collide_boxes"] += len(wcol)
-    stats["collide_wall_boxes"] = len(wcol)
+        y0, y1 = lo - 0.9, hi + WH
+        # client-side like the walls themselves (the local character and car are simulated on the client): an invisible
+        # colliding Part in the detail of its tile (code WCOL)
+        mx, mz = (p[0] + p2[0]) / 2, (p[1] + p2[1]) / 2
+        detail[tile_of(mx, mz)].append(("B", mx, (y0 + y1) / 2, mz, L, y1 - y0, WT + 2 * dev, yaw, "WCOL"))
+    stats["collide_wall_boxes"] = len(wall_boxes)
     print("walls %.2f km, %d lots, %d gates  %.1f s" % (stats["wall_km"], len(lots), len(gates), time.time() - t0))
 
     # -------------------------------------------------------------------------------------------------- write
@@ -881,55 +1016,70 @@ def main():
         nmesh, bad = check_glb(path, info)
         assert not bad, bad
         cell_files.append(os.path.basename(path))
-    # instances and collision as text pages
+    # detail (readable Inst pages for the checks + the packed per-tile data the client streamer reads), shell pages
     for f in os.listdir(OUT):
-        if f.startswith(("Inst_", "Collide_")):
+        if f.startswith(("Inst_", "Collide_", "Shell_")):
             os.remove(os.path.join(OUT, f))
     pages, cur = [], ""
-    for cell in sorted(insts):
-        head = "#%d %d\n" % cell
+    for tile in sorted(detail):
+        head = "#%d %d\n" % tile
         cur += head
-        for line in insts[cell]:
+        for rec in detail[tile]:
+            line = kit_pack.line(rec)
             if len(cur) + len(line) + 1 > CHARS:
                 pages.append(cur)
                 cur = head
             cur += line + "\n"
     if cur:
         pages.append(cur)
-    for k, s in enumerate(pages):
-        open(os.path.join(OUT, "Inst_%d.txt" % (k + 1)), "w", newline="\n").write(s)
+    for k, s_ in enumerate(pages):
+        open(os.path.join(OUT, "Inst_%d.txt" % (k + 1)), "w", newline="\n").write(s_)
     cp, cur = [], ""
-    for line in collide:
+    for rec in shell:
+        line = kit_pack.line(rec)
         if len(cur) + len(line) + 1 > CHARS:
             cp.append(cur)
             cur = ""
         cur += line + "\n"
     if cur:
         cp.append(cur)
-    for k, s in enumerate(cp):
-        open(os.path.join(OUT, "Collide_%d.txt" % (k + 1)), "w", newline="\n").write(s)
-    # triangles drawn (instances x mesh)
-    inst_tris = 0
-    inst_parts = 0
-    for c, ls in insts.items():
-        for line in ls:
-            if line.startswith("#"):
-                continue
-            pid = line.split()[0]
-            if pid == "B":
-                inst_parts += 1
-                inst_tris += 12
-                continue
-            for cc, pinfo in kit_meta[pid]["parts"].items():
-                inst_tris += pinfo["tris"]
-                inst_parts += 1
+    for k, s_ in enumerate(cp):
+        open(os.path.join(OUT, "Shell_%d.txt" % (k + 1)), "w", newline="\n").write(s_)
+    packed = kit_pack.write_rbxmx(os.path.join(GLB, "ygnkit_%s.rbxmx" % TAG.lower()), "Data_%s" % TAG, detail, TILE)
+    # parts and triangles: in the place (shell) and made near the camera (detail)
+    def rec_cost(rec):
+        if rec[0] == "B":
+            return 1, (0 if rec[8] == "WCOL" else 12)
+        if rec[0] in ("S",):
+            return 1, 12
+        if rec[0] == "W":
+            return 1, 0
+        pid = rec[1]
+        ps = kit_meta[pid]["parts"]
+        return len(ps), sum(v["tris"] for v in ps.values())
+    det_parts = det_tris = 0
+    for t, recs in detail.items():
+        for rec in recs:
+            a_, b_ = rec_cost(rec)
+            det_parts += a_
+            det_tris += b_
+    sh_parts = sh_tris = 0
+    for rec in shell:
+        a_, b_ = rec_cost(rec)
+        sh_parts += a_
+        sh_tris += b_
+    inst_parts, inst_tris = det_parts, det_tris
+    stats.update(detail_records=sum(len(v) for v in detail.values()), detail_parts=det_parts, detail_tris=det_tris,
+                 detail_tiles=len(detail), detail_chars=packed["chars"], shell_parts=sh_parts, shell_tris=sh_tris,
+                 place_parts=sh_parts + len(named_cells), collide_boxes=sum(1 for r_ in shell if r_[0] == "S"),
+                 shell_pages=len(cp))
     kit_tris = sum(m.tris for _, m in named_kit)
     st = dict(stats, buildings=len(blds), archetypes=dict(arch_n), floors=dict(sorted(floor_n.items())),
               src=dict(Counter(q["src"] for q in blds)), unique_kit_meshes=len(named_kit), kit_panels_unique=len(kit.data),
               kit_files=kit_files, kit_tris_unique=kit_tris, cell_meshes=len(named_cells), cell_files=cell_files,
               cell_tris=dict(cell_tris), instance_parts=inst_parts, instance_tris=inst_tris,
-              tris_total=inst_tris + sum(cell_tris.values()), panes_lit=panes_lit, inst_pages=len(pages),
-              collide_pages=len(cp), unique_meshes=len(named_kit) + len(named_cells),
+              tris_total=inst_tris + sh_tris + sum(cell_tris.values()), panes_lit=panes_lit, inst_pages=len(pages),
+              shell_pages_n=len(cp), unique_meshes=len(named_kit) + len(named_cells),
               landmark_sites_empty={k: [round(v, 1) for v in z.bounds] for k, z in zones.items()},
               seconds=round(time.time() - t0, 1))
     json.dump(st, open(os.path.join(OUT, "stats.json"), "w"), indent=1)

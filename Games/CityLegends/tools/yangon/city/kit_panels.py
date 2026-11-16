@@ -28,6 +28,7 @@ wall plane is Z = 0, the building is at Z < 0). kit.py works in metres with y in
 import math
 import os
 import sys
+import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -56,7 +57,7 @@ WALL_K = {"KWX": 1.0, "KW0": 1.0, "KWG": 0.74, "KCO": 0.82, "KSU": 0.84, "KST": 
           "KGM3": 0.8, "KGB": 0.72, "KW1": 1.0, "KW4": 1.0, "KW6": 1.0}
 CLOTH = {"KAW", "KAR", "KTP", "KNT", "KS1", "KS2", "KS3", "KS4", "KSW", "KSV", "KL1", "KL2", "KL3", "KL4", "KL5", "KL6"}
 NIGHT = {"NWH", "NWA", "NWY", "NWC"}
-ROOF_G = {"KRO"}   # the pitched roof sheet of the hip / gable pieces (class R: named by the sheet code in Studio)
+ROOF_G = {"KRO", "KRS2"}   # the pitched roof sheet of the hip / gable pieces (class R: named by the sheet code in Studio)
 # per-bay repaints inside a wall mesh are relative tints (the part's Color is the building's wall colour)
 PAINT_TINT = {"KW1": (1.0, 0.93, 0.8), "KW4": (0.95, 0.99, 1.0), "KW6": (1.0, 1.0, 1.0), "KWB": (0.85, 0.92, 1.0)}
 
@@ -301,8 +302,6 @@ def p_walkup(W, bays, floors, role, shop, age, civic=False):
                 blue = (not civic) and K.R.random() < (0.55 if front else 0.25)
                 window(x + BAY / 2 - 0.75, z + 0.9, 1.5, 1.35 if not civic else 1.6, 0.0, holes, wall, grille=True,
                        awning_kind="KAW" if blue else None)
-                if not civic and K.R.random() < 0.45:
-                    K.ac_unit(x + K.R.choice([0.15, BAY - 0.95]), z + 0.3, 0.0)
             paint = K.R.choice(["KW1", "KW4", "KW6"]) if (front and not civic and K.R.random() < 0.2) else None
             if paint:
                 for (a, b, c, d) in K.rect_minus(x + 0.05, x + BAY - 0.05, z + 0.05, z + FH - 0.2, holes):
@@ -312,8 +311,6 @@ def p_walkup(W, bays, floors, role, shop, age, civic=False):
         stains_light(0.0, W, GF + FH * (f - 1) - 0.12, 0.0, FH * 0.8, age, holes)
     stains_light(0.0, W, H, 0.0, FH, age, holes)
     K.grime(0.0, W, H - FH if floors > 1 else 0.0, H, 0.0, age, holes)
-    if front:
-        K.drainpipe(W - 0.03, 0.0, H + 0.6, 0.0)
     parapet(W, H, ARCH["walkup"]["par"], wall)
     return H
 
@@ -343,16 +340,12 @@ def p_township(W, bays, floors, role, shop, age):
             if front and f == 1 and K.R.random() < 0.5:
                 K.face(K.R.choice(["KSV", "KS2", "KS1"]), [(x + 0.3, -0.06, z + 0.1), (x + BAY - 0.3, -0.06, z + 0.1),
                                                            (x + BAY - 0.3, -0.06, z + 0.75), (x + 0.3, -0.06, z + 0.75)], (0, -1, 0))
-            elif K.R.random() < 0.5:
-                K.ac_unit(x + BAY / 2 - 0.4, z + 0.3, 0.0)
     for f in range(1, floors):
         band("KW0", W, GF + FH * (f - 1) - 0.1, 0.1, 0.12)
     K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
     for f in range(1, floors):
         stains_light(0.0, W, GF + FH * (f - 1) - 0.1, 0.0, FH * 0.8, age, holes)
     K.grime(0.0, W, H - FH, H, 0.0, age, holes)
-    if front:
-        K.drainpipe(0.12, 0.0, H, 0.0)
     parapet(W, H, ARCH["township"]["par"], wall)
     return H
 
@@ -377,8 +370,6 @@ def p_house(W, bays, floors, role, age, villa=False):
             window(x + BAY / 2 - ww / 2, z + 0.85, ww, wh, 0.0, holes, wall, grille=(f == 0 or not villa))
             if villa and K.R.random() < 0.5:
                 K.shutters(x + BAY / 2 - ww / 2, z + 0.85, ww, wh, 0.0, shut, K.R.choice(["flat", "flat", "closed"]))
-            if f > 0 and K.R.random() < 0.25:
-                K.ac_unit(x + 0.2, z + 0.35, 0.0)
         if f > 0:
             band("KW0", W, z - 0.15, 0.15, 0.15)
     K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
@@ -499,7 +490,68 @@ def p_shed(W, bays, floors, role, age, market=False):
     return H
 
 
+def p_pier(arch, W, floors, role, age):
+    """(2026-11-16, light pass) a half-bay pier: the archetype's wall, bands, plinth and parapet at the same heights as
+    its full panels, no openings. It closes a wall whose length does not fit whole bays (no plain end strips)."""
+    holes, wall = [], "KWX"
+    if arch in ("walkup", "civic"):
+        A = ARCH["civic" if arch == "civic" else "walkup"]
+        GF = A["gf"]
+        H = height("civic" if arch == "civic" else "walkup", floors)
+        for f in range(1, floors):
+            band("KWG", W, GF + FH * (f - 1) - 0.12, 0.12, 0.15)
+        K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+        stains_light(0.0, W, H, 0.0, FH, age, holes)
+        K.grime(0.0, W, H - FH if floors > 1 else 0.0, H, 0.0, age, holes)
+        parapet(W, H, ARCH["walkup"]["par"], wall)
+        return H
+    if arch == "township":
+        GF = ARCH["township"]["gf"]
+        H = height("township", floors)
+        for f in range(1, floors):
+            band("KW0", W, GF + FH * (f - 1) - 0.1, 0.1, 0.12)
+        K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+        K.grime(0.0, W, H - FH, H, 0.0, age, holes)
+        parapet(W, H, ARCH["township"]["par"], wall)
+        return H
+    if arch in ("house", "villa"):
+        GF = ARCH[arch]["gf"]
+        H = height(arch, floors)
+        band("KWG", W, 0.0, 0.6 if arch == "villa" else 0.35, 0.12)
+        for f in range(1, floors):
+            band("KW0", W, GF + FH * (f - 1) - 0.15, 0.15, 0.15)
+        K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+        stains_light(0.0, W, H, 0.0, min(FH, H), age, holes)
+        K.grime(0.0, W, max(0.6, H - FH), H, 0.0, age, holes, z_base=0.0)
+        return H
+    if arch == "condo":       # the 2-floor podium
+        H = height("condo", 2)
+        K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+        K.grime(0.0, W, H - FH, H, 0.0, age, holes, z_base=0.0)
+        return H
+    if arch == "condo_band":
+        H = floors * FH
+        for f in range(floors):
+            band("KW0", W, FH * f - 0.15 if f else 0.0, 0.15, 0.12)
+        K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+        return H
+    if arch == "condo_top":
+        parapet(W, 0.0, ARCH["condo"]["par"], "KWX")
+        return 0.0
+    E = ARCH["shed"]["gf"]   # shed / market
+    H = E + FH * max(0, floors - 1)
+    K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
+    K.grime(0.0, W, 0.6, H, 0.0, age, holes, z_base=0.0)
+    return H
+
+
 # ------------------------------------------------------------------------------------------ the kit
+def stable_id(prefix, key):
+    """(2026-11-16, light pass) a piece's id from its key, the same in every district run (the kit is shared by the
+    whole city: templates are named KIND_<id>)"""
+    return prefix + format(zlib.crc32(repr(key).encode()) & 0xffffffff, "08x")
+
+
 class Kit:
     def __init__(self):
         self.p = {}      # key -> pid
@@ -515,7 +567,7 @@ class Kit:
         key = (arch, role, floors, k, var, bool(shop), bool(stripe))
         if key in self.p:
             return self.p[key]
-        pid = "p%d" % (len(self.p) + 1)
+        pid = stable_id("p", key)
         self.p[key] = pid
         seed = hash(key) & 0xffffff
         seed = sum(ord(c) * (i + 7) for i, c in enumerate(repr(key))) * 7919 + var
@@ -524,7 +576,10 @@ class Kit:
         age = K.R.uniform(0.35, 0.8)
         base = "shed" if arch == "market" else ("condo" if arch.startswith("condo") else arch)
         W = ARCH[base]["bay"] * k
-        if arch in ("walkup", "civic"):
+        if k == 0:   # the half-bay pier
+            W = ARCH[base]["bay"] * 0.5
+            H = p_pier(arch, W, floors, role, age)
+        elif arch in ("walkup", "civic"):
             H = p_walkup(W, k, floors, role, shop, age, civic=arch == "civic")
         elif arch == "township":
             H = p_township(W, k, floors, role, shop, age)
@@ -562,7 +617,7 @@ class Kit:
                 # (cloth went into the metal class: 2 parts a panel, not 3; YgnSteelPainted is neutral like YgnCanvas)
                 cls, rgb = "M", tuple(min(255, v * 1.15) for v in GROUPS[grp][1])
             elif grp in ROOF_G:
-                cls, rgb = "R", (255, 255, 255)
+                cls, rgb = "R", ((150, 150, 150) if grp == "KRS2" else (255, 255, 255))
             else:
                 cls = "M"
                 rgb = GROUPS[grp][1] if grp in GROUPS else (60, 60, 60)
@@ -583,9 +638,9 @@ class Kit:
         key = ("prop", name)
         if key in self.p:
             return self.p[key]
-        pid = "q%d" % (len(self.p) + 1)
+        pid = stable_id("q", key)
         self.p[key] = pid
-        K.reset(99 + len(self.p))
+        K.reset(99 + zlib.crc32(name.encode()) % 100000)
         if name == "tanks":
             for k in range(2):
                 cx, cy = 0.8 + k * 1.6, 0.0
@@ -611,10 +666,22 @@ class Kit:
                 K.box("KWX", px, -0.3, 0.0, 0.55, 0.6, 2.8)
                 K.box("KW0", px - 0.08, -0.38, 2.8, 0.71, 0.76, 0.2)
                 K.cyl("KAC", px + 0.27, 0.0, 3.0, 0.35, 0.16, 6)
-        elif name in ("cwall1", "cwall4"):
+        elif name == "pipe":
+            # (2026-11-16) one drainpipe a building on a street face: 5 cm square, 1 cm off the wall (the old per-panel
+            # pipe stood 0.45 m off), 3 m tall (scaled in Y to the building); no back face (it would lie 1 cm from the
+            # wall: flicker), its front 6 cm out (2 cm from the paint 4 cm and stain 8 cm layers)
+            K.box("KPP", -0.025, -0.06, 0.0, 0.05, 0.05, 3.0, faces=("-y", "+x", "-x"))
+        elif name == "ac":
+            # (2026-11-16) an AC unit 0.12 m off the wall on two brackets (clear of sills 0.06 m out), the fan grille
+            # 0.02 m in front of the box (no drip streak: every free layer near the wall is taken by the panels' bands)
+            K.box("KAC", 0.0, -0.42, 0.0, 0.8, 0.3, 0.55, faces=("-y", "+x", "-x", "top", "bottom"))
+            K.front_quad("KGR", 0.42, 0.74, 0.1, 0.42, -0.44)
+            for bx in (0.1, 0.62):
+                K.box("KGR", bx, -0.45, -0.04, 0.05, 0.44, 0.04, faces=("-y", "+x", "-x", "top", "bottom"))
+        elif name in ("cwall1", "cwall2", "cwall4", "cwall8"):
             # a compound wall run: 1 or 4 bays of 3.5 m, 2.1 m tall + 0.3 m into the ground, 0.22 m thick, a pillar at
             # each bay start (0.4 m, 2.4 m), coping, a dark splash band, rain stains under the coping (all wall class)
-            nb = 1 if name == "cwall1" else 4
+            nb = int(name[5:])
             W = 3.5 * nb
             K.box("KWX", 0.0, -0.11, -0.3, W, 0.22, 2.4, faces=("-y", "+y"))
             # the coping: a ridge (0.03 m fall to each side), so two runs meeting at a corner cross along a line
@@ -649,7 +716,8 @@ class Kit:
                 e = 0.6 / 5.0  # the gable wall sits at the wall line, 0.6 m in from the eave
                 for sx in (-a + 0.6, a - 0.6):
                     K.face("KWX", [(sx, -b + 0.6, 0.0), (sx, b - 0.6, 0.0), (sx, 0.0, r * (1 - 0.6 / b))], (sx, 0, 0))
-            K.face("KSU", [A, Bq, C, D], (0, 0, -1))  # the soffit (a darker underside, wall class)
+            # the soffit: the sheet's underside in the roof class (one part a hip roof; 2026-11-16), darker
+            K.face("KRS2", [A, Bq, C, D], (0, 0, -1))
         self.data[pid] = self._collect(K.g, 0, 0, key)
         return pid
 
