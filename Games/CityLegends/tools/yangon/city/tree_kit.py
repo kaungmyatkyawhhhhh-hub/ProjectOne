@@ -34,16 +34,17 @@ S = 3.0  # studs a metre (the 1:1 frame)
 
 # foliage vertex colours (multiply YgnGrassLawn's map 81,117,54): sunlit top, mid, shaded underside
 LEAF = {
-    "rain": ((0.95, 0.92, 0.80), (0.70, 0.70, 0.62), (0.34, 0.36, 0.33)),
-    "broad": ((1.00, 0.98, 0.78), (0.76, 0.76, 0.62), (0.38, 0.40, 0.34)),
-    "mango": ((0.70, 0.72, 0.70), (0.50, 0.52, 0.52), (0.26, 0.28, 0.28)),
-    "mahog": ((0.78, 0.78, 0.70), (0.56, 0.58, 0.54), (0.28, 0.30, 0.29)),
+    "rain": ((0.80, 0.80, 0.62), (0.56, 0.58, 0.48), (0.26, 0.28, 0.25)),
+    "broad": ((0.86, 0.86, 0.62), (0.62, 0.64, 0.50), (0.30, 0.32, 0.27)),
+    "mango": ((0.58, 0.62, 0.56), (0.40, 0.44, 0.42), (0.20, 0.22, 0.22)),
+    "mahog": ((0.66, 0.68, 0.56), (0.46, 0.49, 0.43), (0.22, 0.24, 0.23)),
     "palm": ((1.05, 1.00, 0.70), (0.86, 0.84, 0.60), (0.55, 0.54, 0.42)),
     "banana": ((1.10, 1.10, 0.78), (0.92, 0.95, 0.66), (0.62, 0.62, 0.45)),
     "hedge": ((0.80, 0.84, 0.70), (0.58, 0.62, 0.55), (0.32, 0.34, 0.31)),
     "shrub": ((0.92, 0.94, 0.74), (0.66, 0.70, 0.58), (0.34, 0.36, 0.32)),
 }
-BARK = {"rain": (92, 80, 70), "broad": (98, 86, 72), "mango": (78, 66, 56), "mahog": (86, 72, 60), "palm": (128, 116, 100)}
+BARK = {"rain": (176, 164, 150), "broad": (182, 168, 150), "mango": (150, 136, 122), "mahog": (164, 148, 132),
+        "palm": (196, 186, 170)}
 
 
 # ------------------------------------------------------------------------------------------------- geometry
@@ -146,7 +147,7 @@ def lobe(m, centre, radii, seed, pal, ytop, ybot, level=2, amp=0.16, flat_bottom
     V0, F = ICO[level]
     V = []
     for v in V0:
-        d = 1.0 + amp * vnoise(v[0] * 2.2, v[1] * 2.2, v[2] * 2.2, seed)
+        d = 1.0 + amp * vnoise(v[0] * 3.4, v[1] * 3.4, v[2] * 3.4, seed)
         y = v[1]
         if flat_bottom and y < 0:
             y = y * (1 - flat_bottom)
@@ -241,17 +242,23 @@ def broadleaf_tree(seed, kind, D, Hgt, fork, nlobes, pal_name, nlimbs=3, flat=0.
         end = (top[0] + math.cos(a) * rr, cm + r.uniform(-0.3, 0.4), top[2] + math.sin(a) * rr)
         limb(bark, top, mid, r0 * 0.7, r0 * 0.5, br, sides=6)
         limb(bark, mid, end, r0 * 0.5, r0 * 0.25, br, sides=5)
-    # crown: a centre lobe and a ring
-    lobe(crown, (top[0], cm + R * lobe_h * 0.6, top[2]), (R * 0.55, R * (0.42 if flat else 0.62), R * 0.55), r.random() * 9,
-         pal, ytop, ybot, 2, 0.14, flat, tint)
-    for k in range(nlobes):
-        a = a0 + 2 * math.pi * (k + 0.5) / nlobes + r.uniform(-0.25, 0.25)
-        d = R * spread * r.uniform(0.85, 1.05)
-        cy = cm + r.uniform(-0.12, 0.12) * R - (0.10 * R if flat else 0)
-        lr = R * lobe_r * r.uniform(0.9, 1.15)
-        lobe(crown, (top[0] + math.cos(a) * d, cy, top[2] + math.sin(a) * d),
-             (lr, R * (lobe_h if flat else lobe_r * 0.9) * r.uniform(0.9, 1.1), lr), r.random() * 9, pal, ytop, ybot,
-             2 if lr > 4.5 else 1, 0.16, flat * 0.6, tint)
+    # crown: a core and many leaf clumps on a shell (broken, leafy silhouette; 16 Nov: a centre lobe + a ring of big
+    # smooth lobes read as cartoon "broccoli" in Studio)
+    ry = R * (0.50 if flat else 0.72)
+    cc = (top[0], cm + (0.12 * R if flat else 0.0), top[2])
+    lobe(crown, cc, (R * 0.74, ry * 0.8, R * 0.74), r.random() * 9, pal, ytop, ybot, 1, 0.22, 0.5 if flat else 0.25,
+         tint * 0.85)
+    n = nlobes
+    for k in range(n):
+        t = (k + 0.5) / n
+        y = 1.0 - t * (1.25 if flat else 1.45)
+        rr = math.sqrt(max(0.0, 1 - min(1.0, y * y)))
+        ph = k * 2.39996 + r.uniform(-0.3, 0.3)
+        f = r.uniform(0.70, 0.92)
+        pc = (cc[0] + math.cos(ph) * rr * R * 0.92 * f, cc[1] + y * ry * f, cc[2] + math.sin(ph) * rr * R * 0.92 * f)
+        lr = R * lobe_r * r.uniform(0.7, 1.2)
+        lobe(crown, pc, (lr, lr * (0.62 if flat else 0.8), lr), r.random() * 9, pal, ytop, ybot, 1, 0.3,
+             0.35 if flat else 0.15, tint * r.uniform(0.86, 1.1))
     return crown, bark
 
 
@@ -430,16 +437,16 @@ def build():
 
     # rain tree: 22 m umbrella, 15 m tall, low fork at 4 m, wide low limbs
     for i, sd in enumerate((11, 23)):
-        c, b = broadleaf_tree(sd, "rain", 22.0, 15.0, 4.0, 7, "rain", nlimbs=5, flat=0.45, spread=0.66, lobe_r=0.32,
-                              lobe_h=0.22, crown_mid=11.2)
+        c, b = broadleaf_tree(sd, "rain", 22.0, 15.0, 4.0, 20, "rain", nlimbs=5, flat=0.45, spread=0.66, lobe_r=0.22,
+                              lobe_h=0.22, crown_mid=10.2)
         add("rt%d" % (i + 1), {"TRC": c, "TRB": b}, dict(species="rain tree", D=22.0, H=15.0, base=7.5))
     for i, sd in enumerate((31, 37)):
-        c, b = broadleaf_tree(sd, "broad", 12.0, 13.0, 3.6, 5, "broad", nlimbs=3, spread=0.5, lobe_r=0.4, crown_mid=8.6)
+        c, b = broadleaf_tree(sd, "broad", 12.0, 13.0, 3.6, 14, "broad", nlimbs=3, spread=0.5, lobe_r=0.30, crown_mid=8.6)
         add("bl%d" % (i + 1), {"TRC": c, "TRB": b}, dict(species="padauk / tamarind / gold mohur", D=12.0, H=13.0, base=4.5))
     for i, sd in enumerate((41, 47)):
-        c, b = broadleaf_tree(sd, "mango", 11.0, 10.0, 1.8, 6, "mango", nlimbs=3, spread=0.48, lobe_r=0.42, crown_mid=5.6)
+        c, b = broadleaf_tree(sd, "mango", 11.0, 10.0, 1.8, 15, "mango", nlimbs=3, spread=0.48, lobe_r=0.32, crown_mid=5.6)
         add("mg%d" % (i + 1), {"TRC": c, "TRB": b}, dict(species="mango / jackfruit", D=11.0, H=10.0, base=2.0))
-    c, b = broadleaf_tree(53, "mahog", 10.0, 18.0, 6.0, 5, "mahog", nlimbs=3, spread=0.42, lobe_r=0.42, crown_mid=12.5)
+    c, b = broadleaf_tree(53, "mahog", 10.0, 18.0, 6.0, 14, "mahog", nlimbs=3, spread=0.42, lobe_r=0.32, crown_mid=12.5)
     # stretch the mahogany crown upward (dense tall oval)
     c.P = [(p[0], 12.5 + (p[1] - 12.5) * 1.35, p[2]) for p in c.P]
     add("mh1", {"TRC": c, "TRB": b}, dict(species="mahogany", D=10.0, H=19.0, base=7.0))

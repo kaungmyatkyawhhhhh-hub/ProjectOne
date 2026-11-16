@@ -55,10 +55,18 @@ G.TERRAIN = {
 	Pebble = "YgnGravel",
 	Salt = "YgnEarthRed",
 }
--- terrain-only colours of the two paved materials (Terrain:SetMaterialColor touches no part)
+-- terrain-only colours (Terrain:SetMaterialColor touches no part). They TINT the overriding MaterialVariant's map
+-- (16 Nov: Roblox's default Ground colour 132,114,86 turned YgnDirtPacked orange-brown and Grass 106,127,63 made the
+-- lawn near-black green), so the variant materials get near-white tints and the maps carry the colour. Salt can't be
+-- coloured ("Invalid terrain material").
 G.TERRAIN_COLOR = {
 	Concrete = Color3.fromRGB(150, 146, 136),
 	Pavement = Color3.fromRGB(164, 158, 146),
+	Ground = Color3.fromRGB(228, 222, 214),
+	Grass = Color3.fromRGB(205, 218, 195),
+	LeafyGrass = Color3.fromRGB(226, 220, 204),
+	Pebble = Color3.fromRGB(226, 226, 226),
+	Mud = Color3.fromRGB(215, 210, 205),
 }
 
 local B64 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
@@ -203,18 +211,20 @@ function G.terrainLook(undo: boolean?)
 	for matName, colr in G.TERRAIN_COLOR do
 		local mat = Enum.Material[matName]
 		local key = "YgnOldColor_" .. matName
-		if undo then
-			local old = T:GetAttribute(key)
-			if old then
-				T:SetMaterialColor(mat, old)
-				T:SetAttribute(key, nil)
+		pcall(function()
+			if undo then
+				local old = T:GetAttribute(key)
+				if old then
+					T:SetMaterialColor(mat, old)
+					T:SetAttribute(key, nil)
+				end
+			else
+				if T:GetAttribute(key) == nil then
+					T:SetAttribute(key, T:GetMaterialColor(mat))
+				end
+				T:SetMaterialColor(mat, colr)
 			end
-		else
-			if T:GetAttribute(key) == nil then
-				T:SetAttribute(key, T:GetMaterialColor(mat))
-			end
-			T:SetMaterialColor(mat, colr)
-		end
+		end)
 	end
 	return table.concat(out, " ")
 end

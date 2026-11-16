@@ -12,6 +12,9 @@ Ngahtatgyi: OSM way/314121257 (72 x 58 m, axis-aligned), checked on Esri z19 (re
   outline; the old landmarks.json point 96.1645, 16.8104 was 299 m off). Local x = east, y = north, origin = bbox centre.
   Buddha under the tower, facing west (down the nave; not confirmed by a source: the tower sits in the east half).
 """
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import ornament_kit as OK  # noqa: E402  (2026-11-16 carved ornament kit)
 import json
 import math
 import os
@@ -432,6 +435,7 @@ def ngah():
     from shapely.geometry import Polygon as SPoly
     outline = SPoly(bd)
     leaf = [(0, -0.75), (0.42, -0.35), (0.5, 0.15), (0.3, 0.55), (0.05, 0.95), (-0.1, 0.55), (-0.42, 0.3), (-0.5, -0.3)]
+    relief = []
     for inset, step, sc, dep in ((0.9, 1.25, 1.0, 0.12), (2.2, 1.5, 0.85, 0.2)):
         ring2 = outline.buffer(-inset, join_style=2).exterior
         L = ring2.length
@@ -448,12 +452,23 @@ def ngah():
             nx, ny = ty, -tx       # outward of the CCW ring
             if outline.contains(type(p)(p.x + nx * 0.5, p.y + ny * 0.5)):
                 nx, ny = -nx, -ny
-            pts = [(p.x + (a * tx + b2 * nx) * sc, p.y + (a * ty + b2 * ny) * sc) for a, b2 in leaf]
-            m.prism("TKL", pts, -dep, 0, frame=((15.2, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0)), top=False, bottom=True)
+            # 2026-11-16: an acanthus scroll leaf from the ornament kit (bevelled, curling into a volute, alternating
+            # hands) in place of a flat leaf plate; it rises from the ring along the outward normal
+            ang = math.degrees(math.atan2(ny, nx)) - 90.0
+            sl = OK.scroll(1.25 * sc, p.x, p.y, ang=ang, mirror=(k % 2 == 0), n=6)
+            relief.append((sl, dep))
+    for sl, dep in relief:
+        P_ = OK.Piece("bd")
+        OK.slab(P_, "G", sl, 0.0, dep, 0.035, back=False, band=False)
+        OK.into_model(P_, m, {"G": "TKL"}, (15.2, 0.0, 0.0), (0.0, 1.0, 0.0), (-1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
+    # gold flames by the crown: the ornament kit's carved kanote (bevelled, flame tongues, raised spine) on the teak
     for sy in (-1, 1):
-        flame = [(4.6, 7.5), (5.2, 8.5), (5.0, 10.0), (5.6, 11.5), (5.1, 12.8), (4.6, 11.4), (4.3, 9.6)]
-        flame = [(sy * a, S + b2) for a, b2 in flame]
-        m.prism("GLD", flame, 0, 0.1, frame=((15.1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 0, 0)), top=False, bottom=True)
+        fl = OK.Piece("fl")
+        OK.slab(fl, "G", OK.move(OK.flame_outline(1.4, 5.4, lobes=3, n_lobe=3, barb=0.6, lean=sy * 0.06), dx=sy * 4.95,
+                                 dz=S + 7.4), 0.0, 0.14, 0.04, back=False, band=True)
+        OK.slab(fl, "G", OK.move(OK.flame_outline(0.5, 3.6, lobes=2, n_lobe=2, barb=0.4, lean=sy * 0.05), dx=sy * 4.95,
+                                 dz=S + 8.2), 0.14, 0.08, 0.025, back=False, band=False)
+        OK.into_model(fl, m, {"G": "FGB"}, (15.2, 0.0, 0.0), (0.0, 1.0, 0.0), (-1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
     # offering table (white cloth)
     m.box("CLT", 4.4, 5.8, -9.0, 9.0, FL, 2.0, skip=("-z",))
     boxes.append((5.1, 0, FL, 1.4, 18.0, 1.2, 0))

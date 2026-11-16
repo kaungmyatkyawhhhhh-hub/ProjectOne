@@ -681,6 +681,17 @@ def into_geo(piece, geo, groups, origin, right=(1, 0, 0), out=(0, 1, 0), up=(0, 
             geo.tri(g, a, b, c)
 
 
+def into_model(piece, m, groups, origin, right=(1, 0, 0), out=(0, 1, 0), up=(0, 0, 1), s=1.0, **kw):
+    """solid3d.Model (bahan_buddhas3d): groups = {kit group: group}; flat-shaded triangles, winding kept."""
+    per = {}
+    for grp, a, b, c in piece.placed(origin, right, out, up, s, **kw):
+        g = groups.get(grp)
+        if g is not None:
+            per.setdefault(g, []).append((a, b, c, None))
+    for g, tris in per.items():
+        m._put(g, tris)
+
+
 def basis_facing(bearing_rad):
     """Kit frame for a wall facing compass bearing (x east, y north, z up): returns (right, out, up)."""
     out = (math.sin(bearing_rad), math.cos(bearing_rad), 0.0)

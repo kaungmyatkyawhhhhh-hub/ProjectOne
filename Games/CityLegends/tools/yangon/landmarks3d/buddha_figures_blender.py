@@ -20,6 +20,8 @@ import sys
 import numpy as np
 from mathutils import Vector, Quaternion, Matrix
 from mathutils.bvhtree import BVHTree
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import ornament_kit as OK  # noqa: E402  (2026-11-16 carved ornament kit: the crown filigree)
 
 ARGS = sys.argv[sys.argv.index("--") + 1:]
 WHICH, OUT = ARGS[0], ARGS[1]
@@ -287,14 +289,15 @@ def face_sculpt_v3(P, N, H):
     gc = lambda cy, sx, sy: np.exp(-((x / sx) ** 2 + ((y - cy) / sy) ** 2))
     v = V3
     d = np.zeros(len(P))
-    d += -0.045 * g(v["eyex"], v["eyey"], 0.30, 0.14)              # eye sockets
+    d += -0.078 * g(v["eyex"], v["eyey"], 0.27, 0.13)              # eye sockets (v4: deeper set, photo 1)
     d += 0.022 * g(v["eyex"], v["eyey"], 0.22, 0.065)               # eyeball / lids
-    d += 0.022 * g(0.38, v["brow"] - 0.02, 0.32, 0.05)              # brow ridge
+    d += 0.040 * g(0.38, v["brow"] - 0.01, 0.30, 0.045)             # brow ridge (v4: stronger, shades the eyes)
     d += 0.060 * g(0.44, -0.36, 0.26, 0.26)                          # full cheeks
     d += 0.030 * g(0.30, -0.62, 0.16, 0.14)                          # lower cheeks
-    ridge = np.exp(-((x / 0.06) ** 2)) * np.clip((0.12 - y) / 0.5, 0, 1) * np.clip((y - v["nosey"] + 0.02) / 0.05, 0, 1)
-    d += 0.12 * ridge                                                # straight nose ridge
-    d += 0.065 * gc(v["nosey"] + 0.01, 0.075, 0.05)                 # tip
+    ridge = np.exp(-((x / 0.042) ** 2)) * np.clip((0.16 - y) / 0.4, 0, 1) * np.clip((y - v["nosey"] + 0.02) / 0.04, 0, 1)
+    d += 0.17 * ridge                                                # straight nose ridge (v4: sharper, higher)
+    d += 0.035 * np.exp(-((x / 0.11) ** 2)) * np.clip((0.1 - y) / 0.45, 0, 1) * np.clip((y - v["nosey"]) / 0.06, 0, 1)  # its flanks
+    d += 0.075 * gc(v["nosey"] + 0.01, 0.06, 0.045)                 # tip (v4: narrower)
     d += 0.040 * g(0.10, v["nosey"] - 0.005, 0.045, 0.04)           # wings
     d += -0.020 * g(0.062, v["nosey"] - 0.04, 0.03, 0.02)          # nostrils
     d += -0.014 * gc(v["nosey"] - 0.085, 0.035, 0.03)               # philtrum
@@ -521,7 +524,8 @@ def chauk():
         emit(b, None, xf, default="FSO")
 
     # ---------------- crown: a gold band round the forehead and sides, scalloped top, pointed flap by each ear
-    crown_band(H, xf, th0=-118, th1=118, ylo=0.33, yhi=0.70, flap=92, off=0.09, petals=(11, 0.17))
+    # v4 (2026-11-16): the band ends lower and the petals are now open filigree from the ornament kit (below)
+    crown_band(H, xf, th0=-118, th1=118, ylo=0.33, yhi=0.60, flap=92, off=0.09, petals=(0, 0))
     crown_band(H, xf, th0=-116, th1=116, ylo=0.325, yhi=0.38, flap=999, off=0.16, petals=(0, 0), thick=0.07)   # lower rim
     crown_band(H, xf, th0=-114, th1=114, ylo=0.62, yhi=0.655, flap=999, off=0.16, petals=(0, 0), thick=0.06)  # upper rim
     for row, (yy, n, r0, grp) in enumerate(((0.515, 19, 0.11, "FLP"), (0.585, 27, 0.06, "FLD"))):
@@ -530,6 +534,34 @@ def chauk():
             r = max(0.05, 1 - yy * yy) ** 0.5
             p, nv = surface_hit(H, r * math.sin(th), yy, r * math.cos(th))
             jewel(p + nv * (0.17 + r0 * 0.4), r0, grp if (k % 2 == 0 or row == 1) else "FGB", xf)
+    # v4 crown filigree (ornament kit): 13 carved kanote flame finials (knob, curled leaves, lobed blade, raised
+    # beaded spine) standing round the band's top edge with open gaps between them, and a pair of curled scroll leaves
+    # on the band between each two; leaning out a little like the photo's crown points
+    Uw = Vector(H.U.tolist())
+    fin = OK.flame_finial(1.05, lod="lo")
+    for k in range(13):
+        th = math.radians(-100 + 200 * k / 12)
+        yy = 0.55
+        r = max(0.05, 1 - yy * yy) ** 0.5
+        p, nv = surface_hit(H, r * math.sin(th), yy, r * math.cos(th))
+        oh = (nv - Uw * nv.dot(Uw)).normalized()
+        up = (Uw + oh * 0.35).normalized()
+        out = (oh - up * oh.dot(up)).normalized()
+        o = p + nv * 0.16
+        kit_on(fin, o, out.cross(up), out, up, "FGB", xf)
+    for k in range(12):
+        th = math.radians(-100 + 200 * (k + 0.5) / 12)
+        yy = 0.45
+        r = max(0.05, 1 - yy * yy) ** 0.5
+        p, nv = surface_hit(H, r * math.sin(th), yy, r * math.cos(th))
+        oh = (nv - Uw * nv.dot(Uw)).normalized()
+        up = (Uw - oh * Uw.dot(oh)).normalized()
+        out = oh
+        sp = OK.Piece("sc")
+        for hand in (1, -1):
+            OK.slab(sp, "G", OK.scroll(0.32, hand * 0.03, -0.12, ang=-hand * 20, mirror=hand < 0, n=5), 0.0, 0.05, 0.015,
+                    band=False)
+        kit_on(sp, p + nv * 0.205, out.cross(up), out, up, "FGB", xf)
     # (v3: no lashes, the long winged liner carries the eye)
     for s in ():
         for k in range(11):
@@ -628,6 +660,21 @@ def stick(p0, p1, w, grp, xf):
         for tri in ((q[0], q[1], q[2]), (q[0], q[2], q[3])):
             pts = [xf(v) for v in tri]
             GROUPS.setdefault(grp, []).append([pts[::-1] if MIRROR[0] else pts, [xf(n, direction=True)] * 3])
+
+
+def kit_on(piece, origin, right, out, up, grp, xf):
+    """An ornament_kit piece (metres, x right / y out / z up) onto the figure at origin (model coords), flat-shaded."""
+    for _g, a, b, c in piece.placed(tuple(origin), tuple(right), tuple(out), tuple(up)):
+        A, B, C = Vector(a), Vector(b), Vector(c)
+        n = (B - A).cross(C - A)
+        if n.length < 1e-12:
+            continue
+        n.normalize()
+        pts = [xf(A), xf(B), xf(C)]
+        nn = xf(n, direction=True)
+        if MIRROR[0]:
+            pts = pts[::-1]
+        GROUPS.setdefault(grp, []).append([pts, [nn, nn, nn]])
 
 
 def crown_band(H, xf, th0, th1, ylo, yhi, flap, off, grp="FGB", n=160, thick=0.12, petals=(0, 0.035)):

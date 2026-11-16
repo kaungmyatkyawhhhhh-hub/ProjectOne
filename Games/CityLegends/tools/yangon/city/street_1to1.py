@@ -341,8 +341,16 @@ class World:
         self.WALL = unary_union(walls + gates).buffer(0.3)
         self.GATES = unary_union(gates) if gates else Polygon()
         self.LMZ = landmark_zone()
+        # the green layer's trees (green_1to1.py: [family, variant, x, z, height]): their trunks are obstacles
+        tf = os.path.join(B1, "green_%s" % TAG, "trees.json")
+        trunks = []
+        if os.path.exists(tf):
+            R = dict(rt=2.4, mh=1.6, bl=1.2, cp=1.0, mg=1.2, bn=0.8)
+            trunks = [Point(t[2], t[3]).buffer(R.get(t[0], 1.0) + 0.3, 8) for t in json.load(open(tf))]
+        self.TREES = unary_union(trunks) if trunks else Polygon()
+        self.n_trees = len(trunks)
         self.btree = STRtree(polys)
-        for g in (self.CARR, self.PAVE, self.MED, self.ROADS, self.DECK, self.LANES, self.BLD, self.WALL, self.LMZ, self.GATES):
+        for g in (self.CARR, self.PAVE, self.MED, self.ROADS, self.DECK, self.LANES, self.BLD, self.WALL, self.LMZ, self.GATES, self.TREES):
             shapely.prepare(g)
         self.occ = defaultdict(list)
         self.items = []
@@ -374,7 +382,7 @@ class World:
         allowed) roads; `allow` = a polygon of road where this item may stand (its own pavement / edge strip)"""
         if not self.district.contains(g):
             return False
-        if self.BLD.intersects(g) or self.WALL.intersects(g) or self.LMZ.intersects(g) or self.DECK.intersects(g):
+        if self.BLD.intersects(g) or self.WALL.intersects(g) or self.LMZ.intersects(g) or self.DECK.intersects(g) or                 self.TREES.intersects(g):
             return False
         if self.LANES.intersects(g):
             return False
