@@ -38,6 +38,7 @@ created: 2026-11-16
 | Materials and textures (50 MaterialVariants) | [[2026-11-16 Research - Yangon materials and textures library]] |
 | What is missing (places, systems, decorations, walls) | [[2026-11-16 Audit - What is missing from the Yangon map]] |
 | What was invented, and the fixes | [[2026-11-16 Audit - invented content in the Yangon map]] |
+| Chaukhtatgyi + Ngahtatgyi halls (1:1 models, walkable insides; Ngahtatgyi position fixed) | [[2026-11-16 Chaukhtatgyi and Ngahtatgyi 3D models]] |
 
 ## Already live in the current map (16 Nov, version 957)
 - Yangon's pale hazy midday sky and warm daylight.
