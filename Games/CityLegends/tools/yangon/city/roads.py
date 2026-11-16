@@ -167,6 +167,7 @@ def write_meshes(meshes, tag, log=print):
             lo, hi = m.box()
             c = [(lo[k] + hi[k]) / 2 for k in range(3)]
             sz = [max(hi[k] - lo[k], 0.01) for k in range(3)]
+            assert max(sz) <= 2048.0, ('MeshPart limit 2048 studs', kind, cid, sz)
             named.append((code(kind, cid, c, sz), m, kind))
         path = os.path.join(d, 'roads_%s_%d.glb' % (tag, fi + 1))
         info = write_glb(path, [(nm_, m) for nm_, m, _ in named], generator='yangon city roads.py')

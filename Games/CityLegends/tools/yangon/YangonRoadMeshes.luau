@@ -128,6 +128,9 @@ function M.place(holding: Instance, folder: Instance, opts: any?): number
 				end)
 				q:SetAttribute("Cell", cell)
 				q.Parent = model
+				-- (2026-11-16, P1) set again once parented: on an unparented clone the set above did not stick (P1's 216
+				-- meshes all came out Default). It is slow (~13 a second): run place() in M.spawn.
+				pcall(function() q.CollisionFidelity = Enum.CollisionFidelity.Box end)
 				n += 1
 				if n % 40 == 0 then
 					task.wait()

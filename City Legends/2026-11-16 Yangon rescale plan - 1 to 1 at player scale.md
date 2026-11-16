@@ -413,3 +413,21 @@ Rules for every step:
 - The 6 m corner closing joins the flyover's ground lanes and ramp foot into one asphalt band from above.
 - No stop lines, turn arrows, splitters or kerb parking yet (audit items 11-13).
 - Next: upload, place and collision in the new frame, then terrain (step 3.4) and graph_test.
+
+### P1 roads and ground in Studio (16 Nov 2026, not saved)
+- **Placed:** `Workspace.Yangon1to1.Roads`: `Meshes` (216 meshes in 33 cell Models), `Collide` (8,350 invisible boxes, YangonRoadMeshes.collide). Terrain skin under the whole district: 1,080 tiles, 4.14 M columns, grass, road beds 1 stud under the roads, Inya Lake as real water at 40.5 (13.5 m x 3). The skin is thin: 12 studs of solid under each tile's lowest top (lowest bottom y 16). `Workspace.Yangon` not touched. Nothing saved, no Play.
+- **Looks:** carriageway Asphalt + YgnAsphaltWorn, pavement Pavement + YgnPavementSlabs, kerbs Concrete + YgnKerb (own colours), medians / bridge / edge strips Concrete + YgnConcreteBare, lines SmoothPlastic (white, yellow LY 232, 184, 52). Visual meshes CollisionFidelity Box, CanQuery false.
+- **Assets:** meshes 118225667657179, 140026349574196, 133845673202805, 115233685609501, 107098753198662, 100043275291480, 102340709396221 (group 33151111). Collision + terrain data: version 78 of 133014134133489 (22 StringValues, checksums matched, deleted after use).
+- **Fixed on the way:**
+  - The 3,072-stud mesh cells were too big: a MeshPart is at most 2,048 studs on any axis, so Roblox shrank every cell mesh (roads drawn in the wrong place). `roadmesh.MESH_CELL` is 1536 at 1:1 now (216 meshes, still 567,262 triangles); `roads.py` stops on a mesh over 2,048.
+  - Medians came out grass green: the mesh's corner colour tints the variant. MG is concrete grey at 1:1 now.
+  - `terrain.py` runs for a pilot (`YANGON_SCALE=1to1 python terrain.py P1`, outputs in `build/city_1to1/`); it no longer lowers Inya Lake to the DEM (it had put it at 39.9).
+  - CollisionFidelity set on an unparented clone did not stick; YangonRoadMeshes sets it again after parenting.
+- **Checks:** road boxes sit 0.5-3 studs over the terrain (1,531 samples), none under it. Junctions (Pyay x U Wisara, Hanthawaddy) show no z-fighting.
+- **Screenshot trap:** in Edit the terrain far from Studio's own camera is drawn coarse and covers the roads (whole areas look roadless). Move `workspace.CurrentCamera` to the view, wait ~4 s, then `screen_capture`.
+- **Still wrong:**
+  - Inya Lake stops at the district's north edge: water and sand end in a wall.
+  - Lane lines and the centre line run through junction boxes.
+  - Every road stands about 1 stud over the grass with a small skirt showing.
+  - The MaterialVariant textures were still loading for some surfaces (asphalt already shows its cracks on U Wisara Rd).
+- **Next:** lanes and graph_test (step 3.5), then save and measure.

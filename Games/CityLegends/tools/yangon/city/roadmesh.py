@@ -68,7 +68,11 @@ if ONE_TO_ONE:
     # (item 3), median-side lines yellow, no outer edge line (item 9), red-white kerbs only on trunk / primary roads and
     # roundabouts (item 16), parapets 1.1 m high and 0.5 m thick
     CELL = 512.0
-    MESH_CELL = 3072.0
+    # (2026-11-16) 1536, not 3072: a MeshPart is at most 2048 studs on any axis; Roblox clamped the 3,072-stud cells to
+    # 2048 and shrank the whole mesh (P1's first placement: roads drawn in the wrong place, kerbs alone at the roundabout)
+    MESH_CELL = 1536.0
+    # (2026-11-16) medians are bare concrete at 1:1 (YgnConcreteBare): the vertex colour tints the variant, so no grass green
+    COL = dict(COL, MG=(150, 146, 138))
     MARGIN *= geo.LK
     RC = 18.0
     GRID *= geo.LK

@@ -46,6 +46,9 @@ import roadnet as rn
 import roadmesh as rm
 
 OUT = os.path.join(geo.BUILD, 'city')
+if geo.ONE_TO_ONE:
+    # (2026-11-16, rescale step 3) the 1:1 frame's outputs (roads.py writes roads_<tag>_profile.json there too)
+    OUT = os.path.join(geo.BUILD, 'city_1to1')
 RES = 4.0
 TILE = 256
 UNDER = 1.0
@@ -85,8 +88,12 @@ def dec(s):
 
 
 def regions(tag):
-    from shapely.geometry import box as sbox
+    from shapely.geometry import box as sbox, Polygon
     from shapely.ops import unary_union
+    if geo.standalone(tag):
+        # (2026-11-16) a 1:1 pilot district: its own box only (no batch 0.5, no game roads, no other batch in this frame)
+        poly = geo.batch_poly(tag)
+        return poly, poly, Polygon(), Polygon()
     game, _ = rn.game_roads()
     ex = rn.game_exclusion(game)
     poly = geo.batch_poly(tag)
@@ -499,7 +506,10 @@ def build(tag, log=print, diff=False):
         inO |= wr
         log('  %d columns batch %s wrote outside this outline left as they are' % (drop.sum(), u))
     log('  region %d columns (%.0f s)' % (inR.sum(), time.time() - t0))
-    nat, protect = landmark_ground(nat, xs, zs, inR, log)
+    if geo.standalone(tag):
+        protect = np.zeros((nx, nz), bool)      # (the landmark pads are in the old frame)
+    else:
+        nat, protect = landmark_ground(nat, xs, zs, inR, log)
     H = nat.copy()
     code = np.where(inR, 1, 0).astype(np.int8)   # 0 keep, 1 grass, 2 mud, 3 water mud bed, 4 water sand bed
     level = np.zeros((nx, nz), np.float32)
@@ -508,7 +518,7 @@ def build(tag, log=print, diff=False):
     bigriv = np.zeros((nx, nz), bool)    # the Yangon River and its docks (not Pazundaung Creek): the quay edge
     nwb = 0
     from shapely.geometry import Polygon as _Poly
-    lm_polys = [_Poly(L['poly']).buffer(20) for L in LANDMARK_GROUND] if USE_LANDMARKS else []
+    lm_polys = [_Poly(L['poly']).buffer(20) for L in LANDMARK_GROUND] if USE_LANDMARKS and not geo.standalone(tag) else []
     for w in sorted(G.water, key=lambda w: w['level_m']):
         pg = w['poly']
         if not pg.intersects(region):
@@ -530,7 +540,8 @@ def build(tag, log=print, diff=False):
         nwb += 1
         L = w['level_m'] * ground.VS
         # (SRTM over a small pond can read roofs or trees: a level over the ground round it would stand as a block of water)
-        if not (w in rivers):
+        # (2026-11-16, 1:1) ground.py already sets the measured lake levels (Inya 13.5 m, Kandawgyi 12.0 m): keep them
+        if not (w in rivers) and not (geo.ONE_TO_ONE and w['big']):
             Lg = float(np.median(H[i0:i1, j0:j1][ins])) + UNDER - 0.6
             if L > Lg:
                 L = Lg
