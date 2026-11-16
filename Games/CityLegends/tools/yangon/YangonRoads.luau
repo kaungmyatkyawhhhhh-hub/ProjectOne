@@ -1703,7 +1703,8 @@ end
 ------------------------------------------------------------------------------------------------
 -- step 4: the flyover decks (data.decks from d7_flyovers.py)
 ------------------------------------------------------------------------------------------------
-M.DECK_CLEAR = 9 -- surface this far over the ground or more: a girder on piers; less: walls down to the ground
+M.DECK_CLEAR = 7 -- surface this far over the ground or more: open, a girder on piers; less: a short abutment wall to the ground
+M.DECK_GRADE_H = 1.2 -- (owner's bug 2, 17 Nov) under this over the ground the deck is just road: no walls (the level start by a junction)
 M.GIRDER = 3 -- the box girder's depth under the slab
 M.PIER_EVERY = 8 -- samples between piers (about 51 studs)
 M.PARAPET = 2.6 -- the parapet's top over the deck's edge
@@ -1799,7 +1800,7 @@ function M.buildDecks()
 		local n = math.min(#s, #ED.L, #ED.R)
 		local made, piers, skipped, ramp = 0, 0, {}, 0
 		-- per segment: elevated or not (the ground under the middle and 2 studs past both edges)
-		local elevated = {}
+		local elevated, atGrade = {}, {}
 		for i = 1, n - 1 do
 			local cL = (ED.L[i] + ED.L[i + 1]) / 2
 			local cR = (ED.R[i] + ED.R[i + 1]) / 2
@@ -1807,11 +1808,12 @@ function M.buildDecks()
 			local out = ((cR - cL) * Vector3.new(1, 0, 1)).Unit
 			local g = math.max(groundY(mid.X, mid.Z, mid.Y), groundY(cL.X - out.X * 2, cL.Z - out.Z * 2, mid.Y), groundY(cR.X + out.X * 2, cR.Z + out.Z * 2, mid.Y))
 			elevated[i] = mid.Y - g >= M.DECK_CLEAR
+			atGrade[i] = mid.Y - groundY(mid.X, mid.Z, mid.Y) < M.DECK_GRADE_H
 		end
 		for i = 1, n - 1 do
 			-- the walls: a parapet on each edge; on a ramp it goes down into the ground (a retaining wall),
 			-- elevated it is a fascia over the slab's side
-			for _, side in { "L", "R" } do
+			for _, side in (if atGrade[i] then {} else { "L", "R" }) do
 				local other = if side == "L" then "R" else "L"
 				local e0, e1 = ED[side][i], ED[side][i + 1]
 				local o0, o1 = ED[other][i], ED[other][i + 1]

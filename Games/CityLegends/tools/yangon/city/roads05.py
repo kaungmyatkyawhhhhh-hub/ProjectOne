@@ -44,8 +44,8 @@ PAIR_MAX = geo.m(26.0)  # Pyay Road along Inya Lake: 23.8 m between its OSM line
 TAIL = geo.m(45.0)    # a one-way remnant shorter than this at the end of a paired run is folded into the midline
 JOIN = geo.m(12.0)    # ends of one road (same name) this close are one road
 MED_MIN = 1.5         # a 1 m barrier between kerbs (kerbs included: half 1.5 studs)
-OPEN_R = 12.0         # a median opens where another main road's carriageway comes this near
-NOSE = 18.0           # a median eases from 0 over this
+OPEN_R = 24.0         # a median opens where another main road's carriageway comes this near
+MED_CUT = geo.m(1.0)  # a median half under this (a full median under 2 m) is no median, except a run's 1 m barrier
 MIN_MEDIAN = geo.m(25.0)
 RING_LANE_W = 12.0
 EASE_W = 120.0         # width changes eased over this
@@ -819,6 +819,36 @@ def run_median(v, c, L):
     return out
 
 
+def med_runs(mb, c):
+    """median halves per sample -> constant-width runs with blunt noses (see finish)"""
+    mb = np.asarray(mb, float).copy()
+    n = len(mb)
+
+    def runs(on):
+        k, n = 0, len(on)
+        while k < n:
+            if not on[k]:
+                k += 1
+                continue
+            j = k
+            while j + 1 < n and on[j + 1]:
+                j += 1
+            yield k, j
+            k = j + 1
+    out = np.zeros(n)
+    for k, j in runs(mb > 0):
+        w = float(np.median(mb[k:j + 1]))
+        keep = mb[k:j + 1] >= max(0.75 * w, min(w, MED_CUT))
+        for a, b in runs(keep):
+            a, b = a + k, b + k
+            if c[b] - c[a] < MIN_MEDIAN:
+                continue
+            ww = float(mb[a:b + 1].min())  # never wider than the lanes' gap (s[11])
+            out[a:b + 1] = ww
+            out[a] = out[b] = ww * 0.7      # a blunt nose: the builder closes it over one sample step
+    return out
+
+
 def widen_rate(v, c, k=0.12):
     """an edge never steps in faster than k studs a stud (it widens instead: no notches)"""
     v = np.asarray(v, float).copy()
@@ -986,6 +1016,25 @@ def inside0(px, pz, o, margin=0.0):
     return None
 
 
+DECK_FLAT = 24.0     # a deck starts level off its ramp foot (owner's bug 2: the ramp rose out of the junction box)
+DECK_GRADE = 0.05
+
+
+def deck_profile(raw, cc, y0, y1):
+    """a flyover's heights (owner's bugs 2-5, 17 Nov: the raised profile stepped and dipped): level start at each
+    foot, one straight grade up to one level top (the profile's 90th percentile), vertical curves, ends on the feet"""
+    L = float(cc[-1])
+    top = max(float(np.percentile(raw, 90)), y0, y1)
+    run = max(L / 2 - DECK_FLAT, 1.0)
+    grade = max(DECK_GRADE, (top - min(y0, y1)) / run)
+    y = np.minimum(top, np.minimum(y0 + grade * np.maximum(0, cc - DECK_FLAT), y1 + grade * np.maximum(0, L - cc - DECK_FLAT)))
+    k = 3
+    if len(y) > 2 * k + 1:
+        y = np.convolve(np.pad(y, k, mode='edge'), np.ones(2 * k + 1) / (2 * k + 1), mode='valid')
+    y[0], y[-1] = y0, y1
+    return y
+
+
 def finish(net):
     roads, rings, H = net['roads'], net['rings'], net['H']
     region = net['region']
@@ -1059,9 +1108,8 @@ def finish(net):
         for i in range(dk['from'], dk['to'] + 1):
             yy, gg, _ = H.at(r['P'][i], r['keys'], allow_raised=True)
             ys.append(yy)
-        dk['y'] = np.array(ys)
-        dk['y'][0] = r['y'][dk['from']]
-        dk['y'][-1] = r['y'][dk['to']]
+        dk['y'] = deck_profile(np.array(ys), r['c'][dk['from']:dk['to'] + 1] - r['c'][dk['from']],
+                               r['y'][dk['from']], r['y'][dk['to']])
     # roundabouts: an arm's samples well inside the ring are cut (Friday's R_CUT = R_OUT - 14)
     for R in rings:
         for r in roads:
@@ -1250,24 +1298,10 @@ def finish(net):
                     lo, hi = max(0, k - 3), min(n, k + 4)
                     if r['cut'][lo:hi].any():
                         mb[k] = 0
-            # runs shorter than MIN_MEDIAN out; noses
-            on = mb > 0
-            k = 0
-            while k < n:
-                if not on[k]:
-                    k += 1
-                    continue
-                j = k
-                while j + 1 < n and on[j + 1]:
-                    j += 1
-                if c[j] - c[k] < MIN_MEDIAN:
-                    mb[k:j + 1] = 0
-                else:
-                    for q in range(k, j + 1):
-                        dd = min(c[q] - c[k], c[j] - c[q])
-                        if dd < NOSE:
-                            mb[q] = mb[q] * max(0.0, dd / NOSE)
-                k = j + 1
+            # median runs (owner's bug 1, 17 Nov: a long kerbed sliver where OSM's carriageways converge):
+            # a run keeps ONE width (its median), ends where the real gap falls under 3/4 of it or under
+            # MED_CUT (no easing into a median), runs shorter than MIN_MEDIAN go, and each end is a blunt nose
+            mb = med_runs(mb, c)
         r['mb'] = mb
     # decks: the road widens at the gores to the deck + side lanes
     for dk in decks:

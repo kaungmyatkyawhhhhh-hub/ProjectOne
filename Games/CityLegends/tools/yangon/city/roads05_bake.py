@@ -408,7 +408,7 @@ def densify_ring(coords, step=3.0):
     return out
 
 
-def paint_tris(items, surf, deck_surf):
+def paint_tris(items, surf, deck_surf, refy=None):
     out = {'L': [], 'LY': []}
     dropped = 0
     for it in items:
@@ -437,21 +437,118 @@ def paint_tris(items, surf, deck_surf):
                 cs = list(t.exterior.coords)[:3]
                 pts = []
                 ok = True
+                # one level per triangle (owner's bug 10, 17 Nov: under a deck one corner took the deck and the
+                # others the road, and zebra stripes stood up): the middle's level, each corner the height nearest it
+                c = t.centroid
+                hc = S.heights(c.x, c.y)
+                ry = refy(it, c.x, c.y) if refy else None
+                if hc and ry is not None:
+                    ref = min(hc, key=lambda h: abs(h - ry))
+                else:
+                    ref = (max(hc) if it.get('deck') else min(hc)) if hc else None
                 for x, z in cs:
                     hs = S.heights(x, z)
                     if hs:
-                        y = max(hs) if it.get('deck') else min(hs)
+                        near = [h for h in hs if ref is not None and abs(h - ref) < 0.8]
+                        y = max(near) if near else ((max(hs) if it.get('deck') else min(hs)) if ref is None else min(hs, key=lambda h: abs(h - ref)))
                     else:
                         y = S.near(x, z)
                         if y is None:
                             ok = False
                             break
+                    if ref is not None and abs(y - ref) > 1.5:
+                        ok = False
+                        break
                     pts.append(np.array([x, y + LIFT, z]))
                 if not ok:
                     dropped += 1
                     continue
+                nrm = np.cross(pts[1] - pts[0], pts[2] - pts[0])
+                if abs(nrm[1]) < 0.9 * np.linalg.norm(nrm):
+                    PAINT_STEEP[0] += 1      # a paint triangle not lying flat (a standing zebra): never written
+                    continue
                 out[kind].append(up_fix(tuple(pts)))
     return out, dropped
+
+
+PAINT_STEEP = [0]
+
+
+def road_refy(data):
+    """paint item -> the height of its own road (or deck) at a point: the level its triangles keep"""
+    from scipy.spatial import cKDTree
+    S = {}
+    for r in data['roads'] + data.get('decks', []):
+        a = np.array([[q[0], q[2], q[1]] for q in r['s']])
+        S[r['name']] = (cKDTree(a[:, :2]), a[:, 2])
+    deckname = {d.get('of'): d['name'] for d in data.get('decks', [])}
+
+    def f(it, x, z):
+        nm = it.get('r')
+        if it.get('deck') and nm in deckname:
+            nm = deckname[nm]
+        k = S.get(nm)
+        if k is None:
+            return None
+        d, i = k[0].query((x, z))
+        return float(k[1][i]) if d < 80 else None
+    return f
+
+
+def drop_scraps(parts, data, surf):
+    """(owner's bugs 6, 7, 9, 17 Nov) kerb / pavement / median pieces lying on another carriageway at its level
+    (strips across a junction, kerb bits on the road) and lone kerb pieces with no neighbour within 6 studs go"""
+    from shapely.ops import unary_union
+    from scipy.spatial import cKDTree
+    cut = {k: set(v) for k, v in data.get('cut', {}).items()}
+    clear = []
+    for r in data['roads']:
+        s, cs = r['s'], cut.get(r['name'], set())
+        for i in range(len(s) - 1):
+            if i in cs or i + 1 in cs:
+                continue
+            a, b = s[i], s[i + 1]
+            ra, rb = np.array([-a[4], a[3]]), np.array([-b[4], b[3]])
+            pa, pb = np.array([a[0], a[2]]), np.array([b[0], b[2]])
+            q = Polygon([pa - ra * (a[6] - 1.2), pa + ra * (a[7] - 1.2), pb + rb * (b[7] - 1.2), pb - rb * (b[6] - 1.2)])
+            if not q.is_valid or q.area < 0.5:
+                continue
+            ma, mb = a[8], b[8]
+            if ma > 0 or mb > 0:
+                ma, mb = ma + 1.5, mb + 1.5
+                q = q.difference(Polygon([pa - ra * ma, pa + ra * ma, pb + rb * mb, pb - rb * mb]).buffer(0))
+            clear.append(q)
+    for g in data.get('roundabouts', []):
+        clear.append(Point(g['c'][0], g['c'][2]).buffer(g['r_out'] - 1.5, 64).difference(Point(g['c'][0], g['c'][2]).buffer(g['r_in'] + 1.5, 64)))
+    tree = STRtree(clear)
+    keep = np.ones(len(parts), bool)
+    k_on = 0
+    only = set(c for c in os.environ.get('R05_ONLY', '').split(',') if c)
+    for i, p in enumerate(parts):
+        if p[0] not in ('r', 'w', 'P', 'm'):
+            continue
+        x, y, z = p[2]
+        if only and cell_of(x, z) not in only:
+            continue
+        pt = Point(x, z)
+        if not any(clear[int(j)].contains(pt) for j in tree.query(pt)):
+            continue
+        hs = surf.heights(x, z)
+        if any(abs(y - h) < 2.0 for h in hs):
+            keep[i] = False
+            k_on += 1
+    idx = [i for i, p in enumerate(parts) if keep[i] and p[0] in ('r', 'w', 'P')]
+    pos = np.array([parts[i][2] for i in idx])
+    k_lone = 0
+    if len(pos):
+        tr = cKDTree(pos)
+        cnt = tr.query_ball_point(pos, 6.0, return_length=True)
+        for i, n in zip(idx, cnt):
+            if n <= 1 and parts[i][0] in ('r', 'w'):
+                keep[i] = False
+                k_lone += 1
+    print('scraps: %d on a carriageway, %d lone kerb pieces' % (k_on, k_lone))
+    return [p for i, p in enumerate(parts) if keep[i]], dict(on_carriageway=k_on, lone=k_lone)
 
 
 def bake(tag):
@@ -474,6 +571,7 @@ def bake(tag):
                 by[('R', cell_of(mid[0], mid[2]))].append(t)
                 road_tris.append(t)
     surf = Surface(road_tris)
+    parts, scrap = drop_scraps(parts, data, surf)
     for p in parts:
         k = p[0]
         if k == 'R':
@@ -484,7 +582,7 @@ def bake(tag):
         for t in faces_of(p, surf):
             mid = (t[0] + t[1] + t[2]) / 3
             by[(KIND[k], cell_of(mid[0], mid[2]))].append(t)
-    ptris, dropped = paint_tris(paint, surf, surf)
+    ptris, dropped = paint_tris(paint, surf, surf, road_refy(data))
     for kind, ts in ptris.items():
         for t in ts:
             mid = (t[0] + t[1] + t[2]) / 3
@@ -548,7 +646,7 @@ def bake(tag):
             k, buf, n = k + 1, [], 0
     if buf:
         open(os.path.join(cdir, 'Collide05_%d.txt' % k), 'w', newline='\n').write('\n'.join(buf))
-    st = dict(parts=len(parts), unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
+    st = dict(parts=len(parts), scraps_dropped=scrap, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
               paint_dropped=dropped, collision_boxes=len(rows), collide_files=k)
     json.dump(st, open(os.path.join(D, 'bake_stats.json'), 'w'), indent=1)
     print(json.dumps(st, indent=1))
