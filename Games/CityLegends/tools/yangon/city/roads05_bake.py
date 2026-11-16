@@ -162,24 +162,48 @@ def faces_of(part, surf=None):
             ((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1)),  # -Y
         ]
         # thin flat pieces (pavement slabs, medians, kerbs): every face but the bottom; bridge pieces: all six
-        # (kerbs, pavements, medians: the top and the two long sides; their ends butt onto the next piece and the
-        # bottom is under the road)
-        use = quads if k == 'B' else quads[:3]
-        if surf is not None and k in ('r', 'w', 'P') and S[1] > 0.3:
-            # a kerb shows its top and its face to the road (the back is 0.1 over the pavement); a pavement its top and
-            # its outer edge (the inner one is behind the kerb): drop the long side that has the road just past it
-            keep = [quads[0]]
-            for q, sx in ((quads[1], 1), (quads[2], -1)):
-                probe = c + R * sx * (hx + 1.2)
+        # (kerbs, pavements, medians: the face looking up, and of the side faces only the long ones that show: a kerb's
+        # face to the road, a pavement's outer edge, a median's two sides; never the bottom. The builder lays some
+        # pieces on their side (Size.X up), so faces are picked by their world normal, not by the part's axes)
+        if k == 'B':
+            use = quads
+        else:
+            use = []
+            hl = {}
+            for q in quads:
+                a, b, cc, d = (v[x] for x in q)
+                e = [b - a, cc - b]
+                hl[q] = max(math.hypot(x[0], x[2]) for x in e if abs(x[1]) < 0.5 * np.linalg.norm(x) + 1e-9) if any(abs(x[1]) < 0.5 * np.linalg.norm(x) + 1e-9 for x in e) else 0.0
+            for q in quads:
+                a, b, cc, d = (v[x] for x in q)
+                t = fix((a, b, cc), c)
+                n = np.cross(t[1] - t[0], t[2] - t[0])
+                L = np.linalg.norm(n)
+                if L < 1e-9:
+                    continue
+                n = n / L
+                if n[1] > 0.5:
+                    use.append(q)
+                    continue
+                if n[1] < -0.5:
+                    continue
+                # a side: skip the short ends
+                longest = max(hl[x] for x in quads)
+                if hl[q] < 0.6 * longest:
+                    continue
+                fc = (a + b + cc + d) / 4
+                if surf is None or k == 'm':
+                    use.append(q)
+                    continue
+                probe = fc + n * 1.0
                 road_there = bool(surf.heights(probe[0], probe[2]))
                 if k == 'P':
-                    probe2 = c + R * sx * (hx + 2.5)
+                    probe2 = fc + n * 2.5
                     road_there = road_there or bool(surf.heights(probe2[0], probe2[2]))
                     if not road_there:
-                        keep.append(q)
+                        use.append(q)
                 elif road_there:
-                    keep.append(q)
-            use = keep
+                    use.append(q)
         for q in use:
             a, b, cc, d = (v[x] for x in q)
             tris.append(fix((a, b, cc), c))
