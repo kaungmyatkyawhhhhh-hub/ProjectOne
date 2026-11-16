@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 12:07 [dashboard, unverified] Roblox's UI sucks... (topic: tiktok)
 - 2026-11-16 12:01 [dashboard, unverified] The Roblox VIP button was designed in Figma and brought into Roblox Studio with Framewisp. (topic: tiktok)
 - 2026-11-16 12:00 [dashboard, unverified] Roblox Environment Building Is Getting INSANE… (topic: tiktok)
 - 2026-11-16 12:00 [dashboard, unverified] Clicklab will help you if you're struggling to get players to click on your Roblox game. (topic: tiktok)
