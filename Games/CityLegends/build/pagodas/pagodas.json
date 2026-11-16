@@ -1,0 +1,2363 @@
+{
+ "count": 48,
+ "skipped": [
+  {
+   "id": "w117379705",
+   "name": "Shwedagon Paya",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w117389465",
+   "name": "Naung Taw Gyi Pagoda",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w407462386",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444334649",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444462852",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444462853",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444462855",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444462857",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444462858",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444463030",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444465518",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444465519",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470092",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470094",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470095",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470097",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470098",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470104",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470105",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470109",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470110",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470114",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470117",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470118",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470122",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470127",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470129",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470132",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470135",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470140",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470147",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470150",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470153",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470160",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470163",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470173",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470176",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470179",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470186",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470187",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470189",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470190",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470191",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470192",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470194",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470198",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470199",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470206",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470207",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470209",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470210",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470211",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470213",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470214",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470217",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470220",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470224",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470225",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470228",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470229",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470230",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470231",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470235",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470236",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470237",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470240",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470241",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470243",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470244",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470246",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470248",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444470249",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444471806",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444471809",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444471812",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444472201",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444472203",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474231",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474232",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474233",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474234",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474235",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474236",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474237",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474238",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474742",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474743",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474744",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474746",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474747",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474748",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444474749",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476608",
+   "name": "Htidaw Pagoda",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476609",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476610",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476611",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476612",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476615",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476618",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476620",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476621",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476622",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476625",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476626",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476627",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476628",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476629",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476630",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476631",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476632",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476633",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476634",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476635",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476636",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476637",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476638",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476639",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476640",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476641",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476642",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476643",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476644",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476645",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476646",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476647",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476648",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444476649",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444477587",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444477589",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444477591",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444477593",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w444477596",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w477836654",
+   "name": "Sule Pagoda",
+   "why": "landmark job: \\bsule\\b"
+  },
+  {
+   "id": "w779515078",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779515079",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779515080",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779515081",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779515082",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779529430",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779529431",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779529432",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779529433",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779529434",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779529436",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w779529437",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w1303504313",
+   "name": "",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w117384553",
+   "name": "Paya Chaukhtatgyi",
+   "why": "landmark job: chauk ?htat ?gyi"
+  },
+  {
+   "id": "w117388457",
+   "name": "Shwedagon Pagoda",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "w131745510",
+   "name": "Sule Pagoda",
+   "why": "landmark job: \\bsule\\b"
+  },
+  {
+   "id": "w180605242",
+   "name": "Botahtaung Pagoda",
+   "why": "landmark job: botah?taung"
+  },
+  {
+   "id": "w186911800",
+   "name": "Kaba Aye Pagoda",
+   "why": "landmark job: kaba ?aye"
+  },
+  {
+   "id": "w314121257",
+   "name": "Ngahtatgyi Buddha Temple",
+   "why": "landmark job: nga ?htat ?gyi"
+  },
+  {
+   "id": "w314136068",
+   "name": "Botahtaung Pagoda the bus 57 in front of the pagoda goes beside the river",
+   "why": "landmark job: botah?taung"
+  },
+  {
+   "id": "w346447607",
+   "name": "Pyi Lone Chan Thar Pagoda",
+   "why": "checked: Esri z19: red-roofed hall picked, no stupa seen in the compound"
+  },
+  {
+   "id": "w385710305",
+   "name": "Ywar Ma Zedi",
+   "why": "checked: Esri z19: hall picked; the stupa not found in the compound yet"
+  },
+  {
+   "id": "w389512154",
+   "name": "Kyitewaing Pagoda",
+   "why": "checked: Esri z19: rows of small gold stupas round a hall: needs its own layout"
+  },
+  {
+   "id": "w390143757",
+   "name": "Thuwunna Myo Oo Pagoda",
+   "why": "checked: Esri z19: a grid of small white stupas round a hall: needs its own layout"
+  },
+  {
+   "id": "w425804832",
+   "name": "MaharThakya Moni Pagoda",
+   "why": "checked: Esri z19: grey-roofed hall, no stupa seen"
+  },
+  {
+   "id": "w440018981",
+   "name": "Kyauk Taw Gyi Pagoda",
+   "why": "checked: Esri z19: Kyauk Taw Gyi is a hall with tiered roofs, not a zedi"
+  },
+  {
+   "id": "w486799650",
+   "name": "Shwe Phone Pwint Zedi",
+   "why": "same outline as w289328798"
+  },
+  {
+   "id": "n14351637752",
+   "name": "",
+   "why": "point inside outline w1575765050"
+  },
+  {
+   "id": "n26616893",
+   "name": "Swe Taw Myat Pagoda",
+   "why": "point inside outline w379875332"
+  },
+  {
+   "id": "n1727330967",
+   "name": "Shwe Sayan Pagoda",
+   "why": "point inside outline w198622454"
+  },
+  {
+   "id": "n2572465383",
+   "name": "Kyitewaing Pagoda",
+   "why": "point inside outline w389512154"
+  },
+  {
+   "id": "n3978301045",
+   "name": "Replica of the Shwedagon Pagoda",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "n4323529495",
+   "name": "Zi Na Man Aung Pagoda",
+   "why": "point inside outline w406044505"
+  },
+  {
+   "id": "n4328046089",
+   "name": "Kyaethoon Pagoda",
+   "why": "checked: Esri z19: point on a big red-roofed hall, no stupa seen"
+  },
+  {
+   "id": "n4419569936",
+   "name": "Boe Boe Aung's Buddha Image",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "n4419569940",
+   "name": "Pyidawpyan Buddha Image",
+   "why": "landmark job: shwe dagon platform"
+  },
+  {
+   "id": "n4483155292",
+   "name": "Pyi Lone Chan Thar Mahar Warluka Pagoda",
+   "why": "checked: Esri z19: no stupa seen clearly (road edge, roofs)"
+  },
+  {
+   "id": "n4483163891",
+   "name": "Buddha Warluka pagoda",
+   "why": "checked: Esri z19: red-roofed building, no stupa seen"
+  },
+  {
+   "id": "n4541168492",
+   "name": "Bamboo Thread Buddha Image",
+   "why": "checked: Esri z19: a hall (Bamboo Thread Buddha image), no stupa"
+  },
+  {
+   "id": "n4716828097",
+   "name": "ကိုးနဝင်းကပ်ကျော်ဘုရား",
+   "why": "checked: Esri z19: point on the road, no stupa seen"
+  },
+  {
+   "id": "n4938193139",
+   "name": "Shwe Hpone Pwint Pagoda",
+   "why": "checked: Esri z19: blue roof; the real Shwe Phone Pwint is w289328798"
+  },
+  {
+   "id": "n5060321526",
+   "name": "Pagoda",
+   "why": "checked: Esri z19: houses and yards, no stupa seen"
+  },
+  {
+   "id": "n5243566982",
+   "name": "Bohdi Kone Pagoda",
+   "why": "point inside outline w407771486"
+  },
+  {
+   "id": "n5441557223",
+   "name": "သ်ရီဟိႏၵဴဘုရား​ေက်ာင္​း",
+   "why": "checked: a Hindu temple by its name, not a stupa"
+  },
+  {
+   "id": "n6032270836",
+   "name": "Myat Phone Shein Pagoda",
+   "why": "checked: Esri z19: metal-roofed building and a crane, no stupa seen"
+  },
+  {
+   "id": "n6210030951",
+   "name": "ဆယ့်တစ်တောင်ဆုတောင်းပြည့်စေတီတော်",
+   "why": "checked: Esri z19: blue metal roof, no stupa seen"
+  },
+  {
+   "id": "n8622598222",
+   "name": "Mae La Mu Pagoda",
+   "why": "point inside outline w399545334"
+  }
+ ],
+ "place_box": [
+  96.10499999999999,
+  16.782999999999998,
+  96.18700000000001,
+  16.861
+ ],
+ "pagodas": [
+  {
+   "id": "n10177587706",
+   "name": "Ngar Man Aung Pagoda",
+   "name_my": "ငါးမာန်အောင်စေတီတော်",
+   "pick": "pow",
+   "lon": 96.188805,
+   "lat": 16.857904,
+   "x": 45601.7,
+   "z": 17430.28,
+   "w": 25.73,
+   "h": 48.89,
+   "shape": "sq",
+   "yaw": 11.5,
+   "cls": "L",
+   "scheme": "whitegold",
+   "src": {
+    "W": "footprint m96188805_16857904 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa on a white terrace"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 13.6,
+   "ground_span": 0.57,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n11806237755",
+   "name": "Mingalar Myintzu Thalpon Pagoda မင်္ဂလာမဥ္ဇူသဲပုံစေတီတော်",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.125354,
+   "lat": 16.837457,
+   "x": 25318.08,
+   "z": 24210.87,
+   "w": 12.91,
+   "h": 24.52,
+   "shape": "oct",
+   "yaw": 1.4,
+   "cls": "M",
+   "scheme": "whitetop",
+   "src": {
+    "W": "footprint m96125354_16837457 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: white square"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 25.38,
+   "ground_span": 0.73,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n11838369698",
+   "name": "စေတီ",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.153877,
+   "lat": 16.861791,
+   "x": 34436.0,
+   "z": 16141.37,
+   "w": 14.35,
+   "h": 27.26,
+   "shape": "sq",
+   "yaw": 10.2,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96153877_16861791 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 63.64,
+   "ground_span": 1.33,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n11838369699",
+   "name": "စေတီ",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.153504,
+   "lat": 16.862191,
+   "x": 34317.0,
+   "z": 16008.49,
+   "w": 13.85,
+   "h": 26.31,
+   "shape": "sq",
+   "yaw": 31.7,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96153504_16862191 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 62.57,
+   "ground_span": 1.34,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n13601098532",
+   "name": "ဝိဇ္ဇာ သိဒ္ဓိ မဟိဒ္ဓိ စေတီ",
+   "name_my": "ဝိဇ္ဇာ သိဒ္ဓိ မဟိဒ္ဓိ စေတီ",
+   "pick": "pow",
+   "lon": 96.149412,
+   "lat": 16.850655,
+   "x": 33008.74,
+   "z": 19834.34,
+   "w": 19.13,
+   "h": 36.34,
+   "shape": "sq",
+   "yaw": 87.7,
+   "cls": "M",
+   "scheme": "whitegold",
+   "src": {
+    "W": "footprint m96149412_16850655 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa on a white square terrace"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 60.56,
+   "ground_span": 0.7,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n2579920827",
+   "name": "Pauktaw Pagoda",
+   "name_my": "ပေါက်တောစေတီ",
+   "pick": "pow",
+   "lon": 96.139601,
+   "lat": 16.865079,
+   "x": 29872.5,
+   "z": 15050.84,
+   "w": 12.26,
+   "h": 23.3,
+   "shape": "sq",
+   "yaw": 86.6,
+   "cls": "M",
+   "scheme": "whitetop",
+   "src": {
+    "W": "footprint m96139601_16865079 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: white zedi"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 69.8,
+   "ground_span": 0.91,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n2579920829",
+   "name": "Paw Taw Mu Pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.118885,
+   "lat": 16.863423,
+   "x": 23250.01,
+   "z": 15600.1,
+   "w": 10.0,
+   "h": 19.0,
+   "shape": "sq",
+   "yaw": 27.0,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96118885_16863310 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa 12 m north of the point"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 26.97,
+   "ground_span": 0.54,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n2583375434",
+   "name": "Yan Kin Zedi",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.107026,
+   "lat": 16.859476,
+   "x": 19459.05,
+   "z": 16908.87,
+   "w": 10.0,
+   "h": 19.0,
+   "shape": "sq",
+   "yaw": 0.0,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "guess: point (10 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa, 10 m"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 13.99,
+   "ground_span": 0.52,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n2875149013",
+   "name": "Youk Kaw Zedi",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.218613,
+   "lat": 16.842762,
+   "x": 55130.41,
+   "z": 22451.52,
+   "w": 33.05,
+   "h": 62.79,
+   "shape": "rd",
+   "yaw": 86.6,
+   "cls": "L",
+   "scheme": "whitetop",
+   "src": {
+    "W": "footprint m96218613_16842762 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: white round stupa"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 12.64,
+   "ground_span": 0.21,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n5111241221",
+   "name": "ကိုးနဝင်း စေတီ",
+   "name_my": null,
+   "pick": "pow",
+   "lon": 96.121153,
+   "lat": 16.82228,
+   "x": 23975.22,
+   "z": 29244.01,
+   "w": 10.0,
+   "h": 19.0,
+   "shape": "sq",
+   "yaw": 0.0,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "guess: point (10 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship"
+   },
+   "ground_y": 21.62,
+   "ground_span": 0.01,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n5158587121",
+   "name": "Shwe Kyet Yat Pagoda",
+   "name_my": null,
+   "pick": "pow",
+   "lon": 96.164189,
+   "lat": 16.803216,
+   "x": 37732.66,
+   "z": 35565.91,
+   "w": 10.0,
+   "h": 19.0,
+   "shape": "sq",
+   "yaw": 0.0,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "guess: point (10 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "name (shwe = gold)",
+    "photo": "Esri z19: white and gold stupa 7 m west of the point"
+   },
+   "tags": {
+    "amenity": "place_of_worship"
+   },
+   "ground_y": 68.33,
+   "ground_span": 0.11,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n5273125898",
+   "name": "Pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.154932,
+   "lat": 16.759587,
+   "x": 34773.27,
+   "z": 50034.27,
+   "w": 7.0,
+   "h": 13.3,
+   "shape": "sq",
+   "yaw": 83.3,
+   "cls": "S",
+   "scheme": "whitetop",
+   "src": {
+    "W": "footprint m96154997_16759659 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: small white zedi SW of the point"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "temple",
+    "religion": "buddhist"
+   },
+   "ground_y": 15.37,
+   "ground_span": 0.02,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n5317743721",
+   "name": "Kyeik bar di pagoda",
+   "name_my": null,
+   "pick": "pow",
+   "lon": 96.126767,
+   "lat": 16.85023,
+   "x": 25769.92,
+   "z": 19975.28,
+   "w": 7.18,
+   "h": 13.65,
+   "shape": "sq",
+   "yaw": 6.0,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96126767_16850230 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship"
+   },
+   "ground_y": 30.38,
+   "ground_span": 0.35,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n5482431422",
+   "name": "Pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.157647,
+   "lat": 16.800441,
+   "x": 35641.26,
+   "z": 36486.16,
+   "w": 11.62,
+   "h": 22.07,
+   "shape": "sq",
+   "yaw": 86.7,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96157647_16800441 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 48.19,
+   "ground_span": 0.54,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n6202563445",
+   "name": "ဥက္ကလာဦး",
+   "name_my": "ဥက္ကလာဦး",
+   "pick": "pow",
+   "lon": 96.183164,
+   "lat": 16.828293,
+   "x": 43798.32,
+   "z": 27249.89,
+   "w": 8.86,
+   "h": 16.84,
+   "shape": "sq",
+   "yaw": 8.4,
+   "cls": "S",
+   "scheme": "whitetop",
+   "src": {
+    "W": "footprint m96183164_16828293 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: small white zedi"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 36.71,
+   "ground_span": 0.41,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n6718161758",
+   "name": "ဝဋ်ကြွေးတော်ပြေဘုရား",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.159994,
+   "lat": 16.885364,
+   "x": 36391.54,
+   "z": 8324.06,
+   "w": 10.0,
+   "h": 19.0,
+   "shape": "sq",
+   "yaw": 0.0,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "guess: point (10 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 16.45,
+   "ground_span": 0.0,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n7123778010",
+   "name": "Thatbyinnyu Sutaungpyae Pagoda",
+   "name_my": "သဗ္ဗညုဆုတောင်းပြည့်စေတီ",
+   "pick": "pow",
+   "lon": 96.137966,
+   "lat": 16.757161,
+   "x": 29349.77,
+   "z": 50838.66,
+   "w": 16.4,
+   "h": 31.17,
+   "shape": "sq",
+   "yaw": 64.5,
+   "cls": "M",
+   "scheme": "whitegold",
+   "src": {
+    "W": "footprint o944617398 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold and white stupa"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 11.86,
+   "ground_span": 0.16,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "n8318841850",
+   "name": "Shin Saw Pu grave pagoda",
+   "name_my": null,
+   "pick": "pow",
+   "lon": 96.136195,
+   "lat": 16.801184,
+   "x": 28783.81,
+   "z": 36239.76,
+   "w": 6.0,
+   "h": 11.4,
+   "shape": "sq",
+   "yaw": 0.0,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "guess: point (10 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: small gold top among roofs"
+   },
+   "tags": {
+    "amenity": "place_of_worship"
+   },
+   "ground_y": 45.96,
+   "ground_span": 0.58,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "n8573939171",
+   "name": "Kyauk Sar Taw Pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.188528,
+   "lat": 16.835961,
+   "x": 45513.05,
+   "z": 24707.04,
+   "w": 13.66,
+   "h": 25.96,
+   "shape": "oct",
+   "yaw": 2.6,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint o923642084 at the point",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 36.72,
+   "ground_span": 0.02,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w1266188921",
+   "name": "Anda Metta Temple",
+   "name_my": "အနန္တမေတ္တာစေတီတော်",
+   "pick": "pow",
+   "lon": 96.211237,
+   "lat": 16.886512,
+   "x": 52772.52,
+   "z": 7943.21,
+   "w": 12.29,
+   "h": 23.34,
+   "shape": "sq",
+   "yaw": 31.0,
+   "cls": "M",
+   "scheme": "whitegold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: white terrace, small gold middle"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 11.36,
+   "ground_span": 0.6,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w1554637597",
+   "name": "",
+   "name_my": null,
+   "pick": "stupa",
+   "lon": 96.145398,
+   "lat": 16.789434,
+   "x": 31725.65,
+   "z": 40136.33,
+   "w": 4.76,
+   "h": 9.03,
+   "shape": "rd",
+   "yaw": 6.3,
+   "cls": "XS",
+   "scheme": "whitegold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: unnamed zedi",
+    "photo": "Esri z19: small gold-topped stupa"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "man_made": "stupa",
+    "religion": "buddhist"
+   },
+   "ground_y": 65.62,
+   "ground_span": 0.12,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w1554637598",
+   "name": "",
+   "name_my": null,
+   "pick": "stupa",
+   "lon": 96.145442,
+   "lat": 16.789347,
+   "x": 31739.68,
+   "z": 40165.27,
+   "w": 5.01,
+   "h": 9.52,
+   "shape": "sq",
+   "yaw": 8.5,
+   "cls": "S",
+   "scheme": "whitetop",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: unnamed zedi"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "man_made": "stupa",
+    "religion": "buddhist"
+   },
+   "ground_y": 65.35,
+   "ground_span": 0.13,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w1554637599",
+   "name": "",
+   "name_my": null,
+   "pick": "stupa",
+   "lon": 96.145032,
+   "lat": 16.788831,
+   "x": 31608.67,
+   "z": 40336.23,
+   "w": 4.21,
+   "h": 8.01,
+   "shape": "sq",
+   "yaw": 6.0,
+   "cls": "XS",
+   "scheme": "whitetop",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: unnamed zedi"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "man_made": "stupa",
+    "religion": "buddhist"
+   },
+   "ground_y": 64.45,
+   "ground_span": 0.11,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w1557635845",
+   "name": "Shwe Oat Gu Pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.216072,
+   "lat": 16.806738,
+   "x": 54318.13,
+   "z": 34397.81,
+   "w": 12.5,
+   "h": 23.75,
+   "shape": "sq",
+   "yaw": 88.1,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "name (shwe = gold)"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 15.9,
+   "ground_span": 0.04,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w1575765050",
+   "name": "",
+   "name_my": null,
+   "pick": "stupa",
+   "lon": 96.116746,
+   "lat": 16.886829,
+   "x": 22566.38,
+   "z": 7838.16,
+   "w": 6.22,
+   "h": 11.82,
+   "shape": "rd",
+   "yaw": 31.9,
+   "cls": "S",
+   "scheme": "whitetop",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: unnamed zedi"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "man_made": "stupa",
+    "religion": "buddhist"
+   },
+   "ground_y": 53.68,
+   "ground_span": 0.43,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w180543971",
+   "name": "Eain Taw Yar Pagoda",
+   "name_my": "အိမ်တော်ရာဘုရား",
+   "pick": "stupa",
+   "lon": 96.145151,
+   "lat": 16.789124,
+   "x": 31646.62,
+   "z": 40239.07,
+   "w": 18.23,
+   "h": 34.63,
+   "shape": "sq",
+   "yaw": 7.5,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa on a white platform, outline fits"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "temple",
+    "man_made": "stupa",
+    "religion": "buddhist"
+   },
+   "ground_y": 64.92,
+   "ground_span": 0.45,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w198622454",
+   "name": "Shwe Sayan Pagoda",
+   "name_my": null,
+   "pick": "pow",
+   "lon": 96.162023,
+   "lat": 16.75848,
+   "x": 37040.16,
+   "z": 50401.27,
+   "w": 16.7,
+   "h": 31.74,
+   "shape": "sq",
+   "yaw": 1.0,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "name (shwe = gold)"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 18.44,
+   "ground_span": 0.19,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w217565794",
+   "name": "Aung Taw Mu Su Taung Pyae Pagoda",
+   "name_my": "အောင်တော်မူဆုတောင်းပြည့်စေတီတော်",
+   "pick": "pow",
+   "lon": 96.169674,
+   "lat": 16.811773,
+   "x": 39486.03,
+   "z": 32728.27,
+   "w": 16.79,
+   "h": 31.91,
+   "shape": "sq",
+   "yaw": 35.6,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 34.37,
+   "ground_span": 1.02,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w265735743",
+   "name": "Sein Yaung Chi Pagoda",
+   "name_my": "စိန်ရောင်ခြည်ဘုရား",
+   "pick": "pow",
+   "lon": 96.153912,
+   "lat": 16.785246,
+   "x": 34447.23,
+   "z": 41524.98,
+   "w": 20.13,
+   "h": 38.25,
+   "shape": "rd",
+   "yaw": 15.6,
+   "cls": "M",
+   "scheme": "mosaic",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19 + photo (shwedagonpagodayangon.blogspot.com): grey-green mirror mosaic tower, gold top"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 48.54,
+   "ground_span": 2.81,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w289328798",
+   "name": "Shwe Phone Pwint Pagoda",
+   "name_my": "ရွှေဘုန်းပွင့်စေတီတော်",
+   "pick": "pow",
+   "lon": 96.172523,
+   "lat": 16.779887,
+   "x": 40396.82,
+   "z": 43302.25,
+   "w": 22.62,
+   "h": 42.98,
+   "shape": "rd",
+   "yaw": 47.1,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint o486799650 in compound (56 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "name (shwe = gold)"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 26.59,
+   "ground_span": 0.03,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w354454988",
+   "name": "Moe Kaung Pagoda",
+   "name_my": "မိုးကောင်းဘုရား",
+   "pick": "pow",
+   "lon": 96.166775,
+   "lat": 16.836852,
+   "x": 38559.33,
+   "z": 24411.46,
+   "w": 11.98,
+   "h": 22.76,
+   "shape": "oct",
+   "yaw": 6.1,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96166775_16837106 in compound (100 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold and green dome 28 m south of the OSM footprint pick"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 50.71,
+   "ground_span": 0.81,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w379875332",
+   "name": "Buddha tooth Pagoda",
+   "name_my": "စွယ်တော်စေတီ",
+   "pick": "pow",
+   "lon": 96.149382,
+   "lat": 16.875214,
+   "x": 32999.02,
+   "z": 11690.03,
+   "w": 45.0,
+   "h": 85.5,
+   "shape": "oct",
+   "yaw": 31.6,
+   "cls": "L",
+   "scheme": "gold",
+   "src": {
+    "W": "guess: 0.45 x compound (109 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: Swe Taw Myat (Buddha Tooth), a big hollow pagoda: stand-in until its own model"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 67.3,
+   "ground_span": 1.5,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w388247577",
+   "name": "Myo Oo Zedi",
+   "name_my": "မြို့ဦးစေတီ",
+   "pick": "pow",
+   "lon": 96.213268,
+   "lat": 16.863168,
+   "x": 53421.71,
+   "z": 15684.55,
+   "w": 24.0,
+   "h": 45.6,
+   "shape": "sq",
+   "yaw": 1.7,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96213043_16863168 in compound (80 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: big gold stupa east of the green-roofed hall"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 13.89,
+   "ground_span": 0.41,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w392859753",
+   "name": "Yan Myo Aung Pagoda",
+   "name_my": null,
+   "pick": "pow",
+   "lon": 96.206146,
+   "lat": 16.84574,
+   "x": 51145.05,
+   "z": 21464.14,
+   "w": 28.16,
+   "h": 53.5,
+   "shape": "sq",
+   "yaw": 0.3,
+   "cls": "L",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint o392859761 in compound (150 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 13.65,
+   "ground_span": 0.54,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w392995671",
+   "name": "Arr Nan Dar Pagoda",
+   "name_my": "အာနန္ဒာ ဘုရား",
+   "pick": "pow",
+   "lon": 96.19575,
+   "lat": 16.839727,
+   "x": 47821.85,
+   "z": 23458.18,
+   "w": 42.95,
+   "h": 81.6,
+   "shape": "oct",
+   "yaw": 89.4,
+   "cls": "L",
+   "scheme": "white",
+   "src": {
+    "W": "footprint own outline (compact, nothing inside) in compound (43 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: pale octagonal stupa"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 21.97,
+   "ground_span": 1.05,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w393490899",
+   "name": "Shwe Nar Pan Pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.182923,
+   "lat": 16.824847,
+   "x": 43721.27,
+   "z": 28392.47,
+   "w": 14.0,
+   "h": 26.6,
+   "shape": "sq",
+   "yaw": 86.5,
+   "cls": "M",
+   "scheme": "whitegold",
+   "src": {
+    "W": "footprint own outline (compact, nothing inside) in compound (37 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "name (shwe = gold)",
+    "photo": "Esri z19: white 37 m terrace with 4 teal shrines, small gold middle"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 33.13,
+   "ground_span": 0.13,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w397352635",
+   "name": "South Okkalapa Pagoda",
+   "name_my": "တောင်ဥက္ကလာပေစတီ",
+   "pick": "pow",
+   "lon": 96.186187,
+   "lat": 16.852953,
+   "x": 44764.64,
+   "z": 19072.18,
+   "w": 26.0,
+   "h": 49.4,
+   "shape": "sq",
+   "yaw": 40.9,
+   "cls": "L",
+   "scheme": "whitegold",
+   "src": {
+    "W": "footprint own outline (compact, nothing inside) in compound (43 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa ~24 m on a 43 m white terrace"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 16.79,
+   "ground_span": 0.26,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w399545334",
+   "name": "Meilamu Pagoda",
+   "name_my": "မယ်လမုဘုရား",
+   "pick": "pow",
+   "lon": 96.155659,
+   "lat": 16.883737,
+   "x": 35005.75,
+   "z": 8863.63,
+   "w": 19.0,
+   "h": 36.1,
+   "shape": "sq",
+   "yaw": 79.7,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96155495_16883746 in compound (150 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa SE of the red-roofed hall"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 14.15,
+   "ground_span": 0.06,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w405364332",
+   "name": "အောင်မင်းဂေါင် ဓါတ်ပေါင်းစုစေတီ",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.143434,
+   "lat": 16.817613,
+   "x": 31097.64,
+   "z": 30791.55,
+   "w": 10.0,
+   "h": 19.0,
+   "shape": "sq",
+   "yaw": 2.8,
+   "cls": "S",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint m96143668_16817532 in compound (94 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa NW of the pink-roofed hall"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 89.15,
+   "ground_span": 0.11,
+   "in_p1": true,
+   "place_now": true
+  },
+  {
+   "id": "w406044505",
+   "name": "",
+   "name_my": null,
+   "pick": "stupa",
+   "lon": 96.207843,
+   "lat": 16.800654,
+   "x": 51687.53,
+   "z": 36415.66,
+   "w": 30.0,
+   "h": 30.0,
+   "shape": "sq",
+   "yaw": 0.0,
+   "cls": "L",
+   "scheme": "whitegold",
+   "src": {
+    "W": "OSM outline",
+    "H": "OSM height",
+    "scheme": "osm colour",
+    "photo": "Esri z19: gold stupa ~30 m on a 43 m white terrace"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "stupa",
+    "height": "30",
+    "religion": "buddhist"
+   },
+   "ground_y": 14.63,
+   "ground_span": 0.11,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w406045904",
+   "name": "108 Taung Pagoda",
+   "name_my": "",
+   "pick": "stupa",
+   "lon": 96.219422,
+   "lat": 16.805035,
+   "x": 55388.98,
+   "z": 34962.77,
+   "w": 21.24,
+   "h": 40.0,
+   "shape": "sq",
+   "yaw": 88.2,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "OSM outline",
+    "H": "OSM height",
+    "scheme": "osm colour"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "stupa",
+    "height": "40",
+    "religion": "buddhist"
+   },
+   "ground_y": 17.34,
+   "ground_span": 0.41,
+   "in_p1": false,
+   "place_now": false
+  },
+  {
+   "id": "w407771486",
+   "name": "Maha Bohdi Su Taung Pyae Pagoda",
+   "name_my": "မဟာဗောဓိ ဆုတောင်းပြည့် စေတီတော်",
+   "pick": "pow",
+   "lon": 96.14437,
+   "lat": 16.809283,
+   "x": 31396.96,
+   "z": 33554.05,
+   "w": 16.72,
+   "h": 31.76,
+   "shape": "oct",
+   "yaw": 88.1,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "footprint o986952740 in compound (110 m)",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: gold stupa, outline fits"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "religion": "buddhist"
+   },
+   "ground_y": 56.7,
+   "ground_span": 0.68,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w425781831",
+   "name": "Tant Taw Mu Pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.151206,
+   "lat": 16.793339,
+   "x": 33582.34,
+   "z": 38841.41,
+   "w": 7.59,
+   "h": 14.42,
+   "shape": "sq",
+   "yaw": 15.2,
+   "cls": "S",
+   "scheme": "whitetop",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: small white zedi by the railway"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 102.03,
+   "ground_span": 0.91,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w444474741",
+   "name": "",
+   "name_my": null,
+   "pick": "stupa",
+   "lon": 96.147644,
+   "lat": 16.799054,
+   "x": 32443.52,
+   "z": 36945.99,
+   "w": 15.12,
+   "h": 28.72,
+   "shape": "sq",
+   "yaw": 15.1,
+   "cls": "M",
+   "scheme": "whitegold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: unnamed zedi",
+    "photo": "Esri z19: white terrace, gold middle"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "man_made": "stupa",
+    "religion": "buddhist"
+   },
+   "ground_y": 127.55,
+   "ground_span": 5.65,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w444474745",
+   "name": "",
+   "name_my": null,
+   "pick": "stupa",
+   "lon": 96.148018,
+   "lat": 16.79974,
+   "x": 32563.14,
+   "z": 36718.55,
+   "w": 14.03,
+   "h": 26.65,
+   "shape": "sq",
+   "yaw": 16.4,
+   "cls": "M",
+   "scheme": "whitegold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: unnamed zedi",
+    "photo": "Esri z19: white terrace, gold top"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "man_made": "stupa",
+    "religion": "buddhist"
+   },
+   "ground_y": 131.89,
+   "ground_span": 5.12,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w522961767",
+   "name": "သဲပုံစေတီ",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.131156,
+   "lat": 16.800767,
+   "x": 27172.83,
+   "z": 36378.1,
+   "w": 18.12,
+   "h": 34.42,
+   "shape": "sq",
+   "yaw": 27.5,
+   "cls": "M",
+   "scheme": "gold",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 39.36,
+   "ground_span": 1.02,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w588550736",
+   "name": "pagoda",
+   "name_my": "",
+   "pick": "pow",
+   "lon": 96.123033,
+   "lat": 16.833303,
+   "x": 24576.21,
+   "z": 25588.59,
+   "w": 25.76,
+   "h": 48.94,
+   "shape": "oct",
+   "yaw": 22.9,
+   "cls": "L",
+   "scheme": "white",
+   "src": {
+    "W": "OSM outline",
+    "H": "ratio 1.9 x W",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: white stupa, grey top"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "religion": "buddhist"
+   },
+   "ground_y": 18.65,
+   "ground_span": 0.21,
+   "in_p1": false,
+   "place_now": true
+  },
+  {
+   "id": "w923283762",
+   "name": "Original Kabar Aye Pagoda",
+   "name_my": "မူလ ကမ္ဘာအေး စေတီ",
+   "pick": "pow",
+   "lon": 96.14988,
+   "lat": 16.80256,
+   "x": 33158.21,
+   "z": 35783.44,
+   "w": 22.0,
+   "h": 20.0,
+   "shape": "oct",
+   "yaw": 53.4,
+   "cls": "M",
+   "scheme": "white",
+   "src": {
+    "W": "footprint own outline (compact, nothing inside) in compound (33 m)",
+    "H": "OSM height",
+    "scheme": "guess: named pagoda",
+    "photo": "Esri z19: white stupa ~20 m with a pink-roofed hall"
+   },
+   "tags": {
+    "amenity": "place_of_worship",
+    "building": "yes",
+    "height": "20",
+    "religion": "buddhist"
+   },
+   "ground_y": 105.52,
+   "ground_span": 0.56,
+   "in_p1": false,
+   "place_now": true
+  }
+ ]
+}
