@@ -24,7 +24,7 @@ released. ClaudeTools.YangonRoads in Studio = the repo file with MOUTH_SNAP (128
 ## Counts
 mouthsim failed joins: 1,621 -> 20 (+102 shallow merges closed by the new `YangonRoads.MOUTH_SNAP` = 30: an edge that
 ends within 30 studs of the bigger road's edge closes onto its nearest point instead of erroring). QA counts before ->
-QA before -> after: mouth_short 81 -> 89, mouth_over 35 -> 50, mouth_edge 25 -> 27, kerb_cross 522 -> 552, median_cross 3 -> 3, zero_width 0, overlap 12 -> 10, rank_dup 0 (NOT improved: the QA rules are approximations, see Next 5; the paint QA was still running at commit time, log NET/qa_paint.log).
+QA before -> after: mouth_short 81 -> 89, mouth_over 35 -> 50, mouth_edge 25 -> 27, kerb_cross 522 -> 552, median_cross 3 -> 3, zero_width 0, overlap 12 -> 10, rank_dup 0 (NOT improved: the QA rules are approximations, see Next 5; paint QA (NET/qa_paint.json): paint_off 438, zebra_median 129, stack_paint 89, median_box 0 - fix these in roads05_paint after the junctions).
 
 ## Studio test J5 (`build/city_1to1/roads05_J5`; asset 133014134133489 = Roads + YangonRoads + 13 data modules)
 All 5: 0 MOUTH FAILED. Shots in vault `City Legends/2026-11-17 roads05 Studio test - *.jpg` (roads lifted +400).
@@ -49,7 +49,8 @@ shot are ground terrain, not parts). Earlier passes did the same; decide before 
    other (Pyay Road #12 on #4 / #6, May Ni Gone Overpass on Pyay Road #2 - also the QA "overlap" doubled roads: drop
    the piece lying inside the other), parallel merges further than 30 studs (Bahan Road #2, Ahlone Road #2 / #3,
    U Htaung Bo Road #3), Y forks of mains (Bogyoke Aung San Road #2 / Lower Pazundaung Road on Upper Pazundaung #3).
-5. kerb_cross / mouth_short / mouth_over: re-read with the new QA counts; make QA's mouth_edge call mouthsim.
-6. Studio test again (J5 recipe above: subset roads within 800 of each junction, `pack_tools.py`, PATCH the asset as
+5. Paint QA: paint_off 438 (lines past the asphalt, likely at the new chained corners / snapped merges), zebra_median 129, stack_paint 89.
+6. kerb_cross / mouth_short / mouth_over: re-read with the new QA counts; make QA's mouth_edge call mouthsim.
+7. Studio test again (J5 recipe above: subset roads within 800 of each junction, `pack_tools.py`, PATCH the asset as
    model/x-rbxm, LoadAsset, data into YangonData, `Y.load()` then `Y.stepCell(box, folder)` per junction in
    task.spawn, lift +400, screen_capture from 320 above, then delete everything, save, check the log, unlock).
