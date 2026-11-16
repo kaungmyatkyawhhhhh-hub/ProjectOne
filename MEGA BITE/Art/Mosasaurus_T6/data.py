@@ -15,7 +15,7 @@ for x in xs:
     T.append(runs[0][0] if runs else np.nan); B.append(max(r[-1] for r in runs) if runs else np.nan)
 T=np.array(T,float); B=np.array(B,float)
 T=median_filter(np.nan_to_num(T,nan=np.nanmean(T)),9)
-B=interp_over(xs,np.nan_to_num(B,nan=256),[(320,525),(815,1000)]); B=median_filter(B,9)
+B=interp_over(xs,np.nan_to_num(B,nan=266),[(315,665),(805,1165)]); B=median_filter(B,9)
 HW=[]
 for x in xs:
     xt=int(round(TX0+(x-X0)*(TX1-TX0)/(X1-X0)))

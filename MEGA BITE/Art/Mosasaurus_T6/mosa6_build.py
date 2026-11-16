@@ -62,7 +62,7 @@ def jit(c, k, a=0.12):   # per-face colour variation, deterministic
     r = random.Random(k).uniform(-a, a); return tuple(max(0, min(1, v * (1 + r))) for v in c[:3]) + (1,)
 
 # ---------- body lofts ----------
-NR, PEX = 14, 2.4
+NR, PEX = 16, 2.4
 def ring_pt(x, top, bot, hw, th):
     zc, hz, w = (Z(top) + Z(bot)) / 2, (Z(top) - Z(bot)) / 2, hw * S
     sy, cz = math.sin(th), math.cos(th)
@@ -78,14 +78,13 @@ def ring(x, top, bot, hw, jitter=0.03):
     return out
 
 def belly_z(x): return Z(line(D['belly_line'], x))
-def body_colour(o_name, centres):
+def body_colour(o_name, centres, belly_faces=()):
     def f(p):
-        c = centres(p)
-        if c.z < belly_z((c.x + D['len_m'] / 2) / S + X0) and abs(c.y) < 10: base = P['belly']
+        if p.index in belly_faces: base = P['belly']     # whole ring quads: a straight band edge, as the exploded sheet
         else:
             r = random.Random(p.index * 7 + len(o_name)).random()
-            base = P['dark'] if r < 0.15 else (P['light'] if r > 0.9 else P['green'])
-        return jit(base, p.index * 13 + len(o_name), 0.06)
+            base = P['dark'] if r < 0.1 else (P['light'] if r > 0.94 else P['green'])
+        return jit(base, p.index * 13 + len(o_name), 0.05)
     return f
 
 def loft(name, xs, prof, tip_start=None, tip_end=None, colour=None, glow=False):
@@ -105,7 +104,9 @@ def loft(name, xs, prof, tip_start=None, tip_end=None, colour=None, glow=False):
     me_name = 'M6_' + name
     o = make(me_name, verts, faces, (0, 0, 0, 1), glow)
     me = o.data
-    cf = colour or body_colour(me_name, lambda p: p.center)
+    ba = D.get('belly_angle_deg', 180); step = 360 / NR
+    belly = {f for f in range(2 * NR * (len(rings) - 1)) if ba < ((f // 2) % NR + 0.5) * step < 360 - ba}
+    cf = colour or body_colour(me_name, lambda p: p.center, belly)
     ca = me.color_attributes['Col']
     for p in me.polygons:
         cc = cf(p)
@@ -116,7 +117,7 @@ def xs_between(a, b, step=22):
     v = list(np.arange(a, b, step)) + [b]; return [float(x) for x in v]
 body = lambda x: (T(x), B(x), HW(x))
 cut = D['cuts']
-loft('TailTip', xs_between(60, cut['tail_tip'][1]), body, tip_start=Vector((X(X0), 0, Z(255))))
+loft('TailTip', xs_between(60, cut['tail_tip'][1]), body, tip_start=Vector((X(X0), 0, (Z(T(60)) + Z(B(60))) / 2)))
 loft('TailBase', xs_between(*cut['tail_base']), body)
 loft('Torso', xs_between(*cut['torso']), body)
 loft('Neck', xs_between(*cut['neck']), body)
@@ -218,24 +219,25 @@ for i, c in enumerate(D['crystals']):
 
 # ---------- raised hexagonal scale plates (one object) ----------
 pv, pf = [], []
-def plate(c, n, r, th):
+def plate(c, n, r, th, asp=1.0):
     t1 = Vector((1, 0, 0)); t1 = (t1 - n * t1.dot(n)).normalized(); t2 = n.cross(t1)
     b = len(pv)
     for k in range(6):
-        a = 2 * math.pi * k / 6; pv.append(c - n * 2 * S + t1 * r * 1.25 * math.cos(a) + t2 * r * math.sin(a))
+        a = 2 * math.pi * k / 6; pv.append(c - n * 2 * S + t1 * r * 1.25 * math.cos(a) + t2 * r * asp * math.sin(a))
     for k in range(6):
-        a = 2 * math.pi * k / 6; pv.append(c + n * th + t1 * r * 0.95 * math.cos(a) + t2 * r * 0.7 * math.sin(a))
+        a = 2 * math.pi * k / 6; pv.append(c + n * th + t1 * r * 0.95 * math.cos(a) + t2 * r * 0.7 * asp * math.sin(a))
     pf.extend([(b + k, b + (k + 1) % 6, b + 6 + (k + 1) % 6, b + 6 + k) for k in range(6)])
     pf.append(tuple(b + 6 + k for k in range(6))); pf.append(tuple(b + 5 - k for k in range(6)))
-for row, th_deg in enumerate((28, 62)):
-    for x in np.arange(cut['tail_base'][0] + 25 + (row % 2) * 30, cut['neck'][1] - 10, 60):
+PL = D['plates']   # exploded sheet: two rows of large flat plates, staggered
+for row, th_deg in enumerate(PL['rows_deg']):
+    for x in np.arange(cut['tail_base'][0] + 25 + (row % 2) * PL['step'] / 2, cut['neck'][1] - 10, PL['step']):
         x = float(x); top, bot, hw = body(x)
         if hw < 30: continue
         for side in (1, -1):
             p = ring_pt(x, top, bot, hw, math.radians(th_deg)); p.y *= side
             n = Vector((0, p.y, p.z - (Z(top) + Z(bot)) / 2)).normalized()
-            plate(p, n, 19 * S * min(1, hw / 80), 7 * S)
-for x, y in ((1225, 232), (1262, 236), (1172, 202)):     # the few plates on the skull
+            plate(p, n, PL['r'] * S * min(1, hw / 80), PL['th'] * S, 0.45)
+for x, y in ((1238, 248), (1268, 256), (1225, 218)):     # the few plates on the skull
     top, bot, hw = skull(x)
     lo, hi = 0.0, math.pi
     for _ in range(40):
@@ -245,7 +247,7 @@ for x, y in ((1225, 232), (1262, 236), (1172, 202)):     # the few plates on the
     for side in (1, -1):
         p = ring_pt(x, top, bot, hw, lo); p.y *= side
         plate(p, Vector((0, p.y, p.z - (Z(top) + Z(bot)) / 2)).normalized(), 13 * S, 5 * S)
-make('M6_ScalePlates', pv, pf, lambda p: jit(P['plate'] if p.index % 8 != 7 else P['dark'], p.index, 0.06))
+make('M6_ScalePlates', pv, pf, lambda p: jit(P['plate'] if p.index % 8 == 6 else P['dark'], p.index, 0.05))   # light top, dark bevel sides
 
 # ---------- flippers: faceted paddles, root sunk into the lower flank ----------
 for f in D['flippers']:
@@ -269,7 +271,7 @@ for f in D['flippers']:
             for k in range(K):
                 a, b = i * K + k, i * K + (k + 1) % K; faces.append((a, b, b + K, a + K))
         faces.append(tuple(range(K - 1, -1, -1))); L = (len(secs) - 1) * K; faces.append(tuple(L + k for k in range(K)))
-        make('M6_%sFlipper%s' % (f['name'], sname), verts, faces, lambda p: jit(P['dark'] if p.index % 4 == 0 else P['green'], p.index, 0.1))
+        make('M6_%sFlipper%s' % (f['name'], sname), verts, faces, lambda p: jit(P['light'] if p.index % 2 else P['green'], p.index, 0.08))   # fine mid-green check, like the sheet
 
 objs = [o for o in col.objects if o.name.startswith('M6_')]
 tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in objs)

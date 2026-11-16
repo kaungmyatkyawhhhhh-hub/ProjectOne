@@ -79,3 +79,17 @@ Owner: "lets not import yet. lets just view in blender first with everything set
 - **Bigger flippers:** width 88 -> 112 px, 25 % longer (`len_k` 1.25 in mosa6_data.json).
 - Gates PASS (30 parts). IoU side 0.927, top 0.814, front 0.691 (top/front lower on purpose: flippers now bigger than the sheet).
 - Asset 104031266367399 is the v1 upload (before these tweaks). `install_serverstorage.luau` now needs the NEW upload's id (ASSET_ID) and also sets the eyes to Neon yellow. Not uploaded yet: the owner wants to approve in Blender first.
+
+---
+# v3: "exactly like the exploded diagram" (owner, 16 Nov)
+The side contract is now the exploded sheet's **ASSEMBLED VIEW** (scaled x1.446 into the turnaround's side frame: `side_ex.png`; with the turnaround's top/front views: `sheet_v2.png`). Overrides read off the exploded sheet live in **`data_exploded.py`** (run after data.py).
+Pipeline: `analyse.py sheet_v2.png` -> `crys.py` -> `data.py` -> `data_exploded.py` -> `mosa6_build.py` -> `gates.py` / `compare.py` -> `mosa6_export.py`.
+- Part seams as the assembled view: tail tip 52-228, tail base 228-430, torso 430-1080, neck 1080-1205, head 1205-1478.
+- **15 crystals** (assembled view draws 14; the parts row has 15, the extra tiny one added at the tail end).
+- Belly: a straight band on whole ring quads (16-vertex rings, band from 112 deg = about 20 % of the body height), no zig-zag.
+- Plates: two staggered rows (48 / 74 deg), 68 px apart, large flat hexes with dark bevel sides.
+- Flippers: the near-side flippers' shapes, broad leaves hanging down and back (width 100, spread 120, no twist). The sheet staggers each left/right pair ~1 m apart so all four show from the side; a symmetric body can't, so both sides use the same position.
+- Brighter palette sampled from the assembled view; head lines, jaw gape, eye and teeth from the assembled view.
+- Glowing eye, thin lip band kept from v2. The v2 "bigger flippers" are replaced by the sheet's flipper size.
+- 31 parts, 6,128 triangles, gates PASS. IoU vs the new contract: side 0.908, top 0.757, front 0.662 (top/front are the turnaround's views, which the exploded sheet doesn't have).
+- Picture: `checks/mosa6_side_vs_exploded_assembled.png`. Not uploaded (asset 104031266367399 is still v1).
