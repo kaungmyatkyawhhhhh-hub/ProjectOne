@@ -8,13 +8,15 @@
 	A Part's material texture hangs from its top face, so the phase (picture moved down 0 / 2.5 / 5 / 7.5 studs) is
 	chosen per box to put a floor line nearest its base + ground floor height (base = box bottom + 1).
 
-	Which set a box takes: city/shell_facades.py map -> build/shell_facades/keys_<k>.txt ('<set> <key> ...', key =
-	round(x*10)_round(z*10) of the box middle; villa is the default, 'none' = sheds / halls / markets keep theirs).
+	Which set a box takes: city/shell_facades.py map -> build/shell_facades/packed_<set>.txt (6-character keys run
+	together: base 36 of math.round(x) and math.round(z) of the box middle, 3 characters each; villa is the default,
+	'none' = sheds / halls / markets keep theirs).
 	Roofs (no attribute T) are never touched. Undo puts back YangonKitPlace's variant for the shell's wall code (its
 	Name): YgnRenderStained for KWG / KWD2 / KWC, else YgnRenderPainted.
 
-	F.variants(ids)            ids = { Walkup = { {color, normal, rough} x4 }, ... } -> creates / updates the 12 variants
-	F.apply(pages, folder)     pages = list of key-page strings; runs in chunks (task.wait), sets attribute
+	F.variants(ids)            ids = { Walkup = { {color, normal, rough} x4 }, ... } (city/shell_facades_ids.json
+	                           "phases") -> creates / updates the 12 variants
+	F.apply(pages, folder)     pages = { walkup = packed, shop = packed, none = packed }; runs in chunks (task.wait), sets attribute
 	                           workspace.YgnShellFacadesDone = count when done
 	F.undo(folder)
 ]]
@@ -25,6 +27,7 @@ local MS = game:GetService("MaterialService")
 F.SETS = { walkup = "Walkup", shop = "Shop", villa = "Villa" }
 F.GF = { Walkup = 11.7, Shop = 13.0, Villa = 10.3 } -- studs: the archetypes' ground floors (kit_panels.ARCH)
 F.FLOOR, F.PHASES, F.TILE = 10.0, 4, 60
+local STAINED = { KWG = true, KWD2 = true, KWC = true } -- YangonKitPlace's wall codes on YgnRenderStained
 
 function F.variants(ids)
 	for set, list in ids do
@@ -50,12 +53,20 @@ end
 
 function F.apply(pages, folder: Instance)
 	local setOf = {}
-	for _, page in pages do
-		local w = string.split(page, " ")
-		local set = w[1]
-		for i = 2, #w do
-			setOf[w[i]] = set
+	for set, page in pages do
+		for i = 1, #page, 6 do
+			setOf[string.sub(page, i, i + 5)] = set
 		end
+	end
+	local D = "0123456789abcdefghijklmnopqrstuvwxyz"
+	local function b36(n: number): string
+		local o = ""
+		for _ = 1, 3 do
+			local d = n % 36
+			o = string.sub(D, d + 1, d + 1) .. o
+			n = n // 36
+		end
+		return o
 	end
 	workspace:SetAttribute("YgnShellFacadesDone", nil)
 	task.spawn(function()
@@ -64,7 +75,7 @@ function F.apply(pages, folder: Instance)
 		for _, d in folder:GetDescendants() do
 			if d.ClassName == "Part" and d:GetAttribute("T") then
 				local p = d.Position
-				local key = string.format("%d_%d", math.round(p.X * 10), math.round(p.Z * 10))
+				local key = b36(math.round(p.X)) .. b36(math.round(p.Z))
 				local s = setOf[key] or "villa"
 				if s ~= "none" then
 					local set = F.SETS[s]
@@ -72,6 +83,8 @@ function F.apply(pages, folder: Instance)
 					d.MaterialVariant = "YgnShell" .. set .. F.phase(set, d.Size.Y)
 					counts[set] = (counts[set] or 0) + 1
 					n += 1
+				else
+					d.MaterialVariant = if STAINED[d.Name] then "YgnRenderStained" else "YgnRenderPainted"
 				end
 				k += 1
 				if k % 800 == 0 then
@@ -87,10 +100,9 @@ end
 function F.undo(folder: Instance)
 	task.spawn(function()
 		local k = 0
-		local stained = { KWG = true, KWD2 = true, KWC = true }
 		for _, d in folder:GetDescendants() do
 			if d.ClassName == "Part" and d:GetAttribute("T") and string.sub(d.MaterialVariant, 1, 8) == "YgnShell" then
-				d.MaterialVariant = if stained[d.Name] then "YgnRenderStained" else "YgnRenderPainted"
+				d.MaterialVariant = if STAINED[d.Name] then "YgnRenderStained" else "YgnRenderPainted"
 				k += 1
 				if k % 800 == 0 then
 					task.wait()

@@ -514,3 +514,11 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   1. Real-world accuracy means real shapes, sizes and places, but the look stays clean and attractive. Never add grime or dirt that makes the game look dirty.
   2. Before replacing any look (trees, grass, materials) everywhere, show a side by side with the current one and keep the better one.
   3. Every researched feature must appear in a build brief, with a check that it got built.
+
+## City Legends 1:1 Yangon: "why are the buildings just blocks, even the old one was BETTER" (16 Nov 2026)
+- **What felt bad:** after the light-buildings pass, far views and Studio's Edit view showed plain boxes; the facade detail only came within 1,000 studs in Play.
+- **Cause:** we judged the light pass by part counts and Play close-ups. Nobody looked at it the way the owner does: from far away and in Studio Edit.
+- **Fix:** the shells wear a window-grid material (looks like a building from any distance), and a local Studio plugin builds the real detail round the Studio camera.
+- **Rule:**
+  1. A performance trick (LOD, streaming, stand-ins) must still look like the game from far away AND in Studio Edit. Check both views before reporting.
+  2. Never let a stand-in be a plain coloured box: give it at least the right texture (windows, floors) for what it stands for.

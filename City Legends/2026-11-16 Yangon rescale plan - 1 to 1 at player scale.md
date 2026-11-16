@@ -602,6 +602,20 @@ Rules for every step:
   - Maha Pasana Guha has no OSM outline; only the compound and the court are kept empty.
 
 
+### Shell facades and the Studio Edit preview (16 Nov 2026, in Studio, not saved)
+- **Owner:** "why are the buildings just blocks, even the old one was BETTER"; then "all the buildings in roblox studio look like the ones in game (not some random blocks)".
+- **Far look:** all 15,553 shell boxes of P1 + P2 now show windows and floors. Three neutral facade sets drawn in code (walk-up / condo / civic with balcony cages and AC boxes, shophouse with two windows a bay, house / villa with shutters), 10-stud floors, whole bays, window recesses in the normal map, smooth glass. The part's own colour still tints each building. Sheds, halls and markets keep their plain wall.
+  - Counts: Walkup 4,149, Villa 9,147, Shop 1,048, kept plain 1,209.
+  - Floors line up with each building's ground floor to within 1.25 studs. A material picture hangs from a part's top, so each set has 4 shifted copies.
+- **Studio Edit:** a local plugin (`YangonEditPreview`) builds the same detail Play shows within 1,000 studs of the Studio camera: facades, street poles and wires, trees. Nothing it makes is saved or sent to Team Create. Tested: 72 tiles, 14,307 parts round the dense street in about 4 s, and it followed the camera.
+- **Owner step:** close Studio and open the place again (the plugin loads at start). The toolbar gets a "Yangon" tab with a "Yangon preview" button to turn it off and on.
+- **Detail radius in Play stays 1,000 studs.** At 1,500 the near parts doubled (14k to 30k). FPS did not change measurably on the busy PC (menu up: 8.6 with detail, 9.5 shells only, 11.2 at 1,500), so the radius was left as it is for phones.
+- **Screenshots** (`C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`):
+  - Before (plain shells, from the light pass): aerial `mcp-Roblox_Studio-blob-1794808838325-09zd6k.jpg`.
+  - After, Edit, aerial: `mcp-Roblox_Studio-blob-1794821977510-cmrvl3.jpg`. Street: `...1794821996621-27umup.jpg`.
+  - Edit with the preview plugin, street: `...1794822033116-du0hbb.jpg`. Aerial: `...1794822047206-12lv0v.jpg`.
+  - Old batch 0.5 buildings for comparison: `...1794805603735-9t9wm3.jpg` (aerial) and `...1794805617099-aa8dar.jpg` (street).
+
 ## Owner's order (16 Nov 2026, evening)
 > "do up to batch 3 first, then start renovating every house and put interiors by every district from then. also while doing up to batch 3, make the road maker use the same as the friday's builder with real roundabouts, proper markings and all 1:1 roads. BUT FIRST, fix the current roads as the FIRST FIRST priority"
 
