@@ -316,8 +316,11 @@ def plan():
         lv = levels_of(t)
         name = t.get("name:en") or t.get("name") or ""
         bt = t.get("building")
-        is_res = bt in ("apartments", "residential", "condominium") or bool(CONDO_WORDS.search(name)) or \
-            t.get("residential") in ("apartments", "condominium")
+        is_res = bt in ("apartments", "residential", "condominium") or t.get("residential") in ("apartments", "condominium") \
+            or (bool(CONDO_WORDS.search(name)) and bt not in ("office", "commercial", "retail", "hotel", "industrial")) \
+            or a["bid"] in CROWNS
+        if a["bid"] in CROWNS and not lv:
+            lv = int(b["floors"] or 0)
         if a["bid"] in HEIGHTS:
             lv = HEIGHTS[a["bid"]][0]
         if is_res and lv and lv >= 6:
