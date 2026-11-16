@@ -166,3 +166,26 @@ The runway show scripts are in `ScriptBackups.retired_RunwayShow_16Nov` (disable
 - Not saved or published.
 
 ![[Screenshots/2026-11-16 media lounge lights hung.jpg]]
+
+## Cheap tells fixed (owner: "Fix the cheap tells")
+**Backup:** `ServerStorage.MapBackups.pre_CheapTells_16Nov`. It holds the games room, fitting rooms, style booths, string lights and the old SkyDeckServer.
+
+| Tell | Fix |
+|---|---|
+| Podium sign backs were blank dark slabs | The back of each sign has a gradient in that style's colour, a brass **MM** and the style name over a brass rule |
+| Games room: leather blocks on wood cubes, a table on one solid block | Round leather stools on brass pedestals and feet. The table has 4 turned walnut legs, an apron and a brass edge. The Seats are kept |
+| Fitting rooms were near-black boxes | Walnut panels with brass front edges and top caps. A plum sign with brass rules, and a warm lamp in each booth. The mirror and curtains still work (parts are found by name) |
+| An empty Guest looks podium | Faceless translucent plum **silhouettes** (no clothes, no prompt) stand in until real guest looks exist. The sign line reads "BE ONE OF THE FIRST 3 UP HERE". Both swap automatically once looks are published |
+| Deck string-light bulbs floated (no wire) | 64 thin dark wire segments run pole top → bulbs → pole top along all 4 sides, following the sag |
+
+- **Not changed:** the boutique ceiling. It's beamed wood with lamps and doesn't read as cheap up close.
+- **Still open** (the "fill the empty spots" list):
+  - the empty boutique centre where the runway was
+  - the empty south half of the deck
+  - the plain city and sky
+- **Tested (Studio Play, PC):** each fix screenshotted, the fitting room enter/mirror works, 0 console errors.
+
+![[Screenshots/2026-11-16 podium sign back.jpg]]
+![[Screenshots/2026-11-16 guest looks silhouettes.jpg]]
+![[Screenshots/2026-11-16 games room stools and table.jpg]]
+![[Screenshots/2026-11-16 fitting rooms walnut.jpg]]
