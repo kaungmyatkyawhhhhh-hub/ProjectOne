@@ -347,18 +347,47 @@ def to_world_dir(n, bearing):
 MAX_TRIS = 9000
 
 
+class DMesh(Mesh):
+    """Mesh that shares corners with the same position, normal, uv and colour (smooth figure meshes: ~5x smaller files)."""
+
+    def __init__(self):
+        super().__init__()
+        self._ix = {}
+
+    def tri(self, a, b, c, ua, ub, uc, rgb, normals=None):
+        n = cross(sub(b, a), sub(c, a))
+        if n[0] * n[0] + n[1] * n[1] + n[2] * n[2] < 1e-14:
+            return
+        fn = unit(n)
+        col = tuple(int(max(0, min(255, round(x)))) for x in rgb)
+        for p, u, q in zip((a, b, c), (ua, ub, uc), normals or (fn, fn, fn)):
+            key = (round(p[0], 4), round(p[1], 4), round(p[2], 4), round(q[0], 3), round(q[1], 3), round(q[2], 3),
+                   round(u[0], 3), round(u[1], 3))
+            i = self._ix.get(key)
+            if i is None:
+                i = len(self.P)
+                self._ix[key] = i
+                self.P.append(p)
+                self.N.append(q)
+                self.U.append(u)
+                self.C.append(col)
+            self.T.append(i)
+
+
 def export(model, pivot, bearing, out_glb, tag, s=3.0):
     named = []
     world = []
     k = 0
     for grp in sorted(model.g):
         T = model.g[grp]
+        smooth = grp.startswith("F") and grp not in ("FLR", "FRD")
         for st in range(0, len(T), MAX_TRIS):
-            m = Mesh()
+            m = DMesh() if smooth else Mesh()
             for a, b, c, n, sid in T[st:st + MAX_TRIS]:
                 P = [to_world(p, pivot, bearing, s) for p in (a, b, c)]
                 N = [to_world_dir(q, bearing) for q in n] if n else None
-                m.tri(P[0], P[1], P[2], *box_uv(P), (255, 255, 255), N)
+                uv = ((0.5, 0.5),) * 3 if smooth else box_uv(P)
+                m.tri(P[0], P[1], P[2], *uv, (255, 255, 255), N)
                 world.append(((P[0], P[1], P[2]), grp, sid))
             if not m.T:
                 continue

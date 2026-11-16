@@ -1,18 +1,20 @@
--- Ngahtatgyi placer (bahan_buddhas3d.py), asset 117322729142436
-local NAME, ASSET = "Ngahtatgyi", 117322729142436
+-- Ngahtatgyi placer (bahan_buddhas3d.py), asset 135129652866498
+local NAME, ASSET = "Ngahtatgyi", 135129652866498
 local LOOK = {
-  BLK = {"SmoothPlastic", 28, 28, 34, "", 0.1},
   CLT = {"SmoothPlastic", 240, 240, 236, "", 0},
+  FBK = {"SmoothPlastic", 22, 22, 26, "", 0.04},
+  FGB = {"SmoothPlastic", 222, 172, 64, "", 0.18},
+  FGO = {"SmoothPlastic", 204, 164, 86, "", 0.12},
+  FLP = {"SmoothPlastic", 192, 46, 56, "", 0.1},
+  FPK = {"SmoothPlastic", 232, 142, 142, "", 0.05},
   FRD = {"SmoothPlastic", 150, 46, 40, "", 0.2},
+  FSK = {"SmoothPlastic", 240, 238, 232, "", 0.15},
   GBL = {"SmoothPlastic", 204, 218, 212, "", 0.1},
   GLD = {"Metal", 226, 222, 245, "YgnGoldLeaf", 0},
-  LIP = {"SmoothPlastic", 186, 44, 52, "", 0.05},
   MIR = {"Foil", 204, 208, 214, "", 0.3},
   PLN = {"SmoothPlastic", 196, 190, 180, "", 0},
   RBS = {"SmoothPlastic", 176, 32, 32, "", 0.05},
-  ROB = {"Metal", 226, 222, 245, "YgnGoldLeaf", 0},
   RUS = {"Metal", 132, 66, 50, "YgnCorrugatedZinc", 0},
-  SKN = {"SmoothPlastic", 255, 255, 250, "", 0.05},
   SKY = {"SmoothPlastic", 228, 236, 240, "", 0.1},
   STW = {"SmoothPlastic", 226, 229, 232, "", 0.05},
   TEK = {"Wood", 96, 52, 40, "", 0},

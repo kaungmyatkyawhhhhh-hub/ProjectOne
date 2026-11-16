@@ -1,24 +1,26 @@
--- Chaukhtatgyi placer (bahan_buddhas3d.py), asset 129397555354535
-local NAME, ASSET = "Chaukhtatgyi", 129397555354535
+-- Chaukhtatgyi placer (bahan_buddhas3d.py), asset 102279438796873
+local NAME, ASSET = "Chaukhtatgyi", 102279438796873
 local LOOK = {
-  BLK = {"SmoothPlastic", 28, 28, 34, "", 0.1},
   CEL = {"SmoothPlastic", 236, 236, 230, "", 0},
-  CUS = {"SmoothPlastic", 150, 40, 40, "", 0.05},
+  FBK = {"SmoothPlastic", 22, 22, 26, "", 0.04},
+  FGB = {"SmoothPlastic", 222, 172, 64, "", 0.18},
+  FGO = {"SmoothPlastic", 204, 164, 86, "", 0.12},
+  FLD = {"SmoothPlastic", 170, 205, 230, "", 0.05},
+  FLP = {"SmoothPlastic", 192, 46, 56, "", 0.1},
   FLR = {"SmoothPlastic", 150, 160, 150, "", 0.15},
+  FMR = {"SmoothPlastic", 112, 30, 38, "", 0.05},
+  FPK = {"SmoothPlastic", 232, 142, 142, "", 0.05},
+  FSK = {"SmoothPlastic", 240, 238, 232, "", 0.15},
+  FSO = {"SmoothPlastic", 214, 128, 112, "", 0.03},
   GLD = {"Metal", 226, 222, 245, "YgnGoldLeaf", 0},
-  LID = {"SmoothPlastic", 172, 206, 230, "", 0.05},
-  LIP = {"SmoothPlastic", 186, 44, 52, "", 0.05},
   LMP = {"Neon", 255, 232, 160, "", 0},
   MOS = {"Foil", 150, 160, 140, "", 0.2},
   NCM = {"SmoothPlastic", 122, 46, 40, "", 0},
   NMI = {"SmoothPlastic", 164, 206, 184, "", 0},
   PLT = {"SmoothPlastic", 196, 196, 190, "", 0.05},
   RFG = {"SmoothPlastic", 72, 104, 76, "", 0},
-  ROB = {"Metal", 226, 222, 245, "YgnGoldLeaf", 0},
   RUG = {"SmoothPlastic", 96, 96, 100, "", 0},
-  SKN = {"SmoothPlastic", 255, 255, 250, "", 0.05},
   SKY = {"SmoothPlastic", 228, 236, 240, "", 0.1},
-  SOL = {"SmoothPlastic", 214, 128, 112, "", 0.03},
   STM = {"SmoothPlastic", 112, 50, 44, "", 0.05},
   TEA = {"SmoothPlastic", 44, 92, 102, "", 0},
   WRD = {"Metal", 120, 46, 44, "YgnCorrugatedZinc", 0}
