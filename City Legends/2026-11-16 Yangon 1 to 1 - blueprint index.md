@@ -36,6 +36,7 @@ created: 2026-11-16
 | Sites (Sedona, Myanmar Centre, landmarks, venues) | [[2026-11-16 Audit - Yangon sites 1 to 1]] |
 | Interiors that can be built (53 rated) | [[2026-11-16 Research - Yangon interiors catalogue]], [[2026-11-16 Research - Melia Yangon interior]] |
 | Myanmar Plaza and Sedona look | [[2026-11-16 Research - Myanmar Plaza and Sedona real look (photo measurements)]] |
+| Myanmar Centre (mall, towers, Meliá) and Sedona built at 1:1 in P1 | [[2026-11-16 Myanmar Centre and Sedona 1 to 1 refit (P1)]] |
 | Textures and materials (real PBR surfaces, MaterialVariants) | being built: `Games/CityLegends/build/materials/materials_library.md` |
 | Materials and textures (50 MaterialVariants) | [[2026-11-16 Research - Yangon materials and textures library]] |
 | What is missing (places, systems, decorations, walls) | [[2026-11-16 Audit - What is missing from the Yangon map]] |

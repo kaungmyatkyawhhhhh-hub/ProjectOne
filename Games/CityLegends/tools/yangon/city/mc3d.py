@@ -26,7 +26,11 @@ from geom3d import Geo, ccw, offset_poly, outward, ellipse, raster_boxes  # noqa
 import landmark_glb3d as LG  # noqa: E402
 
 ROOT = os.path.join(HERE, "..", "..", "..", "build", "landmarks", "myanmar_centre")
-LAY = json.load(open(os.path.join(ROOT, "layout_fit.json")))
+import geo as GEO  # noqa: E402
+# 1:1 (2026-11-16, YANGON_SCALE=1to1): the real layout (p1_refit_layout.py) built through onetoone.py: across x 1.875,
+# up the mall 16.5 / 15 studs a floor (5.5 / 5.0 m), towers and the Melia 11.25 (3.75 m); fit-outs stay player scale
+ONE = GEO.ONE_TO_ONE
+LAY = json.load(open(os.path.join(ROOT, "layout_fit_1to1.json" if ONE else "layout_fit.json")))
 LET = json.load(open(os.path.join(HERE, "..", "..", "..", "build", "landmarks", "text3d.json")))
 FLOOR = 9.0
 SKIRT = -4.0
@@ -34,10 +38,18 @@ POD_Z = [0.0, 14.0, 26.0, 38.0, 50.0]  # the mall floors; the roof at 62 + a 4-s
 POD_H = [14.0, 12.0, 12.0, 12.0, 12.0]
 POD_TOP = 66.0
 
-g = Geo()
-COLL = []
+if ONE:
+    import onetoone as X1  # noqa: E402
+    g = X1.XGeo(X1.zmap_factory(14.0, 16.5, 1.25))
+    GCOLL = []               # ground boxes that follow the pavement plane (paving, plaza, drives: g.ground())
+    COLL = X1.XColl(g, ground=GCOLL)
+    LIGHTS = X1.XLights(g)
+else:
+    g = Geo()
+    COLL = []
+    GCOLL = []
+    LIGHTS = []
 BOARDS = []
-LIGHTS = []
 
 
 def V(p):
@@ -486,15 +498,198 @@ def plinth():
         pp = P(b, r + 0.05)
         g.box("LIT", pp[0], pp[1], 0.3, 0.7, 0.2, 0.45, b + math.pi / 2, faces=("-y", "top"))
     # the raised garden bed behind the wall (inside the arc, closed by the chord)
-    garden = [P(a0 + span * k / 24, r - 1.1) for k in range(25)]
-    g.cap("LAW", garden, 1.2)
-    g.wall("PGR", garden[-1], garden[0], SKIRT, 1.2)
+    if ONE:
+        # the teal water channel inside the arc (r - 1.1 .. r - 3.3, 1.2 m wide), granite kerb on its inner side,
+        # the round paved plaza (paving()), a 2 x 2 m sculpture plinth in the middle
+        ro, ri = r - 1.1, r - 3.3
+        for k in range(24):
+            b0, b1 = a0 + span * k / 24, a0 + span * (k + 1) / 24
+            po, qo, pi_, qi_ = P(b0, ro), P(b1, ro), P(b0, ri), P(b1, ri)
+            g.quad("WAT", (po[0], po[1], 0.35), (qo[0], qo[1], 0.35), (qi_[0], qi_[1], 0.35), (pi_[0], pi_[1], 0.35))
+            g.quad("POL", (po[0], po[1], -0.4), (qo[0], qo[1], -0.4), (qi_[0], qi_[1], -0.4), (pi_[0], pi_[1], -0.4))
+            ki, kq = P(b0, ri - 0.6), P(b1, ri - 0.6)
+            g.wall("PGR", pi_, qi_, -0.4, 0.7)
+            g.wall("PGR", kq, ki, SKIRT, 0.7)
+            g.quad("PGR", (pi_[0], pi_[1], 0.7), (qi_[0], qi_[1], 0.7), (kq[0], kq[1], 0.7), (ki[0], ki[1], 0.7))
+        for b, sgn in ((a0, 1), (a0 + span, -1)):
+            o_, i_ = P(b, ro), P(b, ri - 0.6)
+            g.wall("PGR", o_, i_, -0.4, 0.7)
+            g.wall("PGR", i_, o_, -0.4, 0.7)
+        g.box("PGR", cx, cy, SKIRT, 3.2, 3.2, 1.0 - SKIRT, 0.0)
+        COLL.append((cx, cy, 0.0, 3.2, 3.2, 1.0, 0.0))
+    else:
+        garden = [P(a0 + span * k / 24, r - 1.1) for k in range(25)]
+        g.cap("LAW", garden, 1.2)
+        g.wall("PGR", garden[-1], garden[0], SKIRT, 1.2)
 
 
 def paving():
     tiles = [Polygon(t["outer"], t.get("holes") or []) for t in LAY["paving"]]
     shape = unary_union([t.buffer(0.01) for t in tiles]).buffer(-0.01)
+    if ONE:
+        shape = shape.difference(_drive_shapes(full=True))
     g.capshape("PAV", shape, 0.06)
+    if ONE:
+        COLL.extend(raster_boxes(shape, -1.0, 0.06, 2.0))
+        drives()
+
+
+from contextlib import nullcontext as _null  # noqa: E402
+
+RAMP_DEPTH = 10.5      # true studs (3.5 m) down to the basement portals (site audit fix 5)
+CARVE = []             # terrain to carve for the ramps: (cx, cy, z0, sx, sy, sz, yaw) model boxes (scaled), ground based
+
+
+def _site():
+    return unary_union([Polygon(r).buffer(0) for r in LAY["site"]])
+
+
+def _drive_shapes(full=False):
+    """The drives clipped to the site (old model frame); ramps included when full."""
+    site = _site()
+    blds = unary_union([Polygon(POD).buffer(0.5), Polygon(LAY["melia_osm"]).buffer(0.5)])
+    out = []
+    for name, d in LAY.get("drives", {}).items():
+        if d.get("ramp") and not full:
+            continue
+        L = LineString(d["pts"])
+        w = d["w"] * 1.6
+        out.append(L.buffer(w / 2, cap_style=2, join_style=2).intersection(site).difference(blds))
+    return unary_union(out) if out else Polygon()
+
+
+def drives():
+    """1:1 (site audit fixes 5-8): the Melia drop-off, the service drives round the Melia and from Industrial Road,
+    and the two basement ramps from Kabar Aye Pagoda Road (3.5 m down, concrete side walls, a dark portal under a
+    slab with a height bar), all on the pavement plane (called in ground mode)."""
+    flat = _drive_shapes()
+    g.capshape("DRV", flat, 0.06)
+    COLL.extend(raster_boxes(flat, -1.0, 0.06, 2.0))
+    site = _site()
+    KZ = 16.5 / 14.0
+    for name, d in LAY.get("drives", {}).items():
+        if not d.get("ramp"):
+            continue
+        L = LineString(d["pts"])
+        seg = L.intersection(site.buffer(-0.5))
+        if seg.is_empty or seg.length < 8:
+            continue
+        if seg.geom_type != "LineString":
+            seg = max(seg.geoms, key=lambda q: q.length)
+        a, b = seg.coords[0], seg.coords[-1]
+        # the ramp runs from the site edge (road side, the end nearer the drive's first point) down to the portal
+        if math.dist(a, d["pts"][0]) > math.dist(b, d["pts"][0]):
+            a, b = b, a
+        if "out" in name:      # ramp_out's polyline runs portal -> road
+            a, b = b, a
+        Lr = math.dist(a, b)
+        e = unit((b[0] - a[0], b[1] - a[1]))
+        nrm = (-e[1], e[0])
+        yaw = math.atan2(e[1], e[0])
+        hw = d["w"] * 1.6 / 2
+        dep = RAMP_DEPTH / X1.S / KZ * X1.S   # pre-map units (z is mapped by f below 0: z * KZ)
+        dep = RAMP_DEPTH / KZ
+        n = max(6, int(Lr / 2.0))
+        flat_end = 0.18                        # the last 18 % level at the bottom (the portal)
+
+        def zt(t):
+            u = min(1.0, t / (1 - flat_end))
+            return -dep * (3 * u * u - 2 * u * u * u)
+
+        def P(t, s, z):
+            return (a[0] + e[0] * Lr * t + nrm[0] * s, a[1] + e[1] * Lr * t + nrm[1] * s, z)
+        for k in range(n):
+            t0, t1 = k / n, (k + 1) / n
+            z0_, z1_ = zt(t0), zt(t1)
+            g.quad("DRV", P(t0, -hw, z0_), P(t1, -hw, z1_), P(t1, hw, z1_), P(t0, hw, z0_))
+            for sd in (-1, 1):
+                # the side walls: inner face toward the ramp, a coping on top 0.4 over the ground, outer face hidden
+                s_in, s_out = sd * hw, sd * (hw + 0.8)
+                q = [P(t0, s_in, z0_), P(t1, s_in, z1_), P(t1, s_in, 0.4), P(t0, s_in, 0.4)]
+                g.quad("ROF", *(q if sd > 0 else q[::-1]))
+                q = [P(t0, s_in, 0.4), P(t1, s_in, 0.4), P(t1, s_out, 0.4), P(t0, s_out, 0.4)]
+                g.quad("ROF", *(q[::-1] if sd > 0 else q))
+                q = [P(t0, s_out, -0.6), P(t1, s_out, -0.6), P(t1, s_out, 0.4), P(t0, s_out, 0.4)]
+                g.quad("ROF", *(q[::-1] if sd > 0 else q))
+            tm = (t0 + t1) / 2
+            c = P(tm, 0, 0)
+            COLL.append((c[0], c[1], zt(tm) - 2.0, Lr / n + 0.2, 2 * hw, 2.0, yaw))
+        for sd in (-1, 1):
+            c = P(0.5, sd * (hw + 0.4), 0)
+            COLL.append((c[0], c[1], -dep, Lr, 0.8, dep + 0.4, yaw))
+        # the portal: a dark opening in an end wall, a concrete slab over the last stretch, a height bar, a barrier
+        c = P(1.0, 0, 0)
+        g.box("DRK", c[0] + e[0] * 0.4, c[1] + e[1] * 0.4, -dep, 0.8, 2 * hw + 1.6, dep + 0.4, yaw)
+        COLL.append((c[0] + e[0] * 0.4, c[1] + e[1] * 0.4, -dep, 0.8, 2 * hw + 1.6, dep + 0.4, yaw))
+        slab_t0 = 1 - flat_end * 0.9
+        c = P((slab_t0 + 1) / 2, 0, 0)
+        sl = Lr * (1 - slab_t0)
+        top = 0.4
+        bottom = -dep + 7.0 / KZ          # 2.3 m clear under the slab
+        g.box("ROF", c[0], c[1], bottom, sl, 2 * hw + 1.6, top - bottom, yaw)
+        COLL.append((c[0], c[1], bottom, sl, 2 * hw + 1.6, top - bottom, yaw))
+        hb = P(slab_t0 - 0.02, 0, 0)
+        for j in range(6):
+            pa, pb = P(slab_t0 - 0.02, -hw + 2 * hw * j / 6, bottom - 0.4), P(slab_t0 - 0.02, -hw + 2 * hw * (j + 1) / 6, bottom - 0.4)
+            g.tube("RED" if j % 2 == 0 else "MUW", pa, pb, 0.3)
+        bp = P(1 - flat_end * 0.5, 0, 0)
+        g.tube("RED", P(1 - flat_end * 0.5, -hw + 0.6, -dep + 3.0 / KZ), P(1 - flat_end * 0.5, hw * 0.2, -dep + 3.0 / KZ), 0.25)
+        g.box("DRK", *P(1 - flat_end * 0.5, -hw + 0.6, 0)[:2], -dep, 0.8, 0.8, 3.2 / KZ, yaw)
+        c = P(0.5, 0, 0)
+        CARVE.append(X1.XGeo.box_x(g, (c[0], c[1], -dep - 1.0, Lr + 2.0, 2 * hw + 2.0, dep + 6.0, yaw)))
+
+
+def _lamp(x, y, yaw):
+    """A plaza lamp post (1:1, player scale: 16 studs = 5.3 m), no banners (site audit: lamp-post banners removed)."""
+    g.box("DRK", x, y, SKIRT, 0.7, 0.7, 16.0 - SKIRT, yaw)
+    COLL.append((x, y, 0.0, 0.8, 0.8, 16.0, yaw))
+    oct_ = [(x + 2.0 * math.cos(k * math.pi / 4), y + 2.0 * math.sin(k * math.pi / 4)) for k in range(8)]
+    g.ring("DRK", oct_, 16.0, 16.8)
+    g.cap("DRK", oct_, 16.8)
+    g.cap("LIT", oct_, 16.0, down=True)
+    LIGHTS.append({"p": (x, y, 15.6), "kind": "street"})
+
+
+def _palm(x, y, h):
+    """A palm: a slightly leaning grey trunk and 9 drooping fronds (kit groups KTW / KTL), player scale."""
+    lean = (0.04 * math.cos(x), 0.04 * math.sin(y))
+    top = (x + lean[0] * h, y + lean[1] * h, h)
+    prev = (x, y, -2.0)
+    for k in range(1, 7):
+        t = k / 6
+        cur = (x + lean[0] * h * t, y + lean[1] * h * t, -2.0 + (h + 2.0) * t)
+        g.tube("KTW", prev, cur, 1.3 - 0.4 * t)
+        prev = cur
+    for j in range(9):
+        a = 2 * math.pi * j / 9 + 0.3
+        mid = (top[0] + math.cos(a) * 4.5, top[1] + math.sin(a) * 4.5, top[2] + 1.2)
+        tip = (top[0] + math.cos(a) * 9.0, top[1] + math.sin(a) * 9.0, top[2] - 2.5)
+        sx, sy = -math.sin(a) * 1.4, math.cos(a) * 1.4
+        for p0, p1, w0, w1 in ((top, mid, 0.3, 1.0), (mid, tip, 1.0, 0.1)):
+            A = (p0[0] - sx * w0, p0[1] - sy * w0, p0[2]); B_ = (p0[0] + sx * w0, p0[1] + sy * w0, p0[2])
+            C = (p1[0] + sx * w1, p1[1] + sy * w1, p1[2]); D = (p1[0] - sx * w1, p1[1] - sy * w1, p1[2])
+            g.quad("KTL", A, B_, C, D)
+    COLL.append((x, y, 0.0, 1.4, 1.4, h, 0.0))
+
+
+def _rain_tree(x, y, h):
+    """A broad tree: trunk, three limbs, a flattened 12-sided crown (KTW / KTL), player scale."""
+    g.tube("KTW", (x, y, -2.0), (x, y, h * 0.45), 2.2)
+    for j in range(3):
+        a = 2 * math.pi * j / 3
+        g.tube("KTW", (x, y, h * 0.4), (x + math.cos(a) * 7, y + math.sin(a) * 7, h * 0.7), 1.2)
+    R, n = h * 0.55, 12
+    zb, zt = h * 0.6, h
+    lo = [(x + R * math.cos(2 * math.pi * k / n), y + R * math.sin(2 * math.pi * k / n)) for k in range(n)]
+    hi = [(x + R * 0.6 * math.cos(2 * math.pi * (k + 0.5) / n), y + R * 0.6 * math.sin(2 * math.pi * (k + 0.5) / n)) for k in range(n)]
+    for k in range(n):
+        a_, b_ = lo[k], lo[(k + 1) % n]
+        c_ = hi[k]
+        g.tri("KTL", (a_[0], a_[1], zb + 2), (b_[0], b_[1], zb + 2), (c_[0], c_[1], zt))
+        g.tri("KTL", (b_[0], b_[1], zb + 2), (hi[(k + 1) % n][0], hi[(k + 1) % n][1], zt), (c_[0], c_[1], zt))
+        g.tri("KTL", (b_[0], b_[1], zb + 2), (a_[0], a_[1], zb + 2), (x, y, zb))
+    g.cap("KTL", hi, zt)
+    COLL.append((x, y, 0.0, 2.2, 2.2, h * 0.45, 0.0))
 
 
 def props():
@@ -503,6 +698,10 @@ def props():
         dv = (x - pc[0], y - pc[1])
         l = math.hypot(*dv)
         if l > 1e-3 and (dv[0] * FACE[0] + dv[1] * FACE[1]) / l > math.cos(math.radians(65)):
+            continue
+        if ONE:
+            with g.keep(x, y, 0.0):
+                _lamp(x, y, yaw)
             continue
         g.box("DRK", x, y, SKIRT, 0.7, 0.7, 16.0 - SKIRT, yaw)
         COLL.append((x, y, 0.0, 0.8, 0.8, 16.0, yaw))
@@ -517,8 +716,16 @@ def props():
             bc = (x + sx * s * 2.0, y + sy * s * 2.0)
             g.box("RED", bc[0], bc[1], 9.0, 1.7, 0.12, 5.0, yaw + math.pi / 2 * 0 + (math.pi / 2), faces=("+y", "-y", "+x", "-x"))
     for x, y in LAY.get("bollards", []):
-        g.box("MUW", x, y, 0.0, 0.5, 0.5, 2.4)
-        COLL.append((x, y, 0.0, 0.5, 0.5, 2.4, 0.0))
+        with (g.keep(x, y, 0.0) if ONE else _null()):
+            g.box("MUW", x, y, 0.0, 0.5, 0.5, 2.4)
+            COLL.append((x, y, 0.0, 0.5, 0.5, 2.4, 0.0))
+    if ONE:
+        for x, y in LAY.get("palms", []):
+            with g.keep(x, y, 0.0):
+                _palm(x, y, 24.0 + (abs(x * 7 + y * 3) % 6))
+        for x, y in LAY.get("trees", []):
+            with g.keep(x, y, 0.0):
+                _rain_tree(x, y, 30.0)
     fc0 = V(LAY["front_c"])
     tv = (FACE[1], -FACE[0])
     for along in (-30.0, -19.0, 19.0, 30.0):
@@ -536,7 +743,9 @@ def melia():
     g.ring("DRK", base, SKIRT, 0.0)
     # the opaque lobby glass, except in front of the walkable lobby (see-through there: melia_interior)
     fi = _front_edge(inner)[0]
-    g.ring("GLL", inner, 0.3, 12.0, skip=_span_skip(fi, inner, LOB_Y0, LOB_Y1))
+    # 1:1: the lobby is player scale (a KEEP frame at the door), so its openings in the scaled front are 1 / S as long
+    KY = (lambda y: DOOR_Y + (y - DOOR_Y) / X1.S) if ONE else (lambda y: y)
+    g.ring("GLL", inner, 0.3, 12.0, skip=_span_skip(fi, inner, KY(LOB_Y0), KY(LOB_Y1)))
     mullions(inner, 0.3, 12.0, 7.0, 0.5, 0.35, "MUL", edges=[i for i in range(len(inner)) if i != fi])
     g.ring("MEL", inner, 12.0, 14.0)
     g.annulus("CEL", base, inner, 14.0, down=True)
@@ -548,7 +757,7 @@ def melia():
     g.annulus("MEL", offset_poly(base, 0.6), base, 41.0)
     g.cap("ROF", base, 40.9)
     # the street storey's collision open at the lobby's door, full walls above
-    coll_poly(base, 0.0, 14.0, skip=_span_skip(fi, base, DOOR_Y - DOOR_W / 2 + 0.6, DOOR_Y + DOOR_W / 2 - 0.6))
+    coll_poly(base, 0.0, 14.0, skip=_span_skip(fi, base, KY(DOOR_Y - DOOR_W / 2 + 0.6), KY(DOOR_Y + DOOR_W / 2 - 0.6)))
     coll_poly(base, 14.0, 27.0)
     # tower C: banded long faces, solid white ends with a dark slot, the name on both long crowns
     C = ccw([V(p) for p in LAY["C"]])
@@ -618,7 +827,13 @@ def melia():
         if k == 1:
             g.box("MEL", cxp + 8, cyp, z2 + 1.0, 12.0, 7.0, 0.9)
             g.box("WAT", cxp + 8, cyp, z2 + 1.9, 11.0, 6.0, 0.05, faces=("top",))
-    melia_interior(base)
+    if ONE:
+        dN, dS = _front_at(inner, DOOR_Y + DOOR_W / 2), _front_at(inner, DOOR_Y - DOOR_W / 2)
+        dm = ((dN[0] + dS[0]) / 2, (dN[1] + dS[1]) / 2)
+        with g.keep(dm[0], dm[1], 0.0, zkeep=False):
+            melia_interior(base)
+    else:
+        melia_interior(base)
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -626,6 +841,8 @@ def melia():
 # spaces with real photos (vault: "City Legends/2026-11-16 Research - Melia Yangon interior.md"): the lobby with its
 # reception, the Lobby Bar, the Elyxr deli, The Market. No corridors, no walkway inside, no Garbo Bar; the link to
 # Myanmar Plaza is a CLOSED door. Player scale, about 3 studs a metre.
+MELIA_STEP = (LAY.get("ground", {}).get("doors_y", {}).get("melia", 0.0) - LAY.get("ground", {}).get("y0", 0.0)) if ONE else 0.0
+MELIA_DROP_X = -133.0                              # the drop-off drive's middle at the door (old model x)
 LOB_Y0, LOB_Y1, LOB_X1 = -204.0, -141.0, -22.0   # the lobby: south wall, north wall, east (reception) wall
 DOOR_Y, DOOR_W, DOOR_H = -172.5, 12.0, 9.0       # the street door on Kabar Aye Pagoda Road, on the lobby's axis
 VOID_Y0, VOID_Y1, VOID_X1 = -192.0, -153.0, -31.0  # the double-height hall; galleries 12 deep N / S, 9 deep E
@@ -900,6 +1117,9 @@ def melia_interior(base):
         g.box("DRK", c[0], c[1], 0.0, 2.4, 2.4, 12.0, yaw_f, faces=("+x", "-x", "+y", "-y"))
     # the deep canopy, its underside lit warm white, MELIA YANGON on its front edge (photo 51241)
     dep, half = 8.0, 13.0
+    if ONE:
+        # 1:1: the canopy reaches over the drop-off drive (site audit fix 6: the drive along x ~ -133 at the door)
+        dep = max(8.0, (dm[0] - MELIA_DROP_X) * X1.S + 9.0)
     ca = (dm[0] - e_f[0] * half, dm[1] - e_f[1] * half)
     cb = (dm[0] + e_f[0] * half, dm[1] + e_f[1] * half)
     out = 2.5 + dep
@@ -913,6 +1133,25 @@ def melia_interior(base):
         c = (c[0] + (dm[0] - c0[0]) * 0.12, c[1] + (dm[1] - c0[1]) * 0.12)
         g.box("DRK", c[0], c[1], SKIRT, 1.8, 1.8, 11.2 - SKIRT, yaw_f, faces=("+x", "-x", "+y", "-y"))
         COLL.append((c[0], c[1], 0.0, 1.8, 1.8, 11.2, yaw_f))
+    if ONE and MELIA_STEP < -0.3:
+        # 1:1: the drive is MELIA_STEP below the floor at the door (the site slopes ~3 m north to south): a landing
+        # outside the door and granite steps down to the drop-off, 0.6-0.7 studs each (heights here are pre-map: / KZ)
+        KZ = 16.5 / 14.0
+        nst = int(math.ceil(-MELIA_STEP / 0.7))
+        rz = -MELIA_STEP / nst
+        d_land = 6.0
+        for k in range(nst):
+            d0, d1 = (0.0, 2.5 + d_land) if k == 0 else (2.5 + d_land + (k - 1) * 1.1, 2.5 + d_land + k * 1.1)
+            top = -rz * k
+            mid = ((d0 + d1) / 2)
+            c = (dm[0] + n_f[0] * mid, dm[1] + n_f[1] * mid)
+            zb = (-MELIA_STEP - 1.0 + top) * 0 + MELIA_STEP - 1.0
+            if k == 0:
+                c = (dm[0] + n_f[0] * (2.5 + (2.5 + d_land)) / 2, dm[1] + n_f[1] * (2.5 + (2.5 + d_land)) / 2)
+                d0 = 2.5
+            g.box("MWH", c[0], c[1], zb / KZ, 2 * half + 4.0, d1 - d0, (top - zb) / KZ, yaw_f,
+                  faces=("+x", "-x", "+y", "-y", "top"))
+            COLL.append((c[0], c[1], zb / KZ, 2 * half + 4.0, d1 - d0, (top - zb) / KZ, yaw_f))
     for u in (-0.5, 0.5):
         LIGHTS.append({"p": (dm[0] + e_f[0] * half * u + n_f[0] * 6, dm[1] + e_f[1] * half * u + n_f[1] * 6, 10.6),
                        "kind": "soffit"})
@@ -1722,6 +1961,14 @@ def interior():
 
     # escalators: a side-by-side up / down pair GF-1F, then single runs crossing the void, direction alternating
     def escalator(p_lo, p_hi, z0, z1, wdt=6.0):
+        if ONE:
+            # 1:1: built at true size in a KEEP frame at the bottom landing, reaching the scaled top landing
+            with g.keep(p_lo[0], p_lo[1], z0):
+                ph = g.local(p_hi)
+                return _escalator(p_lo, ph, z0, z0 + g.f(z1) - g.f(z0), wdt)
+        return _escalator(p_lo, p_hi, z0, z1, wdt)
+
+    def _escalator(p_lo, p_hi, z0, z1, wdt=6.0):
         """A real escalator (owner, 2026-11-16: "its an elevator, not like that"): a truss from p_lo at z0 to p_hi at z1
         (plan points just outside the void, on the galleries) with real steps, red-brown side cladding (photos 61,35,25)
         under a steel deck strip, glass balustrades with black rubber handrails rounded over at both ends, a flat landing
@@ -1830,8 +2077,14 @@ def interior():
         return ((pa[0] - nrm[0] * off, pa[1] - nrm[1] * off), (pb[0] - nrm[0] * off, pb[1] - nrm[1] * off))
     rise1, rise = POD_Z[1] - POD_Z[0], POD_Z[2] - POD_Z[1]
     run1, run2 = rise1 * 1.73 + 4.8, rise * 1.73 + 4.8  # 30 degrees plus the two flat steps at each end
+    offs = (3.4, 9.8)
+    if ONE:
+        # true rises (16.5 / 15 studs), runs at 30 degrees, as old-frame chord lengths; the pair side by side
+        run1 = ((g.f(POD_Z[1]) - g.f(POD_Z[0])) * 1.73 + 4.8) / X1.S
+        run2 = ((g.f(POD_Z[2]) - g.f(POD_Z[1])) * 1.73 + 4.8) / X1.S
+        offs = (3.4, 3.4 + 6.6 / X1.S)
     # GF-1F pair at the void's south end (up and down, side by side)
-    for off in (3.4, 9.8):
+    for off in offs:
         pa, pb = chord(-math.pi / 2, run1, off=off)
         escalator(pa, pb, POD_Z[0], POD_Z[1])
     # 1F-2F at the north end (the other way), 2F-3F back at the south end
@@ -1895,7 +2148,8 @@ def interior():
             # the sign on the fascia (a SurfaceGui text in Studio), facing the gallery
             sp = pts[2]
             nrm = unit((cx - sp[0], cy - sp[1]))
-            SIGNS.append({"c": (sp[0] + nrm[0] * 0.08, sp[1] + nrm[1] * 0.08), "z0": top_z - 1.7, "w": 9.0, "h": 1.4,
+            if not ONE:  # (1:1: blank sign bands, no invented shop names: invented-content audit 6)
+              SIGNS.append({"c": (sp[0] + nrm[0] * 0.08, sp[1] + nrm[1] * 0.08), "z0": top_z - 1.7, "w": 9.0, "h": 1.4,
                           "n": nrm, "text": SHOP_NAMES[k][u % 12], "floor": k})
             for a_, pp in ((a0_, pts[0]), (a1_, pts[4])):
                 ray = LineString([pp, (cx + 400 * math.cos(a_), cy + 400 * math.sin(a_))])
@@ -1913,7 +2167,16 @@ def interior():
                     g.wall("CEL", s1, s0, z + 0.05, top_z)
                     coll_wall(s0, s1, z, top_z - z, 0.4)
             cpt = area.representative_point()
-            shop_fit(SHOP_NAMES[k][u % 12], area, pts[2], (cx, cy), z, top_z, (u * 7 + k * 3) % 6)
+            if ONE:
+                # player-scale fit-out in a KEEP frame at the shop front; the shop's outline and height in true studs
+                from shapely import affinity as _aff
+                fr = pts[2]
+                with g.keep(fr[0], fr[1], z):
+                    shop_fit(SHOP_NAMES[k][u % 12], _aff.scale(area, X1.S, X1.S, origin=(fr[0], fr[1])), fr,
+                             (fr[0] + (cx - fr[0]) * X1.S, fr[1] + (cy - fr[1]) * X1.S), z, z + g.f(top_z) - g.f(z),
+                             (u * 7 + k * 3) % 6)
+            else:
+                shop_fit(SHOP_NAMES[k][u % 12], area, pts[2], (cx, cy), z, top_z, (u * 7 + k * 3) % 6)
             g.box("LIT", cpt.x, cpt.y, top_z - 0.15, 6.0, 4.0, 0.1, am, faces=("bottom",))
             LIGHTS.append({"p": (cpt.x, cpt.y, top_z - 1.0), "kind": "shop"})
     # the west lobby: dark granite columns, a three-ring light over a round planter
@@ -1943,7 +2206,8 @@ def interior():
 
 # ---------------------------------------------------------------------------------------------------------------------
 def build():
-    paving()
+    with (g.ground() if ONE else _null()):
+        paving()
     podium()
     dome()
     corner_front()
@@ -1957,12 +2221,47 @@ def build():
     tB = office_tower(B, POD_TOP - 1.0, 20, "SPB", "GLB", 3.2, band_h=2.2, crown_grp="SPB", lip=1.0,
                       night=(0.2, office, 23, None))
     melia()
-    lake_suites()
-    plinth()
-    props()
+    if not ONE:  # (1:1: that lot holds a real OSM building, placed by the buildings agent; Lake Suites not verified)
+        lake_suites()
+    with (g.ground() if ONE else _null()):
+        plinth()
+        props()
     nshops = interior()
     return tA, tB, nshops
 
+
+def main_1to1():
+    """YANGON_SCALE=1to1 python mc3d.py -> imports/sync/landmarks/mc1/mc1*.glb + build/landmarks/p1_refit/mc1_*"""
+    gr = LAY["ground"]
+    y0, plane = gr["y0"], gr["plane"]
+    tA, tB, nshops = build()
+    cnt = g.count()
+    print("tower tops (pre-map)", tA, tB, "-> studs", round(g.f(tA), 1), round(g.f(tB), 1), "shops", nshops,
+          "tris", sum(cnt.values()))
+    print(sorted(cnt.items(), key=lambda kv: -kv[1]))
+    out = os.path.join(HERE, "..", "..", "..", "imports", "sync", "landmarks", "mc1", "mc1.glb")
+    files = X1.export(g, y0, plane, out, "mc1")
+    for f in files:
+        print(f)
+    OUTD = os.path.join(HERE, "..", "..", "..", "build", "landmarks", "p1_refit")
+    os.makedirs(OUTD, exist_ok=True)
+    open(os.path.join(OUTD, "mc1_collide.txt"), "w").write(X1.collide_text(COLL, GCOLL, y0, plane, "mc1") + chr(10))
+    json.dump(X1.lights_world(LIGHTS, y0, plane), open(os.path.join(OUTD, "mc1_lights.json"), "w"))
+    carve = []
+    for cx, cy, z0, sx, sy, sz, yaw in CARVE:
+        X, Z = X1.OX1 + cx, X1.OZ1 - cy
+        carve.append([round(X, 2), round(X1.plane_y(plane, X, Z) + z0 + sz / 2, 2), round(Z, 2), round(sx, 2), round(sz, 2), round(sy, 2), round(yaw, 4)])
+    site = [[list(X1.world_of_model(x * X1.S, yy * X1.S)) for x, yy in r] for r in LAY["site"]]
+    foot = [[list(X1.world_of_model(x * X1.S, yy * X1.S)) for x, yy in poly] for poly in (POD, ccw([V(p) for p in LAY["melia_osm"][:-1]]), A, B)]
+    json.dump({"y0": y0, "plane": plane, "carve": carve, "site": site, "footprints": foot, "files": [f[0] for f in files]},
+              open(os.path.join(OUTD, "mc1_meta.json"), "w"))
+    json.dump({"g": g.g, "gg": g.gg, "y0": y0, "plane": plane}, open(os.path.join(OUTD, "mc1_tris.json"), "w"))
+    print("collide", len(COLL), "+ ground", len(GCOLL), "lights", len(LIGHTS), "carve", len(carve))
+
+
+if __name__ == "__main__" and ONE:
+    main_1to1()
+    sys.exit(0)
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]

@@ -22,18 +22,32 @@ from shapely.ops import unary_union
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from geom3d import Geo, ccw, offset_poly, outward, ellipse  # noqa: E402
+from geom3d import Geo, ccw, offset_poly, outward, ellipse, raster_boxes  # noqa: E402
 import landmark_glb3d as LG  # noqa: E402
 
 REF = os.path.join(HERE, "..", "..", "..", "build", "landmarks", "refs", "sedona")
 OSM = json.load(open(os.path.join(REF, "sedona_model.json")))
-LOT = Polygon(json.load(open(os.path.join(REF, "lot_fine.json")))).buffer(0)
+import geo as GEO  # noqa: E402
+# 1:1 (2026-11-16, YANGON_SCALE=1to1): onetoone.py scales the old frame (x 1.875 across; up: lobby storey 13.5 studs =
+# 4.5 m, then 1.1 x: 9.9-stud floors = 3.3 m, the Inya Wing ~100 m); the grounds are rebuilt from the site audit
+# (grounds_1to1); the whole site follows the pavement plane
+ONE = GEO.ONE_TO_ONE
+SITE1 = json.load(open(os.path.join(REF, "site_1to1.json"))) if ONE else None
+LOT = Polygon(SITE1["site"] if ONE else json.load(open(os.path.join(REF, "lot_fine.json")))).buffer(0)
 LET = json.load(open(os.path.join(HERE, "..", "..", "..", "build", "landmarks", "text3d.json")))
 FLOOR = 9.0
 SKIRT = -4.0
-g = Geo()
-COLL = []
-LIGHTS = []
+if ONE:
+    import onetoone as X1  # noqa: E402
+    import props1to1 as PR  # noqa: E402
+    g = X1.XGeo(X1.zmap_factory(12.0, 13.5, 1.1))
+    GCOLL = []
+    COLL = X1.XColl(g, ground=GCOLL)
+    LIGHTS = X1.XLights(g)
+else:
+    g = Geo()
+    COLL = []
+    LIGHTS = []
 
 
 def unit(v):
@@ -332,6 +346,13 @@ def build():
     e1 = unit((T[1][0] - T[0][0], T[1][1] - T[0][1]))
     e2 = unit((T[3][0] - T[0][0], T[3][1] - T[0][1]))
     L1, L2 = math.dist(T[0], T[1]), math.dist(T[0], T[3])
+    if ONE:
+        # site audit fix 18: two courts side by side east-west, each long north-south: split along the east-west side
+        if abs(e1[1]) > abs(e2[1]):
+            T = [T[1], T[2], T[3], T[0]]
+            e1 = unit((T[1][0] - T[0][0], T[1][1] - T[0][1]))
+            e2 = unit((T[3][0] - T[0][0], T[3][1] - T[0][1]))
+            L1, L2 = math.dist(T[0], T[1]), math.dist(T[0], T[3])
     for k in (0, 1):
         # two courts side by side across the short-ish axis
         a0, a1 = 0.06 + k * 0.49, 0.45 + k * 0.49
@@ -360,6 +381,9 @@ def build():
     g.cap("ROF", sbp, top)
     hip_roof(mrr(sb), top, 0.45, 1.6)
 
+    if ONE:
+        grounds_1to1(gw, tower, deck, tn, sb)
+        return {"garden_tops": tops, "pavilion": topJ, "inya": (top_sw, top_md, top_ne)}
     # ---- the entrance loop: a one-way drive round an oval garden, a porte-cochere canopy, the sign, the fence ----
     loop_pts = OSM["1206690868"]["m"] + OSM["1206690867"]["m"] + OSM["617314196"]["m"]
     lc = (sum(p[0] for p in loop_pts) / len(loop_pts), sum(p[1] for p in loop_pts) / len(loop_pts))
@@ -521,6 +545,317 @@ def build():
     g.capshape("LAW", lawn, 0.04)
     return {"garden_tops": tops, "pavilion": topJ, "inya": (top_sw, top_md, top_ne)}
 
+
+# ---------------------------------------------------------------------------------------------------------------------
+# 1:1 GROUNDS (2026-11-16, the site audit "Sedona Hotel Yangon": 22 fixes; owner: "sedona car parking, entrance and
+# everything & design"). Old model frame studs (1.6 a metre across); heights pre-map (z < 12: true studs / 1.125).
+def _M(m):
+    return m * 1.6
+
+
+def _H(m):
+    return m * 3.0 / 1.125
+
+
+def _edge_x(y):
+    """x of Kabar Aye Pagoda Road's east road edge (P1 roads) at plan y."""
+    E = SITE1["kabar_edge"]
+    for (x0, y0), (x1, y1) in zip(E, E[1:]):
+        if y0 <= y <= y1:
+            return x0 + (x1 - x0) * (y - y0) / (y1 - y0)
+    return E[0][0] if y < E[0][1] else E[-1][0]
+
+
+def _bar(grp, p, q, z0, z1, w):
+    """A thin upright slab from p to q (w thick)."""
+    L = math.dist(p, q)
+    if L < 1e-3:
+        return
+    m = lerp(p, q, 0.5)
+    g.box(grp, m[0], m[1], z0, L, w, z1 - z0, math.atan2(q[1] - p[1], q[0] - p[0]), faces=("+x", "-x", "+y", "-y", "top"))
+
+
+def _fence_run(p, q):
+    """The real road wall (audit fix 14): a white 0.6 m plinth, white square pillars 0.45 m x 1.9 m about every
+    2.5 m, white vertical picket railings between them (see-through)."""
+    L = math.dist(p, q)
+    if L < 1.0:
+        return
+    e = unit((q[0] - p[0], q[1] - p[1]))
+    yaw = math.atan2(e[1], e[0])
+    zp, zt = _H(0.6), _H(1.9)
+    _bar("SED", p, q, SKIRT, zp, _M(0.3))
+    k = max(1, int(round(L / _M(2.5))))
+    for j in range(k + 1):
+        c = lerp(p, q, j / k)
+        g.box("SED", c[0], c[1], zp, _M(0.45), _M(0.45), zt - zp, yaw)
+        g.box("SED", c[0], c[1], zt, _M(0.55), _M(0.55), _H(0.08), yaw)
+    for j in range(k):
+        a_, b_ = lerp(p, q, j / k), lerp(p, q, (j + 1) / k)
+        dd = math.dist(a_, b_)
+        seg = dd - _M(0.45)
+        if seg <= 0.2:
+            continue
+        npk = max(2, int(seg / _M(0.16)))
+        for i in range(1, npk):
+            c = lerp(a_, b_, (_M(0.225) + seg * i / npk) / dd)
+            g.box("MUW", c[0], c[1], zp, _M(0.035), _M(0.035), _H(1.15), yaw, faces=("+x", "-x", "+y", "-y"))
+        ma = lerp(a_, b_, 0.5)
+        for zz in (zp + _H(0.12), zp + _H(1.12)):
+            g.box("MUW", ma[0], ma[1], zz, seg, _M(0.05), _H(0.05), yaw, faces=("+y", "-y", "top", "bottom"))
+    m = lerp(p, q, 0.5)
+    COLL.append((m[0], m[1], 0.0, L, _M(0.45), _H(1.9), yaw))
+
+
+def _tiered(c, yaw, w, h):
+    """A big white gate pillar with a stepped two-tier cap (photos kv_kabaaye_north_gate_*)."""
+    g.box("SED", c[0], c[1], SKIRT, w, w, h - SKIRT, yaw)
+    z = h
+    for dw, dh in ((0.8, 0.35), (0.3, 0.5), (0.6, 0.3), (-0.2, 0.45), (0.2, 0.25)):
+        g.box("SED", c[0], c[1], z, w + dw, w + dw, dh, yaw)
+        z += dh
+    g.box("SED", c[0], c[1], z, w * 0.4, w * 0.4, w * 0.5, yaw)
+    COLL.append((c[0], c[1], 0.0, w, w, h, yaw))
+
+
+def _barrier(c, e, half):
+    """A red-and-white folding barrier (closed) on a dark post."""
+    a3 = (c[0] - e[0] * half, c[1] - e[1] * half)
+    b3 = (c[0] + e[0] * half, c[1] + e[1] * half)
+    for t in range(8):
+        pa, pb = lerp(a3, b3, t / 8), lerp(a3, b3, (t + 1) / 8)
+        g.tube("RED" if t % 2 == 0 else "MUW", (pa[0], pa[1], _H(0.95)), (pb[0], pb[1], _H(0.95)), 0.3)
+    g.box("DRK", a3[0], a3[1], 0.0, 0.7, 0.7, _H(1.05), math.atan2(e[1], e[0]))
+
+
+def grounds_1to1(gw, tower, deck, tn, sb):
+    site = LOT
+    from p1_site_ground import Ground
+    from shapely import affinity as _aff
+    from shapely.ops import polygonize
+    G = Ground((-200, 120, 260, 640))
+    road = G.road
+    bld = unary_union([gw, tower, deck, tn, sb]).buffer(0.3)
+    shift = 2.0
+    # ---- the drives (audit fixes 2, 9, 10, 11) ----
+    ye = [540, 520, 500, 480, 460, 440, 420, 400, 385]
+    fore = [(_edge_x(540) - 2.0, 540.0)] + [(_edge_x(y) + 12.0, float(y)) for y in ye] + [(-60.0 + shift, 368.0), (-60.6 + shift, 364.4)]
+    loop_l = [_aff.translate(LineString(OSM[k]["m"]), shift, 0) for k in ("1206690868", "1206690867", "617314196")]
+    south = [(-38.9 + shift, 260.9), (-23.6, 246.2), (46, 187.1), (89.4, 148.5), (98.5, 144), (111.8, 149.5), (138.3, 177.1),
+             (177.9, 224.6), (191.9, 238.9), (200.0, 247.0)]
+    north = [(_edge_x(534) + 12.0, 534.0), (-17, 550), (29, 544), (44.6, 511), (47, 466), (50, 420), (64.5, 418), (198, 435),
+             (215.0, 433.0)]
+    loop = unary_union([L.buffer(_M(7.0) / 2, join_style=1) for L in loop_l])
+    drive = unary_union([loop, LineString(fore).buffer(_M(6.5) / 2, join_style=1),
+                         LineString(south).buffer(_M(5.6) / 2, join_style=1),
+                         LineString(north).buffer(_M(5.0) / 2, join_style=1)]).intersection(site).difference(bld)
+    # ---- the forecourt car park: nose-in bays 2.5 x 5 m east of the forecourt drive, runs of 5 with a tree ----
+    bays, bay_trees = [], []
+    y = 522.0
+    slot = 0
+    while y > 380.0:
+        x0 = _edge_x(y) + 12.0 + _M(6.5) / 2
+        rect = sbox(x0, y - _M(2.5), x0 + _M(5.0), y)
+        if site.buffer(-0.5).contains(rect) and not rect.intersects(bld.buffer(2.0)) and not rect.intersects(loop):
+            if slot % 6 == 5:
+                bay_trees.append((x0 + _M(2.5), y - _M(1.25)))
+            else:
+                bays.append(rect)
+            slot += 1
+        y -= _M(2.5)
+    park = unary_union([b.buffer(0.01) for b in bays] + [Point(t).buffer(_M(1.25)) for t in bay_trees]).buffer(-0.01)
+    drive = drive.union(park.intersection(site))
+    g.capshape("DRV", drive, 0.06)
+    COLL.extend(raster_boxes(drive, -1.0, 0.06, 2.0))
+    for b in bays:
+        x0, y0_, x1, y1 = b.bounds
+        for yy in (y0_, y1):
+            g.box("MUW", (x0 + x1) / 2 + 0.3, yy, 0.06, x1 - x0 - 0.6, _M(0.15), 0.12, 0.0, faces=("top",))
+    # one-way arrows on the loop (anticlockwise): white chevrons on the two legs
+    for (ax_, ay_, ang) in ((-79.0 + shift, 312.0, -math.pi / 2), (-29.5 + shift, 312.0, math.pi / 2)):
+        d = (math.cos(ang), math.sin(ang))
+        nn = (-d[1], d[0])
+        tip = (ax_ + d[0] * 3.0, ay_ + d[1] * 3.0)
+        for sgn in (-1, 1):
+            base_ = (ax_ - d[0] * 1.0 + nn[0] * sgn * 2.2, ay_ - d[1] * 1.0 + nn[1] * sgn * 2.2)
+            m = lerp(tip, base_, 0.5)
+            g.box("MUW", m[0], m[1], 0.06, math.dist(tip, base_), 0.5, 0.12, math.atan2(base_[1] - tip[1], base_[0] - tip[0]), faces=("top",))
+    # ---- the island: lawn and palms round a round blue-tiled fountain basin (audit fix 7) ----
+    ring_ = unary_union([LineString(list(L.coords)) for L in loop_l])
+    inner = list(polygonize(ring_))
+    isl = max(inner, key=lambda P: P.area).buffer(-_M(7.0) / 2 - 0.4) if inner else Polygon()
+    if not isl.is_empty:
+        isl = isl.intersection(site)
+        if isl.geom_type != "Polygon":
+            isl = max(isl.geoms, key=lambda P: P.area)
+        ip = list(isl.exterior.coords)[:-1]
+        g.ring("MUW", ip, SKIRT, _H(0.15))
+        fc = (-62.0 + shift, 316.0)
+        basin = [(fc[0] + 10.0 * math.cos(2 * math.pi * k / 32), fc[1] + 10.0 * math.sin(2 * math.pi * k / 32)) for k in range(32)]
+        basin_in = offset_poly(basin, -0.8)
+        g.capshape("LAW", isl.difference(Polygon(basin).buffer(0.05)), _H(0.15))
+        COLL.extend(raster_boxes(isl, -1.0, _H(0.15), 2.0))
+        g.ring("POL", basin, 0.0, _H(0.6))
+        g.annulus("MUW", basin, basin_in, _H(0.6))
+        g.ring("POL", basin_in, 0.0, _H(0.6), inward=True)
+        g.cap("POL", basin_in, 0.1)
+        g.cap("WAT", basin_in, _H(0.4))
+        COLL.append((fc[0], fc[1], 0.0, 20.0, 20.0, _H(0.6), 0.0))
+        g.column("POL", fc[0], fc[1], _H(0.4), _H(1.2), 1.6, 12)
+        g.cap("POL", [(fc[0] + 1.6 * math.cos(2 * math.pi * k / 12), fc[1] + 1.6 * math.sin(2 * math.pi * k / 12)) for k in range(12)], _H(1.2))
+        for k in range(8):
+            a = 2 * math.pi * k / 8
+            g.tube("WAT", (fc[0], fc[1], _H(1.2)), (fc[0] + math.cos(a) * 3.5, fc[1] + math.sin(a) * 3.5, _H(0.45)), 0.35)
+        g.tube("WAT", (fc[0], fc[1], _H(1.2)), (fc[0], fc[1], _H(2.6)), 0.4)
+        for dy in (-22.0, -15.0, 15.0, 22.0):
+            pp = (fc[0] + (2.0 if dy > 0 else -2.0), fc[1] + dy)
+            if isl.buffer(-1.5).contains(Point(pp)):
+                PR.palm(g, COLL, pp[0], pp[1], _H(0.15), 26.0 + abs(dy) % 5)
+    # ---- the porte-cochere over the loop's east leg (audit fix 8): ~12 x 34 m, red-brown tile hip roof, white columns
+    # along both edges of the drive, dark eaves, a lit soffit ----
+    can = ccw([(-45 + shift, 283), (-25 + shift, 283), (-25 + shift, 338), (-45 + shift, 338)])
+    zc = 13.5
+    g.cap("SOF", offset_poly(can, 1.45), zc - 0.95, down=True)
+    hip_roof(can, zc, 0.5, 1.5, roof_grp="TER", fascia_grp="EAV")
+    for yy in (288.0, 299.0, 310.0, 321.0, 332.0):
+        for xx in (-43.5 + shift, -26.5 + shift):
+            g.column("SED", xx, yy, SKIRT, zc - 0.95, 1.0, 12)
+            COLL.append((xx, yy, 0.0, 2.0, 2.0, zc - 0.95, 0.0))
+        LIGHTS.append({"p": (-35.0 + shift, yy, zc - 1.6), "kind": "soffit"})
+    # ---- the road wall, the north gate, the back gate (audit fixes 1, 4, 5, 11, 14, 15) ----
+    gate_y0, gate_y1 = 532.0, 548.0
+    openings = [Point(_edge_x(540), 540.0).buffer(9.0), Point(200.0, 247.0).buffer(7.0)]
+    back = Point(209.0, 433.0)
+    line = site.buffer(-0.6).exterior
+    near = road.buffer(3.2)
+    runs, cur = [], []
+    n_s = int(line.length / 1.0)
+    for i in range(n_s + 1):
+        pt = line.interpolate(i * line.length / n_s)
+        ok = near.contains(pt) and not any(o.contains(pt) for o in openings) and pt.distance(back) > 6.0
+        if ok:
+            cur.append((pt.x, pt.y))
+        elif cur:
+            runs.append(cur)
+            cur = []
+    if cur:
+        runs.append(cur)
+    nrun = 0
+    for r in runs:
+        if len(r) < 3:
+            continue
+        simp = list(LineString(r).simplify(0.4).coords)
+        for p, q in zip(simp, simp[1:]):
+            _fence_run(p, q)
+        nrun += 1
+    # the north gate: tiered pillars either side, barriers, the sentry box (red tile roof), the cream sign wall
+    e = unit((_edge_x(gate_y1) - _edge_x(gate_y0), gate_y1 - gate_y0))
+    yaw = math.atan2(e[1], e[0])
+    nin = (e[1], -e[0]) if e[1] > 0 else (-e[1], e[0])         # into the site (east)
+    for yy in (gate_y0 - 1.6, gate_y1 + 1.6):
+        c = (_edge_x(yy) + 0.6, yy)
+        _tiered(c, yaw, 2.4, 5.2)
+        LIGHTS.append({"p": (c[0] + nin[0] * 3, c[1] + nin[1] * 3, 4.0), "kind": "gate"})
+    for yy in (gate_y0 + 4.0, gate_y1 - 4.0):
+        _barrier((_edge_x(yy) + 3.0, yy), e, 3.6)
+    hc = (_edge_x(549) + 9.0, 551.0)
+    hut = ccw([(hc[0] - 2, hc[1] - 2), (hc[0] + 2, hc[1] - 2), (hc[0] + 2, hc[1] + 2), (hc[0] - 2, hc[1] + 2)])
+    g.ring("SED", hut, SKIRT, _H(2.6))
+    g.ring("SEW", offset_poly(hut, 0.04), _H(1.1), _H(2.1))
+    g.cap("SED", hut, _H(2.6))
+    hip_roof(hut, _H(2.6), 0.5, 0.7, roof_grp="RTL", fascia_grp="SED")
+    COLL.append((hc[0], hc[1], 0.0, 4.0, 4.0, _H(2.6), 0.0))
+    LIGHTS.append({"p": (hc[0], hc[1], _H(2.3)), "kind": "gate"})
+    swc = (_edge_x(563) + 1.4, 563.0)
+    g.box("CRM", swc[0], swc[1], SKIRT, 10.0, 1.2, 4.6 - SKIRT, yaw)
+    g.box("SED", swc[0], swc[1], 4.6, 10.4, 1.4, 0.4, yaw)
+    COLL.append((swc[0], swc[1], 0.0, 10.0, 1.2, 5.0, yaw))
+    out = (-nin[0], -nin[1])
+    g.text("EAV", LET, "SEDONA", (swc[0] + out[0] * 0.7, swc[1] + out[1] * 0.7, 1.6), (-out[1], out[0]), 1.9, 0.15, max_w=8.5)
+    # the closed back gate on Maw Ya Waddy Street (OSM access=no): a dark steel gate between two pillars
+    bp = line.interpolate(line.project(back))
+    tq = line.interpolate(line.project(back) + 1.0)
+    eb = unit((tq.x - bp.x, tq.y - bp.y))
+    for sg in (-1, 1):
+        _tiered((bp.x + eb[0] * sg * 6.5, bp.y + eb[1] * sg * 6.5), math.atan2(eb[1], eb[0]), 1.6, 4.6)
+    g.box("KGT", bp.x, bp.y, 0.0, 11.4, 0.4, _H(2.0), math.atan2(eb[1], eb[0]))
+    COLL.append((bp.x, bp.y, 0.0, 11.4, 0.4, _H(2.0), math.atan2(eb[1], eb[0])))
+    # ---- the blue SEDONA board on two posts in the strip behind the road wall, facing the road (audit fix 19) ----
+    sb_c = (_edge_x(359) + 4.0, 359.0)
+    g.box("BLU", sb_c[0], sb_c[1], _H(1.0), 0.8, _M(9.0), _H(3.0), 0.0)
+    for sg in (-1, 1):
+        g.box("DRK", sb_c[0], sb_c[1] + sg * _M(3.6), SKIRT, 0.6, 0.6, _H(1.0) - SKIRT, 0.0)
+    g.text("WLT", LET, "SEDONA", (sb_c[0] - 0.42, sb_c[1], _H(1.5)), (0.0, -1.0), 3.6, 0.3, max_w=_M(8.0))
+    COLL.append((sb_c[0], sb_c[1], 0.0, 0.8, _M(9.0), _H(4.0), 0.0))
+    # ---- the Maw Ya Waddy Street face of the podium: brown vertical metal fins (audit fix 16) ----
+    dp = ccw(list(deck.simplify(0.4).exterior.coords)[:-1])
+    east = [i for i in range(len(dp)) if outward(dp, i)[0] > 0.5]
+    fins(dp, 0.0, 12.0 + 2 * FLOOR, 1.6, 0.6, 0.25, "ESC", edges=east)
+    # ---- ground: the service yard in concrete, a footpath from the porte-cochere to the gate, lawn elsewhere ----
+    yard = sbox(15, 415, 50, 530).intersection(site).difference(bld).difference(drive)
+    g.capshape("ROF", yard, 0.05)
+    COLL.extend(raster_boxes(yard, -1.0, 0.05, 2.0))
+    walk = LineString([(-45 + shift, 340), (_edge_x(400) + 7.0, 400), (_edge_x(500) + 7.0, 500), (_edge_x(530) + 7.0, 530)]).buffer(_M(1.0))
+    walk = walk.intersection(site).difference(drive).difference(bld).difference(yard)
+    g.capshape("PAV", walk, 0.05)
+    COLL.extend(raster_boxes(walk, -1.0, 0.05, 2.0))
+    lawn = site.difference(bld).difference(drive).difference(yard).difference(walk)
+    if not isl.is_empty:
+        lawn = lawn.difference(isl.buffer(0.3))
+    g.capshape("LAW", lawn, 0.04)
+    COLL.extend(raster_boxes(lawn, -1.0, 0.04, 2.5))
+    # ---- trees (audit fix 17): rain trees in the Kabar Aye Pagoda Road strip and along the Industrial Road fence,
+    # trees between the parking runs, palms on the pool terrace ----
+    free = lawn.buffer(-1.5)
+    nt = 0
+    for yy in range(296, 536, 22):
+        pp = (_edge_x(yy) + 4.5, float(yy))
+        if free.contains(Point(pp)) and abs(yy - 359) > 12:
+            PR.rain_tree(g, COLL, pp[0], pp[1], 0.0, 42.0 + (yy * 7) % 9)
+            nt += 1
+    seg = site.buffer(-6.0).exterior
+    d_ = 0.0
+    while d_ < seg.length:
+        pt = seg.interpolate(d_)
+        if pt.y < 290 and pt.x < 120 and near.buffer(6).contains(pt) and free.contains(pt):
+            PR.rain_tree(g, COLL, pt.x, pt.y, 0.0, 40.0 + int(abs(pt.x)) % 8)
+            nt += 1
+        d_ += 22.0
+    for t in bay_trees:
+        PR.rain_tree(g, COLL, t[0], t[1], 0.06, 30.0)
+        nt += 1
+    zd = 12.0 + 2 * FLOOR
+    for (px, py) in ((140.0, 300.0), (160.0, 312.0), (180.0, 296.0), (150.0, 286.0)):
+        if deck.buffer(-3).contains(Point(px, py)):
+            PR.palm(g, COLL, px, py, zd + 1.2, 22.0)
+    print("1:1 grounds: fence runs", nrun, "bays", len(bays), "trees", nt, "island", round(isl.area))
+
+
+def main_1to1():
+    """YANGON_SCALE=1to1 python sedona3d.py -> imports/sync/landmarks/sd1/sd1*.glb + build/landmarks/p1_refit/sd1_*"""
+    plane = SITE1["plane"]
+    with g.ground():
+        info = build()
+    cnt = g.count()
+    print(info, "tris", sum(cnt.values()))
+    print(sorted(cnt.items(), key=lambda kv: -kv[1]))
+    out = os.path.join(HERE, "..", "..", "..", "imports", "sync", "landmarks", "sd1", "sd1.glb")
+    files = X1.export(g, 0.0, plane, out, "sd1")
+    for f in files:
+        print(f)
+    OUTD = os.path.join(HERE, "..", "..", "..", "build", "landmarks", "p1_refit")
+    os.makedirs(OUTD, exist_ok=True)
+    open(os.path.join(OUTD, "sd1_collide.txt"), "w").write(X1.collide_text(COLL, GCOLL, 0.0, plane, "sd1") + chr(10))
+    json.dump(X1.lights_world(LIGHTS, 0.0, plane), open(os.path.join(OUTD, "sd1_lights.json"), "w"))
+    site = [[list(X1.world_of_model(x * X1.S, y * X1.S)) for x, y in SITE1["site"]]]
+    json.dump({"plane": plane, "site": site, "files": [f[0] for f in files]}, open(os.path.join(OUTD, "sd1_meta.json"), "w"))
+    json.dump({"g": g.g, "gg": g.gg, "plane": plane}, open(os.path.join(OUTD, "sd1_tris.json"), "w"))
+    print("collide", len(COLL), "+ ground", len(GCOLL), "lights", len(LIGHTS))
+
+
+if __name__ == "__main__" and ONE:
+    main_1to1()
+    sys.exit(0)
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
