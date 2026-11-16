@@ -49,14 +49,13 @@ Two Buddha halls in Bahan, modelled at true size (3 studs a metre). They were bu
 | Roof | rusty red-brown corrugated; a five-tier tower (Nga Htat Gyi = "five tiers") over the shrine, gold finial at 36.5 m | stairs photo, Esri z19 |
 
 ## Model (v1)
-Triangles and meshes are filled in after the Studio step (see "In Studio").
-- **Chaukhtatgyi:**
-  - 22,360 triangles, 21 meshes, 0 flicker pairs.
+- **Chaukhtatgyi (v3):**
+  - 23,482 triangles, 21 meshes, 0 flicker pairs.
   - The shed has 48 steel columns, 12 nave trusses, aisle rafters, a clerestory window band, gable walls and a green roof with a white ceiling.
   - The dais is glass mosaic with a white lip. There are 2 railings (spikes and lamps) and a 94 m niche wall (about 120 niches).
-  - The figure is a robe loft for the torso and legs, plus a head, neck, crown, ears, eyes, lids, brows, nose, lips, both arms and hands, a cushion, two stacked feet with 10 toes, and the sole grids and wheels.
-- **Ngahtatgyi:**
-  - 9,568 triangles, 18 meshes, 0 flicker pairs.
+  - The figure is a robe loft for the torso and legs, plus a head, neck, gold crown band, black hair cap, ears with pink insides, eyes, lids, brows, nose, nostrils, lips, both arms and hands, a cushion, two stacked feet with 10 toes, and the sole grids and wheels.
+- **Ngahtatgyi (v2):**
+  - 9,806 triangles, 18 meshes, 0 flicker pairs.
   - The hall has walls with 4 doors and steps, a glass-block band, a skirt roof, a clerestory with a skylight band and a gable roof.
   - There are 26 mirror columns, white girders, rafters and trusses, and the five-tier tower.
   - The throne has 3 tiers. The figure is seated in the earth-touching pose (bhumisparsha). The teak backdrop has 2 rows of carved leaf plates and gold flames, and there is an offering table.
@@ -68,5 +67,62 @@ Triangles and meshes are filled in after the Studio step (see "In Studio").
 - **No invented text:** the red name plates on the dais are left out.
 - **Buddhas:** respectful and simplified, in the pose and colours of the photos. Both have white faces and hands, gold robes, red lips and black brows. Chaukhtatgyi also has its blue lids and gold crown, and the feet are salmon pink.
 
-## In Studio
-(filled in below after placing)
+## In Studio (16 Nov)
+**Where:**
+- `Workspace.Yangon1to1.Landmarks.Chaukhtatgyi`: `Visual` = 21 MeshParts, `Collision` = 55 invisible parts.
+- `Workspace.Yangon1to1.Landmarks.Ngahtatgyi`: `Visual` = 18 MeshParts, `Collision` = 47 invisible parts.
+- Plates: `Landmarks.ChaukhtatgyiPlate_TEMP` (300 x 156 studs, turned with the shed) and `Landmarks.NgahtatgyiPlate_TEMP` (228 x 192 studs). Both are concrete, 6 studs thick, top at the GLO-30 ground.
+
+**Assets (Open Cloud Models, group 33151111):**
+
+| | Asset id |
+|---|---|
+| Chaukhtatgyi v3 (live) | **129397555354535** |
+| Chaukhtatgyi v2 | 110006804909642 |
+| Chaukhtatgyi v1 | 112316935260997 |
+| Ngahtatgyi v2 (live) | **117322729142436** |
+| Ngahtatgyi v1 | 130568123838143 |
+
+v2 fixed three things:
+- `face()` built off-plane triangles (the top tier of Ngahtatgyi's tower showed two peaks, and the railing spikes leaned).
+- The big floors were 2 long triangles, which showed a light seam line in Studio. They are now tiled.
+- Ngahtatgyi's shoulders slope.
+
+v3 gave Chaukhtatgyi bigger eyes, smaller lips, nostrils, pink inner ears and a black hair cap.
+
+**How it was placed:**
+- Pivots: Chaukhtatgyi X 37635.06, Y 69.98, Z 32763.72 (shed axis 122.3 deg); Ngahtatgyi X 37211.85, Y 73.36, Z 33831.02 (axis-aligned).
+- No 180 degree turn was needed: `glb.py` writes x and z negated, and each part is placed at the box encoded in its name.
+- Visual meshes have CollisionFidelity Box and CanQuery / CanCollide / CanTouch off. Holding folders were deleted. The place was not saved and Play was not started.
+
+**Looks:**
+- Gold: Metal + YgnGoldLeaf (226, 222, 245).
+- Skin: SmoothPlastic (255, 255, 250).
+- Mosaic: Foil (150, 160, 140).
+- Corrugated walls and roofs: Metal + YgnCorrugatedZinc.
+- Teak: Wood.
+- The rest is SmoothPlastic in photo colours. The full table is `LOOK` in `bahan_buddhas3d.py`.
+
+**Pictures** (PlayLight 13, camera set, then 4 s), in `Games/CityLegends/build/landmarks/`:
+- `chaukhtatgyi/compare_face.png`, `compare_feet.png` (photo | in game)
+- `chaukhtatgyi/ingame_inside.jpg`, `ingame_aerial.jpg`
+- `chaukhtatgyi/ingame_niche_graze.jpg` (grazing check, no flicker)
+- `ngahtatgyi/compare_buddha.png`, `compare_hall.png`, `compare_outside.png`
+- `ngahtatgyi/ingame_roof_graze.jpg` (grazing check along the eaves, no flicker)
+
+## What still differs from the photos
+- **Ngahtatgyi figure proportions.** The torso is a tall straight barrel. In the photo, the shoulders are broader and slope, the chest is shorter, and the knees spread wider than the shoulders. The crown and face also read smaller than in the photo. The robe has none of the gold jewelled bands, the collar or the bare white chest V. This is the first thing to fix next.
+- **Chaukhtatgyi face.** It is simplified: an egg-shaped head with added features. The real face has deep carved eye sockets, a long nose ridge and fuller cheeks. The robe has no folds and no maroon border.
+- **Gold reads orange-yellow and grainy** with the settled YgnGoldLeaf. In the photos, Chaukhtatgyi's robe is a paler satin gold.
+- **Sole marks.** The 108 marks are a plain gold grid with a wheel; the real cells hold small figures (animals, palaces).
+- **Teak backdrop.** The carving is flat leaf plates in two rows, not deep scroll relief, and there is no carved canopy beam.
+- **Ngahtatgyi outside:**
+  - The walls follow the bbox rectangle (72 x 58 m); OSM has 3 m notches on the north-west and east.
+  - The covered stairway up from Shwegondaing Road is not built.
+  - The tower tiers are square hips; the photo shows stacked gables.
+  - Which way the Buddha faces is a guess (west, down the nave, under the tower in the east half).
+- **Chaukhtatgyi outside:**
+  - The covered walkways, the main door on the north-east side and the car park are not built (see the site audit).
+  - The head-to-the-south-east direction comes from one secondary source.
+- **Not built in either hall:** the bell, the small shrines, the display cases, the peacock seat and the lamps.
+- **Ground.** Both stand on flat `_TEMP` plates. The GLO-30 ground varies by about +/-4 studs across Chaukhtatgyi, so the plates will need replacing by the 1:1 terrain.

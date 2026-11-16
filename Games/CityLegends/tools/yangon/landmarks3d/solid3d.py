@@ -108,7 +108,15 @@ class Model:
 
     def face(self, grp, pts, n):
         """Planar polygon (3D points, convex or not), shown on the side of normal hint n."""
-        n = unit(n)
+        # true plane normal (Newell), turned to the hint
+        nn = [0.0, 0.0, 0.0]
+        for i in range(len(pts)):
+            a, b = pts[i], pts[(i + 1) % len(pts)]
+            nn[0] += (a[1] - b[1]) * (a[2] + b[2])
+            nn[1] += (a[2] - b[2]) * (a[0] + b[0])
+            nn[2] += (a[0] - b[0]) * (a[1] + b[1])
+        pn = unit(tuple(nn))
+        n = pn if dot(pn, n) >= 0 else mul(pn, -1)
         e1 = unit(sub(pts[1], pts[0]))
         e2 = cross(n, e1)
         o = pts[0]
@@ -120,6 +128,14 @@ class Model:
                 P = [P[0], P[2], P[1]]
             out.append((P[0], P[1], P[2], None))
         self._put(grp, out)
+
+    def grid_top(self, grp, x0, x1, y0, y1, z, nx, ny):
+        """A flat up-facing rectangle split into nx x ny quads (no huge triangles: they show seam sparkles)."""
+        for i in range(nx):
+            for j in range(ny):
+                xa, xb = x0 + (x1 - x0) * i / nx, x0 + (x1 - x0) * (i + 1) / nx
+                ya, yb = y0 + (y1 - y0) * j / ny, y0 + (y1 - y0) * (j + 1) / ny
+                self.quad(grp, (xa, ya, z), (xb, ya, z), (xb, yb, z), (xa, yb, z), (0, 0, 1))
 
     def quad(self, grp, a, b, c, d, n):
         out = []
