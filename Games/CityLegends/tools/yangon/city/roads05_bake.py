@@ -496,7 +496,11 @@ def bake(tag):
         os.remove(f)
     named = []
     tri_count = collections.Counter()
+    # R05_ONLY=cell,cell (1536-stud mesh cells): re-bake only these cells' meshes and collision (a partial rebuild)
+    only = set(c for c in os.environ.get('R05_ONLY', '').split(',') if c)
     for (kind, cell), ts in sorted(by.items()):
+        if only and cell not in only:
+            continue
         for s0 in range(0, len(ts), MAX_TRIS):
             chunk = ts[s0:s0 + MAX_TRIS]
             m = Mesh()
@@ -529,6 +533,8 @@ def bake(tag):
         write_glb(os.path.join(gdir, 'roads05_%d.glb' % (i + 1)), [(nm, m) for nm, m, _ in f], generator='roads05_bake.py')
     # collision
     rows = collision(data, surf, parts)
+    if only:
+        rows = [r for r in rows if cell_of(float(r.split()[1]), float(r.split()[3])) in only]
     cdir = os.path.join(D, 'collide')
     os.makedirs(cdir, exist_ok=True)
     for f in glob.glob(os.path.join(cdir, '*.txt')):
