@@ -595,6 +595,25 @@ def gable_frame(w=6.9, h=4.5, nf=2, lod="hi"):
     return P.check()
 
 
+def gable_fingers(w=6.9, h=4.0, n=7, side=1, lod="hi"):
+    """The stepped skyline of carved flame fingers behind a gable frame (Kaba Aye porch photo 2: 7 a side stepping up
+    to a taller centre one). One side per piece (<= 600 triangles); side +1 also carries the centre finger. Wall piece,
+    back y = 0, base centre at the origin, same w / h as gable_frame: the fingers stand inside the frame's red board
+    (y 0.026..0.054, more than 0.02 m from both of the board's faces) and show above its outline."""
+    P = Piece("gable_fingers")
+    hw = w / 2
+    fw = hw / (n + 0.5)
+    xs = [side * (hw - fw * (k + 0.5)) for k in range(1, n)]   # the outermost slot is the eave scroll's
+    if side > 0:
+        xs.append(0.0)
+    for x in xs:
+        top = h * (0.225 + 0.9 * (1 - abs(x) / hw)) + (0.06 * h if x == 0.0 else 0.0)
+        ln = min(1.3, top)
+        fl = move(flame_outline(fw * 0.78, ln, lobes=1, n_lobe=2, barb=0.5, base=0.7), dx=x, dz=top - ln)
+        slab(P, "G", fl, 0.026, 0.028, 0.006, back=True, band=False)   # 0.026 clear of both board faces
+    return P.check()
+
+
 def arch_hood(a=1.08, rise=1.15, band=0.31, n=14, lod="hi", flame=True, scrolls=True):
     """Carved arch hood (wall piece, back y = 0): a band over a round-topped arch (half width a, rise `rise` from the
     springing at z = 0) with a scalloped inner edge, a raised outer rim, a flame at the crown and leaf curls at the
@@ -657,6 +676,7 @@ PIECES = {
     "flame_blade": flame_blade,
     "merlon_leaf": merlon_leaf,
     "gable_frame": gable_frame,
+    "gable_fingers": gable_fingers,
     "arch_hood": arch_hood,
     "panel_tile": panel_tile,
 }

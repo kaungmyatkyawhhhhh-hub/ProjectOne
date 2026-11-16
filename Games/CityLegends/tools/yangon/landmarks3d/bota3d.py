@@ -596,6 +596,9 @@ def gate_pavilion(g, coll, cx, yfront):
     # fingers and an apex flame to ~11.2 m, raised gold sun disc, scrolls at the eave ends (photo Konsek 01)
     OK.into_geo(OK.gable_frame(w + 0.8, 4.0), g, {"G": "GCV", "R": "WHT"}, (cx, yf + 0.4, H), (1.0, 0.0, 0.0),
                 (0.0, 1.0, 0.0))
+    for sd in (1, -1):   # the stepped skyline of carved fingers along both gable edges (Konsek 01)
+        OK.into_geo(OK.gable_fingers(w + 0.8, 4.0, 8, sd), g, {"G": "GCV"}, (cx, yf + 0.4, H), (1.0, 0.0, 0.0),
+                    (0.0, 1.0, 0.0))
     g.lathe("GLD", [(0.35, zr + 0.6), (0.3, zr + 1.2), (0.12, zr + 2.0), (0.0, zr + 2.4)], 8, cx=cx, cy=yc + 0.0) if False else None
     # steps (3) in front of the door, red edges
     for k in range(3):

@@ -616,6 +616,8 @@ def porch_meshes():
     # fingers up its edge and a big apex flame, raised gold sun disc (rays + boss) in the red field, scrolls curling out at
     # the eave ends. Base 6.9 m on the eave (zb), apex flame tip ~10.3 m (photo 2).
     OK.into_mb(OK.gable_frame(6.9, 4.0), {"G": gold, "R": red}, (0.0, yf + 0.05, zb))
+    for sd in (1, -1):   # the stepped skyline of carved fingers behind the frame (7 a side + the centre, photo 2)
+        OK.into_mb(OK.gable_fingers(6.9, 4.0, 7, sd), {"G": gold}, (0.0, yf + 0.05, zb))
     return {"YgnRenderPainted_Cream": cream, "YgnGlassMosaic_Teal": teal, "YgnPaint_Red": red,
             "YgnGoldPlate_Trim": gold, "YgnPaint_DarkHall": dark, "YgnPaint_RoofRed": roof, "YgnPaint_Maroon": maroon}
 
