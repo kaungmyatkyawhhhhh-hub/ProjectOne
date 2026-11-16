@@ -24,6 +24,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from pagoda_lib import PGeo, catmull, export_site, flicker, dump_scene, geo, SPM  # noqa: E402
 from sule3d import pyatthat_tpl, zedi_tpl, buddha_tpl  # noqa: E402
+import ornament_kit as OK  # noqa: E402  (2026-11-16 carved ornament kit)
+KG = {"G": "GCV", "J": "GJL", "P": "GPN", "R": "RED"}
 from geom3d import ccw, raster_boxes  # noqa: E402
 from shapely.geometry import Polygon, LineString, Point, box as sbox  # noqa: E402
 from shapely import affinity  # noqa: E402
@@ -191,7 +193,7 @@ def panel_wall(g, A, B, mosaic=False):
     """A carved gold wall A -> B (walkable side on the right): embossed panel tiles (GLC) in raised gold frames (GLT:
     dado rail, top frieze, stiles every ~0.9 m), red skirting (photos Room_Inside_Paya, Eingang). mosaic: the mirror
     mosaic sections (MOS) with the same frames."""
-    wall = "MOS" if mosaic else "GLC"
+    wall = "MOS" if mosaic else "GPN"      # 2026-11-16: carved relief field (YgnCarvedGold normal map), was flat GLC
     L = math.dist(A, B)
     ex, ey = (B[0] - A[0]) / L, (B[1] - A[1]) / L
     P = lambda s: (A[0] + ex * s, A[1] + ey * s)
@@ -519,8 +521,9 @@ def pond(g, pondP, coll, places):
             cm = (pm[0] + nx * D / 2, pm[1] + ny * D / 2)
             if math.dist(cm, (cxs, cys)) < 3.4:
                 continue                                    # under the pavilion
-            g.tri("GWR", (pa[0] + nx * D / 2, pa[1] + ny * D / 2, zr + 0.02),
-                  (pb[0] + nx * D / 2, pb[1] + ny * D / 2, zr + 0.02), (cm[0], cm[1], zr + 0.75))
+            # 2026-11-16: carved ridge crest from the ornament kit (back board + a bevelled flame finger a run)
+            OK.into_geo(OK.crest_segment(math.dist(pa, pb), 0.8, 1, lod="xlo"), g, KG, (cm[0], cm[1], zr + 0.02),
+                        (ex, ey, 0.0), (-ey, ex, 0.0))
     places.append(("pyatthats", cxs, cys, P + 4.2, math.atan2(strips[0][2], strips[0][1])))
     # fountain ring (steel) in the middle of the open water
     c = pondP.centroid
@@ -589,17 +592,10 @@ def gate_pavilion(g, coll, cx, yfront):
     for (yy, front) in ((yf + 0.4, True), (yb - 0.4, False)):
         pts = [(x0 - 0.4, yy, H), (x1 + 0.4, yy, H), (cx, yy, zr)]
         g.poly3("WHT", pts[::-1] if front else pts)
-    # crest: stepped gold fingers along both gable edges of the front (thin double-sided plates)
-    yc = yf + 0.45
-    nf = 9
-    for sgn in (-1, 1):
-        for k in range(nf):
-            f0, f1 = k / nf, (k + 1) / nf
-            xa = cx + sgn * (w / 2 + 0.4) * (1 - f0)
-            xb = cx + sgn * (w / 2 + 0.4) * (1 - f1)
-            za = H + 3.5 * f0
-            zb = H + 3.5 * f1
-            g.quad("GWR", (xa, yc, za), (xb, yc, zb), (xb, yc, zb + 0.9), (xa, yc, za + 0.9))
+    # crest (2026-11-16): the ornament kit's carved gable over the white tympanum: gold ogee frame band with flame
+    # fingers and an apex flame to ~11.2 m, raised gold sun disc, scrolls at the eave ends (photo Konsek 01)
+    OK.into_geo(OK.gable_frame(w + 0.8, 4.0), g, {"G": "GCV", "R": "WHT"}, (cx, yf + 0.4, H), (1.0, 0.0, 0.0),
+                (0.0, 1.0, 0.0))
     g.lathe("GLD", [(0.35, zr + 0.6), (0.3, zr + 1.2), (0.12, zr + 2.0), (0.0, zr + 2.4)], 8, cx=cx, cy=yc + 0.0) if False else None
     # steps (3) in front of the door, red edges
     for k in range(3):

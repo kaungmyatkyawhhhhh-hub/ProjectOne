@@ -9,6 +9,8 @@
 	nearest tiles first. While a tile is built its shells are hidden on this client only (LocalTransparencyModifier;
 	collision and camera rays still use them). Visual parts only: no collision, no rays, no touches.
 	Studio test hook: player attribute KitStreamOff = true takes everything down and stops.
+	(2026-11-16, the street detail layer) a data folder whose Meta has LOAD=<studs> (Data_<district>S: poles, cables,
+	lamps, signals, stops, stalls ...) is built within its own radius; its tiles are keyed "S<i>_<j>" and hide no shells.
 ]]
 
 local Players = game:GetService("Players")
@@ -40,20 +42,28 @@ local T = KD.index(templates)
 -- tiles: key "i_j" -> { { s, meta }, ... } (two districts may share a tile on their border)
 local tiles = {}
 local centre = {}
+local loadOf = {} -- key -> its build radius
 local tileSize = 256
+local prefixes = { [""] = LOAD }
 local function addData(folder: Instance)
 	local meta = KD.meta(folder)
 	if not meta then
 		return
 	end
 	tileSize = meta.tile
+	local pre = if meta.load then "S" else ""
+	if meta.load then
+		prefixes[pre] = meta.load
+	end
 	for _, v in folder:GetChildren() do
 		if v:IsA("StringValue") and v.Name ~= "Meta" then
 			local i, j = string.match(v.Name, "^(%-?%d+)_(%-?%d+)$")
 			if i then
-				tiles[v.Name] = tiles[v.Name] or {}
-				table.insert(tiles[v.Name], { s = v.Value, meta = meta, i = tonumber(i), j = tonumber(j) })
-				centre[v.Name] = Vector2.new((tonumber(i) + 0.5) * meta.tile, (tonumber(j) + 0.5) * meta.tile)
+				local key = pre .. v.Name
+				tiles[key] = tiles[key] or {}
+				table.insert(tiles[key], { s = v.Value, meta = meta, i = tonumber(i), j = tonumber(j) })
+				centre[key] = Vector2.new((tonumber(i) + 0.5) * meta.tile, (tonumber(j) + 0.5) * meta.tile)
+				loadOf[key] = meta.load or LOAD
 			end
 		end
 	end
@@ -158,7 +168,7 @@ local function refresh()
 	lastPos = p
 	local here = Vector2.new(p.X, p.Z)
 	for key in folders do
-		if (centre[key] - here).Magnitude > UNLOAD then
+		if (centre[key] - here).Magnitude > loadOf[key] + (UNLOAD - LOAD) then
 			unload(key)
 		end
 	end
@@ -167,9 +177,11 @@ local function refresh()
 	local ci, cj = math.floor(p.X / tileSize), math.floor(p.Z / tileSize)
 	for i = ci - r, ci + r do
 		for j = cj - r, cj + r do
-			local key = i .. "_" .. j
-			if tiles[key] and not folders[key] and (centre[key] - here).Magnitude <= LOAD then
-				table.insert(queue, key)
+			for pre in prefixes do
+				local key = pre .. i .. "_" .. j
+				if tiles[key] and not folders[key] and (centre[key] - here).Magnitude <= loadOf[key] then
+					table.insert(queue, key)
+				end
 			end
 		end
 	end

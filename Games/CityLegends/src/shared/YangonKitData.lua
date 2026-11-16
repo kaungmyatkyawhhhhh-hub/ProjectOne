@@ -12,6 +12,12 @@
 	  P pid(2) x(4) y(3) z(4) yaw(3) sx(3) code(1)            a kit piece
 	  Q ... as P ... sy(3) sz(3)                              a kit piece scaled in Y / Z too
 	  B x(4) y(3) z(4) yaw(3) sx(3) sy(3) sz(3) code(1)       a plain Part (code WCOL: compound-wall collision)
+	Street detail (2026-11-16, tools/yangon/city/street_1to1.py; Data_<district>S, Meta LOAD / ATTACH / ATLAS / CELL):
+	  L x1(4) y1(3) z1(4) yaw1(3) x2(4) y2(3) z2(4) yaw2(3) n(1) seed(1)   n black cables between two power poles (Beams
+	                                                                        between the Meta ATTACH points of each pole)
+	  K x1(4) y1(3) z1(4) x2(4) y2(3) z2(4) sag(2)                         one cable (a service drop to a house)
+	  T x(4) y(3) z(4) yaw(3) w(2) h(2) atlas(1) cell(2)                   a name plate: an atlas cell on a SurfaceGui
+	                                                                        (faces local -Z; an invisible carrier part)
 
 	local KD = require(ReplicatedStorage.Shared.YangonKitData)
 	local T = KD.index(templatesFolder)          -- pid -> pieces
@@ -95,8 +101,17 @@ function KD.meta(folder: Instance)
 		return nil
 	end
 	local text = (m :: StringValue).Value
-	local out = { tile = 256, pids = {}, codes = {} }
+	local out = { tile = 256, pids = {}, codes = {}, attach = {}, atlas = {} }
 	out.tile = tonumber(string.match(text, "TILE=([%d%.]+)")) or 256
+	out.load = tonumber(string.match(text, "LOAD=([%d%.]+)") or "")
+	for a, b, c in string.gmatch(string.match(text, "ATTACH=([^\n]*)") or "", "([%-%d%.]+),([%-%d%.]+),([%-%d%.]+)") do
+		table.insert(out.attach, Vector3.new(tonumber(a) :: number, tonumber(b) :: number, tonumber(c) :: number))
+	end
+	for w in string.gmatch(string.match(text, "ATLAS=([^\n]*)") or "", "%S+") do
+		table.insert(out.atlas, if string.match(w, "^%d+$") then "rbxassetid://" .. w else w)
+	end
+	local cw, ch, cols = string.match(text, "CELL=(%d+) (%d+) (%d+)")
+	out.cell = { tonumber(cw) or 256, tonumber(ch) or 88, tonumber(cols) or 4 }
 	for w in string.gmatch(string.match(text, "PIDS=([^\n]*)") or "", "%S+") do
 		table.insert(out.pids, w)
 	end
@@ -106,7 +121,37 @@ function KD.meta(folder: Instance)
 	return out
 end
 
-local LEN = { [string.byte("P")] = 21, [string.byte("Q")] = 27, [string.byte("B")] = 25 }
+local LEN = {
+	[string.byte("P")] = 21, [string.byte("Q")] = 27, [string.byte("B")] = 25,
+	[string.byte("L")] = 31, [string.byte("K")] = 25, [string.byte("T")] = 22,
+}
+local WIRE_COLOR = ColorSequence.new(Color3.fromRGB(22, 22, 24))
+local WIRE_T = NumberSequence.new(0)
+
+-- a sagging black cable (old YangonDetails' Beam look): attachments on the tile's invisible anchor part
+local function wire(anchor: BasePart, a: Vector3, b: Vector3, sag: number, width: number)
+	local att0 = Instance.new("Attachment")
+	att0.WorldCFrame = CFrame.fromMatrix(a, Vector3.new(0, -1, 0), Vector3.new(1, 0, 0))
+	att0.Parent = anchor
+	local att1 = Instance.new("Attachment")
+	att1.WorldCFrame = CFrame.fromMatrix(b, Vector3.new(0, -1, 0), Vector3.new(1, 0, 0))
+	att1.Parent = anchor
+	local beam = Instance.new("Beam")
+	beam.Attachment0 = att0
+	beam.Attachment1 = att1
+	beam.Width0 = width
+	beam.Width1 = width
+	beam.Color = WIRE_COLOR
+	beam.Transparency = WIRE_T
+	beam.LightInfluence = 1
+	beam.FaceCamera = true
+	beam.Segments = 10
+	beam.CurveSize0 = sag
+	beam.CurveSize1 = -sag
+	beam.Texture = ""
+	beam.Parent = anchor
+end
+KD.wire = wire
 
 local function visual(q: BasePart)
 	q.Anchored = true
@@ -139,7 +184,86 @@ function Job:step(budget: number): boolean
 			self.pos = n + 1
 			break
 		end
-		if t == 66 then -- "B"
+		if t == 76 or t == 75 then -- "L" / "K": cables
+			if not self.anchor then
+				local a = Instance.new("Part")
+				a.Name = "Wires"
+				a.Anchored = true
+				a.CanCollide = false
+				a.CanQuery = false
+				a.CanTouch = false
+				a.Transparency = 1
+				a.Size = Vector3.new(1, 1, 1)
+				a.CFrame = CFrame.new(x0, 0, z0)
+				a.Parent = self.parent
+				self.anchor = a
+			end
+			local x1 = num(s, p + 1, 4) / 500 - 16384 + x0
+			local y1 = num(s, p + 5, 3) / 200 - 200
+			local z1 = num(s, p + 8, 4) / 500 - 16384 + z0
+			if t == 76 then
+				local a1 = num(s, p + 12, 3) / 262144 * TWO_PI
+				local x2 = num(s, p + 15, 4) / 500 - 16384 + x0
+				local y2 = num(s, p + 19, 3) / 200 - 200
+				local z2 = num(s, p + 22, 4) / 500 - 16384 + z0
+				local a2 = num(s, p + 26, 3) / 262144 * TWO_PI
+				local n = VAL[string.byte(s, p + 29)]
+				local seed = VAL[string.byte(s, p + 30)]
+				local cf1 = CFrame.new(x1, y1, z1) * CFrame.Angles(0, a1, 0)
+				local cf2 = CFrame.new(x2, y2, z2) * CFrame.Angles(0, a2, 0)
+				local dist = (Vector3.new(x2, y2, z2) - Vector3.new(x1, y1, z1)).Magnitude
+				local att = meta.attach
+				local m = math.min(n, #att)
+				for k = 1, m do
+					local o = att[k]
+					local sag = dist * (0.022 + 0.004 * ((seed + k * 7) % 5)) + 0.15 * ((seed + k) % 3)
+					wire(self.anchor, (cf1 * CFrame.new(o)).Position, (cf2 * CFrame.new(o)).Position, sag, if k <= 4 then 0.09 else 0.12)
+				end
+				made += m
+			else
+				local x2 = num(s, p + 12, 4) / 500 - 16384 + x0
+				local y2 = num(s, p + 16, 3) / 200 - 200
+				local z2 = num(s, p + 19, 4) / 500 - 16384 + z0
+				local sag = num(s, p + 23, 2) / 100
+				wire(self.anchor, Vector3.new(x1, y1, z1), Vector3.new(x2, y2, z2), sag, 0.08)
+				made += 1
+			end
+		elseif t == 84 then -- "T": a name plate
+			local x = num(s, p + 1, 4) / 500 - 16384 + x0
+			local y = num(s, p + 5, 3) / 200 - 200
+			local z = num(s, p + 8, 4) / 500 - 16384 + z0
+			local yaw = num(s, p + 12, 3) / 262144 * TWO_PI
+			local w, h = num(s, p + 15, 2) / 50, num(s, p + 17, 2) / 50
+			local a = VAL[string.byte(s, p + 19)] + 1
+			local cell = num(s, p + 20, 2)
+			local img = meta.atlas[a]
+			if img and img ~= "-" then
+				local q = Instance.new("Part")
+				q.Name = "Plate"
+				q.Size = Vector3.new(w, h, 0.05)
+				q.CFrame = CFrame.new(x, y, z) * CFrame.Angles(0, yaw, 0)
+				q.Transparency = 1
+				visual(q)
+				q.CastShadow = false
+				local cw, ch, cols = meta.cell[1], meta.cell[2], meta.cell[3]
+				local g = Instance.new("SurfaceGui")
+				g.Face = Enum.NormalId.Front
+				g.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+				g.CanvasSize = Vector2.new(cw, ch)
+				g.LightInfluence = 1
+				g.MaxDistance = 260
+				local im = Instance.new("ImageLabel")
+				im.BackgroundTransparency = 1
+				im.Size = UDim2.fromScale(1, 1)
+				im.Image = img
+				im.ImageRectOffset = Vector2.new((cell % cols) * cw, math.floor(cell / cols) * ch)
+				im.ImageRectSize = Vector2.new(cw, ch)
+				im.Parent = g
+				g.Parent = q
+				table.insert(batch, q)
+				made += 1
+			end
+		elseif t == 66 then -- "B"
 			local x = num(s, p + 1, 4) / 500 - 16384 + x0
 			local y = num(s, p + 5, 3) / 200 - 200
 			local z = num(s, p + 8, 4) / 500 - 16384 + z0

@@ -39,6 +39,8 @@ import re
 import sys
 import time
 import zlib
+import functools
+print = functools.partial(print, flush=True)
 from collections import Counter, defaultdict
 
 import numpy as np
@@ -157,8 +159,17 @@ def lateral(c, t, off):
     return c[0] - t[1] * off, c[1] + t[0] * off
 
 
+_STRIPS = {}
+
+
 def edge_strips(e, trim=None):
     """the flush edge strips of a street (both sides), trimmed 6 m from the ends (junctions)"""
+    if (e["id"], trim) not in _STRIPS:
+        _STRIPS[(e["id"], trim)] = _edge_strips(e, trim)
+    return _STRIPS[(e["id"], trim)]
+
+
+def _edge_strips(e, trim=None):
     k = M(6) if trim is None else trim
     return unary_union([strip_poly(e, e["h1"], e["h1"] + e["walk"], k, e["L"] - k),
                         strip_poly(e, -e["h0"] - e["walk"], -e["h0"], k, e["L"] - k)])
@@ -315,6 +326,9 @@ class World:
         self.CARR = unary_union([x["poly"] for x in b if x["kind"] in ("R", "J", "D")]).buffer(0)
         self.PAVE = unary_union([x["poly"] for x in b if x["kind"] == "P"]).buffer(0)
         self.MED = unary_union([x["poly"] for x in b if x["kind"] == "M"]).buffer(0)
+        self.ppolys = [x["poly"] for x in b if x["kind"] == "P"]
+        self.mpolys = [x["poly"] for x in b if x["kind"] == "M"]
+        self.ptree, self.mtree = STRtree(self.ppolys), STRtree(self.mpolys)
         self.ROADS = unary_union([self.CARR, self.PAVE, self.MED] + [x["poly"] for x in b if x["kind"] == "W"]).buffer(0)
         deck = [x["poly"] for x in b if x["kind"] in ("D", "W")]
         self.DECK = unary_union(deck).buffer(M(3)) if deck else Polygon()
@@ -362,7 +376,14 @@ class World:
             return False
         if self.LANES.intersects(g):
             return False
-        rest = g if allow is None else g.difference(allow.buffer(0.01))
+        if allow is None:
+            rest = g
+        else:
+            if isinstance(allow, str):
+                tree, polys = (self.ptree, self.ppolys) if allow == "P" else (self.mtree, self.mpolys)
+                near = [polys[int(k)] for k in tree.query(g)]
+                allow = unary_union(near) if near else Polygon()
+            rest = g.difference(allow.buffer(0.01)) if not allow.is_empty else g
         if not rest.is_empty and rest.area > 0.01 and self.ROADS.intersects(rest):
             return False
         if tall is not None and self.BLD.intersects(tall):
@@ -412,7 +433,7 @@ def poles():
             allow = edge_strips(e)
         else:
             offs = [h + 1.25, h + 1.9]                           # main road: just inside the kerb, on the pavement
-            allow = W.PAVE
+            allow = "P"
         every = M(POLE_EVERY) * (0.92 + 0.16 * rnd("pe", e["id"]))
         s = M(6) + rnd("ps", e["id"]) * every * 0.6
         chain = None
@@ -522,7 +543,7 @@ def lamps():
                     x, z = c
                     yaw = yaw_of(t[0], t[1])
                     g = rect(x, z, yaw, (-0.8, -0.8), (0.8, 0.8))
-                    if W.MED.contains(g) and W.clear_of(g, allow=W.MED):
+                    if W.MED.contains(g) and W.clear_of(g, allow="M"):
                         W.put("lamp", "lamp2", x, z, yaw, g, y=W.G.y(x, z, ("M",))[0])
                         n2 += 1
             else:
@@ -536,7 +557,7 @@ def lamps():
                     if ((-t[1]) * rz[0] + t[0] * rz[1]) < 0:
                         yaw = yaw_of(-t[0], -t[1])
                     g = rect(x, z, yaw, (-0.8, -0.8), (0.8, 0.8))
-                    if W.clear_of(g, allow=W.PAVE, tall=rect(x, z, yaw, (-0.6, -0.6), (0.6, 7))):
+                    if W.clear_of(g, allow="P", tall=rect(x, z, yaw, (-0.6, -0.6), (0.6, 7))):
                         W.put("lamp", "lamp1", x, z, yaw, g)
                         n1 += 1
                         break
@@ -598,14 +619,14 @@ def signals(items):
                     width = (h if e["h0"] >= -0.5 else (e["h1"] - (-e["h0"])))
                     L = 6 if width < M(7) else (8 if width < M(9.5) else 10)
                     g = rect(x, z, yaw, (-0.7, -0.7), (0.7, 0.7))
-                    if not W.clear_of(g, allow=W.PAVE, tall=rect(x, z, yaw, (-0.5, -2), (2, 2))):
+                    if not W.clear_of(g, allow="P", tall=rect(x, z, yaw, (-0.5, -2), (2, 2))):
                         continue
                     W.put("signal", "sig%d" % L, x, z, yaw, g)
                     # the controller cabinet 1.2 m behind the pole on the pavement (only one per junction)
                     if made == 0:
                         bx, bz = x - ax[0] * 1.2 - d_in[0] * 2.5, z - ax[1] * 1.2 - d_in[1] * 2.5
                         gb = rect(bx, bz, yaw, (-1.0, -0.7), (1.0, 0.7))
-                        if W.clear_of(gb, allow=W.PAVE):
+                        if W.clear_of(gb, allow="P"):
                             W.put("signal", "sigcab", bx, bz, yaw, gb)
                     made += 1
                     n += 1
@@ -663,7 +684,7 @@ def bus_stops(items, atlas):
                 off = outer - 3.0
                 x, z = lateral(c, t, side * off)
                 g = foot("busd", x, z, yaw, grow=0.1)
-                if not W.clear_of(g, allow=W.PAVE):
+                if not W.clear_of(g, allow="P"):
                     continue
                 it_ = W.put("busstop", "busd", x, z, yaw, g)
                 if cell is not None:
@@ -673,7 +694,7 @@ def bus_stops(items, atlas):
                 off = h + 1.3
                 x, z = lateral(c, t, side * off)
                 g = rect(x, z, yaw, (-1.0, -0.4), (1.0, 0.4))
-                if not W.clear_of(g, allow=W.PAVE):
+                if not W.clear_of(g, allow="P"):
                     continue
                 it_ = W.put("busstop", "busp", x, z, yaw, g)
                 if cell is not None:
@@ -682,7 +703,7 @@ def bus_stops(items, atlas):
             for bd in (4.5, -4.5, 7.0):
                 bx, bz = lateral(at(e, s + bd)[0], t, side * (outer - 2.0))
                 gb = rect(bx, bz, yaw, (-1.0, -1.1), (1.0, 1.1))
-                if W.clear_of(gb, allow=W.PAVE):
+                if W.clear_of(gb, allow="P"):
                     W.put("bin", "bin", bx, bz, yaw, gb)
                     break
             placed = True
@@ -769,7 +790,7 @@ def name_signs(atlas):
                 for off in ((outer + 0.9, outer - 0.6) if e["flush"] else (outer - 1.0, h + 2.0)):
                     x, z = lateral(c, t, side * off)
                     g = rect(x, z, 0, (-0.5, -0.5), (0.5, 0.5))
-                    allow = W.PAVE if not e["flush"] else edge_strips(e)
+                    allow = "P" if not e["flush"] else edge_strips(e)
                     if W.clear_of(g, allow=allow, tall=Point(x, z).buffer(1.6)):
                         placed = (x, z, t)
                         break
@@ -827,7 +848,7 @@ def place_on_side(e, side, s, pid, kind, depth_from_outer):
             allow = edge_strips(e)
         else:
             offs = [outer - depth_from_outer - 2.0, outer - depth_from_outer - 1.0]
-            allow = W.PAVE
+            allow = "P"
         for off in offs:
             x, z = lateral(c, t, side * off)
             g = foot(pid, x, z, yaw, grow=0.2)
@@ -940,7 +961,7 @@ def drains():
                 continue
             h, outer = side_offsets(e, side)
             off = (outer - 1.0) if not e["flush"] else (outer + 1.05)
-            allow = W.PAVE if not e["flush"] else None
+            allow = "P" if not e["flush"] else None
             s = M(8)
             while s + DRAIN_PIECE < e["L"] - M(8):
                 c0, t0, _ = at(e, s)
@@ -986,7 +1007,7 @@ def fences():
             yaw = yaw_of(t[0], t[1])
             g = rect(x, z, yaw, (-4.6, -0.3), (4.6, 0.3))
             # only on narrow medians (a railing; wide medians are planted)
-            if W.MED.contains(g) and W.MED.intersection(Point(x, z).buffer(5.0)).area < 34 and W.clear_of(g, allow=W.MED):
+            if W.MED.contains(g) and unary_union([W.mpolys[int(k)] for k in W.mtree.query(Point(x, z).buffer(5.0))]).intersection(Point(x, z).buffer(5.0)).area < 34 and W.clear_of(g, allow="M"):
                 W.put("fence", "mfence", x, z, yaw, g, y=W.G.y(x, z, ("M",))[0])
                 n += 1
             s += 9.06
@@ -1003,7 +1024,7 @@ def litter():
             x, z = it["x"] + dx, it["z"] + dz
             g = rect(x, z, 0.3, (-0.9, -0.8), (0.9, 0.8))
             e = EDGE[it["edge"]]
-            if W.clear_of(g, allow=edge_strips(e) if e["flush"] else W.PAVE):
+            if W.clear_of(g, allow=edge_strips(e) if e["flush"] else "P"):
                 W.put("litter", "litter", x, z, rnd("ly", x) * 6, g)
                 n += 1
                 break

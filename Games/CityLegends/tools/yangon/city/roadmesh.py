@@ -773,7 +773,7 @@ class Builder:
                 if opens:
                     M = M.difference(unary_union(opens).buffer(2.0))
                 M = sn(M.buffer(1.0, join_style=2).buffer(-1.0, join_style=2).buffer(-0.4).buffer(0.4))
-                if not self.ring_zone.is_empty:
+                if not self.ring_zone.is_empty and self.ring_zone.intersects(cbm):
                     M = sn(M.difference(self.ring_zone).buffer(-0.4).buffer(0.4))
         raised = Polygon()
         if self.rtree is not None:
