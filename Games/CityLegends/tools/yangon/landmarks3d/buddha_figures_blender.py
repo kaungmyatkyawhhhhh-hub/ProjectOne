@@ -294,10 +294,10 @@ def face_sculpt_v3(P, N, H):
     d += 0.040 * g(0.38, v["brow"] - 0.01, 0.30, 0.045)             # brow ridge (v4: stronger, shades the eyes)
     d += 0.060 * g(0.44, -0.36, 0.26, 0.26)                          # full cheeks
     d += 0.030 * g(0.30, -0.62, 0.16, 0.14)                          # lower cheeks
-    ridge = np.exp(-((x / 0.042) ** 2)) * np.clip((0.16 - y) / 0.4, 0, 1) * np.clip((y - v["nosey"] + 0.02) / 0.04, 0, 1)
+    ridge = np.exp(-((x / 0.045) ** 2)) * np.clip((0.1 - y) / 0.4, 0, 1) * np.clip((y - v["nosey"] + 0.02) / 0.04, 0, 1)
     d += 0.17 * ridge                                                # straight nose ridge (v4: sharper, higher)
     d += 0.035 * np.exp(-((x / 0.11) ** 2)) * np.clip((0.1 - y) / 0.45, 0, 1) * np.clip((y - v["nosey"]) / 0.06, 0, 1)  # its flanks
-    d += 0.075 * gc(v["nosey"] + 0.01, 0.06, 0.045)                 # tip (v4: narrower)
+    d += 0.07 * gc(v["nosey"] + 0.01, 0.07, 0.05)                   # tip
     d += 0.040 * g(0.10, v["nosey"] - 0.005, 0.045, 0.04)           # wings
     d += -0.020 * g(0.062, v["nosey"] - 0.04, 0.03, 0.02)          # nostrils
     d += -0.014 * gc(v["nosey"] - 0.085, 0.035, 0.03)               # philtrum
@@ -551,7 +551,7 @@ def chauk():
         kit_on(fin, o, out.cross(up), out, up, "FGB", xf)
     for k in range(12):
         th = math.radians(-100 + 200 * (k + 0.5) / 12)
-        yy = 0.45
+        yy = 0.5
         r = max(0.05, 1 - yy * yy) ** 0.5
         p, nv = surface_hit(H, r * math.sin(th), yy, r * math.cos(th))
         oh = (nv - Uw * nv.dot(Uw)).normalized()

@@ -460,7 +460,7 @@ def poles():
                     zdir = (-t[1], t[0])       # local +Z for this yaw = right of t
                     if (zdir[0] * rz[0] + zdir[1] * rz[1]) < 0:
                         yaw = yaw_of(-t[0], -t[1])
-                    trafo = (nth % TRAFO_EVERY == TRAFO_EVERY - 1) and not e["kind"] == "lane"
+                    trafo = (W.stats["pole"] % TRAFO_EVERY == TRAFO_EVERY - 1) and not e["kind"] == "lane"
                     pid = "trafo" if trafo else "ppolea"
                     g = rect(x, z, yaw, (-0.5, -0.5), (0.5, 0.5)) if not trafo else rect(x, z, yaw, (-4.6, -0.9), (4.6, 0.9))
                     tall = rect(x, z, yaw, (-0.6 - (4 if trafo else 0), -3.5), (0.6 + (4 if trafo else 0), 3.5))
