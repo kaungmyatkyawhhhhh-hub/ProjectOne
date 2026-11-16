@@ -91,7 +91,11 @@ RING_SPLIT = 70.0       # medians this close to where an arm meets a roundabout 
 STOP_W, STOP_GAP = 1.2, 3.0         # stop line width along the road, its gap before the zebra
 ARROW_L, ARROW_BACK = 15.0, 30.0    # turn arrow length (5 m), its middle this far behind the stop line
 HATCH_PITCH, HATCH_W = 4.5, 0.75    # yellow hatch stripes
-HATCH_MIN, HATCH_MAX = 25.0, 6000.0 # hatched pieces' area (sq studs): splitters, gores, small islands (audit: < ~600 m2)
+HATCH_MIN, HATCH_MAX = 25.0, 6000.0
+JUNC_JOIN = 45.0        # junction nodes this close are one junction (a divided road's two carriageway crossings)
+JUNC_WIN = 160.0        # the window round a junction its box is looked for in
+MED_NOSE = 1.0          # median ends rounded with this radius (an opening); narrower bits than 2 x this go
+MED_MIN_AREA = 30.0     # median pieces under this (sq studs) are dropped # hatched pieces' area (sq studs): splitters, gores, small islands (audit: < ~600 m2)
 
 
 def raised_samples(net, e):
@@ -224,6 +228,7 @@ class Builder:
                        if e.tags.get('junction') not in ('roundabout', 'circular') and (e.a in ring_keys or e.b in ring_keys)]
             if arm_pts:
                 self.ring_zone = unary_union([Point(p).buffer(RING_SPLIT) for p in arm_pts])
+            self._junctions()
 
     # ------------------------------------------------------------ heights
     def h(self, X):
@@ -231,6 +236,179 @@ class Builder:
         d, i = self.htree.query(X, k=6)
         w = 1.0 / np.maximum(d, 0.5) ** 2
         return (self.HH[i] * w).sum(1) / w.sum(1)
+
+    # ------------------------------------------------------------ junction boxes (1:1)
+    def _junctions(self):
+        """(2026-11-16, owner: "the roads in this new map are so bad, everywhere its like this") every junction of two
+        or more traffic roads gets a box: the convex hull of where the carriageways of different roads overlap. Nodes
+        closer than JUNC_JOIN (a divided road crossing another: one node per carriageway crossing) are one junction.
+          * boxes[i]: J (the box), Z (J + zebra + stop line: no line paint inside), Zm (J + zebra: medians end here),
+            arms [(edge, end, s of the zebra's middle)], zebra (main x main, or a signal at it), centre;
+          * M_final: every median once, cut off every carriageway and every Zm, ends rounded (an opening of MED_NOSE),
+            no piece under MED_MIN_AREA. _ground_cell, the collision boxes and junction_check all use it."""
+        net = self.net
+        edges = [e for e in net.edges if not getattr(e, 'paved', False)]
+        inc = {}
+        for e in edges:
+            for end, key in ((0, e.a), (-1, e.b)):
+                inc.setdefault(key, []).append((e, end))
+        self.nodes_inc = inc
+
+        def road_key(e):
+            nm = rn.norm_name(e.name)
+            return nm if nm else ('id', e.id)
+        cand = []
+        for key, lst in inc.items():
+            if len(lst) < 3:
+                continue
+            if all(self.raised[e.id][0][end] for e, end in lst):
+                continue
+            roads_ = {road_key(e) for e, _ in lst if e.traffic}
+            if len(roads_) < 2 and not (len(lst) >= 3 and sum(1 for e, _ in lst if e.traffic) >= 3):
+                continue
+            cand.append(key)
+        sig = []
+        for q in geo.load('points'):
+            if q['k'] == 'highway' and q['v'] == 'traffic_signals':
+                x, z = geo.world(*q['p'])
+                if net.outline.buffer(50).contains(Point(x, z)):
+                    sig.append((x, z))
+        sigt = cKDTree(np.array(sig)) if sig else None
+        pos = {k: inc[k][0][0].P[inc[k][0][1]] for k in cand}
+        # clusters (union-find on node distance)
+        par = {k: k for k in cand}
+
+        def find(k):
+            while par[k] != k:
+                par[k] = par[par[k]]
+                k = par[k]
+            return k
+        if cand:
+            kt = cKDTree(np.array([pos[k] for k in cand]))
+            for a, b in kt.query_pairs(JUNC_JOIN):
+                ra, rb = find(cand[a]), find(cand[b])
+                if ra != rb:
+                    par[ra] = rb
+        groups = {}
+        for k in cand:
+            groups.setdefault(find(k), []).append(k)
+        self.boxes = []
+        for keys in groups.values():
+            kset = set(keys)
+            centre = np.mean([pos[k] for k in keys], axis=0)
+            win = Point(centre).buffer(JUNC_WIN)
+            mine = {}
+            for k in keys:
+                for e, end in inc[k]:
+                    mine[e.id] = e
+            by = {}
+            for kk in self.ctree.query(win):
+                e = self.meta[int(kk)]
+                if e.id not in mine:
+                    continue
+                g = self.carr[int(kk)].intersection(win)
+                if not g.is_empty:
+                    by.setdefault(road_key(e), []).append(g)
+            gl = [(rk, unary_union(v)) for rk, v in by.items()]
+            parts = []
+            for i in range(len(gl)):
+                for j in range(i + 1, len(gl)):
+                    x = gl[i][1].intersection(gl[j][1])
+                    if not x.is_empty and x.area > 0.5:
+                        parts.append(x)
+            if not parts:
+                continue
+            J = unary_union(parts).convex_hull.buffer(0.5)
+            mains = {road_key(e) for e in mine.values() if e.traffic and e.look == 'main'}
+            signal = sigt is not None and sigt.query(centre)[0] < 40.0 * geo.LK
+            zebra = len(mains) >= 2 or (signal and len(mains) >= 1)
+            arms = []
+            for e in mine.values():
+                for end, key in ((0, e.a), (-1, e.b)):
+                    if key not in kset:
+                        continue
+                    other = e.b if end == 0 else e.a
+                    if other in kset or self.raised[e.id][0][end]:
+                        continue
+                    sx = self._exit(e, end, J)
+                    if sx is None:
+                        continue
+                    c = rn.chain(e.P)
+                    t = sx + 1.0 + ZEBRA_HALF
+                    if t + ZEBRA_HALF + STOP_GAP + STOP_W + 12.0 > c[-1]:
+                        continue
+                    arms.append((e, end, t if end == 0 else c[-1] - t))
+            d_z = 1.0 + 2 * ZEBRA_HALF + STOP_GAP + STOP_W if zebra else 1.0
+            d_m = 1.0 + 2 * ZEBRA_HALF + 1.0 if zebra else 3.0
+            self.boxes.append(dict(J=J, Z=J.buffer(d_z), Zm=J.buffer(d_m), arms=arms, zebra=zebra, centre=centre,
+                                   signal=signal))
+        # the medians, once for the whole district
+        M = unary_union([m for m in self.mlist]) if self.mlist else Polygon()
+        if not M.is_empty:
+            cut = []
+            for kk in self.ctree.query(M):
+                cut.append(self.carr[int(kk)])
+            cut += [b['Zm'] for b in self.boxes]
+            if cut:
+                M = M.difference(unary_union(cut))
+            if not self.ring_zone.is_empty:
+                M = M.difference(self.ring_zone)
+            M = M.buffer(-MED_NOSE, join_style=1).buffer(MED_NOSE, join_style=1)
+            M = unary_union([g for g in _polys(M) if g.area >= MED_MIN_AREA]) if not M.is_empty else M
+        self.M_final = M
+        self.M_tree = None
+
+    def _exit(self, e, end, J):
+        """arc length (from the node end) where the carriageway of e leaves the junction box J (its two edges and middle)"""
+        c = rn.chain(e.P)
+        L = c[-1]
+        lo, hi = self.lohi[e.id]
+        Jp = prep(J)
+        t = 0.0
+        while t < L - 1.0:
+            s_ = t if end == 0 else L - t
+            i = int(np.clip(np.searchsorted(c, s_), 1, len(e.P) - 1))
+            q = np.array([np.interp(s_, c, e.P[:, 0]), np.interp(s_, c, e.P[:, 1])])
+            r = np.array([-e.D[i][1], e.D[i][0]])
+            inside = any(Jp.contains(Point(q + r * o)) for o in (lo[i] + 0.3, (lo[i] + hi[i]) / 2, hi[i] - 0.3))
+            if not inside:
+                return t
+            t += 1.0
+        return None
+
+    def junction_check(self, lines):
+        """(owner, 2026-11-16) every junction: no median piece in a box, medians off every carriageway, no line paint
+        in a box (Z: up to the stop lines), zebras outside the box -> dict of counts and the worst places"""
+        bad = dict(junctions=len(getattr(self, 'boxes', [])), median_in_box=0, median_on_carriageway=0.0,
+                   lines_in_box=0, zebra_in_box=0, where=[])
+        M = getattr(self, 'M_final', Polygon())
+        for b in getattr(self, 'boxes', []):
+            a = M.intersection(b['J']).area if not M.is_empty else 0.0
+            if a > 0.5:
+                bad['median_in_box'] += 1
+                bad['where'].append(('median', [round(float(v)) for v in b['centre']], round(a, 1)))
+        if not M.is_empty:
+            for kk in self.ctree.query(M):
+                bad['median_on_carriageway'] += M.intersection(self.carr[int(kk)]).area
+        bad['median_on_carriageway'] = round(bad['median_on_carriageway'], 2)
+        if self.boxes:
+            Zs = [b['Z'] if b['zebra'] else b['J'] for b in self.boxes]
+            zt = STRtree(Zs)
+            for q, e, kd in lines:
+                for k in zt.query(q):
+                    if Zs[int(k)].intersection(q).area > 0.05:
+                        bad['lines_in_box'] += 1
+                        if len(bad['where']) < 40:
+                            bad['where'].append(('line', [round(float(v)) for v in self.boxes[int(k)]['centre']]))
+                        break
+            Js = [b['J'] for b in self.boxes]
+            jt = STRtree(Js)
+            for z in self.zebras:
+                for k in jt.query(z):
+                    if Js[int(k)].intersection(z).area > 0.05:
+                        bad['zebra_in_box'] += 1
+                        break
+        return bad
 
     # ------------------------------------------------------------ zebra crossings
     def make_zebras(self):
@@ -259,6 +437,8 @@ class Builder:
         zeb = []
         for kind, p in pts:
             d, j = kt.query(p)
+            if kind == 'traffic_signals' and ONE_TO_ONE:
+                continue        # (1:1: the junction boxes place them, below)
             if kind == 'traffic_signals' and d < 40 * geo.LK:
                 key = keys[j]
                 if key in done:
@@ -293,6 +473,14 @@ class Builder:
                     e = best[1]
                     s_ = LineString(e.P).project(Point(p))
                     zeb.extend(self._zebra_at(e, s_))
+        if ONE_TO_ONE:
+            # every main junction: a zebra across each arm just outside the box, square to it, the whole carriageway
+            for b in self.boxes:
+                if not b['zebra']:
+                    continue
+                for e, end, sz in b['arms']:
+                    zeb.extend(self._zebra_at(e, sz))
+                self.signal_nodes.append((b['centre'], 0.0, b['arms']))
         self.zebras = zeb
         self.zebra_union = unary_union(zeb) if zeb else Polygon()
         return zeb
@@ -394,7 +582,7 @@ class Builder:
                 thr = 1.5 if getattr(e, 'paired', False) else 4.0
                 zones[key] = rn.strip_poly(e, thr, 160.0) if side > 0 else rn.strip_poly(e, -160.0, -thr)
             return zones[key]
-        boxes = [Point(p).buffer(r + 3.0) for p, r, arms in getattr(self, 'signal_nodes', [])] if ONE_TO_ONE else []
+        boxes = [(b['Z'] if b['zebra'] else b['J'].buffer(1.0)) for b in getattr(self, 'boxes', [])] if ONE_TO_ONE else []
         btree = STRtree(boxes) if boxes else None
         for pg, e, role, side in out:
             if pg.is_empty:
@@ -597,6 +785,9 @@ class Builder:
                 if rk:
                     G = G.difference(unary_union([self.rfoot[k] for k in rk]).buffer(1.0))
             G = G.intersection(Point(p).buffer(80.0))
+            jb = [(b['Z'] if b['zebra'] else b['J']) for b in getattr(self, 'boxes', []) if b['J'].intersects(disk)]
+            if jb:
+                G = G.difference(unary_union(jb))
             for pc0 in _polys(G):
                 for pc in _polys(pc0.buffer(-0.2).buffer(0.2)):
                     if not (HATCH_MIN <= pc.area <= HATCH_MAX):
@@ -661,6 +852,8 @@ class Builder:
         lines = self.line_polys()
         ltree = STRtree([x[0] for x in lines]) if lines else None
         xw, xy = self.extra_paint() if ONE_TO_ONE else ([], [])
+        if ONE_TO_ONE:
+            self.paint_stats['check'] = self.junction_check(lines)
         xwt = STRtree(xw) if xw else None
         xyt = STRtree(xy) if xy else None
         meshes = {}
@@ -758,7 +951,10 @@ class Builder:
         Fo = sn(Fo.buffer(RC * 0.75, join_style=1).buffer(-RC * 0.75, join_style=1))
         Po = sn(Po)
         M = Polygon()
-        if self.mtree is not None:
+        if ONE_TO_ONE:
+            Mf = getattr(self, 'M_final', Polygon())
+            M = sn(Mf.intersection(cbm)) if not Mf.is_empty else Polygon()
+        elif self.mtree is not None:
             mk = [int(k) for k in self.mtree.query(cbm)]
             if mk:
                 M = unary_union([self.mlist[k] for k in mk]).intersection(cbm)

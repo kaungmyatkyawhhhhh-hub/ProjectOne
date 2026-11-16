@@ -502,7 +502,56 @@ def poles():
             if e["flush"] and rnd("drop", e["id"], nth) < DROP_SHARE:
                 drops(x, it["y"], z, e, side, t, nth)
             s += every
+    link_ends()
     print("poles %d (transformers %d), spans %d, drops %d" % (n_poles, n_trafo, W.stats["wire_spans"], len(W.drops)))
+
+
+def link_ends():
+    """the cable runs go on across junctions and edge breaks: a pole with fewer than two spans is joined to the nearest
+    such pole 15-50 m away that lies along its road (within 35 degrees of its crossarm's normal), clear of buildings"""
+    from scipy.spatial import cKDTree
+    P = [i for i in W.items if i["kind"] == "pole"]
+    deg = defaultdict(int)
+    key = {(round(p["x"], 2), round(p["z"], 2)): k for k, p in enumerate(P)}
+    for w in W.wires:
+        for end in ("a", "b"):
+            k = key.get((round(w[end][0], 2), round(w[end][2], 2)))
+            if k is not None:
+                deg[k] += 1
+    tree = cKDTree([(p["x"], p["z"]) for p in P])
+    pairs = []
+    for k, p in enumerate(P):
+        if deg[k] >= 2:
+            continue
+        ax = (math.cos(p["yaw"]), -math.sin(p["yaw"]))      # local X = along the road
+        for j in tree.query_ball_point((p["x"], p["z"]), M(50)):
+            if j == k or deg[j] >= 2:
+                continue
+            q = P[j]
+            dx, dz = q["x"] - p["x"], q["z"] - p["z"]
+            d = math.hypot(dx, dz)
+            if d < M(15):
+                continue
+            if abs(ax[0] * dx + ax[1] * dz) / d < math.cos(math.radians(35)):
+                continue
+            pairs.append((d, k, j))
+    pairs.sort()
+    done = set()
+    made = 0
+    for d, k, j in pairs:
+        if deg[k] >= 2 or deg[j] >= 2 or (min(k, j), max(k, j)) in done:
+            continue
+        p, q = P[k], P[j]
+        if W.BLD.intersects(LineString([(p["x"], p["z"]), (q["x"], q["z"])])):
+            continue
+        wy = q["yaw"] if math.cos(q["yaw"] - p["yaw"]) >= 0 else q["yaw"] + math.pi
+        W.wires.append(dict(a=(p["x"], p["y"], p["z"], p["yaw"]), b=(q["x"], q["y"], q["z"], wy), n=8, seed=H("lk", k, j) % 64))
+        deg[k] += 1
+        deg[j] += 1
+        done.add((min(k, j), max(k, j)))
+        made += 1
+    W.stats["wire_spans"] += made
+    print("  joined %d more spans across junctions / edge breaks" % made)
 
 
 def drops(x, y, z, e, side, t, nth):

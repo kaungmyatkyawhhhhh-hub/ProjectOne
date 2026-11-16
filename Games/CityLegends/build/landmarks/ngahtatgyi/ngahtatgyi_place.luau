@@ -1,5 +1,5 @@
--- Ngahtatgyi placer (bahan_buddhas3d.py), asset 135129652866498
-local NAME, ASSET = "Ngahtatgyi", 135129652866498
+-- Ngahtatgyi placer (bahan_buddhas3d.py), asset 0
+local NAME, ASSET = "Ngahtatgyi", 0
 local LOOK = {
   CLT = {"SmoothPlastic", 240, 240, 236, "", 0},
   FBK = {"SmoothPlastic", 22, 22, 26, "", 0.04},

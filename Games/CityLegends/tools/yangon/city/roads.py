@@ -297,7 +297,7 @@ def collision(B, net):
                 # (2026-11-14) a pavement / median box mostly inside batch 0.5's box (a road running obliquely along the
                 # edge: its mesh is clipped there) lay on the 0.5 street's carriageway, 0.5 over it
                 inbox = not (e.seam[0] or e.seam[1]) and q.intersection(_BOX05).area > 0.05 * q.area
-                if not inbox and not _blocked(B, q, e):
+                if not inbox and not _blocked(B, q, e) and (kind != 'M' or _in_med(B, q)):
                     ya, yb = hy((a_ + b_) / 2)
                     row(p0, p1, ya + rm.PAVE_UP, yb + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
                     continue
@@ -307,7 +307,7 @@ def collision(B, net):
                     qq = Polygon([q0 + Rv * a_, q1 + Rv * a_, q1 + Rv * b_, q0 + Rv * b_])
                     if inbox and _BOX05.contains(qq.centroid):
                         continue
-                    if not _blocked(B, qq, e):
+                    if not _blocked(B, qq, e) and (kind != 'M' or _in_med(B, qq)):
                         ya, yb = hy((a_ + b_) / 2, k, k2)
                         row(q0, q1, ya + rm.PAVE_UP, yb + rm.PAVE_UP, b_ - a_, kind, (a_ + b_) / 2, Rv)
     # junction squares
@@ -356,6 +356,14 @@ def _street_end_near(p):
         ends = [(q[0], q[1]) for q in json.load(open(pth))['ends']] if os.path.exists(pth) else []
         _S05 = cKDTree(np.array(ends)) if ends else False
     return bool(_S05) and _S05.query((float(p[0]), float(p[1])))[0] < 3.0
+
+
+def _in_med(B, q):
+    """(2026-11-16, 1:1) a median box only where roadmesh's final medians are (cut at junctions, off carriageways)"""
+    Mf = getattr(B, 'M_final', None)
+    if Mf is None:
+        return True
+    return Mf.intersection(q).area >= 0.6 * q.area
 
 
 def _blocked(B, q, e):

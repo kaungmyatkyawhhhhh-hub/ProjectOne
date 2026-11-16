@@ -89,7 +89,9 @@ function KD.index(store: Instance)
 		local kind, pid = string.match(q.Name, "^(%u+)_(%w+)$")
 		if kind and q:IsA("BasePart") then
 			T[pid] = T[pid] or {}
-			table.insert(T[pid], { kind = kind, part = q, c = q:GetAttribute("C"), size = q:GetAttribute("S") })
+			-- (2026-11-16, greenery) optional attribute R: the piece's own rotation in the record frame (CFrame; the
+			-- reused old-map tree meshes sit turned in their models)
+			table.insert(T[pid], { kind = kind, part = q, c = q:GetAttribute("C"), size = q:GetAttribute("S"), r = q:GetAttribute("R") })
 		end
 	end
 	return T
@@ -311,7 +313,7 @@ function Job:step(budget: number): boolean
 				for _, tp in pieces do
 					local q = tp.part:Clone()
 					q.Size = Vector3.new(tp.size.X * sx, tp.size.Y * sy, tp.size.Z * sz)
-					q.CFrame = cf * CFrame.new(tp.c.X * sx, tp.c.Y * sy, tp.c.Z * sz)
+					q.CFrame = cf * CFrame.new(tp.c.X * sx, tp.c.Y * sy, tp.c.Z * sz) * (tp.r or CFrame.identity)
 					if tp.kind == "KWX" then
 						q.Name = code
 						KD.look(q, code, KD.WALL[code])

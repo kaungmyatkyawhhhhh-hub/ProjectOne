@@ -106,6 +106,13 @@ FAM = {
     "bn": dict(pids=("bn1",), D=(3.5, 6.0), ref=4.5, base=1.5 / 4.5, low=True),
 }
 # shifted to bigger crowns than the measured blob spread (its small blobs are crown fragments; research section 4)
+# (owner, 16 Nov, after the first look: "the old map vibe was better ... the trees are so ugly ... the first version
+# grass looked better") STYLE "clean": the game's own terrain Grass everywhere (no Ygn ground overrides, no dirt /
+# earth / gravel patches), clean concrete only on real forecourts and parking, the old map's tree kit (Monaco Tree /
+# Palm / PalmA copies, ServerStorage.YangonData.GreenKit) at real sizes, no shrubs / hedges / banana. "patchy" = the
+# first pass (Ygn ground variants + tree_kit.py meshes).
+STYLE = "clean"
+OLD_KIT = {"tree": ("ot1", 18.3), "palm": (("op1", 12.2), ("op2", 16.3))}   # pid, crown width / height (m) at scale 1
 SIZE_BINS = [((6, 10), 0.22), ((10, 18), 0.46), ((18, 28), 0.26), ((28, 35), 0.06)]
 
 
@@ -373,7 +380,20 @@ def main():
     mat[bld & land] = np.where(paved_arch[bld & land], "C", "P")
     mat[lmk] = "."
     mat[~land] = "."
-    log("ground classes", dict(Counter(mat[land].ravel().tolist())))
+    if STYLE == "clean":
+        mat[:] = "."
+        mat[land] = "L"
+        cl = open_ & (zn == "paved")
+        cl |= fore & (d_road <= M(9)) & ~(zn == "park")
+        mat[cl] = "C"
+        mat[lmk] = "."
+        mat[~land] = "."
+    edge_parts, edge_mask, edge_len = lake_edge(G, water, prof, H, lmk)
+    deck |= edge_mask
+    d_deck = distance_transform_edt(~deck) * RES
+    mat[edge_mask & land] = np.where(mat[edge_mask & land] == ".", ".", "L")
+    log("ground classes", dict(Counter(mat[land].ravel().tolist())), "lake edge parts", len(edge_parts),
+        "bund m", round(edge_len / 3))
 
     # ------------------------------------------------------------------------------------ trees
     R = random.Random(SEED)
@@ -581,7 +601,7 @@ def main():
             (not low or d_wall[i, j] >= r + 0.3)
 
     nh = nbv = 0
-    for (x, y, z, sx, sy, sz, yaw) in walls:
+    for (x, y, z, sx, sy, sz, yaw) in (walls if STYLE != "clean" else []):
         c = col(x, z)
         if not c:
             continue
@@ -630,7 +650,7 @@ def main():
     nsh = 0
     ci_ = rng.integers(0, nx, 220000)
     cj_ = rng.integers(0, nz, 220000)
-    for i, j in zip(ci_.tolist(), cj_.tolist()):
+    for i, j in zip(ci_.tolist(), cj_.tolist()) if STYLE != "clean" else []:
         zname = ZONES[zone[i, j]]
         if zname not in ("villa", "house", "civic", "park", "condo", "religious"):
             continue
@@ -651,9 +671,9 @@ def main():
     # ground under crowns in yards / campus / vacant: dirt and red earth (leaf litter, bare earth)
     under_c = cov & land & ~bld & ~road & np.isin(zn, ["house", "villa", "walkup", "civic", "campus", "school", "vacant",
                                                        "religious", "shed", "township"])
-    soft = under_c & np.isin(mat, ["L", "D"]) & (u1 < 0.62)
+    soft = under_c & np.isin(mat, ["L", "D"]) & (u1 < 0.62) & (STYLE != "clean")
     mat[soft] = np.where(u2[soft] < 0.55, "P", "E")
-    soft_p = cov & land & np.isin(zn, ["park", "cemetery"]) & (mat == "L") & (u1 < 0.28)
+    soft_p = cov & land & np.isin(zn, ["park", "cemetery"]) & (mat == "L") & (u1 < 0.28) & (STYLE != "clean")
     mat[soft_p] = np.where(u2[soft_p] < 0.6, "D", "P")
     log("ground under crowns re-painted", int(soft.sum() + soft_p.sum()))
 
@@ -698,17 +718,51 @@ def main():
     detail = defaultdict(list)
     tri_of = {pid: sum(p["tris"] for p in v["parts"].values()) for pid, v in kit.items()}
     tri_near = 0
+    if STYLE == "clean":
+        keep = []
+        for t in trees:
+            if t["fam"] == "bn":
+                continue
+            if t["fam"] == "cp":
+                pid, ref = OLD_KIT["palm"][0] if R.random() < 0.55 else OLD_KIT["palm"][1]
+                Hm = R.uniform(10.0, 15.0)
+                s = Hm / ref
+                t.update(pid=pid, s=s, sy=s)
+            else:
+                pid, ref = OLD_KIT["tree"]
+                Dm = t["D"] / 3.0
+                if t["fam"] == "rt":
+                    Dm = min(max(Dm, 15.0), 25.0)
+                    Dm = min(Dm, max(t["D"] / 3.0, 15.0))
+                s = Dm / ref
+                t.update(pid=pid, s=s, sy=s * R.uniform(0.92, 1.12))
+            keep.append(t)
+        trees[:] = keep
     for t in trees:
         key = (int(t["x"] // TILE), int(t["z"] // TILE))
         detail[key].append(("Q", t["pid"], t["x"], t["y"], t["z"], t["yaw"], t["s"], "TRE", t["sy"], t["s"]))
-        tri_near += tri_of[t["pid"]]
+        tri_near += tri_of.get(t["pid"], 0)
     for s in shrubs:
         key = (int(s["x"] // TILE), int(s["z"] // TILE))
         detail[key].append(("Q", s["pid"], s["x"], s["y"], s["z"], s["yaw"], s["sx"], "TRE", s["sy"], s["sz"]))
-        tri_near += tri_of[s["pid"]]
+        tri_near += tri_of.get(s["pid"], 0)
     # far looks (place): crowns 9 m and up, palms 14 m and up
     far = []
     for t in trees:
+        if t["fam"] == "cp" and STYLE == "clean":
+            Hm = (12.2 if t["pid"] == "op1" else 16.3) * t["s"]
+            if Hm < 12:
+                continue
+            far.append("fp1 %.2f %.2f %.2f %.2f %.2f %.2f %.4f %d_%d" % (t["x"], t["y"], t["z"], M(7.0), M(Hm), M(7.0),
+                                                                     t["yaw"], t["x"] // TILE, t["z"] // TILE))
+            continue
+        if STYLE == "clean":
+            if t["D"] >= M(11.0):
+                Dm = 18.3 * t["s"]
+                far.append("ff1 %.2f %.2f %.2f %.2f %.2f %.2f %.4f %d_%d" % (t["x"], t["y"], t["z"], M(Dm) * 0.92,
+                                                                         M(Dm) * 0.62 * t["sy"] / t["s"], M(Dm) * 0.85,
+                                                                         t["yaw"], t["x"] // TILE, t["z"] // TILE))
+            continue
         if t["fam"] == "cp":
             Hm = 17.0 * t["sy"]
             if Hm < 19:
@@ -738,6 +792,11 @@ def main():
     for n in range(len(fpages)):
         items.append(sv(ref, "Far_%d" % (n + 1), open(os.path.join(OUT, "Far_%d.txt" % (n + 1))).read()))
         ref += 1
+    epages = paginate(edge_parts)
+    for n, pg in enumerate(epages):
+        open(os.path.join(OUT, "Edge_%d.txt" % (n + 1)), "w", newline="\n").write("\n".join(pg))
+        items.append(sv(ref, "Edge_%d" % (n + 1), "\n".join(pg)))
+        ref += 1
     tool = open(os.path.join(ROOT, "tools", "yangon", "YangonGreen1to1.luau"), encoding="utf-8").read().replace("\r\n", "\n")
     assert "]]>" not in tool
     items.append('<Item class="ModuleScript" referent="R%d"><Properties><string name="Name">YangonGreen1to1</string>'
@@ -764,7 +823,7 @@ def main():
         mk = land & (d_wat > M(a)) & (d_wat <= M(b))
         lakeb["%d-%d m" % (a, b)] = round(float(cov[mk].mean()), 3)
     fams = Counter(t["fam"] for t in trees)
-    st = dict(tag=TAG, land_km2=round(area_km2, 2), trees=len(trees), street_trees=sum(nst.values()),
+    st = dict(tag=TAG, style=STYLE, lake_edge_parts=len(edge_parts), bund_m=round(edge_len / 3), land_km2=round(area_km2, 2), trees=len(trees), street_trees=sum(nst.values()),
               per_road=dict(nst), fill_trees=nfill, by_family=dict(fams), shrubs=dict(Counter(s["pid"] for s in shrubs)),
               canopy_share=round(float(canopy), 3), canopy_by_zone=by_zone, lake_bands=lakeb,
               crown_m=dict(p10=round(np.percentile([t["D"] / 3 for t in trees], 10), 1),
