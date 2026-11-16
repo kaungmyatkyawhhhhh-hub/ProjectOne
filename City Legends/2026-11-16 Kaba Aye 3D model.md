@@ -104,3 +104,13 @@ Tried and dropped: gold as SmoothPlastic + Reflectance (reads flat cream, plasti
 
 ## Next
 - Place it in Studio (another step) with the materials JSON and `YangonMaterials.luau`.
+
+## Ornament kit pass (16 Nov)
+The flat cut-out plates were replaced with the carved kit ([[2026-11-16 Burmese ornament kit]]), in `kaba_aye_blender.py` (built headless: `blender -b --factory-startup --python-expr "exec(...); build(); check_overlaps(fix=True); export()"`):
+- **Porch gable:** `gable_frame(6.9, 4.0)` (red board, gold ogee frame 0.1 m proud, flame fingers, apex flame, raised sun disc with rays and boss, eave-end scrolls) + `gable_fingers` (the stepped skyline, 6 a side + the centre).
+- **Merlons:** `merlon_leaf(1.45, 0.6, lo)` x 88 (lobed leaf 0.09 m, raised inner leaf, spine).
+- **Arch hoods:** `arch_hood` (scalloped red band 0.1 m proud, raised white rim 0.14 m).
+- **Leaf panels:** a kit leaf in cream on a mint backing leaf.
+- 59,904 triangles (was 51,749); overlap check 0 same-facing pairs. Asset **105750762375498**, swapped in Studio with `VisualSwap.luau` (318 parts, looks copied by name, Collision kept). Gold looks unchanged (Metal + YgnGoldLeaf 226, 222, 245).
+- ![[Ornament kit - Kaba Aye photo before after.jpg]] ![[Ornament kit - Kaba Aye porch grazing check.jpg]] (no flicker at grazing angles)
+- Still differs: the photo's porch crest is a dense wall of small fingers; ours has fewer, bigger pieces.

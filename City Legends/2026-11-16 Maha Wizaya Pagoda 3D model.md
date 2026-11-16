@@ -88,3 +88,9 @@ Built in headless Blender 3.6 (not the owner's Blender) from the real photos, OS
   - Chamber size is an estimate (22 m).
   - The gate pavilions' size comes from Esri only.
 - **Ground:** the plate is temporary (no 1:1 terrain yet). The real site sits on Dhammarakkhita hill, and GLO-30 rises about 1.3 m across the plaza.
+
+## Ornament kit pass (16 Nov)
+- Porches: carved kit flames (bevelled, 0.1 m proud, tongues both sides) along both pediment slopes instead of the flat zigzag, and a carved kit flame finial at the pediment's centre.
+- Terraces: rows of carved flames (`flame_blade` micro) along all three terrace edges, clear of the porches ([[2026-11-16 Burmese ornament kit]]).
+- 56,469 triangles (budget 70,000); overlap check 0 same-facing pairs. Asset **132275924726216**, placed with `maha_wizaya_place.luau` (replaces; collision and lights rebuilt). Gold unchanged (Metal + YgnGoldLeaf).
+- ![[Ornament kit - Maha Wizaya photo before after.jpg]]

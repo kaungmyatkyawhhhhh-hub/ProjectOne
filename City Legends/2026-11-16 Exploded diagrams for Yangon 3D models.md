@@ -38,6 +38,8 @@ The method is the "Exploded Diagram Method" in [[Brain/Skills/roblox-3d-model-fr
 
 | 2 | Yangon trishaw (sai kaa) | `imports/refs/exploded/trishaw/01_..., 02_....jpg` (Commons) | `imports/refs/exploded/trishaw/trishaw_exploded_v1.png` | 9 good parts: frame, wheels, handlebar, sprung saddle, red sidecar chassis with 2 mounting bars, sidecar wheel, red vinyl seat box, side panels and foot board. **WRONG in the sheet:** the assembled view puts the sidecar BEHIND the bike, like a cargo trike. Real (photo 01): the sidecar is bolted BESIDE the bicycle, with its wheel level with the bike's rear wheel and its two cushions back to back. In photo 01 the bikes face right and the sidecar is on the far side, the bike's LEFT; check more photos before modelling. Model the PARTS from the sheet and the PLACEMENT from the photos. |
 
+| 3 | Burmese carved ornament: pyatthat tier crest + flame finial | `imports/refs/exploded/ornament/ref1-4_*.jpg` (Commons: Shwedagon crests and finials, Kaba Aye gable, Botataung gate) | `imports/refs/exploded/ornament/ornament_exploded_v1_lowres.png` (only a 380 x 253 copy: the browser tool refused the click and zoom capture that day) | Crest layers: back board, scroll leaf row, flame fingers, corner flame, bead moulding, glass drop strip. Finial: knob, leaf curls, blade, spine, tip. Built as the kit [[2026-11-16 Burmese ornament kit]]. |
+
 ## Next sheets (planned)
 - YBS bus stop
 - Concrete power pole with transformer and wire bundle
