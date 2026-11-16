@@ -527,6 +527,32 @@ def city_hall():
     return sc
 
 
+def band_seg(grp, x0, x1, z, h, d, caps=(False, False)):
+    """kit_panels.band from x0 to x1 (same drip profile), with end faces where a door cuts it"""
+    s_ = min(0.03, h * 0.3)
+    K.face(grp, [(x0, -d, z + s_), (x1, -d, z + s_), (x1, -d, z + h - s_), (x0, -d, z + h - s_)], (0, -1, 0))
+    K.face(grp, [(x0, -d, z + h - s_), (x1, -d, z + h - s_), (x1, 0.0, z + h), (x0, 0.0, z + h)], (0, -0.3, 1))
+    K.face(grp, [(x0, 0.0, z), (x1, 0.0, z), (x1, -d, z + s_), (x0, -d, z + s_)], (0, -0.3, -1))
+    for x, on, nx in ((x0, caps[0], -1), (x1, caps[1], 1)):
+        if on:
+            K.face(grp, [(x, 0.0, z), (x, -d, z + s_), (x, -d, z + h - s_), (x, 0.0, z + h)], (nx, 0, 0))
+
+
+def band_cut(W, z, h, d, doors):
+    """a band across the panel, cut where a door's opening (with its 0.25 m frame) passes through its height"""
+    cuts = sorted((u - dw / 2 - 0.25, u + dw / 2 + 0.25) for (u, dw, dh, sill) in doors if sill < z + h and sill + dh > z)
+    if not cuts:
+        KP.band("KW0", W, z, h, d)
+        return
+    x = 0.0
+    for c0, c1 in cuts:
+        if c0 > x:
+            band_seg("KW0", x, c0, z, h, d, (False, True))
+        x = max(x, c1)
+    if x < W:
+        band_seg("KW0", x, W, z, h, d, (True, False))
+
+
 def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3, seg=8, stains=True):
     """facade builder for walls(): levels = [(height m, kind)], kind 'arch' (glazed arched window), 'arcade' (tall open
     arch), 'rect' (glazed window), 'blank'"""
@@ -553,7 +579,7 @@ def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3,
                     ww = min(1.5, BAY - 1.0)
                     rect_window(x + BAY / 2 - ww / 2, z + 0.9, ww, max(0.8, h - 1.9), holes)
             if li > 0:
-                KP.band("KW0", Wm, z - band_depth, band_depth, band_depth)
+                band_cut(Wm, z - band_depth, band_depth, band_depth, doors)
             if pil and kind != "blank":
                 for k in range(1, n):
                     if any(z < d[3] + d[2] and z + h > d[3] and abs(k * BAY - d[0]) < d[1] / 2 + 0.6 for d in doors):
@@ -1266,13 +1292,14 @@ def secretariat():
     return report(lid, sc, base, top)
 
 
-def market_hall(sc, hall, o, ax, ay, Lm, Wm, base, H, fy, k, boxes, lights, clears):
+def market_hall(sc, hall, o, ax, ay, Lm, Wm, base, H, fy, k, boxes, lights, clears, rise_at):
     """a walkable Bogyoke Market hall ground floor (photos: Textile_shop_Bogyoke_Aung_San_Market, Bogyoke_Market_Jwelly):
     long narrow aisles (3.2 m) between rows of shop stalls, each stall a counter at the aisle with stacked cloth hanging
     behind it and a red name board over it (hall 0: jewellery, glass counters and gold), cross aisles every ~30 m,
     tiled floor on the hall's plinth (1 m over its highest ground), a cream ceiling under the first-floor band with dark exposed beams every
-    4 m and fluorescent tubes along the aisles. Returns (aisle middles v (m), floor Y (studs)); doors are cut by the
-    caller at every aisle end in both gable walls. Collision boxes and lights are appended."""
+    4 m and fluorescent tubes along the aisles. Doors at every aisle end in both gable walls open at the ground there
+    (rise_at(end, v) = the floor's height over it, m) with a stair up inside the 4 m entry zone. Returns the aisle
+    middles v (m) and the floor Y (studs); the caller cuts the doors. Collision boxes and lights are appended."""
     import random
     rnd = random.Random(700 + k)
     F = Frame(sc, o, ax, ay, fy)
@@ -1291,35 +1318,74 @@ def market_hall(sc, hall, o, ax, ay, Lm, Wm, base, H, fy, k, boxes, lights, clea
             rows.append((v, v + DM, True, True))
             v += DM
     rows.append((v, Vi, True, False))          # (v0, v1, faces an aisle at v0, at v1)
-    # shell: floor, ceiling, liners (the gable liners open at each aisle), door passages through the 0.5 m wall gap
-    F.hq("TIL", Lo, Vo, Hi, Vi, 0.0)
+    # shell: ceiling, side liners; at each aisle end a door from the ground at that door (rise_at gives the floor's
+    # height over it, m), its passage through the 0.5 m wall gap at ground level, and a stair up to the floor inside
+    # the 4 m entry zone (no stall there): nothing outside on the pavement
     F.hq("CEI", Lo, Vo, Hi, Vi, yc, up=False)
     F.wq("CRW", Lo, Vo, Hi, Vo, 0.0, yc, mid)
     F.wq("CRW", Lo, Vi, Hi, Vi, 0.0, yc, mid)
-    for (ug, ur) in ((Lo, (K.REVEAL + 0.01, Lo)), (Hi, (Hi, Lm - K.REVEAL - 0.01))):
+    F.cb(clears, Lm / 2, Wm / 2, -0.1, Lm - 0.2, Wm - 0.2, yc + 0.1)   # no terrain inside
+    slab0 = -(fy - base) / S - 0.4
+    F.cb(boxes, Lm / 2, Wm / 2, yc, Lm, Wm, (base + H * S - fy) / S - yc)
+    for vv in (Vo / 2, Wm - Vo / 2):
+        F.cb(boxes, Lm / 2, vv, slab0, Lm, Vo, yc - slab0)
+    wells = {}
+    for e, ug, uw, inw in ((0, Lo, 0.0, 1), (1, Hi, Lm, -1)):
+        ur = sorted((uw + inw * (K.REVEAL + 0.01), ug))
         vs = Vo
         for va in aisles:
+            h = max(0.16, rise_at(e, va))
+            n = max(1, int(round(h / 0.16)))
+            run = min(0.3, 3.4 / n)
+            wells[(e, va)] = (h, n, run)
+            y0 = -h
             F.wq("CRW", ug, vs, ug, va - 1.5, 0.0, yc, mid)
             F.wq("CRW", ug, va - 1.5, ug, va + 1.5, DH, yc, mid)
             vs = va + 1.5
+            pm = ((ur[0] + ur[1]) / 2, va)
             for sv in (-1.5, 1.5):
-                F.wq("CRW", ur[0], va + sv, ur[1], va + sv, 0.0, DH, ((ur[0] + ur[1]) / 2, va))
+                F.wq("CRW", ur[0], va + sv, ur[1], va + sv, y0, DH, pm)
             F.hq("CRW", ur[0], va - 1.5, ur[1], va + 1.5, DH, up=False)
-            F.hq("TIL", ur[0], va - 1.5, ur[1], va + 1.5, 0.0)
+            F.hq("TIL", ur[0], va - 1.5, ur[1], va + 1.5, y0)
+            # the stair: tread j over [(j-1) run, j run] inward from the liner, the last one at floor level
+            for jj in range(1, n + 1):
+                ua, ub = ug + inw * (jj - 1) * run, ug + inw * jj * run
+                yj = y0 + jj * h / n
+                F.hq("TIL", min(ua, ub), va - 1.5, max(ua, ub), va + 1.5, yj)
+                F.wq("MRB", ua, va - 1.5, ua, va + 1.5, yj - h / n, yj, (ua - inw, va))
+                F.cb(boxes, (ua + ub) / 2, va, y0 - 1.0, run, 3.0, yj - y0 + 1.0)
+            R = n * run
+            for sv in (-1.5, 1.5):          # the well's sides under the floor
+                F.wq("CRW", ug, va + sv, ug + inw * R, va + sv, y0, 0.0, (ug + inw * R / 2, va))
+            F.cb(boxes, pm[0], va, y0 - 1.0, ur[1] - ur[0] + 0.02, 3.0, 1.0)      # passage floor
+            cu0, cu1 = sorted((uw, ug + inw * R))
+            F.cb(clears, (cu0 + cu1) / 2, va, y0 - 0.1, cu1 - cu0, 3.0, h + 0.1)
+            F.cb(boxes, (uw + ug) / 2, va, DH, Lo, 3.0, yc - DH)                     # wall over the door
         F.wq("CRW", ug, vs, ug, Vi, 0.0, yc, mid)
-    F.cb(clears, Lm / 2, Wm / 2, -0.1, Lm - 0.2, Wm - 0.2, yc + 0.1)   # no terrain inside
-    # collision: the slab under the floor, the walls (open at the doors), everything over the ceiling
-    F.cb(boxes, Lm / 2, Wm / 2, -(fy - base) / S - 0.4, Lm, Wm, (fy - base) / S + 0.4)
-    F.cb(boxes, Lm / 2, Wm / 2, yc, Lm, Wm, (base + H * S - fy) / S - yc)
-    for vv in (Vo / 2, Wm - Vo / 2):
-        F.cb(boxes, Lm / 2, vv, 0.0, Lm, Vo, yc)
-    for uu in (Lo / 2, Lm - Lo / 2):
         vs = 0.0
-        for va in aisles:
-            F.cb(boxes, uu, (vs + va - 1.5) / 2, 0.0, Lo, va - 1.5 - vs, yc)
-            F.cb(boxes, uu, va, DH, Lo, 3.0, yc - DH)
+        for va in aisles:                     # gable wall collision beside the doors, from the slab's bottom
+            F.cb(boxes, (uw + ug) / 2, (vs + va - 1.5) / 2, slab0, Lo, va - 1.5 - vs, yc - slab0)
             vs = va + 1.5
-        F.cb(boxes, uu, (vs + Wm) / 2, 0.0, Lo, Wm - vs, yc)
+        F.cb(boxes, (uw + ug) / 2, (vs + Wm) / 2, slab0, Lo, Wm - vs, yc - slab0)
+    # floor and slab: the whole hall minus the stair wells
+    Re = [max(wells[(e, va)][1] * wells[(e, va)][2] for va in aisles) for e in (0, 1)]
+    rects = [(Lo + Re[0], Vo, Hi - Re[1], Vi)]
+    for e, ug, inw in ((0, Lo, 1), (1, Hi, -1)):
+        far = ug + inw * Re[e]
+        u_lo, u_hi = min(ug, far), max(ug, far)
+        vs = Vo
+        for va in aisles:
+            rects.append((u_lo, vs, u_hi, va - 1.5))
+            vs = va + 1.5
+            R = wells[(e, va)][1] * wells[(e, va)][2]
+            if R < Re[e] - 0.01:
+                a_ = ug + inw * R
+                rects.append((min(a_, far), va - 1.5, max(a_, far), va + 1.5))
+        rects.append((u_lo, vs, u_hi, Vi))
+    for (u0_, v0_, u1_, v1_) in rects:
+        if u1_ - u0_ > 0.01 and v1_ - v0_ > 0.01:
+            F.hq("TIL", u0_, v0_, u1_, v1_, 0.0)
+            F.cb(boxes, (u0_ + u1_) / 2, (v0_ + v1_) / 2, slab0, u1_ - u0_, v1_ - v0_, -slab0)
     # stall rows, cut by cross aisles
     Us, Ue = Lo + 4.0, Hi - 4.0
     ns = max(1, int(round((Ue - Us) / 30.0)))
@@ -1411,31 +1477,26 @@ def bogyoke_market():
         sill = (g1h - hb) / S + 1.0
         # (6 m bays, 4-segment arches, no stains: the 4 halls' 1.4 km of wall kept the model at 120k triangles)
         fn, H = std_facade([(sill, "blank"), (5.0, "arcade"), (4.4, "arch")], 6.0, parapet=0.0, seg=4, stains=False)
-        aisles, fy = market_hall(sc, hall, P(u0, v0), ax, ay, (u1 - u0) / S, hw / S, hb, H, hb + sill * S, k, boxes, lights, clears)
-        DOOR["spec"] = [(*P(uu, v0 + va * S), 3.0, 3.4, sill) for va in aisles for uu in (u0, u1)]
+        fy = hb + sill * S
+
+        def rise_at(e, va, uu_=(u0, u1), v0_=v0, fy_=fy):
+            """the floor's height over the ground in front of the door at aisle va on end e (m)"""
+            uu = uu_[e]
+            sg = -1 if e == 0 else 1
+            q0, q1 = P(uu, v0_ + (va - 1.5) * S), P(uu, v0_ + (va + 1.5) * S)
+            foot = Polygon([q0, q1, (q1[0] + ax[0] * sg * 2 * S, q1[1] + ax[1] * sg * 2 * S),
+                            (q0[0] + ax[0] * sg * 2 * S, q0[1] + ax[1] * sg * 2 * S)])
+            return (fy_ - ground_of(foot)[1]) / S
+        aisles, _ = market_hall(sc, hall, P(u0, v0), ax, ay, (u1 - u0) / S, hw / S, hb, H, fy, k, boxes, lights, clears,
+                                rise_at)
+        specs = []
+        for va in aisles:
+            for e, uu in ((0, u0), (1, u1)):
+                h = max(0.16, rise_at(e, va))
+                specs.append((*P(uu, v0 + va * S), 3.0, h + 3.4, sill - h))
+        DOOR["spec"] = specs
         ring_walls(sc, hall, hb, lambda i, W: fn(i, W), 70 + k)
         DOOR["spec"] = None
-        # steps up to each door from the ground at that door, all inside the market's 4 m setback (3.6 m of run: the
-        # first version's 0.4 m treads ran 8 m out across the pavement into the road)
-        fy = hb + sill * S
-        for va in aisles:
-            for uu, sg in ((u0, -1), (u1, 1)):
-                fa, fb = P(uu, v0 + (va - 1.5) * S), P(uu, v0 + (va + 1.5) * S)
-                out_ = (ax[0] * sg, ax[1] * sg)
-                foot = Polygon([fa, fb, (fb[0] + out_[0] * 3.6 * S, fb[1] + out_[1] * 3.6 * S),
-                                (fa[0] + out_[0] * 3.6 * S, fa[1] + out_[1] * 3.6 * S)])
-                gd = ground_of(foot)[1]
-                h_m = max(0.16, (fy - gd) / S)
-                n_st = max(1, int(round(h_m / 0.16)))
-                run = min(0.4, 3.6 / n_st)
-                y0s = fy - h_m * S
-                steps(sc, fa, fb, out_, y0s, n=n_st, rise=h_m / n_st, run=run, away=Polygon(hall).centroid.coords[0])
-                for j in range(n_st):     # step collision: one box per tread
-                    d0 = run * (n_st - j) - run / 2
-                    q = P(uu + sg * d0 * S, v0 + va * S)
-                    hj = h_m / n_st * (j + 1) * S
-                    boxes.append([q[0], y0s - 0.5 + (hj + 0.5) / 2, q[1], run * S, hj + 0.5, 3.0 * S,
-                                  -math.atan2(ax[1], ax[0])])
         yH = hb + H * S
         top = max(top, yH)
         hc = Polygon(hall).centroid
