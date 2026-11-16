@@ -356,6 +356,7 @@ class Out:
         self.stats = Counter()
         self.boxes = []      # (shapely footprint, y0, y1, code) of everything placed: the overlap check
         self.keep = []       # ground the places cover (slabs, pads): no trees, no street props there
+        self.grade = []      # terrain cuts over graded slabs: (cx, cz, sx, sz, yaw, top)
 
     def box(self, x, y0, z, sx, sy, sz, ux, uz, code, coll=False, check=True):
         """a box from y0 up sy, centred (x, z), its X along (ux, uz)"""
@@ -390,12 +391,18 @@ def gmax(poly, step=4.0):
 def slab(o, poly, code, coll=True, lift=0.25):
     """a ground slab on a polygon (rectangles), its top `lift` over the highest terrain under it; returns the top y"""
     hi, lo = gmax(poly)
-    top = hi + lift
+    # graded flat at the LOW side of the lot (the pavement side): the terrain over the slab is cut away in Studio
+    # (grade.json -> PlacesApply.grade: Air from top - 0.5 up), so the forecourt meets the pavement with no step;
+    # a lot on a slope over 3 studs keeps its top over the highest ground instead (no deep cut)
+    graded = hi - lo <= 3.0
+    top = (lo + 0.3) if graded else (hi + lift)
     o.keep.append(poly)
     for (cx, cz, sx, sz, yw) in BK.roof_rects(poly, M(1.0)):
         ux, uz = math.cos(yw), -math.sin(yw)
         y0 = lo - 1.0
         o.box(cx, y0, cz, sx, top - y0, sz, ux, uz, code, coll=coll, check=False)
+        if graded and hi > top - 0.5:
+            o.grade.append((round(cx, 2), round(cz, 2), round(sx, 2), round(sz, 2), round(yw, 5), round(top, 2)))
     o.stats["slab_m2"] += poly.area / 9.0
     return top
 
@@ -764,6 +771,9 @@ def build():
     keep = unary_union(o.keep + [b[0] for b in o.boxes]).buffer(M(0.5))
     kl = [list(map(list, g.exterior.coords)) for g in (keep.geoms if keep.geom_type == "MultiPolygon" else [keep])]
     json.dump(kl, open(os.path.join(OUT, "keepout.json"), "w"))
+    nl = chr(10)
+    open(os.path.join(OUT, "Grade_1.txt"), "w", newline=nl).write("".join(("%s %s %s %s %s %s" % g) + nl for g in o.grade))
+    o.stats["grade_rects"] = len(o.grade)
     # what the current green / street layers have standing there (they are re-run with keepout.json)
     try:
         trees = json.load(open(os.path.join(B1, "green_%s" % TAG, "trees.json")))
