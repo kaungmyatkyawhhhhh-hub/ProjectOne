@@ -117,6 +117,15 @@ LANDMARK_SITES_BY_TAG["P4"] = {
     "m_tower": dict(osm=["o1514269236"], pts=[], grow=10.0),
     "crystal_residences": dict(osm=["o471327872"], pts=[], grow=12.0),
 }
+# P7 (Shwedagon / Bahan): the placed Shwedagon (platform OSM area 117388457 + the hill round the stupa) and Maha Wizaya
+# models; the Martyrs' Mausoleum, the Fallen Heroes memorial, the National Museum and People's Park stay empty for theirs
+LANDMARK_SITES_BY_TAG["P7"] = {
+    "shwedagon": dict(osm=["o117379705"], areas=[117388457], pts=[], circles=[(96.14958, 16.79834, 190.0)], grow=10.0),
+    "maha_wizaya": dict(osm=["o160698623"], pts=[], circles=[(96.15222, 16.79491, 80.0)], grow=6.0),
+    "martyrs_mausoleum": dict(osm=[], areas=[431832281, 984908043], pts=[], grow=8.0),
+    "national_museum": dict(osm=[], areas=[428294069], pts=[], grow=4.0),
+    "peoples_park": dict(osm=[], areas=[374243908], pts=[], grow=2.0),
+}
 LANDMARK_SITES = LANDMARK_SITES_BY_TAG.get(TAG, {})
 # earlier pilots this one meets (geo.PILOT_SEAMS): their buildings by the shared edge are kept, never doubled, and no
 # compound wall is drawn along the shared edge twice
