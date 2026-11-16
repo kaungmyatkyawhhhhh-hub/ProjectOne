@@ -15,7 +15,9 @@ pid and code are indices into the Meta lists (PIDS, CODES). The pid of a piece i
 (kit_panels.stable_id), so one template set serves the whole city.
 
     line(rec)               -> the readable line (Inst / Shell pages)
-    write_rbxmx(path, name, detail, tile) -> a Folder `name` of StringValues: Meta + one per tile ("i_j")
+    write_rbxmx(path, name, detail, tile[, compact]) -> a Folder `name` of StringValues: Meta + one per tile ("i_j")
+(2026-11-16) FORMAT=2 (buildings_1to1.py): a tile string starting with "!" holds kit_layout.py records (H buildings,
+W compound-wall chains, laid out on the client) + old records; Meta adds FORMAT / ARCH / WALLS / WCOLS / LAYOUT.
 """
 import math
 import os
@@ -85,7 +87,9 @@ def pack_tile(recs, x0, z0, pids, codes):
     return "".join(out)
 
 
-def write_rbxmx(path, name, detail, tile):
+def write_rbxmx(path, name, detail, tile, compact=None):
+    """compact = (records, raw, meta lines) (kit_layout, FORMAT=2): each tile string is "!" + its kit_layout records +
+    its raw old records; `detail` (the expanded records) still gives PIDS / CODES"""
     pids, codes = {}, {}
     for recs in detail.values():
         for rec in recs:
@@ -97,10 +101,15 @@ def write_rbxmx(path, name, detail, tile):
     assert len(pids) < 4096 and len(codes) <= 64
     items = []
     meta = "TILE=%g\nPIDS=%s\nCODES=%s\n" % (tile, " ".join(sorted(pids, key=pids.get)), " ".join(sorted(codes, key=codes.get)))
+    if compact:
+        meta += compact[2]
     items.append(("Meta", meta))
     chars = 0
     for (i, j), recs in sorted(detail.items()):
-        s = pack_tile(recs, i * tile, j * tile, pids, codes)
+        if compact:
+            s = "!" + "".join(compact[0].get((i, j), ())) + pack_tile(compact[1].get((i, j), ()), i * tile, j * tile, pids, codes)
+        else:
+            s = pack_tile(recs, i * tile, j * tile, pids, codes)
         assert len(s) < 190000, (i, j, len(s))
         items.append(("%d_%d" % (i, j), s))
         chars += len(s)

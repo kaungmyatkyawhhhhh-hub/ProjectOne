@@ -91,7 +91,7 @@ function M.kit(kitId, nightA, nightB)
 		night.Name = "Night"
 		night.Parent = b
 		local nc = 0
-		for _, id in { nightA, nightB } do
+		for _, id in (type(nightA) == "table" and nightA or { nightA, nightB }) do -- a list of night-cell ids also works
 			if not id then continue end
 			local m = loadAsset(id)
 			nc += P.cells(m, night)

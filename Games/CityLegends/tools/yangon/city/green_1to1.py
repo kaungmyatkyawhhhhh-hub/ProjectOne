@@ -447,7 +447,20 @@ def main():
     # (owner's two pictures, 16 Nov) the lake walk (grass bank down to the water, narrow walk, fan palms ...) and the
     # Kabar Aye green bank (low black railing, embankment, tree row): green_edges.py; the bund wall of v2 is retired
     import green_edges
-    ED = green_edges.edges(G, water, prof, H, lmk, ~land & ~water, d_bld, road, d_road,
+    # (roads05, 16 Nov night) the P1 / P2 roads were rebuilt with the batch 0.5 builder: Kabar Aye Pagoda Road's lines
+    # and widths come from roads05_*/roads.json when it exists (its samples: x y z dx dz _ halfL halfR ...)
+    prof_e = prof
+    for rj in sorted(glob.glob(os.path.join(B1, "roads05_*", "roads.json"))):
+        if TAG not in os.path.basename(os.path.dirname(rj))[len("roads05_"):].split("_"):
+            continue
+        prof_e = [e for e in prof if e.get("name") != green_edges.KA_ROAD]
+        for r in json.load(open(rj))["roads"]:
+            if r.get("name", "").startswith(green_edges.KA_ROAD) and len(r["s"]) > 1:
+                hw_ = max(max(q[6], q[7]) for q in r["s"])
+                prof_e.append(dict(name=green_edges.KA_ROAD, raised=any(len(q) > 5 and q[5] for q in r["s"]),
+                                   pts=[[q[0], q[1], q[2]] for q in r["s"]], half=[hw_, hw_],
+                                   walk=max(r.get("walkL", 0.0), r.get("walkR", 0.0))))
+    ED = green_edges.edges(G, water, prof_e, H, lmk, ~land & ~water, d_bld, road, d_road,
                            landmark_boxes=LANDMARK_BOXES.get(TAG, []))
     edge_parts, edge_mask, edge_len = ED["parts"], ED["mask"], ED["stats"]["walk_m"] * 3
     log("edges", ED["stats"])

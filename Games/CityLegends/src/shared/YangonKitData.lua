@@ -12,6 +12,9 @@
 	  P pid(2) x(4) y(3) z(4) yaw(3) sx(3) code(1)            a kit piece
 	  Q ... as P ... sy(3) sz(3)                              a kit piece scaled in Y / Z too
 	  B x(4) y(3) z(4) yaw(3) sx(3) sy(3) sz(3) code(1)       a plain Part (code WCOL: compound-wall collision)
+	Compact buildings (2026-11-16, Meta FORMAT=2, tools/yangon/city/kit_layout.py): a tile string starting with "!" holds
+	  H (a building's outline, archetype, floors, wall colour, edge flags) and W (compound-wall runs) records, laid out
+	  here by KD.expand into the records above (same code as kit_layout.expand), plus old records.
 	Street detail (2026-11-16, tools/yangon/city/street_1to1.py; Data_<district>S, Meta LOAD / ATTACH / ATLAS / CELL):
 	  L x1(4) y1(3) z1(4) yaw1(3) x2(4) y2(3) z2(4) yaw2(3) n(1) seed(1)   n black cables between two power poles (Beams
 	                                                                        between the Meta ATTACH points of each pole)
@@ -134,13 +137,610 @@ function KD.meta(folder: Instance)
 	for w in string.gmatch(string.match(text, "CODES=([^\n]*)") or "", "%S+") do
 		table.insert(out.codes, w)
 	end
+	-- (FORMAT=2, compact building data) the layout constants of kit_layout.py
+	out.format = tonumber(string.match(text, "FORMAT=(%d+)") or "") or 1
+	if out.format >= 2 then
+		out.pidIndex, out.codeIndex, out.arch, out.walls, out.wcols = {}, {}, {}, {}, {}
+		for k, p in out.pids do
+			out.pidIndex[p] = k - 1
+		end
+		for k, c in out.codes do
+			out.codeIndex[c] = k - 1
+		end
+		for name, a, b, c, d in string.gmatch(string.match(text, "ARCH=([^\n]*)") or "", "(%w+):([^,]+),([^,]+),([^,]+),(%S+)") do
+			out.arch[name] = { bay = tonumber(a), gf = tonumber(b), par = tonumber(c), fh = tonumber(d) }
+		end
+		for w in string.gmatch(string.match(text, "WALLS=([^\n]*)") or "", "%S+") do
+			table.insert(out.walls, w)
+		end
+		for w in string.gmatch(string.match(text, "WCOLS=([^\n]*)") or "", "%S+") do
+			table.insert(out.wcols, w)
+		end
+		local s_, fh_, st_ = string.match(text, "LAYOUT=(%S+) (%S+) (%S+)")
+		out.S, out.FH, out.STRETCH = tonumber(s_), tonumber(fh_), tonumber(st_)
+	end
 	return out
+end
+
+--[[ (2026-11-16) compact building data (Meta FORMAT=2, tools/yangon/city/kit_layout.py): a tile string starting with "!"
+	holds H (a building: outline + archetype + seed) and W (a chain of compound-wall runs) records plus old records.
+	KD.expand lays them out into the old fixed-width string with the SAME code as kit_layout.expand (keep the two in
+	step: only + - * / sqrt and floor decide anything, so Python and Luau give the same records). ]]
+local CRC = {}
+for i = 0, 255 do
+	local c = i
+	for _ = 1, 8 do
+		c = if bit32.band(c, 1) == 1 then bit32.bxor(0xEDB88320, bit32.rshift(c, 1)) else bit32.rshift(c, 1)
+	end
+	CRC[i] = c
+end
+local function crc32(s: string): number
+	local c = 0xFFFFFFFF
+	for k = 1, #s do
+		c = bit32.bxor(CRC[bit32.band(bit32.bxor(c, string.byte(s, k)), 255)], bit32.rshift(c, 8))
+	end
+	return bit32.bxor(c, 0xFFFFFFFF)
+end
+local function mul32(a: number, b: number): number
+	local al = a % 65536
+	return (al * b + (((a - al) / 65536 * b) % 65536) * 65536) % 4294967296
+end
+local function mix(x: number): number
+	x = bit32.bxor(x, bit32.rshift(x, 16))
+	x = mul32(x, 0x7feb352d)
+	x = bit32.bxor(x, bit32.rshift(x, 15))
+	x = mul32(x, 0x846ca68b)
+	return bit32.bxor(x, bit32.rshift(x, 16))
+end
+local function rnd(seed: number, k: number): number
+	return mix(bit32.bxor(seed, mix(k + 1))) / 4294967296
+end
+KD.mix, KD.crc32 = mix, crc32
+
+-- kit_panels.stable_id: "p" / "q" + crc32 of the Python repr of the key
+local pidCache = {}
+local function panelPid(arch, role, floors, k, var, shop, stripe)
+	local key = string.format("('%s', '%s', %d, %d, %d, %s, %s)", arch, role, floors, k, var, if shop then "True" else "False",
+		if stripe then "True" else "False")
+	local p = pidCache[key]
+	if not p then
+		p = string.format("p%08x", crc32(key))
+		pidCache[key] = p
+	end
+	return p
+end
+local function propPid(name)
+	local key = "('prop', '" .. name .. "')"
+	local p = pidCache[key]
+	if not p then
+		p = string.format("q%08x", crc32(key))
+		pidCache[key] = p
+	end
+	return p
+end
+
+local function enc(v: number, n: number): string
+	v = math.floor(v + 0.5)
+	local t = table.create(n)
+	for k = n, 1, -1 do
+		local d = v % 64
+		t[k] = string.sub(B64, d + 1, d + 1)
+		v = (v - d) / 64
+	end
+	return table.concat(t)
+end
+local function yawEnc(v: number): string
+	return enc(math.floor((v % TWO_PI) / TWO_PI * 262144 + 0.5) % 262144, 3)
 end
 
 local LEN = {
 	[string.byte("P")] = 21, [string.byte("Q")] = 27, [string.byte("B")] = 25,
 	[string.byte("L")] = 31, [string.byte("K")] = 25, [string.byte("T")] = 22,
 }
+local QO = 10240
+local K_SET = { 6, 4, 3, 2, 1 }
+local ARCHS = { "walkup", "township", "house", "villa", "condo", "civic", "shed", "market", "colonial" }
+
+local function fitWall(L, bay, STRETCH)
+	local best
+	local n0 = math.floor(L / bay)
+	for n = math.max(1, n0 - 1), n0 + 2 do
+		local s = L / (n * bay)
+		if math.abs(s - 1) <= STRETCH then
+			local c = math.abs(s - 1)
+			if best == nil or c < best[1] then
+				best = { c, n, s, 0.0 }
+			end
+		end
+		s = math.min(math.max((L - 0.5 * bay) / (n * bay), 1 - STRETCH), 1 + STRETCH)
+		local pw = L - n * bay * s
+		local ps = pw / (0.5 * bay)
+		if 0.3 <= ps and ps <= 1.6 then
+			local c = math.abs(s - 1) + 0.3 * math.abs(ps - 1) + 0.05
+			if best == nil or c < best[1] then
+				best = { c, n, s, ps }
+			end
+		end
+	end
+	return best
+end
+
+local function inner(ring, px: number, pz: number, d: number): boolean
+	local c = false
+	local n = #ring
+	local j = n
+	local d2 = d * d
+	for i = 1, n do
+		local xi, zi = ring[i][1], ring[i][2]
+		local xj, zj = ring[j][1], ring[j][2]
+		if (zi > pz) ~= (zj > pz) and px < (xj - xi) * (pz - zi) / (zj - zi) + xi then
+			c = not c
+		end
+		local ex, ez = xj - xi, zj - zi
+		local ll = ex * ex + ez * ez
+		local t = if ll > 0 then ((px - xi) * ex + (pz - zi) * ez) / ll else 0.0
+		t = math.min(math.max(t, 0.0), 1.0)
+		local qx, qz = px - (xi + t * ex), pz - (zi + t * ez)
+		if qx * qx + qz * qz < d2 then
+			return false
+		end
+		j = i
+	end
+	return c
+end
+
+local function area(ring): number
+	local a = 0.0
+	local n = #ring
+	for i = 1, n do
+		local p, q = ring[i], ring[i % n + 1]
+		a += p[1] * q[2] - q[1] * p[2]
+	end
+	return math.abs(a) / 2
+end
+
+local function cross(o, a, b)
+	return (a[1] - o[1]) * (b[2] - o[2]) - (a[2] - o[2]) * (b[1] - o[1])
+end
+
+-- the min-area rectangle: { cx, cz, e1x, e1z, hl, hw } (e1 along the long side), nil if degenerate
+local function frame(ring)
+	local srt = table.clone(ring)
+	table.sort(srt, function(a, b)
+		return a[1] < b[1] or (a[1] == b[1] and a[2] < b[2])
+	end)
+	local pts = {}
+	for _, p in srt do
+		local l = pts[#pts]
+		if not l or l[1] ~= p[1] or l[2] ~= p[2] then
+			table.insert(pts, p)
+		end
+	end
+	if #pts < 3 then
+		return nil
+	end
+	local lo, up = {}, {}
+	for _, p in pts do
+		while #lo >= 2 and cross(lo[#lo - 1], lo[#lo], p) <= 0 do
+			table.remove(lo)
+		end
+		table.insert(lo, p)
+	end
+	for k = #pts, 1, -1 do
+		local p = pts[k]
+		while #up >= 2 and cross(up[#up - 1], up[#up], p) <= 0 do
+			table.remove(up)
+		end
+		table.insert(up, p)
+	end
+	local hull = {}
+	for k = 1, #lo - 1 do
+		table.insert(hull, lo[k])
+	end
+	for k = 1, #up - 1 do
+		table.insert(hull, up[k])
+	end
+	if #hull < 3 then
+		return nil
+	end
+	local best
+	local nh = #hull
+	for k = 1, nh do
+		local a, b = hull[k], hull[k % nh + 1]
+		local dx, dz = b[1] - a[1], b[2] - a[2]
+		local ll = math.sqrt(dx * dx + dz * dz)
+		if ll >= 1e-9 then
+			local ux, uz = dx / ll, dz / ll
+			local u0 = hull[1][1] * ux + hull[1][2] * uz
+			local v0 = -hull[1][1] * uz + hull[1][2] * ux
+			local u1, v1 = u0, v0
+			for _, p in hull do
+				local u = p[1] * ux + p[2] * uz
+				local v = -p[1] * uz + p[2] * ux
+				u0, u1, v0, v1 = math.min(u0, u), math.max(u1, u), math.min(v0, v), math.max(v1, v)
+			end
+			local ar = (u1 - u0) * (v1 - v0)
+			if best == nil or ar < best[1] then
+				best = { ar, ux, uz, u0, u1, v0, v1 }
+			end
+		end
+	end
+	local _, ux, uz, u0, u1, v0, v1 = table.unpack(best)
+	local um, vm = (u0 + u1) / 2, (v0 + v1) / 2
+	local cx, cz = ux * um - uz * vm, uz * um + ux * vm
+	if u1 - u0 >= v1 - v0 then
+		return { cx, cz, ux, uz, (u1 - u0) / 2, (v1 - v0) / 2 }
+	end
+	return { cx, cz, -uz, ux, (v1 - v0) / 2, (u1 - u0) / 2 }
+end
+
+local function roofSlabs(ring, fr, CELLM: number)
+	local inset = 0.75
+	local cx, cz, e1x, e1z = fr[1], fr[2], fr[3], fr[4]
+	local hl, hw = fr[5] - inset, fr[6] - inset
+	local e2x, e2z = -e1z, e1x
+	local yw = math.atan2(-e1z, e1x)
+	if hl < 0.25 or hw < 0.25 then
+		return {}
+	end
+	local function ok(uu, v, hu, hv)
+		for _, c in { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } } do
+			local a, b = c[1], c[2]
+			if not inner(ring, cx + e1x * (uu + a * hu) + e2x * (v + b * hv), cz + e1z * (uu + a * hu) + e2z * (v + b * hv), 0.6) then
+				return false
+			end
+		end
+		return true
+	end
+	if ok(0.0, 0.0, hl, hw) then
+		return { { cx, cz, 2 * hl, 2 * hw, yw } }
+	end
+	local nu, nv = math.max(1, math.ceil(2 * hl / CELLM)), math.max(1, math.ceil(2 * hw / CELLM))
+	local du, dv = 2 * hl / nu, 2 * hw / nv
+	local res, open = {}, {}
+	for j = 0, nv do
+		local runs = {}
+		if j < nv then
+			local v = -hw + (j + 0.5) * dv
+			local start
+			for i = 0, nu do
+				local inside = i < nu and ok(-hl + (i + 0.5) * du, v, du / 2, dv / 2)
+				if inside and start == nil then
+					start = i
+				elseif not inside and start ~= nil then
+					table.insert(runs, { start, i })
+					start = nil
+				end
+			end
+		end
+		local nxt = {}
+		for _, rr in runs do
+			local j0 = j
+			for _, o in open do
+				if o[1][1] == rr[1] and o[1][2] == rr[2] then
+					j0 = o[2]
+					o[2] = -1
+					break
+				end
+			end
+			table.insert(nxt, { rr, j0 })
+		end
+		for _, o in open do
+			local j0 = o[2]
+			if j0 >= 0 then
+				local i0, i1 = o[1][1], o[1][2]
+				local uu = -hl + (i0 + i1) / 2 * du
+				local v = -hw + (j0 + j) / 2 * dv
+				table.insert(res, { cx + e1x * uu + e2x * v, cz + e1z * uu + e2z * v, (i1 - i0) * du, (j - j0) * dv, yw })
+			end
+		end
+		open = nxt
+	end
+	return res
+end
+
+local function wallLayout(a, b, BAYW: number)
+	local dx, dz = b[1] - a[1], b[2] - a[2]
+	local L = math.sqrt(dx * dx + dz * dz)
+	local n = math.max(1, math.floor(L / BAYW + 0.5))
+	local ks = {}
+	for _ = 1, n // 8 do
+		table.insert(ks, 8)
+	end
+	for _ = 1, (n % 8) // 4 do
+		table.insert(ks, 4)
+	end
+	for _ = 1, (n % 4) // 2 do
+		table.insert(ks, 2)
+	end
+	for _ = 1, n % 2 do
+		table.insert(ks, 1)
+	end
+	return L, dx / L, dz / L, L / (n * BAYW), ks
+end
+
+-- a compact tile string -> the old fixed-width string (and the number of records it could not write)
+function KD.expand(s: string, i: number, j: number, meta): (string, number)
+	local x0, z0 = i * meta.tile, j * meta.tile
+	local S, FH, STRETCH = meta.S, meta.FH, meta.STRETCH
+	local BAYW, WH, WT, CELLM = 3.5 * S, 2.1 * S, 0.22 * S, 1.0 * S
+	local pidIndex, codeIndex = meta.pidIndex, meta.codeIndex
+	local out = {}
+	local bad = 0
+	local function P(pid, x, y, z, yaw, sx, code, sy, sz)
+		local pi, ci = pidIndex[pid], codeIndex[code]
+		if not pi or not ci then
+			bad += 1
+			return
+		end
+		local r = (if sy then "Q" else "P") .. enc(pi, 2) .. enc((x - x0 + 16384) * 500, 4) .. enc((y + 200) * 200, 3)
+			.. enc((z - z0 + 16384) * 500, 4) .. yawEnc(yaw) .. enc((sx - 0.1) * 50000, 3) .. string.sub(B64, ci + 1, ci + 1)
+		if sy then
+			r ..= enc((sy - 0.05) * 5000, 3) .. enc((sz - 0.05) * 5000, 3)
+		end
+		table.insert(out, r)
+	end
+	local function B(x, y, z, sx, sy, sz, yaw, code)
+		local ci = codeIndex[code]
+		if not ci then
+			bad += 1
+			return
+		end
+		table.insert(out, "B" .. enc((x - x0 + 16384) * 500, 4) .. enc((y + 200) * 200, 3) .. enc((z - z0 + 16384) * 500, 4)
+			.. yawEnc(yaw) .. enc(sx * 200, 3) .. enc(sy * 200, 3) .. enc(sz * 200, 3) .. string.sub(B64, ci + 1, ci + 1))
+	end
+	local function wallBox(p, q, y0, y1, code, k)
+		local dx, dz = q[1] - p[1], q[2] - p[2]
+		local L = math.sqrt(dx * dx + dz * dz)
+		local ux, uz = dx / L, dz / L
+		local nx, nz = uz, -ux
+		local cx, cz = (p[1] + q[1]) / 2 - nx * 0.01, (p[2] + q[2]) / 2 - nz * 0.01
+		y1 -= 0.06 * k
+		B(cx, (y0 + y1) / 2, cz, L, y1 - y0, 0.02, math.atan2(-uz, ux), code)
+	end
+
+	local function building(arch, floors, wall, flags, base, ring, edges, seed)
+		local baseArch = if arch == "market" then "shed" else arch
+		local A = meta.arch[baseArch]
+		local bay = A.bay * S
+		local Hs = (A.gf + A.fh * math.max(0, floors - 1)) * S
+		local par = A.par * S
+		local top = base + Hs + (if par > 0 then par else 0)
+		local N = #ring
+		local fronts = {}
+		local isCondo = arch == "condo"
+		local function stack(role, kk, var, shop, stripe, ox, oz, yaw, sx)
+			if isCondo then
+				local vv, st = var, stripe
+				if kk == 0 then
+					vv, st = 0, false
+				end
+				P(panelPid("condo", role, 2, kk, vv, false, st), ox, base, oz, yaw, sx, wall)
+				local y = base + (meta.arch.condo.gf + FH) * S
+				local left = floors - 2
+				for _, nf in { 8, 4, 2, 1 } do
+					while left >= nf do
+						P(panelPid("condo_band", role, nf, kk, vv, false, st), ox, y, oz, yaw, sx, wall)
+						y += nf * FH * S
+						left -= nf
+					end
+				end
+				P(panelPid("condo_top", role, 0, kk, vv, false, st), ox, y, oz, yaw, sx, wall)
+			elseif kk == 0 then
+				P(panelPid(arch, role, floors, 0, 0, false, false), ox, base, oz, yaw, sx, wall)
+			else
+				P(panelPid(arch, role, floors, kk, var, shop, stripe), ox, base, oz, yaw, sx, wall)
+			end
+		end
+		local shopArch = arch == "walkup" or arch == "township" or arch == "colonial"
+		for ei = 0, N - 1 do
+			local a, b = ring[ei + 1], ring[(ei + 1) % N + 1]
+			local dx, dz = b[1] - a[1], b[2] - a[2]
+			local L = math.sqrt(dx * dx + dz * dz)
+			if L >= 0.3 then
+				local nx, nz = dz / L, -dx / L
+				local e = edges[ei + 1]
+				local party, front, shop = bit32.band(e, 1) ~= 0, bit32.band(e, 2) ~= 0, bit32.band(e, 4) ~= 0
+				local fit = if party or L < 0.85 * bay then nil else fitWall(L, bay, STRETCH)
+				if fit == nil then
+					wallBox(a, b, base - 1.0, top, wall, if N % 2 == 1 and ei == N - 1 then 2 else ei % 2)
+				else
+					local n, s, ps = fit[2], fit[3], fit[4]
+					local role = if front then "front" else "side"
+					local ax, az = nz, -nx
+					local yaw = math.atan2(nx, nz)
+					if front then
+						table.insert(fronts, { L, b, ax, az, yaw, s, n })
+					end
+					local u = 0.0
+					local var = if front and shopArch then bit32.band(mix(bit32.bxor(seed, ei + 1000)), 1) else 0
+					local stripeDone = false
+					local pieces = {}
+					local left = n
+					for _, k in K_SET do
+						while left >= k do
+							table.insert(pieces, k)
+							left -= k
+						end
+					end
+					if ps > 0 then
+						table.insert(pieces, 0)
+					end
+					for _, kk in pieces do
+						local stripe = false
+						if isCondo and front and not stripeDone and kk == 1 then
+							stripe, stripeDone = true, true
+						end
+						local sx = if kk == 0 then ps else s
+						stack(role, kk, var, shop, stripe, b[1] + ax * u, b[2] + az * u, yaw, sx)
+						u += if kk == 0 then (0.5 * bay * ps) else kk * bay * s
+					end
+				end
+			end
+		end
+		-- one drainpipe and one or two AC units a building, on its longest street face
+		if #fronts > 0 and (arch == "walkup" or arch == "township" or arch == "house" or arch == "villa") and floors >= 2 then
+			local e = fronts[1]
+			for k = 2, #fronts do
+				if fronts[k][1] > e[1] then
+					e = fronts[k]
+				end
+			end
+			local L, b, ax, az, yaw, s, n = e[1], e[2], e[3], e[4], e[5], e[6], e[7]
+			local gf = A.gf
+			if arch == "walkup" or arch == "township" then
+				local u = L - 0.07 * S
+				local y0, y1 = base + (gf - 0.3) * S, top - 0.1 * S
+				P(propPid("pipe"), b[1] + ax * u, y0, b[2] + az * u, yaw, 1.0, wall, (y1 - y0) / (3.0 * S), 1.0)
+			end
+			local nAc = if arch == "walkup" and floors >= 4 then 2 else 1
+			local spots = {}
+			for bb = 0, n - 1 do
+				for f = 1, floors - 1 do
+					if (bb * bay + 0.16 * S) * s + 0.8 * S < L - 0.15 * S then
+						table.insert(spots, { bb, f })
+					end
+				end
+			end
+			for k = #spots - 1, 1, -1 do
+				local m = math.floor(rnd(seed, 50 + k) * (k + 1))
+				spots[k + 1], spots[m + 1] = spots[m + 1], spots[k + 1]
+			end
+			for k = 1, math.min(nAc, #spots) do
+				local bb, f = spots[k][1], spots[k][2]
+				local u = (bb * bay + 0.16 * S) * s
+				P(propPid("ac"), b[1] + ax * u, base + (gf + FH * (f - 1) + 0.17) * S, b[2] + az * u, yaw, 1.0, wall)
+			end
+		end
+		if bit32.band(flags, 1) ~= 0 then
+			return
+		end
+		local topY = base + Hs
+		local fr = frame(ring)
+		if not fr then
+			return
+		end
+		local slabs = roofSlabs(ring, fr, CELLM)
+		for _, q in slabs do
+			B(q[1], topY + 0.15 - 0.4, q[2], q[3], 0.8, q[4], q[5], "KCO")
+		end
+		-- roof props on flat roofs: tanks, a dish, a stair room (2.5 m inside the outline)
+		local pa = arch == "walkup" or arch == "township" or arch == "civic" or arch == "condo" or arch == "colonial"
+		if pa and area(ring) > (5 * S) * (5 * S) and bit32.band(flags, 2) == 0 then
+			local cx, cz, e1x, e1z = fr[1], fr[2], fr[3], fr[4]
+			local rp
+			if inner(ring, cx, cz, 2.5 * S) then
+				rp = { cx, cz }
+			elseif #slabs > 0 then
+				local big = slabs[1]
+				for k = 2, #slabs do
+					if slabs[k][3] * slabs[k][4] > big[3] * big[4] then
+						big = slabs[k]
+					end
+				end
+				if inner(ring, big[1], big[2], 2.5 * S) then
+					rp = { big[1], big[2] }
+				end
+			end
+			if rp then
+				local wd = arch == "walkup" or arch == "condo"
+				for _, it in { { "tanks", 0.0, 0.0 }, { "dish", 4 * S, 1 * S }, { "stair", -(4 * S), 2 * S } } do
+					local name = it[1]
+					local skip = (name == "dish" and (not wd or rnd(seed, 300) < 0.4))
+						or (name == "stair" and not (wd or arch == "civic"))
+					if not skip then
+						local px = rp[1] + it[2] * e1x - it[3] * e1z
+						local pz = rp[2] + it[2] * e1z + it[3] * e1x
+						if inner(ring, px, pz, 2.5 * S) then
+							P(propPid(name), px, topY + 0.15, pz, -math.atan2(e1z, e1x), 1.0, wall)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	local p = if string.byte(s, 1) == 33 then 2 else 1
+	local n = #s
+	while p <= n do
+		local t = string.byte(s, p)
+		if t == 72 then -- "H"
+			local arch = ARCHS[VAL[string.byte(s, p + 1)] + 1]
+			local floors = VAL[string.byte(s, p + 2)]
+			local wall = meta.walls[VAL[string.byte(s, p + 3)] + 1]
+			local flags = VAL[string.byte(s, p + 4)]
+			local base = num(s, p + 5, 3) / 200 - 200
+			local N = num(s, p + 8, 2)
+			local X, Z = num(s, p + 10, 3), num(s, p + 13, 3)
+			local seed = mix(bit32.bxor(X, mix(Z + 7919)))
+			local ring = { { x0 + (X - QO) / 10, z0 + (Z - QO) / 10 } }
+			p += 16
+			for _ = 2, N do
+				X += num(s, p, 2) - 2048
+				Z += num(s, p + 2, 2) - 2048
+				table.insert(ring, { x0 + (X - QO) / 10, z0 + (Z - QO) / 10 })
+				p += 4
+			end
+			local edges = {}
+			for _ = 1, (N + 1) // 2 do
+				local v = VAL[string.byte(s, p)]
+				table.insert(edges, v % 8)
+				table.insert(edges, v // 8)
+				p += 1
+			end
+			building(arch, floors, wall, flags, base, ring, edges, seed)
+		elseif t == 87 then -- "W"
+			local X, Z = num(s, p + 1, 3), num(s, p + 4, 3)
+			local nseg = VAL[string.byte(s, p + 7)]
+			p += 8
+			for _ = 1, nseg do
+				local X2, Z2 = X + num(s, p, 2) - 2048, Z + num(s, p + 2, 2) - 2048
+				local inf = VAL[string.byte(s, p + 4)]
+				local P0 = { x0 + (X - QO) / 10, z0 + (Z - QO) / 10 }
+				local P1 = { x0 + (X2 - QO) / 10, z0 + (Z2 - QO) / 10 }
+				local a, b = P0, P1
+				if bit32.band(inf, 4) ~= 0 then
+					a, b = P1, P0
+				end
+				local L, ux, uz, sw, ks = wallLayout(a, b, BAYW)
+				local hq = { num(s, p + 5, 3) }
+				p += 8
+				for k = 2, #ks do
+					if bit32.band(inf, 8) ~= 0 then
+						hq[k] = num(s, p, 3)
+						p += 3
+					else
+						hq[k] = hq[k - 1] + 20 * (VAL[string.byte(s, p)] - 32)
+						p += 1
+					end
+				end
+				local col = meta.wcols[inf % 4 + 1]
+				local yaw = math.atan2(-uz, ux)
+				local u = 0.0
+				local lo, hi = math.huge, -math.huge
+				for k, kk in ks do
+					local gy = hq[k] / 200 - 200
+					lo, hi = math.min(lo, gy), math.max(hi, gy)
+					P(propPid("cwall" .. kk), a[1] + ux * u, gy, a[2] + uz * u, yaw, sw, col)
+					u += kk * BAYW * sw
+				end
+				local y0, y1 = lo - 0.9, hi + WH
+				B((a[1] + b[1]) / 2, (y0 + y1) / 2, (a[2] + b[2]) / 2, L, y1 - y0, WT, yaw, "WCOL")
+				X, Z = X2, Z2
+			end
+		else
+			local L = LEN[t]
+			if not L then
+				bad += 1
+				break
+			end
+			table.insert(out, string.sub(s, p, p + L - 1))
+			p += L
+		end
+	end
+	return table.concat(out), bad
+end
+
 local WIRE_COLOR = ColorSequence.new(Color3.fromRGB(22, 22, 24))
 local WIRE_T = NumberSequence.new(0)
 
@@ -188,6 +788,11 @@ end
 
 -- builds up to `budget` parts; true when the tile is done
 function Job:step(budget: number): boolean
+	if string.byte(self.s, 1) == 33 then -- "!": compact (FORMAT=2): lay it out first
+		local bad
+		self.s, bad = KD.expand(self.s, self.x0 / self.meta.tile, self.z0 / self.meta.tile, self.meta)
+		self.missing += bad
+	end
 	local s, x0, z0, meta, T = self.s, self.x0, self.z0, self.meta, self.T
 	local n = #s
 	local made = 0
