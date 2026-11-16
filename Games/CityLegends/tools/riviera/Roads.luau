@@ -739,7 +739,14 @@ function Roads.build(data, opts)
 		local zebraDone = {}
 		for i = 1, n - 1 do
 			local a, b = pts[i], pts[i + 1]
-			if not (inBox(box, a.pos) or inBox(box, b.pos)) then
+			if box and opts.boxMid then
+				-- (2026-11-16, 1:1 cells: a piece belongs to the one cell its middle lies in, so cells never
+				-- build the same piece twice; the box is [x0, x1) x [z0, z1))
+				local m = (a.pos + b.pos) / 2
+				if not (m.X >= box[1] and m.X < box[3] and m.Z >= box[2] and m.Z < box[4]) then
+					continue
+				end
+			elseif not (inBox(box, a.pos) or inBox(box, b.pos)) then
 				continue
 			end
 			-- (opts.cut: nothing at all between cut samples; the last piece before a cut ends square)

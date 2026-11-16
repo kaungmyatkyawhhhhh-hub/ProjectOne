@@ -1066,7 +1066,9 @@ def finish(net):
     for R in rings:
         for r in roads:
             d = np.linalg.norm(r['P'] - R['c'], axis=1)
-            r['cut'] |= d < R['r_out'] - 14
+            rc = d < R['r_out'] - 14
+            r['ringcut'] = r.get('ringcut', np.zeros(len(r['P']), bool)) | rc
+            r['cut'] |= rc
     # rings: heights at their centre from the arms' ends
     for R in rings:
         ys = []
@@ -1426,8 +1428,10 @@ def write(net):
             rec['edgeStart'] = True
         if bnd.distance(Point(P[-1])) < 1.0:
             rec['edgeEnd'] = True
-        if r['cut'].any():
-            cut[name] = [int(i) for i in np.where(r['cut'])[0]]
+        # (the data's cut lists only the decks' runs: YangonRoads cuts the roundabouts' insides itself, R_OUT - 14)
+        dcut = r['cut'] & ~r.get('ringcut', np.zeros(len(P), bool))
+        if dcut.any():
+            cut[name] = [int(i) for i in np.where(dcut)[0]]
         if turns.get(id(r)):
             rec['turn'] = turns[id(r)]
         out_roads.append(rec)
