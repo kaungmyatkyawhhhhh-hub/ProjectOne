@@ -508,3 +508,26 @@ Next (in order):
 - **No ad boards:** the made-up picture boards, the corner screen wall and the roof billboards are gone.
 - **New standing rule:** interiors only where real photos exist online (CLAUDE.md "Interiors rule"). The Meliá's interior and its link to the mall are being researched from photos, and it will be built enterable from them.
 - **Kit pilot:** in Studio on a test platform at X 36880-38260, Y 600 (`Workspace.KitPilot`) for checks; colours weathered (less saturated), rain streaks see-through.
+
+## 2026-11-16 (evening): Meliá interior, real sign words, many agents (place version 954)
+- **Meliá Yangon is enterable** from Kabar Aye Pagoda Road (a 4 m door, glass front, MELIA YANGON canopy). Built only from the spaces with real photos:
+  - the double-height lobby: white marble floor, teak walls, a spiral crystal chandelier, a reception desk in front of a black wall with lit waves, a gallery and stair
+  - the Lobby Bar with its lacquer plates
+  - the Elyxr café
+  - The Market restaurant
+  - a closed door toward Myanmar Plaza (the walkway's inside has no photos)
+  
+  Research: [[2026-11-16 Research - Melia Yangon interior]].
+- **Signs:** real Burmese words (shaped by Windows' DirectWrite, Myanmar Text font) and real English words replace the fake glyphs on every map building (atlas image 123535046497863, glow 124145189783769).
+- **Mall:** the 39 invented shop-name signs are removed (blank bands).
+- **Agents** (owner: "run every agent for every possible occasion for the best 1:1 EXACT yangon city"), each report saved to the vault as it lands:
+  - kit fixes
+  - Yangon detail survey
+  - interiors catalogue
+  - site-by-site audit (Sedona first)
+  - roads audit
+  - real building footprints
+  - landmark catalogue
+  - terrain, water and trees
+  - Shwedagon blueprint
+  - street furniture and traffic
