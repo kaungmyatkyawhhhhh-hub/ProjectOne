@@ -98,6 +98,11 @@ function D.place(holding: Instance, placeJson: string, folder: Instance): number
 		p.CFrame = CFrame.new(b[1], b[2], b[3]) * CFrame.Angles(0, b[7], 0)
 		p.Parent = col
 	end
+	-- walkable interiors: the smooth terrain (and its grass bulge) is cleared out of these boxes (same form as collide)
+	for _, b in data.clear or {} do
+		workspace.Terrain:FillBlock(CFrame.new(b[1], b[2], b[3]) * CFrame.Angles(0, b[7], 0), Vector3.new(b[4], b[5], b[6]),
+			Enum.Material.Air)
+	end
 	-- warm PointLights (interiors: data.lights = { {x, y, z, range, brightness} })
 	for _, l in data.lights or {} do
 		local p = Instance.new("Part")

@@ -34,10 +34,24 @@ The 9 lots left empty by the P3 district build, each built at real size from its
 | Bogyoke Aung San Market | area way/23395611, 187 x 187 m | 4 long two-storey halls (cream walls, arcaded shopfronts, terracotta gable roofs) with lanes between them. A white clock tower with a white dome on the south front. | 25 m | 0 |
 | Maha Bandula Park + Independence Monument | park way/129485365 | A paved circle and a stepped round platform. A white drum with 3 gold bands. A 46 m obelisk with a pyramidion and 5 fins round its foot. The lawns are the terrain's grass. | 46 m | 0 |
 
-## Not built yet (honest list)
-- Interiors: the Central Station hall and the Bogyoke Market halls have photos, but they are still closed blocks.
+## Walkable interiors (built from the catalogue photos)
+- **Bogyoke Market halls (photos Textile_shop and Bogyoke_Market_Jwelly):** the ground floor of all 4 halls.
+  - The ground falls about 3 m across the market, so each hall stands on its own plinth, 1 m over its highest ground. Marble steps go up to a 3 m door at every aisle end, in both gable walls.
+  - Inside: 3.2 m aisles between rows of stalls, with a cross aisle every ~30 m. Each stall has a counter at the aisle, coloured cloth hanging behind it and a red name board. Hall 0 is the jewellery hall: glass counters and gold.
+  - Tiled floor, a cream ceiling at 4.6 m, dark beams every 4 m, fluorescent tubes along the aisles and a warm PointLight every 24 m.
+  - Collision: the stall rows, the walls (open at the doors), the slab and everything over the ceiling.
+  - The terrain is cleared out of each hall (`clear` boxes in place.json: DowntownPlace fills them with Air). Without this the grass came up through the floor.
+- **Central Station undercroft (photo 05):** a 14 m drive-through under the middle of the station, between the two inner towers. It has a flat cream concrete ceiling at 6 m with beams every 1.6 m, and cream walls with deep round arches (`niche_arch`, 1.5 m deep). There are 3 green food carts with blue canopies and 3 warm lights. The upper storey bridges over it.
 - **Strand lobby (walkable, from photos 2 and 3):** an open porch on 6 pillars, then a teak-framed door into an 18 x 14 m lobby with cream panelled walls, a dado rail and teak doors. It has a white coffered ceiling, 4 ceiling fans and a chandelier with warm PointLights, a marble floor with a teak border, and 16 wicker armchairs round 4 tables. The collision leaves the lobby open.
-- The chinthe statues round the Independence Monument.
+- **Independence Monument chinthes (photo 1):** 10 seated dark-bronze chinthe on stone pedestals, 17 m out on the paving, facing out (Shwedagon's chinthe model at 0.37, 3.3 m with the plinth). The photo shows about a dozen; their exact spots are a guess.
+
+![[Bogyoke Market hall aisle - Studio copy.jpg]]
+![[Central Station undercroft - Studio copy.jpg]]
+![[Independence Monument chinthes - Studio copy.jpg]]
+
+## Not built yet (honest list)
+- The Central Station platforms and ticket hall: no photos of them in the catalogue.
+- The Bogyoke Market upper floors (closed).
 - City Hall's peacock and naga mouldings.
 - The High Court's central second dome.
 - Bogyoke Market's real hall layout: it is 4 parallel halls, not the real plan.

@@ -76,7 +76,21 @@ LOOKS = {
     "GR1": ("SmoothPlastic", (72, 68, 62), 0.82, 0.0, None, False, None),           # grime (light, mid, heavy)
     "GR2": ("SmoothPlastic", (67, 63, 58), 0.72, 0.0, None, False, None),
     "GR3": ("SmoothPlastic", (60, 56, 52), 0.62, 0.0, None, False, None),
+    # Bogyoke Market stalls (photos: textile aisle, jewellery), Central Station undercroft, monument chinthes
+    "FB1": ("Fabric", (245, 70, 130), 0.0, 0.0, None, False, None),                 # cloth: magenta
+    "FB2": ("Fabric", (70, 130, 235), 0.0, 0.0, None, False, None),                 # royal blue
+    "FB3": ("Fabric", (255, 205, 70), 0.0, 0.0, None, False, None),                 # saffron
+    "FB4": ("Fabric", (70, 185, 120), 0.0, 0.0, None, False, None),                 # green
+    "FB5": ("Fabric", (175, 85, 200), 0.0, 0.0, None, False, None),                 # purple
+    "TIL": ("Slate", (176, 168, 156), 0.0, 0.0, None, False, None),                 # market floor tiles
+    "SGN": ("SmoothPlastic", (200, 40, 40), 0.0, 0.0, None, False, None),           # shop name boards (red)
+    "GLC": ("Glass", (200, 220, 225), 0.4, 0.2, None, False, None),                 # jewellery glass counters
+    "CRT": ("SmoothPlastic", (70, 160, 80), 0.0, 0.0, None, True, None),            # green food carts
+    "CNP": ("Fabric", (60, 90, 170), 0.0, 0.0, None, True, None),                   # cart canopies
+    "BRZ": ("Metal", (112, 106, 94), 0.0, 0.05, None, True, None),                    # dark bronze chinthes
+    "STD": ("Slate", (128, 124, 116), 0.0, 0.0, None, True, None),                     # dark stone pedestals
 }
+FABRICS = ("FB1", "FB2", "FB3", "FB4", "FB5")
 # kit.py / kit_panels groups -> our looks
 KIT_MAP = {"KWX": "WAL", "KW0": "WTR", "KWG": "WTR", "KGL": "GLW", "KGR": "GRL", "KFR": "GRL", "KST": "STK", "KSU": "STN",
            "KCO": "SLB", "KSH": "SHT", "KSH2": "SHT", "KSH3": "SHT", "KSH4": "SHT", "KSI": "GLW",
@@ -163,17 +177,22 @@ def walls(sc, poly, base, fn_for_edge, seed=1, skip=None):
         a = ((B[0] - A[0]) / L, (B[1] - A[1]) / L)
         # outward (X, Z) of a CW-in-(east,north) ring walked A -> B: to the left in (X, Z)
         out = (-a[1], a[0])
-        DOOR["cur"] = None
-        sp = DOOR["spec"]
-        if sp:
-            u = (sp[0] - A[0]) * a[0] + (sp[1] - A[1]) * a[1]
-            off = abs((sp[0] - A[0]) * out[0] + (sp[1] - A[1]) * out[1])
-            if 0 < u < L and off < 2.0:
-                DOOR["cur"] = (u / S, sp[2], sp[3], sp[4])
+        _door_cur(A, a, out, L)
         tris, _ = kit_panel(lambda W: fn_for_edge(i, W / S), L, seed * 1000 + i)
         place_panel(sc, tris, A, a, out, base)
     DOOR["cur"] = None
     return ring
+
+
+def _door_cur(A, a, out, L):
+    """DOOR["cur"] = the doors of DOOR["spec"] (one tuple or a list) that lie on the edge A + a * t (t < L)"""
+    sp = DOOR["spec"]
+    DOOR["cur"] = []
+    for d in ([sp] if isinstance(sp, tuple) else (sp or [])):
+        u = (d[0] - A[0]) * a[0] + (d[1] - A[1]) * a[1]
+        off = abs((d[0] - A[0]) * out[0] + (d[1] - A[1]) * out[1])
+        if 0 < u < L and off < 2.0:
+            DOOR["cur"].append((u / S, d[2], d[3], d[4]))
 
 
 def rect_window(x, z, w, h, holes, grille=False):
@@ -291,8 +310,10 @@ def ring_walls(sc, ring, base, fn_for_edge, seed, inward=False):
             continue
         a = ((B[0] - A[0]) / L, (B[1] - A[1]) / L)
         out = (-a[1], a[0])
+        _door_cur(A, a, out, L)
         tris, _ = kit_panel(lambda W: fn_for_edge(i, W / S), L, seed * 1000 + i)
         place_panel(sc, tris, A, a, out, base)
+    DOOR["cur"] = None
 
 
 def hip_ring(sc, outer, ridge, inner, y0, rise, over, look="TER", eave="WTR"):
@@ -515,11 +536,11 @@ def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3)
         BAY = Wm / n
         holes = []
         z = 0.0
-        door = DOOR["cur"]
+        doors = DOOR["cur"] or []
         for li, (h, kind) in enumerate(levels):
             for k in range(n):
                 x = k * BAY
-                if door and li == 0 and abs(x + BAY / 2 - door[0]) < door[1] / 2 + BAY / 2:
+                if any(z < d[3] + d[2] and z + h > d[3] and abs(x + BAY / 2 - d[0]) < d[1] / 2 + BAY / 2 for d in doors):
                     continue
                 if kind == "arch":
                     ww = min(2.0, BAY - 1.0)
@@ -534,13 +555,12 @@ def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3)
                 KP.band("KW0", Wm, z - band_depth, band_depth, band_depth)
             if pil and kind != "blank":
                 for k in range(1, n):
-                    if door and li == 0 and abs(k * BAY - door[0]) < door[1] / 2 + 0.6:
+                    if any(z < d[3] + d[2] and z + h > d[3] and abs(k * BAY - d[0]) < d[1] / 2 + 0.6 for d in doors):
                         continue
                     top = h - (band_depth if li < len(levels) - 1 else cornice)
                     K.box("KW0", k * BAY - 0.2, -0.16, z, 0.4, 0.16, top, faces=("-y", "+x", "-x"))
             z += h
-        if door:
-            u, dw, dh, sill = door
+        for (u, dw, dh, sill) in doors:
             K.opening(holes, u - dw / 2, sill, dw, dh, 0.0, "KWX", glass=None)
             K.box("KW0", u - dw / 2 - 0.25, -0.12, sill, 0.25, 0.12, dh + 0.25, faces=("-y", "+x", "-x"))
             K.box("KW0", u + dw / 2, -0.12, sill, 0.25, 0.12, dh + 0.25, faces=("-y", "+x", "-x"))
@@ -577,6 +597,7 @@ def dump_preview(lid, sc, base):
     views = {"sw": [[-r * 0.7, -r * 0.7, r * 0.45], [0, 0, hgt * 0.3], 35],
              "ne": [[r * 0.7, r * 0.7, r * 0.45], [0, 0, hgt * 0.3], 35]}
     json.dump(views, open(os.path.join(d, "views.json"), "w"))
+    json.dump([cx, cz, base], open(os.path.join(d, "origin.json"), "w"))   # for interior views
     return d
 
 
@@ -639,6 +660,87 @@ def box_any(sc, look, cx, cz, y0, hx, hz, h, yaw=0.0, top=True):
     if top:
         cap4(sc, look, pts, y0 + h)
     return pts
+
+
+class Frame:
+    """a local frame for interiors (metres): u along a, v along inn (both unit X / Z), y over the floor fy (studs)"""
+
+    def __init__(self, sc, o, a, inn, fy):
+        self.sc, self.o, self.a, self.inn, self.fy = sc, o, a, inn, fy
+        self.yaw = math.atan2(a[1], a[0])
+
+    def W(self, u, v, y=0.0):
+        o, a, n = self.o, self.a, self.inn
+        return (o[0] + (a[0] * u + n[0] * v) * S, self.fy + y * S, o[1] + (a[1] * u + n[1] * v) * S)
+
+    def XZ(self, u, v):
+        p = self.W(u, v)
+        return (p[0], p[2])
+
+    def wq(self, look, u0, v0, u1, v1, y0, y1, inside):
+        """a vertical quad (u0, v0) -> (u1, v1), y0..y1, showing toward the point `inside` (u, v)"""
+        q = [self.W(u0, v0, y0), self.W(u1, v1, y0), self.W(u1, v1, y1), self.W(u0, v0, y1)]
+        ip = self.XZ(*inside)
+        n = _nrm(q[0], q[1], q[2])
+        cx, cz = (q[0][0] + q[1][0]) / 2, (q[0][2] + q[1][2]) / 2
+        if n[0] * (ip[0] - cx) + n[2] * (ip[1] - cz) < 0:
+            q = q[::-1]
+        self.sc.quad(look, *q)
+
+    def hq(self, look, u0, v0, u1, v1, y, up=True):
+        q = [self.W(u0, v0, y), self.W(u1, v0, y), self.W(u1, v1, y), self.W(u0, v1, y)]
+        (up_quad if up else down_quad)(self.sc, look, *q)
+
+    def bx(self, look, u, v, y, su, sv, sy, top=True, bottom=False):
+        c = self.W(u, v, y)
+        box_any(self.sc, look, c[0], c[2], c[1], su * S / 2, sv * S / 2, sy * S, self.yaw, top=top)
+        if bottom:
+            self.hq(look, u - su / 2, v - sv / 2, u + su / 2, v + sv / 2, y, up=False)
+
+    def cb(self, boxes, u, v, y, su, sv, sy):
+        """a collision box (DowntownPlace: [x, y, z, sx, sy, sz, yaw])"""
+        c = self.W(u, v, y + sy / 2)
+        boxes.append([c[0], c[1], c[2], su * S, sy * S, sv * S, -self.yaw])
+
+
+def niche_arch(x, z, w, h, holes, depth):
+    """(kit panel) an open round-arched recess `depth` deep with a plain back wall (col_arch without glass): the
+    station undercroft's arches"""
+    r = w / 2
+    cx, zc = x + r, z + h
+    K.opening(holes, x, z, w, h + r, 0.0, "KWX", depth=depth, glass=None)
+    K.front_quad("KWX", x, x + w, z, z + h, depth)
+    arc = [(cx + r * math.cos(math.pi * t / 8), zc + r * math.sin(math.pi * t / 8)) for t in range(9)]
+    for t in range(8):
+        K.face("KWX", [(cx, depth, zc), (arc[t][0], depth, arc[t][1]), (arc[t + 1][0], depth, arc[t + 1][1])], (0, -1, 0))
+    for corner, ts in (((x + w, zc + r), range(0, 4)), ((x, zc + r), range(4, 8))):
+        for t in ts:
+            K.face("KWX", [(corner[0], 0.0, corner[1]), (arc[t][0], 0.0, arc[t][1]), (arc[t + 1][0], 0.0, arc[t + 1][1])], (0, -1, 0))
+    for t in range(8):
+        a, b = arc[t], arc[t + 1]
+        nx, nz = -(a[0] + b[0]) / 2 + cx, -(a[1] + b[1]) / 2 + zc
+        K.face("KWX", [(a[0], 0.0, a[1]), (b[0], 0.0, b[1]), (b[0], depth, b[1]), (a[0], depth, a[1])], (nx, 0, nz))
+
+
+def chinthe(sc, x, z, y0, face_ang):
+    """a seated dark-bronze chinthe (guardian lion: shwedagon3d.chinthe's model at 0.37, 3.3 m with its plinth) on a
+    dark stone pedestal 0.8 m, facing face_ang (X / Z) (Independence Monument photo 1: about a dozen round the
+    stepped platform, about 2.3 m on 1 m pedestals)"""
+    global _CHINTHE
+    if _CHINTHE is None:
+        import shwedagon3d
+        _CHINTHE = shwedagon3d.chinthe().g
+    f = (math.cos(face_ang), math.sin(face_ang))
+    F = Frame(sc, (x, z), (-f[1], f[0]), f, y0)
+    F.bx("STD", 0, 0, 0, 2.1, 2.9, 0.8)
+    r, k, yb = (-f[1], f[0]), 0.37 * S, y0 + 0.8 * S
+    for grp, tris in _CHINTHE.items():
+        look = "GRL" if grp == "DARK" else "BRZ"
+        for t in tris:
+            sc.tri(look, *[(x + (p[0] * r[0] + p[1] * f[0]) * k, yb + p[2] * k, z + (p[0] * r[1] + p[1] * f[1]) * k) for p in t])
+
+
+_CHINTHE = None
 
 
 def strand_hotel():
@@ -1010,8 +1112,9 @@ def hip_roof_rect(sc, rect, y0, rise, over, look, eave="WTR"):
 def central_station():
     """Yangon Central Railway Station (1954, Burmese style): way/102685394 (197 x 49 m). Photos (catalogue
     central_station): cream-white walls with rows of arched windows over two storeys, green hipped roofs, four towers
-    along the front (Bogyoke Aung San Road side, south) under tall gold multi-tier pyatthat roofs. The station hall
-    inside (photographed) is not built yet."""
+    along the front (Bogyoke Aung San Road side, south) under tall gold multi-tier pyatthat roofs. The undercroft
+    (photo 05, walkable): a 14 m wide drive-through under the middle of the building, a flat cream concrete ceiling
+    with close-set beams at 6 m, cream walls with deep round arches, food carts with blue canopies."""
     lid = "central_station"
     sc = Scene()
     poly = outline(lid)
@@ -1019,10 +1122,62 @@ def central_station():
     base = g0
     KIT_MAP["KWX"], KIT_MAP["KW0"] = "CRW", "WTR"
     fn, H = std_facade([(6.0, "arch"), (5.0, "arch")], 3.6, parapet=0.0)
-    walls(sc, poly, base, fn, seed=51)
     yH = base + H * S
     rect = list(poly.minimum_rotated_rectangle.exterior.coords)[:4]
     rc = Polygon(rect).centroid
+    # --- the undercroft: a strip PW m wide across the building's short axis, through its middle
+    cl = rect if math.dist(rect[0], rect[1]) >= math.dist(rect[1], rect[2]) else rect[1:] + rect[:1]
+    al = ((cl[1][0] - cl[0][0]) / math.dist(cl[0], cl[1]), (cl[1][1] - cl[0][1]) / math.dist(cl[0], cl[1]))
+    ac = (-al[1], al[0])
+    Ls = math.dist(cl[1], cl[2]) / S - 0.6           # through-length (m) of the ceiling: just inside the walls
+    PW, YC = 14.0, 6.0                               # passage width, ceiling over the base (m)
+
+    def SP(u, v):
+        return (rc.x + al[0] * v * S + ac[0] * u * S, rc.y + al[1] * v * S + ac[1] * u * S)
+    strip = Polygon([SP(-200, -PW / 2), SP(-200, PW / 2), SP(200, PW / 2), SP(200, -PW / 2)])
+    on_cut = lambda i, A, B: all(abs(abs((p[0] - rc.x) * al[0] + (p[1] - rc.y) * al[1]) - PW * S / 2) < 1.0 for p in (A, B))
+    halves = list(getattr(poly.difference(strip), "geoms", [poly.difference(strip)]))
+    bridge = poly.intersection(strip)
+
+    def cut_wall(i, Wm):                               # the passage's side walls: deep round arches (photo 05)
+        holes = []
+        n = max(1, int(Wm / 10.0))
+        bw = Wm / n
+        for k in range(n):
+            niche_arch(k * bw + bw / 2 - 3.0, fz, 6.0, 2.2, holes, 1.5)
+        K.facade("KWX", 0.0, Wm, 0.0, YC, 0.0, holes)
+        return YC
+    fp = ground_of(bridge)[1] + 0.15 * S              # passage paving: over the highest ground under it
+    fz = (fp - base) / S
+    for k, hp in enumerate(halves):
+        walls(sc, hp, base, fn, seed=51 + k, skip=on_cut)
+        walls(sc, hp, base, cut_wall, seed=55 + k, skip=lambda i, A, B: not on_cut(i, A, B))
+    ufn, uH = std_facade([(5.0, "arch")], 3.6, parapet=0.0)
+    walls(sc, bridge, base + YC * S, ufn, seed=58, skip=on_cut)
+    F = Frame(sc, SP(-Ls / 2, -PW / 2), ac, al, fp)
+    yc = YC - fz
+    F.hq("PAV", -1.5, 0.0, Ls + 1.5, PW, 0.0)          # paving 1.5 m out of the mouths
+    for uu, ins in ((-1.5, -5.0), (Ls + 1.5, Ls + 5.0)):
+        F.wq("PAV", uu, 0.0, uu, PW, -1.0, 0.0, (ins, PW / 2))
+    F.hq("CEI", 0.0, 0.0, Ls, PW, yc, up=False)
+    u = 1.0
+    while u < Ls - 0.5:
+        F.bx("CEI", u, PW / 2, yc - 0.5, 0.3, PW, 0.5, top=False, bottom=True)
+        u += 1.6
+    boxes = [b for hp in halves for b in collision(hp, base - 1.0, yH)] + collision(bridge, base + YC * S, yH)
+    F.cb(boxes, Ls / 2, PW / 2, -fz - 0.5, Ls + 3.0, PW, fz + 0.5)
+    clears = []
+    F.cb(clears, Ls / 2, PW / 2, -0.1, Ls + 3.0, PW, yc + 0.1)
+    lights = []
+    for (cu, cv) in ((Ls * 0.3, 2.2), (Ls * 0.55, PW - 2.2), (Ls * 0.75, 2.4)):    # food carts
+        F.bx("CRT", cu, cv, 0.0, 2.0, 1.0, 1.0)
+        for du in (-0.9, 0.9):
+            for dv in (-0.4, 0.4):
+                F.bx("GRL", cu + du, cv + dv, 1.0, 0.06, 0.06, 1.0, top=False)
+        F.bx("CNP", cu, cv, 2.0, 2.6, 1.6, 0.06, bottom=True)
+        F.cb(boxes, cu, cv, 0.0, 2.0, 1.0, 1.0)
+    for cu in (Ls * 0.25, Ls * 0.5, Ls * 0.75):
+        lights.append(list(F.W(cu, PW / 2, yc - 1.0)) + [40.0, 0.6])
     hip_roof_rect(sc, [(rc.x + (p[0] - rc.x) * 0.99, rc.y + (p[1] - rc.y) * 0.99) for p in rect], yH + 0.3, 5.0 * S,
                   1.2 * S, "GRT")
     # the four towers: along the long side nearest the road (south = larger Z), at 1/8, 3/8, 5/8, 7/8 of its length
@@ -1046,7 +1201,11 @@ def central_station():
         box_walls(sc, tx, tz, tw / 2, tw / 2, yH - 1.0, yH + hgt * S + 0.1, "CRW", yaw)
         top = max(top, pyatthat(sc, tx, tz, tw * 1.05, yH + hgt * S + 0.6, 5 if k in (0, 3) else 4, yaw=yaw, look="GLD"))
     KIT_MAP["KWX"], KIT_MAP["KW0"] = "WAL", "WTR"
-    write_place(lid, poly, base, yH)
+    write_place(lid, poly, base, yH, extra=dict(lights=lights, clear=clears))
+    pj = os.path.join(OUT, lid, "place.json")
+    d_ = json.load(open(pj))
+    d_["collide"] = boxes
+    json.dump(d_, open(pj, "w"), indent=1)
     return report(lid, sc, base, top)
 
 
@@ -1105,11 +1264,116 @@ def secretariat():
     return report(lid, sc, base, top)
 
 
+def market_hall(sc, hall, o, ax, ay, Lm, Wm, base, H, fy, k, boxes, lights, clears):
+    """a walkable Bogyoke Market hall ground floor (photos: Textile_shop_Bogyoke_Aung_San_Market, Bogyoke_Market_Jwelly):
+    long narrow aisles (3.2 m) between rows of shop stalls, each stall a counter at the aisle with stacked cloth hanging
+    behind it and a red name board over it (hall 0: jewellery, glass counters and gold), cross aisles every ~30 m,
+    tiled floor on the hall's plinth (1 m over its highest ground), a cream ceiling under the first-floor band with dark exposed beams every
+    4 m and fluorescent tubes along the aisles. Returns (aisle middles v (m), floor Y (studs)); doors are cut by the
+    caller at every aisle end in both gable walls. Collision boxes and lights are appended."""
+    import random
+    rnd = random.Random(700 + k)
+    F = Frame(sc, o, ax, ay, fy)
+    yc = 4.6                                  # ceiling over the floor (m): under the 5.0 m arcade storey's band
+    Lo, Hi, Vo, Vi = 0.5, Lm - 0.5, 0.5, Wm - 0.5
+    mid = (Lm / 2, Wm / 2)
+    AW, DW, BH, DH = 3.2, 3.0, 2.8, 3.4         # aisle, wall-row depth, stall height, door height (m)
+    NA = max(2, int(round((Vi - Vo) / 9.0)))
+    DM = (Vi - Vo - NA * AW - 2 * DW) / (NA - 1)
+    rows, aisles = [(Vo, Vo + DW, False, True)], []
+    v = Vo + DW
+    for i in range(NA):
+        aisles.append(v + AW / 2)
+        v += AW
+        if i < NA - 1:
+            rows.append((v, v + DM, True, True))
+            v += DM
+    rows.append((v, Vi, True, False))          # (v0, v1, faces an aisle at v0, at v1)
+    # shell: floor, ceiling, liners (the gable liners open at each aisle), door passages through the 0.5 m wall gap
+    F.hq("TIL", Lo, Vo, Hi, Vi, 0.0)
+    F.hq("CEI", Lo, Vo, Hi, Vi, yc, up=False)
+    F.wq("CRW", Lo, Vo, Hi, Vo, 0.0, yc, mid)
+    F.wq("CRW", Lo, Vi, Hi, Vi, 0.0, yc, mid)
+    for (ug, ur) in ((Lo, (K.REVEAL + 0.01, Lo)), (Hi, (Hi, Lm - K.REVEAL - 0.01))):
+        vs = Vo
+        for va in aisles:
+            F.wq("CRW", ug, vs, ug, va - 1.5, 0.0, yc, mid)
+            F.wq("CRW", ug, va - 1.5, ug, va + 1.5, DH, yc, mid)
+            vs = va + 1.5
+            for sv in (-1.5, 1.5):
+                F.wq("CRW", ur[0], va + sv, ur[1], va + sv, 0.0, DH, ((ur[0] + ur[1]) / 2, va))
+            F.hq("CRW", ur[0], va - 1.5, ur[1], va + 1.5, DH, up=False)
+            F.hq("TIL", ur[0], va - 1.5, ur[1], va + 1.5, 0.0)
+        F.wq("CRW", ug, vs, ug, Vi, 0.0, yc, mid)
+    F.cb(clears, Lm / 2, Wm / 2, -0.1, Lm - 0.2, Wm - 0.2, yc + 0.1)   # no terrain inside
+    # collision: the slab under the floor, the walls (open at the doors), everything over the ceiling
+    F.cb(boxes, Lm / 2, Wm / 2, -(fy - base) / S - 0.4, Lm, Wm, (fy - base) / S + 0.4)
+    F.cb(boxes, Lm / 2, Wm / 2, yc, Lm, Wm, (base + H * S - fy) / S - yc)
+    for vv in (Vo / 2, Wm - Vo / 2):
+        F.cb(boxes, Lm / 2, vv, 0.0, Lm, Vo, yc)
+    for uu in (Lo / 2, Lm - Lo / 2):
+        vs = 0.0
+        for va in aisles:
+            F.cb(boxes, uu, (vs + va - 1.5) / 2, 0.0, Lo, va - 1.5 - vs, yc)
+            F.cb(boxes, uu, va, DH, Lo, 3.0, yc - DH)
+            vs = va + 1.5
+        F.cb(boxes, uu, (vs + Wm) / 2, 0.0, Lo, Wm - vs, yc)
+    # stall rows, cut by cross aisles
+    Us, Ue = Lo + 4.0, Hi - 4.0
+    ns = max(1, int(round((Ue - Us) / 30.0)))
+    sl = (Ue - Us - (ns - 1) * AW) / ns
+    jewel = k == 0
+    for (rv0, rv1, f0, f1) in rows:
+        for si in range(ns):
+            ua = Us + si * (sl + AW)
+            ub = ua + sl
+            vm = (rv0 + rv1) / 2
+            F.hq("PNL", ua, rv0, ub, rv1, BH)
+            F.wq("PNL", ua, rv0, ua, rv1, 0.0, BH, (ua - 1.0, vm))
+            F.wq("PNL", ub, rv0, ub, rv1, 0.0, BH, (ub + 1.0, vm))
+            e0 = 0.55 if f0 else 0.0
+            e1 = 0.55 if f1 else 0.0
+            F.cb(boxes, (ua + ub) / 2, (rv0 - e0 + rv1 + e1) / 2, 0.0, sl, rv1 - rv0 + e0 + e1, BH)
+            for vs, d, on in ((rv0, -1, f0), (rv1, 1, f1)):
+                if not on:
+                    continue
+                F.wq("PNL", ua, vs, ub, vs, 0.0, BH, ((ua + ub) / 2, vs + d))
+                n_st = max(1, int(sl / 3.0))
+                sw = sl / n_st
+                for j in range(n_st):
+                    uc = ua + (j + 0.5) * sw
+                    F.bx("GLC" if jewel else "DOR", uc, vs + d * 0.275, 0.0, sw - 0.4, 0.55, 0.9)
+                    if jewel:
+                        F.wq("GLD", uc - sw / 2 + 0.4, vs + d * 0.06, uc + sw / 2 - 0.4, vs + d * 0.06, 1.3, 2.1, (uc, vs + d))
+                    else:
+                        cw = (sw - 0.4) / 3
+                        for t in range(3):
+                            u_ = uc - (sw - 0.4) / 2 + t * cw
+                            F.wq(rnd.choice(FABRICS), u_ + 0.03, vs + d * 0.06, u_ + cw - 0.03, vs + d * 0.06,
+                                 rnd.uniform(1.0, 1.4), 2.4, (uc, vs + d))
+                    F.wq("SGN", uc - sw / 2 + 0.1, vs + d * 0.04, uc + sw / 2 - 0.1, vs + d * 0.04, 2.45, 2.75, (uc, vs + d))
+    # beams across the hall every 4 m, fluorescent tubes along the aisles, a warm light every 24 m in each aisle
+    u = Lo + 4.0
+    while u < Hi - 1.0:
+        F.bx("DOR", u, Wm / 2, yc - 0.45, 0.3, Vi - Vo, 0.45, top=False, bottom=True)
+        u += 4.0
+    for va in aisles:
+        u = Lo + 2.0
+        while u < Hi - 1.0:
+            F.hq("LMP", u - 0.6, va - 0.06, u + 0.6, va + 0.06, yc - 0.7, up=False)   # tube: only its underside shows
+            u += 4.0
+        u = Lo + 12.0
+        while u < Hi - 6.0:
+            lights.append(list(F.W(u, va, yc - 0.9)) + [40.0, 0.7])
+            u += 24.0
+    return aisles, fy
+
+
 def bogyoke_market():
     """Bogyoke Aung San Market (1926): area way/23395611 (187 x 187 m). Photos (catalogue bogyoke_market): long
     two-storey market halls with cream-white walls, arcaded shop fronts, terracotta-red tiled pitched roofs, lanes
     between the halls, a white clock tower with a white dome over the Bogyoke Aung San Road front (south). The halls'
-    insides (photographed: jewellery and textile shops) are not built yet: the halls are closed blocks for now."""
+    ground floors are walkable (market_hall: photos Textile_shop and Bogyoke_Market_Jwelly)."""
     lid = "bogyoke_market"
     sc = Scene()
     area = outline(lid)
@@ -1131,14 +1395,33 @@ def bogyoke_market():
     hw = (Wd - 2 * inset - (nh - 1) * gap) / nh
     top = base + H * S
     halls = []
+    boxes, lights, clears = [], [], []
     for k in range(nh):
         v0 = inset + k * (hw + gap)
         u0, u1 = inset, L - inset
         P = lambda u, v: (c[0][0] + ax[0] * u + ay[0] * v, c[0][1] + ax[1] * u + ay[1] * v)
         hall = [P(u0, v0), P(u1, v0), P(u1, v0 + hw), P(u0, v0 + hw)]
         halls.append(hall)
-        ring_walls(sc, hall, base, lambda i, W: fn(i, W), 70 + k)
-        yH = base + H * S
+        # the ground falls ~3 m across the market: each hall stands on its own plinth up to 1 m over its highest ground
+        hb, g1h = ground_of(Polygon(hall))
+        sill = (g1h - hb) / S + 1.0
+        fn, H = std_facade([(sill, "blank"), (5.0, "arcade"), (4.4, "arch")], 3.6, parapet=0.0)
+        aisles, fy = market_hall(sc, hall, P(u0, v0), ax, ay, (u1 - u0) / S, hw / S, hb, H, hb + sill * S, k, boxes, lights, clears)
+        DOOR["spec"] = [(*P(uu, v0 + va * S), 3.0, 3.4, sill) for va in aisles for uu in (u0, u1)]
+        ring_walls(sc, hall, hb, lambda i, W: fn(i, W), 70 + k)
+        DOOR["spec"] = None
+        n_st = max(1, int(round(sill / 0.16)))
+        for va in aisles:
+            for uu, sg in ((u0, -1), (u1, 1)):
+                fa, fb = P(uu, v0 + (va - 1.5) * S), P(uu, v0 + (va + 1.5) * S)
+                steps(sc, fa, fb, (ax[0] * sg, ax[1] * sg), hb, n=n_st, rise=sill / n_st, away=Polygon(hall).centroid.coords[0])
+                for j in range(n_st):     # step collision: one box per tread
+                    d0 = 0.4 * (n_st - j) - 0.2
+                    q = P(uu + sg * d0 * S, v0 + va * S)
+                    boxes.append([q[0], hb - 0.5 + (sill / n_st * (j + 1) * S + 0.5) / 2, q[1], 0.4 * S,
+                                  sill / n_st * (j + 1) * S + 0.5, 3.0 * S, -math.atan2(ax[1], ax[0])])
+        yH = hb + H * S
+        top = max(top, yH)
         hc = Polygon(hall).centroid
         ends = gable_roof(sc, [(hc.x + (p[0] - hc.x) * 0.995, hc.y + (p[1] - hc.y) * 0.995) for p in hall], yH + 0.3,
                           5.0 * S, 1.0 * S, "TER")
@@ -1167,7 +1450,7 @@ def bogyoke_market():
         pts = [(tx + math.cos(yaw) * u - math.sin(yaw) * v, tz + math.sin(yaw) * u + math.cos(yaw) * v)
                for u, v in ((-tw / 2, -tw / 2), (tw / 2, -tw / 2), (tw / 2, tw / 2), (-tw / 2, tw / 2))]
     th = 20.0
-    tfn, _ = std_facade([(H, "arcade"), (th - H - 4.0, "blank"), (4.0, "arch")], 3.4, parapet=0.9)
+    tfn, _ = std_facade([(9.4, "arcade"), (th - 9.4 - 4.0, "blank"), (4.0, "arch")], 3.4, parapet=0.9)
     KIT_MAP["KWX"], KIT_MAP["KW0"] = "WAL", "WTR"
     ring_walls(sc, pts, base, lambda i, W: tfn(i, W), 79)
     yt = base + th * S
@@ -1175,14 +1458,11 @@ def bogyoke_market():
     top = max(top, dome(sc, tx, tz, tw * 0.4, yt + 0.9 * S + 0.3, 3.5 * S, look="WAL"))
     finial(sc, tx, top - 0.3, tz, 1.0)
     write_place(lid, Polygon(halls[0]).union(Polygon(halls[-1])).convex_hull, base, base + H * S,
-                extra=dict(halls=halls))
-    # collision: one box per hall + the tower (write_place made boxes for the hull: replace them)
+                extra=dict(halls=halls, lights=lights, clear=clears))
+    # collision: the walkable halls (market_hall) + the tower (write_place made boxes for the hull: replace them)
     pj = os.path.join(OUT, lid, "place.json")
     d_ = json.load(open(pj))
-    boxes = []
-    for h in halls + [pts]:
-        boxes += collision(Polygon(h), base - 1.0, base + H * S)
-    d_["collide"] = boxes
+    d_["collide"] = boxes + collision(Polygon(pts), base - 1.0, base + th * S)
     json.dump(d_, open(pj, "w"), indent=1)
     KIT_MAP["KWX"], KIT_MAP["KW0"] = "WAL", "WTR"
     return report(lid, sc, base, top)
@@ -1206,7 +1486,8 @@ def mahabandula_park():
     """Maha Bandula Park (park way/129485365) and the Independence Monument (1948): a white obelisk 46 m tall
     (landmarks.json) with five fins round its foot, on a white drum with gold bands (photos: drum about 10 m across and
     7 m tall, a gold band at its foot, middle and top), on a round stepped platform; a paved circle round it. The lawns
-    are the terrain's grass; the chinthe statues at the platform (photos) are not built yet."""
+    are the terrain's grass. Photo 1: dark bronze chinthe on dark stone pedestals stand round the stepped platform
+    (about a dozen seen): 10 here on the paving, 17 m out, facing out."""
     lid = "mahabandula_park"
     sc = Scene()
     cx, cz = geo.world(96.15933, 16.77312)
@@ -1272,13 +1553,19 @@ def mahabandula_park():
         if n[0] * ux + n[2] * uz < 0:
             q = q[::-1]
         sc.quad("WAL", *q)
+    chin = []
+    for k in range(10):
+        ang = 2 * math.pi * (k + 0.5) / 10
+        px, pz = cx + 17.0 * S * math.cos(ang), cz + 17.0 * S * math.sin(ang)
+        chinthe(sc, px, pz, base + 0.3, ang)
+        chin.append([px, base + 0.3 + 1.6 * S, pz, 2.1 * S, 3.2 * S, 2.9 * S, -(ang - math.pi / 2)])
     top = y0 + h_shaft + 2.6 * S
     pts = [(cx + 15.0 * S * math.cos(2 * math.pi * k / 24), cz + 15.0 * S * math.sin(2 * math.pi * k / 24)) for k in range(24)]
     write_place(lid, Polygon(pts), base, yd)
     pj = os.path.join(OUT, lid, "place.json")
     d_ = json.load(open(pj))
     d_["collide"] = collision(Polygon(pts), base - 1.0, yd) + [[cx, (yd + y0) / 2, cz, 7.0 * S, y0 - yd, 7.0 * S, 0.0],
-                                                             [cx, (y0 + top) / 2, cz, 3.0 * S, top - y0, 3.0 * S, 0.0]]
+                                                             [cx, (y0 + top) / 2, cz, 3.0 * S, top - y0, 3.0 * S, 0.0]] + chin
     json.dump(d_, open(pj, "w"), indent=1)
     return report(lid, sc, base, top)
 
