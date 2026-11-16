@@ -507,3 +507,18 @@ Rules for every step:
 - 27,594 trees as client-streamed data (`YgnKit.Data_P1G`), 2,363 big crowns as far looks in the place, canopy 36% (research ~33%).
 - Inya Lake: 820 m bund beside Kabar Aye Pagoda Road (wall, railing, 3 m walkway), natural banks elsewhere.
 - Place parts 34,238 -> 39,696; no new unique meshes.
+
+### P1 street detail (16 Nov 2026, in Studio, not saved)
+- **What:** the street layer of P1, from the two street research notes. Details and pictures: [[2026-11-16 P1 street detail (1 to 1)]].
+  - 1,937 concrete power poles (206 of them transformer platforms) with 1,567 cable spans and 835 house drops.
+  - 343 white lamp posts, plus a lamp on every second street pole.
+  - 47 signal poles at the 9 OSM signal junctions.
+  - 28 YBS stops, 54 junctions with real name signs.
+  - 74 tea-shop spills, 129 stalls, 47 trishaws.
+  - 62.6 km of slab drains, median railings, litter.
+- **How:** a 33-piece kit (11,418 triangles, 66 meshes) and placement data `ReplicatedStorage.YgnKit.Data_P1S`. Each player's own client builds it within 700 studs of the camera.
+  - The same streamer and decoder as the light buildings.
+  - New records: L (cable spans), K (single cables) and T (name plates from an image atlas).
+- **Budget:** 22,551 parts and 2.7 M triangles in the whole district's data (24.7 poles a real km). Near the camera on a dense street: 632 parts, 360 cables, 29 lights, beside the buildings' 13,758 parts. Play: about 58.6 FPS without the layer and 57.3 FPS with it (both at the 60 cap); memory +9 MB.
+- **Checks:** flicker 0, on the kit and on a placed sample of 2,398 items. Nothing stands in a lane, on a carriageway, on a building, wall, gate, landmark lot, water, deck or tree trunk.
+- **Next:** parked cars, yellow bus-bay kerbs, a photo check of the median railings, then the same tools for P2 (`street_1to1.py P2`).
