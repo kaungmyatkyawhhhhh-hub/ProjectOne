@@ -39,3 +39,33 @@
 - Trim the HUD.
 - Re-run `Calc/nerdsim.py` + screenshots on PC and phone.
 - The outfits themselves: new outfits made with 3D layered clothing (Add My Outfit now supports it). The 3 current ones are still flat classic shirts and pants, just on R15 bodies.
+
+## Done (17 Nov, part 2: the boutique floor). Owner: "dont ask me for any permissions. just do it"
+- **Cleared** (into `ServerStorage.MapBackups.Removed_Boutique_17Nov`): the green "Fit check corner", the olive/salmon "Rain window lounge", the runway inlay lines, the banquette, the coffee table, the tailoring settle, and the small "MM / OUTFIT GALLERY" lettering.
+- **Palette:** a dark polished floor (SmoothPlastic, Reflectance 0.12), a darker ceiling, hot-pink neon accents, brass feet and frames, and the walnut wall kept. Old colours are saved as attributes.
+- **`Workspace.OutfitShowcase.Boutique` (Persistent):**
+  - Runway: a glossy black strip with pink edge lights from the entrance to the mannequins.
+  - **3 pink neon light arches** over the runway (matching the new thumbnails), with a soft pink light each.
+  - Mannequin stage: a gloss floor and a neon line in front of the 3 mannequins; a **glowing "MM" sign** on the walnut wall.
+  - **Clothing racks:** 2 garment racks and 2 hanging racks, from free Creator Store models.
+  - **Velvet lounge:** a curved red velvet booth and 2 brass/black cocktail tables.
+  - **Fitting rooms:** 2 booths with pink curtains, brass-framed mirrors and a "FITTING ROOMS" sign.
+- **Malware caught:** the free rack and booth models had **hidden scripts inside their mesh parts** ("Runtime", "qTexture" — a known backdoor pattern). Every script in `ServerStorage.BoutiqueKit` was deleted before use. The deco chair (89361110794503) failed to insert.
+- **NPC shoppers** (`ServerScriptService.BoutiqueShoppers`):
+  - 3 shoppers browse the racks wearing catalog outfits, each with its own idle style (played on clients via the `MMBoutiqueShopper` tag), and change outfits every 50 s.
+  - Anchored, no collisions or clicks.
+- **Room banners off:** `PenthouseWayfinding` disabled ("Penthouse gallery" / "Floor 19" banners covered the top of the screen).
+- **Windows:** the fog is dimmer and reacts to the room's light.
+- **Tested in Play:** PC views from the entrance, the lounge side and the café side, plus the A06 phone. 0 console errors.
+
+![[Screenshots/2026-11-17 boutique v2 - runway, arches, MM sign, shoppers.jpg]]
+![[Screenshots/2026-11-17 boutique v2 - velvet lounge.jpg]]
+![[Screenshots/2026-11-17 boutique v2 - cafe + fitting rooms.jpg]]
+
+## Still to do
+- **HUD trim:** on a phone, 8 dock buttons + Admin/Music crowd the top; target 4 + a menu.
+- The "Most Purchases" board is unreadable: make a big readable "Fit of the day" board.
+- The penthouse rooms behind the entrance (gallery, library, suite) still have the old block-out look.
+- Lighting grade pass, and more mesh furniture (a cash wrap, plants in matching pots).
+- New outfits with 3D layered clothing (the 3 current ones are flat classic clothes).
+- Re-run the sim + a full phone audit.
