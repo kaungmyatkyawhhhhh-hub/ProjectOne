@@ -534,8 +534,10 @@ def melia():
     base = ccw([V(p) for p in LAY["melia_osm"][:-1]])
     inner = offset_poly(base, -2.5)
     g.ring("DRK", base, SKIRT, 0.0)
-    g.ring("GLL", inner, 0.3, 12.0)
-    mullions(inner, 0.3, 12.0, 7.0, 0.5, 0.35, "MUL")
+    # the opaque lobby glass, except in front of the walkable lobby (see-through there: melia_interior)
+    fi = _front_edge(inner)[0]
+    g.ring("GLL", inner, 0.3, 12.0, skip=_span_skip(fi, inner, LOB_Y0, LOB_Y1))
+    mullions(inner, 0.3, 12.0, 7.0, 0.5, 0.35, "MUL", edges=[i for i in range(len(inner)) if i != fi])
     g.ring("MEL", inner, 12.0, 14.0)
     g.annulus("CEL", base, inner, 14.0, down=True)
     skin = offset_poly(base, -0.2)
@@ -545,7 +547,9 @@ def melia():
     g.band("MEL", base, 38.0, 41.0, 0.6)
     g.annulus("MEL", offset_poly(base, 0.6), base, 41.0)
     g.cap("ROF", base, 40.9)
-    coll_poly(base, 0.0, 41.0)
+    # the street storey's collision open at the lobby's door, full walls above
+    coll_poly(base, 0.0, 14.0, skip=_span_skip(fi, base, DOOR_Y - DOOR_W / 2 + 0.6, DOOR_Y + DOOR_W / 2 - 0.6))
+    coll_poly(base, 14.0, 27.0)
     # tower C: banded long faces, solid white ends with a dark slot, the name on both long crowns
     C = ccw([V(p) for p in LAY["C"]])
     lens = [math.dist(C[i], C[(i + 1) % 4]) for i in range(4)]
@@ -614,6 +618,713 @@ def melia():
         if k == 1:
             g.box("MEL", cxp + 8, cyp, z2 + 1.0, 12.0, 7.0, 0.9)
             g.box("WAT", cxp + 8, cyp, z2 + 1.9, 11.0, 6.0, 0.05, faces=("top",))
+    melia_interior(base)
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# THE MELIÁ INTERIOR (2026-11-16, owner: "myanmar plaza is connected to melia so make melia able to enter too"). Only
+# spaces with real photos (vault: "City Legends/2026-11-16 Research - Melia Yangon interior.md"): the lobby with its
+# reception, the Lobby Bar, the Elyxr deli, The Market. No corridors, no walkway inside, no Garbo Bar; the link to
+# Myanmar Plaza is a CLOSED door. Player scale, about 3 studs a metre.
+LOB_Y0, LOB_Y1, LOB_X1 = -204.0, -141.0, -22.0   # the lobby: south wall, north wall, east (reception) wall
+DOOR_Y, DOOR_W, DOOR_H = -172.5, 12.0, 9.0       # the street door on Kabar Aye Pagoda Road, on the lobby's axis
+VOID_Y0, VOID_Y1, VOID_X1 = -192.0, -153.0, -31.0  # the double-height hall; galleries 12 deep N / S, 9 deep E
+GAL_Z, GAL_UNDER, CEIL_C, CEIL_G = 18.0, 14.4, 32.0, 29.0
+
+
+def _front_edge(poly):
+    """The edge of the Meliá outline (base or an offset of it) on Kabar Aye Pagoda Road at the lobby (faces west, spans
+    the lobby's axis) -> (index, p, q) in ccw order."""
+    poly = ccw(poly)
+    for i, p, q in edges_of(poly):
+        n = outward(poly, i)
+        if n[0] < -0.9 and min(p[1], q[1]) < DOOR_Y < max(p[1], q[1]):
+            return i, p, q
+    raise ValueError("no Melia front edge")
+
+
+def _front_at(poly, y):
+    """The point of the front edge at height y on plan."""
+    _, p, q = _front_edge(poly)
+    t = (y - p[1]) / (q[1] - p[1])
+    return (p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t)
+
+
+def _span_skip(i_edge, poly, ya, yb):
+    """skip(p, q) for g.ring / coll_poly: leave open the part of edge i_edge between plan y = ya and yb."""
+    poly = ccw(poly)
+    P, Q = poly[i_edge], poly[(i_edge + 1) % len(poly)]
+
+    def skip(p, q):
+        if math.dist(p, P) > 1e-6 or math.dist(q, Q) > 1e-6:
+            return []
+        a, b = sorted(((ya - p[1]) / (q[1] - p[1]), (yb - p[1]) / (q[1] - p[1])))
+        return [(max(0.0, a), min(1.0, b))]
+    return skip
+
+
+def _qf(grp, pts, nrm):
+    """A flat polygon (3+ points, in order) facing nrm."""
+    a, b, c = pts[0], pts[1], pts[2]
+    u = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+    v = (c[0] - a[0], c[1] - a[1], c[2] - a[2])
+    cr = (u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0])
+    if cr[0] * nrm[0] + cr[1] * nrm[1] + cr[2] * nrm[2] < 0:
+        pts = pts[::-1]
+    g.poly3(grp, pts)
+
+
+def _disc_v(grp, c, nrm2, r, n=12):
+    """A round plate on a wall: centre c (x, y, z), facing the plan direction nrm2."""
+    t = (-nrm2[1], nrm2[0])
+    pts = [(c[0] + t[0] * r * math.cos(2 * math.pi * k / n), c[1] + t[1] * r * math.cos(2 * math.pi * k / n),
+            c[2] + r * math.sin(2 * math.pi * k / n)) for k in range(n)]
+    _qf(grp, pts, (nrm2[0], nrm2[1], 0.0))
+
+
+def _ngon(cx, cy, r, n=8, a0=0.0):
+    return [(cx + r * math.cos(a0 + 2 * math.pi * k / n), cy + r * math.sin(a0 + 2 * math.pi * k / n)) for k in range(n)]
+
+
+def _cyl(grp, cx, cy, z0, z1, r, n=8, top=True):
+    pts = _ngon(cx, cy, r, n, math.pi / n)
+    g.ring(grp, pts, z0, z1)
+    if top:
+        g.cap(grp, pts, z1)
+
+
+def _L(cx, cy, yaw, dx, dy):
+    """A point dx along / dy across a local frame turned by yaw."""
+    co, si = math.cos(yaw), math.sin(yaw)
+    return (cx + dx * co - dy * si, cy + dx * si + dy * co)
+
+
+SIDES = ("+x", "-x", "+y", "-y", "top")
+
+
+def _sofa(cx, cy, face, L, body="SFR", cush="CUS", coll=True):
+    """A long low sofa facing the plan angle `face` (seat 0.43 m, back 0.85 m, 0.9 m deep), cushions on it."""
+    yaw = face - math.pi / 2
+    g.box(body, cx, cy, 0.0, L, 2.7, 1.3, yaw, faces=SIDES)
+    p = _L(cx, cy, yaw, 0, -1.05)
+    g.box(body, p[0], p[1], 1.3, L, 0.6, 1.3, yaw, faces=SIDES)
+    for s in (-1, 1):
+        p = _L(cx, cy, yaw, s * (L / 2 - 0.3), 0)
+        g.box(body, p[0], p[1], 1.3, 0.6, 2.7, 0.7, yaw, faces=SIDES)
+    nc = max(1, int(round((L - 1.2) / 2.6)))
+    w = (L - 1.2) / nc
+    for k in range(nc):
+        u = -(L - 1.2) / 2 + w * (k + 0.5)
+        p = _L(cx, cy, yaw, u, 0.25)
+        g.box(cush, p[0], p[1], 1.3, w - 0.1, 1.9, 0.35, yaw, faces=SIDES)
+        p = _L(cx, cy, yaw, u, -0.55)
+        g.box(cush, p[0], p[1], 1.65, w - 0.2, 0.45, 1.0, yaw, faces=SIDES)
+    if coll:
+        COLL.append((cx, cy, 0.0, L, 2.7, 2.6, yaw))
+
+
+def _tub(cx, cy, face, body="TUB", frame="OAK"):
+    """A round tub armchair on four light-oak legs, its curved back behind (photos: grey-blue upholstery, oak frame)."""
+    yaw = face - math.pi / 2
+    for dx, dy in ((-0.8, -0.8), (0.8, -0.8), (0.8, 0.8), (-0.8, 0.8)):
+        p = _L(cx, cy, yaw, dx, dy)
+        g.box(frame, p[0], p[1], 0.0, 0.25, 0.25, 0.45, yaw, faces=("+x", "-x", "+y", "-y"))
+    _cyl(body, cx, cy, 0.45, 1.35, 1.25, 8)
+    for k in range(5):
+        a0 = math.pi + 0.15 + k * (math.pi - 0.3) / 5
+        a1 = a0 + (math.pi - 0.3) / 5
+        p = _L(cx, cy, yaw, 1.25 * math.cos(a0), 1.25 * math.sin(a0))
+        q = _L(cx, cy, yaw, 1.25 * math.cos(a1), 1.25 * math.sin(a1))
+        pi_ = _L(cx, cy, yaw, 0.85 * math.cos(a0), 0.85 * math.sin(a0))
+        qi = _L(cx, cy, yaw, 0.85 * math.cos(a1), 0.85 * math.sin(a1))
+        g.wall(body, q, p, 1.35, 2.5)
+        g.wall(body, pi_, qi, 1.35, 2.5)
+        g.quad(body, (p[0], p[1], 2.5), (pi_[0], pi_[1], 2.5), (qi[0], qi[1], 2.5), (q[0], q[1], 2.5))
+    COLL.append((cx, cy, 0.0, 2.4, 2.4, 2.5, yaw))
+
+
+def _armchair(cx, cy, face, body, frame="OAK"):
+    """A square upholstered armchair with light-oak arms (sage in the bar, ochre in the lobby)."""
+    yaw = face - math.pi / 2
+    g.box(body, cx, cy, 0.4, 2.3, 2.3, 0.9, yaw, faces=SIDES)
+    p = _L(cx, cy, yaw, 0, -0.95)
+    g.box(body, p[0], p[1], 1.3, 2.3, 0.4, 1.3, yaw, faces=SIDES)
+    for s in (-1, 1):
+        p = _L(cx, cy, yaw, s * 1.25, 0.1)
+        g.box(frame, p[0], p[1], 1.55, 0.3, 2.1, 0.2, yaw, faces=SIDES + ("bottom",))
+        for dy in (-0.9, 0.9):
+            p = _L(cx, cy, yaw, s * 1.25, dy)
+            g.box(frame, p[0], p[1], 0.0, 0.22, 0.22, 1.55, yaw, faces=("+x", "-x", "+y", "-y"))
+    COLL.append((cx, cy, 0.0, 2.6, 2.3, 2.2, yaw))
+
+
+def _table_round(cx, cy, d, h=2.25, top="OAK", leg="OAK", coll=True):
+    pts = _ngon(cx, cy, d / 2, 12)
+    g.ring(top, pts, h - 0.15, h)
+    g.cap(top, pts, h)
+    g.cap(top, pts, h - 0.15, down=True)
+    _cyl(leg, cx, cy, 0.0, h - 0.15, 0.18, 6, top=False)
+    _cyl(leg, cx, cy, 0.0, 0.1, d / 4, 8)
+    if coll:
+        COLL.append((cx, cy, 0.0, d * 0.8, d * 0.8, h, 0.0))
+
+
+def _chair(cx, cy, face, seat="BOR", leg="BTP"):
+    """A dining chair on thin dark legs (The Market: burnt orange)."""
+    yaw = face - math.pi / 2
+    for dx, dy in ((-0.6, -0.6), (0.6, -0.6), (0.6, 0.6), (-0.6, 0.6)):
+        p = _L(cx, cy, yaw, dx, dy)
+        g.box(leg, p[0], p[1], 0.0, 0.15, 0.15, 1.3, yaw, faces=("+x", "-x", "+y", "-y"))
+    g.box(seat, cx, cy, 1.3, 1.5, 1.5, 0.3, yaw, faces=SIDES + ("bottom",))
+    p = _L(cx, cy, yaw, 0, -0.68)
+    g.box(seat, p[0], p[1], 1.6, 1.5, 0.22, 1.6, yaw, faces=SIDES)
+
+
+def _orchids(cx, cy, z, h):
+    """A white-orchid arrangement: a low green leaf base, thin stems, small white blooms."""
+    g.box("LEF", cx, cy, z, 1.0, 1.0, 0.5, faces=SIDES)
+    for k, (dx, dy) in enumerate(((-0.25, -0.2), (0.25, 0.15), (0.0, 0.3))):
+        hh = h * (0.8 + 0.2 * k)
+        g.box("LEF", cx + dx, cy + dy, z + 0.5, 0.08, 0.08, hh, faces=("+x", "-x", "+y", "-y"))
+        for j in range(3):
+            zz = z + 0.5 + hh * (0.55 + 0.15 * j)
+            g.box("ORC", cx + dx + 0.18 * (j - 1), cy + dy, zz, 0.3, 0.3, 0.22, faces=SIDES + ("bottom",))
+
+
+def _stool(cx, cy, seat="CUS", leg="OAK", h=2.4):
+    _cyl(leg, cx, cy, 0.0, h - 0.2, 0.14, 4, top=False)
+    _cyl(leg, cx, cy, 0.8, 0.95, 0.55, 6)
+    _cyl(seat, cx, cy, h - 0.2, h, 0.65, 8)
+
+
+def _room(poly, z1, grp, doors=(), skip_edge=None, frame="TEK", h_coll=None):
+    """Inward walls round a room (shapely Polygon) from the floor to z1, with door openings: doors = [(x, y, w, h)]
+    (an opening w wide and h high where the point lies on a wall; the wall goes on above it). grp: a group or a
+    function (p, q, outward normal) -> group. skip_edge(p, q, n) -> True leaves that wall out."""
+    pts = ccw(list(poly.exterior.coords)[:-1])
+    for i, p, q in edges_of(pts):
+        n = outward(pts, i)
+        if skip_edge and skip_edge(p, q, n):
+            continue
+        gw = grp(p, q, n) if callable(grp) else grp
+        L = math.dist(p, q)
+        if L < 0.05:
+            continue
+        e = ((q[0] - p[0]) / L, (q[1] - p[1]) / L)
+        spans = []
+        for (dx, dy, w, h) in doors:
+            d = abs((dx - p[0]) * e[1] - (dy - p[1]) * e[0])
+            t = (dx - p[0]) * e[0] + (dy - p[1]) * e[1]
+            if d < 0.8 and 0 < t < L:
+                spans.append(((t - w / 2) / L, (t + w / 2) / L, h, (dx, dy), w))
+        from geom3d import _keep_spans
+        for a, b in _keep_spans([(s[0], s[1]) for s in spans]):
+            pa = (p[0] + (q[0] - p[0]) * a, p[1] + (q[1] - p[1]) * a)
+            pb = (p[0] + (q[0] - p[0]) * b, p[1] + (q[1] - p[1]) * b)
+            g.wall(gw, pa, pb, 0.0, z1, inward=True)
+            coll_wall(pa, pb, 0.0, h_coll or z1, 0.8, inward=(-n[0], -n[1]))
+        for a, b, h, c, w in spans:
+            pa = (p[0] + (q[0] - p[0]) * a, p[1] + (q[1] - p[1]) * a)
+            pb = (p[0] + (q[0] - p[0]) * b, p[1] + (q[1] - p[1]) * b)
+            g.wall(gw, pa, pb, h, z1, inward=True)
+            coll_wall(pa, pb, h, (h_coll or z1) - h, 0.8, inward=(-n[0], -n[1]))
+            if frame:
+                # a timber door frame: jambs and head through the wall
+                yaw = math.atan2(e[1], e[0])
+                for s in (-1, 1):
+                    jc = (c[0] + e[0] * s * (w / 2 + 0.3), c[1] + e[1] * s * (w / 2 + 0.3))
+                    g.box(frame, jc[0], jc[1], 0.0, 0.6, 1.6, h + 0.6, yaw, faces=SIDES)
+                g.box(frame, c[0], c[1], h, w + 1.2, 1.6, 0.6, yaw, faces=SIDES + ("bottom",))
+
+
+def _edge_of(poly, test):
+    """The longest edge of a polygon whose outward normal passes test(n) -> (p, q, n) or None."""
+    pts = ccw(list(poly.exterior.coords)[:-1])
+    best = None
+    for i, p, q in edges_of(pts):
+        n = outward(pts, i)
+        if test(n) and (best is None or math.dist(p, q) > math.dist(best[0], best[1])):
+            best = (p, q, n)
+    return best
+
+
+def _downlights(shape, z, step, r=0.45, grp="LIT"):
+    x0, y0, x1, y1 = shape.bounds
+    pp = shape.buffer(-1.5)
+    y = y0 + step / 2
+    while y < y1:
+        x = x0 + step / 2
+        while x < x1:
+            if pp.contains(Point(x, y)):
+                g.cap(grp, _ngon(x, y, r, 8), z - 0.03, down=True)
+            x += step
+        y += step
+
+
+def melia_interior(base):
+    B = Polygon(base)
+    R3 = B.buffer(-3.0, join_style=2)
+    R25 = B.buffer(-2.5, join_style=2)
+    inner = offset_poly(base, -2.5)
+    n_f = outward(ccw(inner), _front_edge(inner)[0])           # the front's outward normal (toward the road)
+    e_f = (-n_f[1], n_f[0])                                    # along the front, north -> south is -e_f ... see below
+    _, fp, fq = _front_edge(inner)
+    e_f = unit((fq[0] - fp[0], fq[1] - fp[1]))                 # along the front, north -> south
+    yaw_f = math.atan2(e_f[1], e_f[0])
+
+    # ---- 1. the street front: see-through glass in front of the lobby, the door, granite columns, the canopy ----
+    nA, sA = _front_at(inner, LOB_Y1), _front_at(inner, LOB_Y0)
+    dN, dS = _front_at(inner, DOOR_Y + DOOR_W / 2), _front_at(inner, DOOR_Y - DOOR_W / 2)
+    g.wall("GLS", nA, dN, 0.3, 12.0)
+    g.wall("GLS", dS, sA, 0.3, 12.0)
+    g.wall("GLS", dN, dS, DOOR_H + 0.6, 12.0)
+    g.wall("DRK", nA, sA, 0.0, 0.3)
+    for c in (dN, dS):
+        g.box("DRK", c[0], c[1], 0.0, 0.6, 1.2, DOOR_H + 0.6, yaw_f, faces=SIDES)
+    dm = ((dN[0] + dS[0]) / 2, (dN[1] + dS[1]) / 2)
+    g.box("DRK", dm[0], dm[1], DOOR_H, DOOR_W + 0.6, 1.2, 0.6, yaw_f, faces=SIDES + ("bottom",))
+    Lf = math.dist(nA, sA)
+    s = 3.5
+    while s < Lf - 1.0:
+        if abs(s - math.dist(nA, dm)) > DOOR_W / 2 + 0.8:
+            c = (nA[0] + e_f[0] * s, nA[1] + e_f[1] * s)
+            g.box("MUL", c[0], c[1], 0.3, 0.35, 0.5, 11.7, yaw_f, faces=("+x", "-x", "+y", "-y"))
+        s += 7.0
+    # the band between the ground-floor glass and the upper glass, seen from inside; a sill over the gap behind it
+    g.wall("DRK", nA, sA, 11.9, GAL_UNDER, inward=True)
+    g.quad("DRK", (nA[0], nA[1], 14.05), (sA[0], sA[1], 14.05),
+           (sA[0] + n_f[0] * 2.3, sA[1] + n_f[1] * 2.3, 14.05), (nA[0] + n_f[0] * 2.3, nA[1] + n_f[1] * 2.3, 14.05))
+    # a row of dark granite columns (0.8 m) in front of the glass, between the glass and the facade line
+    for u in (0.1, 0.3, 0.7, 0.9):
+        c = (nA[0] + (sA[0] - nA[0]) * u + n_f[0] * 1.25, nA[1] + (sA[1] - nA[1]) * u + n_f[1] * 1.25)
+        g.box("DRK", c[0], c[1], 0.0, 2.4, 2.4, 12.0, yaw_f, faces=("+x", "-x", "+y", "-y"))
+    # the deep canopy, its underside lit warm white, MELIA YANGON on its front edge (photo 51241)
+    dep, half = 8.0, 13.0
+    ca = (dm[0] - e_f[0] * half, dm[1] - e_f[1] * half)
+    cb = (dm[0] + e_f[0] * half, dm[1] + e_f[1] * half)
+    out = 2.5 + dep
+    slab = [ca, (ca[0] + n_f[0] * out, ca[1] + n_f[1] * out), (cb[0] + n_f[0] * out, cb[1] + n_f[1] * out), cb]
+    slab = ccw(slab)
+    g.cap("FAS", slab, 12.6)
+    g.cap("SOF", slab, 11.2, down=True)
+    g.ring("FAS", slab, 11.2, 12.6)
+    for c0 in (ca, cb):
+        c = (c0[0] + n_f[0] * (out - 1.4) - e_f[0] * 0, c0[1] + n_f[1] * (out - 1.4))
+        c = (c[0] + (dm[0] - c0[0]) * 0.12, c[1] + (dm[1] - c0[1]) * 0.12)
+        g.box("DRK", c[0], c[1], SKIRT, 1.8, 1.8, 11.2 - SKIRT, yaw_f, faces=("+x", "-x", "+y", "-y"))
+        COLL.append((c[0], c[1], 0.0, 1.8, 1.8, 11.2, yaw_f))
+    for u in (-0.5, 0.5):
+        LIGHTS.append({"p": (dm[0] + e_f[0] * half * u + n_f[0] * 6, dm[1] + e_f[1] * half * u + n_f[1] * 6, 10.6),
+                       "kind": "soffit"})
+    right = (-n_f[1], n_f[0])
+    org = (dm[0] + n_f[0] * (out - 0.6), dm[1] + n_f[1] * (out - 0.6), 12.6)
+    g.text("RDL", LET, "MELIA YANGON", org, right, 2.4, 0.4, max_w=2 * half - 3)
+
+    # ---- 2. the lobby (photos L1-L3): about 21 x 27 m here (photos ~25 x 30 m; the footprint is 21 m wide) ----
+    LOB = sbox(-200.0, LOB_Y0, LOB_X1, LOB_Y1).intersection(R25)
+    g.capshape("MWH", sbox(-200.0, LOB_Y0, LOB_X1, LOB_Y1).intersection(B), 0.05)
+    COLL.extend(raster_boxes(sbox(-200.0, LOB_Y0, LOB_X1, LOB_Y1).intersection(B), -1.0, 0.05, 4.0))
+    lob_doors = [(-35.0, LOB_Y1, 10.0, 10.0), (-85.0, LOB_Y0, 9.0, 9.0)]   # to The Market (N), to the Lobby Bar (S)
+    is_front = lambda p, q, n: n[0] < -0.9 and min(p[0], q[0]) < -90
+    _room(LOB, CEIL_G, "TEK", lob_doors, skip_edge=is_front)
+    xwn, xws = _front_at(inner, VOID_Y1)[0], _front_at(inner, VOID_Y0)[0]
+    VOID = Polygon([(xws, VOID_Y0), (VOID_X1, VOID_Y0), (VOID_X1, VOID_Y1), (xwn, VOID_Y1)])
+    GAL = LOB.difference(VOID)
+    # the gallery on three sides: white marble on top, timber-veneer soffit over the reception, white elsewhere
+    g.capshape("MWH", GAL, GAL_Z)
+    east = GAL.intersection(sbox(VOID_X1, -300, 0, 0))
+    g.capshape("TKC", east, GAL_UNDER, down=True)
+    g.capshape("CEL", GAL.difference(east), GAL_UNDER, down=True)
+    COLL.extend(raster_boxes(GAL, GAL_UNDER, GAL_Z, 3.0))
+    vp = ccw(list(VOID.exterior.coords)[:-1])
+    not_front = [i for i in range(4) if outward(vp, i)[0] > -0.9]
+    g.ring("TEK", vp, GAL_UNDER, GAL_Z, inward=True, edges=not_front)       # the solid timber gallery band
+    g.ring("TEK", vp, GAL_Z, GAL_Z + 0.25, inward=True, edges=not_front)
+    # glass balustrade with a timber handrail, open where the stair arrives on the east gallery
+    bal = [((xws, VOID_Y0 - 0.3), (VOID_X1 + 0.3, VOID_Y0 - 0.3)),
+           ((VOID_X1 + 0.3, VOID_Y0 + 6.0), (VOID_X1 + 0.3, VOID_Y1 + 0.3)),
+           ((VOID_X1 + 0.3, VOID_Y1 + 0.3), (xwn, VOID_Y1 + 0.3))]
+    for p, q in bal:
+        g.wall("RAL", p, q, GAL_Z, GAL_Z + 3.3)
+        g.tube("TEK", (p[0], p[1], GAL_Z + 3.4), (q[0], q[1], GAL_Z + 3.4), 0.35)
+        coll_wall(p, q, GAL_Z, 3.8, 0.4)
+    # ceilings: white flat centre at 32 with a cove of light, 29 over the galleries, round downlights
+    g.capshape("CEL", VOID, CEIL_C, down=True)
+    g.capshape("CEL", GAL, CEIL_G, down=True)
+    g.ring("CEL", vp, CEIL_G, CEIL_C, inward=True, edges=not_front)
+    g.ring("LIT", offset_poly(vp, -0.05), CEIL_C - 0.6, CEIL_C - 0.2, inward=True, edges=not_front)
+    _downlights(VOID, CEIL_C, 9.0)
+    _downlights(GAL, CEIL_G, 9.0)
+    _downlights(GAL.intersection(sbox(-200, -300, VOID_X1, 0)), GAL_UNDER, 8.0)
+    for x in (-27.0,):
+        for y in (-184.0, -178.0, -172.5, -167.0, -161.0):
+            g.cap("LIT", _ngon(x, y, 0.4, 4, math.pi / 4), GAL_UNDER - 0.03, down=True)   # square downlights
+    # four big square teak columns with a grey stone strip, black-and-gold grid screens between each pair
+    for y, ny in ((VOID_Y1, -1), (VOID_Y0, 1)):
+        for x in (-80.0, -58.0):
+            g.box("TEK", x, y, 0.0, 3.6, 3.6, CEIL_C, faces=("+x", "-x", "+y", "-y"))
+            g.box("GST", x, y + ny * 1.8, 0.0, 1.0, 0.16, CEIL_C, faces=("+x", "-x", "+y", "-y"))
+            COLL.append((x, y, 0.0, 3.6, 3.6, CEIL_C, 0.0))
+        x0s, x1s = -78.2, -59.8
+        L = x1s - x0s
+        g.box("SBK", (x0s + x1s) / 2, y, 0.0, L, 0.3, 9.0, faces=SIDES)
+        ncx, ncz = 12, 6
+        for i in range(ncx):
+            for j in range(ncz):
+                if (i + j) % 2:
+                    continue
+                xc = x0s + L * (i + 0.5) / ncx
+                zc = 9.0 * (j + 0.5) / ncz
+                for sgn in (-1, 1):
+                    yy = y + sgn * 0.17
+                    pts = [(xc - 0.5, yy, zc - 0.5), (xc + 0.5, yy, zc - 0.5), (xc + 0.5, yy, zc + 0.5), (xc - 0.5, yy, zc + 0.5)]
+                    _qf("SGD", pts, (0, sgn, 0))
+        COLL.append(((x0s + x1s) / 2, y, 0.0, L, 0.4, 9.0, 0.0))
+    # the spiral crystal chandelier: an inverted cone of clear glass rods, 12 tall, 10.5 across, bottom at 16.5
+    ccx, ccy = -69.0, (VOID_Y0 + VOID_Y1) / 2
+    for strand in (0.0, math.pi):
+        nrod = 80
+        for k in range(nrod):
+            sk = k / (nrod - 1)
+            ang = strand + 2 * math.pi * 3.0 * sk
+            r = 5.25 - 3.75 * sk
+            zt = 28.5 - 9.0 * sk
+            x, y = ccx + r * math.cos(ang), ccy + r * math.sin(ang)
+            g.tube("CRY", (x, y, zt), (x, y, zt - 3.0), 0.2)
+    g.cap("STL", _ngon(ccx, ccy, 5.6, 16), 28.6, down=True)
+    g.ring("STL", _ngon(ccx, ccy, 5.6, 16), 28.6, 29.0)
+    g.tube("STL", (ccx, ccy, 29.0), (ccx, ccy, CEIL_C), 0.3)
+    g.cap("LIT", _ngon(ccx, ccy, 1.2, 8), 28.55, down=True)
+    # the round rug and the tall flower table with three orchid arrangements
+    g.cap("RUG", _ngon(ccx, ccy, 8.0, 20), 0.1)
+    # a rectangular frame table about 1 m high: four legs, rails, a top
+    for dx, dy in ((-2.35, -0.85), (2.35, -0.85), (2.35, 0.85), (-2.35, 0.85)):
+        g.box("OAK", ccx + dx, ccy + dy, 0.1, 0.3, 0.3, 2.8, faces=("+x", "-x", "+y", "-y"))
+    g.box("OAK", ccx, ccy, 2.75, 5.0, 2.0, 0.35, faces=SIDES + ("bottom",))
+    for dy in (-0.85, 0.85):
+        g.box("OAK", ccx, ccy + dy, 0.5, 4.4, 0.2, 0.2, faces=SIDES + ("bottom",))
+    COLL.append((ccx, ccy, 0.0, 5.0, 2.0, 3.1, 0.0))
+    for dx in (-1.6, 0.0, 1.6):
+        _orchids(ccx + dx, ccy, 3.1, 1.6 if dx == 0 else 1.0)
+    # the reception: a white marble desk in two sections on a black plinth, the glossy black wall with white lines
+    for y0, y1 in ((-183.0, -173.0), (-172.0, -162.0)):
+        yc = (y0 + y1) / 2
+        g.box("BTP", -30.0, yc, 0.0, 2.1, y1 - y0 - 0.3, 0.3, faces=("+x", "-x", "+y", "-y"))
+        g.box("MDK", -30.0, yc, 0.3, 2.4, y1 - y0, 3.0, faces=SIDES)
+        COLL.append((-30.0, yc, 0.0, 2.4, y1 - y0, 3.3, 0.0))
+    g.box("BKG", LOB_X1 - 0.2, -172.5, 0.0, 0.4, 27.0, GAL_UNDER, faces=("-x", "+y", "-y"))
+    for j in range(5):
+        prev = None
+        for k in range(31):
+            u = k / 30
+            yy = -185.5 + 25.0 * u
+            zz = 0.6 + j * 1.6 + 6.0 * u + 0.9 * math.sin(2 * math.pi * (u * 1.3 + j * 0.17))
+            cur = (yy, zz)
+            if prev:
+                xw = LOB_X1 - 0.43
+                _qf("LIT", [(xw, prev[0], prev[1] - 0.12), (xw, cur[0], cur[1] - 0.12), (xw, cur[0], cur[1] + 0.12),
+                            (xw, prev[0], prev[1] + 0.12)], (-1, 0, 0))
+            prev = cur
+    for y in (-187.5, -157.5):
+        g.box("BTP", LOB_X1 - 1.0, y, 0.0, 2.0, 2.0, GAL_UNDER, faces=("+x", "-x", "+y", "-y"))
+        COLL.append((LOB_X1 - 1.0, y, 0.0, 2.0, 2.0, GAL_UNDER, 0.0))
+    # left of the reception: a book-matched white marble wall; tall dark-grey planters with orchids
+    g.box("MDK", LOB_X1 - 0.1, -149.0, 0.0, 0.2, 13.0, GAL_UNDER, faces=("-x",))
+    for y in (-153.5, -191.0):
+        _cyl("GST", -26.0, y, 0.0, 3.6, 1.0, 8)
+        _orchids(-26.0, y, 3.6, 1.4)
+        COLL.append((-26.0, y, 0.0, 2.0, 2.0, 3.6, 0.0))
+    # the white stair up to the gallery (back right in photo L2): along the south side, arriving on the east gallery
+    nst, rise = 24, GAL_Z / 24
+    sx0 = VOID_X1 - nst * 1.0
+    for k in range(nst):
+        x0 = sx0 + k * 1.0
+        g.box("MWH", x0 + 0.5, VOID_Y0 + 3.0, 0.0, 1.0, 6.0, (k + 1) * rise, faces=("-x", "+y", "-y", "top"))
+        COLL.append((x0 + 0.5, VOID_Y0 + 3.0, 0.0, 1.0, 6.0, (k + 1) * rise, 0.0))
+    ys = VOID_Y0 + 6.05
+    _qf("RAL", [(sx0, ys, rise), (VOID_X1, ys, GAL_Z), (VOID_X1, ys, GAL_Z + 3.3), (sx0, ys, rise + 3.3)], (0, 1, 0))
+    _qf("RAL", [(sx0, ys, rise), (VOID_X1, ys, GAL_Z), (VOID_X1, ys, GAL_Z + 3.3), (sx0, ys, rise + 3.3)], (0, -1, 0))
+    g.tube("TEK", (sx0, ys, rise + 3.4), (VOID_X1, ys, GAL_Z + 3.4), 0.35)
+    for k in range(0, nst, 4):
+        COLL.append((sx0 + k + 2.0, ys, 0.0, 4.0, 0.4, (k + 4) * rise + 3.5, 0.0))
+    # lounge seating: rust sofas with grey cushions, grey-blue tub chairs, ochre accent chairs, round oak tables
+    for y, f in ((LOB_Y1 - 1.6, -math.pi / 2), (LOB_Y0 + 1.6, math.pi / 2)):     # the bays behind the screens
+        _sofa(-69.0, y, f, 12.0)
+        ty = y + (-1 if f < 0 else 1) * 4.6
+        _table_round(-69.0, ty, 2.7)
+        for dx in (-3.6, 3.6):
+            _tub(-69.0 + dx, ty + (-1 if f < 0 else 1) * 3.2, -f)
+    for y, f in ((-160.5, -math.pi / 2), (-184.5, math.pi / 2)):                   # either side of the axis, by the door
+        _sofa(-92.0, y + (1.5 if f < 0 else -1.5), f, 10.0)
+        _table_round(-92.0, y - (2.2 if f < 0 else -2.2), 3.3)
+        _armchair(-86.0, y - (2.2 if f < 0 else -2.2), math.pi, "OCH")
+    for (x, y) in ((-46.0, -160.0),):                                              # tub chairs near the reception
+        _table_round(x, y, 2.7)
+        for a in (0, 1, 2, 3):
+            ang = a * math.pi / 2 + math.pi / 4
+            _tub(x + 3.2 * math.cos(ang), y + 3.2 * math.sin(ang), ang + math.pi)
+    _table_round(-46.0, -180.5, 2.7)
+    _armchair(-49.5, -180.5, 0.0, "OCH")
+    _armchair(-42.5, -180.5, math.pi, "OCH")
+    # the closed door to Myanmar Plaza (owner rule: the covered walkway has no photos, so it stays shut): a pair of
+    # teak door panels in a dark frame on the north wall, MYANMAR PLAZA over it
+    mx = -90.0
+    wy = LOB_Y1 - 0.02
+    g.box("DRK", mx, wy - 0.25, 0.0, 9.4, 0.5, 9.0, faces=("-y", "+x", "-x", "top"))
+    for s in (-1, 1):
+        g.box("TEK", mx + s * 2.1, wy - 0.55, 0.0, 4.0, 0.15, 8.4, faces=("-y", "+x", "-x", "top"))
+        g.box("STL", mx + s * 0.45, wy - 0.7, 3.0, 0.2, 0.15, 2.6, faces=("-y", "+x", "-x"))
+    g.text("RDL", LET, "MYANMAR PLAZA", (mx, wy - 0.3, 9.6), (1.0, 0.0), 1.1, 0.15, max_w=9.0)
+    # lights (warm "lobby" kind)
+    for p in ((ccx, ccy, 20.0), (-92.0, ccy, 10.0), (-46.0, ccy, 10.0), (-69.0, -147.0, 11.0), (-69.0, -198.0, 11.0),
+              (-27.0, ccy, 11.0), (-69.0, -147.0, 26.0), (-69.0, -198.0, 26.0), (-26.5, ccy, 26.0)):
+        LIGHTS.append({"p": p, "kind": "lobby"})
+
+    # ---- 3. the Lobby Bar (photos B1, B2): about 19 x 14 m here (photos ~25 x 10 m) ----
+    BAR = sbox(-200.0, -300.0, -50.0, LOB_Y0 - 0.4).intersection(R3)
+    g.capshape("TRZ", BAR, 0.05)
+    COLL.extend(raster_boxes(BAR, -1.0, 0.05, 4.0))
+    zb = 11.4
+    window = lambda p, q, n: n[1] < -0.5                       # the long glazed side (south)
+    wall_grp = lambda p, q, n: "MDK" if n[1] > 0.9 else "TEK"  # white marble wall opposite the glass
+
+    _room(BAR, zb, wall_grp, [(-85.0, LOB_Y0 - 0.4, 9.0, 9.0), (-50.0, -214.4, 20.0, 9.0)], skip_edge=window,
+          frame=None)
+    pts = ccw(list(BAR.exterior.coords)[:-1])
+    for i, p, q in edges_of(pts):
+        n = outward(pts, i)
+        if n[1] < -0.5:
+            g.wall("GLS", p, q, 0.1, zb)
+            coll_wall(p, q, 0.0, zb, 0.6, inward=(-n[0], -n[1]))
+            L = math.dist(p, q)
+            e = unit((q[0] - p[0], q[1] - p[1]))
+            k = 1
+            while k * 4.5 < L - 1.0:
+                c = (p[0] + e[0] * k * 4.5 - n[0] * 0.3, p[1] + e[1] * k * 4.5 - n[1] * 0.3)
+                g.box("MUL", c[0], c[1], 0.1, 0.35, 0.5, zb - 0.1, math.atan2(e[1], e[0]), faces=("+x", "-x", "+y", "-y"))
+                k += 1
+    g.capshape("CEL", BAR, zb, down=True)
+    _downlights(BAR, zb, 8.0)
+    # the bar at the far (west) end: amber back-lit onyx front, black stone top, glass shelves behind
+    bx_, by0, by1 = -100.0, -229.5, -214.5
+    g.box("BTP", bx_, (by0 + by1) / 2, 0.0, 2.4, by1 - by0, 3.0, faces=SIDES)
+    g.box("AMB", bx_ + 1.25, (by0 + by1) / 2, 0.3, 0.1, by1 - by0 - 0.4, 2.5, faces=("+x",))
+    g.box("BTP", bx_ + 0.2, (by0 + by1) / 2, 3.0, 3.2, by1 - by0 + 0.6, 0.35, faces=SIDES + ("bottom",))
+    COLL.append((bx_, (by0 + by1) / 2, 0.0, 2.8, by1 - by0, 3.35, 0.0))
+    for k in range(4):
+        _stool(bx_ + 3.6, by0 + 2.0 + k * 3.6, seat="CUS")
+    shx = -106.2
+    for y in (by0 + 0.5, (by0 + by1) / 2, by1 - 0.5):
+        g.box("STL", shx, y, 0.0, 0.25, 0.25, 9.5, faces=("+x", "-x", "+y", "-y"))
+    for zz in (3.2, 5.2, 7.2, 9.2):
+        g.box("RAL", shx, (by0 + by1) / 2, zz, 1.4, by1 - by0, 0.12, faces=("top", "bottom", "+x"))
+        if zz < 9:
+            for k in range(9):
+                gb = ("PRA", "PRE", "PRF", "BTP", "LQG")[(k + int(zz)) % 5]
+                g.box(gb, shx, by0 + 1.2 + k * 1.55, zz + 0.12, 0.45, 0.45, 1.3, faces=SIDES)
+    COLL.append((shx, (by0 + by1) / 2, 0.0, 1.6, by1 - by0, 9.5, 0.0))
+    g.box("TEK", -103.5, by1 + 2.4, 0.0, 2.4, 2.4, zb, faces=("+x", "-x", "+y", "-y"))
+    g.box("BTP", -103.5, by0 - 2.4, 0.0, 2.4, 2.4, zb, faces=("+x", "-x", "+y", "-y"))
+    COLL.append((-103.5, by1 + 2.4, 0.0, 2.4, 2.4, zb, 0.0))
+    COLL.append((-103.5, by0 - 2.4, 0.0, 2.4, 2.4, zb, 0.0))
+    # round Burmese lacquer plates on the white marble wall: red, green, black, orange
+    wyb = LOB_Y0 - 0.4 - 0.05
+    plates = [(-104.0, 6.0, 1.1, "LQR"), (-99.5, 8.2, 0.7, "LQG"), (-96.0, 5.4, 0.9, "BTP"), (-92.5, 8.0, 1.2, "BOR"),
+              (-78.0, 6.2, 1.0, "LQG"), (-74.0, 8.4, 0.6, "LQR"), (-70.0, 5.6, 1.2, "BTP"), (-65.0, 7.8, 0.8, "LQR"),
+              (-61.0, 5.2, 0.7, "BOR"), (-57.0, 7.4, 1.1, "LQG")]
+    for x, z, r, gp in plates:
+        _disc_v(gp, (x, wyb, z), (0, -1), r)
+    # sage armchairs round light-oak tables; grey sofas by the window; a low slatted oak screen
+    for (x, y) in ((-88.0, -215.0), (-68.0, -214.0), (-84.0, -233.0), (-64.0, -229.0)):
+        _table_round(x, y, 2.4)
+        for a in (0.3, 0.3 + 2.1, 0.3 + 4.2):
+            _armchair(x + 3.0 * math.cos(a), y + 3.0 * math.sin(a), a + math.pi, "SAG")
+    pw, qw, nw = _edge_of(BAR, lambda n: n[1] < -0.5)
+    ew = unit((qw[0] - pw[0], qw[1] - pw[1]))
+    Lw = math.dist(pw, qw)
+    for u in (0.32, 0.68):
+        c = (pw[0] + ew[0] * Lw * u - nw[0] * 3.2, pw[1] + ew[1] * Lw * u - nw[1] * 3.2)
+        _sofa(c[0], c[1], math.atan2(-nw[1], -nw[0]), 9.0, body="CUS", cush="TUB")
+    for k in range(14):
+        g.box("OAK", -76.0, -219.0 - k * 0.75, 0.0, 0.3, 0.3, 3.6, faces=("+x", "-x", "+y", "-y", "top"))
+    g.box("OAK", -76.0, -219.0 - 13 * 0.375, 3.5, 0.4, 13 * 0.75 + 0.3, 0.2, faces=SIDES + ("bottom",))
+    COLL.append((-76.0, -219.0 - 13 * 0.375, 0.0, 0.5, 13 * 0.75 + 0.3, 3.7, 0.0))
+    for p in ((-98.0, -222.0, 9.0), (-78.0, -214.0, 9.0), (-74.0, -232.0, 9.0), (-58.0, -222.0, 9.0)):
+        LIGHTS.append({"p": p, "kind": "lobby"})
+
+    # ---- 4. the Elyxr deli (photos B3, B4): a glazed teak-slat shopfront on the lounge, about 6 x 6.5 m ----
+    CAF = sbox(-50.0, -224.4, -32.0, LOB_Y0 - 0.4).intersection(R3)
+    zc = 9.0
+    g.capshape("WTL", CAF, 0.05)
+    COLL.extend(raster_boxes(CAF, -1.0, 0.05, 3.0))
+    _room(CAF, zc, "PLM", skip_edge=lambda p, q, n: n[0] < -0.9, frame=None)
+    g.capshape("CEL", CAF, zc, down=True)
+    _downlights(CAF, zc, 6.0)
+    fy0, fy1, gy0, gy1 = -224.4, LOB_Y0 - 0.4, -216.6, -212.0
+    for a, b in ((fy0, gy0), (gy1, fy1)):
+        g.wall("GLS", (-50.0, a), (-50.0, b), 0.1, zc)
+        coll_wall((-50.0, a), (-50.0, b), 0.0, zc, 0.4)
+    y = fy0 + 0.2
+    while y < fy1:
+        if not (gy0 - 0.3 < y < gy1 + 0.3):
+            g.box("TEK", -50.35, y, 0.0, 0.5, 0.35, zc, faces=("+x", "-x", "+y", "-y"))
+        y += 1.6
+    for y in (gy0 - 0.2, gy1 + 0.2):
+        g.box("TEK", -50.2, y, 0.0, 0.8, 0.4, zc, faces=("+x", "-x", "+y", "-y"))
+    g.box("TEK", -50.3, (fy0 + fy1) / 2, zc - 1.2, 0.6, fy1 - fy0, 1.2, faces=("-x", "bottom"))
+    # the counter: black stone top on oak, a glass display with pastries; back-lit oak shelves with bread
+    g.box("OAK", -39.0, -214.0, 0.0, 2.4, 10.0, 3.0, faces=SIDES)
+    g.box("BTP", -39.0, -214.0, 3.0, 2.8, 10.4, 0.25, faces=SIDES + ("bottom",))
+    g.box("GLS", -39.6, -214.0, 3.25, 1.4, 9.0, 1.5, faces=SIDES)
+    for k in range(6):
+        g.box("BRD", -39.6, -217.8 + k * 1.5, 3.3, 0.8, 0.9, 0.45, faces=SIDES)
+    COLL.append((-39.0, -214.0, 0.0, 2.8, 10.4, 4.75, 0.0))
+    for zz in (3.4, 5.2, 7.0):
+        g.box("OAK", -33.6, -214.0, zz, 1.2, 15.0, 0.2, faces=SIDES + ("bottom",))
+        g.box("LIT", -33.05, -214.0, zz + 0.25, 0.05, 15.0, 1.3, faces=("-x",))
+        for k in range(8):
+            g.box("BRD", -33.7, -220.5 + k * 1.85, zz + 0.2, 0.8, 1.2, 0.6, faces=SIDES)
+    for (x, y) in ((-45.5, -208.5), (-45.5, -220.0)):
+        _table_round(x, y, 2.1, top="WAL", leg="BTP")
+        _chair(x, y - 2.3, math.pi / 2, seat="CUS")
+        _chair(x, y + 2.3, -math.pi / 2, seat="CUS")
+    LIGHTS.append({"p": (-41.0, -214.4, 7.5), "kind": "lobby"})
+
+    # ---- 5. The Market (photos R1-R3): about 21 x 20 m here (photos ~30 x 18 m) ----
+    # the mall's white-roof block reaches over the Meliá's north end (to y ~ -98): the two buildings touch there, so
+    # the restaurant stops 3 short of it
+    WR = Polygon(ccw([V(p) for p in LAY["whiteroof"]])).buffer(3.0, join_style=2)
+    MKT = sbox(-48.0, LOB_Y1 + 0.4, 60.0, 0.0).intersection(R3).difference(WR)
+    if MKT.geom_type != "Polygon":
+        MKT = max(MKT.geoms, key=lambda G: G.area)
+    zm = 12.0
+    g.capshape("MFL", MKT, 0.05)
+    COLL.extend(raster_boxes(MKT, -1.0, 0.05, 4.0))
+    _room(MKT, zm, "TEK", [(-35.0, LOB_Y1 + 0.4, 10.0, 10.0)], frame=None)
+    g.capshape("MCO", MKT, zm, down=True)
+    # the dark-stained timber beam grid
+    x0m, y0m, x1m, y1m = MKT.bounds
+    for k in range(int((x1m - x0m) / 7.5) + 1):
+        x = x0m + 3.0 + k * 7.5
+        seg = LineString([(x, y0m - 1), (x, y1m + 1)]).intersection(MKT)
+        for G in ([seg] if seg.geom_type == "LineString" else getattr(seg, "geoms", [])):
+            if G.geom_type == "LineString" and G.length > 1:
+                (ax, ay), (bx2, by2) = G.coords[0], G.coords[-1]
+                g.box("MBM", x, (ay + by2) / 2, zm - 1.2, 0.9, abs(by2 - ay), 1.2, faces=("bottom", "+x", "-x"))
+    for k in range(int((y1m - y0m) / 7.5) + 1):
+        y = y0m + 3.0 + k * 7.5
+        seg = LineString([(x0m - 1, y), (x1m + 1, y)]).intersection(MKT)
+        for G in ([seg] if seg.geom_type == "LineString" else getattr(seg, "geoms", [])):
+            if G.geom_type == "LineString" and G.length > 1:
+                (ax, ay), (bx2, by2) = G.coords[0], G.coords[-1]
+                g.box("MBM", (ax + bx2) / 2, y, zm - 1.25, abs(bx2 - ax), 0.9, 1.2, faces=("bottom", "+y", "-y"))
+    # the bar on the left: dark wood top, blue-and-white tile front; a strip of the same tiles in the floor
+    mbx, mby0, mby1 = -44.0, -134.0, -114.0
+    g.box("MBM", mbx, (mby0 + mby1) / 2, 0.0, 2.4, mby1 - mby0, 3.0, faces=("-x", "+y", "-y", "top"))
+    g.box("MBM", mbx + 0.3, (mby0 + mby1) / 2, 3.0, 3.2, mby1 - mby0 + 0.6, 0.3, faces=SIDES + ("bottom",))
+    g.box("TLW", mbx + 1.22, (mby0 + mby1) / 2, 0.0, 0.05, mby1 - mby0, 3.0, faces=("+x",))
+    ncol = int((mby1 - mby0) / 1.0)
+    for i in range(ncol):
+        for j in range(3):
+            if (i + j) % 2 == 0:
+                yc, zc_ = mby0 + (i + 0.5) * (mby1 - mby0) / ncol, 0.5 + j * 1.0
+                xw = mbx + 1.27
+                _qf("TLB", [(xw, yc - 0.38, zc_ - 0.38), (xw, yc + 0.38, zc_ - 0.38), (xw, yc + 0.38, zc_ + 0.38),
+                            (xw, yc - 0.38, zc_ + 0.38)], (1, 0, 0))
+    COLL.append((mbx + 0.3, (mby0 + mby1) / 2, 0.0, 3.2, mby1 - mby0, 3.3, 0.0))
+    for i in range(int((mby1 - mby0) / 1.5)):
+        for j in range(3):
+            gt = "TLB" if (i + j) % 2 == 0 else "TLW"
+            xc, yc = mbx + 3.6 + j * 1.5, mby0 + 0.75 + i * 1.5
+            g.cap(gt, [(xc - 0.74, yc - 0.74), (xc + 0.74, yc - 0.74), (xc + 0.74, yc + 0.74), (xc - 0.74, yc + 0.74)], 0.09)
+    for k in range(5):
+        y = mby0 + 2.0 + k * 4.0
+        _cyl("BTP", mbx + 3.4, y, 0.0, 2.2, 0.12, 4, top=False)
+        _cyl("BTP", mbx + 3.4, y, 2.2, 2.4, 0.65, 8)
+        g.box("BTP", mbx + 4.0, y, 2.4, 0.15, 1.1, 1.3, faces=("+x", "-x", "top"))
+    # long walnut tables with burnt-orange chairs on thin dark legs, black dome pendants over them
+    domes = []
+    for tx in (-26.0, -6.0):
+        for ty in (-131.0, -117.0, -103.0):
+            if not MKT.buffer(-3).contains(sbox(tx - 6, ty - 4, tx + 6, ty + 4)):
+                continue
+            g.box("WAL", tx, ty, 2.1, 9.0, 3.0, 0.15, faces=SIDES + ("bottom",))
+            for sx_ in (-1, 1):
+                g.box("WAL", tx + sx_ * 3.9, ty, 0.0, 0.6, 2.4, 2.1, faces=("+x", "-x", "+y", "-y"))
+            COLL.append((tx, ty, 0.0, 9.0, 3.0, 2.25, 0.0))
+            for k in (-3.0, 0.0, 3.0):
+                _chair(tx + k, ty - 2.6, math.pi / 2)
+                _chair(tx + k, ty + 2.6, -math.pi / 2)
+            domes += [(tx - 2.5, ty), (tx + 2.5, ty)]
+    # semi-private booths in black steel grid cages with white slat backs and navy seats, along the east wall
+    pe, qe, ne = _edge_of(MKT, lambda n: n[0] > 0.9)
+    for k in range(3):
+        y = -133.0 + k * 11.0
+        ex = pe[0] + (qe[0] - pe[0]) * ((y - pe[1]) / (qe[1] - pe[1]))
+        bx2 = ex - 6.0
+        if not MKT.contains(sbox(bx2 - 4.2, y - 4.6, bx2 + 4.2, y + 4.6)):
+            continue
+        for sy_ in (-1, 1):
+            g.box("NAV", bx2, y + sy_ * 3.0, 0.0, 6.0, 2.2, 1.4, faces=SIDES)
+            g.box("CEL", bx2, y + sy_ * 4.2, 0.0, 6.0, 0.4, 4.2, faces=SIDES)
+            COLL.append((bx2, y + sy_ * 3.4, 0.0, 6.0, 3.0, 4.2, 0.0))
+        g.box("WAL", bx2, y, 2.1, 5.0, 2.8, 0.15, faces=SIDES + ("bottom",))
+        g.box("BTP", bx2, y, 0.0, 0.5, 0.5, 2.1, faces=("+x", "-x", "+y", "-y"))
+        hc = 7.8
+        for cx_ in (-4.0, 4.0):
+            for cy_ in (-4.4, 4.4):
+                g.tube("BTP", (bx2 + cx_, y + cy_, 0.0), (bx2 + cx_, y + cy_, hc), 0.25)
+        for cy_ in (-4.4, 4.4):
+            g.tube("BTP", (bx2 - 4.0, y + cy_, hc), (bx2 + 4.0, y + cy_, hc), 0.25)
+        for cx_ in (-4.0, -2.0, 0.0, 2.0, 4.0):
+            g.tube("BTP", (bx2 + cx_, y - 4.4, hc), (bx2 + cx_, y + 4.4, hc), 0.2)
+        for cy_ in (-4.4, 4.4):
+            for zz in (2.6, 5.2):
+                g.tube("BTP", (bx2 - 4.0, y + cy_, zz), (bx2 + 4.0, y + cy_, zz), 0.2)
+        for dx in (-1.5, 0.0, 1.5):   # a cluster of bare-bulb cord pendants, warm amber
+            zz = 9.0 + abs(dx) * 0.4
+            g.tube("BTP", (bx2 + dx, y, zz + 0.4), (bx2 + dx, y, zm - 1.2), 0.06)
+            g.box("AMB", bx2 + dx, y, zz, 0.4, 0.4, 0.4, faces=SIDES + ("bottom",))
+    # the buffet: white stone counters along the north wall under stainless rack frames with jars and bottles
+    pn, qn, nn = _edge_of(MKT, lambda n: n[1] > 0.9)
+    en = unit((qn[0] - pn[0], qn[1] - pn[1]))
+    yawn = math.atan2(en[1], en[0])
+    Ln = math.dist(pn, qn)
+    for u in (0.3, 0.7):
+        c = (pn[0] + en[0] * Ln * u - nn[0] * 2.6, pn[1] + en[1] * Ln * u - nn[1] * 2.6)
+        g.box("MDK", c[0], c[1], 0.0, 15.0, 2.6, 2.8, yawn, faces=SIDES)
+        COLL.append((c[0], c[1], 0.0, 15.0, 2.6, 2.8, yawn))
+        for s in (-7.0, 7.0):
+            p = _L(c[0], c[1], yawn, s, 0)
+            g.tube("STL", (p[0], p[1], 2.8), (p[0], p[1], 7.6), 0.2)
+        a = _L(c[0], c[1], yawn, -7.0, 0)
+        b = _L(c[0], c[1], yawn, 7.0, 0)
+        for zz in (5.6, 7.6):
+            g.tube("STL", (a[0], a[1], zz), (b[0], b[1], zz), 0.2)
+        for k in range(10):
+            p = _L(c[0], c[1], yawn, -6.3 + k * 1.4, 0)
+            g.box(("PRF", "PRE", "PRC", "PRA")[k % 4], p[0], p[1], 5.7, 0.5, 0.5, 0.9, yawn, faces=SIDES)
+    # teak-clad columns
+    for (x, y) in ((-16.0, -124.0), (-16.0, -110.0)):
+        g.box("TEK", x, y, 0.0, 2.4, 2.4, zm, faces=("+x", "-x", "+y", "-y"))
+        COLL.append((x, y, 0.0, 2.4, 2.4, zm, 0.0))
+    for (x, y) in domes:
+        top, bot = zm - 3.0, zm - 4.2   # 0.7 m domes hanging to about 2.6 m
+        prof = [(1.05, 0.0), (0.98, 0.45), (0.75, 0.85), (0.3, 1.2)]
+        for (r0, h0), (r1, h1) in zip(prof, prof[1:]):
+            o = _ngon(x, y, r0, 8)
+            i_ = _ngon(x, y, r1, 8)
+            for k in range(8):
+                a, b = o[k], o[(k + 1) % 8]
+                c, d = i_[(k + 1) % 8], i_[k]
+                _qf("BTP", [(a[0], a[1], bot + h0), (b[0], b[1], bot + h0), (c[0], c[1], bot + h1), (d[0], d[1], bot + h1)],
+                    ((a[0] + b[0]) / 2 - x, (a[1] + b[1]) / 2 - y, (r0 - r1) / max(h1 - h0, 1e-3)))
+        g.cap("BTP", _ngon(x, y, 0.3, 8), bot + 1.2)
+        top = bot + 1.2
+        g.cap("LIT", _ngon(x, y, 0.95, 8), bot + 0.05, down=True)
+        g.tube("BTP", (x, y, top), (x, y, zm - 1.2), 0.08)
+    for p in ((-26.0, -124.0, 8.0), (-6.0, -124.0, 8.0), (-40.0, -122.0, 8.0), (6.0, -112.0, 8.0), (-12.0, -106.0, 8.0)):
+        LIGHTS.append({"p": p, "kind": "lobby"})
 
 
 def lake_suites():
