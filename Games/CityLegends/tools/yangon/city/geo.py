@@ -129,10 +129,13 @@ PILOT_LL = {
     # batch 1 south-west + batch 2's west edge: Sanchaung, Kamayut south, Ahlone, Kyimyindaing to the river; seams with
     # P4 + P1 (north) and P3 (east, lat 16.776-16.787)
     'P6': (96.118, 16.776, 96.140, 16.810),
+    # batch 1 south: Shwedagon (its placed model + TEMP hill), Maha Wizaya, People's Park, Martyrs' Mausoleum, the
+    # National Museum, Kandawgyi's west end; seams with P1 (north), P6 (west), P3 (south)
+    'P7': (96.140, 16.787, 96.159, 16.810),
 }
 # a later pilot joins the earlier ones it touches: its roads that cross the shared edge end exactly on the earlier
 # district's road ends (position, direction, height: roadnet.pilot_seams), its lakes run on (terrain.py)
-PILOT_SEAMS = {'P2': ('P1',), 'P4': ('P1', 'P2'), 'P5': ('P4',), 'P6': ('P4', 'P1', 'P3')}
+PILOT_SEAMS = {'P2': ('P1',), 'P4': ('P1', 'P2'), 'P5': ('P4',), 'P6': ('P4', 'P1', 'P3'), 'P7': ('P1', 'P6', 'P3')}
 for _t, (_lo0, _la0, _lo1, _la1) in PILOT_LL.items():
     BATCH_LL[_t] = [(_lo0, _la1), (_lo1, _la1), (_lo1, _la0), (_lo0, _la0)]
 

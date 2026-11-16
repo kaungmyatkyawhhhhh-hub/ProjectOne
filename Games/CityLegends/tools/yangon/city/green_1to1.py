@@ -84,6 +84,9 @@ LANDMARK_BOXES = {
     "P4": [(26051.7, 30890.5, 26809.5, 31496.9), (26856.0, 27940.5, 27091.3, 28101.4), (26639.7, 30592.3, 27109.4, 30974.5),
            (25272.6, 24165.4, 25363.6, 24256.4), (23935.8, 29204.6, 24014.4, 29283.2), (25736.5, 19941.8, 25803.1, 20008.4),
            (24503.2, 25515.6, 24649.0, 25661.3)],
+    "P5": [],
+    # P6: its two placed pagodas (no catalogue landmark in P6)
+    "P6": [(28752.9, 36209.0, 28814.4, 36270.5), (27116.2, 36321.5, 27229.4, 36434.6)],
 }
 AVENUES = {"University Avenue Road", "Inya Road", "U Wisara Road", "New University Avenue Road", "Kan Yeiktha Road",
            "Natmauk Road", "Ahlone Road", "Zoological Garden Road", "Shwe Gone Dine Road", "Bawdi Avenue"}

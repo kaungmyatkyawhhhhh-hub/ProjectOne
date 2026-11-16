@@ -1242,12 +1242,16 @@ function M.verge(names: { string })
 		if not M.nearRing(x, z) then
 			return false
 		end
-		local ringSecs = M._sectors(M.RING_V)
 		local d = hyp(x - C.X, z - C.Z)
 		if d < M.RING_V + 0.5 then
 			return true
 		elseif d > M.RING_V + M.WALK + 1 then
 			return false
+		end
+		local ringSecs = M.curRing.secs
+		if not ringSecs then
+			ringSecs = M._sectors(M.RING_V)
+			M.curRing.secs = ringSecs
 		end
 		local a = math.atan2(z - C.Z, x - C.X)
 		for _, sec in ringSecs do
