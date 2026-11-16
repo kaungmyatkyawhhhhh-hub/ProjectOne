@@ -107,6 +107,9 @@ CONDO_WORDS = re.compile(r"condo|residen|tower|housing|apartment|mansion|garden"
 CROWNS = {"o374511963": "KRT", "o374511964": "KRT", "o374511984": "KRT", "o374512116": "KRT"}
 # real heights where a source beats OSM (levels): id -> (levels, source)
 HEIGHTS = {}
+# forecourt tops measured in Studio (16 Nov, after roads05): the pavement collision (RCol) at the lot's front, so the forecourt
+# meets the pavement flush (the terrain-state guess left B 1.5 and New Day 4 studs under it)
+FUEL_TOP = {"n2956795311": 62.31, "n3838315913": 61.29, "n2578264080": 42.67}   # roads05 road surface + 0.3 (1 m kerb-ish pavement)
 # fuel stations measured on the Esri z19 satellite (16 Nov 2026, build/city_1to1/places_P1/sat/): the canopy's middle,
 # its length along the road and depth (m), the roof colour seen from above
 SAT = {
@@ -420,14 +423,18 @@ def gmax(poly, step=4.0):
     return max(hs), min(hs)
 
 
-def slab(o, poly, code, coll=True, lift=0.25):
+def slab(o, poly, code, coll=True, lift=0.25, top=None):
     """a ground slab on a polygon (rectangles), its top `lift` over the highest terrain under it; returns the top y"""
     hi, lo = gmax(poly)
     # graded flat at the LOW side of the lot (the pavement side): the terrain over the slab is cut away in Studio
     # (grade.json -> PlacesApply.grade: Air from top - 0.5 up), so the forecourt meets the pavement with no step;
     # a lot on a slope over 3 studs keeps its top over the highest ground instead (no deep cut)
-    graded = hi - lo <= 3.0
-    top = (lo + 0.3) if graded else (hi + lift)
+    if top is not None:
+        graded = True       # a measured height (the pavement at the lot's front): cut the terrain to it
+        lo = min(lo, top - 1.0)
+    else:
+        graded = hi - lo <= 3.0
+        top = (lo + 0.3) if graded else (hi + lift)
     o.keep.append(poly)
     for (cx, cz, sx, sz, yw) in BK.roof_rects(poly, M(1.0)):
         ux, uz = math.cos(yw), -math.sin(yw)
@@ -476,7 +483,7 @@ def fuel_station(o, st, keep_off, rng):
     nx, nz = st["n"]
     if ux * nz - uz * nx < 0:   # keep (u, n) a right-handed pair: n = left of u
         ux, uz = -ux, -uz
-    top = slab(o, lot, "PCN")
+    top = slab(o, lot, "PCN", top=FUEL_TOP.get(st["id"]))
     # frame: along the road u, inward n; the lot's extent in that frame
     pts = list(lot.exterior.coords)
     us = [p[0] * ux + p[1] * uz for p in pts]

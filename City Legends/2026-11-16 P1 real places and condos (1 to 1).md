@@ -4,6 +4,8 @@ created: 2026-11-16
 ---
 # P1 real places and condos (1 to 1)
 
+![[P1 places - Myawaddy fuel station, University Avenue (Studio).jpg]]
+
 > Owner: "most of the stuff like the gas station near myanmar plaza ... is missing", "also the yangon condominiums arent there?"
 
 Pilot district P1 (lon 96.133-96.159, lat 16.810-16.834). In Studio, **not saved**.
@@ -85,6 +87,11 @@ Next to P1 but not built: Crystal Residences (lon 96.130, just west of P1, 90 m 
 - Both districts were planned and built again against it. Nothing is on a road or in a building.
 - All condos stand clear of the new corridors (under 2 m² of touch).
 - Compounds and condos live in the kit-building data (`buildings_1to1` reads `places.json`). The districts agent swaps those.
+
+- **In Studio (16 Nov, 22:50, saved):**
+  - `Data_P1P` (47 tiles) and `Data_P2P` (24 tiles) are in `ReplicatedStorage.YgnKit`.
+  - The terrain is cut over 138 graded slabs.
+  - The forecourt tops are set from the roads05 road height + 0.3 (`FUEL_TOP`). They still stand about 1 stud (0.3 m) over the pavement: a low raised pad, which a car can drive up.
 
 ## Checks
 - Nothing stands on a road corridor or in a building: 0 and 0.
