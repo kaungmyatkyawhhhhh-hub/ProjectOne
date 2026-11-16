@@ -141,3 +141,17 @@ Top tells left: blocky furniture (the penthouse rooms still use block furniture,
 - Lower level (media salon, games room) furniture is still block-built (rarely visited).
 - The Floor 19 Furniture meshes (café, bookcase, media console) are the owner's earlier meshes and were kept.
 - **Bed fix:** `SuiteBedServer` (lie on the bed) waits for `Floor 19 Furniture.Suite bed` and its "Mattress rest sensor". The old model is restored as an **invisible helper** (all parts Transparency 1, no collision except the sensor). The visible bed is the new mesh. Console clean.
+
+## Owner corrections (17 Nov, late)
+- **"so bright in full graphics"** (owner screenshot: white clothes and neon glowing into blobs). My bloom (0.42 / 22 / 1.15) looked fine at Studio's lower test quality but blew out at max graphics.
+  - Now: Bloom **0.22 / 20 / threshold 1.7** (only neon really glows), ExposureCompensation 0.18 → **0.06**, ColorCorrection brightness 0.
+  - The 15 mannequin pad lights are ×0.6 (`OrigBrightness` attribute kept); the arch neon is a bit deeper (205,55,140).
+  - **Lesson:** judge bloom and exposure at MAX graphics. Studio MCP can't set the quality level (needs RobloxScript capability), so ask the owner for a max-quality screenshot or keep bloom thresholds ≥ 1.6.
+- **"dont use layered clothing, our game wont use layered clothing at all"** — MM is classic clothing only.
+  - Midnight / Frost / Sakura are back to their original 2D shirt and pants templates (idle animations and R15 mannequins kept).
+  - The 4 layered outfits (04–07) are removed; the layered Config is kept in `ScriptBackups.pre_R15_17Nov.Config_layered_version_17Nov`.
+  - `OutfitShowcaseServer.ACCESSORY_TYPES` no longer maps types 64–72, so layered items are skipped on mannequins and in try-on.
+  - `CatalogAdminServer` only accepts classic accessories again (max 10); Add My Outfit counts layered items as "left out".
+  - **Trap:** a ModuleScript edited through the script editor has a DRAFT. Setting `.Source` from `execute_luau` changed the saved text, but **Play ran the draft** (7 outfits still showed, as bare mannequins). Edit through `multi_edit` (the editor path) so the draft changes too.
+
+![[Screenshots/2026-11-17 classic clothes only, bloom fixed.jpg]]

@@ -72,6 +72,9 @@ Do not save the place, publish, or spend Robux without the owner's OK. Play sess
 - Save the change log + screenshots to the game's notes (the vault) like any other change.
 
 ## Do / don't
+- **Bloom and exposure: judge at MAX graphics.** Studio MCP captures run at a lower quality, and scripts can't set the quality level (it needs RobloxScript capability). MM Outfit Catalog, 17 Nov: bloom 0.42/22/threshold 1.15 looked fine in Studio captures but blew white clothes and neon into blobs at the owner's full graphics. What worked: bloom 0.22/20/**threshold ≥ 1.6** (only neon glows), ExposureCompensation ~0.06, and pad spotlights ×0.6 over white outfits. Ask the owner for a max-graphics screenshot before calling a glowy grade done.
+- **Glass hides particles:** windows that must show rain, snow or VFX outside use SmoothPlastic with Transparency 0.85+ and Reflectance 0.1–0.15, not Glass.
+- **Light warm-up after joining** is engine-side (all Lighting values stay constant; the room is black for ~10–14 s in Studio). Fixes: fewer lights, Persistent streaming for the play area, a short branded loading screen, and the owner trying `Lighting.Technology = ShadowMap` (not script-writable).
 
 - **Do** keep the Atmosphere Offset at 0 and the Density ≤ 0.45 on land maps: higher turns the horizon into a grey wall and hides the world you built.
 - **Do** raise contrast before saturation. Saturation > 0.5 looks cheap fast, especially on green grass and red parts.
