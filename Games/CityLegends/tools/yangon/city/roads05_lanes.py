@@ -308,7 +308,33 @@ def main(tag):
             # a one-way road ending nowhere: on to the nearest other lane start
             pass
     linked_from_end = set(l[0] for l in links if l[1] >= len(lanes[l[0]]['pts']))
+    # 5. what is still dead (one-way pieces ending nowhere, odd junctions): on to the nearest point of any other lane,
+    # heading the same way if one is within 150 studs, else the nearest within 400 (P3: 14 such ends)
+    rescued = []
+    for li, l in enumerate(lanes):
+        if l['closed'] or li in linked_from_end:
+            continue
+        end = np.array([l['pts'][-1][0], l['pts'][-1][2]])
+        din = ldir(li, len(l['pts']) - 2)
+        best_same, best_any = None, None
+        for ti, t in enumerate(lanes):
+            if ti == li or len(t['pts']) < 3:
+                continue
+            P = np.array([[p[0], p[2]] for p in t['pts'][:-2]])
+            d = np.hypot(P[:, 0] - end[0], P[:, 1] - end[1])
+            kk = int(np.argmin(d))
+            dd = float(d[kk])
+            if best_any is None or dd < best_any[0]:
+                best_any = (dd, ti, kk)
+            if dd < 150 and float(ldir(ti, kk) @ din) > 0 and (best_same is None or dd < best_same[0]):
+                best_same = (dd, ti, kk)
+        pick = best_same or (best_any if best_any and best_any[0] < 400 else None)
+        if pick:
+            links.append([li, len(l['pts']), pick[1], pick[2] + 2])
+            rescued.append((l['road'], round(pick[0]), lanes[pick[1]]['road']))
+    linked_from_end = set(l[0] for l in links if l[1] >= len(lanes[l[0]]['pts']))
     dead = [li for li, l in enumerate(lanes) if not l['closed'] and li not in linked_from_end]
+    assert not dead, ('dead ends', [lanes[i]['road'] for i in dead])
     # write
     SRC = os.path.join(geo.ROOT, 'src', 'shared') if '--install' in sys.argv else os.path.join(od(tag), 'lanes')
     os.makedirs(SRC, exist_ok=True)
@@ -349,7 +375,7 @@ def main(tag):
         open(os.path.join(SRC, 'YangonLanes1to1_%d.lua' % (mi + 1)), 'w', encoding='utf-8', newline='\n').write(text)
         print('YangonLanes1to1_%d.lua %d chars, %d lanes, %d links' % (mi + 1, len(text), len(ls), len(link_mod[mi])))
     st = dict(lanes=len(lanes), links=len(links), turned_round=turned, dead_ends=len(dead), ring_lanes=len(ring_lanes), turned_inside=len(inner_turn), turned_inside_sample=inner_turn[:25],
-              dead_sample=[lanes[i]['road'] for i in dead[:10]])
+              dead_sample=[lanes[i]['road'] for i in dead[:10]], rescued=rescued)
     json.dump(st, open(os.path.join(od(tag), 'lanes_stats.json'), 'w'), indent=1)
     print(json.dumps(st))
 
