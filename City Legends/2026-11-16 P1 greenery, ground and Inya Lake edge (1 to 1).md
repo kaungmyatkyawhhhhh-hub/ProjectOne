@@ -61,3 +61,14 @@ Pilot district P1 (lon 96.133-96.159, lat 16.810-16.834). In Studio under `Works
 - No trunk collision (players and cars pass through trunks).
 - Studio's `ClaudeTools.YangonGreen1to1` is the earlier copy (no `farOld`); the repo file is current.
 - Studio's ground is from the data before the flat-only concrete filter (about 2,300 columns differ).
+
+## Version 3: the owner's two pictures (16 Nov night, saved as place version 1091)
+Owner refs: `Games/CityLegends/build/landmarks/refs/owner/owner_inya_walkway.webp` (lake walk) and `owner_kabaraye_roadside_greenbank.png` (Kabar Aye Pagoda Road green bank). Owner: "the grass is sloped up and the grass is so green". The grass colour stays the plain terrain Grass the owner approved.
+- **Inya lake walk** (818 m beside Kabar Aye Pagoda Road, replaces the v2 wall and railing): a grass bank sloping from the walk down under the water, a 2 m concrete walk, 131 fan palms (old-map PalmA), 86 flowering bushes, 45 white square planters, 12 green bins and 3 small green bench shelters (planters, bins and shelters built from parts).
+- **Kabar Aye green bank** (1,099 m where the frontage is open, on the roads05 lines): low black railing (2 rails, a post every 2 m), a grass slope rising 2 m over 4 m, a row of 143 trees on top (old-map Tree, 8 m apart). Not in front of Myanmar Plaza itself: that frontage is inside the Myanmar Centre / Sedona sites.
+- **P2 north shore:** its 342 m wall and railing turned into the same grassy bank (`wallToBank`; 42 wall pieces, 261 parts removed; P2's walk kept, in `Green.LakeEdgeP2`).
+- **Lake bed:** Inya's sand bed in P1 and P2 painted Mud (it read white through the water).
+- Code: `tools/yangon/city/green_edges.py` (bank, walk, furniture, terrain columns), `green_1to1.py` (Kabar Aye from `roads05_*/roads.json`), `YangonGreen1to1.luau` (`cols`, `edge`, `models`, `makeFurniture`, `prepKit`, `wallToBank`, `lakeBed`). Kit models in `ServerStorage.GreenEdgeKit`.
+- Screenshots (`C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`): lake walk `mcp-Roblox_Studio-blob-1794842667052-h9shpp.jpg`, Kabar Aye bank `mcp-Roblox_Studio-blob-1794842685491-iqtt8w.jpg`.
+- Still different from the pictures: the bank trees are the old map's wide acacia (the picture's trees are narrower with straight trunks); the palms are the old-map palm, not a fan palm; the shelter pad hangs over the bank's edge; the "big white Inya area" in the owner's aerial was not checked beyond the sand-to-mud repaint.
+- Lesson: a shared `edge()` that destroys its output folder by name wiped another district's work; rename the old folder (or name folders per district) before rebuilding.
