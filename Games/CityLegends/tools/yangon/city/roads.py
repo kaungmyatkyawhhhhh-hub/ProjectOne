@@ -43,9 +43,15 @@ import roadlanes as rl
 from glb import Mesh, write_glb, check_glb, code
 
 OUT = os.path.join(geo.BUILD, 'city')
+if geo.ONE_TO_ONE:
+    # (2026-11-16, rescale step 3) the 1:1 frame's outputs apart from the old map's
+    OUT = os.path.join(geo.BUILD, 'city_1to1')
+    os.makedirs(OUT, exist_ok=True)
 COLLIDE_CHARS = 189000
 SEAM_COLLIDE_EXT = 12.0
-BOX_LEN = 40.0      # a collision box covers at most this much road (lead, 14 Nov: Studio memory)
+BOX_LEN = 40.0 * geo.LK   # a collision box covers at most this much road (lead, 14 Nov: Studio memory)
+if geo.ONE_TO_ONE:
+    BOX_LEN = geo.m(30.0)     # (1:1) boxes per real km at or under batches 1-3's (budget rules)
 FILE_TRIS, FILE_MESHES = 90000, 100
 
 
@@ -109,7 +115,7 @@ def mesh_part(tag, k, n, cells):
     sel = allc()
     if cells:
         x0, z0, x1, z1 = cells
-        sel = [c for c in sel if x0 <= c[0] * 256 < x1 and z0 <= c[1] * 256 < z1]
+        sel = [c for c in sel if x0 <= c[0] * rm.CELL < x1 and z0 <= c[1] * rm.CELL < z1]
     mine = sel[k::n]
     B.cells = lambda: mine
     B.rpieces_all = B.rpieces
@@ -125,6 +131,13 @@ def write_meshes(meshes, tag, log=print):
     for f in os.listdir(d):
         if f.endswith('.glb'):
             os.remove(os.path.join(d, f))
+    if rm.MESH_CELL != rm.CELL:
+        # (1:1) the work tiles' triangles grouped into cells of about 1 km (rescale plan budget rules)
+        f = int(round(rm.MESH_CELL / rm.CELL))
+        merged = {}
+        for (kind, i, j), tris in meshes.items():
+            merged.setdefault((kind, i // f, j // f), []).append(np.asarray(tris))
+        meshes = {k: np.concatenate(v) for k, v in merged.items()}
     items = []
     for (kind, i, j), tris in sorted(meshes.items()):
         tris = np.asarray(tris)
@@ -177,7 +190,8 @@ def collision(B, net):
     """invisible boxes: carriageways, pavements, medians, junction squares, decks and parapets"""
     from shapely.geometry import Polygon, box as _sbox
     global _BOX05
-    _BOX05 = _sbox(*geo.BOX_05)
+    standalone = getattr(net, 'standalone', False)
+    _BOX05 = Polygon() if standalone else _sbox(*geo.BOX_05)
     rows = []
 
     def row(p0, p1, y0, y1, width, kind, off=0.0, R=None):
@@ -217,7 +231,7 @@ def collision(B, net):
         lo, hi = B.lohi[e.id]
         r, rr = B.raised[e.id]
         cut_ = getattr(e, 'cut', None) or [False, False]
-        cut_ = [cut_[k] and _street_end_near(e.P[0 if k == 0 else -1]) for k in (0, 1)]
+        cut_ = [cut_[k] and not standalone and _street_end_near(e.P[0 if k == 0 else -1]) for k in (0, 1)]
         for i, j in runs_of(e, lo, hi, r):
             p0, p1 = e.P[i], e.P[j]
             if np.linalg.norm(p1 - p0) < 0.5:
@@ -429,7 +443,7 @@ def run(tag, glb=True, cells=None, log=print, jobs=1):
     if cells:
         x0, z0, x1, z1 = cells
         allc = B.cells
-        B.cells = lambda: [c for c in allc() if x0 <= c[0] * 256 < x1 and z0 <= c[1] * 256 < z1]
+        B.cells = lambda: [c for c in allc() if x0 <= c[0] * rm.CELL < x1 and z0 <= c[1] * rm.CELL < z1]
     if jobs > 1:
         meshes = parallel_meshes(B, tag, jobs, cells, log)
     else:

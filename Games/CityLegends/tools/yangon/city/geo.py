@@ -28,6 +28,10 @@ if os.environ.get("YANGON_SCALE") == "1to1":
     SPM = 3.0
     VS = 3.0
     OZ = 30000.0
+ONE_TO_ONE = SPM == 3.0
+# (2026-11-16, rescale step 3) lengths in studs that the batch 1-3 tools tuned at 1.6 studs a metre (spacings, reaches,
+# seam distances, height thresholds): multiply by LK to keep them in metres. Exactly 1.0 at the default scale.
+LK = SPM / 1.6
 
 
 def m(v):
@@ -99,6 +103,21 @@ BATCH_LL = {
                             (650, 420), (670, 470), (690, 500), (640, 540), (600, 500), (580, 500), (560, 525), (535, 560),
                             (520, 527), (460, 505), (400, 460), (380, 420), (385, 340))],
 }
+
+
+# (2026-11-16, rescale step 3) the 1:1 pilot districts: built standalone (no batch 0.5 box, no v4/v5 game roads, no seam
+# with batches 1-3: none of them exists in the 1:1 frame), the map edge is the district box, the ground straight from the DEM
+PILOT_LL = {
+    # Myanmar Plaza / Kabar Aye Pagoda Road and its flyover, Hanthawaddy roundabout, Sedona, Inya Lake's east shore
+    'P1': (96.133, 16.810, 96.159, 16.834),
+}
+for _t, (_lo0, _la0, _lo1, _la1) in PILOT_LL.items():
+    BATCH_LL[_t] = [(_lo0, _la1), (_lo1, _la1), (_lo1, _la0), (_lo0, _la0)]
+
+
+def standalone(tag):
+    """a pilot district (PILOT_LL): no seams with batch 0.5 or other batches"""
+    return tag in PILOT_LL
 
 
 def batch_poly(tag, grow=0.0):

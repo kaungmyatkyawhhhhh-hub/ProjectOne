@@ -30,6 +30,17 @@ MARGIN = 0.5        # extra on every clearance
 RAIL_TOP = 1.0      # the rail top over the ground
 RAISE = 1.5         # a sample this far over the ground is built raised (ramp walls or a viaduct)
 GRADE_MAIN, GRADE_STREET = 0.06, 0.10
+RAIL_HALF = 7.0     # half width of the corridor a railway keeps clear under a deck
+FAM_EXT = 700.0     # a bridge family grows this far along the road it continues (its ramps)
+if geo.ONE_TO_ONE:
+    # (2026-11-16, rescale step 3) CLEAR 17 = 5.7 m stays (the owner's 17+ under the girders); a real flyover deck is ~1.5 m
+    # deep; water clearance 6 m (rescale plan); the other lengths kept in metres
+    DECK = 4.5
+    WATER_CLEAR = 18.0
+    RAISE *= geo.LK
+    RAIL_TOP *= geo.LK
+    RAIL_HALF *= geo.LK
+    FAM_EXT *= geo.LK
 
 
 def grade_of(e):
@@ -122,7 +133,7 @@ def rails_beneath():
         pts = geo.proj(l['p'])
         if len(pts) > 1:
             out.append(dict(name=t.get('name:en') or t.get('name') or 'railway', line=LineString(pts),
-                            poly=LineString(pts).buffer(7.0, cap_style=2)))
+                            poly=LineString(pts).buffer(RAIL_HALF, cap_style=2)))
     return out
 
 
@@ -146,10 +157,12 @@ def _sub_maxprop(base, verts, adj_cost):
     return y
 
 
-def families(net, ext_max=700.0):
+def families(net, ext_max=None):
     """bridge / layer >= 1 edges, grown along the road they continue (through nodes where only that road meets) up to
     ext_max studs: the ramps. -> list of (edge ids, landing node keys)"""
     edges, nodes = net.edges, net.nodes
+    if ext_max is None:
+        ext_max = FAM_EXT
     f0 = {e.id for e in edges if (e.bridge or e.layer >= 1) and not e.tunnel}
     fam = set(f0)
     stack = []
@@ -270,11 +283,15 @@ def _trim_end(e, end, dist):
         keep = c > dist
         P = np.vstack([np.interp(dist, c, e.P[:, 0]), np.interp(dist, c, e.P[:, 1])]).T
         e.P = np.vstack([P, e.P[keep]])
+        if getattr(e, 'med', None) is not None and len(e.med) == len(c):
+            e.med = np.r_[np.interp(dist, c, e.med), e.med[keep]]
         e.w = np.r_[np.interp(dist, c, e.w), e.w[keep]]
     else:
         keep = c < L - dist
         P = np.vstack([np.interp(L - dist, c, e.P[:, 0]), np.interp(L - dist, c, e.P[:, 1])]).T
         e.P = np.vstack([e.P[keep], P])
+        if getattr(e, 'med', None) is not None and len(e.med) == len(c):
+            e.med = np.r_[e.med[keep], np.interp(L - dist, c, e.med)]
         e.w = np.r_[e.w[keep], np.interp(L - dist, c, e.w)]
     e.D = rn.dirs_of(e.P)
 
@@ -354,7 +371,7 @@ def extend_short(net, G, log=print):
                 walked += float(rn.chain(cont.P)[-1])
                 prev = cont
                 cur_key = cont.b if cont.a == cur_key else cont.a
-                if walked > 700:
+                if walked > FAM_EXT:
                     break
     if changed:
         log('  %d junctions on long ramps changed (roads passing under or ending at a ramp wall)' % changed)
@@ -463,7 +480,7 @@ def solve(net, G, iters=2, log=print):
     # (2026-11-14) an end on batch 0.5's box edge where a batch 0.5 mesh street continues it, more than STREET_PIN_STEP
     # off that street's height (Nar Nat Taw's ramp left the box 10.6 studs over its street): pinned to the street
     # (streets.py writes the street ends' own heights, streets_05_edgeends.json); smaller steps are eased by streets.py
-    for v, yy in street_pins(edges, y).items():
+    for v, yy in ({} if getattr(net, 'standalone', False) else street_pins(edges, y)).items():
         pins.setdefault(v, yy)
     for v, yy in bpins.items():
         pins.setdefault(v, yy)
@@ -472,6 +489,8 @@ def solve(net, G, iters=2, log=print):
         for (eid, i), (need, what) in req_info.items():
             floor[edges[eid]._ids[i]] = need
         y = minprop_from(y, pins, adj2, floor)
+    if geo.ONE_TO_ONE:
+        y = fill_deck_dips(net, edges, y, fam_of, fam_grade)
     net.y_v = y
     for e in edges:
         e.y = y[e._ids]
@@ -485,6 +504,48 @@ def solve(net, G, iters=2, log=print):
         spill += float(((e.y - e.g) > RAISE).sum()) * rn.STEP
     net.spill = spill
     log('  raised outside the bridge families: %.0f studs of road' % spill)
+    return y
+
+
+def fill_deck_dips(net, edges, y, fam_of, fam_grade):
+    """(2026-11-16, 1:1) a deck held up only over the roads it crosses sagged between them (22 -> 13 -> 22 studs over the
+    ground on the Kabar Aye flyover: solid ramp walls and no underside mid-span). Along each carriageway's chain of
+    bridge-family edges the profile's valleys are filled (y = max(y, min(highest before, highest after))); a vertex
+    another road also uses is left as it is."""
+    fe = [e for e in edges if fam_of.get(e.id) in fam_grade]
+    if not fe:
+        return y
+    users = {}
+    for e in edges:
+        for v in (int(e._ids[0]), int(e._ids[-1])):
+            users.setdefault(v, set()).add(e.id)
+    fids = {e.id for e in fe}
+    nxt = {}
+    has_prev = set()
+    for e in fe:
+        cands = [f for f in fe if f.id != e.id and f.a == e.b and fam_of.get(f.id) == fam_of.get(e.id)]
+        if e.oneway and len(cands) == 1:
+            nxt[e.id] = cands[0]
+            has_prev.add(cands[0].id)
+    y = y.copy()
+    for e in fe:
+        if e.id in has_prev or not e.oneway:
+            continue
+        chain, seen, cur = [], set(), e
+        while cur is not None and cur.id not in seen:
+            seen.add(cur.id)
+            ids = [int(v) for v in cur._ids]
+            chain += ids if not chain else ids[1:]
+            cur = nxt.get(cur.id)
+        if len(chain) < 3:
+            continue
+        v = np.array([y[i] for i in chain])
+        left = np.maximum.accumulate(v)
+        right = np.maximum.accumulate(v[::-1])[::-1]
+        fill = np.maximum(v, np.minimum(left, right))
+        for k, i in enumerate(chain):
+            if fill[k] > y[i] + 1e-6 and users.get(i, set()) <= fids:
+                y[i] = fill[k]
     return y
 
 

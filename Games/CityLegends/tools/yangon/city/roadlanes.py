@@ -26,11 +26,13 @@ import numpy as np
 import geo
 import roadnet as rn
 
-STEP = 24.0
+STEP = 24.0 * geo.LK     # (geo.LK: 1.0 at the default scale; 1:1 keeps these lengths in metres: points about every 45)
 LIFT = 0.15
-CLEAR = 6.0
+CLEAR = 6.0 * geo.LK
 CHARS = 189000
-MAX_LINK = 180.0    # no junction link longer than this (studs, end to start)
+MAX_LINK = 180.0 * geo.LK   # no junction link longer than this (studs, end to start)
+MIN_LANE = 16.0 * geo.LK    # a road piece shorter than this between its trims holds no lane
+TURN_REACH = 140.0 * geo.LK # a carriageway end turns round onto a partner starting this close
 
 
 def lane_offsets(e, way):
@@ -87,7 +89,7 @@ def build(net, tag, log=print):
     for e in edges:
         L = rn.chain(e.P)[-1]
         ta, tb = trim.get(e.a, 0), trim.get(e.b, 0)
-        if L - ta - tb < 16:
+        if L - ta - tb < MIN_LANE:
             internal.add(e.id)
             parent[find(e.a)] = find(e.b)
     clusters = {}
@@ -107,7 +109,7 @@ def build(net, tag, log=print):
         if e.seam[1]:
             tb = 0.0
         d0, d1 = ta, L - tb
-        if d1 - d0 < 16:
+        if d1 - d0 < MIN_LANE:
             continue
         n = max(2, int(round((d1 - d0) / STEP))) + 1
         ds = np.linspace(d0, d1, n)
@@ -254,7 +256,7 @@ def build(net, tag, log=print):
                     for (fid, fway), lout in [(k_, v_) for cl2 in leave.values() for k_, v_ in cl2.items()]:
                         q0 = lanes[lout[1]]['pts'][0]
                         d = math.hypot(q0[0] - p_end[0], q0[2] - p_end[2])
-                        if d > 140:
+                        if d > TURN_REACH:
                             continue
                         dq = lanes[lout[1]]['pts'][1] - q0
                         dq = np.array([dq[0], dq[2]])
@@ -270,8 +272,8 @@ def build(net, tag, log=print):
                         ok = True
                 if ok:
                     stats['turnround'] += 1
-    # the batch 0.5 seam
-    seam_links, seam_first = _seam(net, lanes, index, link)
+    # the batch 0.5 seam (none for a standalone pilot district)
+    seam_links, seam_first = (0, None) if getattr(net, 'standalone', False) else _seam(net, lanes, index, link)
     stats['seam'] = seam_links
     # (2026-11-14, batch 2) the seam with an earlier batch: a lane that ends on its border runs on into that batch's lane
     # there (and that batch's lanes ending there run on into ours), instead of turning round

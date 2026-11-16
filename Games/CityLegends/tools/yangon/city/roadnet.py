@@ -30,11 +30,14 @@ from shapely.strtree import STRtree
 
 import geo
 
-STEP = 8.0
+STEP = 8.0 * geo.LK   # (geo.LK: 1.0 at the default scale; the 1:1 rebuild keeps these lengths in metres)
 MED = 3.0             # median half (kerbs included), master plan / v5
 PAIR_MAX = 45.0       # two one-way ways this close (centre to centre) are one divided road
-PAIR_MIN = 6.0
-TAPER = 48.0          # studs over which a move fades at a node / where pairing stops
+PAIR_MIN = 6.0 * geo.LK
+TAPER = 48.0 * geo.LK # studs over which a move fades at a node / where pairing stops
+if geo.ONE_TO_ONE:
+    PAIR_MAX = geo.m(26.0)   # Pyay Road along Inya Lake: its two OSM lines 23.8 m apart (the real planted median)
+MED_MIN = 1.5         # (1:1) the narrowest median half: a 1 m barrier between kerbs
 
 PUBLIC = {'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'living_street', 'trunk_link',
           'primary_link', 'secondary_link', 'tertiary_link', 'motorway', 'motorway_link', 'road'}
@@ -115,8 +118,92 @@ def oneway_of(t):
     return 0
 
 
+# ---------------------------------------------------------------- 1:1 cross-sections (2026-11-16, rescale step 3)
+# Owner's road rule "1:1 EXACT" (vault "Audit - Yangon roads 1 to 1", decisions 1, 2, 4): kerbs on their real lines; lanes
+# 12 studs where they fit, otherwise the real carriageway width / the lane count, never under 10; real lane counts (up to
+# 4 a side); each carriageway of a divided road on its own OSM line, the median its real width (pair_edges: e.med).
+LANE_MIN, LANE_MAX = 10.0, 12.0
+LANE_REAL_M = 3.5     # an unmeasured main road's lane (the audit's measured lanes are 3.0-3.8 m; the plan's 3.5 m)
+LANE_CAP_1TO1 = 4     # audit item 4: one-way lanes=4 roads keep their 4th lane
+# measured carriageways: (normalised name, bridge) -> (lanes a side, kerb to kerb of ONE carriageway in metres); trunk and
+# primary ways here, secondary ways in REAL_XS_SECONDARY (Kabar Aye's secondary ways are the flyover's ground lanes)
+REAL_XS = {
+    ('kabarayepagoda', False): (3, 9.25),   # road_04 (16.8406): ~19.5 m kerb to kerb, 3+3 at ~3.1 m, ~1 m barrier
+    ('kabarayepagoda', True): (2, 8.0),     # junc_06, the flyover by Myanmar Plaza: deck ~17 m, 2+2 (OSM says 4 a side)
+    ('pyay', False): (3, 11.5),             # road_01 (Inya Lake): 2 x ~11.5 m, 3+3, 12-14 m planted median
+}
+REAL_XS_SECONDARY = {
+    ('uwisara', False): (2, 7.5),           # road_22 (16.8084): ~20 m with a ~5 m tree median, 2+2
+    ('kabarayepagoda', False): (1, 4.0),    # junc_06: the ground lanes beside the flyover, one narrow lane a side
+}
+WALK_1TO1 = dict(main=7.5, street=4.0, narrow=3.0)   # pavement 2.5 m on main roads (audit item 14); flush strips
+
+
+def cross_section_1to1(t):
+    hw = t.get('highway')
+    one = oneway_of(t)
+    total, fw, bw = _num(t, 'lanes'), _num(t, 'lanes:forward'), _num(t, 'lanes:backward')
+    w = width_m(t)
+    narrow = (hw == 'living_street' or hw == 'service' or (w is not None and w < 5.5)) and hw not in MAIN | LINKS
+    dflt = 2 if hw in ('trunk', 'primary', 'motorway', 'secondary') else 1
+    tagged = total is not None or fw is not None
+    if one:
+        n = total if total is not None else (fw if fw is not None else dflt)
+        if n >= 5:
+            n = n / 2
+        nf, nb = n, 0
+    else:
+        if fw is not None or bw is not None:
+            nf = fw if fw is not None else ((total - bw) if total is not None and bw is not None else dflt)
+            nb = bw if bw is not None else ((total - fw) if total is not None and fw is not None else dflt)
+        elif total is not None:
+            nf = nb = max(1.0, total / 2)
+        else:
+            nf = nb = dflt
+    cap = LANE_CAP_1TO1
+    nf = int(max(1, min(cap, round(nf + 1e-6)))) if nf else 0
+    nb = int(max(1, min(cap, round(nb + 1e-6)))) if (nb or not one) else 0
+    if not one:
+        nb = max(nb, 1)
+    bridge = t.get('bridge') not in (None, 'no')
+    table = REAL_XS if hw in ('trunk', 'primary') else (REAL_XS_SECONDARY if hw == 'secondary' else {})
+    meas = table.get((norm_name(t.get('name:en') or t.get('name') or ''), bridge))
+    if meas:
+        nf = meas[0]
+        if not one:
+            nb = meas[0]
+    ring = t.get('junction') in ('roundabout', 'circular')
+    if ring and not tagged and hw in ('trunk', 'primary') and one:
+        nf = 3                       # Hanthawaddy: one untagged piece of a 3-lane ring (audit item 6)
+    main = hw in MAIN or hw in LINKS or max(nf, nb) >= 2
+    look = 'main' if main else ('narrow' if narrow else 'street')
+
+    def lw(n):
+        if n == 0:
+            return 0.0
+        if meas:
+            return float(min(LANE_MAX, max(LANE_MIN, geo.m(meas[1]) / n)))
+        if ring:
+            return LANE_MAX          # Hanthawaddy: a 3-lane ring ~14 m wide
+        if main:
+            return float(min(LANE_MAX, max(LANE_MIN, geo.m(LANE_REAL_M))))
+        if narrow:
+            # an alley / living street: one shared lane, its real width (a 4 m alley when untagged), at least 10 studs
+            tot = max(LANE_MIN, geo.m(w if w else 4.0))
+            return tot if one else tot / 2
+        if one:
+            return LANE_MAX          # a one-way street lane: 3.5-4 m
+        return float(min(LANE_MAX, max(LANE_MIN, geo.m(w) / 2 if w else LANE_MIN)))
+    traffic = max(nf, nb) >= 2 or hw in MAIN or hw in LINKS
+    walk = WALK_1TO1[look]
+    return dict(oneway=one, nf=nf, nb=nb, Wf=lw(nf), Wb=lw(nb), look=look, walk=walk, traffic=traffic, tagged=tagged,
+                measured=bool(meas))
+
+
 def cross_section(t):
     """-> dict: oneway, nf, nb (lanes forward / backward; 0 for a one-way's back), Wf, Wb, look, walk, traffic"""
+    if geo.ONE_TO_ONE:
+        return cross_section_1to1(t)
     hw = t.get('highway')
     one = oneway_of(t)
     total, fw, bw = _num(t, 'lanes'), _num(t, 'lanes:forward'), _num(t, 'lanes:backward')
@@ -259,7 +346,7 @@ def load_edges(area_ll):
             e.hw = t.get('highway')
             e.rank = RANK.get(e.hw, 6)
             for k, v in cs.items():
-                if k != 'tagged':
+                if k not in ('tagged', 'measured'):
                     setattr(e, k, v)
             e.cs = cs
             e.bridge = t.get('bridge') not in (None, 'no')
@@ -294,7 +381,7 @@ def node_map(edges):
     return nodes
 
 
-def family_ids(edges, nodes, ext_max=450.0):
+def family_ids(edges, nodes, ext_max=450.0 * geo.LK):
     """bridge / layer >= 1 edges, grown along the road they continue (through nodes where only that road meets) up to
     ext_max studs (their ramps): ids"""
     f0 = {e.id for e in edges if (e.bridge or e.layer >= 1) and not e.tunnel}
@@ -325,7 +412,7 @@ def side_extent(e, side):
     return e.nf * e.Wf if side > 0 else e.nb * e.Wb
 
 
-def push_beside(edges, fam, gap=3.0, reach=80.0):
+def push_beside(edges, fam, gap=3.0 * geo.LK, reach=80.0 * geo.LK):
     """a ground road running beside a flyover / its ramps (within 30 degrees) is moved sideways until its carriageway
     clears the deck (+ parapet + gap): in the game the lanes are wider than real ones, so OSM's at-grade lanes would
     sit under the ramps"""
@@ -334,8 +421,16 @@ def push_beside(edges, fam, gap=3.0, reach=80.0):
         return 0
     tree = STRtree([L for _, L in fl])
     moved = 0
+    if geo.ONE_TO_ONE:
+        # (1:1) the lanes are real, so only real overlaps move: a 1-stud gap past the parapet, and the road's own carriageways
+        # that run on from a ramp's foot (same name, sharing a node with the family) stay on their OSM lines
+        gap = 1.0
+        fnodes = {k for i in fam for k in (edges[i].a, edges[i].b)}
+        fnames = {norm_name(edges[i].name) for i in fam if edges[i].name}
     for e in edges:
         if e.id in fam or e.tunnel:
+            continue
+        if geo.ONE_TO_ONE and e.name and norm_name(e.name) in fnames and e.hw in MAIN and (e.a in fnodes or e.b in fnodes):
             continue
         L0 = LineString(e.P0)
         near = [int(j) for j in tree.query(L0.buffer(reach))]
@@ -413,6 +508,7 @@ def pair_edges(edges, fam=frozenset(), unpair_near=None):
             continue
         nm = norm_name(e.name)
         raw = np.zeros_like(e.P0)
+        gap = np.zeros(len(e.P0))
         ok = np.zeros(len(e.P0), bool)
         for i, p in enumerate(e.P0):
             pt = Point(p)
@@ -453,6 +549,7 @@ def pair_edges(edges, fam=frozenset(), unpair_near=None):
                     best = (d, v)
             if best:
                 raw[i] = best[1] / 2
+                gap[i] = best[0]
                 ok[i] = True
         if not ok.any():
             continue
@@ -474,6 +571,12 @@ def pair_edges(edges, fam=frozenset(), unpair_near=None):
             fs[:, c] = np.convolve(np.pad(full[:, c], 3, mode='edge'), np.ones(7) / 7, mode='valid')
         if unpair_near is not None:
             ws = ws * unpair_near(e.P0)
+        if geo.ONE_TO_ONE:
+            # (1:1) each carriageway stays on its own OSM line: the median half is the real gap's half minus the
+            # carriageway's half (offsets: centre = w (med + n W / 2) right of the midline = the OSM line for any w)
+            gfull = np.interp(np.arange(len(gap)), idx, gap[idx])
+            gfull = np.convolve(np.pad(gfull, 3, mode='edge'), np.ones(7) / 7, mode='valid')
+            e.med = np.maximum(MED_MIN, gfull / 2 - e.nf * e.Wf / 2)
         e.w = ws
         e.own = fs * ws[:, None]
         stats['paired_len'] += float((ws > 0.5).sum() * STEP)
@@ -552,7 +655,10 @@ def offsets(e):
     n = len(e.P)
     if e.oneway:
         hw_ = e.nf * e.Wf / 2
-        c = e.w * (MED + hw_)
+        med = getattr(e, 'med', None)
+        if med is None or len(med) != n:
+            med = MED
+        c = e.w * (med + hw_)
         return c - hw_, c + hw_
     return np.full(n, -e.nb * e.Wb), np.full(n, e.nf * e.Wf)
 
@@ -768,6 +874,8 @@ def clip_edges(edges, region, keep_seam_pieces):
             f.__dict__.update(e.__dict__)
             f.P = P
             f.w = Wv
+            if getattr(e, 'med', None) is not None and len(e.med) == len(e.P):
+                f.med = np.r_[np.interp(s0, c, e.med), e.med[keep], np.interp(s1, c, e.med)]
             f.seam = [e.seam[0] if s0 < 0.5 else None, e.seam[1] if s1 > c[-1] - 0.5 else None]
             f.cut = [s0 > 0.5, s1 < c[-1] - 0.5]
             if f.cut[0]:
@@ -792,6 +900,9 @@ def build(tag, margin=400.0):
     net.tag = tag
     poly = geo.batch_poly(tag)
     net.outline = poly
+    net.standalone = geo.standalone(tag)
+    if net.standalone:
+        return _build_standalone(net, poly, margin)
     game, gname = game_roads()
     net.game_name = gname
     excl = game_exclusion(game)
@@ -862,6 +973,34 @@ def build(tag, margin=400.0):
         edges = clip_edges(edges, region, net.seam_region)
     net.edges = edges
     # nodes
+    nodes = {}
+    for e in edges:
+        nodes.setdefault(e.a, []).append((e.id, 0))
+        nodes.setdefault(e.b, []).append((e.id, -1))
+    net.nodes = nodes
+    return net
+
+
+def _build_standalone(net, poly, margin):
+    """(2026-11-16, rescale step 3) a pilot district: the OSM network clipped to the district box and nothing else (no
+    batch 0.5 box, no v4/v5 game roads, no seams: none of them exists in the 1:1 frame)"""
+    net.game_name = None
+    net.exclusion = Polygon()
+    net.region = poly
+    net.seam_region = poly
+    net.seam_report, net.seam_ends, net.inside_ends = [], [], []
+    big = poly.buffer(margin * geo.LK)
+    area_ll = Polygon([geo.lonlat(x, z) for x, z in big.exterior.coords])
+    edges = load_edges(area_ll)
+    round_fit(edges, net.tag)
+    fam = family_ids(edges, node_map(edges))
+    for e in edges:
+        e.push = None
+    net.pushed = push_beside(edges, fam)
+    net.stats_pair = pair_edges(edges, fam)
+    blend_nodes(edges)
+    edges = clip_edges(edges, poly, poly)
+    net.edges = edges
     nodes = {}
     for e in edges:
         nodes.setdefault(e.a, []).append((e.id, 0))
