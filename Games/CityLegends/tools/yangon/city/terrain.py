@@ -69,8 +69,15 @@ RIVER_EXT = {'2': dict(reach=2700.0, bank=320.0, landings=[(30391.0, 11066.0, 42
 # batches written after another one: shared lakes keep the earlier batch's columns and level, the earlier batch's road
 # banks reach over the seam, and the earlier batch's state file is read for both (terrain_<u>_state.npz)
 LATER_BATCH_BLEND = {'2': ('1',), '3': ('1', '2')}
+# (2026-11-16, step 5) a later 1:1 pilot after the pilots it touches (geo.PILOT_SEAMS): their road banks reach over the
+# shared edge, the columns they wrote past their own outline are kept
+LATER_BATCH_BLEND.update({t: tuple(u) for t, u in getattr(geo, 'PILOT_SEAMS', {}).items()})
 # riverfront (batch 2): docks (OSM waterway=dock) are river water; piers (man_made=pier touching the river) are solid
 # concrete at the quay's level; land within QUAY_W of the river inside the outline is a concrete quay edge
+# (2026-11-16, step 5) 1:1 landmark courts (x, z, radius, top shown, blend studs): Kaba Aye's model stands with its base
+# at Y 77.30 (vault "Kaba Aye 3D model"), on a 315-stud court (the old KabaAyePlate_TEMP); the terrain shows 0.3 over the
+# base so it hides the meshes' open bottom edge
+PILOT_PADS = {'P2': [(34625.66, 17793.07, 157.5, 77.6, 60.0)]}
 QUAY_W = 10.0
 FAR_SHORE = 120.0          # studs of low far shore where a river runs out of the region into the void
 FAR_UP = 1.2
@@ -93,7 +100,8 @@ def regions(tag):
     if geo.standalone(tag):
         # (2026-11-16) a 1:1 pilot district: its own box only (no batch 0.5, no game roads, no other batch in this frame)
         poly = geo.batch_poly(tag)
-        return poly, poly, Polygon(), Polygon()
+        others = unary_union([geo.batch_poly(u) for u in getattr(geo, 'PILOT_SEAMS', {}).get(tag, ())]) or Polygon()
+        return poly, poly, others, Polygon()
     game, _ = rn.game_roads()
     ex = rn.game_exclusion(game)
     poly = geo.batch_poly(tag)
@@ -551,7 +559,10 @@ def build(tag, log=print, diff=False):
                 if abs(Le - L) > 0.05:
                     log('  water %s: level %.2f -> %.2f (as written by an earlier batch)' % (w['name'] or w['id'], L, Le))
                 L = Le
-        pad = np.pad(ins, 1)
+        # (2026-11-16, step 5) the bed deepens from the body's real shore, not from the region's edge: a lake that runs on
+        # into the next district (Inya Lake across P1 / P2) keeps its full depth at the shared edge (the grid reaches
+        # 64+ studs past the outline, more than the bed needs to reach its depth)
+        pad = np.pad(contains_xy(pg, XX, ZZ), 1)
         d = distance_transform_edt(pad)[1:-1, 1:-1] * RES
         river = w in rivers
         dmax = 14.0 if river else (8.0 if w['big'] else 4.0)
@@ -628,6 +639,18 @@ def build(tag, log=print, diff=False):
     code = np.where(onbed & wet, 1, code)       # a ground road over a pond / drain: land
     wet &= ~onbed
     log('  beds: %d columns on a bed, %d on a bank (%.0f s)' % (onbed.sum(), bank.sum(), time.time() - t0))
+    # (2026-11-16, step 5) a 1:1 landmark's flat court (its model's base, no floor faces): the terrain at top inside r
+    # (concrete), eased back to the natural ground over blend studs; road beds and water are kept
+    for (px_, pz_, pr_, ptop, pbl) in PILOT_PADS.get(tag, ()):
+        i0 = max(0, int((px_ - pr_ - pbl - X0) / RES)); i1 = min(nx, int((px_ + pr_ + pbl - X0) / RES) + 1)
+        j0 = max(0, int((pz_ - pr_ - pbl - Z0) / RES)); j1 = min(nz, int((pz_ + pr_ + pbl - Z0) / RES) + 1)
+        sub = (slice(i0, i1), slice(j0, j1))
+        dd = np.hypot(xs[i0:i1][:, None] - px_, zs[j0:j1][None, :] - pz_)
+        ok = inR[sub] & ~wet[sub] & ~onbed[sub]
+        wgt = np.clip((dd - pr_) / pbl, 0.0, 1.0)
+        H[sub] = np.where(ok & (dd < pr_ + pbl), ptop * (1 - wgt) + H[sub] * wgt, H[sub])
+        code[sub] = np.where(ok & (dd < pr_), 5, code[sub])
+        log('  pad at %.0f, %.0f: %d columns at %.2f' % (px_, pz_, int((ok & (dd < pr_)).sum()), ptop))
     filled = onbed & (bedv > nat + 0.05)
     log('  bed over the natural ground: %d columns, max %.1f studs' % (filled.sum(), float((bedv - nat)[filled].max()) if filled.any() else 0))
     # ---- tiles (diff: only the tiles that differ from the last state written, terrain_<tag>_state.npz, into

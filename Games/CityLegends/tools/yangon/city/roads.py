@@ -85,6 +85,7 @@ def parallel_meshes(B, tag, jobs, cells, log=print):
             B.tris_total[kk] = B.tris_total.get(kk, 0) + v
         if k == 0:
             B.zebras = d['zebras']
+            B.paint_stats = d.get('paint')
     # raised strips (cheap) in this process
     extra = {}
     for e, a, b in B.rpieces:
@@ -121,7 +122,7 @@ def mesh_part(tag, k, n, cells):
     B.rpieces_all = B.rpieces
     B.rpieces = []          # the raised strips are made once, by the parent
     meshes = B.build(log=q)
-    pickle.dump(dict(meshes=meshes, tris=B.tris_total, zebras=B.zebras),
+    pickle.dump(dict(meshes=meshes, tris=B.tris_total, zebras=B.zebras, paint=getattr(B, 'paint_stats', None)),
                 open(os.path.join(OUT, 'roads_%s_part%d.pkl' % (tag, k)), 'wb'))
 
 
@@ -189,7 +190,7 @@ def write_meshes(meshes, tag, log=print):
 
 def collision(B, net):
     """invisible boxes: carriageways, pavements, medians, junction squares, decks and parapets"""
-    from shapely.geometry import Polygon, box as _sbox
+    from shapely.geometry import Polygon, Point, box as _sbox
     global _BOX05
     standalone = getattr(net, 'standalone', False)
     _BOX05 = Polygon() if standalone else _sbox(*geo.BOX_05)
@@ -271,6 +272,11 @@ def collision(B, net):
                 b_ = (e.P[j] if k1 is None else e.P[k1]) + Rv * off
                 hh = B.h(np.array([a_, b_]))
                 return float(hh[0]), float(hh[1])
+            if getattr(e, 'paved', False):
+                # (2026-11-16) roadnet.PAVED_WAYS: pavement over the whole width (roadmesh paves it)
+                y0, y1 = hy((l_ + h_) / 2)
+                row(p0, p1, y0 + rm.PAVE_UP, y1 + rm.PAVE_UP, h_ - l_ + 2 * e.walk, 'P', (l_ + h_) / 2, Rv)
+                continue
             if rm.flush(e):
                 # a street with flush edge strips: one box over the whole width
                 y0, y1 = hy((l_ + h_) / 2)
@@ -284,6 +290,9 @@ def collision(B, net):
                     continue
                 if kind == 'M' and not (paired and l_ > 0.5):
                     continue
+                if kind == 'M' and not B.ring_zone.is_empty and B.ring_zone.contains(
+                        Point(((p0 + p1) / 2 + Rv * (a_ + b_) / 2).tolist())):
+                    continue    # (2026-11-16) a roundabout arm's painted splitter: asphalt, no median box
                 q = Polygon([p0 + Rv * a_, p1 + Rv * a_, p1 + Rv * b_, p0 + Rv * b_])
                 # (2026-11-14) a pavement / median box mostly inside batch 0.5's box (a road running obliquely along the
                 # edge: its mesh is clipped there) lay on the 0.5 street's carriageway, 0.5 over it
@@ -304,6 +313,8 @@ def collision(B, net):
     # junction squares
     inc = {}
     for e in net.edges:
+        if getattr(e, 'paved', False):
+            continue
         inc.setdefault(e.a, []).append((e, 0))
         inc.setdefault(e.b, []).append((e, -1))
     for key, lst in inc.items():
@@ -507,7 +518,7 @@ def stats(net, B, structs, lanes, links, lstats, rows, nmods, files, first, mani
                 triangles=tris, meshes=manifest['meshes'] if manifest else None, glb_files=len(manifest['files']) if manifest else None,
                 collision_boxes=len(rows), collision_modules=nmods,
                 lanes=len(lanes), lane_links=len(links), lane_stats=lstats, lane_modules=[dict(file=os.path.basename(p), chars=c, lanes=n, first=f) for p, c, n, f in files],
-                lanes_first=first, zebras=len(B.zebras))
+                lanes_first=first, zebras=len(B.zebras), paint=getattr(B, 'paint_stats', None))
 
 
 def print_stats(st, log=print):
@@ -534,6 +545,8 @@ def print_stats(st, log=print):
     log('lanes %d, links %d, %s; first = %d; modules %s' % (st['lanes'], st['lane_links'], st['lane_stats'], st['lanes_first'],
                                                            ', '.join('%s (%d chars, %d lanes, first %d)' % (m['file'], m['chars'], m['lanes'], m['first']) for m in st['lane_modules'])))
     log('zebra stripes %d' % st['zebras'])
+    if st.get('paint'):
+        log('junction paint: %s' % st['paint'])
 
 
 if __name__ == '__main__':

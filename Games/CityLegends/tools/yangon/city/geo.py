@@ -110,7 +110,12 @@ BATCH_LL = {
 PILOT_LL = {
     # Myanmar Plaza / Kabar Aye Pagoda Road and its flyover, Hanthawaddy roundabout, Sedona, Inya Lake's east shore
     'P1': (96.133, 16.810, 96.159, 16.834),
+    # (2026-11-16, step 5) north of P1: Inya Lake's north / east shores, Kaba Aye Pagoda, the Mayangon / Yankin edge
+    'P2': (96.133, 16.834, 96.165, 16.862),
 }
+# a later pilot joins the earlier ones it touches: its roads that cross the shared edge end exactly on the earlier
+# district's road ends (position, direction, height: roadnet.pilot_seams), its lakes run on (terrain.py)
+PILOT_SEAMS = {'P2': ('P1',)}
 for _t, (_lo0, _la0, _lo1, _la1) in PILOT_LL.items():
     BATCH_LL[_t] = [(_lo0, _la1), (_lo1, _la1), (_lo1, _la0), (_lo0, _la0)]
 

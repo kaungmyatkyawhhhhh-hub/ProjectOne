@@ -11,8 +11,14 @@
 #   merlon ring 25.6 m across (Esri z19: 24.6 m red disc), arcade ring 35 m (Esri z19), 5 porches at bearings 43, 115, 187,
 #   259, 331 deg (Esri walkway spokes), 4 arches between porches = 20 and one window per bay join = 15 (photo 2), 88 merlons.
 #   Heights from photo 2 with a fitted camera (kaba_aye_camera_fit.py). Owner rule: no flicker / overlap -> check_overlaps().
-import bpy, bmesh, math, json, os
+import bpy, bmesh, math, json, os, sys
 from mathutils import Vector, Matrix
+_KIT_DIR = r"D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/tools/yangon/landmarks3d"
+if _KIT_DIR not in sys.path:
+    sys.path.insert(0, _KIT_DIR)
+import importlib
+import ornament_kit as OK  # noqa: E402  (2026-11-16: the carved-gold ornament kit, real relief instead of flat plates)
+importlib.reload(OK)
 
 VAULT = r"D:/ObsidianOne/Claude+Obsidian"
 GLB = VAULT + "/Games/CityLegends/imports/sync/landmarks/kaba_aye.glb"
@@ -314,9 +320,9 @@ def bay_meshes():
             mb.P([(xa, yh, za), (xb, yh, zb), (xc, yh, zc), (xd, yh, zd)], (0, 1, 0))
             mb.P([(xd, Y, zd), (xc, Y, zc), (xc, yh, zc), (xd, yh, zd)], (xd + xc, 0, (zd + zc) / 2 - zs))
             mb.P([(xa, Y, za), (xb, Y, zb), (xb, yh, zb), (xa, yh, za)], (-(xa + xb), 0, -((za + zb) / 2 - zs)))
-    ring(0.02, 0.09, white, 0.0, 0.0)
-    ring(0.09, 0.33, red, 0.0, 0.07)
-    ring(0.33, 0.40, white, 0.07, 0.07)
+    # 2026-11-16: the ornament kit's carved hood (scalloped red band 0.1 m proud, raised white rim 0.14 m, leaf scrolls
+    # at the springings) in place of three flat rings
+    OK.into_mb(OK.arch_hood(a, h, band=0.4, flame=False, scrolls=False), {"B": red, "W": white, "G": white}, (0.0, Y, zs))
     # carved finger panels over the arch: 2 layers (pale green outline behind, cream in front) + red buds
     fw, cw = 0.25, 0.36
     tops = [5.9, 6.2, 6.55, 6.95]
@@ -349,37 +355,26 @@ def bay_meshes():
 
 
 def leaf_meshes():
-    """Curled leaf panel over each bay join (photo: tall S-leaves between the arches), pale green outline + cream."""
+    """Curled leaf panel over each bay join (photo: tall S-leaves between the arches), pale green outline + cream.
+    2026-11-16: the ornament kit's carved leaf (kanote blade with raised inner leaf, spine and foot scrolls) in cream on
+    a mint backing leaf, real bevelled relief instead of two flat plates."""
     mint, cream = MB(), MB()
     y0 = R_ARC + 0.32
-
-    def leaf(pad):
-        n = 12
-        right, left = [], []
-        for i in range(n + 1):
-            t = i / n
-            z = 3.45 + (6.2 - 3.45) * t
-            hw = 0.33 * (math.sin(math.pi * min(t * 1.05, 1.0)) ** 0.6) + pad
-            curl = 0.14 * t * t
-            right.append((curl + hw, z))
-            left.append((curl - hw, z))
-        tip = (0.14, 6.2 + 0.25 + pad)
-        return [left[0], right[0]] + right[1:-1] + [tip] + list(reversed(left[1:-1]))
-    mint.extrude(leaf(0.04), XZ(0), y0, y0 + 0.08)
-    cream.extrude(leaf(0.0), XZ(0), y0 + 0.08, y0 + 0.16, back_face=False)
+    back = OK.Piece("leafback")
+    OK.slab(back, "M", OK.move(OK.flame_outline(0.82, 2.95, lobes=2, n_lobe=2, barb=0.35, base=0.5, lean=0.04), dz=3.4),
+            0.0, 0.06, 0.012, back=True, band=False)
+    OK.into_mb(back, {"M": mint}, (0.0, y0, 0.0))
+    OK.into_mb(OK.merlon_leaf(2.75, 0.66, lod="hi"), {"G": cream}, (0.0, y0 + 0.06 + 0.045 + 0.004, 3.45))
     return {"YgnRenderPainted_Mint": mint, "YgnRenderPainted_Cream": cream}
 
 
 def merlon_mesh():
-    """Gold leaf-shaped merlon (photo), two carved layers 0.08 + 0.06 m."""
+    """Gold leaf merlon (photo 2), from the ornament kit (2026-11-16): a lobed kanote leaf with a raised inner leaf and
+    spine, bevelled relief 0.09 + 0.05 + 0.04 m (was two flat cut-out plates). 'lo' detail: 88 copies."""
     mb = MB()
-    o = [(-0.3, 0.0), (0.3, 0.0), (0.3, 0.6), (0.2, 0.98), (0.1, 1.1), (0.13, 1.22), (0.0, 1.45),
-         (-0.13, 1.22), (-0.1, 1.1), (-0.2, 0.98), (-0.3, 0.6)]
     r = 12.6
     zb = T_TERRACE + 0.3
-    mb.extrude([(u, v + zb) for u, v in o], XZ(0), r - 0.04, r + 0.04)
-    inner = [(u * 0.6, (v - 0.6) * 0.65 + 0.62 + zb) for u, v in o]
-    mb.extrude(inner, XZ(0), r + 0.04, r + 0.1, back_face=False)
+    OK.into_mb(OK.merlon_leaf(1.45, 0.6, lod="lo"), {"G": mb}, (0.0, r, zb))
     return mb
 
 
@@ -617,35 +612,10 @@ def porch_meshes():
     roof.P([(-3.5, yb, zb), (-3.5, yf + 0.04, zb), (0, yf + 0.04, 8.9), (0, yb, 8.9)], (-1, 0, 1))
     roof.P([(3.5, yb, zb), (3.5, yf + 0.04, zb), (0, yf + 0.04, 8.9), (0, yb, 8.9)], (1, 0, 1))
     cream.P([(-3.5, yb, zb), (3.5, yb, zb), (0.0, yb, 8.9)], (0, -1, 0))
-    # crest, layer 0: red backboard
-    red.extrude([(-3.45, zb), (3.45, zb), (0.0, 9.4)], XZ(0), yf + 0.05, yf + 0.15)
-    # layer 1: gold carved fingers stepping up to the centre (7 a side + the centre one)
-    nf, hw = 7, 3.45
-    fwid = hw / (nf + 0.5)
-    fingers = []
-    for k in range(nf):
-        x0 = -hw + fwid * k
-        xm = x0 + fwid / 2
-        fingers.append((x0, x0 + fwid, zb + 0.9 + 3.6 * (1 - abs(xm) / hw)))
-    fingers.append((-fwid / 2, fwid / 2, zb + 0.9 + 3.6 + 0.25))
-    for k in range(nf):
-        x1 = hw - fwid * k
-        xm = x1 - fwid / 2
-        fingers.append((x1 - fwid, x1, zb + 0.9 + 3.6 * (1 - abs(xm) / hw)))
-    fingers.sort()
-    gold.extrude(finger_skyline(fingers, zb), XZ(0), yf + 0.15, yf + 0.27)
-    # layer 2: gold ogee frame, layer 3: red ogee field, sun disc on top
-    gold.extrude(ogee(3.25, zb + 0.1, 8.25, tip=0.3), XZ(0), yf + 0.27, yf + 0.36, back_face=False)
-    red.extrude(ogee(2.95, zb + 0.22, 7.85, tip=0.15), XZ(0), yf + 0.36, yf + 0.44, back_face=False)
-    sun = [(0.55 * math.cos(2 * math.pi * k / 16), 6.65 + 0.55 * math.sin(2 * math.pi * k / 16)) for k in range(16)]
-    gold.extrude(sun, XZ(0), yf + 0.44, yf + 0.52, back_face=False)
-    # gold scrolls curling out at the eave ends
-    for s in (-1, 1):
-        sc = [(3.45, zb), (4.0, zb), (4.3, zb + 0.35), (4.15, zb + 0.8), (4.35, zb + 1.25), (4.1, zb + 1.75), (4.25, zb + 2.2),
-              (3.9, zb + 1.7), (3.95, zb + 1.2), (3.7, zb + 0.8), (3.5, zb + 0.45)]
-        if s < 0:
-            sc = [(-x, z) for x, z in reversed(sc)]
-        gold.extrude(sc, XZ(0), yf + 0.05, yf + 0.25)
+    # crest (2026-11-16): the ornament kit's carved gable: red backboard, gold ogee frame band 0.1 m proud with flame
+    # fingers up its edge and a big apex flame, raised gold sun disc (rays + boss) in the red field, scrolls curling out at
+    # the eave ends. Base 6.9 m on the eave (zb), apex flame tip ~10.3 m (photo 2).
+    OK.into_mb(OK.gable_frame(6.9, 4.0), {"G": gold, "R": red}, (0.0, yf + 0.05, zb))
     return {"YgnRenderPainted_Cream": cream, "YgnGlassMosaic_Teal": teal, "YgnPaint_Red": red,
             "YgnGoldPlate_Trim": gold, "YgnPaint_DarkHall": dark, "YgnPaint_RoofRed": roof, "YgnPaint_Maroon": maroon}
 

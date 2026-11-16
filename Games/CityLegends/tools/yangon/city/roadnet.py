@@ -137,6 +137,11 @@ REAL_XS_SECONDARY = {
     ('kabarayepagoda', False): (1, 4.0),    # junc_06: the ground lanes beside the flyover, one narrow lane a side
 }
 WALK_1TO1 = dict(main=7.5, street=4.0, narrow=3.0)   # pavement 2.5 m on main roads (audit item 14); flush strips
+# (2026-11-16, P1 road fixes) OSM ways built as paving instead of road, per pilot. P1: the Myanmar Centre junction's second
+# slip (Kabar Aye Pagoda Road northbound -> the road east, 1513604988 + 730091070, both untagged primary_link) ran between
+# the mall and its corner plaza and made the plaza an island; the real plaza joins the mall's corner (MC refit note), and
+# the right turn there keeps its other slip (317877729, lanes=1).
+PAVED_WAYS = {'P1': (1513604988, 730091070)}
 
 
 def cross_section_1to1(t):
@@ -1000,6 +1005,14 @@ def _build_standalone(net, poly, margin):
     net.stats_pair = pair_edges(edges, fam)
     blend_nodes(edges)
     edges = clip_edges(edges, poly, poly)
+    # (2026-11-16, P1 road fixes) ways laid as paving, not road (PAVED_WAYS): they stay in the network (heights, terrain
+    # beds) but carry no traffic, no carriageway and no paint; roadmesh paves their whole width (P), roads.py gives them
+    # pavement collision
+    for e in edges:
+        e.paved = e.wid in PAVED_WAYS.get(net.tag, ())
+        if e.paved:
+            e.traffic = False
+    net.pilot_seam_report = pilot_seams(net.tag, edges, poly) if net.tag in getattr(geo, 'PILOT_SEAMS', {}) else []
     net.edges = edges
     nodes = {}
     for e in edges:
@@ -1007,6 +1020,112 @@ def _build_standalone(net, poly, margin):
         nodes.setdefault(e.b, []).append((e.id, -1))
     net.nodes = nodes
     return net
+
+
+PILOT_SNAP = 40.0      # (1:1) studs: a cut end this close to an earlier pilot's cut end on the shared edge is its continuation
+PILOT_EASE = 160.0     # studs over which the lateral snap is eased in
+
+
+def pilot_seams(tag, edges, poly):
+    """(2026-11-16, step 5) a later 1:1 pilot (geo.PILOT_SEAMS) meets the earlier districts it touches: every cut end on
+    the shared edge is matched to the earlier district's road end there (roads_<u>_profile.json: its centre line and
+    surface heights) and moved onto it: the same point, the same direction at the end (eased over PILOT_EASE), and a height
+    pin (e.pin, heights.solve) at the earlier road's surface height. Ends with no partner are reported."""
+    out_dir = os.path.join(geo.BUILD, 'city_1to1')
+    report = []
+    for u in geo.PILOT_SEAMS.get(tag, ()):
+        prof_p = os.path.join(out_dir, 'roads_%s_profile.json' % u)
+        if not os.path.exists(prof_p):
+            report.append(dict(pilot=u, status='no roads_%s_profile.json' % u))
+            continue
+        shared = geo.batch_poly(u).boundary.intersection(poly.boundary)
+        prof = json.load(open(prof_p))
+        # the earlier district's network as roads.py built it (deterministic: terrain.py checks it against the profile),
+        # for its cross-section at each end; the heights come from the profile (same edge order)
+        net_u = build(u)
+        assert len(net_u.edges) == len(prof), 'roads_%s_profile.json is not this network' % u
+        ends = []
+        for eu, pe in zip(net_u.edges, prof):
+            pts = pe['pts']
+            if len(pts) < 2 or len(pts) != len(eu.P):
+                continue
+            lo_u, hi_u = offsets(eu)
+            for k, k2 in ((0, 1), (-1, -2)):
+                q = np.array([pts[k][0], pts[k][2]])
+                if shared.distance(Point(q)) > 0.5:
+                    continue
+                d = q - np.array([pts[k2][0], pts[k2][2]])     # pointing out of the earlier district
+                d /= max(np.linalg.norm(d), 1e-9)
+                med_u = getattr(eu, 'med', None)
+                ends.append(dict(p=q, y=pts[k][1], out=d, name=pe['name'], walk=pe['walk'], oneway=bool(eu.oneway),
+                                 lohi=(float(lo_u[k]), float(hi_u[k])), w=float(eu.w[k]),
+                                 med=None if med_u is None or len(med_u) != len(eu.P) else float(med_u[k]), used=False))
+        for e in edges:
+            for end in (0, 1):
+                if not e.cut[end]:
+                    continue
+                k = 0 if end == 0 else -1
+                q = e.P[k]
+                if shared.distance(Point(q)) > 1.0:
+                    continue
+                # the direction INTO this district at this end
+                din = (e.P[1] - e.P[0]) if end == 0 else (e.P[-2] - e.P[-1])
+                din = din / max(np.linalg.norm(din), 1e-9)
+                best = None
+                for E in ends:
+                    if E['used']:
+                        continue
+                    dd = float(np.linalg.norm(E['p'] - q))
+                    if dd > PILOT_SNAP or float(E['out'] @ din) < 0.7:
+                        continue
+                    if best is None or dd < best[0]:
+                        best = (dd, E)
+                if best is None:
+                    report.append(dict(pilot=u, status='no road end in %s' % u, road=e.name, at=[round(float(q[0])), round(float(q[1]))]))
+                    continue
+                dd, E = best
+                E['used'] = True
+                pE = E['p']
+                P = e.P.copy()
+                c = chain(P)
+                dist = c if end == 0 else c[-1] - c
+                ramp = np.clip(1 - dist / PILOT_EASE, 0, 1)
+                outd = E['out']
+                for i in range(len(P)):
+                    v = P[i] - pE
+                    along = v @ outd
+                    perp = v - along * outd
+                    P[i] = P[i] - perp * ramp[i] ** 1.5
+                P[k] = pE
+                e.P = P
+                e.P0 = P.copy()
+                e.D = dirs_of(P)
+                e.D[k] = outd if end == 0 else -outd
+                # the earlier road's cross-section at the edge: pair weight and median eased in over PILOT_EASE
+                if e.oneway and E['oneway']:
+                    e.w = e.w * (1 - ramp) + E['w'] * ramp
+                    if E['med'] is not None:
+                        med = getattr(e, 'med', None)
+                        if med is None or len(med) != len(P):
+                            med = np.full(len(P), MED)
+                        e.med = med * (1 - ramp) + E['med'] * ramp
+                    elif getattr(e, 'med', None) is not None and len(e.med) == len(P):
+                        e.med = e.med * (1 - ramp) + MED * ramp
+                if not hasattr(e, 'pin') or e.pin is None:
+                    e.pin = [None, None]
+                e.pin[end] = float(E['y'])
+                lo_, hi_ = offsets(e)
+                # (both lines run the same way across the edge: compare the carriageway's span right of the line)
+                xs_here = [round(float(lo_[k]), 2), round(float(hi_[k]), 2)]
+                xs_there = [round(E['lohi'][0], 2), round(E['lohi'][1], 2)]
+                report.append(dict(pilot=u, status='joined', road=e.name, moved=round(dd, 2), y=round(float(E['y']), 2),
+                                   span_here=xs_here, span_there=xs_there, walk_here=e.walk, walk_there=E['walk'],
+                                   at=[round(float(pE[0]), 1), round(float(pE[1]), 1)]))
+        for E in ends:
+            if not E['used']:
+                report.append(dict(pilot=u, status='%s road end with no partner here' % u, road=E['name'],
+                                   at=[round(float(E['p'][0])), round(float(E['p'][1]))]))
+    return report
 
 
 if __name__ == '__main__':
@@ -1017,4 +1136,6 @@ if __name__ == '__main__':
     L = sum(chain(e.P)[-1] for e in net.edges)
     print('edges', len(net.edges), 'nodes', len(net.nodes), 'km %.1f' % (L / geo.SPM / 1000), net.stats_pair)
     for r in net.seam_report:
+        print(r)
+    for r in getattr(net, 'pilot_seam_report', []):
         print(r)

@@ -86,6 +86,12 @@ if ONE_TO_ONE:
     LINE_W = DASH_W = 0.45
     ZEBRA_HALF = 6.0
     BARRIER_H = 2.4
+# (2026-11-16, 1:1 junction paint, audit items 11-13) stop lines, turn arrows, hatched splitters / gores / islands
+RING_SPLIT = 70.0       # medians this close to where an arm meets a roundabout become painted splitters
+STOP_W, STOP_GAP = 1.2, 3.0         # stop line width along the road, its gap before the zebra
+ARROW_L, ARROW_BACK = 15.0, 30.0    # turn arrow length (5 m), its middle this far behind the stop line
+HATCH_PITCH, HATCH_W = 4.5, 0.75    # yellow hatch stripes
+HATCH_MIN, HATCH_MAX = 25.0, 6000.0 # hatched pieces' area (sq studs): splitters, gores, small islands (audit: < ~600 m2)
 
 
 def raised_samples(net, e):
@@ -152,9 +158,13 @@ class Builder:
                 i = j + 1
         # strip polygons
         self.carr, self.outer, self.med, self.meta = [], [], [], []
+        self.paved = []     # (2026-11-16) roadnet.PAVED_WAYS: their whole width as pavement, no carriageway
         for e, a, b in self.gpieces:
             lo, hi = self.lohi[e.id]
             sub = _sub(e, a, b)
+            if getattr(e, 'paved', False):
+                self.paved.append(rn.strip_poly(sub, lo[a:b + 1] - e.walk, hi[a:b + 1] + e.walk))
+                continue
             lo_, hi_ = lo[a:b + 1], hi[a:b + 1]
             paired = (e.w[a:b + 1] > 0.5) & bool(e.oneway)
             if not getattr(net, 'standalone', False):
@@ -205,6 +215,15 @@ class Builder:
             self.allowed = self.allowed.union(net.reach_area)
         self.allowed_p = prep(self.allowed)
         self.zebras = []
+        # (2026-11-16, 1:1, audit items 6 / 12) a roundabout's arms meet the ring on painted splitters, not kerbed
+        # medians: medians within RING_SPLIT of a node where an arm joins the ring are left out (asphalt + yellow hatch)
+        self.ring_zone = Polygon()
+        if ONE_TO_ONE:
+            ring_keys = {k for e in edges if e.tags.get('junction') in ('roundabout', 'circular') for k in (e.a, e.b)}
+            arm_pts = [e.P[0 if e.a in ring_keys else -1] for e in edges
+                       if e.tags.get('junction') not in ('roundabout', 'circular') and (e.a in ring_keys or e.b in ring_keys)]
+            if arm_pts:
+                self.ring_zone = unary_union([Point(p).buffer(RING_SPLIT) for p in arm_pts])
 
     # ------------------------------------------------------------ heights
     def h(self, X):
@@ -225,8 +244,12 @@ class Builder:
         # junction nodes
         nodes = {}
         for e in net.edges:
+            if getattr(e, 'paved', False):
+                continue
             for end, key in ((0, e.a), (-1, e.b)):
                 nodes.setdefault(key, []).append((e, end))
+        self.nodes_inc = nodes
+        self.signal_nodes = []      # (2026-11-16) (node point, radius of its box, [(edge, end, zebra s)])
         npos = {k: v[0][0].P[v[0][1]] for k, v in nodes.items() if len(v) >= 3}
         keys = list(npos)
         if not keys:
@@ -245,10 +268,17 @@ class Builder:
                 if not any(e.look == 'main' for e, _ in inc):
                     continue
                 rad = max(max(abs(self.lohi[e.id][0][end]), abs(self.lohi[e.id][1][end])) for e, end in inc)
+                arms = []
                 for e, end in inc:
                     if self.raised[e.id][0][end]:
                         continue
-                    zeb.extend(self._zebra_on(e, end, rad + 6.0 * geo.LK))
+                    zz = self._zebra_on(e, end, rad + 6.0 * geo.LK)
+                    zeb.extend(zz)
+                    if zz:
+                        L_ = rn.chain(e.P)[-1]
+                        d_ = rad + 6.0 * geo.LK + 4
+                        arms.append((e, end, d_ if end == 0 else L_ - d_))
+                self.signal_nodes.append((npos[key], rad, arms))
             elif kind == 'crossing':
                 # a crossing on a main road away from junctions
                 best = None
@@ -298,7 +328,7 @@ class Builder:
         """white paint polygons per edge (ground and raised), already cut at junctions and zebras"""
         out = []   # (polygon, edge)
         for e in self.net.edges:
-            if e.look != 'main':
+            if e.look != 'main' or getattr(e, 'paved', False):
                 continue
             lo, hi = self.lohi[e.id]
             n = len(e.P)
@@ -337,7 +367,7 @@ class Builder:
                 if role == 'edge' and e.nf + e.nb <= 1 and False:
                     continue
                 if not dashed:
-                    out.append((rn.strip_poly(e, off - wd / 2, off + wd / 2), e, role))
+                    out.append((rn.strip_poly(e, off - wd / 2, off + wd / 2), e, role, _side(e, off)))
                 else:
                     # dashes DASH_ON on, DASH_OFF off (6 / 6; 1:1: 9 / 18)
                     s0 = 0.0
@@ -346,14 +376,27 @@ class Builder:
                         sub = _sub_s(e, a, b)
                         if sub is not None:
                             oo = np.interp(rn.chain(sub.P) + a, c, off)
-                            out.append((rn.strip_poly(sub, oo - wd / 2, oo + wd / 2), e, role))
+                            out.append((rn.strip_poly(sub, oo - wd / 2, oo + wd / 2), e, role, _side(e, oo)))
                         s0 += DASH_ON + DASH_OFF
         # cut: lines stop where another road's carriageway lies (for the centre / lane lines only roads at least as big)
         res = []
         carr_b = {}
         zb = [z.buffer(0.6, join_style=2) for z in self.zebras]
         ztree = STRtree(zb) if zb else None
-        for pg, e, role in out:
+        # (2026-11-16, 1:1, CLAUDE.md "Yangon look": RoadLines clearMouths) a smaller road (or one of the same rank that
+        # does not cross) breaks only the lines on its own side of this road's middle (4 studs out; 1.5 past a divided
+        # road's midline), so the far side's lines and the middle line run on; a bigger road breaks every line; and at
+        # a signalised junction every line stops at the zebras (the junction box)
+        zones = {}
+        def zone(e, side):
+            key = (e.id, side)
+            if key not in zones:
+                thr = 1.5 if getattr(e, 'paired', False) else 4.0
+                zones[key] = rn.strip_poly(e, thr, 160.0) if side > 0 else rn.strip_poly(e, -160.0, -thr)
+            return zones[key]
+        boxes = [Point(p).buffer(r + 3.0) for p, r, arms in getattr(self, 'signal_nodes', [])] if ONE_TO_ONE else []
+        btree = STRtree(boxes) if boxes else None
+        for pg, e, role, side in out:
             if pg.is_empty:
                 continue
             cut = []
@@ -363,15 +406,39 @@ class Builder:
                     continue
                 if rn.norm_name(f.name) == rn.norm_name(e.name) and f.name:
                     continue
-                if role != 'edge' and f.rank > e.rank:
-                    continue
                 if f.oneway and e.oneway and f.layer == e.layer and abs(float(f.D[len(f.D) // 2] @ e.D[len(e.D) // 2])) > 0.95:
                     continue
                 k = int(k)
+                if not ONE_TO_ONE:
+                    if role != 'edge' and f.rank > e.rank:
+                        continue
+                    if k not in carr_b:
+                        carr_b[k] = self.carr[k].buffer(1.0, join_style=2)
+                    if carr_b[k].intersects(pg):
+                        cut.append(carr_b[k])
+                    continue
                 if k not in carr_b:
                     carr_b[k] = self.carr[k].buffer(1.0, join_style=2)
-                if carr_b[k].intersects(pg):
-                    cut.append(carr_b[k])
+                cb_ = carr_b[k]
+                if not cb_.intersects(pg):
+                    continue
+                if f.rank < e.rank or f.layer != e.layer:
+                    cut.append(cb_)
+                    continue
+                if f.rank == e.rank:
+                    near = cb_.intersection(pg.buffer(40.0))
+                    if near.intersects(zone(e, 1)) and near.intersects(zone(e, -1)):
+                        cut.append(cb_)      # a crossing road of the same rank: every line stops
+                        continue
+                if side == 0:
+                    continue                 # the middle line never breaks for a smaller road
+                part = cb_.intersection(zone(e, side))
+                if not part.is_empty:
+                    cut.append(part)
+            if btree is not None:
+                bb = [boxes[int(k)] for k in btree.query(pg)]
+                if bb:
+                    cut.append(unary_union(bb))
             g = pg
             if cut:
                 g = g.difference(unary_union(cut))
@@ -383,6 +450,201 @@ class Builder:
                 if q.area > 0.05:
                     res.append((q, e, 'LY' if role == 'median' else 'L'))
         return res
+
+    # ------------------------------------------------------------ junction paint (1:1)
+    def extra_paint(self):
+        """(2026-11-16, audit items 11-13) -> (white, yellow) polygons: stop lines before the zebras of every signalised
+        approach, turn arrows from OSM turn:lanes, yellow hatch on the pieces the junction closing fills between two
+        carriageways running the same way or opposite ways (roundabout splitters, slip / ramp gores) and on small
+        islands closed in by carriageways"""
+        white, yellow = [], []
+        stop_at = {}
+        for p, rad, arms in getattr(self, 'signal_nodes', []):
+            for e, end, sz in arms:
+                lo, hi = self.lohi[e.id]
+                if end == -1:
+                    s_ = sz - ZEBRA_HALF - STOP_GAP - STOP_W / 2
+                else:
+                    if e.oneway:
+                        continue
+                    s_ = sz + ZEBRA_HALF + STOP_GAP + STOP_W / 2
+                pq = self._at(e, s_)
+                if pq is None:
+                    continue
+                q, d, i = pq
+                r = np.array([-d[1], d[0]])
+                if end == -1:
+                    a_, b_ = (lo[i] if e.oneway else 0.0), hi[i]
+                else:
+                    a_, b_ = lo[i], 0.0
+                a_, b_ = a_ + 0.6, b_ - 0.6
+                if b_ - a_ < 3.0:
+                    continue
+                white.append(Polygon([q - d * STOP_W / 2 + r * a_, q + d * STOP_W / 2 + r * a_,
+                                      q + d * STOP_W / 2 + r * b_, q - d * STOP_W / 2 + r * b_]))
+                stop_at[(e.id, end)] = s_
+        white += self._arrows(stop_at)
+        yellow += self._hatches()
+        self.paint_stats = dict(stop_lines=len(stop_at), arrows=getattr(self, '_n_arrows', 0), hatches=getattr(self, '_n_hatch', 0))
+        return white, yellow
+
+    def _at(self, e, s_):
+        c = rn.chain(e.P)
+        if s_ < 1.0 or s_ > c[-1] - 1.0:
+            return None
+        i = int(np.clip(np.searchsorted(c, s_), 1, len(e.P) - 1))
+        q = np.array([np.interp(s_, c, e.P[:, 0]), np.interp(s_, c, e.P[:, 1])])
+        return q, e.D[i], i
+
+    def _arrows(self, stop_at):
+        out = []
+        n_ = 0
+        inc = getattr(self, 'nodes_inc', {})
+        for e in self.net.edges:
+            if getattr(e, 'paved', False) or not e.traffic:
+                continue
+            for end, key in ((-1, e.b), (0, e.a)):
+                if len(inc.get(key, [])) < 3 or self.raised[e.id][0][end]:
+                    continue
+                if e.oneway:
+                    if end == 0:
+                        continue
+                    tag = e.tags.get('turn:lanes') or e.tags.get('turn:lanes:forward')
+                    n = e.nf
+                else:
+                    tag = e.tags.get('turn:lanes:forward' if end == -1 else 'turn:lanes:backward')
+                    n = e.nf if end == -1 else e.nb
+                if not tag or n < 1:
+                    continue
+                toks = tag.split('|')
+                L = rn.chain(e.P)[-1]
+                if (e.id, end) in stop_at:
+                    s0 = stop_at[(e.id, end)]
+                    s_ = s0 - ARROW_BACK if end == -1 else s0 + ARROW_BACK
+                else:
+                    reach = max(max(abs(self.lohi[f.id][0][k]), abs(self.lohi[f.id][1][k])) for f, k in inc[key])
+                    s_ = L - reach - 12.0 - ARROW_BACK if end == -1 else reach + 12.0 + ARROW_BACK
+                pq = self._at(e, s_)
+                if pq is None or s_ < ARROW_L or s_ > L - ARROW_L:
+                    continue
+                q, d, i = pq
+                lo, hi = self.lohi[e.id]
+                R = np.array([-d[1], d[0]])
+                t = d if end == -1 else -d          # the way of travel
+                rr = R if end == -1 else -R         # right of the travel
+                for k in range(1, n + 1):
+                    if e.oneway:
+                        off = lo[i] + (hi[i] - lo[i]) * (k - 0.5) / n
+                    elif end == -1:
+                        off = hi[i] * (k - 0.5) / n
+                    else:
+                        off = lo[i] * (k - 0.5) / n
+                    m = len(toks)
+                    j = 0 if n == 1 else int(round((k - 1) * (m - 1) / (n - 1)))
+                    kinds = set()
+                    for w in toks[min(j, m - 1)].split(';'):
+                        w = w.strip()
+                        if w == 'through':
+                            kinds.add('T')
+                        elif w.endswith('left') and not w.startswith('merge'):
+                            kinds.add('L')
+                        elif w.endswith('right') and not w.startswith('merge'):
+                            kinds.add('R')
+                    if not kinds:
+                        continue
+                    pg = _arrow(q + R * off, t, rr, kinds)
+                    if pg is None:
+                        continue
+                    clash = False
+                    for kk in self.ctree.query(pg):
+                        f = self.meta[int(kk)]
+                        if f.id != e.id and rn.norm_name(f.name) != rn.norm_name(e.name) and self.carr[int(kk)].intersects(pg):
+                            clash = True
+                            break
+                    if not clash:
+                        out.append(pg)
+                        n_ += 1
+        self._n_arrows = n_
+        return out
+
+    def _hatches(self):
+        """yellow hatch on the junction closing's fill between carriageways (see extra_paint)"""
+        inc = getattr(self, 'nodes_inc', {})
+        mm = self.mlist
+        pieces = []
+        seen = []
+        for key, lst in inc.items():
+            if len(lst) < 3:
+                continue
+            e0, end0 = lst[0]
+            if self.raised[e0.id][0][end0]:
+                continue
+            p = e0.P[end0]
+            disk = Point(p).buffer(90.0)
+            ks = [int(k) for k in self.ctree.query(disk.buffer(40.0))]
+            if len(ks) < 2:
+                continue
+            U = unary_union([self.carr[k] for k in ks])
+            C = U.buffer(RC, join_style=1).buffer(-RC, join_style=1)
+            G = C.difference(U)
+            if self.mtree is not None:
+                med = [mm[int(k)] for k in self.mtree.query(disk.buffer(40.0))]
+                if med:
+                    Mr = unary_union(med).buffer(1.5)
+                    G = G.difference(Mr.difference(self.ring_zone))
+            if self.rtree is not None:
+                rk = [int(k) for k in self.rtree.query(disk)]
+                if rk:
+                    G = G.difference(unary_union([self.rfoot[k] for k in rk]).buffer(1.0))
+            G = G.intersection(Point(p).buffer(80.0))
+            for pc0 in _polys(G):
+                for pc in _polys(pc0.buffer(-0.2).buffer(0.2)):
+                    if not (HATCH_MIN <= pc.area <= HATCH_MAX):
+                        continue
+                    if any(pc.centroid.distance(sp) < 0.5 and abs(pc.area - sa) < 1.0 for sp, sa in seen):
+                        continue
+                    if self._hatch_kind(pc, ks):
+                        seen.append((pc.centroid, pc.area))
+                        pieces.append(pc)
+        # two nodes can find overlapping pieces: one union, so no hatch lies on hatch
+        merged = _polys(unary_union(pieces)) if pieces else []
+        self._n_hatch = len(merged)
+        out = []
+        for pc in merged:
+            h = _hatch(pc)
+            if h is not None:
+                out.append(h)
+        return out
+
+    def _hatch_kind(self, pc, ks):
+        """a splitter / gore: it touches two carriageways (of different edges) that run within 45 degrees of parallel
+        beside it; an island: closed in by carriageways (85% of its edge on one)"""
+        touch = []
+        ring = pc.exterior
+        on = 0.0
+        for k in ks:
+            g = self.carr[k]
+            if g.distance(pc) < 0.6:
+                e = self.meta[k]
+                L = LineString(e.P)
+                s_ = L.project(pc.centroid)
+                c = rn.chain(e.P)
+                i = int(np.clip(np.searchsorted(c, s_), 1, len(e.P) - 1))
+                touch.append((e, e.D[i]))
+                on += ring.intersection(g.buffer(0.6)).length
+        if len(touch) < 2:
+            return False
+        if on >= 0.85 * ring.length and len(touch) >= 3:
+            return True
+        for a in range(len(touch)):
+            for b in range(a + 1, len(touch)):
+                ea, da = touch[a]
+                eb, db = touch[b]
+                if ea.id == eb.id:
+                    continue
+                if abs(float(da @ db)) > 0.7:
+                    return True
+        return False
 
     # ------------------------------------------------------------ cells
     def cells(self):
@@ -398,6 +660,9 @@ class Builder:
         self.make_zebras()
         lines = self.line_polys()
         ltree = STRtree([x[0] for x in lines]) if lines else None
+        xw, xy = self.extra_paint() if ONE_TO_ONE else ([], [])
+        xwt = STRtree(xw) if xw else None
+        xyt = STRtree(xy) if xy else None
         meshes = {}
         tris_total = {}
         cl = self.cells()
@@ -438,6 +703,10 @@ class Builder:
                 for z in self.zebras:
                     if z.intersects(cb):
                         (yellow if ONE_TO_ONE else paint).append(z)
+            if xwt is not None:
+                paint += [xw[int(k)] for k in xwt.query(cb)]
+            if xyt is not None:
+                yellow += [xy[int(k)] for k in xyt.query(cb)]
             gy = None
             if yellow:
                 gy = unary_union(yellow)
@@ -481,6 +750,7 @@ class Builder:
         Rc = sn(carr.buffer(RC, join_style=1).buffer(-RC, join_style=1))
         ko = [int(k) for k in self.otree.query(cbm)]
         oo_r = [self.outer[k] for k in ko if not flush(self.meta[k])]
+        oo_r += [pv for pv in self.paved if pv.intersects(cbm)]
         oo_f = [self.outer[k] for k in ko if flush(self.meta[k])]
         Po = unary_union(oo_r).intersection(cbm) if oo_r else Polygon()
         Po = Po.buffer(RC * 0.75, join_style=1).buffer(-RC * 0.75, join_style=1)
@@ -503,6 +773,8 @@ class Builder:
                 if opens:
                     M = M.difference(unary_union(opens).buffer(2.0))
                 M = sn(M.buffer(1.0, join_style=2).buffer(-1.0, join_style=2).buffer(-0.4).buffer(0.4))
+                if not self.ring_zone.is_empty:
+                    M = sn(M.difference(self.ring_zone).buffer(-0.4).buffer(0.4))
         raised = Polygon()
         if self.rtree is not None:
             rk = [int(k) for k in self.rtree.query(cbm)]
@@ -788,6 +1060,68 @@ class Builder:
             if g.intersects(foot):
                 return True
         return False
+
+
+def _arrow(c, t, r, kinds):
+    """a painted turn arrow (ARROW_L long) with its middle at c, pointing along t (r = right of t); kinds of T / L / R"""
+    t = np.asarray(t, float)
+    r = np.asarray(r, float)
+
+    def P(u, v):
+        return tuple(c + t * u + r * v)
+    h = ARROW_L / 2
+    parts = []
+    W = 0.35
+    if 'T' in kinds:
+        parts.append(LineString([P(-h, 0), P(h - 4.0, 0)]).buffer(W, cap_style=2))
+        parts.append(Polygon([P(h - 4.0, -1.5), P(h, 0), P(h - 4.0, 1.5)]))
+    for side, k in ((-1.0, 'L'), (1.0, 'R')):
+        if k not in kinds:
+            continue
+        base = 0.5 if 'T' in kinds else 2.0
+        parts.append(LineString([P(-h, 0), P(base, 0), P(base + 2.6, side * 2.6)]).buffer(W, cap_style=2, join_style=2))
+        b0 = np.array([base + 2.6, side * 2.6])
+        tip = b0 + np.array([1.0, side]) / math.sqrt(2) * 3.0
+        n_ = np.array([1.0, -side]) / math.sqrt(2) * 1.4
+        parts.append(Polygon([P(*(b0 + n_)), P(*tip), P(*(b0 - n_))]))
+    if not parts:
+        return None
+    g = unary_union(parts)
+    return g if g.is_valid and not g.is_empty else g.buffer(0)
+
+
+def _hatch(pc):
+    """yellow hatch: an outline LINE_W wide inside the piece and stripes HATCH_W wide every HATCH_PITCH at 45 degrees
+    to the piece's long side"""
+    inner = pc.buffer(-LINE_W)
+    outline = pc.difference(inner) if not inner.is_empty else pc
+    mr = pc.minimum_rotated_rectangle
+    xy = np.array(mr.exterior.coords)[:4]
+    e1, e2 = xy[1] - xy[0], xy[2] - xy[1]
+    ax = e1 if np.linalg.norm(e1) >= np.linalg.norm(e2) else e2
+    ang = math.atan2(ax[1], ax[0]) + math.pi / 4
+    d = np.array([math.cos(ang), math.sin(ang)])
+    n = np.array([-d[1], d[0]])
+    c = np.array(pc.centroid.coords[0])
+    R_ = math.hypot(pc.bounds[2] - pc.bounds[0], pc.bounds[3] - pc.bounds[1])
+    stripes = []
+    k = -int(R_ / HATCH_PITCH) - 1
+    while k * HATCH_PITCH <= R_:
+        o = c + n * (k * HATCH_PITCH)
+        stripes.append(LineString([tuple(o - d * R_), tuple(o + d * R_)]).buffer(HATCH_W / 2, cap_style=2))
+        k += 1
+    g = outline
+    if not inner.is_empty and stripes:
+        g = g.union(unary_union(stripes).intersection(inner))
+    return g if not g.is_empty else None
+
+
+def _side(e, off):
+    """(1:1 clearMouths) which side of the road's middle a line runs on: +1 right, -1 left, 0 the middle line (within
+    4 studs of a two-way road's centre; a divided road's lines all lie right of its midline)"""
+    m = float(np.mean(off))
+    thr = 1.5 if getattr(e, 'paired', False) else 4.0
+    return 1 if m >= thr else (-1 if m <= -thr else 0)
 
 
 def dif(a, b):

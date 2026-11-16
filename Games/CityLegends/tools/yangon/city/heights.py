@@ -477,6 +477,10 @@ def solve(net, G, iters=2, log=print):
         for end, sm in ((0, e.seam[0]), (-1, e.seam[1])):
             if sm:
                 pins[int(e._ids[end])] = sm['y']
+        # (2026-11-16, step 5) a 1:1 pilot's road end on an earlier pilot's edge: that road's surface height there
+        for end, py in zip((0, -1), getattr(e, 'pin', None) or (None, None)):
+            if py is not None:
+                pins[int(e._ids[end])] = py
     # (2026-11-14) an end on batch 0.5's box edge where a batch 0.5 mesh street continues it, more than STREET_PIN_STEP
     # off that street's height (Nar Nat Taw's ramp left the box 10.6 studs over its street): pinned to the street
     # (streets.py writes the street ends' own heights, streets_05_edgeends.json); smaller steps are eased by streets.py

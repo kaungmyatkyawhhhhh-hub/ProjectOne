@@ -498,6 +498,18 @@ def first_index(tag):
                 break
             total += len(re.findall(r'\{ road = ', open(p, encoding='utf-8').read()))
             k += 1
+    # (2026-11-16, step 5) a 1:1 pilot numbers on after the earlier pilots' modules (build/city_1to1)
+    if geo.standalone(tag):
+        for t in geo.PILOT_LL:
+            if t == tag:
+                break
+            k = 1
+            while True:
+                p = os.path.join(geo.BUILD, 'city_1to1', 'YangonLanesB%s_%d.lua' % (t, k))
+                if not os.path.exists(p):
+                    break
+                total += len(re.findall(r'\{ road = ', open(p, encoding='utf-8').read()))
+                k += 1
     return total + 1
 
 

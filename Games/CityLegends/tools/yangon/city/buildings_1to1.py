@@ -80,12 +80,25 @@ M = geo.m
 
 # landmark sites built on their own (re-fitted later): the lots stay empty. Points in lon / lat round the real site
 # (OSM outlines Myanmar Plaza 421632377, Melia 463189671, Sedona 374512164 + the drives and gates of the site audit).
-LANDMARK_SITES = {
+LANDMARK_SITES_BY_TAG = {}
+LANDMARK_SITES_BY_TAG["P1"] = {
     "myanmar_centre": dict(osm=["o421632377", "o463189671"], pts=[(96.15439, 16.82723), (96.15476, 16.82866)], grow=22.0),
     # o452876267 = Sedona's Inya Wing tower: built by the Sedona refit (sedona3d.py at 1:1), not as a kit condo
     "sedona": dict(osm=["o374512164", "o452876267"], pts=[(96.154804, 16.830686), (96.154804, 16.830816), (96.156476, 16.830081),
                                             (96.154886, 16.829420), (96.155045, 16.829389), (96.154687, 16.829663)], grow=18.0),
 }
+# (2026-11-16, step 5) P2's catalogue landmarks (vault "Research - Yangon landmarks catalogue"): their lots stay empty for
+# their own models. Kaba Aye: the OSM compound (area 186911800) and the placed model's 315-stud platform round the stupa.
+LANDMARK_SITES_BY_TAG["P2"] = {
+    "kaba_aye": dict(osm=[], areas=[186911800], pts=[], circles=[(96.15447, 16.85681, 52.5)], grow=6.0),
+    "diamond_inya": dict(osm=["o522822395"], pts=[], grow=15.0),
+    "inya_lake_hotel": dict(osm=["o1281765358", "o522822402"], pts=[], grow=15.0),
+    "lotte_hotel": dict(osm=["o1525507325"], pts=[], grow=15.0),
+}
+LANDMARK_SITES = LANDMARK_SITES_BY_TAG.get(TAG, {})
+# earlier pilots this one meets (geo.PILOT_SEAMS): their buildings by the shared edge are kept, never doubled, and no
+# compound wall is drawn along the shared edge twice
+SEAM_WITH = getattr(geo, "PILOT_SEAMS", {}).get(TAG, ())
 
 # wall palettes (kit critique, measured: 55-85% neutral)
 PAL = {
@@ -163,13 +176,31 @@ def corridors():
 
 def landmark_zones(fp_by_id):
     zones = {}
+    areas = None
     for name, s in LANDMARK_SITES.items():
         geoms = [Point(geo.world(*p)) for p in s["pts"]]
         for oid in s["osm"]:
             b = fp_by_id.get(oid)
             if b:
                 geoms.append(Polygon(geo.proj(b["poly"])))
+        if s.get("areas"):
+            if areas is None:
+                areas = {a["id"]: a for a in json.load(open(os.path.join(geo.OSM, "areas.json"), encoding="utf-8"))["areas"]}
+            for aid in s["areas"]:
+                a = areas.get(aid)
+                if a:
+                    geoms.append(Polygon(geo.proj(a["p"])).buffer(0))
+        for lo, la, r_m in s.get("circles", ()):
+            geoms.append(Point(geo.world(lo, la)).buffer(M(r_m), 32))
         zones[name] = unary_union(geoms).convex_hull.buffer(M(s["grow"]))
+    # (step 5) the ordinary pagodas of build/pagodas/pagodas.json in this district (PagodaPlace puts them there): the stupa
+    # and a clear ring round it
+    pj = os.path.join(ROOT, "build", "pagodas", "pagodas.json")
+    if TAG != "P1" and os.path.exists(pj):
+        lo0, la0, lo1, la1 = geo.PILOT_LL[TAG]
+        for pg in json.load(open(pj, encoding="utf-8"))["pagodas"]:
+            if lo0 <= pg["lon"] <= lo1 and la0 <= pg["lat"] <= la1:
+                zones["pagoda_" + pg["id"]] = Point(geo.world(pg["lon"], pg["lat"])).buffer(M(pg["w"] * 0.71 + 6.0), 24)
     return zones
 
 
@@ -465,6 +496,41 @@ def main():
         kept.append(q)
         kp.append(q["g"])
     blds = kept
+    # (step 5) the earlier pilots' buildings standing over the shared edge (their centroid on their side): never built twice,
+    # a building of ours they overlap is dropped (> 30 %) or cut clear of them
+    seam_polys = []
+    for u in SEAM_WITH:
+        pp = os.path.join(B1, "buildings_%s" % u, "plots.json")
+        if not os.path.exists(pp):
+            continue
+        near_edge = geo.batch_poly(u).boundary.intersection(district.boundary).buffer(M(60))
+        seen = set()
+        for r_ in json.load(open(pp)):
+            seen.add(r_["id"])
+            g_ = Polygon(r_["poly"]).buffer(0)
+            if g_.intersects(near_edge):
+                seam_polys.append(g_.buffer(M(1.0)))
+        n0 = len(blds)
+        blds = [q for q in blds if q["id"] not in seen]
+        stats["dropped_built_in_" + u] += n0 - len(blds)
+    if seam_polys:
+        stree = STRtree(seam_polys)
+        out_ = []
+        for q in blds:
+            g = q["g"]
+            for j in stree.query(g, predicate="intersects"):
+                if g.intersection(seam_polys[j]).area > 0.3 * q["g"].area:
+                    g = None
+                    break
+                g = g.difference(seam_polys[j])
+                if g.geom_type == "MultiPolygon":
+                    g = max(g.geoms, key=lambda x: x.area)
+            if g is None or g.is_empty or g.geom_type != "Polygon" or g.area < M(3) * M(3):
+                stats["dropped_seam_overlap"] += 1
+                continue
+            q["g"] = g.buffer(0)
+            out_.append(q)
+        blds = out_
     # remove the small overlaps that remain (they would z-fight)
     tree = STRtree([q["g"] for q in blds])
     for i, q in enumerate(blds):
@@ -505,6 +571,7 @@ def main():
     blocks = district.difference(corr.buffer(M(0.5)))
     blocks = [p for p in (blocks.geoms if blocks.geom_type == "MultiPolygon" else [blocks]) if p.area > M(10) * M(10)]
     btree = STRtree([q["g"] for q in blds])
+    infill_block = unary_union(list(zones.values()) + seam_polys) if (zones or seam_polys) else Polygon()
     infill = 0
     for bl in blocks:
         if bl.area < M(40) * M(40):
@@ -520,7 +587,7 @@ def main():
         for gx in np.arange(x0 + M(4), x1 - M(10), M(14)):
             for gz in np.arange(z0 + M(4), z1 - M(12), M(16)):
                 hb = sbox(gx, gz, gx + M(10), gz + M(12))
-                if bl.buffer(-M(2)).contains(hb) and not open_u.intersects(hb):
+                if bl.buffer(-M(2)).contains(hb) and not open_u.intersects(hb) and not infill_block.intersects(hb):
                     blds.append(dict(id="i%d" % infill, src="infill", kind="house", floors=r.choice([1, 2, 2, 3]),
                                      area_m2=120.0, g=hb, name=None))
                     infill += 1
@@ -836,7 +903,8 @@ def main():
         extra = [e.difference(lines.buffer(M(1.0))) for e in extra]
         lines = unary_union([lines] + [e for e in extra if not e.is_empty])
         stats["osm_walls"] = len(extra)
-    cut = unary_union([bunion, corr.buffer(M(0.3))] + gate_cut + list(zones.values()))
+    seam_cut = [geo.batch_poly(u).boundary.intersection(district.boundary).buffer(M(1.0)) for u in SEAM_WITH]
+    cut = unary_union([bunion, corr.buffer(M(0.3))] + gate_cut + list(zones.values()) + seam_polys + seam_cut)
     lines = lines.difference(cut)
     # straight runs: consecutive segments of a line that turn less than 3 degrees are one run (one collision box)
     runs = []
