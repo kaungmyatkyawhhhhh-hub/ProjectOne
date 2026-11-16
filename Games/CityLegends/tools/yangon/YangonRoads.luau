@@ -906,7 +906,12 @@ function M.findCorners()
 				end
 			end
 			local px, pz, ka, ta, kb, tb = crossOf(ePts, bPts)
-			assert(px, "corner: " .. m.road .. " side " .. side .. " never meets " .. m.on)
+			if not px then
+				-- (1:1: an edge that never meets the other kerb gets no round corner, the mouth stays square)
+				sideP = nil
+				M.noCorner = (M.noCorner or 0) + 1
+				break
+			end
 			sideP[side] = { px = px, pz = pz, ePts = ePts, bPts = bPts, ka = ka, ta = ta, kb = kb, tb = tb, sb = sb }
 		end
 		pass[mi] = sideP
@@ -921,6 +926,9 @@ function M.findCorners()
 	end
 	for mi, m in M.mouths do
 		local sideP = pass[mi]
+		if not sideP then
+			continue
+		end
 		local S = M.R[m.road]
 		for _, side in { -1, 1 } do
 			local c = sideP[side]
@@ -1536,8 +1544,15 @@ function M.buildRoads(names: { string })
 				mf.Name = m.road
 				mf.Parent = parent
 			end
-			local made = M.buildMouth(m, mf :: Instance)
-			table.insert(lines, string.format("mouth %s on %s: k %d, %d corners, %d wedges, area %.1f of %.1f", m.road, m.on, m.k, m.corners, made, m.area, m.outline))
+			local okM, made = pcall(M.buildMouth, m, mf :: Instance)
+			if not okM then
+				table.insert(lines, "MOUTH FAILED " .. m.road .. " on " .. m.on .. ": " .. tostring(made))
+				made = 0
+			elseif M.box == nil then
+				table.insert(lines, string.format("mouth %s on %s: k %d, %d corners, %d wedges, area %.1f of %.1f", m.road, m.on, m.k, m.corners, made, m.area, m.outline))
+			else
+				M.mouthsBuilt = (M.mouthsBuilt or 0) + 1
+			end
 			task.wait()
 		end
 	end
