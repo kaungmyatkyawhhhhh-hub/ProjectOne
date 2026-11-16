@@ -491,8 +491,10 @@ function G.edge(holding: Instance)
 			local cf = CFrame.new(x, y, z) * CFrame.Angles(0, yaw, 0)
 			if code == "WALK" then
 				local top = y + sy / 2
-				T:FillBlock(CFrame.new(x, top - 1.0 + 8.5, z) * CFrame.Angles(0, yaw, 0), Vector3.new(sx + 2, 17, sz + 2), Enum.Material.Air)
-				T:FillBlock(CFrame.new(x, top - 2.6 - 3, z) * CFrame.Angles(0, yaw, 0), Vector3.new(sx + 1, 6, sz), Enum.Material.Grass)
+				-- (4-stud voxels: clear from 3.5 under the top so no voxel layer ends level with the walkway; the 4-stud
+				-- deep walkway hides the step to the grass under it)
+				T:FillBlock(CFrame.new(x, top - 3.5 + 10, z) * CFrame.Angles(0, yaw, 0), Vector3.new(sx + 2, 20, sz + 2), Enum.Material.Air)
+				T:FillBlock(CFrame.new(x, top - 3.6 - 3, z) * CFrame.Angles(0, yaw, 0), Vector3.new(sx + 1, 6, sz), Enum.Material.Grass)
 			end
 			local lk = G.EDGE_LOOK[code]
 			local q = Instance.new("Part")

@@ -385,6 +385,8 @@ def main():
         mat[land] = "L"
         cl = open_ & (zn == "paved")
         cl |= fore & (d_road <= M(9)) & ~(zn == "park")
+        gx, gz = np.gradient(H.astype(np.float32), RES)
+        cl &= np.hypot(gx, gz) < 0.12     # concrete only where the ground is flat (no sloped concrete banks)
         mat[cl] = "C"
         mat[lmk] = "."
         mat[~land] = "."
@@ -943,7 +945,7 @@ def lake_edge(G, water, prof, H, lmk, outside):
             parts.append("WALL %.2f %.2f %.2f %.2f %.2f %.2f %.5f" % (wc[0], (wall_bot + wall_top) / 2, wc[1], L + wt,
                                                                     wall_top - wall_bot, wt, yaw))
             kc = wc + nrm * (wt / 2 - 0.1 + WALK_W / 2)
-            parts.append("WALK %.2f %.2f %.2f %.2f %.2f %.2f %.5f" % (kc[0], top - 1.0 + alt, kc[1], L + 0.4, 2.0, WALK_W,
+            parts.append("WALK %.2f %.2f %.2f %.2f %.2f %.2f %.5f" % (kc[0], top - 2.0 + alt, kc[1], L + 0.4, 4.0, WALK_W,
                                                                     yaw))
             # rails (top + middle) on the wall, posts every POST_GAP
             for hh, th in ((RAIL_H, 0.3), (RAIL_H * 0.55, 0.22)):
