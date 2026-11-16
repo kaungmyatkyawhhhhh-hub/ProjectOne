@@ -232,6 +232,25 @@ def corridors():
         for k in range(len(P)):
             polys.append(Point(P[k]).buffer(max(abs(lo), abs(hi)) * 0.98, 8))
         lines.append((LineString(P), e["hw"], (lo, hi), e))
+    # (2026-11-16, P3) the roads05 network (the Friday builder's 1:1 roads, build/city_1to1/roads05_*<TAG>*/roads.json)
+    # can lie a few metres off the profile's lines: its carriageway + pavements are kept clear too
+    import glob
+    # (up to batch 3) every roads05 build that holds this tag (the live one and the newer, wider ones): all kept clear
+    r05 = sorted(p for p in glob.glob(os.path.join(B1, "roads05_*", "roads.json"))
+                 if TAG in os.path.basename(os.path.dirname(p))[len("roads05_"):].split("_"))
+    x0, z0, x1, z1 = geo.batch_poly(TAG).buffer(M(60)).bounds
+    for rj in r05:
+        print("roads05 kept clear:", os.path.basename(os.path.dirname(rj)))
+        data05 = json.load(open(rj))
+        for g in data05.get("roundabouts", []):   # the ring and its outer pavement (the island stays)
+            polys.append(Point(g["c"][0], g["c"][2]).buffer(g["r_out"] + M(3.1), 64).difference(Point(g["c"][0], g["c"][2]).buffer(g["r_in"], 64)))
+        for r in data05["roads"]:
+            pts = [(q[0], q[2]) for q in r["s"] if x0 <= q[0] <= x1 and z0 <= q[2] <= z1]
+            if len(pts) < 2:
+                continue
+            half = max(max(q[6], q[7]) for q in r["s"])
+            walk = max(r.get("walkL", 0.0), r.get("walkR", 0.0))
+            polys.append(LineString(pts).buffer(half + walk + M(0.6), cap_style=2))
     return unary_union(polys).buffer(0), lines
 
 
@@ -342,6 +361,37 @@ def fit_wall(L, bay):
             if best is None or c < best[0]:
                 best = (c, n, s, ps)
     return best[1:] if best else None
+
+
+def clip_box(bb, corr, step=1.0):
+    """(P3, roads05) a shell box (the min rectangle of a concave outline) can reach over a carriageway the outline
+    itself keeps clear of: pull its sides in, a stud at a time, the side that frees most first, until it is clear"""
+    x, y, z, sx, sy, sz, yw = bb
+    c, s_ = math.cos(yw), math.sin(yw)
+
+    def poly(u0, u1, v0, v1):
+        return Polygon([(x + c * u + s_ * v, z - s_ * u + c * v) for u, v in ((u0, v0), (u1, v0), (u1, v1), (u0, v1))])
+    e = [-sx / 2, sx / 2, -sz / 2, sz / 2]
+    ov = poly(*e).intersection(corr).area
+    if ov < 0.5:
+        return bb
+    for _ in range(400):
+        best = None
+        for k, d in ((0, step), (1, -step), (2, step), (3, -step)):
+            t = list(e)
+            t[k] += d
+            if t[1] - t[0] < 3.0 or t[3] - t[2] < 3.0:
+                continue
+            o = poly(*t).intersection(corr).area
+            if best is None or o < best[0]:
+                best = (o, t)
+        if best is None:
+            break
+        ov, e = best
+        if ov < 0.5:
+            break
+    u, v = (e[0] + e[1]) / 2, (e[2] + e[3]) / 2
+    return (x + c * u + s_ * v, y, z - s_ * u + c * v, e[1] - e[0], sy, e[3] - e[2], yw)
 
 
 def tile_of(x, z):
@@ -910,7 +960,7 @@ def main():
         # touching shells never share a plane)
         # (each box of one building steps 0.05 down and in too: the boxes of an L / U building overlap a little and their
         # tops and sides must not share a plane either)
-        boxes = collision(g, base - 1.0, shell_top)
+        boxes = [clip_box(bb, corr) for bb in collision(g, base - 1.0, shell_top)]
         for k, bb in enumerate(boxes):
             x, y, z, sxb, syb, szb, yw = bb
             ins = 0.2 + 0.25 * lv + 0.08 * k

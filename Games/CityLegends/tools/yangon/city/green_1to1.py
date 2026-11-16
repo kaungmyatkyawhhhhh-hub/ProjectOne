@@ -253,6 +253,29 @@ def main():
             ci, cj = G.ij(*b)
             dr.ellipse([ci - rad, cj - rad, ci + rad, cj + rad], fill=1)
         lines.append((P, e))
+    # (up to batch 3) the roads05 network (the Friday builder's 1:1 roads, roads05_*<TAG>*/roads.json) can lie metres off
+    # the profile's lines: its carriageway + pavements are kept clear of trees too (the same rule as buildings_1to1)
+    import glob
+    r05 = sorted(p for p in glob.glob(os.path.join(B1, "roads05_*", "roads.json"))
+                 if TAG in os.path.basename(os.path.dirname(p))[len("roads05_"):].split("_"))
+    for rj in r05:
+        data05 = json.load(open(rj))
+        for g in data05.get("roundabouts", []):
+            rad = (g["r_out"] + M(3.1)) / RES
+            ci, cj = G.ij(g["c"][0], g["c"][2])
+            dr_r.ellipse([ci - rad, cj - rad, ci + rad, cj + rad], fill=1)   # shortcut: the island too (no trees on it)
+        for r in data05["roads"]:
+            s = r["s"]
+            wid = max(max(q[6], q[7]) for q in s) + max(r.get("walkL", 0.0), r.get("walkR", 0.0)) + M(0.6)
+            for k in range(len(s) - 1):
+                a, b = np.array([s[k][0], s[k][2]]), np.array([s[k + 1][0], s[k + 1][2]])
+                d = b - a
+                L = math.hypot(*d)
+                if L < 1e-6:
+                    continue
+                R = np.array([-d[1], d[0]]) / L
+                G.poly(dr_r, [a - R * wid, b - R * wid, b + R * wid, a + R * wid])
+        log("roads05 kept clear:", os.path.basename(os.path.dirname(rj)))
     road = G.arr(im_r)
     deck = G.arr(im_d)
     log("road corridor cols", road.sum(), "deck", deck.sum())

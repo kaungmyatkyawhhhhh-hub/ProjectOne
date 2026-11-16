@@ -664,3 +664,45 @@ Rules for every step:
 - **Trap:** `AttributesSerialized` written into an .rbxmx did not survive the Open Cloud upload (attribute `T` came in empty). The shells now carry `code|T|variant` in their Name and the load loop splits it.
 - **Still open:** roads (the roads agent, from `roads05_P1_P2_P3`); the ground between the carriageway and the shopfronts is grass until the pavements come; the riverside port yards along the Strand are grass (real: concrete yards); `kit_flicker_test.py P3` had not finished (the colonial panels alone tested 0).
 - **Screenshots** (copy place, `C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`): terrain aerial with the jetties `mcp-Roblox_Studio-blob-1794827469364-ab4hwm.jpg`; 37th Street `...1794827794184-kknqfw.jpg`; Pansodan Road with a colonial row `...1794827808102-s11p3i.jpg`; the Strand `...1794827818315-ffl6vw.jpg`; aerial over the empty Sule / City Hall / Maha Bandula Park lots `...1794827824286-mo078e.jpg`.
+
+## Step 7 progress: up to batch 3 (P4-P12)
+
+### Districts P4-P12 (16 Nov 2026, evening; built and checked in the copy place, moves into the cloud place pending)
+- **District grid** (`geo.PILOT_LL`, ~2.5-3 km boxes, seams in `geo.PILOT_SEAMS`):
+
+| Tag | Box (lon / lat) | Area | Seams |
+|---|---|---|---|
+| P4 | 96.118-96.133 / 16.810-16.858 | rest of batch 0.5 (its west strip) + batch 1: Hledan, Kamayut | P1, P2 |
+| P5 | 96.098-96.118 / 16.828-16.859 | batch 1 NW to the Hlaing | P4 |
+| P6 | 96.118-96.140 / 16.776-16.810 | batch 1 SW + batch 2 west: Sanchaung, Ahlone, Kyimyindaing | P4, P1, P3 |
+| P7 | 96.140-96.159 / 16.787-16.810 | Shwedagon, Maha Wizaya, People's Park, Bahan | P1, P6, P3 |
+| P8 | 96.159-96.190 / 16.787-16.812 | Kandawgyi, Karaweik, Zoo, Chaukhtatgyi, Ngahtatgyi | P7, P3, P1 |
+| P9 | 96.165-96.190 / 16.834-16.864 | batch 3 NW (Inno City) | P2 |
+| P10 | 96.190-96.219 / 16.834-16.864 | batch 3 NE (Kyaik Ka San) | P9 |
+| P11 | 96.159-96.190 / 16.812-16.834 | batch 3 SW (Thuwunna, Golden City) | P1, P2, P8, P9 |
+| P12 | 96.190-96.219 / 16.804-16.834 | batch 3 SE | P10, P11, P8 |
+
+- **One command per district** (files): `tools/yangon/city/district_files.sh <tag>` = `roads.py --no-glb` (outlines + profile only) -> `terrain.py` -> `buildings_1to1.py` -> `green_1to1.py` -> `pagoda_rows.py` (PagodaPlace rows from `build/pagodas/pagodas.json`) -> terrain packs -> `place_pack.py` (3-4 packs: shells split in two above ~10 MB, the Open Cloud upload timed out on 12.8 MB). `... --no-roads buildings` reruns from the buildings on.
+- **Mover:** `tools/yangon/DistrictPlace.luau` = P3Place made general (`M.tag`, any pagoda class through `PagodaPlace.placeOne`, `M.clear` for the copy place, shells from packs 3 + 4, no `terrainLook`). Asset ids of every pack, night cells and the tools: `build/city_1to1/districts_assets.txt`.
+- **Seams:** every road end on a shared edge joined its neighbour's (P4: 34 of 36, the 2 left are a Pyay Road flyover end; P6: 37 of 37); terrain keeps the earlier districts' columns.
+- **Landmark lots left EMPTY** (`buildings_1to1.LANDMARK_SITES_BY_TAG`): P4 Times City, M Tower, Crystal Residences; P7 Shwedagon (platform area + 190 m round the stupa), Maha Wizaya, Martyrs' Mausoleum + Fallen Heroes, National Museum, People's Park; P8 Chaukhtatgyi, Ngahtatgyi, Karaweik, Kandawgyi Palace site, Yangon Zoo; P9 Inno City; P10 Kyaik Ka San; P11 Thuwunna stadiums, Golden City (not in OSM: a circle on the Wikipedia point).
+- **Landmark ground** (`terrain.PILOT_PADS`): Shwedagon platform pad r 300 at Y 172 (the model's floor is 174; GLO-30's hilltop is 173.1), Maha Wizaya 108.6 (its plaza 108.92), Chaukhtatgyi 69.7, Ngahtatgyi 73.06. In the cloud place delete `Shwedagon_Hill_TEMP`, `MahaWizayaPlate_TEMP`, `ChaukhtatgyiPlate_TEMP`, `NgahtatgyiPlate_TEMP` when P7 / P8 move.
+- **Pagodas:** every pagodas.json stupa in each box re-placed on the new terrain (P4 4, P6 2, P7 10, P8 2, P9 4, P10 4): the old TEMP plates go with them.
+- **Night windows:** a cell's panes can reach past 2,048 studs at big buildings; `buildings_1to1` now splits such a cell's mesh by 1,024-stud squares (only those cells: P10 48 meshes, was 239).
+- **Roads05 clearance (coordinator, 16 Nov):** roads05 merges dual carriageways onto one centre line, so its outlines differ from roadnet's. `buildings_1to1.py` and `green_1to1.py` keep buildings and trees off the carriageway + pavements + 0.6 m of EVERY `roads05_<tags>/roads.json` holding the district's tag (roundabout rings too). `roads05.py P1 ... P12` (one network) -> `build/city_1to1/roads05_P1_..._P12`; P4-P12 regenerated against it before their moves.
+- **Copy-place checks** (one district at a time, cleared before the next, saved after each): all kit pieces present (P6 needed one: KWX_p79f2cbba, asset 77931646990291), every pagoda on terrain, Studio 4.9 GB at most.
+
+| District | Buildings | Shells (place parts) | Roof parts | Trees near / far crowns |
+|---|---|---|---|---|
+| P4 | 11,726 | 14,564 | 7,461 | 26,662 / 3,952 |
+| P5 | 3,213 | 4,017 | 2,394 | 29,941 / 5,568 |
+| P6 | 9,426 | 11,112 | 5,324 | 29,424 / 5,324 |
+| P7 | 3,649 | 4,753 | 1,395 | - / 2,944 |
+| P8 | - | 12,368 | 4,573 | - / 4,730 |
+| P9 | 15,796 | 18,962 | 11,816 | - / 3,372 |
+| P10 | 12,052 | 14,692 | 9,926 | - / 5,264 |
+
+(first build; the roads05 re-clear changes these a little)
+- **Screenshots** (copy place, `C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`): P4 aerial `mcp-Roblox_Studio-blob-1794834360078-vggf7n.jpg`, P4 street `...1794834366123-jztne2.jpg`, P5 `...1794835492570-p9tkhn.jpg`, P6 `...1794837255051-yltwzs.jpg`, P7 Shwedagon hill `...1794837895882-6to3me.jpg`, P8 Kandawgyi `...1794838857735-211dv9.jpg`, P9 `...1794839062109-fh6vs4.jpg`, P10 `...1794839535331-q9dzyz.jpg`.
+- **Traps:** the copy Studio's Open Cloud token lacks `asset:read` (upload through the cloud place's Studio id; the upload does not touch that place); several 10+ MB uploads at once time out; a `save_place` that answers "Target is not reachable" usually did save (call it again: NotNeeded).
+- **Still open:** the moves into the cloud place (after the roads agent and the downtown agent's P3 move; memory gate 14 GB), P1 / P2 shells off the roads05 carriageways, the rest of batch 2 outside P3 (Pazundaung / Botahtaung east, Lanmadaw west edge), roads (the roads agent), Shwedagon hill planting (the hill is grass: its lot was kept empty).
