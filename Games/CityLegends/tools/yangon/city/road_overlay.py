@@ -7,7 +7,8 @@ the street plan picture is approved before building).
    OSM roads we lack red; our samples off every OSM way purple) and build/city_1to1/roads05_<tag>/osm_check_<d>.json
 
 Mismatch rules (all in the district box):
-  missing   an OSM way that roads05 keeps (keep_way) with more than half its length over 3 m off our carriageways
+  missing   ANY drivable OSM way (public classes + *_link slip roads; service ways counted apart as missing_service:
+            driveways / parking aisles are not built by design) with more than half its length over 3 m off our carriageways
   ours_off  one of our roads with more than half its samples further than its half width + 5 m from every OSM
             highway way (fictional)
   offset    our samples 5-8 m from the nearest kept OSM way (merged dual carriageways sit between their two lines)
@@ -30,6 +31,15 @@ VAULT = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', '..
 COL = dict(route=(255, 140, 0, 120), street=(255, 225, 40, 110), side=(0, 220, 255, 140), deck=(255, 0, 200, 150))
 
 
+def drivable(w):
+    """every drivable OSM way, independent of what roads05 keeps (owner 17 Nov: the old check hid the slip roads)"""
+    t = w['t']
+    hw = t.get('highway')
+    if hw not in R05.RN.PUBLIC and hw not in R05.RN.LINKS and hw != 'service':
+        return False
+    return t.get('access') not in ('private', 'no') and t.get('area') != 'yes' and t.get('motor_vehicle') != 'no' and len(w['p']) >= 2
+
+
 def dense(pts, step):
     out = []
     for a, b in zip(pts[:-1], pts[1:]):
@@ -43,7 +53,8 @@ def dense(pts, step):
 def main():
     tag, dist = sys.argv[1], sys.argv[2]
     z = int(sys.argv[3]) if len(sys.argv) > 3 else 17
-    lo0, la0, lo1, la1 = geo.PILOT_LL[dist]
+    # a close-up (17 Nov): road_overlay.py <tag> "<name>" <zoom> lon0 lat0 lon1 lat1 -> "Road plan - <name> overlay.png"
+    lo0, la0, lo1, la1 = geo.PILOT_LL[dist] if dist in geo.PILOT_LL else [float(v) for v in sys.argv[4:8]]
     data = json.load(open(os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag, 'roads.json'), encoding='utf-8'))
     # satellite
     x0, y0 = tile_xy(lo0, la1, z)
@@ -102,14 +113,14 @@ def main():
             continue
         P = [geo.world(q[0], q[1]) for q in p]
         allw.append(P)
-        if R05.keep_way(w, set()):
+        if drivable(w):
             kept.append((w, P))
     for w, P in kept:
         d.line([px(*q) for q in P], fill=(255, 255, 255, 230), width=2)
     CW = unary_union(cw + [Point(g['c'][0], g['c'][2]).buffer(g['r_out']) for g in data['roundabouts']]
                      + [LineString([(q[0], q[2]) for q in dk['s']]).buffer(dk['half']) for dk in data['decks']])
     near8 = geo.m(8)
-    res = dict(district=dist, missing=[], ours_off=[], offset_samples=0, cut_end=[])
+    res = dict(district=dist, missing=[], missing_service=[], ours_off=[], offset_samples=0, cut_end=[])
     inbox = lambda x, zz: lo0 <= geo.lonlat(x, zz)[0] <= lo1 and la0 <= geo.lonlat(x, zz)[1] <= la1
     for w, P in kept:
         D = dense(P, geo.m(5))
@@ -119,7 +130,7 @@ def main():
         far = np.array([CW.distance(Point(q)) > geo.m(3) for q in D])
         if far.mean() > 0.5:
             name = w['t'].get('name:en') or w['t'].get('name') or ''
-            res['missing'].append(dict(osm=w.get('id'), name=name, hw=w['t'].get('highway'), m=round(len(D) * 5),
+            res['missing' if w['t'].get('highway') != 'service' else 'missing_service'].append(dict(osm=w.get('id'), name=name, hw=w['t'].get('highway'), m=round(len(D) * 5),
                                        x=round(D[len(D) // 2][0], 1), z=round(D[len(D) // 2][1], 1)))
             for a, b in zip(D[:-1], D[1:]):
                 d.line([px(*a), px(*b)], fill=(255, 30, 30, 255), width=5)

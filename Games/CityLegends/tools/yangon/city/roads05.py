@@ -7,7 +7,8 @@ with the simplicity of batch 0.5:
   * ONE centre line per road. A dual carriageway (two one-way OSM ways of one name and class, partner on the left,
     PAIR_MIN..PAIR_MAX apart) becomes one road on their midline with the real total width and the median inside the
     record (s[8] built median half, Roads.luau / YangonRoads.buildMedians). Never two roads + islands.
-  * no slip lanes (every *_link), no PAVED_WAYS, no traffic islands.
+  * slip roads (*_link) are kept as one-way roads (owner 17 Nov: OSM is the truth); no PAVED_WAYS, no traffic islands.
+  * a pair is merged only where its outer edges stay within MERGE_TOL of both OSM lines; flares stay two roads.
   * junctions only by rank: the LOWER rank is the bigger road, no ties; a road that ends inside another's carriageway is
     always the smaller one (Kahn order over the "ends on" relation, then class / lanes / length).
   * every real roundabout (junction=roundabout / circular) is a roundabout record (centre, ring radius from a circle fit,
@@ -43,6 +44,7 @@ PAIR_MIN = geo.m(3.0)
 PAIR_MAX = geo.m(26.0)  # Pyay Road along Inya Lake: 23.8 m between its OSM lines
 TAIL = geo.m(45.0)    # a one-way remnant shorter than this at the end of a paired run is folded into the midline
 JOIN = geo.m(12.0)    # ends of one road (same name) this close are one road
+MERGE_TOL = geo.m(2.0)  # a merged dual carriageway reproduces both OSM lines' outer edges within this (owner 17 Nov)
 MED_MIN = 1.5         # a 1 m barrier between kerbs (kerbs included: half 1.5 studs)
 OPEN_R = 24.0         # a median opens where another main road's carriageway comes this near
 MED_CUT = geo.m(1.0)  # a median half under this (a full median under 2 m) is no median, except a run's 1 m barrier
@@ -126,8 +128,10 @@ def region_of(tags):
 def keep_way(r, paved):
     t = r['t']
     hw = t.get('highway')
-    if r['id'] in paved or hw in RN.LINKS:
+    if r['id'] in paved:
         return False
+    if hw in RN.LINKS:  # owner 17 Nov: OSM's slip roads are real (University Ave x Kabar Aye): one-way roads of their own
+        return t.get('access') not in ('private', 'no') and t.get('area') != 'yes' and len(r['p']) >= 2
     if hw == 'service':
         if not (t.get('name') or t.get('name:en') or t.get('service') == 'alley'):
             return False
@@ -395,6 +399,15 @@ def pair(strokes, edges, bridge_lines):
                         continue
                 if best[i] is None or d < best[i][0]:
                     best[i] = (d, v, T['id'], s)
+        # a merged pair keeps both OSM lines' outer edges within ~2 m only where the gap follows its neighbours'
+        # (the built median is eased): a flare at a junction stays two one-way roads (owner 17 Nov)
+        gaps = np.array([b[0] if b else np.nan for b in best])
+        for i, b in enumerate(best):
+            if b:
+                w = gaps[max(0, i - 6):i + 7]
+                w = w[~np.isnan(w)]
+                if len(w) >= 3 and abs(b[0] - np.median(w)) > 2 * MERGE_TOL:
+                    best[i] = None
         # runs per partner
         by_t = collections.defaultdict(list)
         for i, b in enumerate(best):
@@ -517,7 +530,10 @@ def build_pieces(edges, rings):
         for p in mid_by_stroke[R['S']]:
             cs = p.cS if p.pairS == R['S'] else p.cT
             if abs(R['b'] - cs[0]) < 6 or abs(R['a'] - cs[1]) < 6:
-                folded.add(ri)
+                # folding moves the tail onto the midline: only where that keeps its edge within MERGE_TOL
+                end = 0 if abs(R['b'] - cs[0]) < 6 else -1
+                if float(np.asarray(p.med)[end]) <= MERGE_TOL:
+                    folded.add(ri)
                 break
     # extend each midline end to the middle of its folded tails' far ends
     for p in pieces:
