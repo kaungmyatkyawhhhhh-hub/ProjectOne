@@ -565,7 +565,8 @@ def col_arch(x, z, w, h, holes, wall, shut, state):
              (cx + ro * math.cos(a1), -0.05, zc + ro * math.sin(a1)), (cx + r * math.cos(a1), -0.05, zc + r * math.sin(a1))]
         K.face("KW0", q, (0, -1, 0))
     K.box("KW0", cx - 0.12, -0.14, zc + r - 0.04, 0.24, 0.14, 0.3, faces=("-y", "+x", "-x", "top"))
-    shutters(x, z, w, h, 0.0, shut, state)
+    if state:   # (landmarks: glazed arches without shutters pass None)
+        shutters(x, z, w, h, 0.0, shut, state)
 
 
 def p_colonial(W, bays, floors, role, shop, age):

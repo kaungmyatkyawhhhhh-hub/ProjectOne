@@ -49,6 +49,7 @@ created: 2026-11-16
 | P1 real places and condos: 2 fuel stations, 4 car parks, 29 courts / pitches, 2 playgrounds, 16 walled compounds, condos at real levels (Pearl Condo crowns) | [[2026-11-16 P1 real places and condos (1 to 1)]] |
 | District P2 north of P1 (Inya north / east, Kaba Aye on real ground, P1 seam, Pyay Road bund, buildings, trees; roads placeholder) | [[2026-11-16 Yangon rescale plan - 1 to 1 at player scale#Step 5 progress: P2]] |
 | District P3 downtown (colonial shophouse rows, river quay + jetties, Sule / Botataung pads, empty landmark lots; built in the copy place, roads pending) | [[2026-11-16 Yangon rescale plan - 1 to 1 at player scale#Step 6 progress: P3]] |
+| Downtown landmarks (City Hall, High Court, Strand Hotel, Immanuel Baptist, Holy Trinity, Central Station, Secretariat, Bogyoke Market, Independence Monument): built offline, Studio placement pending | [[2026-11-16 Downtown landmarks 1 to 1 (P3)]] |
 
 ## Already live in the current map (16 Nov, version 957)
 - Yangon's pale hazy midday sky and warm daylight.
