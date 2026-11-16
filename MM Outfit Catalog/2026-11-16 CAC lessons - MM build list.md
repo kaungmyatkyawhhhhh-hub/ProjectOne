@@ -50,4 +50,4 @@ CAC is a tool on a baseplate. MM is a **place**: a penthouse boutique with manne
   - 6: [[2026-11-16 Built - Worn by count]]
   - 4: [[2026-11-16 Built - Wear your last look]]
 - **Not saved or published yet** (owner step).
-- **Next:** phase 2 (7 community looks, 10 catalog search) when the owner wants it.
+- **Phase 2 also built (16 Nov):** 7 as Guest looks, 10 as catalog Search. See [[2026-11-16 Game batch - outfits, runway, first minute, guest looks, styles, search]] and [[2026-11-16 Map batch - signs, fitting rooms, closet, salon, life, Sky Deck]].
