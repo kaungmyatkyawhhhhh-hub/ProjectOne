@@ -142,7 +142,7 @@ def frame(pos, R, U):
     return np.array(pos, float), R, U, Bk
 
 
-def faces_of(part):
+def faces_of(part, surf=None):
     """visible faces as triangles [(a, b, c)], counter-clockwise from outside"""
     k, cls, pos, R, U, S = part
     c, R, U, Bk = frame(pos, R, U)
@@ -162,7 +162,24 @@ def faces_of(part):
             ((-1, -1, -1), (1, -1, -1), (1, -1, 1), (-1, -1, 1)),  # -Y
         ]
         # thin flat pieces (pavement slabs, medians, kerbs): every face but the bottom; bridge pieces: all six
-        use = quads if k == 'B' else quads[:5]
+        # (kerbs, pavements, medians: the top and the two long sides; their ends butt onto the next piece and the
+        # bottom is under the road)
+        use = quads if k == 'B' else quads[:3]
+        if surf is not None and k in ('r', 'w', 'P') and S[1] > 0.3:
+            # a kerb shows its top and its face to the road (the back is 0.1 over the pavement); a pavement its top and
+            # its outer edge (the inner one is behind the kerb): drop the long side that has the road just past it
+            keep = [quads[0]]
+            for q, sx in ((quads[1], 1), (quads[2], -1)):
+                probe = c + R * sx * (hx + 1.2)
+                road_there = bool(surf.heights(probe[0], probe[2]))
+                if k == 'P':
+                    probe2 = c + R * sx * (hx + 2.5)
+                    road_there = road_there or bool(surf.heights(probe2[0], probe2[2]))
+                    if not road_there:
+                        keep.append(q)
+                elif road_there:
+                    keep.append(q)
+            use = keep
         for q in use:
             a, b, cc, d = (v[x] for x in q)
             tris.append(fix((a, b, cc), c))
@@ -410,16 +427,22 @@ def bake(tag):
         deck_box.append(sbox(min(xs), min(zs), max(xs), max(zs)).buffer(d.get('half', 24) + 4))
     n_unknown = 0
     for p in parts:
+        if p[0] == 'R':
+            for t in faces_of(p):
+                mid = (t[0] + t[1] + t[2]) / 3
+                by[('R', cell_of(mid[0], mid[2]))].append(t)
+                road_tris.append(t)
+    surf = Surface(road_tris)
+    for p in parts:
         k = p[0]
+        if k == 'R':
+            continue
         if k not in KIND:
             n_unknown += 1
             continue
-        for t in faces_of(p):
+        for t in faces_of(p, surf):
             mid = (t[0] + t[1] + t[2]) / 3
             by[(KIND[k], cell_of(mid[0], mid[2]))].append(t)
-            if k == 'R':
-                road_tris.append(t)
-    surf = Surface(road_tris)
     ptris, dropped = paint_tris(paint, surf, surf)
     for kind, ts in ptris.items():
         for t in ts:
@@ -506,7 +529,7 @@ def collision(data, surf, parts):
                 continue
             # extend while straight (heading within 2 degrees) and the width the same
             j = i + 1
-            while j + 1 < n and j + 1 not in c and j - i < 6:
+            while j + 1 < n and j + 1 not in c and j - i < 12:
                 d0 = np.array([s[i + 1][0] - s[i][0], s[i + 1][2] - s[i][2]])
                 d1 = np.array([s[j + 1][0] - s[j][0], s[j + 1][2] - s[j][2]])
                 if np.linalg.norm(d0) < 1e-6 or np.linalg.norm(d1) < 1e-6:
@@ -516,9 +539,10 @@ def collision(data, surf, parts):
                     break
                 j += 1
             a, b = s[i], s[j]
-            for lat_lo, lat_hi, kind, up in ((-a[6], a[7], 'R', 0.0),
-                                             (-a[6] - r.get('walkL', 7.5), -a[6], 'P', 0.5),
-                                             (a[7], a[7] + r.get('walkR', 7.5), 'P', 0.5)):
+            spans = [(-a[6], a[7], 'R', 0.0)]
+            if r['kind'] != 'street':
+                spans += [(-a[6] - r.get('walkL', 7.5), -a[6], 'P', 0.5), (a[7], a[7] + r.get('walkR', 7.5), 'P', 0.5)]
+            for lat_lo, lat_hi, kind, up in spans:
                 rows.extend(strip_box(a, b, lat_lo, lat_hi, kind, up, surf, THK))
             i = j
     # roundabouts: 48 boxes round the ring, 48 round the pavement, an island disc of boxes
