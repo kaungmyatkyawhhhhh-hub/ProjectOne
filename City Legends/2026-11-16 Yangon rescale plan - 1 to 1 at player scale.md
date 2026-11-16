@@ -500,3 +500,10 @@ Rules for every step:
 - Compound-wall collision is on the client only (the server has none; NPC traffic stays on the roads).
 - Edit memory was not comparable (other agents' work came in; Studio held 7.5 GB after the two Plays).
 - Trap: another agent's `git pull --rebase --autostash` put this job's `buildings_1to1.py` into `stash@{0}` mid-run (it ran the old code once); it was restored from the stash. The stash still holds other agents' changes: not dropped.
+
+### P1 greenery, ground and Inya Lake edge (16 Nov 2026, in Studio, not saved)
+- Note: [[2026-11-16 P1 greenery, ground and Inya Lake edge (1 to 1)]].
+- First version (Ygn dirt / earth / gravel ground + own tree meshes) rejected by the owner ("dirty", "trees so ugly"); now: the game's own grass, clean concrete only on forecourts / parking, the old map's Tree / Palm / PalmA kit at real sizes.
+- 27,594 trees as client-streamed data (`YgnKit.Data_P1G`), 2,363 big crowns as far looks in the place, canopy 36% (research ~33%).
+- Inya Lake: 820 m bund beside Kabar Aye Pagoda Road (wall, railing, 3 m walkway), natural banks elsewhere.
+- Place parts 34,238 -> 39,696; no new unique meshes.

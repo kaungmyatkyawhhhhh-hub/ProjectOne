@@ -29,6 +29,7 @@ created: 2026-11-16
 | Street detail, densities per 100 m | [[2026-11-16 Research - Real Yangon street detail survey]] |
 | Street furniture, vehicles, pedestrians | [[2026-11-16 Research - Yangon street furniture and traffic life]] |
 | Terrain, lakes, rivers, trees | [[2026-11-16 Research - Yangon terrain, water and trees]] |
+| P1 greenery, ground and Inya Lake edge (built, in Studio) | [[2026-11-16 P1 greenery, ground and Inya Lake edge (1 to 1)]] |
 | Landmarks (71) | [[2026-11-16 Research - Yangon landmarks catalogue]] |
 | Shwedagon | [[2026-11-16 Research - Shwedagon 1 to 1 blueprint]] |
 | Sule Pagoda and Botataung Pagoda (3D, in Studio) | [[2026-11-16 Sule and Botataung 1 to 1]] |
