@@ -328,7 +328,7 @@ local function startLod(scale: number)
 	end
 	task.spawn(function()
 		watchVenues(workspace:WaitForChild("City", 30))
-		local y = workspace:FindFirstChild("Yangon")
+		local y = Config.mapRoot()
 		watchVenues(y and y:WaitForChild("CarCare", 30))
 	end)
 	-- the light ranges (worked out each sweep from lightScale, which follows the menu's Graphics choice):

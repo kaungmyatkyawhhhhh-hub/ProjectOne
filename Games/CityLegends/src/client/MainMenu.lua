@@ -668,7 +668,7 @@ end
 ---------------------------------------------------------------------
 local mapDrawing: Frame? = nil
 -- Monaco's middle (world x, z); Yangon's when it is in the place (build step 9)
-local MAP_CENTRE = if Config.activeMap() == "Yangon" then Vector2.new(30716, -2388) else Vector2.new(14300, 250)
+local MAP_CENTRE = if Config.activeMap() == "Yangon" then Vector2.new(34500, 31000) else Vector2.new(14300, 250)
 local function getMap(): Frame
 	if mapDrawing then
 		return mapDrawing

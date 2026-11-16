@@ -118,13 +118,21 @@ function Config.activeMap(): string?
 	if workspace == nil then
 		return nil
 	end
-	if workspace:FindFirstChild("Yangon") then
+	-- (2026-11-17) the old 1.6 Yangon (Workspace.Yangon) was deleted; the 1:1 map (Workspace.Yangon1to1) is "Yangon" too
+	if workspace:FindFirstChild("Yangon") or workspace:FindFirstChild("Yangon1to1") then
 		return "Yangon"
 	end
 	if workspace:FindFirstChild("Riviera") then
 		return "Riviera"
 	end
 	return nil
+end
+-- the Yangon map's root folder in the Workspace (the 1:1 Yangon1to1 since 2026-11-17, the old Yangon while it is there)
+function Config.mapRoot(): Instance?
+	if workspace == nil then
+		return nil
+	end
+	return workspace:FindFirstChild("Yangon") or workspace:FindFirstChild("Yangon1to1")
 end
 function Config.monacoOnly(): boolean
 	return not Config.World.OldCity and Config.activeMap() ~= nil
@@ -161,11 +169,12 @@ function Config.isYangon1to1At(pos: Vector3): boolean
 	return inBoxes(Config.Areas.Yangon1to1Areas, pos)
 end
 function Config.mapAt(pos: Vector3): string
-	return if Config.isYangonAt(pos) then "Yangon" else "Riviera"
+	-- (the name of the map's root folder in the Workspace: the 1:1 frame's is Yangon1to1)
+	return if Config.isYangon1to1At(pos) then "Yangon1to1" elseif Config.isYangonAt(pos) then "Yangon" else "Riviera"
 end
 -- the lane width of the map in use, or (with a point) of the area that point is in: 12 in the 1:1 frame
 function Config.laneWidth(pos: Vector3?): number
-	if pos and Config.isYangon1to1At(pos) then
+	if (pos and Config.isYangon1to1At(pos)) or (not pos and workspace and not workspace:FindFirstChild("Yangon") and workspace:FindFirstChild("Yangon1to1")) then
 		return Config.Areas.LaneWidthYangon1to1
 	end
 	return if Config.activeMap() == "Yangon" then Config.Areas.LaneWidthYangon else Config.City.LaneWidth
@@ -201,23 +210,27 @@ Config.RivieraVenues = {
 
 -- the venues in Yangon (build step 9, 2026-11-13): same format as RivieraVenues; a venue named here
 -- is in Yangon, the rest stay where RivieraVenues puts them. Lots from tools/yangon/d11_sites.py.
+-- the venues in Yangon (build step 9, 2026-11-13): same format as RivieraVenues; a venue named here
+-- is in Yangon, the rest stay where RivieraVenues puts them.
+-- (2026-11-17, the switch to the 1:1 map) lots from tools/yangon/city/venues_1to1.py on the roads05 main roads of P1 / P2,
+-- checked in Studio (no water, road or landmark; few or no shells), made ready by tools/yangon/YangonSites.luau
+-- (S.root = workspace.Yangon1to1). The venue row is on Kabar Aye Pagoda Road's east side north of Myanmar Plaza;
+-- the bank, its drop-off (by Myanmar Plaza) and the gem showcase stay on one map.
 Config.YangonVenues = {
 	On = true,
 	Sites = {
-		dealership = { x = 30836.8, z = 957.4, fx = -0.560, fz = -0.829, y = 46.57 }, -- on the loop, 176 from Optima Werkz
-		customs = { x = 31025.7, z = 646.7, fx = -0.990, fz = -0.144, y = 47.53 }, -- on the loop, 188 from Optima Werkz
-		-- (owner, 2026-11-14: "Move more venues"; lots from tools/yangon/d13_more_sites.py and d14_wide_lot.py)
-		-- the bank, its heist drop-off and the gem showcase move together: gem loot is cashed in at the bank's drop-off
-		bank = { x = 31074.1, z = 394.2, fx = -0.991, fz = -0.136, y = 49.51 }, -- on the loop south of Optima Werkz
-		dropoff = { x = 32358.8, z = -1833.6, fx = 0.992, fz = 0.127, y = 32.15 }, -- on the loop by Myanmar Plaza
-		gems = { x = 30742.3, z = 223.9, fx = 0.969, fz = -0.249, y = 50.23 }, -- on the loop south of Optima Werkz
-		rewards = { x = 30730.5, z = 552.9, fx = 0.987, fz = 0.159, y = 47.93, w = 304 }, -- its car courts make it 304 wide
+		dealership = { x = 35454.1, z = 22409.3, fx = -0.991, fz = -0.135, y = 38.56 },
+		customs = { x = 35533.5, z = 21839.2, fx = -0.991, fz = -0.136, y = 41.08 },
+		bank = { x = 35609.5, z = 21267.0, fx = -0.992, fz = -0.128, y = 42.08 },
+		dropoff = { x = 35416.6, z = 27780.7, fx = 0.622, fz = -0.783, y = 36.12 }, -- by Myanmar Plaza
+		gems = { x = 35653.1, z = 20934.2, fx = -0.992, fz = -0.130, y = 39.77 },
+		rewards = { x = 35389.0, z = 22838.7, fx = -0.989, fz = -0.150, y = 37.06, w = 304 }, -- its car courts make it 304 wide
 		-- square to the world axes (their towers and facade tiers are)
-		hotel = { x = 29745.3, z = 1089.0, fx = 0, fz = 1, y = 54.97 }, -- on the loop's south-west side
-		tower_aurum = { x = 30655.1, z = 1303.2, fx = 0, fz = -1, y = 45.16 }, -- a row of three towers along New Road
-		tower_skyline = { x = 30911.0, z = 1306.4, fx = 0, fz = -1, y = 44.07 },
-		tower_crown = { x = 29867.2, z = 1398.6, fx = 0, fz = -1, y = 55.5 },
-		realty = { x = 30465.2, z = 921.7, fx = 0.560, fz = 0.829, y = 48.83, size = 80 }, -- by the loop west of Optima Werkz
+		hotel = { x = 36030.1, z = 19832.9, fx = 0, fz = 1, y = 29.64 },
+		tower_aurum = { x = 34841.0, z = 19736.6, fx = 0, fz = 1, y = 39.07 },
+		tower_skyline = { x = 36686.0, z = 24776.8, fx = 0, fz = 1, y = 34.0 },
+		tower_crown = { x = 34397.5, z = 20059.9, fx = 0, fz = -1, y = 40.2 },
+		realty = { x = 35426.2, z = 22115.1, fx = -0.991, fz = -0.136, y = 40.35, size = 80 },
 	},
 }
 
@@ -233,9 +246,10 @@ Config.Spawn = {
 	RivieraNear = Vector3.new(13650, 0, 520), -- start within RivieraRadius of this
 	RivieraRadius = 450,
 	-- Yangon (build step 9): a first car on the Yangon Loop by Optima Werkz, on foot on its forecourt
-	YangonRoads = { ["Yangon Loop A"] = true, ["Yangon Loop B"] = true },
-	YangonNear = Vector3.new(30892, 0, 785),
-	YangonRadius = 260,
+	-- (1:1, 2026-11-17: on Kabar Aye Pagoda Road by Myanmar Plaza)
+	YangonRoads = { ["Kabar Aye Pagoda Road"] = true },
+	YangonNear = Vector3.new(34640, 0, 27300),
+	YangonRadius = 500,
 }
 -- the east highway runs from the city's edge to the loop's inner edge
 Config.City.HighwayLength = Config.City.LoopHalf - Config.City.HighwayWidth / 2 - (Config.City.HalfExtent + Config.City.RoadWidth / 2)
@@ -3142,8 +3156,52 @@ Config.Fuel = {
 		{ id = "fuel_mountain", name = "Riviera Fuel Mountain", pumps = { Vector3.new(16195.3, 167.2, -671.1), Vector3.new(16209.2, 167.2, -669.3), Vector3.new(16193.2, 167.2, -654.2), Vector3.new(16207.1, 167.2, -652.5) }, chargers = { Vector3.new(16234.6, 167.2, -667.2), Vector3.new(16233.5, 167.2, -658.3), Vector3.new(16232.4, 167.2, -649.4) }, arrive = CFrame.new(16194.2, 169.8, -662.6, -0.1222, 0.0000, -0.9925, 0.0000, 1.0000, 0.0000, 0.9925, 0.0000, -0.1222) },
 		{ id = "fuel_corniche", name = "Riviera Fuel Corniche", pumps = { Vector3.new(14337.4, 448.6, -1681.8), Vector3.new(14351.3, 448.6, -1680.2), Vector3.new(14335.5, 448.6, -1664.9), Vector3.new(14349.4, 448.6, -1663.3) }, chargers = { Vector3.new(14376.8, 448.6, -1678.3), Vector3.new(14375.7, 448.6, -1669.3), Vector3.new(14374.7, 448.6, -1660.4) }, arrive = CFrame.new(14336.4, 451.2, -1673.3, -0.1130, 0.0000, -0.9936, 0.0000, 1.0000, 0.0000, 0.9936, 0.0000, -0.1130) },
 		-- Yangon (build step 9, 2026-11-13): on New Road by Optima Werkz (tools/yangon/YangonSites.luau S.fuel)
-		{ id = "fuel_yangon", name = "Legends Fuel Yangon", pumps = { Vector3.new(31163.3, 45.0, 1048.2), Vector3.new(31150.1, 45.0, 1052.8), Vector3.new(31157.8, 45.0, 1032.2), Vector3.new(31144.5, 45.0, 1036.7) }, chargers = { Vector3.new(31126.3, 45.0, 1062.1), Vector3.new(31123.3, 45.0, 1053.5), Vector3.new(31120.4, 45.0, 1045.0) }, arrive = CFrame.new(31160.5, 47.5, 1040.2, -0.3261, 0.0000, 0.9453, 0.0000, 1.0000, 0.0000, -0.9453, 0.0000, -0.3261) },
+		-- (1:1, 2026-11-17) the real Myawady station on Kabar Aye Pagoda Road by the flyover (places_1to1.py, Data_P1P): its 8 pumps
+		{ id = "fuel_yangon", name = "Kabar Aye Fuel", pumps = { Vector3.new(34606.32, 62.91, 29147.38), Vector3.new(34603.18, 62.91, 29140.24), Vector3.new(34621.32, 62.91, 29140.79), Vector3.new(34618.18, 62.91, 29133.65), Vector3.new(34595.54, 62.91, 29122.82), Vector3.new(34592.4, 62.91, 29115.68), Vector3.new(34610.53, 62.91, 29116.24), Vector3.new(34607.4, 62.91, 29109.09) }, chargers = { Vector3.new(34595.54, 62.91, 29122.82), Vector3.new(34592.4, 62.91, 29115.68), Vector3.new(34610.53, 62.91, 29116.24), Vector3.new(34607.4, 62.91, 29109.09) }, arrive = CFrame.lookAt(Vector3.new(34596, 65.2, 29165), Vector3.new(34606.9, 65.2, 29128.2)) },
 	} :: { { id: string, name: string, pumps: { Vector3 }, chargers: { Vector3 }, arrive: CFrame } },
 }
+
+---------------------------------------------------------------------
+-- GG Gaming Fest (2026-11-17; vault "City Legends/2026-11-17 GGFest at YCC (in game).md"): the real festival at
+-- the Yangon Convention Centre, 21-22 Nov 2026. The hall and its dressing are in Workspace.Yangon1to1.Landmarks
+-- (tools/yangon/landmarks3d/ycc_ggfest.py). While it is live: the GG Quest (Goals.lua; saved in profile.Goals.GG) and,
+-- for finishing it, the GGFest look on your car (free, Customs). Studio test: workspace attribute GGFestForce = true.
+-- (a function: Config's main chunk is at its constant limit)
+---------------------------------------------------------------------
+Config.GGFest = (function()
+	return {
+		Start = 1795195800, -- 2026-11-21 00:00 Myanmar time (UTC+6:30)
+		End = 1795368600, -- 2026-11-23 00:00 Myanmar time
+		Name = "GG Gaming Fest",
+		Line = "21-22 Nov · Yangon Convention Centre",
+		Hall = Vector3.new(33667.65, 54.82, 22020.95), -- the hall's middle on its floor
+		Arrive = CFrame.lookAt(Vector3.new(33746.53, 57.82, 21934.52), Vector3.new(33746.53 + 0.7436, 57.82, 21934.52 + 0.6686)),
+		ArriveRadius = 330, -- studs from the hall's middle: "drive to YCC"
+		Photo = Vector3.new(33797.04, 54.82, 22137.28), -- the photo spot ring in front of the stage
+		PhotoRadius = 14,
+		PhotoSpeed = 3, -- studs a second: stopped
+		-- the quest, in order: { id, text, stat (Goals.note), need, pts, best = a best value, not a sum }
+		Quest = {
+			{ id = "arrive", text = "Drive to GG Gaming Fest at YCC", stat = "ggarrive", need = 1, pts = 100 },
+			{ id = "cuts", text = "Cut up %d cars", stat = "cuts", need = 15, pts = 150 },
+			{ id = "combo", text = "Hit a x%d combo", stat = "combo", need = 6, pts = 150, best = true },
+			{ id = "drift", text = "Bank a drift", stat = "drifts", need = 1, pts = 150 },
+			{ id = "photo", text = "Stop on the photo spot at the stage", stat = "ggphoto", need = 1, pts = 200 },
+		},
+		CashPerPoint = 25,
+		-- the limited GGFest look, put on the car you finish the quest in (Customs.clean keeps only valid fields)
+		Wrap = { paint = { 124, 66, 240 }, finish = "metallic", accent = { 0, 196, 228 }, glow = { 236, 38, 150 }, plate = "GGFEST26" },
+	}
+end)()
+
+-- is the festival on? (`now` = os.time(); Studio only: workspace attribute GGFestForce)
+function Config.ggLive(now: number?): boolean
+	local t = now or os.time()
+	local g = Config.GGFest
+	if t >= g.Start and t < g.End then
+		return true
+	end
+	return game:GetService("RunService"):IsStudio() and workspace:GetAttribute("GGFestForce") == true
+end
 
 return Config

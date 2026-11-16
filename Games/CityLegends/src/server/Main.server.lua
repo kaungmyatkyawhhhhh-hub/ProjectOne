@@ -411,6 +411,8 @@ local Dealership = require(script.Parent:WaitForChild("Dealership"))
 Dealership.init(ctx)
 -- drift scoring, speed traps, jumps and the leaderboard
 require(script.Parent:WaitForChild("Challenges")).init(ctx)
+-- (2026-11-17) GG Gaming Fest at YCC: the screens' countdown and the GG Quest's place steps (Config.GGFest)
+require(script.Parent:WaitForChild("GGFest")).init(ctx)
 local Customs = require(script.Parent:WaitForChild("Customs"))
 Customs.init(ctx)
 -- the Legends Gem Showcase, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
@@ -1188,7 +1190,7 @@ local function menuFocus(player: Player)
 	-- monaco now"; Main.client's startOrbit)
 	-- (Yangon: over Optima Werkz, where players start, build step 9)
 	p.Position = if Config.activeMap() == "Yangon"
-		then Vector3.new(30892, 90, 785)
+		then Vector3.new(34897, 90, 27549) -- (1:1: Myanmar Plaza, 2026-11-17)
 		elseif workspace:FindFirstChild("Riviera") then Vector3.new(13700, 40, 700)
 		else Vector3.new(500, 30, 0)
 	p.Parent = focusFolder

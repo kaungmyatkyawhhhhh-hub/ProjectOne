@@ -238,7 +238,7 @@ if Config.monacoOnly() then
 end
 -- (2026-11-13: the Yangon map's lanes come in the same graph, so either map in the place turns it on)
 -- (2026-11-16: or the 1:1 Yangon frame, Workspace.Yangon1to1; its lanes are marked oneToOne)
-if workspace:FindFirstChild("Riviera") or workspace:FindFirstChild("Yangon") or workspace:FindFirstChild("Yangon1to1") then
+if workspace:FindFirstChild("Riviera") or Config.mapRoot() then
 	local riv = RivieraTraffic.build()
 	if riv then
 		for _, seg in riv.lanes do

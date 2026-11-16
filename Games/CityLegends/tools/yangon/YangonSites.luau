@@ -41,8 +41,23 @@ local function hidden(name: string): Folder
 	return f :: Folder
 end
 
+-- (2026-11-17, the 1:1 map) S.root = workspace.Yangon1to1: its buildings are shell Parts (Buildings.Shell / roofs) and far
+-- tree crowns (Green.Far), deleted where they stand in a lot (the place is near its size limit; they are in build/);
+-- the clients' kit detail, trees and street props skip the pads' boxes (YangonKitStream)
+S.root = nil :: Instance?
+
+-- the boxes the clients' YangonKitStream builds nothing in (ReplicatedStorage: never streamed out)
+local function keepOut(): Folder
+	local kit = game:GetService("ReplicatedStorage"):WaitForChild("YgnKit")
+	local f = kit:FindFirstChild("KeepOut") or Instance.new("Folder")
+	f.Name = "KeepOut"
+	f.Parent = kit
+	return f :: Folder
+end
+
 function S.prepare(sites: { [string]: any }, names: { string }?): string
-	local Y = workspace.Yangon
+	local Y = S.root or workspace.Yangon
+	local partMode = Y.Name == "Yangon1to1"
 	local folder = Y:FindFirstChild("Sites") or Instance.new("Folder")
 	folder.Name = "Sites"
 	folder.Parent = Y
@@ -57,8 +72,39 @@ function S.prepare(sites: { [string]: any }, names: { string }?): string
 		local w = s.w or lot
 		-- buildings with any corner (or middle) of their box in the lot
 		local moved = 0
-		local keep = hidden(name)
-		for _, m in Y.Buildings:GetChildren() do
+		if partMode then
+			for _, holder in { Y.Buildings.Shell, Y.Buildings:FindFirstChild("Roofs"), Y.Green:FindFirstChild("Far") } do
+				for k, q in (if holder then holder:GetDescendants() else {}) do
+					if q:IsA("BasePart") then
+						local hit = false
+						for _, ox in { -0.5, 0, 0.5 } do
+							for _, oz in { -0.5, 0, 0.5 } do
+								hit = hit or inside(cf, (q.CFrame * CFrame.new(q.Size.X * ox, 0, q.Size.Z * oz)).Position, MARGIN, lot, w)
+							end
+						end
+						if hit then
+							-- (a shell's building keeps its client detail unless its box is kept out too)
+							if holder == Y.Buildings.Shell then
+								local b = Instance.new("Part")
+								b.Name = name
+								b.Anchored, b.CanCollide, b.CanQuery, b.CanTouch = true, false, false, false
+								b.Transparency = 1
+								b.Size = q.Size + Vector3.new(8, 8, 8)
+								b.CFrame = q.CFrame
+								b.Parent = keepOut()
+							end
+							q:Destroy()
+							moved += 1
+						end
+					end
+					if k % 5000 == 0 then
+						task.wait()
+					end
+				end
+			end
+		end
+		local keep = if partMode then Instance.new("Folder") else hidden(name)
+		for _, m in (if partMode then {} else Y.Buildings:GetChildren()) do
 			if not m:IsA("Model") or m:GetAttribute("MeetSpot") then
 				continue
 			end
@@ -101,6 +147,16 @@ function S.prepare(sites: { [string]: any }, names: { string }?): string
 		pad.CastShadow = false
 		pad:SetAttribute("Venue", name)
 		pad.Parent = folder
+		if partMode then
+			local old2 = keepOut():FindFirstChild("pad_" .. name)
+			if old2 then
+				old2:Destroy()
+			end
+			local b = pad:Clone()
+			b.Name = "pad_" .. name
+			b.Transparency, b.CanCollide, b.CanQuery, b.CanTouch = 1, false, false, false
+			b.Parent = keepOut()
+		end
 		table.insert(out, string.format("%s: %d buildings moved", name, moved))
 		task.wait()
 	end
@@ -108,7 +164,8 @@ function S.prepare(sites: { [string]: any }, names: { string }?): string
 end
 
 function S.undo(name: string)
-	local pad = workspace.Yangon:FindFirstChild("Sites") and workspace.Yangon.Sites:FindFirstChild(name)
+	local Y = S.root or workspace.Yangon
+	local pad = Y:FindFirstChild("Sites") and Y.Sites:FindFirstChild(name)
 	if pad then
 		pad:Destroy()
 	end
@@ -116,7 +173,7 @@ function S.undo(name: string)
 	local f = root and root:FindFirstChild(name)
 	if f then
 		for _, m in f:GetChildren() do
-			m.Parent = workspace.Yangon.Buildings
+			m.Parent = Y.Buildings
 		end
 		f:Destroy()
 	end
@@ -124,8 +181,8 @@ end
 
 -- the fuel station on a prepared lot: its forecourt starts at the lot's front edge (the road side)
 function S.fuel(id: string, name: string, s, V, litre: number, kwh: number): string
-	V.root = workspace.Yangon
-	V.clearIn = workspace.Yangon.Buildings
+	V.root = S.root or workspace.Yangon
+	V.clearIn = (S.root or workspace.Yangon).Buildings
 	V.brand = { "LEGENDS", "FUEL" }
 	local cf = frameOf(s)
 	local f = Vector3.new(s.fx, 0, s.fz).Unit

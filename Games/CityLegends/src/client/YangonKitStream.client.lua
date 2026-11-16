@@ -74,6 +74,40 @@ for _, f in root:GetChildren() do
 	end
 end
 
+-- (2026-11-17, the venues on the 1:1 map) nothing is built inside the boxes of ReplicatedStorage.YgnKit.KeepOut (venue lots
+-- and the buildings their lots replaced, tools/yangon/YangonSites.luau): those parts are taken out once a tile is built
+local keepOut = {}
+do
+	local ko = root:FindFirstChild("KeepOut")
+	for _, b in (if ko then ko:GetChildren() else {}) do
+		if b:IsA("BasePart") then
+			table.insert(keepOut, { cf = b.CFrame:Inverse(), hx = b.Size.X / 2, hz = b.Size.Z / 2, c = Vector2.new(b.Position.X, b.Position.Z), r = Vector2.new(b.Size.X, b.Size.Z).Magnitude / 2 })
+		end
+	end
+end
+local function clearKeepOut(f: Instance, key: string)
+	local mine = {}
+	for _, k in keepOut do
+		if (k.c - centre[key]).Magnitude < k.r + 400 then -- (a tile is at most 256 across)
+			table.insert(mine, k)
+		end
+	end
+	if #mine == 0 then
+		return
+	end
+	for _, d in f:GetDescendants() do
+		if d:IsA("BasePart") then
+			for _, k in mine do
+				local l = k.cf * d.Position
+				if math.abs(l.X) < k.hx and math.abs(l.Z) < k.hz then
+					d:Destroy()
+					break
+				end
+			end
+		end
+	end
+end
+
 local near = Instance.new("Folder")
 near.Name = "YgnKitNear"
 near.Parent = workspace
@@ -237,6 +271,7 @@ RunService.Heartbeat:Connect(function(dt)
 			end
 			if #list == 0 then
 				jobs[key] = nil
+				clearKeepOut(folders[key], key)
 				built[key] = true
 				setShells(key, true)
 			end

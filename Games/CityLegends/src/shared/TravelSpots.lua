@@ -46,13 +46,14 @@ local INFO = {
 	home = "Your house",
 	service = "Oil, tyres, brakes, engine and body repair",
 	fuel = "Fuel, fast chargers and a car wash",
+	ggfest = "GG Gaming Fest, 21-22 Nov: the GG Quest",
 }
 
 local function iconFor(id: string): string
 	if string.sub(id, 1, 6) == "tower_" then
 		return "tower"
 	end
-	local map = { ygn_optima = "race", ygn_novotel = "hotel", ygn_mmplaza = "harbour", ygn_roundabout = "lookout", ygn_newroad = "lookout", ygn_university = "lookout", old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", rewards = "rewards", gems = "gems", beach = "beach" }
+	local map = { ygn_optima = "race", ygn_novotel = "hotel", ygn_mmplaza = "harbour", ygn_roundabout = "lookout", ygn_newroad = "lookout", ygn_university = "lookout", y1_mmplaza = "harbour", y1_sedona = "hotel", y1_roundabout = "lookout", y1_kabaaye = "lookout", y1_sule = "lookout", y1_bogyoke = "harbour", y1_botataung = "lookout", ggfest = "race", old_rock = "palace", mountain = "lookout", stadium = "stadium", harbour = "harbour", dealership = "dealership", customs = "customs", bank = "bank", hotel = "hotel", rewards = "rewards", gems = "gems", beach = "beach" }
 	return map[id] or "harbour"
 end
 
@@ -98,7 +99,7 @@ function TravelSpots.list(): { Spot }
 	table.insert(list, { id = "service", name = "Legends Service", icon = "service", info = INFO.service, cf = (Config :: any).Service.Arrive })
 	for _, st in (Config :: any).Fuel.Stations do
 		-- (only the stations of a map in the place: Monaco's are kept in ServerStorage since Yangon step 11)
-		local here = if Config.isYangonAt(st.arrive.Position) then workspace:FindFirstChild("Yangon") else riv
+		local here = workspace:FindFirstChild(Config.mapAt(st.arrive.Position))
 		if here then
 			table.insert(list, { id = st.id, name = st.name, icon = "fuel", info = INFO.fuel, cf = st.arrive })
 		end

@@ -53,7 +53,7 @@ end
 function WestLayout.siteData(name: string): { [string]: any }?
 	local yv = Config.YangonVenues
 	local s = yv and yv.On and yv.Sites[name]
-	if s and workspace and workspace:FindFirstChild("Yangon") then
+	if s and Config.mapRoot() then
 		return s
 	end
 	local rv = Config.RivieraVenues
@@ -67,7 +67,7 @@ end
 function WestLayout.rivieraSite(name: string): CFrame?
 	local yv = Config.YangonVenues
 	local s = yv and yv.On and yv.Sites[name]
-	if not s or not (workspace and workspace:FindFirstChild("Yangon")) then
+	if not s or not Config.mapRoot() then
 		local rv = Config.RivieraVenues
 		s = rv and rv.On and rv.Sites[name]
 		if not s or not (workspace and workspace:FindFirstChild("Riviera")) then -- (Lune has no workspace)
@@ -229,16 +229,21 @@ function WestLayout.places(): { Place }
 			onRoad("harbour", "The Harbour", Vector3.new(13696.26, 6, 536.58), Vector3.new(1, 0, -0.03))
 			onRoad("mountain", "Mountain Road Lookout", Vector3.new(13598.51, 121.33, -754.69), Vector3.new(1, 0, 0))
 		end
-		-- Yangon (build step 9): its landmarks, on the outer lane beside them (YangonLanes)
-		if workspace:FindFirstChild("Yangon") then
-			onRoad("ygn_optima", "Optima Werkz", Vector3.new(30866.98, 46.15, 764.83), Vector3.new(0.519, 0, -0.855))
-			onRoad("ygn_novotel", "Novotel", Vector3.new(28637.73, 40.34, -137.68), Vector3.new(0.253, 0, 0.967))
-			onRoad("ygn_mmplaza", "Myanmar Plaza", Vector3.new(32471.71, 28.96, -1305.15), Vector3.new(0.134, 0, -0.991))
-			onRoad("ygn_roundabout", "Hanthawaddy Roundabout", Vector3.new(28976.76, 47.42, 1184.83), Vector3.new(0.125, 0, 0.992))
-			onRoad("ygn_newroad", "New Road", Vector3.new(32450.83, 59.4, 894.39), Vector3.new(0.996, 0, 0.088))
-			onRoad("ygn_university", "University Avenue", Vector3.new(29652.39, 52.59, -1013.03), Vector3.new(0.996, 0, 0.091))
+		-- Yangon at 1:1 (2026-11-17): its landmarks, on the outer lane beside them (YangonLanes1to1); new ids, y1_*
+		if Config.mapRoot() then
+			onRoad("y1_mmplaza", "Myanmar Plaza", Vector3.new(34616.66, 40.42, 27561.15), Vector3.new(0.131, 0, -0.991))
+			onRoad("y1_sedona", "Sedona Hotel", Vector3.new(34717.2, 48.68, 26764.12), Vector3.new(0.124, 0, -0.992))
+			onRoad("y1_roundabout", "Hanthawaddy Roundabout", Vector3.new(28319.12, 75.21, 32107.15), Vector3.new(-0.782, 0, -0.624))
+			onRoad("y1_kabaaye", "Kaba Aye Pagoda", Vector3.new(35232.24, 62.01, 17651.11), Vector3.new(0.235, 0, 0.972))
+			onRoad("y1_sule", "Sule Pagoda", Vector3.new(36142.84, 23.32, 45208.77), Vector3.new(0.53, 0, -0.848))
+			onRoad("y1_bogyoke", "Bogyoke Market", Vector3.new(34986.49, 33.59, 43431.03), Vector3.new(-0.999, 0, -0.033))
+			onRoad("y1_botataung", "Botataung Pagoda", Vector3.new(40337.05, 18.32, 47395.4), Vector3.new(-0.055, 0, 0.998))
 		end
-		return keep
+		list = keep
+	end
+	-- (2026-11-17) GG Gaming Fest at the Yangon Convention Centre (1:1 map): on the forecourt by the middle door
+	if workspace:FindFirstChild("Yangon1to1") then
+		table.insert(list, { id = "ggfest", name = "GGFest @ YCC", cf = Config.GGFest.Arrive })
 	end
 	return list
 end

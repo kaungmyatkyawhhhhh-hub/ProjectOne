@@ -59,11 +59,11 @@ do
 		-- Yangon (build step 9): the server streams the city in round Optima Werkz (the start), and the
 		-- far city and Shwedagon are always there (Yangon.Far is Persistent): close shots round Optima,
 		-- one across the city to the pagoda
+		-- (1:1, 2026-11-17: round Myanmar Plaza on Kabar Aye Pagoda Road, where players start)
 		shots = {
-			{ Vector3.new(30700, 110, 600), Vector3.new(30892, 50, 785), Vector3.new(8, 0, -4), 58 }, -- over Optima Werkz
-			{ Vector3.new(30985, 70, 1010), Vector3.new(30850, 48, 780), Vector3.new(-10, 0, 0), 56 }, -- along the loop
-			{ Vector3.new(30900, 170, 880), Vector3.new(31619, 140, 3821), Vector3.new(-6, 0, 0), 50 }, -- to Shwedagon
-			{ Vector3.new(31150, 230, 520), Vector3.new(30892, 40, 785), Vector3.new(0, 0, 8), 62 }, -- high over the loop
+			{ Vector3.new(34400, 140, 27300), Vector3.new(34897, 60, 27549), Vector3.new(8, 0, -4), 58 }, -- over Myanmar Plaza
+			{ Vector3.new(34560, 70, 28000), Vector3.new(34616, 42, 27560), Vector3.new(-10, 0, 0), 56 }, -- along Kabar Aye Pagoda Road
+			{ Vector3.new(35200, 230, 27000), Vector3.new(34983, 60, 26798), Vector3.new(0, 0, 8), 62 }, -- high over Sedona
 		}
 	elseif workspace:FindFirstChild("Riviera") and far then
 		far.Parent = workspace -- (WorldFx's far-city switch picks it up from here later)
@@ -132,7 +132,7 @@ end
 -- player arrives over a few seconds. The loading screen stays up (the car held) until parts have
 -- stopped arriving for a moment, then the game starts. SKIP (after 5 s, Playbook) still works.
 local streamedIn = 0
-for _, root in { workspace:FindFirstChild("Riviera"), workspace:FindFirstChild("Yangon"), city } do
+for _, root in { workspace:FindFirstChild("Riviera"), Config.mapRoot(), city } do
 	if root then
 		root.DescendantAdded:Connect(function(d)
 			if d:IsA("BasePart") then
@@ -341,7 +341,7 @@ local function startOrbit()
 			-- it and the loop; the server streams the city in round it (MenuFocus)
 			travel += dt
 			local a = travel * (math.pi * 2 / 150)
-			local centre = Vector3.new(30892, 47, 785)
+			local centre = Vector3.new(34897, 47, 27549) -- (1:1: Myanmar Plaza, 2026-11-17)
 			local off = Vector3.new(math.cos(a), 0, math.sin(a))
 			local pos = centre + off * 150 + Vector3.new(0, 70 + math.sin(travel / 9) * 6, 0)
 			camera.CFrame = CFrame.lookAt(pos, centre + Vector3.new(0, 8, 0))
