@@ -7,6 +7,8 @@
 	The gameplay modules report what happened with ctx.note(player, stat, amount) (Goals.note);
 	levels, owned cars and brands and houses are read from the profile. Saved as profile.Goals.
 	Remotes: GoalsCall (state, claim the streak), GoalsPush (state updates and "done" moments).
+	(2026-11-17) the GG Quest while GG Gaming Fest is live (Config.GGFest, Config.ggLive): its steps count only
+	during the festival, pay points (+ cash), and finishing it puts the GGFest look on your car. Saved as profile.Goals.GG.
 ]]
 
 local Players = game:GetService("Players")
@@ -19,6 +21,7 @@ local ChallengeData = require(Shared:WaitForChild("ChallengeData"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local G = Config.Goals
+local GG = Config.GGFest
 
 local Goals = {}
 
@@ -75,6 +78,24 @@ local function data(profile: any): Data
 		g.Tasks = { Date = "", List = {} }
 	end
 	return g :: Data
+end
+
+-- the GG Quest's saved progress ({ Have = { id = n }, Done = { id = true }, Pts, Wrap }), checked on load
+local function ggData(g: any): any
+	local q = g.GG
+	if type(q) ~= "table" then
+		q = {}
+		g.GG = q
+	end
+	if type(q.Have) ~= "table" then
+		q.Have = {}
+	end
+	if type(q.Done) ~= "table" then
+		q.Done = {}
+	end
+	q.Pts = math.max(0, math.floor(tonumber(q.Pts) or 0))
+	q.Wrap = q.Wrap == true
+	return q
 end
 
 local function available(stat: string): boolean
@@ -181,10 +202,59 @@ local function check(player: Player)
 			end
 		end
 	end
+	if Config.ggLive() then
+		local q = ggData(g)
+		for _, step in GG.Quest do
+			if not q.Done[step.id] and (q.Have[step.id] or 0) >= step.need then
+				q.Done[step.id] = true
+				q.Pts += step.pts
+				pay(player, step.pts * GG.CashPerPoint, 0)
+				paid = true
+				if Push then
+					Push:FireClient(player, { kind = "done", what = "gg", text = string.format(step.text, step.need), cash = step.pts * GG.CashPerPoint, pts = step.pts })
+				end
+			end
+		end
+		if not q.Wrap then
+			local all = true
+			for _, step in GG.Quest do
+				all = all and q.Done[step.id] == true
+			end
+			if all then
+				q.Wrap = true
+				Goals.giveWrap(player, profile)
+				if Push then
+					Push:FireClient(player, { kind = "done", what = "ggwrap", text = "GG Quest done: the GGFest look is on your car", cash = 0 })
+				end
+			end
+		end
+	end
 	if paid then
 		task.spawn(PlayerData.save, player)
 	end
 	dirty[player] = true
+end
+
+-- the limited GGFest look on the player's selected car (merged over its own look; free), and on the car if it's out
+function Goals.giveWrap(player: Player, profile: any)
+	local Customs = require(script.Parent:WaitForChild("Customs")) :: any
+	local carId = profile.Selected
+	if type(carId) ~= "string" or not profile.Owned[carId] then
+		return
+	end
+	local look = Customs.lookOf(profile, carId)
+	for k, v in GG.Wrap do
+		(look :: any)[k] = v
+	end
+	look = Customs.clean(look)
+	if type(profile.Customs) ~= "table" then
+		profile.Customs = {}
+	end
+	profile.Customs[carId] = look
+	local car = ctx and ctx.playerCars and ctx.playerCars:FindFirstChild(player.Name)
+	if car and car:GetAttribute("CarId") == carId then
+		Customs.setOn(car, look)
+	end
 end
 
 -- something happened: `stat` went up by `amount` (for "combo", the combo reached)
@@ -207,6 +277,14 @@ function Goals.note(player: Player, stat: string, amount: number?)
 		local spec = TASK_BY_ID[t.id]
 		if spec and spec.stat == stat and not t.done then
 			t.have = if spec.best then math.max(t.have, n) else t.have + n
+		end
+	end
+	if Config.ggLive() then
+		local q = ggData(g)
+		for _, step in GG.Quest do
+			if step.stat == stat and not q.Done[step.id] then
+				q.Have[step.id] = if step.best then math.max(q.Have[step.id] or 0, n) else (q.Have[step.id] or 0) + n
+			end
 		end
 	end
 	check(player)
@@ -326,6 +404,17 @@ function Goals.state(player: Player): { [string]: any }?
 			})
 		end
 	end
+	local gg = nil
+	if Config.ggLive() then
+		local q = ggData(g)
+		local steps, doneN = {}, 0
+		for _, step in GG.Quest do
+			local done = q.Done[step.id] == true
+			doneN += if done then 1 else 0
+			table.insert(steps, { text = string.format(step.text, step.need), need = step.need, have = math.min(step.need, q.Have[step.id] or 0), pts = step.pts, cash = step.pts * GG.CashPerPoint, done = done })
+		end
+		gg = { list = steps, done = doneN, total = #GG.Quest, pts = q.Pts, wrap = q.Wrap }
+	end
 	local day, readyIn = Goals.streak(player)
 	local rewards = {}
 	for d = 1, 7 do
@@ -339,6 +428,7 @@ function Goals.state(player: Player): { [string]: any }?
 		tasks = list,
 		tasksIn = secondsToNextDay(),
 		streak = { day = day, readyIn = readyIn, rewards = rewards, last = data(profile).Streak.Day },
+		gg = gg,
 	}
 end
 

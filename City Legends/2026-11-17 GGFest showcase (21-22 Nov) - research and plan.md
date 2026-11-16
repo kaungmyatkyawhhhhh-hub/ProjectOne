@@ -47,6 +47,9 @@ YCC sits on **Kabar Aye Pagoda Road, inside the Inya Lake Hotel compound**, whic
    - a short trailer loop (pro-video-editing skill)
 4. **Stability first:** the booth build must not crash. **Checkpoint Thursday evening:** if the 1:1 roads are fixed and QA'd, show the 1:1 map. If not, show the stable live map, with the GGFest zone placed there too.
 
+## Built (17 Nov)
+- YCC at 1:1, the festival dressing, the GG Quest, the GGFest look, fast travel and the map marker: [[2026-11-17 GGFest at YCC (in game)]].
+
 ## Rules
 - Real names as plain text only (landmark-name rule). GGFest logo artwork only with the organisers' OK.
 - Interiors only from real photos: YCC hall photos are on Cvent. Check before building the inside.

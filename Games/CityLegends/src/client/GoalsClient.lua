@@ -111,7 +111,7 @@ local function buildTracker()
 	trackerSub = label({ Text = "", TextSize = if UI.isTouch then 10 else 11, Font = Enum.Font.GothamBold, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -12, 1, -5), Size = UDim2.new(0.5, -8, 0, 13), Parent = t })
 	t.Activated:Connect(function()
 		Audio.click()
-		GoalsClient.open("path")
+		GoalsClient.open(if state and (state :: any).gg then "gg" else "path")
 	end)
 	placeTracker()
 	camera:GetPropertyChangedSignal("ViewportSize"):Connect(placeTracker)
@@ -132,6 +132,19 @@ local function refreshTracker()
 	local nxt = st.next
 	local title, text, fill, sub = trackerTitle :: TextLabel, trackerText :: TextLabel, trackerFill :: Frame, trackerSub :: TextLabel
 	title.Text = string.format("LEGENDS PATH  %d/%d", st.done or 0, st.total or 0)
+	-- (2026-11-17) while GG Gaming Fest is live and its quest isn't done, the tracker shows the next quest step
+	local gg = st.gg
+	if gg and gg.done < gg.total then
+		for _, step in gg.list do
+			if not step.done then
+				title.Text = string.format("GG QUEST  %d/%d", gg.done, gg.total)
+				text.Text = step.text
+				tween(fill, 0.3, { Size = UDim2.fromScale(if step.need > 0 then math.clamp(step.have / step.need, 0, 1) else 0, 1) })
+				sub.Text = count(step.have, step.need) .. "   +" .. step.pts .. " PTS"
+				return
+			end
+		end
+	end
 	if nxt then
 		text.Text = nxt.text
 		local k = if nxt.need > 0 then math.clamp(nxt.have / nxt.need, 0, 1) else 0
@@ -175,20 +188,21 @@ local function bar(parent: Instance, k: number, color: Color3, props: { [string]
 	new("Frame", { Size = UDim2.fromScale(math.clamp(k, 0, 1), 1), BackgroundColor3 = color, BorderSizePixel = 0, ZIndex = 75, Parent = back }, { corner(3) })
 end
 
-local function buildPath(body: Frame)
+local function buildPath(body: Frame, items: { any }?)
 	local st = state :: any
+	local entries = items or st.path
 	local list = new("ScrollingFrame", {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		ScrollBarThickness = 4,
 		ScrollBarImageColor3 = Theme.Stroke,
-		CanvasSize = UDim2.fromOffset(0, #st.path * 56),
+		CanvasSize = UDim2.fromOffset(0, #entries * 56),
 		ZIndex = 72,
 		Parent = body,
 	})
 	local firstOpen: number? = nil
-	for i, g in st.path do
+	for i, g in entries do
 		local r = row(list, (i - 1) * 56, 50, g.done)
 		local mark = label({ Text = if g.done then "✓" else tostring(i), TextSize = 16, Font = Enum.Font.GothamBlack, TextColor3 = if g.done then Theme.Money else GOLD, Position = UDim2.fromOffset(8, 0), Size = UDim2.fromOffset(30, 50), ZIndex = 74, Parent = r })
 		mark.TextTransparency = 0
@@ -198,7 +212,7 @@ local function buildPath(body: Frame)
 			label({ Text = count(g.have, g.need), TextSize = 11, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -116, 0, 26), Size = UDim2.fromOffset(70, 16), ZIndex = 74, Parent = r })
 			firstOpen = firstOpen or i
 		end
-		label({ Text = "+" .. UI.formatCash(g.cash), TextSize = 14, Font = Enum.Font.GothamBlack, TextColor3 = if g.done then Theme.SubText else Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -12, 0.5, 0), Size = UDim2.fromOffset(100, 20), ZIndex = 74, Parent = r })
+		label({ Text = if g.pts then "+" .. g.pts .. " PTS" else "+" .. UI.formatCash(g.cash), TextSize = 14, Font = Enum.Font.GothamBlack, TextColor3 = if g.done then Theme.SubText else Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -12, 0.5, 0), Size = UDim2.fromOffset(100, 20), ZIndex = 74, Parent = r })
 	end
 	-- show the next goal near the top
 	if firstOpen then
@@ -319,6 +333,12 @@ function GoalsClient.open(tab: string?)
 	x.Activated:Connect(closeScreen)
 	-- tabs
 	local tabs = { { "path", "PATH" }, { "daily", "DAILY" }, { "streak", "STREAK" } }
+	-- (2026-11-17) the GG Quest's tab while GG Gaming Fest is live
+	if (state :: any).gg then
+		table.insert(tabs, 1, { "gg", "GG QUEST" })
+	elseif screenTab == "gg" then
+		screenTab = "path"
+	end
 	local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 110), Size = UDim2.new(1, -40, 1, -126), ZIndex = 72, Parent = f })
 	local tabButtons: { [string]: TextButton } = {}
 	local ticker: (() -> ())? = nil
@@ -333,6 +353,8 @@ function GoalsClient.open(tab: string?)
 		local st = state :: any
 		if which == "path" then
 			buildPath(body)
+		elseif which == "gg" and st.gg then
+			buildPath(body, st.gg.list)
 		elseif which == "daily" then
 			ticker = buildDaily(body)
 		else
@@ -340,12 +362,14 @@ function GoalsClient.open(tab: string?)
 		end
 		local sub = f:FindFirstChild("Sub") :: TextLabel?
 		if sub then
-			sub.Text = if which == "path" then string.format("LEGENDS PATH: %d OF %d DONE", st.done, st.total) elseif which == "daily" then "3 NEW TASKS EVERY DAY" else "DAILY STREAK"
+			sub.Text = if which == "gg" and st.gg then string.format("GG GAMING FEST · 21-22 NOV · YANGON CONVENTION CENTRE · %d PTS", st.gg.pts)
+				elseif which == "path" then string.format("LEGENDS PATH: %d OF %d DONE", st.done, st.total) elseif which == "daily" then "3 NEW TASKS EVERY DAY" else "DAILY STREAK"
 		end
 	end
 	label({ Name = "Sub", Text = "", TextSize = 13, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(20, 46), Size = UDim2.new(1, -90, 0, 16), ZIndex = 72, Parent = f })
 	for i, t in tabs do
-		local b = button(t[2], GOLD, { Position = UDim2.new((i - 1) / 3, 20 - (i - 1) * 13.3, 0, 62), Size = UDim2.new(1 / 3, -26.6, 0, 40), TextSize = 15, ZIndex = 72, Parent = f })
+		local n = #tabs
+		local b = button(t[2], GOLD, { Position = UDim2.new((i - 1) / n, 20 - (i - 1) * 40 / n, 0, 62), Size = UDim2.new(1 / n, -40 / n - 6, 0, 40), TextSize = 15, ZIndex = 72, Parent = f })
 		tabButtons[t[1]] = b
 		b.Activated:Connect(function()
 			show(t[1])
@@ -427,7 +451,7 @@ function GoalsClient.init()
 			if msg.kind == "state" and type(msg.state) == "table" then
 				setState(msg.state)
 			elseif msg.kind == "done" then
-				local what = if msg.what == "task" then "DAILY TASK DONE" else "GOAL DONE"
+				local what = if msg.what == "task" then "DAILY TASK DONE" elseif msg.what == "gg" then "GG QUEST +" .. tostring(msg.pts) .. " PTS" elseif msg.what == "ggwrap" then "GGFEST LOOK UNLOCKED" else "GOAL DONE"
 				UI.popup(what, tonumber(msg.cash) or 0, GOLD)
 				UI.toast(tostring(msg.text), GOLD)
 				Audio.cutUp(8, "goal")

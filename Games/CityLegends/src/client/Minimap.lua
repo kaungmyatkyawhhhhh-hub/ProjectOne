@@ -50,7 +50,7 @@ end
 -- the Yangon map (build step 9, 2026-11-13; tools/yangon/d12_minimap.py), drawn beside Monaco's in the
 -- same world-stud space while both maps are in the place
 local okYArt, YArt = pcall(function()
-	return if workspace:FindFirstChild("Yangon") then require(script.Parent:WaitForChild("YangonMapArt", 3)) :: any else nil
+	return if Config.mapRoot() then require(script.Parent:WaitForChild("YangonMapArt", 3)) :: any else nil
 end)
 if not okYArt then
 	YArt = nil
@@ -289,7 +289,7 @@ function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 	-- Yangon (build step 9): its own frame
 	if YArt and Config.activeMap() == "Yangon" then
 		local m = YArt.map
-		name("INYA LAKE", 30780, -3250)
+		name("INYA LAKE", 31600, 25000) -- (1:1, 2026-11-17)
 		return Vector2.new((m.x0 + m.x1) / 2, (m.z0 + m.z1) / 2), Vector2.new(m.x1 - m.x0, m.z1 - m.z0)
 	end
 	local z0 = CityLayout.roadCoord(0)
@@ -346,6 +346,7 @@ local LANDMARKS: { [string]: { glyph: string, color: Color3 } } = {
 	gems = { glyph = "◆", color = Color3.fromRGB(120, 210, 255) },
 	beach = { glyph = "☀", color = Color3.fromRGB(255, 220, 110) },
 	downtown = { glyph = "D", color = Color3.fromRGB(200, 200, 210) },
+	ggfest = { glyph = "G", color = Color3.fromRGB(236, 38, 150) }, -- (2026-11-17) GG Gaming Fest at YCC
 }
 
 ---------------------------------------------------------------------
@@ -537,6 +538,10 @@ function Minimap.start()
 		local list = {}
 		if workspace:GetAttribute("LiveBank") == true and landmarkPos.bank then
 			table.insert(list, { pos = landmarkPos.bank, glyph = "$", color = Color3.fromRGB(80, 255, 140) })
+		end
+		-- (2026-11-17) GG Gaming Fest is on: YCC pulses
+		if workspace:GetAttribute("GGFestLive") == true and landmarkPos.ggfest then
+			table.insert(list, { pos = landmarkPos.ggfest, glyph = "G", color = Color3.fromRGB(236, 38, 150) })
 		end
 		local meetCount = workspace:GetAttribute("MeetCount")
 		local meetPos = workspace:GetAttribute("MeetSpot")
