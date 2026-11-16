@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 09:46 [dashboard, unverified] Beams, fire, and explosions are used in Roblox. (topic: tiktok)
+- 2026-11-16 09:45 [dashboard, unverified] I'll start using meshes more in my work. (topic: tiktok)
 - 2026-11-16 09:44 [dashboard, unverified] Taught by Todor Nikolov, you'll start with the basics and progress all the way up to squash and stretch, facial rigging, mech rigging, and much more! (topic: tiktok)
 - 2026-11-16 09:42 [dashboard, unverified] Blender 3D Product Animation. (topic: tiktok)
 - 2026-11-16 09:36 [dashboard, unverified] Blender3D is used for character animation. (topic: tiktok)
