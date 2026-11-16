@@ -157,6 +157,80 @@ function A.placesData(holding: Instance): string
 	return A.data(holding)
 end
 
+-- the whole district swap in one go (idempotent: run it again and the result is the same). box = {x0, x1, z0, z1}: the
+-- district's world box; every Shell part and Green.Far part with its middle inside is replaced (no other district's parts
+-- stand in it: checked per district before use).
+function A.run(holding: Instance, box): string
+	local SS = game:GetService("ServerStorage")
+	local log = {}
+	local function inBox(p: Vector3): boolean
+		return p.X > box[1] and p.X < box[2] and p.Z > box[3] and p.Z < box[4]
+	end
+	local P = require(holding.YangonKitPlace:Clone())
+	P.index(RS.YgnKit.Templates)
+	table.insert(log, A.kitData(holding))
+	-- shells
+	local removed = 0
+	for _, cm in workspace.Yangon1to1.Buildings.Shell:GetChildren() do
+		for _, q in cm:GetChildren() do
+			if q:IsA("BasePart") and inBox(q.Position) then
+				q:Destroy()
+				removed += 1
+			end
+		end
+		task.wait()
+	end
+	table.insert(log, "shells removed " .. removed)
+	table.insert(log, A.shells(holding, P))
+	table.insert(log, A.data(holding))
+	-- facades on every shell (packed maps of all built districts)
+	local F = require(holding.YangonShellFacades:Clone())
+	F.apply({ walkup = holding.Fac_walkup.Value, shop = holding.Fac_shop.Value, none = holding.Fac_none.Value },
+		workspace.Yangon1to1.Buildings.Shell)
+	table.insert(log, "facades " .. tostring(workspace:GetAttribute("YgnShellFacadesDone")))
+	-- green: its data, and its far trees merged into the shared Far folder (farOld destroys the whole folder)
+	local gh
+	for _, c in holding:GetChildren() do
+		if string.match(c.Name, "^GreenHolding_") then
+			gh = c
+		end
+	end
+	if gh then
+		local G = require(holding.YangonGreen1to1:Clone())
+		table.insert(log, G.data(gh))
+		local green = workspace.Yangon1to1.Green
+		local keep = green:FindFirstChild("Far")
+		if keep then
+			keep.Name = "FarKeep"
+			for _, q in keep:GetDescendants() do
+				if q:IsA("BasePart") and inBox(q.Position) then
+					q:Destroy()
+				end
+			end
+		end
+		local r = G.farOld(gh)
+		if keep then
+			local far = green.Far
+			for _, m in keep:GetChildren() do
+				local t = far:FindFirstChild(m.Name)
+				if t then
+					for _, q in m:GetChildren() do
+						q.Parent = t
+					end
+					m:Destroy()
+				else
+					m.Parent = far
+				end
+			end
+			keep:Destroy()
+		end
+		table.insert(log, "far " .. tostring(r))
+	end
+	table.insert(log, A.grade(holding))
+	SS:SetAttribute("PlacesApplyLog", table.concat(log, " | "))
+	return table.concat(log, " | ")
+end
+
 function A.spawn(name: string, fn)
 	SS:SetAttribute("PlacesApplyStatus", name .. ": running")
 	task.spawn(function()

@@ -41,13 +41,11 @@ def main():
         k += 1
         parts.append('<Item class="StringValue" referent="S%d"><Properties><string name="Name">%s</string>'
                      '<string name="Value">%s</string></Properties></Item>' % (k, os.path.splitext(os.path.basename(p))[0], escape(v)))
-    # the run being replaced (its exact positions: PlacesApply.unshells removes only those parts)
-    old = os.path.join(B1, "buildings_%s_before_places" % TAG)
-    for p in sorted(glob.glob(os.path.join(old, "Shell_*.txt")), key=lambda s: int(re.findall(r"\d+", os.path.basename(s))[0])):
-        v = open(p, encoding="utf-8").read().replace("\r\n", "\n")
+    # terrain cuts over the graded slabs (PlacesApply.grade); the old shells are removed by the district box in Studio
+    for p in sorted(glob.glob(os.path.join(B1, "places_%s" % TAG, "Grade_*.txt"))):
         k += 1
-        parts.append('<Item class="StringValue" referent="S%d"><Properties><string name="Name">Old%s</string>'
-                     '<string name="Value">%s</string></Properties></Item>' % (k, os.path.splitext(os.path.basename(p))[0], escape(v)))
+        parts.append('<Item class="StringValue" referent="S%d"><Properties><string name="Name">%s</string>'
+                     '<string name="Value">%s</string></Properties></Item>' % (k, os.path.splitext(os.path.basename(p))[0], escape(open(p).read())))
     # the green layer run again with the places keep-out (its own holding folder, nested)
     gp = os.path.join(ROOT, "imports", "sync", "ygn1to1_green", "green_%s.rbxmx" % TAG.lower())
     if os.path.exists(gp):

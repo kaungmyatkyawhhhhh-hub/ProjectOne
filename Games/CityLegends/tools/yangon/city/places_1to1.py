@@ -56,6 +56,37 @@ import buildings_1to1 as BK  # noqa: E402  (corridors, ground, roof_rects, rect_
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 B1 = os.path.join(ROOT, "build", "city_1to1")
+
+
+# (2026-11-16) the roads05 network (batch 0.5 builder at 1:1, dual carriageways on one centre line) replaces the old P1 / P2
+# road meshes: the corridors are its carriageways + pavements + 0.6 m (roads05_clear.road_polys), when a roads05 build
+# covers this district
+def _roads05_corridors():
+    import glob as _g
+    # the build that is in Studio for P1 / P2 (coordinator, 16 Nov): roads05_P1_P2; otherwise the newest that covers TAG
+    pref = os.path.join(B1, "roads05_P1_P2", "roads.json")
+    for d in [pref] + sorted(_g.glob(os.path.join(B1, "roads05_*", "roads.json")), key=os.path.getmtime, reverse=True):
+        if not os.path.exists(d):
+            continue
+        data = json.load(open(d, encoding="utf-8"))
+        if TAG not in data.get("tags", []):
+            continue
+        import roads05_clear
+        cw, pv = roads05_clear.road_polys(data)
+        corr = unary_union([g for _, g in cw] + [g for _, g in pv]).buffer(geo.m(0.6))
+        lines = []
+        for r in data["roads"]:
+            P = [(q[0], q[2]) for q in r["s"]]
+            if len(P) >= 2:
+                lines.append((LineString(P), r.get("hw", ""), None, r))
+        print("corridors: roads05 %s (%d roads)" % (os.path.basename(os.path.dirname(d)), len(lines)))
+        return corr, lines
+    return None
+
+
+_c05 = _roads05_corridors()
+if _c05:
+    BK.corridors = lambda: _c05
 OUT = os.path.join(B1, "places_%s" % TAG)
 M = geo.m
 TILE = 256.0
@@ -667,6 +698,8 @@ def pitch(o, pt, keep_off):
             o.stats["nets"] += 1
         o.stats["courts"] += 1
         return dict(id=pt["id"], kind="court", sport=sport)
+    if sport not in ("", "soccer", "football", "futsal", "multi"):
+        return dict(id=pt["id"], kind="field", sport=sport)   # baseball, cricket ...: no goals (nothing invented)
     # a grass / earth field: goals at the two ends (7.32 x 2.44 m full size, 5 x 2 m on small fields)
     big = hl > M(40)
     gw, gh = (M(7.32), M(2.44)) if big else (M(5.0), M(2.0))
@@ -674,6 +707,8 @@ def pitch(o, pt, keep_off):
         return dict(id=pt["id"], kind="field", sport=sport)
     for s in (-1, 1):
         gx, gz = cx + ux * s * (hl - M(1.0)), cz + uz * s * (hl - M(1.0))
+        if LineString([(gx + fx * gw / 2, gz + fz * gw / 2), (gx - fx * gw / 2, gz - fz * gw / 2)]).intersects(keep_off):
+            continue   # the goal line runs into a building / wall / road: no goal at this end
         gy = min(BK.ground(gx + fx * gw / 2, gz + fz * gw / 2)[0], BK.ground(gx - fx * gw / 2, gz - fz * gw / 2)[0]) - 0.3
         for k in (-1, 1):
             px, pz = gx + fx * k * gw / 2, gz + fz * k * gw / 2
@@ -766,8 +801,11 @@ def build():
     ctree = corr
     bad_road = sum(1 for (fpoly, _, _, _) in o.boxes if fpoly.intersects(corr))
     btree = STRtree(bpolys)
-    bad_bld = sum(1 for (fpoly, _, _, _) in o.boxes if any(bpolys[j].intersection(fpoly).area > 0.05
-                                                            for j in btree.query(fpoly, predicate="intersects")))
+    bad_bld = 0
+    for (fpoly, y0, y1, code) in o.boxes:
+        if any(bpolys[j].intersection(fpoly).area > 0.05 for j in btree.query(fpoly, predicate="intersects")):
+            bad_bld += 1
+            print("  in a building:", code, round(fpoly.centroid.x, 1), round(fpoly.centroid.y, 1), round(y0, 1))
     o.stats["check_on_road"] = bad_road
     keep = unary_union(o.keep + [b[0] for b in o.boxes]).buffer(M(0.5))
     kl = [list(map(list, g.exterior.coords)) for g in (keep.geoms if keep.geom_type == "MultiPolygon" else [keep])]

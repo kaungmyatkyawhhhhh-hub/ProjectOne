@@ -26,6 +26,26 @@ Not included:
 - Logos and brand names.
 - Fuel colours: only the satellite roof colour (Myawaddy, University Avenue: pale green-grey). The fascia green is a plain colour, not checked against a photo.
 
+## P2 (north of P1: Inya Lake north / east, Kaba Aye, Mayangone edge)
+- **Fuel:** New Day (Kabar Aye Pagoda Rd, 1 km north of Myanmar Plaza). Canopy measured on the satellite: 27 x 22 m, roof pale grey-green. 6 islands with 12 pumps, a kiosk, IN / OUT arrows.
+- **Car parks:** 9, with 146 bays.
+- **Courts:** 6 tennis.
+- **Baseball fields:** 3. No goals: nothing is invented for a sport the kit does not have.
+- **Playgrounds:** 2.
+- **Walled compounds:** 13 of the 14 mapped:
+  - schools (BEHS 4, BEMS 1, BEPS 10 Mayangone, MISY, Khayay, International School);
+  - hospitals (Yankin Children, Kan Thar Yar, Parami);
+  - universities (UIT, ICTTI, Economics Hlaing campus);
+  - Micasa Hotel.
+  - Kaba Aye stays its landmark site.
+- **Condos at real levels:**
+  - Sae Lae May Condos: 12 levels.
+  - May Inya: 10 levels.
+  - Myat Lay Hall and Kaytumati Hall: 7 levels each.
+  - A 5-part tower group at 16.8343, 96.1562 (just north of P1): 30-39 levels. The only source is OSM, and it needs checking.
+  - Diamond Inya (33 levels) stays its landmark site.
+- **Greenery:** green P2 run again. It found 39 trees on the new lots; now there are 0.
+
 ## Condos (height = 4.5 m ground floor + 3.33 m a floor + 1.2 m parapet)
 | Condo | Levels | Game height | Source | Look |
 |---|---|---|---|---|
@@ -58,6 +78,13 @@ Next to P1 but not built: Crystal Residences (lon 96.130, just west of P1, 90 m 
 - `green_1to1.py P1`: run again. It found 118 trees standing on the new lots; now there are 0.
 - New colour codes in `src/shared/YangonKitData.lua` (PCN, PAS, PLN, PLY, PCW, PCS, PFG ... PLT is Neon).
 - Studio: `places_pack.py P1` (all of it) or `places_pack.py P1 places` (the places layer only). PATCH asset 133014134133489, then `tools/yangon/PlacesApply.luau` (`unshells`, `shells`, `data`, `kitData`, `grade`). Then `YangonShellFacades.apply` (map P1-P4) and, for green, `G.data` and `G.farOld` merged into the existing Far.
+
+## Roads05 (16 Nov evening)
+- The P1 / P2 roads are now roads05 (one centre line per dual carriageway).
+- `places_1to1.py` takes its corridors from `build/city_1to1/roads05_P1_P2/roads.json`: carriageways plus pavements plus 0.6 m, the same as `roads05_clear.road_polys`.
+- Both districts were planned and built again against it. Nothing is on a road or in a building.
+- All condos stand clear of the new corridors (under 2 m² of touch).
+- Compounds and condos live in the kit-building data (`buildings_1to1` reads `places.json`). The districts agent swaps those.
 
 ## Checks
 - Nothing stands on a road corridor or in a building: 0 and 0.
