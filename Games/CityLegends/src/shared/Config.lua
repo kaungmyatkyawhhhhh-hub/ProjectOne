@@ -136,9 +136,11 @@ end
 Config.Areas = (function()
 	return {
 		-- (2026-11-16) the 1:1 Yangon frame (tools/yangon/city/geo.py at YANGON_SCALE=1to1: the whole OSM box lands at
-		-- x 15,600-60,400, z 6,800-53,200, clear of the old map's z -12,000-3,000); its lanes are 12 wide
-		YangonAreas = { { 25000, math.huge, -math.huge, math.huge }, { 15000, 61000, 6000, 54000 } },
-		Yangon1to1Areas = { { 15000, 61000, 6000, 54000 } },
+		-- x 15,600-60,400, z 6,800-53,200); its lanes are 12 wide. The old map's batches 1-3 (1.6 studs a metre) reach
+		-- z ~12,400, so the 1:1 area starts at z 14,000 (the pilots P1 / P2 lie at z 23,000-32,000; the 1:1 frame's
+		-- northern edge, lat 16.865-16.89, overlaps the old batches and must wait until they are retired)
+		YangonAreas = { { 25000, math.huge, -math.huge, math.huge }, { 15000, 61000, 14000, 54000 } },
+		Yangon1to1Areas = { { 15000, 61000, 14000, 54000 } },
 		LaneWidthYangon = 16,
 		LaneWidthYangon1to1 = 12,
 	}
