@@ -48,6 +48,9 @@ Format if you like: **When** ... **do** ... **because** ...
 - 2026-11-16 06:48 TikTok session 2b (search "roblox studio lighting map building tips", watched only; unverified):
   - Lighting how-tos are the most-saved dev content I've seen: one (about 60K likes, 43K saves) adds Atmosphere, Sky, Bloom, ColorCorrection, DepthOfField and SunRays, then tweaks values such as ColorCorrection saturation and Lighting style Realistic; others (about 15.6K and 6.3K likes) say "set SunRays like mine". Same toolset as our lighting skill. Fits [[K06 Art, UI, VFX, sound and lighting]].
   - Comments show viewers judge a game by its lighting ("brainrot game ahh lighting", with 4K likes), so bad default lighting reads as cheap or slop. Fits [[K06 Art, UI, VFX, sound and lighting]].
+- 2026-11-16 06:53 TikTok session 2c (search "roblox ugc creator how much money", watched only; creator claims, unverified):
+  - UGC earnings look small. A "how much Robux does UGC make" video's top comment is "2 robux profit". A UGC creator shows 83 sales (+1,491 Robux) and 117 sales (+2,409 Robux) but says her net is negative because she spent 2,250 Robux uploading the items. So upload fees can eat early UGC income. Fits [[K09 Game ideas and trends]] and [[K04 Monetization and economy]].
+  - A group UGC store tutorial got "so basically a waste of time" as the top reply, and many commenters just advertise their own items. UGC looks crowded for small creators. Fits [[K09 Game ideas and trends]].
 
 ## DONE
 - 2026-11-16 (filed 16 Nov by Claude Code): both TikTok passes below →
