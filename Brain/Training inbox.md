@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 11:52 [dashboard, unverified] Claude and Blender can be combined to create something. (topic: tiktok)
 - 2026-11-16 11:44 [dashboard, unverified] Roblox game development. (topic: tiktok)
 - 2026-11-16 11:40 [dashboard, unverified] Funnels can track when players leave your game. (topic: tiktok)
 - 2026-11-16 11:39 [dashboard, unverified] 1. Before starting to develop, ask yourself if the concept is clickable. (topic: tiktok)
