@@ -74,7 +74,8 @@ def chauk():
     L2, W2 = 47.0, 23.0          # half length / width of the shed
     FL = 0.4                     # floor top
     # floor slab
-    m.box("FLR", -L2, L2, -W2, W2, 0, FL, skip=("-z",))
+    m.box("FLR", -L2, L2, -W2, W2, 0, FL, skip=("-z", "+z"))
+    m.grid_top("FLR", -L2, L2, -W2, W2, FL, 12, 6)
     boxes.append((0, 0, 0, 2 * L2, 2 * W2, FL, 0))
 
     # ---- columns
@@ -193,22 +194,24 @@ def chauk():
     m.ellipsoid("SKN", F(*HC), (2.9, 3.0, 4.0), nu=40, nv=24)
     # neck (down into the cushion / body)
     m.tube("SKN", [(F(4.6, 0.0, 0.9), 2.0), (F(4.6, 0.1, 8.2), 1.9)], seg=24)
-    # crown (gold), elliptical lathe over the top of the head
-    prof = [(12.3, 2.98), (12.9, 3.02), (13.6, 2.72), (14.3, 2.2), (14.9, 1.55), (15.4, 0.8), (15.75, 0.25), (15.85, 0.0)]
-    m.loft("GLD", [(F(HC[0], HC[1], z), (-r * 0.95, 0, 0), (0, r, 0)) for z, r in prof], seg=36, cap0="flat", cap1=None)
-    # finial on the crown
-    m.tube("GLD", [(F(HC[0], HC[1], 15.7), 0.22), (F(HC[0], HC[1], 16.5), 0.05)], seg=10)
+    # crown: gold band round the forehead (photo 1) and the black hair cap above and behind it
+    prof = [(12.3, 2.98), (12.9, 3.05), (13.5, 2.82), (13.9, 2.55)]
+    m.loft("GLD", [(F(HC[0], HC[1], z), (-r * 0.95, 0, 0), (0, r, 0)) for z, r in prof], seg=36, cap0="flat", cap1="flat")
+    m.ellipsoid("BLK", F(*HC), (2.98, 3.1, 4.15), nu=36, nv=10, zcut=0.4)
     # ears (long lobes) at the sides of the head (along x)
     for su in (-1, 1):
         m.ellipsoid("SKN", F(HC[0] + su * 2.85, HC[1] - 0.2, 10.2), (0.5, 0.95, 2.7), nu=16, nv=10)
     # face features
     for su in (-1, 1):
         ex = HC[0] + su * 1.25
-        m.ellipsoid("BLK", F(ex, 2.84, 11.6), (0.88, 0.24, 0.29), nu=16, nv=8)           # glass eye, 1.77 x 0.58 m
+        m.ellipsoid("BLK", F(ex, 2.80, 11.55), (0.9, 0.24, 0.36), nu=18, nv=8)           # glass eye, 1.77 x 0.58 m
         m.ellipsoid("LID", F(ex, 2.80, 11.85), (0.95, 0.26, 0.2), nu=16, nv=8)           # pale blue lid
         m.ellipsoid("BLK", F(ex + su * 0.1, 2.68, 12.45), (1.05, 0.18, 0.12), nu=16, nv=6)  # brow
     m.ellipsoid("SKN", F(HC[0], 2.9, 10.3), (0.38, 0.32, 0.8), nu=14, nv=8)              # nose
-    m.ellipsoid("LIP", F(HC[0], 2.75, 9.0), (0.8, 0.28, 0.28), nu=16, nv=8)              # red lips
+    m.ellipsoid("LIP", F(HC[0], 2.66, 9.05), (0.7, 0.22, 0.24), nu=16, nv=8)             # red lips
+    for su in (-1, 1):
+        m.ellipsoid("BLK", F(HC[0] + su * 0.28, 2.98, 9.72), (0.17, 0.12, 0.12), nu=10, nv=5)  # nostrils
+        m.ellipsoid("LIP", F(HC[0] + su * 2.85, HC[1] + 0.55, 10.5), (0.3, 0.42, 1.2), nu=12, nv=8)  # pink inner ear
     # right arm: upper arm on the dais, forearm up to the hand under the head (gold sleeve), hand white
     m.tube("ROB", [(F(10.5, 0.0, 1.7), 1.8), (F(6.0, 0.3, 1.7), 1.65), (F(2.6, 0.5, 1.9), 1.55)], seg=24)
     m.tube("ROB", [(F(2.3, 0.3, 1.2), 1.45), (F(2.5, -0.3, 4.5), 1.3), (F(2.9, -0.6, 6.6), 1.15)], seg=24)
@@ -258,7 +261,7 @@ def ngah():
     boxes = []
     HX, HY = 35.9, 28.8           # half sizes of the hall (OSM bbox 71.8 x 57.6 m)
     FL = 0.8                      # floor top (the hall stands on a plinth on its hill)
-    m.box("FRD", -HX, HX, -HY, HY, 0, FL, skip=("-z", "+x", "-x", "+y", "-y"))
+    m.grid_top("FRD", -HX, HX, -HY, HY, FL, 10, 8)
     m.box("PLN", -HX, HX, -HY, HY, 0, FL, skip=("-z", "+z"))
     boxes.append((0, 0, 0, 2 * HX, 2 * HY, FL, 0))
 
@@ -451,8 +454,8 @@ def ngah():
     m.tube("SKN", [((8.3, 5.0, S + 1.45), 0.9), ((8.1, -0.5, S + 1.75), 0.82), ((8.0, -4.6, S + 1.85), 0.72)], seg=20)
     m.ellipsoid("SKN", (8.8, -5.3, S + 1.85), (1.6, 1.1, 0.5), nu=16, nv=8)
     # torso (gold robe)
-    T = [(-0.2, 3.6, 2.5), (1.5, 3.4, 2.4), (3.0, 3.2, 2.3), (4.6, 3.5, 2.35), (5.8, 3.9, 2.35), (6.7, 4.2, 2.25),
-         (7.4, 3.6, 2.0), (7.9, 2.4, 1.6), (8.3, 1.3, 1.15)]
+    T = [(-0.2, 3.6, 2.5), (1.5, 3.4, 2.4), (3.0, 3.2, 2.3), (4.6, 3.5, 2.35), (5.8, 3.9, 2.35), (6.6, 4.15, 2.25),
+         (7.2, 3.8, 2.1), (7.7, 3.0, 1.85), (8.1, 2.0, 1.5), (8.4, 1.2, 1.15)]
     m.loft("ROB", [((12.2, 0, S + z), (0, hy, 0), (hx, 0, 0)) for z, hy, hx in T], seg=40)
     # neck, head, crown, ears
     m.tube("SKN", [((12.0, 0, S + 7.4), 1.15), ((12.0, 0, S + 9.0), 1.1)], seg=20)
