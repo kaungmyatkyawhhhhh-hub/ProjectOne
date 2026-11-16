@@ -643,76 +643,145 @@ SIGN = [(200, 30, 40), (24, 70, 160), (246, 206, 40), (30, 130, 70), (250, 250, 
         (20, 20, 24)]
 
 
-def glyphs(R, x0, y0, x1, y1, col, glow):
-    """round abstract shapes in the rhythm of Burmese lettering (not real text): open circles, c-shapes, double bowls,
-    small marks above and below, word gaps."""
-    r = R.r
-    hgt = y1 - y0
-    rr = hgt * 0.3
-    cy = (y0 + y1) / 2
+# ------------------------------------------------------------------ real sign text (2026-11-16, owner: the old shapes
+# "cant even read in burmese ... its not even burmese alphabets"). Burmese words come from burmese_text.py (WPF /
+# DirectWrite shaping in Myanmar Text Bold: Pillow here has no raqm and can't shape Myanmar); English in Arial Bold.
+# The word for a sign is picked by its own Random seeded from the sign's place, and glyphs() / blocks() still draw
+# from R.r exactly what the old abstract shapes did (_burn_*), so everything else in the atlas stays where it was.
+WORDS_DIR = os.path.join(HERE, "..", "..", "..", "build", "signs", "words")
+LATIN_FONT = "C:/Windows/Fonts/arialbd.ttf"
+_WORDS = {}
+
+
+def sign_words():
+    """[{id, my, en, latin?, img (L, 96 px tall)}] + the English list; renders the PNGs first if they are missing."""
+    if not _WORDS:
+        meta = os.path.join(WORDS_DIR, "words.json")
+        if not os.path.exists(meta):
+            sys.path.insert(0, HERE)
+            import burmese_text
+            os.makedirs(WORDS_DIR, exist_ok=True)
+            burmese_text.render(WORDS_DIR)
+        d = json.load(open(meta, encoding="utf-8"))
+        for w in d["words"]:
+            a = Image.open(os.path.join(WORDS_DIR, w["file"])).convert("RGBA").split()[3]
+            # each word cropped to its own ink top and bottom: on a sign one word fills the line, as big as it can be
+            rows = np.where(np.array(a).max(axis=1) > 6)[0]
+            w["img"] = a.crop((0, max(0, rows[0] - 1), a.width, min(a.height, rows[-1] + 2)))
+        _WORDS["my"] = d["words"]
+        _WORDS["latin"] = d["latin"]
+        _WORDS["latin_img"] = {}
+    return _WORDS
+
+
+def latin_img(word):
+    """a word in Arial Bold as an L mask cropped to its ink (caps: top of the caps to the baseline)."""
+    cache = sign_words()["latin_img"]
+    if word not in cache:
+        from PIL import ImageFont
+        f = ImageFont.truetype(LATIN_FONT, 96)
+        l, t, rgt, b = f.getbbox(word)
+        im = Image.new("L", (rgt - l + 8, 140), 0)
+        ImageDraw.Draw(im).text((4 - l, 110), word, font=f, fill=255, anchor="ls")
+        cap = f.getbbox("H", anchor="ls")[1]  # negative: cap height above the baseline
+        cols = np.where(np.array(im).max(axis=0) > 0)[0]
+        cache[word] = im.crop((cols[0], 110 + cap - 1, cols[-1] + 1, 110 + 1))
+    return cache[word]
+
+
+def sign_state(R, x0, y0):
+    """the sign this text belongs to: its own Random and the words picked so far (set by sign_board)."""
+    s = getattr(R, "sign", None)
+    if s is None:
+        s = {"rng": __import__("random").Random("%s:%d:%d" % (R.name, x0, y0)), "my": None, "en": None}
+    return s
+
+
+def paste_text(R, mask, x, y, col, glow):
+    """the white-on-transparent word (an L mask) tinted to the sign's text colour; lit signs light it in the glow mask."""
+    x, y = int(round(x)), int(round(y))
+    R.img.paste(Image.new("RGB", mask.size, col), (x, y), mask)
+    if glow:
+        R.mask.paste(255, (x, y, x + mask.width, y + mask.height), mask)
+
+
+def _burn_glyphs(r, x0, y0, x1, y1):
+    """the random draws the old abstract glyphs() made, in the same order (keeps R.r's sequence)."""
+    rr = (y1 - y0) * 0.3
     x = x0 + r.randrange(2, 8)
-
-    def ell(box, a=None, b=None, fill=None):
-        if a is None:
-            if fill is None:
-                R.d.ellipse(box, outline=col, width=3)
-                if glow:
-                    R.m.ellipse(box, outline=255, width=3)
-            else:
-                R.d.ellipse(box, fill=col)
-                if glow:
-                    R.m.ellipse(box, fill=255)
-        else:
-            R.d.arc(box, a, b, fill=col, width=3)
-            if glow:
-                R.m.arc(box, a, b, fill=255, width=3)
-
     while x < x1 - 2 * rr:
         k = r.random()
-        box = [x, cy - rr, x + 2 * rr, cy + rr]
-        if k < 0.3:
-            ell(box, 300, 240 + 360)  # open circle (gap at the top right)
-        elif k < 0.5:
-            ell(box, 90, 360)  # c / u shape
-        elif k < 0.65:  # double bowl
-            ell([x, cy - rr, x + 2 * rr, cy + rr], 0, 180)
-            ell([x + 2 * rr - 3, cy - rr, x + 4 * rr - 3, cy + rr], 0, 180)
-            R.d.line([(x + 1, cy), (x + 1, cy - rr)], fill=col, width=3)
+        if 0.5 <= k < 0.65:
             x += 2 * rr
-        elif k < 0.8:
-            ell(box)
-            ell([x + rr * 0.7, cy - rr * 0.3, x + rr * 1.3, cy + rr * 0.3], fill=True)
-        else:
-            ell(box, 180, 450)
-            R.d.line([(x + 2 * rr, cy), (x + 2 * rr, cy + rr * 1.6)], fill=col, width=3)  # a tail
-        if r.random() < 0.25:  # a mark above or below
-            mx = x + rr
-            my = cy - rr * 1.7 if r.random() < 0.6 else cy + rr * 1.5
-            ell([mx - rr * 0.35, my - rr * 0.35, mx + rr * 0.35, my + rr * 0.35], fill=True if r.random() < 0.5 else None)
+        if r.random() < 0.25:
+            r.random()
+            r.random()
         x += int(2 * rr + r.randrange(1, 4))
         if r.random() < 0.18:
             x += int(rr * 1.6)
 
 
-def blocks(R, x0, y0, x1, y1, col, glow, bg):
-    """a line of latin-like capitals as plain hollow blocks (not readable)."""
+def _burn_blocks(r, x0, x1):
     x = int(x0)
-    y0, y1 = int(y0), int(y1)
     while x < x1 - 8:
-        cw = R.r.randrange(6, 13)
-        R.rect((x, y0, x + cw, y1), col, 255 if glow else None)
-        k = R.r.random()
-        if k < 0.4:
-            R.rect((x + 3, y0 + 3, x + cw - 3, y1 - 3), bg, 0)
-        elif k < 0.7:
-            R.rect((x + 3, y0 + (y1 - y0) // 2 - 1, x + cw, y0 + (y1 - y0) // 2 + 1), bg, 0)
-        x += cw + R.r.randrange(2, 5)
-        if R.r.random() < 0.18:
+        cw = r.randrange(6, 13)
+        r.random()
+        x += cw + r.randrange(2, 5)
+        if r.random() < 0.18:
             x += 10
+
+
+def glyphs(R, x0, y0, x1, y1, col, glow):
+    """a real Burmese shop-sign word (build/signs/words), scaled to the box's height, centred, in the text colour."""
+    _burn_glyphs(R.r, x0, y0, x1, y1)
+    s = sign_state(R, x0, y0)
+    words = sign_words()["my"]
+    bw, bh = x1 - x0, y1 - y0
+    fits = [w for w in words if w["img"].width * bh / w["img"].height <= bw]
+    if s["en"]:  # the English line is already there: a Burmese word that says the same, if one fits
+        same = [w for w in fits if w.get("latin") == s["en"]]
+        fits = same or fits
+    if fits:
+        w = s["rng"].choice(fits)
+        k = bh / w["img"].height
+    else:
+        w = min(words, key=lambda w: w["img"].width)
+        k = bw / w["img"].width
+    s["my"] = w
+    m = w["img"].resize((max(1, round(w["img"].width * k)), max(1, round(w["img"].height * k))), Image.LANCZOS)
+    paste_text(R, m, x0 + (bw - m.width) / 2, y0 + (bh - m.height) / 2, col, glow)
+
+
+def blocks(R, x0, y0, x1, y1, col, glow, bg):
+    """a short real English sign word in Arial Bold, caps filling the line's height, from the left of the box."""
+    _burn_blocks(R.r, x0, x1)
+    s = sign_state(R, x0, y0)
+    lat = sign_words()["latin"]
+    bw, bh = x1 - x0, y1 - y0
+    if bh < 2 or bw < 4:
+        return
+
+    def width(word):
+        im = latin_img(word)
+        return im.width * bh / im.height
+
+    word = None
+    if s["my"] is not None and s["my"].get("latin") and width(s["my"]["latin"]) <= bw:
+        word = s["my"]["latin"]
+    if word is None:
+        fits = [t for t in lat if width(t) <= bw]
+        word = s["rng"].choice(fits) if fits else min(lat, key=width)
+    s["en"] = word
+    im = latin_img(word)
+    k = min(bh / im.height, bw / im.width)
+    m = im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS)
+    paste_text(R, m, x0, y0 + (bh - m.height) / 2, col, glow)
 
 
 def sign_board(R, x0, y0, x1, y1, lit):
     r = R.r
+    R.sign = None
+    R.sign = sign_state(R, x0, y0)  # the Burmese and English lines of one sign say the same thing where they can
     bg = r.choice(SIGN)
     fg = (250, 250, 246) if sum(bg) < 400 else r.choice([(200, 30, 40), (24, 40, 120), (20, 20, 24)])
     R.rect((x0, y0, x1, y1), bg, 235 if lit else 0)
@@ -731,6 +800,7 @@ def sign_board(R, x0, y0, x1, y1, lit):
         blocks(R, x0 + 8, y0 + (y1 - y0) * 0.16, x0 + (x1 - x0) * r.uniform(0.5, 0.9), y0 + (y1 - y0) * 0.5, fg, lit, bg)
         glyphs(R, x0 + 8, y0 + (y1 - y0) * 0.56, x1 - 8, y1 - 2, fg, lit)
     R.d.rectangle([x0, y0, x1, y1], outline=shade(bg, 0.6), width=2)
+    R.sign = None
 
 
 DUSTY = [(150, 60, 50), (60, 90, 140), (200, 170, 60), (210, 206, 196), (70, 120, 80), (160, 100, 60), (120, 80, 120),
