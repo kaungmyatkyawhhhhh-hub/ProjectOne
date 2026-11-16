@@ -600,3 +600,11 @@ Rules for every step:
   - The 99 corner-band pairs.
   - P2 street detail (`street_1to1.py P2`) has not been run.
   - Maha Pasana Guha has no OSM outline; only the compound and the court are kept empty.
+
+
+## Owner's order (16 Nov 2026, evening)
+> "do up to batch 3 first, then start renovating every house and put interiors by every district from then. also while doing up to batch 3, make the road maker use the same as the friday's builder with real roundabouts, proper markings and all 1:1 roads. BUT FIRST, fix the current roads as the FIRST FIRST priority"
+
+1. **First:** fix the current 1:1 roads with the Friday (13 Nov, batch 0.5) builder: real roundabouts, proper markings. While this runs, `Games/CityLegends/build/studio.priority` names the roads agent, and other agents give it Studio first.
+2. **Then:** build the 1:1 map up to batch 3: batches 0.5, 1, 2 and 3 (`geo.BATCH_LL`), every road made with the same Friday builder.
+3. **After that:** renovate every house (real looks) and add interiors district by district. Interiors only where real photos exist.
