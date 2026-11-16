@@ -120,3 +120,11 @@ Why they differed: the ChatGPT sheets drifted from the card (yellow belly, small
 - **Outline**: Roblox Highlight `MB_CardOutline` (cyan, fill off) in the install script. In Blender an inverted hull isn't culled by EEVEE, so the preview has no outline.
 - 38 parts, 6,296 tris, gates PASS (tail tip now counts as body for the crystal-root check). FBX re-exported. Picture: `checks/mosa6_card_vs_model.png`.
 - Still different from the card: its painted camo detail, its stronger S-curve (tail curling back over), the outline/background (card art). Not uploaded.
+
+---
+# v5: new sheets made straight from the card (2026-11-16, owner: "Yes, new sheets")
+- **`mosasaurus_turnaround_v2.png`**: new ChatGPT chat with only the card attached; prompt in `Mosasaurus T6 - prompts v2 (from the card).md` names every card feature (chunky body, big wide open-jawed head, camo green all over with NO yellow belly, dark diamond scutes, ~12 large separate crystals down to the tail tip, 4 huge paddles, orange slit eye). It came out close to the card.
+- Exploded v2 was requested in the same chat (chat https://chatgpt.com/c/6afab42a-1f30-83ec-bd23-ea31be7a1611) but NOT captured yet; the build uses the turnaround v2 (side for the shape, top for widths, front for the head width).
+- Pipeline v2: `analyse.py ../mosasaurus_turnaround_v2.png` -> `crys.py` -> **`data_v2.py`** (frame 24-1505, top view 25-1029, centre row 755, flipper ranges) -> **`data_v2_parts.py`** (seams, head lines, 10+10 teeth, eye 58x34, flippers, plates, dark camo palette, head widened 38 % from the neck forward as the front view draws it) -> `mosa6_build.py` (centre row now from the data, `yc` 245). `data_exploded.py` / `data_card.py` are the v3/v4 path and are not used by v5.
+- 30 parts, 6,388 tris, gates PASS. IoU vs the v2 sheet: **side 0.919**, top 0.73, front 0.61 (the sheet's top view draws the head narrow, its front view wide; the wide card head was kept). FBX re-exported (body 5,972 / crystals 336 / eyes 80).
+- Pictures: `checks/mosa6_v2_sheet_vs_model.png`, `checks/mosa6_v2_card_sheet_model.png`. Not uploaded (asset 104031266367399 is still v1).

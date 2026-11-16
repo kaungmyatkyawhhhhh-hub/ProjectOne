@@ -11,7 +11,7 @@ NAME, TEX = 'Mosasaurus_T6', 512
 X0, X1 = D['side_x']; S = D['len_m'] / (X1 - X0)
 SHIFT = -D['len_m'] / 2                                    # nose to x=0, tail to -6.4 (FishKit layout)
 def X(x): return (x - X0) * S - D['len_m'] / 2 + SHIFT
-def Z(y): return (270 - y) * S * D.get('yz_k', 1.0)   # same chunkiness scale as the build
+def Z(y): return (D.get('yc', 270) - y) * S * D.get('yz_k', 1.0)   # same chunkiness scale as the build
 def line(pts, x): p = np.array(pts, float); return float(np.interp(x, p[:, 0], p[:, 1]))
 sc = bpy.context.scene
 parts = [o for o in sc.objects if o.name.startswith('M6_') and o.type == 'MESH']
