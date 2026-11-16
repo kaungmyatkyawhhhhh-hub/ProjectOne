@@ -126,10 +126,13 @@ PILOT_LL = {
     'P4': (96.118, 16.810, 96.133, 16.858),
     # batch 1 north-west to the Hlaing River (Hlaing township, the Bayint Naung side); seam with P4 (east)
     'P5': (96.098, 16.828, 96.118, 16.859),
+    # batch 1 south-west + batch 2's west edge: Sanchaung, Kamayut south, Ahlone, Kyimyindaing to the river; seams with
+    # P4 + P1 (north) and P3 (east, lat 16.776-16.787)
+    'P6': (96.118, 16.776, 96.140, 16.810),
 }
 # a later pilot joins the earlier ones it touches: its roads that cross the shared edge end exactly on the earlier
 # district's road ends (position, direction, height: roadnet.pilot_seams), its lakes run on (terrain.py)
-PILOT_SEAMS = {'P2': ('P1',), 'P4': ('P1', 'P2'), 'P5': ('P4',)}
+PILOT_SEAMS = {'P2': ('P1',), 'P4': ('P1', 'P2'), 'P5': ('P4',), 'P6': ('P4', 'P1', 'P3')}
 for _t, (_lo0, _la0, _lo1, _la1) in PILOT_LL.items():
     BATCH_LL[_t] = [(_lo0, _la1), (_lo1, _la1), (_lo1, _la0), (_lo0, _la0)]
 
