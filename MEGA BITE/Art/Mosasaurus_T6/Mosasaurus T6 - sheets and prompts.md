@@ -65,3 +65,9 @@ Not done yet: rig (8 spine bones + Jaw) and Swim clip, baking colours into one t
 - **Model asset 104031266367399** "MB_Mosasaurus_T6" (group 33151111, Open Cloud, moderation Approved). Its embedded texture came up as image **95389907506981**.
 - Checked by `InsertService:LoadAsset` (loaded, never parented): 2 MeshParts (`Mosasaurus_T6`, `Mosasaurus_T6_Crystals`) + bones Root, Spine0-7, Jaw. Comes in 640 studs long (FBX in cm).
 - Owner (16 Nov): **"Studio only, not in play"**: goes to `ServerStorage.MB_Mosasaurus_T6`, no game wiring. Script: `install_serverstorage.luau` (scales to 165 studs like evolution 9, crystals Neon, DoubleSided on). NOT run yet: MEGA BITE (place 131715256145044) was not open in Studio.
+
+---
+# Blender preview (2026-11-16)
+Owner: "lets not import yet. lets just view in blender first with everything set up then when its ready lets import into roblox studio". `install_serverstorage.luau` stays NOT run until the owner says it is ready.
+- Owner's Blender, scene **Mosasaurus T6**: the rigged export (rig + 2 meshes) replaced the unrigged parts; Swim action looping (frames 0-23, 24 fps, side-to-side S-wave, tail +/-8 deg); crystals use `Mosasaurus_T6_CrystalGlow` (emission 1.6 = Roblox Neon); EEVEE, Standard view transform (AgX turned the cyan glow white), dark-blue world + one sun, matte body (no white highlights on the flippers).
+- Copy of that setup: `export/Mosasaurus_T6_preview.blend`.
