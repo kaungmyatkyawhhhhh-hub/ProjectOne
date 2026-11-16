@@ -907,11 +907,15 @@ def build(tags):
         # cross-section per sample
         nl, nr, Wl, Wr, med = att['nl'], att['nr'], att['Wl'], att['Wr'], att['med']
         one = att['oneway'] > 0.5
-        wl = np.where(one, (nr * Wr) / 2, med + nl * Wl)
-        wr = np.where(one, (nr * Wr) / 2, med + nr * Wr)
+        # (17 Nov, owner's "streets stop into grass": a one-way piece joined against its stroke carries its lanes in
+        # nl, and nr * Wr gave it NO width: half of 57 downtown streets were never built) a one-way's lanes either side
+        n1 = np.where(nr > 0, nr, nl)
+        W1 = np.where(nr > 0, Wr, Wl)
+        wl = np.where(one, (n1 * W1) / 2, med + nl * Wl)
+        wr = np.where(one, (n1 * W1) / 2, med + nr * Wr)
         lm = np.where(one, 0.0, med)
-        lanes = np.maximum(np.where(one, nr, np.maximum(nl, nr)), 1)
-        lw = np.where(one, Wr, np.maximum(Wl, Wr))
+        lanes = np.maximum(np.where(one, n1, np.maximum(nl, nr)), 1)
+        lw = np.where(one, W1, np.maximum(Wl, Wr))
         # no section shorter than SEC_MIN (OSM's lane tags change at every way: a notch each time): a running median
         wl, wr, lm, lw = (run_median(x, c, SEC_MIN) for x in (wl, wr, lm, lw))
         lanes = np.round(run_median(lanes.astype(float), c, SEC_MIN)).astype(int)
@@ -921,7 +925,7 @@ def build(tags):
         look = 'main' if main else ('narrow' if any(edges[s].cs['look'] == 'narrow' for s in srcs) and not main else 'street')
         walk = WALK[look]
         r = dict(name=name or '', hw=hw, main=main, P=Q, c=c, wl=wl, wr=wr, lm=lm, lanes=lanes, lw=lw,
-                 oneway=bool(one.all()), src=srcs, walk=walk,
+                 oneway=bool(one.all() and (nr > 0).all()), src=srcs, walk=walk,  # (a one-way run against its stroke: two-way data)
                  keys=[(norm(edges[s].name), edges[s].hw) for s in sorted(set(srcs))],
                  bridge=any(edges[s].bridge for s in srcs),
                  L=float(c[-1]))

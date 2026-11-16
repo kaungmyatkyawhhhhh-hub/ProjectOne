@@ -58,7 +58,8 @@ def main():
     names = list(cw)
     geoms = [cw[n] for n in names]
     tree = STRtree(geoms)
-    allcw = unary_union(geoms + rings)
+    allg = geoms + rings
+    alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint')}
     # dead ends
     for r in data['roads']:
@@ -90,7 +91,8 @@ def main():
         if not P.is_valid:
             P = P.buffer(0)
         polys.append(P)
-        off = P.difference(allcw.buffer(0.3)).area
+        loc = [allg[int(j)] for j in alltree.query(P)]
+        off = P.difference(unary_union(loc).buffer(0.3)).area if loc else P.area
         if off > 1.0:
             c = P.centroid
             issues['paint_off'].append(dict(what=it.get('w'), road=it.get('r'), off=round(off, 1), x=round(c.x, 1), z=round(c.y, 1)))
