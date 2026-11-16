@@ -312,6 +312,10 @@ def landmark_zone():
                     zs.append(Polygon([(q[0], q[-1]) for q in v]).buffer(6))
                 except Exception:
                     pass
+    # (2026-11-16, real places) fuel forecourts, car parks, courts, playgrounds (places_1to1.py build)
+    kp = os.path.join(B1, "places_%s" % TAG, "keepout.json")
+    if os.path.exists(kp):
+        zs += [Polygon(pts).buffer(0) for pts in json.load(open(kp))]
     return unary_union(zs)
 
 

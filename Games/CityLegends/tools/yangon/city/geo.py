@@ -117,10 +117,17 @@ PILOT_LL = {
     # Hall, Maha Bandula Park, Bogyoke Market, Strand Hotel, Pansodan, the jetties, Botataung. Standalone for now (seams
     # later); the river and the creek reach past the box (terrain.RIVER_EXT['P3'])
     'P3': (96.140, 16.7645, 96.178, 16.787),
+    # (2026-11-16, "up to batch 3") the REST of batch 0.5 (its west strip, lon 96.128-96.133) + batch 1 beside it, west of
+    # P1 / P2: Hledan, Kamayut, Times City, the Insein Road side. Seams with P1 (east, lat 16.810-16.834) and P2 (east,
+    # 16.834-16.858). Districts after it (plan, 16 Nov): P5 batch 1 NW to the Hlaing (96.098-96.118 x 16.828-16.859),
+    # P6 batch 1 SW (96.118-96.140 x 16.776-16.810), P7 Shwedagon / Bahan (96.140-96.159 x 16.787-16.810), P8 Kandawgyi
+    # east (96.159-96.190 x 16.787-16.812), then batch 3: P9 (96.165-96.190 x 16.834-16.864), P10 (96.190-96.219 x
+    # 16.834-16.864), P11 (96.159-96.190 x 16.812-16.834), P12 (96.190-96.219 x 16.804-16.834), then the rest of batch 2.
+    'P4': (96.118, 16.810, 96.133, 16.858),
 }
 # a later pilot joins the earlier ones it touches: its roads that cross the shared edge end exactly on the earlier
 # district's road ends (position, direction, height: roadnet.pilot_seams), its lakes run on (terrain.py)
-PILOT_SEAMS = {'P2': ('P1',)}
+PILOT_SEAMS = {'P2': ('P1',), 'P4': ('P1', 'P2')}
 for _t, (_lo0, _la0, _lo1, _la1) in PILOT_LL.items():
     BATCH_LL[_t] = [(_lo0, _la1), (_lo1, _la1), (_lo1, _la0), (_lo0, _la0)]
 
