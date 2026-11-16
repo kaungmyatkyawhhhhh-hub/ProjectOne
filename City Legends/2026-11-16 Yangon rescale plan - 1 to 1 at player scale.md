@@ -649,6 +649,11 @@ Rules for every step:
   - **Per cell:** each 4-stud terrain cell within 30 studs gets a target height: 0.5 under the pavement top, level for 6 studs (14 beside a carriageway box), then down 0.4 per stud. The highest target wins.
   - **Fill:** a cell is filled with Grass only up to its target (FillBlock top 2 under it, because of the smooth-terrain bulge).
   - **Skipped cells:** cells over any road box (an underpass too), over a landmark, pagoda or building shell, or over water.
+  - **Run on all of P3 and saved (17:02 UTC, log "Saved new changes"):** box `30000, 40943` to `42148, 48405`. The fill took 644 s: 13,324 boxes, 136,401 cells raised.
+  - **Then `trim`:** it carves every cell under a pavement, or within 6 studs of one (9 beside a carriageway box), whose ground is within 0.6 of the pavement top, down to 1.2 under it. It takes the lower of the pavement and carriageway levels. 206,060 + 119,718 cells were carved (382 + 232 s).
+  - **Why the trim is needed:** the first cell beside a pavement swelled to 0.1 under the pavement top, so the grass showed through at the edge, and downhill side streets were covered.
+  - **Result:** the pavement edge now shows about 1.2-1.5 studs, like a kerb face.
+  - **Checked:** Sule Pagoda Road, the Sule roundabout and the Bogyoke Market road.
   - **Traps:**
     - `GetPartBoundsInBox` tests axis-aligned bounds, so rotated carriageway boxes "touched" every probe. Use down-rays.
     - Filling strips along each box left 1-cell trenches between strips and at road edges. Fill per terrain cell instead.

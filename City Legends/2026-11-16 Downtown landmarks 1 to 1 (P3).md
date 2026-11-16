@@ -66,5 +66,7 @@ All 9 landmarks are in `Workspace.Yangon1to1.Landmarks`, each with `Visual` (Pre
 - **16:24 UTC (log: "Saved new changes"):** Bogyoke v4 slim and the lighter chinthe.
   - **Bogyoke v4 (asset 131247073597606):** 52k triangles instead of 120k. The halls have 6 m bays, 4-segment arches (`kit_panels.col_arch(..., seg)`; the default 8 is unchanged for every other building) and no stains. Inside, there is one counter and one name band per stall row, and 2 cloth strips per stall. The cloth is SmoothPlastic (Fabric rendered near-black) and the counters are a lighter teak (`CTR`).
   - **Chinthe:** bronze (112, 106, 94) on stone (128, 124, 116).
+- **17:02 UTC:** Bogyoke v5 (asset 98002728894209). The steps now start from each door's own ground and fit in 3.6 m. Before, they ran 8 m out across the pavement into the road.
+  - **Still to do:** at the downhill gable ends the steps still cover the pavement, because the wall stands at the pavement edge. Move them inside the hall's 4 m entry zone (the door opening down to the ground).
 - **High Court roof checked in main:** it renders fully. The outline in the v1094 aerial was only the parts still loading.
 - **Main-place additions are on hold** until the coordinator says so: the place is near its size limit.
