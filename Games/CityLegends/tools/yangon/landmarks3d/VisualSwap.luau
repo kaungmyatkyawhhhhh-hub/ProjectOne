@@ -21,10 +21,11 @@ task.spawn(function()
 		hold.Parent = SS
 		local m = IS:LoadAsset(ASSET)
 		m.Parent = hold
-		local new, old = {}, {}
+		local new, old, newByName = {}, {}, {}
 		for _, d in m:GetDescendants() do
 			if d:IsA("MeshPart") then
-				new[d.Name] = d
+				table.insert(new, d)       -- names repeat (instanced pieces share a mesh name)
+				newByName[d.Name] = newByName[d.Name] or d
 			end
 		end
 		local suffix = {}
@@ -37,14 +38,15 @@ task.spawn(function()
 				end
 			end
 		end
-		local rn, ro = new[REF], old[REF]
+		local rn, ro = newByName[REF], old[REF]
 		assert(rn and ro, "reference part missing: " .. REF)
 		assert((rn.Size - ro.Size).Magnitude < 0.05, "reference size differs")
 		local delta = ro.CFrame * rn.CFrame:Inverse()
 		local vis = Instance.new("Folder")
 		vis.Name = "Visual"
 		local n, copied, bySfx = 0, 0, 0
-		for name, p in new do
+		for _, p in new do
+			local name = p.Name
 			p.CFrame = delta * p.CFrame
 			local src = old[name]
 			if src then
