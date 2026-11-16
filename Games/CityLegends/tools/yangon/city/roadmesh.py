@@ -173,6 +173,11 @@ class Builder:
             paired = (e.w[a:b + 1] > 0.5) & bool(e.oneway)
             if not getattr(net, 'standalone', False):
                 sub, lo_, hi_, paired = _seam_extend(e, a, b, sub, lo_, hi_, paired)
+            else:
+                # (2026-11-16, step 5) a 1:1 pilot's road that leaves the district: its strips run on past the cut and the
+                # meshes are clipped at the outline, so an oblique road fills the edge line across its whole width and
+                # meets the next district's road with no wedge of ground between (P1 / P2 seam)
+                sub, lo_, hi_, paired = _seam_extend(e, a, b, sub, lo_, hi_, paired, pilot=True)
             wl = np.where(paired, 0.0, e.walk)
             self.carr.append(rn.strip_poly(sub, lo_, hi_))
             self.outer.append(rn.strip_poly(sub, lo_ - wl, hi_ + e.walk))
@@ -1387,11 +1392,11 @@ def _on_box_edge(p):
     return min(abs(p[0] - x0), abs(p[0] - x1), abs(p[1] - z0), abs(p[1] - z1)) <= 1.0
 
 
-def _seam_extend(e, a, b, sub, lo_, hi_, paired):
+def _seam_extend(e, a, b, sub, lo_, hi_, paired, pilot=False):
     cut = getattr(e, 'cut', None) or [False, False]
     n = len(e.P)
-    pre = a == 0 and cut[0] and _on_box_edge(e.P[0])
-    post = b == n - 1 and cut[1] and _on_box_edge(e.P[-1])
+    pre = a == 0 and cut[0] and (pilot or _on_box_edge(e.P[0]))
+    post = b == n - 1 and cut[1] and (pilot or _on_box_edge(e.P[-1]))
     if not (pre or post):
         return sub, lo_, hi_, paired
     s = _Sub()
