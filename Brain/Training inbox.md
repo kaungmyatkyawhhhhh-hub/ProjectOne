@@ -7,6 +7,9 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 12:01 [dashboard, unverified] The Roblox VIP button was designed in Figma and brought into Roblox Studio with Framewisp. (topic: tiktok)
+- 2026-11-16 12:00 [dashboard, unverified] Roblox Environment Building Is Getting INSANE… (topic: tiktok)
+- 2026-11-16 12:00 [dashboard, unverified] Clicklab will help you if you're struggling to get players to click on your Roblox game. (topic: tiktok)
 - 2026-11-16 11:57 [dashboard, unverified] The Avatar Editor UI was created with a single prompt. (topic: tiktok)
 - 2026-11-16 11:52 [dashboard, unverified] Claude and Blender can be combined to create something. (topic: tiktok)
 - 2026-11-16 11:44 [dashboard, unverified] Roblox game development. (topic: tiktok)
