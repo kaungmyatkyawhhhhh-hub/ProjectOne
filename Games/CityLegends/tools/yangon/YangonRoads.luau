@@ -67,11 +67,56 @@ M.centre = { solid = true } :: { [string]: any }? -- the middle line (RoadLines 
 local C = M.C
 local TAU = 2 * math.pi
 
+------------------------------------------------------------------------------------------------
+-- (2026-11-16, 1:1 districts, tools/yangon/city/roads05.py) parameters instead of Friday's constants:
+--   M.RINGS: every roundabout of the data (data.roundabouts: c, r_in, r_out, name); without that list the
+--     one Hanthawaddy Roundabout above. Code that looks at "the" ring asks M.nearRing(x, z) first (or
+--     M.useRing(R)), which points C / R_IN / R_OUT / RING_V / R_CUT at the nearest ring.
+--   M.ROOT: the Model the roads are built into (default Workspace.Yangon); M.box = { x0, z0, x1, z1 }: build only
+--     what this cell owns (a piece by its middle, a mouth by its end, a corner by its point, a ring / deck by its centre)
+--   M.noLines: no Line parts (the 1:1 paint comes from roads05_paint.py and is baked into meshes)
+--   M.vergeSkip(x, z): no verge there (landmark lots with their own ground)
+------------------------------------------------------------------------------------------------
+M.RINGS = {}
+M.ringNames = {}
+M.ROOT = nil :: Instance?
+M.box = nil :: { number }?
+M.noLines = false
+M.vergeSkip = nil :: ((number, number) -> boolean)?
+local FAR = Vector3.new(1e9, 0, 1e9)
+function M.useRing(R)
+	if R then
+		C = R.C
+		M.C, M.R_IN, M.R_OUT, M.RING_V, M.R_CUT, M.RING_NAME = R.C, R.R_IN, R.R_OUT, R.RING_V, R.R_CUT, R.name
+	else
+		C = FAR
+		M.C = FAR
+	end
+	M.curRing = R
+end
+function M.nearRing(x: number, z: number)
+	local best, bd = nil, math.huge
+	for _, R in M.RINGS do
+		local d = math.sqrt((x - R.C.X) ^ 2 + (z - R.C.Z) ^ 2) - R.R_OUT
+		if d < bd then
+			best, bd = R, d
+		end
+	end
+	M.useRing(best)
+	return best
+end
+local function own(x: number, z: number): boolean
+	local b = M.box
+	return b == nil or (x >= b[1] and x < b[3] and z >= b[2] and z < b[4])
+end
+M.own = own
+
 local function hyp(x: number, z: number): number
 	return math.sqrt(x * x + z * z)
 end
 
 local function radius(s): number
+	M.nearRing(s[1], s[3])
 	return hyp(s[1] - C.X, s[3] - C.Z)
 end
 
@@ -118,16 +163,34 @@ function M.load()
 	-- the decks; without it the step 3 data and its flyover corridors)
 	-- (step 5: Roads3_* = ygn_roads_v3.json from tools/yangon/d8_streets.py: every road is built, Inya Road
 	-- in three pieces at its crossings, the map-edge ends marked)
-	local pre = if YD:FindFirstChild("Roads3_1") then "Roads3_" elseif YD:FindFirstChild("Roads2_1") then "Roads2_" else "Roads_"
+	-- (1:1, roads05.py: Roads05_* win)
+	local pre = if YD:FindFirstChild("Roads05_1") then "Roads05_" elseif YD:FindFirstChild("Roads3_1") then "Roads3_" elseif YD:FindFirstChild("Roads2_1") then "Roads2_" else "Roads_"
+	M.v05 = pre == "Roads05_"
 	M.v2 = pre ~= "Roads_"
-	M.v3 = pre == "Roads3_"
+	M.v3 = pre == "Roads3_" or M.v05
 	local parts, k = {}, 1
 	while YD:FindFirstChild(pre .. k) do
 		parts[k] = require(YD[pre .. k]:Clone())
 		k += 1
 	end
 	M.data = Http:JSONDecode(table.concat(parts))
-	M.design = Http:JSONDecode(require(YD.Design:Clone()))
+	M.design = if YD:FindFirstChild("Design") and not M.v05 then Http:JSONDecode(require(YD.Design:Clone())) else { flyovers = {} }
+	-- the roundabouts
+	M.RINGS, M.ringNames = {}, {}
+	if M.data.roundabouts then
+		for _, g in M.data.roundabouts do
+			table.insert(M.RINGS, { C = Vector3.new(g.c[1], g.c[2], g.c[3]), R_IN = g.r_in, R_OUT = g.r_out,
+				RING_V = g.r_out / math.cos(math.pi / M.N), R_CUT = g.r_out - 14, name = g.name, lanes = g.lanes, laneW = g.laneW })
+		end
+	else
+		table.insert(M.RINGS, { C = Vector3.new(29072, 47.27, 1172.8), R_IN = 60, R_OUT = 108, RING_V = 108.06, R_CUT = 94, name = "Hanthawaddy Roundabout" })
+	end
+	for _, R in M.RINGS do
+		M.ringNames[R.name] = true
+	end
+	if M.v05 then
+		M.WALK = 7.5 -- (1:1: a main road's 2.5 m pavement; each road carries its own walkL / walkR)
+	end
 	M.R, M.list = {}, {}
 	local seen = {}
 	for ri, r in M.data.roads do
@@ -221,7 +284,7 @@ function M.load()
 	for _, o in M.list do
 		for i = 1, o.n do
 			if radius(o.s[i]) < M.R_CUT and not M.cut[o.name][i] then
-				M.cut[o.name][i] = "Hanthawaddy Roundabout"
+				M.cut[o.name][i] = M.RING_NAME
 			end
 		end
 	end
@@ -231,6 +294,7 @@ function M.load()
 		for _, e in { { 1, 1 }, { o.n, -1 } } do
 			local i0, step = e[1], e[2]
 			if radius(o.s[i0]) < M.R_OUT then
+				local ringR = M.curRing
 				-- flat at the ring's height out to R0 (past the ring's own pavement), eased from there
 				local R0 = M.R_OUT + M.FLAT
 				local i = i0
@@ -254,7 +318,7 @@ function M.load()
 					end
 					j += step
 				end
-				table.insert(M.arms, { road = o.name, o = o, i0 = i0, step = step, first = i, shift = shift })
+				table.insert(M.arms, { road = o.name, o = o, i0 = i0, step = step, first = i, shift = shift, ring = ringR })
 			end
 		end
 	end
@@ -266,7 +330,7 @@ function M.load()
 		for i = 1, o.n do
 			if not cut[i] then
 				local why = (i > 1 and cut[i - 1]) or (i < o.n and cut[i + 1])
-				if why and why ~= "Hanthawaddy Roundabout" then
+				if why and not M.ringNames[why] then
 					local s = o.s[i]
 					table.insert(M.cutEnds, { road = o.name, sample = i, m = o.chain[i] / M.SPM, x = s[1], y = s[2], z = s[3], why = why, cutIs = if i > 1 and cut[i - 1] then "before" else "after" })
 				end
@@ -403,6 +467,7 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	end
 	local mineOnly = owner == name
 	-- the roundabout: an arm's kerb stops at the ring's kerb, its pavement at the ring's pavement
+	M.nearRing(px, pz)
 	if not mineOnly and hyp(px - C.X, pz - C.Z) < M.RING_V + (if what == "Kerb" then M.KERB_W else M.WALK) then
 		return true
 	end
@@ -425,7 +490,7 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 		end
 		if o.rank < me.rank then
 			-- a bigger road: my kerb stops at its kerb, my pavement at its pavement's far edge
-			if not mineOnly and polyDist(o, b[2], px, pz) < oh + (if what == "Kerb" then M.KERB_W else M.WALK) then
+			if not mineOnly and polyDist(o, b[2], px, pz) < oh + (if what == "Kerb" then M.KERB_W else math.max(o.walkL or M.WALK, o.walkR or M.WALK)) then
 				return true
 			end
 		else
@@ -467,7 +532,7 @@ function M.findMouths(names: { string })
 			local s0 = o.s[i0]
 			local m = nil
 			if radius(s0) < M.R_OUT then
-				m = { road = name, i0 = i0, step = step, ring = true, on = "Hanthawaddy Roundabout" }
+				m = { road = name, i0 = i0, step = step, ring = true, ringR = M.curRing, on = M.RING_NAME }
 			elseif not M.cut[name][i0] then
 				local bestRank = nil
 				for oi, b in M.near(s0[1], s0[3], 2) do
@@ -481,6 +546,7 @@ function M.findMouths(names: { string })
 			if m then
 				local function outside(px, pz): boolean
 					if m.ring then
+						M.useRing(m.ringR)
 						return hyp(px - C.X, pz - C.Z) > M.RING_V + 0.5
 					end
 					local b = M.near(px, pz, 3)[m.big.index]
@@ -788,7 +854,7 @@ end
 
 function M.findCorners()
 	M.corners, M.cornerSpan = {}, {}
-	local ringPts = M.ringOuter()
+	local ringPts = nil
 	local pass = {}
 	for mi, m in M.mouths do
 		local S = M.R[m.road]
@@ -805,6 +871,8 @@ function M.findCorners()
 			-- the other road's kerb line near here
 			local bPts, sb = {}, 0
 			if m.ring then
+				M.useRing(m.ringR)
+				ringPts = M.ringOuter()
 				local s0 = S.s[m.k]
 				local a0 = math.atan2(s0[3] - C.Z, s0[1] - C.X)
 				local j0 = math.floor((a0 % TAU) / TAU * M.N + 0.5)
@@ -894,7 +962,7 @@ function M.findCorners()
 				sweep -= TAU
 			end
 			local corner = {
-				road = m.road, side = side, on = m.on, ring = m.ring, big = m.big, sb = c.sb,
+				road = m.road, side = side, on = m.on, ring = m.ring, ringR = m.ringR, big = m.big, sb = c.sb,
 				r = r, theta = theta, ox = ox, oz = oz, px = c.px, pz = c.pz,
 				tax = tax, taz = taz, tbx = tbx, tbz = tbz, aA = aA, sweep = sweep,
 				ePts = c.ePts, bPts = c.bPts, ka = c.ka, ta = c.ta, kb = c.kb, tb = c.tb, sa = sa, sta = sta, sbb = sbb, stb = stb,
@@ -976,8 +1044,20 @@ function M.buildCorners()
 	local made = 0
 	local lines = {}
 	for _, c in M.corners do
+		if not own(c.px, c.pz) then
+			continue
+		end
+		if c.ring then
+			M.useRing(c.ringR)
+		end
 		local S = M.R[c.road]
 		local folder = M.folder():FindFirstChild(c.road) :: Instance
+		if not folder then
+			local f = Instance.new("Folder")
+			f.Name = c.road
+			f.Parent = M.folder()
+			folder = f
+		end
 		local ES = E[c.road][if c.side < 0 then "L" else "R"]
 		local function sY(seg: number, t: number): number
 			local a, b = c.ePts[seg], c.ePts[seg + 1]
@@ -1138,8 +1218,11 @@ M.VERGE_TOP = -1.7
 function M.verge(names: { string })
 	local made = 0
 	-- (the ring's carriageway and its kerb and pavement between the arms; an arm's gap is the arm's)
-	local ringSecs = M._sectors(M.RING_V)
 	local function onRing(x: number, z: number): boolean
+		if not M.nearRing(x, z) then
+			return false
+		end
+		local ringSecs = M._sectors(M.RING_V)
 		local d = hyp(x - C.X, z - C.Z)
 		if d < M.RING_V + 0.5 then
 			return true
@@ -1177,8 +1260,11 @@ function M.verge(names: { string })
 				continue
 			end
 			local a, b = o.s[i], o.s[i + 1]
+			if not own((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) or (M.vergeSkip and M.vergeSkip((a[1] + b[1]) / 2, (a[3] + b[3]) / 2)) then
+				continue
+			end
 			for _, side in { -1, 1 } do
-				if side < 0 and o.walkL then
+				if side < 0 and o.walkL and o.kind == "side" then
 					continue -- (a flyover side lane's inner side: the deck's ramp and piers stand there)
 				end
 				local rx, rz = rightOf(a)
@@ -1212,6 +1298,11 @@ function M.verge(names: { string })
 		end
 	end
 	-- round the roundabout, between the arms, and inside the round corners at the ring
+	for _, R in M.RINGS do
+	if not own(R.C.X, R.C.Z) then
+		continue
+	end
+	M.useRing(R)
 	for j = 0, M.N - 1 do
 		local a = (j + 0.5) * TAU / M.N
 		local rho = M.RING_V + M.WALK + M.VERGE_W / 2
@@ -1230,11 +1321,15 @@ function M.verge(names: { string })
 			made += 1
 		end
 	end
+	end
 	-- inside each round corner: strips along the curve, like the strips along the roads (a round fill
 	-- came out up to a stud too high or too low)
 	for _, c in M.corners do
 		local inner = c.r - M.WALK
-		if inner > 0.5 then
+		if c.ring then
+			M.useRing(c.ringR)
+		end
+		if inner > 0.5 and own(c.px, c.pz) and not (M.vergeSkip and M.vergeSkip(c.px, c.pz)) then
 			local w = math.min(M.VERGE_W, inner)
 			local rho = inner - w / 2
 			local S = M.R[c.road]
@@ -1266,6 +1361,15 @@ end
 ------------------------------------------------------------------------------------------------
 
 function M.folder(): Instance
+	if M.ROOT then
+		local roads = M.ROOT:FindFirstChild("Roads")
+		if not roads then
+			roads = Instance.new("Folder")
+			roads.Name = "Roads"
+			roads.Parent = M.ROOT
+		end
+		return roads
+	end
 	local model = workspace:FindFirstChild("Yangon")
 	if not model then
 		model = Instance.new("Model")
@@ -1407,11 +1511,20 @@ function M.buildRoads(names: { string })
 		-- (step 7, LaneCheck: Yangon is flat. Monaco's 19% cap on how fast a road's edge may climb from a
 		-- junction onto its own height left New Road climbing 1.1 studs in 6 at its fork off the loop)
 		edgeGrade = M.EDGE_GRADE,
+		box = M.box,
+		boxMid = M.box ~= nil,
 	})
 	local lines = { string.format("Roads.build: %d parts", count) }
 	for _, m in M.mouths do
-		if only[m.road] then
-			local made = M.buildMouth(m, parent:FindFirstChild(m.road) :: Instance)
+		local e = M.R[m.road].s[m.i0]
+		if only[m.road] and own(e[1], e[3]) then
+			local mf = parent:FindFirstChild(m.road)
+			if not mf then
+				mf = Instance.new("Folder")
+				mf.Name = m.road
+				mf.Parent = parent
+			end
+			local made = M.buildMouth(m, mf :: Instance)
 			table.insert(lines, string.format("mouth %s on %s: k %d, %d corners, %d wedges, area %.1f of %.1f", m.road, m.on, m.k, m.corners, made, m.area, m.outline))
 			task.wait()
 		end
@@ -1426,7 +1539,7 @@ function M.mendCutEnds(names: { string })
 	local built = setOf(names)
 	local n = 0
 	for _, e in M.cutEnds do
-		if built[e.road] then
+		if built[e.road] and own(e.x, e.z) then
 			local o = M.R[e.road]
 			local s = o.s[e.sample]
 			local L = hyp(s[4], s[5])
@@ -1503,7 +1616,7 @@ local function part(props: { [string]: any }, parent: Instance): BasePart
 end
 
 function M.decksFolder(): Instance
-	local model = M.folder().Parent :: Instance
+	local model = (M.ROOT or M.folder().Parent) :: Instance
 	local f = model:FindFirstChild("Decks")
 	if not f then
 		f = Instance.new("Folder")
@@ -1522,8 +1635,16 @@ function M.buildDecks()
 		end
 	end
 	local data = { roads = {} }
+	M.deckHalf = {}
 	for k, d in M.data.decks do
-		table.insert(data.roads, { name = d.name, kind = "deck", rank = -k, half = 32, closed = false, s = d.s })
+		local mid = d.s[math.floor(#d.s / 2) + 1]
+		if own(mid[1], mid[3]) then
+			table.insert(data.roads, { name = d.name, kind = "deck", rank = -k, half = d.half or 32, closed = false, s = d.s })
+			M.deckHalf[d.name] = d.half or 32
+		end
+	end
+	if #data.roads == 0 then
+		return "decks: none in this cell"
 	end
 	local count = M.Roads.build(data, {
 		parent = F,
@@ -1535,7 +1656,7 @@ function M.buildDecks()
 		palette = M.palette,
 		live = true,
 		keepEdges = true,
-		clearHalf = 33,
+		clearHalf = data.roads[1].half + 1,
 	})
 	local E = M.Roads.debugEdges
 	local log = { string.format("deck surfaces: %d parts", count) }
@@ -1557,6 +1678,10 @@ function M.buildDecks()
 		return nil
 	end
 	for _, d in M.data.decks do
+		if not M.deckHalf[d.name] then
+			continue
+		end
+		local DH = M.deckHalf[d.name]
 		local folder = F:FindFirstChild(d.name) :: Instance
 		local ED = E[d.name]
 		local s = d.s
@@ -1611,7 +1736,7 @@ function M.buildDecks()
 				local alt = (i % 2) * 0.06
 				local props = table.clone(M.deckLook.girder)
 				props.Name = "Girder"
-				props.Size = Vector3.new(64 - 14 - alt * 2, M.GIRDER - alt, (pb - pa).Magnitude + 0.3)
+				props.Size = Vector3.new(DH * 2 - 14 - alt * 2, M.GIRDER - alt, (pb - pa).Magnitude + 0.3)
 				props.CFrame = CFrame.lookAt((pa + pb) / 2, pb) * CFrame.new(0, alt / 2, 0)
 				part(props, folder)
 				made += 1
@@ -1635,7 +1760,7 @@ function M.buildDecks()
 				local L = hyp(c[4], c[5])
 				local fx, fz = c[4] / L, c[5] / L
 				local hit = nil
-				for _, lat in { -30, -15, 0, 15, 30 } do
+				for _, lat in { -(DH - 2), -(DH - 2) / 2, 0, (DH - 2) / 2, DH - 2 } do
 					for _, along in { -4, 0, 4 } do
 						hit = hit or onRoad(c[1] + rx * lat + fx * along, c[3] + rz * lat + fz * along, 3)
 					end
@@ -1649,7 +1774,7 @@ function M.buildDecks()
 				local look = CFrame.lookAt(Vector3.zero, Vector3.new(fx, 0, fz)).Rotation
 				local cap = table.clone(M.deckLook.girder)
 				cap.Name = "PierCap"
-				cap.Size = Vector3.new(58, 2.5, 6)
+				cap.Size = Vector3.new(DH * 2 - 6, 2.5, 6)
 				cap.CFrame = CFrame.new(c[1], top - 1.25, c[3]) * look
 				part(cap, folder)
 				local colTop, colBot = top - 2.5, g - 4
@@ -1672,6 +1797,9 @@ function M.buildDecks()
 		table.insert(log, string.format("%s: %d parts, %d piers (moved off: %s), %d ramp wall pieces", d.name, made, piers, table.concat(sk, ", "), ramp))
 	end
 	-- the lines on the decks
+	if M.noLines then
+		return table.concat(log, "\n")
+	end
 	local only = {}
 	for _, d in M.data.decks do
 		only[d.name] = true
@@ -2103,7 +2231,7 @@ function M.buildMedians(names: { string })
 		for i = 1, o.n - 1 do
 			local a, b = s[i], s[i + 1]
 			local ma, mb = a[9] or 0, b[9] or 0
-			if cut[i] or cut[i + 1] or (ma < 0.15 and mb < 0.15) or M.inCorner((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) then
+			if cut[i] or cut[i + 1] or (ma < 0.15 and mb < 0.15) or not own((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) or M.inCorner((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) then
 				continue
 			end
 			any = true
@@ -2260,7 +2388,12 @@ end
 
 -- the stretches between the arms at radius rho: { { from angle, to angle } }, anticlockwise in angle
 local function sectors(rho: number): { { number } }
-	local arms = table.clone(M.arms)
+	local arms = {}
+	for _, a in M.arms do
+		if a.ring == M.curRing then
+			table.insert(arms, a)
+		end
+	end
 	table.sort(arms, function(a, b)
 		return armAngle(a, 0, M.R_OUT + 5) < armAngle(b, 0, M.R_OUT + 5)
 	end)
@@ -2286,13 +2419,24 @@ local function ringPoint(rho: number, a: number, y: number): Vector3
 end
 
 function M.buildRoundabout()
+	local out = {}
+	for _, R in M.RINGS do
+		if own(R.C.X, R.C.Z) then
+			M.useRing(R)
+			table.insert(out, R.name .. ": " .. M.buildRing())
+		end
+	end
+	return table.concat(out, "; ")
+end
+
+function M.buildRing()
 	local roads = M.folder()
-	local old = roads:FindFirstChild("Hanthawaddy Roundabout")
+	local old = roads:FindFirstChild(M.RING_NAME)
 	if old then
 		old:Destroy()
 	end
 	local folder = Instance.new("Folder")
-	folder.Name = "Hanthawaddy Roundabout"
+	folder.Name = M.RING_NAME
 	local pal = M.palette
 	local function T(a: Vector3, b: Vector3, c: Vector3, th: number, props, parent: Instance): number
 		return if M.Roads.sliver(a, b, c) then 0 else M.Roads.triangle(a, b, c, th, props, parent)
@@ -2326,6 +2470,9 @@ function M.buildRoundabout()
 		end
 	end
 	local function line(p0: Vector3, p1: Vector3, w: number)
+		if M.noLines then
+			return
+		end
 		local up = Vector3.new(0, M.LIFT + M.LINE_T / 2, 0)
 		local p = part({ Name = "Line", Size = Vector3.new(w, M.LINE_T, (p1 - p0).Magnitude), CFrame = CFrame.lookAt((p0 + p1) / 2 + up, p1 + up), Material = Enum.Material.SmoothPlastic, Color = pal.paint })
 		p.CanCollide, p.CanQuery, p.CanTouch = false, false, false
@@ -2426,7 +2573,7 @@ function M.buildRoundabout()
 	end
 	local giveWay = 0
 	for _, arm in M.arms do
-		if arm.o.kind == "route" then
+		if arm.o.kind == "route" and arm.ring == M.curRing and not M.noLines then
 			-- (traffic keeps right: the lanes coming in are on the left of a road that starts here, on the
 			-- right of a road that ends here)
 			local rho = M.R_OUT - 1.4
