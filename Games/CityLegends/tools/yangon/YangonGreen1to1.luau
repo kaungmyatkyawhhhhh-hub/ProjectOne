@@ -519,6 +519,67 @@ function G.edge(holding: Instance)
 	return n
 end
 
+-- far looks from the old map's tree kit (owner, 16 Nov: the round ff1 blobs read as ugly): only the big crowns
+-- (MIN_FAR_M across and up), the same Tree mesh as near, no shadows; attribute T hides them where the streamer has
+-- built the real trees. Palms have no far look (thin, lost in the haze).
+G.MIN_FAR_M = 16
+function G.farOld(holding: Instance, store: Instance?)
+	store = store or ReplicatedStorage.YgnKit.Templates
+	local root = workspace.Yangon1to1
+	local green = root:FindFirstChild("Green") or Instance.new("Folder")
+	green.Name = "Green"
+	green.Parent = root
+	local far = green:FindFirstChild("Far")
+	if far then
+		far:Destroy()
+	end
+	far = Instance.new("Folder")
+	far.Name = "Far"
+	far.Parent = green
+	local pieces = {}
+	for _, q in store:GetChildren() do
+		if string.match(q.Name, "^OK%u_ot1$") then
+			table.insert(pieces, q)
+		end
+	end
+	local cells, n, k = {}, 0, 0
+	for _, text in pages(holding, "Far") do
+		for line in string.gmatch(text, "[^\n]+") do
+			local pid, x, y, z, sx, _sy, _sz, yaw, tile =
+				string.match(line, "^(%w+) (%S+) (%S+) (%S+) (%S+) (%S+) (%S+) (%S+) (%S+)$")
+			local Dm = (tonumber(sx) or 0) / 0.92 / 3
+			if pid == "ff1" and Dm >= G.MIN_FAR_M then
+				local s = Dm / 18.3
+				local at = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
+				local cf = CFrame.new(at) * CFrame.Angles(0, tonumber(yaw), 0)
+				local key = math.floor(at.X / 1536) .. "_" .. math.floor(at.Z / 1536)
+				local cell = cells[key]
+				if not cell then
+					cell = Instance.new("Model")
+					cell.Name = "Cell_" .. key
+					cell.Parent = far
+					cells[key] = cell
+				end
+				for _, q in pieces do
+					local p = q:Clone()
+					local C, S, R = q:GetAttribute("C"), q:GetAttribute("S"), q:GetAttribute("R")
+					p.Size = S * s
+					p.CFrame = cf * CFrame.new(C * s) * R
+					p.CastShadow = false
+					p:SetAttribute("T", tile)
+					p.Parent = cell
+					k += 1
+				end
+				n += 1
+				if n % 150 == 0 then
+					task.wait()
+				end
+			end
+		end
+	end
+	return n .. " trees, " .. k .. " parts"
+end
+
 function G.data(holding: Instance)
 	local kit = ReplicatedStorage:FindFirstChild("YgnKit")
 	local moved = {}
