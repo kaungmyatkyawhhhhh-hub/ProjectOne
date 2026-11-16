@@ -31,6 +31,7 @@ created: 2026-11-16
 | Terrain, lakes, rivers, trees | [[2026-11-16 Research - Yangon terrain, water and trees]] |
 | Landmarks (71) | [[2026-11-16 Research - Yangon landmarks catalogue]] |
 | Shwedagon | [[2026-11-16 Research - Shwedagon 1 to 1 blueprint]] |
+| Sule Pagoda and Botataung Pagoda (3D, in Studio) | [[2026-11-16 Sule and Botataung 1 to 1]] |
 | Shwedagon 3D model (built, in Studio: Yangon1to1.Landmarks.Shwedagon) | [[2026-11-16 Shwedagon 3D model 1 to 1]] |
 | Sites (Sedona, Myanmar Centre, landmarks, venues) | [[2026-11-16 Audit - Yangon sites 1 to 1]] |
 | Interiors that can be built (53 rated) | [[2026-11-16 Research - Yangon interiors catalogue]], [[2026-11-16 Research - Melia Yangon interior]] |
