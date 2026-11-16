@@ -44,6 +44,9 @@ CAC is a tool on a baseplate. MM is a **place**: a penthouse boutique with manne
 4. **Phase 2:** 7, then 10.
 
 ## Status (16 Nov)
-- **Built:** 1, 2, 3 ([[2026-11-16 Built - try one piece, owned count, Undo]]) and 5 ([[2026-11-16 Built - Photo Booth]]).
+- **Built:**
+  - 1, 2, 3: [[2026-11-16 Built - try one piece, owned count, Undo]]
+  - 5: [[2026-11-16 Built - Photo Booth]]
+  - 6: [[2026-11-16 Built - Worn by count]]
 - **Not saved or published yet** (owner step).
-- **Next:** 6 (worn-by count), then 4.
+- **Next:** 4 (wear your last look on rejoin).
