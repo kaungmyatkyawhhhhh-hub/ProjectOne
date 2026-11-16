@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 11:18 [dashboard, unverified] Roblox ads are for stats, not CCU. (topic: tiktok)
+- 2026-11-16 11:17 [dashboard, unverified] The game is releasing in 25 minutes. (topic: tiktok)
 - 2026-11-16 11:16 [dashboard, unverified] Test as many thumbnails as you possibly can. (topic: tiktok)
 - 2026-11-16 11:01 [dashboard, unverified] The sound design for this animation was built to make the VFX feel physical and cinematic. (topic: tiktok)
 - 2026-11-16 11:00 [dashboard, unverified] Qwen 3.8 Max 0902 scores 3 pts above Claude Opus 5. (topic: tiktok)
