@@ -1,0 +1,5520 @@
+{
+ "meta": {
+  "method": "Boxes on facades (crops in crops/, numbered by sample index). rgb = median of the dominant colour cluster (window glass/deep openings under luma 55 ignored) = the wall AS SEEN incl. stains; paint_rgb = the same on the brightest 40% of the box = the cleanest paint; raw_median = plain median of the whole box. darker_than_wall_share = share of box pixels 28-82% darker than the wall colour (stains, grime, shadow lines). Light: sun / overcast / shade-bright; dusk photos excluded (market_shed/suburb_teashop_shed; condo_tower/skyline_modern not sampled). Families are by paint_rgb (HSV: S<0.10 or warm S<0.16 = neutral).",
+  "game_render_2026-11-16_midday": {
+   "colonial cream (KW1)": [
+    185,
+    169,
+    133
+   ],
+   "colonial ochre (KW3)": [
+    148,
+    100,
+    58
+   ],
+   "colonial pink (KW5)": [
+    182,
+    111,
+    114
+   ],
+   "walkup mint (KW2)": [
+    115,
+    190,
+    167
+   ],
+   "township pink (KW5, sunlit)": [
+    214,
+    140,
+    137
+   ],
+   "condo pink (KW5)": [
+    205,
+    143,
+    146
+   ],
+   "condo podium white (KW0)": [
+    212,
+    205,
+    187
+   ],
+   "colonial awning (KAW)": [
+    17,
+    32,
+    79
+   ]
+  }
+ },
+ "samples": [
+  {
+   "i": 0,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_01.jpg",
+   "label": "tan corner block upper",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1651,
+    384,
+    1862,
+    512
+   ],
+   "crop": "crops/00_downtown_shophouse__26th_street_01.png",
+   "rgb": [
+    170,
+    159,
+    149
+   ],
+   "paint_rgb": [
+    170,
+    160,
+    150
+   ],
+   "raw_median": [
+    163,
+    148,
+    122
+   ],
+   "paint_hsv": [
+    30,
+    0.118,
+    0.667
+   ],
+   "cluster_share": 0.37,
+   "darker_than_wall_share": 0.37,
+   "hsv": [
+    29,
+    0.124,
+    0.667
+   ],
+   "family": "off-white / greige (warm)",
+   "seen_family": "off-white / greige (warm)",
+   "excluded": false
+  },
+  {
+   "i": 1,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_01.jpg",
+   "label": "black-stained tower",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1152,
+    409,
+    1267,
+    537
+   ],
+   "crop": "crops/01_downtown_shophouse__26th_street_01.png",
+   "rgb": [
+    68,
+    71,
+    73
+   ],
+   "paint_rgb": [
+    133,
+    138,
+    141
+   ],
+   "raw_median": [
+    85,
+    89,
+    93
+   ],
+   "paint_hsv": [
+    203,
+    0.057,
+    0.553
+   ],
+   "cluster_share": 0.3,
+   "darker_than_wall_share": 0.23,
+   "hsv": [
+    204,
+    0.068,
+    0.286
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 2,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_01.jpg",
+   "label": "left white-cream front",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    38,
+    384,
+    192,
+    576
+   ],
+   "crop": "crops/02_downtown_shophouse__26th_street_01.png",
+   "rgb": [
+    154,
+    160,
+    153
+   ],
+   "paint_rgb": [
+    218,
+    199,
+    168
+   ],
+   "raw_median": [
+    155,
+    160,
+    151
+   ],
+   "paint_hsv": [
+    37,
+    0.229,
+    0.855
+   ],
+   "cluster_share": 0.46,
+   "darker_than_wall_share": 0.15,
+   "hsv": [
+    111,
+    0.044,
+    0.627
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 3,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_01.jpg",
+   "label": "ochre shop block lower",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1689,
+    512,
+    1881,
+    601
+   ],
+   "crop": "crops/03_downtown_shophouse__26th_street_01.png",
+   "rgb": [
+    179,
+    155,
+    128
+   ],
+   "paint_rgb": [
+    179,
+    156,
+    129
+   ],
+   "raw_median": [
+    163,
+    131,
+    94
+   ],
+   "paint_hsv": [
+    32,
+    0.279,
+    0.702
+   ],
+   "cluster_share": 0.48,
+   "darker_than_wall_share": 0.39,
+   "hsv": [
+    32,
+    0.285,
+    0.702
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 4,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_02.jpg",
+   "label": "turquoise front",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1190,
+    114,
+    1344,
+    315
+   ],
+   "crop": "crops/04_downtown_shophouse__26th_street_02.png",
+   "rgb": [
+    223,
+    238,
+    226
+   ],
+   "paint_rgb": [
+    223,
+    238,
+    226
+   ],
+   "raw_median": [
+    167,
+    189,
+    175
+   ],
+   "paint_hsv": [
+    132,
+    0.063,
+    0.933
+   ],
+   "cluster_share": 0.3,
+   "darker_than_wall_share": 0.39,
+   "hsv": [
+    132,
+    0.063,
+    0.933
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 5,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_02.jpg",
+   "label": "far cream fronts",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    729,
+    430,
+    844,
+    645
+   ],
+   "crop": "crops/05_downtown_shophouse__26th_street_02.png",
+   "rgb": [
+    243,
+    241,
+    235
+   ],
+   "paint_rgb": [
+    245,
+    244,
+    237
+   ],
+   "raw_median": [
+    218,
+    207,
+    206
+   ],
+   "paint_hsv": [
+    53,
+    0.033,
+    0.961
+   ],
+   "cluster_share": 0.22,
+   "darker_than_wall_share": 0.18,
+   "hsv": [
+    45,
+    0.033,
+    0.953
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 6,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_facade_detail.jpg",
+   "label": "turquoise frieze",
+   "role": "wall",
+   "light": "shade-bright",
+   "box_px": [
+    384,
+    543,
+    768,
+    620
+   ],
+   "crop": "crops/06_downtown_shophouse__26th_street_facade_detail.png",
+   "rgb": [
+    38,
+    122,
+    125
+   ],
+   "paint_rgb": [
+    105,
+    180,
+    198
+   ],
+   "raw_median": [
+    44,
+    130,
+    134
+   ],
+   "paint_hsv": [
+    192,
+    0.47,
+    0.776
+   ],
+   "cluster_share": 0.61,
+   "darker_than_wall_share": 0.03,
+   "hsv": [
+    182,
+    0.696,
+    0.49
+   ],
+   "family": "mint / turquoise / aqua",
+   "seen_family": "mint / turquoise / aqua",
+   "excluded": false
+  },
+  {
+   "i": 7,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_facade_detail.jpg",
+   "label": "turquoise wall stained",
+   "role": "wall",
+   "light": "shade-bright",
+   "box_px": [
+    1075,
+    840,
+    1171,
+    1034
+   ],
+   "crop": "crops/07_downtown_shophouse__26th_street_facade_detail.png",
+   "rgb": [
+    148,
+    197,
+    211
+   ],
+   "paint_rgb": [
+    150,
+    200,
+    214
+   ],
+   "raw_median": [
+    147,
+    196,
+    210
+   ],
+   "paint_hsv": [
+    193,
+    0.299,
+    0.839
+   ],
+   "cluster_share": 0.86,
+   "darker_than_wall_share": 0.04,
+   "hsv": [
+    193,
+    0.299,
+    0.827
+   ],
+   "family": "mint / turquoise / aqua",
+   "seen_family": "mint / turquoise / aqua",
+   "excluded": false
+  },
+  {
+   "i": 8,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_facade_detail.jpg",
+   "label": "upper pale front",
+   "role": "wall",
+   "light": "shade-bright",
+   "box_px": [
+    1152,
+    258,
+    1440,
+    336
+   ],
+   "crop": "crops/08_downtown_shophouse__26th_street_facade_detail.png",
+   "rgb": [
+    222,
+    219,
+    215
+   ],
+   "paint_rgb": [
+    222,
+    219,
+    215
+   ],
+   "raw_median": [
+    134,
+    131,
+    124
+   ],
+   "paint_hsv": [
+    34,
+    0.032,
+    0.871
+   ],
+   "cluster_share": 0.41,
+   "darker_than_wall_share": 0.5,
+   "hsv": [
+    34,
+    0.032,
+    0.871
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 9,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_facade_detail.jpg",
+   "label": "door leaf painted orange-teak",
+   "role": "shutter",
+   "light": "shade-bright",
+   "box_px": [
+    1257,
+    1086,
+    1324,
+    1202
+   ],
+   "crop": "crops/09_downtown_shophouse__26th_street_facade_detail.png",
+   "rgb": [
+    178,
+    117,
+    70
+   ],
+   "paint_rgb": [
+    184,
+    122,
+    74
+   ],
+   "raw_median": [
+    178,
+    116,
+    70
+   ],
+   "paint_hsv": [
+    26,
+    0.598,
+    0.722
+   ],
+   "cluster_share": 0.91,
+   "darker_than_wall_share": 0.07,
+   "hsv": [
+    26,
+    0.607,
+    0.698
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 10,
+   "type": "downtown_shophouse",
+   "photo": "26th_street_facade_detail.jpg",
+   "label": "blue shutter",
+   "role": "shutter",
+   "light": "shade-bright",
+   "box_px": [
+    249,
+    905,
+    297,
+    1099
+   ],
+   "crop": "crops/10_downtown_shophouse__26th_street_facade_detail.png",
+   "rgb": [
+    86,
+    175,
+    219
+   ],
+   "paint_rgb": [
+    86,
+    175,
+    220
+   ],
+   "raw_median": [
+    41,
+    129,
+    165
+   ],
+   "paint_hsv": [
+    200,
+    0.609,
+    0.863
+   ],
+   "cluster_share": 0.41,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    200,
+    0.607,
+    0.859
+   ],
+   "family": "blue",
+   "seen_family": "blue",
+   "excluded": false
+  },
+  {
+   "i": 11,
+   "type": "downtown_shophouse",
+   "photo": "aqua_balconies.jpg",
+   "label": "aqua wall",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    307,
+    268,
+    378,
+    368
+   ],
+   "crop": "crops/11_downtown_shophouse__aqua_balconies.png",
+   "rgb": [
+    183,
+    220,
+    222
+   ],
+   "paint_rgb": [
+    183,
+    220,
+    222
+   ],
+   "raw_median": [
+    86,
+    126,
+    127
+   ],
+   "paint_hsv": [
+    183,
+    0.176,
+    0.871
+   ],
+   "cluster_share": 0.28,
+   "darker_than_wall_share": 0.54,
+   "hsv": [
+    183,
+    0.176,
+    0.871
+   ],
+   "family": "mint / turquoise / aqua",
+   "seen_family": "mint / turquoise / aqua",
+   "excluded": false
+  },
+  {
+   "i": 12,
+   "type": "downtown_shophouse",
+   "photo": "aqua_balconies.jpg",
+   "label": "yellow neighbour",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    901,
+    307,
+    993,
+    368
+   ],
+   "crop": "crops/12_downtown_shophouse__aqua_balconies.png",
+   "rgb": [
+    119,
+    111,
+    97
+   ],
+   "paint_rgb": [
+    149,
+    138,
+    113
+   ],
+   "raw_median": [
+    119,
+    111,
+    98
+   ],
+   "paint_hsv": [
+    42,
+    0.242,
+    0.584
+   ],
+   "cluster_share": 0.72,
+   "darker_than_wall_share": 0.04,
+   "hsv": [
+    38,
+    0.185,
+    0.467
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 13,
+   "type": "downtown_shophouse",
+   "photo": "merchant_rd_corner.jpg",
+   "label": "stained ochre upper",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    902,
+    244,
+    1056,
+    360
+   ],
+   "crop": "crops/13_downtown_shophouse__merchant_rd_corner.png",
+   "rgb": [
+    72,
+    65,
+    61
+   ],
+   "paint_rgb": [
+    72,
+    65,
+    61
+   ],
+   "raw_median": [
+    44,
+    41,
+    40
+   ],
+   "paint_hsv": [
+    22,
+    0.153,
+    0.282
+   ],
+   "cluster_share": 0.65,
+   "darker_than_wall_share": 0.56,
+   "hsv": [
+    22,
+    0.153,
+    0.282
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 14,
+   "type": "downtown_shophouse",
+   "photo": "merchant_rd_corner.jpg",
+   "label": "stained ochre mid",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    633,
+    503,
+    768,
+    648
+   ],
+   "crop": "crops/14_downtown_shophouse__merchant_rd_corner.png",
+   "rgb": [
+    77,
+    68,
+    62
+   ],
+   "paint_rgb": [
+    184,
+    170,
+    150
+   ],
+   "raw_median": [
+    115,
+    105,
+    93
+   ],
+   "paint_hsv": [
+    35,
+    0.185,
+    0.722
+   ],
+   "cluster_share": 0.24,
+   "darker_than_wall_share": 0.19,
+   "hsv": [
+    24,
+    0.195,
+    0.302
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 15,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_corner_5storey.jpg",
+   "label": "ochre corner",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1152,
+    604,
+    1305,
+    720
+   ],
+   "crop": "crops/15_downtown_shophouse__pansodan_corner_5storey.png",
+   "rgb": [
+    73,
+    67,
+    64
+   ],
+   "paint_rgb": [
+    85,
+    80,
+    77
+   ],
+   "raw_median": [
+    59,
+    54,
+    52
+   ],
+   "paint_hsv": [
+    23,
+    0.094,
+    0.333
+   ],
+   "cluster_share": 0.49,
+   "darker_than_wall_share": 0.41,
+   "hsv": [
+    20,
+    0.123,
+    0.286
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 16,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_corner_5storey.jpg",
+   "label": "grey-white neighbour",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    480,
+    792,
+    614,
+    892
+   ],
+   "crop": "crops/16_downtown_shophouse__pansodan_corner_5storey.png",
+   "rgb": [
+    175,
+    176,
+    176
+   ],
+   "paint_rgb": [
+    175,
+    176,
+    176
+   ],
+   "raw_median": [
+    136,
+    137,
+    137
+   ],
+   "paint_hsv": [
+    180,
+    0.006,
+    0.69
+   ],
+   "cluster_share": 0.41,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    180,
+    0.006,
+    0.69
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 17,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_pink_corner.jpg",
+   "label": "pink corner",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    864,
+    676,
+    998,
+    763
+   ],
+   "crop": "crops/17_downtown_shophouse__pansodan_pink_corner.png",
+   "rgb": [
+    98,
+    93,
+    88
+   ],
+   "paint_rgb": [
+    233,
+    154,
+    162
+   ],
+   "raw_median": [
+    121,
+    105,
+    100
+   ],
+   "paint_hsv": [
+    354,
+    0.339,
+    0.914
+   ],
+   "cluster_share": 0.32,
+   "darker_than_wall_share": 0.22,
+   "hsv": [
+    30,
+    0.102,
+    0.384
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "off-white / greige (warm)",
+   "excluded": false
+  },
+  {
+   "i": 18,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_pink_corner.jpg",
+   "label": "pale green neighbour",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    211,
+    763,
+    307,
+    835
+   ],
+   "crop": "crops/18_downtown_shophouse__pansodan_pink_corner.png",
+   "rgb": [
+    196,
+    222,
+    167
+   ],
+   "paint_rgb": [
+    197,
+    222,
+    168
+   ],
+   "raw_median": [
+    148,
+    163,
+    130
+   ],
+   "paint_hsv": [
+    88,
+    0.243,
+    0.871
+   ],
+   "cluster_share": 0.33,
+   "darker_than_wall_share": 0.41,
+   "hsv": [
+    88,
+    0.248,
+    0.871
+   ],
+   "family": "green",
+   "seen_family": "green",
+   "excluded": false
+  },
+  {
+   "i": 19,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_pink_corner.jpg",
+   "label": "white modern neighbour",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1401,
+    547,
+    1536,
+    662
+   ],
+   "crop": "crops/19_downtown_shophouse__pansodan_pink_corner.png",
+   "rgb": [
+    125,
+    130,
+    128
+   ],
+   "paint_rgb": [
+    126,
+    131,
+    129
+   ],
+   "raw_median": [
+    111,
+    114,
+    107
+   ],
+   "paint_hsv": [
+    156,
+    0.038,
+    0.514
+   ],
+   "cluster_share": 0.61,
+   "darker_than_wall_share": 0.33,
+   "hsv": [
+    156,
+    0.038,
+    0.51
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 20,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_pink_corner.jpg",
+   "label": "white colonial left",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    384,
+    604,
+    518,
+    720
+   ],
+   "crop": "crops/20_downtown_shophouse__pansodan_pink_corner.png",
+   "rgb": [
+    243,
+    245,
+    244
+   ],
+   "paint_rgb": [
+    245,
+    247,
+    246
+   ],
+   "raw_median": [
+    209,
+    211,
+    210
+   ],
+   "paint_hsv": [
+    150,
+    0.008,
+    0.969
+   ],
+   "cluster_share": 0.29,
+   "darker_than_wall_share": 0.29,
+   "hsv": [
+    150,
+    0.008,
+    0.961
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 21,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_row.jpg",
+   "label": "stained grey colonial",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    480,
+    360,
+    672,
+    503
+   ],
+   "crop": "crops/21_downtown_shophouse__pansodan_row.png",
+   "rgb": [
+    82,
+    76,
+    72
+   ],
+   "paint_rgb": [
+    124,
+    120,
+    116
+   ],
+   "raw_median": [
+    86,
+    80,
+    77
+   ],
+   "paint_hsv": [
+    30,
+    0.065,
+    0.486
+   ],
+   "cluster_share": 0.47,
+   "darker_than_wall_share": 0.26,
+   "hsv": [
+    24,
+    0.122,
+    0.322
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 22,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_row.jpg",
+   "label": "white ground band",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    288,
+    547,
+    480,
+    648
+   ],
+   "crop": "crops/22_downtown_shophouse__pansodan_row.png",
+   "rgb": [
+    150,
+    152,
+    153
+   ],
+   "paint_rgb": [
+    153,
+    155,
+    156
+   ],
+   "raw_median": [
+    122,
+    124,
+    124
+   ],
+   "paint_hsv": [
+    200,
+    0.019,
+    0.612
+   ],
+   "cluster_share": 0.5,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    200,
+    0.02,
+    0.6
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 23,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_row.jpg",
+   "label": "ochre right",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1401,
+    360,
+    1536,
+    503
+   ],
+   "crop": "crops/23_downtown_shophouse__pansodan_row.png",
+   "rgb": [
+    151,
+    131,
+    112
+   ],
+   "paint_rgb": [
+    151,
+    131,
+    112
+   ],
+   "raw_median": [
+    106,
+    89,
+    75
+   ],
+   "paint_hsv": [
+    29,
+    0.258,
+    0.592
+   ],
+   "cluster_share": 0.44,
+   "darker_than_wall_share": 0.45,
+   "hsv": [
+    29,
+    0.258,
+    0.592
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 24,
+   "type": "downtown_shophouse",
+   "photo": "pansodan_row.jpg",
+   "label": "red brick far right",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1766,
+    792,
+    1881,
+    936
+   ],
+   "crop": "crops/24_downtown_shophouse__pansodan_row.png",
+   "rgb": [
+    82,
+    60,
+    56
+   ],
+   "paint_rgb": [
+    103,
+    84,
+    77
+   ],
+   "raw_median": [
+    76,
+    53,
+    49
+   ],
+   "paint_hsv": [
+    16,
+    0.252,
+    0.404
+   ],
+   "cluster_share": 0.39,
+   "darker_than_wall_share": 0.32,
+   "hsv": [
+    9,
+    0.317,
+    0.322
+   ],
+   "family": "brick / maroon",
+   "seen_family": "brick / maroon",
+   "excluded": false
+  },
+  {
+   "i": 25,
+   "type": "walkup_apartment",
+   "photo": "30th_street_blocks.jpg",
+   "label": "yellow block side",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    38,
+    388,
+    230,
+    777
+   ],
+   "crop": "crops/25_walkup_apartment__30th_street_blocks.png",
+   "rgb": [
+    224,
+    197,
+    155
+   ],
+   "paint_rgb": [
+    228,
+    205,
+    165
+   ],
+   "raw_median": [
+    223,
+    197,
+    154
+   ],
+   "paint_hsv": [
+    38,
+    0.276,
+    0.894
+   ],
+   "cluster_share": 0.96,
+   "darker_than_wall_share": 0.0,
+   "hsv": [
+    37,
+    0.308,
+    0.878
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 26,
+   "type": "walkup_apartment",
+   "photo": "30th_street_blocks.jpg",
+   "label": "stained mint-white block",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    384,
+    492,
+    460,
+    622
+   ],
+   "crop": "crops/26_walkup_apartment__30th_street_blocks.png",
+   "rgb": [
+    171,
+    190,
+    180
+   ],
+   "paint_rgb": [
+    171,
+    190,
+    180
+   ],
+   "raw_median": [
+    95,
+    122,
+    144
+   ],
+   "paint_hsv": [
+    148,
+    0.1,
+    0.745
+   ],
+   "cluster_share": 0.31,
+   "darker_than_wall_share": 0.51,
+   "hsv": [
+    148,
+    0.1,
+    0.745
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 27,
+   "type": "walkup_apartment",
+   "photo": "47th_street_blocks.jpg",
+   "label": "white block",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1152,
+    306,
+    1440,
+    766
+   ],
+   "crop": "crops/27_walkup_apartment__47th_street_blocks.png",
+   "rgb": [
+    238,
+    240,
+    238
+   ],
+   "paint_rgb": [
+    238,
+    240,
+    238
+   ],
+   "raw_median": [
+    89,
+    111,
+    127
+   ],
+   "paint_hsv": [
+    120,
+    0.008,
+    0.941
+   ],
+   "cluster_share": 0.3,
+   "darker_than_wall_share": 0.54,
+   "hsv": [
+    120,
+    0.008,
+    0.941
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 28,
+   "type": "walkup_apartment",
+   "photo": "47th_street_blocks.jpg",
+   "label": "grey right block",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1651,
+    766,
+    1824,
+    1226
+   ],
+   "crop": "crops/28_walkup_apartment__47th_street_blocks.png",
+   "rgb": [
+    132,
+    146,
+    158
+   ],
+   "paint_rgb": [
+    140,
+    152,
+    163
+   ],
+   "raw_median": [
+    122,
+    135,
+    147
+   ],
+   "paint_hsv": [
+    209,
+    0.141,
+    0.639
+   ],
+   "cluster_share": 0.58,
+   "darker_than_wall_share": 0.28,
+   "hsv": [
+    208,
+    0.165,
+    0.62
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "blue",
+   "excluded": false
+  },
+  {
+   "i": 29,
+   "type": "walkup_apartment",
+   "photo": "anawrahta_block_01.jpg",
+   "label": "stained side wall (beige block)",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    768,
+    230,
+    921,
+    358
+   ],
+   "crop": "crops/29_walkup_apartment__anawrahta_block_01.png",
+   "rgb": [
+    115,
+    114,
+    118
+   ],
+   "paint_rgb": [
+    125,
+    124,
+    127
+   ],
+   "raw_median": [
+    113,
+    113,
+    116
+   ],
+   "paint_hsv": [
+    260,
+    0.024,
+    0.498
+   ],
+   "cluster_share": 0.69,
+   "darker_than_wall_share": 0.15,
+   "hsv": [
+    255,
+    0.034,
+    0.463
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 30,
+   "type": "walkup_apartment",
+   "photo": "anawrahta_block_01.jpg",
+   "label": "white right block",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1689,
+    384,
+    1824,
+    576
+   ],
+   "crop": "crops/30_walkup_apartment__anawrahta_block_01.png",
+   "rgb": [
+    126,
+    131,
+    134
+   ],
+   "paint_rgb": [
+    129,
+    136,
+    140
+   ],
+   "raw_median": [
+    118,
+    121,
+    121
+   ],
+   "paint_hsv": [
+    202,
+    0.079,
+    0.549
+   ],
+   "cluster_share": 0.67,
+   "darker_than_wall_share": 0.28,
+   "hsv": [
+    203,
+    0.06,
+    0.525
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 31,
+   "type": "walkup_apartment",
+   "photo": "anawrahta_block_01.jpg",
+   "label": "blue block left",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    19,
+    704,
+    153,
+    832
+   ],
+   "crop": "crops/31_walkup_apartment__anawrahta_block_01.png",
+   "rgb": [
+    194,
+    218,
+    224
+   ],
+   "paint_rgb": [
+    195,
+    219,
+    225
+   ],
+   "raw_median": [
+    152,
+    175,
+    179
+   ],
+   "paint_hsv": [
+    192,
+    0.133,
+    0.882
+   ],
+   "cluster_share": 0.44,
+   "darker_than_wall_share": 0.46,
+   "hsv": [
+    192,
+    0.134,
+    0.878
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 32,
+   "type": "walkup_apartment",
+   "photo": "balcony_grilles_grime.jpg",
+   "label": "mint wall",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    10,
+    76,
+    71,
+    307
+   ],
+   "crop": "crops/32_walkup_apartment__balcony_grilles_grime.png",
+   "rgb": [
+    182,
+    221,
+    216
+   ],
+   "paint_rgb": [
+    182,
+    221,
+    216
+   ],
+   "raw_median": [
+    133,
+    168,
+    159
+   ],
+   "paint_hsv": [
+    172,
+    0.176,
+    0.867
+   ],
+   "cluster_share": 0.43,
+   "darker_than_wall_share": 0.45,
+   "hsv": [
+    172,
+    0.176,
+    0.867
+   ],
+   "family": "mint / turquoise / aqua",
+   "seen_family": "mint / turquoise / aqua",
+   "excluded": false
+  },
+  {
+   "i": 33,
+   "type": "walkup_apartment",
+   "photo": "balcony_grilles_grime.jpg",
+   "label": "mint balcony slab",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    102,
+    184,
+    460,
+    207
+   ],
+   "crop": "crops/33_walkup_apartment__balcony_grilles_grime.png",
+   "rgb": [
+    115,
+    130,
+    118
+   ],
+   "paint_rgb": [
+    198,
+    234,
+    226
+   ],
+   "raw_median": [
+    106,
+    116,
+    102
+   ],
+   "paint_hsv": [
+    167,
+    0.154,
+    0.918
+   ],
+   "cluster_share": 0.42,
+   "darker_than_wall_share": 0.33,
+   "hsv": [
+    132,
+    0.115,
+    0.51
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 34,
+   "type": "walkup_apartment",
+   "photo": "block_shopfronts_grilles.jpg",
+   "label": "yellow block",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1056,
+    57,
+    1305,
+    288
+   ],
+   "crop": "crops/34_walkup_apartment__block_shopfronts_grilles.png",
+   "rgb": [
+    222,
+    200,
+    154
+   ],
+   "paint_rgb": [
+    222,
+    200,
+    154
+   ],
+   "raw_median": [
+    145,
+    138,
+    117
+   ],
+   "paint_hsv": [
+    41,
+    0.306,
+    0.871
+   ],
+   "cluster_share": 0.31,
+   "darker_than_wall_share": 0.52,
+   "hsv": [
+    41,
+    0.306,
+    0.871
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 35,
+   "type": "walkup_apartment",
+   "photo": "block_shopfronts_grilles.jpg",
+   "label": "grey stained slab edge",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    576,
+    691,
+    1344,
+    734
+   ],
+   "crop": "crops/35_walkup_apartment__block_shopfronts_grilles.png",
+   "rgb": [
+    69,
+    74,
+    74
+   ],
+   "paint_rgb": [
+    124,
+    139,
+    138
+   ],
+   "raw_median": [
+    97,
+    115,
+    114
+   ],
+   "paint_hsv": [
+    176,
+    0.108,
+    0.545
+   ],
+   "cluster_share": 0.33,
+   "darker_than_wall_share": 0.05,
+   "hsv": [
+    180,
+    0.068,
+    0.29
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 36,
+   "type": "walkup_apartment",
+   "photo": "mahabandula_block_cages.jpg",
+   "label": "white-grey pillar",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    537,
+    384,
+    595,
+    1024
+   ],
+   "crop": "crops/36_walkup_apartment__mahabandula_block_cages.png",
+   "rgb": [
+    72,
+    69,
+    71
+   ],
+   "paint_rgb": [
+    226,
+    225,
+    220
+   ],
+   "raw_median": [
+    91,
+    90,
+    91
+   ],
+   "paint_hsv": [
+    50,
+    0.027,
+    0.886
+   ],
+   "cluster_share": 0.26,
+   "darker_than_wall_share": 0.23,
+   "hsv": [
+    320,
+    0.042,
+    0.282
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 37,
+   "type": "walkup_apartment",
+   "photo": "mahabandula_block_cages.jpg",
+   "label": "pillar 2",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    825,
+    448,
+    883,
+    960
+   ],
+   "crop": "crops/37_walkup_apartment__mahabandula_block_cages.png",
+   "rgb": [
+    70,
+    69,
+    69
+   ],
+   "paint_rgb": [
+    223,
+    220,
+    212
+   ],
+   "raw_median": [
+    108,
+    107,
+    104
+   ],
+   "paint_hsv": [
+    44,
+    0.049,
+    0.875
+   ],
+   "cluster_share": 0.25,
+   "darker_than_wall_share": 0.2,
+   "hsv": [
+    0,
+    0.014,
+    0.275
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 38,
+   "type": "walkup_apartment",
+   "photo": "roofscape_from_sakura.jpg",
+   "label": "white block",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1440,
+    576,
+    1728,
+    792
+   ],
+   "crop": "crops/38_walkup_apartment__roofscape_from_sakura.png",
+   "rgb": [
+    205,
+    215,
+    215
+   ],
+   "paint_rgb": [
+    210,
+    221,
+    220
+   ],
+   "raw_median": [
+    193,
+    204,
+    203
+   ],
+   "paint_hsv": [
+    175,
+    0.05,
+    0.867
+   ],
+   "cluster_share": 0.61,
+   "darker_than_wall_share": 0.19,
+   "hsv": [
+    180,
+    0.047,
+    0.843
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 39,
+   "type": "walkup_apartment",
+   "photo": "roofscape_from_sakura.jpg",
+   "label": "rusty roofs",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    1056,
+    1180,
+    1267,
+    1296
+   ],
+   "crop": "crops/39_walkup_apartment__roofscape_from_sakura.png",
+   "rgb": [
+    83,
+    79,
+    78
+   ],
+   "paint_rgb": [
+    133,
+    119,
+    107
+   ],
+   "raw_median": [
+    115,
+    103,
+    96
+   ],
+   "paint_hsv": [
+    28,
+    0.195,
+    0.522
+   ],
+   "cluster_share": 0.38,
+   "darker_than_wall_share": 0.0,
+   "hsv": [
+    12,
+    0.06,
+    0.325
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 40,
+   "type": "walkup_apartment",
+   "photo": "roofscape_from_sakura.jpg",
+   "label": "grey roofs",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    480,
+    216,
+    672,
+    288
+   ],
+   "crop": "crops/40_walkup_apartment__roofscape_from_sakura.png",
+   "rgb": [
+    116,
+    116,
+    110
+   ],
+   "paint_rgb": [
+    131,
+    131,
+    124
+   ],
+   "raw_median": [
+    115,
+    115,
+    109
+   ],
+   "paint_hsv": [
+    60,
+    0.053,
+    0.514
+   ],
+   "cluster_share": 0.54,
+   "darker_than_wall_share": 0.11,
+   "hsv": [
+    60,
+    0.052,
+    0.455
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 41,
+   "type": "walkup_apartment",
+   "photo": "yankin_5storey_blocks.jpg",
+   "label": "grey stained block",
+   "role": "wall",
+   "light": "sun-haze",
+   "box_px": [
+    1593,
+    576,
+    1728,
+    691
+   ],
+   "crop": "crops/41_walkup_apartment__yankin_5storey_blocks.png",
+   "rgb": [
+    176,
+    169,
+    153
+   ],
+   "paint_rgb": [
+    179,
+    172,
+    156
+   ],
+   "raw_median": [
+    139,
+    136,
+    127
+   ],
+   "paint_hsv": [
+    42,
+    0.128,
+    0.702
+   ],
+   "cluster_share": 0.52,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    42,
+    0.131,
+    0.69
+   ],
+   "family": "off-white / greige (warm)",
+   "seen_family": "off-white / greige (warm)",
+   "excluded": false
+  },
+  {
+   "i": 42,
+   "type": "walkup_apartment",
+   "photo": "yankin_5storey_blocks.jpg",
+   "label": "cream block",
+   "role": "wall",
+   "light": "sun-haze",
+   "box_px": [
+    768,
+    720,
+    825,
+    892
+   ],
+   "crop": "crops/42_walkup_apartment__yankin_5storey_blocks.png",
+   "rgb": [
+    238,
+    241,
+    224
+   ],
+   "paint_rgb": [
+    240,
+    242,
+    225
+   ],
+   "raw_median": [
+    206,
+    210,
+    195
+   ],
+   "paint_hsv": [
+    67,
+    0.07,
+    0.949
+   ],
+   "cluster_share": 0.48,
+   "darker_than_wall_share": 0.41,
+   "hsv": [
+    71,
+    0.071,
+    0.945
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 43,
+   "type": "walkup_apartment",
+   "photo": "yankin_5storey_blocks.jpg",
+   "label": "mint-white block",
+   "role": "wall",
+   "light": "sun-haze",
+   "box_px": [
+    1113,
+    648,
+    1152,
+    792
+   ],
+   "crop": "crops/43_walkup_apartment__yankin_5storey_blocks.png",
+   "rgb": [
+    78,
+    80,
+    76
+   ],
+   "paint_rgb": [
+    86,
+    89,
+    85
+   ],
+   "raw_median": [
+    62,
+    63,
+    59
+   ],
+   "paint_hsv": [
+    105,
+    0.045,
+    0.349
+   ],
+   "cluster_share": 0.76,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    90,
+    0.05,
+    0.314
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 44,
+   "type": "township_shophouse",
+   "photo": "kamayut_street.jpg",
+   "label": "white block",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    537,
+    287,
+    633,
+    431
+   ],
+   "crop": "crops/44_township_shophouse__kamayut_street.png",
+   "rgb": [
+    164,
+    174,
+    180
+   ],
+   "paint_rgb": [
+    168,
+    179,
+    186
+   ],
+   "raw_median": [
+    139,
+    154,
+    158
+   ],
+   "paint_hsv": [
+    203,
+    0.097,
+    0.729
+   ],
+   "cluster_share": 0.45,
+   "darker_than_wall_share": 0.29,
+   "hsv": [
+    202,
+    0.089,
+    0.706
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 45,
+   "type": "township_shophouse",
+   "photo": "kamayut_street.jpg",
+   "label": "grey far block",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1190,
+    719,
+    1344,
+    834
+   ],
+   "crop": "crops/45_township_shophouse__kamayut_street.png",
+   "rgb": [
+    177,
+    197,
+    216
+   ],
+   "paint_rgb": [
+    181,
+    200,
+    219
+   ],
+   "raw_median": [
+    150,
+    170,
+    194
+   ],
+   "paint_hsv": [
+    210,
+    0.174,
+    0.859
+   ],
+   "cluster_share": 0.41,
+   "darker_than_wall_share": 0.28,
+   "hsv": [
+    209,
+    0.181,
+    0.847
+   ],
+   "family": "blue",
+   "seen_family": "blue",
+   "excluded": false
+  },
+  {
+   "i": 46,
+   "type": "township_shophouse",
+   "photo": "mahabandula_signboards.jpg",
+   "label": "red signboard",
+   "role": "sign",
+   "light": "sun",
+   "box_px": [
+    422,
+    153,
+    576,
+    282
+   ],
+   "crop": "crops/46_township_shophouse__mahabandula_signboards.png",
+   "rgb": [
+    192,
+    52,
+    45
+   ],
+   "paint_rgb": [
+    201,
+    205,
+    217
+   ],
+   "raw_median": [
+    190,
+    61,
+    52
+   ],
+   "paint_hsv": [
+    225,
+    0.074,
+    0.851
+   ],
+   "cluster_share": 0.56,
+   "darker_than_wall_share": 0.04,
+   "hsv": [
+    3,
+    0.766,
+    0.753
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "pink / salmon / red-brown",
+   "excluded": false
+  },
+  {
+   "i": 47,
+   "type": "township_shophouse",
+   "photo": "mahabandula_signboards.jpg",
+   "label": "yellow signboard",
+   "role": "sign",
+   "light": "sun",
+   "box_px": [
+    1209,
+    423,
+    1324,
+    538
+   ],
+   "crop": "crops/47_township_shophouse__mahabandula_signboards.png",
+   "rgb": [
+    238,
+    186,
+    19
+   ],
+   "paint_rgb": [
+    238,
+    186,
+    19
+   ],
+   "raw_median": [
+    175,
+    126,
+    21
+   ],
+   "paint_hsv": [
+    46,
+    0.92,
+    0.933
+   ],
+   "cluster_share": 0.48,
+   "darker_than_wall_share": 0.42,
+   "hsv": [
+    46,
+    0.92,
+    0.933
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 48,
+   "type": "township_shophouse",
+   "photo": "open_shopfront.jpg",
+   "label": "stained cream wall",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    675,
+    192,
+    778,
+    307
+   ],
+   "crop": "crops/48_township_shophouse__open_shopfront.png",
+   "rgb": [
+    181,
+    160,
+    122
+   ],
+   "paint_rgb": [
+    186,
+    164,
+    130
+   ],
+   "raw_median": [
+    169,
+    139,
+    95
+   ],
+   "paint_hsv": [
+    36,
+    0.301,
+    0.729
+   ],
+   "cluster_share": 0.48,
+   "darker_than_wall_share": 0.3,
+   "hsv": [
+    39,
+    0.326,
+    0.71
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 49,
+   "type": "township_shophouse",
+   "photo": "open_shopfront.jpg",
+   "label": "rusty awning",
+   "role": "awning",
+   "light": "overcast",
+   "box_px": [
+    563,
+    92,
+    665,
+    122
+   ],
+   "crop": "crops/49_township_shophouse__open_shopfront.png",
+   "rgb": [
+    186,
+    174,
+    192
+   ],
+   "paint_rgb": [
+    191,
+    180,
+    198
+   ],
+   "raw_median": [
+    182,
+    171,
+    189
+   ],
+   "paint_hsv": [
+    277,
+    0.091,
+    0.776
+   ],
+   "cluster_share": 0.75,
+   "darker_than_wall_share": 0.04,
+   "hsv": [
+    280,
+    0.094,
+    0.753
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 50,
+   "type": "township_shophouse",
+   "photo": "poe_computer_signboards.jpg",
+   "label": "block wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    614,
+    270,
+    768,
+    324
+   ],
+   "crop": "crops/50_township_shophouse__poe_computer_signboards.png",
+   "rgb": [
+    78,
+    83,
+    74
+   ],
+   "paint_rgb": [
+    194,
+    221,
+    209
+   ],
+   "raw_median": [
+    115,
+    123,
+    108
+   ],
+   "paint_hsv": [
+    153,
+    0.122,
+    0.867
+   ],
+   "cluster_share": 0.3,
+   "darker_than_wall_share": 0.17,
+   "hsv": [
+    93,
+    0.108,
+    0.325
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 51,
+   "type": "township_shophouse",
+   "photo": "poe_computer_signboards.jpg",
+   "label": "yellow sign",
+   "role": "sign",
+   "light": "sun",
+   "box_px": [
+    1401,
+    345,
+    1536,
+    388
+   ],
+   "crop": "crops/51_township_shophouse__poe_computer_signboards.png",
+   "rgb": [
+    198,
+    182,
+    116
+   ],
+   "paint_rgb": [
+    209,
+    209,
+    161
+   ],
+   "raw_median": [
+    202,
+    193,
+    128
+   ],
+   "paint_hsv": [
+    60,
+    0.23,
+    0.82
+   ],
+   "cluster_share": 0.54,
+   "darker_than_wall_share": 0.06,
+   "hsv": [
+    48,
+    0.414,
+    0.776
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 52,
+   "type": "township_shophouse",
+   "photo": "yankin_3storey_shop.jpg",
+   "label": "pale blue wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1228,
+    768,
+    1344,
+    870
+   ],
+   "crop": "crops/52_township_shophouse__yankin_3storey_shop.png",
+   "rgb": [
+    103,
+    133,
+    154
+   ],
+   "paint_rgb": [
+    110,
+    138,
+    158
+   ],
+   "raw_median": [
+    102,
+    133,
+    154
+   ],
+   "paint_hsv": [
+    205,
+    0.304,
+    0.62
+   ],
+   "cluster_share": 0.87,
+   "darker_than_wall_share": 0.06,
+   "hsv": [
+    205,
+    0.331,
+    0.604
+   ],
+   "family": "blue",
+   "seen_family": "blue",
+   "excluded": false
+  },
+  {
+   "i": 53,
+   "type": "township_shophouse",
+   "photo": "yankin_3storey_shop.jpg",
+   "label": "grey pillar",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    806,
+    768,
+    864,
+    1152
+   ],
+   "crop": "crops/53_township_shophouse__yankin_3storey_shop.png",
+   "rgb": [
+    139,
+    152,
+    160
+   ],
+   "paint_rgb": [
+    142,
+    156,
+    163
+   ],
+   "raw_median": [
+    136,
+    149,
+    156
+   ],
+   "paint_hsv": [
+    200,
+    0.129,
+    0.639
+   ],
+   "cluster_share": 0.79,
+   "darker_than_wall_share": 0.03,
+   "hsv": [
+    203,
+    0.131,
+    0.627
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 54,
+   "type": "township_shophouse",
+   "photo": "yankin_3storey_shop.jpg",
+   "label": "red-brown metal sheet",
+   "role": "roof",
+   "light": "sun",
+   "box_px": [
+    1094,
+    947,
+    1209,
+    1228
+   ],
+   "crop": "crops/54_township_shophouse__yankin_3storey_shop.png",
+   "rgb": [
+    57,
+    34,
+    40
+   ],
+   "paint_rgb": [
+    62,
+    39,
+    45
+   ],
+   "raw_median": [
+    58,
+    35,
+    40
+   ],
+   "paint_hsv": [
+    344,
+    0.371,
+    0.243
+   ],
+   "cluster_share": 0.98,
+   "darker_than_wall_share": 0.01,
+   "hsv": [
+    344,
+    0.404,
+    0.224
+   ],
+   "family": "brick / maroon",
+   "seen_family": "brick / maroon",
+   "excluded": false
+  },
+  {
+   "i": 55,
+   "type": "township_shophouse",
+   "photo": "yankin_3storey_shop.jpg",
+   "label": "compound wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1632,
+    2048,
+    1881,
+    2304
+   ],
+   "crop": "crops/55_township_shophouse__yankin_3storey_shop.png",
+   "rgb": [
+    76,
+    66,
+    61
+   ],
+   "paint_rgb": [
+    82,
+    72,
+    67
+   ],
+   "raw_median": [
+    76,
+    66,
+    61
+   ],
+   "paint_hsv": [
+    20,
+    0.183,
+    0.322
+   ],
+   "cluster_share": 1.0,
+   "darker_than_wall_share": 0.0,
+   "hsv": [
+    20,
+    0.197,
+    0.298
+   ],
+   "family": "brick / maroon",
+   "seen_family": "brick / maroon",
+   "excluded": false
+  },
+  {
+   "i": 56,
+   "type": "township_shophouse",
+   "photo": "yankin_shop_signs.jpg",
+   "label": "white podium",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    960,
+    748,
+    1152,
+    835
+   ],
+   "crop": "crops/56_township_shophouse__yankin_shop_signs.png",
+   "rgb": [
+    238,
+    239,
+    230
+   ],
+   "paint_rgb": [
+    239,
+    239,
+    231
+   ],
+   "raw_median": [
+    155,
+    155,
+    151
+   ],
+   "paint_hsv": [
+    60,
+    0.033,
+    0.937
+   ],
+   "cluster_share": 0.51,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    67,
+    0.038,
+    0.937
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 57,
+   "type": "township_shophouse",
+   "photo": "yankin_shop_signs.jpg",
+   "label": "red panel",
+   "role": "sign",
+   "light": "sun",
+   "box_px": [
+    1075,
+    835,
+    1152,
+    907
+   ],
+   "crop": "crops/57_township_shophouse__yankin_shop_signs.png",
+   "rgb": [
+    129,
+    64,
+    72
+   ],
+   "paint_rgb": [
+    98,
+    99,
+    98
+   ],
+   "raw_median": [
+    103,
+    65,
+    73
+   ],
+   "paint_hsv": [
+    120,
+    0.01,
+    0.388
+   ],
+   "cluster_share": 0.32,
+   "darker_than_wall_share": 0.15,
+   "hsv": [
+    353,
+    0.504,
+    0.506
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "pink / salmon / red-brown",
+   "excluded": false
+  },
+  {
+   "i": 58,
+   "type": "township_shophouse",
+   "photo": "yankin_shop_signs.jpg",
+   "label": "orange shop",
+   "role": "sign",
+   "light": "sun",
+   "box_px": [
+    1689,
+    1051,
+    1824,
+    1152
+   ],
+   "crop": "crops/58_township_shophouse__yankin_shop_signs.png",
+   "rgb": [
+    213,
+    94,
+    63
+   ],
+   "paint_rgb": [
+    214,
+    95,
+    64
+   ],
+   "raw_median": [
+    211,
+    92,
+    62
+   ],
+   "paint_hsv": [
+    12,
+    0.701,
+    0.839
+   ],
+   "cluster_share": 0.69,
+   "darker_than_wall_share": 0.19,
+   "hsv": [
+    12,
+    0.704,
+    0.835
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "pink / salmon / red-brown",
+   "excluded": false
+  },
+  {
+   "i": 59,
+   "type": "villa",
+   "photo": "yankin_villa_gate.jpg",
+   "label": "white house wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    480,
+    604,
+    576,
+    676
+   ],
+   "crop": "crops/59_villa__yankin_villa_gate.png",
+   "rgb": [
+    241,
+    236,
+    226
+   ],
+   "paint_rgb": [
+    243,
+    238,
+    227
+   ],
+   "raw_median": [
+    200,
+    200,
+    196
+   ],
+   "paint_hsv": [
+    41,
+    0.066,
+    0.953
+   ],
+   "cluster_share": 0.42,
+   "darker_than_wall_share": 0.32,
+   "hsv": [
+    40,
+    0.062,
+    0.945
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 60,
+   "type": "villa",
+   "photo": "yankin_villa_gate.jpg",
+   "label": "gate pillar",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    595,
+    892,
+    652,
+    1080
+   ],
+   "crop": "crops/60_villa__yankin_villa_gate.png",
+   "rgb": [
+    242,
+    233,
+    221
+   ],
+   "paint_rgb": [
+    242,
+    234,
+    222
+   ],
+   "raw_median": [
+    174,
+    171,
+    167
+   ],
+   "paint_hsv": [
+    36,
+    0.083,
+    0.949
+   ],
+   "cluster_share": 0.41,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    34,
+    0.087,
+    0.949
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 61,
+   "type": "villa",
+   "photo": "yankin_villa_gate.jpg",
+   "label": "dark green gate",
+   "role": "gate",
+   "light": "sun",
+   "box_px": [
+    768,
+    979,
+    844,
+    1123
+   ],
+   "crop": "crops/61_villa__yankin_villa_gate.png",
+   "rgb": [
+    15,
+    21,
+    21
+   ],
+   "paint_rgb": [
+    21,
+    29,
+    28
+   ],
+   "raw_median": [
+    16,
+    22,
+    21
+   ],
+   "paint_hsv": [
+    172,
+    0.276,
+    0.114
+   ],
+   "cluster_share": 0.94,
+   "darker_than_wall_share": 0.2,
+   "hsv": [
+    180,
+    0.286,
+    0.082
+   ],
+   "family": "very dark / black stain",
+   "seen_family": "very dark / black stain",
+   "excluded": false
+  },
+  {
+   "i": 62,
+   "type": "villa",
+   "photo": "university_ave_compound_gate.jpg",
+   "label": "compound wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    38,
+    993,
+    192,
+    1051
+   ],
+   "crop": "crops/62_villa__university_ave_compound_gate.png",
+   "rgb": [
+    134,
+    137,
+    135
+   ],
+   "paint_rgb": [
+    137,
+    140,
+    139
+   ],
+   "raw_median": [
+    134,
+    136,
+    134
+   ],
+   "paint_hsv": [
+    160,
+    0.021,
+    0.549
+   ],
+   "cluster_share": 0.86,
+   "darker_than_wall_share": 0.02,
+   "hsv": [
+    140,
+    0.022,
+    0.537
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 63,
+   "type": "villa",
+   "photo": "university_ave_compound_gate.jpg",
+   "label": "grey steel gate",
+   "role": "gate",
+   "light": "sun",
+   "box_px": [
+    672,
+    1152,
+    768,
+    1224
+   ],
+   "crop": "crops/63_villa__university_ave_compound_gate.png",
+   "rgb": [
+    230,
+    225,
+    215
+   ],
+   "paint_rgb": [
+    230,
+    225,
+    215
+   ],
+   "raw_median": [
+    200,
+    194,
+    183
+   ],
+   "paint_hsv": [
+    40,
+    0.065,
+    0.902
+   ],
+   "cluster_share": 0.39,
+   "darker_than_wall_share": 0.12,
+   "hsv": [
+    40,
+    0.065,
+    0.902
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 64,
+   "type": "villa",
+   "photo": "university_ave_compound_gate.jpg",
+   "label": "rusty roof",
+   "role": "roof",
+   "light": "sun",
+   "box_px": [
+    1536,
+    720,
+    1824,
+    763
+   ],
+   "crop": "crops/64_villa__university_ave_compound_gate.png",
+   "rgb": [
+    231,
+    195,
+    165
+   ],
+   "paint_rgb": [
+    233,
+    198,
+    168
+   ],
+   "raw_median": [
+    212,
+    176,
+    149
+   ],
+   "paint_hsv": [
+    28,
+    0.279,
+    0.914
+   ],
+   "cluster_share": 0.51,
+   "darker_than_wall_share": 0.37,
+   "hsv": [
+    27,
+    0.286,
+    0.906
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 65,
+   "type": "villa",
+   "photo": "colonial_timber_villa.jpg",
+   "label": "teak upper",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    768,
+    564,
+    883,
+    649
+   ],
+   "crop": "crops/65_villa__colonial_timber_villa.png",
+   "rgb": [
+    95,
+    73,
+    50
+   ],
+   "paint_rgb": [
+    141,
+    120,
+    98
+   ],
+   "raw_median": [
+    116,
+    86,
+    53
+   ],
+   "paint_hsv": [
+    31,
+    0.305,
+    0.553
+   ],
+   "cluster_share": 0.28,
+   "darker_than_wall_share": 0.18,
+   "hsv": [
+    31,
+    0.474,
+    0.373
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 66,
+   "type": "villa",
+   "photo": "colonial_timber_villa.jpg",
+   "label": "rusty roof",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    864,
+    734,
+    1152,
+    790
+   ],
+   "crop": "crops/66_villa__colonial_timber_villa.png",
+   "rgb": [
+    106,
+    69,
+    67
+   ],
+   "paint_rgb": [
+    121,
+    83,
+    81
+   ],
+   "raw_median": [
+    106,
+    69,
+    67
+   ],
+   "paint_hsv": [
+    3,
+    0.331,
+    0.475
+   ],
+   "cluster_share": 0.82,
+   "darker_than_wall_share": 0.08,
+   "hsv": [
+    3,
+    0.368,
+    0.416
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "brick / maroon",
+   "excluded": false
+  },
+  {
+   "i": 67,
+   "type": "villa",
+   "photo": "colonial_timber_villa.jpg",
+   "label": "cream ground wall",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    864,
+    960,
+    960,
+    1059
+   ],
+   "crop": "crops/67_villa__colonial_timber_villa.png",
+   "rgb": [
+    48,
+    37,
+    22
+   ],
+   "paint_rgb": [
+    60,
+    46,
+    28
+   ],
+   "raw_median": [
+    49,
+    37,
+    22
+   ],
+   "paint_hsv": [
+    34,
+    0.533,
+    0.235
+   ],
+   "cluster_share": 0.88,
+   "darker_than_wall_share": 0.24,
+   "hsv": [
+    35,
+    0.542,
+    0.188
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "very dark / black stain",
+   "excluded": false
+  },
+  {
+   "i": 68,
+   "type": "villa",
+   "photo": "yankin_timber_house.jpg",
+   "label": "dark teak wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    825,
+    576,
+    902,
+    792
+   ],
+   "crop": "crops/68_villa__yankin_timber_house.png",
+   "rgb": [
+    52,
+    43,
+    40
+   ],
+   "paint_rgb": [
+    72,
+    58,
+    54
+   ],
+   "raw_median": [
+    53,
+    44,
+    41
+   ],
+   "paint_hsv": [
+    13,
+    0.25,
+    0.282
+   ],
+   "cluster_share": 0.89,
+   "darker_than_wall_share": 0.02,
+   "hsv": [
+    15,
+    0.231,
+    0.204
+   ],
+   "family": "brick / maroon",
+   "seen_family": "very dark / black stain",
+   "excluded": false
+  },
+  {
+   "i": 69,
+   "type": "villa",
+   "photo": "yankin_timber_house.jpg",
+   "label": "rusty roof",
+   "role": "roof",
+   "light": "sun",
+   "box_px": [
+    768,
+    316,
+    1152,
+    374
+   ],
+   "crop": "crops/69_villa__yankin_timber_house.png",
+   "rgb": [
+    111,
+    88,
+    83
+   ],
+   "paint_rgb": [
+    124,
+    97,
+    91
+   ],
+   "raw_median": [
+    110,
+    87,
+    82
+   ],
+   "paint_hsv": [
+    11,
+    0.266,
+    0.486
+   ],
+   "cluster_share": 0.79,
+   "darker_than_wall_share": 0.08,
+   "hsv": [
+    11,
+    0.252,
+    0.435
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "brick / maroon",
+   "excluded": false
+  },
+  {
+   "i": 70,
+   "type": "villa",
+   "photo": "yankin_timber_house.jpg",
+   "label": "tile roof neighbour",
+   "role": "roof",
+   "light": "sun",
+   "box_px": [
+    1689,
+    547,
+    1824,
+    633
+   ],
+   "crop": "crops/70_villa__yankin_timber_house.png",
+   "rgb": [
+    231,
+    174,
+    149
+   ],
+   "paint_rgb": [
+    239,
+    182,
+    158
+   ],
+   "raw_median": [
+    223,
+    171,
+    147
+   ],
+   "paint_hsv": [
+    18,
+    0.339,
+    0.937
+   ],
+   "cluster_share": 0.6,
+   "darker_than_wall_share": 0.14,
+   "hsv": [
+    18,
+    0.355,
+    0.906
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "pink / salmon / red-brown",
+   "excluded": false
+  },
+  {
+   "i": 71,
+   "type": "villa",
+   "photo": "yankin_timber_house.jpg",
+   "label": "white neighbour",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    192,
+    576,
+    268,
+    676
+   ],
+   "crop": "crops/71_villa__yankin_timber_house.png",
+   "rgb": [
+    133,
+    132,
+    134
+   ],
+   "paint_rgb": [
+    243,
+    241,
+    239
+   ],
+   "raw_median": [
+    151,
+    151,
+    151
+   ],
+   "paint_hsv": [
+    30,
+    0.016,
+    0.953
+   ],
+   "cluster_share": 0.57,
+   "darker_than_wall_share": 0.08,
+   "hsv": [
+    270,
+    0.015,
+    0.525
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 72,
+   "type": "villa",
+   "photo": "yankin_house_gate.jpg",
+   "label": "teak wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    768,
+    768,
+    902,
+    1024
+   ],
+   "crop": "crops/72_villa__yankin_house_gate.png",
+   "rgb": [
+    130,
+    115,
+    106
+   ],
+   "paint_rgb": [
+    165,
+    145,
+    135
+   ],
+   "raw_median": [
+    139,
+    124,
+    114
+   ],
+   "paint_hsv": [
+    20,
+    0.182,
+    0.647
+   ],
+   "cluster_share": 0.64,
+   "darker_than_wall_share": 0.09,
+   "hsv": [
+    23,
+    0.185,
+    0.51
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 73,
+   "type": "villa",
+   "photo": "yankin_house_gate.jpg",
+   "label": "white ground wall",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1152,
+    1331,
+    1267,
+    1433
+   ],
+   "crop": "crops/73_villa__yankin_house_gate.png",
+   "rgb": [
+    255,
+    255,
+    255
+   ],
+   "paint_rgb": [
+    255,
+    255,
+    255
+   ],
+   "raw_median": [
+    255,
+    255,
+    255
+   ],
+   "paint_hsv": [
+    0,
+    0.0,
+    1.0
+   ],
+   "cluster_share": 0.93,
+   "darker_than_wall_share": 0.04,
+   "hsv": [
+    0,
+    0.0,
+    1.0
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 74,
+   "type": "villa",
+   "photo": "yankin_house_gate.jpg",
+   "label": "rusty gate",
+   "role": "gate",
+   "light": "sun",
+   "box_px": [
+    288,
+    1996,
+    576,
+    2252
+   ],
+   "crop": "crops/74_villa__yankin_house_gate.png",
+   "rgb": [
+    166,
+    120,
+    83
+   ],
+   "paint_rgb": [
+    200,
+    146,
+    104
+   ],
+   "raw_median": [
+    181,
+    131,
+    92
+   ],
+   "paint_hsv": [
+    26,
+    0.48,
+    0.784
+   ],
+   "cluster_share": 0.61,
+   "darker_than_wall_share": 0.02,
+   "hsv": [
+    27,
+    0.5,
+    0.651
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 75,
+   "type": "villa",
+   "photo": "ahlone_hipped_roofs_aerial.jpg",
+   "label": "red roof",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    902,
+    1267,
+    1113,
+    1324
+   ],
+   "crop": "crops/75_villa__ahlone_hipped_roofs_aerial.png",
+   "rgb": [
+    148,
+    88,
+    79
+   ],
+   "paint_rgb": [
+    158,
+    98,
+    89
+   ],
+   "raw_median": [
+    147,
+    87,
+    79
+   ],
+   "paint_hsv": [
+    8,
+    0.437,
+    0.62
+   ],
+   "cluster_share": 0.71,
+   "darker_than_wall_share": 0.1,
+   "hsv": [
+    8,
+    0.466,
+    0.58
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "pink / salmon / red-brown",
+   "excluded": false
+  },
+  {
+   "i": 76,
+   "type": "villa",
+   "photo": "ahlone_hipped_roofs_aerial.jpg",
+   "label": "blue roof",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    288,
+    1267,
+    480,
+    1339
+   ],
+   "crop": "crops/76_villa__ahlone_hipped_roofs_aerial.png",
+   "rgb": [
+    96,
+    145,
+    196
+   ],
+   "paint_rgb": [
+    99,
+    148,
+    198
+   ],
+   "raw_median": [
+    80,
+    131,
+    184
+   ],
+   "paint_hsv": [
+    210,
+    0.5,
+    0.776
+   ],
+   "cluster_share": 0.61,
+   "darker_than_wall_share": 0.3,
+   "hsv": [
+    211,
+    0.51,
+    0.769
+   ],
+   "family": "blue",
+   "seen_family": "blue",
+   "excluded": false
+  },
+  {
+   "i": 77,
+   "type": "villa",
+   "photo": "ahlone_hipped_roofs_aerial.jpg",
+   "label": "white villa wall",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1248,
+    1180,
+    1382,
+    1224
+   ],
+   "crop": "crops/77_villa__ahlone_hipped_roofs_aerial.png",
+   "rgb": [
+    224,
+    224,
+    218
+   ],
+   "paint_rgb": [
+    227,
+    227,
+    220
+   ],
+   "raw_median": [
+    222,
+    222,
+    215
+   ],
+   "paint_hsv": [
+    60,
+    0.031,
+    0.89
+   ],
+   "cluster_share": 0.78,
+   "darker_than_wall_share": 0.11,
+   "hsv": [
+    60,
+    0.027,
+    0.878
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 78,
+   "type": "condo_tower",
+   "photo": "yankin_tower_construction.jpg",
+   "label": "white frame",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    844,
+    896,
+    873,
+    1280
+   ],
+   "crop": "crops/78_condo_tower__yankin_tower_construction.png",
+   "rgb": [
+    138,
+    146,
+    161
+   ],
+   "paint_rgb": [
+    138,
+    146,
+    161
+   ],
+   "raw_median": [
+    72,
+    81,
+    86
+   ],
+   "paint_hsv": [
+    219,
+    0.143,
+    0.631
+   ],
+   "cluster_share": 0.41,
+   "darker_than_wall_share": 0.54,
+   "hsv": [
+    219,
+    0.143,
+    0.631
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 79,
+   "type": "condo_tower",
+   "photo": "yankin_tower_construction.jpg",
+   "label": "blue cladding",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1190,
+    768,
+    1219,
+    1152
+   ],
+   "crop": "crops/79_condo_tower__yankin_tower_construction.png",
+   "rgb": [
+    52,
+    86,
+    133
+   ],
+   "paint_rgb": [
+    55,
+    89,
+    136
+   ],
+   "raw_median": [
+    52,
+    86,
+    133
+   ],
+   "paint_hsv": [
+    215,
+    0.596,
+    0.533
+   ],
+   "cluster_share": 0.98,
+   "darker_than_wall_share": 0.02,
+   "hsv": [
+    215,
+    0.609,
+    0.522
+   ],
+   "family": "blue",
+   "seen_family": "blue",
+   "excluded": false
+  },
+  {
+   "i": 80,
+   "type": "condo_tower",
+   "photo": "red_hill_towers.jpg",
+   "label": "grey KBZ tower",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    192,
+    576,
+    345,
+    648
+   ],
+   "crop": "crops/80_condo_tower__red_hill_towers.png",
+   "rgb": [
+    177,
+    174,
+    162
+   ],
+   "paint_rgb": [
+    177,
+    174,
+    162
+   ],
+   "raw_median": [
+    116,
+    114,
+    107
+   ],
+   "paint_hsv": [
+    48,
+    0.085,
+    0.694
+   ],
+   "cluster_share": 0.51,
+   "darker_than_wall_share": 0.41,
+   "hsv": [
+    48,
+    0.085,
+    0.694
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 81,
+   "type": "condo_tower",
+   "photo": "red_hill_towers.jpg",
+   "label": "white tower",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    1689,
+    288,
+    1785,
+    432
+   ],
+   "crop": "crops/81_condo_tower__red_hill_towers.png",
+   "rgb": [
+    173,
+    168,
+    162
+   ],
+   "paint_rgb": [
+    173,
+    168,
+    162
+   ],
+   "raw_median": [
+    114,
+    107,
+    98
+   ],
+   "paint_hsv": [
+    33,
+    0.064,
+    0.678
+   ],
+   "cluster_share": 0.43,
+   "darker_than_wall_share": 0.5,
+   "hsv": [
+    33,
+    0.064,
+    0.678
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 82,
+   "type": "condo_tower",
+   "photo": "red_hill_towers.jpg",
+   "label": "curtain glass",
+   "role": "glass",
+   "light": "sun",
+   "box_px": [
+    1344,
+    503,
+    1497,
+    648
+   ],
+   "crop": "crops/82_condo_tower__red_hill_towers.png",
+   "rgb": [
+    154,
+    169,
+    163
+   ],
+   "paint_rgb": [
+    156,
+    171,
+    165
+   ],
+   "raw_median": [
+    120,
+    121,
+    111
+   ],
+   "paint_hsv": [
+    156,
+    0.088,
+    0.671
+   ],
+   "cluster_share": 0.35,
+   "darker_than_wall_share": 0.41,
+   "hsv": [
+    156,
+    0.089,
+    0.663
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 83,
+   "type": "condo_tower",
+   "photo": "view_junction_city.jpg",
+   "label": "cream tower",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    998,
+    460,
+    1152,
+    640
+   ],
+   "crop": "crops/83_condo_tower__view_junction_city.png",
+   "rgb": [
+    180,
+    177,
+    175
+   ],
+   "paint_rgb": [
+    185,
+    183,
+    181
+   ],
+   "raw_median": [
+    177,
+    174,
+    171
+   ],
+   "paint_hsv": [
+    30,
+    0.022,
+    0.725
+   ],
+   "cluster_share": 0.75,
+   "darker_than_wall_share": 0.15,
+   "hsv": [
+    24,
+    0.028,
+    0.706
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 84,
+   "type": "condo_tower",
+   "photo": "view_junction_city.jpg",
+   "label": "white tower right",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1766,
+    640,
+    1881,
+    768
+   ],
+   "crop": "crops/84_condo_tower__view_junction_city.png",
+   "rgb": [
+    185,
+    184,
+    178
+   ],
+   "paint_rgb": [
+    189,
+    189,
+    183
+   ],
+   "raw_median": [
+    182,
+    182,
+    175
+   ],
+   "paint_hsv": [
+    60,
+    0.032,
+    0.741
+   ],
+   "cluster_share": 0.73,
+   "darker_than_wall_share": 0.21,
+   "hsv": [
+    51,
+    0.038,
+    0.725
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 85,
+   "type": "condo_tower",
+   "photo": "kyimyindaing_skyline.jpg",
+   "label": "white towers",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    518,
+    676,
+    633,
+    748
+   ],
+   "crop": "crops/85_condo_tower__kyimyindaing_skyline.png",
+   "rgb": [
+    196,
+    196,
+    185
+   ],
+   "paint_rgb": [
+    199,
+    199,
+    188
+   ],
+   "raw_median": [
+    185,
+    185,
+    174
+   ],
+   "paint_hsv": [
+    60,
+    0.055,
+    0.78
+   ],
+   "cluster_share": 0.55,
+   "darker_than_wall_share": 0.33,
+   "hsv": [
+    60,
+    0.056,
+    0.769
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 86,
+   "type": "condo_tower",
+   "photo": "olympic_tower_view.jpg",
+   "label": "white block",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    288,
+    629,
+    384,
+    681
+   ],
+   "crop": "crops/86_condo_tower__olympic_tower_view.png",
+   "rgb": [
+    172,
+    176,
+    185
+   ],
+   "paint_rgb": [
+    172,
+    176,
+    185
+   ],
+   "raw_median": [
+    125,
+    129,
+    136
+   ],
+   "paint_hsv": [
+    222,
+    0.07,
+    0.725
+   ],
+   "cluster_share": 0.45,
+   "darker_than_wall_share": 0.4,
+   "hsv": [
+    222,
+    0.07,
+    0.725
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 87,
+   "type": "condo_tower",
+   "photo": "olympic_tower_view.jpg",
+   "label": "stained white block",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1689,
+    681,
+    1824,
+    755
+   ],
+   "crop": "crops/87_condo_tower__olympic_tower_view.png",
+   "rgb": [
+    73,
+    76,
+    79
+   ],
+   "paint_rgb": [
+    104,
+    105,
+    108
+   ],
+   "raw_median": [
+    84,
+    86,
+    89
+   ],
+   "paint_hsv": [
+    225,
+    0.037,
+    0.424
+   ],
+   "cluster_share": 0.57,
+   "darker_than_wall_share": 0.12,
+   "hsv": [
+    210,
+    0.076,
+    0.31
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": false
+  },
+  {
+   "i": 88,
+   "type": "condo_tower",
+   "photo": "olympic_tower_view.jpg",
+   "label": "red roofs",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    192,
+    786,
+    384,
+    818
+   ],
+   "crop": "crops/88_condo_tower__olympic_tower_view.png",
+   "rgb": [
+    98,
+    51,
+    51
+   ],
+   "paint_rgb": [
+    101,
+    56,
+    57
+   ],
+   "raw_median": [
+    96,
+    50,
+    51
+   ],
+   "paint_hsv": [
+    359,
+    0.446,
+    0.396
+   ],
+   "cluster_share": 0.92,
+   "darker_than_wall_share": 0.09,
+   "hsv": [
+    0,
+    0.48,
+    0.384
+   ],
+   "family": "brick / maroon",
+   "seen_family": "brick / maroon",
+   "excluded": false
+  },
+  {
+   "i": 89,
+   "type": "market_shed",
+   "photo": "downtown_market_lane.jpg",
+   "label": "cream hall wall",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1766,
+    143,
+    1881,
+    287
+   ],
+   "crop": "crops/89_market_shed__downtown_market_lane.png",
+   "rgb": [
+    177,
+    170,
+    142
+   ],
+   "paint_rgb": [
+    178,
+    171,
+    145
+   ],
+   "raw_median": [
+    162,
+    151,
+    118
+   ],
+   "paint_hsv": [
+    47,
+    0.185,
+    0.698
+   ],
+   "cluster_share": 0.67,
+   "darker_than_wall_share": 0.34,
+   "hsv": [
+    48,
+    0.198,
+    0.694
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 90,
+   "type": "market_shed",
+   "photo": "downtown_market_lane.jpg",
+   "label": "rusty roof",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    96,
+    546,
+    384,
+    647
+   ],
+   "crop": "crops/90_market_shed__downtown_market_lane.png",
+   "rgb": [
+    105,
+    70,
+    56
+   ],
+   "paint_rgb": [
+    114,
+    77,
+    63
+   ],
+   "raw_median": [
+    101,
+    67,
+    54
+   ],
+   "paint_hsv": [
+    16,
+    0.447,
+    0.447
+   ],
+   "cluster_share": 0.9,
+   "darker_than_wall_share": 0.12,
+   "hsv": [
+    17,
+    0.467,
+    0.412
+   ],
+   "family": "brick / maroon",
+   "seen_family": "brick / maroon",
+   "excluded": false
+  },
+  {
+   "i": 91,
+   "type": "market_shed",
+   "photo": "downtown_market_lane.jpg",
+   "label": "salmon tower",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    576,
+    172,
+    729,
+    287
+   ],
+   "crop": "crops/91_market_shed__downtown_market_lane.png",
+   "rgb": [
+    192,
+    152,
+    118
+   ],
+   "paint_rgb": [
+    195,
+    155,
+    122
+   ],
+   "raw_median": [
+    192,
+    151,
+    118
+   ],
+   "paint_hsv": [
+    27,
+    0.374,
+    0.765
+   ],
+   "cluster_share": 0.68,
+   "darker_than_wall_share": 0.12,
+   "hsv": [
+    28,
+    0.385,
+    0.753
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 92,
+   "type": "market_shed",
+   "photo": "downtown_market_lane.jpg",
+   "label": "red awning",
+   "role": "awning",
+   "light": "overcast",
+   "box_px": [
+    1632,
+    603,
+    1824,
+    661
+   ],
+   "crop": "crops/92_market_shed__downtown_market_lane.png",
+   "rgb": [
+    140,
+    86,
+    80
+   ],
+   "paint_rgb": [
+    147,
+    94,
+    88
+   ],
+   "raw_median": [
+    134,
+    83,
+    77
+   ],
+   "paint_hsv": [
+    6,
+    0.401,
+    0.576
+   ],
+   "cluster_share": 0.74,
+   "darker_than_wall_share": 0.16,
+   "hsv": [
+    6,
+    0.429,
+    0.549
+   ],
+   "family": "pink / salmon / red-brown",
+   "seen_family": "pink / salmon / red-brown",
+   "excluded": false
+  },
+  {
+   "i": 93,
+   "type": "market_shed",
+   "photo": "okkalapa_station_shed.jpg",
+   "label": "yellow wall",
+   "role": "wall",
+   "light": "shade",
+   "box_px": [
+    57,
+    288,
+    192,
+    432
+   ],
+   "crop": "crops/93_market_shed__okkalapa_station_shed.png",
+   "rgb": [
+    122,
+    94,
+    56
+   ],
+   "paint_rgb": [
+    124,
+    98,
+    62
+   ],
+   "raw_median": [
+    122,
+    94,
+    56
+   ],
+   "paint_hsv": [
+    35,
+    0.5,
+    0.486
+   ],
+   "cluster_share": 1.0,
+   "darker_than_wall_share": 0.0,
+   "hsv": [
+    35,
+    0.541,
+    0.478
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 94,
+   "type": "market_shed",
+   "photo": "okkalapa_station_shed.jpg",
+   "label": "green dado",
+   "role": "wall",
+   "light": "shade",
+   "box_px": [
+    192,
+    576,
+    480,
+    792
+   ],
+   "crop": "crops/94_market_shed__okkalapa_station_shed.png",
+   "rgb": [
+    21,
+    42,
+    38
+   ],
+   "paint_rgb": [
+    25,
+    46,
+    43
+   ],
+   "raw_median": [
+    21,
+    42,
+    38
+   ],
+   "paint_hsv": [
+    171,
+    0.457,
+    0.18
+   ],
+   "cluster_share": 1.0,
+   "darker_than_wall_share": 0.01,
+   "hsv": [
+    169,
+    0.5,
+    0.165
+   ],
+   "family": "very dark / black stain",
+   "seen_family": "very dark / black stain",
+   "excluded": false
+  },
+  {
+   "i": 95,
+   "type": "market_shed",
+   "photo": "okkalapa_station_shed.jpg",
+   "label": "timber ceiling",
+   "role": "roof",
+   "light": "shade",
+   "box_px": [
+    768,
+    72,
+    960,
+    172
+   ],
+   "crop": "crops/95_market_shed__okkalapa_station_shed.png",
+   "rgb": [
+    142,
+    104,
+    69
+   ],
+   "paint_rgb": [
+    148,
+    112,
+    79
+   ],
+   "raw_median": [
+    140,
+    102,
+    66
+   ],
+   "paint_hsv": [
+    29,
+    0.466,
+    0.58
+   ],
+   "cluster_share": 0.89,
+   "darker_than_wall_share": 0.1,
+   "hsv": [
+    29,
+    0.514,
+    0.557
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 96,
+   "type": "market_shed",
+   "photo": "strand_market_stalls.jpg",
+   "label": "port office white",
+   "role": "wall",
+   "light": "sun",
+   "box_px": [
+    864,
+    732,
+    960,
+    783
+   ],
+   "crop": "crops/96_market_shed__strand_market_stalls.png",
+   "rgb": [
+    231,
+    227,
+    216
+   ],
+   "paint_rgb": [
+    231,
+    227,
+    216
+   ],
+   "raw_median": [
+    170,
+    166,
+    156
+   ],
+   "paint_hsv": [
+    44,
+    0.065,
+    0.906
+   ],
+   "cluster_share": 0.29,
+   "darker_than_wall_share": 0.42,
+   "hsv": [
+    44,
+    0.065,
+    0.906
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  },
+  {
+   "i": 97,
+   "type": "market_shed",
+   "photo": "suburb_teashop_shed.jpg",
+   "label": "grey roof (dusk, excluded)",
+   "role": "roof",
+   "light": "dusk-dark",
+   "box_px": [
+    864,
+    576,
+    1056,
+    614
+   ],
+   "crop": "crops/97_market_shed__suburb_teashop_shed.png",
+   "rgb": [
+    70,
+    74,
+    79
+   ],
+   "paint_rgb": [
+    88,
+    93,
+    97
+   ],
+   "raw_median": [
+    64,
+    67,
+    73
+   ],
+   "paint_hsv": [
+    207,
+    0.093,
+    0.38
+   ],
+   "cluster_share": 0.64,
+   "darker_than_wall_share": 0.3,
+   "hsv": [
+    213,
+    0.114,
+    0.31
+   ],
+   "family": "grey / stained grey",
+   "seen_family": "grey / stained grey",
+   "excluded": true
+  },
+  {
+   "i": 98,
+   "type": "market_shed",
+   "photo": "theingyi_market.jpg",
+   "label": "salmon building",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    409,
+    144,
+    512,
+    201
+   ],
+   "crop": "crops/98_market_shed__theingyi_market.png",
+   "rgb": [
+    207,
+    184,
+    158
+   ],
+   "paint_rgb": [
+    208,
+    185,
+    159
+   ],
+   "raw_median": [
+    174,
+    157,
+    129
+   ],
+   "paint_hsv": [
+    32,
+    0.236,
+    0.816
+   ],
+   "cluster_share": 0.43,
+   "darker_than_wall_share": 0.36,
+   "hsv": [
+    32,
+    0.237,
+    0.812
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "cream / ochre / yellow",
+   "excluded": false
+  },
+  {
+   "i": 99,
+   "type": "market_shed",
+   "photo": "theingyi_market.jpg",
+   "label": "red roof",
+   "role": "roof",
+   "light": "overcast",
+   "box_px": [
+    64,
+    237,
+    256,
+    266
+   ],
+   "crop": "crops/99_market_shed__theingyi_market.png",
+   "rgb": [
+    139,
+    88,
+    77
+   ],
+   "paint_rgb": [
+    155,
+    152,
+    146
+   ],
+   "raw_median": [
+    142,
+    92,
+    82
+   ],
+   "paint_hsv": [
+    40,
+    0.058,
+    0.608
+   ],
+   "cluster_share": 0.63,
+   "darker_than_wall_share": 0.02,
+   "hsv": [
+    11,
+    0.446,
+    0.545
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "pink / salmon / red-brown",
+   "excluded": false
+  },
+  {
+   "i": 100,
+   "type": "market_shed",
+   "photo": "theingyi_market.jpg",
+   "label": "ochre building right",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    1126,
+    230,
+    1216,
+    288
+   ],
+   "crop": "crops/100_market_shed__theingyi_market.png",
+   "rgb": [
+    69,
+    66,
+    60
+   ],
+   "paint_rgb": [
+    181,
+    169,
+    140
+   ],
+   "raw_median": [
+    101,
+    91,
+    77
+   ],
+   "paint_hsv": [
+    42,
+    0.227,
+    0.71
+   ],
+   "cluster_share": 0.46,
+   "darker_than_wall_share": 0.0,
+   "hsv": [
+    40,
+    0.13,
+    0.271
+   ],
+   "family": "cream / ochre / yellow",
+   "seen_family": "off-white / greige (warm)",
+   "excluded": false
+  },
+  {
+   "i": 101,
+   "type": "market_shed",
+   "photo": "theingyi_market.jpg",
+   "label": "grey building left",
+   "role": "wall",
+   "light": "overcast",
+   "box_px": [
+    128,
+    72,
+    256,
+    144
+   ],
+   "crop": "crops/101_market_shed__theingyi_market.png",
+   "rgb": [
+    166,
+    167,
+    162
+   ],
+   "paint_rgb": [
+    171,
+    172,
+    168
+   ],
+   "raw_median": [
+    163,
+    165,
+    160
+   ],
+   "paint_hsv": [
+    75,
+    0.023,
+    0.675
+   ],
+   "cluster_share": 0.81,
+   "darker_than_wall_share": 0.13,
+   "hsv": [
+    72,
+    0.03,
+    0.655
+   ],
+   "family": "white / off-white / grey",
+   "seen_family": "white / off-white / grey",
+   "excluded": false
+  }
+ ],
+ "types": {
+  "condo_tower": {
+   "wall_families": [
+    {
+     "family": "white / off-white / grey",
+     "n": 7,
+     "paint_median_rgb": [
+      177,
+      176,
+      181
+     ],
+     "seen_median_rgb": [
+      177,
+      176,
+      175
+     ],
+     "members": [
+      "white frame (yankin_tower_construction.jpg)",
+      "grey KBZ tower (red_hill_towers.jpg)",
+      "white tower (red_hill_towers.jpg)",
+      "cream tower (view_junction_city.jpg)",
+      "white tower right (view_junction_city.jpg)",
+      "white towers (kyimyindaing_skyline.jpg)",
+      "white block (olympic_tower_view.jpg)"
+     ]
+    },
+    {
+     "family": "blue",
+     "n": 1,
+     "paint_median_rgb": [
+      55,
+      89,
+      136
+     ],
+     "seen_median_rgb": [
+      52,
+      86,
+      133
+     ],
+     "members": [
+      "blue cladding (yankin_tower_construction.jpg)"
+     ]
+    },
+    {
+     "family": "grey / stained grey",
+     "n": 1,
+     "paint_median_rgb": [
+      104,
+      105,
+      108
+     ],
+     "seen_median_rgb": [
+      73,
+      76,
+      79
+     ],
+     "members": [
+      "stained white block (olympic_tower_view.jpg)"
+     ]
+    }
+   ],
+   "wall_swatches_neutral_share_by_paint": 0.89,
+   "wall_swatches_neutral_share_as_seen": 0.89,
+   "wall_median_paint_saturation": 0.064,
+   "wall_median_saturation": 0.07,
+   "wall_median_value": 0.694,
+   "other": [
+    {
+     "role": "glass",
+     "label": "curtain glass",
+     "rgb": [
+      154,
+      169,
+      163
+     ],
+     "photo": "red_hill_towers.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "red roofs",
+     "rgb": [
+      98,
+      51,
+      51
+     ],
+     "photo": "olympic_tower_view.jpg"
+    }
+   ],
+   "building_count_from_photos": {
+    "white_offwhite_grey_or_black_stained": 16,
+    "coloured": 4,
+    "note": "coloured = blue glass/cladding stripes, one red podium"
+   }
+  },
+  "downtown_shophouse": {
+   "wall_families": [
+    {
+     "family": "white / off-white / grey",
+     "n": 7,
+     "paint_median_rgb": [
+      222,
+      219,
+      215
+     ],
+     "seen_median_rgb": [
+      222,
+      219,
+      215
+     ],
+     "members": [
+      "black-stained tower (26th_street_01.jpg)",
+      "turquoise front (26th_street_02.jpg)",
+      "far cream fronts (26th_street_02.jpg)",
+      "upper pale front (26th_street_facade_detail.jpg)",
+      "grey-white neighbour (pansodan_corner_5storey.jpg)",
+      "white colonial left (pansodan_pink_corner.jpg)",
+      "white ground band (pansodan_row.jpg)"
+     ]
+    },
+    {
+     "family": "cream / ochre / yellow",
+     "n": 5,
+     "paint_median_rgb": [
+      179,
+      156,
+      129
+     ],
+     "seen_median_rgb": [
+      151,
+      131,
+      112
+     ],
+     "members": [
+      "left white-cream front (26th_street_01.jpg)",
+      "ochre shop block lower (26th_street_01.jpg)",
+      "yellow neighbour (aqua_balconies.jpg)",
+      "stained ochre mid (merchant_rd_corner.jpg)",
+      "ochre right (pansodan_row.jpg)"
+     ]
+    },
+    {
+     "family": "grey / stained grey",
+     "n": 4,
+     "paint_median_rgb": [
+      104,
+      100,
+      96
+     ],
+     "seen_median_rgb": [
+      77,
+      71,
+      68
+     ],
+     "members": [
+      "stained ochre upper (merchant_rd_corner.jpg)",
+      "ochre corner (pansodan_corner_5storey.jpg)",
+      "white modern neighbour (pansodan_pink_corner.jpg)",
+      "stained grey colonial (pansodan_row.jpg)"
+     ]
+    },
+    {
+     "family": "mint / turquoise / aqua",
+     "n": 3,
+     "paint_median_rgb": [
+      150,
+      200,
+      214
+     ],
+     "seen_median_rgb": [
+      148,
+      197,
+      211
+     ],
+     "members": [
+      "turquoise frieze (26th_street_facade_detail.jpg)",
+      "turquoise wall stained (26th_street_facade_detail.jpg)",
+      "aqua wall (aqua_balconies.jpg)"
+     ]
+    },
+    {
+     "family": "off-white / greige (warm)",
+     "n": 1,
+     "paint_median_rgb": [
+      170,
+      160,
+      150
+     ],
+     "seen_median_rgb": [
+      170,
+      159,
+      149
+     ],
+     "members": [
+      "tan corner block upper (26th_street_01.jpg)"
+     ]
+    },
+    {
+     "family": "pink / salmon / red-brown",
+     "n": 1,
+     "paint_median_rgb": [
+      233,
+      154,
+      162
+     ],
+     "seen_median_rgb": [
+      98,
+      93,
+      88
+     ],
+     "members": [
+      "pink corner (pansodan_pink_corner.jpg)"
+     ]
+    },
+    {
+     "family": "green",
+     "n": 1,
+     "paint_median_rgb": [
+      197,
+      222,
+      168
+     ],
+     "seen_median_rgb": [
+      196,
+      222,
+      167
+     ],
+     "members": [
+      "pale green neighbour (pansodan_pink_corner.jpg)"
+     ]
+    },
+    {
+     "family": "brick / maroon",
+     "n": 1,
+     "paint_median_rgb": [
+      103,
+      84,
+      77
+     ],
+     "seen_median_rgb": [
+      82,
+      60,
+      56
+     ],
+     "members": [
+      "red brick far right (pansodan_row.jpg)"
+     ]
+    }
+   ],
+   "wall_swatches_neutral_share_by_paint": 0.52,
+   "wall_swatches_neutral_share_as_seen": 0.61,
+   "wall_median_paint_saturation": 0.153,
+   "wall_median_saturation": 0.123,
+   "wall_median_value": 0.6,
+   "other": [
+    {
+     "role": "shutter",
+     "label": "door leaf painted orange-teak",
+     "rgb": [
+      178,
+      117,
+      70
+     ],
+     "photo": "26th_street_facade_detail.jpg"
+    },
+    {
+     "role": "shutter",
+     "label": "blue shutter",
+     "rgb": [
+      86,
+      175,
+      219
+     ],
+     "photo": "26th_street_facade_detail.jpg"
+    }
+   ],
+   "building_count_from_photos": {
+    "white_offwhite_grey_or_black_stained": 17,
+    "coloured": 16,
+    "note": "coloured ones are mostly dull stained ochre/cream; only the Pansodan pink and green corners are bright"
+   }
+  },
+  "market_shed": {
+   "wall_families": [
+    {
+     "family": "cream / ochre / yellow",
+     "n": 5,
+     "paint_median_rgb": [
+      181,
+      169,
+      140
+     ],
+     "seen_median_rgb": [
+      177,
+      152,
+      118
+     ],
+     "members": [
+      "cream hall wall (downtown_market_lane.jpg)",
+      "salmon tower (downtown_market_lane.jpg)",
+      "yellow wall (okkalapa_station_shed.jpg)",
+      "salmon building (theingyi_market.jpg)",
+      "ochre building right (theingyi_market.jpg)"
+     ]
+    },
+    {
+     "family": "white / off-white / grey",
+     "n": 2,
+     "paint_median_rgb": [
+      201,
+      199,
+      192
+     ],
+     "seen_median_rgb": [
+      198,
+      197,
+      189
+     ],
+     "members": [
+      "port office white (strand_market_stalls.jpg)",
+      "grey building left (theingyi_market.jpg)"
+     ]
+    },
+    {
+     "family": "very dark / black stain",
+     "n": 1,
+     "paint_median_rgb": [
+      25,
+      46,
+      43
+     ],
+     "seen_median_rgb": [
+      21,
+      42,
+      38
+     ],
+     "members": [
+      "green dado (okkalapa_station_shed.jpg)"
+     ]
+    }
+   ],
+   "wall_swatches_neutral_share_by_paint": 0.38,
+   "wall_swatches_neutral_share_as_seen": 0.5,
+   "wall_median_paint_saturation": 0.231,
+   "wall_median_saturation": 0.217,
+   "wall_median_value": 0.674,
+   "other": [
+    {
+     "role": "roof",
+     "label": "rusty roof",
+     "rgb": [
+      105,
+      70,
+      56
+     ],
+     "photo": "downtown_market_lane.jpg"
+    },
+    {
+     "role": "awning",
+     "label": "red awning",
+     "rgb": [
+      140,
+      86,
+      80
+     ],
+     "photo": "downtown_market_lane.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "timber ceiling",
+     "rgb": [
+      142,
+      104,
+      69
+     ],
+     "photo": "okkalapa_station_shed.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "red roof",
+     "rgb": [
+      139,
+      88,
+      77
+     ],
+     "photo": "theingyi_market.jpg"
+    }
+   ],
+   "building_count_from_photos": {
+    "white_offwhite_grey_or_black_stained": 5,
+    "coloured": 5,
+    "note": "walls cream/whitewash; colour from rust roofs, tarps, umbrellas"
+   }
+  },
+  "township_shophouse": {
+   "wall_families": [
+    {
+     "family": "white / off-white / grey",
+     "n": 4,
+     "paint_median_rgb": [
+      181,
+      200,
+      197
+     ],
+     "seen_median_rgb": [
+      151,
+      163,
+      170
+     ],
+     "members": [
+      "white block (kamayut_street.jpg)",
+      "block wall (poe_computer_signboards.jpg)",
+      "grey pillar (yankin_3storey_shop.jpg)",
+      "white podium (yankin_shop_signs.jpg)"
+     ]
+    },
+    {
+     "family": "blue",
+     "n": 2,
+     "paint_median_rgb": [
+      145,
+      169,
+      188
+     ],
+     "seen_median_rgb": [
+      140,
+      165,
+      185
+     ],
+     "members": [
+      "grey far block (kamayut_street.jpg)",
+      "pale blue wall (yankin_3storey_shop.jpg)"
+     ]
+    },
+    {
+     "family": "cream / ochre / yellow",
+     "n": 1,
+     "paint_median_rgb": [
+      186,
+      164,
+      130
+     ],
+     "seen_median_rgb": [
+      181,
+      160,
+      122
+     ],
+     "members": [
+      "stained cream wall (open_shopfront.jpg)"
+     ]
+    },
+    {
+     "family": "brick / maroon",
+     "n": 1,
+     "paint_median_rgb": [
+      82,
+      72,
+      67
+     ],
+     "seen_median_rgb": [
+      76,
+      66,
+      61
+     ],
+     "members": [
+      "compound wall (yankin_3storey_shop.jpg)"
+     ]
+    }
+   ],
+   "wall_swatches_neutral_share_by_paint": 0.5,
+   "wall_swatches_neutral_share_as_seen": 0.5,
+   "wall_median_paint_saturation": 0.151,
+   "wall_median_saturation": 0.156,
+   "wall_median_value": 0.666,
+   "other": [
+    {
+     "role": "sign",
+     "label": "red signboard",
+     "rgb": [
+      192,
+      52,
+      45
+     ],
+     "photo": "mahabandula_signboards.jpg"
+    },
+    {
+     "role": "sign",
+     "label": "yellow signboard",
+     "rgb": [
+      238,
+      186,
+      19
+     ],
+     "photo": "mahabandula_signboards.jpg"
+    },
+    {
+     "role": "awning",
+     "label": "rusty awning",
+     "rgb": [
+      186,
+      174,
+      192
+     ],
+     "photo": "open_shopfront.jpg"
+    },
+    {
+     "role": "sign",
+     "label": "yellow sign",
+     "rgb": [
+      198,
+      182,
+      116
+     ],
+     "photo": "poe_computer_signboards.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "red-brown metal sheet",
+     "rgb": [
+      57,
+      34,
+      40
+     ],
+     "photo": "yankin_3storey_shop.jpg"
+    },
+    {
+     "role": "sign",
+     "label": "red panel",
+     "rgb": [
+      129,
+      64,
+      72
+     ],
+     "photo": "yankin_shop_signs.jpg"
+    },
+    {
+     "role": "sign",
+     "label": "orange shop",
+     "rgb": [
+      213,
+      94,
+      63
+     ],
+     "photo": "yankin_shop_signs.jpg"
+    }
+   ],
+   "building_count_from_photos": {
+    "white_offwhite_grey_or_black_stained": 9,
+    "coloured": 6,
+    "note": "colour mostly from signboards; walls pale blue/grey/white"
+   }
+  },
+  "villa": {
+   "wall_families": [
+    {
+     "family": "white / off-white / grey",
+     "n": 5,
+     "paint_median_rgb": [
+      243,
+      238,
+      227
+     ],
+     "seen_median_rgb": [
+      241,
+      233,
+      221
+     ],
+     "members": [
+      "white house wall (yankin_villa_gate.jpg)",
+      "gate pillar (yankin_villa_gate.jpg)",
+      "white neighbour (yankin_timber_house.jpg)",
+      "white ground wall (yankin_house_gate.jpg)",
+      "white villa wall (ahlone_hipped_roofs_aerial.jpg)"
+     ]
+    },
+    {
+     "family": "cream / ochre / yellow",
+     "n": 2,
+     "paint_median_rgb": [
+      100,
+      83,
+      63
+     ],
+     "seen_median_rgb": [
+      71,
+      55,
+      36
+     ],
+     "members": [
+      "teak upper (colonial_timber_villa.jpg)",
+      "cream ground wall (colonial_timber_villa.jpg)"
+     ]
+    },
+    {
+     "family": "grey / stained grey",
+     "n": 1,
+     "paint_median_rgb": [
+      137,
+      140,
+      139
+     ],
+     "seen_median_rgb": [
+      134,
+      137,
+      135
+     ],
+     "members": [
+      "compound wall (university_ave_compound_gate.jpg)"
+     ]
+    },
+    {
+     "family": "brick / maroon",
+     "n": 1,
+     "paint_median_rgb": [
+      72,
+      58,
+      54
+     ],
+     "seen_median_rgb": [
+      52,
+      43,
+      40
+     ],
+     "members": [
+      "dark teak wall (yankin_timber_house.jpg)"
+     ]
+    },
+    {
+     "family": "pink / salmon / red-brown",
+     "n": 1,
+     "paint_median_rgb": [
+      165,
+      145,
+      135
+     ],
+     "seen_median_rgb": [
+      130,
+      115,
+      106
+     ],
+     "members": [
+      "teak wall (yankin_house_gate.jpg)"
+     ]
+    }
+   ],
+   "wall_swatches_neutral_share_by_paint": 0.6,
+   "wall_swatches_neutral_share_as_seen": 0.8,
+   "wall_median_paint_saturation": 0.075,
+   "wall_median_saturation": 0.074,
+   "wall_median_value": 0.531,
+   "other": [
+    {
+     "role": "gate",
+     "label": "dark green gate",
+     "rgb": [
+      15,
+      21,
+      21
+     ],
+     "photo": "yankin_villa_gate.jpg"
+    },
+    {
+     "role": "gate",
+     "label": "grey steel gate",
+     "rgb": [
+      230,
+      225,
+      215
+     ],
+     "photo": "university_ave_compound_gate.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "rusty roof",
+     "rgb": [
+      231,
+      195,
+      165
+     ],
+     "photo": "university_ave_compound_gate.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "rusty roof",
+     "rgb": [
+      106,
+      69,
+      67
+     ],
+     "photo": "colonial_timber_villa.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "rusty roof",
+     "rgb": [
+      111,
+      88,
+      83
+     ],
+     "photo": "yankin_timber_house.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "tile roof neighbour",
+     "rgb": [
+      231,
+      174,
+      149
+     ],
+     "photo": "yankin_timber_house.jpg"
+    },
+    {
+     "role": "gate",
+     "label": "rusty gate",
+     "rgb": [
+      166,
+      120,
+      83
+     ],
+     "photo": "yankin_house_gate.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "red roof",
+     "rgb": [
+      148,
+      88,
+      79
+     ],
+     "photo": "ahlone_hipped_roofs_aerial.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "blue roof",
+     "rgb": [
+      96,
+      145,
+      196
+     ],
+     "photo": "ahlone_hipped_roofs_aerial.jpg"
+    }
+   ],
+   "building_count_from_photos": {
+    "white_offwhite_grey_or_black_stained": 20,
+    "coloured": 3,
+    "timber_brown": 4
+   }
+  },
+  "walkup_apartment": {
+   "wall_families": [
+    {
+     "family": "white / off-white / grey",
+     "n": 9,
+     "paint_median_rgb": [
+      210,
+      221,
+      220
+     ],
+     "seen_median_rgb": [
+      171,
+      190,
+      180
+     ],
+     "members": [
+      "stained mint-white block (30th_street_blocks.jpg)",
+      "white block (47th_street_blocks.jpg)",
+      "grey right block (47th_street_blocks.jpg)",
+      "blue block left (anawrahta_block_01.jpg)",
+      "mint balcony slab (balcony_grilles_grime.jpg)",
+      "white-grey pillar (mahabandula_block_cages.jpg)",
+      "pillar 2 (mahabandula_block_cages.jpg)",
+      "white block (roofscape_from_sakura.jpg)",
+      "cream block (yankin_5storey_blocks.jpg)"
+     ]
+    },
+    {
+     "family": "grey / stained grey",
+     "n": 4,
+     "paint_median_rgb": [
+      124,
+      130,
+      132
+     ],
+     "seen_median_rgb": [
+      96,
+      97,
+      97
+     ],
+     "members": [
+      "stained side wall (beige block) (anawrahta_block_01.jpg)",
+      "white right block (anawrahta_block_01.jpg)",
+      "grey stained slab edge (block_shopfronts_grilles.jpg)",
+      "mint-white block (yankin_5storey_blocks.jpg)"
+     ]
+    },
+    {
+     "family": "cream / ochre / yellow",
+     "n": 2,
+     "paint_median_rgb": [
+      225,
+      202,
+      159
+     ],
+     "seen_median_rgb": [
+      223,
+      198,
+      154
+     ],
+     "members": [
+      "yellow block side (30th_street_blocks.jpg)",
+      "yellow block (block_shopfronts_grilles.jpg)"
+     ]
+    },
+    {
+     "family": "mint / turquoise / aqua",
+     "n": 1,
+     "paint_median_rgb": [
+      182,
+      221,
+      216
+     ],
+     "seen_median_rgb": [
+      182,
+      221,
+      216
+     ],
+     "members": [
+      "mint wall (balcony_grilles_grime.jpg)"
+     ]
+    },
+    {
+     "family": "off-white / greige (warm)",
+     "n": 1,
+     "paint_median_rgb": [
+      179,
+      172,
+      156
+     ],
+     "seen_median_rgb": [
+      176,
+      169,
+      153
+     ],
+     "members": [
+      "grey stained block (yankin_5storey_blocks.jpg)"
+     ]
+    }
+   ],
+   "wall_swatches_neutral_share_by_paint": 0.82,
+   "wall_swatches_neutral_share_as_seen": 0.76,
+   "wall_median_paint_saturation": 0.1,
+   "wall_median_saturation": 0.071,
+   "wall_median_value": 0.69,
+   "other": [
+    {
+     "role": "roof",
+     "label": "rusty roofs",
+     "rgb": [
+      83,
+      79,
+      78
+     ],
+     "photo": "roofscape_from_sakura.jpg"
+    },
+    {
+     "role": "roof",
+     "label": "grey roofs",
+     "rgb": [
+      116,
+      116,
+      110
+     ],
+     "photo": "roofscape_from_sakura.jpg"
+    }
+   ],
+   "building_count_from_photos": {
+    "white_offwhite_grey_or_black_stained": 20,
+    "coloured": 8,
+    "note": "colour mostly from awnings, cages, laundry, signs, not wall paint"
+   }
+  }
+ }
+}
