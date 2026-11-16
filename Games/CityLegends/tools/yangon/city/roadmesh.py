@@ -496,6 +496,11 @@ class Builder:
                 for e, end, sz in b['arms']:
                     zeb.extend(self._zebra_at(e, sz))
                 self.signal_nodes.append((b['centre'], 0.0, b['arms']))
+            # a bar that would reach into a box (another junction close by) is left out
+            Js = [b['J'] for b in self.boxes]
+            if Js:
+                jt = STRtree(Js)
+                zeb = [z for z in zeb if not any(Js[int(k)].intersection(z).area > 0.05 for k in jt.query(z))]
         self.zebras = zeb
         self.zebra_union = unary_union(zeb) if zeb else Polygon()
         return zeb
@@ -612,6 +617,8 @@ class Builder:
                 if f.oneway and e.oneway and f.layer == e.layer and abs(float(f.D[len(f.D) // 2] @ e.D[len(e.D) // 2])) > 0.95:
                     continue
                 k = int(k)
+                if ONE_TO_ONE and _continues(e, f):
+                    continue        # the next piece of the same road (a ring's pieces, an unnamed way split at a node)
                 if not ONE_TO_ONE:
                     if role != 'edge' and f.rank > e.rank:
                         continue
@@ -1325,6 +1332,21 @@ def _hatch(pc):
     if not inner.is_empty and stripes:
         g = g.union(unary_union(stripes).intersection(inner))
     return g if not g.is_empty else None
+
+
+def _continues(e, f):
+    """(1:1) f is the next piece of e's own road: both on a roundabout's ring, or they share a node where f runs straight
+    on from e (within about 25 degrees) with the same class"""
+    ring = ('roundabout', 'circular')
+    if e.tags.get('junction') in ring and f.tags.get('junction') in ring:
+        return True
+    if e.hw != f.hw:
+        return False
+    for ke, de in ((e.a, -e.D[0]), (e.b, e.D[-1])):
+        for kf, df in ((f.a, f.D[0]), (f.b, -f.D[-1])):
+            if ke == kf and float(de @ df) > 0.9:
+                return True
+    return False
 
 
 def _side(e, off):
