@@ -84,6 +84,12 @@ M.box = nil :: { number }?
 M.noLines = false
 M.vergeSkip = nil :: ((number, number) -> boolean)?
 local FAR = Vector3.new(1e9, 0, 1e9)
+-- (P3, 16 Nov: a cell job froze Studio for 40+ minutes with no sign of where) progress for long jobs in
+-- ServerStorage attribute R05Step, and a yield so Studio and MCP calls keep running
+function M.step(what: string)
+	SS:SetAttribute("R05Step", string.format("%s (%.0f s)", what, os.clock() - (M.t0 or os.clock())))
+	task.wait()
+end
 function M.useRing(R)
 	if R then
 		C = R.C
@@ -173,7 +179,10 @@ function M.load()
 		parts[k] = require(YD[pre .. k]:Clone())
 		k += 1
 	end
+	M.t0 = os.clock()
+	M.step("load: decoding " .. (k - 1) .. " modules")
 	M.data = Http:JSONDecode(table.concat(parts))
+	M.step("load: decoded")
 	M.design = if YD:FindFirstChild("Design") and not M.v05 then Http:JSONDecode(require(YD.Design:Clone())) else { flyovers = {} }
 	-- the roundabouts
 	M.RINGS, M.ringNames = {}, {}
@@ -354,8 +363,11 @@ function M.load()
 			end
 		end
 	end
+	M.step("load: findMouths")
 	M.findMouths(M.MAIN)
+	M.step("load: findCorners")
 	M.findCorners()
+	M.step("load: done")
 	local nCut = 0
 	for _, o in M.list do
 		for _ in M.cut[o.name] do
@@ -521,7 +533,10 @@ end
 -- Roads.build lays no slab between the end and k (M.noSlab); buildMouth lays it, cut on the edge.
 function M.findMouths(names: { string })
 	M.mouths, M.noSlab = {}, {}
-	for _, name in names do
+	for ni, name in names do
+		if ni % 100 == 0 then
+			M.step("findMouths " .. ni .. " / " .. #names)
+		end
 		local o = M.R[name]
 		M.noSlab[name] = {}
 		for _, e in { { 1, 1 }, { o.n, -1 } } do
@@ -865,10 +880,13 @@ local function cross2(ax: number, az: number, bx: number, bz: number): number
 end
 
 function M.findCorners()
-	M.corners, M.cornerSpan = {}, {}
+	M.corners, M.cornerSpan, M.cornerGrid = {}, {}, {}
 	local ringPts = nil
 	local pass = {}
 	for mi, m in M.mouths do
+		if mi % 100 == 0 then
+			M.step("findCorners " .. mi .. " / " .. #M.mouths)
+		end
 		local S = M.R[m.road]
 		local sideP = {}
 		for _, side in { -1, 1 } do
@@ -918,16 +936,22 @@ function M.findCorners()
 	end
 	-- (review, 13 Nov) every corner starts about T studs from its P. Where another junction's corner point
 	-- is closer than 2 T + 4 along the same kerb, both corners would overlap: T shrinks to 0.45 of the gap.
+	-- (bucketed by 48 studs = 2 T + 4 at most, so only the 3 x 3 cells round a corner are looked at)
 	local allP = {}
 	for mi, sideP in pass do
 		for _, side in { -1, 1 } do
-			table.insert(allP, { mi = mi, px = sideP[side].px, pz = sideP[side].pz })
+			local key = math.floor(sideP[side].px / 48) .. "," .. math.floor(sideP[side].pz / 48)
+			allP[key] = allP[key] or {}
+			table.insert(allP[key], { mi = mi, px = sideP[side].px, pz = sideP[side].pz })
 		end
 	end
 	for mi, m in M.mouths do
 		local sideP = pass[mi]
 		if not sideP then
 			continue
+		end
+		if mi % 100 == 0 then
+			M.step("corners " .. mi .. " / " .. #M.mouths)
 		end
 		local S = M.R[m.road]
 		for _, side in { -1, 1 } do
@@ -948,11 +972,16 @@ function M.findCorners()
 			end
 			local theta = math.acos(math.clamp(ux * vx + uz * vz, -1, 1))
 			local T = if m.ring then M.CORNER_T_RING else M.CORNER_T
-			for _, q in allP do
-				if q.mi ~= mi then
-					local gap = hyp(q.px - c.px, q.pz - c.pz)
-					if gap < 2 * T + 4 then
-						T = math.min(T, 0.45 * gap)
+			local gx, gz = math.floor(c.px / 48), math.floor(c.pz / 48)
+			for dx = -1, 1 do
+				for dz = -1, 1 do
+					for _, q in allP[(gx + dx) .. "," .. (gz + dz)] or {} do
+						if q.mi ~= mi then
+							local gap = hyp(q.px - c.px, q.pz - c.pz)
+							if gap < 2 * T + 4 then
+								T = math.min(T, 0.45 * gap)
+							end
+						end
 					end
 				end
 			end
@@ -989,6 +1018,19 @@ function M.findCorners()
 				rin = math.max(r - M.WALK, 0) - 0.3, rout = hyp(c.px - ox, c.pz - oz) + M.WALK + 2, err = math.max(math.abs(dA - r), math.abs(dB - r)),
 			}
 			table.insert(M.corners, corner)
+			-- (P3, 16 Nov: inCorner / ownedBy ran over every corner of the network for each piece; a 64-stud
+			-- grid of the corners each spot can see: the wedge (O, rout) and the 60 studs past TA)
+			local x0 = math.min(ox - corner.rout, tax - 60)
+			local x1 = math.max(ox + corner.rout, tax + 60)
+			local z0 = math.min(oz - corner.rout, taz - 60)
+			local z1 = math.max(oz + corner.rout, taz + 60)
+			for gx = math.floor(x0 / 64), math.floor(x1 / 64) do
+				for gz = math.floor(z0 / 64), math.floor(z1 / 64) do
+					local key = gx .. "," .. gz
+					M.cornerGrid[key] = M.cornerGrid[key] or {}
+					table.insert(M.cornerGrid[key], corner)
+				end
+			end
 			if m.ring then
 				-- (the ring's own kerb and pavement stop where the round corner starts)
 				local key = m.road .. "@" .. m.i0
@@ -1020,8 +1062,13 @@ M.inWedge = inWedge
 -- Past a corner's TA (on the far side of the ray O->TA, up to 60 studs on), in the joining road's own
 -- kerb and pavement band on that side: that road owns it. (At a slanting join the bigger road's pavement
 -- band overlaps it there: its pavement would bury the joining road's kerb.)
+local NONE = {}
+local function cornersAt(px: number, pz: number)
+	return M.cornerGrid and (M.cornerGrid[math.floor(px / 64) .. "," .. math.floor(pz / 64)] or NONE) or M.corners
+end
+
 function M.ownedBy(px: number, pz: number): (string?, any)
-	for _, c in M.corners do
+	for _, c in cornersAt(px, pz) do
 		local tx, tz = c.tax - c.px, c.taz - c.pz
 		local L = hyp(tx, tz)
 		if L > 1e-6 and hyp(px - c.tax, pz - c.taz) < 60 and (px - c.tax) * tx + (pz - c.taz) * tz > 0 then
@@ -1043,7 +1090,7 @@ end
 
 -- in any corner's way (for the kerbs, pavements and edge lines of the straight roads)?
 function M.inCorner(px: number, pz: number): boolean
-	for _, c in M.corners do
+	for _, c in cornersAt(px, pz) do
 		if inWedge(c, px, pz, c.rin, c.rout) then
 			return true
 		end
@@ -3306,21 +3353,25 @@ function M.stepCell(box: { number }, root: Instance)
 		return log[1]
 	end
 	local t0 = os.clock()
+	M.t0 = t0
+	M.step("cell: buildRoads, " .. #names .. " roads")
 	table.insert(log, M.buildRoads(names))
 	table.insert(log, string.format("(%.0f s)", os.clock() - t0))
-	task.wait()
+	M.step("cell: mendCutEnds")
 	table.insert(log, M.mendCutEnds(names))
+	M.step("cell: buildCorners")
 	table.insert(log, "corners " .. tostring(M.buildCorners()))
-	task.wait()
+	M.step("cell: verge")
 	table.insert(log, M.verge(names))
-	task.wait()
+	M.step("cell: roundabouts")
 	table.insert(log, M.buildRoundabout())
-	task.wait()
+	M.step("cell: medians")
 	table.insert(log, M.buildMedians(names))
-	task.wait()
+	M.step("cell: decks")
 	table.insert(log, M.buildDecks())
-	task.wait()
+	M.step("cell: scrub")
 	table.insert(log, M.scrub(true))
+	M.step("cell: done")
 	table.insert(log, string.format("(%.0f s in all)", os.clock() - t0))
 	return table.concat(log, "\n")
 end
