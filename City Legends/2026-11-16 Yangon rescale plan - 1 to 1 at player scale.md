@@ -622,3 +622,16 @@ Rules for every step:
 1. **First:** fix the current 1:1 roads with the Friday (13 Nov, batch 0.5) builder: real roundabouts, proper markings. While this runs, `Games/CityLegends/build/studio.priority` names the roads agent, and other agents give it Studio first.
 2. **Then:** build the 1:1 map up to batch 3: batches 0.5, 1, 2 and 3 (`geo.BATCH_LL`), every road made with the same Friday builder.
 3. **After that:** renovate every house (real looks) and add interiors district by district. Interiors only where real photos exist.
+
+### Roads the batch 0.5 way (roads05), step 1: converter and previews (16 Nov 2026, files only, nothing in Studio yet)
+- **Why:** owner: "the old road system was better ... batch 0.5 roads", "roundabouts are not roundabouts", "the road markings were bad". The 1:1 roads go back to Friday's proven part builder (Roads.luau / RoadLines / YangonRoads), with real roundabouts and real markings, then get baked to meshes cell by cell.
+- **Converter:** `YANGON_SCALE=1to1 python tools/yangon/city/roads05.py P1 P2` (any list of district tags, built as ONE network so district edges match) -> `build/city_1to1/roads05_P1_P2/roads.json` (v5 format + `roundabouts`, `turn`) and `Roads05_1..23.luau` modules.
+  - One centre line per road: each OSM dual carriageway merged onto its midline with the real total width and the median inside the record. No slip lanes, no islands. Short junction filler pieces dropped (26).
+  - Ranks: no ties; "ends on" order (Kahn, mutual pairs left to class / lanes / length). 19 of 944 roads still end inside a smaller one (to check with `checkMouths`).
+  - Roundabouts from OSM `junction=roundabout`: circle fit, lanes from the tags (Hanthawaddy: Ø island 53 m, 3 lanes of 12; P2: one residential roundabout, 1 lane).
+  - Flyovers from the raised profile: one deck over the cut run (Kabar Aye 2+2, Parami Road in P2), ground lanes as Friday's `side` roads pushed clear of the deck, starting and ending on the cut ends; the road widens at the gores.
+  - Heights from each district's own road profile (the terrain beds), smaller roads pinned to bigger ones.
+- **Markings:** `roads05_paint.py P1_P2` -> `paint.json` (9,296 polygons): white dashed lane lines 9 / 18, one solid white centre on undivided main roads, yellow lines along medians, no edge lines, nothing in junction boxes, lane lines break at mouths, yellow zebras 12 studs at main x main junctions, white stop lines at the 32 OSM signals, give-way dashes and hatched splitters at roundabouts, ring lane lines, deck lines, 119 turn arrows from OSM `turn:lanes`. Small streets have no paint (as real).
+- **Preview:** `roads05_view.py` (top-down of what the builder lays). Sheet: [[2026-11-16 roads05 preview - MC, Hanthawaddy, roundabout, flyover.png]] (Myanmar Centre junction, Hanthawaddy, the P2 roundabout, the Kabar Aye flyover).
+- **Numbers (P1 + P2):** 944 roads (30 main, 912 streets, 2 side lanes), 151 km, 58,128 samples, 2 decks, 2 roundabouts, 14 divided roads.
+- **Next:** YangonRoads parameterised for 1:1 (roundabouts list, deck half from data, walk per road, near-grid reach), build cell by cell, bake, replace `Yangon1to1.Roads`.
