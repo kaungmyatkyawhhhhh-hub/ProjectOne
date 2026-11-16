@@ -22,20 +22,24 @@ SPM = 3.0  # studs per metre (the game's scale)
 # --- materials: flat colours measured from the midday photos (Kaba_Aye_Paya_2.jpg 13:03) + Esri for the roof terrace.
 # name prefix = the game's MaterialVariant group (YgnGoldLeaf / YgnGoldPlate / YgnRenderPainted / YgnPaint ...).
 MATS = {
-    "YgnGoldLeaf_Bell":       ((226, 190, 124), 0.55, 0.35),  # bell, lotus bands, bud, mouldings (lit 247,232,183 / shade 172,146,102)
-    "YgnGoldPlate_Trim":      ((206, 166, 104), 0.55, 0.40),  # merlons, porch gables, cornice, hti (photo 202,165,114 / 209,171,111)
-    "YgnRenderPainted_White": ((238, 234, 224), 0.0, 0.85),   # drum wall
-    "YgnRenderPainted_Cream": ((232, 226, 170), 0.0, 0.80),   # arcade, flame gables, porch walls (photo 213,209,160 in light shade)
-    "YgnPaint_Red":           ((150, 44, 38), 0.0, 0.70),     # arch hoods, frieze drops, porch sign + pediment panels
-    "YgnPaint_RoofRed":       ((178, 112, 92), 0.0, 0.85),    # roof terrace + porch roofs (Esri: terracotta disc)
-    "YgnGlassMosaic_Teal":    ((152, 178, 160), 0.30, 0.30),  # porch pillars (mirror mosaic, photo 156,170,148)
-    "YgnMarbleWhite_Base":    ((232, 230, 222), 0.0, 0.60),   # stepped base
-    "YgnConcreteBare_Roof":   ((150, 148, 142), 0.0, 0.90),   # arcade roof ring (hidden behind the gables)
-    "YgnTeakPanel_Door":      ((92, 58, 34), 0.0, 0.70),      # closed porch doors
-    "YgnSteelPainted_Grille": ((72, 74, 78), 0.3, 0.60),      # small grille windows
+    "YgnGoldLeaf_Bell":        ((226, 190, 124), 0.55, 0.35),  # bell, lotus bands, bud, mouldings (lit 247,232,183 / shade 172,146,102)
+    "YgnGoldPlate_Trim":       ((212, 170, 98), 0.55, 0.40),   # merlons, porch crest, cornice, frieze, hti, walkway fringe
+    "YgnRenderPainted_White":  ((238, 238, 230), 0.0, 0.85),   # drum wall (really white: photo 237,237,229), hood edges, posts
+    "YgnRenderPainted_Cream":  ((238, 228, 168), 0.0, 0.80),   # arcade walls + carved panels: cream-yellow (photo 237,226,174 lit)
+    "YgnRenderPainted_Mint":   ((188, 208, 168), 0.0, 0.80),   # pale green outlines of the carved panels (photo)
+    "YgnPaint_Red":            ((165, 52, 44), 0.0, 0.70),     # arch hoods, pilaster bands, frieze drops, crest field
+    "YgnPaint_Maroon":         ((96, 34, 30), 0.0, 0.70),      # porch name panel (photo 69-78, 30, 28 in its shade), left plain
+    "YgnPaint_RoofRed":        ((178, 112, 92), 0.0, 0.85),    # roof terrace + porch roofs (Esri: terracotta disc)
+    "YgnPaint_DarkHall":       ((46, 36, 30), 0.0, 0.95),      # the dark hall seen through each porch (closed recess)
+    "YgnGlassMosaic_Teal":     ((152, 178, 160), 0.30, 0.30),  # porch pillars, arch niches (mirror mosaic)
+    "YgnMarbleWhite_Base":     ((232, 230, 222), 0.0, 0.60),   # stepped base
+    "YgnConcreteBare_Roof":    ((150, 148, 142), 0.0, 0.90),   # arcade roof ring (hidden behind the panels)
+    "YgnSteelPainted_Grille":  ((72, 74, 78), 0.3, 0.60),      # small grille windows
+    "YgnSteelPainted_Red":     ((176, 52, 42), 0.3, 0.55),     # terrace stair and rails
+    "YgnCorrugatedZinc_Green": ((92, 150, 146), 0.2, 0.60),    # covered walkway roofs (photo: teal)
 }
 
-PORCH_BEARINGS = [187.0 + 72.0 * k for k in range(5)]  # deg from north, clockwise
+PORCH_BEARINGS = [33.0, 112.0, 191.0, 261.0, 322.0]  # deg from north, clockwise: Esri z19 walkway spokes (79, 79, 70, 61, 71 apart)
 PORCH_HALF = 10.87     # deg of the arcade ring a porch takes (6.6 m body at r 17.5, photo)
 R_ARC = 17.5           # arcade facade radius
 R_DRUM = 12.3          # drum wall radius
@@ -223,29 +227,62 @@ def arch_pts(a, zs, h, n=14):
     return [(a * math.cos(math.pi * i / n), zs + h * math.sin(math.pi * i / n)) for i in range(n + 1)]  # right -> left
 
 
+def finger_skyline(fingers, zb, pad=0.0):
+    """Outline of a row of carved finger panels (photo: tall boards with pointed tops stepping up to a centre one).
+    fingers = [(x0, x1, top)] left -> right, touching. pad grows it (the back layer that shows as an outline)."""
+    out = [(fingers[-1][1] + pad, zb), (fingers[0][0] - pad, zb)]
+    for i, (x0, x1, T) in enumerate(fingers):
+        x0p = x0 - (pad if i == 0 else 0.0)
+        x1p = x1 + (pad if i == len(fingers) - 1 else 0.0)
+        wd = x1 - x0
+        T += pad
+        sh = min(0.6, 1.4 * wd)  # deep notches between fingers so each reads on its own (photo)
+        out += [(x0p, T - sh), (x0 + 0.12 * wd, T - 0.45 * sh), (x0 + 0.32 * wd, T - 0.15 * sh), ((x0 + x1) / 2, T),
+                (x1 - 0.32 * wd, T - 0.15 * sh), (x1 - 0.12 * wd, T - 0.45 * sh), (x1p, T - sh)]
+    clean = []
+    for p in out:
+        if not clean or abs(p[0] - clean[-1][0]) > 1e-6 or abs(p[1] - clean[-1][1]) > 1e-6:
+            clean.append(p)
+    return clean
+
+
+def ogee(hw, zb, zt, n=10, tip=0.25):
+    """Ogee arch outline (S-curved sides to a point), base +-hw at zb, top at zt (+ a small tip)."""
+    right = []
+    for i in range(n + 1):
+        u = i / n
+        x = hw * (1 - u)
+        f = u - 0.16 * math.sin(2 * math.pi * u)
+        right.append((x, zb + (zt - zb) * f))
+    right[-1] = (0.0, zt + tip)
+    left = [(-x, z) for x, z in reversed(right[:-1])]
+    return [(-hw, zb)] + right + left[:-1]
+
+
+BAY_HB0 = math.radians((72.0 - 2 * PORCH_HALF) / 8.0)  # nominal half-angle of a bay (instances are scaled in x per sector)
+
+
 def bay_meshes():
-    """One arcade bay in local coords: facade at y = R_ARC (local +Y outward), centred on x = 0."""
-    half = math.radians((72.0 - 2 * PORCH_HALF) / 4.0) / 2.0
-    w = R_ARC * math.sin(half)
-    Y = R_ARC
-    a, zs, h, z0, top, dep = 1.12, 3.4, 1.15, 1.0, 5.6, 1.5  # photo: capital 2.4 m, hood top 4.2 m, gable tip 6.5 m over the floor
-    cream, red, mural, gold = MB(), MB(), MB(), MB()
-    arc = arch_pts(a, zs, h)  # (x, z) right -> left
-    # facade wall front with the arch opening
+    """One arcade bay in local coords (nominal size): facade plane at y = R_ARC*cos(hb0), edges exactly on the
+    R_ARC circle, centred on x = 0. Photo 2: arch with a red scalloped hood edged white, a row of cream carved
+    finger panels with pale green outlines and red buds above it, pilasters with red bands, a mosaic niche."""
+    w = R_ARC * math.sin(BAY_HB0)
+    Y = R_ARC * math.cos(BAY_HB0)
+    a, zs, h, z0, top, dep = 1.08, 3.4, 1.15, 1.0, 5.6, 1.5
+    cream, red, mosaic, white, mint = MB(), MB(), MB(), MB(), MB()
+    arc = arch_pts(a, zs, h)
     cream.P([(-w, Y, z0), (-a, Y, z0), (-a, Y, top), (-w, Y, top)], (0, 1, 0))
     cream.P([(a, Y, z0), (w, Y, z0), (w, Y, top), (a, Y, top)], (0, 1, 0))
     for i in range(len(arc) - 1):
         (x0, zA), (x1, zB) = arc[i], arc[i + 1]
         cream.P([(x0, Y, zA), (x1, Y, zB), (x1, Y, top), (x0, Y, top)], (0, 1, 0))
         xm, zm = (x0 + x1) / 2, (zA + zB) / 2
-        cream.P([(x0, Y, zA), (x1, Y, zB), (x1, Y - dep, zB), (x0, Y - dep, zA)], (-xm, 0, -(zm - zs)))  # soffit
-    cream.P([(a, Y, z0), (a, Y, zs), (a, Y - dep, zs), (a, Y - dep, z0)], (-1, 0, 0))   # jambs
+        mosaic.P([(x0, Y, zA), (x1, Y, zB), (x1, Y - dep, zB), (x0, Y - dep, zA)], (-xm, 0, -(zm - zs)))  # mosaic vault
+    cream.P([(a, Y, z0), (a, Y, zs), (a, Y - dep, zs), (a, Y - dep, z0)], (-1, 0, 0))
     cream.P([(-a, Y, z0), (-a, Y, zs), (-a, Y - dep, zs), (-a, Y - dep, z0)], (1, 0, 0))
-    cream.P([(-w, Y, top), (w, Y, top), (w, Y - 0.45, top), (-w, Y - 0.45, top)], (0, 0, 1))  # wall top
-    # niche back (mural), closed: no way in
-    back = [(a, Y - dep, z0)] + [(x, Y - dep, z) for x, z in arc] + [(-a, Y - dep, z0)]
-    mural.P(back, (0, 1, 0))
-    # half pilasters at both edges (the neighbour bay makes the other half)
+    cream.P([(-w, Y, top), (w, Y, top), (w, Y - 0.45, top), (-w, Y - 0.45, top)], (0, 0, 1))
+    mosaic.P([(a, Y - dep, z0)] + [(x, Y - dep, z) for x, z in arc] + [(-a, Y - dep, z0)], (0, 1, 0))  # closed niche back
+    # half pilasters at both edges with red bands
     pw, pd = 0.35, 0.3
     for sx in (-1, 1):
         xo, xi = sx * w, sx * (w - pw)
@@ -253,66 +290,96 @@ def bay_meshes():
         cream.P([(x0_, Y + pd, z0), (x1_, Y + pd, z0), (x1_, Y + pd, 5.2), (x0_, Y + pd, 5.2)], (0, 1, 0))
         cream.P([(xi, Y, z0), (xi, Y + pd, z0), (xi, Y + pd, 5.2), (xi, Y, 5.2)], (-sx, 0, 0))
         cream.P([(x0_, Y, 5.2), (x1_, Y, 5.2), (x1_, Y + pd, 5.2), (x0_, Y + pd, 5.2)], (0, 0, 1))
-        for zb0, zb1 in ((1.0, 1.3), (3.1, 3.4)):  # red bands: base and capital
+        for zb0, zb1 in ((1.0, 1.3), (3.1, 3.4)):
             e = 0.04
             red.P([(x0_, Y + pd + e, zb0), (x1_, Y + pd + e, zb0), (x1_, Y + pd + e, zb1), (x0_, Y + pd + e, zb1)], (0, 1, 0))
             red.P([(xi - sx * e, Y, zb0), (xi - sx * e, Y + pd + e, zb0), (xi - sx * e, Y + pd + e, zb1), (xi - sx * e, Y, zb1)], (-sx, 0, 0))
             red.P([(x0_, Y, zb1), (x1_, Y, zb1), (x1_, Y + pd + e, zb1), (x0_, Y + pd + e, zb1)], (0, 0, 1))
-        # pillar finial: half a cream flame spike
-        spike = [(xi, 5.2), (xo, 5.2), (xo, 6.2)] if sx > 0 else [(xo, 5.2), (xi, 5.2), (xo, 6.2)]
-        cream.extrude(spike, XZ(0), Y + 0.02, Y + pd - 0.02)
-    # red scalloped arch hood
-    n = 24
-    inner, outer = [], []
-    for i in range(n + 1):
-        t = math.pi * i / n
-        sc = 0.08 if i % 2 else 0.0  # outer edge stays inside w - pw
-        inner.append(((a + 0.04) * math.cos(t), zs + (h + 0.04) * math.sin(t)))
-        outer.append(((a + 0.3 + sc) * math.cos(t), zs + (h + 0.3 + sc) * math.sin(t)))
+    # arch hood: white inner edge, red scalloped band, white outer edge (photo)
+    n = 16
     yh = Y + 0.12
-    for i in range(n):
-        (xa, za), (xb, zb) = inner[i], inner[i + 1]
-        (xc, zc), (xd, zd) = outer[i + 1], outer[i]
-        red.P([(xa, yh, za), (xb, yh, zb), (xc, yh, zc), (xd, yh, zd)], (0, 1, 0))
-        red.P([(xd, Y, zd), (xc, Y, zc), (xc, yh, zc), (xd, yh, zd)], (xd + xc, 0, (zd + zc) / 2 - zs))
-        red.P([(xa, Y, za), (xb, Y, zb), (xb, yh, zb), (xa, yh, za)], (-(xa + xb), 0, -((za + zb) / 2 - zs)))
-    # cream flame gable over the arch: saw-tooth edges up to a tall centre tip (photo: pale lime-cream panels)
-    gb = w - pw
-    zb_, zt = 5.15, 7.2
-    left = []
-    teeth = 6
-    for k in range(teeth + 1):
-        f = k / teeth
-        x = -gb + gb * f
-        z = zb_ + 0.35 + (zt - zb_ - 0.35) * f
-        left.append((x, z))
-        if k < teeth:
-            f2 = (k + 0.5) / teeth
-            x2 = -gb + gb * f2 - 0.16
-            z2 = zb_ + 0.35 + (zt - zb_ - 0.35) * f2 + 0.16
-            left.append((x2, z2))
-    # build explicitly: base right -> up the right edge -> tip -> down the left edge
-    right_edge = [(-x, z) for x, z in left]          # from (gb, base) to (0, zt)
-    left_edge = list(reversed(left))                 # from (0, zt) to (-gb, base)
-    outline = [(-gb, zb_), (gb, zb_)] + right_edge[:-1] + [(0.0, zt + 0.35)] + left_edge[1:]
-    cream.extrude(outline, XZ(0), Y + 0.13, Y + 0.33)
+
+    def ring(rin, rout, mb, s_in, s_out):
+        pi_, po = [], []
+        for i in range(n + 1):
+            t = math.pi * i / n
+            odd = i % 2
+            ri = rin + (s_in if odd else 0.0)
+            ro = rout + (s_out if odd else 0.0)
+            pi_.append(((a + ri) * math.cos(t), zs + (h + ri) * math.sin(t)))
+            po.append(((a + ro) * math.cos(t), zs + (h + ro) * math.sin(t)))
+        for i in range(n):
+            (xa, za), (xb, zb) = pi_[i], pi_[i + 1]
+            (xc, zc), (xd, zd) = po[i + 1], po[i]
+            mb.P([(xa, yh, za), (xb, yh, zb), (xc, yh, zc), (xd, yh, zd)], (0, 1, 0))
+            mb.P([(xd, Y, zd), (xc, Y, zc), (xc, yh, zc), (xd, yh, zd)], (xd + xc, 0, (zd + zc) / 2 - zs))
+            mb.P([(xa, Y, za), (xb, Y, zb), (xb, yh, zb), (xa, yh, za)], (-(xa + xb), 0, -((za + zb) / 2 - zs)))
+    ring(0.02, 0.09, white, 0.0, 0.0)
+    ring(0.09, 0.33, red, 0.0, 0.07)
+    ring(0.33, 0.40, white, 0.07, 0.07)
+    # carved finger panels over the arch: 2 layers (pale green outline behind, cream in front) + red buds
+    fw, cw = 0.25, 0.36
+    tops = [5.9, 6.2, 6.55, 6.95]
+    fingers = []
+    for k in range(4):
+        x1 = -cw - fw * (3 - k)
+        fingers.append((x1 - fw, x1, tops[k]))
+    fingers.append((-cw, cw, 7.35))
+    for k in range(4):
+        x0 = cw + fw * k
+        fingers.append((x0, x0 + fw, tops[3 - k]))
+    zb_ = 5.05
+    mint.extrude(finger_skyline(fingers, zb_, pad=0.05), XZ(0), Y + 0.12, Y + 0.22)
+    cream.extrude(finger_skyline(fingers, zb_), XZ(0), Y + 0.22, Y + 0.32, back_face=False)
+    cream.extrude(ogee(0.24, 5.6, 7.0, tip=0.1), XZ(0), Y + 0.32, Y + 0.4, back_face=False)  # raised centre leaf
+    for x0, x1, T in fingers:
+        if x1 - x0 < 0.3:
+            xm = (x0 + x1) / 2
+            red.extrude([(xm, T - 0.5), (xm + 0.08, T - 0.3), (xm, T - 0.08), (xm - 0.08, T - 0.3)], XZ(0), Y + 0.32, Y + 0.38, back_face=False)
     # standing gold Buddha in the niche
     st = MB()
     prof = [(0.45, 0.0), (0.45, 0.12), (0.36, 0.2), (0.42, 0.3), (0.34, 0.3)]
-    st.revolve(prof, 12)
-    body = [(0.34, 0.3), (0.31, 1.0), (0.27, 1.6), (0.30, 1.85), (0.24, 1.98), (0.09, 2.02), (0.09, 2.06),
-            (0.14, 2.12), (0.15, 2.22), (0.12, 2.32), (0.07, 2.36), (0.05, 2.45), (0.0, 2.55)]
-    st.revolve(body, 10)
-    st.v = [(x * 0.85, y * 0.85 + Y - 0.85, z * 0.85 + z0) for x, y, z in st.v]  # ~2.2 m with pedestal (photo)
-    return {"YgnRenderPainted_Cream": cream, "YgnPaint_Red": red, "YgnGlassMosaic_Teal": mural}, st
+    st.revolve(prof, 8)
+    body = [(0.34, 0.3), (0.29, 1.3), (0.30, 1.85), (0.24, 1.98), (0.09, 2.04),
+            (0.15, 2.17), (0.12, 2.32), (0.06, 2.4), (0.0, 2.55)]
+    st.revolve(body, 8)
+    st.v = [(x * 0.85, y * 0.85 + Y - 0.85, z * 0.85 + z0) for x, y, z in st.v]
+    return {"YgnRenderPainted_Cream": cream, "YgnPaint_Red": red, "YgnGlassMosaic_Teal": mosaic,
+            "YgnRenderPainted_White": white, "YgnRenderPainted_Mint": mint}, st
+
+
+def leaf_meshes():
+    """Curled leaf panel over each bay join (photo: tall S-leaves between the arches), pale green outline + cream."""
+    mint, cream = MB(), MB()
+    y0 = R_ARC + 0.32
+
+    def leaf(pad):
+        n = 12
+        right, left = [], []
+        for i in range(n + 1):
+            t = i / n
+            z = 3.45 + (6.2 - 3.45) * t
+            hw = 0.33 * (math.sin(math.pi * min(t * 1.05, 1.0)) ** 0.6) + pad
+            curl = 0.14 * t * t
+            right.append((curl + hw, z))
+            left.append((curl - hw, z))
+        tip = (0.14, 6.2 + 0.25 + pad)
+        return [left[0], right[0]] + right[1:-1] + [tip] + list(reversed(left[1:-1]))
+    mint.extrude(leaf(0.04), XZ(0), y0, y0 + 0.08)
+    cream.extrude(leaf(0.0), XZ(0), y0 + 0.08, y0 + 0.16, back_face=False)
+    return {"YgnRenderPainted_Mint": mint, "YgnRenderPainted_Cream": cream}
 
 
 def merlon_mesh():
+    """Gold leaf-shaped merlon (photo), two carved layers 0.08 + 0.06 m."""
     mb = MB()
-    o = [(-0.32, 0.0), (0.32, 0.0), (0.32, 0.7), (0.28, 0.95), (0.18, 1.15), (0.06, 1.3), (0.0, 1.62), (-0.06, 1.3),
-         (-0.18, 1.15), (-0.28, 0.95), (-0.32, 0.7)]
+    o = [(-0.3, 0.0), (0.3, 0.0), (0.3, 0.6), (0.2, 0.98), (0.1, 1.1), (0.13, 1.22), (0.0, 1.45),
+         (-0.13, 1.22), (-0.1, 1.1), (-0.2, 0.98), (-0.3, 0.6)]
     r = 12.6
-    mb.extrude([(u * 0.95, v * 0.9 + T_TERRACE + 0.3) for u, v in o], XZ(0), r - 0.06, r + 0.06)
+    zb = T_TERRACE + 0.3
+    mb.extrude([(u, v + zb) for u, v in o], XZ(0), r - 0.04, r + 0.04)
+    inner = [(u * 0.6, (v - 0.6) * 0.65 + 0.62 + zb) for u, v in o]
+    mb.extrude(inner, XZ(0), r + 0.04, r + 0.1, back_face=False)
     return mb
 
 
@@ -344,9 +411,13 @@ def part7_drum():
         t = 2 * math.pi * (i + 0.5) / nm
         c, s_ = math.cos(t), math.sin(t)
         tx, ty = -s_, c
-        pts2 = [(-0.24, 8.55), (0.24, 8.55), (0.2, 8.2), (0.0, 7.5), (-0.2, 8.2)]
-        red.P([(rr * c + tx * u, rr * s_ + ty * u, z) for u, z in pts2], (c, s_, 0))
+        pts2 = [(-0.24, 8.45), (0.24, 8.45), (0.2, 8.15), (0.0, 7.55), (-0.2, 8.15)]
+        cart = [(-0.29, 8.5), (0.29, 8.5), (0.26, 8.12), (0.0, 7.45), (-0.26, 8.12)]
+        gold.P([(rr * c + tx * u, rr * s_ + ty * u, z) for u, z in cart], (c, s_, 0))
+        r2 = rr + 0.04
+        red.P([(r2 * c + tx * u, r2 * s_ + ty * u, z) for u, z in pts2], (c, s_, 0))
     gold.revolve([(R_DRUM, 8.65), (12.8, 8.65), (12.8, T_TERRACE)], 120)
+    gold.revolve([(R_DRUM + 0.04, 8.52), (R_DRUM + 0.04, 8.65)], 120)  # gold band over the drops
     roof.revolve([(17.3, 5.55), (R_DRUM, 5.55)], 120)  # 5 cm under the bay wall tops, reaches under them (no slit)
     return {"YgnRenderPainted_White": white, "YgnPaint_Red": red, "YgnGoldPlate_Trim": gold, "YgnConcreteBare_Roof": roof}
 
@@ -355,7 +426,21 @@ def part6_terrace():
     roof, gold = MB(), MB()
     roof.revolve([(12.42, T_TERRACE), (R_MOULD, T_TERRACE)], 120)
     gold.revolve([(12.8, T_TERRACE), (12.8, T_TERRACE + 0.3), (12.42, T_TERRACE + 0.3), (12.42, T_TERRACE)], 120)
-    return {"YgnPaint_RoofRed": roof, "YgnGoldPlate_Trim": gold}
+    white = MB()
+    zb, zt = T_TERRACE + 0.3, T_TERRACE + 1.4
+    for i in range(N_MERLON):
+        t = 2 * math.pi * i / N_MERLON  # between merlons (merlons sit at (i + 0.5) / N)
+        c, s_ = math.cos(t), math.sin(t)
+        tx, ty = -s_, c
+        def P_(u, r, z):
+            return (r * c + tx * u, r * s_ + ty * u, z)
+        r0, r1, hw = 12.56, 12.66, 0.04
+        white.P([P_(-hw, r1, zb), P_(hw, r1, zb), P_(hw, r1, zt), P_(-hw, r1, zt)], (c, s_, 0))
+        white.P([P_(-hw, r0, zb), P_(hw, r0, zb), P_(hw, r0, zt), P_(-hw, r0, zt)], (-c, -s_, 0))
+        white.P([P_(hw, r0, zb), P_(hw, r1, zb), P_(hw, r1, zt), P_(hw, r0, zt)], (tx, ty, 0))
+        white.P([P_(-hw, r0, zb), P_(-hw, r1, zb), P_(-hw, r1, zt), P_(-hw, r0, zt)], (-tx, -ty, 0))
+        white.P([P_(-hw, r0, zt), P_(hw, r0, zt), P_(hw, r1, zt), P_(-hw, r1, zt)], (0, 0, 1))
+    return {"YgnPaint_RoofRed": roof, "YgnGoldPlate_Trim": gold, "YgnRenderPainted_White": white}
 
 
 def part5_mouldings():
@@ -483,86 +568,151 @@ def part1_hti(z0):
 
 
 def porch_meshes():
-    """One entrance porch in local coords, facing +Y, its front at y ~ 21. Shapes from photo Kaba_Aye_Paya_2:
-    one tall gold pediment (red panel, gold sun disc, gold flame crest and a comb of gold fingers above the red panel),
-    curling gold flames at the eave ends, a plain red name panel (~5.1 x 1.3 m) between gold-framed jambs,
-    mirror-mosaic pillars full height at the porch corners."""
+    """One entrance porch in local coords, facing +Y, its front at y = 21. Photo 2 (crop): an open front (gold carved
+    jambs and a gold valance under the sign, a dark hall behind: here a shallow closed recess, 1.4 m), the plain red
+    name panel, a gold eave, then the crest in layers: red backboard, gold carved fingers stepping up to the centre,
+    a gold ogee frame, the red ogee field with the gold sun disc; gold scrolls curling out at the eave ends."""
     W = R_ARC * math.sin(math.radians(PORCH_HALF))  # 3.3
-    cream, teal, red, gold, door, roof = MB(), MB(), MB(), MB(), MB(), MB()
+    cream, teal, red, gold, dark, roof, maroon = MB(), MB(), MB(), MB(), MB(), MB(), MB()
     yb, yw, yf = 17.6, 19.6, 21.0
-    ybw = 17.2  # side walls start at the arcade face
+    ybw = R_ARC * math.cos(math.radians(PORCH_HALF))  # side walls start exactly at the arcade's edge corner
     z0, ze = 1.0, 5.25
-    # side walls
-    for sx in (-1, 1):
-        x0_, x1_ = (W - 0.4, W) if sx > 0 else (-W, -W + 0.4)
-        cream.box(x0_, x1_, ybw, yf - 0.64, z0, ze, skip=("-z", "-y", "+y", "+z"))
-        cream.P([(x0_, ybw, ze), (x1_, ybw, ze), (x1_, yb, ze), (x0_, yb, ze)], (0, 0, 1))  # wall top behind the eave slab
-    # front wall with a closed doorway (shown, not enterable)
-    dx, dz = 1.7, 3.9
-    cream.P([(-W + 0.4, yw, z0), (-dx, yw, z0), (-dx, yw, 4.6), (-W + 0.4, yw, 4.6)], (0, 1, 0))
-    cream.P([(dx, yw, z0), (W - 0.4, yw, z0), (W - 0.4, yw, 4.6), (dx, yw, 4.6)], (0, 1, 0))
-    cream.P([(-dx, yw, dz), (dx, yw, dz), (dx, yw, 4.6), (-dx, yw, 4.6)], (0, 1, 0))
-    cream.P([(dx, yw, z0), (dx, yw, dz), (dx, yw - 0.5, dz), (dx, yw - 0.5, z0)], (-1, 0, 0))
-    cream.P([(-dx, yw, z0), (-dx, yw, dz), (-dx, yw - 0.5, dz), (-dx, yw - 0.5, z0)], (1, 0, 0))
-    cream.P([(-dx, yw, dz), (dx, yw, dz), (dx, yw - 0.5, dz), (-dx, yw - 0.5, dz)], (0, 0, -1))
-    door.P([(-dx, yw - 0.5, z0), (dx, yw - 0.5, z0), (dx, yw - 0.5, dz), (-dx, yw - 0.5, dz)], (0, 1, 0))
-    for x0_, x1_ in ((-dx - 0.2, -dx), (dx, dx + 0.2)):
-        gold.P([(x0_, yw + 0.05, z0), (x1_, yw + 0.05, z0), (x1_, yw + 0.05, dz + 0.2), (x0_, yw + 0.05, dz + 0.2)], (0, 1, 0))
-    gold.P([(-dx, yw + 0.05, dz), (dx, yw + 0.05, dz), (dx, yw + 0.05, dz + 0.2), (-dx, yw + 0.05, dz + 0.2)], (0, 1, 0))
-    # mirror-mosaic pillars at the four corners, up to the eave
-    for px in (-W + 0.3, W - 0.3):
-        teal.box(px - 0.3, px + 0.3, yf - 0.64, yf, z0, ze, skip=("-z", "+z", "-y"))
-    # sign beam: plain red name panel (no fake text), gold frame, cream underside
-    sx_, zs0 = 2.45, 4.35
-    red.P([(-sx_, yf, zs0), (sx_, yf, zs0), (sx_, yf, ze), (-sx_, yf, ze)], (0, 1, 0))
-    cream.P([(-W, yw, zs0), (W, yw, zs0), (W, yf, zs0), (-W, yf, zs0)], (0, 0, -1))
-    for z_a, z_b in ((zs0, zs0 + 0.14), (ze - 0.14, ze)):
-        gold.box(-sx_, sx_, yf, yf + 0.04, z_a, z_b, skip=("-y",))
-    for s in (-1, 1):  # gold jamb pilasters between the sign and the pillars
-        gold.box(min(s * sx_, s * (W - 0.62)), max(s * sx_, s * (W - 0.62)), yf - 0.1, yf + 0.06, zs0 - 0.6, ze, skip=("-y", "-z", "+z"))
-    # eave slab
+    zs0 = 4.35
+    pin = W - 0.6  # inner face of the corner pillars
+    for s in (-1, 1):
+        x0_, x1_ = (W - 0.4, W) if s > 0 else (-W, -W + 0.4)
+        cream.box(x0_, x1_, ybw, yf - 0.64, z0, ze, skip=("-z", "-y", "+y", "+z", "-x" if s > 0 else "+x"))
+        cream.P([(x0_, ybw, ze), (x1_, ybw, ze), (x1_, yb, ze), (x0_, yb, ze)], (0, 0, 1))
+        xi = s * (W - 0.4)
+        dark.P([(xi, yw, z0), (xi, yf - 0.64, z0), (xi, yf - 0.64, zs0), (xi, yw, zs0)], (-s, 0, 0))  # recess side
+        px0, px1 = (pin, W) if s > 0 else (-W, -pin)
+        teal.box(px0, px1, yf - 0.64, yf, z0, ze, skip=("-z", "+z", "-y"))
+    # the recess: dark back wall + dark soffit (no way in)
+    dark.P([(-W + 0.4, yw, z0), (W - 0.4, yw, z0), (W - 0.4, yw, zs0), (-W + 0.4, yw, zs0)], (0, 1, 0))
+    dark.P([(-W + 0.4, yw, zs0), (W - 0.4, yw, zs0), (W - 0.4, yf - 0.64, zs0), (-W + 0.4, yf - 0.64, zs0)], (0, 0, -1))
+    dark.P([(-pin, yf - 0.64, zs0), (pin, yf - 0.64, zs0), (pin, yf - 0.1, zs0), (-pin, yf - 0.1, zs0)], (0, 0, -1))
+    # the step of the pillars' back faces into the recess (between the wall and the pillar, x pin..W-0.4)
+    for s in (-1, 1):
+        dark.P([(s * pin, yf - 0.64, z0), (s * (W - 0.4), yf - 0.64, z0), (s * (W - 0.4), yf - 0.64, zs0), (s * pin, yf - 0.64, zs0)], (0, -1, 0))
+    # gold carved jambs, full height, and the gold valance with a scalloped hem under the sign
+    jx0, jx1 = 2.45, pin
+    for s in (-1, 1):
+        a_, b_ = (jx0, jx1) if s > 0 else (-jx1, -jx0)
+        gold.box(a_, b_, yf - 0.1, yf + 0.06, z0, ze, skip=("-z", "+z", "-y"))
+    dark.P([(-jx0, yf - 0.1, zs0), (jx0, yf - 0.1, zs0), (jx0, yf, zs0), (-jx0, yf, zs0)], (0, 0, -1))
+    hem = [(jx0, zs0), (-jx0, zs0)]
+    nsc = 12
+    for i in range(nsc + 1):
+        x = -jx0 + 2 * jx0 * i / nsc
+        hem.append((x, 3.8 if i % 2 == 0 else 3.95))
+    val = [(-jx0, zs0)] + hem[2:] + [(jx0, zs0)]
+    gold.extrude(val, XZ(0), yf - 0.08, yf + 0.04)
+    # plain name panel (no fake Burmese), gold frame strips
+    maroon.P([(-jx0, yf, zs0), (jx0, yf, zs0), (jx0, yf, ze), (-jx0, yf, ze)], (0, 1, 0))
+    for z_a, z_b in ((zs0 + 0.02, zs0 + 0.14), (ze - 0.14, ze)):
+        gold.box(-jx0, jx0, yf, yf + 0.05, z_a, z_b, skip=("-y",))
+    # eave slab, roof, closed back gable
     gold.box(-3.6, 3.6, yb, yf + 0.35, ze, ze + 0.35, skip=("-y",))
     zb = ze + 0.35
-    # gabled roof behind the pediment
-    roof.P([(-3.5, yb, zb), (-3.5, yf + 0.1, zb), (0, yf + 0.1, 8.9), (0, yb, 8.9)], (-1, 0, 1))
-    roof.P([(3.5, yb, zb), (3.5, yf + 0.1, zb), (0, yf + 0.1, 8.9), (0, yb, 8.9)], (1, 0, 1))
-
-    cream.P([(-3.5, yb, zb), (3.5, yb, zb), (0.0, yb, 8.9)], (0, -1, 0))  # closes the roof's back
-
-    def gable(hw, zb_, zt, teeth):
-        left = []
-        for k in range(teeth + 1):
-            f = k / teeth
-            left.append((-hw + hw * f, zb_ + (zt - zb_) * f))
-            if k < teeth:
-                f2 = (k + 0.5) / teeth
-                left.append((-hw + hw * f2 - 0.22, zb_ + (zt - zb_) * f2 + 0.3))
-        right = [(-x, z) for x, z in left]
-        return [(-hw, zb_), (hw, zb_)] + right[:-1] + [(0.0, zt + 0.6)] + list(reversed(left))[1:]
-    # the pediment: gold plate with a flame crest (photo: eave to crest tip ~4.6 m), red panel, sun disc
-    gold.extrude(gable(3.55, zb, 9.7, 10), XZ(0), yf + 0.05, yf + 0.3)
-    red.extrude([(-3.25, zb + 0.15), (3.25, zb + 0.15), (0.0, 8.05)], XZ(0), yf + 0.3, yf + 0.34, back_face=False)
-    sun = [(0.6 * math.cos(2 * math.pi * k / 16), 6.5 + 0.6 * math.sin(2 * math.pi * k / 16)) for k in range(16)]
-    gold.extrude(sun, XZ(0), yf + 0.34, yf + 0.42, back_face=False)
-    # comb of gold flame fingers above the red panel's apex
-    comb = [(-1.5, 7.65), (1.5, 7.65)]
-    nf = 7
-    for k in range(nf, -1, -1):
-        x = -1.5 + 3.0 * k / nf
-        top = 9.3 - 1.0 * abs(x) / 1.5
-        comb.append((x, top))
-        if k > 0:
-            xm = x - 3.0 / nf / 2
-            comb.append((xm, 9.3 - 1.0 * abs(xm) / 1.5 - 0.45))
-    gold.extrude([(-1.5, 7.65), (1.5, 7.65)] + comb[2:], XZ(0), yf + 0.3, yf + 0.4, back_face=False)
-    # corner flame finials curling out at the eave ends
+    roof.P([(-3.5, yb, zb), (-3.5, yf + 0.04, zb), (0, yf + 0.04, 8.9), (0, yb, 8.9)], (-1, 0, 1))
+    roof.P([(3.5, yb, zb), (3.5, yf + 0.04, zb), (0, yf + 0.04, 8.9), (0, yb, 8.9)], (1, 0, 1))
+    cream.P([(-3.5, yb, zb), (3.5, yb, zb), (0.0, yb, 8.9)], (0, -1, 0))
+    # crest, layer 0: red backboard
+    red.extrude([(-3.45, zb), (3.45, zb), (0.0, 9.4)], XZ(0), yf + 0.05, yf + 0.15)
+    # layer 1: gold carved fingers stepping up to the centre (7 a side + the centre one)
+    nf, hw = 7, 3.45
+    fwid = hw / (nf + 0.5)
+    fingers = []
+    for k in range(nf):
+        x0 = -hw + fwid * k
+        xm = x0 + fwid / 2
+        fingers.append((x0, x0 + fwid, zb + 0.9 + 3.6 * (1 - abs(xm) / hw)))
+    fingers.append((-fwid / 2, fwid / 2, zb + 0.9 + 3.6 + 0.25))
+    for k in range(nf):
+        x1 = hw - fwid * k
+        xm = x1 - fwid / 2
+        fingers.append((x1 - fwid, x1, zb + 0.9 + 3.6 * (1 - abs(xm) / hw)))
+    fingers.sort()
+    gold.extrude(finger_skyline(fingers, zb), XZ(0), yf + 0.15, yf + 0.27)
+    # layer 2: gold ogee frame, layer 3: red ogee field, sun disc on top
+    gold.extrude(ogee(3.25, zb + 0.1, 8.25, tip=0.3), XZ(0), yf + 0.27, yf + 0.36, back_face=False)
+    red.extrude(ogee(2.95, zb + 0.22, 7.85, tip=0.15), XZ(0), yf + 0.36, yf + 0.44, back_face=False)
+    sun = [(0.55 * math.cos(2 * math.pi * k / 16), 6.65 + 0.55 * math.sin(2 * math.pi * k / 16)) for k in range(16)]
+    gold.extrude(sun, XZ(0), yf + 0.44, yf + 0.52, back_face=False)
+    # gold scrolls curling out at the eave ends
     for s in (-1, 1):
-        fl = [(3.55, zb), (4.0, zb), (4.3, zb + 0.6), (4.1, zb + 1.05), (4.25, zb + 1.8), (3.85, zb + 1.2), (3.7, zb + 0.6)]
+        sc = [(3.45, zb), (4.0, zb), (4.3, zb + 0.35), (4.15, zb + 0.8), (4.35, zb + 1.25), (4.1, zb + 1.75), (4.25, zb + 2.2),
+              (3.9, zb + 1.7), (3.95, zb + 1.2), (3.7, zb + 0.8), (3.5, zb + 0.45)]
         if s < 0:
-            fl = [(-x, z) for x, z in reversed(fl)]
-        gold.extrude(fl, XZ(0), yf - 0.25, yf + 0.0)  # behind the pediment plate: no shared volume
+            sc = [(-x, z) for x, z in reversed(sc)]
+        gold.extrude(sc, XZ(0), yf + 0.05, yf + 0.25)
     return {"YgnRenderPainted_Cream": cream, "YgnGlassMosaic_Teal": teal, "YgnPaint_Red": red,
-            "YgnGoldPlate_Trim": gold, "YgnTeakPanel_Door": door, "YgnPaint_RoofRed": roof}
+            "YgnGoldPlate_Trim": gold, "YgnPaint_DarkHall": dark, "YgnPaint_RoofRed": roof, "YgnPaint_Maroon": maroon}
+
+
+def walkway_meshes():
+    """Green-roofed covered walkway from a porch out to the plaza's edge (Esri: 5 spokes ~5.5 m wide to r ~52 m;
+    photo 2: teal roof with a gold fretted eave fringe). Local frame like the porch; ground = 0 beyond the platform."""
+    green, gold, white = MB(), MB(), MB()
+    y0, y1 = 21.05, 52.0
+    ze, zr, hw, t = 3.0, 3.8, 3.0, 0.06
+    for s in (-1, 1):
+        o = [(s * hw, y0, ze), (s * hw, y1, ze), (0, y1, zr), (0, y0, zr)]
+        green.P(o, (s * 0.8, 0, 3.0))
+        green.P([(x, y, z - t) for x, y, z in o], (-s * 0.8, 0, -3.0))
+        green.P([(s * hw, y0, ze - t), (s * hw, y1, ze - t), (s * hw, y1, ze), (s * hw, y0, ze)], (s, 0, 0))
+        green.P([(s * hw, y0, ze), (0, y0, zr), (0, y0, zr - t), (s * hw, y0, ze - t)], (0, -1, 0))
+        green.P([(s * hw, y1, ze), (0, y1, zr), (0, y1, zr - t), (s * hw, y1, ze - t)], (0, 1, 0))
+        # gold fringe board hanging under the eave, scalloped
+        fr = [(y0, ze - t), (y1, ze - t)]
+        n = 30
+        for i in range(n, -1, -1):
+            y = y0 + (y1 - y0) * i / n
+            fr.append((y, ze - t - (0.38 if i % 2 else 0.24)))
+        # plate in the YZ plane at x = s*(hw - 0.05), 0.05 thick
+        frame = (Vector((s * (hw - 0.04), 0, 0)), Vector((0, 1, 0)), Vector((0, 0, 1)), Vector((s, 0, 0)))
+        gold.extrude(fr, frame, -0.06, 0.0)
+        # posts every 4 m from y 24 (outside the platform)
+        for k in range(8):
+            y = 24.0 + 4.0 * k
+            px = s * 2.6
+            zt = ze - t + (zr - ze) * (hw - 2.6) / hw - 0.03
+            white.box(px - 0.09, px + 0.09, y - 0.09, y + 0.09, 0.0, zt, skip=("-z", "+z"))
+    return {"YgnCorrugatedZinc_Green": green, "YgnGoldPlate_Trim": gold, "YgnRenderPainted_White": white}
+
+
+def stair_mesh(bearing):
+    """Red steel stair with hand rails from the arcade roof up the drum to the terrace (photo 2, right of the 2nd window)."""
+    mb = MB()
+    r0, r1 = 12.45, 13.15
+    zb, zt = 5.55, 8.55
+    run = 2.0
+
+    def at(u, r, z):  # u along the tangent (local x), r radius, rotated later by the object
+        return (u, r, z)
+    # stringers (thin slanted plates) at both radii
+    for r in (r0, r1):
+        d = 0.04 if r == r0 else -0.04
+        q = [at(-run / 2, r, zb), at(run / 2, r, zt - 0.2), at(run / 2, r, zt), at(-run / 2, r, zb + 0.2)]
+        mb.P(q, (0, 1 if r == r1 else -1, 0))
+        mb.P([(x, y + d, z) for x, y, z in q], (0, -1 if r == r1 else 1, 0))
+    # treads
+    nt = 10
+    for i in range(1, nt):
+        u = -run / 2 + run * i / nt
+        z = zb + (zt - zb) * i / nt
+        mb.box(u - 0.1, u + 0.1, r0 + 0.04, r1 - 0.04, z - 0.03, z, skip=("-y", "+y"))
+    # hand rails 0.9 m over the stringers + posts
+    for r in (r0 + 0.02, r1 - 0.02):
+        for f in (0.0, 0.5, 1.0):
+            u = -run / 2 + run * f
+            z = zb + (zt - zb) * f + 0.1
+            mb.box(u - 0.02, u + 0.02, r - 0.02, r + 0.02, z + 0.1, z + 0.95, skip=("-z",))
+        a_, b_ = (-run / 2, zb + 1.05), (run / 2, zt + 1.05)
+        mb.P([(a_[0], r - 0.025, a_[1]), (b_[0], r - 0.025, b_[1]), (b_[0], r - 0.025, b_[1] + 0.05), (a_[0], r - 0.025, a_[1] + 0.05)], (0, -1, 0))
+        mb.P([(a_[0], r + 0.025, a_[1]), (b_[0], r + 0.025, b_[1]), (b_[0], r + 0.025, b_[1] + 0.05), (a_[0], r + 0.025, a_[1] + 0.05)], (0, 1, 0))
+        mb.P([(a_[0], r - 0.025, a_[1] + 0.05), (b_[0], r - 0.025, b_[1] + 0.05), (b_[0], r + 0.025, b_[1] + 0.05), (a_[0], r + 0.025, a_[1] + 0.05)], (0, 0, 1))
+    return mb
 
 
 def build():
@@ -583,20 +733,40 @@ def build():
     p7 = part("7 circular hall drum", part7_drum())
     bays, statue = bay_meshes()
     bay_me = {mat: to_mesh("7_bay_" + mat, mb, mat) for mat, mb in bays.items()}
+    leaf_me = {mat: to_mesh("7_leaf_" + mat, mb, mat) for mat, mb in leaf_meshes().items()}
     st_me = to_mesh("7_buddha_YgnGoldLeaf_Bell", statue, "YgnGoldLeaf_Bell")
     win_me = to_mesh("7_window_YgnSteelPainted_Grille", window_mesh(), "YgnSteelPainted_Grille")
-    bay_w = (72.0 - 2 * PORCH_HALF) / 4.0
-    n = 0
-    for b in PORCH_BEARINGS:
+    B = sorted(PORCH_BEARINGS)
+    n = nw = 0
+    for k in range(len(B)):
+        b0 = B[k]
+        span = (B[(k + 1) % len(B)] - b0) % 360.0
+        bay_deg = (span - 2 * PORCH_HALF) / 4.0
+        hb = math.radians(bay_deg / 2.0)
+        sx = math.sin(hb) / math.sin(BAY_HB0)
+        dy = R_ARC * (math.cos(hb) - math.cos(BAY_HB0))
         for j in range(4):
-            ang = b + PORCH_HALF + bay_w * (j + 0.5)
+            ang = b0 + PORCH_HALF + bay_deg * (j + 0.5)
             n += 1
+            rad = math.radians(ang)
+            loc = (dy * math.sin(rad), dy * math.cos(rad), 0.0)
             for mat, me in bay_me.items():
-                add_obj(coll, "7_bay%02d_%s" % (n, mat), me, p7, ang)
-            add_obj(coll, "7_buddha%02d_YgnGoldLeaf_Bell" % n, st_me, p7, ang)
+                ob = add_obj(coll, "7_bay%02d_%s" % (n, mat), me, p7, ang)
+                ob.scale = (sx, 1.0, 1.0)
+                ob.location = loc
+            ob = add_obj(coll, "7_buddha%02d_YgnGoldLeaf_Bell" % n, st_me, p7, ang)
+            ob.location = loc
         for j in range(1, 4):
-            add_obj(coll, "7_window%02d_YgnSteelPainted_Grille" % (len([o for o in coll.objects if "_window" in o.name]) + 1), win_me, p7,
-                    b + PORCH_HALF + bay_w * j)
+            nw += 1
+            ang = b0 + PORCH_HALF + bay_deg * j
+            add_obj(coll, "7_window%02d_YgnSteelPainted_Grille" % nw, win_me, p7, ang)
+            for mat, me in leaf_me.items():
+                add_obj(coll, "7_leaf%02d_%s" % (nw, mat), me, p7, ang)
+    pa = sorted(PORCH_BEARINGS)[(sorted(PORCH_BEARINGS).index(191.0) - 1) % 5]
+    span = (191.0 - pa) % 360.0
+    bay_deg = (span - 2 * PORCH_HALF) / 4.0
+    stair_ang = 191.0 - PORCH_HALF - bay_deg * 2.5
+    add_obj(coll, "7_stair_YgnSteelPainted_Red", to_mesh("7_stair_YgnSteelPainted_Red", stair_mesh(stair_ang), "YgnSteelPainted_Red"), p7, stair_ang)
     porch = porch_meshes()
     p8 = add_empty(coll, "8 entrance porch")
     p8.parent = root
@@ -604,6 +774,12 @@ def build():
     for k, b in enumerate(PORCH_BEARINGS):
         for mat, me in porch_me.items():
             add_obj(coll, "8_porch%d_%s" % (k + 1, mat), me, p8, b)
+    p10 = add_empty(coll, "10 covered walkway")
+    p10.parent = root
+    walk_me = {mat: to_mesh("10_walkway_" + mat, mb, mat) for mat, mb in walkway_meshes().items()}
+    for k, b in enumerate(PORCH_BEARINGS):
+        for mat, me in walk_me.items():
+            add_obj(coll, "10_walkway%d_%s" % (k + 1, mat), me, p10, b)
     p6 = part("6 upper terrace ring", part6_terrace())
     mer = to_mesh("6_merlon_YgnGoldPlate_Trim", merlon_mesh(), "YgnGoldPlate_Trim")
     for i in range(N_MERLON):
@@ -876,7 +1052,7 @@ def check_overlaps(tol=0.02, fix=True, verbose=True):
 
 
 # Camera fitted to Kaba_Aye_Paya_2.jpg (least squares on 14 points, rms 40 px): position, heading, pitch, focal length.
-PHOTO2_FIT = dict(cam=(7.774, -47.632, 1.6), yaw=-5.727, pitch=16.258, f_px=1962.2)
+PHOTO2_FIT = dict(cam=(4.821, -49.955, 1.6), yaw=-1.584, pitch=15.737, f_px=1993.4)  # v2 fit (porch at 191 deg)
 
 
 def set_photo2_fit():

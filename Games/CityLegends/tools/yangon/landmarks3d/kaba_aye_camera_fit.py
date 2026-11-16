@@ -1,6 +1,6 @@
 import numpy as np, math
 from scipy.optimize import least_squares
-b=187.0; PH=10.87; bw=(72-2*PH)/4
+b=191.0; PH=10.87; bw=(79-2*PH)/4  # v2: porch 191, the next porch to the right at 112 (Esri)
 def rot(p,bear):
     t=math.radians(-bear); c,s=math.cos(t),math.sin(t)
     return np.array([c*p[0]-s*p[1], s*p[0]+c*p[1], p[2]])
@@ -11,9 +11,9 @@ add([0,0,34],(833,45)); add([0,0,10.4],(810,712))
 for lp,u in [((2.45,21,5.25),(235,945)),((2.45,21,4.35),(240,1005)),((-2.45,21,5.25),(590,940)),((-2.45,21,4.35),(588,998)),((0,21.42,6.5),(422,862)),((0,21.2,10.3),(450,605))]:
     add(rot(lp,b),u)
 for j,u in enumerate([(805,1005),(1070,1000),(1295,1010),(1440,1040)]):
-    add(polar(b-PH-bw*(j+.5),17.62,4.95),u)
+    add(polar(b-PH-bw*(j+.5),17.5*math.cos(math.radians(bw/2))+0.12,5.02),u)
 for j,u in [(1,(955,940)),(2,(1195,967))]:
-    add(polar(b-PH-bw*j,12.35,6.375),u)
+    add(polar(b-PH-bw*j,12.35,6.725),u)
 P=np.array(P);U=np.array(U,float)
 def proj(cam,yaw,pitch,f,P):
     cp,sp=math.cos(pitch),math.sin(pitch); cy,sy=math.cos(yaw),math.sin(yaw)
