@@ -411,7 +411,8 @@ def sakura_pants():
         d = ImageDraw.Draw(a)
         d.rectangle(P(0, 91, 256, 128), fill=(250, 248, 249, 255))      # white sneakers
         d.rectangle(P(0, 119, 256, 128), fill=(214, 212, 216, 255))
-        d.arc(P(outer + 6, 98, outer + 58, 130), 200, 340, fill=PINK, width=int(2.4 * S))   # pink side stripe
+        for k in (0, 6):                                                # slanted double side stripe
+            d.line(P(outer + 14 + k, 116, outer + 30 + k, 96), fill=PINK, width=int(2.6 * S))
         front = 192 if layout is RLIMB_STRIP else 0
         for k in range(3):
             y = 95 + k * 5
