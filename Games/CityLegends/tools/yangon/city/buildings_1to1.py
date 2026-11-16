@@ -135,6 +135,16 @@ LANDMARK_SITES_BY_TAG["P8"] = {
     "kandawgyi_palace": dict(osm=[], pts=[], circles=[(96.16194, 16.79472, 70.0)], grow=0.0),
     "yangon_zoo": dict(osm=[], areas=[377827695], pts=[], grow=2.0),
 }
+# batch 3: Inno City (5 towers + mall), Kyaik Ka San Pagoda, Thuwunna Stadium + National Indoor Stadium 1, Golden City
+# (not in OSM: the Wikipedia point, a circle round the 7 towers)
+LANDMARK_SITES_BY_TAG["P9"] = {
+    "inno_city": dict(osm=["o1516826581", "o1516826582", "o1516826585", "o1516826586", "o1516826587", "o1523975148"], pts=[], grow=10.0),
+}
+LANDMARK_SITES_BY_TAG["P10"] = {"kyaik_ka_san": dict(osm=["o1528171622"], pts=[], grow=8.0)}
+LANDMARK_SITES_BY_TAG["P11"] = {
+    "thuwunna": dict(osm=["o180596940"], areas=[15059554], pts=[], grow=6.0),
+    "golden_city": dict(osm=[], pts=[], circles=[(96.16361, 16.82683, 110.0)], grow=0.0),
+}
 LANDMARK_SITES = LANDMARK_SITES_BY_TAG.get(TAG, {})
 # earlier pilots this one meets (geo.PILOT_SEAMS): their buildings by the shared edge are kept, never doubled, and no
 # compound wall is drawn along the shared edge twice
@@ -1209,9 +1219,16 @@ def main():
             continue
         # split past MAX_TRIS
         T = m.T
-        for k0 in range(0, len(T), MAX_TRIS * 3):
+        # (P10) a cell's panes can reach past 2,048 studs (big buildings at its edge): chunk by 1,024-stud squares of the
+        # triangle middles first, so every mesh stays inside a MeshPart's limit
+        lo_, hi_ = m.box()
+        sq = 1024 if max(hi_[a] - lo_[a] for a in (0, 2)) > 2040 else 1e9   # only cells that need it (more meshes)
+        groups = defaultdict(list)
+        for t in range(0, len(T), 3):
+            groups[tuple(int(sum(m.P[T[t + q]][a] for q in range(3)) / 3 // sq) for a in (0, 2))] += T[t:t + 3]
+        chunks = [g[k0:k0 + MAX_TRIS * 3] for g in groups.values() for k0 in range(0, len(g), MAX_TRIS * 3)]
+        for k_, idx in enumerate(chunks):
             sub = Mesh()
-            idx = T[k0:k0 + MAX_TRIS * 3]
             for t in range(0, len(idx), 3):
                 i0, i1, i2 = idx[t], idx[t + 1], idx[t + 2]
                 sub.P += [m.P[i0], m.P[i1], m.P[i2]]
@@ -1224,7 +1241,7 @@ def main():
             cen = [(lo[i] + hi[i]) / 2 for i in range(3)]
             siz = [max(0.05, hi[i] - lo[i]) for i in range(3)]
             assert max(siz) <= 2048, (grp, cell, siz)
-            cid = "c%sx%ss%d" % (("n%d" % -cell[0]) if cell[0] < 0 else cell[0], ("n%d" % -cell[1]) if cell[1] < 0 else cell[1], k0 // (MAX_TRIS * 3))
+            cid = "c%sx%ss%d" % (("n%d" % -cell[0]) if cell[0] < 0 else cell[0], ("n%d" % -cell[1]) if cell[1] < 0 else cell[1], k_)
             named_cells.append((code(grp, cid, cen, siz), sub))
             cell_tris[grp] += sub.tris
     cell_files = []

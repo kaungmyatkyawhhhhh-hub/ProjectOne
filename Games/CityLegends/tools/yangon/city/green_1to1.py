@@ -90,6 +90,11 @@ LANDMARK_BOXES = {
     # P6: its two placed pagodas (no catalogue landmark in P6)
     "P6": [(28752.9, 36209.0, 28814.4, 36270.5), (27116.2, 36321.5, 27229.4, 36434.6)],
 }
+# (up to batch 3) a district not listed above takes its empty landmark lots + pagodas from buildings_1to1's stats
+if TAG not in LANDMARK_BOXES:
+    _st = os.path.join(geo.BUILD, "city_1to1", "buildings_%s" % TAG, "stats.json")
+    if os.path.exists(_st):
+        LANDMARK_BOXES[TAG] = [tuple(v) for v in json.load(open(_st)).get("landmark_sites_empty", {}).values()]
 AVENUES = {"University Avenue Road", "Inya Road", "U Wisara Road", "New University Avenue Road", "Kan Yeiktha Road",
            "Natmauk Road", "Ahlone Road", "Zoological Garden Road", "Shwe Gone Dine Road", "Bawdi Avenue"}
 MAINS = {"Kabar Aye Pagoda Road", "Pyay Road", "Insein Road", "Waizayandar Road", "Bayint Naung Road"}

@@ -158,7 +158,12 @@ function M.shells()
 		shellF.Name = "Shell"
 		shellF.Parent = b
 		local n = 0
-		for _, cell in SS[M.tag .. "Place_3"].Shell:GetChildren() do
+		local cells = SS[M.tag .. "Place_3"].Shell:GetChildren()
+		local p4 = SS:FindFirstChild(M.tag .. "Place_4") -- big districts: shells in two packs (place_pack.py)
+		for _, c in (p4 and p4.Shell:GetChildren() or {}) do
+			table.insert(cells, c)
+		end
+		for _, cell in cells do
 			for _, q in cell:GetChildren() do
 				if q:IsA("BasePart") then
 					local w = string.split(q.Name, "|")
@@ -234,7 +239,7 @@ end
 
 function M.cleanup()
 	local n = 0
-	for _, nm in { M.tag .. "Place_1", M.tag .. "Place_2", M.tag .. "Place_3" } do
+	for _, nm in { M.tag .. "Place_1", M.tag .. "Place_2", M.tag .. "Place_3", M.tag .. "Place_4" } do
 		local f = SS:FindFirstChild(nm)
 		if f then
 			f:Destroy()

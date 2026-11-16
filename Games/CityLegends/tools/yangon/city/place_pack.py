@@ -143,9 +143,12 @@ def shell_items(ref):
                     % (ref(), "%s|%s|%s" % (code, w[1], facade_of(ptree, x, z, code, sy)), cframe(x, y, z, yaw), sx, sy, sz,
                        (0xFF << 24) | (r << 16) | (g << 8) | b, attrs({"T": w[1]}), tex))
                 n += 1
-    body = "".join('<Item class="Model" referent="%s"><Properties><string name="Name">Cell_%d_%d</string></Properties>%s</Item>'
-                   % (ref(), i, j, "".join(parts)) for (i, j), parts in sorted(cells.items()))
-    shell = '<Item class="Folder" referent="%s"><Properties><string name="Name">Shell</string></Properties>%s</Item>' % (ref(), body)
+    models = ['<Item class="Model" referent="%s"><Properties><string name="Name">Cell_%d_%d</string></Properties>%s</Item>'
+              % (ref(), i, j, "".join(parts)) for (i, j), parts in sorted(cells.items())]
+    # (up to batch 3) packs over ~10 MB timed out on the Open Cloud upload: then the shells go in halves (packs 3 and 4)
+    halves = [models] if sum(len(m) for m in models) < 10_000_000 else [models[:len(models) // 2], models[len(models) // 2:]]
+    shell = ['<Item class="Folder" referent="%s"><Properties><string name="Name">Shell</string></Properties>%s</Item>' % (ref(), "".join(h))
+             for h in halves]
     return shell, "\n".join(roofs) + "\n", n, len(cells)
 
 
@@ -176,7 +179,8 @@ def main():
     if os.path.exists(pg):
         items2.append(string_value(ref, "PagodaData", open(pg, encoding="utf-8").read()))
     write(2, items2)
-    write(3, [shell])
+    for k, sh in enumerate(shell):
+        write(3 + k, [sh])
     print("shell parts %d in %d cells, roofs %d" % (n, nc, roofs.count("\n")))
 
 

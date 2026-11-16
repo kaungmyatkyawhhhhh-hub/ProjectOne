@@ -135,10 +135,18 @@ PILOT_LL = {
     # batch 1 south-east + batch 3's south-west tip: Kandawgyi Lake (Karaweik, the boardwalk), the Zoo, Chaukhtatgyi and
     # Ngahtatgyi (placed models on TEMP plates); seams with P7 (west), P3 (south), P1 (the 200 m corner)
     'P8': (96.159, 16.787, 96.190, 16.812),
+    # batch 3 (east): P9 north-west (Mayangon / Yankin north, Inno City; seam P2 west), P10 north-east (Thingangyun north,
+    # Kyaik Ka San), P11 south-west (Yankin, Thuwunna, Golden City; seams P1 / P2 / P8 / P9), P12 south-east
+    # (Thingangyun / South Okkalapa to the batch edge; seams P10 / P11)
+    'P9': (96.165, 16.834, 96.190, 16.864),
+    'P10': (96.190, 16.834, 96.219, 16.864),
+    'P11': (96.159, 16.812, 96.190, 16.834),
+    'P12': (96.190, 16.804, 96.219, 16.834),
 }
 # a later pilot joins the earlier ones it touches: its roads that cross the shared edge end exactly on the earlier
 # district's road ends (position, direction, height: roadnet.pilot_seams), its lakes run on (terrain.py)
-PILOT_SEAMS = {'P2': ('P1',), 'P4': ('P1', 'P2'), 'P5': ('P4',), 'P6': ('P4', 'P1', 'P3'), 'P7': ('P1', 'P6', 'P3'), 'P8': ('P7', 'P3', 'P1')}
+PILOT_SEAMS = {'P2': ('P1',), 'P4': ('P1', 'P2'), 'P5': ('P4',), 'P6': ('P4', 'P1', 'P3'), 'P7': ('P1', 'P6', 'P3'), 'P8': ('P7', 'P3', 'P1'), 'P9': ('P2',), 'P10': ('P9',),
+               'P11': ('P1', 'P2', 'P8', 'P9'), 'P12': ('P10', 'P11', 'P8')}
 for _t, (_lo0, _la0, _lo1, _la1) in PILOT_LL.items():
     BATCH_LL[_t] = [(_lo0, _la1), (_lo1, _la1), (_lo1, _la0), (_lo0, _la0)]
 
