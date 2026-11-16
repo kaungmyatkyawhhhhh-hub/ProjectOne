@@ -1,0 +1,543 @@
+{
+ "imagery": "Esri World Imagery z17 (1.14 m/px), Vantor Vivid Advanced 11 Feb 2026 (dry season)",
+ "whole box land": {
+  "ha": 21710.2,
+  "canopy_pct": 39.3,
+  "roofs_pct": 6.5,
+  "open_ground": {
+   "tree canopy": 40.3,
+   "green grass": 7.8,
+   "dry grass / bare earth": 30.9,
+   "paved / grey": 14.4,
+   "deep shadow": 5.4
+  }
+ },
+ "residential (all)": {
+  "ha": 8351.1,
+  "canopy_pct": 46.2,
+  "roofs_pct": 7.8,
+  "open_ground": {
+   "tree canopy": 47.8,
+   "green grass": 5.1,
+   "dry grass / bare earth": 18.6,
+   "paved / grey": 19.6,
+   "deep shadow": 7.5
+  }
+ },
+ "industrial": {
+  "ha": 1600.8,
+  "canopy_pct": 32.4,
+  "roofs_pct": 12.1,
+  "open_ground": {
+   "tree canopy": 34.8,
+   "green grass": 7.0,
+   "dry grass / bare earth": 33.6,
+   "paved / grey": 16.6,
+   "deep shadow": 6.4
+  }
+ },
+ "commercial / retail": {
+  "ha": 203.8,
+  "canopy_pct": 31.5,
+  "roofs_pct": 15.3,
+  "open_ground": {
+   "tree canopy": 34.1,
+   "green grass": 6.4,
+   "dry grass / bare earth": 30.1,
+   "paved / grey": 23.7,
+   "deep shadow": 4.2
+  }
+ },
+ "schools": {
+  "ha": 195.7,
+  "canopy_pct": 51.1,
+  "roofs_pct": 11.2,
+  "open_ground": {
+   "tree canopy": 53.7,
+   "green grass": 8.8,
+   "dry grass / bare earth": 16.8,
+   "paved / grey": 9.8,
+   "deep shadow": 9.4
+  }
+ },
+ "religious compounds (pagodas, monasteries)": {
+  "ha": 164.0,
+  "canopy_pct": 44.1,
+  "roofs_pct": 11.1,
+  "open_ground": {
+   "tree canopy": 46.8,
+   "green grass": 5.1,
+   "dry grass / bare earth": 18.9,
+   "paved / grey": 19.3,
+   "deep shadow": 7.7
+  }
+ },
+ "hospitals": {
+  "ha": 86.9,
+  "canopy_pct": 42.5,
+  "roofs_pct": 28.0,
+  "open_ground": {
+   "tree canopy": 51.7,
+   "green grass": 7.2,
+   "dry grass / bare earth": 17.7,
+   "paved / grey": 14.9,
+   "deep shadow": 6.7
+  }
+ },
+ "universities / colleges": {
+  "ha": 260.8,
+  "canopy_pct": 50.7,
+  "roofs_pct": 11.4,
+  "open_ground": {
+   "tree canopy": 54.4,
+   "green grass": 9.4,
+   "dry grass / bare earth": 16.6,
+   "paved / grey": 9.7,
+   "deep shadow": 8.5
+  }
+ },
+ "military / cantonment": {
+  "ha": 158.5,
+  "canopy_pct": 40.1,
+  "roofs_pct": 3.4,
+  "open_ground": {
+   "tree canopy": 40.7,
+   "green grass": 16.1,
+   "dry grass / bare earth": 29.3,
+   "paved / grey": 5.9,
+   "deep shadow": 6.8
+  }
+ },
+ "parks / gardens": {
+  "ha": 279.3,
+  "canopy_pct": 59.5,
+  "roofs_pct": 6.1,
+  "open_ground": {
+   "tree canopy": 61.3,
+   "green grass": 14.0,
+   "dry grass / bare earth": 12.2,
+   "paved / grey": 5.5,
+   "deep shadow": 6.7
+  }
+ },
+ "golf courses": {
+  "ha": 232.0,
+  "canopy_pct": 38.4,
+  "roofs_pct": 0.1,
+  "open_ground": {
+   "tree canopy": 38.4,
+   "green grass": 29.0,
+   "dry grass / bare earth": 18.3,
+   "paved / grey": 5.4,
+   "deep shadow": 7.6
+  }
+ },
+ "pitches / sports grounds": {
+  "ha": 96.3,
+  "canopy_pct": 19.2,
+  "roofs_pct": 3.5,
+  "open_ground": {
+   "tree canopy": 19.2,
+   "green grass": 16.0,
+   "dry grass / bare earth": 44.5,
+   "paved / grey": 9.7,
+   "deep shadow": 2.8
+  }
+ },
+ "wetland / scrub / grassland": {
+  "ha": 140.7,
+  "canopy_pct": 62.8,
+  "roofs_pct": 0.0,
+  "open_ground": {
+   "tree canopy": 62.8,
+   "green grass": 8.7,
+   "dry grass / bare earth": 14.5,
+   "paved / grey": 6.3,
+   "deep shadow": 7.0
+  }
+ },
+ "wood / forest (OSM)": {
+  "ha": 108.7,
+  "canopy_pct": 67.2,
+  "roofs_pct": 5.3,
+  "open_ground": {
+   "tree canopy": 69.3,
+   "green grass": 8.7,
+   "dry grass / bare earth": 7.2,
+   "paved / grey": 3.8,
+   "deep shadow": 11.0
+  }
+ },
+ "cemetery": {
+  "ha": 7.9,
+  "canopy_pct": 58.9,
+  "roofs_pct": 0.0,
+  "open_ground": {
+   "tree canopy": 58.9,
+   "green grass": 20.8,
+   "dry grass / bare earth": 12.4,
+   "paved / grey": 3.5,
+   "deep shadow": 4.3
+  }
+ },
+ "farmland": {
+  "ha": 80.0,
+  "canopy_pct": 42.6,
+  "roofs_pct": 0.6,
+  "open_ground": {
+   "tree canopy": 42.6,
+   "green grass": 17.1,
+   "dry grass / bare earth": 34.6,
+   "paved / grey": 2.7,
+   "deep shadow": 2.8
+  }
+ },
+ "University of Yangon (main campus)": {
+  "ha": 60.0,
+  "canopy_pct": 53.6,
+  "roofs_pct": 16.6,
+  "open_ground": {
+   "tree canopy": 59.9,
+   "green grass": 12.2,
+   "dry grass / bare earth": 14.9,
+   "paved / grey": 7.1,
+   "deep shadow": 5.6
+  }
+ },
+ "University (Hlaing campus / RIT side, OSM 1549540341)": {
+  "ha": 88.2,
+  "canopy_pct": 49.6,
+  "roofs_pct": 9.6,
+  "open_ground": {
+   "tree canopy": 52.5,
+   "green grass": 11.0,
+   "dry grass / bare earth": 18.4,
+   "paved / grey": 10.0,
+   "deep shadow": 6.1
+  }
+ },
+ "People's Park": {
+  "ha": 65.9,
+  "canopy_pct": 55.1,
+  "roofs_pct": 6.2,
+  "open_ground": {
+   "tree canopy": 57.3,
+   "green grass": 17.7,
+   "dry grass / bare earth": 14.9,
+   "paved / grey": 6.9,
+   "deep shadow": 3.1
+  }
+ },
+ "Kandawgyi Park (incl. lake)": {
+  "ha": 50.9,
+  "canopy_pct": 63.5,
+  "roofs_pct": 7.6,
+  "open_ground": {
+   "tree canopy": 66.7,
+   "green grass": 13.1,
+   "dry grass / bare earth": 9.1,
+   "paved / grey": 4.1,
+   "deep shadow": 6.9
+  }
+ },
+ "Thein Gottara Park": {
+  "ha": 39.8,
+  "canopy_pct": 60.1,
+  "roofs_pct": 19.4,
+  "open_ground": {
+   "tree canopy": 65.3,
+   "green grass": 13.4,
+   "dry grass / bare earth": 9.4,
+   "paved / grey": 9.1,
+   "deep shadow": 2.8
+  }
+ },
+ "Shwedagon Pagoda compound": {
+  "ha": 5.9,
+  "canopy_pct": 17.3,
+  "roofs_pct": 53.0,
+  "open_ground": {
+   "tree canopy": 15.7,
+   "green grass": 4.7,
+   "dry grass / bare earth": 17.4,
+   "paved / grey": 62.1,
+   "deep shadow": 0.0
+  }
+ },
+ "Inya Lake Pyay Road Bank (park)": {
+  "ha": 4.2,
+  "canopy_pct": 57.1,
+  "roofs_pct": 0.0,
+  "open_ground": {
+   "tree canopy": 57.1,
+   "green grass": 29.4,
+   "dry grass / bare earth": 7.3,
+   "paved / grey": 6.0,
+   "deep shadow": 0.3
+  }
+ },
+ "Okkala Golf Course": {
+  "ha": 75.6,
+  "canopy_pct": 36.5,
+  "roofs_pct": 0.2,
+  "open_ground": {
+   "tree canopy": 36.6,
+   "green grass": 36.6,
+   "dry grass / bare earth": 18.9,
+   "paved / grey": 3.4,
+   "deep shadow": 4.5
+  }
+ },
+ "Military Golf Course": {
+  "ha": 34.2,
+  "canopy_pct": 43.4,
+  "roofs_pct": 0.0,
+  "open_ground": {
+   "tree canopy": 43.4,
+   "green grass": 28.1,
+   "dry grass / bare earth": 14.4,
+   "paved / grey": 2.6,
+   "deep shadow": 11.4
+  }
+ },
+ "Golf course N (Mingaladon side)": {
+  "ha": 80.6,
+  "canopy_pct": 43.0,
+  "roofs_pct": 0.1,
+  "open_ground": {
+   "tree canopy": 43.0,
+   "green grass": 22.0,
+   "dry grass / bare earth": 15.8,
+   "paved / grey": 7.4,
+   "deep shadow": 9.2
+  }
+ },
+ "Cantonment N of Inya (military 1274955959)": {
+  "ha": 62.0,
+  "canopy_pct": 49.1,
+  "roofs_pct": 4.0,
+  "open_ground": {
+   "tree canopy": 50.2,
+   "green grass": 19.6,
+   "dry grass / bare earth": 15.0,
+   "paved / grey": 4.5,
+   "deep shadow": 10.6
+  }
+ },
+ "Yangon Technological University": {
+  "ha": 54.0,
+  "canopy_pct": 53.7,
+  "roofs_pct": 6.8,
+  "open_ground": {
+   "tree canopy": 56.0,
+   "green grass": 4.9,
+   "dry grass / bare earth": 12.6,
+   "paved / grey": 10.4,
+   "deep shadow": 15.6
+  }
+ },
+ "Monkey Point (military)": {
+  "ha": 32.1,
+  "canopy_pct": 45.9,
+  "roofs_pct": 2.6,
+  "open_ground": {
+   "tree canopy": 46.7,
+   "green grass": 8.1,
+   "dry grass / bare earth": 23.6,
+   "paved / grey": 8.2,
+   "deep shadow": 11.6
+  }
+ },
+ "National Races Village": {
+  "ha": 56.2,
+  "canopy_pct": 66.5,
+  "roofs_pct": 2.0,
+  "open_ground": {
+   "tree canopy": 67.0,
+   "green grass": 6.8,
+   "dry grass / bare earth": 8.1,
+   "paved / grey": 3.4,
+   "deep shadow": 14.5
+  }
+ },
+ "Downtown grid (Kyauktada/Pabedan/Botataung)": {
+  "ha": 417.4,
+  "canopy_pct": 27.8,
+  "roofs_pct": 33.0,
+  "open_ground": {
+   "tree canopy": 33.3,
+   "green grass": 5.7,
+   "dry grass / bare earth": 24.1,
+   "paved / grey": 23.4,
+   "deep shadow": 12.4
+  }
+ },
+ "Golden Valley / Bahan (leafy villas)": {
+  "ha": 215.6,
+  "canopy_pct": 50.2,
+  "roofs_pct": 11.4,
+  "open_ground": {
+   "tree canopy": 52.8,
+   "green grass": 6.9,
+   "dry grass / bare earth": 17.3,
+   "paved / grey": 16.2,
+   "deep shadow": 4.2
+  }
+ },
+ "Kamayut / Hledan (mixed dense)": {
+  "ha": 166.0,
+  "canopy_pct": 40.4,
+  "roofs_pct": 16.2,
+  "open_ground": {
+   "tree canopy": 44.2,
+   "green grass": 8.6,
+   "dry grass / bare earth": 18.7,
+   "paved / grey": 24.1,
+   "deep shadow": 3.6
+  }
+ },
+ "Sanchaung (dense flats)": {
+  "ha": 154.1,
+  "canopy_pct": 35.6,
+  "roofs_pct": 20.9,
+  "open_ground": {
+   "tree canopy": 39.7,
+   "green grass": 7.9,
+   "dry grass / bare earth": 23.5,
+   "paved / grey": 22.8,
+   "deep shadow": 4.4
+  }
+ },
+ "Thingangyun / South Okkalapa (low-rise suburb)": {
+  "ha": 471.8,
+  "canopy_pct": 41.0,
+  "roofs_pct": 5.4,
+  "open_ground": {
+   "tree canopy": 41.8,
+   "green grass": 4.1,
+   "dry grass / bare earth": 19.6,
+   "paved / grey": 22.5,
+   "deep shadow": 10.5
+  }
+ },
+ "Tamwe / Pazundaung (dense)": {
+  "ha": 333.5,
+  "canopy_pct": 37.0,
+  "roofs_pct": 6.4,
+  "open_ground": {
+   "tree canopy": 38.2,
+   "green grass": 3.8,
+   "dry grass / bare earth": 22.6,
+   "paved / grey": 22.7,
+   "deep shadow": 11.3
+  }
+ },
+ "Mayangone / 8-mile (suburb N)": {
+  "ha": 261.0,
+  "canopy_pct": 49.4,
+  "roofs_pct": 3.2,
+  "open_ground": {
+   "tree canopy": 50.2,
+   "green grass": 6.0,
+   "dry grass / bare earth": 19.3,
+   "paved / grey": 15.6,
+   "deep shadow": 7.1
+  }
+ },
+ "Inya Lake shore 0-15 m": {
+  "ha": 39.5,
+  "canopy_pct": 64.8,
+  "roofs_pct": 0.9,
+  "open_ground": {
+   "tree canopy": 65.0,
+   "green grass": 19.2,
+   "dry grass / bare earth": 7.3,
+   "paved / grey": 3.3,
+   "deep shadow": 5.0
+  }
+ },
+ "Inya Lake shore 15-50 m": {
+  "ha": 79.6,
+  "canopy_pct": 56.3,
+  "roofs_pct": 3.1,
+  "open_ground": {
+   "tree canopy": 57.0,
+   "green grass": 14.6,
+   "dry grass / bare earth": 15.5,
+   "paved / grey": 6.8,
+   "deep shadow": 5.4
+  }
+ },
+ "Inya Lake shore 50-150 m": {
+  "ha": 154.8,
+  "canopy_pct": 47.3,
+  "roofs_pct": 7.1,
+  "open_ground": {
+   "tree canopy": 49.1,
+   "green grass": 9.7,
+   "dry grass / bare earth": 22.3,
+   "paved / grey": 12.7,
+   "deep shadow": 5.2
+  }
+ },
+ "Inya Lake water surface": {
+  "ha": 270.5,
+  "classes": {
+   "tree canopy": 91.8,
+   "green grass": 6.5,
+   "dry grass / bare earth": 0.1,
+   "paved / grey": 0.3,
+   "roof (coloured)": 0.0,
+   "water": 0.0,
+   "deep shadow": 1.3
+  }
+ },
+ "Kandawgyi Lake shore 0-15 m": {
+  "ha": 14.9,
+  "canopy_pct": 65.7,
+  "roofs_pct": 2.3,
+  "open_ground": {
+   "tree canopy": 66.8,
+   "green grass": 15.0,
+   "dry grass / bare earth": 6.3,
+   "paved / grey": 3.5,
+   "deep shadow": 8.3
+  }
+ },
+ "Kandawgyi Lake shore 15-50 m": {
+  "ha": 28.2,
+  "canopy_pct": 60.7,
+  "roofs_pct": 8.7,
+  "open_ground": {
+   "tree canopy": 64.6,
+   "green grass": 12.3,
+   "dry grass / bare earth": 11.3,
+   "paved / grey": 5.0,
+   "deep shadow": 6.7
+  }
+ },
+ "Kandawgyi Lake shore 50-150 m": {
+  "ha": 53.9,
+  "canopy_pct": 50.4,
+  "roofs_pct": 10.5,
+  "open_ground": {
+   "tree canopy": 53.0,
+   "green grass": 12.9,
+   "dry grass / bare earth": 16.1,
+   "paved / grey": 9.8,
+   "deep shadow": 7.3
+  }
+ },
+ "Kandawgyi Lake water surface": {
+  "ha": 52.5,
+  "classes": {
+   "tree canopy": 71.0,
+   "green grass": 24.5,
+   "dry grass / bare earth": 0.9,
+   "paved / grey": 0.6,
+   "roof (coloured)": 0.1,
+   "water": 0.0,
+   "deep shadow": 2.8
+  }
+ }
+}
