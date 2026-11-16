@@ -905,8 +905,9 @@
     408
    ],
    "spread": 195,
-   "width": 88,
-   "twist_deg": -35
+   "width": 112,
+   "twist_deg": -35,
+   "len_k": 1.25
   },
   {
    "name": "Front",
@@ -919,8 +920,9 @@
     412
    ],
    "spread": 195,
-   "width": 88,
-   "twist_deg": -35
+   "width": 112,
+   "twist_deg": -35,
+   "len_k": 1.25
   }
  ],
  "palette": {

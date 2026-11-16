@@ -138,8 +138,10 @@ def jaw(x):
     return (top, bot, max(6, 0.9 * HW(x)))
 red = lambda p: jit(P['red'], p.index, 0.08)
 def jaw_col(p):
-    # top faces = cream inner-lip band, underside = belly, sides green
-    if p.normal.z > 0.5 and p.center.x > X(CORNER - 5): return jit(P['teeth'], p.index, 0.05) if p.normal.z < 0.97 else jit(P['red'], p.index, 0.05)
+    # top faces: a thin cream lip line along the outer edge, mouth red inside; underside = belly, sides green
+    if p.normal.z > 0.5 and p.center.x > X(CORNER - 5):
+        jhw = 0.9 * HW((p.center.x + D['len_m'] / 2) / S + X0) * S
+        return jit(P['teeth'], p.index, 0.05) if abs(p.center.y) > 0.72 * jhw else jit(P['red'], p.index, 0.05)
     if p.normal.z < -0.75: return jit(P['belly'], p.index, 0.05)
     return body_colour('LowerJaw', lambda q: Vector((q.center.x, 0, 99)))(p)
 loft('LowerJaw', xs_between(JX0, JX1, 10), jaw, colour=jaw_col)
@@ -176,7 +178,7 @@ def eye_obj():
         mid = (lo + hi) / 2
         if ring_pt(E['x'], top, bot, hw, mid).z > Z(E['y']): lo = mid
         else: hi = mid
-    verts, faces, cols = [], [], []
+    verts, faces, pv, pf = [], [], [], []   # lens (glows: own Neon part in Roblox) and pupil (dark, body mesh)
     for side in (1, -1):
         p = ring_pt(E['x'], top, bot, hw, lo); p.y *= side
         n = Vector((0, p.y, p.z - (Z(top) + Z(bot)) / 2)).normalized()
@@ -194,12 +196,12 @@ def eye_obj():
             k2 = (k + 1) % K
             faces += [(b0 + k, b0 + k2, b0 + K + k2, b0 + K + k), (b0 + K + k, b0 + K + k2, ap), (b0 + k2, b0 + k, bc)]
         # slit pupil: thin diamond prism just proud of the lens
-        q0 = len(verts); pw, ph = 2.2 * S, E['h'] * 0.45 * S
+        q0 = len(pv); pw, ph = 2.2 * S, E['h'] * 0.45 * S
         for dn in (h * 0.8, h * 1.05):
-            for du, dv in ((0, ph), (pw, 0), (0, -ph), (-pw, 0)): verts.append(p + n * dn + u * du + v * dv)
-        faces += [(q0, q0 + 1, q0 + 2, q0 + 3), (q0 + 7, q0 + 6, q0 + 5, q0 + 4)] + [(q0 + i, q0 + (i + 1) % 4, q0 + 4 + (i + 1) % 4, q0 + 4 + i) for i in range(4)]
-    o = make('M6_Eye', verts, faces, lambda p: (P['pupil'] if (p.index % (3 * 10 + 6)) >= 30 else P['eye']), glow=True)
-    return o
+            for du, dv in ((0, ph), (pw, 0), (0, -ph), (-pw, 0)): pv.append(p + n * dn + u * du + v * dv)
+        pf += [(q0, q0 + 1, q0 + 2, q0 + 3), (q0 + 7, q0 + 6, q0 + 5, q0 + 4)] + [(q0 + i, q0 + (i + 1) % 4, q0 + 4 + (i + 1) % 4, q0 + 4 + i) for i in range(4)]
+    make('M6_EyePupil', pv, pf, P['pupil'])
+    return make('M6_Eye', verts, faces, P['eye'], glow=True)
 eye_obj()
 
 # ---------- dorsal crystals (each its own object, largest mid-back) ----------
@@ -252,7 +254,7 @@ for f in D['flippers']:
         R = ring_pt(rx, top, bot, hw, math.radians(118)); R.y *= side
         R = R - Vector((0, side * 18 * S, -6 * S))               # sink the root into the body
         Tp = Vector((X(f['tip'][0]), side * f['spread'] * S, Z(f['tip'][1])))
-        A = Tp - R; Ah = A.normalized()
+        A = (Tp - R) * f.get('len_k', 1.0); Ah = A.normalized()   # len_k: owner asked for bigger flippers
         W = Vector((1, 0, 0)); W = (W - Ah * W.dot(Ah)).normalized()
         W = (Matrix.Rotation(math.radians(f.get('twist_deg', 0)) * side, 3, Ah) @ W).normalized(); N = Ah.cross(W).normalized()
         secs = ((0.0, 0.55, 14), (0.25, 1.0, 11), (0.55, 0.95, 8), (0.82, 0.6, 5), (1.0, 0.15, 2))

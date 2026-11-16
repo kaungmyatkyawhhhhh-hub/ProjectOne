@@ -29,13 +29,13 @@ def join(objs, name):
     bpy.context.view_layer.objects.active = objs[0]
     with bpy.context.temp_override(active_object=objs[0], selected_editable_objects=objs, selected_objects=objs): bpy.ops.object.join()
     o = objs[0]; o.name = name; o.data.name = name; return o
-glow = [o for o in parts if 'DorsalCrystal' in o.name]
-body = join([o for o in parts if o not in glow], NAME)
-crys = join(glow, NAME + '_Crystals')
+glow = [o for o in parts if 'DorsalCrystal' in o.name]; eyes = [o for o in parts if o.name == 'M6_Eye']
+body = join([o for o in parts if o not in glow and o not in eyes], NAME)
+crys = join(glow, NAME + '_Crystals'); eye = join(eyes, NAME + '_Eyes')
 
 # ---------- palette atlas: every face's flat colour gets its own cell ----------
 cols = {}
-for o in (body, crys):
+for o in (body, crys, eye):
     ca = o.data.color_attributes['Col']
     for p in o.data.polygons:
         c = tuple(int(round(v * 255)) for v in ca.data[p.loop_start].color_srgb[:3]); cols.setdefault(c, len(cols))
@@ -51,7 +51,7 @@ im.filepath_raw = tex_path; im.file_format = 'PNG'; im.save()
 mat = bpy.data.materials.new(NAME + '_mat'); mat.use_nodes = True; nt = mat.node_tree
 tn = nt.nodes.new('ShaderNodeTexImage'); tn.image = im; tn.interpolation = 'Closest'
 bs = next(n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'); nt.links.new(tn.outputs['Color'], bs.inputs['Base Color'])
-for o in (body, crys):
+for o in (body, crys, eye):
     me = o.data; uv = me.uv_layers.new(name='UVMap'); ca = me.color_attributes['Col']
     for p in me.polygons:
         i = cols[tuple(int(round(v * 255)) for v in ca.data[p.loop_start].color_srgb[:3])]; r, q = divmod(i, per)
@@ -75,7 +75,7 @@ j = arm.edit_bones.new('Jaw'); j.head = (X(hinge_x), 0, Z(line(H['lower_lip'], h
 j.tail = (X(H['jaw_bot'][-1][0]), 0, Z(line(H['lower_lip'], H['jaw_bot'][-1][0]))); j.parent = arm.edit_bones['Spine0']
 with bpy.context.temp_override(active_object=rig, object=rig): bpy.ops.object.mode_set(mode='OBJECT')
 seg = (xs[0] - xs[-1]) / NB; maxinf = 0
-for o in (body, crys):
+for o in (body, crys, eye):
     o.parent = rig; md = o.modifiers.new('Armature', 'ARMATURE'); md.object = rig
     gs = [o.vertex_groups.new(name=f'Spine{i}') for i in range(NB)]; jg = o.vertex_groups.new(name='Jaw')
     jaw = o.data.attributes['jaw'].data
@@ -99,13 +99,13 @@ for f in range(0, 25, 3):
 rig.animation_data.action = None
 
 for o in sc.objects: o.select_set(False)
-for o in (body, crys, rig): o.select_set(True)
+for o in (body, crys, eye, rig): o.select_set(True)
 bpy.context.view_layer.objects.active = rig
 fbx = os.path.join(OUT, NAME + '.fbx')
-with bpy.context.temp_override(selected_objects=[body, crys, rig], active_object=rig):
+with bpy.context.temp_override(selected_objects=[body, crys, eye, rig], active_object=rig):
     bpy.ops.export_scene.fbx(filepath=fbx, use_selection=True, object_types={'ARMATURE', 'MESH'}, add_leaf_bones=False, bake_anim=False,
         path_mode='COPY', embed_textures=True, apply_unit_scale=True, use_armature_deform_only=False, mesh_smooth_type='FACE')
-tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in (body, crys))
+tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in (body, crys, eye))
 print('EXPORT', fbx, os.path.getsize(fbx), 'bytes; tris', tris, 'max influences', maxinf)
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(OUT, NAME + '_rigged.blend'))
 
