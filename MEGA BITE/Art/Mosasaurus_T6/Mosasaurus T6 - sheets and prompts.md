@@ -31,3 +31,18 @@ Checks:
 Create a new image: a full orthographic TURNAROUND model sheet of the same creature, matching the first attached image and the exploded diagram you just made exactly (same Roblox low-poly faceted style, flat shading, same colours: dark mossy green with darker green facets and raised hexagonal scale plates on the back, yellow-green belly, 15 glowing cyan ice-crystal dorsal spikes largest at mid-back, glowing yellow slit eye, dark red mouth interior, cream-white teeth, pointed tail tip, 4 paddle flippers). Body straight, mouth slightly open as in the exploded sheet. Layout on a 1536x1024 landscape canvas: TOP ROW the full SIDE view, nose pointing RIGHT, spanning nearly the full width. BOTTOM LEFT the TOP view (looking straight down), nose pointing RIGHT, exactly the same length as the side view and directly under it, showing the flippers spread out and the crystal row down the spine. BOTTOM RIGHT the FRONT view (looking straight at the nose), showing the head, both eyes, the flippers spread, and the crystals sticking up. No labels, no text. Flat MAGENTA #FF00FF background, no shadows, no perspective, no glow halo bleeding onto the background.
 
 ![[mosasaurus_turnaround_v1.png]]
+
+---
+# Build v1 (2026-11-16)
+Built in Blender 5.2 by `mosa6_build.py` from `mosa6_data.json` (measured from the turnaround by `analyse.py` + `data.py`). Rebuild from the script, never hand-edit.
+- Run headless: `blender -b --factory-startup -P mosa6_build.py -- mosa6_data.json <out_dir> render <out>.blend`
+- In the owner's Blender: scene **Mosasaurus T6**, collection `Mosasaurus_T6` (exec the script with `ARGS=[data, out_dir]`).
+- **29 parts, 5,568 triangles**, length 6.4 m. Part names follow the exploded sheet: TailTip, TailBase, Torso, Neck, UpperSkull, LowerJaw, MouthInterior, Upper/LowerTeethRow, Eye, Front/BackFlipper Left/Right, DorsalCrystal_01-14, ScalePlates. Materials: `M6_Body` (vertex colour `Col`), `M6_Glow` (crystals and eye, emission).
+- 14 crystals, not 15: both turnaround views show 14.
+
+Checks (`compare.py`, `gates.py`, pictures in `checks/`):
+- Silhouette IoU: **side 0.922** (passes 0.90), top 0.864, front 0.707.
+- Top and front miss because the sheet's views disagree on the flippers: the side puts the tips further back, the top further forward, and the front draws them broad and low. The build puts the tips halfway and twists each paddle 35 deg. Owner to say which view wins.
+- Gates PASS: zero open edges, every part faces outward (signed-volume fix for the thin flippers), every flipper and crystal rooted in the body.
+
+Not done yet: rig (8 spine bones + Jaw) and Swim clip, baking colours into one texture, FBX export, Studio import, and which game it goes in.

@@ -1,0 +1,41 @@
+# hard gates: open edges, outward normals per island, flippers and crystals rooted in the body
+import bpy, bmesh
+from mathutils.bvhtree import BVHTree
+from mathutils import Vector
+objs=[o for o in bpy.data.objects if o.name.startswith('M6_')]
+bad=0
+for o in objs:
+    bm=bmesh.new(); bm.from_mesh(o.data)
+    ob=[e for e in bm.edges if not e.is_manifold]
+    seen=set(); inward=0; islands=0
+    for f0 in bm.faces:
+        if f0.index in seen: continue
+        isl=[]; stack=[f0]; seen.add(f0.index)
+        while stack:
+            f=stack.pop(); isl.append(f)
+            for e in f.edges:
+                for g in e.link_faces:
+                    if g.index not in seen: seen.add(g.index); stack.append(g)
+        islands+=1
+        c=sum((v.co for f in isl for v in f.verts),Vector())/sum(len(f.verts) for f in isl)
+        n_in=sum(1 for f in isl if f.normal.dot(f.calc_center_median()-c)<0)
+        if n_in>len(isl)*0.25: inward+=1
+    if ob or inward: bad+=1; print('FAIL',o.name,'open',len(ob),'inward islands',inward,'of',islands)
+    bm.free()
+def bvh(name):
+    bm=bmesh.new(); bm.from_mesh(bpy.data.objects[name].data); return BVHTree.FromBMesh(bm)
+body=[bvh(n) for n in ('M6_TailBase','M6_Torso','M6_Neck','M6_UpperSkull')]
+def inside(p):
+    for t in body:
+        n=0; q=p.copy()
+        for _ in range(20):
+            h=t.ray_cast(q,Vector((0,0,1)))
+            if h[0] is None: break
+            n+=1; q=h[0]+Vector((0,0,1e-4))
+        if n%2: return True
+    return False
+for o in objs:
+    if 'Flipper' in o.name or 'DorsalCrystal' in o.name:
+        k=sum(inside(v.co) for v in o.data.vertices)
+        if k<3: bad+=1; print('FAIL not rooted',o.name,k)
+print('parts',len(objs),'GATES','PASS' if not bad else 'FAIL %d'%bad)
