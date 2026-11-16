@@ -541,3 +541,7 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Cause:** `green_1to1.py` painted terrain Concrete on OSM paved / commercial areas and on noise-edged "forecourts"; smooth terrain blends any painted patch into a soft blob.
 - **Fix:** every non-grass land voxel in P1-P3 repainted to plain Grass (`YangonGreen1to1.unblob`; road beds, water / mud edges and P3's quay and piers kept); the tool paints no terrain concrete any more. Note: [[City Legends/2026-11-17 Concrete blobs on the grass removed (P1-P3)]].
 - **Rule:** never show a paved surface by painting terrain. Paved ground is a part or mesh slab with straight edges at the right height; terrain stays one clean material.
+
+## City Legends 1:1 roads: "in google maps its entirely different" (17 Nov 2026)
+- **Cause:** the 1:1 rebuild skipped a step from the owner's 13 Nov plan: a street plan picture (our roads over the real map and satellite) that the owner approves **before** building.
+- **Rule:** every district's road network gets an overlay picture plus an automatic mismatch check against OSM and satellite, approved by the owner before it is built.
