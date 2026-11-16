@@ -69,7 +69,7 @@ PHOTO = {
     'w354454988': dict(shift=(0.0, -28.0), scheme='gold', src=E + ': gold and green dome 28 m south of the OSM footprint pick'),
     'w393490899': dict(w=14.0, scheme='whitegold', src=E + ': white 37 m terrace with 4 teal shrines, small gold middle'),
     'w397352635': dict(w=26.0, scheme='whitegold', src=E + ': gold stupa ~24 m on a 43 m white terrace'),
-    'w405364332': dict(w=10.0, shift=(-25.0, 9.0), shape='sq', scheme='gold', src=E + ': gold stupa NW of the pink-roofed hall'),
+    'w405364332': dict(w=9.0, shift=(-20.0, 9.0), shape='sq', scheme='gold', src=E + ': gold stupa NW of the pink-roofed hall (5 m east of the satellite spot in Studio: clear of the P1 compound walls)'),
     'w407771486': dict(src=E + ': gold stupa, outline fits'),
     'w425781831': dict(scheme='whitetop', src=E + ': small white zedi by the railway'),
     'w425804832': dict(skip=E + ': grey-roofed hall, no stupa seen'),

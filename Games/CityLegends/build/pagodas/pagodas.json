@@ -2053,12 +2053,12 @@
    "name": "အောင်မင်းဂေါင် ဓါတ်ပေါင်းစုစေတီ",
    "name_my": "",
    "pick": "pow",
-   "lon": 96.143434,
+   "lon": 96.143481,
    "lat": 16.817613,
-   "x": 31097.64,
+   "x": 31112.63,
    "z": 30791.55,
-   "w": 10.0,
-   "h": 19.0,
+   "w": 9.0,
+   "h": 17.1,
    "shape": "sq",
    "yaw": 2.8,
    "cls": "S",
@@ -2067,13 +2067,13 @@
     "W": "footprint m96143668_16817532 in compound (94 m)",
     "H": "ratio 1.9 x W",
     "scheme": "guess: named pagoda",
-    "photo": "Esri z19: gold stupa NW of the pink-roofed hall"
+    "photo": "Esri z19: gold stupa NW of the pink-roofed hall (5 m east of the satellite spot in Studio: clear of the P1 compound walls)"
    },
    "tags": {
     "amenity": "place_of_worship",
     "religion": "buddhist"
    },
-   "ground_y": 89.15,
+   "ground_y": 89.11,
    "ground_span": 0.11,
    "in_p1": true,
    "place_now": true

@@ -43,6 +43,7 @@ created: 2026-11-16
 | What was invented, and the fixes | [[2026-11-16 Audit - invented content in the Yangon map]] |
 | Chaukhtatgyi + Ngahtatgyi halls (1:1 models, walkable insides; Ngahtatgyi position fixed) | [[2026-11-16 Chaukhtatgyi and Ngahtatgyi 3D models]] |
 | Maha Wizaya Pagoda (1:1 model, walkable hollow chamber with the star-sign dome; 51.5 m, 36k tris, in Studio) | [[2026-11-16 Maha Wizaya Pagoda 3D model]] |
+| Ordinary pagodas and stupas (48; 26 placed round P1) | [[2026-11-16 Pagoda generator]] |
 
 ## Already live in the current map (16 Nov, version 957)
 - Yangon's pale hazy midday sky and warm daylight.
