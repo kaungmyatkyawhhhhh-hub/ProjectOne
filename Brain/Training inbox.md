@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 12:13 [dashboard, unverified] Built from scratch in Figma. (topic: tiktok)
 - 2026-11-16 12:12 [dashboard, unverified] Roblox uses Ropilot AI. (topic: tiktok)
 - 2026-11-16 12:10 [dashboard, unverified] You can create an animated Roblox Settings button in Figma and bring it into Roblox Studio with Framewisp. (topic: tiktok)
 - 2026-11-16 12:09 [dashboard, unverified] This ends so many Roblox devs and nearly ended my dev career. (topic: tiktok)
