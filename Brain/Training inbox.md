@@ -7,6 +7,8 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 09:32 [dashboard, unverified] Claude is a popular Roblox creator. (topic: tiktok)
+- 2026-11-16 09:32 [dashboard, unverified] Viewport vs Render in Blender can affect performance and workflow. (topic: tiktok)
 - 2026-11-16 09:31 [dashboard, unverified] I use noise or voronoi texture for all my experiments. (topic: tiktok)
 - 2026-11-16 09:29 [dashboard, unverified] The post contains a tip about making a successful Roblox game. (topic: tiktok)
 - 2026-11-16 09:28 [dashboard, unverified] The caption does not contain any concrete tips or insights about game development, Roblox, Blender, or AI tools. (topic: tiktok)
