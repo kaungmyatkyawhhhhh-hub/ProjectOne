@@ -74,6 +74,9 @@ LOOK = {
     "FLP": ("SmoothPlastic", (192, 46, 56), "", 0.1),      # red lips, red jewels
     "FPK": ("SmoothPlastic", (232, 142, 142), "", 0.05),   # pink inner ears, nails
     "FSO": ("SmoothPlastic", (214, 128, 112), "", 0.03),   # salmon soles
+    "FEW": ("SmoothPlastic", (250, 250, 250), "", 0.3),    # white glass eyeball / highlight
+    "FSH": ("SmoothPlastic", (218, 215, 208), "", 0.1),    # baked soft shading (light)
+    "FS2": ("SmoothPlastic", (192, 188, 181), "", 0.08),   # baked soft shading (darker)
 }
 
 

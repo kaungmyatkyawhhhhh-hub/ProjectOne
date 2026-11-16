@@ -274,6 +274,101 @@ def face_paint(L, style):
     return None
 
 
+# ---------------------------------------------------------------- Chaukhtatgyi head v3 (coordinator, 16 Nov: "still cartoonish")
+V3 = dict(eyey=-0.03, eyex=0.355, ew=0.27, eh=0.10, brow=0.235, nosey=-0.40, mouth=-0.57, lw=0.15)
+
+
+def face_sculpt_v3(P, N, H):
+    L = H.local(P)
+    x, y, z = L[:, 0], L[:, 1], L[:, 2]
+    ax = np.abs(x)
+    front = np.clip((z - 0.15) / 0.35, 0, 1)
+    g = lambda cx, cy, sx, sy: np.exp(-(((ax - cx) / sx) ** 2 + ((y - cy) / sy) ** 2))
+    gc = lambda cy, sx, sy: np.exp(-((x / sx) ** 2 + ((y - cy) / sy) ** 2))
+    v = V3
+    d = np.zeros(len(P))
+    d += -0.045 * g(v["eyex"], v["eyey"], 0.30, 0.14)              # eye sockets
+    d += 0.022 * g(v["eyex"], v["eyey"], 0.22, 0.065)               # eyeball / lids
+    d += 0.022 * g(0.38, v["brow"] - 0.02, 0.32, 0.05)              # brow ridge
+    d += 0.060 * g(0.44, -0.36, 0.26, 0.26)                          # full cheeks
+    d += 0.030 * g(0.30, -0.62, 0.16, 0.14)                          # lower cheeks
+    ridge = np.exp(-((x / 0.06) ** 2)) * np.clip((0.12 - y) / 0.5, 0, 1) * np.clip((y - v["nosey"] + 0.02) / 0.05, 0, 1)
+    d += 0.12 * ridge                                                # straight nose ridge
+    d += 0.065 * gc(v["nosey"] + 0.01, 0.075, 0.05)                 # tip
+    d += 0.040 * g(0.10, v["nosey"] - 0.005, 0.045, 0.04)           # wings
+    d += -0.020 * g(0.062, v["nosey"] - 0.04, 0.03, 0.02)          # nostrils
+    d += -0.014 * gc(v["nosey"] - 0.085, 0.035, 0.03)               # philtrum
+    lw = v["lw"]
+    d += 0.032 * gc(v["mouth"] + 0.025, lw, 0.025)
+    d += 0.038 * gc(v["mouth"] - 0.03, lw * 0.85, 0.03)
+    d += -0.012 * np.exp(-((x / (lw * 1.1)) ** 2 + ((y - (v["mouth"] + 0.03 * (x / lw) ** 2)) / 0.008) ** 2))
+    d += -0.012 * g(lw * 1.05, v["mouth"] + 0.025, 0.03, 0.03)
+    d += -0.010 * gc(v["mouth"] - 0.09, 0.10, 0.025)
+    d += 0.060 * gc(-0.86, 0.26, 0.12)                               # chin
+    return d * H.rad[1] * front
+
+
+def face_paint_v3(L):
+    """v3 face paint: white glass eye with iris and highlight, winged liner, thin blue lid, high thin brows,
+    small red lips with a dark line, and soft grey baked shading (FSH light, FS2 darker)."""
+    x, y, z = L
+    if z < 0.2:
+        return None
+    ax = abs(x)
+    v = V3
+    ew, eh, ex, ey = v["ew"], v["eh"], v["eyex"], v["eyey"]
+    if (x / 0.03) ** 2 + ((y - 0.27) / 0.05) ** 2 < 1:
+        return "FGB"
+    by = v["brow"] - 1.3 * (ax - 0.39) ** 2
+    if 0.16 < ax < 0.66 and abs(y - by) < 0.017 * (1.2 - abs(ax - 0.40) * 1.5):
+        return "FBK"
+    t = (ax - ex) / ew
+    tilt = 0.03 * t
+    if abs(t) < 1.6:
+        k = max(0.0, 1 - t * t)
+        top = ey + tilt + eh * k ** 0.75
+        bot = ey + tilt - eh * 0.72 * k ** 0.75
+        if abs(t) < 1 and bot < y < top:
+            ix, iy = ex - 0.01, ey + 0.035
+            dx, dy = (ax - ix), (y - iy) * (3.3 / 2.35)
+            if dx * dx + dy * dy < 0.098 ** 2:
+                hx, hy = ix - 0.03, iy + 0.012
+                if (ax - hx) ** 2 + ((y - hy) * 1.4) ** 2 < 0.016 ** 2:
+                    return "FEW"
+                return "FBK"
+            return "FEW"
+        if abs(t) < 1.04 and top <= y < top + 0.026 + 0.008 * max(0.0, t):
+            return "FBK"
+        if 0.95 <= t < 1.5:
+            wy = ey + tilt + 0.02 + (t - 0.95) * 0.13
+            if abs(y - wy) < 0.02 * (1.55 - t) / 0.6 + 0.002:
+                return "FBK"
+        if -0.2 < t < 1.0 and bot - 0.011 < y <= bot:
+            return "FBK"
+        if abs(t) < 1.0 and top + 0.026 <= y < top + 0.026 + 0.026 * k ** 0.5:
+            return "FLD"
+        if abs(t) < 1.05 and bot - 0.04 < y <= bot - 0.011:
+            return "FSH"
+    lw = v["lw"]
+    if ax < lw:
+        q = (x / lw) ** 2
+        ym = v["mouth"] + 0.03 * q
+        bow = 0.008 * math.cos(math.pi * x / 0.05) if ax < 0.05 else 0.0
+        upper = ym + 0.032 * (1 - q) ** 0.8 + bow
+        lower = ym - 0.045 * (1 - q) ** 0.7
+        if abs(y - ym) < 0.0055:
+            return "FMR"
+        if lower < y < upper:
+            return "FLP"
+        if lower - 0.03 < y <= lower and ax < 0.09:
+            return "FSH"
+    if ((ax - lw * 1.05) / 0.03) ** 2 + ((y - v["mouth"] - 0.03) / 0.03) ** 2 < 1:
+        return "FS2"
+    if ax < 0.06 and v["nosey"] - 0.12 < y < v["nosey"] - 0.07:
+        return "FSH"
+    return None
+
+
 # ================================================================================================ CHAUKHTATGYI
 def chauk():
     """Figure frame: u from the head end (0) to the soles (65), y to the front (face side), z up from the dais top.
@@ -313,22 +408,22 @@ def chauk():
     ell(lhand, F(30.3, 3.6, 6.7), (0.8, 0.25, 0.25), q=Quaternion((0, 0, 1), math.radians(35)))
     # --- head + neck (one family), tilted so the crown leans to the head end; face to +y
     tilt = math.radians(17)
-    HC = Vector((6.9, 0.45, 8.6))
+    HC = Vector((6.9, 0.45, 8.85))
     Rv = Vector((math.cos(tilt), 0, math.sin(tilt)))          # across the face (towards the feet = +u), tilted
     Uv = Vector((-math.sin(tilt), 0, math.cos(tilt)))
     Fv = Vector((0, 1, 0))
-    rad = (2.45, 3.05, 2.55)
-    head = fam("Head", 0.045)
+    rad = (2.35, 3.3, 2.5)
+    head = fam("Head", 0.04)
     qh = Matrix((Rv, Fv, Uv)).transposed().to_quaternion()     # local x=R, y=F, z=U
     ell(head, HC, (rad[0], rad[2], rad[1]), q=qh)
-    ell(head, HC - Fv * 0.35 + Uv * 0.5, (rad[0] * 0.98, rad[2] * 0.95, rad[1] * 0.85), q=qh)   # skull, back and top
-    ell(head, HC + Fv * 0.75 - Uv * 1.95, (1.3, 1.05, 0.95), q=qh)     # chin / jaw
+    ell(head, HC - Fv * 0.35 + Uv * 0.75, (rad[0] * 0.97, rad[2] * 0.95, rad[1] * 0.85), q=qh)   # tall skull
+    ell(head, HC + Fv * 0.75 - Uv * 2.15, (1.35, 1.1, 1.0), q=qh)     # chin / jaw (fuller)
     for s in (-1, 1):
-        ell(head, HC + Fv * 0.8 + Rv * s * 1.0 - Uv * 0.95, (0.85, 0.9, 1.15), q=qh)   # cheeks
-        # long ears
-        ec = HC + Rv * s * 2.35 - Fv * 0.25 - Uv * 0.6
-        ell(head, ec, (0.28, 0.65, 1.55), q=qh)
-        ell(head, ec - Uv * 1.6 + Rv * s * 0.08, (0.26, 0.5, 0.9), q=qh)
+        ell(head, HC + Fv * 0.8 + Rv * s * 1.0 - Uv * 1.05, (0.95, 0.95, 1.2), q=qh)   # full cheeks
+        ec = HC + Rv * s * 2.25 - Fv * 0.25 - Uv * 0.5               # long ears with an open lobe
+        ell(head, ec, (0.28, 0.66, 1.6), q=qh)
+        ell(head, ec - Uv * 1.65 + Rv * s * 0.08, (0.27, 0.52, 0.95), q=qh)
+        ell(head, ec - Uv * 1.75 + Rv * s * 0.12 + Fv * 0.12, (0.2, 0.2, 0.42), q=qh, neg=True)
     # neck down to the shoulders
     limb(head, [(HC - Uv * 2.1 + Fv * 0.1, 1.55), (F(9.6, 0.3, 4.6), 1.6), (F(11.4, 0.2, 3.2), 1.7)])
     H = HeadFrame(HC, Rv, Uv, Fv, rad)
@@ -392,14 +487,16 @@ def chauk():
         emit(b, lambda c, n: "FPK" if (name == "LHand" and c.x > 33.6) else None, xf)
 
     hb = to_bm("Head")
-    displace(hb, lambda P, N: face_sculpt(P, N, H, "chauk"))
-    # hair: fine grooves on the black cap
-    def hair_grooves(P, N):
+    displace(hb, lambda P, N: face_sculpt_v3(P, N, H))
+    # hair: dark tight curls (a bump lattice) above the crown and at the back
+    def hair_curls(P, N):
         L = H.local(P)
-        hair = (L[:, 1] > 0.42) & (L[:, 2] < 0.45)
-        return np.where(hair, 0.015 * np.sin(np.arctan2(L[:, 0], L[:, 2]) * 60), 0.0)
-    displace(hb, hair_grooves)
-    hb = decimate(hb, 6500)
+        hair = (L[:, 1] > 0.93) | ((L[:, 2] < -0.55) & (L[:, 1] > -0.15))
+        k = 2 * math.pi / 0.38
+        b = np.sin(P[:, 0] * k) * np.sin(P[:, 1] * k + 0.7) * np.sin(P[:, 2] * k + 1.3)
+        return np.where(hair, 0.07 * np.clip(b + 0.2, 0, None), 0.0)
+    displace(hb, hair_curls)
+    hb = decimate(hb, 8500)
 
     def head_cls(c, n):
         L = H.local(np.array(c[:]))[0]
@@ -407,13 +504,12 @@ def chauk():
         # inner ears pink (front face of the ear, inside its rim)
         if abs(x) > 0.93 and -0.5 < z < 0.15 and -1.05 < y < 0.3 and n.dot(Fv) > 0.55:
             return "FPK"
-        if y > 0.36:
+        if y > 0.44:
             return "FBK"
         if z < -0.25 and y > -0.15 and abs(x) < 0.9:
             return "FBK"
-
-        return face_paint(L, "chauk")
-    refine(hb, head_cls, levels=4)
+        return face_paint_v3(L)
+    refine(hb, head_cls, levels=5)
     H.bvh = BVHTree.FromBMesh(hb)
     emit(hb, head_cls, xf)
 
@@ -425,15 +521,17 @@ def chauk():
         emit(b, None, xf, default="FSO")
 
     # ---------------- crown: a gold band round the forehead and sides, scalloped top, pointed flap by each ear
-    crown_band(H, xf, th0=-118, th1=118, ylo=0.30, yhi=0.58, flap=92, off=0.06)
-    for k in range(15):
-        th = math.radians(-100 + 200 * k / 14)
-        yy = 0.44
-        r = max(0.05, 1 - yy * yy) ** 0.5
-        p, nv = surface_hit(H, r * math.sin(th), yy, r * math.cos(th))
-        jewel(p + nv * 0.2, 0.09, "FLP" if k % 2 else "FLD", xf)
-    # lashes on the upper liner
-    for s in (-1, 1):
+    crown_band(H, xf, th0=-118, th1=118, ylo=0.33, yhi=0.70, flap=92, off=0.09, petals=(11, 0.17))
+    crown_band(H, xf, th0=-116, th1=116, ylo=0.325, yhi=0.38, flap=999, off=0.16, petals=(0, 0), thick=0.07)   # lower rim
+    crown_band(H, xf, th0=-114, th1=114, ylo=0.62, yhi=0.655, flap=999, off=0.16, petals=(0, 0), thick=0.06)  # upper rim
+    for row, (yy, n, r0, grp) in enumerate(((0.515, 19, 0.11, "FLP"), (0.585, 27, 0.06, "FLD"))):
+        for k in range(n):
+            th = math.radians(-104 + 208 * k / (n - 1))
+            r = max(0.05, 1 - yy * yy) ** 0.5
+            p, nv = surface_hit(H, r * math.sin(th), yy, r * math.cos(th))
+            jewel(p + nv * (0.17 + r0 * 0.4), r0, grp if (k % 2 == 0 or row == 1) else "FGB", xf)
+    # (v3: no lashes, the long winged liner carries the eye)
+    for s in ():
         for k in range(11):
             t = -0.6 + 1.5 * k / 10
             ex = s * (0.36 + 0.25 * t)
@@ -532,14 +630,20 @@ def stick(p0, p1, w, grp, xf):
             GROUPS.setdefault(grp, []).append([pts[::-1] if MIRROR[0] else pts, [xf(n, direction=True)] * 3])
 
 
-def crown_band(H, xf, th0, th1, ylo, yhi, flap, off, grp="FGB", n=120, thick=0.12):
+def crown_band(H, xf, th0, th1, ylo, yhi, flap, off, grp="FGB", n=160, thick=0.12, petals=(0, 0.035)):
     """A band on the head ellipsoid (offset outward) between local heights ylo..yhi (front), angle th0..th1 (deg, 0 = face)."""
     bm = bmesh.new()
     rows = []
     for i in range(n + 1):
         th = math.radians(th0 + (th1 - th0) * i / n)
         dth = math.degrees(th)
-        top = yhi + 0.035 * math.cos(math.radians(dth * 14)) + 0.30 * math.exp(-((abs(dth) - flap) / 9.0) ** 2)
+        pc, pa = petals
+        if pc:
+            ph = (dth / 208.0 * pc * 2 + 0.5) % 1.0          # one pointed lotus petal per period
+            petal = pa * max(0.0, 1 - abs(ph - 0.5) * 2) ** 1.8 + 0.03 * max(0.0, math.cos(math.radians(dth * pc * 6)))
+        else:
+            petal = 0.0
+        top = yhi + petal + 0.30 * math.exp(-((abs(dth) - flap) / 9.0) ** 2)
         bot = ylo + 0.08 * (abs(dth) / 90.0) ** 2
         ring = []
         for y in (bot, top):

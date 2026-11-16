@@ -1,8 +1,9 @@
--- Chaukhtatgyi placer (bahan_buddhas3d.py), asset 102279438796873
-local NAME, ASSET = "Chaukhtatgyi", 102279438796873
+-- Chaukhtatgyi placer (bahan_buddhas3d.py), asset 129935172115845
+local NAME, ASSET = "Chaukhtatgyi", 129935172115845
 local LOOK = {
   CEL = {"SmoothPlastic", 236, 236, 230, "", 0},
   FBK = {"SmoothPlastic", 22, 22, 26, "", 0.04},
+  FEW = {"SmoothPlastic", 250, 250, 250, "", 0.3},
   FGB = {"SmoothPlastic", 222, 172, 64, "", 0.18},
   FGO = {"SmoothPlastic", 204, 164, 86, "", 0.12},
   FLD = {"SmoothPlastic", 170, 205, 230, "", 0.05},
@@ -10,6 +11,8 @@ local LOOK = {
   FLR = {"SmoothPlastic", 150, 160, 150, "", 0.15},
   FMR = {"SmoothPlastic", 112, 30, 38, "", 0.05},
   FPK = {"SmoothPlastic", 232, 142, 142, "", 0.05},
+  FS2 = {"SmoothPlastic", 192, 188, 181, "", 0.08},
+  FSH = {"SmoothPlastic", 218, 215, 208, "", 0.1},
   FSK = {"SmoothPlastic", 240, 238, 232, "", 0.15},
   FSO = {"SmoothPlastic", 214, 128, 112, "", 0.03},
   GLD = {"Metal", 226, 222, 245, "YgnGoldLeaf", 0},

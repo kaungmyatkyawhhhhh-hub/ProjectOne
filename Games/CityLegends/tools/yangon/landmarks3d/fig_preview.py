@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 COL = {"FSK": (250, 250, 246), "FGO": (205, 165, 90), "FGB": (225, 180, 70), "FMR": (110, 30, 36), "FBK": (20, 20, 24),
-       "FLD": (160, 200, 225), "FLP": (200, 50, 60), "FPK": (230, 140, 140), "FSO": (214, 128, 112)}
+       "FLD": (160, 200, 225), "FLP": (200, 50, 60), "FPK": (230, 140, 140), "FSO": (214, 128, 112), "FEW": (248, 248, 248), "FSH": (214, 212, 206), "FS2": (190, 186, 180)}
 fig, out, views = sys.argv[1], os.path.abspath(sys.argv[2]), json.loads(sys.argv[3])
 d = json.load(open(fig))["groups"]
 data = {"look": {g: COL.get(g, (200, 200, 200)) for g in d}, "tris": {g: [t[0] for t in v] for g, v in d.items()}}

@@ -189,3 +189,36 @@ The Visual folders were swapped, and collision and plates are unchanged. Older i
   - Next step: a darker grey shading paint in the eye sockets and under the nose, a white highlight in each glass eye, and a stronger nose ridge.
 - **Ngahtatgyi:** the proportions and face now follow the sheet. Missing: the jewelled collar and the chest-band filigree (the bands are plain raised gold), the shoulder flaps, the crown's filigree tiers, and the carved scrolls on the flame leaves.
 - **Both:** the robe folds are procedural ripples, not the sheet's sculpted drapery.
+
+## Chaukhtatgyi head v3 (16 Nov; the coordinator: "still reads cartoonish")
+The coordinator said Ngahtatgyi v2 is good and stays as it is. Only Chaukhtatgyi's head was redone, in `buddha_figures_blender.py` (`V3`, `face_sculpt_v3`, `face_paint_v3`).
+
+**What changed:**
+- **Head shape:** a longer oval with a taller skull, and fuller cheeks and chin.
+- **Ears:** long, with an open lobe (a negative metaball) and pink inner ears.
+- **Crown:** sits high, as a tall band with 11 pointed lotus petals on its upper edge and raised lower and upper rims. It has two jewel rows: red alternating with gold, and small blue. Dark tight curls (a bump lattice) show above it.
+- **Eyes:**
+  - Shape: calm almond eyes, a white glass eyeball (group FEW), and a large dark iris tucked under the upper lid with a small white highlight.
+  - Lines: a thick upper liner sweeping out into a long black wing, a thin lower liner and a thin blue lid band.
+  - Brows: a high, thin black arch.
+  - The lashes were removed.
+- **Nose and lips:**
+  - Nose: modelled as geometry, with a straight ridge, a tip, wings and shallow nostril hollows.
+  - Lips: small and red with a slight smile, and a dark maroon line between them.
+- **Baked shading:** soft grey regions on the same surface (FSH light grey 218, 215, 208; FS2 darker 192, 188, 181) under the eyes, in the philtrum and at the mouth corners.
+- **Removed:** the grey on the nose sides and round the whole eye. In Studio's flat light they read as drawn outlines.
+- **Paint edges** are split 5 levels deep, so the outlines are crisp. 0 flicker pairs.
+
+**Iterations:** 4 Blender passes compared at the photo 1 camera and head-on, then 2 Studio passes. The live asset is **129935172115845** (v6 = 114990156484588).
+
+**Triangles:** the figure is 57,888, the hall 70,954. That is over the 40k figure budget; the face paint needs the denser mesh.
+
+**Pictures**, in `Games/CityLegends/build/landmarks/chaukhtatgyi/`:
+- `compare_face_v3.png` (face crop: photo 1 | game, PlayLight 13)
+- `compare_face_v3_sheet.png`
+- `ingame_head_v3_photo1.jpg`, `ingame_head_v3_close.jpg`
+
+**Still differs:**
+- The real head is seen near profile in photo 1, with a sharper nose and deeper set eyes. Ours is softer and flatter.
+- The crown is a ribbed band with petals and jewel balls, not the photo's filigree.
+- The mouth-corner grey patches are visible close up.
