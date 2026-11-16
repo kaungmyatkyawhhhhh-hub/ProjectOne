@@ -35,9 +35,13 @@ The 9 lots left empty by the P3 district build, each built at real size from its
 | Maha Bandula Park + Independence Monument | park way/129485365 | A paved circle and a stepped round platform. A white drum with 3 gold bands. A 46 m obelisk with a pyramidion and 5 fins round its foot. The lawns are the terrain's grass. | 46 m | 0 |
 
 ## Not built yet (honest list)
-- Interiors: the Strand lobby, the Central Station hall and the Bogyoke Market halls all have photos, but the buildings are closed blocks for now.
+- Interiors: the Central Station hall and the Bogyoke Market halls have photos, but they are still closed blocks.
+- **Strand lobby (walkable, from photos 2 and 3):** an open porch on 6 pillars, then a teak-framed door into an 18 x 14 m lobby with cream panelled walls, a dado rail and teak doors. It has a white coffered ceiling, 4 ceiling fans and a chandelier with warm PointLights, a marble floor with a teak border, and 16 wicker armchairs round 4 tables. The collision leaves the lobby open.
 - The chinthe statues round the Independence Monument.
 - City Hall's peacock and naga mouldings.
 - The High Court's central second dome.
 - Bogyoke Market's real hall layout: it is 4 parallel halls, not the real plan.
 - Studio placement: see the Step 6 progress entry in the rescale plan.
+
+## In the main place (16 Nov, version 1094)
+All 9 landmarks are in `Workspace.Yangon1to1.Landmarks`, each with `Visual` (Precise render fidelity) and `Collision`. Asset ids are in `Games/CityLegends/build/landmarks/dt_assets.json`. The Independence Monument stands on a terrain pad (top 20.4, radius 88 studs: `terrain.PILOT_PADS['P3']`). Without the pad, its paving was hidden under the grass, because the smooth terrain bulges about 2 studs over its set height.

@@ -647,7 +647,7 @@ Rules for every step:
 
 ## Step 6 progress: P3
 
-### District P3, downtown (16 Nov 2026; built and checked in the copy place, ready to move)
+### District P3, downtown (16 Nov 2026; IN THE MAIN PLACE, saved as version 1094)
 - **Where:** `geo.PILOT_LL['P3']` = lon 96.140-96.178, lat 16.7645-16.787 (inside batch 2): Lanmadaw to Pazundaung Creek, the Yangon River / Strand Road to Bogyoke Aung San Road and the railway yard. Standalone for now (no seam; P1 / P2 are far north).
 - **How to run** (all `YANGON_SCALE=1to1`, in `tools/yangon/city`): `roads.py P3 --no-glb` (road outlines + profile only, no meshes), `terrain.py P3`, `buildings_1to1.py P3`, `green_1to1.py P3`, then `place_pack.py P3`. Roads for the roads agent: `roads05.py P1 P2 P3` (one network) -> `build/city_1to1/roads05_P1_P2_P3/` (1,463 roads, 294 km, 14 decks, 3 roundabouts).
 - **Terrain:** GLO-30 bare, the Yangon River out to the Dala bank and Pazundaung Creek at their DEM level (river 1.0 m = 3 studs), quay edge and 83 jetty / pier columns in concrete (`terrain.RIVER_EXT['P3']`). **Lake / pond beds are mud within 90 studs of the shore at 1:1** (coordinator: sand read white through the water; `terrain.SHORE_MUD`, all 1:1 tags from now on). Court pads replace the TEMP plates: Sule (top 18.2, under its 18.47 floor) and Botataung (17.55, under its 17.81 blocks) (`terrain.PILOT_PADS['P3']`). 2,185 tiles.
@@ -706,3 +706,10 @@ Rules for every step:
 - **Screenshots** (copy place, `C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`): P4 aerial `mcp-Roblox_Studio-blob-1794834360078-vggf7n.jpg`, P4 street `...1794834366123-jztne2.jpg`, P5 `...1794835492570-p9tkhn.jpg`, P6 `...1794837255051-yltwzs.jpg`, P7 Shwedagon hill `...1794837895882-6to3me.jpg`, P8 Kandawgyi `...1794838857735-211dv9.jpg`, P9 `...1794839062109-fh6vs4.jpg`, P10 `...1794839535331-q9dzyz.jpg`.
 - **Traps:** the copy Studio's Open Cloud token lacks `asset:read` (upload through the cloud place's Studio id; the upload does not touch that place); several 10+ MB uploads at once time out; a `save_place` that answers "Target is not reachable" usually did save (call it again: NotNeeded).
 - **Still open:** the moves into the cloud place (after the roads agent and the downtown agent's P3 move; memory gate 14 GB), P1 / P2 shells off the roads05 carriageways, the rest of batch 2 outside P3 (Pazundaung / Botahtaung east, Lanmadaw west edge), roads (the roads agent), Shwedagon hill planting (the hill is grass: its lot was kept empty).
+- **Moved into the main place (version 1094, 16 Nov 22:10).** The move used `tools/yangon/P3Place.luau` with 4 packs: 82783343675761, 114520162334276, 112369318912570 and 93648296556459.
+  - Terrain: 2,185 tiles in 63 s. Green: 2,527 far crowns, merged with the other districts' Far.
+  - Kit: 147 templates. Night windows: 118363320354422 + 90057725213886.
+  - Buildings: 13,017 shells and 1,666 roof parts. 2 pagodas.
+  - The 9 landmarks went in, and the Sule / Botataung TEMP plates were deleted.
+- **Kept off the roads05 roads:** `buildings_1to1` keeps the roads05 carriageway + pavement + 0.6 m clear. `clip_box` pulls in any shell box (the min rectangle of a concave outline) that reached over a road. Shells on a carriageway: 83 before, 0 after.
+- Picture: [[P3 downtown in the main place - aerial (v1094).jpg]].

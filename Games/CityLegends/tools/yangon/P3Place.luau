@@ -4,7 +4,7 @@
 	Run each step from execute_luau (they spawn and report in workspace attribute "P3Place"; poll it):
 
 	local M = require(ServerStorage.ClaudeTools.P3Place:Clone())   -- or paste this file's body
-	M.load({ pack1, pack2, pack3 })   -- the three Model asset ids (place_p3_1..3.rbxmx) -> ServerStorage.P3Place_1..3
+	M.load({ pack1, pack2, pack3, pack4 })   -- the Model asset ids (place_p3_1..4.rbxmx) -> ServerStorage.P3Place_1..4
 	M.kit(kitId, nightA, nightB)      -- kit pieces 79973726669188 into ReplicatedStorage.YgnKit.Templates,
 	                                  -- night windows 82960431231204 + 75559474746620 into Yangon1to1.Buildings.Night
 	M.terrain()                       -- TerrainP3_1..81 (packs 1 + 2) with a thin skin: YB 12 studs under each tile's
@@ -175,7 +175,14 @@ function M.shells()
 		shellF.Name = "Shell"
 		shellF.Parent = b
 		local n = 0
-		for _, cell in SS.P3Place_3.Shell:GetChildren() do
+		local cells = {}
+		for _, nm in { "P3Place_3", "P3Place_4" } do
+			local f = SS:FindFirstChild(nm)
+			for _, c in (f and f.Shell:GetChildren() or {}) do
+				table.insert(cells, c)
+			end
+		end
+		for _, cell in cells do
 			for _, q in cell:GetChildren() do
 				if q:IsA("BasePart") then
 					local w = string.split(q.Name, "|")
@@ -334,7 +341,7 @@ end
 
 function M.cleanup()
 	local n = 0
-	for _, nm in { "P3Place_1", "P3Place_2", "P3Place_3" } do
+	for _, nm in { "P3Place_1", "P3Place_2", "P3Place_3", "P3Place_4" } do
 		local f = SS:FindFirstChild(nm)
 		if f then
 			f:Destroy()

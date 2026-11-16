@@ -98,6 +98,26 @@ function D.place(holding: Instance, placeJson: string, folder: Instance): number
 		p.CFrame = CFrame.new(b[1], b[2], b[3]) * CFrame.Angles(0, b[7], 0)
 		p.Parent = col
 	end
+	-- warm PointLights (interiors: data.lights = { {x, y, z, range, brightness} })
+	for _, l in data.lights or {} do
+		local p = Instance.new("Part")
+		p.Name = "Light"
+		p.Anchored = true
+		p.Transparency = 1
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.CastShadow = false
+		p.Size = Vector3.new(0.4, 0.4, 0.4)
+		p.Position = Vector3.new(l[1], l[2], l[3])
+		local pl = Instance.new("PointLight")
+		pl.Color = Color3.fromRGB(255, 226, 180)
+		pl.Range = l[4]
+		pl.Brightness = l[5]
+		pl.Shadows = false
+		pl.Parent = p
+		p.Parent = vis
+	end
 	model.Parent = folder
 	return n
 end

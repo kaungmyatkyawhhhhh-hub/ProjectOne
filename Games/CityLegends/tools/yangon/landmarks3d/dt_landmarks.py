@@ -65,7 +65,12 @@ LOOKS = {
     "GRS": ("Grass", (104, 150, 66), 0.0, 0.0, None, False, None),                   # lawns
     "PAV": ("Pavement", (150, 146, 138), 0.0, 0.0, None, False, None),               # paving
     "MRB": ("SmoothPlastic", (236, 234, 228), 0.0, 0.05, None, False, None),         # marble steps, floors
-    "GRT": ("Metal", (70, 130, 96), 0.0, 0.0, None, True, None),                     # green metal roof (Immanuel)
+    "GRT": ("Metal", (70, 130, 96), 0.0, 0.0, None, True, None),
+    "PNL": ("SmoothPlastic", (238, 230, 212), 0.0, 0.0, None, False, None),          # lobby panelled walls (photo 2-3)
+    "CEI": ("SmoothPlastic", (244, 240, 230), 0.0, 0.0, None, False, None),          # ceilings
+    "DOR": ("WoodPlanks", (92, 54, 32), 0.0, 0.0, None, False, None),                # dark teak doors, furniture
+    "WCK": ("Fabric", (170, 128, 82), 0.0, 0.0, None, False, None),                  # wicker chairs
+    "LMP": ("Neon", (255, 236, 200), 0.0, 0.0, None, False, None),                   # chandelier / lamp glow                     # green metal roof (Immanuel)
     "SLV": ("Metal", (210, 214, 220), 0.0, 0.1, None, True, None),                   # silver spires
     "BRN": ("CorrodedMetal", (110, 86, 76), 0.0, 0.0, None, True, None),             # brown metal roofs
     "GR1": ("SmoothPlastic", (72, 68, 62), 0.82, 0.0, None, False, None),           # grime (light, mid, heavy)
@@ -131,14 +136,20 @@ def place_panel(sc, tris, A, a_dir, out_dir, base):
         look = KIT_MAP.get(grp)
         if look is None:
             raise KeyError("kit group " + grp)
+        if look == "SKIP":
+            continue
         for t in lst:
             P = [(A[0] + a_dir[0] * p[0] - out_dir[0] * p[1], base + p[2], A[1] + a_dir[1] * p[0] - out_dir[1] * p[1])
                  for p in t]
             sc.tri(look, *P)
 
 
+DOOR = {"spec": None, "cur": None}   # spec: (point X, Z, width m, height m, sill m); cur: (u m, w, h, sill) on this edge
+
+
 def walls(sc, poly, base, fn_for_edge, seed=1, skip=None):
-    """every outline edge (CCW in world X / -Z) gets the facade the builder returns (or a plain wall)"""
+    """every outline edge (CCW in world X / -Z) gets the facade the builder returns (or a plain wall); DOOR["spec"]
+    puts an open doorway on the edge that passes its point"""
     ring = list(poly.exterior.coords)[:-1]
     # CCW in (east, north) = CW in (X, Z): poly in world (X, Z) with Z south; orient so the outside is on the right
     if Polygon(ring).exterior.is_ccw:     # CCW in (X, Z) means CW in (east, north)
@@ -152,8 +163,16 @@ def walls(sc, poly, base, fn_for_edge, seed=1, skip=None):
         a = ((B[0] - A[0]) / L, (B[1] - A[1]) / L)
         # outward (X, Z) of a CW-in-(east,north) ring walked A -> B: to the left in (X, Z)
         out = (-a[1], a[0])
+        DOOR["cur"] = None
+        sp = DOOR["spec"]
+        if sp:
+            u = (sp[0] - A[0]) * a[0] + (sp[1] - A[1]) * a[1]
+            off = abs((sp[0] - A[0]) * out[0] + (sp[1] - A[1]) * out[1])
+            if 0 < u < L and off < 2.0:
+                DOOR["cur"] = (u / S, sp[2], sp[3], sp[4])
         tris, _ = kit_panel(lambda W: fn_for_edge(i, W / S), L, seed * 1000 + i)
         place_panel(sc, tris, A, a, out, base)
+    DOOR["cur"] = None
     return ring
 
 
@@ -496,9 +515,12 @@ def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3)
         BAY = Wm / n
         holes = []
         z = 0.0
+        door = DOOR["cur"]
         for li, (h, kind) in enumerate(levels):
             for k in range(n):
                 x = k * BAY
+                if door and li == 0 and abs(x + BAY / 2 - door[0]) < door[1] / 2 + BAY / 2:
+                    continue
                 if kind == "arch":
                     ww = min(2.0, BAY - 1.0)
                     KP.col_arch(x + BAY / 2 - ww / 2, z + 0.6, ww, max(1.0, h - 1.4 - ww / 2), holes, "KWX", "KSH", None)
@@ -512,9 +534,17 @@ def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3)
                 KP.band("KW0", Wm, z - band_depth, band_depth, band_depth)
             if pil and kind != "blank":
                 for k in range(1, n):
+                    if door and li == 0 and abs(k * BAY - door[0]) < door[1] / 2 + 0.6:
+                        continue
                     top = h - (band_depth if li < len(levels) - 1 else cornice)
                     K.box("KW0", k * BAY - 0.2, -0.16, z, 0.4, 0.16, top, faces=("-y", "+x", "-x"))
             z += h
+        if door:
+            u, dw, dh, sill = door
+            K.opening(holes, u - dw / 2, sill, dw, dh, 0.0, "KWX", glass=None)
+            K.box("KW0", u - dw / 2 - 0.25, -0.12, sill, 0.25, 0.12, dh + 0.25, faces=("-y", "+x", "-x"))
+            K.box("KW0", u + dw / 2, -0.12, sill, 0.25, 0.12, dh + 0.25, faces=("-y", "+x", "-x"))
+            K.box("KW0", u - dw / 2, -0.12, sill + dh, dw, 0.12, 0.25, faces=("-y", "top", "bottom"))
         KP.band("KW0", Wm, H - cornice, cornice, cornice + 0.05)
         K.facade("KWX", 0.0, Wm, 0.0, H, 0.0, holes)
         KP.stains_light(0.0, Wm, H - cornice, 0.0, 3.0, 0.3, holes)
@@ -604,16 +634,27 @@ def steps(sc, front_a, front_b, out, base, n=5, rise=0.16, run=0.4, look="MRB", 
                   away=away)
 
 
+def box_any(sc, look, cx, cz, y0, hx, hz, h, yaw=0.0, top=True):
+    pts = box_walls(sc, cx, cz, hx, hz, y0, y0 + h, look, yaw)
+    if top:
+        cap4(sc, look, pts, y0 + h)
+    return pts
+
+
 def strand_hotel():
     """The Strand Hotel (1901, Sarkies brothers): way/102682120 (60 x 36 m, 3 floors) + the ballroom wing
     way/185858884 (39 x 30 m, 2 floors). Photos (catalogue strand_hotel): cream-white rendered walls, teak-framed
     windows, cornice bands, a flat roof behind a parapet, the entrance on Strand Road (south) up white marble steps
-    under a porch with a pediment. The lobby interior (photo 2) is not built yet."""
+    under an open porch with a pediment, a teak-framed door into the LOBBY (photos 2 and 3, walkable): cream panelled
+    walls with a dado rail, dark teak doors, a white coffered ceiling with ceiling fans and a crystal chandelier, a
+    white marble floor, wicker armchairs round dark wooden tables."""
     lid = "strand_hotel"
     sc = Scene()
     KIT_MAP["KWX"], KIT_MAP["KW0"] = "CRW", "WTR"
     tops = []
     base_all = None
+    lights = []
+    extra_boxes = []
     d = json.load(open(os.path.join(REFS, lid, "footprint_osm.geojson"), encoding="utf-8"))
     for pick, levels in ((0, [(5.0, "rect"), (4.2, "rect"), (4.2, "rect")]), (1, [(5.4, "arch"), (4.6, "rect")])):
         gm = d["features"][pick]["geometry"]
@@ -622,12 +663,7 @@ def strand_hotel():
         base = g0
         base_all = base if base_all is None else min(base_all, base)
         fn, H = std_facade(levels, 3.6)
-        walls(sc, poly, base, fn, seed=31 + pick)
-        yH = base + H * S
-        flat_roof(sc, poly.buffer(-0.75 * S), yH + 0.15 * S - 0.4)
-        tops.append(yH + 1.2 * S)
         if pick == 0:
-            hotel, hbase, hH = poly, base, H
             ring = list(poly.exterior.coords)[:-1]
             best = None
             for i in range(len(ring)):
@@ -638,18 +674,165 @@ def strand_hotel():
             _, A, B = best
             a, out, L = outward_of(poly, A, B)
             mx, mz = (A[0] + B[0]) / 2, (A[1] + B[1]) / 2
-            pw, pd = 12.0 * S, 4.0 * S
-            P0 = (mx - a[0] * pw / 2 + out[0] * 0.3 * S, mz - a[1] * pw / 2 + out[1] * 0.3 * S)
-            P1 = (mx + a[0] * pw / 2 + out[0] * 0.3 * S, mz + a[1] * pw / 2 + out[1] * 0.3 * S)
-            porch = [P0, P1, (P1[0] + out[0] * pd, P1[1] + out[1] * pd), (P0[0] + out[0] * pd, P0[1] + out[1] * pd)]
-            pfn, pH = std_facade([(4.8, "arcade"), (4.2, "rect")], 4.0, parapet=0.0)
-            ring_walls(sc, porch, base, lambda i, W: pfn(i, W), 39)
-            yP = base + pH * S
-            flat_roof(sc, Polygon(porch), yP + 0.02)
-            gable(sc, porch[3], porch[2], yP, 2.6 * S, out)
-            steps(sc, porch[3], porch[2], out, base, away=(mx, mz))
+            FL = 0.8                                  # lobby / porch floor over the ground (5 steps of 0.16 m)
+            DOOR["spec"] = (mx, mz, 3.0, 3.6, FL)
+        walls(sc, poly, base, fn, seed=31 + pick)
+        DOOR["spec"] = None
+        yH = base + H * S
+        flat_roof(sc, poly.buffer(-0.75 * S), yH + 0.15 * S - 0.4)
+        tops.append(yH + 1.2 * S)
+        if pick == 0:
+            hotel, hbase, hH = poly, base, H
+            fy = base + FL * S
+
+            def W(u, v, y=0.0):
+                """lobby frame (metres): u along the front, v into the building, y over the lobby floor -> world"""
+                return (mx + a[0] * u * S - out[0] * v * S, fy + y * S, mz + a[1] * u * S - out[1] * v * S)
+
+            def XZ(u, v):
+                p = W(u, v)
+                return (p[0], p[2])
+
+            def wq(look, u0, v0, u1, v1, y0, y1, inside):
+                """a vertical quad (u0, v0) -> (u1, v1), y0..y1 (lobby frame), showing toward the point `inside`"""
+                q = [W(u0, v0, y0), W(u1, v1, y0), W(u1, v1, y1), W(u0, v0, y1)]
+                ip = XZ(*inside)
+                n = _nrm(q[0], q[1], q[2])
+                cxq, czq = (q[0][0] + q[1][0]) / 2, (q[0][2] + q[1][2]) / 2
+                if n[0] * (ip[0] - cxq) + n[2] * (ip[1] - czq) < 0:
+                    q = q[::-1]
+                sc.quad(look, *q)
+
+            def hq(look, u0, v0, u1, v1, y, up=True):
+                q = [W(u0, v0, y), W(u1, v0, y), W(u1, v1, y), W(u0, v1, y)]
+                (up_quad if up else down_quad)(sc, look, *q)
+
+            def bx(look, u, v, y, su, sv, sy, yaw_off=0.0):
+                c = W(u, v, y)
+                box_any(sc, look, c[0], c[2], c[1], su * S / 2, sv * S / 2, sy * S, math.atan2(a[1], a[0]) + yaw_off)
+
+            U, V0, V1, HH = 9.0, 0.35, 14.35, 4.4
+            mid = (0.0, (V0 + V1) / 2)
+            # --- lobby shell (inward faces)
+            wq("PNL", -U, V0, -1.5, V0, 0, HH, mid)
+            wq("PNL", 1.5, V0, U, V0, 0, HH, mid)
+            wq("PNL", -1.5, V0, 1.5, V0, 3.6, HH, mid)
+            wq("PNL", U, V0, U, V1, 0, HH, mid)
+            wq("PNL", U, V1, -U, V1, 0, HH, mid)
+            wq("PNL", -U, V1, -U, V0, 0, HH, mid)
+            # floor: white marble, a teak border strip 0.3 m in (0.02 m over the marble)
+            hq("MRB", -U, V0, U, V1, 0.0)
+            for (u0, v0, u1, v1) in ((-U + 0.3, V0 + 0.3, U - 0.3, V0 + 0.45), (-U + 0.3, V1 - 0.45, U - 0.3, V1 - 0.3),
+                                     (-U + 0.3, V0 + 0.45, -U + 0.45, V1 - 0.45), (U - 0.45, V0 + 0.45, U - 0.3, V1 - 0.45)):
+                hq("DOR", u0, v0, u1, v1, 0.02)
+            # ceiling with a coffer: the outer frame at HH, the recess 0.6 m higher, its four sides
+            cu, cv0, cv1 = 6.0, V0 + 3.0, V1 - 3.0
+            for (u0, v0, u1, v1) in ((-U, V0, U, cv0), (-U, cv1, U, V1), (-U, cv0, -cu, cv1), (cu, cv0, U, cv1)):
+                hq("CEI", u0, v0, u1, v1, HH, up=False)
+            hq("CEI", -cu, cv0, cu, cv1, HH + 0.6, up=False)
+            mid_c = (0.0, (cv0 + cv1) / 2)
+            wq("CEI", -cu, cv0, cu, cv0, HH, HH + 0.6, mid_c)
+            wq("CEI", cu, cv0, cu, cv1, HH, HH + 0.6, mid_c)
+            wq("CEI", cu, cv1, -cu, cv1, HH, HH + 0.6, mid_c)
+            wq("CEI", -cu, cv1, -cu, cv0, HH, HH + 0.6, mid_c)
+            # dado rail (0.06 m proud, 1.0 m up) and panel mouldings above it (0.04 m proud)
+            for (u0, v0, u1, v1, nu, nv) in ((-U, V1, U, V1, 0, -1), (U, V0, U, V1, -1, 0), (-U, V0, -U, V1, 1, 0)):
+                du, dv = nu * 0.06, nv * 0.06
+                wq("WTR", u0 + du, v0 + dv, u1 + du, v1 + dv, 0.95, 1.05, mid)
+                Lw = math.hypot(u1 - u0, v1 - v0)
+                n_p = max(1, int(Lw / 2.4))
+                for k in range(n_p):
+                    t0, t1 = (k + 0.15) / n_p, (k + 0.85) / n_p
+                    pu0, pv0 = u0 + (u1 - u0) * t0 + nu * 0.04, v0 + (v1 - v0) * t0 + nv * 0.04
+                    pu1, pv1 = u0 + (u1 - u0) * t1 + nu * 0.04, v0 + (v1 - v0) * t1 + nv * 0.04
+                    for (y0, y1) in ((1.4, 1.46), (3.9, 3.96)):
+                        wq("WTR", pu0, pv0, pu1, pv1, y0, y1, mid)
+                    for (qu, qv) in ((pu0, pv0), (pu1, pv1)):
+                        tu, tv = (u1 - u0) / Lw * 0.06, (v1 - v0) / Lw * 0.06
+                        wq("WTR", qu, qv, qu + tu, qv + tv, 1.46, 3.9, mid)
+            # dark teak doors (2 on each side wall, 1 at the back), 0.05 m proud, 1.4 x 2.7 m
+            for (uu, vv, nu, nv) in ((U, 4.5, -1, 0), (U, 10.5, -1, 0), (-U, 4.5, 1, 0), (-U, 10.5, 1, 0), (0.0, V1, 0, -1)):
+                if nu:
+                    wq("DOR", uu + nu * 0.08, vv - 0.7, uu + nu * 0.08, vv + 0.7, 0.0, 2.7, mid)
+                else:
+                    wq("DOR", -0.7, vv - 0.08, 0.7, vv - 0.08, 0.0, 2.7, mid)
+            # ceiling fans (4) and the chandelier
+            for (fu, fv) in ((-4.5, 4.0), (4.5, 4.0), (-4.5, 10.7), (4.5, 10.7)):
+                bx("GRL", fu, fv, HH - 0.7, 0.06, 0.06, 0.7)
+                bx("GRL", fu, fv, HH - 0.85, 0.3, 0.3, 0.15)
+                for k in range(5):
+                    ang = 2 * math.pi * k / 5
+                    bx("DOR", fu + math.cos(ang) * 0.6, fv + math.sin(ang) * 0.6, HH - 0.78, 0.9, 0.15, 0.02, yaw_off=-ang)
+            cv = (V0 + V1) / 2
+            bx("GLD", 0.0, cv, HH + 0.6 - 1.2, 0.05, 0.05, 1.2)
+            for k in range(8):
+                ang = 2 * math.pi * k / 8
+                bx("LMP", math.cos(ang) * 0.6, cv + math.sin(ang) * 0.6, HH - 1.1, 0.12, 0.12, 0.25)
+                bx("GLD", math.cos(ang) * 0.6, cv + math.sin(ang) * 0.6, HH - 1.16, 0.18, 0.18, 0.06)
+            bx("LMP", 0.0, cv, HH - 1.4, 0.3, 0.3, 0.5)
+            lights.append(list(W(0.0, cv, HH - 1.2)) + [36.0, 1.6])
+            for (fu, fv) in ((-5.0, 4.0), (5.0, 11.0)):
+                lights.append(list(W(fu, fv, 2.5)) + [24.0, 0.8])
+            # wicker armchairs round dark tables (4 groups)
+            for (gu, gv) in ((-5.0, 4.5), (5.0, 4.5), (-5.0, 10.5), (5.0, 10.5)):
+                bx("DOR", gu, gv, 0.0, 0.7, 0.7, 0.5)
+                for k in range(4):
+                    ang = math.pi / 2 * k
+                    cu_, cv_ = gu + math.cos(ang) * 1.2, gv + math.sin(ang) * 1.2
+                    bx("WCK", cu_, cv_, 0.0, 0.8, 0.8, 0.45, yaw_off=ang)
+                    bx("WCK", gu + math.cos(ang) * 1.55, gv + math.sin(ang) * 1.55, 0.0, 0.15, 0.8, 0.95, yaw_off=ang)
+            # --- the open porch: floor, 6 pillars, the closed upper room on them, the pediment, steps
+            pw, pd = 12.0, 4.0
+            hq("MRB", -pw / 2, -pd, pw / 2, 0.0, 0.0)
+            for (u0, u1) in ((-pw / 2, pw / 2),):
+                wq("MRB", u0, -pd, u1, -pd, -FL, 0.0, (0.0, 0.0))
+            wq("MRB", -pw / 2, -pd, -pw / 2, 0.0, -FL, 0.0, (0.0, -pd / 2))
+            wq("MRB", pw / 2, 0.0, pw / 2, -pd, -FL, 0.0, (0.0, -pd / 2))
+            for (pu, pv) in ((-pw / 2 + 0.45, -pd + 0.45), (-2.0, -pd + 0.45), (2.0, -pd + 0.45), (pw / 2 - 0.45, -pd + 0.45),
+                             (-pw / 2 + 0.45, -0.75), (pw / 2 - 0.45, -0.75)):
+                bx("CRW", pu, pv, 0.0, 0.8, 0.8, 4.0, )
+            # the upper room: from 4.8 m (over the ground) to 9.0 m, 0.3 m in front of the facade
+            up_base = base + 4.8 * S
+            room = [XZ(-pw / 2, -0.3), XZ(pw / 2, -0.3), XZ(pw / 2, -pd), XZ(-pw / 2, -pd)]
+            ufn, uH = std_facade([(4.2, "rect")], 4.0, parapet=0.0)
+            ring_walls(sc, room, up_base, lambda i, Wd: ufn(i, Wd), 39)
+            down_quad(sc, "CEI", (room[0][0], up_base, room[0][1]), (room[1][0], up_base, room[1][1]),
+                      (room[2][0], up_base, room[2][1]), (room[3][0], up_base, room[3][1]))
+            yP = up_base + uH * S
+            flat_roof(sc, Polygon(room), yP + 0.02)
+            gable(sc, room[3], room[2], yP, 2.6 * S, out)
+            front_a, front_b = XZ(-pw / 2, -pd), XZ(pw / 2, -pd)
+            steps(sc, front_b, front_a, out, base, away=(mx, mz))
+            # collision: the hotel minus the lobby and the door passage, the lobby walls and floors, porch and steps
+            lob = Polygon([XZ(-U, V0 - 0.05), XZ(U, V0 - 0.05), XZ(U, V1), XZ(-U, V1)]).union(
+                Polygon([XZ(-1.5, -0.2), XZ(1.5, -0.2), XZ(1.5, V0 + 0.2), XZ(-1.5, V0 + 0.2)]))
+            from geom3d import raster_boxes
+            for (cx_, cz_, z0, sx_, sz_, sy_, _) in raster_boxes(hotel.difference(lob.buffer(1.0)), base - 1.0, base + H * S, cell=2.0):
+                extra_boxes.append([cx_, z0 + sy_ / 2, cz_, sx_, sy_, sz_, 0.0])
+            yaw = math.atan2(a[1], a[0])
+
+            def cbox(u, v, y, su, sv, sy):
+                c = W(u, v, y + sy / 2)
+                extra_boxes.append([c[0], c[1], c[2], su * S, sy * S, sv * S, -yaw])
+            cbox(0.0, (V0 + V1) / 2, -FL - 0.3, 2 * U, V1 - V0, FL + 0.3)        # lobby floor
+            cbox(0.0, -pd / 2, -FL - 0.3, pw, pd + 0.7, FL + 0.3)                 # porch floor
+            for (u, v, su, sv) in ((0.0, V1 + 0.15, 2 * U, 0.3), (U + 0.15, (V0 + V1) / 2, 0.3, V1 - V0),
+                                   (-U - 0.15, (V0 + V1) / 2, 0.3, V1 - V0), (-5.25, V0 - 0.1, 7.5, 0.3), (5.25, V0 - 0.1, 7.5, 0.3)):
+                cbox(u, v, 0.0, su, sv, HH)
+            cbox(0.0, V0 - 0.1, 3.6, 3.0, 0.3, HH - 3.6)
+            for k in range(5):
+                cbox(0.0, -pd - 0.4 * (5 - k) + 0.2, -FL, pw, 0.4, 0.16 * (k + 1))
+            for (pu, pv) in ((-pw / 2 + 0.45, -pd + 0.45), (-2.0, -pd + 0.45), (2.0, -pd + 0.45), (pw / 2 - 0.45, -pd + 0.45),
+                             (-pw / 2 + 0.45, -0.75), (pw / 2 - 0.45, -0.75)):
+                cbox(pu, pv, 0.0, 0.8, 0.8, 4.0)
+            spawn = list(W(0.0, -pd - 3.0, -FL))
     KIT_MAP["KWX"], KIT_MAP["KW0"] = "WAL", "WTR"
-    write_place(lid, hotel, hbase, hbase + hH * S)
+    write_place(lid, hotel, hbase, hbase + hH * S, extra=dict(lights=lights, entrance=spawn))
+    pj = os.path.join(OUT, lid, "place.json")
+    d_ = json.load(open(pj))
+    ball = Polygon(geo.proj(d["features"][1]["geometry"]["coordinates"][0])).buffer(0).simplify(0.6)
+    d_["collide"] = extra_boxes + collision(ball, ground_of(ball)[0] - 1.0, ground_of(ball)[0] + 10.0 * S)
+    json.dump(d_, open(pj, "w"), indent=1)
     return report(lid, sc, base_all, max(tops))
 
 
