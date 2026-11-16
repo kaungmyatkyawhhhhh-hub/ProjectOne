@@ -55,13 +55,25 @@ KD.WALL = {
 	KW0 = rgb(252, 255, 250), KW1 = rgb(255, 215, 153), KW2 = rgb(178, 242, 255), KW3 = rgb(199, 168, 130),
 	KW4 = rgb(226, 248, 255), KW5 = rgb(255, 197, 187), KW6 = rgb(255, 252, 243), KW7 = rgb(208, 255, 165),
 	KWG = rgb(162, 160, 150), KWB = rgb(173, 209, 250), KWC = rgb(144, 145, 136), KWD2 = rgb(181, 172, 162),
+	-- (2026-11-16, real places: places_1to1.py) fuel stations, car parks, courts, playgrounds
+	PCN = rgb(196, 194, 188), PAS = rgb(84, 84, 86), PLN = rgb(236, 236, 230), PLY = rgb(232, 196, 64),
+	PCW = rgb(240, 240, 236), PCS = rgb(214, 216, 212), PFG = rgb(46, 140, 82), PFR = rgb(196, 40, 40),
+	PFB = rgb(30, 84, 160), PFY = rgb(240, 196, 40), PPD = rgb(40, 42, 46), PGL = rgb(60, 72, 80),
+	PST = rgb(150, 154, 160), PRB = rgb(150, 70, 50), PCG = rgb(78, 128, 92), PLT = rgb(255, 250, 236),
+	PSD = rgb(214, 196, 160),
 }
+-- plain-material codes (no MaterialVariant): Neon canopy lights, glass, plastic
+KD.MAT = { PLT = Enum.Material.Neon, PGL = Enum.Material.Glass, PFG = Enum.Material.SmoothPlastic,
+	PFR = Enum.Material.SmoothPlastic, PFB = Enum.Material.SmoothPlastic, PFY = Enum.Material.SmoothPlastic,
+	PPD = Enum.Material.SmoothPlastic, PLY = Enum.Material.SmoothPlastic, PCW = Enum.Material.SmoothPlastic }
 KD.VARIANT = {
 	KW0 = "YgnRenderPainted", KW1 = "YgnRenderPainted", KW2 = "YgnRenderPainted", KW3 = "YgnRenderPainted",
 	KW4 = "YgnRenderPainted", KW5 = "YgnRenderPainted", KW6 = "YgnRenderPainted", KW7 = "YgnRenderPainted",
 	KWB = "YgnRenderPainted", KWG = "YgnRenderStained", KWD2 = "YgnRenderStained", KWC = "YgnRenderStained",
 	KGR = "YgnSteelPainted", KAR = "YgnCanvas", KCO = "YgnConcreteBare", KRG = "YgnCorrugatedZinc",
 	KRF = "YgnCorrugatedRust", KRB = "YgnCorrugatedBlue", KRT = "YgnClayRoofTile",
+	PCN = "YgnConcreteStained", PAS = "YgnAsphaltWorn", PLN = "YgnConcreteBare", PCS = "YgnSteelPainted",
+	PST = "YgnSteelPainted", PRB = "YgnBrickRed", PCG = "YgnConcreteBare", PSD = "YgnDirtPacked",
 }
 
 local looks = {} -- code -> { material, variant name }
@@ -70,7 +82,9 @@ function KD.look(q: BasePart, code: string, color: Color3?)
 	if not l then
 		local v = KD.VARIANT[code]
 		local mv = v and MaterialService:FindFirstChild(v)
-		if mv and mv:IsA("MaterialVariant") then
+		if KD.MAT[code] then
+			l = { KD.MAT[code], "" }
+		elseif mv and mv:IsA("MaterialVariant") then
 			l = { mv.BaseMaterial, v }
 		else
 			l = { Enum.Material.SmoothPlastic, "" }

@@ -179,8 +179,9 @@ def render(data, name, cx, cz, size, paint=None, out=None, title=None):
     if LABELS:
         for x in S:
             r = x['r']
-            q = r['s'][len(r['s']) // 2]
-            if view.contains(Point(q[0], q[2])):
+            inv = [q for q in r['s'] if view.contains(Point(q[0], q[2]))]
+            q = inv[len(inv) // 2] if inv else None
+            if q is not None:
                 ax.text(q[0], q[2], '%s r%s' % (r['name'], r['rank']), fontsize=6, color='yellow', zorder=30)
             for k in (0, -1):
                 q = r['s'][k]

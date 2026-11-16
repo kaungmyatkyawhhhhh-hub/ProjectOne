@@ -133,6 +133,9 @@ def load():
     H, code, org = st["H"], st["code"], st["origin"]
     prof = json.load(open(os.path.join(B1, "roads_%s_profile.json" % TAG)))
     plots = json.load(open(os.path.join(B1, "buildings_%s" % TAG, "plots.json")))
+    for q_ in plots:   # (P3) downtown colonial rows take the township shophouses' ground (slab / concrete fronts)
+        if q_.get("arch") == "colonial":
+            q_["arch"] = "township"
     walls = []
     bdir = os.path.join(B1, "buildings_%s" % TAG)
     for f in sorted(os.listdir(bdir)):

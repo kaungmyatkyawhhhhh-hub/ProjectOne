@@ -799,6 +799,25 @@ function G.wallToBank(folder: Instance)
 	return n .. " wall pieces banked, " .. gone .. " parts removed"
 end
 
+-- owner's picture 1 (16 Nov: "the grass is so green"): terrain Grass colour, bright fresh green under the Riviera
+-- light (applies to all terrain grass; the old colour is kept on Terrain attribute YgnOldColor_Grass)
+G.GRASS = Color3.fromRGB(88, 158, 40)
+function G.grassColour(c: Color3?, undo: boolean?)
+	local T = workspace.Terrain
+	if undo then
+		local o = T:GetAttribute("YgnOldColor_Grass")
+		if o then
+			T:SetMaterialColor(Enum.Material.Grass, o)
+			T:SetAttribute("YgnOldColor_Grass", nil)
+		end
+		return
+	end
+	if T:GetAttribute("YgnOldColor_Grass") == nil then
+		T:SetAttribute("YgnOldColor_Grass", T:GetMaterialColor(Enum.Material.Grass))
+	end
+	T:SetMaterialColor(Enum.Material.Grass, c or G.GRASS)
+end
+
 -- Inya's shallow bed: Sand reads white through the water near the shores; paint it Mud in a box (x0, z0, x1, z1)
 function G.lakeBed(x0: number, z0: number, x1: number, z1: number, y0: number?, y1: number?)
 	local T = workspace.Terrain

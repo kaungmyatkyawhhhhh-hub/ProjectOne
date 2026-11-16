@@ -108,7 +108,10 @@ def smooth_line(P, win):
 
 
 def norm(s):
-    return RN.norm_name(s or '')
+    s = (s or '').lower()
+    for w in ('(bridge)', 'bridge', 'flyover'):
+        s = s.replace(w, ' ')
+    return RN.norm_name(s)
 
 
 def key_of(p):
@@ -655,7 +658,7 @@ def join_roads(pieces, ring_keys, region):
             g = (qb - qa) / gap
             if abs(float(g @ da)) < 0.7:
                 continue
-        cands.append((cos + gap / 400.0, a, b))
+        cands.append((cos + gap / 400.0 + (0.3 if A.hw != B.hw else 0.0), a, b))
     cands.sort()
     link = {}
     for _, a, b in cands:
@@ -870,6 +873,34 @@ def road_half(r, i):
     return max(r['wl'][i], r['wr'][i])
 
 
+def inside0(px, pz, o, margin=0.0):
+    """is (px, pz) on road o's carriageway (not a cut sample)? -> nearest sample index or None"""
+    P = o['P']
+    q = np.array([px, pz])
+    d = np.linalg.norm(P - q, axis=1)
+    i = int(np.argmin(d))
+    if d[i] > 120:
+        return None
+    if o['cut'][i]:
+        return None
+    best = None
+    for k in (i - 1, i):
+        if k < 0 or k + 1 >= len(P):
+            continue
+        a, b = P[k], P[k + 1]
+        ab = b - a
+        L2 = float(ab @ ab)
+        u = 0.0 if L2 < 1e-9 else float(np.clip((q - a) @ ab / L2, 0, 1))
+        dd = float(np.linalg.norm(q - (a + ab * u)))
+        if best is None or dd < best[0]:
+            best = (dd, k if u < 0.5 else k + 1)
+    if best is None:
+        best = (float(d[i]), i)
+    if best[0] < road_half(o, best[1]) + margin:
+        return best[1]
+    return None
+
+
 def finish(net):
     roads, rings, H = net['roads'], net['rings'], net['H']
     region = net['region']
@@ -960,6 +991,29 @@ def finish(net):
                     ys.append(r['y'][k])
         R['y'] = float(np.median(ys)) if ys else float(H.at(R['c'], [], False)[0])
         R['arms'] = []
+    # junction fillers: a short road lying (almost) wholly on other roads' carriageways goes
+    lines = [LineString(r['P']) for r in roads]
+    tree = STRtree(lines)
+    drop = set()
+    for xi, r in enumerate(roads):
+        if r['L'] > 240 or any(r is dk['road'] for dk in decks):
+            continue
+        cand = [int(j) for j in tree.query(lines[xi].buffer(60)) if int(j) != xi and int(j) not in drop]
+        on = 0
+        for k in range(len(r['P'])):
+            px, pz = r['P'][k]
+            for j in cand:
+                o = roads[j]
+                if o['L'] <= r['L'] and o['main'] == r['main']:
+                    continue
+                if inside0(px, pz, o) is not None:
+                    on += 1
+                    break
+        if on >= 0.8 * len(r['P']):
+            drop.add(xi)
+    net['dropped_fillers'] = len(drop)
+    roads[:] = [r for i, r in enumerate(roads) if i not in drop]
+    net['roads'] = roads
     # ranks
     lines = [LineString(r['P']) for r in roads]
     tree = STRtree(lines)
@@ -989,6 +1043,7 @@ def finish(net):
         if best[0] < road_half(o, best[1]) + margin:
             return best[1]
         return None
+    inside = inside0
     net['inside'] = inside
     ends_on = collections.defaultdict(set)    # X -> {Y}: X ends inside Y
     for xi, r in enumerate(roads):
@@ -1262,7 +1317,7 @@ def write(net):
               km=round(sum(chain(np.array([[q[0], q[2]] for q in r['s']]))[-1] for r in out_roads) / geo.SPM / 1000, 2),
               samples=sum(len(r['s']) for r in out_roads), decks=len(out_decks), roundabouts=len(out_rings),
               ranks_unique=len(set(ranks)) == len(ranks), rank_cycles_broken=net['rank_cycles'],
-              ends_on_smaller=net['ends_on_smaller'], json_chars=len(txt), modules=k,
+              ends_on_smaller=net['ends_on_smaller'], dropped_fillers=net.get('dropped_fillers'), json_chars=len(txt), modules=k,
               divided_roads=sum(1 for r in out_roads if r['median'] > 1.2))
     json.dump(st, open(os.path.join(od, 'stats.json'), 'w'), indent=1)
     return data, st

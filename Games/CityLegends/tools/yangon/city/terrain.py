@@ -66,6 +66,9 @@ OVERLAP_LOW = 6.0
 # kept (studs from the water), and the land round a bridge landing built past the outline (roadnet.REACH_OUT: the
 # Yangon-Dala Bridge lands on Dala-Twante Road). Batch 1 keeps its own rule (west of batch 0.5, EXT, a 600-stud bank).
 RIVER_EXT = {'2': dict(reach=2700.0, bank=320.0, landings=[(30391.0, 11066.0, 420.0)], ways=(1219935185,), way_bank=220.0)}
+# (2026-11-16, step 6) P3 downtown at 1:1: the Yangon River to its far (Dala) bank and Pazundaung Creek, with the quay
+# edge and the jetties; the Yangon-Dala Bridge's far end lands outside (the roads agent's job), no landing pad here
+RIVER_EXT['P3'] = dict(reach=2700.0, bank=360.0, landings=[], ways=(), way_bank=0.0)
 # batches written after another one: shared lakes keep the earlier batch's columns and level, the earlier batch's road
 # banks reach over the seam, and the earlier batch's state file is read for both (terrain_<u>_state.npz)
 LATER_BATCH_BLEND = {'2': ('1',), '3': ('1', '2')}
@@ -86,6 +89,7 @@ PILOT_BUNDS = {'P2': [dict(line=[(28324.1, 24897.6), (28465.8, 23745.3), (28656.
                            walk_m=3.0, grass_m=18.0, deep_m=2.0)]}
 PILOT_PADS = {'P2': [(34625.66, 17793.07, 157.5, 77.6, 60.0)]}
 QUAY_W = 10.0
+SHORE_MUD = 90.0           # (1:1) studs from a lake's shore with a mud bed (sand beyond)
 FAR_SHORE = 120.0          # studs of low far shore where a river runs out of the region into the void
 FAR_UP = 1.2
 PIER_UP_MIN = 3.0          # a pier's top at least this over the river level
@@ -530,6 +534,7 @@ def build(tag, log=print, diff=False):
     level = np.zeros((nx, nz), np.float32)
     # ---- water
     wet = np.zeros((nx, nz), bool)
+    rivm = np.zeros((nx, nz), bool)      # river / canal / dock columns (their banks get mud)
     bigriv = np.zeros((nx, nz), bool)    # the Yangon River and its docks (not Pazundaung Creek): the quay edge
     nwb = 0
     from shapely.geometry import Polygon as _Poly
@@ -577,7 +582,13 @@ def build(tag, log=print, diff=False):
         sub = (slice(i0, i1), slice(j0, j1))
         H[sub] = np.where(ins, bed, H[sub])
         level[sub] = np.where(ins, L, level[sub])
-        code[sub] = np.where(ins, 3 if river else 4, code[sub])
+        if river or not geo.ONE_TO_ONE:
+            code[sub] = np.where(ins, 3 if river else 4, code[sub])
+        else:
+            # (2026-11-16, coordinator) at 1:1 a lake / pond bed is MUD near its shore (sand read white through the
+            # shallow water), sand only out in the deep middle
+            code[sub] = np.where(ins, np.where(d <= SHORE_MUD, 3, 4), code[sub])
+        rivm[sub] |= ins & river
         wet[sub] |= ins
         if river and (w['area_ha'] > 300 or w['kind'] == 'dock'):
             bigriv[sub] |= ins
@@ -589,7 +600,7 @@ def build(tag, log=print, diff=False):
         Lnear = level[idx[0], idx[1]]
         near = (~wet) & inR & (d <= WATER_NEAR)
         H = np.where(near, np.maximum(H, Lnear + WATER_LAND_MIN), H)
-        rnear = (~wet) & inR & (d <= MUD_NEAR) & (code[idx[0], idx[1]] == 3)
+        rnear = (~wet) & inR & (d <= MUD_NEAR) & rivm[idx[0], idx[1]]
         if tag in RIVER_EXT:
             # (batch 2) downtown's riverfront is a built quay, not a mud bank: concrete within QUAY_W of the river inside
             # the outline (the far bank keeps its mud)

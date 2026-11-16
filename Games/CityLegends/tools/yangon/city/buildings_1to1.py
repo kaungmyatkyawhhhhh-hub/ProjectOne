@@ -60,7 +60,7 @@ sys.path.insert(0, HERE)
 import geo  # noqa: E402
 from glb import Mesh, write_glb, check_glb, code  # noqa: E402
 from landmark_glb3d import GROUPS, box_uv  # noqa: E402
-from kit_panels import Kit, ARCH, K_SET, FH, S  # noqa: E402
+from kit_panels import Kit, ARCH, K_SET, FH, S, height as kit_height  # noqa: E402
 from shells import collision  # noqa: E402
 import kit_pack  # noqa: E402
 
@@ -95,6 +95,21 @@ LANDMARK_SITES_BY_TAG["P2"] = {
     "inya_lake_hotel": dict(osm=["o1281765358", "o522822402"], pts=[], grow=15.0),
     "lotte_hotel": dict(osm=["o1525507325"], pts=[], grow=15.0),
 }
+# (2026-11-16, step 6) P3 downtown: Sule and Botataung are placed models (Workspace.Yangon1to1.Landmarks); the other
+# downtown landmarks are separate landmark jobs: their lots stay EMPTY (OSM buildings / areas of 16 Nov)
+LANDMARK_SITES_BY_TAG["P3"] = {
+    "sule": dict(osm=["o477836654"], areas=[131745510], pts=[], grow=6.0),
+    "botataung": dict(osm=["o180605242"], areas=[314136068], pts=[], grow=6.0),
+    "city_hall": dict(osm=["o5677100"], pts=[], grow=4.0),
+    "bogyoke_market": dict(osm=[], areas=[23395611], pts=[], grow=3.0),
+    "strand_hotel": dict(osm=["o102682120", "o185858884"], pts=[], grow=4.0),
+    "high_court": dict(osm=["o2409553"], pts=[], grow=5.0),
+    "secretariat": dict(osm=["o264732913"], pts=[], grow=8.0),
+    "central_station": dict(osm=["o102685394"], pts=[], grow=6.0),
+    "immanuel_baptist": dict(osm=["o182859345"], pts=[], grow=3.0),
+    "holy_trinity": dict(osm=["o186939481"], pts=[], grow=5.0),
+    "mahabandula_park": dict(osm=[], areas=[129485365], pts=[], grow=2.0),
+}
 LANDMARK_SITES = LANDMARK_SITES_BY_TAG.get(TAG, {})
 # earlier pilots this one meets (geo.PILOT_SEAMS): their buildings by the shared edge are kept, never doubled, and no
 # compound wall is drawn along the shared edge twice
@@ -119,6 +134,8 @@ PAL = {
     "civic": {"KW6": 0.5, "KW1": 0.3, "KWG": 0.2},
     "shed": {"KW6": 0.35, "KWG": 0.4, "KW1": 0.25},
     "market": {"KW6": 0.4, "KWG": 0.4, "KW1": 0.2},
+    # (P3) downtown colonial fronts (kit_reference 1: cream, ochre, mint / aqua, pale pink, white; dark-stained ones)
+    "colonial": {"KW6": 0.22, "KW3": 0.2, "KW1": 0.18, "KWG": 0.14, "KWD2": 0.1, "KW2": 0.08, "KW5": 0.04, "KW7": 0.04},
 }
 ROOFS = {  # pitched roof sheets (aerial: rust, blue, grey-zinc, red tile)
     "house": {"KRF": 0.45, "KRB": 0.2, "KRG": 0.2, "KRT": 0.15},
@@ -214,7 +231,31 @@ def landmark_zones(fp_by_id):
 
 
 # --------------------------------------------------------------------------------------------------- archetypes
+DOWNTOWN = TAG == "P3"
+
+
+def archetype_downtown(b, near_main):
+    """(2026-11-16, P3) the downtown grid: long thin shophouse lots of 3-6 storeys. Most shophouse / house / walk-up
+    footprints are colonial rows (more on the main roads), the rest 1960s-90s walk-ups (6-8 storeys) and low township
+    shops; big halls, schools, hospitals and religious buildings keep the general rule"""
+    kind, f, area = b["kind"], int(b["floors"] or 4), b["area_m2"]
+    r = rng_for("dt", b["id"])
+    if kind in ("shophouse", "house", "walkup", "villa") and area < 1500 and f < 9:
+        if f >= 7:
+            return "walkup", min(f, 8)
+        if f <= 3 and r.random() < 0.45:
+            return "township", min(max(f, 2), 3)
+        if r.random() < (0.78 if near_main else 0.62):
+            return "colonial", min(max(f, 3), 6)
+        return "walkup", min(max(f, 5), 8)
+    return None
+
+
 def archetype(b, near_main):
+    if DOWNTOWN:
+        a = archetype_downtown(b, near_main)
+        if a:
+            return a
     kind, f, area = b["kind"], int(b["floors"] or 2), b["area_m2"]
     if kind in ("mass",) or f >= 9:
         return ("condo", max(9, f)) if f >= 8 else ("civic", min(max(f, 3), 7))
@@ -459,6 +500,7 @@ def main():
     zones = landmark_zones(by_id)
     place_clear = unary_union([Polygon(p).buffer(0) for p in PLACES.get("clear", [])]) if PLACES.get("clear") else Polygon()
     place_over = PLACES.get("bld", {})
+    place_drop = set(PLACES.get("drop", []))
     stats = Counter()
     edge_in = district.buffer(-M(3))
     blds = []
@@ -469,6 +511,9 @@ def main():
         stats["footprints"] += 1
         if any(z.intersects(g.centroid) or z.intersection(g).area > 0.3 * g.area for z in zones.values()):
             stats["dropped_landmark_site"] += 1
+            continue
+        if b["id"] in place_drop:
+            stats["dropped_place_lot"] += 1
             continue
         if not place_clear.is_empty and (place_clear.contains(g.centroid) or place_clear.intersection(g).area > 0.3 * g.area):
             stats["dropped_place_lot"] += 1
@@ -670,7 +715,7 @@ def main():
         floor_n[floors] += 1
         base_arch = "shed" if arch == "market" else arch
         bay = ARCH[base_arch]["bay"] * S
-        Hs = (ARCH[base_arch]["gf"] + FH * (floors - 1)) * S
+        Hs = kit_height(base_arch, floors) * S
         par = ARCH[base_arch]["par"] * S
         wallc = wpick(r, PAL[arch])
         q["wall"] = wallc
@@ -714,14 +759,14 @@ def main():
             ray = LineString([(mid[0] + nx * 0.5, mid[1] + nz * 0.5), (mid[0] + nx * M(30), mid[1] + nz * M(30))])
             front = ray.intersects(corr)
             role = "front" if front else "side"
-            shop = front and arch in ("walkup", "township") and (arch == "township" or LineString(
+            shop = front and arch in ("walkup", "township", "colonial") and (arch != "walkup" or LineString(
                 [(mid[0] + nx * 0.5, mid[1] + nz * 0.5), (mid[0] + nx * M(12), mid[1] + nz * M(12))]).intersects(corr))
             ax, az = nz, -nx  # along = up x outward: runs from B to A
             yaw = math.atan2(nx, nz)
             if front:
                 fronts.append(dict(L=L, B=Bp, ax=ax, az=az, nx=nx, nz=nz, yaw=yaw, s=s, n=n, ps=ps))
             u = 0.0
-            var = (zlib.crc32(("%s%d" % (q["id"], ei)).encode()) % 2) if (role == "front" and arch in ("walkup", "township")) else 0
+            var = (zlib.crc32(("%s%d" % (q["id"], ei)).encode()) % 2) if (role == "front" and arch in ("walkup", "township", "colonial")) else 0
             stripe_done = False
             pieces = decompose(n) + ([0] if ps > 0 else [])
             for kk in pieces:
@@ -809,7 +854,7 @@ def main():
                                   wallc, rise / M(3), 2 * hw / M(6), q["crown"]))
                     stats["roof_crowns"] += 1
             # roof props on flat roofs: tanks, dishes, a stair room
-            if arch in ("walkup", "township", "civic", "condo") and g.area > M(5) * M(5) and not q.get("crown"):
+            if arch in ("walkup", "township", "civic", "condo", "colonial") and g.area > M(5) * M(5) and not q.get("crown"):
                 inner = g.buffer(-M(2.5))
                 if not inner.is_empty:
                     rp = inner.representative_point()
@@ -938,13 +983,13 @@ def main():
                 continue
             ed = min(near, key=lambda ab: LineString(ab).distance(gpt))
             if LineString(ed).length >= M(5.5):
-                best = (0.0, ed[0], ed[1])
+                best = (0.0, ed[0], ed[1], LineString(ed).project(gpt))
                 break
         if best:
-            _, a, b = best
+            a, b = best[1], best[2]
             L = math.hypot(b[0] - a[0], b[1] - a[1])
             ux, uz = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-            t = max(M(0.8), min(L - M(5.8), L / 2 - M(2.25)))
+            t = max(M(0.8), min(L - M(5.8), (best[3] if len(best) > 3 else L / 2) - M(2.25)))
             gx, gz = a[0] + ux * t, a[1] + uz * t
             gate_cut.append(LineString([(gx - ux * M(0.7), gz - uz * M(0.7)), (gx + ux * M(5.2), gz + uz * M(5.2))]).buffer(M(0.6)))
             # outward = away from the lot: the side the corridor is on
@@ -966,7 +1011,7 @@ def main():
     corr35 = corr.buffer(M(3.5))
     for q, l in lots:
         ring = LineString(l.exterior.coords)
-        if q["arch"] == "house":
+        if q["arch"] == "house" and not q.get("compound"):
             street.append(ring.intersection(corr35))
         else:
             full.append(ring)
@@ -1253,7 +1298,7 @@ def preview(blds, lots, corr, zones, district):
         d.polygon(P(g.exterior.coords), fill=(90, 90, 92))
     for _, l in lots:
         d.line(P(l.exterior.coords), fill=(190, 190, 180), width=1)
-    col = {"walkup": (120, 170, 220), "township": (230, 120, 80), "house": (220, 220, 210), "villa": (250, 250, 250),
+    col = {"walkup": (120, 170, 220), "township": (230, 120, 80), "colonial": (200, 150, 60), "house": (220, 220, 210), "villa": (250, 250, 250),
            "condo": (80, 120, 240), "civic": (230, 210, 120), "shed": (150, 100, 80), "market": (180, 80, 60)}
     for q in blds:
         d.polygon(P(q["g"].exterior.coords), fill=col[q["arch"]])
