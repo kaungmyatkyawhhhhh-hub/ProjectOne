@@ -71,3 +71,11 @@ Not done yet: rig (8 spine bones + Jaw) and Swim clip, baking colours into one t
 Owner: "lets not import yet. lets just view in blender first with everything set up then when its ready lets import into roblox studio". `install_serverstorage.luau` stays NOT run until the owner says it is ready.
 - Owner's Blender, scene **Mosasaurus T6**: the rigged export (rig + 2 meshes) replaced the unrigged parts; Swim action looping (frames 0-23, 24 fps, side-to-side S-wave, tail +/-8 deg); crystals use `Mosasaurus_T6_CrystalGlow` (emission 1.6 = Roblox Neon); EEVEE, Standard view transform (AgX turned the cyan glow white), dark-blue world + one sun, matte body (no white highlights on the flippers).
 - Copy of that setup: `export/Mosasaurus_T6_preview.blend`.
+
+---
+# Tweaks v2 (2026-11-16, owner picked: glowing eye, thinner lip band, bigger flippers)
+- **Glowing eye:** the lens is its own mesh `Mosasaurus_T6_Eyes` (Neon yellow in Studio); the slit pupil (`M6_EyePupil`) stays dark on the body mesh. FBX = 3 skinned meshes now (body 5,152 / crystals 336 / eyes 80 tris).
+- **Thinner lip band:** only the outer edge of the jaw's top is cream (|y| > 0.86 of the jaw half-width); the rest is mouth red. Picture `checks/mosa6_head_34.png`.
+- **Bigger flippers:** width 88 -> 112 px, 25 % longer (`len_k` 1.25 in mosa6_data.json).
+- Gates PASS (30 parts). IoU side 0.927, top 0.814, front 0.691 (top/front lower on purpose: flippers now bigger than the sheet).
+- Asset 104031266367399 is the v1 upload (before these tweaks). `install_serverstorage.luau` now needs the NEW upload's id (ASSET_ID) and also sets the eyes to Neon yellow. Not uploaded yet: the owner wants to approve in Blender first.

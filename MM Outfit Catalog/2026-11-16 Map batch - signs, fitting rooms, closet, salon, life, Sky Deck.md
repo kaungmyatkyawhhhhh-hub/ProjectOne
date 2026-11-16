@@ -150,3 +150,19 @@ The runway show scripts are in `ScriptBackups.retired_RunwayShow_16Nov` (disable
 ![[Screenshots/2026-11-16 spiral stairs top on the deck.jpg]]
 ![[Screenshots/2026-11-16 west entry wall removed.jpg]]
 ![[Screenshots/2026-11-16 phone podium.jpg]]
+
+## Floating lights fixed (owner: "these lights are floating")
+- **What was wrong:** all 18 penthouse lights are the same small wood plate with an opal diffuser underneath. 16 of them hung 1.8–8.8 studs below the ceiling with nothing holding them:
+  - gallery pendants
+  - lower circulation lamps
+  - media salon globes
+  - games pendant
+  - library, bedroom and dressing lights
+  - the top stairwell light
+- **Fix:**
+  - Each of the 16 now **hangs on a slim brass rod** (non-colliding) with a brass ceiling cap. The script ray-casts up to the first real ceiling or floor slab above.
+  - The 2 stair lights that stick out of the stair wall got a **brass wall mount**.
+- **Rule for next time:** a ceiling light below the ceiling needs a rod or cord; a wall light needs a mount. Check by ray-casting up and out from each fixture.
+- Not saved or published.
+
+![[Screenshots/2026-11-16 media lounge lights hung.jpg]]

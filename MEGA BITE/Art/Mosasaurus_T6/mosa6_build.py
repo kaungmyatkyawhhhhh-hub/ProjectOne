@@ -141,7 +141,7 @@ def jaw_col(p):
     # top faces: a thin cream lip line along the outer edge, mouth red inside; underside = belly, sides green
     if p.normal.z > 0.5 and p.center.x > X(CORNER - 5):
         jhw = 0.9 * HW((p.center.x + D['len_m'] / 2) / S + X0) * S
-        return jit(P['teeth'], p.index, 0.05) if abs(p.center.y) > 0.72 * jhw else jit(P['red'], p.index, 0.05)
+        return jit(P['teeth'], p.index, 0.05) if abs(p.center.y) > 0.86 * jhw else jit(P['red'], p.index, 0.05)
     if p.normal.z < -0.75: return jit(P['belly'], p.index, 0.05)
     return body_colour('LowerJaw', lambda q: Vector((q.center.x, 0, 99)))(p)
 loft('LowerJaw', xs_between(JX0, JX1, 10), jaw, colour=jaw_col)
