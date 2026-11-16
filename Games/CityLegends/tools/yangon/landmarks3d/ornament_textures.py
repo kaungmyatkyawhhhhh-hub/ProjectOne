@@ -1,8 +1,8 @@
 """ornament_textures.py (2026-11-16): the carved-relief maps for the ornament kit's panel field (group P), drawn in code.
 
 A seamless 512 px tile of Burmese foliate carving: a diaper of scroll leaves round small rosettes, with leaf veins and a
-bead border, as a HEIGHTFIELD; from it a normal map (OpenGL, +Y up, as Roblox wants), a colour map (white with dark
-cavities: the part's Color tints it, so one set serves gold and cream), a roughness map (cavities rough, raised polish
+bead border, as a HEIGHTFIELD; from it a normal map (OpenGL, +Y up, as Roblox wants), a colour map (gold with dark
+cavities, baked in), a roughness map (cavities rough, raised polish
 smooth) and a metalness map. No photo is copied.
 
     python ornament_textures.py   -> build/landmarks/ornament/tex/carved_{height,normal,color,rough,metal}.png
@@ -80,9 +80,11 @@ def main():
     blur = np.asarray(Image.fromarray((h * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(9)),
                       dtype=np.float32) / 255.0
     cav = np.clip((blur - h) * 3.0 + 0.5 * (1 - h), 0, 1)
-    col = np.clip(1.0 - 0.55 * cav, 0, 1)
-    c8 = (col * 255).astype(np.uint8)
-    Image.fromarray(np.stack([c8, c8, c8], -1), "RGB").save(os.path.join(OUT, "carved_color.png"))
+    col = np.clip(1.0 - 0.6 * cav, 0, 1)
+    # gold baked in (Studio showed the white map + a gold part Color as silver-grey on Metal): measured photo gold
+    gold = np.array([236, 184, 92], np.float32) / 255.0
+    rgb = (np.stack([col, col, col], -1) * gold * 255).astype(np.uint8)
+    Image.fromarray(rgb, "RGB").save(os.path.join(OUT, "carved_color.png"))
     rough = np.clip(0.28 + 0.5 * cav, 0, 1)
     Image.fromarray((rough * 255).astype(np.uint8)).save(os.path.join(OUT, "carved_rough.png"))
     Image.fromarray(np.full((N, N), 255, np.uint8)).save(os.path.join(OUT, "carved_metal.png"))
