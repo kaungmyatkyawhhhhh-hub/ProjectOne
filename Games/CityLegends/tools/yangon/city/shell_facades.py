@@ -12,6 +12,7 @@ its own wall colour.
 One tile = TILE studs square (MaterialVariant.StudsPerTile is one number): 6 floors of 10 studs (kit_panels.FH) and
 whole bays across (walk-up 6 x 10, shophouse 4 x 15, villa 5 x 12). Floor lines sit on the tile's edges.
 """
+import math
 import os
 import random
 
@@ -173,16 +174,22 @@ def main():
 SET_OF = {"walkup": "walkup", "condo": "walkup", "civic": "walkup", "township": "shop", "house": "villa", "villa": "villa"}
 
 
+def b36(n):
+    d = "0123456789abcdefghijklmnopqrstuvwxyz"
+    return d[n // 1296 % 36] + d[n // 36 % 36] + d[n % 36]
+
+
 def shell_sets(tags):
     """which facade set each shell box takes: the plot (plots.json) its middle lies in. Writes
-    build/shell_facades/keys_<k>.txt: lines '<set> <key> <key> ...', key = round(x*10)_round(z*10) of the box middle
-    (what YangonShellFacades.apply matches the Studio parts by). 'villa' is the default and is not listed."""
+    build/shell_facades/packed_<set>.txt: 6-character keys run together, key = base-36 (3 chars each) of the box
+    middle's x and z rounded to whole studs (what YangonShellFacades.apply matches the Studio parts by: Luau
+    math.round). 'villa' is the default and is not listed."""
     from collections import Counter
     from shapely.geometry import Point, Polygon
     from shapely.strtree import STRtree
     import json
     base = os.path.join(ROOT, "build", "city_1to1")
-    keys = {"walkup": [], "shop": [], "none": []}
+    keys = {"walkup": set(), "shop": set(), "none": set()}
     n = Counter()
     for tag in tags:
         d = os.path.join(base, "buildings_" + tag)
@@ -203,14 +210,11 @@ def shell_sets(tags):
                 st = SET_OF.get(arch, "none")
                 n[st] += 1
                 if st != "villa":
-                    keys[st].append("%d_%d" % (round(x * 10), round(z * 10)))
+                    keys[st].add(b36(math.floor(x + 0.5)) + b36(math.floor(z + 0.5)))
     os.makedirs(PREV, exist_ok=True)
-    k = 0
-    for st, lst in keys.items():
-        for i in range(0, len(lst), 3000):
-            k += 1
-            open(os.path.join(PREV, "keys_%d.txt" % k), "w").write(st + " " + " ".join(lst[i:i + 3000]))
-    print(dict(n), "pages", k)
+    for st, ks in keys.items():
+        open(os.path.join(PREV, "packed_%s.txt" % st), "w").write("".join(sorted(ks)))
+    print(dict(n), {k: len(v) for k, v in keys.items()})
 
 
 if __name__ == "__main__":

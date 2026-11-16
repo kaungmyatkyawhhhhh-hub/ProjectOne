@@ -499,6 +499,46 @@ def p_shed(W, bays, floors, role, age, market=False):
     return H
 
 
+def col_arch(x, z, w, h, holes, wall, shut, state):
+    """(P3) a colonial arched window / French door for the kit panels (kit.arch_window without its flickers: no bars
+    through the wall or the glass; the moulding ring is a flat band 0.05 m out, the keystone 0.14 m out, the fanlight
+    bars flat strips 0.04 m in front of the glass): recessed 0.35 m, teak shutters closed or ajar"""
+    r = w / 2
+    cx, zc = x + r, z + h
+    yb = K.REVEAL
+    K.opening(holes, x, z, w, h + r, 0.0, wall, glass=None)
+    K.front_quad("KGL", x, x + w, z, z + h, yb)
+    K.front_quad(K.R.choice(["NWH", "NWA", "NWY"]), x + 0.03, x + w - 0.03, z + 0.03, z + h - 0.03, yb - 0.03)
+    arc = [(cx + r * math.cos(math.pi * t / 8), zc + r * math.sin(math.pi * t / 8)) for t in range(9)]
+    for t in range(8):
+        K.face("KGL", [(cx, yb, zc), (arc[t][0], yb, arc[t][1]), (arc[t + 1][0], yb, arc[t + 1][1])], (0, -1, 0))
+    yg = yb - 0.04
+    for t in (2, 4, 6):   # fanlight bars: thin flat strips
+        ax, az = arc[t]
+        dx, dz = ax - cx, az - zc
+        L = math.hypot(dx, dz)
+        nx_, nz_ = -dz / L * 0.02, dx / L * 0.02
+        K.face("KGR", [(cx - nx_, yg, zc - nz_), (cx + nx_, yg, zc + nz_), (ax + nx_, yg, az + nz_), (ax - nx_, yg, az - nz_)],
+               (0, -1, 0))
+    K.front_quad("KGR", x, x + w, zc - 0.025, zc + 0.025, yg)
+    for corner, ts in (((x + w, zc + r), range(0, 4)), ((x, zc + r), range(4, 8))):
+        for t in ts:
+            K.face(wall, [(corner[0], 0.0, corner[1]), (arc[t][0], 0.0, arc[t][1]), (arc[t + 1][0], 0.0, arc[t + 1][1])], (0, -1, 0))
+    for t in range(8):
+        a, b = arc[t], arc[t + 1]
+        nx, nz = -(a[0] + b[0]) / 2 + cx, -(a[1] + b[1]) / 2 + zc
+        K.face(wall, [(a[0], 0.0, a[1]), (b[0], 0.0, b[1]), (b[0], yb, b[1]), (a[0], yb, a[1])], (nx, 0, nz))
+    ro = r + 0.12
+    for t in range(8):   # the moulding ring
+        a0 = math.pi * t / 8
+        a1 = math.pi * (t + 1) / 8
+        q = [(cx + r * math.cos(a0), -0.05, zc + r * math.sin(a0)), (cx + ro * math.cos(a0), -0.05, zc + ro * math.sin(a0)),
+             (cx + ro * math.cos(a1), -0.05, zc + ro * math.sin(a1)), (cx + r * math.cos(a1), -0.05, zc + r * math.sin(a1))]
+        K.face("KW0", q, (0, -1, 0))
+    K.box("KW0", cx - 0.12, -0.14, zc + r - 0.04, 0.24, 0.14, 0.3, faces=("-y", "+x", "-x", "top"))
+    shutters(x, z, w, h, 0.0, shut, state)
+
+
 def p_colonial(W, bays, floors, role, shop, age):
     """(2026-11-16, P3 downtown) a colonial shophouse front in kit panels (kit.colonial_row's details, per bay): shops
     under a ground-floor cornice, arched windows / French doors 0.35 m deep with teak shutters, a bracketed balcony on
@@ -523,7 +563,7 @@ def p_colonial(W, bays, floors, role, shop, age):
                 sw = K.R.uniform(1.2, BAY - 0.5)
                 K.sign(x + (BAY - sw) / 2, 3.62, sw, K.R.uniform(0.45, 0.6), 0.0)
         elif front:
-            K.arch_window(x + BAY / 2 - 0.6, 0.15, 1.2, 2.6, 0.0, holes, wall, shut, "closed")
+            col_arch(x + BAY / 2 - 0.6, 0.15, 1.2, 2.6, holes, wall, shut, "closed")
         else:
             window(x + BAY / 2 - 0.7, 1.0, 1.4, 1.5, 0.0, holes, wall, grille=True)
     band(trim, W, GF - 0.3, 0.3, 0.28)
@@ -540,8 +580,8 @@ def p_colonial(W, bays, floors, role, shop, age):
             x = k * BAY
             balc = K.R.random() < pb
             zz, hh = (z + 0.12, 2.4) if balc else (z + 0.6, 1.9)
-            state = K.R.choices(["closed", "flat", "ajar"], [0.5, 0.3, 0.2])[0]
-            K.arch_window(x + BAY / 2 - 0.575, zz, 1.15, hh, 0.0, holes, wall, shut, state)
+            state = K.R.choices(["closed", "ajar"], [0.6, 0.4])[0]
+            col_arch(x + BAY / 2 - 0.575, zz, 1.15, hh, holes, wall, shut, state)
             if not balc:
                 continue
             bd, x0, x1 = 1.1, x + 0.17, x + BAY - 0.17

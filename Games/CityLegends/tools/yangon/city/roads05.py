@@ -539,6 +539,9 @@ def build_pieces(edges, rings):
                         R['unfold'] = True
                     continue
             k0 = 0 if end == 0 else -1
+            # straight on along the run's own end direction (a midpoint off to one side bent the road's end)
+            pe, de = piece_end(p, end)
+            q = pe + de * max(0.0, float((q - pe) @ de))
             if np.linalg.norm(q - p.P[k0]) < 1:
                 continue
             ext = np.linspace(q, p.P[k0], max(2, int(np.linalg.norm(q - p.P[k0]) / 4) + 1))
@@ -589,19 +592,19 @@ def build_pieces(edges, rings):
 
 
 # ------------------------------------------------------------------------------------------------ 4. roads from pieces
-def piece_end(p, end):
+def piece_end(p, end, base=30.0):
     P = p.P
     if end == 0:
         q = P[0]
         k = min(len(P) - 1, 1)
         for k in range(1, len(P)):
-            if np.linalg.norm(P[k] - q) > 6:
+            if np.linalg.norm(P[k] - q) > base:
                 break
         d = q - P[k]
     else:
         q = P[-1]
         for k in range(len(P) - 2, -1, -1):
-            if np.linalg.norm(P[k] - q) > 6:
+            if np.linalg.norm(P[k] - q) > base:
                 break
         d = q - P[k]
     L = np.linalg.norm(d)
@@ -649,7 +652,7 @@ def join_roads(pieces, ring_keys, region):
         if any(k in ring_keys for k in (A.ends[ea], B.ends[eb]) if k is not None):
             continue
         cos = float(da @ db)          # both point outward: a straight join has cos = -1
-        lim = -math.cos(math.radians(40 if named else 30))
+        lim = -math.cos(math.radians(50 if named else 30))
         if cos > lim:
             continue
         gap = float(np.linalg.norm(qa - qb))
@@ -869,6 +872,53 @@ def build(tags):
 
 
 # ------------------------------------------------------------------------------------------------ 6. ranks, heights, decks
+def scc(n, succ):
+    """strongly connected components (iterative Tarjan): node -> component id"""
+    index = [None] * n
+    low = [0] * n
+    on = [False] * n
+    st = []
+    comp = [None] * n
+    nxt = [0]
+    cid = [0]
+    for v0 in range(n):
+        if index[v0] is not None:
+            continue
+        work = [(v0, iter(succ.get(v0, ())))]
+        index[v0] = low[v0] = nxt[0]
+        nxt[0] += 1
+        st.append(v0)
+        on[v0] = True
+        while work:
+            v, it = work[-1]
+            adv = False
+            for w in it:
+                if index[w] is None:
+                    index[w] = low[w] = nxt[0]
+                    nxt[0] += 1
+                    st.append(w)
+                    on[w] = True
+                    work.append((w, iter(succ.get(w, ()))))
+                    adv = True
+                    break
+                elif on[w]:
+                    low[v] = min(low[v], index[w])
+            if adv:
+                continue
+            work.pop()
+            if work:
+                low[work[-1][0]] = min(low[work[-1][0]], low[v])
+            if low[v] == index[v]:
+                while True:
+                    w = st.pop()
+                    on[w] = False
+                    comp[w] = cid[0]
+                    if w == v:
+                        break
+                cid[0] += 1
+    return comp
+
+
 def road_half(r, i):
     return max(r['wl'][i], r['wr'][i])
 
@@ -1065,10 +1115,15 @@ def finish(net):
         cls = RANK_CLASS.get(r['hw'], 6)
         key.append((cls, -float(r['lanes'].max()), -r['L'], r['label']))
     n = len(roads)
+    # mutual "ends on" relations (two pieces of a junction ending in each other) are left to the key: drop the edges
+    # inside each strongly connected group
+    comp = scc(n, {y: set(x for x in range(n) if y in ends_on.get(x, ())) for y in range(n)})
     indeg = [0] * n
     succ = collections.defaultdict(set)
     for x, ys in ends_on.items():
         for y in ys:
+            if comp[x] == comp[y]:
+                continue
             if x not in succ[y]:
                 succ[y].add(x)
                 indeg[x] += 1
@@ -1197,6 +1252,24 @@ def finish(net):
                 for side in ('wl', 'wr'):
                     r[side][k] = max(r[side][k], r[side][k] + (gore - r[side][k]) * u)
             dk[end + '_half'] = gore
+        # the side lanes clear of the deck (OSM draws the ground lanes under its edge): pushed out sideways
+        DL = LineString(r['P'][dk['from']:dk['to'] + 1])
+        for o in dk['sides']:
+            mv = np.zeros_like(o['P'])
+            for k in range(len(o['P'])):
+                pt = Point(o['P'][k])
+                t = DL.project(pt)
+                f = np.array(DL.interpolate(t).coords[0])
+                v = o['P'][k] - f
+                dd = float(np.linalg.norm(v))
+                need = dh + float(o['wl'][k] + o['wr'][k]) / 2 + 1.0
+                if 0 < t < DL.length and dd < need and dd > 1e-6:
+                    mv[k] = v / dd * (need - dd)
+            kk = 6
+            if len(mv) > 2 * kk + 1:
+                for cc in (0, 1):
+                    mv[:, cc] = np.convolve(np.pad(mv[:, cc], kk, mode='edge'), np.ones(2 * kk + 1) / (2 * kk + 1), mode='valid')
+            o['P'] = o['P'] + mv
         # the side lanes start / end square on the cut ends
         for o in dk['sides']:
             D = dirs(r['P'])
