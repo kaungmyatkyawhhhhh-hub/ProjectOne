@@ -304,6 +304,8 @@ def up_fix(t):
 # ------------------------------------------------------------------------------------------------ collect
 def collect(tag, folders):
     pages = read_pages(folders)
+    sub = os.path.join(od(tag), 'subset.json')
+    clip = shapely.union_all([Polygon(b) for b in json.load(open(sub))['boxes']]) if os.path.exists(sub) else None
     cells = collections.defaultdict(dict)
     for (cell, k), (_, body, fmt) in pages.items():
         cells[cell][k] = (fmt, body)
@@ -320,7 +322,10 @@ def collect(tag, folders):
         for k in ks:
             fmt, body = pg[k]
             ps.extend(decode_q(body) if fmt == 'Q' else decode(body))
-        report[cell] = dict(pages=len(ks), missing=missing, parts=len(ps))
+        n0 = len(ps)
+        if clip is not None:  # a subset build (roads05_subset.py): only parts whose centre is in its districts
+            ps = [q for q in ps if clip.contains(Point(q[2][0], q[2][2]))]
+        report[cell] = dict(pages=len(ks), missing=missing, parts=len(ps), clipped=n0 - len(ps))
         parts.extend(ps)
     pickle.dump(parts, open(os.path.join(od(tag), 'parts.pkl'), 'wb'))
     print(json.dumps(report, indent=1))

@@ -1432,9 +1432,12 @@ def write(net):
     cut = {}
     names = set()
     # side lanes: ranks just under their road
+    nth = collections.Counter()  # several side lanes on one side of a road (Kabar Aye Pagoda Road #4-#6): unique ranks
     for r in roads:
         if r.get('sideOf') is not None:
-            r['rank'] = r['sideOf']['rank'] + 0.1 + 0.1 * (r['sideSign'] > 0)
+            key = (id(r['sideOf']), r['sideSign'] > 0)
+            r['rank'] = round(r['sideOf']['rank'] + 0.1 + 0.1 * (r['sideSign'] > 0) + 0.01 * nth[key], 4)
+            nth[key] += 1
     turns = turn_runs(net)
     for r in sorted(roads, key=lambda r: r['rank']):
         P = r['P']
