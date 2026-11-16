@@ -217,7 +217,8 @@ def faces_of(part, surf=None):
             sides.append(t)
         top = max(sides, key=lambda t: sum(p[1] for p in t))
         tris.append(fix(top, c))
-        if k != 'R':
+        if k in ('r', 'w', 'B'):
+            # (pavement and median wedges show only their top: their sides are shared with the next wedge or under a kerb)
             # the prism's side faces (thickness), kept like a block's long sides: kerbs towards the road, pavements
             # away from it, medians and bridge pieces always
             a1, b1 = P(-hx, hy, hz), P(hx, hy, hz)
