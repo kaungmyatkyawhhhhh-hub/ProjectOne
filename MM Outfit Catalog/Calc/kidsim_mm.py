@@ -63,6 +63,8 @@ VERSIONS = [
     ("C + 'Try it on' button in the viewer (1 tap)", dict(loading_tip=True, try_taps=1.5, try_rate=0.7)),
     ("D + runway ring visible from spawn (sign)", dict(loading_tip=True, try_taps=1.5, try_rate=0.7, runway_find=0.45)),
     ("E + Photo booth sign", dict(loading_tip=True, try_taps=1.5, try_rate=0.7, runway_find=0.45, booth_find=0.3)),
+    ("F + cover 9 s -> 5 s", dict(loading=5.0, loading_tip=True, try_taps=1.5, try_rate=0.7, runway_find=0.45, booth_find=0.3)),
+    ("G + cover 5 s -> 3 s", dict(loading=3.0, loading_tip=True, try_taps=1.5, try_rate=0.7, runway_find=0.45, booth_find=0.3)),
 ]
 
 if __name__ == "__main__":
