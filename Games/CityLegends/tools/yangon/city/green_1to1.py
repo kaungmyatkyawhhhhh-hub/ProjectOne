@@ -91,9 +91,9 @@ SPECIES = {
     "school": {"rt": 0.25, "bl": 0.35, "mh": 0.10, "mg": 0.15, "cp": 0.15},
     "religious": {"rt": 0.35, "bl": 0.25, "cp": 0.20, "mg": 0.20},
     "lake": {"rt": 0.30, "bl": 0.30, "cp": 0.22, "mg": 0.08, "bn": 0.10},
-    "villa": {"mg": 0.28, "cp": 0.18, "bl": 0.20, "rt": 0.14, "bn": 0.10, "mh": 0.10},
-    "house": {"mg": 0.32, "cp": 0.18, "bl": 0.18, "rt": 0.08, "bn": 0.18, "mh": 0.06},
-    "walkup": {"bl": 0.40, "mg": 0.25, "cp": 0.15, "bn": 0.12, "rt": 0.08},
+    "villa": {"mg": 0.30, "cp": 0.12, "bl": 0.22, "rt": 0.18, "bn": 0.06, "mh": 0.12},
+    "house": {"mg": 0.36, "cp": 0.12, "bl": 0.22, "rt": 0.10, "bn": 0.12, "mh": 0.08},
+    "walkup": {"bl": 0.42, "mg": 0.28, "cp": 0.10, "bn": 0.08, "rt": 0.12},
     "default": {"bl": 0.45, "mg": 0.25, "cp": 0.15, "rt": 0.10, "bn": 0.05},
 }
 # crown diameter range (m) per family, the kit piece's reference diameter / height (tree_kit)
@@ -105,7 +105,8 @@ FAM = {
     "cp": dict(pids=("cp1", "cp2"), D=(6.5, 9.0), ref=8.0, base=13.0 / 8, low=False),
     "bn": dict(pids=("bn1",), D=(3.5, 6.0), ref=4.5, base=1.5 / 4.5, low=True),
 }
-SIZE_BINS = [((6, 10), 0.40), ((10, 18), 0.35), ((18, 28), 0.20), ((28, 35), 0.05)]
+# shifted to bigger crowns than the measured blob spread (its small blobs are crown fragments; research section 4)
+SIZE_BINS = [((6, 10), 0.22), ((10, 18), 0.46), ((18, 28), 0.26), ((28, 35), 0.06)]
 
 
 def log(*a):
@@ -420,7 +421,7 @@ def main():
         lim = min(d_deck[i, j] - 2.0, d_lmk[i, j] - 2.0)
         if f["low"]:
             lim = min(lim, d_wall[i, j] - M(0.3), d_bld[i, j] - 1.0)
-        for k_ in (1.0, 0.82, 0.68, 0.56):
+        for k_ in (1.0, 0.85):
             rr = min(r * k_, lim)
             Dm = 2 * rr
             if Dm < M(f["D"][0]) * 0.92:
@@ -548,7 +549,7 @@ def main():
     nfill = 0
     for i, j in zip(cand_i.tolist(), cand_j.tolist()):
         ci, cj = min(i // CELL, ncx - 1), min(j // CELL, ncz - 1)
-        if win_cov(ci, cj) >= win_t[ci, cj]:
+        if win_cov(ci, cj) >= win_t[ci, cj] or                 cov[ci * CELL:(ci + 1) * CELL, cj * CELL:(cj + 1) * CELL].sum() >= cell_t[ci, cj] * 1.15:
             continue
         x, z = G.xz(i, j)
         x += R.uniform(-1.8, 1.8)
@@ -557,8 +558,8 @@ def main():
         fam = species(zname, d_wat[i, j] <= M(50), R)
         D = sample_D(fam, R)
         Dm = fits(fam, x, z, D)
-        if not Dm and fam not in ("mg", "bn"):
-            fam = "mg" if R.random() < 0.6 else "bn"
+        if not Dm and fam not in ("mg", "bn") and R.random() < 0.4:
+            fam = "mg"
             Dm = fits(fam, x, z, sample_D(fam, R))
         if not Dm or not clear_of_trees(x, z, Dm / 2):
             continue
@@ -597,7 +598,7 @@ def main():
         if (bx - x) * nrm[0] + (bz - z) * nrm[1] < 0:
             nrm = (-nrm[0], -nrm[1])
         r_ = R.random()
-        if arch in ("villa", "civic", "condo") and r_ < 0.26 and sx > M(4):
+        if arch in ("villa", "civic", "condo") and r_ < 0.18 and sx > M(4):
             hl = 10.737
             n = max(1, int(round(sx / hl)))
             stretch = sx / (n * hl)
@@ -710,11 +711,11 @@ def main():
     for t in trees:
         if t["fam"] == "cp":
             Hm = 17.0 * t["sy"]
-            if Hm < 14:
+            if Hm < 19:
                 continue
             far.append("fp1 %.2f %.2f %.2f %.2f %.2f %.2f %.4f %d_%d" % (t["x"], t["y"], t["z"], t["D"] * 1.0, M(Hm),
                                                                      t["D"] * 1.0, t["yaw"], t["x"] // TILE, t["z"] // TILE))
-        elif t["D"] >= M(9.0) and t["fam"] != "bn":
+        elif t["D"] >= M(13.0) and t["fam"] != "bn":
             kp = kit[t["pid"]]["parts"]
             hgt = (kp["TRC"]["centre"][1] + kp["TRC"]["size"][1] / 2) * t["sy"]
             far.append("ff1 %.2f %.2f %.2f %.2f %.2f %.2f %.4f %d_%d" % (t["x"], t["y"], t["z"], t["D"] * 0.96, hgt,

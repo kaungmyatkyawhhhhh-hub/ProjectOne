@@ -21,6 +21,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from pagoda_lib import PGeo, catmull, export_site, flicker, LOOK, geo, SPM  # noqa: E402
+import ornament_kit as OK  # noqa: E402  (2026-11-16 carved ornament kit)
 from shapely.geometry import Polygon, box as sbox, Point  # noqa: E402
 from shapely import affinity  # noqa: E402
 
@@ -55,6 +56,9 @@ def grounds():
 
 
 # ---------------------------------------------------------------- the stupa
+KG = {"G": "GCV", "J": "GJL", "P": "GPN", "R": "RED"}   # ornament kit groups -> Sule looks
+
+
 def stupa(g):
     """v2 (look pass): profile measured on photo 1 (Maha Bandula Park, far camera: tip 44.1 m = 1670 px, 37.9 px a
     metre, widths read at 12 heights). Below 8 m the ring hides it; the broad terrace base is from photo 8 / OSM.
@@ -97,12 +101,25 @@ def stupa(g):
             x0, y0 = r * math.cos(t0), r * math.sin(t0)
             x1, y1 = r * math.cos(t1), r * math.sin(t1)
             return (x0 + (x1 - x0) * f + nx * 0.06, y0 + (y1 - y0) * f + ny * 0.06, zz)
-        A, B, C, D = pt(ra, za, 0.33), pt(ra, za, 0.67), pt(rc, zc, 0.67), pt(rc, zc, 0.33)
-        g.quad("GLT", A, B, C, D)
-        for (p, q) in ((A, B), (B, C), (C, D), (D, A)):
-            p2 = (p[0] - nx * 0.06, p[1] - ny * 0.06, p[2])
-            q2 = (q[0] - nx * 0.06, q[1] - ny * 0.06, q[2])
-            g.quad("GLT", p2, q2, q, p)
+        # 2026-11-16: a carved panel tile from the ornament kit (bevelled frame, raised rosette and corner scrolls on
+        # the normal-mapped carved field) on the bell face, in place of a flat gold plate
+        def on_face(r, zz, f):
+            x0, y0 = r * math.cos(t0), r * math.sin(t0)
+            x1, y1 = r * math.cos(t1), r * math.sin(t1)
+            return (x0 + (x1 - x0) * f, y0 + (y1 - y0) * f, zz)
+        A, B = on_face(ra, za, 0.33), on_face(ra, za, 0.67)
+        C, D = on_face(rc, zc, 0.67), on_face(rc, zc, 0.33)
+        base = ((A[0] + B[0]) / 2, (A[1] + B[1]) / 2, za)
+        top = ((C[0] + D[0]) / 2, (C[1] + D[1]) / 2, zc)
+        up = tuple(top[j] - base[j] for j in range(3))
+        hgt = math.sqrt(sum(v * v for v in up))
+        up = tuple(v / hgt for v in up)
+        rgt = (B[0] - A[0], B[1] - A[1], 0.0)
+        wid = math.hypot(rgt[0], rgt[1])
+        rgt = (rgt[0] / wid, rgt[1] / wid, 0.0)
+        out = (up[1] * rgt[2] - up[2] * rgt[1], up[2] * rgt[0] - up[0] * rgt[2], up[0] * rgt[1] - up[1] * rgt[0])
+        topw = math.dist(C, D)
+        OK.into_geo(OK.panel_tile((wid + topw) / 2, hgt), g, KG, base, rgt, out, up)
     # round from the shoulder: 5 rings (24.3 -> 28.2), bowl, lotus, the slender bud, hti cage, spire
     z = zt
     rp = [(2.1, z)]
@@ -401,27 +418,30 @@ def pyatthat_tpl(base=7.0, tiers=7, spire=True):
             c, d = pts1[(i + 1) % 4], pts1[i]
             g.quad(grp, (*a, z0), (*b, z0), (*c, z1), (*d, z1))
 
-    def crest(w, z, hgt, n):
-        # flame fingers standing on the eave edge (thin double-sided gold), plus a taller flame at each corner
+    def crest(w, z, hgt, n, lod):
+        # 2026-11-16: the ornament kit's carved crest on each eave (back board + bevelled flame fingers standing 0.05 m
+        # proud; scroll leaves, bead and glass on the big tiers) and a carved corner flame (horn) at each corner
         for i in range(4):
             c0 = [(-w, -w), (w, -w), (w, w), (-w, w)][i]
             c1 = [(-w, -w), (w, -w), (w, w), (-w, w)][(i + 1) % 4]
-            for k in range(n):
-                f0, f1 = (k + 0.15) / n, (k + 0.85) / n
-                fm = (k + 0.5) / n
-                A = (c0[0] + (c1[0] - c0[0]) * f0, c0[1] + (c1[1] - c0[1]) * f0, z + 0.01)
-                B = (c0[0] + (c1[0] - c0[0]) * f1, c0[1] + (c1[1] - c0[1]) * f1, z + 0.01)
-                C = (c0[0] + (c1[0] - c0[0]) * fm, c0[1] + (c1[1] - c0[1]) * fm, z + hgt)
-                g.tri("GWR", A, B, C)
-            ox, oy = c0[0] * 1.0, c0[1] * 1.0
-            dx, dy = (1 if ox > 0 else -1), (1 if oy > 0 else -1)
-            g.quad("GWR", (ox, oy, z + 0.01), (ox + dx * 0.25, oy + dy * 0.25, z + 0.01),
-                   (ox + dx * 0.45, oy + dy * 0.45, z + hgt * 2.6), (ox + dx * 0.1, oy + dy * 0.1, z + hgt * 2.2))
+            mx, my = (c0[0] + c1[0]) / 2, (c0[1] + c1[1]) / 2
+            ox, oy = (1.0 if mx > 1e-9 else -1.0 if mx < -1e-9 else 0.0), (1.0 if my > 1e-9 else -1.0 if my < -1e-9 else 0.0)
+            segs = max(1, (n + 2) // 3)                 # runs of <= 3 fingers (each piece <= 600 triangles)
+            Ls = (2 * w - 0.3) / segs
+            seg = OK.crest_segment(Ls, hgt, max(1, round(n / segs)), lod=lod)
+            for k in range(segs):
+                u = -(2 * w - 0.3) / 2 + Ls * (k + 0.5)
+                OK.into_geo(seg, g, KG, (mx + oy * u, my - ox * u, z), (oy, -ox, 0.0), (ox, oy, 0.0))
+            cx, cy = c0
+            d = math.hypot(cx, cy)
+            dx, dy = cx / d, cy / d
+            OK.into_geo(OK.crest_corner(hgt * 2.0, lod="lo" if lod != "hi" else "hi"), g, KG, (cx, cy, z), (dx, dy, 0.0),
+                        (-dy, dx, 0.0))
 
     w0 = s + 0.35
     g.quad("GLT", (-w0, -w0, 0.0), (-w0, w0, 0.0), (w0, w0, 0.0), (w0, -w0, 0.0))     # eave soffit
     frustum("GLD", w0, s * 0.7, 0.0, 1.0)
-    crest(w0, 0.0, 0.35, 7)
+    crest(w0, 0.0, 0.6, 5, "lo")
     z = 1.0
     w = s * 0.7
     for i in range(tiers):
@@ -432,7 +452,7 @@ def pyatthat_tpl(base=7.0, tiers=7, spire=True):
         g.quad("GLT", (-wo, -wo, z), (-wo, wo, z), (wo, wo, z), (wo, -wo, z))
         w2 = w * 0.76
         frustum("GLD", wo, w2, z, z + rh)
-        crest(wo, z, 0.3 * (0.92 ** i), max(3, 7 - i))
+        crest(wo, z, 0.5 * (0.92 ** i), max(2, 5 - i // 2), "lo" if i < 2 else "xlo")
         z += rh
         w = w2
     g.cap("GLD", [(-w, -w), (w, -w), (w, w), (-w, w)], z)
@@ -494,6 +514,8 @@ def shrine_tpl():
     g.plate("GLD", (dw + 0.35, s), (dw, s), 0.15, 2.65, 0.06)
     g.plate("GLD", (-dw, s), (-dw - 0.35, s), 0.15, 2.65, 0.06)
     g.plate("GLD", (dw + 0.35, s), (-dw - 0.35, s), 2.65, 3.2, 0.06)
+    # carved gilded pediment over the door (ornament kit, 2026-11-16): red field, gold frame, sun disc, flames
+    OK.into_geo(OK.gable_frame(1.9, 0.42), g, KG, (0.0, s, 3.2), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0))
     # interior
     ii = [(-i_, -i_), (i_, -i_), (i_, i_), (-i_, i_)]
     g.ring("TEL", ii, 0.15, 3.7, inward=True, edges=[0, 1, 3])

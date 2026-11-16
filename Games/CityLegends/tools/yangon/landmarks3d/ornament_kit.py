@@ -469,6 +469,13 @@ def crest_segment(L=1.5, h=0.6, n=3, lod="hi", glass=True):
     board = ccw([(-L / 2, 0.0), (L / 2, 0.0), (L / 2, 0.3 * h)] + top[::-1][:-1] + [(-L / 2, 0.3 * h)] if False else
                 [(-L / 2, 0.0), (L / 2, 0.0), (L / 2, 0.3 * h)] + [p for p in top[::-1] if p[0] < L / 2 - 1e-9])
     slab(P, "G", board, 0.0, tb, 0.008, back=True, band=False)
+    if lod == "xlo":       # far / small tiers: back board + flame fingers only (~55 triangles a finger)
+        for i in range(n):
+            x = -L / 2 + L * (i + 0.5) / n
+            fh = (0.86 if i == n // 2 else 0.74) * h
+            fl = move(flame_outline(0.5 * L / n, fh, lobes=1, n_lobe=2, barb=0.5), dx=x, dz=0.2 * h)
+            slab(P, "G", fl, tb + 0.005, 0.05, 0.012, back=True, band=False)
+        return P.check()
     rod(P, "G", -L / 2, L / 2, tb, 0.045 * h, 0.04 * h, k=3 if hi else 2)
     # scalloped band (gold) with green glass drops
     ns = 2 * n
@@ -599,7 +606,7 @@ def panel_tile(w=0.9, h=0.9, lod="hi"):
     f = 0.09 * min(w, h)
     hw = w / 2
     # field
-    slab(P, "P", [(-hw + f, f), (hw - f, f), (hw - f, h - f), (-hw + f, h - f)], 0.0, 0.02, 0.0, band=False)
+    slab(P, "P", [(-hw + f, f), (hw - f, f), (hw - f, h - f), (-hw + f, h - f)], 0.0, 0.03, 0.0, band=False)
     # frame: four bevelled bars (mitred)
     O = [(-hw, 0.0), (hw, 0.0), (hw, h), (-hw, h)]
     I = [(-hw + f, f), (hw - f, f), (hw - f, h - f), (-hw + f, h - f)]
@@ -613,14 +620,14 @@ def panel_tile(w=0.9, h=0.9, lod="hi"):
         t = 2 * math.pi * i / 32
         rr = r * (0.62 + 0.38 * abs(math.cos(4 * t)) ** 0.6)
         pet.append((rr * math.cos(t), zc + rr * math.sin(t)))
-    slab(P, "G", pet, 0.02, 0.05, 0.012, band=False)
-    slab(P, "G", circle(0.32 * r, 8, 0.0, zc), 0.07, 0.035, 0.01, band=False)
+    slab(P, "G", pet, 0.03, 0.05, 0.012, band=False)
+    slab(P, "G", circle(0.32 * r, 8, 0.0, zc), 0.08, 0.035, 0.01, band=False)
     for sx in (1, -1):
         for sz in (1, -1):
             cx, cz = sx * (hw - f - 0.12 * w), zc + sz * (h / 2 - f - 0.12 * h)
             cu = scroll(0.2 * min(w, h), cx, cz, ang=(0 if sz < 0 else 180) + (-sx * 20 if sz < 0 else sx * 20),
                         mirror=(sx < 0) == (sz < 0), n=5)
-            slab(P, "G", cu, 0.02, 0.035, 0.01, band=False)
+            slab(P, "G", cu, 0.03, 0.035, 0.01, band=False)
     return P.check()
 
 

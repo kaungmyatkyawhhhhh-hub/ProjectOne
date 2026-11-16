@@ -135,22 +135,37 @@ end
 -- chunk is at its constant limit.)
 Config.Areas = (function()
 	return {
-		YangonAreas = { { 25000, math.huge, -math.huge, math.huge } },
+		-- (2026-11-16) the 1:1 Yangon frame (tools/yangon/city/geo.py at YANGON_SCALE=1to1: the whole OSM box lands at
+		-- x 15,600-60,400, z 6,800-53,200, clear of the old map's z -12,000-3,000); its lanes are 12 wide
+		YangonAreas = { { 25000, math.huge, -math.huge, math.huge }, { 15000, 61000, 6000, 54000 } },
+		Yangon1to1Areas = { { 15000, 61000, 6000, 54000 } },
 		LaneWidthYangon = 16,
+		LaneWidthYangon1to1 = 12,
 	}
 end)()
-function Config.isYangonAt(pos: Vector3): boolean
-	for _, b in Config.Areas.YangonAreas do
+local function inBoxes(boxes, pos: Vector3): boolean
+	for _, b in boxes do
 		if pos.X >= b[1] and pos.X <= b[2] and pos.Z >= b[3] and pos.Z <= b[4] then
 			return true
 		end
 	end
 	return false
 end
+function Config.isYangonAt(pos: Vector3): boolean
+	return inBoxes(Config.Areas.YangonAreas, pos)
+end
+-- (2026-11-16) the 1:1 Yangon frame (Workspace.Yangon1to1, pilot districts P1...)
+function Config.isYangon1to1At(pos: Vector3): boolean
+	return inBoxes(Config.Areas.Yangon1to1Areas, pos)
+end
 function Config.mapAt(pos: Vector3): string
 	return if Config.isYangonAt(pos) then "Yangon" else "Riviera"
 end
-function Config.laneWidth(): number
+-- the lane width of the map in use, or (with a point) of the area that point is in: 12 in the 1:1 frame
+function Config.laneWidth(pos: Vector3?): number
+	if pos and Config.isYangon1to1At(pos) then
+		return Config.Areas.LaneWidthYangon1to1
+	end
 	return if Config.activeMap() == "Yangon" then Config.Areas.LaneWidthYangon else Config.City.LaneWidth
 end
 

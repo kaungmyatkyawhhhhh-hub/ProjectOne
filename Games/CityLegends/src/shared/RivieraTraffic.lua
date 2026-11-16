@@ -346,6 +346,39 @@ function RivieraTraffic.build()
 			end
 		end
 	end
+	-- (2026-11-16, the 1:1 Yangon frame: tools/yangon/city/roads.py P1 + lanes_1to1.py) the pilot districts' lanes in
+	-- modules YangonLanes1to1_<k>, numbered from 1 within the 1:1 set (`first`, links too) so they don't depend on the
+	-- old map's modules; added after everything above with that count as the offset. The frame lies far from the old
+	-- map (Config.isYangon1to1At), so Traffic's spawns near the player keep each map's cars on its own lanes.
+	do
+		local base = #data.lanes
+		local la, li = nil, nil
+		for k = 1, 60 do
+			local m = script.Parent:FindFirstChild("YangonLanes1to1_" .. k)
+			if not m then
+				break
+			end
+			local okB, mod = pcall(require, m)
+			local count = if la then #la - base else 0
+			if okB and type(mod) == "table" and mod.first == count + 1 then
+				if not la then
+					la, li = table.clone(data.lanes), table.clone(data.links)
+				end
+				for _, l in mod.lanes do
+					table.insert(la, l)
+				end
+				for _, x in mod.links do
+					table.insert(li, { x[1] + base, x[2], x[3] + base, x[4] })
+				end
+			else
+				warn("RivieraTraffic: YangonLanes1to1_" .. k .. " is out of step; the 1:1 frame's traffic is incomplete")
+				break
+			end
+		end
+		if la then
+			data = { lanes = la, links = li }
+		end
+	end
 	local dataLanes, dataLinks = oneLaneStreets(data)
 	dataLinks = mergeRouteEnds(dataLanes, dataLinks)
 	local all, lanes = {}, {}
