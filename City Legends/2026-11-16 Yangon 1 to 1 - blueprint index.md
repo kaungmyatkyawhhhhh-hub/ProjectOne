@@ -46,6 +46,7 @@ created: 2026-11-16
 | Maha Wizaya Pagoda (1:1 model, walkable hollow chamber with the star-sign dome; 51.5 m, 36k tris, in Studio) | [[2026-11-16 Maha Wizaya Pagoda 3D model]] |
 | Ordinary pagodas and stupas (48; 26 placed round P1) | [[2026-11-16 Pagoda generator]] |
 | P1 street detail: poles, cables, transformers, white lamps, signals, YBS stops, real name signs, tea shops, stalls, trishaws, drains (client-streamed, in Studio) | [[2026-11-16 P1 street detail (1 to 1)]] |
+| P1 real places and condos: 2 fuel stations, 4 car parks, 29 courts / pitches, 2 playgrounds, 16 walled compounds, condos at real levels (Pearl Condo crowns) | [[2026-11-16 P1 real places and condos (1 to 1)]] |
 | District P2 north of P1 (Inya north / east, Kaba Aye on real ground, P1 seam, Pyay Road bund, buildings, trees; roads placeholder) | [[2026-11-16 Yangon rescale plan - 1 to 1 at player scale#Step 5 progress: P2]] |
 
 ## Already live in the current map (16 Nov, version 957)

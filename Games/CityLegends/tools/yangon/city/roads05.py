@@ -1083,7 +1083,7 @@ def finish(net):
     tree = STRtree(lines)
     drop = set()
     for xi, r in enumerate(roads):
-        if r['L'] > 240 or any(r is dk['road'] for dk in decks):
+        if any(r is dk['road'] for dk in decks):
             continue
         cand = [int(j) for j in tree.query(lines[xi].buffer(60)) if int(j) != xi and int(j) not in drop]
         on = 0

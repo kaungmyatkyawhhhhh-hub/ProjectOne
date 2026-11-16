@@ -572,13 +572,25 @@ function M.findMouths(names: { string })
 						break
 					end
 					k += step
-					assert(k >= 1 and k <= o.n, "mouth: " .. name .. " never leaves " .. m.on)
+					if k < 1 or k > o.n then
+						k = nil
+						break
+					end
 				end
-				m.k = k
-				for i = math.min(i0, k), math.max(i0, k) - 1 do
-					M.noSlab[name][i] = true
+				if k then
+					m.k = k
+					for i = math.min(i0, k), math.max(i0, k) - 1 do
+						M.noSlab[name][i] = true
+					end
+					table.insert(M.mouths, m)
+				else
+					-- (1:1: a road lying wholly on a bigger one is a duplicate: not built)
+					for i = 1, o.n do
+						M.cut[name][i] = "inside " .. m.on
+					end
+					M.dropped = M.dropped or {}
+					table.insert(M.dropped, name)
 				end
-				table.insert(M.mouths, m)
 			end
 		end
 	end
@@ -3288,8 +3300,7 @@ function M.stepCell(box: { number }, root: Instance)
 	task.wait()
 	table.insert(log, M.scrub(true))
 	table.insert(log, string.format("(%.0f s in all)", os.clock() - t0))
-	return table.concat(log, "
-")
+	return table.concat(log, "\n")
 end
 
 return M

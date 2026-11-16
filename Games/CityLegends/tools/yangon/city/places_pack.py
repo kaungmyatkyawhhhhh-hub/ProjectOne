@@ -78,5 +78,30 @@ def main():
     print("wrote %s  %d bytes, %d shell pages, YangonKitData %d chars checksum %d" % (out, len(x.encode("utf-8")), k, len(src), h))
 
 
+
+
+def places_only():
+    """the places layer alone (Data_<tag>P + Grade pages + PlacesApply): after the buildings / green swap is in"""
+    parts = [inner_folder(os.path.join(B1, "places_%s" % TAG, "ygnplaces_%s.rbxmx" % TAG.lower()))]
+    for p in sorted(glob.glob(os.path.join(B1, "places_%s" % TAG, "Grade_*.txt"))):
+        parts.append('<Item class="StringValue" referent="G%s"><Properties><string name="Name">%s</string>'
+                     '<string name="Value">%s</string></Properties></Item>' % (
+                         os.path.basename(p)[6:-4], os.path.splitext(os.path.basename(p))[0], escape(open(p).read())))
+    code = open(os.path.join(ROOT, "tools", "yangon", "PlacesApply.luau"), encoding="utf-8").read().replace("\r\n", "\n")
+    parts.append('<Item class="ModuleScript" referent="M2"><Properties><string name="Name">PlacesApply</string>'
+                 '<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString></Properties></Item>' % code)
+    x = ('<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+         'version="4"><Item class="Folder" referent="H1"><Properties><string name="Name">PlacesOnly_%s</string></Properties>%s'
+         '</Item></roblox>' % (TAG, "".join(parts)))
+    out = os.path.join(ROOT, "imports", "sync", "places_only_%s.rbxmx" % TAG.lower())
+    open(out, "w", encoding="utf-8", newline="\n").write(x)
+    import xml.dom.minidom
+    xml.dom.minidom.parseString(x.encode("utf-8"))
+    print("wrote %s  %d bytes" % (out, len(x.encode("utf-8"))))
+
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 2 and sys.argv[2] == "places":
+        places_only()
+    else:
+        main()

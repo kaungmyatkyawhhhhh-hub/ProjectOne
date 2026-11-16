@@ -130,6 +130,33 @@ function A.kitData(holding: Instance): string
 	return "YangonKitData " .. #dst.Source .. " chars, checksum " .. h
 end
 
+-- terrain cut over the graded slabs (Grade_<n> lines "cx cz sx sz yaw top"): Air from top - 0.5 up 40 studs, so the
+-- forecourt / car park / court slab is the surface (no terrain through it, no flicker with it)
+function A.grade(holding: Instance): string
+	local n = 0
+	for _, text in pages(holding, "Grade") do
+		for line in string.gmatch(text, "[^\n]+") do
+			local w = string.split(line, " ")
+			local cx, cz, sx, sz, yaw, top = tonumber(w[1]), tonumber(w[2]), tonumber(w[3]), tonumber(w[4]), tonumber(w[5]), tonumber(w[6])
+			if cx then
+				local H = 40
+				workspace.Terrain:FillBlock(CFrame.new(cx, top - 0.5 + H / 2, cz) * CFrame.Angles(0, yaw, 0),
+					Vector3.new(sx, H, sz), Enum.Material.Air)
+				n += 1
+				if n % 5 == 0 then
+					task.wait()
+				end
+			end
+		end
+	end
+	return "graded " .. n
+end
+
+-- a district's places layer only (Data_<tag>P): replaces the folder in ReplicatedStorage.YgnKit
+function A.placesData(holding: Instance): string
+	return A.data(holding)
+end
+
 function A.spawn(name: string, fn)
 	SS:SetAttribute("PlacesApplyStatus", name .. ": running")
 	task.spawn(function()
