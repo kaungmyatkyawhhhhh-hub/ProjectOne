@@ -636,6 +636,14 @@ Rules for every step:
 - **Numbers (P1 + P2):** 944 roads (30 main, 912 streets, 2 side lanes), 151 km, 58,128 samples, 2 decks, 2 roundabouts, 14 divided roads.
 - **Next:** YangonRoads parameterised for 1:1 (roundabouts list, deck half from data, walk per road, near-grid reach), build cell by cell, bake, replace `Yangon1to1.Roads`.
 
+### Roads05 step 2: P1 + P2 built, baked and live (16 Nov 2026, place saved)
+- **Built in Studio** with the Friday builder (`YangonRoads.stepCell(box, root)`: roads, mouths, corners, verge, roundabouts, medians, decks, scrub) one 3072-stud cell at a time (22 cells), each cell exported by `RoadBake05.collect` as `@Q` pages (persisted in `ServerStorage.R05Pages` StringValues so a Studio restart loses nothing), then wiped. 278 pages, 1,234,714 parts.
+- **Baked offline:** `roads05_bake.py P1_P2 collect <pages>` then `bake` -> 456 meshes in 33 glbs (≤1536-stud cells), 2.77 M triangles (kerb bands KR + KW 1.54 M, pavements 0.75 M: the next saving is a textured kerb strip instead of one box per 3.2-stud band), 14,452 invisible collision boxes in 7 `Collide05_*` pages. Paint as triangulated polygons 0.08 over the road (525 tiny pieces dropped).
+- **Live:** `Workspace.Yangon1to1.Roads` = new `Meshes` (72 cells) + `Collide`. Old roads backed up in `ServerStorage.RoadsOld_preR05` until the Play checks pass. Glb asset ids in `build/city_1to1/roads05_P1_P2/upload_ids.json`.
+- **Traffic:** `roads05_lanes.py P1_P2 --install` -> `YangonLanes1to1_1..4` (175 lanes, 321 links, 0 dead ends, 86 turn-rounds at the map edges), synced into `ReplicatedStorage.Shared`.
+- **Checks:** aerials of the Myanmar Centre junction (zebras, yellow median lines, red-white kerbs), Hanthawaddy (a real 3-lane roundabout with give-way and hatched splitters) and the Kabar Aye flyover (one deck, ground lanes under it) look like Friday's roads. Buildings over the new carriageways: P1 80 of 7,266 shells, P2 81 of 8,282 overlap more than 4 sq studs (`roads05_clear.py`, lists in `clear_P1.json` / `clear_P2.json`): the building agent re-cuts them.
+- **Traps:** Studio's `ClaudeTools.YangonRoadMeshes.LOOK` had no LY (yellow paint was skipped: patched in Studio); `open_cloud_invoke` uploads of ~10 MB glbs time out when several run at once: send them one at a time and read each operation after; a cell that errors leaves parts behind, so wipe the build root before and after every cell.
+
 ## Step 6 progress: P3
 
 ### District P3, downtown (16 Nov 2026; built and checked in the copy place, ready to move)
