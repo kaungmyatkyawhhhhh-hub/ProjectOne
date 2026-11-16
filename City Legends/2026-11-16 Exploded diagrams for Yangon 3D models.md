@@ -27,6 +27,8 @@ The method is the "Exploded Diagram Method" in [[Brain/Skills/roblox-3d-model-fr
      2. In a Windows terminal, run `setx OPENROUTER_API_KEY "your-key"`.
      3. Restart Claude.
    - Claude never types or sees the key. A run makes at most 4 calls.
+   - **Status (16 Nov):** the key `CityLegends` is set, with a $10 limit. The account still has $0 credit, so image calls answer 402 "Payment Required". The owner adds credit at openrouter.ai/settings/credits.
+   - Image models listed on 16 Nov include `google/gemini-3.1-flash-image` (the default pick: cheap) and `openai/gpt-5.4-image-2`.
 
 ## Sheets made
 | # | Object | Refs | Sheet | Notes |

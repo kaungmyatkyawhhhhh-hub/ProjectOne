@@ -22,6 +22,7 @@ import json
 import mimetypes
 import os
 import sys
+import urllib.error
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -53,8 +54,14 @@ def call(model, prompt, refs):
     req = urllib.request.Request(URL, data=json.dumps(body).encode(), method="POST",
                                  headers={"Authorization": "Bearer " + key, "Content-Type": "application/json",
                                           "X-Title": "City Legends exploded refs"})
-    with urllib.request.urlopen(req, timeout=300) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req, timeout=300) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read()[:500].decode("utf-8", "replace")
+        if e.code == 402:
+            sys.exit("OpenRouter 402: the account has no credit. The owner adds credit at openrouter.ai/settings/credits. " + body)
+        sys.exit("OpenRouter HTTP %d: %s" % (e.code, body))
 
 
 def main():
