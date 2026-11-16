@@ -222,3 +222,6 @@ The coordinator said Ngahtatgyi v2 is good and stays as it is. Only Chaukhtatgyi
 - The real head is seen near profile in photo 1, with a sharper nose and deeper set eyes. Ours is softer and flatter.
 - The crown is a ribbed band with petals and jewel balls, not the photo's filigree.
 - The mouth-corner grey patches are visible close up.
+
+## Paid 3D generation: no (owner, 16 Nov 2026)
+Owner: "nvm no money". No paid 3D generators (Tripo, Hunyuan3D, Hyper3D, Meshy, Premium). Head v3 stays; later improvements are by hand in Blender (sharper nose, deeper-set eyes, filigree crown).
