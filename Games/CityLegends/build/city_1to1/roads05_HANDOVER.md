@@ -1,4 +1,24 @@
-# roads05 handover (17 Nov 2026, third pass: J7)
+# roads05 handover (17 Nov 2026, fourth pass: J8)
+
+## J8 (this pass)
+- `roads05_fix.py`: `ring_clear` (Lane #4701 pushed out 6.7 studs at most by Roundabout 1, so its inner kerb clears the ring's
+  pavement: the sawtooth is gone) and `butt_match` (after repair; 20 single continuations start on their host's full end
+  cross-section, tapering back over 40 studs: the Bogyoke x Pazundaung Y has asphalt in the gore now). Backup of the J7
+  data: `roads05_P1.._P12/roads_J7.json`, `qa_J7.json`. mouthsim: 0 failed of 7,926. QA counts unchanged (QA does not
+  count either fault): mouth_short 46, mouth_over 38, kerb_cross 22, median_cross 1, deck_grade 24, deck_foot 1, the rest 0.
+- Studio J8 (same 7 junctions, no-terrain copy, lifted 400, saved v1163, "Saved new changes" 23:23:32Z, lock released,
+  no data modules left). Shots `City Legends/2026-11-17 roads05 J8 test - *.jpg`. 0 MOUTH FAILED everywhere.
+  - PASS: University Ave x Kabar Aye; Bogyoke x Pazundaung Y (gore filled).
+  - Bahan Road at Roundabout 1: sawtooth gone; the island NOSE where Lane #4701 splits off is still notched (a stepped
+    pavement end, the slip's inner kerb starts late). Needs a round nose (a corner between two diverging roads).
+  - Hanthawaddy / Sule: ring corner points unchanged (not worked on). Diagnosis: Hanthawaddy Road #2 side -1 has a corner
+    of r 1.64 (an arm meeting the ring at ~8.5 degrees: T 22 x tan(theta/2)); the arc kerb wraps a 1.6-stud nose.
+  - Pyay x University, slip triangle: island insides unpaved + small pavement breaks (not worked on). Satellite: the
+    Pyay x University islands are paved concrete (zebras run onto them) -> fill islands with pavement.
+- NOT done this pass (in order): ring corner points (try a minimum corner r ~3 by raising T on sharp wedges); island
+  fill + pavement breaks; diverging nose; QA rows; deck_grade / deck_foot. Plan is NOT ready for owner approval.
+
+## Third pass (J7)
 
 Owner rule: NO full rebuild / swap in Studio until the owner approves the overlays. Studio is clean (no Roads05_* data
 modules, no Roads05Test, no YangonScraps, no YangonRoadsJ7), saved v1161 ("Saved new changes" 22:39:33Z in the Studio

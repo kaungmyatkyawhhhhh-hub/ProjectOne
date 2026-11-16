@@ -69,6 +69,117 @@ def drop_dups(data):
     return dup
 
 
+RING_WALK, KERB_W = 7.5, 0.9  # YangonRoads 1:1 ring pavement / kerb
+
+
+def ring_clear(data):
+    """A road passing a roundabout without joining it (a slip like Lane #4701 by Roundabout 1, 2-3 m off the ring in
+    OSM) had its kerb inside the ring's kerb / pavement band: the builder cut it piece by piece (a sawtooth). Its
+    samples are pushed out radially until its inner kerb clears the ring's pavement (the shift tapers off at 15%
+    a stud along the road), directions re-taken from the neighbours. Never a road with any sample inside r_out."""
+    moved = []
+    for r in data['roads']:
+        s = r['s']
+        if len(s) < 2 or r.get('closed'):
+            continue
+        for g in data['roundabouts']:
+            if r['name'] in g.get('arms', ()):
+                continue
+            cx, cz, ro = g['c'][0], g['c'][2], g['r_out']
+            rads = [math.hypot(q[0] - cx, q[2] - cz) for q in s]
+            if min(rads) < ro or min(rads) > ro + 60:
+                continue
+            rv = ro / math.cos(math.pi / 96)
+            push = []
+            for q, rad in zip(s, rads):
+                ux, uz = (cx - q[0]) / rad, (cz - q[2]) / rad  # towards the centre
+                hin = q[7] if (-q[4]) * ux + q[3] * uz > 0 else q[6]  # right = (-dz, dx)
+                push.append(max(0.0, rv + RING_WALK + KERB_W + 0.5 + hin - rad))
+            if max(push) <= 0:
+                continue
+            # taper: along-road distance between samples
+            along = [0.0]
+            for a, b in zip(s, s[1:]):
+                along.append(along[-1] + math.hypot(b[0] - a[0], b[2] - a[2]))
+            disp = [max(p - abs(along[i] - along[j]) * 0.15 for j, p in enumerate(push)) for i in range(len(s))]
+            if disp[0] > 0.01 or disp[-1] > 0.01:
+                continue  # it would move a road end (a mouth): leave it to the mouth tools
+            for q, rad, dd in zip(s, rads, disp):
+                if dd > 0:
+                    q[0] = round(q[0] + (q[0] - cx) / rad * dd, 2)
+                    q[2] = round(q[2] + (q[2] - cz) / rad * dd, 2)
+            for i in range(len(s)):
+                if disp[i] > 0 or (i > 0 and disp[i - 1] > 0) or (i + 1 < len(s) and disp[i + 1] > 0):
+                    a, b = s[max(i - 1, 0)], s[min(i + 1, len(s) - 1)]
+                    L = math.hypot(b[0] - a[0], b[2] - a[2]) or 1
+                    s[i][3], s[i][4] = round((b[0] - a[0]) / L, 4), round((b[2] - a[2]) / L, 4)
+            moved.append(dict(road=r['name'], ring=g['name'], max_shift=round(max(disp), 2)))
+    return moved
+
+
+MORPH = 40.0
+
+
+def butt_match(data):
+    """A continuation (startsOnEnd / endsOnEnd) narrower than, or off-centre from, its host's end left a strip of the
+    host's end line with no slab on the far side (the Bogyoke x Pazundaung Y: Upper Pazundaung #3 is 63 wide, Lower
+    Pazundaung 45 and 14 off-centre: grass in the gore). The continuation's first MORPH studs now start on the host's
+    end cross-section exactly (centre and both edges) and taper back to its own. Only where one road continues that
+    end (a real fork keeps both branches as they are)."""
+    R = {r['name']: r for r in data['roads']}
+    users = {}
+    for r in data['roads']:
+        for key, e in (('startsOnEnd', 0), ('endsOnEnd', -1)):
+            h = R.get(r.get(key))
+            if not h or len(r['s']) < 2:
+                continue
+            c = r['s'][e]
+            he = min((0, -1), key=lambda k: math.hypot(h['s'][k][0] - c[0], h['s'][k][2] - c[2]))
+            users.setdefault((h['name'], he), []).append((r, e))
+    done = []
+    for (hn, he), us in users.items():
+        if len(us) != 1:
+            continue
+        r, e = us[0]
+        hq = R[hn]['s'][he]
+        rh = (-hq[4], hq[3])
+        eL = (hq[0] - rh[0] * hq[6], hq[2] - rh[1] * hq[6])
+        eR = (hq[0] + rh[0] * hq[7], hq[2] + rh[1] * hq[7])
+        tc = ((eL[0] + eR[0]) / 2, (eL[1] + eR[1]) / 2)
+        H = math.hypot(eL[0] - eR[0], eL[1] - eR[1]) / 2
+        s = r['s'] if e == 0 else r['s'][::-1]
+        c0 = s[0]
+        rc = (-c0[4], c0[3])
+        lat = (tc[0] - c0[0]) * rc[0] + (tc[1] - c0[2]) * rc[1]
+        if abs(lat) < 1 and abs(H - c0[6]) < 1 and abs(H - c0[7]) < 1:
+            continue
+        # (only the same road going on: same one-way-ness, mostly on the host's end, at least half as wide; a one-way
+        # carriageway leaving a two-way host is half of a split, not this)
+        if bool(r.get('oneway')) != bool(R[hn].get('oneway')):
+            continue
+        lo, hi = max(-lat - c0[6], -H), min(-lat + c0[7], H)  # own span along its right vector, host centre = 0
+        if hi - lo < 0.7 * (c0[6] + c0[7]) or (c0[6] + c0[7]) < H:
+            continue
+        cutn = set(data['cut'].get(r['name'], ())) | set(data['cut'].get(hn, ()))
+        if cutn and (0 in cutn or len(r['s']) - 1 in cutn or 0 in set(data['cut'].get(hn, ())) or len(R[hn]['s']) - 1 in set(data['cut'].get(hn, ()))):
+            continue
+        if any(q[8] > 0 for q in s[:8]):
+            continue  # (a median at the joint: leave it)
+        along = 0.0
+        for i, q in enumerate(s):
+            if i:
+                along += math.hypot(q[0] - s[i - 1][0], q[2] - s[i - 1][2])
+            t = 1 - along / MORPH
+            if t <= 0:
+                break
+            q[0] = round(q[0] + rc[0] * lat * t, 2)
+            q[2] = round(q[2] + rc[1] * lat * t, 2)
+            q[6] = round(q[6] + (H - q[6]) * t, 2)
+            q[7] = round(q[7] + (H - q[7]) * t, 2)
+        done.append(dict(road=r['name'], host=hn, lateral=round(lat, 1), half=round(H, 1)))
+    return done
+
+
 def main():
     tag = sys.argv[1]
     D = os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag)
@@ -82,6 +193,7 @@ def main():
     import roads05_absorb
     chained['absorb'] = roads05_absorb.absorb(data)
     chained['duplicates_dropped'] = drop_dups(data)
+    chained['ring_clear'] = ring_clear(data)
     print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}
@@ -204,6 +316,7 @@ def main():
     import roads05_repair
     st['repair'] = roads05_repair.repair(data)
     print('repair', json.dumps(dict(st['repair'], fixed=len(st['repair']['fixed']), repair_left=len(st['repair']['repair_left']))))
+    st['butt_match'] = butt_match(data)  # (after repair: it flags the last continuations)
     roads = data['roads']
     names = [r['name'] for r in roads]
     cutd = {k: set(v) for k, v in data['cut'].items()}
