@@ -528,7 +528,7 @@ def p_shed(W, bays, floors, role, age, market=False):
     return H
 
 
-def col_arch(x, z, w, h, holes, wall, shut, state):
+def col_arch(x, z, w, h, holes, wall, shut, state, seg=8):
     """(P3) a colonial arched window / French door for the kit panels (kit.arch_window without its flickers: no bars
     through the wall or the glass; the moulding ring is a flat band 0.05 m out, the keystone 0.14 m out, the fanlight
     bars flat strips 0.04 m in front of the glass): recessed 0.35 m, teak shutters closed or ajar"""
@@ -538,11 +538,12 @@ def col_arch(x, z, w, h, holes, wall, shut, state):
     K.opening(holes, x, z, w, h + r, 0.0, wall, glass=None)
     K.front_quad("KGL", x, x + w, z, z + h, yb)
     K.front_quad(K.R.choice(["NWH", "NWA", "NWY"]), x + 0.03, x + w - 0.03, z + 0.03, z + h - 0.03, yb - 0.03)
-    arc = [(cx + r * math.cos(math.pi * t / 8), zc + r * math.sin(math.pi * t / 8)) for t in range(9)]
-    for t in range(8):
+    # seg: arc segments (8; the landmarks' long market walls use 4 to halve the arches' triangles)
+    arc = [(cx + r * math.cos(math.pi * t / seg), zc + r * math.sin(math.pi * t / seg)) for t in range(seg + 1)]
+    for t in range(seg):
         K.face("KGL", [(cx, yb, zc), (arc[t][0], yb, arc[t][1]), (arc[t + 1][0], yb, arc[t + 1][1])], (0, -1, 0))
     yg = yb - 0.04
-    for t in (2, 4, 6):   # fanlight bars: thin flat strips
+    for t in (seg // 4, seg // 2, 3 * seg // 4):   # fanlight bars: thin flat strips
         ax, az = arc[t]
         dx, dz = ax - cx, az - zc
         L = math.hypot(dx, dz)
@@ -550,17 +551,17 @@ def col_arch(x, z, w, h, holes, wall, shut, state):
         K.face("KGR", [(cx - nx_, yg, zc - nz_), (cx + nx_, yg, zc + nz_), (ax + nx_, yg, az + nz_), (ax - nx_, yg, az - nz_)],
                (0, -1, 0))
     K.front_quad("KGR", x, x + w, zc - 0.025, zc + 0.025, yg)
-    for corner, ts in (((x + w, zc + r), range(0, 4)), ((x, zc + r), range(4, 8))):
+    for corner, ts in (((x + w, zc + r), range(0, seg // 2)), ((x, zc + r), range(seg // 2, seg))):
         for t in ts:
             K.face(wall, [(corner[0], 0.0, corner[1]), (arc[t][0], 0.0, arc[t][1]), (arc[t + 1][0], 0.0, arc[t + 1][1])], (0, -1, 0))
-    for t in range(8):
+    for t in range(seg):
         a, b = arc[t], arc[t + 1]
         nx, nz = -(a[0] + b[0]) / 2 + cx, -(a[1] + b[1]) / 2 + zc
         K.face(wall, [(a[0], 0.0, a[1]), (b[0], 0.0, b[1]), (b[0], yb, b[1]), (a[0], yb, a[1])], (nx, 0, nz))
     ro = r + 0.12
-    for t in range(8):   # the moulding ring
-        a0 = math.pi * t / 8
-        a1 = math.pi * (t + 1) / 8
+    for t in range(seg):   # the moulding ring
+        a0 = math.pi * t / seg
+        a1 = math.pi * (t + 1) / seg
         q = [(cx + r * math.cos(a0), -0.05, zc + r * math.sin(a0)), (cx + ro * math.cos(a0), -0.05, zc + ro * math.sin(a0)),
              (cx + ro * math.cos(a1), -0.05, zc + ro * math.sin(a1)), (cx + r * math.cos(a1), -0.05, zc + r * math.sin(a1))]
         K.face("KW0", q, (0, -1, 0))

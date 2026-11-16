@@ -527,7 +527,7 @@ def city_hall():
     return sc
 
 
-def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3):
+def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3, seg=8, stains=True):
     """facade builder for walls(): levels = [(height m, kind)], kind 'arch' (glazed arched window), 'arcade' (tall open
     arch), 'rect' (glazed window), 'blank'"""
     H = sum(h for h, _ in levels)
@@ -545,10 +545,10 @@ def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3)
                     continue
                 if kind == "arch":
                     ww = min(2.0, BAY - 1.0)
-                    KP.col_arch(x + BAY / 2 - ww / 2, z + 0.6, ww, max(1.0, h - 1.4 - ww / 2), holes, "KWX", "KSH", None)
+                    KP.col_arch(x + BAY / 2 - ww / 2, z + 0.6, ww, max(1.0, h - 1.4 - ww / 2), holes, "KWX", "KSH", None, seg)
                 elif kind == "arcade":
                     ww = min(2.4, BAY - 0.9)
-                    KP.col_arch(x + BAY / 2 - ww / 2, z, ww, max(1.0, h - 0.9 - ww / 2), holes, "KWX", "KSH", None)
+                    KP.col_arch(x + BAY / 2 - ww / 2, z, ww, max(1.0, h - 0.9 - ww / 2), holes, "KWX", "KSH", None, seg)
                 elif kind == "rect":
                     ww = min(1.5, BAY - 1.0)
                     rect_window(x + BAY / 2 - ww / 2, z + 0.9, ww, max(0.8, h - 1.9), holes)
@@ -568,7 +568,8 @@ def std_facade(levels, bay, cornice=0.45, parapet=1.2, pil=True, band_depth=0.3)
             K.box("KW0", u - dw / 2, -0.12, sill + dh, dw, 0.12, 0.25, faces=("-y", "top", "bottom"))
         KP.band("KW0", Wm, H - cornice, cornice, cornice + 0.05)
         K.facade("KWX", 0.0, Wm, 0.0, H, 0.0, holes)
-        KP.stains_light(0.0, Wm, H - cornice, 0.0, 3.0, 0.3, holes)
+        if stains:
+            KP.stains_light(0.0, Wm, H - cornice, 0.0, 3.0, 0.3, holes)
         if parapet:
             KP.parapet(Wm, H, parapet, "KWX")
         return H
@@ -1339,20 +1340,22 @@ def market_hall(sc, hall, o, ax, ay, Lm, Wm, base, H, fy, k, boxes, lights, clea
                 if not on:
                     continue
                 F.wq("PNL", ua, vs, ub, vs, 0.0, BH, ((ua + ub) / 2, vs + d))
+                um = (ua + ub) / 2
+                # one counter and one red name-board band along the whole row face (merged: 1 box, 1 quad)
+                F.bx("GLC" if jewel else "CTR", um, vs + d * 0.275, 0.0, sl - 0.2, 0.55, 0.9)
+                F.wq("SGN", ua + 0.1, vs + d * 0.04, ub - 0.1, vs + d * 0.04, 2.45, 2.75, (um, vs + d))
                 n_st = max(1, int(sl / 3.0))
                 sw = sl / n_st
                 for j in range(n_st):
                     uc = ua + (j + 0.5) * sw
-                    F.bx("GLC" if jewel else "CTR", uc, vs + d * 0.275, 0.0, sw - 0.4, 0.55, 0.9)
                     if jewel:
                         F.wq("GLD", uc - sw / 2 + 0.4, vs + d * 0.06, uc + sw / 2 - 0.4, vs + d * 0.06, 1.3, 2.1, (uc, vs + d))
                     else:
-                        cw = (sw - 0.4) / 3
-                        for t in range(3):
-                            u_ = uc - (sw - 0.4) / 2 + t * cw
+                        cw = (sw - 0.2) / 2
+                        for t in range(2):
+                            u_ = uc - (sw - 0.2) / 2 + t * cw
                             F.wq(rnd.choice(FABRICS), u_ + 0.03, vs + d * 0.06, u_ + cw - 0.03, vs + d * 0.06,
                                  rnd.uniform(1.0, 1.4), 2.4, (uc, vs + d))
-                    F.wq("SGN", uc - sw / 2 + 0.1, vs + d * 0.04, uc + sw / 2 - 0.1, vs + d * 0.04, 2.45, 2.75, (uc, vs + d))
     # beams across the hall every 4 m, fluorescent tubes along the aisles, a warm light every 24 m in each aisle
     u = Lo + 4.0
     while u < Hi - 1.0:
@@ -1406,7 +1409,8 @@ def bogyoke_market():
         # the ground falls ~3 m across the market: each hall stands on its own plinth up to 1 m over its highest ground
         hb, g1h = ground_of(Polygon(hall))
         sill = (g1h - hb) / S + 1.0
-        fn, H = std_facade([(sill, "blank"), (5.0, "arcade"), (4.4, "arch")], 3.6, parapet=0.0)
+        # (6 m bays, 4-segment arches, no stains: the 4 halls' 1.4 km of wall kept the model at 120k triangles)
+        fn, H = std_facade([(sill, "blank"), (5.0, "arcade"), (4.4, "arch")], 6.0, parapet=0.0, seg=4, stains=False)
         aisles, fy = market_hall(sc, hall, P(u0, v0), ax, ay, (u1 - u0) / S, hw / S, hb, H, hb + sill * S, k, boxes, lights, clears)
         DOOR["spec"] = [(*P(uu, v0 + va * S), 3.0, 3.4, sill) for va in aisles for uu in (u0, u1)]
         ring_walls(sc, hall, hb, lambda i, W: fn(i, W), 70 + k)
