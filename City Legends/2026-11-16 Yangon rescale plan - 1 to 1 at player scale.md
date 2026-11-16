@@ -654,6 +654,11 @@ Rules for every step:
   - **Why the trim is needed:** the first cell beside a pavement swelled to 0.1 under the pavement top, so the grass showed through at the edge, and downhill side streets were covered.
   - **Result:** the pavement edge now shows about 1.2-1.5 studs, like a kerb face.
   - **Checked:** Sule Pagoda Road, the Sule roundabout and the Bogyoke Market road.
+  - **P1 and P2 too (saved 17:27 UTC):**
+    - **Before:** P1 had 18% of sampled pavement sides more than 1.5 studs over the ground, 3% more than 3. P2 had 14% and 2%.
+    - **Run:** P1 fill 110,647 cells (282 s), trim 115,967 (208 s). P2 fill 116,565 (257 s), trim 128,920 (192 s).
+    - **After:** P2 has no sides over 3 studs; P1 has 9 of 470 sampled. P1's worst (25 studs at 34422, 28896) is a flyover deck with parapets, left alone on purpose. Grass at or over a pavement: 0 (P1) and 1 (P2) of the samples.
+    - **Check script:** sample every 6th pavement box in the district; ground 2 studs past each side that is not on a road box; grass 1 stud in from the edge. It is in the session; write it into the tool if it is needed again.
   - **Traps:**
     - `GetPartBoundsInBox` tests axis-aligned bounds, so rotated carriageway boxes "touched" every probe. Use down-rays.
     - Filling strips along each box left 1-cell trenches between strips and at road edges. Fill per terrain cell instead.
