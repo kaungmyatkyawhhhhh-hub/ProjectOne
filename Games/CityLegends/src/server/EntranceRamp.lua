@@ -48,6 +48,11 @@ local function isRoad(r: RaycastResult): boolean
 	if inst:IsA("Terrain") then
 		return r.Material == Enum.Material.Asphalt
 	end
+	-- (the 1:1 map's invisible collision boxes, 2026-11-17: RoadBox "R" carriageway, "P" pavement)
+	local box = inst:GetAttribute("RoadBox")
+	if box ~= nil then
+		return box == "R"
+	end
 	local n = string.lower(inst.Name)
 	return string.find(n, "road", 1, true) ~= nil or (inst :: BasePart).Material == Enum.Material.Asphalt
 end
@@ -114,7 +119,7 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 			if not r then
 				return nil
 			end
-			if roads and r.Instance:IsDescendantOf(roads) and (r.Instance.Name == "Kerb" or r.Instance.Name == "Pavement") then
+			if roads and r.Instance:IsDescendantOf(roads) and (r.Instance.Name == "Kerb" or r.Instance.Name == "Pavement" or r.Instance:GetAttribute("RoadBox") == "P") then
 				rp:AddToFilter(r.Instance)
 			else
 				return r.Position.Y
