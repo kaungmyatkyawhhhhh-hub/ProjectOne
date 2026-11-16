@@ -35,6 +35,7 @@ created: 2026-11-16
 | Interiors that can be built (53 rated) | [[2026-11-16 Research - Yangon interiors catalogue]], [[2026-11-16 Research - Melia Yangon interior]] |
 | Myanmar Plaza and Sedona look | [[2026-11-16 Research - Myanmar Plaza and Sedona real look (photo measurements)]] |
 | Textures and materials (real PBR surfaces, MaterialVariants) | being built: `Games/CityLegends/build/materials/materials_library.md` |
+| What is missing (places, systems, decorations, walls) | [[2026-11-16 Audit - What is missing from the Yangon map]] |
 | What was invented, and the fixes | [[2026-11-16 Audit - invented content in the Yangon map]] |
 
 ## Already live in the current map (16 Nov, version 957)
