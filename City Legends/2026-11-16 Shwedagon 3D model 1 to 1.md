@@ -91,3 +91,9 @@ Copies in this folder: "Shwedagon 1to1 - vs photo (...)".
 - A night pass (floodlit gold, high masts, lit niches).
 - Carved detail on the adoration halls and the gate pavilion.
 - Remove `Shwedagon_Hill_TEMP` when the 1:1 terrain is built there.
+
+## Ornament kit pass (16 Nov)
+- The 62 niche shrines' flame hoods are carved kit flames (`flame_blade`, bevelled, 0.12 m thick) instead of two flat plates.
+- Every hall pyatthat's lowest tier: carved kit flame finials (square knob + thick flame) at the corners and carved flame fins on the faces ([[2026-11-16 Burmese ornament kit]]). Higher tiers keep the old fins (budget: 744 finials and 1,060 fins in unique meshes).
+- 215,241 triangles placed (was 174,033); flicker test 0 pairs; footprint overlaps 0. Assets **108253982230149** + **98028844589108**, ShwData re-sent in the tools upload; `ShwedagonPlace` replaced the old model (one copy).
+- ![[Ornament kit - Shwedagon photo before after.jpg]]

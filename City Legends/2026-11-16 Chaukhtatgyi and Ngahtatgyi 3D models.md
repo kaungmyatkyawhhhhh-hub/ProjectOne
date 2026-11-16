@@ -225,3 +225,10 @@ The coordinator said Ngahtatgyi v2 is good and stays as it is. Only Chaukhtatgyi
 
 ## Paid 3D generation: no (owner, 16 Nov 2026)
 Owner: "nvm no money". No paid 3D generators (Tripo, Hunyuan3D, Hyper3D, Meshy, Premium). Head v3 stays; later improvements are by hand in Blender (sharper nose, deeper-set eyes, filigree crown).
+
+## Ornament kit pass + Chaukhtatgyi head v4 (16 Nov)
+- **Ngahtatgyi:** the teak backdrop's flat leaf plates are now 89 carved kit scroll leaves (bevelled, curling into volutes, alternating hands), and the two flat gold flames are layered carved flames with a raised inner flame ([[2026-11-16 Burmese ornament kit]]). Asset **133663873545500**.
+- **Chaukhtatgyi head v4** (by hand, `buddha_figures_blender.py`, no paid generation): sharper, higher straight nose ridge (with flanks), deeper-set eyes (socket -0.078, stronger brow ridge), and the crown's petals are now open filigree: 13 carved kit flame finials standing round the band with gaps between them plus 12 pairs of curled scroll leaves on the band. Figure 63,652 triangles, hall 76,717 (over the 70k hall budget by ~6.7k: the crown filigree). 0 flicker pairs. Asset **123824298681155**.
+- Both placed with `bahan_place_luau.py` (replaces; collision and plates the same); figure meshes set to RenderFidelity Precise again.
+- ![[Ornament kit - Chaukhtatgyi head v4 photo before after.jpg]] ![[Ornament kit - Chaukhtatgyi head v4 Blender.jpg]] ![[Ornament kit - Ngahtatgyi photo before after.jpg]]
+- Still differs: at the photo-1 angle the nose is sharper but the face still reads softer than the photo (Studio's flat light); the crown points read as small leaves, the photo's crown is a tall gold filigree band.
