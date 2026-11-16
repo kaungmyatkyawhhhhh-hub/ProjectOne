@@ -114,7 +114,7 @@ def stupa(g):
         up = tuple(top[j] - base[j] for j in range(3))
         hgt = math.sqrt(sum(v * v for v in up))
         up = tuple(v / hgt for v in up)
-        rgt = (B[0] - A[0], B[1] - A[1], 0.0)
+        rgt = (A[0] - B[0], A[1] - B[1], 0.0)          # clockwise seen from above, so up x right points OUT
         wid = math.hypot(rgt[0], rgt[1])
         rgt = (rgt[0] / wid, rgt[1] / wid, 0.0)
         out = (up[1] * rgt[2] - up[2] * rgt[1], up[2] * rgt[0] - up[0] * rgt[2], up[0] * rgt[1] - up[1] * rgt[0])
