@@ -431,3 +431,36 @@ Rules for every step:
   - Every road stands about 1 stud over the grass with a small skirt showing.
   - The MaterialVariant textures were still loading for some surfaces (asphalt already shows its cracks on U Wisara Rd).
 - **Next:** lanes and graph_test (step 3.5), then save and measure.
+
+### P1 ordinary buildings, compound walls and gates (16 Nov 2026, in Studio, not saved)
+- **Placed:** `Workspace.Yangon1to1.Buildings`: `Kit` (per-cell Models of kit MeshParts and plain Parts), `Night` (30 lit-window meshes, tag FacadeNight), `Collide` (invisible boxes). `Workspace.Yangon` not touched, no Play. The coordinator saves.
+- **How it is made** (all in `Games/CityLegends/tools/yangon/city/`, run with `YANGON_SCALE=1to1`):
+  - `buildings_1to1.py P1` reads the real footprints (OSM + Microsoft), cuts them off the road corridors (carriageway + pavement + 0.6 m), drops water, overlaps and the two landmark sites, picks an archetype per building and writes everything to `build/city_1to1/buildings_P1/` and `imports/sync/ygn1to1_p1/`.
+  - `kit_panels.py` is the reusable facade kit: a wall is cut into panels of 1/2/3/4/6 bays x the building's full height, stretched at most 15%. Panels are built from kit.py's details (grilled windows set into the wall, cages, blue hoods, shop bays with shutters and goods, signs, AC units, laundry, rain stains). Tower faces are stacked (podium, bands of 8/4/2/1 floors, top), so the kit stays bounded for the whole city.
+  - Studio: `tools/yangon/YangonKitPlace.luau` (`templates`, `place`, `cells`), collision with `YangonBuildingMeshes.collide`. Data went in as StringValues (`tools/yangon/pack_strings.py`, version 80 of asset 133014134133489) and was deleted after use.
+- **Floors:** ground floor with shops 13 studs, upper floors 10 studs (3.33 m); houses 3.3 m, villas 3.6 m on a plinth, condo podium 4.5 m.
+- **Archetypes (5,345 buildings):** house 2,316, walk-up 1,136, villa 663, civic (school / hospital / mass) 468, shed / hall 458, township shophouse 293, condo 11. Real outlines kept; 11 infill houses only (blocks with no real building in home / shop land use).
+- **Empty landmark lots:** Myanmar Centre / Meliá (X 34,534-35,222, Z 27,062-28,027) and Sedona (X 34,641-35,321, Z 26,359-27,135). 25 footprints dropped there.
+- **Walls and gates:** 114.6 km of compound wall (villa, civic, condo lots all round; houses on the street side only; 9 OSM walls / fences) as 21,915 kit pieces (2.1 m, pillars every 3.5 m, ridge coping, splash band, stains); 757 gates (dark-green or rusty steel, lamp-topped pillars) on the street side of the lots.
+- **Materials:** wall parts are named by their wall code (KW1 / KW4 / KW6 / KWG ...) with Plaster + YgnRenderPainted or YgnRenderStained and the midday-calibrated colour; metal / glass / signs `KGR` (YgnSteelPainted, colours in the vertex colours); roofs by sheet: KRF rust, KRG zinc, KRB blue, KRT clay tile; flat roofs KCO (YgnConcreteBare). Box-projected UVs (1 UV = 1 stud).
+
+| Measure | P1 buildings |
+|---|---|
+| Unique meshes | 767 uploaded (737 kit, reusable for the whole city; 30 night meshes) |
+| Parts | 139,675 (95,779 MeshParts, 20,683 plain Parts for party walls and flat roofs, 23,183 collision boxes) |
+| Triangles drawn | about 18.4 M if all were on screen (kit instances 18.3 M, night 0.13 M) |
+| Collision boxes | 23,183 (7,273 buildings, 15,910 walls) |
+| Studio memory | 5.98 GB in Edit after placing (2.7 GB before the load, other agents' work included) |
+
+- **Assets (group 33151111):** kit 94942980174458, 84391865825287, 90931556475492, 106464368645255, 90898122615860, 107430560242416, 86963099978582, 89401963850662, 118735643115906; night 71151089010596.
+- **No flicker (owner rule):** `kit_flicker_test.py` checks every one of the 375 kit pieces and a 2,500-instance placed sample (432,000 triangles) for same-facing faces under 0.05 studs apart that overlap: kit 0, placed 1 (an 0.008 square-stud corner of two wall pillars). Fixed on the way: layers in front of a wall 0.06 studs apart (grime, paint, stains, streaks), kit.py's own 0.005-0.012 m offsets (louvres, awning ribs, AC grilles, sign stripes, shutter ribs), sill and drainpipe against stains, cages against their slabs, floor bands that met at corners (now sloped drips that cross on a line), panel boxes that ran past their ends, plain walls as 0.02-stud sheets, roof slabs 0.75 studs inside the walls, overlapping footprints dropped, wall runs stretched to their exact length, coping ridges, no doubled pillars. Grazing close-ups in Studio of a walk-up facade and a compound wall showed no flicker.
+- **Screenshots** (Studio, PlayLight 13), in `C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`: aerial `mcp-Roblox_Studio-blob-1794805603735-9t9wm3.jpg`, residential street `mcp-Roblox_Studio-blob-1794805617099-aa8dar.jpg`, Kabar Aye Pagoda Rd (north part) `mcp-Roblox_Studio-blob-1794805649297-o0my0z.jpg`, facade grazing close-up `mcp-Roblox_Studio-blob-1794805662480-8tcaor.jpg`, compound wall close-up `mcp-Roblox_Studio-blob-1794805673796-rl9cer.jpg`.
+- **Still wrong:**
+  - The ground between buildings is lawn: real Yangon is concrete forecourts, dust and trees (the green, pavement and detail steps).
+  - No trees yet, so villas read bare (the villa critique's main point).
+  - Drainpipes stand 0.45 m off the wall (kept clear of signs) and there is one per panel, so long walls get several.
+  - Hip roofs are the kit roof stretched to the building's rectangle: big eaves on wide villas.
+  - 9,984 plain wall strips where a wall's length does not fit whole bays (up to 15% stretch); 116k parts in one district is heavy for the whole city.
+  - One night mesh kept Default collision fidelity (no collision, visual only).
+  - Kabar Aye Pagoda Rd next to Myanmar Plaza has few buildings: the real frontage there is the landmark lots and green compounds.
+  - Setting CollisionFidelity on new kit templates runs at about 1.4 a second in Studio (521 s for 737).
