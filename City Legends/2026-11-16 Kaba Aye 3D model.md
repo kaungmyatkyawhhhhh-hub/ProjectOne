@@ -77,5 +77,14 @@ Materials: `YgnGoldLeaf_Bell`, `YgnGoldPlate_Trim`, `YgnRenderPainted_White` (dr
 - Bays are scaled per sector (x 0.80-1.15). In Studio check that the importer keeps the node scale, because the glb carries it on those 20 bays.
 - Porch walls between the walkway roof and the eave: the walkway roof meets the porch below the name panel. That is right for photo 2, but not checked against the other porches' photos (none).
 
+## In Studio (16 Nov, look check)
+- Asset **103708452636713** (Open Cloud Model, group 33151111). `Workspace.Yangon1to1.Landmarks.KabaAye` (`Visual` = 318 MeshParts, `Collision` = 11 invisible parts) + `Landmarks.KabaAyePlate_TEMP` (concrete cylinder 315 across, 6 thick, top at the ground). Place version 974.
+- Pivot (base centre) at **X 34625.66, Y 77.30, Z 17793.07** (OSM centre lon 96.15447, lat 16.85681 through `geo.world()` at 1to1; ground from GLO-30 `ground.py`, flat within 0.3 studs over the plaza). Turned 180 deg (the importer's half turn): porches at 33 / 112 / 191 / 261 / 322 deg from north, stair at 180.
+- **Arch stretch survived:** the importer bakes each node into its own mesh (318 unique meshes, no rotation). Measured bay widths 13.09 / 11.05 / 9.00 / 11.28 studs = 11.49 x 1.139 / 0.96 / 0.782 / 0.98. No re-export needed.
+- Visual meshes: CollisionFidelity Box, CanQuery / CanCollide / CanTouch off. Collision: platform as 4 steps (0.75 each, r 69.6 -> 66.5), arcade cylinder r 51.9 to 16.7, drum r 37 to 32.1, a box per porch.
+- Materials: gold Metal + YgnGoldLeaf / YgnGoldPlate (colours nudged yellower: bell 232,204,146, trim 218,186,122), white / cream / mint / paints Plaster + YgnRenderPainted, teal Foil + YgnGlassMosaic, platform Marble + YgnMarbleWhite, roof Concrete + YgnConcreteBare, steel Metal + YgnSteelPainted, walkway roofs Metal + YgnCorrugatedZinc. Colours from `kaba_aye_materials.json`.
+- Pictures (PlayLight 13): `build/landmarks/kaba_aye/ingame_compare.png` (photo | Studio, photo 2 camera fit), `ingame_photo_view.jpg`, `ingame_aerial.jpg`, `ingame_porch_graze.jpg`, `ingame_porch_graze2.jpg`. No flicker seen at grazing angles.
+- Looks wrong / to fix: gold reads orange and the YgnGoldPlate tile grid shows on every trim (reads like tiles, not carving); the arch niches' teal mosaic reads dark grey-green, not glittering glass; the cream bays and white drum render darker and yellower than the photo; the porch roofs and terrace (RoofRed) read salmon pink; Buddhas are plain cones from the ground.
+
 ## Next
 - Place it in Studio (another step) with the materials JSON and `YangonMaterials.luau`.
