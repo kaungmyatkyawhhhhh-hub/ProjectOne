@@ -53,14 +53,28 @@ created: 2026-11-16
 - **Body editor** lights up your current skin tone and shape, and refreshes after each change.
 
 ### Community loop
-- **Podium announcement:** when a player's upload climbs onto a theme's top-3 podium, everyone gets a pink chat line ("X's look Y just made the Grunge top 3 on the Sky Deck!"). It stays silent on a server's first pass, so new servers don't spam.
+- **Podium announcement:** when a player's upload climbs onto a theme's top-3 podium, everyone gets a pink chat line ("X's look Y just made the Grunge top 3 on the Sky Deck!").
+  - It's silent for a server's first 2 minutes. Uploads load a moment after start, so a "first pass" flag would have announced every existing podium look on each new server. I caught and fixed that in self-review.
+- **"wearing" tags** show within 28 studs, so a crowded spawn stays readable.
 - **Top Creators board** rows show each creator's headshot.
 - **My uploads** shows your exact worn count from 0 ("Not worn yet" / "Worn by 1"). Elsewhere it stays hidden under 10.
 - **Challenge entries:** uploads made to that day's challenge theme get a "★ Challenge" pill on their cards. The Uploads page says "entries get a ★".
 - **Featured cap:** at most the 2 newest uploads, the rest MM's own looks on the daily rotation. Before, a busy server's 2-day-NEW uploads could push every curated look out of Featured.
 
+- **Staff Pick** (curation for the owner, Admins and Outfit Creators):
+  - A "★ Pick / Unpick" button on any upload card (theme pages, creator pages, My uploads).
+  - Picked looks get a "★ Staff pick" badge and go first in Featured's 2 community slots, even after they stop being NEW.
+  - Saved in the same DataStore list as the looks (`pick`).
+- **Random** is now half MM looks, half uploads. With up to 240 uploads, a uniform pick would almost always land on an upload.
+- **Podium plaques** on the Sky Deck credit the creator ("BY LUIGIRED"). Was "GUEST LOOK" from the old Guest theme.
+
 ### Growth
 - **Invite** button in the More tray: Roblox's own friend-invite sheet (SocialService). It has a drawn two-people icon.
+- **Share a fit:**
+  - A green "Share" button on the outfit page (Outfit actions) opens Roblox's invite sheet with "Check out this fit: NAME".
+  - The invite carries `LaunchData = "fit:<Outfit ID>"`. When the friend joins, the server reads it (`MMLaunchFit`) and that outfit opens for them after the loading screen.
+  - Tested by setting the attribute by hand. A real invite needs the live game.
+- **What's New easel** at spawn, mirroring the Floor Guide on the right: See fit · Skin & body · Share a fit.
 - **Loading tips** rotate: one-tap try-on, uploads reach the Sky Deck, theme sorting, See fit.
 
 ### Performance & reliability
