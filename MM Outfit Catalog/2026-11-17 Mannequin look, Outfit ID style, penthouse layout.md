@@ -115,3 +115,17 @@ The owner didn't like having the Outfit ID panel on screen.
 ![[Screenshots/2026-11-17 calm viewer (phone A06).jpg]]
 
 **Lesson (Roblox):** Glass material hides ParticleEmitters (and other transparent things) behind it. For "see the rain through the window", use SmoothPlastic with Transparency 0.85+ and a little Reflectance.
+
+## 8. Fix of the fix + the viewer "bar"
+- **"Now the mannequins turn the other side when I'm not near them":** the "turn 40° away" in section 7 reacted whenever the player was within range of ANY mannequin.
+  - Replaced it with a **fixed display pose**: in a row, the middle one faces straight out and the side ones stand 28° outward (`DISPLAY_ANGLE`), like a shop window.
+  - The non-watchers never react now; only the nearest one turns to you.
+  - Tested: far away, Midnight -28°, Frost 0°, Sakura 28° (still). In front of Sakura, only Sakura turns (-9°).
+- **"A bar in the top half that never moves when I change camera angles":** it was the far edge of the viewer's 90-stud square floor, sitting near eye level as a straight line.
+  - The camera barely tilts (about 8°) and spinning doesn't change a square's edge much, so it looked fixed.
+  - Proven by hiding parts: the line stayed with the glow image hidden and vanished with the floor hidden.
+  - Fix: a **round glossy platform** (13-stud cylinder) instead of the square floor, plus a smooth backdrop gradient without the painted step at 47–50%.
+  - Checked on PC and A06, 0 errors.
+
+![[Screenshots/2026-11-17 mannequins display pose (side ones angled out).jpg]]
+![[Screenshots/2026-11-17 viewer round platform, no horizon bar.jpg]]
