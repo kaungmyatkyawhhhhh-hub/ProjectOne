@@ -64,66 +64,171 @@ def osm_site():
 
 
 # ---------------------------------------------------------------- the stupa
+def notched(a, n=0.45):
+    """Octagon (corners at the cardinals, half width across flats a) with every corner stepped in (re-entrant
+    corners of Botataung's terraces, 2013 / 2014 photos)."""
+    V = octagon(a)
+    out = []
+    for i in range(8):
+        p0, v, p1 = V[i - 1], V[i], V[(i + 1) % 8]
+        d1 = ((v[0] - p0[0]), (v[1] - p0[1]))
+        l1 = math.hypot(*d1)
+        d1 = (d1[0] / l1, d1[1] / l1)
+        d2 = ((p1[0] - v[0]), (p1[1] - v[1]))
+        l2 = math.hypot(*d2)
+        d2 = (d2[0] / l2, d2[1] / l2)
+        A = (v[0] - d1[0] * n, v[1] - d1[1] * n)
+        B = (A[0] + d2[0] * n, A[1] + d2[1] * n)
+        C = (v[0] + d2[0] * n, v[1] + d2[1] * n)
+        out += [A, B, C]
+    return out
+
+
 def stupa(g):
-    prof = [(A0, BASE_TOP)]
-    a, z = A0, BASE_TOP
+    """v2 look pass (2013 'pagoda' photo, widths relative to the base): 7 lower terraces (to 11.6 m) with stepped-in
+    corners, a taller bell (11.6 -> 22.6 m, 15.6 m across at the lip), slimmer rings / bud / hti."""
+    # ledge from the base storey to the first terrace
+    tiers = []
+    a = A0
+    z = BASE_TOP
     for i in range(7):
-        prof += [(a - 0.65, z)]
-        a -= 0.65
-        z += 1.3
-        prof += [(a, z)]
-    # bell (round): lip, flank with one raised band, shoulder
-    lip = [(a - 0.2, z), (a - 0.2, z + 0.5), (a - 0.45, z + 0.7)]
-    b0 = a - 0.45
-    zb = z + 0.7
-    lower = catmull([(b0, zb), (b0 - 0.08, zb + 0.9), (b0 - 0.4, zb + 2.6)], per=3)
-    zband = zb + 2.6
-    bandp = [(b0 - 0.4 + 0.1, zband + 0.05), (b0 - 0.4 + 0.1, zband + 0.35), (b0 - 0.47, zband + 0.4)]
-    upper = catmull([(b0 - 0.47, zband + 0.4), (b0 - 1.2, zband + 2.3), (b0 - 2.4, zband + 4.2), (b0 - 3.7, zband + 5.7),
-                     (b0 - 4.4, zband + 6.4)], per=3)
-    oct_part = prof + [(0.0, z)]
-    g.lathe("GLD", oct_part, 8)
+        a1 = a - 0.84
+        tiers.append((a, a1, z, z + 1.1))
+        a = a1
+        z += 1.1
+    zt_ter = z
+    prev = Polygon(octagon(A0))
+    for (a_out, a_in, z0, z1) in tiers:
+        P = Polygon(notched(a_in))
+        g.capshape("GLD", prev.difference(P), z0)           # the tread (ledge) at z0
+        g.ring("GLD", ccw(notched(a_in)), z0, z1)            # the riser up to the next tread
+        prev = P
+    # top of the last terrace: annulus out to the bell's lip
+    bell_r = 7.75
+    rv = bell_r / math.cos(math.pi / 32)
+    g.capshape("GLD", prev.difference(Polygon([(rv * math.cos(2 * math.pi * k / 32), rv * math.sin(2 * math.pi * k / 32))
+                                                 for k in range(32)])), zt_ter)
+    zb = zt_ter
+    lip = [(bell_r, zb), (bell_r, zb + 0.4), (bell_r - 0.2, zb + 0.55)]
+    b0 = bell_r - 0.2
+    lower = catmull([(b0, zb + 0.55), (b0 - 0.05, zb + 1.4), (b0 - 0.35, zb + 2.9)], per=3)
+    zband = zb + 2.9
+    bandp = [(b0 - 0.25, zband + 0.05), (b0 - 0.25, zband + 0.35), (b0 - 0.42, zband + 0.4)]
+    upper = catmull([(b0 - 0.42, zband + 0.4), (b0 - 1.1, zband + 2.6), (b0 - 2.2, zband + 4.7), (b0 - 3.4, zband + 6.4),
+                     (b0 - 4.1, zband + 7.2)], per=3)
     zt = upper[-1][1]
     rsh = upper[-1][0]
     rp = lip + lower[1:] + bandp + upper
-    # rings, bowl, lotus, bud
     zz = zt
     r = rsh
     for i in range(4):
-        rp += [(r, zz + 0.55), (r - 0.25, zz + 0.55)]
-        zz += 0.55
-        r -= 0.25
-    rp += catmull([(r - 0.15, zz), (r + 0.2, zz + 0.7), (r - 0.1, zz + 1.3)], per=3)
-    zz += 1.3
+        rp += [(r, zz + 0.5), (r - 0.2, zz + 0.5)]
+        zz += 0.5
+        r -= 0.2
+    rp += catmull([(r - 0.1, zz), (r + 0.15, zz + 0.6), (r - 0.1, zz + 1.1)], per=3)
+    zz += 1.1
     rl = r - 0.1
-    rp += [(rl - 0.45, zz + 1.0), (rl - 0.3, zz + 1.0), (rl - 0.75, zz + 1.8)]
-    zz += 1.8
+    rp += [(rl - 0.35, zz + 0.9), (rl - 0.25, zz + 0.9), (rl - 0.6, zz + 1.6)]
+    zz += 1.6
     zfan2 = zz
-    bud = catmull([(rl - 0.75, zz), (rl - 0.8, zz + 0.9), (rl - 1.05, zz + 2.1), (rl - 1.55, zz + 3.3),
-                   (rl - 2.15, zz + 4.4), (rl - 2.7, zz + 5.2), (rl - 2.95, zz + 5.5)], per=3)
+    rb = rl - 0.6
+    bud = catmull([(rb, zz), (rb - 0.08, zz + 1.2), (rb - 0.3, zz + 2.6), (rb - 0.6, zz + 3.8), (rb - 0.85, zz + 4.6),
+                   (rb - 0.95, zz + 4.9)], per=3)
     rp += bud[1:]
     zz = bud[-1][1]
     rp += [(0.0, zz)]
     g.lathe("GLD", rp, 32, smooth=True)
-    g.fan("GWF", zt, rsh - 0.15, rsh + 2.1, 1.6)
-    g.fan("GWF", zfan2, rl - 0.8, rl + 0.3, 1.0)
-    # hti
+    g.fan("GWF", zt, rsh + 0.1, rsh + 1.6, 1.5)
+    g.fan("GWF", zfan2, rb + 0.1, rb + 1.0, 0.9)
     zh = zz
-    hp = [(0.35, zh)]
-    r = 1.4
+    hp = [(0.3, zh)]
+    r = 1.0
     n_t = 7
     th = (TOP - 1.9 - zh) / n_t
     for i in range(n_t):
-        hp += [(r * 0.6, zh), (r, zh + 0.06), (r * 0.72, zh + th)]
+        hp += [(r * 0.6, zh), (r, zh + 0.05), (r * 0.72, zh + th)]
         zh += th
-        r = max(0.25, r * 0.82)
-    hp += [(0.1, zh), (0.1, zh + 1.3), (0.0, zh + 1.3)]
-    g.lathe("GLD", hp, 16, smooth=True)
+        r = max(0.22, r * 0.83)
+    hp += [(0.08, zh), (0.08, zh + 1.3), (0.0, zh + 1.3)]
+    g.lathe("GLT", hp, 16, smooth=True)
     zm = zh + 1.3
-    g.quad("GWR", (0.1, 0, zm - 0.95), (0.9, 0, zm - 0.8), (0.9, 0, zm - 0.4), (0.1, 0, zm - 0.25))
-    orb = catmull([(0.0, zm), (0.25, zm + 0.12), (0.3, zm + 0.3), (0.18, TOP - 0.06), (0.0, TOP)], per=3)
-    g.lathe("GLD", orb, 12, smooth=True, cap_top=False)
+    g.quad("GWR", (0.08, 0, zm - 0.95), (0.85, 0, zm - 0.8), (0.85, 0, zm - 0.4), (0.08, 0, zm - 0.25))
+    orb = catmull([(0.0, zm), (0.22, zm + 0.12), (0.27, zm + 0.3), (0.16, TOP - 0.06), (0.0, TOP)], per=3)
+    g.lathe("GLT", orb, 12, smooth=True, cap_top=False)
     return zt
+
+
+HB_W, HB_L = 0.15, 0.6
+
+
+def herringbone(g, W, z):
+    """Parquet in a herringbone (photo Room_Inside_Paya): planks 0.6 x 0.15 m on the lattice (w, w), (L, -L), two wood
+    tones, clipped to the walkable floor W (no plank overlaps another: checked area sum)."""
+    from shapely.geometry import box as _b
+    from shapely.prepared import prep
+    x0, y0, x1, y1 = W.bounds
+    pw = prep(W)
+    w, L = HB_W, HB_L
+    rmin = int(math.floor((x0 - y1) / (2 * L))) - 2
+    rmax = int(math.ceil((x1 - y0) / (2 * L))) + 2
+    for r in range(rmin, rmax + 1):
+        smin = int(math.floor((y0 + r * L - L) / w)) - 2
+        smax = int(math.ceil((y1 + r * L + L) / w)) + 2
+        for s in range(smin, smax + 1):
+            bx, by = s * w + r * L, s * w - r * L
+            if bx > x1 + 1 or bx < x0 - 1:
+                continue
+            for grp, pl in (("WD1", _b(bx, by, bx + L, by + w)), ("WD2", _b(bx, by + w, bx + w, by + w + L))):
+                if not pw.intersects(pl):
+                    continue
+                if pw.contains(pl):
+                    g.cap(grp, list(pl.exterior.coords)[:-1], z)
+                else:
+                    g.capshape(grp, pl.intersection(W), z)
+
+
+def panel_wall(g, A, B, mosaic=False):
+    """A carved gold wall A -> B (walkable side on the right): embossed panel tiles (GLC) in raised gold frames (GLT:
+    dado rail, top frieze, stiles every ~0.9 m), red skirting (photos Room_Inside_Paya, Eingang). mosaic: the mirror
+    mosaic sections (MOS) with the same frames."""
+    wall = "MOS" if mosaic else "GLC"
+    L = math.dist(A, B)
+    ex, ey = (B[0] - A[0]) / L, (B[1] - A[1]) / L
+    P = lambda s: (A[0] + ex * s, A[1] + ey * s)
+    g.wall(wall, A, B, FLOOR, CEIL)
+    # rails stop their own depth short of each end, so two rails never overlap in a corner
+    if L > 0.2:
+        g.plate("RED", P(0.03), P(L - 0.03), FLOOR, FLOOR + 0.15, 0.03)
+        g.plate("GLT", P(0.05), P(L - 0.05), FLOOR + 1.05, FLOOR + 1.15, 0.05)
+        g.plate("GLT", P(0.05), P(L - 0.05), CEIL - 0.25, CEIL - 0.02, 0.05)
+    n = int(L / 0.9)
+    if n >= 1 and L > 0.5:
+        for k in range(1, n + 1):
+            s = L * k / (n + 1)
+            if s < 0.12 or s > L - 0.12:
+                continue
+            for (z0, z1) in ((FLOOR + 0.15, FLOOR + 1.05), (FLOOR + 1.15, CEIL - 0.25)):
+                g.plate("GLT", P(s - 0.04), P(s + 0.04), z0, z1, 0.04)
+
+
+def relic_case(g, coll, A, B):
+    """Glass relic case against a corridor wall (photos Treasures 2013, 10424722066): maroon base 0.8 m, glass box
+    to 1.9 m, gold top plate, a small gold relic stupa inside. 0.03 m off the wall, no back faces."""
+    L = math.dist(A, B)
+    ex, ey = (B[0] - A[0]) / L, (B[1] - A[1]) / L
+    nx, ny = ey, -ex                 # right of A -> B = the walkable side
+    m = ((A[0] + B[0]) / 2, (A[1] + B[1]) / 2)
+    d = 0.5
+    c = (m[0] + nx * (0.03 + d / 2), m[1] + ny * (0.03 + d / 2))
+    yaw = math.atan2(ey, ex)
+    # local -y = right of the edge = walkable side
+    g.box("RWD", c[0], c[1], FLOOR, 1.0, d, 0.8, yaw=yaw, faces=("+x", "-x", "-y"))
+    g.box("GLT", c[0], c[1], FLOOR + 0.8, 1.0, d, 0.04, yaw=yaw, faces=("+x", "-x", "-y", "top"))
+    g.box("GLS", c[0], c[1], FLOOR + 0.84, 1.0, d, 1.0, yaw=yaw, faces=("+x", "-x", "-y"))
+    g.box("GLT", c[0], c[1], FLOOR + 1.84, 1.0, d, 0.06, yaw=yaw, faces=("+x", "-x", "-y", "top", "bottom"))
+    rel = catmull([(0.13, FLOOR + 0.84), (0.11, FLOOR + 1.0), (0.06, FLOOR + 1.2), (0.02, FLOOR + 1.4)], per=2)
+    g.lathe("GLT", rel + [(0.0, FLOOR + 1.45)], 10, cx=c[0], cy=c[1])
+    coll.append((c[0], c[1], FLOOR, 1.0, d, 1.9, yaw))
 
 
 def corridor(g, coll, lights):
@@ -152,6 +257,8 @@ def corridor(g, coll, lights):
     ch_oct = Polygon(octagon(CH_A))
     # walls, edge by edge
     rings = [list(W.exterior.coords)[:-1]] + [list(h.coords)[:-1] for h in W.interiors]
+    spoke_zone = spoke.buffer(0.05)
+    ncase = 0
     for k, rr in enumerate(rings):
         rr = ccw(rr)
         hole = k > 0
@@ -165,12 +272,18 @@ def corridor(g, coll, lights):
                 g.wall("GLS", p, q, FLOOR, CEIL)             # glass onto the relic chamber (double-sided)
                 coll.append(_seg_box(p, q, FLOOR, CEIL, 0.1, 0.0))
                 continue
-            # exterior ring: faces into the polygon (inward); holes: faces out of the hole
-            g.wall("GLD", p, q, FLOOR, CEIL, inward=not hole)
+            # exterior ring: the walkable side is on the left (inward); holes: on the right
+            A, B = (q, p) if not hole else (p, q)
+            mos = spoke_zone.contains(mid) and math.hypot(mid.x, mid.y) < 8.2
+            panel_wall(g, A, B, mosaic=mos)
+            if not mos and math.dist(p, q) > 2.6 and math.hypot(mid.x, mid.y) > 9.0:
+                ncase += 1
+                if ncase % 3 == 1:
+                    relic_case(g, coll, A, B)
             # base strip (red skirting, photo Room_Inside_Paya): 0.15 high, 0.03 proud
             coll.append(_seg_box(p, q, FLOOR, CEIL, 0.4, 0.2 if not hole else -0.2))
-    g.capshape("WOD", W, FLOOR)
-    g.capshape("GLD", W, CEIL, down=True)
+    herringbone(g, W, FLOOR)
+    g.capshape("GLC", W, CEIL, down=True)
     # relic chamber: mosaic walls (inward), gold ceiling, floor, the gold relic stupa on a red plinth
     co = ccw(octagon(CH_A))
     for i in range(8):
@@ -188,7 +301,7 @@ def corridor(g, coll, lights):
             g.wall("MOS", q, B, FLOOR, CEIL)
         else:
             g.wall("MOS", q, p, FLOOR, CEIL)
-    g.cap("WOD", co, FLOOR)
+    herringbone(g, Polygon(co), FLOOR)
     g.cap("GLD", co, CEIL, down=True)
     g.ring("RED", octagon(1.1), FLOOR, FLOOR + 0.5)
     g.cap("RED", octagon(1.1), FLOOR + 0.5)
@@ -249,8 +362,8 @@ def corridor(g, coll, lights):
             coll.append(_seg_box(p, q, P, BASE_TOP, 0.8, -0.4))
     # corridor floor and the solid above as collision
     coll.append(("C", 0.0, 0.0, P, 2 * A0, 2 * A0, FLOOR - P, 0.0))
-    for (z0, z1, a) in [(CEIL, BASE_TOP, A0 - 0.2), (BASE_TOP, 7.8, A0 - 1.3), (7.8, 11.7, A0 - 3.2),
-                        (11.7, 16.0, A0 - 5.2), (16.0, 19.5, 6.6), (19.5, 23.0, 4.0), (23.0, 33.0, 1.6)]:
+    for (z0, z1, a) in [(CEIL, BASE_TOP, A0 - 0.2), (BASE_TOP, 7.8, A0 - 1.5), (7.8, 11.6, A0 - 4.4),
+                        (11.6, 16.0, 7.3), (16.0, 19.5, 6.0), (19.5, 22.6, 4.0), (22.6, 33.0, 1.8)]:
         coll.append(("C", 0.0, 0.0, z0, 2 * a, 2 * a, z1 - z0, 0.0))
     # lights along the corridor (warm, the gilding glows), one in the chamber
     for i in range(8):

@@ -56,31 +56,32 @@ def grounds():
 
 # ---------------------------------------------------------------- the stupa
 def stupa(g):
-    """Measured on photo 1 (far camera, 37 px a metre: tip 44.1 m, bell 10-11 m across at 17 m, bud ~2 m, fan ~5 m)
-    and photos 6 / 8 (bell base ~15 m across, the broad stepped octagon below it)."""
+    """v2 (look pass): profile measured on photo 1 (Maha Bandula Park, far camera: tip 44.1 m = 1670 px, 37.9 px a
+    metre, widths read at 12 heights). Below 8 m the ring hides it; the broad terrace base is from photo 8 / OSM.
+    Measured (full width m at height m): bell 10.8 @13.7, 10.3 @16.4, 8.8 @19.0, 6.9 @21.6, 4.5 @24.3; rings 3.4 @25.9,
+    2.5 @27.7; lotus 2.9 @29.6; fan 4.9 @31.4; bud 1.3-1.0 @31.7-36.7; hti cage 2.4 @37.7; spire to the vane 42-43."""
     a = A0
     prof = [(a, PZ)]
     z = PZ
-    tiers = [(1.2, 1.4), (1.2, 1.4), (1.0, 1.2), (1.0, 1.1), (0.9, 1.0), (0.9, 0.9), (0.8, 0.8), (0.8, 0.7), (0.8, 0.6)]
-    for h, inset in tiers:          # the broad stepped octagon (photo 8)
+    tiers = [(1.0, 1.6), (0.9, 1.5), (0.9, 1.4), (0.8, 1.3), (0.8, 1.2), (0.8, 1.1), (0.75, 1.0), (0.75, 0.9),
+             (0.75, 0.7), (0.75, 0.6)]
+    for h, inset in tiers:
         z += h
         prof += [(a, z), (a - inset, z)]
         a -= inset
-    # octagonal bell: moulding, steep lower flank with the cartouches, curving in to the shoulder (photos 1, 6)
-    a1 = a - 0.4
-    prof += [(a1, z), (a1, z + 0.6)]
-    zb = z + 0.6
-    # photo 1: 10.5 m across at 17 m, so the octagonal bell is a near-straight, slightly concave cone (not a dome)
-    bell = catmull([(a1, zb), (a1 - 1.0, zb + 2.0), (a1 - 2.2, zb + 4.4), (a1 - 3.4, zb + 7.0), (a1 - 4.4, zb + 9.6),
-                    (a1 - 5.0, zb + 11.6)], per=3)
+    # octagonal bell: a short moulding then the measured flank
+    a1 = a - 0.3
+    prof += [(a1, z), (a1, z + 0.4)]
+    zb = z + 0.4
+    bell = catmull([(a1, zb), (5.4, 13.7), (5.15, 16.4), (4.4, 19.0), (3.45, 21.6), (2.3, 24.3)], per=3)
     prof += bell[1:]
     zt = bell[-1][1]
-    a_sh = bell[-1][0]
-    prof += [(a_sh - 0.15, zt)]
+    prof += [(2.15, zt)]
     g.lathe("GLD", prof + [(0.0, zt)], 8, rot=ROT)
-    # cartouches: gold plates on the 8 lower bell faces (photo 6: carved leaf panels)
+    # cartouches on the lower bell faces (photo 6)
     k = 1.0 / math.cos(math.pi / 8)
-    za, zc = zb + 0.4, zb + 2.5
+    za, zc = zb + 0.4, zb + 3.4
+
     def a_at(zz):
         for (p0, z0_), (p1, z1_) in zip(bell, bell[1:]):
             if z0_ <= zz <= z1_:
@@ -91,54 +92,48 @@ def stupa(g):
         t0, t1 = ROT + 2 * math.pi * i / 8, ROT + 2 * math.pi * (i + 1) / 8
         tm = (t0 + t1) / 2
         nx, ny = math.cos(tm), math.sin(tm)
+
         def pt(r, zz, f):
             x0, y0 = r * math.cos(t0), r * math.sin(t0)
             x1, y1 = r * math.cos(t1), r * math.sin(t1)
-            return (x0 + (x1 - x0) * f + nx * 0.07, y0 + (y1 - y0) * f + ny * 0.07, zz)
-        A, B, C, D = pt(ra, za, 0.36), pt(ra, za, 0.64), pt(rc, zc, 0.64), pt(rc, zc, 0.36)
-        g.quad("GLD", A, B, C, D)
+            return (x0 + (x1 - x0) * f + nx * 0.06, y0 + (y1 - y0) * f + ny * 0.06, zz)
+        A, B, C, D = pt(ra, za, 0.33), pt(ra, za, 0.67), pt(rc, zc, 0.67), pt(rc, zc, 0.33)
+        g.quad("GLT", A, B, C, D)
         for (p, q) in ((A, B), (B, C), (C, D), (D, A)):
-            p2 = (p[0] - nx * 0.07, p[1] - ny * 0.07, p[2])
-            q2 = (q[0] - nx * 0.07, q[1] - ny * 0.07, q[2])
-            g.quad("GLD", p2, q2, q, p)
-    # round from the shoulder: four rings, inverted bowl, lotus petals, banana bud (photos 1, 6)
+            p2 = (p[0] - nx * 0.06, p[1] - ny * 0.06, p[2])
+            q2 = (q[0] - nx * 0.06, q[1] - ny * 0.06, q[2])
+            g.quad("GLT", p2, q2, q, p)
+    # round from the shoulder: 5 rings (24.3 -> 28.2), bowl, lotus, the slender bud, hti cage, spire
     z = zt
-    r0 = a_sh - 0.25
-    rp = [(r0, z)]
-    for r in (r0, r0 - 0.2, r0 - 0.4, r0 - 0.55):
-        rp += [(r, z), (r, z + 0.6), (r - 0.18, z + 0.6)]
-        z += 0.6
-    rb = r0 - 0.73
-    rp += catmull([(rb, z), (rb + 0.3, z + 0.7), (rb + 0.05, z + 1.3)], per=3)[1:]
-    z += 1.3
-    rl = rb + 0.05
-    rp += [(rl - 0.25, z + 1.1), (rl - 0.15, z + 1.1), (rl - 0.45, z + 1.9)]
-    z += 1.9
+    rp = [(2.1, z)]
+    for r in (2.1, 1.92, 1.76, 1.6, 1.46):
+        rp += [(r, z), (r, z + 0.78), (r - 0.1, z + 0.78)]
+        z += 0.78
+    rp += catmull([(1.36, z), (1.55, z + 0.6), (1.3, z + 1.4)], per=3)[1:]
+    z += 1.4
+    rp += [(1.1, z + 0.8), (1.15, z + 0.8), (0.8, z + 1.6)]
+    z += 1.6
     zfan = z
-    bud = catmull([(rl - 0.45, z), (rl - 0.5, z + 0.8), (rl - 0.65, z + 1.8), (rl - 0.95, z + 2.7), (rl - 1.25, z + 3.3),
-                   (rl - 1.4, z + 3.5)], per=3)
+    bud = catmull([(0.8, z), (0.72, z + 1.3), (0.6, z + 3.0), (0.45, z + 4.8), (0.36, z + 5.5)], per=3)
     rp += bud[1:]
     z = bud[-1][1]
     rp += [(0.0, z)]
     g.lathe("GLD", rp, 32, smooth=True)
-    g.fan("GWF", zfan, rl - 0.4, 3.0, 1.2)
-    # hti (photo 1: a tall stack of umbrella tiers, z ~34 -> 42), mast, vane, orb to 44.1
+    g.fan("GWF", zfan - 0.3, 1.0, 2.45, 0.9)
+    # hti: a cage widening upward (photo 1: 2.4 m across at its top), umbrella rings, then the spire
     zh = z
-    hp = [(0.35, zh)]
-    r = 1.3
-    n_t = 9
-    th = (TOP - 2.2 - zh) / n_t
-    for i in range(n_t):
-        hp += [(r * 0.6, zh), (r, zh + 0.06), (r * 0.72, zh + th)]
-        zh += th
-        r = max(0.22, r * 0.84)
-    hp += [(0.1, zh), (0.1, zh + 1.5), (0.0, zh + 1.5)]
-    g.lathe("GLD", hp, 16, smooth=True)
-    g.fan("GWF", z + 0.15, 1.35, 1.85, 0.8, n=24)
-    zm = zh + 1.5
-    g.quad("GWR", (0.1, 0, zm - 0.95), (0.9, 0, zm - 0.8), (0.9, 0, zm - 0.4), (0.1, 0, zm - 0.25))
-    orb = catmull([(0.0, zm), (0.25, zm + 0.12), (0.3, zm + 0.32), (0.18, TOP - 0.06), (0.0, TOP)], per=3)
-    g.lathe("GLD", orb, 12, smooth=True, cap_top=False)
+    hp = [(0.3, zh), (0.45, zh + 0.3)]
+    for i, r in enumerate((0.6, 0.75, 0.9, 1.05, 1.18)):
+        hp += [(r, zh + 0.35 + 0.4 * i), (r * 0.8, zh + 0.7 + 0.4 * i)]
+    zh += 0.35 + 0.4 * 5
+    hp += [(0.35, zh), (0.3, zh + 0.6), (0.18, zh + 2.2), (0.08, zh + 3.0), (0.0, zh + 3.0)]
+    g.lathe("GLT", hp, 16, smooth=True)
+    g.fan("GWF", z + 0.4, 1.3, 1.4, 1.6, n=24)
+    zm = zh + 3.0
+    g.quad("GWR", (0.08, 0, zm - 0.95), (0.85, 0, zm - 0.8), (0.85, 0, zm - 0.4), (0.08, 0, zm - 0.25))
+    g.lathe("GLT", [(0.06, zm), (0.06, TOP - 0.7), (0.0, TOP - 0.7)], 8, smooth=False)
+    orb = catmull([(0.0, TOP - 0.7), (0.25, TOP - 0.55), (0.3, TOP - 0.35), (0.18, TOP - 0.06), (0.0, TOP)], per=3)
+    g.lathe("GLT", orb, 12, smooth=True, cap_top=False)
     return z
 
 
@@ -160,7 +155,7 @@ def ring(g, outerP, coll):
     for ang, R in rects:
         cut = cut.difference(R)
     pieces = list(cut.geoms) if cut.geom_type == "MultiPolygon" else [cut]
-    signs = ["SG1", "SG2", "SG3", "SG4", "SG2", "SG1", "SG4", "SG3"]
+    signs = list(range(8))
     nsign = 0
     for P in pieces:
         ext = list(P.exterior.coords)[:-1]
@@ -180,7 +175,7 @@ def ring(g, outerP, coll):
                     s0, s1 = b / nb, (b + 1) / nb
                     A = (p[0] + (q[0] - p[0]) * s0, p[1] + (q[1] - p[1]) * s0)
                     B = (p[0] + (q[0] - p[0]) * s1, p[1] + (q[1] - p[1]) * s1)
-                    bay(g, A, B, signs[nsign % len(signs)])
+                    bay(g, A, B, (nsign * 5 + 3) % 17)
                     nsign += 1
                 # roof slope from the facade top (6.8) up and in 2 m to the flat roof (8.0)
                 ex, ey = (q[0] - p[0]) / L, (q[1] - p[1]) / L
@@ -228,7 +223,12 @@ def ring(g, outerP, coll):
     return inner, rects, pieces
 
 
-def bay(g, A, B, sgrp):
+SIGNS = ["SG1", "SG5", "SG2", "SG1", "SG3", "SG5", "SG6", "SG4", "SG1", "SG2", "SG5", "SG3", "SG1", "SG6", "SG2", "SG5", "SG4"]
+AWN = [None, "AW1", None, "AW2", "AW3", None, "AW1", None, "AW3", "AW2", None, None, "AW1", None, "AW3", None, "AW2"]
+SHUT = [0, 0, 1, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 1, 0, 0, 0]   # 0 open, 1 half down, 2 closed (roller shutters)
+
+
+def bay(g, A, B, idx):
     """One shop bay on the outer facade A -> B (outside on the right): open shopfront with a dark interior, piers,
     fascia with a plain sign board, blue band, upper window, white wall."""
     L = math.hypot(B[0] - A[0], B[1] - A[1])
@@ -257,7 +257,18 @@ def bay(g, A, B, sgrp):
     # fascia + sign board
     g.wall("WHT", P(0), P(L), 2.7, PZ)
     if L > 2.0:
-        g.plate(sgrp, P(0.5), P(L - 0.5), 2.8, 3.45, 0.1)
+        g.plate(SIGNS[idx], P(0.5), P(L - 0.5), 2.8, 3.45, 0.1)
+    # roller shutter inside the opening (0.12 behind the front), half or fully down on some bays
+    sh = SHUT[idx]
+    if sh:
+        zlo = 1.8 if sh == 1 else PAVE + 0.15
+        g.wall("SHT", P(s0, 0.12), P(s1, 0.12), zlo, 2.7)
+    # canvas awning over the opening on some bays (double-sided), under the sign
+    aw = AWN[idx]
+    if aw:
+        a0, a1 = P(s0 - 0.1, 0), P(s1 + 0.1, 0)
+        b0, b1 = P(s0 - 0.1, -0.9), P(s1 + 0.1, -0.9)
+        g.quad(aw, (*a0, 2.72), (*a1, 2.72), (*b1, 2.42), (*b0, 2.42))
     # blue band, upper wall with a window
     g.wall("BLU", P(0), P(L), PZ, PZ + 0.25)
     g.wall("WHT", P(0), P(L), PZ + 0.25, 4.2)
@@ -375,13 +386,13 @@ def platform(g, inner, rects, shrine_polys, coll):
 
 
 # ---------------------------------------------------------------- templates
-def pyatthat_tpl(base=9.0, tiers=7, spire=True):
-    """Seven-tier Burmese pyatthat (photo 6): an eave roof, then tiers of a short frieze and a sloped roof, each
-    smaller; green slopes with gold friezes and edges, a gold spire and hti. Local metres, base centre at 0."""
+def pyatthat_tpl(base=7.0, tiers=7, spire=True):
+    """v2: gold tiered pyatthat (photo 6): each tier a dark green frieze and a GOLD roof slope with a carved crest
+    (a row of gold flame fingers along every eave) and taller corner flames; slimmer than v1 (base 7 m, each tier
+    0.76 of the one below, tall spire). Local metres, base centre at 0."""
     g = PGeo()
     s = base / 2
-    z = 0.0
-    # base eave: wide sloped roof over the hall
+
     def frustum(grp, s0, s1, z0, z1):
         pts0 = [(-s0, -s0), (s0, -s0), (s0, s0), (-s0, s0)]
         pts1 = [(-s1, -s1), (s1, -s1), (s1, s1), (-s1, s1)]
@@ -389,33 +400,46 @@ def pyatthat_tpl(base=9.0, tiers=7, spire=True):
             a, b = pts0[i], pts0[(i + 1) % 4]
             c, d = pts1[(i + 1) % 4], pts1[i]
             g.quad(grp, (*a, z0), (*b, z0), (*c, z1), (*d, z1))
-    # eave underside (visible from below) + slope
-    g.quad("GLD", (-s - 0.6, -s - 0.6, 0.0), (-s - 0.6, s + 0.6, 0.0), (s + 0.6, s + 0.6, 0.0), (s + 0.6, -s - 0.6, 0.0))
-    frustum("GRN", s + 0.6, s * 0.72, 0.0, 1.2)
-    z = 1.2
-    w = s * 0.72
+
+    def crest(w, z, hgt, n):
+        # flame fingers standing on the eave edge (thin double-sided gold), plus a taller flame at each corner
+        for i in range(4):
+            c0 = [(-w, -w), (w, -w), (w, w), (-w, w)][i]
+            c1 = [(-w, -w), (w, -w), (w, w), (-w, w)][(i + 1) % 4]
+            for k in range(n):
+                f0, f1 = (k + 0.15) / n, (k + 0.85) / n
+                fm = (k + 0.5) / n
+                A = (c0[0] + (c1[0] - c0[0]) * f0, c0[1] + (c1[1] - c0[1]) * f0, z + 0.01)
+                B = (c0[0] + (c1[0] - c0[0]) * f1, c0[1] + (c1[1] - c0[1]) * f1, z + 0.01)
+                C = (c0[0] + (c1[0] - c0[0]) * fm, c0[1] + (c1[1] - c0[1]) * fm, z + hgt)
+                g.tri("GWR", A, B, C)
+            ox, oy = c0[0] * 1.0, c0[1] * 1.0
+            dx, dy = (1 if ox > 0 else -1), (1 if oy > 0 else -1)
+            g.quad("GWR", (ox, oy, z + 0.01), (ox + dx * 0.25, oy + dy * 0.25, z + 0.01),
+                   (ox + dx * 0.45, oy + dy * 0.45, z + hgt * 2.6), (ox + dx * 0.1, oy + dy * 0.1, z + hgt * 2.2))
+
+    w0 = s + 0.35
+    g.quad("GLT", (-w0, -w0, 0.0), (-w0, w0, 0.0), (w0, w0, 0.0), (w0, -w0, 0.0))     # eave soffit
+    frustum("GLD", w0, s * 0.7, 0.0, 1.0)
+    crest(w0, 0.0, 0.35, 7)
+    z = 1.0
+    w = s * 0.7
     for i in range(tiers):
-        fh, rh = 0.55 * (0.93 ** i), 0.9 * (0.93 ** i)
-        # frieze
-        pts = [(-w, -w), (w, -w), (w, w), (-w, w)]
-        g.ring("GLD", pts, z, z + fh)
+        fh, rh = 0.5 * (0.92 ** i), 0.75 * (0.92 ** i)
+        g.ring("GRN", [(-w, -w), (w, -w), (w, w), (-w, w)], z, z + fh)
         z += fh
-        # roof slope overhanging 0.35
-        g.quad("GLD", (-w - 0.35, -w - 0.35, z), (-w - 0.35, w + 0.35, z), (w + 0.35, w + 0.35, z), (w + 0.35, -w - 0.35, z))
-        w2 = w * 0.78
-        frustum("GRN", w + 0.35, w2, z, z + rh)
-        # gold ridge plates (crest) at the 4 corners: thin double-sided fins
-        for (dx, dy) in ((1, 1), (-1, 1), (-1, -1), (1, -1)):
-            g.quad("GWR", (dx * (w + 0.35), dy * (w + 0.35), z), (dx * w2, dy * w2, z + rh),
-                   (dx * w2, dy * w2, z + rh + 0.45), (dx * (w + 0.35), dy * (w + 0.35), z + 0.5))
+        wo = w + 0.2
+        g.quad("GLT", (-wo, -wo, z), (-wo, wo, z), (wo, wo, z), (wo, -wo, z))
+        w2 = w * 0.76
+        frustum("GLD", wo, w2, z, z + rh)
+        crest(wo, z, 0.3 * (0.92 ** i), max(3, 7 - i))
         z += rh
         w = w2
-    # top cap of the last tier and the spire
-    g.cap("GRN", [(-w, -w), (w, -w), (w, w), (-w, w)], z)
+    g.cap("GLD", [(-w, -w), (w, -w), (w, w), (-w, w)], z)
     if spire:
-        sp = catmull([(0.5, z), (0.45, z + 0.8), (0.32, z + 1.8), (0.18, z + 2.6), (0.08, z + 3.4)], per=2)
-        g.lathe("GLD", sp + [(0.05, z + 4.4), (0.0, z + 4.4)], 12)
-    return g, z + 4.4
+        sp = catmull([(min(0.45, w * 0.9), z), (0.4, z + 0.8), (0.28, z + 1.9), (0.15, z + 3.0), (0.06, z + 4.0)], per=2)
+        g.lathe("GLD", sp + [(0.04, z + 5.2), (0.0, z + 5.2)], 12)
+    return g, z + 5.2
 
 
 def zedi_tpl(h=5.5, a=1.3):
@@ -533,9 +557,9 @@ def build():
         places.append(("zedibig", r * math.cos(t), r * math.sin(t), PZ, t))
     platform(g, inner, rects, shrine_polys + stair_cut, coll)
     # stupa collision: octagon tiers as two crossing boxes each, bell / bud as shrinking boxes
-    for (z0, z1, a) in [(PZ, PZ + 2.4, A0 - 0.1), (PZ + 2.4, PZ + 4.4, A0 - 2.9), (PZ + 4.4, PZ + 6.2, A0 - 5.2),
-                        (PZ + 6.2, PZ + 8.6, A0 - 7.1), (PZ + 8.6, PZ + 13.0, 6.9), (PZ + 13.0, PZ + 17.0, 5.6),
-                        (PZ + 17.0, PZ + 21.0, 3.2), (PZ + 21.0, PZ + 30.0, 1.4)]:
+    for (z0, z1, a) in [(PZ, PZ + 1.9, A0 - 0.1), (PZ + 1.9, PZ + 3.6, A0 - 3.1), (PZ + 3.6, PZ + 5.2, A0 - 5.6),
+                        (PZ + 5.2, PZ + 7.4, A0 - 8.0), (PZ + 7.4, PZ + 8.6, 6.0), (PZ + 8.6, PZ + 15.4, 5.0),
+                        (PZ + 15.4, PZ + 20.7, 3.0), (PZ + 20.7, PZ + 33.0, 1.3)]:
         coll.append(("C", 0.0, 0.0, z0, 2 * a, 2 * a, z1 - z0, 0.0))
     tpl = {}
     tpl["pyatthat"], _ = pyatthat_tpl()
