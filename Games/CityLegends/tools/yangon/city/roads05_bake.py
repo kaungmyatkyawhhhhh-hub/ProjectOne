@@ -70,6 +70,41 @@ def decode(s):
     return out
 
 
+H2 = (NB * NB - 1) // 2
+
+
+def decode_q(s):
+    """v2 pages (@Q): 2-character numbers; position delta x100, rotation quaternion x, y, z x4000 (w >= 0), size x100"""
+    out = []
+    i = 0
+    n = len(s)
+    px = py = pz = 0
+
+    def num():
+        nonlocal i
+        if s[i] == '~':
+            j = s.index('~', i + 1)
+            v = int(s[i + 1:j])
+            i = j + 1
+            return v
+        v = IDX[s[i]] * NB + IDX[s[i + 1]] - H2
+        i += 2
+        return v
+    while i < n:
+        k, c = s[i], s[i + 1]
+        i += 2
+        v = [num() for _ in range(9)]
+        px += v[0]
+        py += v[1]
+        pz += v[2]
+        x, y, z = v[3] / 4000, v[4] / 4000, v[5] / 4000
+        w = math.sqrt(max(0.0, 1 - x * x - y * y - z * z))
+        R = (1 - 2 * (y * y + z * z), 2 * (x * y + w * z), 2 * (x * z - w * y))
+        U = (2 * (x * y - w * z), 1 - 2 * (x * x + z * z), 2 * (y * z + w * x))
+        out.append((k, c, (px / 100, py / 100, pz / 100), R, U, (v[6] / 100, v[7] / 100, v[8] / 100)))
+    return out
+
+
 def read_pages(folders):
     pages = {}
     for f in folders:
@@ -82,7 +117,7 @@ def read_pages(folders):
                     raw = ''.join(x.get('text', '') for x in json.loads(raw))
                 except Exception:
                     pass
-            m = re.search(r'@P([A-Za-z0-9_\-]+?)_(\d\d)@', raw[:200])
+            m = re.search(r'@([PQ])([A-Za-z0-9_\-]+?)_(\d\d)@', raw[:200])
             if not m:
                 continue
             body = raw[m.end():]
@@ -90,9 +125,9 @@ def read_pages(folders):
             if e < 0:
                 print('page without end:', p)
                 continue
-            key = (m.group(1), int(m.group(2)))
+            key = (m.group(2), int(m.group(3)))
             if key not in pages or os.path.getmtime(p) > pages[key][0]:
-                pages[key] = (os.path.getmtime(p), body[:e])
+                pages[key] = (os.path.getmtime(p), body[:e], m.group(1))
     return pages
 
 
@@ -212,16 +247,21 @@ def up_fix(t):
 def collect(tag, folders):
     pages = read_pages(folders)
     cells = collections.defaultdict(dict)
-    for (cell, k), (_, body) in pages.items():
-        cells[cell][k] = body
+    for (cell, k), (_, body, fmt) in pages.items():
+        cells[cell][k] = (fmt, body)
     parts = []
     report = {}
     for cell, pg in sorted(cells.items()):
         ks = sorted(pg)
         missing = [k for k in range(1, max(ks) + 1) if k not in pg]
         ps = []
+        fmts = set(pg[k][0] for k in ks)
+        if len(fmts) > 1:
+            print('cell %s mixes page formats %s: only Q kept' % (cell, fmts))
+            ks = [k for k in ks if pg[k][0] == 'Q']
         for k in ks:
-            ps.extend(decode(pg[k]))
+            fmt, body = pg[k]
+            ps.extend(decode_q(body) if fmt == 'Q' else decode(body))
         report[cell] = dict(pages=len(ks), missing=missing, parts=len(ps))
         parts.extend(ps)
     pickle.dump(parts, open(os.path.join(od(tag), 'parts.pkl'), 'wb'))

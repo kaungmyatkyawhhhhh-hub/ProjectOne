@@ -32,6 +32,53 @@ for i = 1, NB do
 	CH[i - 1] = string.sub(BASE, i, i)
 end
 
+local H2 = (NB * NB - 1) // 2
+-- (v2 pages, "@Q": 2 characters a number, "~n~" past -4049 .. 4049)
+local function enc2(v: number): string
+	local i = math.floor(v + 0.5)
+	if i < -H2 or i > H2 then
+		return "~" .. i .. "~"
+	end
+	i += H2
+	return CH[i // NB] .. CH[i % NB]
+end
+
+-- unit quaternion (x, y, z, w >= 0) of a CFrame's rotation
+local function quat(cf: CFrame): (number, number, number, number)
+	local _, _, _, m00, m01, m02, m10, m11, m12, m20, m21, m22 = cf:GetComponents()
+	local tr = m00 + m11 + m22
+	local x, y, z, w
+	if tr > 0 then
+		local S = math.sqrt(tr + 1) * 2
+		w = 0.25 * S
+		x = (m21 - m12) / S
+		y = (m02 - m20) / S
+		z = (m10 - m01) / S
+	elseif m00 > m11 and m00 > m22 then
+		local S = math.sqrt(1 + m00 - m11 - m22) * 2
+		w = (m21 - m12) / S
+		x = 0.25 * S
+		y = (m01 + m10) / S
+		z = (m02 + m20) / S
+	elseif m11 > m22 then
+		local S = math.sqrt(1 + m11 - m00 - m22) * 2
+		w = (m02 - m20) / S
+		x = (m01 + m10) / S
+		y = 0.25 * S
+		z = (m12 + m21) / S
+	else
+		local S = math.sqrt(1 + m22 - m00 - m11) * 2
+		w = (m10 - m01) / S
+		x = (m02 + m20) / S
+		y = (m12 + m21) / S
+		z = 0.25 * S
+	end
+	if w < 0 then
+		x, y, z, w = -x, -y, -z, -w
+	end
+	return x, y, z, w
+end
+
 local function enc(v: number): string
 	local i = math.floor(v + 0.5)
 	if i < -HALF or i > HALF then
@@ -103,10 +150,10 @@ function M.collect(root: Instance, cell: string): string
 		local k = kindOf(p)
 		counts[k] = (counts[k] or 0) + 1
 		local x, y, z = math.floor(pos.X * 100 + 0.5), math.floor(pos.Y * 100 + 0.5), math.floor(pos.Z * 100 + 0.5)
-		local rec = k .. classOf(p) .. enc(x - px) .. enc(y - py) .. enc(z - pz)
-			.. enc(r.X * 100000) .. enc(r.Y * 100000) .. enc(r.Z * 100000)
-			.. enc(u.X * 100000) .. enc(u.Y * 100000) .. enc(u.Z * 100000)
-			.. enc(s.X * 100) .. enc(s.Y * 100) .. enc(s.Z * 100)
+		local qx, qy, qz = quat(cf)
+		local rec = k .. classOf(p) .. enc2(x - px) .. enc2(y - py) .. enc2(z - pz)
+			.. enc2(qx * 4000) .. enc2(qy * 4000) .. enc2(qz * 4000)
+			.. enc2(s.X * 100) .. enc2(s.Y * 100) .. enc2(s.Z * 100)
 		px, py, pz = x, y, z
 		table.insert(buf, rec)
 		len += #rec
@@ -141,7 +188,7 @@ function M.page(k: number): string
 	if not body then
 		return "no page " .. k
 	end
-	local s = string.format("@P%s_%02d@", _G.RoadBake05Cell, k) .. body .. "@END@"
+	local s = string.format("@Q%s_%02d@", _G.RoadBake05Cell, k) .. body .. "@END@"
 	if #s < 95500 then
 		s ..= string.rep("#", 95500 - #s)
 	end

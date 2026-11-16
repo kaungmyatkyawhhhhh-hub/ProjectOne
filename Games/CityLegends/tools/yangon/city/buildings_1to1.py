@@ -126,6 +126,15 @@ LANDMARK_SITES_BY_TAG["P7"] = {
     "national_museum": dict(osm=[], areas=[428294069], pts=[], grow=4.0),
     "peoples_park": dict(osm=[], areas=[374243908], pts=[], grow=2.0),
 }
+# P8 (Kandawgyi): Chaukhtatgyi and Ngahtatgyi (placed models, their halls + compounds), Karaweik (on the lake), the
+# burnt Kandawgyi Palace Hotel site (not mapped: a circle), the Zoo's own halls stay for a later zoo job
+LANDMARK_SITES_BY_TAG["P8"] = {
+    "chaukhtatgyi": dict(osm=["o117384553"], pts=[], circles=[(96.16390, 16.81171, 70.0)], grow=8.0),
+    "ngahtatgyi": dict(osm=["o314121257"], pts=[], circles=[(96.16250, 16.80850, 60.0)], grow=8.0),
+    "karaweik": dict(osm=[], areas=[117381678], pts=[], grow=6.0),
+    "kandawgyi_palace": dict(osm=[], pts=[], circles=[(96.16194, 16.79472, 70.0)], grow=0.0),
+    "yangon_zoo": dict(osm=[], areas=[377827695], pts=[], grow=2.0),
+}
 LANDMARK_SITES = LANDMARK_SITES_BY_TAG.get(TAG, {})
 # earlier pilots this one meets (geo.PILOT_SEAMS): their buildings by the shared edge are kept, never doubled, and no
 # compound wall is drawn along the shared edge twice
