@@ -139,12 +139,15 @@ DayCycle.RIVIERA_X = 9000 -- east of this the camera is on the Riviera map
 local YANGON_DAY = table.freeze({
 	outdoor = Color3.fromRGB(172, 164, 150),
 	ambient = Color3.fromRGB(126, 122, 116),
-	atmo = Color3.fromRGB(214, 210, 198),
-	decay = Color3.fromRGB(186, 178, 160),
+	atmo = Color3.fromRGB(220, 222, 215),
+	decay = Color3.fromRGB(210, 200, 180),
 	tint = Color3.fromRGB(255, 250, 242),
 	shiftTop = Color3.fromRGB(255, 246, 230),
 })
 local YANGON_SKY_FILL = 0.3
+-- (2026-11-16, the street survey: Yangon's midday sky is pale and hazy, zenith about 150, 185, 220 with a near-white band
+-- at the horizon, not deep blue) more haze over the day, less glare
+local YANGON_DAY_N = table.freeze({ haze = 1.7, density = 0.32, glare = 0.05 })
 
 -- the old map's grade (the place's ColorCorrection)
 local BASE_SAT, BASE_CON = 0.02, 0.12
@@ -332,7 +335,13 @@ function DayCycle.start()
 		local cam = workspace.CurrentCamera
 		w = if cam then math.clamp((cam.CFrame.Position.X - (DayCycle.RIVIERA_X - 1500)) / 1500, 0, 1) else 0
 		local look = LookFx.state
-		setSky(if w >= 0.5 then (if look.Sky ~= "Auto" then look.Sky else rivieraSky(hour)) else "base")
+		local skyName = if w >= 0.5 then (if look.Sky ~= "Auto" then look.Sky else rivieraSky(hour)) else "base"
+		-- (2026-11-16, the street survey) Yangon's day sky is pale and hazy, not the Riviera's deep blue: its own box
+		-- (tools/yangon/city/yangon_sky.py, RivieraSkies.YangonDay) wherever the camera is in Yangon
+		if skyName == "Day" and cam and Config.isYangonAt(cam.CFrame.Position) and skies and skies:FindFirstChild("YangonDay") then
+			skyName = "YangonDay"
+		end
+		setSky(skyName)
 		if sky then
 			sky.CelestialBodiesShown = look.SunClouds
 		end
@@ -368,6 +377,10 @@ function DayCycle.start()
 		if mid > 0 then
 			for key, v in YANGON_DAY do
 				(k :: any)[key] = ((k :: any)[key] :: Color3):Lerp(v, mid)
+			end
+			for key, v in YANGON_DAY_N do
+				local base = (k :: any)[key] :: number
+				(k :: any)[key] = base + (v - base) * mid
 			end
 		end
 		local diffuse = if look.Ambient == "High" then 1 else Config.Look.AmbientLow

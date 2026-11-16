@@ -1,0 +1,15 @@
+[out:json][timeout:180];
+(
+ way["highway"~"^(motorway|trunk|primary|secondary|tertiary)(_link)?$"](16.75,96.095,16.89,96.235);
+ way["highway"~"footway|steps|path"]["bridge"](16.75,96.095,16.89,96.235);
+ way["man_made"="bridge"](16.75,96.095,16.89,96.235);
+ way["area:highway"](16.75,96.095,16.89,96.235);
+ way["barrier"~"jersey_barrier|guard_rail|kerb|fence"]["highway"!~"."](16.75,96.095,16.89,96.235);
+);
+out tags geom;
+node["highway"~"crossing|traffic_signals|stop|give_way|bus_stop|street_lamp|turning_circle|mini_roundabout|speed_camera"](16.75,96.095,16.89,96.235);
+out;
+node["crossing"](16.75,96.095,16.89,96.235);
+out;
+node["traffic_calming"](16.75,96.095,16.89,96.235);
+out;

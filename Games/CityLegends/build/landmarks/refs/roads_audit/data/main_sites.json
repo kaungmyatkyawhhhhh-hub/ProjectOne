@@ -1,0 +1,1082 @@
+[
+{
+"name": "Pyay Road",
+"way": 751480901,
+"tags": {
+"access": "yes",
+"bicycle": "no",
+"foot": "no",
+"highway": "trunk",
+"highway_1": "no",
+"horse": "no",
+"lanes": "3",
+"maxspeed": "70",
+"name": "ပြည်လမ်း",
+"name:en": "Pyay Road",
+"name:my": "ပြည်လမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.888178612959745,
+"lon": 96.12691871581674,
+"dir": [
+-0.978171077523479,
+-0.20780121052716713
+],
+"partner": [
+1322316163,
+9.3,
+"3"
+]
+},
+{
+"name": "Pyay Road",
+"way": 768072169,
+"tags": {
+"access": "yes",
+"alt_name:en": "Prome Road",
+"fixme": "dual carriageway",
+"highway": "trunk",
+"highway_1": "no",
+"lanes": "3",
+"maxspeed": "70",
+"name": "ပြည်လမ်း",
+"name:en": "Pyay Road",
+"name:my": "ပြည်လမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.8494286345815,
+"lon": 96.13902060763958,
+"dir": [
+-0.9622800216447835,
+-0.27206094894952315
+],
+"partner": [
+1414567602,
+23.8,
+"3"
+]
+},
+{
+"name": "Bayint Naung Road",
+"way": 681022823,
+"tags": {
+"highway": "primary",
+"name": "ဘုရင့်နောင်လမ်း",
+"name:en": "Bayint Naung Road",
+"name:my": "ဘုရင့်နောင်လမ်း",
+"oneway": "yes"
+},
+"lat": 16.877972318443337,
+"lon": 96.10031656908852,
+"dir": [
+-0.34926328572467435,
+0.9370246300096944
+],
+"partner": [
+602012313,
+13.2,
+null
+]
+},
+{
+"name": "Bayint Naung Road",
+"way": 658393848,
+"tags": {
+"alt_name": "Pin Lon Road",
+"alt_name:en": "Pin Lon Road",
+"alt_name:my": "ပင်လုံလမ်း",
+"highway": "secondary",
+"name": "Bayint Naung Road",
+"oneway": "yes"
+},
+"lat": 16.85768219664872,
+"lon": 96.2029409730685,
+"dir": [
+-0.9037786382333597,
+0.4280002021880994
+],
+"partner": [
+1257302508,
+12.5,
+null
+]
+},
+{
+"name": "Kabar Aye Pagoda Road",
+"way": 1569956364,
+"tags": {
+"alt_name:en": "Kaba Aye Pagoda Road",
+"bicycle": "yes",
+"highway": "primary",
+"lanes": "3",
+"name": "ကမ္ဘာအေးဘုရားလမ်း",
+"name:en": "Kabar Aye Pagoda Road",
+"name:my": "ကမ္ဘာအေးဘုရားလမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.840604993215287,
+"lon": 96.1562272040524,
+"dir": [
+0.14960940555122387,
+0.988745177369078
+],
+"partner": [
+619352591,
+11.2,
+"3"
+]
+},
+{
+"name": "Kabar Aye Pagoda Road",
+"way": 529373514,
+"tags": {
+"alt_name:en": "Kaba Aye Pagoda Road",
+"bicycle": "no",
+"highway": "primary",
+"horse": "no",
+"lanes": "3",
+"maxspeed": "50",
+"name": "ကမ္ဘာအေးစေတီလမ်း",
+"name:en": "Kabar Aye Pagoda Road",
+"name:my": "ကမ္ဘာအေးစေတီလမ်း",
+"oneway": "yes",
+"sidewalk:left": "separate",
+"sidewalk:right": "yes",
+"surface": "asphalt"
+},
+"lat": 16.867902814675034,
+"lon": 96.15071434616515,
+"dir": [
+0.822719687690422,
+-0.5684472847033174
+],
+"partner": [
+466906568,
+11.4,
+"3"
+]
+},
+{
+"name": "Than Thu Mar Road",
+"way": 565742512,
+"tags": {
+"highway": "secondary",
+"name": "သံသုမာလမ်း",
+"name:en": "Than Thu Mar Road",
+"name:my": "သံသုမာလမ်း",
+"parking:lane:both": "parallel",
+"surface": "concrete"
+},
+"lat": 16.86679353745222,
+"lon": 96.1679615714362,
+"dir": [
+0.7545886780899419,
+-0.6561980851072899
+],
+"partner": null
+},
+{
+"name": "Than Thu Mar Road",
+"way": 1190523812,
+"tags": {
+"alt_name:en": "Thanthuma Road",
+"highway": "primary",
+"lanes": "2",
+"maxspeed": "50",
+"name": "သံသုမာလမ်း",
+"name:en": "Than Thu Mar Road",
+"name:my": "သံသုမာလမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.82162925661398,
+"lon": 96.20344440220317,
+"dir": [
+0.8192571504553101,
+0.5734262999094525
+],
+"partner": [
+663129657,
+9.1,
+"2"
+]
+},
+{
+"name": "Waizayandar Road",
+"way": 252081644,
+"tags": {
+"cycleway:right": "no",
+"highway": "primary",
+"lanes": "3",
+"maxspeed": "70",
+"name": "ဝေဇယန္တာလမ်း",
+"name:en": "Waizayandar Road",
+"name:my": "ဝေဇယန္တာလမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.84678861295038,
+"lon": 96.16977942476404,
+"dir": [
+-0.5028249253213962,
+0.8643882776134417
+],
+"partner": [
+618471856,
+16.1,
+"3"
+]
+},
+{
+"name": "Waizayandar Road",
+"way": 768073537,
+"tags": {
+"alt_name:en": "Waizayanta Road",
+"highway": "primary",
+"lanes": "2",
+"name": "ဝေဇယန္တာလမ်း",
+"name:en": "Waizayandar Road",
+"name:my": "ဝေဇယန္တာလမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.825230254725273,
+"lon": 96.18065980383122,
+"dir": [
+0.28311858693894676,
+-0.9590849105943092
+],
+"partner": [
+768073542,
+16.9,
+"2"
+]
+},
+{
+"name": "Insein Road",
+"way": 617172690,
+"tags": {
+"highway": "primary",
+"lanes": "3",
+"maxspeed": "50",
+"name": "အင်းစိန်လမ်း",
+"name:en": "Insein Road",
+"name:my": "အင်းစိန်လမ်း",
+"oneway": "yes",
+"parking:both": "no",
+"parking:both:restriction": "no_parking",
+"surface": "asphalt"
+},
+"lat": 16.875385068937216,
+"lon": 96.11610349740499,
+"dir": [
+-0.5931815773971627,
+0.8050687028053033
+],
+"partner": [
+617174894,
+12.1,
+"6"
+]
+},
+{
+"name": "Insein Road",
+"way": 1348959922,
+"tags": {
+"highway": "primary",
+"lanes": "3",
+"maxspeed": "70",
+"name": "Insein Road",
+"name:en": "Insein Road",
+"name:my": "အင်းစိန်လမ်း",
+"oneway": "yes",
+"parking:lane:left": "parallel"
+},
+"lat": 16.84103956973584,
+"lon": 96.1268000254326,
+"dir": [
+-0.22937346557345153,
+0.973338488548986
+],
+"partner": [
+617166210,
+11.3,
+"3"
+]
+},
+{
+"name": "Strand Road",
+"way": 395053081,
+"tags": {
+"alt_name:en": "Kan-na Road",
+"highway": "tertiary",
+"lanes": "2",
+"maxspeed": "50",
+"name": "ကမ်းနားလမ်း",
+"name:en": "Strand Road",
+"name:my": "ကမ်းနားလမ်း",
+"oneway": "yes",
+"parking:both": "yes",
+"parking:both:orientation": "perpendicular",
+"surface": "asphalt",
+"wikipedia": "en:Strand Road, Yangon"
+},
+"lat": 16.768612591817423,
+"lon": 96.18611093952431,
+"dir": [
+-0.9991728921250438,
+0.040663640300343536
+],
+"partner": [
+505471089,
+3.7,
+"6"
+]
+},
+{
+"name": "Strand Road",
+"way": 1184419988,
+"tags": {
+"alt_name:en": "Kan-na Road",
+"highway": "primary",
+"lanes": "3",
+"maxspeed": "50",
+"name": "ကမ်းနားလမ်း",
+"name:en": "Strand Road",
+"name:my": "ကမ်းနားလမ်း",
+"oneway": "yes",
+"parking:left": "yes",
+"parking:left:orientation": "perpendicular",
+"sidewalk:left": "yes",
+"sidewalk:right": "separate",
+"surface": "asphalt",
+"turn:lanes": "left|through|through",
+"wikipedia": "en:Strand Road, Yangon"
+},
+"lat": 16.77125049891683,
+"lon": 96.15586759481899,
+"dir": [
+0.9815012825213967,
+-0.19145556249128268
+],
+"partner": [
+505453272,
+10.2,
+"3"
+]
+},
+{
+"name": "Baho Road",
+"way": 24453447,
+"tags": {
+"highway": "secondary",
+"lanes": "2",
+"name": "ဗဟိုလမ်း",
+"name:en": "Baho Road",
+"name:my": "ဗဟိုလမ်း",
+"surface": "concrete"
+},
+"lat": 16.824756301315528,
+"lon": 96.12545235572857,
+"dir": [
+0.2609353346924303,
+-0.9653562819544654
+],
+"partner": null
+},
+{
+"name": "Baho Road",
+"way": 531279015,
+"tags": {
+"highway": "secondary",
+"lanes": "4",
+"maxspeed": "40",
+"name": "ဗဟိုလမ်း",
+"name:en": "Baho Road",
+"name:my": "ဗဟိုလမ်း",
+"surface": "concrete"
+},
+"lat": 16.88135180915886,
+"lon": 96.11037416163882,
+"dir": [
+0.36388364081530244,
+-0.9314444137719653
+],
+"partner": null
+},
+{
+"name": "Anawrahta Road",
+"way": 36006734,
+"tags": {
+"highway": "secondary",
+"name": "အနော်ရထာလမ်း",
+"name:en": "Anawrahta Road",
+"name:my": "အနော်ရထာလမ်း"
+},
+"lat": 16.885501901158282,
+"lon": 96.2016941379302,
+"dir": [
+0.46640007985155246,
+-0.8845738892339438
+],
+"partner": null
+},
+{
+"name": "Anawrahta Road",
+"way": 527745922,
+"tags": {
+"highway": "secondary",
+"lanes": "5",
+"maxspeed": "50",
+"name": "အနော်ရထာလမ်း",
+"name:en": "Anawrahta Road",
+"name:my": "အနော်ရထာလမ်း",
+"old_name:en": "Fraser Road",
+"oneway": "yes",
+"parking:both": "yes",
+"parking:both:orientation": "perpendicular",
+"surface": "asphalt",
+"turn:lanes:forward": "left|through|through|through|through;right",
+"wikipedia": "en:Anawrahta Road"
+},
+"lat": 16.777279712233845,
+"lon": 96.14628915476968,
+"dir": [
+-0.9996942135648226,
+0.024728108803769026
+],
+"partner": null
+},
+{
+"name": "Kyimyindine Kannar Road",
+"way": 1184307792,
+"tags": {
+"alt_name": "Strand Road",
+"highway": "primary",
+"lanes": "4",
+"maxspeed": "50",
+"name": "ကြည့်မြင်တိုင် ကမ်းနားလမ်း",
+"name:en": "Kyimyindine Kannar Road",
+"name:my": "ကြည့်မြင်တိုင် ကမ်းနားလမ်း",
+"oneway": "yes",
+"parking:lane:both": "no_parking",
+"surface": "asphalt"
+},
+"lat": 16.78492351645558,
+"lon": 96.12587078218057,
+"dir": [
+0.4991932918356192,
+-0.8664906562602497
+],
+"partner": [
+1190357605,
+11.4,
+"4"
+]
+},
+{
+"name": "Kyimyindine Kannar Road",
+"way": 538659707,
+"tags": {
+"alt_name": "Strand Road",
+"bicycle": "no",
+"highway": "primary",
+"lanes": "4",
+"maxspeed": "50",
+"name": "ကြည်မြင်တိုင်ကမ်းနားလမ်း",
+"name:en": "Kyimyindine Kannar Road",
+"name:my": "ကြည်မြင်တိုင်ကမ်းနားလမ်း",
+"oneway": "yes",
+"parking:lane:both": "no_parking",
+"surface": "asphalt"
+},
+"lat": 16.817310014284455,
+"lon": 96.1218992574299,
+"dir": [
+-0.012920011878991857,
+-0.9999165331631669
+],
+"partner": [
+538658097,
+8.3,
+"6"
+]
+},
+{
+"name": "Lay Daungkan Road",
+"way": 1432485798,
+"tags": {
+"highway": "primary",
+"maxspeed": "70",
+"name": "လေးထောင့်ကန်လမ်း",
+"name:en": "Lay Daungkan Road",
+"name:my": "လေးထောင့်ကန်လမ်း",
+"oneway": "yes",
+"surface": "asphalt",
+"wheelchair": "no"
+},
+"lat": 16.831819501721302,
+"lon": 96.19411789051492,
+"dir": [
+0.691995696547875,
+0.7219016248487193
+],
+"partner": [
+620581607,
+11.1,
+"3"
+]
+},
+{
+"name": "Lay Daungkan Road",
+"way": 617105916,
+"tags": {
+"highway": "primary",
+"name": "လေးထောင့်ကန်လမ်း",
+"name:en": "Lay Daungkan Road",
+"name:my": "လေးထောင့်ကန်လမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.82053152719012,
+"lon": 96.17344170525145,
+"dir": [
+-0.9963672190203221,
+-0.08516081764350084
+],
+"partner": [
+286599518,
+11.5,
+"6"
+]
+},
+{
+"name": "U Wisara Road",
+"way": 617110313,
+"tags": {
+"highway": "secondary",
+"lanes": "2",
+"maxspeed": "50",
+"name": "ဦးဝီစာရလမ်း",
+"name:en": "U Wisara Road",
+"name:my": "ဦးဝီစာရလမ်း",
+"oneway": "yes",
+"smoothness": "good",
+"surface": "asphalt"
+},
+"lat": 16.808376719982036,
+"lon": 96.13929670290987,
+"dir": [
+-0.6609016485175385,
+0.7504725251378627
+],
+"partner": [
+1269261999,
+13.2,
+"2"
+]
+},
+{
+"name": "U Wisara Road",
+"way": 164199242,
+"tags": {
+"highway": "secondary",
+"name": "ဦးဝိစာရလမ်း",
+"name:en": "U Wisara Road",
+"name:my": "ဦးဝိစာရလမ်း"
+},
+"lat": 16.882093718145697,
+"lon": 96.16930627434694,
+"dir": [
+-0.4901382558879434,
+0.8716447040595869
+],
+"partner": null
+},
+{
+"name": "No. 2 Main Road",
+"way": 390074361,
+"tags": {
+"highway": "primary",
+"lanes": "4",
+"maxspeed": "70",
+"name": "အမှတ် (၂) လမ်း",
+"name:en": "No. 2 Main Road",
+"name:my": "အမှတ် (၂) လမ်း"
+},
+"lat": 16.898074434437607,
+"lon": 96.24486986507966,
+"dir": [
+-0.5497087308324476,
+-0.8353563977408562
+],
+"partner": null
+},
+{
+"name": "Parami Road",
+"way": 685212304,
+"tags": {
+"highway": "primary",
+"lanes": "4",
+"name": "ပါရမီလမ်း",
+"name:en": "Parami Road",
+"name:my": "ပါရမီလမ်း",
+"parking:lane:both": "perpendicular"
+},
+"lat": 16.852182768073213,
+"lon": 96.1489166657718,
+"dir": [
+0.9597229164146458,
+-0.28094825806288026
+],
+"partner": null
+},
+{
+"name": "Heavy-Duty Vehicle Commercial Bypass Road",
+"way": 1190357609,
+"tags": {
+"highway": "secondary",
+"lanes": "4",
+"maxspeed": "100",
+"name": "တွဲကားလမ်း",
+"name:en": "Heavy-Duty Vehicle Commercial Bypass Road",
+"name:my": "တွဲကားလမ်း",
+"oneway": "no",
+"surface": "asphalt"
+},
+"lat": 16.77358582020064,
+"lon": 96.14371440915949,
+"dir": [
+0.8819197218816246,
+-0.4713996225669236
+],
+"partner": null
+},
+{
+"name": "Bogyoke Road",
+"way": 24209991,
+"tags": {
+"highway": "tertiary",
+"name": "ဗိုလ်ချုပ်လမ်း",
+"name:en": "Bogyoke Road",
+"name:my": "ဗိုလ်ချုပ်လမ်း",
+"oneway": "no",
+"ref": "ဗိုလ္ခဵႂပ္လမ္း"
+},
+"lat": 16.735480122774447,
+"lon": 96.18526613838173,
+"dir": [
+-0.1206208114635135,
+0.992698655102284
+],
+"partner": null
+},
+{
+"name": "Shwe Gone Dine Road",
+"way": 1353313344,
+"tags": {
+"highway": "primary",
+"lanes": "2",
+"maxspeed": "70",
+"name": "ရွှေဂုံတိုင်လမ်း",
+"name:en": "Shwe Gone Dine Road",
+"name:my": "ရွှေဂုံတိုင်လမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.809552251155434,
+"lon": 96.15932942988579,
+"dir": [
+-0.8530539071978845,
+-0.5218227969477982
+],
+"partner": [
+617114569,
+10.3,
+null
+]
+},
+{
+"name": "Dala-Twante Road",
+"way": 105886156,
+"tags": {
+"highway": "secondary",
+"name": "ဒလ-တွံတေးလမ်း",
+"name:en": "Dala-Twante Road",
+"name:my": "ဒလ-တွံတေးလမ်း",
+"oneway": "no"
+},
+"lat": 16.751198908889076,
+"lon": 96.11658807377665,
+"dir": [
+0.9152662854886596,
+0.40284938456921
+],
+"partner": null
+},
+{
+"name": "Bogyoke Aung San Road",
+"way": 1208981005,
+"tags": {
+"highway": "primary",
+"lanes": "2",
+"name": "ဗိုလ်ချုပ်အောင်ဆန်းလမ်း",
+"name:en": "Bogyoke Aung San Road",
+"name:my": "ဗိုလ်ချုပ်အောင်ဆန်းလမ်း",
+"oneway": "yes",
+"sidewalk:left": "yes",
+"turn:lanes:forward": "left|through"
+},
+"lat": 16.779128104635795,
+"lon": 96.16449352582053,
+"dir": [
+0.9988821244193318,
+-0.04727051422951256
+],
+"partner": [
+1208981008,
+8.4,
+"4"
+]
+},
+{
+"name": "Maha Bandula Road",
+"way": 217398914,
+"tags": {
+"highway": "primary",
+"lanes": "4",
+"maxspeed": "50",
+"name": "မဟာဗန္ဓုလလမ်း",
+"name:en": "Maha Bandula Road",
+"name:my": "မဟာဗန္ဓုလလမ်း",
+"old_name:en": "Dalhousie Road",
+"oneway": "yes",
+"parking:both": "yes",
+"parking:both:orientation": "perpendicular",
+"surface": "asphalt",
+"wikidata": "Q6732639",
+"wikipedia": "en:Maha Bandula Road"
+},
+"lat": 16.77479194581179,
+"lon": 96.1461239792579,
+"dir": [
+0.9988080720525694,
+-0.04881019568317207
+],
+"partner": [
+618473334,
+5.9,
+null
+]
+},
+{
+"name": "Industrial Zone Road",
+"way": 36006843,
+"tags": {
+"bicycle": "no",
+"highway": "tertiary",
+"maxspeed": "50",
+"name": "စက်မှုဇုန်လမ်း",
+"name:en": "Industrial Zone Road",
+"name:my": "စက်မှုဇုန်လမ်း"
+},
+"lat": 16.834051418963686,
+"lon": 96.22209421179508,
+"dir": [
+-0.03488955230050108,
+0.9993911742357297
+],
+"partner": null
+},
+{
+"name": "Pyi Htaung Su Road",
+"way": 306842166,
+"tags": {
+"highway": "primary",
+"maxspeed": "70",
+"name": "ပြည်ထောင်စုလမ်း",
+"name:en": "Pyi Htaung Su Road",
+"name:my": "ပြည်ထောင်စုလမ်း"
+},
+"lat": 16.871398365137473,
+"lon": 96.20693332971385,
+"dir": [
+-0.3650303940927559,
+0.9309956022390693
+],
+"partner": null
+},
+{
+"name": "Banyar Dala Road",
+"way": 1568766683,
+"tags": {
+"highway": "primary",
+"lane_markings": "yes",
+"name": "ဗညားဒလလမ်း",
+"name:en": "Banyar Dala Road",
+"name:my": "ဗညားဒလလမ်း",
+"oneway": "yes",
+"parking:right": "yes",
+"parking:right:orientation": "perpendicular",
+"surface": "asphalt"
+},
+"lat": 16.794668653988495,
+"lon": 96.17586047912992,
+"dir": [
+-0.584973432505516,
+-0.8110524540760076
+],
+"partner": [
+466051721,
+11.5,
+null
+]
+},
+{
+"name": "Lower Kyimyindine Road",
+"way": 1418276956,
+"tags": {
+"highway": "secondary",
+"lanes": "6",
+"maxspeed": "70",
+"name": "အောက်ကြည့်မြင်တိုင်လမ်း",
+"name:en": "Lower Kyimyindine Road",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.785978306675837,
+"lon": 96.13073655609998,
+"dir": [
+0.6201671389289792,
+-0.7844697061025646
+],
+"partner": [
+564718352,
+6.8,
+"6"
+]
+},
+{
+"name": "Kyaik Waing Pagoda Road",
+"way": 517795769,
+"tags": {
+"highway": "primary",
+"lanes": "4",
+"name": "ကျိုက်ဝိုင်းဘုရားလမ်း",
+"name:en": "Kyaik Waing Pagoda Road",
+"name:my": "ကျိုက်ဝိုင်းဘုရားလမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.8655096355773,
+"lon": 96.12458482818278,
+"dir": [
+0.8032370742212325,
+0.5956594686534532
+],
+"partner": [
+617141806,
+9.5,
+"3"
+]
+},
+{
+"name": "Upper Pazundaung Road",
+"way": 1185446017,
+"tags": {
+"highway": "primary",
+"lanes": "6",
+"name": "Upper Pazundaung Road",
+"name:en": "Upper Pazundaung Road",
+"name:my": "အထက်ပုစွန်တောင်လမ်းမကြီး",
+"oneway": "no",
+"surface": "concrete"
+},
+"lat": 16.797811411291097,
+"lon": 96.18638011598964,
+"dir": [
+-0.2007852430157513,
+-0.9796352822285984
+],
+"partner": null
+},
+{
+"name": "Tabin Shwe Htee Road",
+"way": 35994301,
+"tags": {
+"highway": "tertiary",
+"name": "တပင်ရွှေထီးလမ်း Tabin Shwe Htee Road",
+"name:en": "Tabin Shwe Htee Road",
+"name:my": "တပင်ရွှေထီးလမ်း",
+"oneway": "no"
+},
+"lat": 16.878014383730527,
+"lon": 96.18840839607881,
+"dir": [
+0.8793763224218664,
+0.47612738165725565
+],
+"partner": null
+},
+{
+"name": "Bandoola Road",
+"way": 1161772164,
+"tags": {
+"highway": "tertiary",
+"name": "ဗန္ဓုလလမ်း (မန္တလေးလမ်း)",
+"name:en": "Bandoola Road",
+"name:my": "ဗန္ဓုလလမ်း (မန္တလေးလမ်း)"
+},
+"lat": 16.885917690608775,
+"lon": 96.19228541617352,
+"dir": [
+0.4724489587793899,
+-0.8813580324409998
+],
+"partner": null
+},
+{
+"name": "Thitsar Road",
+"way": 1238864826,
+"tags": {
+"highway": "primary",
+"lanes": "4",
+"name": "သစ္စာလမ်း",
+"name:en": "Thitsar Road",
+"name:my": "သစ္စာလမ်း",
+"oneway": "yes",
+"surface": "asphalt"
+},
+"lat": 16.842617928388925,
+"lon": 96.17554960764362,
+"dir": [
+-0.7797240853640249,
+-0.626123271172087
+],
+"partner": [
+1224673234,
+13.6,
+"4"
+]
+},
+{
+"name": "Thu Dhamma Road",
+"way": 283653256,
+"tags": {
+"highway": "primary",
+"lanes": "3",
+"name": "သုဓမ္မာလမ်း",
+"name:en": "Thu Dhamma Road",
+"name:my": "သုဓမ္မာလမ်း",
+"oneway": "yes",
+"parking:left": "yes",
+"parking:left:orientation": "perpendicular",
+"parking:right": "no",
+"parking:right:restriction": "no_parking",
+"surface": "asphalt"
+},
+"lat": 16.8876765619027,
+"lon": 96.15425197633895,
+"dir": [
+0.1231680111784164,
+-0.9923858327396423
+],
+"partner": [
+565100722,
+8.0,
+"6"
+]
+},
+{
+"name": "Kyaikasan Road",
+"way": 768074901,
+"tags": {
+"bicycle": "yes",
+"foot": "yes",
+"highway": "primary",
+"lanes": "2",
+"maxspeed": "48",
+"name": "ကျိုက္ကစံလမ်း",
+"name:en": "Kyaikasan Road",
+"name:my": "ကျိုက္ကစံလမ်း",
+"name:ဗမာ": "ကျိုက္ကဆံလမ်း",
+"oneway": "yes",
+"parking:both": "yes",
+"parking:both:orientation": "perpendicular",
+"surface": "asphalt"
+},
+"lat": 16.80615359506213,
+"lon": 96.17594616323464,
+"dir": [
+-0.07739010272558124,
+-0.997000888665664
+],
+"partner": [
+466051724,
+6.4,
+"2"
+]
+},
+{
+"name": "Ayeyar Wun Road",
+"way": 1451965757,
+"tags": {
+"alt_name": "Shu Kin Thar Road",
+"highway": "primary",
+"lanes": "4",
+"maxspeed": "50",
+"name": "Ayeyar Wun Road",
+"oneway": "yes",
+"surface": "concrete"
+},
+"lat": 16.804019481273826,
+"lon": 96.21188691998381,
+"dir": [
+0.9278977391878425,
+0.37283479667285696
+],
+"partner": [
+489858575,
+9.9,
+"4"
+]
+},
+{
+"name": "Pyidaungsu Main Road",
+"way": 778458058,
+"tags": {
+"highway": "secondary",
+"name": "Pyidaungsu Main Road",
+"name:en": "Pyidaungsu Main Road",
+"name:my": "ပြည်ထောင်စုလမ်းမကြီး"
+},
+"lat": 16.834437453581334,
+"lon": 96.23409937859967,
+"dir": [
+0.028866954109344294,
+0.9995832626452131
+],
+"partner": null
+},
+{
+"name": "Maungmagan Kantha Road",
+"way": 467181764,
+"tags": {
+"highway": "secondary",
+"maxspeed": "50",
+"name": "မောင်းမကန် ကမ်းသာလမ်း",
+"name:en": "Maungmagan Kantha Road",
+"name:my": "မောင်းမကန် ကမ်းသာလမ်း"
+},
+"lat": 16.863390946567268,
+"lon": 96.22814602267256,
+"dir": [
+-0.7985769224450359,
+0.6018927636533066
+],
+"partner": null
+}
+]
