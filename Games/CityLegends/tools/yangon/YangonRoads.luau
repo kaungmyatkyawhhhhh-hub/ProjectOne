@@ -2039,7 +2039,7 @@ end
 function M.scrub(remove: boolean)
 	local found, byRoad, n = 0, {}, 0
 	local keep = SS:FindFirstChild("YangonScraps")
-	if remove and not keep then
+	if remove and not keep and not M.v05 then
 		keep = Instance.new("Folder")
 		keep.Name = "YangonScraps"
 		keep.Parent = SS
@@ -2055,7 +2055,9 @@ function M.scrub(remove: boolean)
 						found += 1
 						local key = f.Name .. " on " .. o.name
 						byRoad[key] = (byRoad[key] or 0) + 1
-						if remove then
+						if remove and M.v05 then
+							p:Destroy() -- (1:1: 22 cells of scraps piled up in ServerStorage; nobody reads them)
+						elseif remove then
 							p:SetAttribute("FromRoad", f.Name)
 							p.Parent = keep
 						end
