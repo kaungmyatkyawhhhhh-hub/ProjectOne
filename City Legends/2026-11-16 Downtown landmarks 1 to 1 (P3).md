@@ -40,6 +40,7 @@ The 9 lots left empty by the P3 district build, each built at real size from its
   - Inside: 3.2 m aisles between rows of stalls, with a cross aisle every ~30 m. Each stall has a counter at the aisle, coloured cloth hanging behind it and a red name board. Hall 0 is the jewellery hall: glass counters and gold.
   - Tiled floor, a cream ceiling at 4.6 m, dark beams every 4 m, fluorescent tubes along the aisles and a warm PointLight every 24 m.
   - Collision: the stall rows, the walls (open at the doors), the slab and everything over the ceiling.
+  - Colours: the cloth is SmoothPlastic (as Fabric it rendered almost black under the hall ceiling), and the counters are a light teak look (`CTR`).
   - The terrain is cleared out of each hall (`clear` boxes in place.json: DowntownPlace fills them with Air). Without this the grass came up through the floor.
 - **Central Station undercroft (photo 05):** a 14 m drive-through under the middle of the station, between the two inner towers. It has a flat cream concrete ceiling at 6 m with beams every 1.6 m, and cream walls with deep round arches (`niche_arch`, 1.5 m deep). There are 3 green food carts with blue canopies and 3 warm lights. The upper storey bridges over it.
 - **Strand lobby (walkable, from photos 2 and 3):** an open porch on 6 pillars, then a teak-framed door into an 18 x 14 m lobby with cream panelled walls, a dado rail and teak doors. It has a white coffered ceiling, 4 ceiling fans and a chandelier with warm PointLights, a marble floor with a teak border, and 16 wicker armchairs round 4 tables. The collision leaves the lobby open.
@@ -59,3 +60,8 @@ The 9 lots left empty by the P3 district build, each built at real size from its
 
 ## In the main place (16 Nov, version 1094)
 All 9 landmarks are in `Workspace.Yangon1to1.Landmarks`, each with `Visual` (Precise render fidelity) and `Collision`. Asset ids are in `Games/CityLegends/build/landmarks/dt_assets.json`. The Independence Monument stands on a terrain pad (top 20.4, radius 88 studs: `terrain.PILOT_PADS['P3']`). Without the pad, its paving was hidden under the grass, because the smooth terrain bulges about 2 studs over its set height.
+
+## Saved in main (16 Nov, 16:11 UTC)
+The Bogyoke / Station / park swap (walkable halls, undercroft, chinthes) is saved in the main place. The High Court roof was checked in main: it renders fully. The outline in the v1094 aerial was only the parts still loading.
+- **On hold:** main-place additions are paused because the place is near its size limit (coordinator, 16 Nov).
+- **Waiting for the next main swap:** Bogyoke v3 with the brighter cloth and counters (asset 113276920011501, `dt_assets.json` key `bogyoke_market_next`). Checked in the copy only.

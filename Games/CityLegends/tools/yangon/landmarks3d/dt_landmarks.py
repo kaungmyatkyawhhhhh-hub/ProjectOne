@@ -77,11 +77,12 @@ LOOKS = {
     "GR2": ("SmoothPlastic", (67, 63, 58), 0.72, 0.0, None, False, None),
     "GR3": ("SmoothPlastic", (60, 56, 52), 0.62, 0.0, None, False, None),
     # Bogyoke Market stalls (photos: textile aisle, jewellery), Central Station undercroft, monument chinthes
-    "FB1": ("Fabric", (245, 70, 130), 0.0, 0.0, None, False, None),                 # cloth: magenta
-    "FB2": ("Fabric", (70, 130, 235), 0.0, 0.0, None, False, None),                 # royal blue
-    "FB3": ("Fabric", (255, 205, 70), 0.0, 0.0, None, False, None),                 # saffron
-    "FB4": ("Fabric", (70, 185, 120), 0.0, 0.0, None, False, None),                 # green
-    "FB5": ("Fabric", (175, 85, 200), 0.0, 0.0, None, False, None),                 # purple
+    "FB1": ("SmoothPlastic", (245, 70, 130), 0.0, 0.0, None, False, None),                 # cloth: magenta
+    "FB2": ("SmoothPlastic", (70, 130, 235), 0.0, 0.0, None, False, None),                 # royal blue
+    "FB3": ("SmoothPlastic", (255, 205, 70), 0.0, 0.0, None, False, None),                 # saffron
+    "FB4": ("SmoothPlastic", (70, 185, 120), 0.0, 0.0, None, False, None),                 # green
+    "FB5": ("SmoothPlastic", (175, 85, 200), 0.0, 0.0, None, False, None),                 # purple
+    "CTR": ("WoodPlanks", (176, 124, 78), 0.0, 0.0, None, False, None),             # light teak stall counters
     "TIL": ("Slate", (176, 168, 156), 0.0, 0.0, None, False, None),                 # market floor tiles
     "SGN": ("SmoothPlastic", (200, 40, 40), 0.0, 0.0, None, False, None),           # shop name boards (red)
     "GLC": ("Glass", (200, 220, 225), 0.4, 0.2, None, False, None),                 # jewellery glass counters
@@ -1342,7 +1343,7 @@ def market_hall(sc, hall, o, ax, ay, Lm, Wm, base, H, fy, k, boxes, lights, clea
                 sw = sl / n_st
                 for j in range(n_st):
                     uc = ua + (j + 0.5) * sw
-                    F.bx("GLC" if jewel else "DOR", uc, vs + d * 0.275, 0.0, sw - 0.4, 0.55, 0.9)
+                    F.bx("GLC" if jewel else "CTR", uc, vs + d * 0.275, 0.0, sw - 0.4, 0.55, 0.9)
                     if jewel:
                         F.wq("GLD", uc - sw / 2 + 0.4, vs + d * 0.06, uc + sw / 2 - 0.4, vs + d * 0.06, 1.3, 2.1, (uc, vs + d))
                     else:
