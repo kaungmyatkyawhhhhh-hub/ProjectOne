@@ -87,7 +87,8 @@ def main():
     Image.fromarray(rgb, "RGB").save(os.path.join(OUT, "carved_color.png"))
     rough = np.clip(0.28 + 0.5 * cav, 0, 1)
     Image.fromarray((rough * 255).astype(np.uint8)).save(os.path.join(OUT, "carved_rough.png"))
-    Image.fromarray(np.full((N, N), 255, np.uint8)).save(os.path.join(OUT, "carved_metal.png"))
+    # metalness 0.45-0.75 (raised polish brighter): full metal read olive under the Yangon sky in Studio
+    Image.fromarray((np.clip(0.45 + 0.3 * h, 0, 1) * 255).astype(np.uint8)).save(os.path.join(OUT, "carved_metal.png"))
     print("wrote", OUT)
 
 

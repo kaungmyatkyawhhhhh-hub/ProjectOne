@@ -40,7 +40,7 @@ LOOK = {
     # 2026-11-16 ornament kit (ornament_kit.py): carved relief trim = Foil gold (the settled trim value), the carved
     # panel field = Metal + YgnCarvedGold (normal-mapped relief), green glass inlay
     "GCV": ("Foil", (230, 160, 50), 0, 0.1, False, True, ""),
-    "GPN": ("Metal", (255, 206, 130), 0, 0, False, False, "YgnCarvedGold"),
+    "GPN": ("Metal", (255, 250, 240), 0, 0, False, False, "YgnCarvedGold"),   # gold is in the colour map
     "GJL": ("SmoothPlastic", (40, 128, 86), 0, 0.25, False, False, ""),
     "SG5": ("SmoothPlastic", (246, 244, 236), 0, 0, False, True, ""),
     "SG6": ("SmoothPlastic", (226, 112, 34), 0, 0, False, True, ""),
