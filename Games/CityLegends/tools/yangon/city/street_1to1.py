@@ -332,7 +332,7 @@ class World:
         self.ROADS = unary_union([self.CARR, self.PAVE, self.MED] + [x["poly"] for x in b if x["kind"] == "W"]).buffer(0)
         deck = [x["poly"] for x in b if x["kind"] in ("D", "W")]
         self.DECK = unary_union(deck).buffer(M(3)) if deck else Polygon()
-        self.LANES = unary_union([LineString(l["pts"]).buffer(M(2.2), cap_style=2) for l in self.lanes if len(l["pts"]) >= 2])
+        self.LANES = unary_union([LineString(l["pts"]).buffer(4.6, cap_style=2) for l in self.lanes if len(l["pts"]) >= 2])
         polys, self.binfo, walls, gates, shells = load_buildings()
         self.BLDS = polys
         self.BLD = unary_union(polys + shells).buffer(0.4)
@@ -525,42 +525,56 @@ def drops(x, y, z, e, side, t, nth):
 
 
 # =================================================================================================== 2. lamps
+def kerb_lamp(e, c, t, side):
+    """a single-arm post just inside the kerb of one side, its arm over the road"""
+    h, outer = side_offsets(e, side)
+    for off in (h + 1.2, h + 1.8, h + 2.6):
+        x, z = lateral(c, t, side * off)
+        rz = (t[1] * side, -t[0] * side)
+        yaw = yaw_of(t[0], t[1])
+        if ((-t[1]) * rz[0] + t[0] * rz[1]) < 0:
+            yaw = yaw_of(-t[0], -t[1])
+        g = rect(x, z, yaw, (-0.8, -0.8), (0.8, 0.8))
+        if W.clear_of(g, allow="P", tall=rect(x, z, yaw, (-0.6, -0.6), (0.6, 7))):
+            W.put("lamp", "lamp1", x, z, yaw, g)
+            return True
+    return False
+
+
 def lamps():
+    """main roads: a post every 35 m. Divided roads: double-arm posts in the median where it is there (one carriageway
+    of the pair places them), else single-arm posts on each carriageway's outer kerb; undivided: single-arm posts on the
+    side without the power poles"""
     n1 = n2 = 0
-    for e in W.edges:
-        if e["raised"] or not e["traffic"] or e["L"] < M(20):
-            continue
+    meds = []
+    order = sorted([e for e in W.edges if not e["raised"] and e["traffic"] and e["L"] >= M(20)],
+                   key=lambda e: 0 if (e["h0"] < -0.5 and (e["P"][-1][0] - e["P"][0][0]) > 0) else 1)
+    for e in order:
         every = M(LAMP_EVERY)
         s = M(8) + rnd("ls", e["id"]) * every
-        # a paired one-way carriageway (median at offset 0..h0 on its left: inner edge offset = -h0 < 0?)
-        median = e["h0"] < -0.5   # the inner carriageway edge is right of the line: a median lies between
-        lead = e["P"][-1] - e["P"][0]
-        mine = lead[0] > 0 or (abs(lead[0]) < 1e-6 and lead[1] > 0)
+        median = e["h0"] < -0.5
+        mine = (e["P"][-1][0] - e["P"][0][0]) > 0
         while s < e["L"] - M(6):
             c, t, _ = at(e, s)
             if median:
+                done = False
                 if mine:
                     x, z = c
                     yaw = yaw_of(t[0], t[1])
                     g = rect(x, z, yaw, (-0.8, -0.8), (0.8, 0.8))
                     if W.MED.contains(g) and W.clear_of(g, allow="M"):
                         W.put("lamp", "lamp2", x, z, yaw, g, y=W.G.y(x, z, ("M",))[0])
+                        meds.append((x, z))
                         n2 += 1
+                        done = True
+                elif any(math.hypot(c[0] - mx, c[1] - mz) < M(20) for mx, mz in meds):
+                    done = True
+                if not done and kerb_lamp(e, c, t, 1):
+                    n1 += 1
             else:
-                # single-arm posts on the kerb of the side WITHOUT the power poles
                 side = -1 if H("pside", e["id"]) % 2 else 1
-                h, outer = side_offsets(e, side)
-                for off in (h + 1.2, h + 1.8):
-                    x, z = lateral(c, t, side * off)
-                    rz = (t[1] * side, -t[0] * side)
-                    yaw = yaw_of(t[0], t[1])
-                    if ((-t[1]) * rz[0] + t[0] * rz[1]) < 0:
-                        yaw = yaw_of(-t[0], -t[1])
-                    g = rect(x, z, yaw, (-0.8, -0.8), (0.8, 0.8))
-                    if W.clear_of(g, allow="P", tall=rect(x, z, yaw, (-0.6, -0.6), (0.6, 7))):
-                        W.put("lamp", "lamp1", x, z, yaw, g)
-                        n1 += 1
-                        break
+                if kerb_lamp(e, c, t, side):
+                    n1 += 1
             s += every
     print("lamp posts: %d single, %d double (median)" % (n1, n2))
 

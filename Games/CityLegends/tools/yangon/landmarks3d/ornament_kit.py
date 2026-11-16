@@ -557,8 +557,9 @@ def gable_frame(w=6.9, h=4.5, nf=2, lod="hi"):
     slab(P, "G", band_poly, 0.08, 0.1, 0.025, band=False)
     # sun disc: star of rays + boss
     zc = zt * 0.5
-    slab(P, "G", star(0.17 * w, 0.13 * w, 12, 0.0, zc), 0.08, 0.07, 0.015, band=False)
-    slab(P, "G", circle(0.08 * w, 10, 0.0, zc), 0.15, 0.05, 0.015, band=False)
+    sw = min(w, 1.6 * h)                       # the disc fits the field of a wide, low gable too
+    slab(P, "G", star(0.17 * sw, 0.13 * sw, 12, 0.0, zc), 0.08, 0.07, 0.015, band=False)
+    slab(P, "G", circle(0.08 * sw, 10, 0.0, zc), 0.15, 0.05, 0.015, band=False)
     # flame fingers up the frame's edge, leaning out, plus the apex flame
     for s in (1, -1):
         for k in range(nf):
@@ -570,7 +571,7 @@ def gable_frame(w=6.9, h=4.5, nf=2, lod="hi"):
             fl = rotate(move(fl, dx=px, dz=pz - 0.02 * h), -s * 0.35, px, pz)
             slab(P, "G", fl, 0.08, 0.08, 0.016, back=True, band=False)
         cu = scroll(0.36 * h, s * hw * 0.9, 0.0, ang=-s * 25, mirror=s < 0, n=6)
-        slab(P, "G", cu, 0.0, 0.16, 0.02, back=True, band=False)
+        slab(P, "G", cu, 0.02, 0.16, 0.02, back=True, band=False)
     ap = move(flame_outline(0.16 * w, 0.32 * h, lobes=2, n_lobe=2, barb=0.5), dz=zt + 0.05 * h)
     slab(P, "G", ap, 0.1, 0.12, 0.02, back=True, band=False)      # front 0.22: clear of the band's 0.18
     return P.check()

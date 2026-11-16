@@ -2326,13 +2326,13 @@
 ]
 ],
 "tris": {
-"site": 21111,
+"site": 23720,
 "templates": {
 "zedibig": 380,
 "kiosk": 204,
-"pyatthats": 506
+"pyatthats": 8098
 },
-"scene": 23953
+"scene": 34154
 },
 "plate": {
 "name": "BotataungPlate_TEMP",
