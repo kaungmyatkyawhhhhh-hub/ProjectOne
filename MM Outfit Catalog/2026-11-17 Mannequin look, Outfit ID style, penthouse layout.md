@@ -87,3 +87,31 @@ The owner didn't like having the Outfit ID panel on screen.
 
 ## Noticed, not changed
 - I only reviewed the penthouse floor; the lower After Hours floors weren't checked.
+
+## 7. Owner feedback round: "3 of them still looking", "the outfit loader overstimulates me", rain + foggy glass
+- **Mannequins (`PenthouseExhibitClient`):** only the nearest one turned, but the other two kept facing straight out, so from in front all three still seemed to look at you.
+  - The others now turn **40° away from you** (`AWAY_ANGLE`) while one watches.
+  - Tested: in front of Frost, Frost -8° and the others ±40°. Far away, all 0°.
+- **Outfit viewer, calmer (`OutfitViewer`):** "outfit loader" meant the viewer, not the Outfit ID box.
+  - The title is the outfit name in normal type, not a condensed "OUTFIT ID: 01", with a small "ID 01 · 1 of 3" line.
+  - Price pills are neutral grey; only the Buy button is green.
+  - The Buy button is flat: no glow rings, 3D base, gradient or shine.
+  - Sentence case ("In this fit", "Shirt", "Buy 2 items").
+  - The rotate hint shows once, then fades after 5 s.
+  - Checked on PC and A06, 0 errors.
+  - Backup: `ServerStorage.ScriptBackups.pre_CalmViewer_17Nov`.
+- **Rain visible from inside:** the window panes were **Glass material, and Roblox doesn't draw particles behind Glass**.
+  - The 4 panes (After Hours "Rain window" ×2, penthouse "Gallery window" ×2) are now SmoothPlastic, T 0.86, Reflectance 0.12, with a cold blue tint. The original values are saved as attributes (`OrigMaterial`, …) on each pane.
+  - Rain emitters by the windows: LightEmission 0 → 0.35, so the streaks catch the city light.
+- **Foggy glass (cold outside, warm inside):**
+  - Folder `Window condensation`: a thin part just inside each pane with a SurfaceGui.
+  - Warm-white haze, light at the top and thick along the bottom; fog creeping in from the frame; soft swells at the bottom; about 150 small droplets (more low down); 10 drip trails with beads.
+  - No uploaded image needed. MaxDistance 90.
+  - First try had big polka-dot drops and hard pill-shaped patches, which looked cheap, so it was rebuilt softer.
+
+![[Screenshots/2026-11-17 foggy windows + rain visible.jpg]]
+![[Screenshots/2026-11-17 only nearest mannequin looks, others turn away.jpg]]
+![[Screenshots/2026-11-17 calm viewer (PC).jpg]]
+![[Screenshots/2026-11-17 calm viewer (phone A06).jpg]]
+
+**Lesson (Roblox):** Glass material hides ParticleEmitters (and other transparent things) behind it. For "see the rain through the window", use SmoothPlastic with Transparency 0.85+ and a little Reflectance.

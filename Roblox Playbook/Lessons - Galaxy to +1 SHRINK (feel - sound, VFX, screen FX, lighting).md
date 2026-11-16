@@ -489,3 +489,17 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
   2. When photos disagree (beige at dusk, white at noon), it is white. Paint and cladding are almost always lighter and more neutral than evening photos show.
   3. Before building, list the main colours as words ("white panels, dark glass") and check them against what people would say about the building.
   4. If the owner names a colour, theirs wins.
+
+## 2026-11-17 MM Outfit Catalog: owner corrections
+- **"There are still 3 of them looking."**
+  - What felt bad: only the nearest mannequin turned, but the other two kept their rest pose, which faces straight out at the player, so all three still seemed to stare.
+  - Cause: Claude checked the turn ANGLES (0° vs 17°), not what it LOOKS like from the player's camera.
+  - Fix: the non-watchers turn 40° away.
+  - Rule: **judge "looks at you" effects by a screenshot from the player's view, not by numbers.**
+- **"The outfit loader overstimulates me."**
+  - Cause: Claude guessed "outfit UI" meant the Outfit ID box and removed that; the owner meant the full-screen viewer.
+  - Rule: **when a UI name is ambiguous, screenshot the candidates** (or open the one the player sees most) before changing anything.
+  - Calm rules that fixed it: one green per screen, no glow rings or shine, normal-weight title instead of a shouting condensed one, sentence case, one-time hints.
+- **"I can't see the rain from inside."**
+  - Cause: Roblox **Glass material doesn't draw particles behind it**.
+  - Rule: windows that must show rain, snow or VFX outside use SmoothPlastic with Transparency 0.85+ and Reflectance 0.1–0.15.
