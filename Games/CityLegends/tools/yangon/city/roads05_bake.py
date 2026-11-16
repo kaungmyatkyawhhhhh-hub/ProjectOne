@@ -215,20 +215,36 @@ def faces_of(part, surf=None):
         for sx in (-1, 1):
             t = (P(sx * hx, -hy, -hz), P(sx * hx, -hy, hz), P(sx * hx, hy, hz))
             sides.append(t)
-        if k in ('R', 'P', 'm'):
-            # Roads.triangle: the road triangle is one side face; keep the upper one
-            top = max(sides, key=lambda t: sum(p[1] for p in t))
-            tris.append(fix(top, c))
-        else:
-            for t in sides:
-                tris.append(fix(t, c))
-            a, b = P(-hx, hy, hz), P(hx, hy, hz)
+        top = max(sides, key=lambda t: sum(p[1] for p in t))
+        tris.append(fix(top, c))
+        if k != 'R':
+            # the prism's side faces (thickness), kept like a block's long sides: kerbs towards the road, pavements
+            # away from it, medians and bridge pieces always
+            a1, b1 = P(-hx, hy, hz), P(hx, hy, hz)
             d0, d1 = P(-hx, -hy, -hz), P(hx, -hy, -hz)
-            tris.append(fix((a, b, d1), c))
-            tris.append(fix((a, d1, d0), c))
             e0, e1 = P(-hx, -hy, hz), P(hx, -hy, hz)
-            tris.append(fix((a, e0, e1), c))
-            tris.append(fix((a, e1, b), c))
+            for qd in ((a1, b1, d1, d0), (a1, e0, e1, b1), (d0, d1, e1, e0)):
+                t1 = fix((qd[0], qd[1], qd[2]), c)
+                n = np.cross(t1[1] - t1[0], t1[2] - t1[0])
+                L = np.linalg.norm(n)
+                if L < 1e-9:
+                    continue
+                n = n / L
+                if abs(n[1]) > 0.5:
+                    continue
+                if k in ('r', 'w', 'P') and surf is not None:
+                    fc = (qd[0] + qd[1] + qd[2] + qd[3]) / 4
+                    probe = fc + n * 1.0
+                    road_there = bool(surf.heights(probe[0], probe[2]))
+                    if k == 'P':
+                        probe2 = fc + n * 2.5
+                        road_there = road_there or bool(surf.heights(probe2[0], probe2[2]))
+                        if road_there:
+                            continue
+                    elif not road_there:
+                        continue
+                tris.append(t1)
+                tris.append(fix((qd[0], qd[2], qd[3]), c))
     elif cls == 'C':
         # a cylinder along its X axis: the upper cap and the side
         n = 48
