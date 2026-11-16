@@ -7,6 +7,7 @@ Write anything you want Claude to learn, one line each. Claude (or the night shi
 Format if you like: **When** ... **do** ... **because** ...
 
 ## NEW
+- 2026-11-16 15:35 [dashboard, unverified] The game is called "Throw to Scare Animals". (topic: tiktok)
 - 2026-11-16 15:33 [dashboard, unverified] The plugin used is called framewisp.com. (topic: tiktok)
 - 2026-11-16 15:26 [dashboard, unverified] Roblox is a popular online game. (topic: tiktok)
 - 2026-11-16 15:24 [dashboard, unverified] The experiment 001, moonbloom trail, and the astral treadmill update are related to the game Roblox. (topic: tiktok)
