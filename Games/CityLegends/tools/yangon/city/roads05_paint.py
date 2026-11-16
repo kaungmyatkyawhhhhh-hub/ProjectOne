@@ -399,7 +399,14 @@ def hatch(P, pg, road):
     for p in polys_of(pg):
         if p.area < 4:
             continue
-        P.line('LY', LineString(p.exterior.coords), YELLOW_W, 'hatch edge', road)
+        ring = list(p.exterior.coords)
+        h = len(ring) // 2
+        for part in (ring[:h + 1], ring[h:]):
+            if len(part) >= 2:
+                P.line('LY', LineString(part), YELLOW_W, 'hatch edge', road)
+        # a narrow splitter (under 4 studs): its two edges only
+        if p.minimum_rotated_rectangle.length < 0 or min_width(p) < 4:
+            continue
         minx, miny, maxx, maxy = p.bounds
         d = max(maxx - minx, maxy - miny) * 2
         cx, cy = (minx + maxx) / 2, (miny + maxy) / 2
@@ -410,6 +417,14 @@ def hatch(P, pg, road):
             for l in lines_of(x):
                 P.line('LY', l, HATCH_W, 'hatch', road)
             t += HATCH_PITCH * math.sqrt(2)
+
+
+def min_width(p):
+    r = p.minimum_rotated_rectangle
+    c = list(r.exterior.coords)
+    a = math.dist(c[0], c[1])
+    b = math.dist(c[1], c[2])
+    return min(a, b)
 
 
 ARROW = {  # unit arrow shapes (x across, y along, pointing +y), studs

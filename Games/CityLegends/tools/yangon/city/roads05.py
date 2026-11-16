@@ -48,7 +48,7 @@ OPEN_R = 12.0         # a median opens where another main road's carriageway com
 NOSE = 18.0           # a median eases from 0 over this
 MIN_MEDIAN = geo.m(25.0)
 RING_LANE_W = 12.0
-EASE_W = 60.0         # width changes eased over this
+EASE_W = 120.0         # width changes eased over this
 PIN_EASE = 60.0       # a pinned junction height is eased out over this
 WALK = dict(main=7.5, street=4.0, narrow=3.0)
 DECK_LANE_W = 12.0
@@ -298,8 +298,13 @@ def strokes_oneway(edges, ring_keys):
     for e in cand:
         if e.b in ring_keys:
             continue
-        outs = [f for f in by_start[(e.b, e.nn, e.hw)] if f is not e]
-        ins = [f for f in by_end[(e.b, e.nn, e.hw)]]
+        def straight(f, g):
+            d1 = f.P[-1] - f.P[max(0, len(f.P) - 2)]
+            d2 = g.P[min(1, len(g.P) - 1)] - g.P[0]
+            n1, n2 = np.linalg.norm(d1), np.linalg.norm(d2)
+            return n1 > 1e-9 and n2 > 1e-9 and float(d1 @ d2) / (n1 * n2) > 0.5
+        outs = [f for f in by_start[(e.b, e.nn, e.hw)] if f is not e and straight(e, f)]
+        ins = [f for f in by_end[(e.b, e.nn, e.hw)] if f is e or straight(f, outs[0] if outs else e)]
         if len(outs) == 1 and len(ins) == 1:
             nxt[e.id] = outs[0]
             prv[outs[0].id] = e

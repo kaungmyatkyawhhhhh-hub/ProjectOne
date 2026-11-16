@@ -60,12 +60,12 @@ KD.WALL = {
 	PCW = rgb(240, 240, 236), PCS = rgb(214, 216, 212), PFG = rgb(46, 140, 82), PFR = rgb(196, 40, 40),
 	PFB = rgb(30, 84, 160), PFY = rgb(240, 196, 40), PPD = rgb(40, 42, 46), PGL = rgb(60, 72, 80),
 	PST = rgb(150, 154, 160), PRB = rgb(150, 70, 50), PCG = rgb(78, 128, 92), PLT = rgb(255, 250, 236),
-	PSD = rgb(214, 196, 160),
+	PSD = rgb(214, 196, 160), PCR = rgb(160, 175, 148),
 }
 -- plain-material codes (no MaterialVariant): Neon canopy lights, glass, plastic
 KD.MAT = { PLT = Enum.Material.Neon, PGL = Enum.Material.Glass, PFG = Enum.Material.SmoothPlastic,
 	PFR = Enum.Material.SmoothPlastic, PFB = Enum.Material.SmoothPlastic, PFY = Enum.Material.SmoothPlastic,
-	PPD = Enum.Material.SmoothPlastic, PLY = Enum.Material.SmoothPlastic, PCW = Enum.Material.SmoothPlastic }
+	PPD = Enum.Material.SmoothPlastic, PLY = Enum.Material.SmoothPlastic, PCW = Enum.Material.SmoothPlastic, PCR = Enum.Material.SmoothPlastic }
 KD.VARIANT = {
 	KW0 = "YgnRenderPainted", KW1 = "YgnRenderPainted", KW2 = "YgnRenderPainted", KW3 = "YgnRenderPainted",
 	KW4 = "YgnRenderPainted", KW5 = "YgnRenderPainted", KW6 = "YgnRenderPainted", KW7 = "YgnRenderPainted",
