@@ -74,6 +74,8 @@ created: 2026-11-16
   - Phone layout checked.
 - **Notification dot:** when someone wears your upload, a pink dot appears on More and Uploads until you open My uploads (not while you're already on it).
 - **My uploads stats line:** "Your looks have been worn N times · #R of M creators" (same numbers as the Sky Deck board).
+- **Hot right now:** Featured shows "Hot right now: NEON STAR · tried 5 times in the last 15 min ›" when an outfit has 2+ whole-outfit try-ons in this server in 15 min. Tapping it opens that outfit. (Server action "Hot", read-only, no lock.)
+- **Daily challenge chat line:** once per visit, 20 s after loading: "Today's challenge: Soft & Cute! Upload a look in it (More › Uploads) and it gets a ★ badge."
 - **Fixed an existing overlap:** Featured's "All styles ›" pill was drawn over the panel's close (×) button. Both header links now sit left of it.
 
 ### Growth
