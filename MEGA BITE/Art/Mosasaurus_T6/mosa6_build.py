@@ -81,10 +81,11 @@ def belly_z(x): return Z(line(D['belly_line'], x))
 def body_colour(o_name, centres, belly_faces=()):
     def f(p):
         if p.index in belly_faces: base = P['belly']     # whole ring quads: a straight band edge, as the exploded sheet
-        else:
-            r = random.Random(p.index * 7 + len(o_name)).random()
-            base = P['dark'] if r < 0.1 else (P['light'] if r > 0.94 else P['green'])
-        return jit(base, p.index * 13 + len(o_name), 0.05)
+        else:   # card: mottled camo green - smooth patches of dark/mid/light by position, not per-face noise
+            c = centres(p); n = (math.sin(c.x * 2.3 + c.z * 3.1) * math.sin(c.y * 4.7 - c.x * 1.3) + 0.6 * math.sin(c.x * 5.9 + c.y * 2.2 + c.z * 4.4)) / 1.6
+            t = max(0.0, min(1.0, 0.5 + 0.6 * n)); lo, hi = (P['dark'], P['green']) if t < 0.5 else (P['green'], P['light']); u = (t % 0.5) * 2
+            base = tuple(lo[k] + (hi[k] - lo[k]) * u for k in range(3)) + (1,)
+        return jit(base, p.index * 13 + len(o_name), 0.07)
     return f
 
 def loft(name, xs, prof, tip_start=None, tip_end=None, colour=None, glow=False, belly_band=True):
@@ -206,15 +207,25 @@ def eye_obj():
 eye_obj()
 
 # ---------- dorsal crystals (each its own object, largest mid-back) ----------
-for i, c in enumerate(D['crystals']):
-    x = c['x']; r = c['w'] / 2 * S; ht = (c['bot'] - c['top']) * S
-    base_z = Z(T(x)) - 12 * S; top_z = Z(c['top']); sh_z = top_z - 0.38 * ht
-    verts = []
+def shard(verts, faces, cx, base_z, top_z, r, tilt_deg):
+    # hexagonal crystal: base ring (sunk), shoulder ring, point; tilted about its base (+ leans forward)
+    o = len(verts); ht = top_z - base_z; sh_z = top_z - 0.38 * ht; piv = Vector((cx, 0, base_z))
+    R = Matrix.Rotation(math.radians(tilt_deg), 3, 'Y'); pts = []
     for z, rr in ((base_z, r * 0.8), (sh_z, r)):
         for k in range(6):
-            t = 2 * math.pi * k / 6 + math.pi / 6; verts.append(Vector((X(x) + rr * math.cos(t), rr * math.sin(t), z)))
-    verts += [Vector((X(x), 0, top_z)), Vector((X(x), 0, base_z))]
-    faces = [(k, (k + 1) % 6, 6 + (k + 1) % 6, 6 + k) for k in range(6)] + [(6 + k, 6 + (k + 1) % 6, 12) for k in range(6)] + [((k + 1) % 6, k, 13) for k in range(6)]
+            t = 2 * math.pi * k / 6 + math.pi / 6; pts.append(Vector((cx + rr * math.cos(t), rr * math.sin(t), z)))
+    pts += [Vector((cx, 0, top_z)), Vector((cx, 0, base_z))]
+    verts += [piv + R @ (v - piv) for v in pts]
+    faces += [(o + k, o + (k + 1) % 6, o + 6 + (k + 1) % 6, o + 6 + k) for k in range(6)] + [(o + 6 + k, o + 6 + (k + 1) % 6, o + 12) for k in range(6)] + [(o + (k + 1) % 6, o + k, o + 13) for k in range(6)]
+CK = D.get('crystal_k', 1.0)
+for i, c in enumerate(D['crystals']):
+    # card: each spike is a cluster - a tall main shard, a smaller one leaning back, a small one leaning forward
+    x = c['x']; r = c['w'] / 2 * S * CK; ht = (c['bot'] - c['top']) * S * CK
+    base_z = Z(T(x)) - 12 * S; top_z = base_z + ht + 12 * S
+    verts, faces = [], []
+    shard(verts, faces, X(x), base_z, top_z, r, 0)
+    shard(verts, faces, X(x) - r * 1.1, base_z, base_z + (top_z - base_z) * 0.62, r * 0.62, -18)
+    shard(verts, faces, X(x) + r * 0.9, base_z, base_z + (top_z - base_z) * 0.45, r * 0.5, 14)
     make('M6_DorsalCrystal_%02d' % (i + 1), verts, faces, lambda p: jit(P['cyan'] if p.index % 3 else (0.55, 1, 1, 1), p.index, 0.04), glow=True)
 
 # ---------- raised hexagonal scale plates (one object) ----------

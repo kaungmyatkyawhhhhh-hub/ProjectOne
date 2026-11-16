@@ -24,7 +24,7 @@ for o in objs:
     bm.free()
 def bvh(name):
     bm=bmesh.new(); bm.from_mesh(bpy.data.objects[name].data); return BVHTree.FromBMesh(bm)
-body=[bvh(n) for n in ('M6_TailBase','M6_Torso','M6_Neck','M6_UpperSkull')]
+body=[bvh(n) for n in ('M6_TailTip','M6_TailBase','M6_Torso','M6_Neck','M6_UpperSkull')]
 def inside(p):
     for t in body:
         n=0; q=p.copy()
