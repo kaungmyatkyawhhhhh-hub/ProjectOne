@@ -15,6 +15,8 @@
 	M.shells()                        -- the 13,039 shells (Parts named "code|T|variant" -> Name, attribute T,
 	                                  -- MaterialVariant, Plaster) into Buildings.Shell, then the 952 pitched roofs
 	M.pagodas()                       -- the two P3 pagodas (PagodaPlace rows, class M) on the terrain
+	M.landmarks(ids, pack)            -- the 9 downtown landmarks (build/landmarks/dt_assets.json ids, pack =
+	                                  -- ServerStorage.DTLandmarks from asset 128412859648997), TEMP plates deleted
 	M.cleanup()                       -- removes the packs and the TerrainP3_ modules (never leave data in the place)
 	In the cloud place also delete Landmarks.SulePlate_TEMP, BotataungPlate_TEMP and BotataungRiver_TEMP (the terrain
 	pads replace them).
@@ -142,9 +144,25 @@ function M.green()
 			end
 			d.Parent = kit
 		end
-		pcall(G.terrainLook)
+		-- (no G.terrainLook: the Ygn grass overrides stay off, owner 16 Nov "this grass color is good")
 		local r1 = G.paint(h)
+		-- farOld replaces Yangon1to1.Green.Far: keep the other districts' far crowns and merge them back
+		local green = workspace:FindFirstChild("Yangon1to1") and workspace.Yangon1to1:FindFirstChild("Green")
+		local keep = green and green:FindFirstChild("Far")
+		if keep then
+			keep.Name = "Far_keep"
+		end
 		local r2 = G.farOld(h)
+		if keep then
+			local far = green:FindFirstChild("Far")
+			for _, c in keep:GetChildren() do
+				if far:FindFirstChild(c.Name) then
+					c.Name = c.Name .. "_old"
+				end
+				c.Parent = far
+			end
+			keep:Destroy()
+		end
 		local r3 = G.data(h)
 		return string.format("paint %s, far %s, data %s", tostring(r1), tostring(r2), tostring(r3))
 	end)
@@ -284,6 +302,33 @@ function M.pagodas()
 			table.insert(out, string.format("%s y%.2f", id, gy))
 		end
 		return table.concat(out, "; ")
+	end)
+end
+
+-- the 9 downtown landmarks (tools/yangon/landmarks3d/dt_landmarks.py, DowntownPlace) into Yangon1to1.Landmarks
+function M.landmarks(ids, pack)
+	return run("landmarks", function()
+		local D = require(pack.DowntownPlace:Clone())
+		local r = root()
+		local L = r:FindFirstChild("Landmarks") or Instance.new("Folder")
+		L.Name = "Landmarks"
+		L.Parent = r
+		local out = {}
+		for lid, id in ids do
+			local m = loadAsset(id)
+			table.insert(out, lid .. " " .. D.place(m, pack["Place_" .. lid].Value, L))
+			m:Destroy()
+			task.wait()
+		end
+		-- the terrain pads replace the plates the Sule / Botataung models stood on
+		for _, nm in { "SulePlate_TEMP", "BotataungPlate_TEMP", "BotataungRiver_TEMP" } do
+			local p = L:FindFirstChild(nm)
+			if p then
+				p:Destroy()
+				table.insert(out, "deleted " .. nm)
+			end
+		end
+		return table.concat(out, ", ")
 	end)
 end
 

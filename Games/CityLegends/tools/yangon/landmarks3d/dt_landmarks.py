@@ -1029,11 +1029,12 @@ def mahabandula_park():
     cx, cz = geo.world(96.15933, 16.77312)
     st = np.load(os.path.join(ROOT, "build", "city_1to1", "terrain_P3_state.npz"))
     H_, org = st["H"], st["origin"]
-    base = float(H_[int((cx - org[0]) / 4), int((cz - org[1]) / 4)])
+    base = 20.4   # the terrain pad under the paved circle (terrain.PILOT_PADS["P3"]: top 20.4, radius 88 studs)
     # paved circle 28 m, 0.2 m over the ground (the terrain dips under its edge are hidden by a 1 m skirt)
-    cylinder(sc, cx, cz, 28.0 * S, base - 1.0 * S, base + 0.2 * S, "PAV", n=48)
+    # (the smooth terrain's grass bulges ~2 studs over its set height: the paving stands 1.2 m over the ground)
+    cylinder(sc, cx, cz, 28.0 * S, base - 1.0 * S, base + 0.3, "PAV", n=48)
     # 4 steps, 0.18 m each, radii 15 -> 12.5 m
-    y = base + 0.2 * S
+    y = base + 0.3
     for k in range(4):
         r = (15.0 - 0.8 * k) * S
         cylinder(sc, cx, cz, r, y - 0.02, y + 0.18 * S, "MRB", n=48)
@@ -1045,7 +1046,7 @@ def mahabandula_park():
         cylinder(sc, cx, cz, 5.15 * S, yd + zb * S, yd + (zb + 0.6) * S, "GLD", n=40, top=zb < 6.0)
     # the obelisk: a square shaft tapering 3.6 m -> 1.4 m over 37 m, a pyramidion to 46 m over the street
     y0 = yd + 7.0 * S
-    h_shaft = (46.0 - 7.0 - 0.9) * S - 2.6 * S
+    h_shaft = (46.0 - 7.0 - 0.8) * S - 2.6 * S
     lo, hi = 1.8 * S, 0.7 * S
     for i in range(4):
         a0 = math.pi / 4 + i * math.pi / 2

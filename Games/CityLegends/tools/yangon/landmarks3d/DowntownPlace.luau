@@ -80,6 +80,8 @@ function D.place(holding: Instance, placeJson: string, folder: Instance): number
 				q.Parent = vis
 				pcall(function()
 					q.CollisionFidelity = Enum.CollisionFidelity.Box
+					-- big flat pieces (the monument's paving) lost their faces at Automatic: few parts, so Precise
+					q.RenderFidelity = Enum.RenderFidelity.Precise
 				end)
 				n += 1
 			end

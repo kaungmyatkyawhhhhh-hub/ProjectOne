@@ -91,7 +91,14 @@ PILOT_PADS = {'P2': [(34625.66, 17793.07, 157.5, 77.6, 60.0)]}
 # (2026-11-16, step 6) P3: Sule's court (its model's PAV floor starts at Y 18.47: the terrain 0.27 under it, replacing
 # SulePlate_TEMP) and Botataung's platform (its blocks start at Y 17.81; replacing BotataungPlate_TEMP)
 PILOT_PADS['P3'] = [(35999.0, 45119.0, 150.0, 18.2, 40.0), (40188.0, 47050.0, 200.0, 17.55, 40.0),
-                    (40188.0, 47350.0, 200.0, 17.55, 40.0)]
+                    (40188.0, 47350.0, 200.0, 17.55, 40.0),
+                    # Maha Bandula Park: the Independence Monument's paved circle (28 m) sits on a flat pad at 20.4
+                    (36179.27, 45546.35, 88.0, 20.4, 40.0)]
+# ("up to batch 3") P7: Shwedagon's platform (model floor Y 174 = 58 m, stupa axis; the DEM's hilltop is 173.1: flattened
+# 2 under the floor out to the platform's inner edge, eased into the hill) and Maha Wizaya's plaza (ground 108.92, its
+# 336-stud MahaWizayaPlate_TEMP); P8: Chaukhtatgyi (69.98) and Ngahtatgyi (73.36), their TEMP plates (vault notes)
+PILOT_PADS['P7'] = [(33065.66, 37182.89, 300.0, 172.0, 150.0), (33902.88, 38317.36, 240.0, 108.6, 60.0)]
+PILOT_PADS['P8'] = [(37635.06, 32763.72, 175.0, 69.7, 60.0), (37211.85, 33831.02, 150.0, 73.06, 60.0)]
 QUAY_W = 10.0
 SHORE_MUD = 90.0           # (1:1) studs from a lake's shore with a mud bed (sand beyond)
 FAR_SHORE = 120.0          # studs of low far shore where a river runs out of the region into the void
