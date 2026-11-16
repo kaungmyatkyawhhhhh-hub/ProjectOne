@@ -7,8 +7,8 @@ MELIA_GROUPS = {
     # lobby (photos L1-L3)
     "MWH": ("SmoothPlastic", (232, 230, 225), 0.0, 0.06, False, False),  # polished white marble floor, gallery, stair
     "MDK": ("SmoothPlastic", (235, 233, 228), 0.0, 0.05, False, True),   # white marble: reception desk, bar wall, buffets
-    "TEK": ("SmoothPlastic", (176, 120, 62), 0.0, 0.0, False, True),     # teak-tone timber: walls, columns, fascias
-    "TKC": ("SmoothPlastic", (170, 115, 60), 0.0, 0.0, False, False),    # timber-veneer ceiling over the reception
+    "TEK": ("WoodPlanks", (150, 112, 78), 0.0, 0.0, False, True),     # teak-tone timber: walls, columns, fascias (toned 16 Nov: the photo value read orange-red under warm lights)
+    "TKC": ("WoodPlanks", (146, 110, 76), 0.0, 0.0, False, False),    # timber-veneer ceiling over the reception
     "GST": ("SmoothPlastic", (80, 80, 80), 0.0, 0.0, False, True),       # dark grey stone: column strips, planters
     "SBK": ("SmoothPlastic", (30, 30, 30), 0.0, 0.05, False, True),      # screens: black metal frame and dark tiles
     "SGD": ("SmoothPlastic", (170, 130, 70), 0.0, 0.1, False, False),    # screens: gold square panels
