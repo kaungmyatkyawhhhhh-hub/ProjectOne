@@ -170,6 +170,20 @@ def terraces():
     gold = MB()
     oct_revolve(gold, [(28.05, T1), (21.2, T1), (21.2, 8.6), (21.45, 8.6), (21.45, 9.2), (17.4, 9.2), (17.4, 11.8),
                        (17.65, 11.8), (17.65, 12.4), (0.0, 12.4)])
+    # 2026-11-16: a row of carved gold flames (ornament kit, thick kanote slabs) along each terrace's edge (photos 01 and
+    # 2013: the gold terraces are edged with flame leaves); clear of the porches on the cardinal faces
+    fl = OK.flame_blade(0.55, 0.95, 0.08, lod="micro")
+    for a, z, gap in ((28.05 - 0.25, T1, PW + 0.8), (21.45 - 0.22, 9.2, 0.0), (17.65 - 0.22, 12.4, 0.0)):
+        half = a * math.tan(math.pi / 8) - 0.5
+        n = max(2, int(2 * half / 1.45))
+        for k in range(8):
+            th = math.radians(45 * k)
+            o, r = (math.cos(th), math.sin(th), 0.0), (math.sin(th), -math.cos(th), 0.0)
+            for i in range(n + 1):
+                u = -half + 2 * half * i / n
+                if k % 2 == 0 and abs(u) < gap:
+                    continue
+                OK.into_mb(fl, {"G": gold}, (a * o[0] + u * r[0], a * o[1] + u * r[1], z), r, o)
     return {"Gold": gold}
 
 
@@ -261,8 +275,18 @@ def porch():
         top += [(x, roof_z(x) - 0.1), ((x + xn) / 2, roof_z((x + xn) / 2) + 0.42)]
     top.append((xs[-1], roof_z(xs[-1]) - 0.1))
     bot = [(x, roof_z(x) - 0.4) for x in reversed(xs)]
+    # 2026-11-16: the ornament kit's carved flames (bevelled kanote slabs 0.1 m proud, tongues on both sides, a back
+    # face where they stand above the gable) along both roof slopes, in place of a flat zigzag plate; a gold carved
+    # flame finial at the centre and a corner flame (horn) on each horn
+    row = OK.Piece("pedrow")
     for s in (-1, 1):
-        gold.extrude([(s * x, z) for x, z in top + bot], frame, 0.0, 0.06)  # back kept: the tips stand clear of the gable
+        for i, x in enumerate(xs[:-1]):
+            xm = (x + xs[i + 1]) / 2
+            zr = roof_z(xm) - 0.25
+            fl = OK.move(OK.flame_outline(0.42, 0.75, lobes=1, n_lobe=2, barb=0.55, lean=-s * 0.12), dx=s * xm, dz=zr)
+            OK.slab(row, "G", fl, 0.0, 0.1, 0.02, back=True, band=False)
+    OK.into_mb(row, {"G": gold}, (0.0, PY1, 0.0))
+    OK.into_mb(OK.flame_finial(1.9, lod="hi"), {"G": gold}, (0.0, PY1 + 0.02, 10.4))
     # gold band round the arch (0.3 wide, 0.08 proud), from the floor
     oa = pointed_arch(AW + 0.3, A_SPRING, A_APEX + 0.35)
     ia = pointed_arch(AW, A_SPRING, A_APEX)

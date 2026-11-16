@@ -171,8 +171,10 @@ def edge_strips(e, trim=None):
 
 def _edge_strips(e, trim=None):
     k = M(6) if trim is None else trim
-    return unary_union([strip_poly(e, e["h1"], e["h1"] + e["walk"], k, e["L"] - k),
-                        strip_poly(e, -e["h0"] - e["walk"], -e["h0"], k, e["L"] - k)])
+    g = unary_union([strip_poly(e, e["h1"], e["h1"] + e["walk"], k, e["L"] - k),
+                     strip_poly(e, -e["h0"] - e["walk"], -e["h0"], k, e["L"] - k)]).buffer(0.01)
+    shapely.prepare(g)
+    return g
 
 
 def strip_poly(e, lo, hi, s0=0.0, s1=None):
@@ -382,8 +384,8 @@ class World:
             if isinstance(allow, str):
                 tree, polys = (self.ptree, self.ppolys) if allow == "P" else (self.mtree, self.mpolys)
                 near = [polys[int(k)] for k in tree.query(g)]
-                allow = unary_union(near) if near else Polygon()
-            rest = g.difference(allow.buffer(0.01)) if not allow.is_empty else g
+                allow = unary_union(near).buffer(0.01) if near else Polygon()
+            rest = g.difference(allow) if not allow.is_empty else g
         if not rest.is_empty and rest.area > 0.01 and self.ROADS.intersects(rest):
             return False
         if tall is not None and self.BLD.intersects(tall):
@@ -509,8 +511,6 @@ def drops(x, y, z, e, side, t, nth):
         if d < M(3) or d > M(20):
             continue
         ln = LineString([(x, z), (q.x, q.y)])
-        if W.BLD.buffer(-0.6).intersects(ln.interpolate(0.85, normalized=True).buffer(0.1)):
-            continue
         if W.BLD.intersects(LineString([(x, z), ln.interpolate(0.9, normalized=True).coords[0]])):
             continue
         floors = info.get("floors", 2) or 2

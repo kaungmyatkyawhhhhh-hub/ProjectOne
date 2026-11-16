@@ -52,7 +52,6 @@ def main():
                 prim['attributes'] = {k: take(v) for k, v in prim['attributes'].items()}
                 if 'indices' in prim:
                     prim['indices'] = take(prim['indices'])
-                prim.pop('material', None)
             J['meshes'].append(mesh)
             n2 = {k: v for k, v in node.items() if k != 'children'}
             n2['mesh'] = len(J['meshes']) - 1
@@ -61,8 +60,9 @@ def main():
     while len(blob) % 4:
         blob.append(0)
     J['buffers'] = [{'byteLength': len(blob)}]
-    if any('materials' in read(p)[0] for p in ins[:1]):
-        pass
+    mats = read(ins[0])[0].get('materials')
+    if mats:
+        J['materials'] = mats      # (the kit files share one material list: buildings_1to1 writes the same 'facade')
     js_b = json.dumps(J, separators=(',', ':')).encode()
     while len(js_b) % 4:
         js_b += b' '

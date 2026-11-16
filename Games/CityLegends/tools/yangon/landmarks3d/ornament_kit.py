@@ -401,6 +401,11 @@ def flame_finial(h=1.2, lod="hi"):
     blade and a raised beaded spine on both faces. Sheet right half; Shwedagon spires photo."""
     P = Piece("flame_finial")
     hi = lod == "hi"
+    if lod == "micro":     # many-copy roofs (Shwedagon halls): a square knob + a thick flame blade, ~45 triangles
+        lathe(P, "G", [(0.09 * h, 0.0), (0.11 * h, 0.06 * h), (0.05 * h, 0.13 * h)], 4, cap=False)
+        bl = move(flame_outline(0.36 * h, 0.82 * h, lobes=1, n_lobe=2, barb=0.6), dz=0.11 * h)
+        slab(P, "G", bl, -0.04 * h, 0.08 * h, 0.0, double=True, band=False)
+        return P.check()
     lathe(P, "G", [(0.07 * h, 0.0), (0.10 * h, 0.03 * h), (0.11 * h, 0.07 * h), (0.075 * h, 0.11 * h), (0.045 * h, 0.13 * h)],
           8 if hi else 6)
     t = 0.07 * h
@@ -426,6 +431,15 @@ def flame_finial(h=1.2, lod="hi"):
         for hand in (1, -1):
             cu = scroll(0.26 * h, hand * 0.05 * h, 0.1 * h, ang=-hand * 35, mirror=hand < 0, n=6)
             slab(P, "G", cu, -0.025 * h, 0.05 * h, 0.012 * h, double=True, band=False)
+    return P.check()
+
+
+def flame_blade(w=0.6, h=1.0, t=0.08, lod="lo"):
+    """A free-standing carved flame (mid plane y = 0): the kanote outline as a thick slab, bevelled on both faces ('lo',
+    ~110 triangles) or square-edged ('micro', ~40 triangles) for the hundreds of gable fins on the Shwedagon halls."""
+    P = Piece("flame_blade")
+    fl = flame_outline(w, h, lobes=1 if lod == "micro" else 2, n_lobe=2, barb=0.55)
+    slab(P, "G", fl, -t / 2, t, 0.0 if lod == "micro" else 0.012 + 0.0 * t, double=True, band=False)
     return P.check()
 
 
@@ -536,10 +550,14 @@ def gable_frame(w=6.9, h=4.5, nf=2, lod="hi"):
     P = Piece("gable_frame")
     hw = w / 2
     zt = h * 0.8
-    board = ogee(hw * 0.97, 0.0, zt * 1.02, n=6, tip=0.05 * h)
+    lo = lod != "hi"
+    if lo:
+        nf = min(nf, 1)
+    no = 4 if lo else 6
+    board = ogee(hw * 0.97, 0.0, zt * 1.02, n=no, tip=0.05 * h)
     slab(P, "R", board, 0.0, 0.08, 0.02, back=True, band=False)
-    outer = ogee(hw * 0.93, 0.0, zt, n=6, tip=0.12 * h)
-    inner = ogee(hw * 0.78, 0.0, zt * 0.86, n=6, tip=0.06 * h)
+    outer = ogee(hw * 0.93, 0.0, zt, n=no, tip=0.12 * h)
+    inner = ogee(hw * 0.78, 0.0, zt * 0.86, n=no, tip=0.06 * h)
     # frame band = outer arch minus inner arch, open at the eave line (one simple polygon)
     o = [p for p in outer]
     i_ = [p for p in inner]
@@ -558,7 +576,7 @@ def gable_frame(w=6.9, h=4.5, nf=2, lod="hi"):
     # sun disc: star of rays + boss
     zc = zt * 0.5
     sw = min(w, 1.6 * h)                       # the disc fits the field of a wide, low gable too
-    slab(P, "G", star(0.17 * sw, 0.13 * sw, 12, 0.0, zc), 0.08, 0.07, 0.015, band=False)
+    slab(P, "G", star(0.17 * sw, 0.13 * sw, 8 if lo else 12, 0.0, zc), 0.08, 0.07, 0.015, band=False)
     slab(P, "G", circle(0.08 * sw, 10, 0.0, zc), 0.15, 0.05, 0.015, band=False)
     # flame fingers up the frame's edge, leaning out, plus the apex flame
     for s in (1, -1):
@@ -570,7 +588,7 @@ def gable_frame(w=6.9, h=4.5, nf=2, lod="hi"):
             fl = flame_outline(0.13 * w, 0.2 * h, lobes=1, n_lobe=2, barb=0.5, lean=0.25 * s)
             fl = rotate(move(fl, dx=px, dz=pz - 0.02 * h), -s * 0.35, px, pz)
             slab(P, "G", fl, 0.08, 0.08, 0.016, back=True, band=False)
-        cu = scroll(0.36 * h, s * hw * 0.9, 0.0, ang=-s * 25, mirror=s < 0, n=6)
+        cu = scroll(0.36 * h, s * hw * 0.9, 0.0, ang=-s * 25, mirror=s < 0, n=4 if lo else 6)
         slab(P, "G", cu, 0.02, 0.16, 0.02, back=True, band=False)
     ap = move(flame_outline(0.16 * w, 0.32 * h, lobes=2, n_lobe=2, barb=0.5), dz=zt + 0.05 * h)
     slab(P, "G", ap, 0.1, 0.12, 0.02, back=True, band=False)      # front 0.22: clear of the band's 0.18
@@ -636,6 +654,7 @@ PIECES = {
     "flame_finial": flame_finial,
     "crest_segment": crest_segment,
     "crest_corner": crest_corner,
+    "flame_blade": flame_blade,
     "merlon_leaf": merlon_leaf,
     "gable_frame": gable_frame,
     "arch_hood": arch_hood,

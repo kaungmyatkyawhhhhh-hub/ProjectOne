@@ -28,6 +28,8 @@ from shapely import affinity
 import geo
 from geom3d import Geo, ccw
 from glb import Mesh, write_glb
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import ornament_kit as OK  # noqa: E402  (2026-11-16 carved ornament kit)
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))          # Games/CityLegends
 REFS = os.path.join(ROOT, "build", "landmarks", "refs", "shwedagon")
@@ -553,9 +555,9 @@ def niche_shrine():
     g.lathe([(0.42, z, "GOLDL"), (0.42, z + 0.25, "GOLDL"), (0.34, z + 0.55, "GOLDL"), (0.2, z + 0.85, "GOLDL"),
              (0.2, z + 1.0, "GOLDL"), (0.12, z + 1.3, "GOLDL"), (0.05, z + 2.3, "GOLDL"), (0.0, 6.8, "GOLDL")], 6)
     # flame-shaped hood over the arch (front gable), with a back face
-    hood = [(-1.15, TB), (1.15, TB), (0.55, TB + 0.7), (0.0, TB + 1.75), (-0.55, TB + 0.7)]
-    g.vpoly("GOLDL", [(-u, v) for u, v in hood], (0, hy + 0.22, 0), (-1, 0, 0), (0, 0, 1))
-    g.vpoly("GOLDL", [(u, v) for u, v in hood], (0, hy + 0.19, 0), (1, 0, 0), (0, 0, 1))
+    # 2026-11-16: the ornament kit's carved flame (bevelled, flame tongues, 0.12 m thick) in place of two flat plates
+    OK.into_geo(OK.flame_blade(2.3, 1.75, 0.12, lod="lo"), g, {"G": "GOLDL"}, (0.0, hy + 0.21, TB), (1.0, 0.0, 0.0),
+                (0.0, 1.0, 0.0))
     # small seated image in the niche
     g.merge(buddha(1.1, seg=5), 0.0, hy - dep * 0.55, 0.25)
     return g
@@ -599,7 +601,14 @@ def pyatthat(g, cx, cy, z0, hx, hy, n, height, yaw=0.0, roof="GOLDL", neck="GREE
             g.cap(roof, top, z + tier_h)
         for sx_, sy_ in ((1, 1), (-1, 1), (-1, -1), (1, -1)):
             px, py = R(sx_ * ax, sy_ * ay)
-            if k < 3:
+            if k == 0:
+                # 2026-11-16: the ornament kit's carved flame finial (square knob + thick flame) on the lowest tier,
+                # turned to face out along the corner's diagonal
+                d_ = math.hypot(px - cx, py - cy) or 1.0
+                dx_, dy_ = (px - cx) / d_, (py - cy) / d_
+                OK.into_geo(OK.flame_finial(tier_h * 1.1, lod="micro"), g, {"G": roof}, (px, py, z), (-dy_, dx_, 0.0),
+                            (dx_, dy_, 0.0))
+            elif k < 3:
                 finial(g, px, py, z, tier_h * 0.9, roof, 0.06 + 0.02 * ax)
         if gables:
             # one fin per face, standing on the eave line, centred
@@ -617,6 +626,14 @@ def pyatthat(g, cx, cy, z0, hx, hy, n, height, yaw=0.0, roof="GOLDL", neck="GREE
                 ox, oy = rot(0.0, 1.0, fa - math.pi / 2 + math.pi / 2) if False else rot(1.0, 0.0, fa)
                 tx, ty = -oy, ox
                 zb = z + (tier_h * 0.72) * (1 - base_off / off) / 0.45 * 0.45 if False else z + tier_h * 0.72 * 0.3
+                if k == 0:
+                    # 2026-11-16: a carved flame from the ornament kit (thick slab with flame tongues) for the fin
+                    org = (base_off * ox, base_off * oy)
+                    wx, wy = R(*org)
+                    rx, ry = rot(tx, ty, yaw)
+                    OK.into_geo(OK.flame_blade(2 * w, hgt, 0.08, lod="micro"), g, {"G": roof}, (wx, wy, zb),
+                                (rx, ry, 0.0), (-ry, rx, 0.0))
+                    continue
                 for dd, sgn in ((0.0, 1), (-0.05, -1)):
                     org = (base_off + dd) * ox, (base_off + dd) * oy
                     P3 = []

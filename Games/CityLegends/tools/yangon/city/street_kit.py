@@ -273,7 +273,7 @@ def crossarm(p, y, L=2.0 * S, insulators=4):
         z = -L / 2 + 0.5 + (L - 1.0) * k / max(1, insulators - 1)
         if abs(z) < 0.45:
             continue
-        p.prism("SPL", (0, y + 0.15, z), (0, y + 0.6, z), 0.13, 0.09, INSUL, n=6)
+        p.prism("SMT", (0, y + 0.15, z), (0, y + 0.6, z), 0.13, 0.09, INSUL, n=6)
 
 
 def rack(p, y):
@@ -282,7 +282,7 @@ def rack(p, y):
         p.box("SMT", (0, y, side * 0.42), (0.16, 2.2, 0.16), STEEL)
         for k in range(4):
             yy = y - 0.6 + 0.6 * k - 0.3
-            p.prism("SPL", (0, yy, side * 0.5), (0, yy, side * 0.82), 0.1, 0.1, INSUL, n=6)
+            p.prism("SMT", (0, yy, side * 0.5), (0, yy, side * 0.82), 0.1, 0.1, INSUL, n=6)
 
 
 def make_poles():
@@ -294,8 +294,8 @@ def make_poles():
         p.attach = ATTACH
         if "coil" in kind:
             # a coiled slack loop of fibre and a grey junction box (one pole in three, survey 2.4)
-            p.ring("SPL", (0.55, RACK_Y - 3.6, 0), (1, 0, 0), 0.9, 0.06, BLACK, n1=14, n2=4)
-            p.box("SPL", (0.38, RACK_Y - 5.4, 0), (0.3, 1.2, 0.9), (150, 152, 150))
+            p.ring("SMT", (0.55, RACK_Y - 3.6, 0), (1, 0, 0), 0.9, 0.06, BLACK, n1=14, n2=4)
+            p.box("SMT", (0.38, RACK_Y - 5.4, 0), (0.3, 1.2, 0.9), (150, 152, 150))
         if "lamp" in kind:
             # an LED cobra head on a 1.8 m arm toward the road (local -X... the road is local +Z side: see street_1to1)
             y0 = RACK_Y + 2.2
@@ -328,13 +328,13 @@ def make_transformer():
     p.box("SMT", (0, py, 0.75), (2 * gap + 0.9, 0.3, 0.2), STEEL)
     for sx in (-gap + 0.9, 0, gap - 0.9):
         p.box("SMT", (sx, py + 0.2, 0), (0.18, 0.1, 1.7), STEEL)
-    p.box("SPL", (0, py + 0.25 + 1.4 * S / 2, 0), (1.2 * S, 1.4 * S, 1.0 * S * 0.9), TANK, skip=("-y",))
+    p.box("SMT", (0, py + 0.25 + 1.4 * S / 2, 0), (1.2 * S, 1.4 * S, 1.0 * S * 0.9), TANK, skip=("-y",))
     for k in (-1, 0, 1):
-        p.prism("SPL", (k * 0.9, py + 0.25 + 1.4 * S, -0.4), (k * 0.9, py + 0.25 + 1.4 * S + 0.8, -0.4), 0.15, 0.1, (90, 70, 50), n=6)
-        p.prism("SPL", (k * 1.4, ARM_Y - 2.4, 0), (k * 1.4, ARM_Y - 1.2, 0), 0.08, 0.08, INSUL, n=6)
+        p.prism("SMT", (k * 0.9, py + 0.25 + 1.4 * S, -0.4), (k * 0.9, py + 0.25 + 1.4 * S + 0.8, -0.4), 0.15, 0.1, (90, 70, 50), n=6)
+        p.prism("SMT", (k * 1.4, ARM_Y - 2.4, 0), (k * 1.4, ARM_Y - 1.2, 0), 0.08, 0.08, INSUL, n=6)
     p.box("SMT", (0, ARM_Y - 2.6, 0), (2 * gap + 0.6, 0.24, 0.24), STEEL)
     # the red warning plate on the near pole
-    p.box("SPL", (-gap, 2.4 * S, 0.33), (0.6, 0.75, 0.04), (200, 30, 30))
+    p.box("SMT", (-gap, 2.4 * S, 0.33), (0.6, 0.75, 0.04), (200, 30, 30))
     p.attach = ATTACH
 
 
@@ -608,7 +608,7 @@ def make_drains():
         p.box("SCO", (0, top - 1.0, W / 2 - 0.12), (L, 2.0, 0.24), CONC_SLAB, skip=("-y", "+y"))
         p.box("SCO", (-L / 2 + 0.12, top - 1.0, 0), (0.24, 2.0, W - 0.48), CONC_SLAB, skip=("-y", "+y", "+z", "-z"))
         p.box("SCO", (L / 2 - 0.12, top - 1.0, 0), (0.24, 2.0, W - 0.48), CONC_SLAB, skip=("-y", "+y", "+z", "-z"))
-        p.box("SPL", (0, top - 0.55, 0), (L - 0.7, 0.02, W - 0.6), (26, 28, 26), skip=("-y", "+x", "-x", "+z", "-z"))   # dark water
+        p.box("SCO", (0, top - 0.55, 0), (L - 0.7, 0.02, W - 0.6), (26, 28, 26), skip=("-y", "+x", "-x", "+z", "-z"))   # dark water
         n = 8
         sl = (L - 0.1) / n
         miss = 5 if kind == "gap" else -1
@@ -619,7 +619,7 @@ def make_drains():
             col = tuple(int(c_ * (0.9 + 0.1 * ((k * 37) % 5) / 4)) for c_ in CONC_SLAB)
             if kind == "grate" and k == 3:
                 for j in range(5):
-                    p.box("SMT", (x - 0.6 + j * 0.3, top - 0.06, 0), (0.12, 0.12, W - 0.5), (60, 58, 56))
+                    p.box("SCO", (x - 0.6 + j * 0.3, top - 0.06, 0), (0.12, 0.12, W - 0.5), (60, 58, 56))
                 continue
             p.box("SCO", (x, top - 0.12, 0), (sl - 0.08, 0.24, W + 0.12), col, skip=("-y",))
 
