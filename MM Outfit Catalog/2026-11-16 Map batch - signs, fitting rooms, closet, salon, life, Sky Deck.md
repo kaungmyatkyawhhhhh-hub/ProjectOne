@@ -245,3 +245,43 @@ Everything is new models, nothing removed except the stone planter boxes I tried
 ![[Screenshots/2026-11-16 skyline billboard through selfie arch.jpg]]
 ![[Screenshots/2026-11-16 floor guide on the deck.jpg]]
 ![[Screenshots/2026-11-16 floor guide in the boutique.jpg]]
+
+## Wide boutique, drip catalog looks, body parts, skin tone, rooftop displays
+Owner asked for five things:
+- "lets use catalog shirts not our own one"
+- "make the spawn floor bigger to fit all these outfits without being compact and packed tight"
+- "rooftop mannequin should have the same system as the spawn floor mannequin system"
+- "include body meshes ... korblox right leg and headless"
+- "skin tone never saves on the outfit"
+
+**Backups:**
+- `MapBackups.pre_WideBoutique_16Nov` (the showroom, floor-19 bays, the Penthouse Outfit Room pads, window condensation, tower trim).
+- `ScriptBackups.pre_DripCatalogFloor_16Nov` (SkyDeckServer, ShowroomGallery, OutfitShowcaseServer, ShowroomCollection, OutfitViewer, PenthouseExhibitClient, Config, CatalogAdminServer / Client, GuestLooksServer).
+
+- **Wider spawn floor:**
+  - **Room:** the boutique grew from 52 to 80 studs wide (x ±40, under the Sky Deck, over the tower's façade frame). The floor, ceiling, walnut beams, both window walls (glass, mullions, sills, sill lights, rain emitters, condensation), the back display wall and the outside fascia/coping all moved or stretched. New wing-end walls close |x| 31–40 on the north side.
+  - **Mannequins:** **23 bays** on floor 19 (was 15).
+    - 3 stage pads stay.
+    - Two **wings** along the windows hold 10 each: inner row x ±29.5 and outer row x ±36, 7.5 studs apart, staggered, all facing the middle.
+    - The old tight double row down the middle is gone, so the centre is an open plaza (spawn, styling table, stairs).
+    - `ShowroomGallery` now reads bays 01–40 per floor.
+  - All 21 outfits stand on the spawn floor; none overflow to the conservatory.
+- **6 drip looks from the catalog** (outfits 16–21: NEON STAR, STAGE NIGHT, RACER CLUB, URBAN CAMO, PINK GALAXY, ICE GALAXY). Picks and IDs: [[2026-11-16 Drip looks from the catalog - picks]]. They're added to the Styles (Emo & Goth, Y2K & Baddie, Streetwear, Grunge).
+- **Body parts (`outfit.Body = { Head = id, RightLeg = id }`):**
+  - **Where:** shown on mannequins, applied on whole-outfit try-on and on "Try this piece" (viewer sends kind "Body").
+  - **Viewer:** lists them as "Bundle only".
+  - **Cart:** never included. Korblox 139607718 and Headless 134082579 are only sold in 17k–31k R$ bundles; `allowed()` never lists them.
+  - **Who has what:** NEON STAR = Headless + Korblox, STAGE NIGHT = Korblox, ICE GALAXY = Headless.
+- **Rooftop podiums use the spawn-floor system:** each step is a display with the wooden catalog plaque (NAME / OUTFIT NN), the custom "View outfit" prompt (MMExhibit), the rig tagged `MMPenthouseMannequin` with a RestPose (its own idle, turns to the nearest player), and the brass outline (ShowroomCollection now also accepts `PodiumDisplay`).
+- **Skin tone saves:**
+  - **What's saved:** "Add My Outfit" (CatalogAdmin) and Guest looks now store the avatar's six body colours as hex (`Colors` / `colors`). `Config.ColorsFrom` turns them into `outfit.BodyColors`, and the mannequin builder uses them. Editing an admin outfit keeps its saved colours.
+  - **Tested:** a brown-skinned test avatar published a guest look; its mannequin, rack and podium all came out brown (7c5234).
+  - **Older looks:** looks saved before this have no colours, so re-save them to fix.
+- **Missing hair at startup fixed:**
+  - **Cause:** with 21 outfits loading together, item lookups hit the rate limit and 6 mannequins were built without hair.
+  - **Fix:** lookups now retry 5 times, builds are staggered, and an incomplete mannequin rebuilds itself 20–30 s later. The spawn floor and podiums swap in the finished one (`BuildStamp`).
+  - **Tested:** 6 incomplete at 12 s, 0 at 57 s, nothing stale.
+- **Tested (Studio Play, PC):** all of the above, 0 console errors. **Not checked:** phone view of the new wings; the live DataStore save of an admin outfit (not written from Studio on purpose).
+
+![[Screenshots/2026-11-16 wide boutique from the stage.jpg]]
+![[Screenshots/2026-11-16 wide boutique west wing with Neon Star.jpg]]
