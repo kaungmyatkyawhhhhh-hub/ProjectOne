@@ -126,10 +126,10 @@ def stupa(g):
         pt_ = OK.panel_tile((wid + topw) / 2, hgt)
         f_ = 0.09 * min((wid + topw) / 2, hgt)
         hw_ = (wid + topw) / 4
-        OK.slab(pt_, "P", [(-hw_ + f_, f_), (hw_ - f_, f_), (hw_ - f_, hgt - f_), (-hw_ + f_, hgt - f_)], -bulge - 0.05,
+        OK.slab(pt_, "G", [(-hw_, 0.0), (hw_, 0.0), (hw_, hgt), (-hw_, hgt)], -bulge - 0.05,
                 bulge + 0.05, 0.0, back=False, band=False)
         for grp_, ts_ in pt_.g.items():
-            if grp_ == "P":
+            if grp_ == "G":
                 # drop the backing slab's front cap (it would lie in the field's back plane, inside the field slab)
                 pt_.g[grp_] = [t for t in ts_ if not all(abs(q[1]) < 1e-6 for q in t)]
         OK.into_geo(pt_, g, KG, tuple(base[j] + out[j] * bulge for j in range(3)), rgt, out, up)
