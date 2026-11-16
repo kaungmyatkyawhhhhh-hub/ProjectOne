@@ -8,6 +8,7 @@ created: 2026-11-16
 > - "the scaling measurements must be 1:1 accurate too"
 > - "run every agent for every possible occasion for the best 1:1 EXACT yangon city"
 >
+> Owner, 16 Nov: "dont forget about textures & materials & every detail of everything too!": every surface uses a real texture and material (no flat plastic), and every detail is modelled.
 > Everything the rebuild is built from, in one place. Method for any future real place: [[Brain/Methods/Real-world look match]].
 
 ## Plan and rules
@@ -33,6 +34,7 @@ created: 2026-11-16
 | Sites (Sedona, Myanmar Centre, landmarks, venues) | [[2026-11-16 Audit - Yangon sites 1 to 1]] |
 | Interiors that can be built (53 rated) | [[2026-11-16 Research - Yangon interiors catalogue]], [[2026-11-16 Research - Melia Yangon interior]] |
 | Myanmar Plaza and Sedona look | [[2026-11-16 Research - Myanmar Plaza and Sedona real look (photo measurements)]] |
+| Textures and materials (real PBR surfaces, MaterialVariants) | being built: `Games/CityLegends/build/materials/materials_library.md` |
 | What was invented, and the fixes | [[2026-11-16 Audit - invented content in the Yangon map]] |
 
 ## Already live in the current map (16 Nov, version 957)
