@@ -41,6 +41,26 @@ def main():
         k += 1
         parts.append('<Item class="StringValue" referent="S%d"><Properties><string name="Name">%s</string>'
                      '<string name="Value">%s</string></Properties></Item>' % (k, os.path.splitext(os.path.basename(p))[0], escape(v)))
+    # the run being replaced (its exact positions: PlacesApply.unshells removes only those parts)
+    old = os.path.join(B1, "buildings_%s_before_places" % TAG)
+    for p in sorted(glob.glob(os.path.join(old, "Shell_*.txt")), key=lambda s: int(re.findall(r"\d+", os.path.basename(s))[0])):
+        v = open(p, encoding="utf-8").read().replace("\r\n", "\n")
+        k += 1
+        parts.append('<Item class="StringValue" referent="S%d"><Properties><string name="Name">Old%s</string>'
+                     '<string name="Value">%s</string></Properties></Item>' % (k, os.path.splitext(os.path.basename(p))[0], escape(v)))
+    # the green layer run again with the places keep-out (its own holding folder, nested)
+    gp = os.path.join(ROOT, "imports", "sync", "ygn1to1_green", "green_%s.rbxmx" % TAG.lower())
+    if os.path.exists(gp):
+        parts.append(inner_folder(gp))
+    for i, name in enumerate(("PlacesApply", "YangonShellFacades", "YangonKitPlace", "YangonGreen1to1")):
+        code = open(os.path.join(ROOT, "tools", "yangon", name + ".luau"), encoding="utf-8").read().replace("\r\n", "\n")
+        parts.append('<Item class="ModuleScript" referent="M%d"><Properties><string name="Name">%s</string>'
+                     '<ProtectedString name="Source"><![CDATA[%s]]></ProtectedString></Properties></Item>' % (i + 2, name, code))
+    # shell facade sets (city/shell_facades.py map P1 P2 P3 P4): YangonShellFacades.apply pages
+    for st in ("walkup", "shop", "none"):
+        v = open(os.path.join(ROOT, "build", "shell_facades", "packed_%s.txt" % st)).read()
+        parts.append('<Item class="StringValue" referent="F_%s"><Properties><string name="Name">Fac_%s</string>'
+                     '<string name="Value">%s</string></Properties></Item>' % (st, st, v))
     src = open(os.path.join(ROOT, "src", "shared", "YangonKitData.lua"), encoding="utf-8").read().replace("\r\n", "\n")
     assert "]]>" not in src
     parts.append('<Item class="ModuleScript" referent="M1"><Properties><string name="Name">YangonKitData</string>'
