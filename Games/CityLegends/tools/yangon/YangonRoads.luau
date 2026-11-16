@@ -476,6 +476,27 @@ M.polyDist = polyDist
 -- Roads.build's opts.sideZone: must this road's kerb / pavement stay out of this spot?
 function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local px, pz = pos.X, pos.Z
+	-- a driveway mouth (fuel station entry / exit, roads05 data.driveways): no kerb across it
+	-- (the drive's point sits ~12 studs out, past the pavement: measured along the road, within 18 across: the far kerb is 24+ away)
+	if what == "Kerb" and M.data.driveways then
+		local me = M.R[name]
+		local b = M.near(px, pz, 2)[me.index]
+		if b then
+			local s = me.s[b[2]]
+			local L = hyp(s[4], s[5])
+			if L > 1e-6 then
+				local tx, tz = s[4] / L, s[5] / L
+				for _, d in M.data.driveways do
+					local dx, dz = d.x - px, d.z - pz
+					local along = dx * tx + dz * tz
+					local across = math.abs(dx * tz - dz * tx)
+					if math.abs(along) < d.hw and across < 18 then
+						return true
+					end
+				end
+			end
+		end
+	end
 	-- a round corner takes over here
 	if M.inCorner(px, pz) then
 		return true

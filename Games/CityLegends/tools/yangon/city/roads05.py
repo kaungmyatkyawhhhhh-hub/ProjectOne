@@ -1459,8 +1459,16 @@ def write(net):
         out_rings.append(dict(name=nm, c=[round(float(R['c'][0]), 2), round(R['y'], 2), round(float(R['c'][1]), 2)],
                               rc=round(R['rc'], 2), r_in=round(R['r_in'], 2), r_out=round(R['r_out'], 2),
                               lanes=R['lanes'], laneW=R['laneW'], arms=sorted(arms)))
-    data = dict(roads=out_roads, cut=cut, decks=out_decks, roundabouts=out_rings, spm=geo.SPM, ox=geo.OX, oz=geo.OZ,
-                tags=net['tags'],
+    # driveway mouths (places_1to1.py driveways.json: fuel entries / exits): YangonRoads drops the kerb there
+    drives = []
+    for t in net['tags']:
+        p = os.path.join(geo.BUILD, 'city_1to1', 'places_%s' % t, 'driveways.json')
+        if os.path.exists(p):
+            for d in json.load(open(p)):
+                drives.append(dict(x=round(d['at'][0], 2), z=round(d['at'][1], 2), hw=round(geo.m(d['width_m']) / 2, 2),
+                                   kind=d['kind']))
+    data = dict(roads=out_roads, cut=cut, decks=out_decks, roundabouts=out_rings, driveways=drives, spm=geo.SPM,
+                ox=geo.OX, oz=geo.OZ, tags=net['tags'],
                 note='roads05.py (%s): the 1:1 districts %s in the batch 0.5 format (v5 sample fields; roundabouts list)'
                      % ('16 Nov 2026', '+'.join(net['tags'])))
     od = out_dir(net['tags'])
