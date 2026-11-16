@@ -68,6 +68,11 @@ created: 2026-11-16
 - **Random** is now half MM looks, half uploads. With up to 240 uploads, a uniform pick would almost always land on an upload.
 - **Podium plaques** on the Sky Deck credit the creator ("BY LUIGIRED"). Was "GUEST LOOK" from the old Guest theme.
 
+- **Headless / Korblox in the body editor:**
+  - Head: Normal / Headless. Legs: Normal / Korblox. Try-on only; both are bundle-only and never in a cart.
+  - The server accepts only those two asset IDs (134082579, 139607718). "Normal" puts back your own part.
+  - A face accessory still shows on a headless head (that's how Roblox works).
+- **Top Creators board** is 1.35× bigger (it looked tiny between the booths). The empty-board text is now "Upload a look to be #1".
 - **Find my style quiz:**
   - On the Styles page, "Find my style ›" asks 3 quick questions (colour mood, weekend plan, shoes) with 4 picture-free choices each.
   - It then shows "Your style is Grunge" with a button to that theme's looks.
