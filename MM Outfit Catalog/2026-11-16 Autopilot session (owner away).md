@@ -90,7 +90,7 @@ created: 2026-11-16
   - The invite carries `LaunchData = "fit:<Outfit ID>"`. When the friend joins, the server reads it (`MMLaunchFit`) and that outfit opens for them after the loading screen.
   - Tested by setting the attribute by hand. A real invite needs the live game.
 - **What's New easel** at spawn, mirroring the Floor Guide on the right: See fit · Skin & body · Share a fit.
-- **Loading tips** rotate: one-tap try-on, uploads reach the Sky Deck, theme sorting, See fit.
+- **Loading tips** rotate: one-tap try-on, uploads reach the Sky Deck, theme sorting, See fit, the daily challenge ★, "try Headless and Korblox for free in More › Avatar".
 
 ### Performance & reliability
 - **Accessory type cache** (DataStore `MMAssetTypes_v1`): all 30 mannequins are complete within ~5 s (were 50–85 s, with missing hats under rate limits).
