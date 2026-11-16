@@ -503,3 +503,14 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **"I can't see the rain from inside."**
   - Cause: Roblox **Glass material doesn't draw particles behind it**.
   - Rule: windows that must show rain, snow or VFX outside use SmoothPlastic with Transparency 0.85+ and Reflectance 0.1–0.15.
+
+## City Legends 1:1 Yangon: "the old map vibe was better, this feels dirty" (16 Nov 2026)
+- **What felt bad:** the owner said "this vibe feels dirty and the trees are so ugly and unattractive. the grass patches look bad too, the first version grass looked better", and also "still no inya lake border walls (i thought u researched them....???".
+- **Cause:**
+  - We chased photo-real grime: dirt, earth and gravel patches, and stained textures. We put the new low-poly trees in place without comparing them to the old kit.
+  - The researched lake edge (the Pyay Road bund wall and railing) was never put in any agent's brief, so nobody built it.
+- **Fix:** go back to the clean grass of the first version; use trees that look at least as good as the old map's kit; build the Inya bund.
+- **Rule:**
+  1. Real-world accuracy means real shapes, sizes and places, but the look stays clean and attractive. Never add grime or dirt that makes the game look dirty.
+  2. Before replacing any look (trees, grass, materials) everywhere, show a side by side with the current one and keep the better one.
+  3. Every researched feature must appear in a build brief, with a check that it got built.
