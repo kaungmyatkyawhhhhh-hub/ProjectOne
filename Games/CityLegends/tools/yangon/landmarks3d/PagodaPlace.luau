@@ -9,9 +9,19 @@
 local P = {}
 
 P.LOOK = {
-	GLD = { "Metal", { 226, 222, 245 }, 0, 0, false, true, "YgnGoldLeaf" },
-	GWF = { "Metal", { 226, 222, 245 }, 0.45, 0, true, false, "YgnGoldLeaf" },
-	GWR = { "Metal", { 226, 222, 245 }, 0, 0, true, true, "YgnGoldLeaf" },
+	GLD = { "Metal", { 255, 187, 84 }, 0, 0, false, true, "" },   -- v2 look pass: plain Metal (the leaf texture read blotchy)
+	GWF = { "Metal", { 255, 187, 84 }, 0.45, 0, true, false, "" },
+	GWR = { "Metal", { 255, 187, 84 }, 0, 0, true, true, "" },
+	GLT = { "Foil", { 230, 160, 50 }, 0, 0.1, false, true, "" },          -- gilded trim / frames (reads as crinkled leaf)
+	GLC = { "Metal", { 255, 206, 130 }, 0, 0, false, false, "YgnGoldPlate" }, -- embossed gold panel tiles (corridor)
+	SG5 = { "SmoothPlastic", { 246, 244, 236 }, 0, 0, false, true, "" },
+	SG6 = { "SmoothPlastic", { 226, 112, 34 }, 0, 0, false, true, "" },
+	AW1 = { "SmoothPlastic", { 44, 92, 168 }, 0, 0, true, true, "" },
+	AW2 = { "SmoothPlastic", { 40, 120, 84 }, 0, 0, true, true, "" },
+	AW3 = { "SmoothPlastic", { 190, 52, 44 }, 0, 0, true, true, "" },
+	SHT = { "Metal", { 168, 168, 166 }, 0, 0, false, true, "YgnCorrugatedZinc" },
+	WD1 = { "Wood", { 176, 92, 40 }, 0, 0.05, false, false, "" },
+	WD2 = { "Wood", { 146, 72, 30 }, 0, 0.05, false, false, "" },
 	WHT = { "SmoothPlastic", { 255, 255, 250 }, 0, 0, false, true, "" },
 	CRM = { "SmoothPlastic", { 236, 219, 148 }, 0, 0, false, true, "" },
 	MAR = { "SmoothPlastic", { 236, 234, 228 }, 0, 0.03, false, false, "" },

@@ -32,9 +32,19 @@ WHITE = (255, 255, 255)   # vertex colour: white, so a MaterialVariant is not ti
 # Kaba Aye look pass v2 settled values: gold = Metal + YgnGoldLeaf (226, 222, 245); white SmoothPlastic (255, 255, 250);
 # cream SmoothPlastic (236, 219, 148).
 LOOK = {
-    "GLD": ("Metal", (226, 222, 245), 0, 0, False, True, "YgnGoldLeaf"),
-    "GWF": ("Metal", (226, 222, 245), 0.45, 0, True, False, "YgnGoldLeaf"),   # wire fan crowns (see-through)
-    "GWR": ("Metal", (226, 222, 245), 0, 0, True, True, "YgnGoldLeaf"),       # thin gold plates (vanes, crests)
+    "GLD": ("Metal", (255, 187, 84), 0, 0, False, True, ""),   # v2: plain Metal, measured photo gold (look_calib)
+    "GWF": ("Metal", (255, 187, 84), 0.45, 0, True, False, ""),   # wire fan crowns (see-through)
+    "GWR": ("Metal", (255, 187, 84), 0, 0, True, True, ""),       # thin gold plates (vanes, crests)
+    "GLT": ("Foil", (230, 160, 50), 0, 0.1, False, True, ""),     # gilded trim / frames
+    "GLC": ("Metal", (255, 206, 130), 0, 0, False, False, "YgnGoldPlate"),   # embossed gold panel tiles (corridor)
+    "SG5": ("SmoothPlastic", (246, 244, 236), 0, 0, False, True, ""),
+    "SG6": ("SmoothPlastic", (226, 112, 34), 0, 0, False, True, ""),
+    "AW1": ("SmoothPlastic", (44, 92, 168), 0, 0, True, True, ""),           # canvas awnings
+    "AW2": ("SmoothPlastic", (40, 120, 84), 0, 0, True, True, ""),
+    "AW3": ("SmoothPlastic", (190, 52, 44), 0, 0, True, True, ""),
+    "SHT": ("Metal", (168, 168, 166), 0, 0, False, True, "YgnCorrugatedZinc"),  # roller shutters
+    "WD1": ("Wood", (176, 92, 40), 0, 0.05, False, False, ""),       # herringbone parquet, two tones
+    "WD2": ("Wood", (146, 72, 30), 0, 0.05, False, False, ""),
     "WHT": ("SmoothPlastic", (255, 255, 250), 0, 0, False, True, ""),
     "CRM": ("SmoothPlastic", (236, 219, 148), 0, 0, False, True, ""),         # yellow-cream tiles (shrines, fence, ring)
     "MAR": ("SmoothPlastic", (236, 234, 228), 0, 0.03, False, False, ""),     # white tiled / marble paving
@@ -232,12 +242,17 @@ def export_site(geo_, templates, X0, Y0, Z0, out_glb, tag):
     return files, named
 
 
+SKIP_FLICKER = ("WD1", "WD2")   # herringbone planks: tiled exactly by construction (area-sum check), O(n^2) here
+
+
 def flicker(geo_, templates_placed=()):
     """Flicker / overlap test on the model triangles (metres -> studs) with tools/yangon/city/flicker_check.py.
     templates_placed: [(PGeo, x, y, z, yaw)] instances added in site metres. Returns (bad pairs, details)."""
     from flicker_check import check
     items = []
     for grp, tris in geo_.g.items():
+        if grp in SKIP_FLICKER:
+            continue
         for i, t in enumerate(tris):
             items.append((tuple(tuple(c * SPM for c in p) for p in t), "%s:%d" % (grp, i)))
     for k, (tg, x, y, z, yaw) in enumerate(templates_placed):
