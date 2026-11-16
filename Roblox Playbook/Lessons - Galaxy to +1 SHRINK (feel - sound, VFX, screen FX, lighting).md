@@ -549,3 +549,11 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 ## 2026-11-17 City Legends: a QA check that only counts what you kept hides what you dropped
 - **What happened:** the road plan overlay said "0 missing OSM roads", but the owner compared one junction with openstreetmap.org and found every slip road (`*_link`) missing. roads05 drops links on purpose, and the check only counted the roads roads05 keeps.
 - **Rule:** a "missing" check must compare against the full source (every drivable OSM way), never against your own filtered list. Show close-up crops of big junctions next to the source map before asking for approval.
+
+## 2026-11-17 City Legends: a QA check must copy the builder's own rule, not approximate it
+- **What happened:** the roads05 junction QA said 25 "mouth_edge" failures; a Python copy of YangonRoads' real mouth edge walk found 1,621 joins the Studio builder would fail. The QA tested "does the edge touch the bigger road's polygon", but the builder walks only ONE road's edge, so every junction where the bigger road itself ends at the node (L corners, T junctions on a road split in two pieces) failed in Studio and passed in QA.
+- **Rule:** before trusting a pre-Studio check, port the exact rule the builder runs (same inputs, same edge, same limits) and confirm it against one Studio build. Fix the data so that check is 0 (chain pieces meeting end to end into one road), not the check.
+
+## 2026-11-17 City Legends: a slow script is usually one global operation inside a loop
+- **What happened:** roads05_paint ran over 30 min on 12 districts and was killed. Each dashed lane line was cut by a union of every junction box in the city, rebuilt for each dash. An STRtree of the box pieces (cut each line only by the pieces it touches) brought it to 73 s.
+- **Rule:** when a job gets slow as the map grows, look for a whole-map geometry (union, difference, scan of all samples) inside a per-item loop; index it once and query locally.

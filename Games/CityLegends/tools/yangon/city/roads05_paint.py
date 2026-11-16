@@ -118,6 +118,24 @@ def polys_of(g):
     return []
 
 
+class Clip:
+    """a big clip area as an STRtree of its pieces: a line is cut only by the pieces it touches (17 Nov: one city-wide
+    union per dash made paint run for hours on 12 districts)"""
+    def __init__(self, *gs):
+        self.polys = [p for g in gs for p in (g.polys if isinstance(g, Clip) else polys_of(g))]
+        self.tree = STRtree(self.polys) if self.polys else None
+        self.is_empty = not self.polys
+
+    def local(self, g):
+        if self.tree is None:
+            return Polygon()
+        hit = [self.polys[int(j)] for j in self.tree.query(g)]
+        return unary_union(hit) if hit else Polygon()
+
+    def intersects(self, g):
+        return self.tree is not None and any(self.polys[int(j)].intersects(g) for j in self.tree.query(g))
+
+
 class Paint:
     def __init__(self):
         self.items = []
@@ -137,7 +155,7 @@ class Paint:
     def line(self, kind, ln, width, what, road=None, clip=None, deck=False):
         for l in lines_of(ln):
             if clip is not None and not clip.is_empty:
-                l2 = l.difference(clip)
+                l2 = l.difference(clip.local(l) if isinstance(clip, Clip) else clip)
             else:
                 l2 = l
             for x in lines_of(l2):
@@ -183,6 +201,9 @@ def build(data, signals=None):
             if not x.is_empty and x.area > 20:
                 boxes.append(x.convex_hull)
     box_u = unary_union(boxes).buffer(BOX_GROW) if boxes else Polygon()
+    main_names = [r['name'] for r in main]
+    main_tree = STRtree([cw[n] for n in main_names])
+    sxz = {r['name']: np.array([(q[0], q[2]) for q in r['s']]) for r in main}
     ring_disks = unary_union([Point(g['c'][0], g['c'][2]).buffer(g['r_out'] + 0.5, 96) for g in rings]) if rings else Polygon()
     no_paint = box_u.union(ring_disks)
     # zebras / stop lines per main x main box
@@ -190,14 +211,18 @@ def build(data, signals=None):
     sig = [Point(x, z) for x, z in (signals or [])]
     for bx in polys_of(box_u):
         signalled = any(bx.distance(p) < 60 for p in sig)
-        for r in main:
+        for j in main_tree.query(bx):
+            r = main[int(j)]
             g = cw[r['name']]
             if not g.intersects(bx):
                 continue
             s = r['s']
             n = len(s)
             c = cut.get(r['name'], set())
-            inb = [bx.contains(Point(q[0], q[2])) or bx.distance(Point(q[0], q[2])) < 0.5 for q in s]
+            x0, z0, x1, z1 = bx.bounds
+            P_ = sxz[r['name']]
+            near = (P_[:, 0] > x0 - 1) & (P_[:, 0] < x1 + 1) & (P_[:, 1] > z0 - 1) & (P_[:, 1] < z1 + 1)
+            inb = [bool(near[i]) and (bx.contains(Point(q[0], q[2])) or bx.distance(Point(q[0], q[2])) < 0.5) for i, q in enumerate(s)]
             for a, b in runs(inb):
                 for side, k0, step in ((-1, a - 1, -1), (1, b + 1, 1)):
                     # walk out of the box along the road; the arm must go on 30 studs
@@ -264,7 +289,7 @@ def build(data, signals=None):
                             P.poly('LW', Polygon([a0, a1, b1, b0]), 'stop', r['name'])
                             zebra_zone.append(Polygon([a0 - D * 0.5, a1 - D * 0.5, b1 + D * 6, b0 + D * 6]).buffer(0.5))
     zz = unary_union([z for z in zebra_zone if z is not None]) if zebra_zone else Polygon()
-    clip_all = no_paint.union(zz)
+    clip_all = Clip(no_paint, zz)
     # mouths of smaller roads on each main road (lane lines break there)
     for r in main:
         s = r['s']
@@ -281,6 +306,7 @@ def build(data, signals=None):
             if not x.is_empty and x.area > 4:
                 mouths.append(cw[o['name']].buffer(4))
         mouth_u = unary_union(mouths) if mouths else Polygon()
+        clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
         deck = False
         for a, b in runs(built):
             if b - a < 2:
@@ -326,7 +352,7 @@ def build(data, signals=None):
                             continue
                         ln = offset_line(s, off, range(a + v0, a + v1 + 1))
                         for d in dashes(ln, DASH_ON, DASH_OFF):
-                            P.line('LW', d, LINE_W, 'lane', r['name'], clip_all.union(mouth_u))
+                            P.line('LW', d, LINE_W, 'lane', r['name'], clip_road)
     # roundabouts
     for g in rings:
         C = np.array([g['c'][0], g['c'][2]])
@@ -459,7 +485,7 @@ def arrows(P, r, t, clip):
                 continue
             pts = [c + rgt * x * 1.0 + D * y * 1.0 for x, y in shape]
             pg = Polygon(pts).buffer(0)
-            if clip is not None and pg.intersects(clip):
+            if clip is not None and (clip.intersects(pg) if isinstance(clip, Clip) else pg.intersects(clip)):
                 continue
             P.poly('LW', pg, 'arrow', r['name'])
 

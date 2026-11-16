@@ -1,50 +1,55 @@
-# roads05 handover (17 Nov 2026, after commit 89441f83)
+# roads05 handover (17 Nov 2026, second pass)
 
-Owner rule: NO full rebuild / swap in Studio until the owner approves the overlays. Studio is clean (no Roads05_* modules,
-no scratch folders), saved v1155, lock released. Old P1-P3 road meshes still in place (119 Cell_ meshes, 36,844 Collide).
+Owner rule: NO full rebuild / swap in Studio until the owner approves the overlays. Studio is clean (no Roads05_* data
+modules, no scratch folder, YangonScraps removed), saved v1156 ("Saved new changes" 21:01Z in the Studio log), lock
+released. ClaudeTools.YangonRoads in Studio = the repo file with MOUTH_SNAP (128,848 chars, checksum 1317544619).
 
-## State
-- Network: `build/city_1to1/roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12/` (call it NET). Made by
-  `YANGON_SCALE=1to1 python roads05.py P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12` (~10 min; slip roads kept, MERGE_TOL),
-  then `roads05_fix.py NET` (~30 s). `roads_unfixed.json` = before the fix (copy it back over roads.json before
-  re-running the fix). Run everything from `tools/yangon/city` with `YANGON_SCALE=1to1`.
-- `roads05_paint.py NET` on the fixed data was KILLED (exit 143, after >30 min; no paint.json exists for NET now).
-  Run it again in the background (log `NET/paint.log`); it is slow on 12 districts. Paint QA = `roads05_qa.py NET` (with paint).
-- Junction QA without paint (7 min): `python roads05_qa.py NET NET/roads.json <empty paint json {"items":[]}>`.
-  Last counts (spots in `NET/qa_junctions.json`): mouth_short 81, mouth_over 35, mouth_edge 25, kerb_cross 522,
-  median_cross 3, zero_width 0, overlap 12, rank_dup 0. Faster loop: run the QA on a subset dir (see roads05_subset.py)
-  or add a bbox filter.
-- Overlays: `road_overlay.py NET P<n>` and close-ups `road_overlay.py NET "Close-up <name>" 19 lon0 lat0 lon1 lat1`
-  (University Ave x Kabar Aye 96.1513 16.8213 96.1563 16.8253; Hanthawaddy 96.1320 16.8114 96.1370 16.8154;
-  Pyay x University 96.1283 16.8245 96.1333 16.8285; Sule x Bogyoke 96.1565 16.7773 96.1615 16.7813).
+## Pipeline now (run from `tools/yangon/city`, `YANGON_SCALE=1to1`, NET = roads05_P1_..._P12)
+1. `roads05.py P1 .. P12` (~10 min) -> NET/roads.json. `roads05_fix.py <tag>` moves it to `roads_unfixed.json` the
+   first time and ALWAYS starts from `roads_unfixed.json` (re-runnable, ~40 s). It now does, in order:
+   - `roads05_chain.chain`: pieces meeting end to end at one node (ends within NODE 8) joined into one road (degree 2:
+     any turn <= 150 deg; 3+ ends: the straightest pair <= 135 deg), same kind only, one-way only with one-way in travel
+     order; corner sample mitred; ranks re-sorted (`rerank`); cut lists / deck refs / ring arms / side-lane labels renamed.
+     6,979 -> 5,621 roads (1,358 joins).
+   - `roads05_chain.continuations`: an end carrying straight on from another road's END (dual carriageway splitting into
+     two one-ways) gets startsOnEnd / endsOnEnd on both, trimmed to the host's end cross-section (169).
+   - ring arm ends run on until both edges are inside the ring polygon (21), then the old mouth run-on + medians.
+2. `roads05_mouthsim.py NET` (10 s): Python copy of YangonRoads.findMouths + buildMouth's edge walk = the list of
+   "MOUTH FAILED" the Studio builder will give (it matched Studio: 0 predicted / 0 failed in the 5 test junctions).
+   USE THIS, not qa mouth_edge (the QA's polygon test missed 1,500+ real failures: a big road ending at the same node).
+3. `roads05_paint.py` now 73 s in the background (was >30 min and got killed: a city-wide clip union per dash; now
+   `Clip` = STRtree of the pieces). Paint QA = `roads05_qa.py <tag>` (log NET/qa_paint.log).
+4. `roads05_qa.py <tag> NET/roads.json NET/paint_empty.json` (junction QA ~7 min, NET/qa_run.log), `road_overlay.py`.
 
-## Next, in the coordinator's order (target 0 or a listed reason each)
-1. Roads ending on a SIDE lane (Insein Road, Hledan Road #3, University Avenue Road on `Pyay Road #11`): YangonRoads
-   fails "an edge of X never meets Pyay Road #11". `roads05_fix.py` skips `kind == 'side'` for the road itself only;
-   decide: let the end run on to the MAIN road past the side lane (cut it through the side lane), or extend it onto
-   the side lane edge. Check YangonRoads.buildMouth (~line 753): B = the big road's edge polyline on the facing side
-   within +-60 samples of m.bigI, cut samples excluded.
-2. End-to-end pieces (e.g. Hanthawaddy Road #2 on Hanthawaddy Road): the builder makes a mouth for them. Either chain
-   them in roads05.py (`join_roads`, JOIN = 12 m, same name) or set `startsOnEnd` / `endsOnEnd` like side lanes
-   (see YangonRoads load: `startsOnEnd = r.startsOnEnd, endsOnEnd = r.endsOnEnd`). roads05_fix / QA skip ends within
-   40 studs of the other road's end (so QA hides these; the builder still fails).
-3. overlap 12 (e.g. Maha Bandula Road #2 / #5, Bogyoke Aung San Road / #2): doubled pieces of one road.
-4. kerb_cross 522: rule in roads05_qa.junction_checks (a road's kerb + pavement strip over another carriageway where
-   neither ends on the other nor crosses it). Look at a sample first; some may be parallel roads closer than their
-   pavements (OSM side by side) = real, or the rule may still be too loose.
-5. mouth_short / mouth_over / mouth_edge.
-6. Paint + paint QA.
-Then the Studio test (lock protocol: `mkdir build/studio.lock` + owner.txt): pack `YangonRoads.luau` + the subset's
-Roads05_* (`roads05_J3` dir shows how: roads within 700 of each junction), upload Model (group 33151111),
-`InsertService:LoadAsset`, `Y.load()`, `Y.stepCell({x-350,z-350,x+350,z+350}, root)` per junction (returns a log with
-"MOUTH FAILED ..."), `root:PivotTo(+400 y)`, `screen_capture` from (x, 1000, z+5) at (x, 440, z). Junctions (world):
-Univ x Kabar Aye (34426, 28891), Hanthawaddy (28251, 32193), Pyay x Univ (27066, 27859) + one more roundabout + one
-slip-road triangle. Pass = 0 failed joins, 0 grass scraps, 0 diagonal kerbs. Delete the scratch + modules, save,
-check "Saved new changes" in the newest %LOCALAPPDATA%/Roblox/logs Studio log, remove the lock.
+## Counts
+mouthsim failed joins: 1,621 -> 20 (+102 shallow merges closed by the new `YangonRoads.MOUTH_SNAP` = 30: an edge that
+ends within 30 studs of the bigger road's edge closes onto its nearest point instead of erroring). QA counts before ->
+QA before -> after: mouth_short 81 -> 89, mouth_over 35 -> 50, mouth_edge 25 -> 27, kerb_cross 522 -> 552, median_cross 3 -> 3, zero_width 0, overlap 12 -> 10, rank_dup 0 (NOT improved: the QA rules are approximations, see Next 5; the paint QA was still running at commit time, log NET/qa_paint.log).
 
-## Also kept for the P1-P3 rebuild later
-- `roads05_subset.py NET S123 P1 P2 P3` -> Studio subset; `roads05_bake.py` clips parts to subset.json boxes.
-- 9 cells of OLD-network pages in `build/city_1to1/roads05_S123/pages` are STALE now (network changed): re-export.
-- Page export: ~600 tokens a page in a subagent's context; ~85 pages per subagent; the gather script idea: scan the
-  session tool-results folder for files whose head has `@Q<cell>_<kk>@` newer than the export start.
-- Studio HttpService to localhost is blocked ("not in the Assistant HTTP allowlist"): pages must go through MCP results.
+## Studio test J5 (`build/city_1to1/roads05_J5`; asset 133014134133489 = Roads + YangonRoads + 13 data modules)
+All 5: 0 MOUTH FAILED. Shots in vault `City Legends/2026-11-17 roads05 Studio test - *.jpg` (roads lifted +400).
+- University Ave x Kabar Aye: clean (no diagonal kerb, no scrap). PASS.
+- Hanthawaddy Roundabout: clean; tiny kerb points where arms meet the ring kerb. PASS (minor).
+- Pyay Road x University Ave: FAIL - a small hole in the junction slab at its centre (~27066, 27859: ground shows
+  through) and thin seams between slabs west of the box.
+- Roundabout 4 (35997, 45118): FAIL - two loose kerb pieces on the ring carriageway (NW, where the west arms meet it)
+  and dark seams on the west arm.
+- Slip triangle (43471, 29324, primary_link Lane #15-#18): FAIL - the four slip roads stop ~15-20 studs short of the
+  main road (gaps).
+NOTE: stepCell's mendCutEnds / verge write TERRAIN at ground level in the main place (the green patches in the slip
+shot are ground terrain, not parts). Earlier passes did the same; decide before the next test whether that is wanted.
+
+## Next (in order)
+1. Slip triangle gaps: `roads05_view.py <tag> slip 43471 29324 400 --labels`; probably a continuation trim / flag on an
+   end that has no host end there, or noSlab without a mouth. mouthsim must stay 0 there.
+2. Roundabout 4 loose kerbs: which road's Kerb parts lie on the ring (YangonRoads.sideZone ring rule; maybe the ring
+   run-on in roads05_fix should stop at RING_V - 1, not deeper).
+3. Pyay x Univ hole: run that junction's mouths with full logging (`M.box = nil` prints each mouth's area of outline).
+4. The 20 remaining failed joins (`NET/mouthsim.json` failed), all main roads: dual-carriageway pieces lying on each
+   other (Pyay Road #12 on #4 / #6, May Ni Gone Overpass on Pyay Road #2 - also the QA "overlap" doubled roads: drop
+   the piece lying inside the other), parallel merges further than 30 studs (Bahan Road #2, Ahlone Road #2 / #3,
+   U Htaung Bo Road #3), Y forks of mains (Bogyoke Aung San Road #2 / Lower Pazundaung Road on Upper Pazundaung #3).
+5. kerb_cross / mouth_short / mouth_over: re-read with the new QA counts; make QA's mouth_edge call mouthsim.
+6. Studio test again (J5 recipe above: subset roads within 800 of each junction, `pack_tools.py`, PATCH the asset as
+   model/x-rbxm, LoadAsset, data into YangonData, `Y.load()` then `Y.stepCell(box, folder)` per junction in
+   task.spawn, lift +400, screen_capture from 320 above, then delete everything, save, check the log, unlock).

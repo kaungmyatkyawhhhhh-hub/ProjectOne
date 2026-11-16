@@ -28,7 +28,14 @@ CHUNK = 185000
 def main():
     tag = sys.argv[1]
     D = os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag)
-    data = json.load(open(os.path.join(D, 'roads.json'), encoding='utf-8'))
+    raw = os.path.join(D, 'roads_unfixed.json')  # roads05.py's own output: every fix starts from it (re-runnable)
+    if not os.path.exists(raw):
+        os.replace(os.path.join(D, 'roads.json'), raw)
+    data = json.load(open(raw, encoding='utf-8'))
+    import roads05_chain
+    chained = roads05_chain.chain(data)
+    chained['continuations'] = roads05_chain.continuations(data)
+    print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}
     names = [r['name'] for r in roads]
@@ -37,7 +44,7 @@ def main():
     rank = {r['name']: r['rank'] for r in roads}
     rings = [Point(g['c'][0], g['c'][2]).buffer(g['r_out'] + 1, 64) for g in data['roundabouts']]
     ringU = unary_union(rings) if rings else Polygon()
-    st = dict(ends_extended=0, extend_studs=0.0, ends_unreached=[], median_samples_cleared=0)
+    st = dict(chain=chained, ends_extended=0, extend_studs=0.0, ends_unreached=[], median_samples_cleared=0)
     # 1. mouths
     for ri, r in enumerate(roads):
         s = r['s']
@@ -47,8 +54,47 @@ def main():
         for k in (0, -1):
             if (k == 0 and 0 in cut) or (k == -1 and len(s) - 1 in cut):
                 continue
+            if r.get('startsOnEnd' if k == 0 else 'endsOnEnd'):
+                continue  # carries on from another road's end: no mouth
             q = s[k]
             p = Point(q[0], q[2])
+            # a ring arm: both its edges must end inside the ring's outer polygon (buildMouth walks them to it),
+            # an arm arriving off-centre is run on straight (the part inside R_OUT - 14 is cut by the builder anyway)
+            for g in data['roundabouts']:
+                cx, cz, ro = g['c'][0], g['c'][2], g['r_out']
+                if math.hypot(q[0] - cx, q[2] - cz) >= ro:
+                    continue
+                d = np.array([q[3], q[4]]) * (1 if k == -1 else -1)
+                d = d / (np.linalg.norm(d) or 1)
+                right = np.array([-d[1], d[0]])
+                rv = ro / math.cos(math.pi / 96) - 1.5
+                t = 0.0
+                while t < 80:
+                    c = np.array([q[0], q[2]]) + d * t
+                    if all(math.hypot(*(c + right * sd * h - np.array([cx, cz]))) < rv for sd, h in ((-1, max(q[6], q[7])), (1, max(q[6], q[7])))):
+                        break
+                    t += 2.0
+                if t > 0 and t < 80:
+                    add = []
+                    for i in range(1, int(math.ceil(t / STEP)) + 1):
+                        tt = min(t, i * STEP)
+                        nq = list(q)
+                        nq[0], nq[2] = round(q[0] + d[0] * tt, 2), round(q[2] + d[1] * tt, 2)
+                        add.append(nq)
+                    if k == -1:
+                        s.extend(add)
+                    else:
+                        for nq in add:
+                            s.insert(0, nq)
+                        if r['name'] in cutd:
+                            cutd[r['name']] = set(i + len(add) for i in cutd[r['name']])
+                            data['cut'][r['name']] = sorted(cutd[r['name']])
+                        for dk in data['decks']:
+                            if dk['of'] == r['name']:
+                                dk['from'] += len(add)
+                                dk['to'] += len(add)
+                    st['ring_arms_extended'] = st.get('ring_arms_extended', 0) + 1
+                break
             if ringU.distance(p) < 2:
                 continue
             big = None

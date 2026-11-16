@@ -34,6 +34,7 @@ M.C = Vector3.new(29072, 47.27, 1172.8) -- roundabout centre, at the ring's road
 M.R_IN, M.R_OUT = 60, 108 -- island radius, the ring's outer radius
 M.RING_V = 108.06 -- the outer polygon's corners (its sides then pass 108 at their middle: nothing of an arm is closer than 108)
 M.N = 96 -- sides of the ring
+M.MOUTH_SNAP = 30 -- a mouth edge that ends this near the bigger road's edge (a shallow merge) is closed onto it
 M.R_CUT = 94 -- samples nearer the centre than this are cut (not built, not seen by other roads)
 M.WALK, M.KERB_W, M.CURB_UP, M.SLAB = 10, 0.9, 0.5, 2 -- as in Roads.luau
 M.CORRIDOR = 70 -- flyover corridor: this far either side of the deck's centre line
@@ -788,6 +789,22 @@ function M.buildMouth(m, folder: Instance)
 		while true do
 			local j = i - m.step
 			if j < 1 or j > o.n then
+				-- (17 Nov, roads05: a slip road or a flare meeting the bigger road at a shallow angle keeps one edge
+				-- just outside the bigger road's edge to its end: close the mouth from that end to the nearest point
+				-- of the edge instead of failing, when it is near)
+				local p = edge[i]
+				local best, bx, bat = M.MOUTH_SNAP, nil, nil
+				for jb = 1, (if closed then nB else nB - 1) do
+					local a, b = B[jb], B[jb % nB + 1]
+					local d, t = segDist(p.X, p.Z, a.X, a.Z, b.X, b.Z)
+					if d < best then
+						best, bx, bat = d, a:Lerp(b, t), jb + t
+					end
+				end
+				if bx and bat then
+					m.snapped = (m.snapped or 0) + 1
+					return pts, bx, bat
+				end
 				error("mouth: an edge of " .. m.road .. " never meets " .. m.on)
 			end
 			local X, at = firstHit(edge[i], edge[j], B, closed)
