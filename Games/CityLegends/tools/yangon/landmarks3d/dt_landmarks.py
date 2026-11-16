@@ -1415,16 +1415,27 @@ def bogyoke_market():
         DOOR["spec"] = [(*P(uu, v0 + va * S), 3.0, 3.4, sill) for va in aisles for uu in (u0, u1)]
         ring_walls(sc, hall, hb, lambda i, W: fn(i, W), 70 + k)
         DOOR["spec"] = None
-        n_st = max(1, int(round(sill / 0.16)))
+        # steps up to each door from the ground at that door, all inside the market's 4 m setback (3.6 m of run: the
+        # first version's 0.4 m treads ran 8 m out across the pavement into the road)
+        fy = hb + sill * S
         for va in aisles:
             for uu, sg in ((u0, -1), (u1, 1)):
                 fa, fb = P(uu, v0 + (va - 1.5) * S), P(uu, v0 + (va + 1.5) * S)
-                steps(sc, fa, fb, (ax[0] * sg, ax[1] * sg), hb, n=n_st, rise=sill / n_st, away=Polygon(hall).centroid.coords[0])
+                out_ = (ax[0] * sg, ax[1] * sg)
+                foot = Polygon([fa, fb, (fb[0] + out_[0] * 3.6 * S, fb[1] + out_[1] * 3.6 * S),
+                                (fa[0] + out_[0] * 3.6 * S, fa[1] + out_[1] * 3.6 * S)])
+                gd = ground_of(foot)[1]
+                h_m = max(0.16, (fy - gd) / S)
+                n_st = max(1, int(round(h_m / 0.16)))
+                run = min(0.4, 3.6 / n_st)
+                y0s = fy - h_m * S
+                steps(sc, fa, fb, out_, y0s, n=n_st, rise=h_m / n_st, run=run, away=Polygon(hall).centroid.coords[0])
                 for j in range(n_st):     # step collision: one box per tread
-                    d0 = 0.4 * (n_st - j) - 0.2
+                    d0 = run * (n_st - j) - run / 2
                     q = P(uu + sg * d0 * S, v0 + va * S)
-                    boxes.append([q[0], hb - 0.5 + (sill / n_st * (j + 1) * S + 0.5) / 2, q[1], 0.4 * S,
-                                  sill / n_st * (j + 1) * S + 0.5, 3.0 * S, -math.atan2(ax[1], ax[0])])
+                    hj = h_m / n_st * (j + 1) * S
+                    boxes.append([q[0], y0s - 0.5 + (hj + 0.5) / 2, q[1], run * S, hj + 0.5, 3.0 * S,
+                                  -math.atan2(ax[1], ax[0])])
         yH = hb + H * S
         top = max(top, yH)
         hc = Polygon(hall).centroid
