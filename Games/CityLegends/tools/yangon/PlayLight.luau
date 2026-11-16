@@ -96,7 +96,8 @@ function M.apply(hour, over)
 	k.ambient = k.ambient:Lerp(Color3.new(0, 0, 0), REAL.shade)
 	k.outdoor = k.outdoor:Lerp(Color3.new(0, 0, 0), REAL.shade * 0.6)
 	-- Yangon's daylight (client/DayCycle.lua YANGON_DAY, keep in step)
-	local mid = math.clamp(math.min((hour - 6.4) / 1.6, (17.6 - hour) / 1.1), 0, 1)
+	-- owner 2026-11-16: Riviera (Monaco) light in Yangon too (DayCycle YANGON_LOOK = false), so no Yangon blend
+	local mid = 0 * math.clamp(math.min((hour - 6.4) / 1.6, (17.6 - hour) / 1.1), 0, 1)
 	local YANGON_DAY = {
 		outdoor = rgb(172, 164, 150), ambient = rgb(126, 122, 116), atmo = rgb(220, 222, 215),
 		decay = rgb(210, 200, 180), tint = rgb(255, 250, 242), shiftTop = rgb(255, 246, 230),
@@ -150,7 +151,7 @@ function M.apply(hour, over)
 		end
 	end
 	local name = if hour >= 16.9 and hour < 19.2 then "Sunset" elseif hour >= 5 and hour < 6.8 then "Dusk" else "Day"
-	if name == "Day" and RS:FindFirstChild("RivieraSkies") and RS.RivieraSkies:FindFirstChild("YangonDay") then
+	if false and name == "Day" and RS:FindFirstChild("RivieraSkies") and RS.RivieraSkies:FindFirstChild("YangonDay") then
 		name = "YangonDay" -- (as DayCycle in Yangon)
 	end
 	local src = RS:FindFirstChild("RivieraSkies") and RS.RivieraSkies:FindFirstChild(name)

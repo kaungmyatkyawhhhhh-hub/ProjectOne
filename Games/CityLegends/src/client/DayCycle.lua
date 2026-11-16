@@ -145,6 +145,7 @@ local YANGON_DAY = table.freeze({
 	shiftTop = Color3.fromRGB(255, 246, 230),
 })
 local YANGON_SKY_FILL = 0.3
+local YANGON_LOOK = false -- owner, 2026-11-16: Riviera (Monaco) light in Yangon too; true brings the warm hazy look back
 -- (2026-11-16, the street survey: Yangon's midday sky is pale and hazy, zenith about 150, 185, 220 with a near-white band
 -- at the horizon, not deep blue) more haze over the day, less glare
 local YANGON_DAY_N = table.freeze({ haze = 1.7, density = 0.32, glare = 0.05 })
@@ -338,7 +339,8 @@ function DayCycle.start()
 		local skyName = if w >= 0.5 then (if look.Sky ~= "Auto" then look.Sky else rivieraSky(hour)) else "base"
 		-- (2026-11-16, the street survey) Yangon's day sky is pale and hazy, not the Riviera's deep blue: its own box
 		-- (tools/yangon/city/yangon_sky.py, RivieraSkies.YangonDay) wherever the camera is in Yangon
-		if skyName == "Day" and cam and Config.isYangonAt(cam.CFrame.Position) and skies and skies:FindFirstChild("YangonDay") then
+		-- (owner, 2026-11-16: "so foggy i felt like monaco lighting was better") Yangon uses the Riviera light: YANGON_LOOK off
+		if YANGON_LOOK and skyName == "Day" and cam and Config.isYangonAt(cam.CFrame.Position) and skies and skies:FindFirstChild("YangonDay") then
 			skyName = "YangonDay"
 		end
 		setSky(skyName)
@@ -372,7 +374,7 @@ function DayCycle.start()
 		-- Yangon's daylight (owner, 2026-11-16: "Warm the Yangon daylight"): the Riviera keys made every white
 		-- render pale blue there (sky fill and a blue haze); real Yangon is warm and hazy, whites neutral in sun
 		-- and grey in shade (tools/yangon/Swatches.luau + PlayLight.luau measured it)
-		local wy = if cam and Config.isYangonAt(cam.CFrame.Position) then 1 else 0
+		local wy = if YANGON_LOOK and cam and Config.isYangonAt(cam.CFrame.Position) then 1 else 0
 		local mid = math.clamp(math.min((hour - 6.4) / 1.6, (17.6 - hour) / 1.1), 0, 1) * wy
 		if mid > 0 then
 			for key, v in YANGON_DAY do
