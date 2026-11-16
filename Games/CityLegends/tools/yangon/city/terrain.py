@@ -88,6 +88,10 @@ LATER_BATCH_BLEND.update({t: tuple(u) for t, u in getattr(geo, 'PILOT_SEAMS', {}
 PILOT_BUNDS = {'P2': [dict(line=[(28324.1, 24897.6), (28465.8, 23745.3), (28656.6, 22894.3)], top_m=2.0, edge_m=0.5,
                            walk_m=3.0, grass_m=18.0, deep_m=2.0)]}
 PILOT_PADS = {'P2': [(34625.66, 17793.07, 157.5, 77.6, 60.0)]}
+# (2026-11-16, step 6) P3: Sule's court (its model's PAV floor starts at Y 18.47: the terrain 0.27 under it, replacing
+# SulePlate_TEMP) and Botataung's platform (its blocks start at Y 17.81; replacing BotataungPlate_TEMP)
+PILOT_PADS['P3'] = [(35999.0, 45119.0, 150.0, 18.2, 40.0), (40188.0, 47050.0, 200.0, 17.55, 40.0),
+                    (40188.0, 47350.0, 200.0, 17.55, 40.0)]
 QUAY_W = 10.0
 SHORE_MUD = 90.0           # (1:1) studs from a lake's shore with a mud bed (sand beyond)
 FAR_SHORE = 120.0          # studs of low far shore where a river runs out of the region into the void

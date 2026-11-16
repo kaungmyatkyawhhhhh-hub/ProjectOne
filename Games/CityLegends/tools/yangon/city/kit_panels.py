@@ -560,7 +560,7 @@ def p_colonial(W, bays, floors, role, shop, age):
             if K.R.random() < 0.55:
                 K.awning(x + 0.2, x + BAY - 0.2, 3.5, 0.0, K.R.uniform(0.8, 1.6), K.wpick({"KAW": 0.35, "KAR": 0.4, "KRF": 0.25}))
             if K.R.random() < 0.6:
-                sw = K.R.uniform(1.2, BAY - 0.5)
+                sw = K.R.uniform(1.1, BAY - 0.95)
                 K.sign(x + (BAY - sw) / 2, 3.62, sw, K.R.uniform(0.45, 0.6), 0.0)
         elif front:
             col_arch(x + BAY / 2 - 0.6, 0.15, 1.2, 2.6, holes, wall, shut, "closed")

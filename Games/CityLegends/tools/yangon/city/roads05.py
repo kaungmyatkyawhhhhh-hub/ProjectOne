@@ -798,6 +798,22 @@ class Heights:
 
 
 # ------------------------------------------------------------------------------------------------ main build
+SEC_MIN = 300.0
+
+
+def run_median(v, c, L):
+    """median over +-L/2 studs of chainage (ends: the window shrinks); keeps steps, drops short bumps"""
+    v = np.asarray(v, float)
+    if len(v) < 3 or c[-1] < L / 2:
+        return v.copy()
+    out = v.copy()
+    lo = np.searchsorted(c, c - L / 2)
+    hi = np.searchsorted(c, c + L / 2, side='right')
+    for i in range(len(v)):
+        out[i] = np.median(v[lo[i]:hi[i]])
+    return out
+
+
 def ease_steps(v, c, L=EASE_W):
     """a piecewise-constant array eased linearly over L studs at each change (centred)"""
     v = np.asarray(v, float)
@@ -851,6 +867,9 @@ def build(tags):
         lm = np.where(one, 0.0, med)
         lanes = np.maximum(np.where(one, nr, np.maximum(nl, nr)), 1)
         lw = np.where(one, Wr, np.maximum(Wl, Wr))
+        # no section shorter than SEC_MIN (OSM's lane tags change at every way: a notch each time): a running median
+        wl, wr, lm, lw = (run_median(x, c, SEC_MIN) for x in (wl, wr, lm, lw))
+        lanes = np.round(run_median(lanes.astype(float), c, SEC_MIN)).astype(int)
         wl, wr, lm, lw = (ease_steps(x, c) for x in (wl, wr, lm, lw))
         main = hw in RN.MAIN
         look = 'main' if main else ('narrow' if any(edges[s].cs['look'] == 'narrow' for s in srcs) and not main else 'street')
@@ -1297,6 +1316,58 @@ def finish(net):
 
 
 # ------------------------------------------------------------------------------------------------ 7. write
+def turn_runs(net):
+    """OSM turn:lanes -> per road [{i, dir, lanes: [kinds], offs: [studs right of the travel direction]}], the arrows
+    about 24 studs before the tagged way's end (where it reaches its junction)"""
+    roads = [r for r in net['roads'] if r['main']]
+    out = {}
+    for e in net['edges']:
+        t = e.t
+        jobs = []
+        if e.oneway and t.get('turn:lanes'):
+            jobs.append((t['turn:lanes'], e.P))
+        if not e.oneway:
+            if t.get('turn:lanes:forward'):
+                jobs.append((t['turn:lanes:forward'], e.P))
+            if t.get('turn:lanes:backward'):
+                jobs.append((t['turn:lanes:backward'], e.P[::-1]))
+        for tag, Pt in jobs:
+            if len(Pt) < 2:
+                continue
+            end = Pt[-1]
+            dend = Pt[-1] - Pt[-2]
+            dend = dend / max(np.linalg.norm(dend), 1e-9)
+            best = None
+            for r in roads:
+                d = np.linalg.norm(r['P'] - end, axis=1)
+                i = int(np.argmin(d))
+                if d[i] < 40 and (best is None or d[i] < best[0]) and not r['cut'][i]:
+                    best = (d[i], r, i)
+            if best is None:
+                continue
+            _, r, i = best
+            D = dirs(r['P'])
+            sg = 1 if float(D[i] @ dend) > 0 else -1
+            i = int(np.clip(i - sg * 3, 0, len(r['P']) - 1))
+            lanes = [x for x in tag.split('|')]
+            n = len(lanes)
+            if sg > 0:
+                half = float(r['wr'][i])
+                lm = float(r['lm'][i])
+            else:
+                half = float(r['wl'][i])
+                lm = float(r['lm'][i])
+            if r['oneway']:
+                W = float(r['wl'][i] + r['wr'][i]) / n
+                offs = [-float(r['wl'][i]) + W * (k + 0.5) for k in range(n)]
+            else:
+                W = (half - lm) / n
+                offs = [lm + W * (k + 0.5) for k in range(n)]
+            out.setdefault(id(r), []).append(dict(i=i, dir=sg, lanes=lanes, offs=[round(o, 2) for o in offs]))
+    return out
+
+
+
 def write(net):
     roads, rings, decks = net['roads'], net['rings'], net['decks']
     region = net['region']
@@ -1308,6 +1379,7 @@ def write(net):
     for r in roads:
         if r.get('sideOf') is not None:
             r['rank'] = r['sideOf']['rank'] + 0.1 + 0.1 * (r['sideSign'] > 0)
+    turns = turn_runs(net)
     for r in sorted(roads, key=lambda r: r['rank']):
         P = r['P']
         D = dirs(P)
@@ -1340,6 +1412,8 @@ def write(net):
             rec['edgeEnd'] = True
         if r['cut'].any():
             cut[name] = [int(i) for i in np.where(r['cut'])[0]]
+        if turns.get(id(r)):
+            rec['turn'] = turns[id(r)]
         out_roads.append(rec)
     out_decks = []
     for k, dk in enumerate(decks):
