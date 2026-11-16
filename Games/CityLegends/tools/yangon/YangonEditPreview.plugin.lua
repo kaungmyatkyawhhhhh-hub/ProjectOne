@@ -216,6 +216,13 @@ local function start()
 			if RunService:IsRunning() then
 				continue
 			end
+			-- Studio can replace its Camera while a Team Create place loads, destroying our folder with it: stop
+			-- (shells shown again) and let the plugin's retry loop start a fresh preview
+			if not near.Parent then
+				S.dead = true
+				S.stop()
+				break
+			end
 			acc += dt
 			local c = workspace.CurrentCamera
 			if acc > 0.3 and c and (not lastPos or (c.CFrame.Position - lastPos).Magnitude > 24) then
@@ -288,19 +295,20 @@ if thePlugin then
 		setOn(enabled)
 	end)
 	thePlugin.Unloading:Connect(function()
+		enabled = false
 		setOn(false)
 	end)
-	-- the place's data may arrive after the plugin loads (Team Create): try until it is there
+	-- the place's data may arrive long after the plugin loads (Team Create load of this place took over 10 min,
+	-- 16 Nov), and a camera swap kills a running preview: keep (re)starting it
 	task.spawn(function()
-		for _ = 1, 120 do
-			if state or not enabled then
-				if state then
-					break
-				end
-			else
+		while true do
+			if state and state.dead then
+				state = nil
+			end
+			if enabled and not state then
 				setOn(true)
 			end
-			task.wait(5)
+			task.wait(10)
 		end
 	end)
 else

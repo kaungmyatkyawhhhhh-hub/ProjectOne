@@ -597,7 +597,6 @@ Rules for every step:
 - **Still wrong:**
   - The shallow lake bed is sand, so near the shore Inya Lake reads white through the water (P1 too). A mud bed would read like the real murky lake.
   - The Kaba Aye court's Concrete renders dark blue-grey (the RivConcrete2 override).
-  - The 99 corner-band pairs.
   - P2 street detail (`street_1to1.py P2`) has not been run.
   - Maha Pasana Guha has no OSM outline; only the compound and the court are kept empty.
 
@@ -609,6 +608,7 @@ Rules for every step:
   - Floors line up with each building's ground floor to within 1.25 studs. A material picture hangs from a part's top, so each set has 4 shifted copies.
 - **Studio Edit:** a local plugin (`YangonEditPreview`) builds the same detail Play shows within 1,000 studs of the Studio camera: facades, street poles and wires, trees. Nothing it makes is saved or sent to Team Create. Tested: 72 tiles, 14,307 parts round the dense street in about 4 s, and it followed the camera.
 - **Owner step:** close Studio and open the place again (the plugin loads at start). The toolbar gets a "Yangon" tab with a "Yangon preview" button to turn it off and on.
+- **Corner flicker fixed (P2's 99 pairs -> 0; P1 keeps its 1 old coping pair):** they were not floor bands but deep recesses at building corners: condo balcony / louvre recesses and open shops (2.6 m deep) in a panel's end bay met the perpendicular wall's recess, plus the condo stripe crown and podium stripe overlapping. `kit_panels.py`: end bays get a plain window / roller shutter instead, the stripe crown top slopes 45 degrees, the podium stripe stops at its top. 87 kit pieces changed; their 174 templates were swapped in `ReplicatedStorage.YgnKit.Templates` (version 1090, saved). The data strings did not change (piece ids are stable).
 - **Detail radius in Play stays 1,000 studs.** At 1,500 the near parts doubled (14k to 30k). FPS did not change measurably on the busy PC (menu up: 8.6 with detail, 9.5 shells only, 11.2 at 1,500), so the radius was left as it is for phones.
 - **Screenshots** (`C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results/`):
   - Before (plain shells, from the light pass): aerial `mcp-Roblox_Studio-blob-1794808838325-09zd6k.jpg`.
