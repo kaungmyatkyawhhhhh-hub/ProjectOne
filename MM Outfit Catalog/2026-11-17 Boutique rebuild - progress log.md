@@ -140,3 +140,4 @@ Top tells left: blocky furniture (the penthouse rooms still use block furniture,
 ## Left after part 4
 - Lower level (media salon, games room) furniture is still block-built (rarely visited).
 - The Floor 19 Furniture meshes (café, bookcase, media console) are the owner's earlier meshes and were kept.
+- **Bed fix:** `SuiteBedServer` (lie on the bed) waits for `Floor 19 Furniture.Suite bed` and its "Mattress rest sensor". The old model is restored as an **invisible helper** (all parts Transparency 1, no collision except the sensor). The visible bed is the new mesh. Console clean.
