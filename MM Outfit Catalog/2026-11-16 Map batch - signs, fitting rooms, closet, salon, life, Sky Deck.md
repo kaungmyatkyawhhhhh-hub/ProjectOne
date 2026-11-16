@@ -78,3 +78,22 @@ Scripts can't change `Lighting.Technology`. In Studio: Explorer → Lighting →
 - Elevator up and down; booth → style page.
 - 0 console errors.
 - **Not tested:** phone layout of the new pieces (fitting room bar, publish card); real multiplayer (hearts from other players, curtain seen by others).
+
+## Phone check (Galaxy A06, 705x338): "cant really see anything cuz its squished"
+
+| Problem on phone | Fix |
+|---|---|
+| Styles / Search cards cut off (count pill, Try / Buy hidden) | Those pages drop the empty footer strip; on short screens a card fills the panel height (search cards clear the 16 px edge fade) |
+| Style names cut to "Y2K &..." | Names wrap to 2 lines |
+| First-visit hint covered Featured / Random | On phones it sits top-left |
+| Viewer "Drag to rotate" hint under Try it on | Raised above the button row on phones |
+| Viewer title "Y2k Pop" | Words with digits keep their case ("Y2K Pop") |
+| Cheer button in the middle of the screen | On phones: bottom-right, above the jump button |
+| Fitting room bar too wide; mirror cut the shins | Slimmer bar on phones; mirror aims lower and wider |
+
+![[Screenshots/2026-11-16 phone BEFORE styles squished.jpg]]
+![[Screenshots/2026-11-16 phone AFTER styles.jpg]]
+![[Screenshots/2026-11-16 phone BEFORE search squished.jpg]]
+![[Screenshots/2026-11-16 phone AFTER search.jpg]]
+![[Screenshots/2026-11-16 phone AFTER viewer Y2K title and hint.jpg]]
+![[Screenshots/2026-11-16 phone AFTER fitting room mirror.jpg]]
