@@ -166,7 +166,7 @@ Already researched elsewhere (not repeated here):
 - **Spaces:** **Hall.** About 80 × 30 m (est.). Open steel portal frames, a corrugated roof with skylight strips, and polished tile floor. A glass-mosaic plinth runs the length of the Buddha. Side walls have rows of red/gold/teal niches. White columns with golden shrine rows. Downloaded: 6 details (plinth, niche wall, hall floor).
 
 ### 7. Ngahtatgyi seated Buddha (A)
-- **Where:** lon 96.1488, lat 16.8072, across the road from Chaukhtatgyi. Inside the map. Note: "Kyauk Htat Gyi" in the brief = Chaukhtatgyi; Ngahtatgyi is its neighbour.
+- **Where:** lon 96.16256, lat 16.80845 (OSM way/314121257, checked on Esri z19 16 Nov; was 96.1488, 16.8072), across Shwegondaing Road from Chaukhtatgyi. Inside the map. Note: "Kyauk Htat Gyi" in the brief = Chaukhtatgyi; Ngahtatgyi is its neighbour.
 - **Facts:** A seated Buddha about 14 m high (one source: 20 m) in royal attire, in front of a carved teak backdrop with dragon and floral carving. Sources: [renown-travel](https://renown-travel.com/burma/yangon/ngahtatgyipagoda.html), [yangongui.de](https://www.yangongui.de/?p=50499), [takeyourbackpack](https://www.takeyourbackpack.com/backpacking-in-myanmar/visit-nga-htat-gyi-buddha-temple/).
 - **Spaces:** **Hall.** A steel-truss shed (exposed grey trusses, a high skylight band) and a red polished floor. A white-faced Buddha with gold robes and a winged crown sits on a tiered gilt throne in front of a dark carved-teak backdrop about 18-20 m high (est.). There is a bell in the hall. Downloaded: 11 (`Yangon-Ngahtatgyi-12-Halle` is the best whole-hall view).
 
