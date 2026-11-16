@@ -185,19 +185,35 @@ def monogram(h, w, seed, base=(150, 190, 232)):
 
 # ---------------------------------------------------------------- garment parts
 def hoodie_front(t, rib_col, pocket_col, strings=(245, 245, 248, 255), zip_=False):
-    d = ImageDraw.Draw(t)
-    # hood folded behind the neck (back) + neck opening (front)
-    d.arc(P(98, -22, 158, 14), 0, 180, fill=tuple(int(c * .7) for c in pocket_col[:3]) + (255,), width=4 * S)
-    d.chord(P(280, -30, 360, 30), 0, 180, fill=tuple(int(c * .82) for c in pocket_col[:3]) + (255,))
-    d.arc(P(280, -30, 360, 30), 0, 180, fill=tuple(int(c * .62) for c in pocket_col[:3]) + (255,), width=S)
+    # shading overlays (not solid fills), so the hood and pocket keep the fabric's own print
+    sh = Image.new("RGBA", t.size, (0, 0, 0, 0))
+    ds = ImageDraw.Draw(sh)
+    ds.chord(P(280, -30, 360, 30), 0, 180, fill=(0, 0, 0, 70))                 # hood lying on the back
+    ds.chord(P(286, -24, 354, 22), 0, 180, fill=(0, 0, 0, 30))
+    ds.arc(P(98, -22, 158, 14), 0, 180, fill=(0, 0, 0, 110), width=4 * S)        # neck opening
     if not zip_:
+        ds.polygon([tuple(P(*p)) for p in ((92, 60), (164, 60), (172, 92), (84, 92))], fill=(0, 0, 0, 34))   # kangaroo pocket
+        ds.line(P(92, 60, 164, 60), fill=(0, 0, 0, 120), width=S)
+        ds.line(P(92, 60, 84, 92), fill=(0, 0, 0, 90), width=S)
+        ds.line(P(164, 60, 172, 92), fill=(0, 0, 0, 90), width=S)
+    t.alpha_composite(sh)
+    d = ImageDraw.Draw(t)
+    hl = tuple(min(255, int(c * 1.3) + 20) for c in pocket_col[:3]) + (200,)
+    d.arc(P(280, -30, 360, 30), 0, 180, fill=hl, width=S)
+    if not zip_:
+        stitch(d, 93, 62, 163, 62, hl, dash=2, gap=1.5)
         for x, sway in ((120, -2), (136, 2)):
             d.line(P(x, 8, x + sway, 34), fill=strings, width=int(1.4 * S))
             d.rectangle(P(x + sway - 0.9, 32, x + sway + 0.9, 37), fill=(200, 200, 206, 255))
-        d.polygon([tuple(P(*p)) for p in ((92, 60), (164, 60), (172, 92), (84, 92))], fill=pocket_col)   # kangaroo pocket
-        d.line(P(92, 60, 164, 60), fill=tuple(int(c * .7) for c in pocket_col[:3]) + (255,), width=S)
-        stitch(d, 93, 62, 163, 62, tuple(int(c * .8) for c in pocket_col[:3]) + (255,), dash=2, gap=1.5)
     rib(t, 0, 92, 384, 102, rib_col)
+
+def vert_chrome(img, text, cx, y0, size, **kw):
+    """Chrome lettering running down an arm (rotated 90 degrees)."""
+    L = int(len(text) * size * 0.62) + 12
+    tmp = Image.new("RGBA", (L * S, int(size * 1.6) * S), (0, 0, 0, 0))
+    chrome_text(tmp, text, L / 2, size * 0.8, size, **kw)
+    rot = tmp.rotate(-90, expand=True)
+    img.alpha_composite(rot, (int((cx - size * 0.8) * S), int(y0 * S)))
 
 def sleeves(tpl, fabric_fn, seeds, rib_col, deco=None, cuff=(82, 91)):
     for layout, seed, cap in ((RLIMB_STRIP, seeds[0], "rU"), (LLIMB_STRIP, seeds[1], "lU")):
@@ -275,7 +291,7 @@ def d1_shirt():
     fab = lambda h, w, s: cotton(h, w, s, base=(30, 28, 34))
     t = to_img(fab(128 * S, 384 * S, 201))
     hoodie_front(t, (24, 22, 28, 255), (36, 34, 40, 255))
-    chrome_text(t, "MM", 128, 40, 34, shear=-0.12)
+    chrome_text(t, "MM", 128, 38, 46, shear=-0.12, ow=2.8)
     d = ImageDraw.Draw(t)
     for x, y, r in ((84, 24, 5), (174, 30, 4), (96, 58, 3), (166, 52, 3.5)):
         star(d, x, y, r, (220, 224, 236, 255), outline=(14, 12, 18, 255), ow=0.8)
@@ -288,8 +304,10 @@ def d1_shirt():
         d = ImageDraw.Draw(a)
         o = outer_of(layout)
         rng = np.random.default_rng(o)
-        for _ in range(7):
-            star(d, o + 8 + rng.random() * 48, 10 + rng.random() * 66, 2 + rng.random() * 3.5, (214, 218, 230, 255), outline=(10, 10, 14, 255), ow=0.6)
+        vert_chrome(a, "NEON", o + 32, 6, 15, ow=1.6)
+        f = front_of(layout)
+        for _ in range(5):
+            star(d, f + 8 + rng.random() * 48, 12 + rng.random() * 62, 2 + rng.random() * 3.5, (214, 218, 230, 255), outline=(10, 10, 14, 255), ow=0.6)
     sleeves(tpl, fab, (203, 204), (24, 22, 28, 255), deco)
     return tpl
 
@@ -351,9 +369,6 @@ def d2_shirt():
     t2 = Image.new("RGBA", t.size, (0, 0, 0, 0))
     ImageDraw.Draw(t2).text((320 * S, 76 * S), "STAGE NIGHT  \u00b7  TOUR 26", font=ImageFont.truetype(BLACK, 6 * S), fill=(236, 236, 240, 255), anchor="mm")
     t.alpha_composite(distress(t2, 229))
-    # a ripped hem showing the red stripes underneath
-    for x in (78, 170, 300):
-        d.polygon([tuple(P(*p)) for p in ((x, 92), (x + 6, 86), (x + 11, 93), (x + 4, 98))], fill=(160, 24, 44, 255))
     stitch(d, 0, 100, 384, 100, (60, 58, 64, 255), dash=2, gap=1.5)
     clear_rows(t, 103, 128)
     place_torso(tpl, t)
@@ -385,10 +400,11 @@ def d2_pants():
         d = ImageDraw.Draw(a)
         f = front_of(layout)
         # knee rip: pale threads across a dark hole
-        d.ellipse(P(f + 16, 50, f + 48, 64), fill=(234, 196, 168, 255))
-        for k in range(6):
-            y = 51.5 + k * 2.2
-            d.line(P(f + 15, y, f + 49, y + (k % 2)), fill=(226, 226, 232, 255), width=int(0.8 * S))
+        d.ellipse(P(f + 16, 50, f + 48, 64), fill=(26, 24, 30, 255))     # dark hole
+        for k in range(5):
+            y = 52 + k * 2.6
+            d.line(P(f + 14, y, f + 50, y + (k % 2) * 0.8), fill=(236, 236, 242, 255), width=int(1.2 * S))   # white threads
+        d.ellipse(P(f + 16, 50, f + 48, 64), outline=(90, 90, 104, 255), width=S)
         # flare: lighter whiskers widening at the hem
         for x in range(0, 256, 9):
             d.line(P(x, 70, x - 2, 84), fill=(64, 64, 76, 255), width=S)
@@ -474,9 +490,9 @@ def d4_shirt():
     big = Image.new("RGBA", t.size, (0, 0, 0, 0))
     db = ImageDraw.Draw(big)
     db.text((128 * S, 48 * S), "MM", font=ImageFont.truetype(IMPACT, 50 * S), fill=(244, 244, 246, 255), anchor="mm")
-    db.text((128 * S, 80 * S), "URBAN  CAMO  DIVISION", font=ImageFont.truetype(BLACK, 5 * S), fill=(30, 30, 32, 255), anchor="mm")
-    db.text((320 * S, 40 * S), "NO. 04", font=ImageFont.truetype(IMPACT, 22 * S), fill=(30, 30, 32, 255), anchor="mm")
-    t.alpha_composite(distress(big, 269, 0.6))
+    db.text((128 * S, 80 * S), "URBAN CAMO DIVISION", font=ImageFont.truetype(BLACK, 6 * S), fill=(244, 244, 246, 255), anchor="mm")
+    db.text((320 * S, 40 * S), "NO. 04", font=ImageFont.truetype(IMPACT, 24 * S), fill=(24, 24, 26, 255), anchor="mm")
+    t.alpha_composite(distress(big, 269, 0.25))
     stitch(d, 0, 102, 384, 102, (120, 120, 124, 255), dash=2, gap=1.5)
     clear_rows(t, 106, 128)
     place_torso(tpl, t)
