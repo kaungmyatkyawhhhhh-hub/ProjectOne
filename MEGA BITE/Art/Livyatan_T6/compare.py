@@ -13,7 +13,7 @@ for k,L in (('side',1),('top',2),('front',3)):
         r=np.full((1024,1536,3),(255,0,255),np.uint8); r[:nh,:nw]=s_
     rm=fgm(r.astype(int)); sm=(lab==L)
     ys,xs=np.where(sm); ry,rx=np.where(rm)
-    dy=int((ys.min()+ys.max())/2-(ry.min()+ry.max())/2)
+    dy=int(ys.min()-ry.min()) if k=='front' else int((ys.min()+ys.max())/2-(ry.min()+ry.max())/2)   # front: align the head tops (fins differ)
     dx=0 if k=='side' else (int(xs.min()-rx.min()) if k=='top' else int((xs.min()+xs.max())/2-(rx.min()+rx.max())/2))
     if k=='side': dy=0
     r=np.roll(np.roll(r,dy,0),dx,1); rm=np.roll(np.roll(rm,dy,0),dx,1)

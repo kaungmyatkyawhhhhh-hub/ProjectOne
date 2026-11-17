@@ -27,7 +27,8 @@ for x in range(X0,250):
     T[x-X0]=c-h; B[x-X0]=c+h; HW[x-X0]=min(HW[x-X0],22+20*t)
 st=list(range(X0,X1+1,10))+[X1]
 def med(x0,x1,y0,y1): return [int(v) for v in np.median(im[y0:y1,x0:x1].reshape(-1,3),0)]
-pal=dict(top=med(520,600,262,280), belly=med(520,600,330,350), jaw=med(1290,1340,425,445), groove=med(632,640,250,300),
+pal=dict(top=[62,58,128], belly=[120,95,180], jaw=[140,112,200],   # sheet medians sit in shade; lifted to the card's lit look
+          groove=med(632,640,250,300),
          maroon=[95,22,55], teeth=[238,228,200], cyan=[40,240,255], gold=[255,196,70], eye=[60,250,255], socket=[28,24,60])
 # fluke outline from the top view (tx<205) in side px: (x, lateral)
 fl=(lab==2).astype(np.uint8); fl[:, 205:]=0
@@ -38,10 +39,10 @@ D=dict(src='livyatan_turnaround_v1.png', side_x=[X0,X1], len_m=8.0, yc=276, top=
   stations=[dict(x=int(x),top=float(T[x-X0]),bot=float(B[x-X0]),hw=float(HW[x-X0])) for x in st],
   grooves=[268,372,462,636,812,885,1010,1095], head_x=1095,
   head=dict(corner=[1188,300], upper_lip=[[1188,300],[1240,285],[1300,256],[1400,250],[1500,248],[1519,240]],
-     lower_lip=[[1110,300],[1200,333],[1300,368],[1400,402],[1442,414]], jaw_bot=[[1100,418],[1200,440],[1300,455],[1400,462],[1438,446],[1446,425]],
-     up_teeth=dict(n=9,x=[1228,1478],len=46), lo_teeth=dict(n=8,x=[1230,1420],len=38),
-     eye=dict(x=1182,y=230,w=50,h=26)),
-  fins=dict(root=[930,385],tip=[825,490],spread=265,width=82,len_k=1.0),
+     lower_lip=[[1110,300],[1200,333],[1300,368],[1400,402],[1442,414]], jaw_bot=[[1100,418],[1200,448],[1300,468],[1400,474],[1438,452],[1446,428]],
+     up_teeth=dict(n=9,x=[1228,1478],len=56), lo_teeth=dict(n=8,x=[1230,1420],len=46),
+     eye=dict(x=1182,y=230,w=56,h=32)),
+  fins=dict(root=[930,385],tip=[825,500],spread=250,width=95,len_k=1.0),
   fluke=fluke, palette=pal)
 json.dump(D,open('livy6_data.json','w'),indent=1)
 print(pal); print('fluke pts',len(fluke)); [print(s) for s in D['stations'][::12]]

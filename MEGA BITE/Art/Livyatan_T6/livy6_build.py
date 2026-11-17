@@ -72,6 +72,7 @@ def recolour(o, fcol):
 def ring_pt(x, top, bot, hw, th, pex=2.4):
     zc, hz, w = (Z(top) + Z(bot)) / 2, (Z(top) - Z(bot)) / 2, hw * S
     sy, cz = math.sin(th), math.cos(th)
+    if isinstance(pex, tuple): pex = pex[0] if cz >= 0 else pex[1]   # (top, bottom): domed top, boxy belly
     y = w * math.copysign(abs(sy) ** (2 / pex), sy)
     z = zc + hz * math.copysign(abs(cz) ** (2 / pex), cz)
     return Vector((X(x), y, z))
@@ -134,7 +135,7 @@ def skull(x):
     else: bot = line(H['upper_lip'], x)
     return (T(x), bot, HW(x))
 hxs = [HX - 2, HX + 1, HX + 7] + xs_between(HX + 7, 1480, 16)[1:] + [1495, 1507, 1515]
-head = loft('UpperHead', hxs, skull, nr=20, pex=2.3, scale=lambda i, x: 0.86 if x < HX + 3 else (0.93 if x > 1510 else 1.0),
+head = loft('UpperHead', hxs, skull, nr=20, pex=(2.0, 2.8), scale=lambda i, x: 0.86 if x < HX + 3 else (0.93 if x > 1510 else 1.0),
             tip_end=Vector((X(X1), 0, Z((T(1517) + line(H['upper_lip'], 1517)) / 2))))
 # eye socket CARVED into the head: verts inside the eye ellipse pushed in, deepest at the back
 E = H['eye']
@@ -162,7 +163,7 @@ def jaw_col(p):
         xp = (c.x + D['len_m'] / 2) / S + X0; jhw = jaw(min(max(xp, JX0), JX1))[2] * S
         return jit(P['maroon'], p.index, 0.05) if abs(c.y) < 0.78 * jhw and xp > CX - 10 else jit(P['jaw'], p.index, 0.05)
     return jit(P['belly'] if p.normal.z < -0.3 else P['jaw'], p.index, 0.07)
-loft('LowerJaw', xs_between(JX0, JX1, 10), jaw, nr=16, pex=2.8, colour=jaw_col)
+loft('LowerJaw', xs_between(JX0, JX1, 24), jaw, nr=14, pex=2.8, colour=jaw_col)
 def mouth(x):
     top = line(H['upper_lip'], x) + 2; bot = line(H['lower_lip'], x) + 6
     return (top, bot, 0.84 * HW(x))
@@ -180,7 +181,7 @@ def teeth(name, spec, lip, up, wk):
     for i in range(1, nf + 1):
         pts.append((x1 + 2, -hw1 + 2 * hw1 * i / (nf + 1), n + i))
     for x, yl, i in pts:
-        L = spec['len'] * (0.7 + 0.3 * math.sin(i * 1.9) ** 2) * (0.85 if abs(yl) < hw1 * 0.8 and x > x1 else 1.0) * S
+        L = spec['len'] * (0.6 + 0.4 * math.sin(i * 1.9) ** 2) * (0.85 if abs(yl) < hw1 * 0.8 and x > x1 else 1.0) * S
         y0 = line(lip, min(x, x1)) + (2 if up else -2)
         base = Vector((X(x), yl * S, Z(y0))); r = L * 0.42
         b = len(verts)
@@ -195,10 +196,10 @@ teeth('LowerTeethRow', H['lo_teeth'], H['lower_lip'], False, lambda x: 0.8 * jaw
 def eye():
     top, bot, hw = skull(ex); verts, faces = [], []
     for side in (1, -1):
-        p = Vector((X(ex), side * (hw * S * 0.97 - 6 * S), Z(ey)))
-        n = Matrix.Rotation(math.radians(35) * side, 3, 'Z') @ Vector((0, side, 0))
+        p = Vector((X(ex), side * (hw * S - 8 * S), Z(ey)))   # seated in the carved socket, not a bead on the skin
+        n = Matrix.Rotation(math.radians(30) * side, 3, 'Z') @ Vector((0, side, 0))
         u = Vector((1, 0, 0)); u = (u - n * u.dot(n)).normalized(); v = n.cross(u).normalized()
-        a, b, h = E['w'] / 2 / math.cos(math.radians(35)) * 0.85 * S, E['h'] / 2 * S, 7 * S
+        a, b, h = E['w'] / 2 / math.cos(math.radians(30)) * 0.8 * S, E['h'] / 2 * S, 5 * S
         b0 = len(verts); K = 12
         for k in range(K):
             t = 2 * math.pi * k / K; verts.append(p + u * a * math.cos(t) + v * b * math.sin(t) - n * 3 * S)
@@ -220,7 +221,7 @@ for side, sname in ((1, 'Left'), (-1, 'Right')):
     Tp = Vector((X(F['tip'][0]), side * F['spread'] * S, Z(F['tip'][1])))
     A = (Tp - R) * F['len_k']; Ah = A.normalized()
     W = Vector((1, 0, 0)); W = (W - Ah * W.dot(Ah)).normalized()
-    W = (Matrix.Rotation(math.radians(40) * side, 3, Ah) @ W).normalized(); N = Ah.cross(W).normalized()   # twisted so the front view sees the paddle too
+    W = (Matrix.Rotation(math.radians(45) * side, 3, Ah) @ W).normalized(); N = Ah.cross(W).normalized()   # twisted so the front view sees the paddle too
     secs = ((0.0, 0.7, 16), (0.2, 1.0, 13), (0.55, 1.0, 10), (0.85, 0.85, 7), (1.0, 0.45, 4))   # sheet: broad paddle, blunt end
     verts, faces = [], []
     for t, wf, th in secs:
@@ -257,7 +258,7 @@ TP, FP = D['top'], D['front']
 VIEWS = {   # view -> (component label, px->(origin, dir) per mirror side, keep-if normal test)
   'side':  (1, lambda u, w, s: (Vector((X(u), -s * 3, Z(w))), Vector((0, s, 0))), lambda n, s: -s * n.y > 0.35),
   'top':   (2, lambda u, w, s: (Vector((X(X0 + (u - TP['tx'][0]) * TP['k']), (w - TP['tc']) * TP['k'] * S, 3)), Vector((0, 0, -1))), lambda n, s: n.z > 0.45),
-  'front': (3, lambda u, w, s: (Vector((3, (u - FP['cx']) / FP['k'] * S, Z(40 + (w - FP['y0']) / FP['k']))), Vector((-1, 0, 0))), lambda n, s: n.x > 0.45),
+  'front': (3, lambda u, w, s: (Vector((10, (u - FP['cx']) / FP['k'] * S, Z(40 + (w - FP['y0']) / FP['k']))), Vector((-1, 0, 0))), lambda n, s: n.x > 0.45),
 }
 for cname in ('Cyan', 'Gold'):
     verts, faces = [], []
