@@ -1,7 +1,9 @@
 # roads05 handover (18 Nov 2026, seventeenth pass: J21, GEOMETRY agent; DATA + BUILDER + QA + Studio 16 spots)
 
 ## J21 geometry -- counts J20 -> J21 (full net, `J21_qa.log`; backups `qa_J20.json`, `qa_J21a.json`, `roads_J20b.json`)
-COUNTS_LINE
+kerb_cross 2 -> 0, deck_grade 8 -> 7 (Road Flyover 8.1% -> 7.8%; the 7 left are the old junction-blocked `short` ones),
+mouthsim 0 failed of 11,569; deck_clear / deck_wobble / width_wobble / pave_width_jump / overlap / median_cross 0,
+centre_fold 1, mouth_short 35 / mouth_over 37 (real 1), stack_paint 8, paint_off_centre 68 (paint): unchanged.
 Built check (Studio, all 16 spots, table in vault `City Legends/2026-11-18 roads05 J21 studio check.md`).
 - **Item 1 pavement steps:** NOT a builder step. Every "thin wedge 0.29-0.41 lower" checked has a flat top at the right height:
   qaBuilt's ray ran down the WedgePart's vertical slanted face. qaBuilt now casts again a hair off when the hit normal is
@@ -19,10 +21,13 @@ Built check (Studio, all 16 spots, table in vault `City Legends/2026-11-18 roads
 - **Item 4 kerb_cross:** `fork_trim` re-ranks after trimming (a trimmed fork that ENDS inside its sibling outranked it:
   Lane #679 on Bo Min Gaung Street, no mouth); new `kiss_clear` (after crossings): a kerb kerbsim still finds at most
   KISS_MAX 4 inside another carriageway is a graze: the road is pushed off (depth + 1 + kerb, tapering 0.15 / stud),
-  4 passes (Lane #2945 at the Bayint Naung Road #11 flyover foot). KERB_LINE
+  4 passes (Lane #2945 at the Bayint Naung Road #11 flyover foot).
+  QA kerb_cross 2 -> 0.
 - **Item 5 Road Flyover:** its ramp was regraded at 7.8% on the plan before deck_fair / unfold / deck_joints moved the
   samples (spacing 7.85 -> 7.59): 8.1%. New `deck_recap` runs after the LAST plan change (before check): a non-chain deck
-  over 8% is re-profiled by _deck_try on the final plan (same crest / clearances), kept only within DECK_MAX. DECK_LINE
+  over 8% is re-profiled by _deck_try on the final plan (same crest / clearances), kept only within DECK_MAX.
+  Road Flyover is a chain deck (an end on another deck's): capped at DECK_MAX from both ends, ends and the 31.29 top
+  kept: 8.1% -> 7.8% (Road Flyover #2 too). Pinlon 7.8%, top 26.0 unchanged.
   Pinlon Road Flyover on the satellite (`City Legends/Road plan - Close-up Pinlon Road Flyover overlay.png`): a real twin
   bridge over the creek; the crest over the water is right.
 - **Item 6 Studio:** all 16 spots built + qaBuilt (QA now skips 20 studs at the test box edge and subset deck ends: they
