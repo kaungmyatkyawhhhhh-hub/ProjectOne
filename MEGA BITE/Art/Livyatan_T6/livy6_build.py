@@ -46,7 +46,7 @@ M_BODY, M_GLOW = mat('L6_Body', False), mat('L6_Glow', True)
 def make(name, verts, faces, fcol, glow=False, closed=True):
     me = bpy.data.meshes.new(name); me.from_pydata([tuple(v) for v in verts], [], faces); me.update()
     bm = bmesh.new(); bm.from_mesh(me)
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)
+    if closed: bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-6)   # runes come pre-welded; welding would join touching glyphs
     if closed:
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
         vol = sum(f.verts[0].co.dot(f.verts[i].co.cross(f.verts[i + 1].co)) for f in bm.faces for i in range(1, len(f.verts) - 1))
@@ -277,29 +277,28 @@ for cname in ('Cyan', 'Gold'):
         return key[k]
     for vname, (L, ray, keep) in VIEWS.items():
         for loops in RUNES['%s_%s' % (cname, vname)]:
-            flat = [[Vector((float(p[0]), float(p[1]), 0)) for p in l] for l in loops]
+            # resample each outline every ~6 px, fill with no inner vertices (strokes are a few px wide: no chord cuts the skin)
+            flat = []
+            for l in loops:
+                pl = [Vector((float(p[0]), float(p[1]), 0)) for p in l]; rs = []
+                for i in range(len(pl)):
+                    a, b = pl[i], pl[(i + 1) % len(pl)]; k = max(1, int((b - a).length / 6))
+                    rs += [a + (b - a) * (j / k) for j in range(k)]
+                rs = [p for i, p in enumerate(rs) if (p - rs[i - 1]).length > 0.3]   # no zero-length edges
+                if len(rs) >= 3: flat.append(rs)
+            if not flat: continue
             tri = geometry.tessellate_polygon(flat)
             pts = [p for l in flat for p in l]
-            # ONE grid density per glyph: shared triangle edges then split at the same points (no T-junction holes)
-            nsub = max(1, int(max(max((pts[t_[0]] - pts[t_[1]]).length, (pts[t_[1]] - pts[t_[2]]).length, (pts[t_[2]] - pts[t_[0]]).length) for t_ in tri) / 12)) if tri else 1
             for s in ((1, -1) if vname == 'side' else (1,)):   # side runes go on both flanks
-                for t_ in tri:
-                    a, b, cc = (pts[k] for k in t_)
-                    grid = {}
-                    for ii in range(nsub + 1):
-                        for jj in range(nsub + 1 - ii):
-                            q = a + (b - a) * (ii / nsub) + (cc - a) * (jj / nsub)
-                            o_, d_ = ray(q.x, q.y, s); hit = BVH.ray_cast(o_, d_)
-                            grid[ii, jj] = None if hit[0] is None or not keep(hit[1], s) else vid((vname, s, round(q.x, 2), round(q.y, 2)), hit)
-                    for ii in range(nsub):
-                        for jj in range(nsub - ii):
-                            for f in ((grid[ii, jj], grid[ii + 1, jj], grid[ii, jj + 1]),
-                                      (grid[ii + 1, jj], grid[ii + 1, jj + 1], grid[ii, jj + 1]) if jj < nsub - ii - 1 else (None,)):
-                                if None not in f and len(set(f)) == 3: faces.append(f)
-    # orient each top face outward (along the skin normal), then extrude: top = proud, floor = sunk, walls on boundary edges
-    for i, f in enumerate(faces):
-        a, b, c = (hits[k][0] for k in f)
-        if (b - a).cross(c - a).dot(hits[f[0]][1] + hits[f[1]][1] + hits[f[2]][1]) < 0: faces[i] = (f[0], f[2], f[1])
+                ids = []
+                for gi, q in enumerate(pts):
+                    o_, d_ = ray(q.x, q.y, s); hit = BVH.ray_cast(o_, d_)
+                    ids.append(None if hit[0] is None or not keep(hit[1], s) else vid((vname, s, id(loops), gi), hit))
+                gf = [f for f in (tuple(ids[k] for k in t_) for t_ in tri) if None not in f and len(set(f)) == 3]
+                # one winding per glyph (the fill is consistent in 2D): flip the whole glyph if most faces point into the skin
+                vote = sum((hits[f[1]][0] - hits[f[0]][0]).cross(hits[f[2]][0] - hits[f[0]][0]).dot(hits[f[0]][1]) for f in gf)
+                faces += [(f[0], f[2], f[1]) for f in gf] if vote < 0 else gf
+    # extrude: top = proud, floor = sunk, walls on boundary edges
     n = len(hits)
     verts = [p + nn * RUNE_UP * S for p, nn in hits] + [p - nn * RUNE_SINK * S for p, nn in hits]
     edges = {}

@@ -18,6 +18,10 @@ for o in objs:
                     if g.index not in seen: seen.add(g.index); stack.append(g)
         islands+=1
         c=sum((v.co for f in isl for v in f.verts),Vector())/sum(len(f.verts) for f in isl)
+        if 'Runes' in o.name:   # thin strips bent round the body: the centroid test misfires, use the signed volume
+            vol=sum(f.verts[0].co.dot(f.verts[i].co.cross(f.verts[i+1].co)) for f in isl for i in range(1,len(f.verts)-1))
+            if vol<0: inward+=1
+            continue
         n_in=sum(1 for f in isl if f.normal.dot(f.calc_center_median()-c)<0)
         if n_in>len(isl)*0.25: inward+=1
     if ob or inward: bad+=1; print('FAIL',o.name,'open',len(ob),'inward islands',inward,'of',islands)
