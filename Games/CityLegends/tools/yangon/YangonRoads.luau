@@ -475,6 +475,43 @@ end
 M.polyDist = polyDist
 
 -- Roads.build's opts.sideZone: must this road's kerb / pavement stay out of this spot?
+-- inside a traffic island's kerb-line outline (data.islands), by a 64-stud grid built on first use
+function M.inIsland(px: number, pz: number): boolean
+	local list = M.data and M.data.islands
+	if not list then
+		return false
+	end
+	if M.islandGridOf ~= list then
+		M.islandGridOf, M.islandGrid = list, {}
+		for _, isl in list do
+			local x0, x1, z0, z1 = math.huge, -math.huge, math.huge, -math.huge
+			for _, v in isl do
+				x0, x1, z0, z1 = math.min(x0, v[1]), math.max(x1, v[1]), math.min(z0, v[3]), math.max(z1, v[3])
+			end
+			for gx = math.floor(x0 / 64), math.floor(x1 / 64) do
+				for gz = math.floor(z0 / 64), math.floor(z1 / 64) do
+					local key = gx .. "," .. gz
+					M.islandGrid[key] = M.islandGrid[key] or {}
+					table.insert(M.islandGrid[key], isl)
+				end
+			end
+		end
+	end
+	for _, isl in M.islandGrid[math.floor(px / 64) .. "," .. math.floor(pz / 64)] or {} do
+		local inside, n = false, #isl
+		for k = 1, n do
+			local a, b = isl[k], isl[k % n + 1]
+			if (a[3] > pz) ~= (b[3] > pz) and px < a[1] + (pz - a[3]) / (b[3] - a[3]) * (b[1] - a[1]) then
+				inside = not inside
+			end
+		end
+		if inside then
+			return true
+		end
+	end
+	return false
+end
+
 function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local px, pz = pos.X, pos.Z
 	-- a driveway mouth (fuel station entry / exit, roads05 data.driveways): no kerb across it
@@ -502,6 +539,11 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	if M.inCorner(px, pz) then
 		return true
 	end
+	-- (J11: a traffic island is one fill (buildIslands); the bands' own pavements on it overlapped each other
+	-- at their roads' different heights: steps, dark streaks, sliver holes)
+	if what ~= "Kerb" and M.inIsland(px, pz) then
+		return true
+	end
 	-- just past a round corner, the joining road's own kerb and pavement (the other road's go). Its own
 	-- band still stops at a smaller road's mouth (step 5: Parami Road West joins Pyay Road North right
 	-- where Pyay Road North's corner onto the loop hands it its band)
@@ -525,11 +567,22 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local mine = near[me.index]
 	local ax, az, nx, nz = nil, nil, nil, nil
 	for oi, b in near do
-		if oi == me.index or b[1] > 72 then
-			continue
-		end
 		local o = M.list[oi]
 		local oh = M.halfAt(o, b[2])
+		-- (J11: Bahan Road is 76 studs to one side at Roundabout 1 (an absorbed second carriageway): 72 skipped it)
+		if oi == me.index or b[1] > math.max(72, oh + 12) then
+			continue
+		end
+		-- (J11: the half on this spot's side (s[7] left / s[8] right): Maha Bandula Road #2 is 39.6 / 21 at Sule,
+		-- the wider half stopped the links' kerbs up to 18 studs short on its narrow side)
+		do
+			local s = o.s[b[2]]
+			local L = hyp(s[4], s[5])
+			if L > 1e-6 then
+				local k = if (px - s[1]) * -s[5] + (pz - s[3]) * s[4] > 0 then 8 else 7
+				oh = s[k] or o.half
+			end
+		end
 		if me.kind == "side" and o.kind == "side" then
 			-- (step 4: two side lanes splitting from one road end: neither's kerb or pavement on the other)
 			if not mineOnly and polyDist(o, b[2], px, pz) < oh + 1 then
@@ -539,8 +592,19 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 		end
 		if o.rank < me.rank then
 			-- a bigger road: my kerb stops at its kerb, my pavement at its pavement's far edge
-			if not mineOnly and polyDist(o, b[2], px, pz) < oh + (if what == "Kerb" then M.KERB_W else math.max(o.walkL or M.WALK, o.walkR or M.WALK)) then
+			local reach = oh + (if what == "Kerb" then M.KERB_W else math.max(o.walkL or M.WALK, o.walkR or M.WALK))
+			if not mineOnly and polyDist(o, b[2], px, pz) < reach then
 				return true
+			end
+			-- (J11, Bahan nose: my corner on o was found on o's cut samples; my band past P lies on o's
+			-- carriageway there, which polyDist does not see behind the cut end: its plain centre line does)
+			if not mineOnly and M.cutPair and M.cutPair[name .. "|" .. o.name] then
+				for j = math.max(1, b[2] - 2), math.min(o.n - 1, b[2] + 1) do
+					local a, q = o.s[j], o.s[j + 1]
+					if segDist(px, pz, a[1], a[3], q[1], q[3]) < oh - 0.01 then
+						return true
+					end
+				end
 			end
 		else
 			-- a smaller road: only its carriageway (the mouth is as wide as the road), and only the part
@@ -782,6 +846,18 @@ function M.buildMouth(m, folder: Instance)
 		while hi < big.n and not cutB[hi + 1] and hi - m.bigI < 60 do
 			hi += 1
 		end
+		-- (J11, Bahan at Roundabout 1: Lane #4701 meets Kan Yeiktha just inside its ring cut: one edge never
+		-- hit B and snapped 20 studs off, a hole in the asphalt. Such a mouth takes the 2 cut samples next to B too)
+		if m.cutExt then
+			for _ = 1, 2 do
+				if lo > 1 and EB[side][lo - 1] then
+					lo -= 1
+				end
+				if hi < big.n and EB[side][hi + 1] then
+					hi += 1
+				end
+			end
+		end
 		for i = lo, hi do
 			table.insert(B, EB[side][i])
 		end
@@ -822,6 +898,10 @@ function M.buildMouth(m, folder: Instance)
 	end
 	local ptsL, XL, atL = chain(E.L)
 	local ptsR, XR, atR = chain(E.R)
+	if m.snapped and not m.ring and not m.cutExt then
+		m.cutExt, m.snapped = true, nil
+		return M.buildMouth(m, folder)
+	end
 	-- B's corners between XR and XL
 	local between = {}
 	local function walk(from: number, to: number)
@@ -935,7 +1015,8 @@ local function cross2(ax: number, az: number, bx: number, bz: number): number
 end
 
 function M.findCorners()
-	M.corners, M.cornerSpan, M.cornerGrid = {}, {}, {}
+	M.corners, M.cornerSpan, M.cornerGrid, M.cutPair = {}, {}, {}, {}
+	local cands = {}
 	local ringPts = nil
 	local pass = {}
 	for mi, m in M.mouths do
@@ -979,6 +1060,32 @@ function M.findCorners()
 				end
 			end
 			local px, pz, ka, ta, kb, tb = crossOf(ePts, bPts)
+			if not px and not m.ring then
+				-- (J11, Bahan at Roundabout 1: Lane #4701's edge meets Bahan Road between samples 7 and 8, 7 being
+				-- the ring cut; try again with the cut samples next to an uncut one: up to 2 samples into the cut)
+				local B = m.big
+				local cb = M.cut[B.name]
+				local b2 = {}
+				for j = math.max(1, m.bigI - 40), math.min(B.n, m.bigI + 40) do
+					local near = not cb[j]
+					for d = 1, 2 do
+						near = near or (j - d >= 1 and not cb[j - d]) or (j + d <= B.n and not cb[j + d])
+					end
+					if near then
+						local x, z = edgeXZ(B, j, sb)
+						table.insert(b2, { x, z, j = j })
+					end
+				end
+				if #b2 > #bPts then
+					px, pz, ka, ta, kb, tb = crossOf(ePts, b2)
+					if px then
+						bPts = b2
+						M.cutCorner = (M.cutCorner or 0) + 1
+						-- (sideZone: this road's band past P lies on the big road's cut part: it goes there too)
+						M.cutPair[m.road .. "|" .. B.name] = true
+					end
+				end
+			end
 			if not px then
 				-- (1:1: an edge that never meets the other kerb gets no round corner, that side stays square;
 				-- 18 Nov, J9 Bahan: the other side still gets its own, it was dropped too)
@@ -988,6 +1095,14 @@ function M.findCorners()
 			-- (18 Nov, J9 Hanthawaddy: two one-way arms overlapping at the ring; a corner whose P lies on a third
 			-- road's carriageway rounds a wedge that is asphalt: that side gets none)
 			local inside = false
+			-- (J11, Hanthawaddy: Road #2's corner onto Hanthawaddy Road had its P on the ring's carriageway: a kerb
+			-- speck on the ring. A road-on-road corner inside a ring is ring asphalt)
+			if not m.ring then
+				M.nearRing(px, pz)
+				if hyp(px - C.X, pz - C.Z) < M.RING_V then
+					inside = true
+				end
+			end
 			for oi, b in M.near(px, pz, 3) do
 				local o = M.list[oi]
 				if o.name ~= m.road and o ~= m.big and not M.cut[o.name][b[2]] and polyDist(o, b[2], px, pz) < M.halfAt(o, b[2]) - 0.5 then
@@ -1062,68 +1177,124 @@ function M.findCorners()
 					end
 				end
 			end
-			local r = T * math.tan(theta / 2)
-			-- the circle's centre on the wedge's bisector, then pulled until it is r from both kerb lines
-			-- (they are not quite straight: the ring is round, the loop bends)
-			local bx, bz = ux + vx, uz + vz
-			L = hyp(bx, bz)
-			bx, bz = bx / L, bz / L
-			local ox, oz = c.px + bx * r / math.sin(theta / 2), c.pz + bz * r / math.sin(theta / 2)
-			for _ = 1, 40 do
-				local dA, fax, faz = footOn(c.ePts, ox, oz)
-				local dB, fbx, fbz = footOn(c.bPts, ox, oz)
-				local nax, naz = (ox - fax) / math.max(dA, 1e-6), (oz - faz) / math.max(dA, 1e-6)
-				local nbx, nbz = (ox - fbx) / math.max(dB, 1e-6), (oz - fbz) / math.max(dB, 1e-6)
-				ox += nax * (r - dA) * 0.7 + nbx * (r - dB) * 0.7
-				oz += naz * (r - dA) * 0.7 + nbz * (r - dB) * 0.7
+			-- (J11: a closure, so an overlapping corner can be made again with a shorter T)
+			local function build(T: number)
+				local r = T * math.tan(theta / 2)
+				-- the circle's centre on the wedge's bisector, then pulled until it is r from both kerb lines
+				-- (they are not quite straight: the ring is round, the loop bends)
+				local bx, bz = ux + vx, uz + vz
+				L = hyp(bx, bz)
+				bx, bz = bx / L, bz / L
+				local ox, oz = c.px + bx * r / math.sin(theta / 2), c.pz + bz * r / math.sin(theta / 2)
+				for _ = 1, 40 do
+					local dA, fax, faz = footOn(c.ePts, ox, oz)
+					local dB, fbx, fbz = footOn(c.bPts, ox, oz)
+					local nax, naz = (ox - fax) / math.max(dA, 1e-6), (oz - faz) / math.max(dA, 1e-6)
+					local nbx, nbz = (ox - fbx) / math.max(dB, 1e-6), (oz - fbz) / math.max(dB, 1e-6)
+					ox += nax * (r - dA) * 0.7 + nbx * (r - dB) * 0.7
+					oz += naz * (r - dA) * 0.7 + nbz * (r - dB) * 0.7
+				end
+				local dA, tax, taz, sa, sta = footOn(c.ePts, ox, oz)
+				local dB, tbx, tbz, sbb, stb = footOn(c.bPts, ox, oz)
+				-- the arc from TA to TB the way that passes P
+				local aA = math.atan2(taz - oz, tax - ox)
+				local aB = math.atan2(tbz - oz, tbx - ox)
+				local aP = math.atan2(c.pz - oz, c.px - ox)
+				local sweep = (aB - aA) % TAU
+				if ((aP - aA) % TAU) > sweep then
+					sweep -= TAU
+				end
+				-- (18 Nov, J9 "pavement breaks": the arc's pavement was M.WALK wide while a street's own band is 4: a step
+				-- at TA / TB. It now runs from this road's walk at TA to the other road's at TB.)
+				local wA = (if side < 0 then S.walkL else S.walkR) or M.WALK
+				local wB = if m.ring then M.WALK else ((if c.sb < 0 then m.big.walkL else m.big.walkR) or M.WALK)
+				local corner = {
+					road = m.road, side = side, on = m.on, ring = m.ring, ringR = m.ringR, big = m.big, sb = c.sb,
+					r = r, theta = theta, ox = ox, oz = oz, px = c.px, pz = c.pz,
+					tax = tax, taz = taz, tbx = tbx, tbz = tbz, aA = aA, sweep = sweep,
+					ePts = c.ePts, bPts = c.bPts, ka = c.ka, ta = c.ta, kb = c.kb, tb = c.tb, sa = sa, sta = sta, sbb = sbb, stb = stb,
+					rin = math.max(r - math.max(wA, wB), 0) - 0.3, rout = hyp(c.px - ox, c.pz - oz) + M.WALK + 2, err = math.max(math.abs(dA - r), math.abs(dB - r)),
+					wA = wA, wB = wB,
+				}
+				corner.mouth, corner.iP, corner.iT = mi, c.ePts[c.ka].i + c.ta * m.step, c.ePts[sa].i + sta * m.step
+				return corner
 			end
-			local dA, tax, taz, sa, sta = footOn(c.ePts, ox, oz)
-			local dB, tbx, tbz, sbb, stb = footOn(c.bPts, ox, oz)
-			-- the arc from TA to TB the way that passes P
-			local aA = math.atan2(taz - oz, tax - ox)
-			local aB = math.atan2(tbz - oz, tbx - ox)
-			local aP = math.atan2(c.pz - oz, c.px - ox)
-			local sweep = (aB - aA) % TAU
-			if ((aP - aA) % TAU) > sweep then
-				sweep -= TAU
+			local corner = build(T)
+			corner.rebuild, corner.T = build, T
+			table.insert(cands, corner)
+		end
+	end
+	-- (J11, Pyay x University: Lane #470, 22 samples between Insein Road and Hledan Road #3, merges into Hledan
+	-- at a shallow angle; that corner's r came out 96 and its arc ran back along the whole lane, over the Insein
+	-- corner on the same side: two kerbs side by side. Two corners of one road side from different mouths whose
+	-- runs P .. TA overlap along the road: the tighter one (smaller r) stays)
+	local drop, byRoad = {}, {}
+	for _, cc in cands do
+		byRoad[cc.road] = byRoad[cc.road] or {}
+		table.insert(byRoad[cc.road], cc)
+	end
+	for _, rc in byRoad do
+		for a = 1, #rc do
+			for b = a + 1, #rc do
+			local A, B = rc[a], rc[b]
+			if A.side == B.side and A.mouth ~= B.mouth
+				and math.max(math.min(A.iP, A.iT), math.min(B.iP, B.iT)) < math.min(math.max(A.iP, A.iT), math.max(B.iP, B.iT)) then
+				drop[if A.r > B.r then A else B] = A.r > B.r and B or A
 			end
-			-- (18 Nov, J9 "pavement breaks": the arc's pavement was M.WALK wide while a street's own band is 4: a step
-			-- at TA / TB. It now runs from this road's walk at TA to the other road's at TB.)
-			local wA = (if side < 0 then S.walkL else S.walkR) or M.WALK
-			local wB = if m.ring then M.WALK else ((if c.sb < 0 then m.big.walkL else m.big.walkR) or M.WALK)
-			local corner = {
-				road = m.road, side = side, on = m.on, ring = m.ring, ringR = m.ringR, big = m.big, sb = c.sb,
-				r = r, theta = theta, ox = ox, oz = oz, px = c.px, pz = c.pz,
-				tax = tax, taz = taz, tbx = tbx, tbz = tbz, aA = aA, sweep = sweep,
-				ePts = c.ePts, bPts = c.bPts, ka = c.ka, ta = c.ta, kb = c.kb, tb = c.tb, sa = sa, sta = sta, sbb = sbb, stb = stb,
-				rin = math.max(r - math.max(wA, wB), 0) - 0.3, rout = hyp(c.px - ox, c.pz - oz) + M.WALK + 2, err = math.max(math.abs(dA - r), math.abs(dB - r)),
-				wA = wA, wB = wB,
-			}
-			table.insert(M.corners, corner)
-			-- (P3, 16 Nov: inCorner / ownedBy ran over every corner of the network for each piece; a 64-stud
-			-- grid of the corners each spot can see: the wedge (O, rout) and the 60 studs past TA)
-			local x0 = math.min(ox - corner.rout, tax - 60)
-			local x1 = math.max(ox + corner.rout, tax + 60)
-			local z0 = math.min(oz - corner.rout, taz - 60)
-			local z1 = math.max(oz + corner.rout, taz + 60)
-			for gx = math.floor(x0 / 64), math.floor(x1 / 64) do
-				for gz = math.floor(z0 / 64), math.floor(z1 / 64) do
-					local key = gx .. "," .. gz
-					M.cornerGrid[key] = M.cornerGrid[key] or {}
-					table.insert(M.cornerGrid[key], corner)
+			end
+		end
+	end
+	-- (the bigger one is made again with T halved until its run clears the other's (a slip lane's shallow merge
+	-- keeps a shorter round corner: square, the two pavements met in slivers); never clear: dropped)
+	local function overlaps(A, B)
+		return math.max(math.min(A.iP, A.iT), math.min(B.iP, B.iT)) < math.min(math.max(A.iP, A.iT), math.max(B.iP, B.iT))
+	end
+	M.overlapDropped, M.overlapShort = 0, 0
+	for k, corner in cands do
+		local keep = drop[corner]
+		if keep then
+			local T, fixed = corner.T, nil
+			for _ = 1, 6 do
+				T *= 0.5
+				local c2 = corner.rebuild(T)
+				if not overlaps(c2, keep) and c2.r >= 1 then
+					fixed = c2
+					break
 				end
 			end
-			if m.ring then
-				-- (the ring's own kerb and pavement stop where the round corner starts)
-				-- (17 Nov, roads05 J5 "kerb points where the arms meet the ring": C is the CURRENT ring, which with
-				-- several roundabouts in the data was often another one: the span came out at a wrong angle and the
-				-- ring's kerb ran on under the corner)
-				M.useRing(m.ringR)
-				local key = m.road .. "@" .. m.i0
-				-- (18 Nov, J9: per side; a side with no corner keeps the arm's own edge angle)
-				M.cornerSpan[key] = M.cornerSpan[key] or {}
-				M.cornerSpan[key][side] = math.atan2(tbz - C.Z, tbx - C.X)
+			if not fixed then
+				M.overlapDropped += 1
+				continue
 			end
+			M.overlapShort += 1
+			cands[k] = fixed
+			corner = fixed
+		end
+		local m, side, ox, oz, tax, taz, tbx, tbz = M.mouths[corner.mouth], corner.side, corner.ox, corner.oz, corner.tax, corner.taz, corner.tbx, corner.tbz
+		table.insert(M.corners, corner)
+		-- (P3, 16 Nov: inCorner / ownedBy ran over every corner of the network for each piece; a 64-stud
+		-- grid of the corners each spot can see: the wedge (O, rout) and the 60 studs past TA)
+		local x0 = math.min(ox - corner.rout, tax - 60)
+		local x1 = math.max(ox + corner.rout, tax + 60)
+		local z0 = math.min(oz - corner.rout, taz - 60)
+		local z1 = math.max(oz + corner.rout, taz + 60)
+		for gx = math.floor(x0 / 64), math.floor(x1 / 64) do
+			for gz = math.floor(z0 / 64), math.floor(z1 / 64) do
+				local key = gx .. "," .. gz
+				M.cornerGrid[key] = M.cornerGrid[key] or {}
+				table.insert(M.cornerGrid[key], corner)
+			end
+		end
+		if m.ring then
+			-- (the ring's own kerb and pavement stop where the round corner starts)
+			-- (17 Nov, roads05 J5 "kerb points where the arms meet the ring": C is the CURRENT ring, which with
+			-- several roundabouts in the data was often another one: the span came out at a wrong angle and the
+			-- ring's kerb ran on under the corner)
+			M.useRing(m.ringR)
+			local key = m.road .. "@" .. m.i0
+			-- (18 Nov, J9: per side; a side with no corner keeps the arm's own edge angle)
+			M.cornerSpan[key] = M.cornerSpan[key] or {}
+			M.cornerSpan[key][side] = math.atan2(tbz - C.Z, tbx - C.X)
 		end
 	end
 	return #M.corners
@@ -1161,6 +1332,27 @@ function M.ownedBy(px: number, pz: number): (string?, any)
 		if L > 1e-6 and hyp(px - c.tax, pz - c.taz) < 60 and (px - c.tax) * tx + (pz - c.taz) * tz > 0 then
 			local S = M.R[c.road]
 			local b = M.near(px, pz, 3)[S.index]
+			-- (J11, Pyay x University: never inside another of its mouths (the samples between that end and its k):
+			-- Lane #470 is 140 studs long, its Insein corner owned its band on where it merges into Hledan Road #3,
+			-- pavement teeth and a kerb speck on Hledan's carriageway)
+			if b and M.noSlab and M.noSlab[c.road] and M.noSlab[c.road][b[2]] then
+				b = nil
+			end
+			-- (J11, Sule: Maha Bandula Road #2's band past its ring corner "owned" 32nd Street's kerb 40 studs on;
+			-- a bigger road's carriageway and kerb are never this road's band)
+			if b then
+				for oi, ob in M.near(px, pz, 3) do
+					local o = M.list[oi]
+					if o ~= S and o ~= c.big and o.rank < S.rank then
+						local q = o.s[ob[2]]
+						local k = if (px - q[1]) * -q[5] + (pz - q[3]) * q[4] > 0 then 8 else 7
+						if polyDist(o, ob[2], px, pz) < (q[k] or o.half) + M.KERB_W then
+							b = nil
+							break
+						end
+					end
+				end
+			end
 			if b then
 				local d, fx, fz = polyDist(S, b[2], px, pz)
 				local s = S.s[b[2]]
@@ -1483,25 +1675,29 @@ function M.buildIslands()
 						-- starts on past it on the same line: go on to that point, no overlap, no gap)
 						local yA, yB = c.yA or v[2], c.yB or v[2]
 						local y = yA + (yB - yA) * u + M.CURB_UP
+						-- (J11: the straight bands no longer pave the island, the fill reaches the kerb line: at TA / TB it
+						-- runs out along the radius to the kerb)
+						if q == 0 then
+							local kx, kz = arcPoint(c, u, c.r)
+							table.insert(out, Vector3.new(kx, y, kz))
+						end
 						if rho < 0 and (q == 0 or q == nseg) then
+							-- (J11: the band's inner corner past O is island fill now too: kerb point -> O)
 							local ox, oz = arcPoint(c, u, 0)
-							if q == nseg then
-								table.insert(out, Vector3.new(ox, y, oz))
-							end
-							local x, z = arcPoint(c, u, rho)
-							table.insert(out, Vector3.new(x, y, z))
-							if q == 0 then
-								table.insert(out, Vector3.new(ox, y, oz))
-							end
+							table.insert(out, Vector3.new(ox, y, oz))
 						else
 							local x, z = arcPoint(c, u, math.max(rho, 0))
 							table.insert(out, Vector3.new(x, y, z))
 						end
+						if q == nseg then
+							local kx, kz = arcPoint(c, u, c.r)
+							table.insert(out, Vector3.new(kx, y, kz))
+						end
 					end
 				end
 			else
-				local ax, az, ux, uz = off(pv, v, pv[4])
-				local bx, bz, wx, wz = off(v, nv, v[4])
+				local ax, az, ux, uz = off(pv, v, 0)
+				local bx, bz, wx, wz = off(v, nv, 0)
 				local den = ux * wz - uz * wx
 				local x, z
 				if math.abs(den) < 0.02 then
@@ -2410,7 +2606,11 @@ function M.onCarriageway(o, i: number, px: number, pz: number, margin: number): 
 			if L2 > 1e-9 then
 				local tc = math.clamp(((px - a[1]) * vx + (pz - a[3]) * vz) / L2, 0, 1)
 				local d = hyp(px - a[1] - tc * vx, pz - a[3] - tc * vz)
-				local h = M.halfAt(o, j) + (M.halfAt(o, j + 1) - M.halfAt(o, j)) * tc
+				-- (J11: the half on the point's own side, s[7] left / s[8] right: halfAt (the wider) took Lane #17's
+				-- round corner on Lay Daungkan Road #2's narrow side for a scrap and deleted its kerb)
+				local k = if (px - a[1]) * -vz + (pz - a[3]) * vx > 0 then 8 else 7
+				local ha, hb = a[k] or o.half, b[k] or o.half
+				local h = ha + (hb - ha) * tc
 				if d < h - margin then
 					return true
 				end

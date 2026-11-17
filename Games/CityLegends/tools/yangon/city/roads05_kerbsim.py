@@ -80,10 +80,12 @@ def side_zone(net, me, px, pz, what='Kerb'):
     mine = near.get(me)
     a = n = None
     for oi, (d, bi) in near.items():
-        if oi == me or d > 72:
+        if oi == me or d > max(72, net.half_at(oi, bi) + 12):
             continue
         o = net.roads[oi]
-        oh = net.half_at(oi, bi)
+        # (J11, as YangonRoads.sideZone: the half on this spot's own side, s[6] left / s[7] right)
+        q = o['s'][bi]
+        oh = q[7] if (px - q[0]) * -q[4] + (pz - q[2]) * q[3] > 0 else q[6]
         if road['kind'] == 'side' and o['kind'] == 'side':
             if poly_dist(net, oi, bi, px, pz)[0] < oh + 1:
                 return True

@@ -1,4 +1,62 @@
-# roads05 handover (18 Nov 2026, sixth pass: J10)
+# roads05 handover (18 Nov 2026, seventh pass: J11)
+
+## J11 (this pass; YangonRoads + kerbsim only, no data change: roads.json / qa.json are the J9 ones)
+- `YangonRoads.luau`:
+  - `findCorners`: (a) an edge that never meets the big road's uncut kerb tries again with the cut samples next to an
+    uncut one (2 into the cut; `M.cutPair[road|big]`): Lane #4701's nose on Bahan Road. (b) corners are collected
+    first; two corners of one road side from different mouths whose runs P..TA overlap: the bigger one is made again
+    with T halved (`corner.rebuild`) until clear, else dropped (`M.overlapShort` / `M.overlapDropped`): Lane #470
+    (Insein -> Hledan slip at Pyay) had an r 96 arc running back over its Insein corner (the two kerbs side by side).
+    (c) a road-on-road corner whose P lies inside a ring (RING_V) is dropped (Hanthawaddy Road #2: kerb speck on the ring).
+  - `sideZone`: the other road's half on THIS spot's side (s[7] / s[8]; halfAt = the wider: Maha Bandula #2 is
+    39.6 / 21 at Sule); skip test `max(72, half + 12)` (Bahan Road is 76 wide at Roundabout 1: 72 skipped it);
+    `M.inIsland` (data.islands kerb-line outlines): no band PAVEMENT inside an island; with cutPair the big road's plain
+    centre line counts behind its cut end.
+  - `buildIslands`: one fill to the kerb line (straight vertices not moved in; at a corner kerb point -> inner arc
+    -> kerb point, or kerb -> O where the walk is wider than r). The bands' own pavements overlapped there at their
+    roads' different heights (dark streaks, steps, sliver holes in the Waizayandar and Pyay islands).
+  - `ownedBy`: never inside one of the road's own mouth spans (noSlab), never on a bigger road's carriageway + kerb
+    (Lane #470's Insein corner owned its band 60 studs on into Hledan: pavement teeth + the kerb speck; Maha Bandula
+    #2's ring corner owned 32nd Street's kerb away at Sule).
+  - `onCarriageway` (scrub): own-side half too (it deleted Lane #17's corner kerb on Lay Daungkan #2's narrow side:
+    the sawtooth pavement break at the slip triangle).
+  - `buildMouth`: a mouth whose edge has to snap retries with B taken 2 samples into the big road's cut.
+- `roads05_kerbsim.py` side_zone: same own-side half and skip test. Full net: kerb_cross 22, mouth_short 46,
+  mouth_over 38 (unchanged).
+- mouth_short at University x Kabar Aye (Lane #1013 / #1008 / #1014 / #961): kerbsim AGREES with the builder: the
+  builder has no mouth there either (Kabar Aye Pagoda Road is not in `near` there; the lanes end 6-7 studs from the
+  frontage roads #5 / #6). The junction looked fine because those ends sit by the University Ave deck. Data question,
+  not a kerbsim bug: should those lanes join the frontage roads (OSM)? Not changed.
+- Test harness (J7load / J7run / J7queue / J7pick) is in this pass's transcript; J7run now takes `_G.J7Rad[name]`
+  (bahan_ring 300): at +-260 Lane #4701's Kan Yeiktha mouth (its end sample at z 38177.8) was outside the test box,
+  so its slab was never laid: the "hole" by the slip end was a test-box artifact.
+- Studio J11 (no-terrain copy, lifted 400, `Roads05Test`; saved v1175, "Saved new changes" 01:32:23Z, lock released,
+  no data modules / scratch / scraps / YangonRoadsJ7 left; ClaudeTools.YangonRoads = repo, checksum 743589837).
+  Shots `City Legends/2026-11-18 roads05 J11 test - *.jpg`. 0 MOUTH FAILED everywhere; overlap corners 6 shortened,
+  1 dropped (test subset); cut-sample corners 3.
+  - PASS (close-ups too): University Ave x Kabar Aye, Hanthawaddy (ring speck from J11's own run fixed), Bogyoke x
+    Pazundaung Y, Waizayandar slips (island marks + NE sawtooth break gone).
+  - Pyay x University: NW kerbs side by side, island streak and kerb speck GONE. Left: a tiny blue gap between the
+    south-east island and the deck's side wall (islands close-up, lower right), a small kerb step on the north pavement.
+  - Bahan: nose rounded, the loose nose piece and the west-arm notch gone. Left: where Lane #4701's r 101 merge corner
+    meets Kan Yeiktha's kerb (slip end close-up, lower right): 16 corner pieces scrubbed (the arc dips onto Kan
+    Yeiktha's carriageway near TB) and the corner pavement there sits ~4 studs low (yB from Kan Yeiktha's edge
+    height at bPts j 6-7, next to its ring cut: check `bY`). Idea: cap a corner's r (T = R_MAX / tan(theta / 2))
+    on shallow merges, and take yB from the ring-levelled edge.
+  - Sule west: the island's 32nd Street kerb is back. Left: a straight seam between Maha Bandula #2's slab and the
+    ring's (west close-up, x ~645 px), 32nd Street's west pavement has two small dark wedges north of Maha Bandula.
+  - University x Kabar Aye close-up: a thin dark sliver along the west island's deck side: check it was there in J10.
+- QA counts (no data change): mouth_short 46, mouth_over 38, kerb_cross 22, median_cross 1, deck_grade 24, deck_foot 1.
+  Plan is NOT ready for owner approval.
+
+## Next (in order)
+1. Bahan merge corner near TB (above), Sule seam + 32nd Street wedges, Pyay deck-side gap.
+2. QA rows: mouth_short (the Kabar Aye lanes are a data question, see above), mouth_over, kerb_cross, median_cross,
+   deck_grade / deck_foot. kerbsim still does not model corners / islands / cutPair.
+3. Then Studio again (same 7, bahan_ring at +-300).
+
+# (J10 pass below)
+
 
 ## J10 (this pass; YangonRoads only, no data change: roads.json / qa.json are the J9 ones)
 - `YangonRoads.luau`:
