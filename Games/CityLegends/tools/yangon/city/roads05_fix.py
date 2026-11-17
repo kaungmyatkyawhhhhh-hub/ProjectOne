@@ -1873,6 +1873,84 @@ def median_styles(data):
     return dict(n)
 
 
+def mouth_level(data, MIN_GAP=0.15, GRADE=0.03):
+    """(J22, Studio univ_kabaraye / pyay_univ / slip_triangle road_step: Lane #1256 merges into Hledan Road #3 at the
+    University Ave flyover's foot 0.9-1.4 over it: the mouth slab, pinned to Hledan's edge, rose 1 stud in 2.5 studs)
+    A road whose end lies on a bigger road's carriageway (side half + 0.5) takes the host's height there: samples on
+    the host's carriageway sit at the host's height (it is flat across), the step left at the first sample off it fades
+    along the road over |step| / GRADE (20 .. 120 studs). Cut (deck) samples and deck hosts stay."""
+    cutd = {k: set(v) for k, v in data['cut'].items()}
+    decks = {d.get('name') for d in data['decks']} | {d.get('of') for d in data['decks']}
+    R = data['roads']
+    grid = collections.defaultdict(list)
+    for k, r in enumerate(R):
+        for i, q in enumerate(r['s']):
+            grid[(int(q[0] // 64), int(q[2] // 64))].append((k, i))
+
+    def host_at(r, x, z):
+        best = None
+        for gx in (-1, 0, 1):
+            for gz in (-1, 0, 1):
+                for k, j in grid.get((int(x // 64) + gx, int(z // 64) + gz), ()):
+                    o = R[k]
+                    if o is r or o.get('rank', 1e9) >= r.get('rank', 1e9) or o['name'] in decks:
+                        continue
+                    s, cut = o['s'], cutd.get(o['name'], set())
+                    for i in (j - 1, j):
+                        if i < 0 or i + 1 >= len(s):
+                            continue
+                        if i in cut or i + 1 in cut:
+                            continue
+                        a, b = s[i], s[i + 1]
+                        vx, vz = b[0] - a[0], b[2] - a[2]
+                        L2 = vx * vx + vz * vz
+                        if L2 < 1e-9:
+                            continue
+                        u = min(1.0, max(0.0, ((x - a[0]) * vx + (z - a[2]) * vz) / L2))
+                        d = math.hypot(a[0] + vx * u - x, a[2] + vz * u - z)
+                        right = (x - a[0]) * -vz + (z - a[2]) * vx > 0
+                        h = (a[7] if right else a[6]) if len(a) > 7 else o.get('half', 6)
+                        if d < h + 0.5 and (best is None or o['rank'] < best[0]):
+                            best = (o['rank'], a[1] + (b[1] - a[1]) * u, o['name'])
+        return best
+    out, worst = 0, (0.0, None)
+    for r in R:
+        s, cut = r['s'], cutd.get(r['name'], set())
+        if r['name'] in decks or len(s) < 3:
+            continue
+        for idx in (list(range(len(s))), list(range(len(s) - 1, -1, -1))):
+            if idx[0] in cut:
+                continue
+            on = []
+            for i in idx:
+                h = host_at(r, s[i][0], s[i][2]) if i not in cut else None
+                if not h:
+                    break
+                on.append((i, h))
+            if not on or abs(s[on[0][0]][1] - on[0][1][1]) < MIN_GAP:
+                continue
+            new = {i: h[1] for i, h in on}
+            last = on[-1][0]
+            rest = idx[len(on):]
+            gap = s[last][1] - new[last]
+            L = min(120.0, max(20.0, abs(gap) / GRADE))
+            along, prev = 0.0, last
+            for i in rest:
+                if i in cut:
+                    break
+                along += math.hypot(s[i][0] - s[prev][0], s[i][2] - s[prev][2])
+                prev = i
+                if along >= L:
+                    break
+                new[i] = s[i][1] - gap * (1 - along / L)
+            for i, y in new.items():
+                if abs(y - s[i][1]) > abs(worst[0]):
+                    worst = (round(y - s[i][1], 2), r['name'])
+                s[i][1] = round(y, 3)
+            out += 1
+    return dict(ends=out, worst=worst)
+
+
 def main():
     tag = sys.argv[1]
     D = os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag)
@@ -2022,6 +2100,8 @@ def main():
     st['repair'] = roads05_repair.repair(data)
     print('repair', json.dumps(dict(st['repair'], fixed=len(st['repair']['fixed']), repair_left=len(st['repair']['repair_left']))))
     st['butt_match'] = butt_match(data)  # (after repair: it flags the last continuations)
+    st['mouth_level'] = mouth_level(data)  # (J22) a mouth sits at its host's height (deck-foot road_step)
+    print('mouth_level', st['mouth_level'])
     roads = data['roads']
     names = [r['name'] for r in roads]
     cutd = {k: set(v) for k, v in data['cut'].items()}
