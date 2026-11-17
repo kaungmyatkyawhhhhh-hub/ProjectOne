@@ -94,8 +94,11 @@ Numbers and presets: `references/design-tokens.md`. Ready-made pieces: `referenc
       - text depth copy about 14% of the font size;
       - icon depth copy about 13% of the icon size.
     - **Colours (also from that tweak):**
-      - Gradients keep the bright colour until about 45%, e.g. yellow `#FFF200` → `#FFE200` → `#FF9600`.
+      - Gradients keep the bright colour until about 45%, e.g. yellow `#FFF200` → `#FFE200` → `#F39509`.
+      - Purple card: `#7C00F2` → `#8400F4` → `#2A16EA`, with lip `#03246C`.
+      - These values were measured with pixel-check against his frames.
       - Halftone dots are small: a 10 px grid with 4.5 px diamonds.
+      - Tint the dots with the piece's own colour (e.g. `#FFD000` on yellow). White dots at full strength bleach the bottom of the gradient.
     - **Item art (also from that tweak):** a navy `#2B1B3D` silhouette outline, cel shading lit from the top-left, a rim highlight and a gloss streak.
     - **Robux icon:** nested hexes, black → white → black → white, with a black square in the centre and a depth copy.
     - **Building without Figma:** with the Figma MCP capped, drawing the pieces in code (SVG, rendered by headless Chrome) matched his frames.
