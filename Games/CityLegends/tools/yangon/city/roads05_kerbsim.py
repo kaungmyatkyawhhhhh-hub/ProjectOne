@@ -134,6 +134,18 @@ def run(data):
     for m in mouths:
         if 'big' in m:
             mouth_on.setdefault(m['ri'], set()).add(m['big'])
+    # (J19 builder: YangonRoads.crossMouths) at a crossing the smaller road lays no slab on the bigger one and its two
+    # arms are mouths cut on the bigger road's kerb line: neither road keeps a kerb on the other inside the box
+    byname = {x['name']: k for k, x in enumerate(roads)}
+    xbox = {}
+    for c in data.get('crossings', ()):
+        a_, b_ = byname.get(c[0]), byname.get(c[2])
+        if a_ is None or b_ is None:
+            continue
+        sa, sb = roads[a_]['s'][c[1] - 1], roads[b_]['s'][c[3] - 1]
+        R = max(sa[6], sa[7]) + max(sb[6], sb[7]) + 16
+        for u, v in ((a_, b_), (b_, a_)):
+            xbox.setdefault((u, v), []).append((c[4], c[5], R))
     # kerbs
     for ri, r in enumerate(roads):
         s = r['s']
@@ -173,6 +185,8 @@ def run(data):
                         b = net.near(p.x, p.y, 3).get(ri)
                         if b and net.poly_dist(ri, b[1], p.x, p.y) < net.half_at(ri, b[1]) + 2:
                             continue
+                    if on_j is not None and any(math.hypot(p.x - x, p.y - z) < R for x, z, R in xbox.get((ri, on_j), ())):
+                        continue
                     if side_zone(net, ri, p.x, p.y, 'Kerb'):
                         continue
                     if scrubbed(p):  # (J18) the builder's scrub pass removes it (YangonRoads.scrub, 2nd pass)

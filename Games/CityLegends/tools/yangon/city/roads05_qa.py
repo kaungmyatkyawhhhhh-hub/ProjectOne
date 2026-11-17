@@ -252,9 +252,10 @@ def cont_pairs(data):
             e = h['s'][ke]
             if math.hypot(e[0] - q[0], e[2] - q[2]) <= 3:
                 same = ke != k  # start on the host's end (or end on its start) runs the same way
-                al = abs(q[3] * e[3] + q[4] * e[4])
-                # (a fork: several records on one host end: only the one running on most straight carries its pavement)
-                if al > best.get((h['name'], ke), (-1,))[0]:
+                # (a fork: several records on one host end: only the one running on most straight carries its pavement;
+                # J20: a tie (Kun Chan Road #3 and Lane #3414 leave in one direction) goes to the wider record)
+                al = (round(abs(q[3] * e[3] + q[4] * e[4]), 2), q[6] + q[7])
+                if al > best.get((h['name'], ke), ((-1, 0),))[0]:
                     best[(h['name'], ke)] = (al, r, h, q, e, same)
     for v in best.values():
         yield v[1:]
@@ -583,7 +584,8 @@ def main():
                 if not DL.intersects(G):
                     continue
                 if G.geom_type == 'Polygon':
-                    ccs = [c[j] for j, q in enumerate(s) if G.contains(_Pt(q[0], q[2]))]
+                    from roads05_fix import water_cc
+                    ccs = water_cc(G, s, c)  # (J20) the channel middle of each run over it (as deck_regrade)
                 else:
                     X = DL.intersection(G)
                     ccs = [DL.project(P) for P in (list(X.geoms) if hasattr(X, 'geoms') else [X]) if P.geom_type == 'Point']

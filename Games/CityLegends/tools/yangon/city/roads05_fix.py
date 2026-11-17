@@ -705,6 +705,25 @@ def _rail_water():
     return _RW
 
 
+def water_cc(G, s, c):
+    """(J20, Pinlon Road Flyover over Pazundaung Creek: the OSM water area runs up to the deck's east foot, so every
+    sample over it asked for the clearance and no ramp could give it) a water / rail AREA asks for its clearance at
+    the middle of each run of deck samples over it (the channel: the crest goes over the water, the feet stand on the
+    banks); a line keeps its crossing points"""
+    ins = [G.contains(Point(q[0], q[2])) for q in s]
+    out, j = [], 0
+    while j < len(s):
+        if ins[j]:
+            k = j
+            while k + 1 < len(s) and ins[k + 1]:
+                k += 1
+            out.append((c[j] + c[k]) / 2)
+            j = k + 1
+        else:
+            j += 1
+    return out
+
+
 def _deck_try(dk, r, lines, tree, steep=False):
     """the new profile of one deck, or None when no grade <= DECK_MAX keeps every road crossing's clearance (and,
     J16, CLEAR_RAIL over a railway / CLEAR_WATER over water). dk may be a chain of butted decks (_deck_chains): then
@@ -730,7 +749,7 @@ def _deck_try(dk, r, lines, tree, steep=False):
         if not DL.intersects(G):
             continue
         if G.geom_type == 'Polygon':
-            ccs = [c[j] for j, q in enumerate(s) if G.contains(Point(q[0], q[2]))]
+            ccs = water_cc(G, s, c)
         else:
             X = DL.intersection(G)
             ccs = [conv(DL.project(P)) for P in (list(X.geoms) if hasattr(X, 'geoms') else [X]) if P.geom_type == 'Point']
@@ -755,6 +774,8 @@ def _deck_try(dk, r, lines, tree, steep=False):
                 oy = float(np.interp(cc, c, dk.get('_old', old)))
                 need.append((cc, min(oy, o['s'][oi][1] + DECK_CLEAR)))
     ct = c[int(np.argmax(old))]
+    if need:  # (J20) the crest over the water / railway it crosses, not where OSM's profile peaked
+        ct = max(need, key=lambda x: x[1])[0]
     soft = [(ct, top - 1.0)] if DECK_FLAT + 10 < ct < L - DECK_FLAT - 10 else []  # keep the old top (rail / water)
 
     def prof(g):
@@ -1357,6 +1378,59 @@ def signals(data):
 STUB = 30.0  # roads05_qa stub_in_grass
 
 
+def fork_trim(data, IN=2.0):
+    """(J20, Kun Chan x Gyophyu: Lane #3414 lay on Kun Chan Road #3 within 0.05 for ~40 studs, both carrying on from
+    Kun Chan Road's widened end: two slabs z-fighting in the box) a fork = several records carrying on from one host
+    end (joint within the host end's half + 3); the widest keeps the continuation, every other one whose first samples
+    lie inside a wider sibling's carriageway is trimmed back to its last sample still IN inside it and starts there as
+    a mouth on it (the builder cuts the mouth on the kerb line: one slab, one kerb)"""
+    cutd = {k: set(v) for k, v in data['cut'].items()}
+    decked = set(d['of'] for d in data['decks'])
+    byname = {r['name']: r for r in data['roads']}
+    forks = collections.defaultdict(list)
+    for r in data['roads']:
+        for f, k in (('startsOnEnd', 0), ('endsOnEnd', -1)):
+            h = byname.get(r.get(f)) if isinstance(r.get(f), str) else None
+            if not h:
+                continue
+            q = r['s'][k]
+            hk = min((0, -1), key=lambda j: (h['s'][j][0] - q[0]) ** 2 + (h['s'][j][2] - q[2]) ** 2)
+            e = h['s'][hk]
+            if math.hypot(e[0] - q[0], e[2] - q[2]) <= max(e[6], e[7]) + 3:
+                forks[(h['name'], hk)].append((r, f, k))
+    out = []
+    for recs in forks.values():
+        if len(recs) < 2:
+            continue
+        recs.sort(key=lambda x: -(x[0]['s'][x[2]][6] + x[0]['s'][x[2]][7]))
+        for a, (r, f, k) in enumerate(recs[1:], 1):
+            if r['name'] in cutd or r['name'] in decked or len(r['s']) < 6:
+                continue
+            s = r['s'] if k == 0 else r['s'][::-1]
+            for o, _, _ in recs[:a]:
+                line = LineString([(q[0], q[2]) for q in o['s']])
+                w = min(q[6] + q[7] for q in o['s'][:12] + o['s'][-12:]) / 2
+                last = None
+                for i, q in enumerate(s[:-3]):
+                    if line.distance(Point(q[0], q[2])) <= w - IN:
+                        last = i
+                    elif i > 1:
+                        break
+                if last and last >= 2:
+                    break
+            else:
+                continue
+            s = s[last:]
+            r['s'] = s if k == 0 else s[::-1]
+            if r.get('turn'):
+                for tn in r['turn']:
+                    tn['i'] -= last if k == 0 else 0
+                r['turn'] = [tn for tn in r['turn'] if 0 <= tn['i'] < len(r['s'])]
+            del r[f]
+            out.append(dict(road=r['name'], on=o['name'], dropped=last))
+    return out
+
+
 def drop_stubs(data):
     """(J15, QA stub_in_grass) a road under STUB studs with an end on nothing (no other carriageway within 3, no ring,
     not a map edge) goes: what is left of an OSM dead-end bit after the mouths took the rest (a slab and kerb ring in
@@ -1557,6 +1631,18 @@ def walk_match(data):
     and made Kun Chan Road's 28.7 slab longer), until no joint changes (a chain ends up one width); forks: the
     straightest record only"""
     from roads05_qa import cont_pairs
+    # (J20, downtown: "narrower wins" narrowed the wide downtown pavements) first both records of a joint take the
+    # WIDER walk where the narrower record's building line leaves room for it (downtown_walks' room, 10th percentile)
+    room = data.pop('_room', {})
+    up = 0
+    for r, h, q, e, same in list(cont_pairs(data)):
+        for a, b in (('walkL', 'walkL'), ('walkR', 'walkR')) if same else (('walkL', 'walkR'), ('walkR', 'walkL')):
+            w = max(r.get(a) or 7.5, h.get(b) or 7.5)
+            if all((o.get(k) or 7.5) >= w - 1e-6 or room.get((o['name'], k), 0) >= w for o, k in ((r, a), (h, b))):
+                for o, k in ((r, a), (h, b)):
+                    if (o.get(k) or 7.5) < w - 1e-6:
+                        o[k] = w
+                        up += 1
     n = 0
     for _ in range(50):
         ch = 0
@@ -1570,7 +1656,7 @@ def walk_match(data):
         n += ch
         if not ch:
             break
-    return n
+    return dict(widened=up, narrowed=n)
 
 
 def corner_radii(data):
@@ -1642,6 +1728,8 @@ def downtown_walks(data):
             if len(hit) < 0.5 * len(ds):
                 continue
             w = float(np.percentile(hit, 40))
+            # (J20) the room to the building line on nearly every sample: walk_match may widen this side up to it
+            data.setdefault('_room', {})[(r['name'], key)] = min(DT_WALK_MAX, float(np.percentile(hit, 10)))
             w = max(own, min(DT_WALK_MAX, w))
             if w > own + 0.5:
                 r[key] = round(w, 1)
@@ -1699,6 +1787,7 @@ def main():
     chained['deck_smooth'] = deck_smooth(data)
     chained['deck_regrade'] = deck_regrade(data)  # (J15) last: on the final plan's chainage
     chained['deck_fair'] = deck_fair(data)  # (J16) deck_wobble
+    chained['fork_trim'] = fork_trim(data)  # (J20) before the mouths: a trimmed fork record is a mouth now
     print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}
