@@ -32,7 +32,7 @@ from shapely.strtree import STRtree
 sys.stdout.reconfigure(encoding='utf-8')
 import geo
 from roads05_qa import quads
-from roads05_paint import raw_boxes, double_pairs, merged_boxes, neff, runs, nose_caps, SIG_BOX
+from roads05_paint import raw_boxes, double_pairs, merged_boxes, neff, runs, nose_caps, SIG_BOX, folds
 
 RULES = ('arrow_missing', 'stopline_missing', 'stopline_wrong_side', 'dash_jog', 'dash_side_by_side', 'paint_in_median',
          'double_box', 'box_paint', 'paint_snake', 'edge_missing', 'zebra_colour', 'zebra_torn')
@@ -207,7 +207,8 @@ def main():
         # structure, tapers included); the data's lane count only where no dash is painted there
         ue = (e1 - e0) / max(L, 1e-9)
         band = Polygon([e0 - h * 4, e1 - h * 4, e1 - h * 40, e0 - h * 40])
-        ts = sorted(float((np.array(polys[j].centroid.coords[0]) - e0) @ ue) for j in near(band, 0.0, ('lane',)))
+        ts = sorted(float((np.array(polys[j].centroid.coords[0]) - e0) @ ue) for j in near(band, 0.0, ('lane',))
+                    if items[j].get('r') == r['name'])
         ts = [t for t in ts if 1.5 < t < L - 1.5]
         cl = []
         for t in ts:
@@ -354,7 +355,10 @@ def main():
     zs_ = [polys[i] for w in ('zebra', 'stop', 'giveway') for i in by.get(w, [])]
     ztree = STRtree(zs_) if zs_ else None
     fills = unary_union([Polygon([(p[0], p[2]) for p in f]).buffer(0) for f in data.get('fills', []) if len(f) >= 3])
-    skipU = unary_union([unary_union(merged_boxes(raw, R)[0]).buffer(4) if raw else Polygon(), rings, fills.buffer(2)])
+    # (J17) fold-backs of a centre line (geometry faults: no paint there, listed in the handover) are not a missing line
+    foldU = unary_union([Point(r['s'][i][0], r['s'][i][2]).buffer(max(r['s'][i][6], r['s'][i][7]) + 8)
+                         for r in main_ for i in folds(r['s'])])
+    skipU = unary_union([unary_union(merged_boxes(raw, R)[0]).buffer(4) if raw else Polygon(), rings, fills.buffer(2), foldU])
     skip_t = STRtree(list(skipU.geoms) if hasattr(skipU, 'geoms') else [skipU])
     skip_g = list(skipU.geoms) if hasattr(skipU, 'geoms') else [skipU]
 

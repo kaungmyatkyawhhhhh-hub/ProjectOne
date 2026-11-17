@@ -56,6 +56,24 @@ SIG_BOX = 30.0        # (J17) a signalled junction point this close to a box mak
 MIN_PIECE = 3.0       # (J15) a clipped lane / edge piece shorter than this is dropped (clean line ends)
 
 
+def folds(s):
+    """(J17) samples where a road's centre line steps back: a chord against the sample's own direction, or two chords
+    turning more than ~107 degrees"""
+    out = []
+    for i in range(1, len(s)):
+        ax, az = s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2]
+        L = math.hypot(ax, az)
+        if L < 1e-6:
+            continue
+        if ax * s[i][3] + az * s[i][4] < -0.3 * L:
+            out.append(i)
+        elif i + 1 < len(s):
+            bx, bz = s[i + 1][0] - s[i][0], s[i + 1][2] - s[i][2]
+            if ax * bx + az * bz < -0.3 * L * math.hypot(bx, bz):
+                out.append(i)
+    return out
+
+
 def runs(mask):
     out, i, n = [], 0, len(mask)
     while i < n:
@@ -392,7 +410,8 @@ def bounds_at(LL, name, i, sg):
         if idx[0] <= i <= idx[-1] and sg in out:
             j = i - idx[0]
             inner, outer, nn, lines = out[sg]
-            return [inner[j]] + [ln[j] for k, ln in enumerate(lines) if k + 1 < nn[j] and not np.isnan(ln[j])] + [outer[j]]
+            # (J17) every line that is painted there (a lane still tapering out included): arrows sit between the dashes
+            return [inner[j]] + [ln[j] for ln in lines if not np.isnan(ln[j])] + [outer[j]]
     return None
 
 
@@ -606,6 +625,12 @@ def build(data, signals=None):
                 # carriageway (a road running alongside behind a thin island no longer wipes this road's kerb line)
                 mouths.append(unary_union([cw[o['name']].buffer(0.5), x.buffer(4)]) if o['rank'] > r['rank']
                               else cw[o['name']].buffer(1))
+        # (J17) where the data's centre line steps back on itself (a geometry fault, listed in the paint handover) every
+        # line of this road would scribble: no paint of this road within its width there
+        fo = folds(s)
+        fold_u = unary_union([Point(s[i][0], s[i][2]).buffer(max(s[i][6], s[i][7]) + 6) for i in fo]) if fo else Polygon()
+        mouths.append(fold_u)
+        clip_mid = Clip(clip_all, fold_u) if fo else clip_all
         mouth_u = unary_union(mouths) if mouths else Polygon()
         clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
         clip_edge = Clip(edge_np, zz, mouth_u, fills.buffer(2))
@@ -623,7 +648,7 @@ def build(data, signals=None):
                 for sg in (-1, 1):
                     o = sg * steady([s[i][8] for i in sub], [0.0] + dsr[m0 + 1:m1 + 1], 1)
                     ln = smooth([(s[i][0] - s[i][4] * o[j], s[i][2] + s[i][3] * o[j]) for j, i in enumerate(sub)])
-                    P.line('LY', ln, YELLOW_W, 'median', r['name'], clip_all, min_len=MIN_PIECE)
+                    P.line('LY', ln, YELLOW_W, 'median', r['name'], clip_mid, min_len=MIN_PIECE)
             # (J15, owner ref 'Sule Square road') a yellow edge line along each outer kerb of a main road
             edges = [(outer, -sg) for sg, (inner, outer, nn, lines) in out.items()]
             if one:
@@ -641,7 +666,7 @@ def build(data, signals=None):
                     if u1 - u0 < 2:
                         continue
                     ln = smooth([(s[a + j][0] - s[a + j][4] * c0[j], s[a + j][2] + s[a + j][3] * c0[j]) for j in range(u0, u1 + 1)])
-                    P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_all)
+                    P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_mid)
                 # (J15) a painted median (lanes held apart, no kerbed median built): a solid line on each side of it
                 flush = [s[i][11] >= 1.2 and s[i][8] <= 0.3 for i in rng]
                 for u0, u1 in runs(flush):
@@ -650,7 +675,7 @@ def build(data, signals=None):
                     for sg in (-1, 1):
                         ln = smooth([(s[a + j][0] - s[a + j][4] * (c0[j] + sg * (s[a + j][11] - 0.3)),
                                       s[a + j][2] + s[a + j][3] * (c0[j] + sg * (s[a + j][11] - 0.3))) for j in range(u0, u1 + 1)])
-                        P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_all)
+                        P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_mid)
             # lane dividers: one smooth offset per boundary
             for sg, (inner, outer, nn, lines) in out.items():
                 for t in lines:
