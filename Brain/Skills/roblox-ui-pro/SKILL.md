@@ -77,8 +77,18 @@ Numbers and presets: `references/design-tokens.md`. Ready-made pieces: `referenc
   - Build every piece with Develuper's recipe: a gradient that is brightest at the top, a darker lip copy under it for depth, a black outline, a shine band, an inner white edge highlight and little 4-point sparkles.
   - Text is Fredoka One with a thick outside stroke and a zero-blur drop shadow (the depth copy).
   - Icons are chunky SVGs with an ink outline. HUD icons are white; item icons are coloured. All icons get the same depth shadow.
-  - Item cards get a colour per kind and a soft radial glow behind the item.
-  - Ornaments sit in the corners only (leaf sprigs).
+  - **Owner correction, 18 Nov:** the owner said "i think the design sucks" about the v3 Figma kit, which had earthy colours, leaf-sprig ornaments, a radial glow behind items and a dark panel. The owner then said "we need to do 1:1 to the tutorial tips, i like those ui designs". So **copy Develuper's style 1:1**, with no themed reinterpretation. The full recipe and frames are in the vault note "2026-11-18 Watch study - Develuper UI 10x (1-to-1 recipe)".
+    - Panel: a **white panel** with a light grey inner border, or a semi-transparent black one.
+    - Header: a **green gradient title bar** ("SHOP!") with a 3D icon, overlapping the top-left of the panel.
+    - Close: a red **"Close" text button** at the top right, not an X.
+    - The **hero item is big and first**: a tall yellow card on the left. Smaller cards fill a grid after it.
+    - Cards are **saturated colour tiles** whose colour signals the tier: yellow, magenta, purple, cyan, green.
+    - Every price sits on a **green pill** with a currency icon, such as the Robux hex.
+    - Every piece gets a **halftone dot texture** and **diagonal shine stripes**. Put both in a mask on a blend mode.
+    - Every piece gets an **inside-stroke edge highlight**.
+    - The black outline goes Outside, 4.5 px on a 509 px button.
+    - The lip is about 14% of the height, in a darker shade.
+    - Export each piece just under 1024 px.
   - Build each piece as a Figma component that exports alone, then 9-slice it in Studio.
   - Use ChatGPT art only for things vectors can't do (scenes, thumbnails), never for the UI frames.
   - The Figma MCP on the Starter plan runs out of calls fast. Batch the whole kit into 2-3 `use_figma` calls, and read results back through the Figma tab in Chrome instead of spending calls on screenshots.

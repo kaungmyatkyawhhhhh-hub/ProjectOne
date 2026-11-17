@@ -1,0 +1,146 @@
+lang en
+[  0.0-  5.0]  In this video, I'm going to take you from making UIs like this.
+[  5.0-  8.0]  To making professional looking UIs like this.
+[  8.0- 12.0]  Simply by developing your own style and putting it into practice.
+[ 12.0- 14.0]  You can get results like this.
+[ 14.0- 16.0]  Let's get into it.
+[ 16.0- 20.0]  Roblox's UI Editor is somewhat limited,
+[ 20.0- 24.0]  and that's why your interfaces can end up looking pretty flat.
+[ 24.0- 26.0]  Not because you don't know what you're doing,
+[ 26.0- 29.0]  but because you don't have the right tools.
+[ 29.0- 33.0]  To fix that, we're going to use a free design tool called Figma.
+[ 33.0- 36.0]  Figma is a pretty powerful program,
+[ 36.0- 40.0]  but to get started, you only need to know the basics.
+[ 40.0- 41.0]  This is a frame.
+[ 41.0- 45.0]  Basically, it's a box that can contain all kinds of objects,
+[ 45.0- 48.0]  and it's one of the most important things in Figma.
+[ 48.0- 51.0]  Just don't confuse it with a rectangle,
+[ 51.0- 54.0]  because you can't put other objects inside a rectangle.
+[ 54.0- 56.0]  Inside a frame's properties,
+[ 56.0- 60.0]  we have things like position, rotation, opacity,
+[ 60.0- 64.0]  and additional properties like fill, stroke, and so on.
+[ 64.0- 65.0]  That's it.
+[ 65.0- 67.0]  We'll cover everything else as we go.
+[ 67.0- 70.0]  Let's start with this pretty cool design.
+[ 70.0- 73.0]  Here, we're always looking for two things,
+[ 73.0- 75.0]  identity and depth.
+[ 75.0- 79.0]  With identity, we're basically giving the UIs colors,
+[ 79.0- 82.0]  shapes, typography, and texture.
+[ 82.0- 86.0]  And with depth, we're trying to make it look more like a 3D button.
+[ 86.0- 89.0]  Can you see the difference between these two?
+[ 89.0- 91.0]  They both have the same identity,
+[ 91.0- 93.0]  but the one at the bottom has depth.
+[ 93.0- 95.0]  Let's make it.
+[ 95.0- 98.0]  Let's start by setting up a rectangle.
+[ 98.0-101.0]  This is the shape I want, with slightly rounded corners.
+[101.0-105.0]  To add color to an object, we can go to fill.
+[105.0-108.0]  Here, we can switch from solid to gradient.
+[108.0-110.0]  Try to pick saturated colors
+[110.0-113.0]  and keep the brightest ones towards the top.
+[113.0-117.0]  The yellow-orange combination works perfectly here.
+[117.0-121.0]  Now that we have a style in mind, let's create some depth.
+[121.0-124.0]  With Ctrl plus D, we can duplicate the shape,
+[124.0-128.0]  and by holding Shift, we can move it straight down.
+[128.0-131.0]  It's important to keep this shape behind the other one
+[131.0-133.0]  and make its color slightly darker.
+[133.0-136.0]  Now let's combine both shapes.
+[136.0-138.0]  Select them and click Flatten.
+[138.0-142.0]  This gives us one shape that we can use to add a black stroke.
+[142.0-146.0]  Set the stroke to outside so it looks nice and clean.
+[148.0-151.0]  Okay, this is already looking better.
+[151.0-153.0]  Let's add some test.
+[153.0-157.0]  I think Fredoka 1 is probably one of the most iconic Roblox fonts.
+[157.0-159.0]  It looks great with a thick stroke,
+[159.0-163.0]  and very importantly, with the same depth trick.
+[163.0-166.0]  The key element of this button is the arrow.
+[166.0-170.0]  I usually find icons like this on UI resource websites
+[170.0-172.0]  or just on Google.
+[172.0-175.0]  I like this one, so I'm just going to copy it
+[175.0-177.0]  and paste it inside.
+[177.0-180.0]  I know it's black, but we want the arrow to be white.
+[180.0-184.0]  To change the color, the image must be a SVG.
+[184.0-187.0]  Figma can detect if this is an SVG,
+[187.0-189.0]  which is perfect, but if it isn't,
+[189.0-193.0]  we can quickly vectorize it using a plugin like this.
+[196.0-200.0]  Now we can change its color and apply the same depth trick.
+[200.0-201.0]  Perfect.
+[201.0-203.0]  Now let's add some shine.
+[203.0-205.0]  Since our button is square,
+[205.0-208.0]  an invisible frame can work as a mask.
+[210.0-212.0]  Anything we put inside this frame
+[212.0-215.0]  will now be clipped if it goes outside the shape.
+[215.0-217.0]  You might be thinking that this effect
+[217.0-220.0]  looks pretty bad right now, and you're right.
+[220.0-222.0]  That's where blend modes come in.
+[222.0-225.0]  Here, you can pick whichever blend mode
+[225.0-227.0]  looks best for your effect.
+[227.0-229.0]  There we go.
+[229.0-232.0]  Now, there's one effect that makes a surprisingly big difference,
+[232.0-235.0]  and I only discovered it recently.
+[235.0-237.0]  Edge highlighting.
+[237.0-239.0]  We'll create another invisible frame
+[239.0-242.0]  and make it the same shape as our main rectangle.
+[242.0-245.0]  Then we'll add an inside stroke and change the blend mode.
+[245.0-248.0]  This little detail looks really good.
+[248.0-251.0]  Finally, I'm going to visit UI resources
+[251.0-253.0]  and grab these little stars.
+[253.0-255.0]  Using the same technique,
+[255.0-259.0]  I'll put them inside the mask and change their blend mode.
+[259.0-261.0]  And there we go.
+[261.0-266.0]  You can also add a drop shadow in the effects section if you want.
+[266.0-269.0]  Congratulations, you've just learned the techniques
+[269.0-272.0]  you need to turn a button like this into one like this.
+[272.0-274.0]  Now it's your turn.
+[274.0-277.0]  Keep practicing until you can develop your own style,
+[277.0-279.0]  like these examples here.
+[279.0-281.0]  Take inspiration from other people,
+[281.0-283.0]  and even copy me if you want,
+[283.0-285.0]  because this style isn't mine.
+[285.0-287.0]  It's a pretty popular style.
+[287.0-290.0]  And to really show you what a complete interface can look like,
+[290.0-293.0]  let me show you this one I've been working on.
+[293.0-296.0]  This way, I can show you some of the most important things
+[296.0-299.0]  I've applied to the whole structure.
+[299.0-302.0]  As you can see, it's a small shop with some items.
+[302.0-305.0]  The key here is knowing how to create contrast
+[305.0-308.0]  between your buttons, choose the right colors,
+[308.0-311.0]  and build a structure that actually works.
+[311.0-313.0]  My structure is pretty simple.
+[313.0-316.0]  I start with the top bar that stands out,
+[316.0-318.0]  and use it to open the shop.
+[318.0-321.0]  For the background, I usually go with either white
+[321.0-324.0]  with some details, or a semi-transparent black.
+[324.0-326.0]  This gives you more freedom
+[326.0-328.0]  when choosing the rest of your colors.
+[328.0-330.0]  One of the most important things
+[330.0-333.0]  is making your main item bigger and more prominent,
+[333.0-335.0]  and placing it first.
+[335.0-339.0]  Then you can have smaller, less attractive items afterwards.
+[339.0-341.0]  Each item has its own text,
+[341.0-344.0]  a small description if it includes multiple things,
+[344.0-346.0]  a large image of the item,
+[346.0-349.0]  and, very importantly, a green price button.
+[349.0-353.0]  I don't know why, but green is just the color of money.
+[353.0-356.0]  I'd also recommend adding small currency icons,
+[356.0-359.0]  like robux, so it's immediately clear
+[359.0-361.0]  what you're paying with.
+[361.0-363.0]  That's pretty much it.
+[366.0-369.0]  Going from Figma to Roblox is honestly pretty tedious,
+[369.0-372.0]  so I'll keep this quick.
+[372.0-374.0]  We have to export every image separately,
+[374.0-376.0]  and if they have a lot of detail,
+[376.0-379.0]  I'd recommend keeping them as big as possible,
+[379.0-382.0]  but just under 1024 pixels,
+[382.0-386.0]  since Roblox can downscale larger images.
+[386.0-388.0]  Once we've exported every element,
+[388.0-390.0]  we'll open Roblox Studio,
+[390.0-392.0]  and then the Asset Manager.
+[392.0-395.0]  Here we can upload all our images to Roblox,
+[395.0-398.0]  so they get their own ID.
+[400.0-403.0]  The annoying part is rebuilding the structure inside Roblox
+[403.0-406.0]  using image labels and image buttons.
+[409.0-411.0]  And, there we go.
+[411.0-413.0]  It doesn't look too bad.
+[413.0-416.0]  I'd still like the images to look a little sharper though.
+[416.0-419.0]  If you want me to show you how I animate these buttons,
+[419.0-422.0]  let me know, and maybe we'll do a part two.
