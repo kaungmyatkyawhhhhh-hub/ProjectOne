@@ -9,7 +9,7 @@ Big moments sell the game in play and in TikToks. The two most-watched Roblox de
 
 | File | Use |
 |---|---|
-| `scripts/VFXKit.luau` | Copy into ReplicatedStorage. Client-only effects: `impactFrame`, `shake`, `fovPunch`, `flash` (with a `peak` for gentle washes), `uiBurst` (UI rays over menus/ViewportFrames), `shockwave`, `starburst`, `debris`, `titleCard` (optional centre), `heavyHit`, `Tiers`, `reveal`, `overlay()`, plus `oklch` colours. Tested 16 Nov in Studio Play; live in MM Outfit Catalog. |
+| `scripts/VFXKit.luau` | Copy into ReplicatedStorage. Client-only effects: `impactFrame`, `shake`, `fovPunch`, `flash` (with a `peak` for gentle washes), `uiBurst` (soft glow + ring + motes over menus/ViewportFrames), `shockwave`, `glowBurst` (soft halo + light pulse + motes; `starburst` is an alias), `debris`, `titleCard` (optional centre), `heavyHit`, `Tiers`, `reveal`, `overlay()`, plus `oklch` colours. Tested 16 Nov in Studio Play (glowBurst/uiBurst re-tested 17 Nov); live in MM Outfit Catalog. |
 
 ## 1. Plan the moment first
 Write one line per moment: **event | what the player must feel | length | who sees it (self / everyone) | how often**.
@@ -61,7 +61,7 @@ Order matters. The hit lands on frame 0:
 ## 4. Rarity reveal ladder (the RNG clip look)
 - **Escalate on one axis per tier** so players feel the climb. In `VFXKit.Tiers`:
   - Common: colour only.
-  - Rare: + a small starburst.
+  - Rare: + a small soft glow (`glowBurst`).
   - Epic: + a bigger burst and a little shake.
   - Legendary: + a flash.
   - Secret: + a stronger flash/shake and a darker background.
@@ -99,7 +99,7 @@ Order matters. The hit lands on frame 0:
   - it may also fire for "already owned" taps; tag those and skip them;
   - `PromptBulkPurchase` checkouts may not fire it at all; fire it from wherever the purchase is recorded;
   - de-duplicate on the client (one celebration per 2 s): single purchases often arrive twice (PromptPurchaseFinished + the record step).
-- **Over UI, use UI effects.** World parts (starburst, shockwave) are hidden behind a full-screen ViewportFrame stage or a menu. Use `uiBurst` (rays + glow in the overlay ScreenGui) there.
+- **Over UI, use UI effects.** World parts (glowBurst, shockwave) are hidden behind a full-screen ViewportFrame stage or a menu. Use `uiBurst` (glow + ring in the overlay ScreenGui) there.
 
 ## 5. Verify in Studio (the loop)
 1. Start Play. In the Client datamodel, put the kit in ReplicatedStorage, `require` it, and call each effect on the local character.
@@ -113,7 +113,7 @@ Order matters. The hit lands on frame 0:
      - `PromptPurchaseFinished` fires only after the player presses **OK** on "Purchase completed", so wait for that before checking the celebration.
    - **Panels opened from a full-screen view must draw above it.** Check that a panel opened from inside a viewer/stage really shows (DisplayOrder). MM's Buy all opened its checkout *behind* the viewer, unnoticed through two passes.
    - To run the UI audit on many devices in one Play session, put it in a temporary `ReplicatedStorage.ZZ_UIAudit` module that returns a function. Switch devices mid-Play with `StudioDeviceSimulatorService:SetDeviceAsync` from the **Client** datamodel (the Edit datamodel isn't available in Play), and delete the module afterwards.
-2. To screenshot short effects, call them with long durations (impact 4 s, starburst time 6, title hold 5), then `screen_capture`. Real durations are too short to catch.
+2. To screenshot short effects, call them with long durations (impact 4 s, glowBurst time 5, title hold 5), then `screen_capture`. Real durations are too short to catch.
 3. Check:
    - silhouettes read;
    - the title is readable on a phone (Device Simulator, `samsung_galaxy_a06`);
@@ -125,9 +125,9 @@ Order matters. The hit lands on frame 0:
 ## 6. Known limits of the kit (16 Nov)
 - The shockwave is a filled neon disc. For a ring, use a torus MeshPart or a circle of Beams.
 - Starburst spikes are world parts, so an active impact-frame tint colours them too. Play them after the frame, as `heavyHit` does.
-- **`starburst` is a spike ring, which breaks the owner's no-sunburst rule** (section 2b). `Tiers` and `heavyHit` still call it. Until the kit is changed, swap it for `uiBurst` (over UI) or a soft glow plus shockwave (in the world).
+- **17 Nov: the spike `starburst` and the rays in `uiBurst` were removed** (owner rule, section 2b). `glowBurst` is three stacked camera-facing discs (BillboardGui, no texture), a PointLight pulse and drifting motes; `reveal()` calls it. Motes get random angles and distances so they never line up as spokes. A real soft-gradient texture would look softer than stacked discs: upgrade if the halo edges read as rings up close.
 - No flipbook or texture VFX (slashes, smoke, energy swirls) yet. Make the sprites with the `roblox-chatgpt-art-pipeline` skill (flipbook sheets), then use `ParticleEmitter` with `FlipbookLayout`.
-- Not tested on a real phone. Many neon parts at once can cost frames on low-end phones: keep starbursts ≤ 24 spikes.
+- Not tested on a real phone. Many neon parts at once can cost frames on low-end phones: glowBurst clamps motes to 24, use fewer on phones.
 
 ## 7. Report + save
 - A table: moment | tier/frequency | effects used | length | sound | screenshot.

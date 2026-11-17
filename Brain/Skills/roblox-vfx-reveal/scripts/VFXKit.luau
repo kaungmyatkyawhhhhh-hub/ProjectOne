@@ -159,11 +159,27 @@ function VFXKit.impactFrame(models: {Model}, style: string?, duration: number?)
 	end)
 end
 
--- UI starburst: rays + a soft glow ring drawn in the overlay ScreenGui. Use it when the moment
--- happens over UI (a ViewportFrame stage, a menu) where world parts would be hidden.
--- center = screen position (UDim2), length in px.
-function VFXKit.uiBurst(center: UDim2, color: Color3?, rays: number?, length: number?, time: number?)
-	local n, len, t = rays or 14, length or 160, time or 0.55
+local function circle(parent: Instance, color: Color3, transparency: number, z: number): Frame
+	local f = Instance.new("Frame")
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Position = UDim2.fromScale(0.5, 0.5)
+	f.BackgroundColor3 = color
+	f.BackgroundTransparency = transparency
+	f.BorderSizePixel = 0
+	f.ZIndex = z
+	local k = Instance.new("UICorner")
+	k.CornerRadius = UDim.new(0.5, 0)
+	k.Parent = f
+	f.Parent = parent
+	return f
+end
+
+-- UI burst: a soft glow, one thin expanding ring and a few drifting motes, drawn in the overlay ScreenGui.
+-- Use it when the moment happens over UI (a ViewportFrame stage, a menu) where world parts would be hidden.
+-- No rays: the owner's rule is never a spiky sunburst. Motes get random angles AND distances so they never read as spokes.
+-- center = screen position (UDim2), length = how far it reaches in px.
+function VFXKit.uiBurst(center: UDim2, color: Color3?, motes: number?, length: number?, time: number?)
+	local n, len, t = math.clamp(motes or 10, 0, 24), length or 160, time or 0.55
 	local c = color or Color3.fromRGB(255, 220, 140)
 	local holder = Instance.new("Frame")
 	holder.Name = "UIBurst"
@@ -172,39 +188,32 @@ function VFXKit.uiBurst(center: UDim2, color: Color3?, rays: number?, length: nu
 	holder.Size = UDim2.fromOffset(0, 0)
 	holder.ZIndex = 55
 	holder.Parent = overlayGui()
-	local glow = Instance.new("Frame")
-	glow.AnchorPoint = Vector2.new(0.5, 0.5)
-	glow.Size = UDim2.fromOffset(20, 20)
-	glow.BackgroundColor3 = c
-	glow.BackgroundTransparency = 0.35
-	glow.ZIndex = 55
-	local gc = Instance.new("UICorner")
-	gc.CornerRadius = UDim.new(0.5, 0)
-	gc.Parent = glow
-	glow.Parent = holder
-	tween(glow, t, {Size = UDim2.fromOffset(len * 1.3, len * 1.3), BackgroundTransparency = 1}, Enum.EasingStyle.Quint)
+	-- two stacked discs = a soft radial falloff without a texture
+	for i, k in {1.3, 0.75} do
+		local disc = circle(holder, if i == 2 then c:Lerp(Color3.new(1, 1, 1), 0.35) else c, if i == 2 then 0.25 else 0.5, 55)
+		disc.Size = UDim2.fromOffset(16, 16)
+		tween(disc, t, {Size = UDim2.fromOffset(len * k, len * k), BackgroundTransparency = 1}, Enum.EasingStyle.Quint)
+	end
+	local ring = circle(holder, c, 1, 56)
+	ring.Size = UDim2.fromOffset(12, 12)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color, stroke.Thickness, stroke.Transparency = c, 3, 0.15
+	stroke.Parent = ring
+	tween(ring, t, {Size = UDim2.fromOffset(len * 1.2, len * 1.2)}, Enum.EasingStyle.Quint)
+	tween(stroke, t, {Transparency = 1, Thickness = 1}, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
 	if not reduced() then
-		for i = 1, n do
-			local a = (i / n) * math.pi * 2 + math.random() * 0.15
-			local l = len * (0.6 + math.random() * 0.4)
-			local w = 4 + math.random() * 3
-			local ray = Instance.new("Frame")
-			ray.AnchorPoint = Vector2.new(0.5, 0.5)
-			ray.Rotation = math.deg(a)
-			ray.BackgroundColor3 = c
-			ray.BorderSizePixel = 0
-			ray.Size = UDim2.fromOffset(w, 0)
-			ray.ZIndex = 56
-			local g = Instance.new("UIGradient") -- soft tips
-			g.Rotation = 90
-			g.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 1), NumberSequenceKeypoint.new(0.35, 0), NumberSequenceKeypoint.new(1, 1)})
-			g.Parent = ray
-			ray.Parent = holder
-			local dx, dy = math.sin(a), -math.cos(a)
-			tween(ray, t * 0.5, {Size = UDim2.fromOffset(w, l), Position = UDim2.fromOffset(dx * l * 0.6, dy * l * 0.6)}, Enum.EasingStyle.Quint)
-			task.delay(t * 0.5, function()
-				tween(ray, t * 0.5, {Size = UDim2.fromOffset(1, l * 1.1), Position = UDim2.fromOffset(dx * l * 0.85, dy * l * 0.85), BackgroundTransparency = 1}, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-			end)
+		for _ = 1, n do
+			local a = math.random() * math.pi * 2
+			local dist = len * (0.3 + math.random() * 0.4)
+			local s = 5 + math.random() * 6
+			local mote = circle(holder, c:Lerp(Color3.new(1, 1, 1), 0.5), 0.1, 57)
+			mote.Size = UDim2.fromOffset(s, s)
+			mote.Position = UDim2.fromOffset(0, 0)
+			tween(mote, t * (0.7 + math.random() * 0.3), {
+				Position = UDim2.fromOffset(math.cos(a) * dist, math.sin(a) * dist),
+				Size = UDim2.fromOffset(2, 2),
+				BackgroundTransparency = 1,
+			}, Enum.EasingStyle.Quart)
 		end
 	end
 	Debris:AddItem(holder, t + 0.1)
@@ -236,27 +245,44 @@ function VFXKit.shockwave(pos: Vector3, color: Color3?, radius: number?, time: n
 	Debris:AddItem(p, t + 0.05)
 end
 
--- Starburst: thin neon spikes that shoot out from a point (the RNG "LEGENDARY" burst, made in 3D).
-function VFXKit.starburst(pos: Vector3, color: Color3?, spikes: number?, length: number?, time: number?)
-	local n, len, t = spikes or 14, length or 14, time or 0.5
-	local cam = workspace.CurrentCamera
-	local face = CFrame.lookAt(pos, cam.CFrame.Position) -- spikes lie in the plane facing the camera
-	for i = 1, n do
-		local ang = (i / n) * math.pi * 2 + math.random() * 0.2
-		local l = len * (0.55 + math.random() * 0.45)
-		local dir = face * CFrame.Angles(0, 0, ang)
-		local p = neon(Vector3.new(0.25, 0.25, 0.25), dir * CFrame.new(0, 0.2, 0), color or Color3.new(1, 0.9, 0.5))
-		tween(p, t * 0.45, {Size = Vector3.new(0.35, l, 0.35), CFrame = dir * CFrame.new(0, l / 2, 0)}, Enum.EasingStyle.Quint)
-		task.delay(t * 0.45, function()
-			tween(p, t * 0.55, {Size = Vector3.new(0.05, l * 1.15, 0.05), Transparency = 1}, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
-		end)
-		Debris:AddItem(p, t + 0.05)
+-- Glow burst (the RNG "LEGENDARY" burst in 3D): a camera-facing soft halo that swells and fades, a real light
+-- pulse on the surroundings, and soft motes drifting up. Replaced the old spike starburst (owner rule: never a
+-- spiky sunburst). strength = number of motes (0-24, keep it low on phones); size = halo diameter in studs.
+function VFXKit.glowBurst(pos: Vector3, color: Color3?, strength: number?, size: number?, time: number?)
+	local c = color or Color3.fromRGB(255, 225, 150)
+	local n, d, t = math.clamp(strength or 12, 0, 24), size or 12, time or 0.6
+	local anchor = Instance.new("Part") -- invisible carrier for the halo and the light
+	anchor.Anchored, anchor.CanCollide, anchor.CanQuery, anchor.CanTouch = true, false, false, false
+	anchor.Transparency, anchor.Size, anchor.CFrame = 1, Vector3.one * 0.1, CFrame.new(pos)
+	anchor.Parent = fxFolder()
+	local bb = Instance.new("BillboardGui")
+	bb.Size = UDim2.fromScale(d, d) -- Scale on a BillboardGui is in studs
+	bb.LightInfluence = 0
+	bb.Adornee = anchor
+	bb.Parent = anchor
+	-- three stacked discs = a soft radial falloff (faint outside, hot core) without a texture
+	for i, k in {1, 0.62, 0.32} do
+		local disc = circle(bb, if i == 3 then c:Lerp(Color3.new(1, 1, 1), 0.6) else c, 0.6 - i * 0.14, i)
+		disc.Size = UDim2.fromScale(k * 0.25, k * 0.25)
+		tween(disc, t * 0.35, {Size = UDim2.fromScale(k, k)}, Enum.EasingStyle.Quint)
+		task.delay(t * 0.35, function() tween(disc, t * 0.65, {BackgroundTransparency = 1}, Enum.EasingStyle.Quad, Enum.EasingDirection.In) end)
 	end
-	local core = neon(Vector3.one * 0.5, CFrame.new(pos), Color3.new(1, 1, 1), Enum.PartType.Ball)
-	tween(core, t * 0.3, {Size = Vector3.one * 4}, Enum.EasingStyle.Back)
-	task.delay(t * 0.3, function() tween(core, t * 0.7, {Size = Vector3.one * 0.2, Transparency = 1}) end)
-	Debris:AddItem(core, t + 0.05)
+	local light = Instance.new("PointLight")
+	light.Color, light.Range, light.Brightness, light.Shadows = c, d * 1.5, 0, false
+	light.Parent = anchor
+	tween(light, t * 0.25, {Brightness = 3})
+	task.delay(t * 0.25, function() tween(light, t * 0.75, {Brightness = 0}) end)
+	if not reduced() then
+		for _ = 1, n do
+			local m = neon(Vector3.one * (0.25 + math.random() * 0.3), CFrame.new(pos), c:Lerp(Color3.new(1, 1, 1), 0.4), Enum.PartType.Ball)
+			local drift = Vector3.new(math.random() - 0.5, 0.3 + math.random() * 0.7, math.random() - 0.5).Unit * d * (0.3 + math.random() * 0.35)
+			tween(m, t * (0.9 + math.random() * 0.6), {CFrame = CFrame.new(pos + drift), Size = Vector3.one * 0.05, Transparency = 1}, Enum.EasingStyle.Quart)
+			Debris:AddItem(m, t * 1.6)
+		end
+	end
+	Debris:AddItem(anchor, t + 0.1)
 end
+VFXKit.starburst = VFXKit.glowBurst -- old name kept so existing calls still work; the spikes are gone
 
 -- Debris burst (ground slam): chunks that fly up and fall, matching the floor colour.
 function VFXKit.debris(pos: Vector3, color: Color3?, count: number?)
@@ -364,7 +390,7 @@ VFXKit.Tiers = {
 -- Reveal one roll result at a world point (above the player's head). tierIndex into VFXKit.Tiers.
 function VFXKit.reveal(pos: Vector3, tierIndex: number, itemName: string?, odds: string?)
 	local tier = VFXKit.Tiers[math.clamp(tierIndex, 1, #VFXKit.Tiers)]
-	if tier.burst > 0 then VFXKit.starburst(pos, tier.color, tier.burst, 8 + tier.burst * 0.5, 0.6) end
+	if tier.burst > 0 then VFXKit.glowBurst(pos, tier.color, tier.burst, 6 + tier.burst * 0.4, 0.6) end
 	if tier.flash then VFXKit.flash(tier.color, 0.04, 0.04, 0.4) end
 	if tier.shake > 0 then VFXKit.shake(tier.shake, 0.4) end
 	VFXKit.titleCard(tier.name, tier.color, itemName, odds, tier.hold)

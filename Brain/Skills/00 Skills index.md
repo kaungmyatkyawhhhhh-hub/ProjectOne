@@ -30,6 +30,10 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
+- 2026-11-17 (night): roblox-vfx-reveal kit fix (owner's no-sunburst rule):
+  - VFXKit: the spike `starburst` is replaced by `glowBurst` (soft camera-facing halo, light pulse, drifting motes); `starburst` stays as an alias. `reveal()` uses it.
+  - `uiBurst` lost its rays: soft glow, one thin ring, random motes.
+  - Tested in Studio Play (Evolution place). SKILL.md sections 1 (files), 4, 5, 6 and 7 updated. Local and vault copies match.
 - 2026-11-17 (late): roblox-vfx-reveal updated from the 16 Nov TikTok search rounds ([[Brain/Training inbox]], creators' claims, unverified):
   - Section 1: small moments get timing + sound + a small reaction ("make simple actions satisfying").
   - Section 2: pool frequent effects instead of create/destroy.
