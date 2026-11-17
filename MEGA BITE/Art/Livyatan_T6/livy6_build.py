@@ -51,6 +51,18 @@ def make(name, verts, faces, fcol, glow=False, closed=True):
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
         vol = sum(f.verts[0].co.dot(f.verts[i].co.cross(f.verts[i + 1].co)) for f in bm.faces for i in range(1, len(f.verts) - 1))
         if vol < 0: bmesh.ops.reverse_faces(bm, faces=bm.faces)
+    else:   # runes: each glyph is its own closed shell; one whose winding vote lost (thin curved strokes) is simply inside out
+        seen = set()
+        for f0 in bm.faces:
+            if f0 in seen: continue
+            isl, st = [], [f0]; seen.add(f0)
+            while st:
+                f = st.pop(); isl.append(f)
+                for e in f.edges:
+                    for g in e.link_faces:
+                        if g not in seen: seen.add(g); st.append(g)
+            if sum(f.verts[0].co.dot(f.verts[i].co.cross(f.verts[i + 1].co)) for f in isl for i in range(1, len(f.verts) - 1)) < 0:
+                bmesh.ops.reverse_faces(bm, faces=isl)
     bm.to_mesh(me); bm.free()
     ca = me.color_attributes.new('Col', 'BYTE_COLOR', 'CORNER')
     for p in me.polygons:
@@ -293,8 +305,23 @@ for cname in ('Cyan', 'Gold'):
                 ids = []
                 for gi, q in enumerate(pts):
                     o_, d_ = ray(q.x, q.y, s); hit = BVH.ray_cast(o_, d_)
+                    if hit[0] is not None and hit[1].dot(d_) > 0: hit = (hit[0], -hit[1]) + tuple(hit[2:])   # hit the inside of an overlapping segment end: face the ray
                     ids.append(None if hit[0] is None or not keep(hit[1], s) else vid((vname, s, id(loops), gi), hit))
                 gf = [f for f in (tuple(ids[k] for k in t_) for t_ in tri) if None not in f and len(set(f)) == 3]
+                while True:   # rays that miss drop triangles; a vertex the outline then passes twice makes a non-manifold wall: drop its fan
+                    bd = {}
+                    for f in gf:
+                        for e in ((f[0], f[1]), (f[1], f[2]), (f[2], f[0])): bd[e] = 1
+                    out_ = {}
+                    for (a_, b_) in bd:
+                        if (b_, a_) not in bd: out_[a_] = out_.get(a_, 0) + 1
+                    pinch = {v for v, c in out_.items() if c > 1}
+                    if not pinch: break
+                    gf = [f for f in gf if not pinch & set(f)]
+                gv = {i for f in gf for i in f}   # glyphs that straddle a groove fold if each vertex pushes along its own normal: blend in the glyph's mean
+                if gv:
+                    av = sum((hits[i][1] for i in gv), Vector()).normalized()
+                    for i in gv: hits[i] = (hits[i][0], (hits[i][1] + av).normalized())
                 # one winding per glyph (the fill is consistent in 2D): flip the whole glyph if most faces point into the skin
                 vote = sum((hits[f[1]][0] - hits[f[0]][0]).cross(hits[f[2]][0] - hits[f[0]][0]).dot(hits[f[0]][1]) for f in gf)
                 faces += [(f[0], f[2], f[1]) for f in gf] if vote < 0 else gf
