@@ -1,3 +1,26 @@
+# roads05 handover (18 Nov 2026, eighteenth pass: J22, GEOMETRY agent; DATA + BUILDER + QA + Studio 16 spots; stopped: context)
+
+## J22 geometry -- built-surface totals J21 -> J22 (16 spots): box_hole 234 -> 77, kerb_gap 937 -> 639, road_step 168 -> 148, pave_step 211 -> 308 (UP), buried 15 -> 14
+Per spot: vault `City Legends/2026-11-18 roads05 J22 studio check.md`. Python QA (`J22_qa.log`): kerb_cross 0, mouthsim 0 failed of
+11,569, deck_grade 7, NEW seam_step 0 -> 3 and pave_step 0 -> 3 (most likely mouth_level: look first). Backups `roads_J21final.json`.
+- **qaBuilt:** a miss is cast again 0.003 / 0.006 off (rays down two wedges' shared edge: Roundabout 4's 48 holes were mostly that).
+- **YangonRoads.sideHalf** (half on the spot's side) replaces halfAt (the wider) in ownedBy, findCorners' on-road test, crossMouths,
+  the mouth tests and the deck piers' onRoad (Sule Pagoda Road 64 / 33 owned Lane #3352's kerb band: Roundabout 4 kerb_gap).
+- **buildIslands:** outline sides cut into 4-stud pieces, each on the built edge height (edgeY now interpolates along edge segments):
+  fills no longer stand over the kerbs.
+- **roads05_fix.downtown_walks:** a side with a building line is limited 1 stud + the other road's walk before another ground
+  carriageway (Lane #7793 walk 24.6 over 32nd Street -> 4); a road alone never widens a walk.
+- **roads05_fix.mouth_level** (after butt_match): a road end on a bigger road (side half + 0.5, within 2.5 studs height) sits at the
+  host's height, the step faded 3% (20-120 studs): 1,043 ends. univ_kabaraye road_step 50 -> 28 only: Lane #1256 / #1257 / #1248
+  (flyover side lanes onto Hledan Road #3) still crease: check their samples in the J22 roads.json (Lane #1256 was 0.9 over).
+- **Next:** (1) pave_step rise at the deck spots (univ_kabaraye, hledan_flyover, slip_triangle, pyay_univ): probe with the
+  character map (`_G.MAP` idea: 0.5-stud grid, folder letter, `#` kerb, lower case pavement) and the hit stack, some are pavement
+  pieces 4.7 lower on Hledan Road #3's deck side; (2) the Python seam_step / pave_step 3; (3) bahan_ring island between Kan Yeiktha
+  Road / Lane #8112 / Kan Yeiktha: data island overlaps the built carriageway (scrub "Islands on Kan Yeiktha Road 17") and no kerb on
+  Kan Yeiktha Road's side; (4) dropped corners -> rounded noses (double_junction water south of the box, Kun Chan cluster
+  36180-36196 / 42584-42608); (5) shots: only roundabout4 overview + driver, bahan_ring overview this pass (29 left).
+- Studio: main "City Legends" (reopened after the power cut), scratch cleaned, saved, lock released; asset 133014134133489 = the J22 pack.
+
 # roads05 handover (18 Nov 2026, seventeenth pass: J21, GEOMETRY agent; DATA + BUILDER + QA + Studio 16 spots)
 
 ## J21 geometry -- counts J20 -> J21 (full net, `J21_qa.log`; backups `qa_J20.json`, `qa_J21a.json`, `roads_J20b.json`)
