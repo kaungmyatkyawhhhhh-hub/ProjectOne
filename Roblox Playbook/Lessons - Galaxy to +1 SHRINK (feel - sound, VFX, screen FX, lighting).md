@@ -638,3 +638,11 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Rule:** for "stray piece" bugs, the last clean-up pass should test what was actually built (raycasts on the built parts), not re-derive it from the data that made the mistake.
 - **What happened (2):** the owner's "jagged corner pavement" steps were 4-stud terrain voxels of the corner's grass, laid right at the pavement's back edge at centre-line heights (higher than the built edge). A no-terrain Studio test cannot show it.
 - **Rule:** grass beside a part surface starts under the part (4 studs in) at the part's own heights; check terrain-edge bugs in the real build, not in a no-terrain test.
+
+### 2026-11-18 City Legends roads05 J18 geometry: a new data field must be checked where the builder READS it
+- **What happened:** the new `cornerR` field was in roads.json, but the Studio corners did not change: `YangonRoads.load` builds each road object from a fixed list of named fields, so any new field is silently dropped. Found only because the Studio log prints each corner's radius.
+- **Rule:** when adding a data field for the builder, grep the loader for how records are copied, and prove it in Studio with a printed value (log line), not by "the data has it".
+- **What happened (2):** Bahan Road #2 merged into Bahan Road edge to edge (no overlap area), so the doubled-road absorb never paired it; the merge pass also lost its curved end (cos 0.89 < 0.9) and left #2's ring end as a gap until the merge rule took a looser angle.
+- **Rule:** a "merge" (a one-way converging onto the road it ends on) is its own case: pair by "my end lies on you", absorb the gore under 2 kerbs + 2, and run a second pass for slips that ended on the absorbed road.
+- **What happened (3):** the Sule Shangri-La corners the owner drew are where two roads CROSS; the builder rounds corners only where a road ENDS on another (mouths). A bigger radius setting cannot reach them.
+- **Rule:** before tuning a builder number for an owner ref, check which builder path draws that spot.

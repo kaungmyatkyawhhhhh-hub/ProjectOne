@@ -1,3 +1,51 @@
+# roads05 handover (18 Nov 2026, fourteenth pass: J18, GEOMETRY agent; DATA + BUILDER + QA; stopped: context)
+
+## J18 geometry -- counts J17 -> J18 (full net, `J18_qa.log`; mouthsim 0 failed of 11,564)
+kerb_cross 17 -> 13, centre_fold (new) 71 -> 1, mouth_short real 2 -> 3, mouth_over real 1 -> 1, deck_clear 1 -> 1,
+deck_grade 7 -> 7, overlap / median_cross / zero_width / rank_dup / seam_step 0, stack_paint 7 -> 8 (paint),
+**width_wobble 0 -> 14 (NEW REGRESSION, not fixed)**: the 14 roads are the fold-back roads (Pyay Road #6 / #2, Kabar Aye,
+Hledan #3, Min Nandar #2, Bo Min Gaung, Parami, Kun Chan ...) + decks (Bayint Naung Bridge 2, Pansodan, Nga Moe Yeik,
+Shwedagon, East Horse Race Course Bridge): suspect `unfold` (dropped samples -> a width step over a shorter chord) and
+`deck_joints` (the joint sample's flare cut to the deck's half). Look at qa.json width_wobble rows first.
+Backups: `roads_J16.json` (J17 = J16 data), `qa_J17.json`. Version: `roads05_NETWORK_VERSION.txt` (created; force-add it).
+- **Item 1 Bahan / Roundabout 1 (done, Studio-checked):** `roads05_absorb` MERGE: a one-way route / street of class
+  motorway .. tertiary (+ links) whose END lies on the bigger road and >= 15% of its area on it is paired; near samples
+  (gore < NOSE_MIN 6) running on from the alongside run go too and the road widens over them; PARALLEL_MERGE 0.85
+  (0.75 in a second pass `merge_into` = roads widened by a merge, for slips that ended on the absorbed road). Bahan Road #2
+  absorbed whole (Bahan widens to 90 on its east side at the ring), Lane #8112 absorbed 14 samples, mouths onto Bahan at
+  ~37 deg (corner r 62 / 3.9). Pass 1: 89 absorbs (81 merges), pass 2: 43. Shot `... J18 geo - Bahan Road at Roundabout 1.jpg`.
+- **Item 2 double junction (done, Studio-checked):** `roads05_fix.side_clear` (after ring_clear): a lane (street, hw
+  service / residential / unclassified / living_street / track) running >= 6 samples parallel beside a bigger road closer
+  than walk + walk is pushed out until the pavements meet, taper 0.15 / stud, ends fixed (an end may sit in the taper
+  only where the lane leaves square). 47 lanes, max 12 studs; Lane #7108 8.1. ~3 min (the slow step).
+- **Item 3 seams:** Shwedagon landing: `deck_joints` (last before check()): a deck end on its own ground road takes the
+  road sample's direction (they differed up to 3.5 deg: the wedge), the road sample takes the deck's height, and a
+  road flare on the joint sample is cut to the deck's half. 46 deck ends changed. Studio: the crease line and dark
+  wedge are gone (`... J18 geo - Shwedagon deck landing.jpg`). **Junction-box dark seam lines NOT fixed:** likely
+  T-junction cracks between mouth triangles (YangonRoads.buildMouth earClip, vertices on the bigger road's boundary) and
+  the bigger road's quads, or skipped `Roads.sliver` triangles; showing the void in the lifted no-terrain test. Next:
+  raycast down along a seam in the test build (gap or step?) before changing the builder.
+- **Item 4 corner radii (partly):** `roads05_fix.corner_radii`: downtown (P3) roads of class trunk .. tertiary and their
+  links carry `cornerR` 30 (10 m, the middle of the 8-12 m the brief gives; NOT measured per corner on the satellite);
+  `YangonRoads.buildCorners`: T = max(T, min(cornerR / tan(theta/2), CORNER_T_MAX)) when both roads carry it;
+  `YangonRoads.load` now copies cornerR (it copied named fields only). Sule Shangri-La: the 45-deg corners of Sule Pagoda
+  Road #5 went 6.6 -> 9.4 (clamped by the 0.45 x gap rule). **The owner's drawn corners at Sule Pagoda Rd x Bogyoke are
+  a CROSSING (no road ends there): buildCorners only rounds mouths, so those 4 corners stay square** (shot
+  `... J18 geo - Sule Shangri-La corner.jpg`). Next: corners at crossings (a builder feature) or split the crossing.
+- **Item 5:** kerbsim skips kerbs the builder's scrub removes (`scrubbed`: 8 probes SCRUB_R 1.6 all on a carriageway or
+  ring). kerb_cross 13 left: Hanthawaddy Road on Hledan #3, Kun Chan Road #4 on Gyophyu, Lane #2945 x2, #679, #6775,
+  Kabar Aye #8 on Pearl St #3, #5208, #2693, #3486, #2939 ~2, Lane #3 x2 (lanes at a shallow crossing; see qa.json).
+  Block 2 (road_gap, kerb_gap, box_hole, fillet_no_kerb, flare_kerb_gap, corner_pave_gap, buried edges): NOT started.
+  Pinlon Road Flyover (deck_clear 1): it crosses Pazundaung Creek (OSM river, 365 studs wide on the deck) ~767 studs from
+  its start, but its OSM-profile peak sits ~200 studs BEFORE the river (deck 17-20 over the water, ground 15). Not
+  satellite-checked. Fix idea: regrade with the top over the river line (deck_regrade needs the water crossing as the top).
+- **ADD (paint agent) fold-backs:** `roads05_fix.unfold` (before deck_joints): a sample that steps back
+  (`roads05_qa.folds`, the paint agent's rule) is dropped; protected (end / cut / deck) ones take their neighbours'
+  direction. 103 dropped, 1 left: Road #25 i 225 (protected). QA `centre_fold`.
+- Studio: main "City Legends", scratch cleaned, saved (version 1193), lock released; asset 133014134133489 rev 165 =
+  the J18 test pack (YangonRoads sum 1918405911). The double junction shot shows a hole at the spot box's edge (box clip,
+  not checked).
+
 # roads05 handover (18 Nov 2026, thirteenth pass: J17, GEOMETRY agent; BUILDER CODE only, data = J16 bd770808; stopped: context)
 
 ## J17 geometry -- done (YangonRoads.luau, Studio-checked lifted, no terrain)
