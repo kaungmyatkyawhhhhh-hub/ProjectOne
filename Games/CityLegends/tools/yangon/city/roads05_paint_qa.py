@@ -9,7 +9,7 @@ and stop lines', 'Sule Square road', 'junction box grass hole', 'broken median p
   stopline_missing    a zebra arm with incoming traffic and no stop line
   stopline_wrong_side a stop line in a box, on / touching a zebra, on the box side of its zebra, reaching over the centre
                       into the outgoing lanes, or covering under 80% of the incoming lanes
-  dash_jog            a lane dash whose next dash along the line sits 0.7-4 studs sideways (a jump, not a taper)
+  dash_jog            a lane dash whose next dash along the line sits 1.5-4 studs sideways (a jump, not a taper)
   dash_side_by_side   two lane dashes side by side under 4 studs apart
   paint_in_median     paint on a median, an island, or a median's nose cap (paint must stop short of it)
   double_box          a zebra / stop line inside the joined box of a double junction (two parallel roads < 40 apart
@@ -37,6 +37,7 @@ RULES = ('arrow_missing', 'stopline_missing', 'stopline_wrong_side', 'dash_jog',
          'double_box', 'box_paint', 'paint_snake', 'edge_missing', 'zebra_colour', 'zebra_torn')
 LINES = ('lane', 'centre', 'median', 'edge', 'deck centre', 'deck lane', 'ring lane')
 DASHES = ('lane', 'deck lane', 'ring lane')
+JOG = 1.5      # a visible step (owner ref 5 was a whole lane line); under it is a taper on a curve
 
 
 def xz(p):
@@ -74,13 +75,13 @@ def turns(P):
             continue
         t.append(math.degrees(math.atan2(u[0] * v[1] - u[1] * v[0], u @ v)))
     sides, cur = [], []
-    for x in t:
+    for k, x in enumerate(t):
         if x is None or abs(x) > 45:
             if cur:
                 sides.append(cur)
             cur = []
         else:
-            cur.append(x)
+            cur.append((x, co[k]))
     if cur:
         sides.append(cur)
     return sides
@@ -255,7 +256,7 @@ def main():
                 lat = abs(v[0] * m[1] - v[1] * m[0])
                 if lat < 4.0 and (best is None or lat < best[0]):
                     best = (lat, j)
-            if best and best[0] > 0.7 and best[1] > i:
+            if best and best[0] > JOG and best[1] > i:
                 iss['dash_jog'].append(dict(what=W[i], road=items[i].get('r'), lat=round(float(best[0]), 2), **xz(e)))
     # --- 4. median / island / nose
     med = []
@@ -286,12 +287,13 @@ def main():
     # --- 6. snakes
     for w in LINES:
         for i in by.get(w, []):
-            for side in turns(polys[i]):
-                bad = any(abs(x) > 15 for x in side) or any(
-                    side[k] * side[k + 1] < 0 and side[k + 1] * side[k + 2] < 0 and min(abs(side[k]), abs(side[k + 1]), abs(side[k + 2])) > 3
-                    for k in range(len(side) - 2))
+            for sd in turns(polys[i]):
+                side = [x for x, _ in sd]
+                bad = [k for k in range(len(side)) if abs(side[k]) > 15] or [
+                    k + 1 for k in range(len(side) - 2)
+                    if side[k] * side[k + 1] < 0 and side[k + 1] * side[k + 2] < 0 and min(abs(side[k]), abs(side[k + 1]), abs(side[k + 2])) > 3]
                 if bad:
-                    iss['paint_snake'].append(dict(what=w, road=items[i].get('r'), **xz(polys[i].centroid.coords[0])))
+                    iss['paint_snake'].append(dict(what=w, road=items[i].get('r'), **xz(sd[bad[0]][1])))
                     break
     # --- 7. yellow kerb lines on main roads
     yl = [polys[i] for i in by.get('edge', []) + by.get('median', [])]

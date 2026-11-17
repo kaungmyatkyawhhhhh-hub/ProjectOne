@@ -556,6 +556,15 @@ def build(data, signals=None):
                         continue
                     ln = smooth([(s[a + j][0] - s[a + j][4] * c0[j], s[a + j][2] + s[a + j][3] * c0[j]) for j in range(u0, u1 + 1)])
                     P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_all)
+                # (J15) a painted median (lanes held apart, no kerbed median built): a solid line on each side of it
+                flush = [s[i][11] >= 1.2 and s[i][8] <= 0.3 for i in rng]
+                for u0, u1 in runs(flush):
+                    if u1 - u0 < 2:
+                        continue
+                    for sg in (-1, 1):
+                        ln = smooth([(s[a + j][0] - s[a + j][4] * (c0[j] + sg * (s[a + j][11] - 0.3)),
+                                      s[a + j][2] + s[a + j][3] * (c0[j] + sg * (s[a + j][11] - 0.3))) for j in range(u0, u1 + 1)])
+                        P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_all)
             # lane dividers: one smooth offset per boundary
             for sg, (inner, outer, nn, lines) in out.items():
                 for t in lines:
