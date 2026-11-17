@@ -61,3 +61,8 @@ ChatGPT chat: https://chatgpt.com/c/6afc9c72-7c10-83ec-9c87-8c299adf9bc6
 - Checked: FBX re-import (`fbxcheck.py`), bite pose (Jaw -22 deg opens cleanly), swim from above. Picture `checks/livy6_poses.jpg`.
 - Owner's Blender: collection `Livyatan_T6_Rigged` (rig moved 4.5 m to the side of the parts), runes + eye with glow materials, Swim playing. Saved in `livyatan_t6_preview.blend`.
 - `install_serverstorage.luau`: NOT run. Parks `MB_Livyatan_T6` in ServerStorage at 165 studs: runes + eye Neon, gold + cyan sparkle trails, blue aura emitter, rune/eye PointLights, cyan Highlight outline. Needs the FBX uploaded first (set ASSET_ID).
+
+## v1.5 eye area (18 Nov, owner: "eye area is inaccurate")
+- Was: a soft dark smudge (vertices pushed inside an ellipse) under a barely-there brow bump, and a lens blown out to white (glow 7 + strong lights).
+- Now, like the turnaround and the card: the head is CUT along the brow's lower edge, the brow top and the socket outline (bisect, side faces only), then a flat dark recessed socket panel (deeper at the back) under a heavy angular brow ledge that slopes down toward the snout. The lens sits on the panel with its flat top tucked under the brow; light-cyan centre, cyan rim; preview glow 3.5, eye lights 6. Pictures: before `checks/eye_model_now.jpg`, after `checks/eye_model_v15.jpg`, references `checks/card_eye_crops.png`, `checks/eye_sheet_crops.jpg`.
+- Gates PASS, 17,218 tris. FBX re-exported (body 5,970 / cyan runes 5,760 / gold runes 5,392 / eye 96), reloaded in the owner's Blender, `livyatan_t6_preview.blend` saved.
