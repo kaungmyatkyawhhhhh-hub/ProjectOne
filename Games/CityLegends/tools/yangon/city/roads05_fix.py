@@ -1278,6 +1278,19 @@ def deck_recap(data, QA_MAX=DECK_MAX + 0.001):
         ends = [(s[0][0], s[0][2]), (s[-1][0], s[-1][2])]
         if any(o is not dk and math.hypot(o['s'][k][0] - x, o['s'][k][2] - z) < DECK_JOIN + 2
                for o in data['decks'] for k in (0, -1) for x, z in ends):
+            if gm < 0.085:  # (a chain deck just over: its ramps capped at DECK_MAX from both ends, ends and crest kept)
+                c = [0.0]
+                for a, b in zip(s, s[1:]):
+                    c.append(c[-1] + math.hypot(b[0] - a[0], b[2] - a[2]))
+                y = [q[1] for q in s]
+                for i in range(1, len(y)):
+                    y[i] = min(y[i], y[i - 1] + DECK_MAX * (c[i] - c[i - 1]))
+                for i in range(len(y) - 2, -1, -1):
+                    y[i] = min(y[i], y[i + 1] + DECK_MAX * (c[i + 1] - c[i]))
+                top0 = max(q[1] for q in s)
+                for q, v in zip(s, y):
+                    q[1] = round(float(v), 3)
+                out.append(dict(deck=dk['name'], grade=round(gm, 3), capped=True, top=round(max(y) - top0, 2)))
             continue  # (a chain joint: its feet are the chain's, not this road's)
         res = _deck_try(dk, r, lines, tree)
         if res is None or res[1] > DECK_MAX + 1e-6:
