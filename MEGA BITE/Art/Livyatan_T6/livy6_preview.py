@@ -89,12 +89,12 @@ cam.data.lens = 50; cam.location = (9.5, -9.0, 2.2)
 cam.rotation_euler = (Vector((0.6, 0, -0.1)) - cam.location).to_track_quat('-Z', 'Y').to_euler(); sc.camera = cam
 sc.render.resolution_x, sc.render.resolution_y = 1280, 960
 # eye: its own hotter glow + a small cyan light so it reads like the card (Roblox: Neon + PointLight)
-eye = bpy.data.objects['L6_Eye']; em = emit_mat('L6_EyeGlow', (0.45, 1.0, 1.0), 7.0); eye.data.materials.clear(); eye.data.materials.append(em)
+eye = bpy.data.objects['L6_Eye']; em = emit_mat('L6_EyeGlow', (0.2, 0.95, 1.0), 3.5)   # 7 blew the lens out to white; the card's eye is saturated cyan; eye.data.materials.clear(); eye.data.materials.append(em)
 for sd in (1, -1):
     nm = 'L6_EyeLight%s' % ('L' if sd > 0 else 'R'); L_ = bpy.data.objects.get(nm) or bpy.data.objects.new(nm, bpy.data.lights.new(nm, 'POINT'))
     if L_.name not in col.objects: col.objects.link(L_)
     vs = [v.co for v in eye.data.vertices if v.co.y * sd > 0]; c = sum(vs, Vector()) / len(vs)
-    L_.location = c + Vector((0.05, sd * 0.12, 0)); L_.data.energy = 25; L_.data.color = (0.3, 0.95, 1.0); L_.data.shadow_soft_size = 0.05
+    L_.location = c + Vector((0.05, sd * 0.12, 0)); L_.data.energy = 6; L_.data.color = (0.3, 0.95, 1.0); L_.data.shadow_soft_size = 0.05
 sc.frame_end = max(sc.frame_end, 200)
 for f in range(1, 81): sc.frame_set(f)   # particle pre-roll: step frames in order or the trail won't form
 print('preview ready', len(body), 'outlined parts')

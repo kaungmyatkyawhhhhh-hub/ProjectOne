@@ -150,22 +150,38 @@ hxs = sorted(set([HX - 2, HX + 1, HX + 7] + xs_between(HX + 7, 1480, 16)[1:] + [
                + [float(x) for x in range(int(D['head']['eye']['x']) - 48, int(D['head']['eye']['x']) + 49, 8)]))   # dense round the eye for the carve
 head = loft('UpperHead', hxs, skull, nr=32, pex=(2.0, 2.8), scale=lambda i, x: 0.86 if x < HX + 3 else (0.93 if x > 1510 else 1.0),
             tip_end=Vector((X(X1), 0, Z((T(1517) + line(H['upper_lip'], 1517)) / 2))))
-# eye socket CARVED into the head: verts inside the eye ellipse pushed in, deepest at the back
+# eye area CARVED into the head (turnaround + card): a hard-edged dark socket panel under a heavy angular BROW LEDGE that
+# slopes down toward the snout. Real cut lines first (bisect along the brow edge, brow top and socket outline), then push.
 E = H['eye']
-ex, ey, erx, ery = E['x'], E['y'], E['w'] * 0.95, E['h'] * 1.25
-for v in head.data.vertices:
-    u = ((v.co.x - X(ex)) / (erx * S)) ** 2 + ((v.co.z - Z(ey)) / (ery * S)) ** 2
-    if abs(v.co.y) < 0.6 * HW(ex) * S: continue
-    if u < 1:
-        d = (1 - u) * 10 * S * (1.2 if v.co.x < X(ex) else 0.8)
-        v.co.y -= math.copysign(d, v.co.y)
-    bx = (v.co.x - X(ex)) / (erx * 1.25 * S); bz = (v.co.z - Z(ey)) / S - ery * 0.9   # brow band just above the socket
-    if abs(bx) < 1 and 0 < bz < 22:
-        v.co.y += math.copysign((1 - bx * bx) * (1 - abs(bz - 8) / 14 if bz > 8 else bz / 8) * 9 * S, v.co.y)
-head.data.update()
+ex, ey = E['x'], E['y']
+BROW = lambda x: ey - 26 + (x - ex) * 0.16           # brow's lower edge (sheet px y): high at the back, lower at the front
+BROW_T = lambda x: BROW(x) - 20                       # brow's top edge
+SX0, SX1, SB = ex - 52, ex + 50, ey + 30              # socket panel: back, front, bottom
+def in_side(c): return abs(c.y) > 0.55 * HW(ex) * S and X(SX0 - 30) < c.x < X(SX1 + 30) and Z(SB + 25) < c.z < Z(BROW_T(ex) - 25)
+bm = bmesh.new(); bm.from_mesh(head.data)
+def cut(p0, p1):   # bisect the side faces along the sheet line p0->p1 (sheet px), plane contains the y axis
+    a, b_ = Vector((X(p0[0]), 0, Z(p0[1]))), Vector((X(p1[0]), 0, Z(p1[1])))
+    d = (b_ - a).normalized(); nrm = Vector((-d.z, 0, d.x))
+    g = [f for f in bm.faces if in_side(f.calc_center_median())]
+    g = list({x for f in g for x in (list(f.verts) + list(f.edges))}) + g
+    bmesh.ops.bisect_plane(bm, geom=g, plane_co=a, plane_no=nrm)
+for p0, p1 in (((SX0 - 30, BROW(SX0 - 30)), (SX1 + 30, BROW(SX1 + 30))), ((SX0 - 30, BROW_T(SX0 - 30)), (SX1 + 30, BROW_T(SX1 + 30))),
+               ((SX0, 0), (SX0, 1)), ((SX1, 0), (SX1, 1)), ((0, SB), (1, SB))):
+    cut(p0, p1)
+def px(co): return (co.x + D['len_m'] / 2) / S + X0, YC - co.z / S        # back to sheet px
+for v in bm.verts:
+    if abs(v.co.y) < 0.55 * HW(ex) * S: continue
+    x, y = px(v.co); sg = math.copysign(1, v.co.y)
+    if not (SX0 - 1 < x < SX1 + 1): continue
+    if BROW(x) - 0.5 < y < SB + 0.5:                                   # socket: a flat recessed panel, deeper at the back
+        v.co.y -= sg * (9 + 4 * (SX1 - x) / (SX1 - SX0)) * S
+    elif BROW_T(x) - 0.5 < y <= BROW(x) - 0.5:                          # brow ledge: proud at its edge, back to the skin at its top
+        v.co.y += sg * 10 * (y - BROW_T(x)) / (BROW(x) - BROW_T(x)) * S
+bm.to_mesh(head.data); bm.free(); head.data.update()
 def head_col(p):
-    c = p.center; u = ((c.x - X(ex)) / (erx * S)) ** 2 + ((c.z - Z(ey)) / (ery * S)) ** 2
-    if u < 1 and abs(c.y) > 0.5 * HW(ex) * S: return jit(P['socket'], p.index, 0.05)
+    c = p.center; x, y = px(c)
+    if abs(c.y) > 0.5 * HW(ex) * S and SX0 < x < SX1 and BROW(x) < y < SB: return jit(P['socket'], p.index, 0.05)
+    if abs(c.y) > 0.5 * HW(ex) * S and SX0 < x < SX1 and BROW_T(x) < y < BROW(x) and abs(p.normal.y) < 0.7: return jit(P['jaw'], p.index, 0.05)  # lit underside facet of the ledge
     if p.normal.z < -0.6 and c.x > X(CX): return jit(P['maroon'], p.index, 0.05)     # roof of the mouth
     return skin('UpperHead')(p)
 recolour(head, head_col)
@@ -213,7 +229,7 @@ teeth('LowerTeethRow', H['lo_teeth'], H['lower_lip'], False, lambda x: 0.8 * jaw
 def eye():
     top, bot, hw = skull(ex); verts, faces = [], []
     for side in (1, -1):
-        p = Vector((X(ex), side * (hw * S - 5 * S), Z(ey)))   # seated in the carved socket, not a bead on the skin
+        p = Vector((X(ex), side * (hw * S - 9 * S), Z(BROW(ex) + 4 + E['h'] * 0.45 / 2)))   # on the recessed panel, flat top tucked under the brow
         n = Matrix.Rotation(math.radians(30) * side, 3, 'Z') @ Vector((0, side, 0))
         u = Vector((1, 0, 0)); u = (u - n * u.dot(n)).normalized(); v = n.cross(u).normalized()
         a, b, h = E['w'] / 2 / math.cos(math.radians(30)) * S, E['h'] / 2 * S, 10 * S
@@ -228,7 +244,7 @@ def eye():
             k2 = (k + 1) % K
             faces += [(b0 + k, b0 + k2, b0 + K + k2, b0 + K + k), (b0 + K + k, b0 + K + k2, ap), (b0 + k2, b0 + k, bc)]
     o = make('Eye', verts, faces, P['eye'], glow=True)   # card: hot white-cyan centre, cyan rim
-    recolour(o, lambda p: (0.75, 1, 1, 1) if p.index % 3 == 1 else P['eye'])
+    recolour(o, lambda p: (0.55, 1, 1, 1) if p.index % 3 == 1 else P['eye'])   # light-cyan centre, never white
     return o
 eye()
 
