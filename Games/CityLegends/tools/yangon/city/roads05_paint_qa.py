@@ -196,11 +196,21 @@ def main():
         r = R.get(names[0]) if names else None
         if r is None:
             continue
+        bx = nearest_box(c)
+        if bx is None:
+            continue
+        q = r['s'][sample(r['name'], c)]
+        h = np.array(bx.centroid.coords[0]) - c
         if r.get('oneway'):
-            bx = nearest_box(c)
-            q = r['s'][sample(r['name'], c)]
-            if bx is None or np.array([q[3], q[4]]) @ (np.array(bx.centroid.coords[0]) - c) < 0:
+            if np.array([q[3], q[4]]) @ h < 0:
                 continue                # traffic leaves the box here
+        else:
+            # a zebra half on the outgoing side of a median needs no stop line
+            rq = np.array([-q[4], q[3]])
+            c0 = 0.0 if q[8] > 0.3 else (q[7] - q[6]) / 2
+            rg = np.array([-h[1], h[0]])
+            if (c - np.array([q[0], q[2]]) - rq * c0) @ rg < -1.0 and q[8] > 0.3:
+                continue
         if stree is None or not any(stops[int(j)].distance(g) < 8 for j in stree.query(g.buffer(8))):
             iss['stopline_missing'].append(dict(road=r['name'], **xz(c)))
     # --- 3. dashes

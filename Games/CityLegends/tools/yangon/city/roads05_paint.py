@@ -847,7 +847,7 @@ def tidy(data, items):
             P = P.buffer(0)
         a0 = P.area
         surf = D if it.get('deck') else G
-        Q = P.intersection(surf.local(P).buffer(-0.05))
+        Q = P.intersection(surf.local(P).buffer(0.15).buffer(-0.2))   # (J15) seams between two roads' quads closed first
         if not it.get('deck') and not M.is_empty:
             Q = Q.difference(M.local(Q).buffer(0.05)) if not Q.is_empty else Q
         near = []
