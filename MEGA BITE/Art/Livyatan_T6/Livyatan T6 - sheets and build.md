@@ -30,7 +30,7 @@ ChatGPT chat: https://chatgpt.com/c/6afc9c72-7c10-83ec-9c87-8c299adf9bc6
 
 ## Checks (`checks/`)
 - Silhouette IoU: side 0.87 (**0.945 without the tail**, the tail differs by design), top 0.887, front 0.839. Below 0.90 on top/front because the sheet's views disagree on the fins (side: low and back, top: forward and wide, front: steep down) and the fluke. Fins are a split-the-difference compromise. Picture `compare.png`, `head_compare.png`.
-- Gates PASS: zero open edges on every solid part (runes are flat decals by design), outward normals, fins + fluke + jaw rooted in the body.
+- Gates PASS: zero open edges on every solid part (runes were flat decals in v1-v1.2; modelled since v1.3), outward normals, fins + fluke + jaw rooted in the body.
 - Preview look (EEVEE, `livy6_hero.png`): cyan-white OUTLINE + BLUE AURA (one voxel-remeshed copy of the body pushed out, only its back faces glow, BLENDED; per-part shells drew a ring at every groove; the shells must not cast shadows or the body goes black), gold + cyan sparkles.
 
 ## v1.1 gap fixes (owner: "Fix the gaps", 18 Nov)
@@ -47,3 +47,8 @@ ChatGPT chat: https://chatgpt.com/c/6afc9c72-7c10-83ec-9c87-8c299adf9bc6
 - The blocky shells were the PREVIEW glow helpers (`L6_OutlineShell`, `L6_AuraShell`: voxel-remeshed, pushed-out copies of the body). They now live in their own collection **L6_PreviewFX**, hidden in the viewport while modelling; turn it on for the rendered look. They are never exported.
 - Real fix found while checking: the tail stock ended in a flat stub over the fluke root; it now runs out to x70 and tapers onto the fluke. Gates PASS, side IoU 0.878.
 - The small round bumps on the body in solid view are the sparkle particles, not geometry.
+
+## v1.3 runes MODELLED (18 Nov, owner: "these details should be modelled instead of just slapping on a texture")
+- `RunesCyan` / `RunesGold` are now solid raised inlays, not flat decals: each traced glyph outline is resampled every ~6 px, filled (no inner verts), ray-cast onto the skin, pushed 2.5 px proud and 1.5 px sunk into the skin, with walls. One winding per glyph; normals blended with the glyph's mean so glyphs over a groove don't fold; vertices the outline passes twice drop their fan; inside-out glyph shells are flipped.
+- Gates now check the runes too: zero open edges, every glyph's signed volume positive. **Gates PASS.** 19 parts, 16,656 tris (RunesCyan 4,220, RunesGold 3,959; each under Roblox's 20K per mesh). IoU side 0.877 (no-tail 0.944), top 0.888, front 0.836.
+- In Roblox the rune meshes become Neon parts, so the glow comes from real geometry.
