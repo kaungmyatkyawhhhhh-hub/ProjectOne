@@ -395,11 +395,11 @@ def build(data, signals=None):
     arm_fill = []
     box_roads = {}
     for bi, bx in enumerate(polys_of(box_u)):
-        for j in main_tree.query(bx):
+        for j in main_tree.query(bx.buffer(30)):
             r = main[int(j)]
-            if not cw[r['name']].intersects(bx):
-                continue
-            box_roads.setdefault(bi, []).append((r, bx))
+            touches = cw[r['name']].intersects(bx)
+            if touches:
+                box_roads.setdefault(bi, []).append((r, bx))
             s = r['s']
             n = len(s)
             c = cut.get(r['name'], set())
@@ -407,8 +407,15 @@ def build(data, signals=None):
             P_ = sxz[r['name']]
             near = (P_[:, 0] > x0 - 1) & (P_[:, 0] < x1 + 1) & (P_[:, 1] > z0 - 1) & (P_[:, 1] < z1 + 1)
             inb = [bool(near[i]) and (bx.contains(Point(q[0], q[2])) or bx.distance(Point(q[0], q[2])) < 0.5) for i, q in enumerate(s)]
-            for a, b in runs(inb):
-                for k0, step in ((a - 1, -1), (b + 1, 1)):
+            ex = [(a, b, ((a - 1, -1), (b + 1, 1))) for a, b in runs(inb)] if touches else []
+            if not ex:
+                # (J16 Studio test, Pazundaung Y) a road ENDING at the box (a continuation meeting it, its centre line
+                # never inside): its arm leaves from its end
+                e = min((0, n - 1), key=lambda i: bx.distance(Point(s[i][0], s[i][2])))
+                if bx.distance(Point(s[e][0], s[e][2])) < max(s[e][6], s[e][7]) + 30 and e not in c:
+                    ex = [(e, e, ((e + 1, 1),) if e == 0 else ((e - 1, -1),))]
+            for a, b, sides in ex:
+                for k0, step in sides:
                     k = k0
                     if k < 0 or k >= n or k in c:
                         continue
@@ -448,6 +455,10 @@ def build(data, signals=None):
     laid = Grid()           # (J15, zebra_torn) bars and stop lines laid so far: nothing is laid over another
     boxc = Clip(no_paint)
     medc = Clip(*medians(data))
+    # (J16 Studio test, Pyay x University) the ground under a deck can be an open gap (cut corridor): no zebra or stop
+    # line under a deck's footprint
+    from roads05_qa import quads as _quads
+    deckc = Clip(*[g.buffer(1.0) for d in data.get('decks', []) for g in _quads(d['s'])])
     for am in arms:
         r, k, pts, line = am['r'], am['k'], am['pts'], am['line']
         if r['kind'] != 'route':
@@ -468,7 +479,7 @@ def build(data, signals=None):
                 # is left out
                 if (unary_union([geoms[int(j)] for j in tree.query(bar)]).buffer(-0.1).contains(bar)
                         and boxc.local(bar).intersection(bar).area < 0.1 and not laid.hits(bar, 0.3)
-                        and not medc.intersects(bar.buffer(0.1))):
+                        and not medc.intersects(bar.buffer(0.1)) and not deckc.intersects(bar)):
                     P.poly('LZ', bar, 'zebra', r['name'])
                     laid.add(bar)
             o += ZEBRA_PITCH
@@ -504,6 +515,12 @@ def build(data, signals=None):
             a0, a1 = sp + rgt * lo, sp + rgt * hi
             b0, b1 = a0 + D * STOP_W, a1 + D * STOP_W
             st = Polygon([a0, a1, b1, b0])
+            if deckc.intersects(st):
+                # stop at the deck's edge (cut back, one clean piece) or none
+                cutd = st.difference(deckc.local(st))
+                if cutd.geom_type != 'Polygon' or cutd.area < 0.5 * st.area:
+                    continue
+                st = cutd
             if laid.hits(st, 0.5) or boxc.local(st).intersection(st).area > 0.1:
                 continue
             P.poly('LW', st, 'stop', r['name'])
