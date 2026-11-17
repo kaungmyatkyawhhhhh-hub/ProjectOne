@@ -1,3 +1,27 @@
+# roads05 handover (18 Nov 2026, twenty-second pass: J26, GEOMETRY agent; BUILDER + Studio 17 spots; data J23 / paint J25 unchanged)
+
+## J26 -- built-surface totals J25 -> J26 (17 spots): 66 / 446 / 107 / 143 / 5 -> 67 / 394 / 107 / 110 / 5
+Note + table + 3 shots: vault `City Legends/2026-11-18 roads05 J26 studio check.md`. Studio: main "City Legends", ClaudeTools.YangonRoads /
+Roads = repo (1585396069 / 1519410308), scratch cleaned, version 1249, lock released. Asset 133014134133489 still = the J23 pack (the test
+data); the runner's `install` puts ITS YangonRoads over ClaudeTools: re-pack (`roads05_studiotest.py`) before the next Studio test.
+- **Corner pavement height rule (item 1):** `buildCorners` `hAt(x, z, u)` = (1 - u) A's + u B's straight-pavement height at the point's foot
+  on each road's kept edge (`edgeAt`, now above `sideZone`); used by the arc pavement's inner points and the chip (kerb-side points keep yA..yB).
+  Roads.luau `opts.paveY(name, v)` (Yangon only): a cut pavement vertex on a zone edge (sideZone true within 0.2, not a corner zone, 1.5+ off
+  my kerb) takes the nearest bigger road's pavement height there. deck_run pave_step 23 -> 13 (left: Lane #4611's 30-wide walk vs Lane #4610's
+  side -1 corner, two corners 45 studs apart overlapping on Yawmingyi).
+- **Gore kerb (items 2 / 5):** `sideZone`: past another road's corner (ownedBy) my KERB stays where the owner's carriageway + kerb band are not;
+  a bigger road's pavement now also stops at a smaller road's kerb band where that kerb is built (recursive sideZone of the smaller road).
+- **Gyophyu ramp foot (item 5):** `crossMouths` stops an arm at its first cut sample (it ran through 32 cut deck samples to k = 1: a 100-stud
+  sliver along the ramp wall). k = the LAST uncut sample failed (MOUTH FAILED: its cross-section still lies on Kun Chan Road #4).
+- **qaBuilt:** `M.qaLast[kind].all` = every fault spot (cluster them by hand).
+- **Studio debug kit used (scratchpad, not committed):** an incremental patch (difflib hunks vs the last sent copy) applied to the stored
+  Source, `Y.load()`, `T.Y = Y`: a builder change in Studio in ~5 s with no repack. Bahan / deck spots take ~25-60 s each; ALL 17 ~9 min.
+- **Next (in order):** (1) deck-foot road_step: Hledan Road #3's kept edge heights jump 0.7 in 3 studs at Lane #118's mouth (pyay_univ
+  (27180, 27819)); find which edge pass (pin / mouth_level / deck foot) makes it; (2) Gyophyu ramp foot west side: noSlab samples 34-37 have
+  no west kerb and the mouth ends 1.5 short of the ramp wall (Kun Chan (36192, 42592), (36178, 42612)); (3) rounded noses at the other dropped
+  corners (double_junction kerb_gap 86); (4) double_junction 12 box-hole cells; (5) Bahan Kan Yeiktha hole strip (bahan_ring box_hole 5 -> 6,
+  road_step 8 -> 9 this pass: untraced); (6) lanes_unmarked 3 = a zebra zone (Strand) and two shallow mouths: a QA exemption, not paint.
+
 # roads05 handover (18 Nov 2026, twenty-first pass: J25, GEOMETRY agent; PAINT + QA + Studio 17 spots; builder unchanged)
 
 ## J25 -- owner paint "median road dead end, missing lanes" 1 + 2, data J23 unchanged
