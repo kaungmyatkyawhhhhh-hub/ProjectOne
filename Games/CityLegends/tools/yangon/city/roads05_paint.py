@@ -13,11 +13,12 @@
   * mouths: a main road's lane lines break across a smaller road's mouth (RoadLines clearMouths); the centre line runs on
   * zebras: faded ochre LZ (230, 190, 110), 12 studs long, 1.6-stud bars on a 3.2 pitch, across each arm of a route just
     outside its box; (J15) whole bars only (none cut by a kerb, a box, a median nose or another arm's zebra)
-  * stop lines (J15: every approach): white, 1.2 studs, across the incoming lanes only (centre line / median .. kerb),
-    3 studs before the zebra on the approach side, stepped back where another arm's zebra lies
+  * stop lines: white, 1.2 studs, across the incoming lanes only (centre line / median .. kerb), 3 studs before the
+    zebra on the approach side, stepped back where another arm's zebra lies. (J17, photo check 2018-2021) only on the
+    approaches of a SIGNALLED junction (roads.json `junctions`); an unsignalled arm keeps its zebra only
   * roundabouts: dashed lane lines round the ring, a white dashed give-way line across each entry, yellow hatched
     splitters between an arm's entry and exit where it is divided
-  * turn arrows (J15): one per incoming lane at every stop line, 8 studs behind it, for the turns the box offers
+  * turn arrows (J15): one per incoming lane at every stop line (so: signalled approaches only, J17), 8 studs behind it, for the turns the box offers
     (leftmost lane left, rightmost right, all through where it goes on); OSM turn:lanes where the lane count fits
   * paint stops short of median noses and islands (nose caps in tidy)
   QA: roads05_paint_qa.py (J15 rules) besides roads05_qa.py --paint-only.
@@ -51,6 +52,7 @@ EDGE_IN = 0.9         # (J15) yellow kerb lines: middle this far in from the ker
 ARROW_S = 2.0         # (J15) arrows 12 studs long (real ones ~5 m)
 ARROW_L = 6.0 * ARROW_S
 ARROW_BACK = 8.0      # (J15) arrow tip this far behind the stop line
+SIG_BOX = 30.0        # (J17) a signalled junction point this close to a box makes its approaches get stop lines + arrows
 MIN_PIECE = 3.0       # (J15) a clipped lane / edge piece shorter than this is dropped (clean line ends)
 
 
@@ -292,6 +294,16 @@ def merged_boxes(raw, R):
     return [unary_union(g).convex_hull if len(g) > 1 else g[0] for g in groups.values()], len(pairs)
 
 
+def steady(raw, ds, inward):
+    """(J17, paint_snake) a kerb line's offsets from a smoothed kerb: raw kerb offsets (a wavy kerb, geometry
+    width_wobble) averaged over 9 samples and rate-limited, then EDGE_IN in; kept 0.5 .. 1.6 in from the RAW kerb so the
+    line never touches the kerb nor wanders into the lane"""
+    raw = np.asarray(raw, float)
+    t = np.convolve(np.pad(raw, 4, mode='edge'), np.ones(9) / 9, mode='valid')
+    t = limit_rate(t, ds, LANE_RATE)
+    return raw + inward * np.clip(inward * (t - raw) + EDGE_IN, 0.5, 1.6)
+
+
 def limit_rate(t, ds, rate):
     for i in range(1, len(t)):
         t[i] = min(max(t[i], t[i - 1] - rate * ds[i]), t[i - 1] + rate * ds[i])
@@ -484,8 +496,13 @@ def build(data, signals=None):
                     laid.add(bar)
             o += ZEBRA_PITCH
         zebra_zone.append(strip(s, lambda q: -q[6] - 1, lambda q: q[7] + 1, sorted(pts[:4])))
+    # (J17) stop lines and arrows only where real Yangon has them: the approaches of a signalled junction
+    sigp = [Point(j['x'], j['z']) for j in data.get('junctions', []) if j.get('signals')]
+    sig_box = {bi for bi, bx in enumerate(polys_of(box_u)) if any(bx.distance(p) < SIG_BOX for p in sigp)}
     for am in arms:
         r, k, step, pts, line, D = am['r'], am['k'], am['step'], am['pts'], am['line'], am['D']
+        if am['box'] not in sig_box:
+            continue
         s = r['s']
         # incoming side: traffic heading into the box (right-hand traffic: the driver's right side)
         if r.get('oneway'):
@@ -544,7 +561,10 @@ def build(data, signals=None):
             # (J15) a smaller road lying inside this one (a doubled carriageway) is no mouth: the kerb lines run on
             if not x.is_empty and x.area > 4 and (o['rank'] < r['rank'] or cw[o['name']].difference(g.buffer(0.5)).area > 4):
                 # a smaller road's mouth: lines break 4 short of it; (J15) a bigger road: none of this road's lines on it
-                mouths.append(cw[o['name']].buffer(4 if o['rank'] > r['rank'] else 1))
+                # (J17, edge_missing) a smaller road: 4 round the overlap itself (the mouth), only 0.5 off the rest of its
+                # carriageway (a road running alongside behind a thin island no longer wipes this road's kerb line)
+                mouths.append(unary_union([cw[o['name']].buffer(0.5), x.buffer(4)]) if o['rank'] > r['rank']
+                              else cw[o['name']].buffer(1))
         mouth_u = unary_union(mouths) if mouths else Polygon()
         clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
         clip_edge = Clip(clip_road, fills.buffer(2)) if not fills.is_empty else clip_road
@@ -554,20 +574,22 @@ def build(data, signals=None):
             rng = range(a, b + 1)
             # yellow lines along the built median, EDGE_IN from its kerb
             mbm = [s[i][8] > 0.3 for i in rng]
+            dsr = [0.0] + [math.hypot(s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2]) for i in range(a + 1, b + 1)]
             for m0, m1 in runs(mbm):
                 if m1 - m0 < 2:
                     continue
-                sub = range(a + m0, a + m1 + 1)
+                sub = list(range(a + m0, a + m1 + 1))
                 for sg in (-1, 1):
-                    ln = offset_line(s, lambda q, sg=sg: sg * (q[8] + EDGE_IN), sub)
+                    o = sg * steady([s[i][8] for i in sub], [0.0] + dsr[m0 + 1:m1 + 1], 1)
+                    ln = smooth([(s[i][0] - s[i][4] * o[j], s[i][2] + s[i][3] * o[j]) for j, i in enumerate(sub)])
                     P.line('LY', ln, YELLOW_W, 'median', r['name'], clip_all, min_len=MIN_PIECE)
             # (J15, owner ref 'Sule Square road') a yellow edge line along each outer kerb of a main road
             edges = [(outer, -sg) for sg, (inner, outer, nn, lines) in out.items()]
             if one:
                 edges.append((out[1][0], 1))
             for off, sgn in edges:
-                ln = smooth([(s[i][0] - s[i][4] * (off[j] + sgn * EDGE_IN), s[i][2] + s[i][3] * (off[j] + sgn * EDGE_IN))
-                             for j, i in enumerate(idx)])
+                o = steady(off, dsr, sgn)
+                ln = smooth([(s[i][0] - s[i][4] * o[j], s[i][2] + s[i][3] * o[j]) for j, i in enumerate(idx)])
                 P.line('LY', ln, YELLOW_W, 'edge', r['name'], clip_edge, min_len=MIN_PIECE)
             # centre: undivided two-way, on the carriageway's middle (J14), rate-limited like the lane lines
             if not one:
@@ -663,7 +685,7 @@ def build(data, signals=None):
     # really offers (OSM turn:lanes where they fit)
     for job in arrow_jobs:
         approach_arrows(P, job, (by_box, box_roads), LL, clip_all)
-    P.stats = dict(joined=ndouble, boxes=len(boxes), approaches=len(arrow_jobs))
+    P.stats = dict(joined=ndouble, boxes=len(boxes), signalled=len(sig_box), approaches=len(arrow_jobs))
     return P
 
 

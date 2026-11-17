@@ -6,7 +6,8 @@ and stop lines', 'Sule Square road', 'junction box grass hole', 'broken median p
 -> build/city_1to1/roads05_<tags>/qa_paint_J15.json (rows with x, z) and prints the counts.
 
   arrow_missing       a lane at a stop line with no turn arrow 5-40 studs behind it
-  stopline_missing    a zebra arm with incoming traffic and no stop line
+  stopline_missing    a zebra arm with incoming traffic at a signalled junction and no stop line (J17: unsignalled arms
+                      have a zebra only, as in the 2018-2021 photos)
   stopline_wrong_side a stop line in a box, on / touching a zebra, on the box side of its zebra, reaching over the centre
                       into the outgoing lanes, or covering under 80% of the incoming lanes
   dash_jog            a lane dash whose next dash along the line sits 1.5-4 studs sideways (a jump, not a taper)
@@ -31,7 +32,7 @@ from shapely.strtree import STRtree
 sys.stdout.reconfigure(encoding='utf-8')
 import geo
 from roads05_qa import quads
-from roads05_paint import raw_boxes, double_pairs, merged_boxes, neff, runs, nose_caps
+from roads05_paint import raw_boxes, double_pairs, merged_boxes, neff, runs, nose_caps, SIG_BOX
 
 RULES = ('arrow_missing', 'stopline_missing', 'stopline_wrong_side', 'dash_jog', 'dash_side_by_side', 'paint_in_median',
          'double_box', 'box_paint', 'paint_snake', 'edge_missing', 'zebra_colour', 'zebra_torn')
@@ -56,6 +57,26 @@ def axis(P):
         L, u = np.linalg.norm(e2), e2 / max(np.linalg.norm(e2), 1e-9)
         a, b = (c[0] + c[1]) / 2, (c[2] + c[3]) / 2
     return (a + b) / 2, u, L, a, b
+
+
+def caps(P, c, u):
+    """(J17) a dash's two true ends: (end point, outward tangent) from its flat caps (the two short edges farthest apart),
+    not the minimum rectangle's end midpoints: on a curved dash those sit a sagitta off the dash (false dash_jog on bends)"""
+    co = [np.array(p) for p in list(P.exterior.coords)[:-1]] if P.geom_type == 'Polygon' else []
+    ed = [((a + b) / 2, b - a) for a, b in zip(co, co[1:] + co[:1]) if 0.25 < np.linalg.norm(b - a) < 0.7
+          and abs((b - a) @ u) < 0.6 * np.linalg.norm(b - a)]
+    if len(ed) < 2:
+        return None
+    m0, m1 = max(((x, y) for x in ed for y in ed if x is not y), key=lambda xy: np.linalg.norm(xy[0][0] - xy[1][0]))
+    out = []
+    for m, e in (m0, m1):
+        t = np.array([-e[1], e[0]]) / max(np.linalg.norm(e), 1e-9)
+        if t @ (m - c) < 0:
+            t = -t
+        out.append((m, t))
+    if out[0][0] @ u > out[1][0] @ u:
+        out = out[::-1]
+    return out
 
 
 def turns(P):
@@ -188,7 +209,9 @@ def main():
             probe = LineString([lc - h * 5, lc - h * 40]).buffer(1.5)
             if not near(probe, 0.0, ('arrow',)):
                 iss['arrow_missing'].append(dict(road=r['name'], lane=j, n=n, **xz(lc - h * 15)))
-    # --- 2b. zebra arms with incoming traffic and no stop line
+    # --- 2b. zebra arms with incoming traffic and no stop line (signalled junctions only)
+    sigp = [Point(j['x'], j['z']) for j in data.get('junctions', []) if j.get('signals')]
+    mboxes = merged_boxes(raw, R)[0] if raw else []
     stops = [polys[i] for i in by.get('stop', [])]
     stree = STRtree(stops) if stops else None
     for g in zgroups:
@@ -199,6 +222,9 @@ def main():
             continue
         bx = nearest_box(c)
         if bx is None:
+            continue
+        mb = min(mboxes, key=lambda b: b.distance(Point(c)))
+        if not any(mb.distance(p) < SIG_BOX + 2 for p in sigp):
             continue
         q = r['s'][sample(r['name'], c)]
         h = np.array(bx.centroid.coords[0]) - c
@@ -237,8 +263,14 @@ def main():
     ends = []
     for i in di:
         c, u, L, a, b = ax[i]
-        ends.append((a, -u, i))
-        ends.append((b, u, i))
+        cp = caps(polys[i], c, u)
+        if cp:
+            (a, ta), (b, tb) = cp
+            ends.append((a, ta, i))
+            ends.append((b, tb, i))
+        else:
+            ends.append((a, -u, i))
+            ends.append((b, u, i))
     if ends:
         ek = cKDTree([e[0] for e in ends])
         for e, uo, i in ends:
