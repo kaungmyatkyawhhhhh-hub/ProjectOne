@@ -10,6 +10,8 @@ Note + table + 5 shots: vault `City Legends/2026-11-18 roads05 J27 studio check.
   Road's 78-wide side: best stayed sample 1, Lane #3790 pinned 1.1 low). Lane #118 / Hledan Road #3 mouth step gone, slip_triangle
   road_step 31 -> 3, bahan_ring 9 -> 0. Tried + dropped: "on the carriageway only" (+0.5): slip_triangle stayed 21.
 - **lanes_unmarked (item 6, roads05_paint_qa.py):** a zebra or another road's carriageway within the reach is a break: 3 -> 0.
+- **Pipeline (full, `sh roads05_pipeline.sh J27`, ~55 min):** roads.json / paint.json byte-identical to J23 / J25; mouthsim 0 failed of
+  11,569; `J27_qa.log` = J26's; `J27_paint_qa.log` lanes_unmarked 0, the rest unchanged. Version line written.
 - **Debug kit (scratchpad, not committed):** `mkpatch.py` (difflib grouped hunks -> Luau find/replace on ClaudeTools.<name>.Source,
   prints the repo checksum), `_G.RELOAD` (no-terrain YangonRoads copy re-required, Roads.build wrapped to keep the edgeSurface call's
   debugEdges in `_G.DE`: later builds of decks reset Roads.debugEdges), `_G.RUNALL(list)` / `_G.SHOWTAB()`, `_G.COL` (height + part
