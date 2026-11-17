@@ -225,7 +225,12 @@ class Paint:
             for x in lines_of(l2):
                 if x.length < min_len:
                     continue
-                self.poly(kind, x.buffer(width / 2, cap_style=2, join_style=2), what, road, deck)
+                pg = x.buffer(width / 2, cap_style=2, join_style=2)
+                # (J17) a line folded on itself (a centre line that turns back: Kabar Aye Pagoda Road 1203-1205) buffers
+                # into a fat blob, not a line: leave it out
+                if 2 * pg.area / max(pg.length, 1e-9) > 1.6 * width:
+                    continue
+                self.poly(kind, pg, what, road, deck)
 
 
 def neff(q, one):
@@ -233,6 +238,21 @@ def neff(q, one):
     lanes a side, more where a direction's asphalt holds more 12-stud lanes (a parking shoulder gets its own line)"""
     span = (q[6] + q[7]) if one else ((q[6] if q[8] > 0.3 else (q[6] + q[7]) / 2) - q[11])
     return max(1, int(q[9]), int(round(span / 12.0)))
+
+
+STACK = 6.0     # (J17) two roads more than this apart in height where they overlap in plan are stacked, not joined
+
+
+def y_at(r, pt):
+    s = r['s']
+    return min(s, key=lambda q: (q[0] - pt[0]) ** 2 + (q[2] - pt[1]) ** 2)[1]
+
+
+def stacked(a, b, g):
+    """(J17) roads a and b overlap in plan at g, but one runs over the other (a ramp over a road: U Htaung Bo Road
+    under Lane #1428): no junction, no mouth"""
+    c = g.representative_point().coords[0]
+    return abs(y_at(a, c) - y_at(b, c)) > STACK
 
 
 def raw_boxes(roads, main, cw, tree):
@@ -250,7 +270,7 @@ def raw_boxes(roads, main, cw, tree):
             if r.get('name') in (o.get('startsOnEnd'), o.get('endsOnEnd')) or o['name'] in (r.get('startsOnEnd'), r.get('endsOnEnd')):
                 continue
             x = g.intersection(cw[o['name']])
-            if not x.is_empty and x.area > 20:
+            if not x.is_empty and x.area > 20 and not stacked(r, o, x):
                 out.append((x.convex_hull, r['name'], o['name']))
     return out
 
@@ -468,6 +488,7 @@ def build(data, signals=None):
                         continue
                     D = np.array([s[k][3], s[k][4]]) * (-1 if step < 0 else 1)   # outward
                     arms.append(dict(box=bi, r=r, k=k, step=step, pts=pts, line=line, D=D))
+    edge_np = no_paint      # (J17) kerb lines run on along the arm from the box to its zebra (as round real corners)
     no_paint = unary_union([no_paint] + [p for p in arm_fill if p is not None])
     by_box = {}
     for am in arms:
@@ -492,7 +513,9 @@ def build(data, signals=None):
         half_l, half_r, mb = q[6], q[7], q[8]
         zline = substring(line, 2.0, 2.0 + ZEBRA_L)
         o = -half_l + 1.0
+        bars, slots = [], 0
         while o + ZEBRA_BAR <= half_r - 1.0 + 1e-6:
+            slots += 1
             # (J15) bars keep 1.3 off a median (its nose cap): no bar is cut
             if not (mb > 0.3 and (o + ZEBRA_BAR > -mb - 1.3 and o < mb + 1.3)):
                 a0 = np.array(zline.coords[0]) + rgt * o
@@ -503,9 +526,15 @@ def build(data, signals=None):
                 if (unary_union([geoms[int(j)] for j in tree.query(bar)]).buffer(-0.1).contains(bar)
                         and boxc.local(bar).intersection(bar).area < 0.1 and not laid.hits(bar, 0.3)
                         and not medc.intersects(bar.buffer(0.1)) and not deckc.intersects(bar)):
-                    P.poly('LZ', bar, 'zebra', r['name'])
-                    laid.add(bar)
+                    bars.append(bar)
             o += ZEBRA_PITCH
+        # (J17, Studio test 'stray bars') a zebra is whole or none: an arm left with under 3 bars, or under half its
+        # bars (the rest under a deck, on a box, off the kerb), gets none
+        if len(bars) < max(3, 0.5 * slots):
+            continue
+        for bar in bars:
+            P.poly('LZ', bar, 'zebra', r['name'])
+            laid.add(bar)
         zebra_zone.append(strip(s, lambda q: -q[6] - 1, lambda q: q[7] + 1, sorted(pts[:4])))
     # (J17) stop lines and arrows only where real Yangon has them: the approaches of a signalled junction
     sigp = [Point(j['x'], j['z']) for j in data.get('junctions', []) if j.get('signals')]
@@ -570,7 +599,8 @@ def build(data, signals=None):
                 continue
             x = g.intersection(cw[o['name']])
             # (J15) a smaller road lying inside this one (a doubled carriageway) is no mouth: the kerb lines run on
-            if not x.is_empty and x.area > 4 and (o['rank'] < r['rank'] or cw[o['name']].difference(g.buffer(0.5)).area > 4):
+            if (not x.is_empty and x.area > 4 and (o['rank'] < r['rank'] or cw[o['name']].difference(g.buffer(0.5)).area > 4)
+                    and not stacked(r, o, x)):
                 # a smaller road's mouth: lines break 4 short of it; (J15) a bigger road: none of this road's lines on it
                 # (J17, edge_missing) a smaller road: 4 round the overlap itself (the mouth), only 0.5 off the rest of its
                 # carriageway (a road running alongside behind a thin island no longer wipes this road's kerb line)
@@ -578,7 +608,7 @@ def build(data, signals=None):
                               else cw[o['name']].buffer(1))
         mouth_u = unary_union(mouths) if mouths else Polygon()
         clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
-        clip_edge = Clip(clip_road, fills.buffer(2)) if not fills.is_empty else clip_road
+        clip_edge = Clip(edge_np, zz, mouth_u, fills.buffer(2))
         one = bool(r.get('oneway'))
         for idx, out in LL.get(r['name'], ()):
             a, b = idx[0], idx[-1]

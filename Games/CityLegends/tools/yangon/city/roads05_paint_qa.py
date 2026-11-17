@@ -161,6 +161,7 @@ def main():
         j = raw_tree.nearest(Point(p))
         return raw[int(j)][0]
 
+    deckc = unary_union([g.buffer(1.0) for d in data.get('decks', []) for g in quads(d['s'])])
     # --- 2. stop lines
     for i in by.get('stop', []):
         P = polys[i]
@@ -202,10 +203,28 @@ def main():
         # --- 1. arrows on every incoming lane
         if r is None or why in ('in box', 'over the centre'):
             continue
-        q = r['s'][sample(r['name'], c)]
-        n = neff(q, bool(r.get('oneway')))
+        # (J17) the lanes a driver sees: split by the lane dashes 4-40 studs behind the stop line (the paint's own lane
+        # structure, tapers included); the data's lane count only where no dash is painted there
+        ue = (e1 - e0) / max(L, 1e-9)
+        band = Polygon([e0 - h * 4, e1 - h * 4, e1 - h * 40, e0 - h * 40])
+        ts = sorted(float((np.array(polys[j].centroid.coords[0]) - e0) @ ue) for j in near(band, 0.0, ('lane',)))
+        ts = [t for t in ts if 1.5 < t < L - 1.5]
+        cl = []
+        for t in ts:
+            if cl and t - cl[-1][-1] < 2.5:
+                cl[-1].append(t)
+            else:
+                cl.append([t])
+        if cl:
+            bnd = [0.0] + [sum(x) / len(x) for x in cl] + [L]
+        else:
+            n0 = neff(r['s'][sample(r['name'], c)], bool(r.get('oneway')))
+            bnd = [L * k / n0 for k in range(n0 + 1)]
+        n = len(bnd) - 1
         for j in range(n):
-            lc = e0 + (e1 - e0) * (j + 0.5) / n
+            lc = e0 + ue * (bnd[j] + bnd[j + 1]) / 2
+            if deckc.intersects(Point(lc - h * 15)):
+                continue                # (J17) that lane's arrow spot is under a deck (its ground is cut there)
             probe = LineString([lc - h * 5, lc - h * 40]).buffer(1.5)
             if not near(probe, 0.0, ('arrow',)):
                 iss['arrow_missing'].append(dict(road=r['name'], lane=j, n=n, **xz(lc - h * 15)))
