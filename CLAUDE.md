@@ -12,6 +12,7 @@ This repo is my Obsidian vault. It syncs to my PC with the Obsidian Git plugin (
   - When I tell you something new and lasting (a decision, a status change, a new project, a new preference), add it to the right note.
   - Commit and push to `master` so Obsidian pulls it. Small updates don't need permission.
   - Ask before restructuring or deleting anything.
+  - **Skills (permanent rule):** whenever a skill is created or changed, copy it (SKILL.md and all its files) into `Brain/Skills/<name>/` in the same turn, and update `Brain/Skills/00 Skills index.md` (its table row and a dated Log line). Our skills only, not Anthropic's built-in ones.
 - **Don't announce it:** never say that you read the vault.
 - **Leave `.obsidian/` alone:** it is Obsidian's own settings and plugins.
 - **Roblox Playbook (every game):** before planning or building any feature, update, launch, store item, thumbnail/icon or new game, read `Roblox Playbook/Roblox Playbook - Rules for every game.md` and follow it. For details, search inside the three Playbook guides in that folder (never read them whole).

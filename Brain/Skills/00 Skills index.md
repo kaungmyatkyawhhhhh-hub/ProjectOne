@@ -1,6 +1,6 @@
 ---
 tags: [brain, skills]
-updated: 2026-11-16
+updated: 2026-11-17
 ---
 # Skills index (Brain/Skills)
 Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are in [[00 Plugins index]]. Each folder holds the CURRENT copy of one of the owner's Claude skills (`<name>/SKILL.md` + any helper files).
@@ -27,9 +27,14 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/roblox-vfx-reveal/SKILL\|roblox-vfx-reveal]] | Use for Roblox VFX and big moments: combat hit VFX (impact frames, shake, FOV punch, shockwave, debris, flash), RNG/egg rarity reveal ladders with a top-tier cutscene, and reward title cards. Tested client kit `scripts/VFXKit.luau`. |
 | [[Skills/what-if-animation/SKILL\|what-if-animation]] | Make a 15-25 s "What If" stick-figure animated episode from one topic line: script, free Piper voice, storyboard, Remotion/SVG animation, free synthesised sound, master to -14 LUFS. |
 | [[Skills/ytdlp-video-watch/SKILL\|ytdlp-video-watch]] | Use when the user shares a TikTok/YouTube/Shorts/Reels link or video to watch, break down or research: watch it in the browser (no download) or download with yt-dlp, extract frames, sound hits and transcript, then analyze. |
-| play-roblox | (vault-only tool, not a synced Claude skill) |
+| [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
+- 2026-11-17: full check of every installed skill against the vault.
+  - The 5 local skills in `~/.claude/skills` (play-roblox, roblox-game-lighting, roblox-organic-marketing, roblox-ui-pro, roblox-vfx-reveal) match the vault exactly, file for file.
+  - All synced skills are in the vault. **The vault is NEWER** for pro-video-editing, roblox-3d-model-from-sheet, roblox-chatgpt-art-pipeline, roblox-game-sounds, roblox-icon-thumbnail and ytdlp-video-watch. The installed copies date from 7–10 Nov, so the owner still needs to re-upload those 6 to Claude.
+  - The play-roblox row now has its link and description.
+  - Anthropic's built-in skills (docx, pdf, pptx, xlsx, docs, skill-creator and the others) are left out on purpose: they are not ours.
 - 2026-11-16 (night): **New: roblox-organic-marketing**, from [[2026-11-16 Watch study - Organic Roblox marketing TikToks]].
   - SKILL.md: gate, own clips, game-rec creator campaign, measuring, owner rules.
   - `references/templates.md`.
