@@ -54,6 +54,23 @@ const ICONS = {
       + `<path d="M52 40 l4 8 9 1 -7 6 2 9 -8 -5 -8 5 2 -9 -7 -6 9 -1 Z" fill="#FFD23F" stroke="${L}" stroke-width="2.5" stroke-linejoin="round"/>`
       + gloss('M33 26 L56 23');
   }],
+  clover: [100, 100, () => { // Lucky Genes: four-leaf clover
+    const leaf = a => `<path d="M50 50 C${50 + 30 * Math.cos(a - .9)} ${50 + 30 * Math.sin(a - .9)} ${50 + 36 * Math.cos(a - .2)} ${50 + 36 * Math.sin(a - .2)} ${50 + 30 * Math.cos(a)} ${50 + 30 * Math.sin(a)} C${50 + 36 * Math.cos(a + .2)} ${50 + 36 * Math.sin(a + .2)} ${50 + 30 * Math.cos(a + .9)} ${50 + 30 * Math.sin(a + .9)} 50 50 Z"/>`;
+    const leaves = [-Math.PI / 4, Math.PI / 4, 3 * Math.PI / 4, -3 * Math.PI / 4].map(leaf).join('');
+    const stem = `<path d="M50 52 C54 66 60 76 68 86" fill="none"/>`;
+    return shadow(50, 93, 28) + sil(leaves + stem, 9)
+      + `<path d="M50 52 C54 66 60 76 68 86" fill="none" stroke="#2DB82E" stroke-width="5" stroke-linecap="round"/>`
+      + `<g fill="${rg([[0, '#B6FF7A'], [.6, '#4FD83A'], [1, '#1F9E2A']], .35, .3, .8)}">${leaves}</g>`
+      + `<g fill="none" stroke="#1F8A26" stroke-width="2.5" stroke-linecap="round" opacity=".7">${[-Math.PI / 4, Math.PI / 4, 3 * Math.PI / 4, -3 * Math.PI / 4].map(a => `<path d="M50 50 L${50 + 22 * Math.cos(a)} ${50 + 22 * Math.sin(a)}"/>`).join('')}</g>`
+      + `<circle cx="50" cy="50" r="5" fill="#FFE45C" stroke="${L}" stroke-width="2.5"/>` + gloss('M30 28 C34 24 40 23 44 25');
+  }],
+  shield: [100, 100, () => { // Immunity: shield with a white cross
+    const s = `<path d="M50 10 C62 18 74 20 84 20 C84 52 74 76 50 90 C26 76 16 52 16 20 C26 20 38 18 50 10 Z"/>`;
+    return shadow(50, 94, 28) + sil(s, 10) + s.replace('/>', ` fill="${g([[0, '#7AD8FF'], [.55, '#2E8CF0'], [1, '#1A4FC0']], 0, 0, .4, 1)}"/>`)
+      + `<path d="M50 18 C60 24 70 26 77 26 C76 50 68 70 50 82 Z" fill="#000" opacity=".12"/>`
+      + `<path d="M44 34 H56 V46 H68 V58 H56 V70 H44 V58 H32 V46 H44 Z" fill="#fff" stroke="${L}" stroke-width="3" stroke-linejoin="round"/>`
+      + gloss('M26 26 C34 25 42 22 48 18');
+  }],
   dna: [100, 100, () => helix('#4CFF8A', '#2EB8FF')],
   dna2: [100, 100, () => helix('#FFD23F', '#FF8A00') + `<g transform="translate(58 64)">${badge('x2')}</g>`],
   brain: [100, 100, () => {

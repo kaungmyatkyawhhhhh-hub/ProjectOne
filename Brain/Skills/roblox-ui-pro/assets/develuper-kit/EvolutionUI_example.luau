@@ -22,31 +22,31 @@ if RunService:IsStudio() then -- test key: [ unlocks everything (the server only
 	end)
 end
 
----------------------------------------------------------------- art (uploaded 18 Nov, Develuper style)
+---------------------------------------------------------------- art (uploaded 18 Nov, Develuper "Neon kit" skin: kitgen.html?skin=neon)
 -- every PNG is drawn at 2 px per design point with a transparent margin: rect = {x, y, w, h} trims it (ImageRect),
 -- slice = {left, top, right, bottom} insets in px inside that rect; SliceScale 0.5 turns px back into points
 local PX = 0.5
 local ART = {
-	btnGreen = { id = 86248783945307, rect = { 4, 4, 200, 104 }, slice = { 24, 24, 24, 45 } },
-	btnGreenW = { id = 110678860078664, rect = { 4, 4, 224, 100 }, slice = { 23, 23, 23, 43 } },
-	btnGreenSq = { id = 86290175800270, rect = { 2, 2, 132, 132 }, slice = { 30, 30, 30, 56 } },
-	btnYellowW = { id = 129528628876472, rect = { 4, 4, 224, 100 }, slice = { 23, 23, 23, 43 } },
-	btnYellowSq = { id = 76036121642537, rect = { 2, 2, 132, 132 }, slice = { 30, 30, 30, 56 } },
-	tab = { id = 124017499955927, rect = { 5, 5, 262, 86 }, slice = { 20, 20, 20, 37 } },
-	close = { id = 71393467181562, rect = { 4, 5, 208, 94 }, slice = { 22, 22, 22, 41 } },
-	header = { id = 87655519427030, rect = { 2, 2, 480, 124 }, slice = { 28, 28, 28, 53 } },
-	window = { id = 72841935379436, rect = { 4, 4, 416, 296 }, slice = { 46, 46, 46, 46 } },
-	dnaPill = { id = 98050108315217, rect = { 3, 3, 370, 110 }, slice = { 25, 25, 25, 47 } },
-	status = { id = 120633695375989, rect = { 2, 2, 652, 204 }, slice = { 29, 29, 29, 49 } },
-	row = { id = 116748327916772, rect = { 6, 6, 972, 128 }, slice = { 19, 19, 19, 31 } },
-	toast = { id = 120412494866146, rect = { 6, 6, 772, 116 }, slice = { 17, 17, 17, 28 } },
-	barTrack = { id = 135952223944341, rect = { 8, 8, 520, 52 }, slice = { 13, 13, 13, 23 } },
-	cardYellow = { id = 101088221683122, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
-	cardMagenta = { id = 134630462851957, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
-	cardPurple = { id = 87803340346172, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
-	cardGreen = { id = 96337093170583, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
-	cardCyan = { id = 84133856283246, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
-	cardHero = { id = 94432653282259, rect = { 4, 4, 356, 408 }, slice = { 27, 27, 27, 47 } },
+	btnGreen = { id = 99152619942938, rect = { 4, 4, 200, 104 }, slice = { 24, 24, 24, 45 } },
+	btnGreenW = { id = 122607256932016, rect = { 4, 4, 224, 100 }, slice = { 23, 23, 23, 43 } },
+	btnGreenSq = { id = 134991785436106, rect = { 2, 2, 132, 132 }, slice = { 30, 30, 30, 56 } },
+	btnYellowW = { id = 101786149004135, rect = { 4, 4, 224, 100 }, slice = { 23, 23, 23, 43 } },
+	btnYellowSq = { id = 127397210538281, rect = { 2, 2, 132, 132 }, slice = { 30, 30, 30, 56 } },
+	tab = { id = 103209281537164, rect = { 5, 5, 262, 86 }, slice = { 20, 20, 20, 37 } },
+	close = { id = 99979308862490, rect = { 4, 5, 208, 94 }, slice = { 22, 22, 22, 41 } },
+	header = { id = 86356717734007, rect = { 2, 2, 480, 124 }, slice = { 28, 28, 28, 53 } },
+	window = { id = 71497684952255, rect = { 4, 4, 416, 296 }, slice = { 46, 46, 46, 46 } },
+	dnaPill = { id = 114080700329192, rect = { 3, 3, 370, 110 }, slice = { 25, 25, 25, 47 } },
+	status = { id = 110219725577619, rect = { 2, 2, 652, 204 }, slice = { 29, 29, 29, 49 } },
+	row = { id = 113152138086851, rect = { 6, 6, 972, 128 }, slice = { 19, 19, 19, 31 } },
+	toast = { id = 107751349187669, rect = { 6, 6, 772, 116 }, slice = { 17, 17, 17, 28 } },
+	barTrack = { id = 95750994020821, rect = { 8, 8, 520, 52 }, slice = { 13, 13, 13, 23 } },
+	cardYellow = { id = 92349994686051, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
+	cardMagenta = { id = 125816991334707, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
+	cardPurple = { id = 78767308581492, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
+	cardGreen = { id = 117491775654576, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
+	cardCyan = { id = 124570689040785, rect = { 7, 7, 230, 402 }, slice = { 18, 18, 18, 31 } },
+	cardHero = { id = 88565839554030, rect = { 4, 4, 356, 408 }, slice = { 27, 27, 27, 47 } },
 	shop = { id = 121083340817415, rect = { 25, 35, 174, 171 } },
 	diet = { id = 140061570538941, rect = { 33, 21, 158, 187 } },
 	index = { id = 122362092196907, rect = { 39, 34, 146, 174 } },
@@ -61,6 +61,33 @@ local ART = {
 	moon = { id = 118256929964343, rect = { 34, 30, 149, 168 } },
 	skip = { id = 101437450811165, rect = { 30, 50, 172, 152 } },
 	jar = { id = 123272377840378, rect = { 46, 35, 132, 175 } },
+	clover = { id = 110098495099896, rect = { 50, 50, 124, 158 } },
+	shield = { id = 96363517409622, rect = { 34, 21, 156, 189 } },
+	-- HUD in the owner's ChatGPT-mock look (hud.html, uploaded 18 Nov)
+	hudPlate = { id = 99387855322055, rect = { 7, 7, 670, 266 } },
+	dnaPlate = { id = 131431574744300, rect = { 7, 7, 362, 102 } },
+	plate9 = { id = 102036198893418, rect = { 7, 7, 250, 130 }, slice = { 41, 41, 41, 45 } },
+	slot = { id = 88980806970695, rect = { 11, 12, 242, 48 }, slice = { 21, 20, 21, 20 } },
+	miniTrack = { id = 80304283470164, rect = { 12, 12, 160, 28 }, slice = { 14, 14, 14, 14 } },
+	fillGold = { id = 110420409866117, rect = { 12, 12, 80, 28 }, slice = { 14, 14, 14, 14 } },
+	titleBand = { id = 127097984147022, rect = { 12, 12, 460, 64 } },
+	sqGreen = { id = 95825050705850, rect = { 7, 7, 130, 130 } },
+	sqBlue = { id = 140649401825975, rect = { 7, 7, 130, 130 } },
+	sqPurple = { id = 83791679223440, rect = { 7, 7, 130, 130 } },
+	chevron = { id = 130338925901928, rect = { 18, 34, 148, 156 } },
+	stall = { id = 90821629593898, rect = { 26, 26, 172, 182 } },
+	port1 = { id = 83511662512157, rect = { 7, 7, 138, 150 } },
+	port2 = { id = 101610475812861, rect = { 7, 7, 138, 150 } },
+	port3 = { id = 139949073882603, rect = { 7, 7, 138, 150 } },
+	port4 = { id = 74015997624824, rect = { 7, 7, 138, 150 } },
+	port5 = { id = 116672581162680, rect = { 7, 7, 138, 150 } },
+	port6 = { id = 125623672238165, rect = { 7, 7, 138, 150 } },
+	port7 = { id = 122085693687516, rect = { 7, 7, 138, 150 } },
+	port8 = { id = 89985532690390, rect = { 7, 7, 138, 150 } },
+	port9 = { id = 71216777393119, rect = { 7, 7, 138, 150 } },
+	port10 = { id = 87728832487266, rect = { 7, 7, 138, 150 } },
+	port11 = { id = 112027057344929, rect = { 7, 7, 138, 150 } },
+	port12 = { id = 98207495064814, rect = { 7, 7, 138, 150 } },
 }
 local INK = Color3.new(0, 0, 0)
 local CREAM = Color3.new(1, 1, 1) -- his text is pure white with a black stroke
@@ -112,7 +139,7 @@ local function label(parent, text, size, props)
 	shadow.TextColor3, shadow.ZIndex, shadow.Name = INK, l.ZIndex - 1, "Depth"
 	shadow.Position = l.Position + UDim2.fromOffset(0, math.max(1, size / 12))
 	shadow.Parent = parent
-	l:GetPropertyChangedSignal("Text"):Connect(function() shadow.Text = l.Text end)
+	l:GetPropertyChangedSignal("Text"):Connect(function() shadow.Text = (l.Text:gsub("<[^>]+>", "")) end)
 	l:GetPropertyChangedSignal("Visible"):Connect(function() shadow.Visible = l.Visible end)
 	return l
 end
@@ -168,52 +195,63 @@ end
 local hudGui = Kit.screen("EvolutionHUD", 10, playerGui)
 local hud = scaledRoot(hudGui)
 
--- DNA counter
-local pill = img(hud, "dnaPill", { Position = UDim2.fromOffset(8, 6), Size = UDim2.fromOffset(176, 46) })
-img(pill, "dna", { Position = UDim2.fromOffset(8, 3), Size = UDim2.fromOffset(30, 36), ZIndex = 2 })
-local dnaText = label(pill, "", 21, { Position = UDim2.fromOffset(46, 0), Size = UDim2.new(1, -86, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, TextColor3 = DNA_C })
-local multText = label(pill, "", 15, { Position = UDim2.new(1, -46, 0, 0), Size = UDim2.fromOffset(36, 46), TextXAlignment = Enum.TextXAlignment.Right, TextColor3 = GOLD })
-
--- status plate
-local status = img(hud, "status", { Size = UDim2.fromOffset(316, 92) })
-local title = label(status, "", 18, { Position = UDim2.fromOffset(0, 9), Size = UDim2.new(1, 0, 0, 24) })
-local function bar(y, color)
-	local track = img(status, "barTrack", { Position = UDim2.new(0, 30, 0, y), Size = UDim2.new(1, -60, 0, 22) })
-	local inner = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(4, 3), Size = UDim2.new(1, -8, 1, -10), ClipsDescendants = true }, track)
-	local fill = new("Frame", { BackgroundColor3 = color, BorderSizePixel = 0, Size = UDim2.fromScale(0, 1) }, inner)
-	new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, fill)
-	new("UIGradient", { Rotation = 90, Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(185, 185, 185)) }, fill)
-	local t = label(track, "", 13, { ZIndex = 5 })
-	return fill, t
-end
-local ageFill, ageText = bar(36, Color3.fromRGB(245, 170, 50))
-local evoFill, evoText = bar(61, Color3.fromRGB(110, 205, 60))
-
-local menuRow = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(8, 56), Size = UDim2.fromOffset(176, 56) }, hud)
+-- DNA counter: the helix breaks out of the plate (mock look)
+local pill = img(hud, "dnaPlate", { Position = UDim2.fromOffset(8, 8), Size = UDim2.fromOffset(181, 51) })
+img(pill, "dna", { Position = UDim2.fromOffset(-4, -9), Size = UDim2.fromOffset(42, 62), ZIndex = 3 })
+local dnaText = label(pill, "", 22, { Position = UDim2.fromOffset(44, 0), Size = UDim2.fromOffset(62, 47), TextXAlignment = Enum.TextXAlignment.Left })
+local multText = label(pill, "", 15, { Position = UDim2.fromOffset(104, 0), Size = UDim2.fromOffset(36, 47), TextXAlignment = Enum.TextXAlignment.Right, TextColor3 = GOLD })
+local pillScale = new("UIScale", {}, pill)
 local menus = {}
+button(pill, "sqGreen", "+", 22, { Position = UDim2.fromOffset(145, 9), Size = UDim2.fromOffset(30, 30), ZIndex = 4 }, function()
+	menus.Shop.Open()
+	menus.Shop.ShowTab("Robux")
+end)
+
+-- status plate: gold hex portrait of your species, title on a brush band, two slot rows with icons
+local status = img(hud, "hudPlate", { Size = UDim2.fromOffset(335, 133) })
+local portrait = img(status, "port1", { Position = UDim2.fromOffset(-8, -8), Size = UDim2.fromOffset(66, 72), ZIndex = 4 })
+img(status, "titleBand", { Position = UDim2.fromOffset(62, 12), Size = UDim2.fromOffset(250, 34), ZIndex = 2 })
+local title = label(status, "", 22, { Position = UDim2.fromOffset(62, 12), Size = UDim2.fromOffset(250, 32), RichText = true })
+local function slotRow(y, icon)
+	local r = img(status, "slot", { Position = UDim2.fromOffset(20, y), Size = UDim2.fromOffset(298, 26), ZIndex = 2 })
+	img(r, icon, { Position = UDim2.fromOffset(5, 2), Size = UDim2.fromOffset(22, 22), ZIndex = 3 })
+	return r
+end
+local ageRow, evoRow = slotRow(62, "hourglass"), slotRow(90, "chevron")
+local ageTrack = img(ageRow, "miniTrack", { Position = UDim2.fromOffset(32, 6), Size = UDim2.fromOffset(110, 14), ZIndex = 3 })
+local ageFill = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(0, 1), ClipsDescendants = true, ZIndex = 4 }, ageTrack)
+img(ageFill, "fillGold", { Size = UDim2.fromOffset(110, 14), ZIndex = 4 })
+local ageText = label(ageRow, "", 14, { Position = UDim2.fromOffset(146, 0), Size = UDim2.new(1, -150, 1, 0), ZIndex = 5 })
+local evoText = label(evoRow, "", 15, { Position = UDim2.fromOffset(32, 0), Size = UDim2.new(1, -40, 1, 0), ZIndex = 5, RichText = true })
+local SPECIES_ORDER = { "Monkey", "Ape", "Australopithecus", "Homo habilis", "Homo erectus", "Neanderthal", "Homo sapiens",
+	"Modern Human", "Cyborg", "Space Colonist", "Digital Mind", "Cosmic Being" } -- port1..port12 in hud.html
+local function portraitKey(name) return "port" .. (table.find(SPECIES_ORDER, name) or 1) end
+
+-- one colour per menu button, like the mock: green shop, blue diet, purple index
+local menuRow = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(8, 66), Size = UDim2.fromOffset(194, 65) }, hud)
 local function menuButton(i, key, icon, text, menuName)
-	local b = button(menuRow, key, "", 13, { Position = UDim2.fromOffset((i - 1) * 60, 0), Size = UDim2.fromOffset(56, 56) }, function()
+	local b = button(menuRow, key, "", 15, { Position = UDim2.fromOffset((i - 1) * 66, 0), Size = UDim2.fromOffset(62, 62) }, function()
 		menus[menuName].Open()
 	end)
-	img(b.Button, icon, { Position = UDim2.fromOffset(11, 3), Size = UDim2.fromOffset(34, 30), ZIndex = 3 })
-	b.Label.Position, b.Label.Size = UDim2.fromOffset(0, 29), UDim2.new(1, 0, 0, 18)
-	b.Label.Parent:FindFirstChild("Depth").Position = UDim2.fromOffset(0, 30)
+	img(b.Button, icon, { Position = UDim2.fromOffset(9, 2), Size = UDim2.fromOffset(44, 38), ZIndex = 3 })
+	b.Label.Position, b.Label.Size = UDim2.fromOffset(0, 36), UDim2.new(1, 0, 0, 20)
+	b.Label.Parent:FindFirstChild("Depth").Position = UDim2.fromOffset(0, 37)
 	b.Label.Parent:FindFirstChild("Depth").Size = b.Label.Size
 	b.SetText(text)
 	return b
 end
-local shopButton = menuButton(1, "btnGreenSq", "shop", "Shop", "Shop")
-menuButton(2, "btnYellowSq", "diet", "Diet", "Diet")
-menuButton(3, "btnYellowSq", "index", "Index", "Index")
+local shopButton = menuButton(1, "sqGreen", "stall", "Shop", "Shop")
+menuButton(2, "sqBlue", "diet", "Diet", "Diet")
+menuButton(3, "sqPurple", "index", "Index", "Index")
 
 -- wide: status centred; narrow: status sits right of the left column so they never touch
 local function layout()
 	local w = hud.AbsoluteSize.X / hud:FindFirstChildOfClass("UIScale").Scale
-	local left = 8 + 176 + 10
-	if w / 2 - 158 >= left then
-		status.AnchorPoint, status.Position = Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, 4)
+	local left = 8 + 194 + 12
+	if w / 2 - 168 >= left then
+		status.AnchorPoint, status.Position = Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, 6)
 	else
-		status.AnchorPoint, status.Position = Vector2.zero, UDim2.fromOffset(left, 4)
+		status.AnchorPoint, status.Position = Vector2.zero, UDim2.fromOffset(left, 6)
 	end
 end
 hud:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
@@ -223,10 +261,11 @@ layout()
 local menuGui = Kit.screen("EvolutionMenus", 20, playerGui)
 local menuRoot = scaledRoot(menuGui)
 local openName = nil
+local news = {} -- set by the toast queue below: windows pause news so it never plays hidden behind them
 local function window(name, titleText, iconKey)
 	local dim = new("TextButton", { Name = name .. "Backdrop", Text = "", AutoButtonColor = false, BackgroundColor3 = Color3.new(0, 0, 0),
 		BackgroundTransparency = 0.45, Size = UDim2.fromScale(1, 1), Visible = false, ZIndex = 1 }, menuRoot)
-	local w = img(menuRoot, "window", { Name = name, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
+	local w = img(menuRoot, "plate9", { Name = name, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5),
 		Size = UDim2.fromOffset(560, 300), Visible = false, ZIndex = 2 }) -- 300 + the 22 pt title overhang fits a 360-pt-tall phone
 	new("UISizeConstraint", { MaxSize = Vector2.new(560, 300) }, w)
 	local sc = new("UIScale", {}, w)
@@ -241,11 +280,13 @@ local function window(name, titleText, iconKey)
 		if openName ~= name then return end
 		openName = nil
 		dim.Visible, w.Visible = false, false
+		task.defer(news.resume) -- deferred: switching windows re-opens one before this runs
 	end
 	function m.Open()
 		if openName == name then return end
 		if openName then menus[openName].Close() end
 		openName = name
+		news.pause()
 		dim.Visible, w.Visible = true, true
 		sc.Scale = 0.9
 		TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.18, Enum.EasingStyle.Back), { Scale = 1 }):Play()
@@ -288,7 +329,7 @@ local function card(parent, order, frameKey, itemKey, name, info, onBuy)
 end
 
 ---------------------------------------------------------------- Shop: Upgrades tab (DNA) and Robux tab
-local shop = window("Shop", "Shop", "shop")
+local shop = window("Shop", "Shop", "stall")
 local pages, tabs = {}, {}
 local function showTab(which)
 	for k, p in pages do p.Visible = k == which end
@@ -299,11 +340,14 @@ for i, t in { { "Upgrades", "Upgrades" }, { "Robux", "Robux" } } do
 	pages[t[1]] = hscroll(shop.Content, { Position = UDim2.fromOffset(0, 42), Size = UDim2.new(1, 0, 1, -38), Visible = false })
 end
 showTab("Upgrades")
+shop.ShowTab = showTab
 
 local UPGRADES = {
 	{ id = "Brain", name = "Bigger Brain", info = "+1 DNA every second", art = "brain" },
 	{ id = "Aging", name = "Faster Aging", info = "Shorter lives, faster gens", art = "hourglass" },
 	{ id = "Family", name = "Big Family", info = "+1 evolution each gen", art = "cradle" },
+	{ id = "Luck", name = "Lucky Genes", short = "Luck", info = "+4% mutation chance", art = "clover" },
+	{ id = "Immunity", name = "Immunity", info = "Less disease each level", art = "shield" },
 }
 local upgradeCards = {}
 for i, u in UPGRADES do
@@ -327,10 +371,12 @@ local ROBUX_ART = {
 	-- colour = tier, like his store: hero yellow, epic magenta, rare purple, cash-style cyan, common green
 	DoubleDNA = { "cardMagenta", "dna2" }, FastLife = { "cardPurple", "stopwatch" }, VIP = { "cardHero", "crown" },
 	OfflinePlus = { "cardPurple", "moon" }, Skip5 = { "cardCyan", "skip" }, Skip20 = { "cardCyan", "skip" }, DNAPack = { "cardGreen", "jar" },
+	SuperGenes = { "cardMagenta", "clover" },
 }
 local SHORT = { DoubleDNA = "Double DNA forever", FastLife = "Lives 30% shorter", VIP = "+25% DNA, gold graves",
-	OfflinePlus = "Evolve 24h offline", Skip5 = "5 lives right now", Skip20 = "20 lives, best value", DNAPack = "10 minutes of DNA" }
-local CARD_NAME = { FastLife = "Fast Life", OfflinePlus = "Long Nap" } -- cards fit ~12 letters at 15 pt
+	OfflinePlus = "Evolve 24h offline", Skip5 = "5 lives right now", Skip20 = "20 lives, best value", DNAPack = "10 minutes of DNA",
+	SuperGenes = "2x mutations, keep good genes" }
+local CARD_NAME = { FastLife = "Fast Life", OfflinePlus = "Long Nap", SuperGenes = "Super Genes" } -- cards fit ~12 letters at 15 pt
 local robuxCards = {}
 local VIP_FIRST = { VIP = 0 } -- hero item first
 for i, entry in (remotes:GetAttribute("Store") or ""):split(";") do
@@ -415,13 +461,13 @@ section(4, "Badges", entries("AllBadges", ";", "B:", GOLD), 2)
 refresh = function()
 	local a = player:GetAttributes()
 	if not a.Species then return end
-	title.Text = ("%s  ·  Gen %d"):format(a.Species, a.Gen)
+	title.Text = ('%s · <font color="#FFD23F">Gen %d</font>'):format(a.Species, a.Gen)
+	local pk = ART[portraitKey(a.Species)]
+	portrait.Image, portrait.ImageRectOffset, portrait.ImageRectSize = uri(pk), Vector2.new(pk.rect[1], pk.rect[2]), Vector2.new(pk.rect[3], pk.rect[4])
 	if a.NextSpecies == "" then
-		evoFill.Size = UDim2.fromScale(1, 1)
 		evoText.Text = "Fully evolved!"
 	else
-		evoFill.Size = UDim2.fromScale(math.clamp((a.Evo - a.PrevAt) / (a.NextAt - a.PrevAt), 0, 1), 1)
-		evoText.Text = ("Next: %s  %d/%d"):format(a.NextSpecies, a.Evo, a.NextAt)
+		evoText.Text = ('Next: %s   <font color="#5CF2FF">%d/%d</font>'):format(a.NextSpecies, a.Evo, a.NextAt)
 	end
 	dnaText.Text = Kit.abbrev(a.DNA or 0)
 	local mult = a.DnaMult or 1
@@ -430,8 +476,10 @@ refresh = function()
 	local canBuy = false
 	for u, c in upgradeCards do
 		local cost = a[u.id .. "Cost"] or 0
-		c.Name.Text = ("%s %d"):format(u.name:match("%S+$"), a[u.id] or 0) -- "Brain 3": short enough for the card
-		if (a.DNA or 0) >= cost then
+		c.Name.Text = ("%s %d"):format(u.short or u.name:match("%S+$"), a[u.id] or 0) -- "Brain 3": short enough for the card
+		if cost < 0 then
+			c.Buy.SetEnabled(false, "MAX")
+		elseif (a.DNA or 0) >= cost then
 			canBuy = true
 			c.Buy.SetEnabled(true, Kit.abbrev(cost))
 		else
@@ -480,7 +528,7 @@ RunService.RenderStepped:Connect(function()
 	local age = math.clamp((workspace:GetServerTimeNow() - start) / len, 0, 1)
 	ageFill.Size = UDim2.fromScale(age, 1)
 	local phase = age < 0.35 and "Child" or age < 0.8 and "Adult" or "Elder"
-	ageText.Text = ("%s  ·  %ds left"):format(phase, math.ceil(len * (1 - age)))
+	ageText.Text = ("%s · %ds left"):format(phase, math.ceil(len * (1 - age)))
 end)
 
 ---------------------------------------------------------------- news: one toast at a time, biggest news first
@@ -492,36 +540,92 @@ local STYLES = {
 	{ find = "evolved", priority = 10, color = GOLD, hold = 3.5 },
 	{ find = "Badge", priority = 9, color = GOLD, hold = 3 },
 	{ find = "Thank you", priority = 9, color = DNA_C, hold = 3 },
+	{ find = "Daily streak", priority = 8, color = DNA_C, hold = 3 },
 	{ find = "entered the", priority = 7, color = Color3.fromRGB(140, 200, 255), hold = 3 },
 	{ find = "Mutation", priority = 6, color = Color3.fromRGB(205, 150, 255) },
 	{ find = "Caught", priority = 5, color = Color3.fromRGB(255, 130, 110) },
 }
-local queue, showing, seq = {}, false, 0
+-- Overstimulated-kid sim (18 Nov, vault EVOLVE/Calc): news played behind open windows and left before a 7-year-old
+-- could read it (~47% of evolve/era/badge news missed). Now: news waits while a window is open, a toast cut by a
+-- window comes back after, big news stays words / 1.2 + 0.5 s, and it sits below the menu buttons (y 120).
+local queue, showing, seq = {}, nil, 0
+local function byPriority(x, y) return x.priority > y.priority or (x.priority == y.priority and x.seq < y.seq) end
 local function showNext()
-	if showing or #queue == 0 then return end
-	table.sort(queue, function(x, y) return x.priority > y.priority or (x.priority == y.priority and x.seq < y.seq) end)
+	if showing or #queue == 0 or openName or news.banner then return end
+	table.sort(queue, byPriority)
 	local item = table.remove(queue, 1)
-	showing = true
-	local t = img(toastRoot, "toast", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, -70), Size = UDim2.fromOffset(380, 52), ZIndex = 10 })
+	local t = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, -70), Size = UDim2.fromOffset(380, 52), ZIndex = 10 })
 	label(t, item.text, 17, { Position = UDim2.fromOffset(14, 0), Size = UDim2.new(1, -28, 1, 0), TextColor3 = item.color or CREAM, ZIndex = 12, TextTruncate = Enum.TextTruncate.AtEnd })
-	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0.5, 0, 0, 104) }):Play()
-	task.delay(item.hold or 2.2, function()
+	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0.5, 0, 0, 146) }):Play()
+	local cur = {}
+	function cur.hide(requeue)
+		if showing ~= cur then return end
+		showing = nil
+		if requeue then table.insert(queue, item) end
 		TweenService:Create(t, TweenInfo.new(0.2), { Position = UDim2.new(0.5, 0, 0, -70) }):Play()
-		task.wait(0.22)
-		t:Destroy()
-		showing = false
-		showNext()
-	end)
+		task.delay(0.22, function() t:Destroy() showNext() end)
+	end
+	showing = cur
+	local hold = item.hold or 2.2
+	if item.priority >= 7 then hold = math.max(hold, #item.text:split(" ") / 1.2 + 0.5) end -- slowest 7-year-old: ~1.2 words/s
+	task.delay(hold, cur.hide)
 end
+news.pause = function() if showing then showing.hide(true) end end
+news.resume = showNext
 remotes.Notify.OnClientEvent:Connect(function(msg)
-	for _, line in msg:split("\n") do
+	local lines = msg:split("\n")
+	for i, line in lines do
+		if i == 1 and #lines > 1 and line:find("^Generation") then continue end -- bigger news this life: skip the routine line
+		if line:find("evolved into", 1, true) and os.clock() - (news.bannerAt or -99) < 3 then continue end -- the banner already said it
 		local style = { priority = 1 }
 		for _, s in STYLES do
 			if line:find(s.find, 1, true) then style = s break end
 		end
 		seq += 1
 		table.insert(queue, { text = line, priority = style.priority, color = style.color, hold = style.hold, seq = seq })
-		while #queue > 6 do table.remove(queue) end -- drop the least important when news piles up
 	end
+	table.sort(queue, byPriority)
+	while #queue > 6 do table.remove(queue) end -- sorted first, so this drops the least important, not the newest
 	showNext()
+end)
+
+---------------------------------------------------------------- evolve banner: the biggest moment gets its own plate, news waits behind it
+remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stage, total)
+	news.bannerAt = os.clock()
+	news.pause()
+	news.banner = true
+	local b = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.55), Size = UDim2.fromOffset(330, 112), ZIndex = 20 })
+	img(b, portraitKey(speciesName), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
+	label(b, "EVOLVED!", 30, { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 36), TextColor3 = GOLD, ZIndex = 22 })
+	label(b, speciesName, 22, { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 28), ZIndex = 22, TextTruncate = Enum.TextTruncate.AtEnd })
+	label(b, ("Species %d / %d"):format(stage, total), 14, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 20), TextColor3 = DNA_C, ZIndex = 22 })
+	local sc = new("UIScale", { Scale = 0.6 }, b)
+	TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	task.delay(math.max(3, #speciesName:split(" ") / 1.2 + 2), function() -- 2 words of title + the name, slowest 7-year-old
+		TweenService:Create(sc, TweenInfo.new(0.15), { Scale = 0.01 }):Play()
+		task.delay(0.16, function()
+			b:Destroy()
+			news.banner = false
+			news.resume()
+		end)
+	end)
+end)
+
+---------------------------------------------------------------- DNA orb pickup: "+N" floats up where the orb was, the DNA pill pops
+remotes:WaitForChild("Pickup").OnClientEvent:Connect(function(gain, pos)
+	local at = new("Attachment", { WorldPosition = pos }, workspace.Terrain)
+	local bb = new("BillboardGui", { Adornee = at, Size = UDim2.fromOffset(120, 40), AlwaysOnTop = true, LightInfluence = 0 }, playerGui)
+	label(bb, "+" .. Kit.abbrev(gain) .. " DNA", 22, { TextColor3 = DNA_C })
+	TweenService:Create(bb, TweenInfo.new(0.9), { StudsOffset = Vector3.new(0, 4, 0) }):Play()
+	task.delay(0.6, function()
+		for _, o in bb:GetDescendants() do
+			if o:IsA("TextLabel") then TweenService:Create(o, TweenInfo.new(0.3), { TextTransparency = 1 }):Play() end
+			if o:IsA("UIStroke") then TweenService:Create(o, TweenInfo.new(0.3), { Transparency = 1 }):Play() end
+		end
+	end)
+	task.delay(1, function() bb:Destroy() at:Destroy() end)
+	if not GuiService.ReducedMotionEnabled then
+		pillScale.Scale = 1.12
+		TweenService:Create(pillScale, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	end
 end)

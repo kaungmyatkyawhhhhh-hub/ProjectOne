@@ -37,6 +37,28 @@ const C = {
               edge: ['#FFFFC0', '#FAFE11'], line: '#FAFE11', dot: {kind: 'round', color: '#FFFFA0', opacity: .7}},
   navy:      {stops: [[0,'#140E38'],[1,'#241A5C']], lip: '#0A0720', edge: ['#000000', '#3A2E80'], dot: null},
 };
+// --- "Neon kit" skin (owner's pick for EVOLVE, 18 Nov): his recipe kept, space colours, cut corners, hatch instead of dots.
+// kitgen.html?skin=neon#piece. Same keys, so the game script keeps its piece names.
+const NEON = new URLSearchParams(location.search).get('skin') === 'neon';
+if (NEON) {
+  const H = (color, opacity) => ({kind: 'hatch', color, opacity});
+  Object.assign(C, {
+    greenPill: {stops: [[0,'#B8FF3A'],[.5,'#4CFF20'],[1,'#18D21A']], lip: '#0A7A0C', edge: ['#E8FF9A', '#5CFF40'], dot: H('#E0FF90', .3)},
+    yellowBtn: {stops: [[0,'#8CFFF8'],[.45,'#2BE4F5'],[1,'#0A9BE6']], lip: '#063A86', edge: ['#E0FFFF', '#3FE6FF'], dot: H('#B8FFFF', .35)},
+    greenBar:  {stops: [[0,'#8CFFF8'],[.45,'#2BE4F5'],[1,'#0A9BE6']], lip: '#063A86', edge: ['#E0FFFF', '#3FE6FF'], dot: H('#B8FFFF', .35)},
+    red:       {stops: [[0,'#FF5AA0'],[.5,'#F0145A'],[1,'#B0003A']], lip: '#4A0018', edge: ['#FFB0D0', '#FF2E6E'], dot: H('#FF8AB4', .3)},
+    purple:    {stops: [[0,'#B04CFF'],[.5,'#6A1CF0'],[1,'#2C10B8']], dir: .25, lip: '#120650', edge: ['#F08CFF', '#3FA0FF'], line: '#3FA0FF', dot: H('#E08CFF', .45)},
+    magenta:   {stops: [[0,'#FF5CE0'],[.5,'#E01AA8'],[1,'#9A0A78']], dir: .25, lip: '#44063F', edge: ['#FFC0F0', '#FF4CC8'], line: '#FF4CC8', dot: H('#FFA0EA', .45)},
+    green:     {stops: [[0,'#9CFF6A'],[.5,'#2EE88A'],[1,'#0AA87A']], dir: .25, lip: '#05484E', edge: ['#E8FFC0', '#5CFFC8'], line: '#5CFFC8', dot: H('#D0FFC0', .45)},
+    cyan:      {stops: [[0,'#5CFFE8'],[.5,'#14C8F0'],[1,'#0A6FD8']], dir: .25, lip: '#04306E', edge: ['#E8FFFF', '#4AD8FF'], line: '#4AD8FF', dot: H('#C8FFFF', .45)},
+    yellow:    {stops: [[0,'#FFF27A'],[.5,'#FFC81E'],[1,'#F08A00']], dir: .25, lip: '#6A2A00', edge: ['#FFFFD0', '#FFD84A'], line: '#FFD84A', dot: H('#FFF6B0', .45)},
+    navy:      {stops: [[0,'#05071E'],[1,'#0E1440']], lip: '#020310', edge: ['#000000', '#2C3C9A'], dot: null},
+    plate:     {stops: [[0,'#1E2A78'],[1,'#0C1240']], lip: '#05071A', edge: ['#56E8FF', '#2B5CFF'], dot: {kind: 'grid', color: '#2C3C9A', opacity: .5}},
+    plateRow:  {stops: [[0,'#2A3A9A'],[1,'#162064']], lip: '#070A2A', edge: ['#7AF0FF', '#3A6CFF'], dot: {kind: 'grid', color: '#3A4CB0', opacity: .45}},
+  });
+}
+const chamferPath = (w, h, c) => `M${c},0 H${w} V${h - c} L${w - c},${h} H0 V${c} Z`;   // cut top-left + bottom-right
+const shape = (w, h, r, attrs) => NEON ? `<path d="${chamferPath(w, h, r)}" ${attrs}/>` : `<rect width="${w}" height="${h}" rx="${r}" ${attrs}/>`;
 
 function piece(w, h, recipe, col, o = {}) {
   const id = 'p' + (uid++), R = RECIPE[recipe](h, w), FH = h - R.lip, ew = R.edge, ol = R.outline;
@@ -44,10 +66,12 @@ function piece(w, h, recipe, col, o = {}) {
   let dots = '';
   if (col.dot) {
     const g = Math.max(6, Math.min(w, h) * (recipe === 'card' ? .047 : .1)), sz = g * .57;
-    const shape = col.dot.kind === 'round'
-      ? `<circle cx="${g / 2}" cy="${g / 2}" r="${sz / 2}" fill="${col.dot.color}"/>`
+    const k = col.dot.kind;
+    const shape = k === 'round' ? `<circle cx="${g / 2}" cy="${g / 2}" r="${sz / 2}" fill="${col.dot.color}"/>`
+      : k === 'hatch' ? `<rect width="${g * .25}" height="${g}" fill="${col.dot.color}"/>`
+      : k === 'grid' ? `<path d="M${g} 0H0V${g}" fill="none" stroke="${col.dot.color}" stroke-width="${g * .08}" transform="rotate(-45 ${g / 2} ${g / 2})"/>`
       : `<rect x="${(g - sz) / 2}" y="${(g - sz) / 2}" width="${sz}" height="${sz}" fill="${col.dot.color}"/>`;
-    const fade = col.dot.kind === 'round'
+    const fade = k !== 'diamond'
       ? `<radialGradient id="${id}f" cx=".9" cy=".2" r=".75"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
       : `<linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset=".2" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff"/></linearGradient>`;
     dots = `<defs><pattern id="${id}d" width="${g}" height="${g}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">${shape}</pattern>${fade}
@@ -62,23 +86,30 @@ function piece(w, h, recipe, col, o = {}) {
   const line = R.line && col.line ? `<rect y="${FH - R.line}" width="${w}" height="${R.line}" fill="${col.line}"/>` : '';
   return `<defs>
     <linearGradient id="${id}g" x1="0" y1="0" x2="${col.dir || 0}" y2="1">${stops}</linearGradient>
-    <clipPath id="${id}c"><rect width="${w}" height="${FH}" rx="${R.r}"/></clipPath>
+    <clipPath id="${id}c">${shape(w, FH, R.r, '')}</clipPath>
     <linearGradient id="${id}e" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col.edge[0]}"/><stop offset="1" stop-color="${col.edge[1]}"/></linearGradient>
   </defs>
-  <rect width="${w}" height="${h}" rx="${R.r}" fill="none" stroke="${INK}" stroke-width="${ol * 2}"/>
-  <rect width="${w}" height="${h}" rx="${R.r}" fill="${col.lip}"/>
+  ${shape(w, h, R.r, `fill="none" stroke="${INK}" stroke-width="${ol * 2}" stroke-linejoin="round"`)}
+  ${shape(w, h, R.r, `fill="${col.lip}"`)}
   <g clip-path="url(#${id}c)">
     <rect width="${w}" height="${FH}" fill="url(#${id}g)"/>
     ${dots}
     <g fill="#fff" opacity=".8" style="mix-blend-mode:soft-light">${bands}</g>
     ${line}
-    <rect x="${ew / 2}" y="${ew / 2}" width="${w - ew}" height="${FH - ew}" rx="${Math.max(0, R.r - ew / 2)}" fill="none" stroke="url(#${id}e)" stroke-width="${ew}"/>
+    ${NEON ? shape(w, FH, R.r, `fill="none" stroke="url(#${id}e)" stroke-width="${ew * 2}"`)
+           : `<rect x="${ew / 2}" y="${ew / 2}" width="${w - ew}" height="${FH - ew}" rx="${Math.max(0, R.r - ew / 2)}" fill="none" stroke="url(#${id}e)" stroke-width="${ew}"/>`}
   </g>`;
 }
 
 // his white panel: black outline, white face, a light grey inner ring ("white with some details")
 function panel(w, h) {
   const r = 18, ol = 4;
+  if (NEON) return `<defs><pattern id="pg" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#2C3C9A" stroke-width="1"/></pattern>
+      <linearGradient id="pf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B2360"/><stop offset="1" stop-color="#0B0F33"/></linearGradient>
+      <clipPath id="pc"><path d="${chamferPath(w, h, r)}"/></clipPath></defs>
+    <path d="${chamferPath(w, h, r)}" fill="url(#pf)" stroke="${INK}" stroke-width="${ol * 2}" stroke-linejoin="round"/>
+    <g clip-path="url(#pc)"><rect width="${w}" height="${h}" fill="url(#pg)" opacity=".55"/>
+      <path d="${chamferPath(w, h, r)}" fill="none" stroke="#3B57D9" stroke-width="8"/></g>`;
   return `<rect width="${w}" height="${h}" rx="${r}" fill="#FEFEFE" stroke="${INK}" stroke-width="${ol * 2}"/>
           <rect x="10" y="10" width="${w - 20}" height="${h - 20}" rx="${r - 8}" fill="none" stroke="#E9E9E9" stroke-width="5"/>`;
 }
@@ -100,9 +131,9 @@ const PIECES = {
   cardGreen:  [110, 196, () => piece(110, 196, 'card', C.green)],
   cardCyan:   [110, 196, () => piece(110, 196, 'card', C.cyan)],
   cardHero:   [170, 196, () => piece(170, 196, 'card', C.yellow)],
-  dnaPill:    [176, 46, () => piece(176, 46, 'pill', C.purple)],
-  status:     [316, 92, () => piece(316, 92, 'button', C.purple)],
-  row:        [480, 58, () => piece(480, 58, 'button', C.cyan)],
+  dnaPill:    [176, 46, () => piece(176, 46, 'pill', NEON ? C.plate : C.purple, {noShine: NEON})],
+  status:     [316, 92, () => piece(316, 92, 'button', NEON ? C.plate : C.purple, {noShine: NEON})],
+  row:        [480, 58, () => piece(480, 58, 'button', NEON ? C.plateRow : C.cyan)],
   toast:      [380, 52, () => piece(380, 52, 'button', C.purple)],
   barTrack:   [256, 22, () => piece(256, 22, 'pill', C.navy, {noShine: true})],
 };

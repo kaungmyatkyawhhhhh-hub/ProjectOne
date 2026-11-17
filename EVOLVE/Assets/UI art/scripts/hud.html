@@ -1,0 +1,161 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:transparent;overflow:hidden}</style>
+</head><body>
+<script>
+// EVOLVE HUD, "mock" look (owner's ChatGPT mock, 18 Nov: "SIGNIFICANTLY WAY BETTER"):
+// light bevelled blue rims on deep navy, cut corners, gold hex species portrait, cyan accent slashes,
+// slot rows with an icon, one colour per menu button. Usage: hud.html#<name> (export.py renders 2x + margin).
+// Every piece lists its 9-slice insets in points as the 4th entry (null = shown at its exact size, never sliced).
+const O = '#0A1440';               // outline: deep navy, not black (the mock never uses pure black)
+let uid = 0, defs = [];
+const id = () => 'h' + (uid++);
+const lin = (stops, x2 = 0, y2 = 1) => { const i = id(); defs.push(`<linearGradient id="${i}" x1="0" y1="0" x2="${x2}" y2="${y2}">${stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}" stop-opacity="${a}"/>`).join('')}</linearGradient>`); return `url(#${i})`; };
+const rad = (stops, cx = .5, cy = .4, r = .7) => { const i = id(); defs.push(`<radialGradient id="${i}" cx="${cx}" cy="${cy}" r="${r}">${stops.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}" stop-opacity="${a}"/>`).join('')}</radialGradient>`); return `url(#${i})`; };
+const cut = (x, y, w, h, c) => `M${x + c},${y} H${x + w - c} L${x + w},${y + c} V${y + h - c} L${x + w - c},${y + h} H${x + c} L${x},${y + h - c} V${y + c} Z`;
+const slashes = (x, y, n, hgt = 6, col = '#7FE6FF') => Array.from({length: n}, (_, i) => `<path d="M${x + i * 7 + hgt * .7},${y} h4 l${-hgt * .7},${hgt} h-4 Z" fill="${col}"/>`).join('');
+
+// the frame: outline, bright bevel rim (lighter on top), thicker bottom lip, navy face, thin inner line
+function plate(w, h, {c = 12, deco = true, lip = 4} = {}) {
+  const rim = lin([[0, '#7FDcff'], [.45, '#3FA2F5'], [1, '#2366DA']]);
+  const face = lin([[0, '#25397F'], [1, '#162562']]);
+  let s = `<path d="${cut(0, 0, w, h, c)}" fill="${rim}" stroke="${O}" stroke-width="5" stroke-linejoin="round"/>`
+    + (() => { const k = id(); defs.push(`<clipPath id="${k}"><path d="${cut(0, 0, w, h, c)}"/></clipPath>`); return `<rect y="${h - lip - 4}" width="${w}" height="${lip + 4}" fill="#1B4FB8" opacity=".55" clip-path="url(#${k})"/>`; })()
+    + `<path d="${cut(5, 5, w - 10, h - 10 - lip, c - 3)}" fill="${face}" stroke="${O}" stroke-width="1.5"/>`
+    + `<path d="${cut(9, 9, w - 18, h - 18 - lip, c - 5)}" fill="none" stroke="#3D6AD8" stroke-width="1.4" opacity=".9"/>`
+    + `<path d="M${c + 3},1.6 H${w - c - 3}" stroke="#D2F6FF" stroke-width="1.6" stroke-linecap="round" opacity=".85"/>`;
+  if (deco) s += `<path d="M1.5,${c + 10} V${c} L${c},1.5 H${c + 26}" fill="none" stroke="#B8F2FF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`
+    + slashes(c + 8, h - lip - 2.5, 3, 5) + slashes(w - c - 34, h - lip - 2.5, 4, 5)
+    + `<path d="M${w - 1.5},${h - c - 10} V${h - c} L${w - c},${h - 1.5} H${w - c - 26}" fill="none" stroke="#9BE8FF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return s;
+}
+// slot row: dark recessed bar with a blue edge (the mock's "Child · 40s left" row)
+const slot = (w, h) => `<rect x="0" y="0" width="${w}" height="${h}" rx="${h * .32}" fill="${O}"/>`
+  + `<rect x="1.5" y="1.5" width="${w - 3}" height="${h - 3}" rx="${h * .28}" fill="${lin([[0, '#111C45'], [1, '#1A2B62']])}" stroke="#3A63C9" stroke-width="1.4"/>`;
+const track = (w, h) => `<rect width="${w}" height="${h}" rx="${h / 2}" fill="${O}"/><rect x="1.2" y="1.2" width="${w - 2.4}" height="${h - 2.4}" rx="${h / 2 - 1.2}" fill="${lin([[0, '#0F193E'], [1, '#2A3F86']])}"/>`;
+const fill = (w, h, a, b) => `<rect width="${w}" height="${h}" rx="${h / 2}" fill="${lin([[0, a], [1, b]])}"/><rect x="${h * .4}" y="${h * .18}" width="${w - h * .8}" height="${h * .2}" rx="${h * .1}" fill="#fff" opacity=".55"/>`;
+// one colour per menu button: rounded square, navy outline, darker lip, light inner rim, faint stripes low down
+function sq(w, top, bot, lipC, rimC) {
+  const h = w, r = w * .2, lip = w * .09, stripes = id();
+  defs.push(`<pattern id="${stripes}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2.4" height="7" fill="#fff"/></pattern>`,
+    `<linearGradient id="${stripes}m" x1="0" y1="0" x2="0" y2="1"><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".9"/></linearGradient><mask id="${stripes}k"><rect width="${w}" height="${h}" fill="url(#${stripes}m)"/></mask>`);
+  return `<rect width="${w}" height="${h}" rx="${r}" fill="${lipC}" stroke="${O}" stroke-width="5"/>`
+    + `<rect width="${w}" height="${h - lip}" rx="${r}" fill="${lin([[0, top], [1, bot]])}"/>`
+    + `<rect width="${w}" height="${h - lip}" rx="${r}" fill="url(#${stripes})" mask="url(#${stripes}k)" opacity=".16"/>`
+    + `<rect x="2.6" y="2.6" width="${w - 5.2}" height="${h - lip - 5.2}" rx="${r - 2.6}" fill="none" stroke="${rimC}" stroke-width="2.2" opacity=".9"/>`
+    + `<path d="M${r},5.5 H${w - r}" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".7"/>`;
+}
+// title backdrop: a painted brush stripe, fading at both ends
+function band(w, h) {
+  const g = lin([[0, '#2F6EE8', 0], [.12, '#2F6EE8', .95], [.85, '#2A5FD6', .95], [1, '#2A5FD6', 0]], 1, 0);
+  const pts = [[8, 3], [w * .3, 0], [w * .7, 2], [w - 4, 0], [w, h * .5], [w - 10, h], [w * .6, h - 1.5], [w * .25, h], [0, h - 2], [4, h * .5]];
+  return `<polygon points="${pts.map(p => p.join(',')).join(' ')}" fill="${g}"/>`
+    + `<path d="M${w * .1},${h * .22} H${w * .9}" stroke="#7FB4FF" stroke-width="1.6" opacity=".55" stroke-linecap="round"/>`;
+}
+
+// ---- species portraits: one parametric cartoon face, clipped into a gold hex
+const L = '#2B1B3D';
+function face(o) {
+  const cx = 50, cy = 56;
+  let s = '';
+  const ears = o.ears ?? 'small';
+  if (ears !== 'none') {
+    const er = ears === 'big' ? 13 : 8, ex = ears === 'big' ? 22 : 24;
+    for (const sx of [-1, 1]) s += `<circle cx="${cx + sx * (ex + 2)}" cy="${cy - 2}" r="${er}" fill="${o.fur}" stroke="${L}" stroke-width="3"/><circle cx="${cx + sx * (ex + 2)}" cy="${cy - 2}" r="${er * .55}" fill="${o.earIn || o.skin}"/>`;
+  }
+  s += `<ellipse cx="${cx}" cy="${cy}" rx="27" ry="28" fill="${o.fur}" stroke="${L}" stroke-width="3"/>`;
+  if (o.mask === 'monkey') s += `<path d="M${cx} ${cy - 6} C${cx - 6} ${cy - 20} ${cx - 25} ${cy - 16} ${cx - 21} ${cy} C${cx - 23} ${cy + 18} ${cx - 10} ${cy + 26} ${cx} ${cy + 26} C${cx + 10} ${cy + 26} ${cx + 23} ${cy + 18} ${cx + 21} ${cy} C${cx + 25} ${cy - 16} ${cx + 6} ${cy - 20} ${cx} ${cy - 6} Z" fill="${o.skin}"/>`;
+  if (o.mask === 'ape') s += `<ellipse cx="${cx}" cy="${cy + 6}" rx="20" ry="20" fill="${o.skin}"/>`;
+  if (o.mask === 'human') s += `<ellipse cx="${cx}" cy="${cy + 2}" rx="24" ry="25.5" fill="${o.skin}"/>`;
+  if (o.hair) s += o.hair;
+  if (o.brow) s += `<path d="M${cx - 19} ${cy - 9} Q${cx} ${cy - 17} ${cx + 19} ${cy - 9} Q${cx} ${cy - 11} ${cx - 19} ${cy - 9} Z" fill="${o.browC || o.fur}" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/>`;
+  const ey = cy - 2 + (o.eyeDrop || 0), es = o.eyeSize || 6.5;
+  for (const sx of [-1, 1]) {
+    if (o.eyes === 'glow') { s += `<ellipse cx="${cx + sx * 9}" cy="${ey}" rx="${es * .8}" ry="${es}" fill="${o.glow}" stroke="${L}" stroke-width="2"/><circle cx="${cx + sx * 9 - 1.5}" cy="${ey - 2}" r="1.8" fill="#fff"/>`; continue; }
+    if (o.eyes === 'robot' && sx === 1) { s += `<circle cx="${cx + 9}" cy="${ey}" r="${es}" fill="#FF2B3C" stroke="${L}" stroke-width="2"/><circle cx="${cx + 9}" cy="${ey}" r="${es * .45}" fill="#FFD0D0"/>`; continue; }
+    s += `<ellipse cx="${cx + sx * 9}" cy="${ey}" rx="${es * .85}" ry="${es}" fill="#fff" stroke="${L}" stroke-width="2"/>`
+      + `<circle cx="${cx + sx * 9 + 1}" cy="${ey + 1}" r="${es * .55}" fill="${o.pupil || '#2B1B3D'}"/><circle cx="${cx + sx * 9 + 2.4}" cy="${ey - 1.2}" r="${es * .22}" fill="#fff"/>`;
+  }
+  if (o.nose === 'ape') s += `<ellipse cx="${cx - 3}" cy="${cy + 10}" rx="2" ry="1.6" fill="${L}"/><ellipse cx="${cx + 3}" cy="${cy + 10}" rx="2" ry="1.6" fill="${L}"/>`;
+  else if (o.nose !== 'none') s += `<path d="M${cx - 3} ${cy + 9} Q${cx} ${cy + 12} ${cx + 3} ${cy + 9}" fill="none" stroke="${o.noseC || '#9A5A3A'}" stroke-width="2.2" stroke-linecap="round"/>`;
+  if (o.beard) s += `<path d="M${cx - 21} ${cy + 6} Q${cx - 20} ${cy + 30} ${cx} ${cy + 31} Q${cx + 20} ${cy + 30} ${cx + 21} ${cy + 6} Q${cx + 12} ${cy + 22} ${cx} ${cy + 21} Q${cx - 12} ${cy + 22} ${cx - 21} ${cy + 6} Z" fill="${o.beard}" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/>`;
+  s += o.mouth ?? `<path d="M${cx - 8} ${cy + 15} Q${cx} ${cy + 23} ${cx + 8} ${cy + 15} Q${cx} ${cy + 18} ${cx - 8} ${cy + 15} Z" fill="#7A2230" stroke="${L}" stroke-width="2" stroke-linejoin="round"/>`;
+  if (o.cheeks !== false) s += `<ellipse cx="${cx - 16}" cy="${cy + 9}" rx="4" ry="2.4" fill="#FF7A8A" opacity=".45"/><ellipse cx="${cx + 16}" cy="${cy + 9}" rx="4" ry="2.4" fill="#FF7A8A" opacity=".45"/>`;
+  return s + (o.extra || '');
+}
+const hairCap = (c, extra = '') => `<path d="M24 52 C22 26 40 22 50 22 C62 22 79 27 76 52 C70 40 62 36 50 37 C40 37 30 42 24 52 Z" fill="${c}" stroke="${L}" stroke-width="2.6" stroke-linejoin="round"/>${extra}`;
+const shaggy = c => `<path d="M22 54 C17 30 34 18 50 19 C68 18 84 30 78 54 L72 44 L68 50 L62 38 L56 46 L50 36 L44 46 L38 38 L32 50 L28 44 Z" fill="${c}" stroke="${L}" stroke-width="2.6" stroke-linejoin="round"/>`;
+const SPECIES = [
+  // 1 Monkey .. 12 Cosmic Being; bg = the colour inside the hex
+  {fur: '#9A5F2C', skin: '#F4CFA3', mask: 'monkey', ears: 'big', earIn: '#F4B5A0', hair: `<path d="M44 30 C46 24 50 22 53 26 C55 22 60 23 58 30" fill="#9A5F2C" stroke="${L}" stroke-width="2.4" stroke-linejoin="round"/>`, bg: ['#7FD4FF', '#2F7BE0']},
+  {fur: '#3D3946', skin: '#77697A', mask: 'ape', ears: 'small', brow: true, browC: '#2A2731', nose: 'ape', eyeSize: 5.6, eyeDrop: 2, cheeks: false, bg: ['#9FE07A', '#3A9A3A']},
+  {fur: '#7A5232', skin: '#CF9E74', mask: 'ape', ears: 'small', brow: true, browC: '#5C3C22', nose: 'ape', eyeSize: 6, bg: ['#FFD27A', '#E08A2A']},
+  {fur: '#6B4A30', skin: '#D8A87E', mask: 'human', ears: 'small', brow: true, browC: '#4E3420', hair: shaggy('#5A3C24'), eyeSize: 6, bg: ['#FFB27A', '#D0602A']},
+  {fur: '#C68E62', skin: '#C68E62', mask: 'human', ears: 'small', brow: true, browC: '#8A5A38', hair: shaggy('#3A2616'), bg: ['#FF9A6A', '#C83A2A']},
+  {fur: '#E3B088', skin: '#E3B088', mask: 'human', ears: 'small', brow: true, browC: '#B07A52', hair: shaggy('#9A4A22'), beard: '#9A4A22', mouth: '', bg: ['#C9A6FF', '#6A3AD0']},
+  {fur: '#B87A50', skin: '#B87A50', mask: 'human', ears: 'small', hair: hairCap('#2A1A10'), noseC: '#7A4A2A', bg: ['#7FE0D0', '#1F9A8A']},
+  {fur: '#F2C29A', skin: '#F2C29A', mask: 'human', ears: 'small', hair: hairCap('#6A3E1E', `<path d="M30 40 C40 28 58 26 70 36 C60 30 44 31 36 42 Z" fill="#8A5428"/>`), bg: ['#8FD0FF', '#3A6AE0']},
+  {fur: '#E8B994', skin: '#E8B994', mask: 'human', ears: 'small', eyes: 'robot', hair: hairCap('#30303A'),
+   extra: `<path d="M50 31 C66 31 76 42 75 58 C74 72 64 81 50 82 Z" fill="${lin([[0, '#DDE6F2'], [1, '#8C9AB2']], 1, 1)}" stroke="${L}" stroke-width="2.6" stroke-linejoin="round" opacity=".92"/><circle cx="59" cy="54" r="6.5" fill="#FF2B3C" stroke="${L}" stroke-width="2"/><circle cx="59" cy="54" r="3" fill="#FFE0E0"/><path d="M62 70 h8 M64 64 h9" stroke="#5A6A86" stroke-width="2" stroke-linecap="round"/>`, bg: ['#FF8AA0', '#C02A5A']},
+  {fur: '#D9A27A', skin: '#D9A27A', mask: 'human', ears: 'none', hair: hairCap('#4A2A16'),
+   extra: `<circle cx="50" cy="55" r="37" fill="none" stroke="#F4F7FF" stroke-width="7"/><circle cx="50" cy="55" r="37" fill="none" stroke="${L}" stroke-width="1.8"/><circle cx="50" cy="55" r="33.5" fill="none" stroke="${L}" stroke-width="1.6"/><path d="M28 36 C34 26 44 22 52 22" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/><circle cx="76" cy="40" r="2.5" fill="#FF4A5A"/>`, bg: ['#4A5AA0', '#141C48']},
+  {fur: '#0E2A5A', skin: '#123870', mask: 'human', ears: 'none', eyes: 'glow', glow: '#5CFFF0', nose: 'none', cheeks: false,
+   mouth: `<path d="M42 70 H58" stroke="#5CFFF0" stroke-width="2.6" stroke-linecap="round"/>`,
+   extra: `<g stroke="#5CFFF0" stroke-width="1.3" opacity=".7" fill="none"><path d="M30 46 H38 V40 M70 46 H62 V40 M34 64 H40 L44 68 M66 64 H60 L56 68 M50 30 V38"/></g><ellipse cx="50" cy="56" rx="27" ry="28" fill="none" stroke="#5CFFF0" stroke-width="2"/>`, bg: ['#3AE0FF', '#0A3A8A']},
+  {fur: '#7A3AE0', skin: '#8A4AF0', mask: 'human', ears: 'none', eyes: 'glow', glow: '#FFFFFF', nose: 'none', cheeks: false,
+   mouth: `<path d="M44 69 Q50 74 56 69" stroke="#FFE6FF" stroke-width="2.4" fill="none" stroke-linecap="round"/>`,
+   extra: `<g fill="#FFF6A0"><path d="M36 38 l1.6 3.4 3.4 1.6 -3.4 1.6 -1.6 3.4 -1.6 -3.4 -3.4 -1.6 3.4 -1.6 Z"/><path d="M64 34 l1.2 2.6 2.6 1.2 -2.6 1.2 -1.2 2.6 -1.2 -2.6 -2.6 -1.2 2.6 -1.2 Z"/><circle cx="58" cy="76" r="1.4"/><circle cx="38" cy="72" r="1.1"/></g><ellipse cx="50" cy="56" rx="27" ry="28" fill="${rad([[0, '#FF9AF0', .0], [1, '#FF9AF0', .45]])}"/>`, bg: ['#FF9AF0', '#5A2AC0']},
+];
+function portrait(i) {
+  const o = SPECIES[i], W = 64, H = 70, c = 'clip' + id();
+  const hex = (inset) => { const cx = W / 2, cy = H / 2, r = H / 2 - inset, rx = W / 2 - inset; return `M${cx},${cy - r} L${cx + rx},${cy - r / 2} L${cx + rx},${cy + r / 2} L${cx},${cy + r} L${cx - rx},${cy + r / 2} L${cx - rx},${cy - r / 2} Z`; };
+  defs.push(`<clipPath id="${c}"><path d="${hex(7)}"/></clipPath>`);
+  return `<path d="${hex(0)}" fill="${lin([[0, '#FFF2A0'], [.4, '#FFC93A'], [1, '#E08A00']])}" stroke="${O}" stroke-width="4.5" stroke-linejoin="round"/>`
+    + `<path d="${hex(3.2)}" fill="none" stroke="#FFF8C8" stroke-width="1.4" opacity=".8"/>`
+    + `<path d="${hex(7)}" fill="${rad([[0, o.bg[0]], [1, o.bg[1]]], .5, .35, .75)}" stroke="#9A5A00" stroke-width="1.6"/>`
+    + `<g clip-path="url(#${c})"><g transform="translate(${W / 2 - 50 * .72},${H / 2 - 56 * .72 + 3}) scale(.72)">${face(o)}</g></g>`;
+}
+
+// ---- small icons in the mock style
+const chevron = () => [0, 26].map(dx => `<path d="M${14 + dx} 22 L${40 + dx} 50 L${14 + dx} 78" fill="none" stroke="${O}" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>`).join('')
+  + [0, 26].map(dx => `<path d="M${14 + dx} 22 L${40 + dx} 50 L${14 + dx} 78" fill="none" stroke="${lin([[0, '#9BFFFF'], [1, '#18C8F0']])}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>`).join('');
+function stall() { // shop: market stall with a striped awning, read as "shop" at a glance
+  let s = `<ellipse cx="50" cy="93" rx="36" ry="5" fill="#000" opacity=".2"/>`;
+  s += `<rect x="18" y="38" width="8" height="40" fill="#8A5428" stroke="${L}" stroke-width="3"/><rect x="74" y="38" width="8" height="40" fill="#8A5428" stroke="${L}" stroke-width="3"/>`;
+  s += `<path d="M14 58 H86 V88 H14 Z" fill="${lin([[0, '#E9A25A'], [1, '#B8662A']])}" stroke="${L}" stroke-width="4" stroke-linejoin="round"/>`
+    + `<path d="M14 58 H86 V65 H14 Z" fill="#F6C27A" stroke="${L}" stroke-width="3"/>`
+    + `<g stroke="#8A4A1E" stroke-width="2" opacity=".7"><path d="M14 76 H86 M38 65 V88 M62 65 V88"/></g>`
+    + `<rect x="44" y="70" width="14" height="10" rx="2" fill="#FFD23F" stroke="${L}" stroke-width="2.5"/>`;
+  const stripes = [0, 1, 2, 3, 4, 5].map(i => `<path d="M${10 + i * 13.3} 16 H${23.3 + i * 13.3} L${23.3 + i * 13.3 + (i - 2.5) * 0.6} 40 H${10 + i * 13.3 + (i - 2.5) * .6} Z" fill="${i % 2 ? '#FFFFFF' : '#F0303C'}"/>`).join('');
+  const scallops = [0, 1, 2, 3, 4, 5].map(i => `<path d="M${10 + i * 13.3} 40 A6.65 6.65 0 0 0 ${23.3 + i * 13.3} 40 Z" fill="${i % 2 ? '#FFFFFF' : '#F0303C'}" stroke="${L}" stroke-width="2.5" stroke-linejoin="round"/>`).join('');
+  s += `<path d="M14 10 H86 L90 40 H10 Z" fill="${L}" stroke="${L}" stroke-width="6" stroke-linejoin="round"/>` + `<clipPath id="aw"><path d="M14 10 H86 L90 40 H10 Z"/></clipPath><g clip-path="url(#aw)"><g transform="translate(0,-6) scale(1,1.1)">${stripes}</g></g>` + scallops
+    + `<path d="M18 14 H60" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>`;
+  return s;
+}
+
+const PIECES = {
+  hudPlate:  [330, 128, () => plate(330, 128), null],
+  dnaPlate:  [176, 46, () => plate(176, 46, {c: 10, deco: false, lip: 3}) + slashes(108, 13, 2, 20, '#3A6AD8'), null],
+  plate9:    [120, 60, () => plate(120, 60, {c: 10, deco: false, lip: 3}), [18, 18, 18, 20]],
+  slot:      [120, 24, () => slot(120, 24), [10, 10, 10, 10]],
+  miniTrack: [80, 14, () => track(80, 14), [7, 7, 7, 7]],
+  fillGold:  [40, 14, () => fill(40, 14, '#FFE866', '#F2A400'), [7, 7, 7, 7]],
+  titleBand: [230, 32, () => band(230, 32), null],
+  sqGreen:   [60, 60, () => sq(60, '#9BF24A', '#2FA82A', '#14661A', '#D6FF90'), null],
+  sqBlue:    [60, 60, () => sq(60, '#6AD6FF', '#1F78E2', '#0C3C94', '#B8F0FF'), null],
+  sqPurple:  [60, 60, () => sq(60, '#BE92FF', '#6C34DC', '#36168A', '#E2CCFF'), null],
+  chevron:   [100, 100, chevron, null],
+  stall:     [100, 100, stall, null],
+};
+SPECIES.forEach((_, i) => PIECES['port' + (i + 1)] = [64, 70, () => portrait(i), null]);
+
+const name = decodeURIComponent(location.hash.slice(1));
+const [w, h, draw] = PIECES[name] || [];
+const S = 2, M = 6;
+if (draw) {
+  const body = draw();
+  document.body.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${(w + 2 * M) * S}" height="${(h + 2 * M) * S}">
+    <defs>${defs.join('')}</defs><g transform="scale(${S}) translate(${M},${M})">${body}</g></svg>`;
+}
+window.HUD_PIECES = Object.fromEntries(Object.entries(PIECES).map(([k, v]) => [k, v[3]]));
+</script></body></html>

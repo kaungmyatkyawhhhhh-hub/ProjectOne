@@ -13,6 +13,16 @@ Build Roblox UI that works on every device, looks like the owner's approved styl
 
 Never decorate a broken layout.
 
+**HUD lesson (18 Nov 2026, EVOLVE).** The owner put our Neon HUD next to a ChatGPT mock of the same HUD and called the mock "SIGNIFICANTLY WAY BETTER". What the mock had and ours lacked:
+- light blue bevelled rims on deep navy, with navy outlines instead of pure black;
+- a character portrait in a gold hex;
+- the title on a painted brush band, with the key number in gold;
+- slot rows with an icon each, and the number in cyan;
+- one colour per menu button (green, blue, purple);
+- the currency icon breaking out of its plate.
+
+The fix is `assets/develuper-kit/hud.html`, the mock look as a generator. It has 9-slice insets per piece and a parametric face generator for the species portraits. **When the owner shows a mock they like, match the mock**, not the kit, and start a HUD from `hud.html`. Ask for or make a ChatGPT mock of the screen early; it is a cheap target.
+
 **The look is settled.** The house style is Develuper's "UI 10x", copied 1:1. The owner approved it on 18 Nov 2026 ("these are so great") after rejecting four other looks. Use it for every game unless the owner asks for something else. Build new pieces with the kit's generator. Never hand-tune by eye, and never draw plates out of Frames and UIStroke.
 
 ## Files
@@ -20,7 +30,7 @@ Never decorate a broken layout.
 | File | Read when |
 |---|---|
 | `references/develuper-style.md` | **Any visual work.** The recipe, measured numbers, layout sizes, the pipeline from SVG to Studio, fitting, gotchas, and the rejected styles. |
-| `assets/develuper-kit/` | Making or changing art. It contains:<br>- `kitgen.html`: frame pieces;<br>- `icons.html`: item and HUD icons;<br>- `export.py`: PNG export, ≤1024 px, transparent;<br>- `artlua.py`: the Luau ART table with trim rect and 9-slice;<br>- `exact.html`/`card.html` + `fit*.py`/`rows.py`: fitting against his frames;<br>- `EvolutionUI_example.luau`: a full HUD, shop, list, grid and toast wired to the kit. |
+| `assets/develuper-kit/` | Making or changing art. It contains:<br>- `hud.html`: the owner-preferred HUD look (bevel plate, gold hex portraits, slot rows, coloured square buttons); `export.py` renders it too;<br>- `kitgen.html`: frame pieces;<br>- `icons.html`: item and HUD icons;<br>- `export.py`: PNG export, ≤1024 px, transparent;<br>- `artlua.py`: the Luau ART table with trim rect and 9-slice;<br>- `exact.html`/`card.html` + `fit*.py`/`rows.py`: fitting against his frames;<br>- `EvolutionUI_example.luau`: a full HUD, shop, list, grid and toast wired to the kit. |
 | `references/roblox-ui-api.md` | Writing or fixing UI code: containers, insets, layouts, text, input, focus. |
 | `references/components.md` | Behaviour recipes: tab bar, modal, toast queue, reward reveal. Take the behaviour only; the look comes from the kit. |
 | `references/design-tokens.md` | Spacing, type scale and motion timings. Its colour and plate presets are **superseded** by the house style. |
