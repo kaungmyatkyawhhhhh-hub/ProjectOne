@@ -1,5 +1,7 @@
 # EVOLVE - UI art (ChatGPT sandstone set)
 
+> **Superseded the same night.** The owner said: "chatgpt one looks too ai, figma one looks bad but it looks like it has some hardwork and heart in it. use figma but do it like how the tiktok developers use it". The v3 Figma kit and mock are in the Figma file "Evolution UI - Figma version": frames "Kit v3 (export pieces, 2x)" and "Evolution UI v3 - Figma, TikTok method". The ChatGPT UI is still live in Studio until the Figma pieces are exported and uploaded.
+
 18 Nov 2026. The game's UI is now drawn with painted ChatGPT art instead of code-built Frames. The owner picked this in an A/B test (Figma vectors vs ChatGPT art), then asked for v2: "the texts are small and it could be ALOT better".
 
 - Studio script: `StarterPlayer.StarterPlayerScripts.EvolutionUI`.
