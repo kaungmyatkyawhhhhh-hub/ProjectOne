@@ -114,6 +114,13 @@ def run(data):
     rings = [Point(R['cx'], R['cz']).buffer(R['RING_V'], 96) for R in net.rings]
     ringU = unary_union(rings) if rings else None
     out = dict(kerb_cross=[], mouth_short=[], mouth_over=[], mouth_edge=[], dropped=[])
+    mouths, dropped = net.find_mouths()
+    # (J13) a road mouthing onto a bigger one is built only up to that road's edge (YangonRoads.buildMouth): its data
+    # carriageway running on past the bigger road's far edge carries no slab, so the far kerb there is no fault
+    mouth_on = {}
+    for m in mouths:
+        if 'big' in m:
+            mouth_on.setdefault(m['ri'], set()).add(m['big'])
     # kerbs
     for ri, r in enumerate(roads):
         s = r['s']
@@ -137,10 +144,10 @@ def run(data):
                 m = max(1, int(L / STEP))
                 for t in range(m + 1):
                     p = seg.interpolate(L * t / m)
-                    on = None
+                    on = on_j = None
                     for j in hits:
                         if cw[j].contains(p) and p.distance(cw[j].boundary) > 0.5:
-                            on = roads[j]['name']
+                            on, on_j = roads[j]['name'], j
                             break
                     if on is None and onring:
                         for R, g in zip(net.rings, rings):
@@ -149,6 +156,10 @@ def run(data):
                                 break
                     if on is None:
                         continue
+                    if on_j is not None and ri in mouth_on.get(on_j, ()):
+                        b = net.near(p.x, p.y, 3).get(ri)
+                        if b and net.poly_dist(ri, b[1], p.x, p.y) < net.half_at(ri, b[1]) + 2:
+                            continue
                     if side_zone(net, ri, p.x, p.y, 'Kerb'):
                         continue
                     if i - last[side] > 6:
@@ -156,7 +167,6 @@ def run(data):
                     last[side] = i
                     break
     # joins
-    mouths, dropped = net.find_mouths()
     out['dropped'] = dropped
     mouth_ends = set((m['ri'], m['i0']) for m in mouths)
     for m in mouths:
@@ -196,6 +206,8 @@ def run(data):
         if not near:
             continue
         dmin = min(cw[j].distance(p) for j in near)
+        if 1.0 < dmin <= 12 and any(len(roads[j]['s']) > 1 and LineString([(x[0], x[2]) for x in roads[j]['s']]).distance(p) < 1.0 for j in near):
+            dmin = 0.0  # (J13) on another road's centre line (a T on that road's sharp bend: its quads fold there)
         if 1.0 < dmin <= 12:
             out['mouth_short'].append(dict(road=r['name'], gap=round(dmin, 1), x=round(q[0], 1), z=round(q[2], 1)))
             continue
@@ -203,7 +215,10 @@ def run(data):
         s = r['s']
         idx = range(min(len(s) - 1, 6), -1, -1) if k == 0 else range(max(0, len(s) - 7), len(s))
         tail = LineString([(s[i][0], s[i][2]) for i in idx])
+        other = Point(s[-1 - k][0], s[-1 - k][2]) if k == 0 else Point(s[0][0], s[0][2])
         for j in near:
+            if cw[j].distance(other) < 0.5 and len(s) <= 7:
+                continue  # (J13) a short stub whose OTHER end is its mouth on j: it leaves j, it does not run past it
             if cw[j].distance(p) > 0.5 and tail.intersects(cw[j]) and roads[j]['rank'] < r['rank']:
                 out['mouth_over'].append(dict(road=r['name'], on=roads[j]['name'], x=round(q[0], 1), z=round(q[2], 1)))
                 break

@@ -200,7 +200,7 @@ function M.load()
 	if M.data.roundabouts then
 		for _, g in M.data.roundabouts do
 			table.insert(M.RINGS, { C = Vector3.new(g.c[1], g.c[2], g.c[3]), R_IN = g.r_in, R_OUT = g.r_out,
-				RING_V = g.r_out / math.cos(math.pi / M.N), R_CUT = g.r_out - 14, name = g.name, lanes = g.lanes, laneW = g.laneW })
+				RING_V = g.r_out / math.cos(math.pi / M.N), R_CUT = g.r_out - 14, name = g.name, lanes = g.lanes, laneW = g.laneW, LEVEL = g.level })
 		end
 	else
 		table.insert(M.RINGS, { C = Vector3.new(29072, 47.27, 1172.8), R_IN = 60, R_OUT = 108, RING_V = 108.06, R_CUT = 94, name = "Hanthawaddy Roundabout" })
@@ -476,13 +476,21 @@ M.polyDist = polyDist
 
 -- Roads.build's opts.sideZone: must this road's kerb / pavement stay out of this spot?
 -- inside a traffic island's kerb-line outline (data.islands), by a 64-stud grid built on first use
-function M.inIsland(px: number, pz: number): boolean
-	local list = M.data and M.data.islands
+function M.inIsland(px: number, pz: number, which: string?): boolean
+	-- (J13: which = "fills": the asphalt gores (data.fills) instead of the paved islands)
+	local list = M.data and M.data[which or "islands"]
 	if not list then
 		return false
 	end
-	if M.islandGridOf ~= list then
-		M.islandGridOf, M.islandGrid = list, {}
+	M.islandGrids = M.islandGrids or {}
+	local cache = M.islandGrids[which or "islands"]
+	if not cache or cache.of ~= list then
+		cache = { of = list, grid = {} }
+		M.islandGrids[which or "islands"] = cache
+	end
+	M.islandGrid = cache.grid
+	if not cache.built then
+		cache.built = true
 		for _, isl in list do
 			local x0, x1, z0, z1 = math.huge, -math.huge, math.huge, -math.huge
 			for _, v in isl do
@@ -542,6 +550,11 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	-- (J11: a traffic island is one fill (buildIslands); the bands' own pavements on it overlapped each other
 	-- at their roads' different heights: steps, dark streaks, sliver holes)
 	if what ~= "Kerb" and M.inIsland(px, pz) then
+		return true
+	end
+	-- (J13, owner's drawing at Kun Chan Road: a gore between links that is really one asphalt area: no kerb, no
+	-- pavement inside it; buildIslands("fills") lays it as asphalt at road level)
+	if M.inIsland(px, pz, "fills") then
 		return true
 	end
 	-- just past a round corner, the joining road's own kerb and pavement (the other road's go). Its own
@@ -1301,6 +1314,11 @@ function M.findCorners()
 			cands[k] = fixed
 			corner = fixed
 		end
+		-- (J13: a corner inside an asphalt gore (data.fills) is no corner: that area is one road surface)
+		local gl = math.max(hyp(corner.ox - corner.px, corner.oz - corner.pz), 1e-6)
+		if M.inIsland(corner.px + (corner.ox - corner.px) / gl * 1.5, corner.pz + (corner.oz - corner.pz) / gl * 1.5, "fills") then
+			continue
+		end
 		local m, side, ox, oz, tax, taz, tbx, tbz = M.mouths[corner.mouth], corner.side, corner.ox, corner.oz, corner.tax, corner.taz, corner.tbx, corner.tbz
 		table.insert(M.corners, corner)
 		-- (P3, 16 Nov: inCorner / ownedBy ran over every corner of the network for each piece; a 64-stud
@@ -1628,13 +1646,19 @@ end
 -- (18 Nov, J9) small traffic islands (roads05_fix islands: kerb-line outlines with each edge's walk): the part the
 -- straight bands and the round corners leave open is paved, its edge exactly on theirs (nothing on top of them):
 -- each edge moved in by its own walk, each corner's run replaced by its pavement's inner curve
-function M.buildIslands()
-	local list = M.data and M.data.islands
+function M.buildIslands(which: string?)
+	local list = M.data and M.data[which or "islands"]
 	if not list then
-		return "islands: none in the data"
+		return (which or "islands") .. ": none in the data"
 	end
 	local pal = M.palette
 	local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
+	local UP = M.CURB_UP
+	if which == "fills" then
+		-- (J13: an asphalt gore: the roads' own surface, at their edge height)
+		pave = { Name = "Road", Material = Enum.Material.Asphalt, Color = pal.asphalt, CastShadow = false }
+		UP = 0
+	end
 	local made, built, skipped = 0, 0, 0
 	local function cornerOf(x: number, z: number)
 		for _, c in cornersAt(x, z) do
@@ -1722,7 +1746,7 @@ function M.buildIslands()
 						-- (J10: a walk wider than r: the pavement ends at O, the straight band's inner edge
 						-- starts on past it on the same line: go on to that point, no overlap, no gap)
 						local yA, yB = c.yA or v[2], c.yB or v[2]
-						local y = yA + (yB - yA) * u + M.CURB_UP
+						local y = yA + (yB - yA) * u + UP
 						-- (J11: the straight bands no longer pave the island, the fill reaches the kerb line: at TA / TB it
 						-- runs out along the radius to the kerb)
 						if q == 0 then
@@ -1755,7 +1779,7 @@ function M.buildIslands()
 					local tt = ((bx - ax) * wz - (bz - az) * wx) / den
 					x, z = ax + ux * tt, az + uz * tt
 				end
-				table.insert(out, Vector3.new(x, edgeY(v[1], v[3], v[2]) + M.CURB_UP, z))
+				table.insert(out, Vector3.new(x, edgeY(v[1], v[3], v[2]) + UP, z))
 			end
 			lastC = c
 		end
@@ -1828,10 +1852,11 @@ function M.buildIslands()
 			skipped += 1
 			continue
 		end
-		local folder = M.folder():FindFirstChild("Islands")
+		local fname = if which == "fills" then "Fills" else "Islands"
+		local folder = M.folder():FindFirstChild(fname)
 		if not folder then
 			local f = Instance.new("Folder")
-			f.Name = "Islands"
+			f.Name = fname
 			f.Parent = M.folder()
 			folder = f
 		end
@@ -1982,7 +2007,7 @@ function M.verge(names: { string })
 					-- (J10: roads05_fix.ring_level lowers arms up to 5 studs onto a ring's height; the ground
 					-- beside them stood over the pavement there: clear it down to the verge, as the corners do)
 					local R = M.nearRing(mid.X, mid.Z)
-					if R and hyp(mid.X - R.C.X, mid.Z - R.C.Z) < R.R_OUT + M.RING_RAMP + 8 then
+					if R and hyp(mid.X - R.C.X, mid.Z - R.C.Z) < R.R_OUT + (R.LEVEL or M.RING_RAMP) + 8 then -- (J13: data's level = ring_level's reach past r_out)
 						workspace.Terrain:FillBlock(cf * CFrame.new(0, 5 - 1.3 + 12.5, 0), Vector3.new(M.VERGE_W + 4, 25, len + 1), Enum.Material.Air)
 					end
 					workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W + 4, 10, len + 1), Enum.Material.Grass)
@@ -2273,6 +2298,7 @@ function M.step3()
 	task.wait()
 	table.insert(log, M.buildCorners())
 	table.insert(log, M.buildIslands())
+	table.insert(log, M.buildIslands("fills"))
 	task.wait()
 	table.insert(log, M.verge(M.MAIN))
 	task.wait()
@@ -2427,14 +2453,59 @@ function M.buildDecks()
 					below = math.max(M.SLAB + 1.5, math.max(e0.Y, e1.Y) - g + 3)
 					ramp += 1
 				end
-				local cf = CFrame.lookAt((p0 + p1) / 2, p1) * CFrame.new(0, (M.PARAPET - below) / 2, 0)
-				local props = table.clone(M.deckLook.wall)
-				props.Name = if elevated[i] then "Parapet" else "RampWall"
-				props.Size = Vector3.new(1, M.PARAPET + below, len)
-				props.CFrame = cf
-				props.CastShadow = true
-				part(props, folder)
-				made += 1
+				local band = M.SLAB + 1.5
+				if below <= band + 0.3 then
+					local cf = CFrame.lookAt((p0 + p1) / 2, p1) * CFrame.new(0, (M.PARAPET - below) / 2, 0)
+					local props = table.clone(M.deckLook.wall)
+					props.Name = if elevated[i] then "Parapet" else "RampWall"
+					props.Size = Vector3.new(1, M.PARAPET + below, len)
+					props.CFrame = cf
+					props.CastShadow = true
+					part(props, folder)
+					made += 1
+				else
+					-- (J13, owner: jagged ramp walls. One tall block tilted with the grade put every joint's
+					-- face out of line by its height x the change of pitch. Now: the parapet band tilted with the
+					-- deck (short, so its joints meet), and under it an upright wall to the band's low end plus a
+					-- wedge for the rise, 0.05 inside the band's faces (no shared face, no flicker))
+					local cf = CFrame.lookAt((p0 + p1) / 2, p1) * CFrame.new(0, (M.PARAPET - band) / 2, 0)
+					local props = table.clone(M.deckLook.wall)
+					props.Name = "RampWall"
+					props.Size = Vector3.new(1, M.PARAPET + band, len)
+					props.CFrame = cf
+					props.CastShadow = true
+					part(props, folder)
+					local lo, hi = if p0.Y <= p1.Y then p0 else p1, if p0.Y <= p1.Y then p1 else p0
+					local flat = Vector3.new(1, 0, 1)
+					local lenH = ((p1 - p0) * flat).Magnitude
+					local yTop = lo.Y - band
+					local yBot = math.max(e0.Y, e1.Y) - below
+					local midF = (lo + hi) / 2 * flat
+					local lowF = lo * flat
+					if yTop - yBot > 0.1 and lenH > 0.05 then
+						local w = table.clone(M.deckLook.wall)
+						w.Name = "RampWall"
+						w.Size = Vector3.new(0.9, yTop - yBot, lenH)
+						w.CFrame = CFrame.lookAt(midF + Vector3.new(0, (yTop + yBot) / 2, 0), lowF + Vector3.new(0, (yTop + yBot) / 2, 0))
+						w.CastShadow = true
+						part(w, folder)
+						made += 1
+					end
+					local dy = hi.Y - lo.Y
+					if dy > 0.05 and lenH > 0.05 then
+						local wd = Instance.new("WedgePart")
+						wd.Anchored = true
+						wd.Name = "RampWall"
+						wd.Material, wd.Color = M.deckLook.wall.Material, M.deckLook.wall.Color
+						wd.TopSurface, wd.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+						wd.Size = Vector3.new(0.9, dy, lenH)
+						-- (thin edge (-Z) at the low end, full height at the high end)
+						wd.CFrame = CFrame.lookAt(midF + Vector3.new(0, yTop + dy / 2, 0), lowF + Vector3.new(0, yTop + dy / 2, 0))
+						wd.Parent = folder
+						made += 1
+					end
+					made += 1
+				end
 			end
 			-- elevated: the box girder under the slab (neighbours a hair different, so overlaps never flicker)
 			if elevated[i] then
@@ -4013,6 +4084,7 @@ function M.stepCell(box: { number }, root: Instance)
 	table.insert(log, "corners " .. tostring(M.buildCorners()))
 	M.step("cell: islands")
 	table.insert(log, M.buildIslands())
+	table.insert(log, M.buildIslands("fills"))
 	M.step("cell: verge")
 	table.insert(log, M.verge(names))
 	M.step("cell: roundabouts")

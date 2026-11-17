@@ -208,6 +208,34 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
                 issues['overlap'].append(dict(a=a, b=b, area=round(inter), x=round(c.x, 1), z=round(c.y, 1)))
 
 
+def osm_mark(issues):
+    """(J13) each mouth_short / mouth_over row against OSM: `osm` = "dead end" (the nearest OSM way end, within 3
+    studs, is shared by no other way that roads05 builds: a real dead end, explained, not a fault; a join only to a
+    driveway / private / footway way is a dead end on our map), "join" (OSM joins it: a fault) or
+    "off" (no OSM way end there: a fault to look at). Counts in issues['real'] leave the dead ends out."""
+    from scipy.spatial import cKDTree
+    import roads05
+    ways = [w for w in geo.load('roads') if roads05.keep_way(w, set())]  # the ways roads05 builds
+    use = {}
+    for w in ways:
+        for p in w['p']:
+            use.setdefault((round(p[0], 7), round(p[1], 7)), set()).add(w['id'])
+    ends, joins = [], []
+    for w in ways:
+        for p in (w['p'][0], w['p'][-1]):
+            ends.append(geo.world(p[0], p[1]))
+            joins.append(len(use[(round(p[0], 7), round(p[1], 7))]) - 1)
+    T = cKDTree(ends)
+    real = {}
+    for k in ('mouth_short', 'mouth_over'):
+        for row in issues[k]:
+            d, j = T.query((row['x'], row['z']))
+            row['osm'] = 'off' if d > 3 else ('dead end' if joins[j] == 0 else 'join')
+        real[k] = sum(1 for row in issues[k] if row['osm'] != 'dead end')
+        real[k + '_osm_dead_end'] = len(issues[k]) - real[k]
+    issues['real'] = [real]
+
+
 def main():
     av = [a for a in sys.argv[1:] if not a.startswith('--')]
     tag = av[0]
@@ -227,7 +255,7 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped')}
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave')}
     if not PAINT_ONLY:
         junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
         if not OLD:
@@ -236,6 +264,7 @@ def main():
             for k in ('kerb_cross', 'mouth_short', 'mouth_over', 'mouth_edge'):
                 issues[k] = ks[k]
             issues['dropped'] = ks['dropped']
+            osm_mark(issues)
     # dead ends
     for r in (data['roads'] if not PAINT_ONLY else ()):
         s = r['s']
@@ -253,6 +282,17 @@ def main():
                     break
             if not on:
                 issues['dead_end'].append(dict(road=r['name'], kind=r['kind'], end=end, x=round(s[k][0], 1), z=round(s[k][2], 1)))
+    # (J13, owner refs 18 Nov) stub_in_grass: a road under STUB studs long with an end on nothing (a dead end listed
+    # above); street_no_pave: a street / route with no pavement on a side (walkL / walkR 0)
+    STUB = 30.0
+    de = {(x['road'], x['end']) for x in issues['dead_end']}
+    for r in (data['roads'] if not PAINT_ONLY else ()):
+        s = r['s']
+        L = sum(np.hypot(s[i + 1][0] - s[i][0], s[i + 1][2] - s[i][2]) for i in range(len(s) - 1))
+        if L < STUB and ((r['name'], 'start') in de or (r['name'], 'end') in de):
+            issues['stub_in_grass'].append(dict(road=r['name'], length=round(float(L), 1), x=round(s[0][0], 1), z=round(s[0][2], 1)))
+        if r['kind'] in ('street', 'route') and not ((r.get('walkL') or 0) > 0 and (r.get('walkR') or 0) > 0):
+            issues['street_no_pave'].append(dict(road=r['name'], walkL=r.get('walkL'), walkR=r.get('walkR'), x=round(s[0][0], 1), z=round(s[0][2], 1)))
     # paint off the asphalt
     med = []
     for r in data['roads']:
@@ -318,7 +358,9 @@ def main():
                 if dy > 0.3:
                     issues['deck_foot'].append(dict(deck=d['name'], dy=round(float(dy), 2), x=round(s[k][0], 1), z=round(s[k][2], 1)))
     json.dump(issues, open(os.path.join(D, 'qa_paint.json' if PAINT_ONLY else 'qa.json'), 'w'), indent=1)
-    print(json.dumps({k: len(v) for k, v in issues.items()}))
+    print(json.dumps({k: len(v) for k, v in issues.items() if k != 'real'}))
+    if issues.get('real'):
+        print('real faults (OSM dead ends left out):', json.dumps(issues['real'][0]))
     return issues
 
 

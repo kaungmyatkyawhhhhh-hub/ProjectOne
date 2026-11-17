@@ -1,4 +1,79 @@
-# roads05 handover (18 Nov 2026, eighth pass: J12)
+# roads05 handover (18 Nov 2026, ninth pass: J13, DATA ONLY: no Studio test this pass, context ran out)
+
+## J13 (this pass)
+- `roads05_fix.py` (backup of the J12 data: `roads_J12.json`, `qa_J12.json`):
+  - `osm_joins` (after ring_level): an end OSM joins to another way (an OSM join node within 12, or our end inside an
+    OSM way) that stops 0.9-12 beside a carriageway is bent onto that road's centre line (smoothstep over
+    max(40, 4 x move); a wide road: own half + 2 inside its edge), an end running past a bigger road is cut back to
+    where it crosses that road's centre line, an end on a smaller road's centre line in its cut gap runs across it.
+    41 ends (21 cut back, 20 bent). University x Kabar Aye: Lane #1013 / #1008 / #1014 / #961 cut back onto Kabar
+    Aye #5 / #6 (now mouths). 9 stubs left wholly on another road went (check(): duplicates_dropped).
+  - `ring_level` rewritten: flat at c.y to r_out + 4 + RING_FLAT, then scale-easing with the change spread evenly
+    along each road between PINNED samples (flat ones, junction samples shared with another road, ramp end): shared
+    samples keep one height. Ramp per ring 100 -> 300 until the easing adds no segment over RING_GRADE 5% (unless
+    the road already was): results R1 5.3% (U Htaung Bo, own 4.3%), R2 ok, Sule 6.7% (32nd Street, own 5.4%), R11
+    7.4% (Lane #489, own 6.4%), others 0. So: no eased road over 5% unless the DEM road itself is >= 5.4%, then
+    +1.0..1.3% at most. The ring's reach goes to the builder as `roundabouts[].level` (YangonRoads verge air clear).
+    `RING_MODE=fade` (per-sample step fade) is kept as an option; it was worse at Sule west (8%).
+  - `deck_regrade`: decks re-profiled at <= 7.8% where that is no worse and keeps the old clearance or 4.5 m
+    (DECK_CLEAR 13.5) over each road below; feet = their road's height. deck_grade 24 -> 7 (the 7 need longer decks:
+    roads05.py deck span; Arzani's feet differ 53 studs), deck_foot 1 -> 0.
+  - `deck_butt` (owner ref `broken flyover deck ends (P3)`): deck ends that meet: a continuation fits the host's
+    end; a FORK (Sule Pagoda Road's deck -> Alan Pya Pagoda Road's + Gyophyu Road's by Yangon Central) widens the
+    host's end to span both branches (taper over 40) and each branch starts exactly on that line.
+  - owner overrides (`OWNER_GORES`, `OWNER_MEDIAN_OFF`): Kun Chan Road x Gyophyu Road (36350, 42490) by Yangon
+    Central: the gore between the links is one asphalt area (`data.fills`), Kun Chan Road's median cleared within
+    140 of its west end (owner drawing `junction wrong shape`).
+- `YangonRoads.luau`: `data.fills` = asphalt gores (buildIslands("fills"), folder Fills, no kerb / pavement / corner
+  inside: sideZone + findCorners); ring `LEVEL`; ramp walls (owner ref `jagged flyover walls`): a tilted parapet
+  band + an upright wall + a WedgePart for the rise, 0.05 inside the band's faces (was one tall tilted block).
+  NOT TESTED IN STUDIO (wedge orientation: thin end must be at the LOW end; check first).
+- `roads05_kerbsim.py`: a short stub whose OTHER end is its mouth on a road is not "running past" it; an end on
+  another road's centre line is no gap (a T on a sharp bend: the quads fold); a far kerb over a mouthing street's
+  data run-on is not kept-kerb-on-carriageway (the builder stops that street at the near edge).
+- `roads05_qa.py`: `osm` on every mouth row ("dead end" = joined in OSM only to ways roads05 does not build;
+  "join"; "off"), `real` counts; new `stub_in_grass` (< 30 studs, an end on nothing), `street_no_pave`.
+- QA (full net) J12 -> J13: mouth_short 46 -> 17 (real 32 -> 2: Sagawar 2 street gap 1.0, Lane #4587 gap 2.7; 15 OSM
+  dead ends), mouth_over 38 -> 16 (real 19 -> 1: East Horse Race Course Road (Bridge) on Banyar Dala #3, a deck foot;
+  15 OSM dead ends), kerb_cross 22 -> 14, median_cross 1 -> 1 (Aung Yadana Street under Baho Road Flyover),
+  deck_grade 24 -> 7, deck_foot 1 -> 0, mouthsim 0 failed of 7,934, stub_in_grass 7 (new), street_no_pave 0.
+- Yangon Central (owner refs `Alan Pya ...`, `Yangon Central area`): in roads05 Alan Pya Pagoda Road and Gyophyu Road
+  (Google: Zoological Garden Road) are already two separate one-way decks over the railway (the merged bridge is the
+  OLD game build). OSM around the station: every public way is built; the station / rail-yard streets the owner drew
+  are OSM `service` (no name, no access tag: 186939494/5, 525722124-7, 614715535-42, 614704889 east of the road):
+  not built by the rule then in force; the coordinator's later "any road the owner draws is real" + "widen keep_way"
+  items (below) cover them. The railway (owner's yellow) is not ours: the bridges must span a railway cut later.
+- absorb merges 4 different-named pairs side by side (Thamaing Station Road -> Bayint Naung Bridge 2, Kyimyindaing
+  Strand -> Kyimyindine Kannar #5, No. 2 Main Road -> Lay Daungkan #2, Lane #88 -> Road #14): un-merging needs them
+  narrowed to sit side by side (else overlap / flicker): NOT done.
+- Overlays NOT regenerated this pass (road_overlay.py, see J12 command in overlay_J12.log's pass).
+
+## Next (in order) -- plan is NOT ready for owner approval
+1. Studio J13 test (harness: J12 transcript calls #14-#20, #164-#169; `roads05_J7/junctions_J13.json` adds
+   `ycentral` (36120, 42950), J7Rad 560: covers junction 8 (Alan Pya / Gyophyu fork + decks climbing, running,
+   landing) and junction 9 (Kun Chan gore, 36330, 42480)). Check: wedge walls, deck fork, Kun Chan fill, Univ x Kabar
+   Aye (island-7 1-stud hole: data changed round it; look again).
+2. Coordinator ADD list (owner refs in `City Legends/Owner ref - *`), none done yet:
+   - paint/QA rules: arrow_missing, stopline_wrong_side (+ one junction box for roads < 40 apart crossing one road:
+     no zebras / stops inside, ref `double junction zebras`), dash_jog, dash_side_by_side, corner_pave_gap,
+     flare_kerb_gap, fillet_no_kerb, kerb_gap, box_hole, road_gap, median_broken, paint_in_median, width_wobble,
+     seam_step, carriageway_too_narrow (ref `lane with no carriageway`: find the root), buried edges = kerb_cross
+     truly 0 + Studio raycast grid + driver's-eye shot per junction, zebra orientation.
+   - keep_way widening (residential / unclassified / living_street / service except parking_aisle and drive-through,
+     long driveways joining two roads, paved tracks) + a dropped-ways overlay per district (refs `missing streets by
+     big hall`, `missing lanes by the lake`, `stub road and kerb gaps`); any road the owner draws is real.
+   - median style per area (downtown: white concrete barrier + railing, yellow edge lines; ref `Sule Square road`),
+     width smoothing (ref `wavy road edges`), corner pavement as one curved piece (ref `jagged corner pavement`).
+   - test junctions 10 (double junction), the big hall block, the lake lanes, a taper, a bell mouth, a crossroads, a
+     downtown straight, a long straight median.
+   - ref `median nose at Sule Shangri-La`: downtown / wide medians PAVED (terrazzo-pattern MaterialVariant, plain grey
+     kerb, no extra parts) where the satellite is grey, grass only where green; zebra colour: check 5+ real 2019-2026
+     photos (downtown, Pyay Rd, Kabar Aye) and note it in `Roblox Playbook/2026-11-13 Research - Yangon road look.md`;
+     the median-end lamp poles belong to the street-detail layer.
+3. Remaining J13 rows above, the 7 decks, the 4 different-named absorbs.
+
+# (J12 pass below)
+
 
 ## J12 (this pass)
 - `YangonRoads.luau`:
