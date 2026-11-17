@@ -90,9 +90,13 @@ Numbers and presets: `references/design-tokens.md`. Ready-made pieces: `referenc
     - The lip is about 14% of the height, in a darker shade.
     - Export each piece just under 1024 px.
     - **Owner tweak, 18 Nov, on the code-drawn samples: "Depth, not thicker outlines".** Keep the 4.5 px outline and get the 3D look from depth instead:
-      - lip about 20% of the height;
       - text depth copy about 14% of the font size;
       - icon depth copy about 13% of the icon size.
+    - **Second owner tweak, 18 Nov: "Lip back to his size".** A 20% lip was too much, so keep the lip at about **8% of the height**, as his is. The text and icon keep their deeper depth.
+    - **Also from the second tweak:**
+      - A **bright line where the face meets the lip**: about 3.5% of the face height, drawn in the piece's own top colour at 90%. This is his yellow line.
+      - **Stronger shine stripes**: 0.5 opacity on buttons, 0.35 on cards.
+      - **Bigger card title and art**: the title is about 16% of the card width, and the item art fills about 55% of the card height. Keep the art clear of the title.
     - **Colours (also from that tweak):**
       - Gradients keep the bright colour until about 45%, e.g. yellow `#FFF200` → `#FFE200` → `#F39509`.
       - Purple card: `#7C00F2` → `#8400F4` → `#2A16EA`, with lip `#03246C`.
