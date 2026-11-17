@@ -1,0 +1,157 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=block" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#222}
+  #stage{display:flex;gap:40px;align-items:flex-start;padding:30px}
+  svg text{font-family:'Fredoka One';}
+</style></head>
+<body><div id="stage"></div>
+<script>
+// Develuper recipe, one function per step. All pieces share it.
+let uid = 0;
+const INK = '#111';
+
+// Steps 1-4 + 6-9: gradient face, darker lip behind, outside black stroke,
+// halftone + diagonal shine inside a mask, inside-stroke edge highlight.
+function piece({x=0, y=0, w, h, r=14, top, bottom, lip, mid, lipH=Math.round(h*0.08), stroke=4.5,
+                dots='#fff', dotsOpacity=0.6, shine=0.5, edge=0.4, bottomLine=0.9}) {
+  const id = 'p' + (uid++);
+  const fh = h - lipH;                      // face height; lip sits under it
+  const s2 = stroke * 2;                    // centred stroke drawn behind = "Outside"
+  return `
+  <defs>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${top}"/>${mid ? `<stop offset="0.45" stop-color="${mid}"/>` : ''}<stop offset="1" stop-color="${bottom}"/></linearGradient>
+    <clipPath id="${id}c"><rect x="${x}" y="${y}" width="${w}" height="${fh}" rx="${r}"/></clipPath>
+    <pattern id="${id}d" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect x="2.75" y="2.75" width="4.5" height="4.5" fill="${dots}"/></pattern>
+    <linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.25"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient>
+    <mask id="${id}m"><rect x="${x}" y="${y}" width="${w}" height="${fh}" fill="url(#${id}f)"/></mask>
+  </defs>
+  <g filter="url(#drop)">
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="none" stroke="${INK}" stroke-width="${s2}"/>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${lip}"/>
+  </g>
+  <rect x="${x}" y="${y}" width="${w}" height="${fh}" rx="${r}" fill="url(#${id}g)"/>
+  <g clip-path="url(#${id}c)">
+    <rect x="${x}" y="${y}" width="${w}" height="${fh}" fill="url(#${id}d)" mask="url(#${id}m)"
+          opacity="${dotsOpacity}" style="mix-blend-mode:overlay"/>
+    <g fill="#fff" opacity="${shine}" style="mix-blend-mode:overlay">
+      <polygon points="${x+w*0.30},${y-5} ${x+w*0.46},${y-5} ${x+w*0.36},${y+fh+5} ${x+w*0.20},${y+fh+5}"/>
+      <polygon points="${x+w*0.52},${y-5} ${x+w*0.57},${y-5} ${x+w*0.47},${y+fh+5} ${x+w*0.42},${y+fh+5}"/>
+      <polygon points="${x+w*0.86},${y-5} ${x+w*0.97},${y-5} ${x+w*0.87},${y+fh+5} ${x+w*0.76},${y+fh+5}"/>
+    </g>
+    <rect x="${x}" y="${y+fh-Math.max(3, fh*0.035)-2}" width="${w}" height="${Math.max(3, fh*0.035)}"
+          fill="${top}" opacity="${bottomLine}"/>
+    <rect x="${x+2.5}" y="${y+2.5}" width="${w-5}" height="${fh-5}" rx="${r-2}" fill="none"
+          stroke="#fff" stroke-width="3" opacity="${edge}" style="mix-blend-mode:soft-light"/>
+  </g>`;
+}
+
+// Step 5: Fredoka, white, thick black stroke, same depth copy underneath.
+function label(t, x, y, size, {anchor='middle', depth=Math.round(size*0.14), sw=size*0.2, fill='#fff'}={}) {
+  const base = `x="${x}" text-anchor="${anchor}" font-size="${size}" stroke-linejoin="round" paint-order="stroke"`;
+  return `<text ${base} y="${y+depth}" fill="${INK}" stroke="${INK}" stroke-width="${sw}">${t}</text>
+          <text ${base} y="${y}" fill="${fill}" stroke="${INK}" stroke-width="${sw}">${t}</text>`;
+}
+
+// Step 6 icons: white vector with black stroke + depth copy.
+function retryIcon(cx, cy, s) {
+  // open "C" ring, gap on the right, arrowhead at the top end pointing clockwise
+  const R = s*0.40, t0 = 40*Math.PI/180, t1 = 300*Math.PI/180;
+  const P = t => [cx+R*Math.cos(t), cy+R*Math.sin(t)];
+  const [x0,y0] = P(t0), [x1,y1] = P(t1);
+  const d = `M ${x0} ${y0} A ${R} ${R} 0 1 1 ${x1} ${y1}`;
+  const dx = -Math.sin(t1), dy = Math.cos(t1), nx = Math.cos(t1), ny = Math.sin(t1), h = s*0.26;
+  const head = `${x1+dx*h},${y1+dy*h} ${x1+nx*h*0.85},${y1+ny*h*0.85} ${x1-nx*h*0.85},${y1-ny*h*0.85}`;
+  const one = (off, col, w, hw) => `<g transform="translate(0,${off})">
+      <path d="${d}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round"/>
+      <polygon points="${head}" fill="${col}" stroke="${col}" stroke-width="${hw}" stroke-linejoin="round"/></g>`;
+  return one(s*0.13, INK, s*0.30, s*0.16) + one(0, INK, s*0.30, s*0.16) + one(0, '#fff', s*0.13, 1);
+}
+
+function robuxHex(cx, cy, s) {
+  // his icon: black / white / black / white nested hexes, black square centre, depth copy
+  const hex = (rr, oy=0) => [...Array(6)].map((_, i) => {
+    const a = -Math.PI/2 + i*Math.PI/3; return `${cx+rr*Math.cos(a)},${cy+oy+rr*Math.sin(a)}`; }).join(' ');
+  const H = (rr, f, oy=0) => `<polygon points="${hex(rr,oy)}" fill="${f}" stroke="${f}" stroke-width="${s*0.08}" stroke-linejoin="round"/>`;
+  return H(s*0.62, INK, s*0.10) + H(s*0.62, INK) + H(s*0.50, '#fff') + H(s*0.33, INK) + H(s*0.25, '#fff')
+       + `<rect x="${cx-s*0.11}" y="${cy-s*0.11}" width="${s*0.22}" height="${s*0.22}" fill="${INK}"/>`;
+}
+
+// Item art in his pet style: navy silhouette outline, cel shading lit from top-left, rim light, gloss.
+const LINE = '#2B1B3D';
+function stopwatch(cx, cy, s) {
+  const id = 'sw' + (uid++);
+  const body = `<circle cx="${cx}" cy="${cy}" r="${s*0.48}"/>`;
+  const knob = `<rect x="${cx-s*0.10}" y="${cy-s*0.64}" width="${s*0.20}" height="${s*0.18}" rx="${s*0.03}"/>`;
+  const cap  = `<rect x="${cx-s*0.21}" y="${cy-s*0.76}" width="${s*0.42}" height="${s*0.15}" rx="${s*0.07}"/>`;
+  const side = `<rect x="${cx-s*0.08}" y="${cy-s*0.62}" width="${s*0.16}" height="${s*0.14}" rx="${s*0.03}" transform="rotate(45 ${cx} ${cy})"/>`;
+  const ticks = [...Array(12)].map((_, i) => {
+    const a = i*Math.PI/6, r1 = s*(i%3 ? 0.30 : 0.27), r2 = s*0.33;
+    return `<line x1="${cx+r1*Math.sin(a)}" y1="${cy-r1*Math.cos(a)}" x2="${cx+r2*Math.sin(a)}" y2="${cy-r2*Math.cos(a)}"
+             stroke="${LINE}" stroke-width="${s*(i%3 ? 0.018 : 0.03)}" stroke-linecap="round"/>`; }).join('');
+  return `<defs>
+    <radialGradient id="${id}b" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#FFC94D"/><stop offset="0.55" stop-color="#FF8A00"/><stop offset="1" stop-color="#D45A00"/></radialGradient>
+    <radialGradient id="${id}f" cx="0.4" cy="0.35" r="0.75"><stop offset="0.5" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D3E2F2"/></radialGradient>
+    <linearGradient id="${id}k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE680"/><stop offset="1" stop-color="#F0A000"/></linearGradient>
+    <clipPath id="${id}c">${body}</clipPath>
+  </defs>
+  <ellipse cx="${cx}" cy="${cy+s*0.56}" rx="${s*0.40}" ry="${s*0.07}" fill="#000" opacity="0.22"/>
+  <g fill="${LINE}" stroke="${LINE}" stroke-width="${s*0.09}" stroke-linejoin="round">${side}${knob}${cap}${body}</g>
+  <g fill="url(#${id}k)">${side}${knob}${cap}</g>
+  <rect x="${cx-s*0.15}" y="${cy-s*0.735}" width="${s*0.22}" height="${s*0.035}" rx="${s*0.017}" fill="#fff" opacity="0.8"/>
+  <g fill="url(#${id}b)">${body}</g>
+  <g clip-path="url(#${id}c)">
+    <circle cx="${cx-s*0.10}" cy="${cy-s*0.10}" r="${s*0.50}" fill="none" stroke="#9E3F00" stroke-width="${s*0.12}" opacity="0.45"/>
+  </g>
+  <circle cx="${cx}" cy="${cy}" r="${s*0.36}" fill="${LINE}"/>
+  <circle cx="${cx}" cy="${cy}" r="${s*0.335}" fill="url(#${id}f)"/>
+  ${ticks}
+  <line x1="${cx}" y1="${cy}" x2="${cx-s*0.06}" y2="${cy-s*0.22}" stroke="${LINE}" stroke-width="${s*0.05}" stroke-linecap="round"/>
+  <line x1="${cx}" y1="${cy}" x2="${cx+s*0.20}" y2="${cy+s*0.10}" stroke="#E8341C" stroke-width="${s*0.03}" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="${s*0.045}" fill="#E8341C" stroke="${LINE}" stroke-width="${s*0.015}"/>
+  <path d="M ${cx-s*0.40} ${cy-s*0.12} A ${s*0.42} ${s*0.42} 0 0 1 ${cx-s*0.16} ${cy-s*0.39}" fill="none" stroke="#fff" stroke-width="${s*0.055}" stroke-linecap="round" opacity="0.85"/>
+  <circle cx="${cx-s*0.43}" cy="${cy+s*0.02}" r="${s*0.025}" fill="#fff" opacity="0.85"/>
+  <path d="M ${cx-s*0.22} ${cy-s*0.22} A ${s*0.30} ${s*0.30} 0 0 1 ${cx+s*0.02} ${cy-s*0.31}" fill="none" stroke="#fff" stroke-width="${s*0.03}" stroke-linecap="round" opacity="0.9"/>
+  `;
+}
+
+function sparkle(x, y, s, o=0.9) {
+  return `<path d="M ${x} ${y-s} Q ${x} ${y} ${x+s} ${y} Q ${x} ${y} ${x} ${y+s} Q ${x} ${y} ${x-s} ${y} Q ${x} ${y} ${x} ${y-s} Z"
+           fill="#fff" opacity="${o}" style="mix-blend-mode:overlay"/>`;
+}
+
+const DROP = `<defs><filter id="drop" x="-10%" y="-10%" width="120%" height="140%">
+  <feDropShadow dx="0" dy="6" stdDeviation="2" flood-color="#000" flood-opacity="0.25"/></filter></defs>`;
+
+function svg(w, h, body) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${DROP}${body}</svg>`;
+}
+
+// 1) His RETRY button, same size and values as the frame (509x147).
+const retry = svg(540, 180, `<g transform="translate(15,10)">
+  ${piece({w:509, h:147, r:14, top:'#FFF200', mid:'#FFE200', bottom:'#F39509', dots:'#FFD000', dotsOpacity:0.5, lip:'#AA5000'})}
+  ${label('RETRY', 205, 106, 92)}
+  ${retryIcon(425, 64, 100)}
+  ${sparkle(470, 26, 9)}${sparkle(40, 100, 7, 0.6)}
+</g>`);
+
+// 2) An EVOLVE shop card in his small-card style (Rare = purple), 2x his frame size.
+const cw = 300, ch = 380;
+const card = svg(cw + 30, ch + 30, `<g transform="translate(15,10)">
+  ${piece({w:cw, h:ch, r:16, top:'#7C00F2', mid:'#8400F4', bottom:'#2A16EA', lip:'#03246C', lipH:14, dotsOpacity:0.3, shine:0.35})}
+  ${label('Fast Life', cw/2, 56, 48)}
+  ${stopwatch(cw/2, 196, 165)}
+  ${label('x2', cw-48, 270, 42)}
+  ${piece({x:30, y:285, w:cw-60, h:66, r:12, top:'#A6FF2E', bottom:'#2FBF00', lip:'#1E7A00', lipH:7, shine:0.4})}
+  ${robuxHex(cw/2-42, 309, 42)}
+  ${label('99', cw/2+18, 328, 38, {anchor:'middle'})}
+  ${sparkle(40, 80, 8, 0.7)}${sparkle(cw-40, 120, 6, 0.6)}
+</g>`);
+
+document.getElementById('stage').innerHTML = retry + card;
+document.fonts.ready.then(() => document.title = 'ready');
+</script></body></html>

@@ -89,21 +89,44 @@ Numbers and presets: `references/design-tokens.md`. Ready-made pieces: `referenc
     - The black outline goes Outside, 4.5 px on a 509 px button.
     - The lip is about 14% of the height, in a darker shade.
     - Export each piece just under 1024 px.
-    - **Owner tweak, 18 Nov, on the code-drawn samples: "Depth, not thicker outlines".** Keep the 4.5 px outline and get the 3D look from depth instead:
-      - text depth copy about 14% of the font size;
-      - icon depth copy about 13% of the icon size.
-    - **Second owner tweak, 18 Nov: "Lip back to his size".** A 20% lip was too much, so keep the lip at about **8% of the height**, as his is. The text and icon keep their deeper depth.
-    - **Also from the second tweak:**
-      - A **bright line where the face meets the lip**: about 3.5% of the face height, drawn in the piece's own top colour at 90%. This is his yellow line.
-      - **Stronger shine stripes**: 0.5 opacity on buttons, 0.35 on cards.
-      - **Bigger card title and art**: the title is about 16% of the card width, and the item art fills about 55% of the card height. Keep the art clear of the title.
-    - **Colours (also from that tweak):**
-      - Gradients keep the bright colour until about 45%, e.g. yellow `#FFF200` → `#FFE200` → `#F39509`.
-      - Purple card: `#7C00F2` → `#8400F4` → `#2A16EA`, with lip `#03246C`.
-      - These values were measured with pixel-check against his frames.
-      - Halftone dots are small: a 10 px grid with 4.5 px diamonds.
-      - Tint the dots with the piece's own colour (e.g. `#FFD000` on yellow). White dots at full strength bleach the bottom of the gradient.
-    - **Item art (also from that tweak):** a navy `#2B1B3D` silhouette outline, cel shading lit from the top-left, a rim highlight and a gloss streak.
+    - **Owner's final call, 18 Nov: "just make it exact exact like the developer's".** This replaces the earlier tweaks: the 20% lip, the deeper depth, and the eyeballed colours. **Measure his frames and copy the numbers.** Do not tune by eye.
+      - **Method:**
+        1. Render our piece at his exact zoom and screen position on his video frame (the Figma zoom is readable from the outline width).
+        2. Compare the bounding boxes of the white text, the icon and the green pill.
+        3. Compare the average colour of each row in strips with no text.
+        4. Repeat until the boxes are within a few px and the rows are within about 15 RGB.
+        5. Expect about 9% of pixels to still differ. That is JPEG noise and the dot pattern's phase, not a design difference.
+      - **Tools** (in the vault at `EVOLVE/Assets/UI art/develuper-exact/`):
+        - `exact.html` + `params.json` + `fit.py` for the button;
+        - `card.html` + `card_params.json` + `fit_card.py` for the card;
+        - `rows.py` for the strip-colour comparison.
+      - **Button (RETRY, 509x147 units):**
+        - Outline 4.5 (Outside), corner radius 14, lip 16 in `#A04C04`.
+        - Gradient: `#F8FE10` 0 → `#F6EE08` .29 → `#F7E408` .45 → `#F7D708` .58 → `#F5BD06` .71 → `#F3A307` .84 → `#F09605` .93 → `#EE8E05` 1.
+        - **No blue in any yellow layer.** His colours are `#xxxx0x`; a light dot or a white stripe adds blue and washes the piece out.
+        - Text: Fredoka One at 96, stroke 9.8 (half shows), depth copy 8 straight down. The white caps sit at units 39.5–348 by 24.6–94.9.
+        - Icon: an open-C ring (radius 30, width 21, round end), gap from 42° to 298°, arrowhead turned −15° off the tangent, depth 5.
+      - **Edge highlight** (this IS his bright bottom line):
+        - An inside stroke 8 units wide, with a vertical gradient from the top colour to the bottom colour: lemon `#F8F00A` on yellow; pink `#D500FD` → cyan `#2B8EFF` on purple.
+        - On the card the bottom band is wider: an extra 18 units of `#2E9AFF`.
+      - **Shine bands:**
+        - White on **soft-light** blend, 0.8 opacity.
+        - Five bands on the button at x 91 (width 78), 197 (43), 382 (43), 446 (14), 488 (36), slanted 0.4.
+        - The blend only works when the gradient is inside the same clip group. A clip group isolates the blend, so otherwise the bands render white.
+      - **Halftone:**
+        - Button: yellow diamonds `#FFF000`, grid 14, size 8, 0.6 opacity, fading in from 20% down.
+        - Card: **round** magenta dots `#E040FF`, grid 14, size 8, 0.7 opacity, in a radial fade from the top-right (0.9, 0.2, r 0.75).
+      - **Purple card (300x397 units):**
+        - Outline 6.5, radius 16, lip 15 in `#0B216A`.
+        - Diagonal gradient (x2 0.25): `#8A00F4` → `#7800F0` .07 → `#6000EE` .25 → `#5000EE` .46 → `#4400EA` .60 → `#3000ED` .75 → `#2600F4` .83 → `#1C04F2` .91 → `#1406F4`.
+        - Title: cap height 27 units (Fredoka 39), baseline at 60, stroke 10, depth 3.
+        - Art box: units 20–270 wide, 85–268 tall.
+      - **Price pill (250x73 units at x 25, y 270):**
+        - Outline 6.5, radius 12, a deep lip of 17 in `#089E02`.
+        - Gradient `#5CFF06` → `#36FF00` .4 → `#1DFF0D` .75 → `#21EA08`; edge `#B2FF44` → `#4DFE40`.
+        - Price text Fredoka 44, baseline 318, starting at x 148.
+        - Currency icon about 46 units, centred at (107.5, 303.5).
+    - **Item art:** a navy `#2B1B3D` silhouette outline, cel shading lit from the top-left, a rim highlight and a gloss streak.
     - **Robux icon:** nested hexes, black → white → black → white, with a black square in the centre and a depth copy.
     - **Building without Figma:** with the Figma MCP capped, drawing the pieces in code (SVG, rendered by headless Chrome) matched his frames.
   - Build each piece as a Figma component that exports alone, then 9-slice it in Studio.

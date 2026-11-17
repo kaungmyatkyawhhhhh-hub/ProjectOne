@@ -1,0 +1,119 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=block" rel="stylesheet">
+<style>html,body{margin:0;background:#fff;overflow:hidden} svg text{font-family:'Fredoka One'}</style>
+<script src="card_params.js"></script>
+</head><body>
+<script>
+// Develuper shop card, measured from his frame (video t=348s, "x3 Rare Pet", zoom 0.6).
+// P.mode = "his" draws his title/price text for calibration; "ours" draws the EVOLVE content.
+const P = window.P, INK = '#000';
+let uid = 0;
+
+// One Develuper piece: gradient face, lip behind, outside outline, then inside a clip:
+// halftone, soft-light shine bands, gradient inside-stroke edge highlight.
+function piece(o) {
+  const id = 'p' + (uid++), W = o.w, H = o.h, R = o.r, FH = H - o.lip;
+  const stops = o.stops.map(([f, c]) => `<stop offset="${f}" stop-color="${c}"/>`).join('');
+  const dot = o.dot.round
+    ? `<circle cx="${o.dot.grid / 2}" cy="${o.dot.grid / 2}" r="${o.dot.size / 2}" fill="${o.dot.color}"/>`
+    : `<rect x="${(o.dot.grid - o.dot.size) / 2}" y="${(o.dot.grid - o.dot.size) / 2}" width="${o.dot.size}" height="${o.dot.size}" fill="${o.dot.color}"/>`;
+  const mask = o.dot.radial
+    ? `<radialGradient id="${id}f" cx="${o.dot.radial[0]}" cy="${o.dot.radial[1]}" r="${o.dot.radial[2]}">
+         <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
+    : `<linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="${o.dot.from}" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff"/></linearGradient>`;
+  const bands = o.stripes.map(([x, wd]) =>
+    `<polygon points="${x},-5 ${x + wd},-5 ${x + wd - FH * o.slant},${FH + 5} ${x - FH * o.slant},${FH + 5}"/>`).join('');
+  const ew = o.edge.w;
+  return `<g transform="translate(${o.x || 0},${o.y || 0})">
+  <defs>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="${o.dir || 0}" y2="1">${stops}</linearGradient>
+    <clipPath id="${id}c"><rect width="${W}" height="${FH}" rx="${R}"/></clipPath>
+    <pattern id="${id}d" width="${o.dot.grid}" height="${o.dot.grid}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">${dot}</pattern>
+    ${mask}
+    <mask id="${id}m"><rect width="${W}" height="${FH}" fill="url(#${id}f)"/></mask>
+    <linearGradient id="${id}e" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${o.edge.top}"/><stop offset="1" stop-color="${o.edge.bottom}"/></linearGradient>
+  </defs>
+  <g filter="url(#drop)">
+    <rect width="${W}" height="${H}" rx="${R}" fill="none" stroke="${INK}" stroke-width="${o.outline * 2}"/>
+    <rect width="${W}" height="${H}" rx="${R}" fill="${o.lipColor}"/>
+  </g>
+  <g clip-path="url(#${id}c)">
+    <rect width="${W}" height="${FH}" fill="url(#${id}g)"/>
+    <rect width="${W}" height="${FH}" fill="url(#${id}d)" mask="url(#${id}m)" opacity="${o.dot.opacity}"/>
+    <g fill="${o.stripeColor}" opacity="${o.stripeOpacity}" style="mix-blend-mode:soft-light">${bands}</g>
+    ${o.line ? `<rect y="${FH - o.line.h}" width="${W}" height="${o.line.h}" fill="${o.line.color}"/>` : ''}
+    <rect x="${ew / 2}" y="${ew / 2}" width="${W - ew}" height="${FH - ew}" rx="${R - ew / 2}" fill="none" stroke="url(#${id}e)" stroke-width="${ew}" opacity="${o.edge.opacity}"/>
+  </g></g>`;
+}
+function label(t, x, y, size, sw, depth, anchor = 'middle') {
+  const a = `x="${x}" font-size="${size}" text-anchor="${anchor}" stroke-linejoin="round" paint-order="stroke"`;
+  return `<text ${a} y="${y + depth}" fill="${INK}" stroke="${INK}" stroke-width="${sw}">${t}</text>
+          <text ${a} y="${y}" fill="#fff" stroke="${INK}" stroke-width="${sw}">${t}</text>`;
+}
+function robuxHex(cx, cy, s) {
+  const hex = (rr, oy = 0) => [...Array(6)].map((_, i) => {
+    const a = -Math.PI / 2 + i * Math.PI / 3; return `${cx + rr * Math.cos(a)},${cy + oy + rr * Math.sin(a)}`; }).join(' ');
+  const Hx = (rr, f, oy = 0) => `<polygon points="${hex(rr, oy)}" fill="${f}" stroke="${f}" stroke-width="${s * 0.08}" stroke-linejoin="round"/>`;
+  return Hx(s * 0.5, INK, s * 0.08) + Hx(s * 0.5, INK) + Hx(s * 0.4, '#fff') + Hx(s * 0.27, INK) + Hx(s * 0.2, '#fff')
+       + `<rect x="${cx - s * 0.09}" y="${cy - s * 0.09}" width="${s * 0.18}" height="${s * 0.18}" fill="${INK}"/>`;
+}
+
+// Item art in his pet style: navy silhouette outline, cel shading lit from top-left, rim light, gloss.
+const LINE = '#2B1B3D';
+function stopwatch(cx, cy, s) {
+  const id = 'sw' + (uid++);
+  const body = `<circle cx="${cx}" cy="${cy}" r="${s*0.48}"/>`;
+  const knob = `<rect x="${cx-s*0.10}" y="${cy-s*0.64}" width="${s*0.20}" height="${s*0.18}" rx="${s*0.03}"/>`;
+  const cap  = `<rect x="${cx-s*0.21}" y="${cy-s*0.76}" width="${s*0.42}" height="${s*0.15}" rx="${s*0.07}"/>`;
+  const side = `<rect x="${cx-s*0.08}" y="${cy-s*0.62}" width="${s*0.16}" height="${s*0.14}" rx="${s*0.03}" transform="rotate(45 ${cx} ${cy})"/>`;
+  const ticks = [...Array(12)].map((_, i) => {
+    const a = i*Math.PI/6, r1 = s*(i%3 ? 0.30 : 0.27), r2 = s*0.33;
+    return `<line x1="${cx+r1*Math.sin(a)}" y1="${cy-r1*Math.cos(a)}" x2="${cx+r2*Math.sin(a)}" y2="${cy-r2*Math.cos(a)}"
+             stroke="${LINE}" stroke-width="${s*(i%3 ? 0.018 : 0.03)}" stroke-linecap="round"/>`; }).join('');
+  return `<defs>
+    <radialGradient id="${id}b" cx="0.35" cy="0.3" r="0.8"><stop offset="0" stop-color="#FFC94D"/><stop offset="0.55" stop-color="#FF8A00"/><stop offset="1" stop-color="#D45A00"/></radialGradient>
+    <radialGradient id="${id}f" cx="0.4" cy="0.35" r="0.75"><stop offset="0.5" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D3E2F2"/></radialGradient>
+    <linearGradient id="${id}k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE680"/><stop offset="1" stop-color="#F0A000"/></linearGradient>
+    <clipPath id="${id}c">${body}</clipPath>
+  </defs>
+  <ellipse cx="${cx}" cy="${cy+s*0.56}" rx="${s*0.40}" ry="${s*0.07}" fill="#000" opacity="0.22"/>
+  <g fill="${LINE}" stroke="${LINE}" stroke-width="${s*0.09}" stroke-linejoin="round">${side}${knob}${cap}${body}</g>
+  <g fill="url(#${id}k)">${side}${knob}${cap}</g>
+  <rect x="${cx-s*0.15}" y="${cy-s*0.735}" width="${s*0.22}" height="${s*0.035}" rx="${s*0.017}" fill="#fff" opacity="0.8"/>
+  <g fill="url(#${id}b)">${body}</g>
+  <g clip-path="url(#${id}c)">
+    <circle cx="${cx-s*0.10}" cy="${cy-s*0.10}" r="${s*0.50}" fill="none" stroke="#9E3F00" stroke-width="${s*0.12}" opacity="0.45"/>
+  </g>
+  <circle cx="${cx}" cy="${cy}" r="${s*0.36}" fill="${LINE}"/>
+  <circle cx="${cx}" cy="${cy}" r="${s*0.335}" fill="url(#${id}f)"/>
+  ${ticks}
+  <line x1="${cx}" y1="${cy}" x2="${cx-s*0.06}" y2="${cy-s*0.22}" stroke="${LINE}" stroke-width="${s*0.05}" stroke-linecap="round"/>
+  <line x1="${cx}" y1="${cy}" x2="${cx+s*0.20}" y2="${cy+s*0.10}" stroke="#E8341C" stroke-width="${s*0.03}" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="${s*0.045}" fill="#E8341C" stroke="${LINE}" stroke-width="${s*0.015}"/>
+  <path d="M ${cx-s*0.40} ${cy-s*0.12} A ${s*0.42} ${s*0.42} 0 0 1 ${cx-s*0.16} ${cy-s*0.39}" fill="none" stroke="#fff" stroke-width="${s*0.055}" stroke-linecap="round" opacity="0.85"/>
+  <circle cx="${cx-s*0.43}" cy="${cy+s*0.02}" r="${s*0.025}" fill="#fff" opacity="0.85"/>
+  <path d="M ${cx-s*0.22} ${cy-s*0.22} A ${s*0.30} ${s*0.30} 0 0 1 ${cx+s*0.02} ${cy-s*0.31}" fill="none" stroke="#fff" stroke-width="${s*0.03}" stroke-linecap="round" opacity="0.9"/>
+  `;
+}
+
+
+const C = P.card, T = P.title, PL = P.pill;
+let content = '';
+if (P.mode === 'his') {
+  content = label('x3 Rare Pet', C.w / 2, T.y, T.size, T.sw, T.depth)
+          + label('300', PL.textX, PL.textY, PL.textSize, PL.textSw, PL.textDepth, 'start')
+          + `<circle cx="${PL.iconX}" cy="${PL.iconY}" r="${PL.iconS / 2}" fill="#F5A300" stroke="${INK}" stroke-width="3"/>`;
+} else {
+  content = label(P.ours.title, C.w / 2, T.y, T.size, T.sw, T.depth)
+          + label(P.ours.price, PL.textX, PL.textY, PL.textSize, PL.textSw, PL.textDepth, 'start')
+          + robuxHex(PL.iconX, PL.iconY, PL.iconS);
+}
+const art = P.mode === 'ours' ? stopwatch(P.art.cx, P.art.cy, P.art.s) + label('x2', P.art.countX, P.art.countY, P.art.countSize, T.sw, T.depth) : '';
+
+const body = piece(C) + art + piece(Object.assign({}, PL, {x: PL.x, y: PL.y})) + content;
+document.body.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">
+  <defs><filter id="drop" x="-10%" y="-10%" width="120%" height="140%">
+    <feDropShadow dx="0" dy="6" stdDeviation="2" flood-color="#000" flood-opacity="0.25"/></filter></defs>
+  <g transform="translate(${P.X0},${P.Y0}) scale(${P.Z})">${body}</g></svg>`;
+</script></body></html>
