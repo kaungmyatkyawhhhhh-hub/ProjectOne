@@ -1931,25 +1931,65 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
         s, cut = r['s'], cutd.get(r['name'], set())
         if r['name'] in decks or len(s) < 3:
             continue
-        for idx, cf in ((list(range(len(s))), 'startsOnEnd'), (list(range(len(s) - 1, -1, -1)), 'endsOnEnd')):
-            # (J23: a continuation joint keeps its partner's height: moving one side made seam_step / pave_step 3)
-            if idx[0] in cut or isinstance(r.get(cf), str):
-                continue
-            on = []
-            for i in idx:
-                h = host_at(r, s[i][0], s[i][2], s[i][1], s[i]) if i not in cut else None
-                if not h:
-                    break
-                on.append((i, h))
-            if not on or abs(s[on[0][0]][1] - on[0][1][1]) < MIN_GAP:
-                continue
-            new = {i: h[1] for i, h in on}
+        def find_runs(wide):
+            runs, taken = [], set()
+            for idx, cf in ((list(range(len(s))), 'startsOnEnd'), (list(range(len(s) - 1, -1, -1)), 'endsOnEnd')):
+                # (J23: a continuation joint keeps its partner's height: moving one side made seam_step / pave_step 3)
+                if idx[0] in cut or isinstance(r.get(cf), str):
+                    continue
+                on = []
+                for i in idx:
+                    h = host_at(r, s[i][0], s[i][2], s[i][1], s[i] if wide else None) if i not in cut and i not in taken else None
+                    # (one host per run: Lane #1256's run went on from Hledan Road #3 onto Kabar Aye Pagoda Road #6)
+                    if not h or (on and h[2] != on[0][2]):
+                        break
+                    on.append((i, h[1], h[2]))
+                if not on or abs(s[on[0][0]][1] - on[0][1]) < MIN_GAP:
+                    continue
+                taken.update(i for i, _, _ in on)
+                runs.append((idx, on))
+            return runs
+        runs = find_runs(True)
+        # (a short record on two hosts: flat by the centre line only, so the climb between them has room)
+        if len(runs) == 2 and runs[1][1][-1][0] - runs[0][1][-1][0] < 4:
+            runs = find_runs(False)
+        # (still abutting (Lane #1257 between Kabar Aye Pagoda Road #5 and Hledan Road #3): give the climb 3 samples)
+        while len(runs) == 2 and runs[1][1][-1][0] - runs[0][1][-1][0] < 4 and len(runs[0][1]) + len(runs[1][1]) > 2:
+            k = 0 if len(runs[0][1]) >= len(runs[1][1]) else 1
+            if len(runs[k][1]) == 1:
+                k = 1 - k
+            runs[k][1].pop()
+        if not runs:
+            continue
+        # (J23, Lane #1256: flat on Hledan Road #3 from one end, on Kabar Aye Pagoda Road #6 from the other, the two
+        # fades met in a 1.1 step) each run's correction (host - own height at its last sample) fades along the record;
+        # where two runs face each other the correction goes linearly from one to the other: no step anywhere
+        new = {}
+        for idx, on in runs:
+            for i, y, _ in on:
+                new[i] = y
+        corr = {}
+        if len(runs) == 2:
+            a, b = runs[0][1][-1][0], runs[1][1][-1][0]
+            mid = list(range(a + 1, b))
+            ch, acc = {a: 0.0}, 0.0
+            for i in range(a + 1, b + 1):
+                acc += math.hypot(s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2])
+                ch[i] = acc
+            ca, cb = new[a] - s[a][1], new[b] - s[b][1]
+            for i in mid:
+                if i in cut:
+                    continue
+                u = ch[i] / max(acc, 1e-6)
+                corr[i] = ca * (1 - u) + cb * u
+        else:
+            idx, on = runs[0]
             last = on[-1][0]
             rest = idx[len(on):]
-            gap = s[last][1] - new[last]
+            gap = new[last] - s[last][1]
             L = min(120.0, max(20.0, abs(gap) / GRADE))
-            # (J23: the fade ends by the record's far end: that end keeps its height (its joint))
-            rest_len = sum(math.hypot(s[b][0] - s[a][0], s[b][2] - s[a][2]) for a, b in zip([last] + rest[:-1], rest)) if rest else 0.0
+            # (the fade ends by the record's far end: that end keeps its height (its joint))
+            rest_len = sum(math.hypot(s[q][0] - s[p_][0], s[q][2] - s[p_][2]) for p_, q in zip([last] + rest[:-1], rest)) if rest else 0.0
             if 0 < rest_len < L:
                 L = rest_len
             along, prev = 0.0, last
@@ -1960,12 +2000,14 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
                 prev = i
                 if along >= L:
                     break
-                new[i] = s[i][1] - gap * (1 - along / L)
-            for i, y in new.items():
-                if abs(y - s[i][1]) > abs(worst[0]):
-                    worst = (round(y - s[i][1], 2), r['name'])
-                s[i][1] = round(y, 3)
-            out += 1
+                corr[i] = gap * (1 - along / L)
+        for i, c in corr.items():
+            new[i] = s[i][1] + c
+        for i, y in new.items():
+            if abs(y - s[i][1]) > abs(worst[0]):
+                worst = (round(y - s[i][1], 2), r['name'])
+            s[i][1] = round(y, 3)
+        out += len(runs)
     return dict(ends=out, worst=worst)
 
 
