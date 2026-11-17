@@ -223,6 +223,7 @@ layout()
 local menuGui = Kit.screen("EvolutionMenus", 20, playerGui)
 local menuRoot = scaledRoot(menuGui)
 local openName = nil
+local news = {} -- set by the toast queue below: windows pause news so it never plays hidden behind them
 local function window(name, titleText, iconKey)
 	local dim = new("TextButton", { Name = name .. "Backdrop", Text = "", AutoButtonColor = false, BackgroundColor3 = Color3.new(0, 0, 0),
 		BackgroundTransparency = 0.45, Size = UDim2.fromScale(1, 1), Visible = false, ZIndex = 1 }, menuRoot)
@@ -241,11 +242,13 @@ local function window(name, titleText, iconKey)
 		if openName ~= name then return end
 		openName = nil
 		dim.Visible, w.Visible = false, false
+		task.defer(news.resume) -- deferred: switching windows re-opens one before this runs
 	end
 	function m.Open()
 		if openName == name then return end
 		if openName then menus[openName].Close() end
 		openName = name
+		news.pause()
 		dim.Visible, w.Visible = true, true
 		sc.Scale = 0.9
 		TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.18, Enum.EasingStyle.Back), { Scale = 1 }):Play()
@@ -496,32 +499,45 @@ local STYLES = {
 	{ find = "Mutation", priority = 6, color = Color3.fromRGB(205, 150, 255) },
 	{ find = "Caught", priority = 5, color = Color3.fromRGB(255, 130, 110) },
 }
-local queue, showing, seq = {}, false, 0
+-- Overstimulated-kid sim (18 Nov, vault EVOLVE/Calc): news played behind open windows and left before a 7-year-old
+-- could read it (~47% of evolve/era/badge news missed). Now: news waits while a window is open, a toast cut by a
+-- window comes back after, big news stays words / 1.2 + 0.5 s, and it sits below the menu buttons (y 120).
+local queue, showing, seq = {}, nil, 0
+local function byPriority(x, y) return x.priority > y.priority or (x.priority == y.priority and x.seq < y.seq) end
 local function showNext()
-	if showing or #queue == 0 then return end
-	table.sort(queue, function(x, y) return x.priority > y.priority or (x.priority == y.priority and x.seq < y.seq) end)
+	if showing or #queue == 0 or openName then return end
+	table.sort(queue, byPriority)
 	local item = table.remove(queue, 1)
-	showing = true
 	local t = img(toastRoot, "toast", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, -70), Size = UDim2.fromOffset(380, 52), ZIndex = 10 })
 	label(t, item.text, 17, { Position = UDim2.fromOffset(14, 0), Size = UDim2.new(1, -28, 1, 0), TextColor3 = item.color or CREAM, ZIndex = 12, TextTruncate = Enum.TextTruncate.AtEnd })
-	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0.5, 0, 0, 104) }):Play()
-	task.delay(item.hold or 2.2, function()
+	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0.5, 0, 0, 120) }):Play()
+	local cur = {}
+	function cur.hide(requeue)
+		if showing ~= cur then return end
+		showing = nil
+		if requeue then table.insert(queue, item) end
 		TweenService:Create(t, TweenInfo.new(0.2), { Position = UDim2.new(0.5, 0, 0, -70) }):Play()
-		task.wait(0.22)
-		t:Destroy()
-		showing = false
-		showNext()
-	end)
+		task.delay(0.22, function() t:Destroy() showNext() end)
+	end
+	showing = cur
+	local hold = item.hold or 2.2
+	if item.priority >= 7 then hold = math.max(hold, #item.text:split(" ") / 1.2 + 0.5) end -- slowest 7-year-old: ~1.2 words/s
+	task.delay(hold, cur.hide)
 end
+news.pause = function() if showing then showing.hide(true) end end
+news.resume = showNext
 remotes.Notify.OnClientEvent:Connect(function(msg)
-	for _, line in msg:split("\n") do
+	local lines = msg:split("\n")
+	for i, line in lines do
+		if i == 1 and #lines > 1 and line:find("^Generation") then continue end -- bigger news this life: skip the routine line
 		local style = { priority = 1 }
 		for _, s in STYLES do
 			if line:find(s.find, 1, true) then style = s break end
 		end
 		seq += 1
 		table.insert(queue, { text = line, priority = style.priority, color = style.color, hold = style.hold, seq = seq })
-		while #queue > 6 do table.remove(queue) end -- drop the least important when news piles up
 	end
+	table.sort(queue, byPriority)
+	while #queue > 6 do table.remove(queue) end -- sorted first, so this drops the least important, not the newest
 	showNext()
 end)
