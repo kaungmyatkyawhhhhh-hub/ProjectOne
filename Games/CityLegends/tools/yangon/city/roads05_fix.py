@@ -1873,7 +1873,7 @@ def median_styles(data):
     return dict(n)
 
 
-def mouth_level(data, MIN_GAP=0.15, GRADE=0.03):
+def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
     """(J22, Studio univ_kabaraye / pyay_univ / slip_triangle road_step: Lane #1256 merges into Hledan Road #3 at the
     University Ave flyover's foot 0.9-1.4 over it: the mouth slab, pinned to Hledan's edge, rose 1 stud in 2.5 studs)
     A road whose end lies on a bigger road's carriageway (side half + 0.5) takes the host's height there: samples on
@@ -1887,7 +1887,7 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03):
         for i, q in enumerate(r['s']):
             grid[(int(q[0] // 64), int(q[2] // 64))].append((k, i))
 
-    def host_at(r, x, z):
+    def host_at(r, x, z, y):
         best = None
         for gx in (-1, 0, 1):
             for gz in (-1, 0, 1):
@@ -1910,8 +1910,10 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03):
                         d = math.hypot(a[0] + vx * u - x, a[2] + vz * u - z)
                         right = (x - a[0]) * -vz + (z - a[2]) * vx > 0
                         h = (a[7] if right else a[6]) if len(a) > 7 else o.get('half', 6)
-                        if d < h + 0.5 and (best is None or o['rank'] < best[0]):
-                            best = (o['rank'], a[1] + (b[1] - a[1]) * u, o['name'])
+                        hy = a[1] + (b[1] - a[1]) * u
+                        # (a road passing over / under, not joining: Lane #4687 was pulled 13 studs)
+                        if d < h + 0.5 and abs(hy - y) < MAX_GAP and (best is None or o['rank'] < best[0]):
+                            best = (o['rank'], hy, o['name'])
         return best
     out, worst = 0, (0.0, None)
     for r in R:
@@ -1923,7 +1925,7 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03):
                 continue
             on = []
             for i in idx:
-                h = host_at(r, s[i][0], s[i][2]) if i not in cut else None
+                h = host_at(r, s[i][0], s[i][2], s[i][1]) if i not in cut else None
                 if not h:
                     break
                 on.append((i, h))
