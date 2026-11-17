@@ -1,3 +1,49 @@
+# roads05 handover (18 Nov 2026, sixteenth pass: J20, GEOMETRY agent; DATA + BUILDER + QA + Studio; stopped: context)
+
+## J20 geometry -- counts J19 -> J20 (full net, `J20_qa.log`; backup `qa_J19.json`, `roads_J19.json`, data `roads_J20.json`)
+kerb_cross 12 -> 2, deck_clear 1 -> 0, deck_grade 7 -> 8 (new: "Road Flyover" 8.1% at (31584, 45624), just over 8%),
+mouthsim 0 failed of 11,568 (+4 mouths: the trimmed forks); width_wobble / pave_width_jump / pave_step / seam_step /
+overlap / median_cross 0, centre_fold 1, mouth_short real 3, mouth_over real 1, stack_paint 8 (paint): unchanged.
+Builder QA (Studio, new `YangonRoads.qaBuilt`, Kun Chan box +-170, 0.5 grid): box_hole 8, kerb_gap 54, road_step 28,
+pave_step 48, buried 4; corner_in_road: 21 corners dropped over the test pack's 474 roads, 0 built in a road.
+- **Item 1 Kun Chan x Gyophyu:** `roads05_fix.fork_trim` (before the mouths): records joining one host end within its
+  half + 3 = a fork; the widest carries on, a record lying inside it is cut back to its last sample 2 inside it and
+  starts as a MOUTH on it. 5 forks: Lane #3414 on Kun Chan Road #3 (3 samples), Lane #679, #1428, #274, #2956.
+  `roads05_qa.cont_pairs` ties go to the wider record. Gore cracks / pavement steps: NOT fixed. What qaBuilt shows
+  there: pave_step = single thin pavement wedges 0.29-0.41 under their neighbours (e.g. Kun Chan Road #4 (36194, 42585)
+  top 34.01 vs 34.30; Gyophyu (36256, 42477) 33.42 vs 33.83): clipped zone pieces whose edge points are pinned to the
+  bigger road's surface (Roads.luau edge pin / relax), not corner pieces. `pave_step` network-wide in Python still
+  measures record joints only (0); the built check exists only in Studio (qaBuilt) per test spot: run it on all 16.
+- **Item 2 taper (builder):** a corner arc shorter than `TAPER_MIN` 20 keeps the wider walk on the whole arc and lays
+  a taper strip behind the narrower straight pavement from the arc's walk down to its own over 20 studs (`buildCorners`,
+  corner `wA0` / `wB0`). Not seen in a shot (no short-arc walk change in the Kun Chan box).
+- **Item 3 downtown walks:** walk_match first widens a joint to the wider walk where the narrower record's building
+  line (downtown_walks' 10th percentile, `data._room`) allows it, then narrows as before: widened 0, narrowed 98. The
+  98 wider downtown sides did NOT survive; their building lines are closer than the wider walk on nearly every one
+  (e.g. Seik Kan Tha Street (Middle Block) L 22.5 room 5.3), the narrow partners are mostly lanes with no building data.
+- **Item 4 kerb_cross 12 -> 2:** kerbsim now knows the crossing boxes (J19 crossMouths: no kerb of either road on the
+  other inside max halves + 16 of a crossing): 10 were crossings already done. Left: Lane #2945 on Bayint Naung Road #11
+  (a loop lane "kissing" the road at the Bayint Naung Road Flyover's foot, (52601, 18639): the crossing step rejects it
+  because the touch is on the cut / deck foot); Lane #679 on Bo Min Gaung Street (now a mouth after fork_trim).
+- **Item 5 block 2:** rules exist only as `qaBuilt` (built surface, per Studio spot): box_hole, kerb_gap (= fillet_no_kerb
+  / flare_kerb_gap / corner_pave_gap / road_gap edges), road_step, pave_step, buried. Not 0. kerb_gap at
+  (36180-36196, 42584-42608) is where the Gyophyu x Kun Chan #4 crossing corner was dropped (its arc lay on Gyophyu).
+- **Item 6 Pinlon Road Flyover:** `roads05_fix.water_cc`: a water / rail AREA asks its clearance at the middle of each
+  run of deck samples over it (deck_regrade and QA deck_clear); the soft top goes over the highest need. Pinlon now
+  regrades (7.8%, not "short / kept"), deck_clear 0. NOT checked on the satellite.
+- **ADD (owner, "random pavements in the middle", ref `Owner ref - random pavement in junction by Yangon Central.webp`):**
+  `findCorners` drops a corner whose kerb arc / pavement (4 radii x 15 steps) is 0.5 inside any carriageway (the
+  corner's own two roads: 2 inside; roads > 4 studs above / below skipped) or in a gore fill (`M.cornerInRoad`, list
+  `M.cornerInRoadList`). Scrub second pass: probes from a wedge's triangle centroid; a kerb / pavement within 1.5 of a
+  fill goes; tiny cut-off triangles (< 0.3 sq studs) with no whole piece of their kind within 1.5 go (the island tip
+  by the zebra). Studio: the floating arc and the tip are gone; a box_hole (36276, 42538) opens where the tip stood.
+  Dropping a corner leaves its two kerb ends square (kerb_gap): next, close them with a plain asphalt fillet.
+- Shots: `City Legends/2026-11-18 roads05 J20 geo - Kun Chan x Gyophyu overview.jpg`, `... close-up.jpg`, `... driver.jpg`,
+  `... driver (before stub scrub).jpg`. Studio: main "City Legends", scratch cleaned, saved (version 1202), lock
+  released; asset 133014134133489 = the J20 test pack.
+- **Next:** root of the pavement steps (pinned edges vs clipped pieces); kerb_gap where corners are dropped; qaBuilt over
+  all 16 spots (and a network-wide built pave_step); kerb_cross 2; Road Flyover grade 8.1%; Pinlon on the satellite.
+
 # roads05 handover (18 Nov 2026, fifteenth pass: J19, GEOMETRY agent; DATA + BUILDER + QA + Studio; stopped: context)
 
 ## J19 geometry -- counts J18 -> J19 (full net, `J19_qa.log`; `J19a_qa.log` = item 1 alone)
