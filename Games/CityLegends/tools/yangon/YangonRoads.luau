@@ -4617,6 +4617,7 @@ end
 --   pave_step    two neighbouring pavement cells more than STEP apart (corner vs straight, inside a road)
 --   buried       a kerb top under 0.3 over the asphalt next to it (a buried edge)
 -- returns counts and the first few spots (x, z) of each
+local TOP_ORDER = { Kerb = 1, Pavement = 2, Road = 3 }
 function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: number, g: number?, yTop: number?, margin: number?)
 	local G = g or 0.5
 	-- (J21) the test cell is clipped at its box (roads end square there) and decks of the subset end in the air: cells
@@ -4649,6 +4650,26 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 					break
 				end
 				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.003 * t, Y0, z0 + j * G + 0.002 * t), Vector3.new(0, -Y0 - 500, 0), P) or r
+			end
+			-- (J28, owner "0 everywhere": the same build counted ±1-3 per spot from run to run. Two tops in one plane
+			-- (an overlap) gave whichever part the engine's tree returned first: the top here is every part within 0.01
+			-- of the first hit, the one taken by a fixed order (Kerb, Pavement, Road, other), so a count is repeatable)
+			if r and r.Normal.Y >= 0.5 then
+				local ex = { r.Instance }
+				for _ = 1, 3 do
+					local P2 = RaycastParams.new()
+					P2.FilterType = Enum.RaycastFilterType.Exclude
+					P2.FilterDescendantsInstances = ex
+					local o = r.Position + Vector3.new(0, 0.011, 0)
+					local r2 = workspace:Raycast(o, Vector3.new(0, -0.022, 0), P2)
+					if not (r2 and r2.Normal.Y >= 0.5 and r2.Instance:IsDescendantOf(root)) then
+						break
+					end
+					if (TOP_ORDER[r2.Instance.Name] or 9) < (TOP_ORDER[r.Instance.Name] or 9) then
+						r = r2
+					end
+					table.insert(ex, r2.Instance)
+				end
 			end
 			local k = i * (nz + 1) + j
 			if r and r.Normal.Y < 0.5 then

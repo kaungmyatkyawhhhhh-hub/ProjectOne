@@ -1258,6 +1258,26 @@ def deck_fair(data):
     return out
 
 
+def deck_feet(data):
+    """(J28, Gyophyu ramp foot west: deck_smooth / deck_fair move a deck's plan up to ~5 studs, its road's cut samples kept
+    the OSM line, so a crossing arm's mouth by the foot (cut on the road's own edge) stood 1-1.5 off the ramp wall: a slit,
+    no kerb, a dip) the road's cut stretch takes the deck's plan (x, z, direction); heights stay (nothing is built there)."""
+    R = {r['name']: r for r in data['roads']}
+    moved = 0
+    for d in data['decks']:
+        r = R.get(d.get('of'))
+        if r is None or d.get('from') is None:
+            continue
+        for j, q in enumerate(d['s']):
+            i = d['from'] + j
+            if i < len(r['s']):
+                s = r['s'][i]
+                if abs(s[0] - q[0]) + abs(s[2] - q[2]) > 0.01:
+                    moved += 1
+                s[0], s[2], s[3], s[4] = q[0], q[2], q[3], q[4]
+    return moved
+
+
 def deck_recap(data, QA_MAX=DECK_MAX + 0.001):
     """(J21, "Road Flyover" 8.1%) deck_fair's sideways moves shorten the plan spacing a few % (7.85 -> 7.59 studs), so a
     ramp regraded at DECK_MAX on the old chainage ends just over QA's 8%. A deck now over QA_MAX (DECK_MAX + 0.1%: QA rounds
@@ -2036,6 +2056,7 @@ def main():
     chained['deck_smooth'] = deck_smooth(data)
     chained['deck_regrade'] = deck_regrade(data)  # (J15) last: on the final plan's chainage
     chained['deck_fair'] = deck_fair(data)  # (J16) deck_wobble
+    chained['deck_feet'] = deck_feet(data)  # (J28) the road's cut stretch follows its deck's plan
     chained['fork_trim'] = fork_trim(data)  # (J20) before the mouths: a trimmed fork record is a mouth now
     print('chain', json.dumps(chained))
     roads = data['roads']

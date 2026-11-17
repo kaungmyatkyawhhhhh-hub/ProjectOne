@@ -1,3 +1,31 @@
+# roads05 handover (18 Nov 2026, twenty-fourth pass: J28, GEOMETRY agent; BUILDER (Roads.luau, Yangon path) + DATA (fix deck_feet) + Studio 17 spots)
+
+## J28 -- built-surface totals J27 -> J28 (17 spots): 63 / 385 / 58 / 102 / 7 -> 57 / 364 / 40 / 101 / 7
+Note + table + 2 shots: vault `City Legends/2026-11-18 roads05 J28 studio check.md`. Studio: main "City Legends", test re-packed FIRST
+(asset 133014134133489 revision 200 = J28 roads.json + current builder), ClaudeTools.Roads 1407280218 / YangonRoads 1416678337 (= repo),
+scratch cleaned, version 1274, lock released to the QA agent. **Owner decision (coordinator): "0 everywhere"**: the game roads are rebuilt
+only when every built-surface count at all 17 spots and every QA rule is 0.
+- **Inner cross-section pins (item 1, Roads.luau, `finalEdges` = edgeSurface only, Monaco unchanged):** a cross-section with a pinned edge
+  or in a junction (`inJunction`) pins its 7 inner eighths to `bigSurface(..., HALF - 0.5, wide)` minus `PIN_UNDER` 0.06 (the bigger
+  road's face shows, never two faces in one plane); strips = 8 there; `finalEdges[ri].C` keeps the SHOWN heights and bigSurface's
+  `across` reads them. pyay_univ road_step 27 -> 8 (Insein Road's start over Pyay (Prome) end / Pyay Road #9 / Hledan Road #3).
+  Tried + changed: exact pins (no PIN_UNDER) raised Hledan #3 to Insein's straight line and added coplanar cells (6,430 -> 7,263);
+  with PIN_UNDER + inJunction: 5,781 (different-road coplanar cells within 45 of (27020, 27855), probe = second cast excluding the hit).
+- **deck_feet (item 2, roads05_fix.py, after deck_fair):** the road's cut stretch takes its deck's plan (x, z, dir; heights kept): deck_smooth
+  / deck_fair had moved Gyophyu Road Flyover up to 1.3 here (5 max), so the crossing arm by the ramp foot stood 1-1.5 off the ramp wall.
+  3,776 samples moved, mouthsim 0 failed of 11,569. kunchan_gyophyu 3 / 42 -> 1 / 28. Studio test: patching Y.data in memory does NOT
+  reach the arm mouths (crossMouths / findCorners run in Y.load): data changes need the fix + re-pack.
+- **Deterministic check (owner):** `qaBuilt` takes every top within 0.01 of the first hit (exclude-and-recast, up to 3) and keeps one by
+  TOP_ORDER Kerb < Pavement < Road < other. The ±1-3 noise was the engine returning either of two coplanar parts. Same build twice:
+  kunchan_gyophyu 3/42/2/15/0 twice, double_junction 12/86/1/23/2 twice. The QA agent owns the census now (`T.qa` in Roads05StudioTest).
+- **Pipeline:** `J28a_fix.log` / `J28a_mouthsim.log`, then paint / QA / paint QA as `J28_*.log` (see the version line). roads_J27.json = backup.
+- **Next (in order, findings in the note):** (3) double_junction kerb_gap 86 / box_hole 12: corner-arc kerb chords leave 1-stud slits
+  against the next road's edge ((39930, 32838), (39941, 32839)); (5) Bahan: 15 "None between pavements" slots ((35387, 37898), (35406,
+  38080), (35470, 38138)), not counted by qaBuilt; (6) overlaps: Yawmingyi corner wedge on a straight block (34552, 42646); Hledan Road #3
+  (smaller) laid through the Insein / Pyay junction within 0.05 of them (should have no slab there, like a crossing arm); Kun Chan #3
+  kerb pairs not re-traced; (7) slip_triangle buried 3 (Lane #15's kerb edge unpinned, carriageway 1 in pinned 0.25 higher to
+  Waizayandar), univ_kabaraye pave_step 6 (island (34396-34402, 28831-28837): Lane #1248 / Hledan #3 / Islands pavements 0.2-0.3 apart).
+
 # roads05 handover (18 Nov 2026, twenty-third pass: J27, GEOMETRY agent; BUILDER (Roads.luau, Yangon path) + paint QA + Studio 17 spots)
 
 ## J27 -- built-surface totals J26 -> J27 (17 spots): 67 / 394 / 107 / 110 / 5 -> 63 / 385 / 58 / 102 / 7

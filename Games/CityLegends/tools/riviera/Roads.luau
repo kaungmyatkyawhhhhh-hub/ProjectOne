@@ -130,6 +130,7 @@ end
 -- (Yangon 2026-11-13) the widest road's half width over HALF: how much further "near" can reach
 local maxDh = 0
 local maxW = 0 -- (widest sample side - HALF, for otherNear's `wide`)
+local PIN_UNDER = 0.06 -- (J28: an inner cross-section point pinned to a bigger road sits this far under its face)
 
 -- the part of a polygon outside a zone (inside(p) -> boolean): every corner outside comes back as it
 -- is, and each side that crosses the zone's edge is cut on the edge (found by halving).
@@ -368,6 +369,21 @@ local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number,
 		local L, R = L0:Lerp(L1, t), R0:Lerp(R1, t)
 		local w = Vector2.new(R.X - L.X, R.Z - L.Z)
 		local s = math.clamp(Vector2.new(pos.X - L.X, pos.Z - L.Z):Dot(w) / math.max(w:Dot(w), 1e-9), 0, 1)
+		-- (J28: a cross-section with pinned inner points (fe.C) is not straight)
+		local C = fe.C
+		local function hx(k: number, Lk: Vector3, Rk: Vector3): number
+			local c = C and C[k]
+			if not c then
+				return Lk.Y + (Rk.Y - Lk.Y) * s
+			end
+			local u = math.clamp(math.floor(s * 8), 0, 7)
+			local ya = if u == 0 then Lk.Y else c[u]
+			local yb = if u == 7 then Rk.Y else c[u + 1]
+			return ya + (yb - ya) * (s * 8 - u)
+		end
+		if C and (C[k0] or C[k1]) then
+			return hx(k0, L0, R0) + (hx(k1, L1, R1) - hx(k0, L0, R0)) * t
+		end
 		return L.Y + (R.Y - L.Y) * s
 	end
 	for _, pair in { { best - 1, best }, { best, best + 1 } } do
@@ -776,6 +792,33 @@ function Roads.build(data, opts)
 		if finalEdges then
 			finalEdges[ri] = { L = edgeL, R = edgeR }
 		end
+		-- (Yangon J28, pyay_univ: Insein Road starts on Pyay (Prome) Road's end with Pyay Road #9 beside it, 48.37 /
+		-- 48.4-49.2; its first cross-section was one straight line from edge to edge, 0.2-0.4 over the middle road: a
+		-- step along the whole join) a cross-section with a pinned edge pins its inner points too, each just under
+		-- the bigger road it lies on (PIN_UNDER: that road's face shows, no two faces in one plane; eighths across;
+		-- nil = straight as before). finalEdges keeps the shown heights (the bigger road's) for smaller roads' pins
+		local crossY, shownY = {}, {}
+		if finalEdges then
+			for i = 1, n do
+				-- (also any cross-section in a junction: its inner points on a bigger road's carriageway lay a second
+				-- face within 0.05 of that road's, which flickers: 6,430 such cells at pyay_univ)
+				if pinL[i] or pinR[i] or inJunction[i] then
+					local ys, vis, any = {}, {}, false
+					for k = 1, 7 do
+						local p = edgeL[i]:Lerp(edgeR[i], k / 8)
+						local y = bigSurface(roads, grid, p, ri, r.rank, HALF - 0.5, true)
+						if y and math.abs(y - p.Y) < 1.5 then
+							ys[k], vis[k], any = y - PIN_UNDER, y, true
+						else
+							ys[k], vis[k] = p.Y, p.Y
+						end
+					end
+					crossY[i] = if any then ys else nil
+					shownY[i] = if any then vis else nil
+				end
+			end
+			finalEdges[ri].C = shownY
+		end
 		if opts.debug or opts.keepEdges then
 			Roads.debugEdges = Roads.debugEdges or {}
 			Roads.debugEdges[r.name] = { L = edgeL, R = edgeR, waitL = waitL, waitR = waitR, pinL = pinL, pinR = pinR }
@@ -853,10 +896,19 @@ function Roads.build(data, opts)
 				if noSlab and noSlab[i] then
 					strips = 0
 				end
+				local ca, cb = crossY[i], crossY[i + 1]
+				if (ca or cb) and strips > 0 then
+					strips = 8 -- (J28: on the pinned eighths)
+				end
+				local function at(e0: Vector3, e1: Vector3, cy, t: number, k: number): Vector3
+					local p = e0:Lerp(e1, t)
+					local y = cy and cy[k]
+					return if y then Vector3.new(p.X, y, p.Z) else p
+				end
 				for k = 0, strips - 1 do
 					local t0, t1 = k / strips, (k + 1) / strips
-					local pa0, pa1 = la:Lerp(rra, t0), la:Lerp(rra, t1)
-					local pb0, pb1 = lb:Lerp(rrb, t0), lb:Lerp(rrb, t1)
+					local pa0, pa1 = at(la, rra, ca, t0, k), at(la, rra, ca, t1, k + 1)
+					local pb0, pb1 = at(lb, rrb, cb, t0, k), at(lb, rrb, cb, t1, k + 1)
 					count += triangle(pa0, pa1, pb1, SLAB, props, folder)
 					count += triangle(pa0, pb1, pb0, SLAB, props, folder)
 				end
