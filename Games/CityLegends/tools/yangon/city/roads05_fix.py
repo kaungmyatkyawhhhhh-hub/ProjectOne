@@ -1497,7 +1497,8 @@ def corner_radii(data):
         return 0
     n = 0
     for r in data['roads']:
-        if r.get('hw') in CORNER_HW and r['kind'] == 'route' and any(area.contains(Point(q[0], q[2])) for q in r['s'][::4]):
+        # (a slip road counts too: the Sule Shangri-La corner is Sule Pagoda Road #5, a primary_link, on Bogyoke)
+        if (r.get('hw') or '').split('_')[0] in CORNER_HW and r['kind'] in ('route', 'street') and any(area.contains(Point(q[0], q[2])) for q in r['s'][::4]):
             r['cornerR'] = CORNER_R_DT
             n += 1
     return n

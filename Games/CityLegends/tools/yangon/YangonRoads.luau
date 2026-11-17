@@ -228,7 +228,7 @@ function M.load()
 			-- median half where divided, laneW; per sample s[9] built median half, s[10] lanes a side, s[11]
 			-- lane width, s[12] the lanes' median half. All nil before v5)
 			lanes = r.lanes, median = r.median, laneW = r.laneW, lanesV5 = r.s[1] ~= nil and r.s[1][10] ~= nil,
-			medianStyle = r.medianStyle }
+			medianStyle = r.medianStyle, cornerR = r.cornerR }
 		M.R[r.name] = o
 		M.list[ri] = o
 	end
