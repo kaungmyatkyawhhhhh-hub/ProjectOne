@@ -21,6 +21,7 @@ def main():
     d['decks'] = [k for k in d['decks'] if k['of'] in names]
     d['roundabouts'] = [g for g in d['roundabouts'] if any(math.hypot(g['c'][0] - x, g['c'][2] - z) < REACH + g['r_out'] for x, z in pts)]
     d['driveways'] = [w for w in d.get('driveways', []) if any(math.hypot(w['x'] - x, w['z'] - z) < REACH for x, z in pts)]
+    d['islands'] = [i for i in d.get('islands', []) if any(math.hypot(i[0][0] - x, i[0][2] - z) < REACH for x, z in pts)]
     os.makedirs(out, exist_ok=True)
     for f in os.listdir(out):
         if f.startswith('Roads05_'):

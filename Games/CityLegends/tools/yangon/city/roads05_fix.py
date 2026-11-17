@@ -25,6 +25,66 @@ MED_GAP = 6.0
 CHUNK = 185000
 
 
+ISLAND_MAX = 2500.0  # studs^2: a traffic island (real ones are paved concrete: Pyay x University Ave, satellite)
+
+
+def islands(data):
+    """(J9) Small traffic islands (a hole in the union of every carriageway and ring, under ISLAND_MAX) that the
+    kerb + pavement bands round them do not cover were left unpaved (ground showed). Each such island goes to the
+    builder as its kerb-line outline: [x, y, z, walk of the edge from this point to the next]; YangonRoads.buildIslands
+    paves what is left inside the bands and the round corners (exactly, nothing on top of them)."""
+    cutd = {k: set(v) for k, v in data['cut'].items()}
+    polys, owner = [], []
+    for r in data['roads']:
+        g = unary_union(quads(r['s'], cutd.get(r['name'], ())))
+        if not g.is_empty:
+            polys.append(g)
+            owner.append(r)
+    for g in data['roundabouts']:
+        rv = g['r_out'] / math.cos(math.pi / 96)
+        polys.append(Polygon([(g['c'][0] + rv * math.cos(2 * math.pi * j / 96), g['c'][2] + rv * math.sin(2 * math.pi * j / 96)) for j in range(96)]))
+        owner.append(g)
+    allg = unary_union(polys)
+    tree = STRtree(polys)
+    out = []
+    for poly in getattr(allg, 'geoms', [allg]):
+        for ring in poly.interiors:
+            H = Polygon(ring)
+            if H.area >= ISLAND_MAX or H.area < 4:
+                continue
+            pts = list(Polygon(ring).simplify(0.15).exterior.coords)[:-1]
+            if len(pts) < 3:
+                continue
+            rows, wmin = [], 99.0
+            for k, (x, z) in enumerate(pts):
+                x2, z2 = pts[(k + 1) % len(pts)]
+                mid = Point((x + x2) / 2, (z + z2) / 2)
+                best, bo = 1e9, None
+                for i in tree.query(mid.buffer(1.0)):
+                    d = polys[i].distance(mid)
+                    if d < best:
+                        best, bo = d, owner[i]
+                if bo is None:
+                    rows = None
+                    break
+                if 'r_out' in bo:
+                    walk, y = RING_WALK, bo['c'][1]
+                else:
+                    s = bo['s']
+                    j = min(range(len(s)), key=lambda j: (s[j][0] - mid.x) ** 2 + (s[j][2] - mid.y) ** 2)
+                    q = s[j]
+                    right = (-q[4]) * (mid.x - q[0]) + q[3] * (mid.y - q[2]) > 0
+                    walk = (bo.get('walkR') if right else bo.get('walkL')) or RING_WALK
+                    y = q[1]
+                wmin = min(wmin, walk)
+                rows.append([round(x, 2), round(y, 3), round(z, 2), walk])
+            # only an island the bands leave open
+            if rows and not H.buffer(-wmin - 0.3).is_empty:
+                out.append(rows)
+    data['islands'] = out
+    return len(out)
+
+
 def check(data):
     """what YangonRoads.load needs, or it errors (17 Nov: a 3-sample leftover by Sule's ring ran its arm loop off the
     road): unique names / ranks, decks and cuts inside their roads, every ring arm reaching past R_OUT + FLAT (12).
@@ -120,6 +180,32 @@ def ring_clear(data):
 MORPH = 40.0
 
 
+RING_RAMP = 100.0
+
+
+def ring_level(data):
+    """(J9, Sule) the ring is flat at c.y, but its arms reached it up to 4.8 studs higher or lower (the DEM round the
+    pagoda): a step at the ring's edge. Every road sample within r_out + 4 + RING_RAMP of a ring eases to c.y: the
+    gap to c.y scales by (rad - r_out - 4) / RING_RAMP (0 at the ring, whole at the ramp's end). Roads sharing a
+    junction sample share its height before, so they still do. Raised samples (12+ over the ring: decks) stay."""
+    out = []
+    for g in data['roundabouts']:
+        cx, cy, cz, ro = g['c'][0], g['c'][1], g['c'][2], g['r_out']
+        worst = 0.0
+        for r in data['roads']:
+            for q in r['s']:
+                rad = math.hypot(q[0] - cx, q[2] - cz)
+                if rad >= ro + 4 + RING_RAMP or q[1] - cy > 12:
+                    continue
+                w = min(1.0, max(0.0, (rad - ro - 4) / RING_RAMP))
+                ny = round(cy + (q[1] - cy) * w, 3)
+                worst = max(worst, abs(ny - q[1]))
+                q[1] = ny
+        if worst > 0.05:
+            out.append(dict(ring=g['name'], max_change=round(worst, 2)))
+    return out
+
+
 def butt_match(data):
     """A continuation (startsOnEnd / endsOnEnd) narrower than, or off-centre from, its host's end left a strip of the
     host's end line with no slab on the far side (the Bogyoke x Pazundaung Y: Upper Pazundaung #3 is 63 wide, Lower
@@ -194,6 +280,7 @@ def main():
     chained['absorb'] = roads05_absorb.absorb(data)
     chained['duplicates_dropped'] = drop_dups(data)
     chained['ring_clear'] = ring_clear(data)
+    chained['ring_level'] = ring_level(data)
     print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}
@@ -343,6 +430,8 @@ def main():
         for i in clear:
             s[i][8] = 0
         st['median_samples_cleared'] += len(clear)
+    st['islands'] = islands(data)
+    print('islands', st['islands'])
     st['checks'] = check(data)
     txt = json.dumps(data, separators=(',', ':'))
     open(os.path.join(D, 'roads.json'), 'w', encoding='utf-8').write(txt)

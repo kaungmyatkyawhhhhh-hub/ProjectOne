@@ -1,4 +1,46 @@
-# roads05 handover (17 Nov 2026, fourth pass: J8)
+# roads05 handover (18 Nov 2026, fifth pass: J9)
+
+## J9 (this pass)
+- `YangonRoads.luau`:
+  - `sectors()`: two arms overlapping at the ring (Hanthawaddy Road + Road #2, one-way, 8 studs on top of each other)
+    gave a stretch b0 < a0 that the old wrap turned into 352 degrees of ring kerb / pavement over every arm (scrub
+    hid most of it: the "kerb points"). Each end is now taken next to its own arm's centre; overlapping arms = empty.
+  - corners: a corner whose P lies on a third road's carriageway is dropped (that wedge is asphalt); a mouth keeps
+    the corner on its good side when the other side's edge never meets the kerb (was: both dropped); cornerSpan per
+    side (missing side = the arm's own edge angle); ring corners get r >= `CORNER_R_MIN` 3 by a longer T (<= 48).
+  - corner pavement tapers from this road's walk at TA to the other road's at TB (streets are 4, the arc was 7.5).
+  - `buildIslands()` (stepCell + step 5, after buildCorners): paves `data.islands` exactly inside the bands and
+    the corners' inner curves (folder `Islands`).
+- `roads05_fix.py`: `ring_level` (every sample within r_out + 4 + 100 eases to the ring's height: Sule's arms were
+  up to 4.99 studs off, R1 2.4, R2 2.7, Hanthawaddy 1.7, R11 2.0: steps at the ring edge) and `islands` (181 small
+  holes in the carriageway union, < 2,500 studs^2, that the bands leave open: kerb-line outline + each edge's walk).
+  `roads05_jsubset.py` copies the islands near the junctions. Backup of the J8 data: `roads_J8.json`, `qa_J8.json`.
+  mouthsim 0 failed (218 joins in the test subset, 0 network-wide after repair).
+- Studio J9 (same 7 junctions, no-terrain copy, lifted 400; saved v1166, "Saved new changes" 00:08:44Z, lock released,
+  no data modules / scratch / scraps left; ClaudeTools.YangonRoads = repo, checksum 412598751).
+  Shots `City Legends/2026-11-18 roads05 J9 test - *.jpg`. 0 MOUTH FAILED everywhere.
+  - PASS: University Ave x Kabar Aye (3 islands paved); Hanthawaddy (points gone); Bogyoke x Pazundaung Y.
+  - Pyay x University: islands paved; LEFT: a pavement gap where a slip's corner (Lane #468 on Hledan #3, r 6.2)
+    meets the straight band, a small square hole in an island fill near its kerb, faint step lines inside fills
+    (fill height = the sample's y; bands follow the builder's edge heights).
+  - Waizayandar x Lay Daungkan: islands paved but with holes / dark marks (same causes).
+  - Sule: west side (32nd Street runs 12-20 studs off the ring; Maha Bandula #2, Lane #2533, Lane #4568 join the
+    ring there): a kerbed scrap island and broken slips. Not looked at after ring_level in close-up.
+  - Bahan at Roundabout 1: island nose still notched: Lane #4701's gore edge meets Bahan Road only inside Bahan's
+    ring cut (samples 1-7), so that side gets no corner; it needs a nose against the ring / a gore cap.
+- NOT done: QA rows (kerb_cross 22, mouth_short 46, mouth_over 38, median_cross 1), deck_grade 24, deck_foot 1.
+  Plan is NOT ready for owner approval.
+
+## Next (in order)
+1. Pyay / slip triangle: the band gap at a slip corner (why does Lane #468's band stop short of TA? the band's
+   pieces are cut by sideZone into hundreds of 0.2-stud bits there); fill heights from the builder's edge heights
+   (`M.Roads.debugEdges`) instead of the sample y; find what makes the square hole (an island vertex that cornerOf
+   misses, so its mitre point lands on the corner pavement).
+2. Bahan nose: a gore cap where a slip's edge meets the big road only in its ring cut.
+3. Sule west: close-up after ring_level; 32nd Street vs the ring band.
+4. QA rows, deck_grade / deck_foot (untouched since J7).
+
+# (J8 pass below)
 
 ## J8 (this pass)
 - `roads05_fix.py`: `ring_clear` (Lane #4701 pushed out 6.7 studs at most by Roundabout 1, so its inner kerb clears the ring's

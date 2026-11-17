@@ -898,6 +898,8 @@ end
 -- before P: a narrow nose (the New Road fork) gets a small r, a wide elbow a big one.
 M.CORNER_T = 16 -- studs from P to where the curve starts, road on road...
 M.CORNER_T_RING = 22 -- ...and on the roundabout
+M.CORNER_R_MIN = 3 -- (J9) a ring corner's smallest radius...
+M.CORNER_T_MAX = 48 -- ...reached by a longer T, at most this
 M.corners = {}
 
 -- the foot of a point on a polyline { {x, z, i = index, f = fraction}... } (open): (distance, x, z, segment, t)
@@ -978,14 +980,25 @@ function M.findCorners()
 			end
 			local px, pz, ka, ta, kb, tb = crossOf(ePts, bPts)
 			if not px then
-				-- (1:1: an edge that never meets the other kerb gets no round corner, the mouth stays square)
-				sideP = nil
+				-- (1:1: an edge that never meets the other kerb gets no round corner, that side stays square;
+				-- 18 Nov, J9 Bahan: the other side still gets its own, it was dropped too)
 				M.noCorner = (M.noCorner or 0) + 1
-				break
+				continue
 			end
-			sideP[side] = { px = px, pz = pz, ePts = ePts, bPts = bPts, ka = ka, ta = ta, kb = kb, tb = tb, sb = sb }
+			-- (18 Nov, J9 Hanthawaddy: two one-way arms overlapping at the ring; a corner whose P lies on a third
+			-- road's carriageway rounds a wedge that is asphalt: that side gets none)
+			local inside = false
+			for oi, b in M.near(px, pz, 3) do
+				local o = M.list[oi]
+				if o.name ~= m.road and o ~= m.big and not M.cut[o.name][b[2]] and polyDist(o, b[2], px, pz) < M.halfAt(o, b[2]) - 0.5 then
+					inside = true
+				end
+			end
+			if not inside then
+				sideP[side] = { px = px, pz = pz, ePts = ePts, bPts = bPts, ka = ka, ta = ta, kb = kb, tb = tb, sb = sb }
+			end
 		end
-		pass[mi] = sideP
+		pass[mi] = if sideP[-1] or sideP[1] then sideP else nil
 	end
 	-- (review, 13 Nov) every corner starts about T studs from its P. Where another junction's corner point
 	-- is closer than 2 T + 4 along the same kerb, both corners would overlap: T shrinks to 0.45 of the gap.
@@ -993,9 +1006,11 @@ function M.findCorners()
 	local allP = {}
 	for mi, sideP in pass do
 		for _, side in { -1, 1 } do
-			local key = math.floor(sideP[side].px / 48) .. "," .. math.floor(sideP[side].pz / 48)
-			allP[key] = allP[key] or {}
-			table.insert(allP[key], { mi = mi, px = sideP[side].px, pz = sideP[side].pz })
+			if sideP[side] then
+				local key = math.floor(sideP[side].px / 48) .. "," .. math.floor(sideP[side].pz / 48)
+				allP[key] = allP[key] or {}
+				table.insert(allP[key], { mi = mi, px = sideP[side].px, pz = sideP[side].pz })
+			end
 		end
 	end
 	for mi, m in M.mouths do
@@ -1009,7 +1024,11 @@ function M.findCorners()
 		local S = M.R[m.road]
 		for _, side in { -1, 1 } do
 			local c = sideP[side]
-			local other = sideP[-side]
+			if not c then
+				continue
+			end
+			-- (no corner on the other side: the road's own centre at its end orients the ring / kerb ray)
+			local other = sideP[-side] or { px = S.s[m.k][1], pz = S.s[m.k][3] }
 			-- the two rays of the pavement wedge: along this road away from the other, along the other
 			-- road's kerb away from this road's other corner
 			local e1, e2 = c.ePts[c.ka], c.ePts[c.ka + 1]
@@ -1025,6 +1044,11 @@ function M.findCorners()
 			end
 			local theta = math.acos(math.clamp(ux * vx + uz * vz, -1, 1))
 			local T = if m.ring then M.CORNER_T_RING else M.CORNER_T
+			-- (18 Nov, J9: a ring arm meeting the ring at a shallow angle got a 1.6-stud corner, a kerb point;
+			-- T grows until r reaches CORNER_R_MIN, never past the edge samples the corner can see)
+			if m.ring and T * math.tan(theta / 2) < M.CORNER_R_MIN then
+				T = math.max(T, math.min(M.CORNER_R_MIN / math.tan(theta / 2), M.CORNER_T_MAX))
+			end
 			local gx, gz = math.floor(c.px / 48), math.floor(c.pz / 48)
 			for dx = -1, 1 do
 				for dz = -1, 1 do
@@ -1063,12 +1087,17 @@ function M.findCorners()
 			if ((aP - aA) % TAU) > sweep then
 				sweep -= TAU
 			end
+			-- (18 Nov, J9 "pavement breaks": the arc's pavement was M.WALK wide while a street's own band is 4: a step
+			-- at TA / TB. It now runs from this road's walk at TA to the other road's at TB.)
+			local wA = (if side < 0 then S.walkL else S.walkR) or M.WALK
+			local wB = if m.ring then M.WALK else ((if c.sb < 0 then m.big.walkL else m.big.walkR) or M.WALK)
 			local corner = {
 				road = m.road, side = side, on = m.on, ring = m.ring, ringR = m.ringR, big = m.big, sb = c.sb,
 				r = r, theta = theta, ox = ox, oz = oz, px = c.px, pz = c.pz,
 				tax = tax, taz = taz, tbx = tbx, tbz = tbz, aA = aA, sweep = sweep,
 				ePts = c.ePts, bPts = c.bPts, ka = c.ka, ta = c.ta, kb = c.kb, tb = c.tb, sa = sa, sta = sta, sbb = sbb, stb = stb,
-				rin = math.max(r - M.WALK, 0) - 0.3, rout = hyp(c.px - ox, c.pz - oz) + M.WALK + 2, err = math.max(math.abs(dA - r), math.abs(dB - r)),
+				rin = math.max(r - math.max(wA, wB), 0) - 0.3, rout = hyp(c.px - ox, c.pz - oz) + M.WALK + 2, err = math.max(math.abs(dA - r), math.abs(dB - r)),
+				wA = wA, wB = wB,
 			}
 			table.insert(M.corners, corner)
 			-- (P3, 16 Nov: inCorner / ownedBy ran over every corner of the network for each piece; a 64-stud
@@ -1091,8 +1120,9 @@ function M.findCorners()
 				-- ring's kerb ran on under the corner)
 				M.useRing(m.ringR)
 				local key = m.road .. "@" .. m.i0
+				-- (18 Nov, J9: per side; a side with no corner keeps the arm's own edge angle)
 				M.cornerSpan[key] = M.cornerSpan[key] or {}
-				table.insert(M.cornerSpan[key], math.atan2(tbz - C.Z, tbx - C.X))
+				M.cornerSpan[key][side] = math.atan2(tbz - C.Z, tbx - C.X)
 			end
 		end
 	end
@@ -1258,7 +1288,6 @@ function M.buildCorners()
 		local len = math.abs(c.sweep) * c.r
 		local nb = math.max(1, math.floor(len / 3.2 + 0.5))
 		local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
-		local pIn = math.max(c.r - M.WALK, 0)
 		for q = 0, nb - 1 do
 			local u0, u1 = q / nb, (q + 1) / nb
 			local y0, y1 = yA + (yB - yA) * u0, yA + (yB - yA) * u1
@@ -1277,7 +1306,8 @@ function M.buildCorners()
 			end
 			if c.r - 0.85 > 0.05 then
 				local a0, a1 = pt(u0, c.r - 0.85, y0 + M.CURB_UP), pt(u1, c.r - 0.85, y1 + M.CURB_UP)
-				local b0, b1 = pt(u0, pIn, y0 + M.CURB_UP), pt(u1, pIn, y1 + M.CURB_UP)
+				local b0 = pt(u0, math.max(c.r - (c.wA + (c.wB - c.wA) * u0), 0), y0 + M.CURB_UP)
+				local b1 = pt(u1, math.max(c.r - (c.wA + (c.wB - c.wA) * u1), 0), y1 + M.CURB_UP)
 				for _, t in { { a0, a1, b1 }, { a0, b1, b0 } } do
 					if not M.Roads.sliver(t[1], t[2], t[3]) then
 						made += M.Roads.triangle(t[1], t[2], t[3], 6, pave, folder)
@@ -1289,6 +1319,122 @@ function M.buildCorners()
 		task.wait()
 	end
 	return string.format("corners: %d parts\n  %s", made, table.concat(lines, "\n  "))
+end
+
+-- (18 Nov, J9) small traffic islands (roads05_fix islands: kerb-line outlines with each edge's walk): the part the
+-- straight bands and the round corners leave open is paved, its edge exactly on theirs (nothing on top of them):
+-- each edge moved in by its own walk, each corner's run replaced by its pavement's inner curve
+function M.buildIslands()
+	local list = M.data and M.data.islands
+	if not list then
+		return "islands: none in the data"
+	end
+	local pal = M.palette
+	local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
+	local made, built, skipped = 0, 0, 0
+	local function cornerOf(x: number, z: number)
+		for _, c in cornersAt(x, z) do
+			if inWedge(c, x, z, c.r - 0.6, hyp(c.px - c.ox, c.pz - c.oz) + 0.6) then
+				return c
+			end
+		end
+		return nil
+	end
+	for _, isl in list do
+		local n = #isl
+		if n < 3 or not own(isl[1][1], isl[1][3]) then
+			continue
+		end
+		local area = 0
+		for i = 1, n do
+			local p, q = isl[i], isl[i % n + 1]
+			area += p[1] * q[3] - q[1] * p[3]
+		end
+		local sg = if area > 0 then 1 else -1
+		local s0 = nil
+		for i = 1, n do
+			if not cornerOf(isl[i][1], isl[i][3]) then
+				s0 = i
+				break
+			end
+		end
+		if not s0 then
+			skipped += 1
+			continue
+		end
+		-- an edge moved in by w: a point on it and its direction (inward = left on an anticlockwise outline)
+		local function off(a, b, w: number)
+			local dx, dz = b[1] - a[1], b[3] - a[3]
+			local L = math.max(hyp(dx, dz), 1e-6)
+			return a[1] - dz / L * sg * w, a[3] + dx / L * sg * w, dx / L, dz / L
+		end
+		local out = {}
+		local lastC = nil
+		for k = 0, n - 1 do
+			local i = (s0 - 1 + k) % n + 1
+			local v, pv, nv = isl[i], isl[(i - 2) % n + 1], isl[i % n + 1]
+			local c = cornerOf(v[1], v[3])
+			if c then
+				if c ~= lastC then
+					local fwd = hyp(pv[1] - c.tax, pv[3] - c.taz) <= hyp(pv[1] - c.tbx, pv[3] - c.tbz)
+					local nseg = math.max(4, math.ceil(math.abs(c.sweep) * c.r / 2))
+					for q = 0, nseg do
+						local u = if fwd then q / nseg else 1 - q / nseg
+						local x, z = arcPoint(c, u, math.max(c.r - (c.wA + (c.wB - c.wA) * u), 0))
+						table.insert(out, Vector3.new(x, v[2] + M.CURB_UP, z))
+					end
+				end
+			else
+				local ax, az, ux, uz = off(pv, v, pv[4])
+				local bx, bz, wx, wz = off(v, nv, v[4])
+				local den = ux * wz - uz * wx
+				local x, z
+				if math.abs(den) < 0.02 then
+					-- (nearly straight on: the two moved-in points at v, averaged)
+					x, z = (ax + (v[1] - pv[1]) + bx) / 2, (az + (v[3] - pv[3]) + bz) / 2
+				else
+					local tt = ((bx - ax) * wz - (bz - az) * wx) / den
+					x, z = ax + ux * tt, az + uz * tt
+				end
+				table.insert(out, Vector3.new(x, v[2] + M.CURB_UP, z))
+			end
+			lastC = c
+		end
+		local clean = {}
+		for _, p in out do
+			local last = clean[#clean]
+			if not last or hyp(p.X - last.X, p.Z - last.Z) > 0.05 then
+				table.insert(clean, p)
+			end
+		end
+		if #clean > 1 and hyp(clean[1].X - clean[#clean].X, clean[1].Z - clean[#clean].Z) <= 0.05 then
+			table.remove(clean)
+		end
+		local a2 = 0
+		for i = 1, #clean do
+			local p, q = clean[i], clean[i % #clean + 1]
+			a2 += p.X * q.Z - q.X * p.Z
+		end
+		-- (an island the bands cover whole turns inside out when moved in: nothing to pave)
+		if #clean < 3 or a2 * area <= 0 or math.abs(a2) < 2 then
+			skipped += 1
+			continue
+		end
+		local folder = M.folder():FindFirstChild("Islands")
+		if not folder then
+			local f = Instance.new("Folder")
+			f.Name = "Islands"
+			f.Parent = M.folder()
+			folder = f
+		end
+		for _, tr in earClip(clean) do
+			if not M.Roads.sliver(tr[1], tr[2], tr[3]) then
+				made += M.Roads.triangle(tr[1], tr[2], tr[3], 6, pave, folder)
+			end
+		end
+		built += 1
+	end
+	return string.format("islands: %d paved (%d parts), %d covered by their bands", built, made, skipped)
 end
 
 -- each round corner's solid edge line, 1.2 in from the kerb, joining the two roads' edge lines (after
@@ -1453,7 +1599,7 @@ function M.verge(names: { string })
 	-- inside each round corner: strips along the curve, like the strips along the roads (a round fill
 	-- came out up to a stud too high or too low)
 	for _, c in M.corners do
-		local inner = c.r - M.WALK
+		local inner = c.r - math.max(c.wA, c.wB)
 		if c.ring then
 			M.useRing(c.ringR)
 		end
@@ -1703,6 +1849,7 @@ function M.step3()
 	table.insert(log, M.mendCutEnds(M.MAIN))
 	task.wait()
 	table.insert(log, M.buildCorners())
+	table.insert(log, M.buildIslands())
 	task.wait()
 	table.insert(log, M.verge(M.MAIN))
 	task.wait()
@@ -2529,11 +2676,8 @@ local function armSpan(arm, rho: number): (number, number)
 	-- (an arm with round corners: the ring's kerb and pavement stop where the corners start, the same
 	-- angle at every radius, so their ends are square to the ring)
 	local span = M.cornerSpan and M.cornerSpan[arm.road .. "@" .. arm.i0]
-	if span and #span == 2 then
-		local a, b = near(span[1]), near(span[2])
-		return math.min(a, b), math.max(a, b)
-	end
-	local a, b = near(armAngle(arm, -1, rho)), near(armAngle(arm, 1, rho))
+	local a = near(span and span[-1] or armAngle(arm, -1, rho))
+	local b = near(span and span[1] or armAngle(arm, 1, rho))
 	return math.min(a, b), math.max(a, b)
 end
 
@@ -2550,15 +2694,20 @@ local function sectors(rho: number): { { number } }
 	end)
 	local out = {}
 	for p = 1, #arms do
+		local q = p % #arms + 1
 		local _, a0 = armSpan(arms[p], rho)
-		local b0 = armSpan(arms[p % #arms + 1], rho)
-		while b0 <= a0 do
-			b0 += TAU
+		local b0 = armSpan(arms[q], rho)
+		-- (18 Nov, J9 Hanthawaddy "kerb points at the arms": two one-way arms whose ends overlap at the ring had
+		-- b0 < a0, and the old wrap made that stretch run 352 degrees, over every other arm. Each end is taken
+		-- next to its own arm's centre; arms that overlap leave an empty stretch.)
+		local cp = armAngle(arms[p], 0, rho)
+		local cq = armAngle(arms[q], 0, rho)
+		while cq <= cp do
+			cq += TAU
 		end
-		while b0 - a0 > TAU do
-			b0 -= TAU
-		end
-		out[p] = { a0, b0 }
+		a0 += TAU * math.floor((cp - a0) / TAU + 0.5)
+		b0 += TAU * math.floor((cq - b0) / TAU + 0.5)
+		out[p] = { a0, math.max(a0, b0) }
 	end
 	return out
 end
@@ -3424,6 +3573,8 @@ function M.stepCell(box: { number }, root: Instance)
 	table.insert(log, M.mendCutEnds(names))
 	M.step("cell: buildCorners")
 	table.insert(log, "corners " .. tostring(M.buildCorners()))
+	M.step("cell: islands")
+	table.insert(log, M.buildIslands())
 	M.step("cell: verge")
 	table.insert(log, M.verge(names))
 	M.step("cell: roundabouts")
