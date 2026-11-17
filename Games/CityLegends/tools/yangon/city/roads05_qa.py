@@ -24,6 +24,9 @@ Friday-level junction checks (17 Nov, owner: kerbs lying diagonally across a jun
   zero_width    a sample with carriageway width under 2 studs
   overlap       two roads whose carriageways overlap far more than a crossing would (a doubled road)
   rank_dup      two roads with one rank
+  dual_dead_end (J25, owner paint 'median road dead end') a divided road (a built median within 60 studs of the end) ending
+                on nothing (a dead_end row) where OSM goes on: a kept OSM way within the road's width of the end reaches
+                30+ studs past it. Ends outside or within EDGE_NEAR of the districts' outline are the map edge, not counted.
 """
 import json, math, os, sys
 
@@ -307,6 +310,46 @@ def osm_mark(issues):
     issues['real'] = [real]
 
 
+EDGE_NEAR = 12.0   # (J25) a road end this close to the districts' outline is the map edge (fix trims ends a few studs)
+
+
+def dual_dead_end(data, issues, tree=None, geoms=None, names=None, rings=()):
+    """(J25) dead_end rows of divided roads where OSM goes on (see the header)"""
+    import roads05
+    reg = roads05.region_of(data['tags']) if data.get('tags') else None
+    region = reg.boundary if reg is not None else None
+    ways = [LineString([geo.world(*p) for p in w['p']]) for w in geo.load('roads') if roads05.keep_way(w, set())]
+    wt = STRtree(ways)
+    by = {r['name']: r for r in data['roads']}
+    for x in issues['dead_end']:
+        r = by[x['road']]
+        s = r['s'] if x['end'] == 'end' else r['s'][::-1]
+        e = s[-1]
+        L, i = 0.0, len(s) - 1
+        med = False
+        while i > 0 and L < 60:
+            med = med or s[i][8] > 0.3
+            L += math.hypot(s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2])
+            i -= 1
+        if not med:
+            continue
+        p = Point(e[0], e[2])
+        if region is not None and (region.distance(p) < EDGE_NEAR or not reg.contains(p)):
+            continue
+        # the end's whole cross-section (left kerb .. right kerb) on another road / deck / ring: a split or merge, not an end
+        xs = LineString([(e[0] + e[4] * e[6], e[2] - e[3] * e[6]), (e[0] - e[4] * e[7], e[2] + e[3] * e[7])])
+        if tree is not None and (any(names[int(j)] != r['name'] and geoms[int(j)].distance(xs) < 3 for j in tree.query(xs.buffer(3)))
+                                 or any(g.distance(xs) < 3 for g in rings)):
+            continue
+        u = np.array([e[0] - s[i][0], e[2] - s[i][2]])
+        u /= max(np.linalg.norm(u), 1e-9)
+        w = e[6] + e[7]
+        beyond = max([float((np.array(c) - (e[0], e[2])) @ u) for j in wt.query(p.buffer(w)) if ways[int(j)].distance(p) < w
+                      for c in ways[int(j)].coords] or [0.0])
+        if beyond >= 30:
+            issues['dual_dead_end'].append(dict(road=r['name'], end=x['end'], osm_beyond=round(beyond), x=x['x'], z=x['z']))
+
+
 def main():
     av = [a for a in sys.argv[1:] if not a.startswith('--')]
     tag = av[0]
@@ -326,7 +369,7 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals', 'deck_clear', 'centre_fold', 'pave_width_jump', 'pave_step')}
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals', 'deck_clear', 'centre_fold', 'pave_width_jump', 'pave_step', 'dual_dead_end')}
     if not PAINT_ONLY:
         junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
         if not OLD:
@@ -597,6 +640,8 @@ def main():
             if worst:
                 P = DL.interpolate(worst[1])
                 issues['deck_clear'].append(dict(deck=d['name'], over=worst[2], short_by=round(-worst[0], 1), x=round(P.x, 1), z=round(P.y, 1)))
+    if not PAINT_ONLY:
+        dual_dead_end(data, issues, tree, geoms, names, rings)
     json.dump(issues, open(os.path.join(D, 'qa_paint.json' if PAINT_ONLY else 'qa.json'), 'w'), indent=1)
     print(json.dumps({k: len(v) for k, v in issues.items() if k != 'real'}))
     if issues.get('real'):

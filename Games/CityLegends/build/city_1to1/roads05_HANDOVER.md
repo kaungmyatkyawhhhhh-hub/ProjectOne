@@ -1,3 +1,23 @@
+# roads05 handover (18 Nov 2026, twenty-first pass: J25, GEOMETRY agent; PAINT + QA + Studio 17 spots; builder unchanged)
+
+## J25 -- owner paint "median road dead end, missing lanes" 1 + 2, data J23 unchanged
+- **The spot:** Sule Pagoda Road's north arm at Bogyoke Aung San Road (the J24 `sule_shangrila` shot, cropped by the owner).
+  The "dead end" was the Studio TEST box (half 220, top z 43253): the arm's full-width flyover ramp ("Sule Pagoda Road
+  Flyover", 93 wide, z 43266 -> 42836, y 33 -> 48) starts 13 studs inside the box edge, then curves NW onto Alan Pya
+  Pagoda Road (the owner's red curve). OSM: both one-way carriageways run on (ground to z 42990, bridge layer 1 to 42835).
+  Data was right. New spot `sule_north` (36090, 43080, half 300) shows the arm, the ramp and the curve.
+- **QA (geometry) `dual_dead_end`** (roads05_qa.py): a dead_end row of a divided road (median within 60 of the end)
+  whose end cross-section (kerb to kerb) touches no road / deck / ring, not outside / within 12 of the districts'
+  outline, where a kept OSM way reaches 30+ past it. J25: 0 (the centre-point first try flagged 9: splits, merges, edges).
+- **QA (paint) `lanes_unmarked`** (roads05_paint_qa.py): 30+ studs of a carriageway with 2+ lanes a direction
+  (`neff`) and no lane dash of that road within 14 studs. 30 -> 3 (paint: `wide` streets now get lane dividers + centre
+  line; yellow kerb lines / boxes / zebras / stops stay main-road only). Left: Strand Road (34042, 45943) 56 studs, Min
+  Nandar Road #2 (47657, 35072) 31, Shwe Gone Dine Road #2 (34501, 34915) 32 (routes: mouth / fold clipping, not traced).
+  All other paint rules unchanged.
+- **roads05_studiotest.py:** driver camera stepped out of every real ring (r_out + 12, the ring's own centre).
+- **NOT done (context):** items 2-7 (corner pavement height rule, rounded kerb noses, deck-foot road_step, double
+  junction box holes, Kun Chan seam, Bahan hole strip): unchanged from the J24 "Next" list below.
+
 # roads05 handover (18 Nov 2026, twentieth pass: J24, GEOMETRY agent; Studio 16 spots + 32 shots; NO code / data change kept)
 
 ## J24 -- built-surface totals J23 -> J24 (16 spots): unchanged, 66 / 446 / 107 / 143 / 5 (same code repeats exactly)

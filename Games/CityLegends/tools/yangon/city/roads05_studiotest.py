@@ -42,6 +42,9 @@ SPOTS = {
     'deck_run': (34266.8, 42814.4, 420, 'Shwedagon Pagoda Rd deck at Phaya Lan (climb, run, land)', 'Shwedagon Pagoda Road', 380),
     'long_median': (42916.6, 27960.9, 260, 'Long straight median (Waizayandar Rd)', 'Waizayandar Road', 200),
     'lane_taper': (38720.9, 44068.2, 220, 'Lane taper (Thein Phyu Rd 3 -> 2)', 'Thein Phyu Road', 120),
+    # (J25, owner paint 'median road dead end, missing lanes' 1 + 2: the sule_shangrila box cut Sule Pagoda Rd's north arm
+    # where its flyover ramp starts) the north arm, the ramp (deck from z 43266) and its NW curve onto Alan Pya Pagoda Rd
+    'sule_north': (36090.0, 43080.0, 300, 'Sule Pagoda Rd north arm + flyover ramp (owner paint)', 'Sule Pagoda Road', 160),
 }
 # close-ups that are not a junction corner: (camera, target), data heights
 CLOSE = {
@@ -97,6 +100,21 @@ def cams(d, R, J, name, spot):
     # (J23: never inside a roundabout's island: a ring arm's nearest sample to the centre lies in the ring)
     while 0 < j < len(s) - 1 and math.hypot(s[j][0] - x, s[j][2] - z) < h * 0.35:
         j = j + 1 if math.hypot(s[j + 1][0] - x, s[j + 1][2] - z) > math.hypot(s[j - 1][0] - x, s[j - 1][2] - z) else j - 1
+    # (J25, J24 shots: bahan_ring / hanthawaddy / roundabout4 drivers sat in the island mound) also never within a real
+    # ring's outer radius + 12 (the ring's own centre, not the spot's): step away from the ring along the road
+    def in_ring(q):
+        return any(math.hypot(q[0] - g['c'][0], q[2] - g['c'][2]) < g['r_out'] + 12 for g in d['roundabouts'])
+    for _ in range(len(s)):
+        if not in_ring(s[j]):
+            break
+        g = min(d['roundabouts'], key=lambda g: math.hypot(s[j][0] - g['c'][0], s[j][2] - g['c'][2]))
+        out = lambda k: math.hypot(s[k][0] - g['c'][0], s[k][2] - g['c'][2])
+        if j < len(s) - 1 and (j == 0 or out(j + 1) >= out(j - 1)):
+            j += 1
+        elif j > 0:
+            j -= 1
+        else:
+            break
     q = s[j]
     # the middle of the right-hand carriageway (Yangon drives on the right; past the median on a divided road)
     dx, dz = x - q[0], z - q[2]
