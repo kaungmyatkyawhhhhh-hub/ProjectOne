@@ -613,7 +613,18 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	-- where Pyay Road North's corner onto the loop hands it its band)
 	local owner = M.ownedBy(px, pz)
 	if owner and owner ~= name then
-		return true
+		-- (J26, Kun Chan kerb_gap at the dropped Lane #3414 / Kun Chan Road #3 gore: the owner's band past its corner
+		-- runs on beside my carriageway, and my kerb went with it: its pavement met my asphalt with no kerb) my kerb
+		-- stays where the owner's carriageway and kerb are not (the owner's pavement gives way to it, below)
+		local ow = M.R[owner]
+		local keep = false
+		if what == "Kerb" and ow then
+			local b = M.near(px, pz, 3)[ow.index]
+			keep = not b or polyDist(ow, b[2], px, pz) > M.sideHalf(ow, b[2], px, pz) + M.KERB_W + 0.05
+		end
+		if not keep then
+			return true
+		end
 	end
 	local mineOnly = owner == name
 	-- the roundabout: an arm's kerb stops at the ring's kerb, its pavement at the ring's pavement
@@ -685,8 +696,20 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 					end
 				end
 			end
-			if polyDist(o, b[2], px, pz, ax, az, nx, nz) < oh - 0.01 then
+			local dO = polyDist(o, b[2], px, pz, ax, az, nx, nz)
+			if dO < oh - 0.01 then
 				return true
+			end
+			-- (J26) ... and its kerb band, where its kerb is built (beside my pavement past a dropped corner / a gore)
+			if what ~= "Kerb" and dO < oh + M.KERB_W - 0.05 and polyDist(o, b[2], px, pz) >= oh - 0.01 then
+				local _, fx, fz = polyDist(o, b[2], px, pz)
+				local L = if fx then hyp(px - fx, pz - fz) else 0
+				if L > 1e-6 then
+					local ex, ez = fx + (px - fx) / L * (oh + 0.4), fz + (pz - fz) / L * (oh + 0.4)
+					if not M.sideZone(o.name, Vector3.new(ex, 0, ez), "Kerb") then
+						return true
+					end
+				end
 			end
 		end
 	end
@@ -1141,6 +1164,12 @@ function M.crossMouths(): { any }
 			while k and k >= 1 and k <= A.n do
 				local lx, lz = edgeXZ(A, k, -1)
 				local rx, rz = edgeXZ(A, k, 1)
+				-- (J26, Kun Chan "kerbless strip" (36150, 42666): Gyophyu Road's arm ran on through its 32 cut deck samples
+				-- to k = 1, and the mouth laid a 100-stud asphalt sliver along the ramp wall) the first cut sample ends
+				-- the arm: k = that sample (the deck's foot; the last uncut one can still lie on the bigger road)
+				if k ~= x[2] and M.cut[x[1]][k] then
+					break
+				end
 				local all = not M.cut[x[1]][k]
 				for t = 0, 8 do
 					local px, pz = lx + (rx - lx) * t / 8, lz + (rz - lz) * t / 8
@@ -4641,6 +4670,7 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 		end
 	end
 	local out, seen = {}, {}
+	M.qaLast = out
 	local function add(what: string, i: number, j: number)
 		local x, z = x0 + i * G, z0 + j * G
 		local key = what .. math.floor(x / 4) .. "," .. math.floor(z / 4)
@@ -4648,8 +4678,9 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 			return
 		end
 		seen[key] = true
-		out[what] = out[what] or { n = 0, at = {} }
+		out[what] = out[what] or { n = 0, at = {}, all = {} }
 		out[what].n += 1
+		table.insert(out[what].all, { x, z }) -- (J26: every spot, M.qaLast, for clustering by hand)
 		if #out[what].at < 12 then
 			table.insert(out[what].at, string.format("(%.0f, %.0f)", x, z))
 		end
