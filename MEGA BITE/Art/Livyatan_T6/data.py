@@ -35,6 +35,7 @@ fl=(lab==2).astype(np.uint8); fl[:, 205:]=0
 cs,_=cv2.findContours(fl,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE); c=max(cs,key=cv2.contourArea)
 c=cv2.approxPolyDP(c,2.0,True)[:,0]
 fluke=[[float(X0+(p[0]-TX0)*TK),float((p[1]-TC)*TK)] for p in c]
+fluke=[[x,y*0.6 if x>240 else y] for x,y in fluke]   # root edge pulled inside the tail stock (fin attachment gate)
 D=dict(src='livyatan_turnaround_v1.png', side_x=[X0,X1], len_m=8.0, yc=276, top=dict(tx=[TX0,TX1],tc=TC,k=TK), front=dict(cx=FX,y0=FY0,k=FK),
   stations=[dict(x=int(x),top=float(T[x-X0]),bot=float(B[x-X0]),hw=float(HW[x-X0])) for x in st],
   grooves=[268,372,462,636,812,885,1010,1095], head_x=1095,
@@ -42,7 +43,7 @@ D=dict(src='livyatan_turnaround_v1.png', side_x=[X0,X1], len_m=8.0, yc=276, top=
      lower_lip=[[1110,300],[1200,333],[1300,368],[1400,402],[1442,414]], jaw_bot=[[1100,418],[1200,448],[1300,468],[1400,474],[1438,452],[1446,428]],
      up_teeth=dict(n=9,x=[1228,1478],len=56), lo_teeth=dict(n=8,x=[1230,1420],len=46),
      eye=dict(x=1182,y=230,w=56,h=32)),
-  fins=dict(root=[930,385],tip=[825,500],spread=250,width=95,len_k=1.0),
+  fins=dict(root=[930,385],tip=[825,500],spread=265,width=85,len_k=1.0),
   fluke=fluke, palette=pal)
 json.dump(D,open('livy6_data.json','w'),indent=1)
 print(pal); print('fluke pts',len(fluke)); [print(s) for s in D['stations'][::12]]

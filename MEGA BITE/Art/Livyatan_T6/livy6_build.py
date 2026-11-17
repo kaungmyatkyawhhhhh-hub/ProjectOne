@@ -201,10 +201,11 @@ def eye():
         u = Vector((1, 0, 0)); u = (u - n * u.dot(n)).normalized(); v = n.cross(u).normalized()
         a, b, h = E['w'] / 2 / math.cos(math.radians(30)) * 0.8 * S, E['h'] / 2 * S, 5 * S
         b0 = len(verts); K = 12
+        cl = lambda s_: min(s_, 0.25)   # sheet: a half-dome, flat along the top under the brow
         for k in range(K):
-            t = 2 * math.pi * k / K; verts.append(p + u * a * math.cos(t) + v * b * math.sin(t) - n * 3 * S)
+            t = 2 * math.pi * k / K; verts.append(p + u * a * math.cos(t) + v * b * cl(math.sin(t)) - n * 3 * S)
         for k in range(K):
-            t = 2 * math.pi * k / K; verts.append(p + u * a * 0.7 * math.cos(t) + v * b * 0.7 * math.sin(t) + n * h * 0.7)
+            t = 2 * math.pi * k / K; verts.append(p + u * a * 0.7 * math.cos(t) + v * b * 0.7 * cl(math.sin(t)) + n * h * 0.7)
         verts.append(p + n * h); ap = len(verts) - 1; verts.append(p - n * 4 * S); bc = len(verts) - 1
         for k in range(K):
             k2 = (k + 1) % K
@@ -221,7 +222,7 @@ for side, sname in ((1, 'Left'), (-1, 'Right')):
     Tp = Vector((X(F['tip'][0]), side * F['spread'] * S, Z(F['tip'][1])))
     A = (Tp - R) * F['len_k']; Ah = A.normalized()
     W = Vector((1, 0, 0)); W = (W - Ah * W.dot(Ah)).normalized()
-    W = (Matrix.Rotation(math.radians(45) * side, 3, Ah) @ W).normalized(); N = Ah.cross(W).normalized()   # twisted so the front view sees the paddle too
+    W = (Matrix.Rotation(math.radians(25) * side, 3, Ah) @ W).normalized(); N = Ah.cross(W).normalized()   # twisted so the front view sees the paddle too
     secs = ((0.0, 0.7, 16), (0.2, 1.0, 13), (0.55, 1.0, 10), (0.85, 0.85, 7), (1.0, 0.45, 4))   # sheet: broad paddle, blunt end
     verts, faces = [], []
     for t, wf, th in secs:
@@ -256,7 +257,7 @@ for o in skin_objs: bm_all.from_mesh(o.data)
 bm_all.normal_update(); BVH = BVHTree.FromBMesh(bm_all)
 TP, FP = D['top'], D['front']
 VIEWS = {   # view -> (component label, px->(origin, dir) per mirror side, keep-if normal test)
-  'side':  (1, lambda u, w, s: (Vector((X(u), -s * 3, Z(w))), Vector((0, s, 0))), lambda n, s: -s * n.y > 0.35),
+  'side':  (1, lambda u, w, s: (Vector((X(u), -s * 3, Z(w))), Vector((0, s, 0))), lambda n, s: -s * n.y > 0.15),
   'top':   (2, lambda u, w, s: (Vector((X(X0 + (u - TP['tx'][0]) * TP['k']), (w - TP['tc']) * TP['k'] * S, 3)), Vector((0, 0, -1))), lambda n, s: n.z > 0.45),
   'front': (3, lambda u, w, s: (Vector((10, (u - FP['cx']) / FP['k'] * S, Z(40 + (w - FP['y0']) / FP['k']))), Vector((-1, 0, 0))), lambda n, s: n.x > 0.45),
 }
