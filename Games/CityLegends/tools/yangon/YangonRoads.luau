@@ -158,6 +158,15 @@ function M.halfAt(o, i: number): number
 	return math.max(s[7] or o.half, s[8] or o.half)
 end
 
+-- (J22) the half on a spot's own side (s[7] left / s[8] right, as onCarriageway): halfAt (the wider) made a divided
+-- road with an absorbed slip (Sule Pagoda Road at Roundabout 4: 64 / 33) "own" a lane's kerb band 30 studs off its
+-- narrow side: Lane #3352 lost 40 studs of kerb and pavement (kerb_gap)
+function M.sideHalf(o, i: number, px: number, pz: number): number
+	local s = o.s[i]
+	local k = if (px - s[1]) * -s[5] + (pz - s[3]) * s[4] > 0 then 8 else 7
+	return s[k] or o.half
+end
+
 ------------------------------------------------------------------------------------------------
 -- data
 ------------------------------------------------------------------------------------------------
@@ -667,7 +676,7 @@ function M.findMouths(names: { string })
 				local bestRank = nil
 				for oi, b in M.near(s0[1], s0[3], 2) do
 					local big = M.list[oi]
-					if big.rank < o.rank and polyDist(big, b[2], s0[1], s0[3]) < M.halfAt(big, b[2]) and (not bestRank or big.rank < bestRank) then
+					if big.rank < o.rank and polyDist(big, b[2], s0[1], s0[3]) < M.sideHalf(big, b[2], s0[1], s0[3]) and (not bestRank or big.rank < bestRank) then
 						bestRank = big.rank
 						m = { road = name, i0 = i0, step = step, big = big, bigI = b[2], on = big.name }
 					end
@@ -683,7 +692,7 @@ function M.findMouths(names: { string })
 					if not b then
 						return true
 					end
-					return polyDist(m.big, b[2], px, pz) > M.halfAt(m.big, b[2]) + 0.5
+					return polyDist(m.big, b[2], px, pz) > M.sideHalf(m.big, b[2], px, pz) + 0.5
 				end
 				local k = i0
 				while true do
@@ -1049,7 +1058,7 @@ function M.crossMouths(): { any }
 				for t = 0, 8 do
 					local px, pz = lx + (rx - lx) * t / 8, lz + (rz - lz) * t / 8
 					local b = M.near(px, pz, 3)[B.index]
-					if b and polyDist(B, b[2], px, pz) <= M.halfAt(B, b[2]) + 0.5 then
+					if b and polyDist(B, b[2], px, pz) <= M.sideHalf(B, b[2], px, pz) + 0.5 then
 						all = false
 						break
 					end
@@ -1171,7 +1180,7 @@ function M.findCorners()
 			end
 			for oi, b in M.near(px, pz, 3) do
 				local o = M.list[oi]
-				if o.name ~= m.road and o ~= m.big and not M.cut[o.name][b[2]] and polyDist(o, b[2], px, pz) < M.halfAt(o, b[2]) - 0.5 then
+				if o.name ~= m.road and o ~= m.big and not M.cut[o.name][b[2]] and polyDist(o, b[2], px, pz) < M.sideHalf(o, b[2], px, pz) - 0.5 then
 					inside = true
 				end
 			end
@@ -1529,7 +1538,7 @@ function M.ownedBy(px: number, pz: number): (string?, any)
 				local d, fx, fz = polyDist(S, b[2], px, pz)
 				local s = S.s[b[2]]
 				local rx, rz = rightOf(s)
-				local h = M.halfAt(S, b[2]) -- (v5: a road's width changes along it)
+				local h = M.sideHalf(S, b[2], px, pz) -- (v5: a road's width changes along it; J22: on the spot's side)
 				-- (J10: its own walk on that side; M.WALK 7.5 took 3.5 studs of the other road's band past a
 				-- 4-stud street walk: a hole at the tip of a Pyay x University Ave island)
 				local w = (if c.side < 0 then S.walkL else S.walkR) or M.WALK
@@ -2626,7 +2635,7 @@ function M.buildDecks()
 			local o = M.list[oi]
 			local d = polyDist(o, b[2], x, z)
 			-- (J15) a spot on a divided road's median (s[9] = its built half) is not in a lane: piers stand there
-			if d < M.halfAt(o, b[2]) + margin and not (d < (o.s[b[2]][9] or 0) - 1) then
+			if d < M.sideHalf(o, b[2], x, z) + margin and not (d < (o.s[b[2]][9] or 0) - 1) then
 				return o.name
 			end
 		end
