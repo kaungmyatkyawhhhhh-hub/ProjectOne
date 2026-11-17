@@ -1173,6 +1173,12 @@ function M.findCorners()
 			end
 			local theta = math.acos(math.clamp(ux * vx + uz * vz, -1, 1))
 			local T = if m.ring then M.CORNER_T_RING else M.CORNER_T
+			-- (J18, owner ref Sule Shangri-La corner: downtown main-road corners are 8-12 m on the satellite) a road
+			-- pair that both carry cornerR (roads05_fix.corner_radii) gets that radius: T = r / tan(theta / 2)
+			local wantR = if m.ring or not m.big then 0 else math.min(S.cornerR or 0, m.big.cornerR or 0)
+			if wantR > 0 and theta > 0.2 then
+				T = math.max(T, math.min(wantR / math.tan(theta / 2), M.CORNER_T_MAX))
+			end
 			-- (18 Nov, J9: a ring arm meeting the ring at a shallow angle got a 1.6-stud corner, a kerb point;
 			-- T grows until r reaches CORNER_R_MIN, never past the edge samples the corner can see)
 			if m.ring and T * math.tan(theta / 2) < M.CORNER_R_MIN then
