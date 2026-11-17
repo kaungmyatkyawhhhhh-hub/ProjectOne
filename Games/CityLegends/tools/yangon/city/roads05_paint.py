@@ -2,17 +2,25 @@
 "Research - Yangon road look"), as paint polygons the preview draws and the Studio build lays (0.08 over the road):
 
   * lane lines: white, dashed 3 m on / 6 m off (9 / 18 studs), 0.15 m wide (0.45 studs); none on small streets (real
-    residential streets are unmarked)
+    residential streets are unmarked). (J15) One smooth offset per boundary: the lane count is a 9-sample median, each
+    line moves at most LANE_RATE sideways per stud, so a new lane tapers out of the kerb (no jogs, no side-by-side
+    dashes); all lines are Chaikin-smoothed (no sample corners); clipped pieces under 3 studs are dropped
   * centre: one solid white line on an undivided main road (never broken by a smaller road's mouth)
-  * divided roads: a yellow solid line along each median kerb
-  * no outer edge lines (most photos show none)
-  * junction boxes (where two main roads' carriageways overlap): nothing painted inside
+  * yellow kerb lines (J15, owner ref 'Sule Square road'): along every kerb of a main road, outer and median, 0.9 in
+  * junction boxes (where two main roads' carriageways overlap): nothing painted inside; (J15) two parallel roads under
+    40 studs apart crossing one road make ONE box (owner ref 'double junction zebras and stop lines'), and each road's
+    stretch from the box to its arm's zebra is box too (ref 'junction box grass hole')
   * mouths: a main road's lane lines break across a smaller road's mouth (RoadLines clearMouths); the centre line runs on
-  * zebras: yellow, 12 studs long, 1.6-stud bars on a 3.2 pitch, across each arm just outside a main x main box
-  * stop lines: white, 1.2 studs, across the approach lanes 3 studs before the zebra, where an OSM traffic signal stands
+  * zebras: faded ochre LZ (230, 190, 110), 12 studs long, 1.6-stud bars on a 3.2 pitch, across each arm of a route just
+    outside its box; (J15) whole bars only (none cut by a kerb, a box, a median nose or another arm's zebra)
+  * stop lines (J15: every approach): white, 1.2 studs, across the incoming lanes only (centre line / median .. kerb),
+    3 studs before the zebra on the approach side, stepped back where another arm's zebra lies
   * roundabouts: dashed lane lines round the ring, a white dashed give-way line across each entry, yellow hatched
     splitters between an arm's entry and exit where it is divided
-  * turn arrows from OSM turn:lanes (roads.json `turn` runs), one per lane, 10 studs before the stop line / box
+  * turn arrows (J15): one per incoming lane at every stop line, 8 studs behind it, for the turns the box offers
+    (leftmost lane left, rightmost right, all through where it goes on); OSM turn:lanes where the lane count fits
+  * paint stops short of median noses and islands (nose caps in tidy)
+  QA: roads05_paint_qa.py (J15 rules) besides roads05_qa.py --paint-only.
 
     YANGON_SCALE=1to1 python roads05_paint.py <tags joined by _>   -> build/city_1to1/roads05_<tags>/paint.json
 """
@@ -312,10 +320,13 @@ def lane_lines(s, a, b, one):
             outer.append(hi)
             nn.append(neff(q, one))
         inner, outer, nn = np.array(inner), np.array(outer), np.array(nn)
+        # lane count: the median over 9 samples (a width near x.5 lanes flipped it every sample: snaking lines)
+        nn = np.array([int(np.median(nn[max(0, j - 4):j + 5])) for j in range(len(nn))])
         lines = []
         for k in range(1, int(nn.max())):
             t = np.where(k < nn, inner + (outer - inner) * k / nn, outer)
-            t = limit_rate(t.astype(float), ds, LANE_RATE)
+            t = np.convolve(np.pad(t.astype(float), 2, mode='edge'), np.ones(5) / 5, mode='valid')
+            t = limit_rate(t, ds, LANE_RATE)
             lines.append(np.where(np.abs(t - outer) > 1.5, t, np.nan))
         out[sg] = (inner, outer, nn, lines)
     return idx, out
@@ -371,11 +382,13 @@ def build(data, signals=None):
     # arms: every main road leaving every box (first sample whose whole cross-section is outside it)
     arms = []
     arm_fill = []
+    box_roads = {}
     for bi, bx in enumerate(polys_of(box_u)):
         for j in main_tree.query(bx):
             r = main[int(j)]
             if not cw[r['name']].intersects(bx):
                 continue
+            box_roads.setdefault(bi, []).append((r, bx))
             s = r['s']
             n = len(s)
             c = cut.get(r['name'], set())
@@ -495,11 +508,13 @@ def build(data, signals=None):
         mouths = []
         for j in tree.query(g):
             o = roads[int(j)]
-            if o['name'] == r['name'] or o['rank'] < r['rank']:
+            if o['name'] == r['name']:
                 continue
             x = g.intersection(cw[o['name']])
-            if not x.is_empty and x.area > 4:
-                mouths.append(cw[o['name']].buffer(4))
+            # (J15) a smaller road lying inside this one (a doubled carriageway) is no mouth: the kerb lines run on
+            if not x.is_empty and x.area > 4 and (o['rank'] < r['rank'] or cw[o['name']].difference(g.buffer(0.5)).area > 4):
+                # a smaller road's mouth: lines break 4 short of it; (J15) a bigger road: none of this road's lines on it
+                mouths.append(cw[o['name']].buffer(4 if o['rank'] > r['rank'] else 1))
         mouth_u = unary_union(mouths) if mouths else Polygon()
         clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
         clip_edge = Clip(clip_road, fills.buffer(2)) if not fills.is_empty else clip_road
@@ -608,16 +623,28 @@ def build(data, signals=None):
     # (J15) turn arrows: one per incoming lane at every approach, ARROW_BACK behind the stop line, for the turns the box
     # really offers (OSM turn:lanes where they fit)
     for job in arrow_jobs:
-        approach_arrows(P, job, by_box, LL, clip_all)
+        approach_arrows(P, job, (by_box, box_roads), LL, clip_all)
     P.stats = dict(double=ndouble, boxes=len(boxes), approaches=len(arrow_jobs))
     return P
 
 
-def turns_of(job, by_box):
-    """left / through / right the box offers an approach heading into it"""
+def turns_of(job, boxes):
+    """left / through / right the box offers an approach heading into it: its other arms, or (a T whose through road
+    has no arm in the box: its carriageway only touches it) the directions of the other roads through the box"""
+    by_box, box_roads = boxes
     h = -job['D']
     rgt = np.array([-h[1], h[0]])
     have = set()
+    armed = {o['r']['name'] for o in by_box.get(job['box'], ())}
+    for r, bx in box_roads.get(job['box'], ()):
+        if r['name'] in armed or r['name'] == job['r']['name']:
+            continue
+        c = np.array(bx.centroid.coords[0])
+        q = min(r['s'], key=lambda q: (q[0] - c[0]) ** 2 + (q[2] - c[1]) ** 2)
+        for d in ([np.array([q[3], q[4]])] if r.get('oneway') else [np.array([q[3], q[4]]), -np.array([q[3], q[4]])]):
+            if d @ h < -0.7:
+                continue
+            have.add('through' if d @ h > 0.7 else ('right' if d @ rgt > 0 else 'left'))
     for o in by_box.get(job['box'], ()):
         if o['r']['name'] == job['r']['name'] and o['k'] == job['k']:
             continue

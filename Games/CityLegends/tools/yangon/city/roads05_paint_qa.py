@@ -119,8 +119,12 @@ def main():
             KD[name] = cKDTree(S[name])
         return int(KD[name].query(p)[1])
 
-    def near(g, d, kinds=None):
-        return [int(j) for j in ptree.query(g.buffer(d)) if (kinds is None or W[int(j)] in kinds) and polys[int(j)].distance(g) <= d]
+    lvl = [bool(it.get('deck')) for it in items]
+
+    def near(g, d, kinds=None, deck=False):
+        """paint items within d of g on one level (deck paint lies over ground paint in plan only)"""
+        return [int(j) for j in ptree.query(g.buffer(d)) if (kinds is None or W[int(j)] in kinds) and lvl[int(j)] == deck
+                and polys[int(j)].distance(g) <= d]
 
     # zebra groups (one per arm): bars within 2 studs of each other
     zeb = by.get('zebra', [])
@@ -208,7 +212,7 @@ def main():
         ca, ua, La, _, _ = ax[i]
         for j_ in dtree.query(polys[i].buffer(4)):
             j = di[int(j_)]
-            if j <= i or (i, j) in seen:
+            if j <= i or (i, j) in seen or lvl[i] != lvl[j]:
                 continue
             cb, ub, Lb, b0, b1 = ax[j]
             if abs(ua @ ub) < 0.85:
@@ -230,7 +234,7 @@ def main():
             best = None
             for k in ek.query_ball_point(e, 26.0):
                 f, uf, j = ends[k]
-                if j == i:
+                if j == i or lvl[i] != lvl[j]:
                     continue
                 v = f - e
                 along = v @ uo
@@ -338,7 +342,7 @@ def main():
             iss['zebra_colour'].append(dict(road=it.get('r'), **xz(polys[i].centroid.coords[0])))
         P = polys[i]
         why = None
-        if [j for j in near(P, 0.15) if j != i]:
+        if [j for j in near(P, 0.15, deck=lvl[i]) if j != i]:
             why = 'touched by paint'
         elif P.area / max(P.minimum_rotated_rectangle.area, 1e-9) < 0.97:
             why = 'not a rectangle'
