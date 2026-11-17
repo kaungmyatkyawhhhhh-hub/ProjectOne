@@ -24,6 +24,8 @@ KEEP_IN = 2         # absorbed samples kept at each cut so the leftover piece st
 EASE = 8            # samples over which the bigger road's widening eases in / out
 MIN_PIECE = 8       # a leftover shorter than this goes (3 samples by Sule's ring were all inside the ring's flat)
 MIN_RUN = 6         # alongside runs shorter than this are a junction, not a doubled road
+ALONG_SHARE = 0     # (J16) off: see absorb()
+BESIDE_GAP = 3.0    # (J16) 1 m: a stretch this close beside the bigger road, between two absorbed stretches, goes too
 
 
 def unit(x, z):
@@ -53,14 +55,17 @@ def absorb(data, min_area=None):
             # (the QA's 'overlap' rule; or a short one-way piece lying half on the other: Bahan Road #2 by the ring,
             # whose pulled-back mouth left jagged kerbs along the merge in the J7 Studio test)
             one = roads[a] if geoms[a].area <= geoms[b].area else roads[b]
-            if inter > 2.5 * wid[a] * wid[b] + 500 or (one.get('oneway') and one['kind'] == 'route' and inter > 0.5 * small):
-                pairs.append((inter, a, b))
+            # (J16 tried pairing any road with a quarter of its area on another (ALONG_SHARE 0.25, QA kerb_cross lanes
+            # along a road): kerb_cross 17 -> 23 (the cut lanes' pieces ended alongside the road): off)
+            strong = inter > 2.5 * wid[a] * wid[b] + 500 or (one.get('oneway') and one['kind'] == 'route' and inter > 0.5 * small)
+            if strong or (ALONG_SHARE and inter > ALONG_SHARE * small):
+                pairs.append((inter, a, b, strong))
     pairs.sort(reverse=True)
     st = dict(pairs=len(pairs), absorbed=[], skipped=[])
     gone = set()
     out_extra = []
     newcut = {}
-    for inter, a, b in pairs:
+    for inter, a, b, strong in pairs:
         if a in gone or b in gone:
             continue
         # (J15) the bigger road by OSM class first, rank only between equals: "ends on" ranks can invert (Shwedagon
@@ -77,6 +82,7 @@ def absorb(data, min_area=None):
         cutA = cut.get(A['name'], set())
         along = np.zeros(len(sb), bool)
         widen = {}  # A sample -> (side, half needed)
+        near = {}   # (J16) B samples just beside A (edge gap < BESIDE_GAP): A sample, side, half needed, A's half
         for i, q in enumerate(sb):
             p = Point(q[0], q[2])
             t = LA.project(p)
@@ -95,15 +101,38 @@ def absorb(data, min_area=None):
             side = 1 if off > 0 else -1
             ha = qa[7] if side > 0 else qa[6]
             if abs(off) - hb >= ha - 0.5:
+                if abs(off) - hb < ha + BESIDE_GAP:
+                    near[i] = (j, side, abs(off) + hb, ha)
                 continue  # beside, not on it
             along[i] = True
             need = abs(off) + hb
             # (J14, owner ref `road width jumps`) a service / track way alongside never widens the road (its strip
             # stays verge: the alongside part of the service way still goes)
-            if B.get('hw') in ('service', 'track') or (A.get('hw') in ('service', 'track')):
-                continue
+            if B.get('hw') in ('service', 'track') or (A.get('hw') in ('service', 'track')) or not strong:
+                continue  # (J16: a lane only partly along a road goes there, the road keeps its width: no width jump)
             if need > ha + 0.5 and need > widen.get(j, (side, 0.0))[1]:
                 widen[j] = (side, need)
+        # (J16, QA overlap: Bogyoke Aung San Road #2's middle ran 0-3 studs beside the road, its two ends on it: the
+        # ends were absorbed, the widening eased onto the kept middle piece) a stretch of B just beside A between two
+        # alongside stretches goes too (A widens over it as well)
+        idx = np.flatnonzero(along)
+        if len(idx):
+            i = int(idx[0])
+            while i < idx[-1]:
+                if along[i]:
+                    i += 1
+                    continue
+                j = i
+                while not along[j]:
+                    j += 1
+                if all(k in near for k in range(i, j)):
+                    for k in range(i, j):
+                        along[k] = True
+                        ja, side, need, ha = near[k]
+                        if (strong and not (B.get('hw') in ('service', 'track') or A.get('hw') in ('service', 'track'))
+                                and need > ha + 0.5 and need > widen.get(ja, (side, 0.0))[1]):
+                            widen[ja] = (side, need)
+                i = j
         # runs of alongside samples
         runs, i = [], 0
         while i < len(sb):

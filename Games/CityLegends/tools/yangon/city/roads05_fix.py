@@ -18,7 +18,7 @@ from shapely.ops import unary_union
 from shapely.strtree import STRtree
 
 import geo
-from roads05_qa import quads
+from roads05_qa import quads, deck_segs, AT_GRADE
 
 STEP = 8.0
 MED_GAP = 6.0
@@ -577,31 +577,80 @@ def _vcurve(c, y, W=DECK_VC):
 DECK_EXT = 48      # (J15) samples a simple bridge's deck may grow at each end (longer ramps) when it is too short
 
 
+CLEAR_RAIL = 13.5   # (J16) 4.5 m over a railway (OSM railway=rail, sidings / yards too) under a deck
+CLEAR_WATER = 9.0   # (J16) 3 m over a river / canal / lake
+_RW = None
+
+
+def _rail_water():
+    """(J16) OSM railway=rail lines and water (river / canal lines, water areas) as [(geometry, clearance)]"""
+    global _RW
+    if _RW is None:
+        g = []
+        for l in geo.load('lines'):
+            t = l['t']
+            if len(l['p']) >= 2 and (t.get('railway') == 'rail' or t.get('waterway') in ('river', 'canal')):
+                g.append((LineString(geo.proj(l['p'])), CLEAR_RAIL if t.get('railway') == 'rail' else CLEAR_WATER))
+        for a in geo.load('areas'):
+            t = a['t']
+            if t.get('natural') == 'water' or t.get('water') in ('river', 'reservoir', 'lake') or t.get('waterway') == 'riverbank':
+                try:
+                    P = Polygon(geo.proj(a['p']))
+                except Exception:
+                    continue
+                if P.is_valid and P.area > 0:
+                    g.append((P, CLEAR_WATER))
+        _RW = (STRtree([x for x, _ in g]), g)
+    return _RW
+
+
 def _deck_try(dk, r, lines, tree, steep=False):
-    """the new profile of one deck, or None when no grade <= DECK_MAX keeps every road crossing's clearance"""
+    """the new profile of one deck, or None when no grade <= DECK_MAX keeps every road crossing's clearance (and,
+    J16, CLEAR_RAIL over a railway / CLEAR_WATER over water). dk may be a chain of butted decks (_deck_chains): then
+    its own feet `_y0` / `_y1`, ground `_gnd` per sample and road names `_names`."""
     s = dk['s']
-    y0, y1 = r['s'][dk['from']][1], r['s'][dk['to']][1]
+    y0, y1 = dk.get('_y0', r['s'][dk['from']][1]), dk.get('_y1', r['s'][dk['to']][1])
+    names = dk.get('_names', (r['name'],))
     c = [0.0]
     for a, b in zip(s, s[1:]):
         c.append(c[-1] + math.hypot(b[0] - a[0], b[2] - a[2]))
+    cg = c  # (J16) a chain through a fork has its own chainage `_c` (no sideways jump across the joint)
+    c = dk.get('_c', c)
+    conv = (lambda x: float(np.interp(x, cg, c))) if c is not cg else (lambda x: x)
     L = c[-1]
+    gnd = dk.get('_gnd') or [r['s'][min(len(r['s']) - 1, dk['from'] + j)][1] for j in range(len(s))]
     old = [q[1] for q in s]
     top = max(old)
     DL = LineString([(q[0], q[2]) for q in s])
     need = []
+    rwt, rw = _rail_water()
+    for k in rwt.query(DL):
+        G, clr = rw[int(k)]
+        if not DL.intersects(G):
+            continue
+        if G.geom_type == 'Polygon':
+            ccs = [c[j] for j, q in enumerate(s) if G.contains(Point(q[0], q[2]))]
+        else:
+            X = DL.intersection(G)
+            ccs = [conv(DL.project(P)) for P in (list(X.geoms) if hasattr(X, 'geoms') else [X]) if P.geom_type == 'Point']
+        for cc in ccs:
+            if DECK_FLAT + 10 <= cc <= L - DECK_FLAT - 10:  # (at a foot: the abutment stands on the bank)
+                need.append((cc, float(np.interp(cc, c, gnd)) + clr))
+    if need:
+        top = max(top, max(ny for _, ny in need))
     for li in tree.query(DL):
         o, ol = lines[int(li)]
-        if o['name'] == r['name'] or o.get('kind') == 'side' or not DL.intersects(ol):
+        if o['name'] in names or o.get('kind') == 'side' or not DL.intersects(ol):
             continue
         X = DL.intersection(ol)
         for P in (list(X.geoms) if hasattr(X, 'geoms') else [X]):
             if P.geom_type != 'Point':
                 continue
-            cc = DL.project(P)
+            cc = conv(DL.project(P))
             if cc < DECK_FLAT + 10 or cc > L - DECK_FLAT - 10:
                 continue  # at a foot, not under the deck
             oi = min(range(len(o['s'])), key=lambda i: (o['s'][i][0] - P.x) ** 2 + (o['s'][i][2] - P.y) ** 2)
-            if abs(o['s'][oi][1] - (y0 + (y1 - y0) * cc / L)) < 8:  # a ground road under it (not another deck)
+            if abs(o['s'][oi][1] - float(np.interp(cc, c, gnd))) < 8:  # a ground road under it (not another deck)
                 oy = float(np.interp(cc, c, dk.get('_old', old)))
                 need.append((cc, min(oy, o['s'][oi][1] + DECK_CLEAR)))
     ct = c[int(np.argmax(old))]
@@ -627,9 +676,165 @@ def _deck_try(dk, r, lines, tree, steep=False):
         if (gm > DECK_MAX + 1e-6 and not steep) or not ok(v, need):
             continue
         fall = (v, gm, need, top)
-        if ok(v, soft):
+        if ok(v, soft) or steep:  # (J16: steep = the least grade that keeps the clearance, not one that keeps the old top)
             return fall
     return fall
+
+
+DECK_JOIN = 6.0   # (J16) deck ends this close are one joint (deck_butt puts them on one spot)
+
+
+def _deck_chains(data, R, lines, tree, out, grow, grown):
+    """(J16, Thaketa Bridge -> Set Yone St, Lanmadaw Rd -> Myoma Kyaung St, Sule Pagoda Rd -> Gyophyu / Alan Pya Pagoda
+    Rd: one bridge cut into named decks dipped to the GROUND at each joint, right beside the railway). Deck ends that
+    meet are a joint, not a foot: at each joint the two ends that run on straightest are one chain, regraded as one
+    deck (feet only at the chain's two outer ends); any other deck ending there (a fork) is regraded after, its foot
+    at the joint held at the chain's height. Returns the ids of the decks done (deck_regrade skips them)."""
+    D = [d for d in data['decks'] if d['of'] in R and len(d['s']) >= 3]
+    ends = [(d, k) for d in D for k in (0, -1)]
+    joint, pair = {}, {}
+    for a in ends:
+        if (id(a[0]), a[1]) in joint:
+            continue
+        qa = a[0]['s'][a[1]]
+        # (a fork: deck_butt lays the branch ends across the host's end line, up to its whole width off its centre)
+        grp = [b for b in ends if b[0] is not a[0] and math.hypot(b[0]['s'][b[1]][0] - qa[0], b[0]['s'][b[1]][2] - qa[2])
+               < max(DECK_JOIN, qa[6] + qa[7], b[0]['s'][b[1]][6] + b[0]['s'][b[1]][7])]
+        if not grp:
+            continue
+        grp.append(a)
+        for b in grp:
+            joint[(id(b[0]), b[1])] = grp
+
+        def out_dir(e):
+            s = e[0]['s']
+            p, q = (s[0], s[2]) if e[1] == 0 else (s[-1], s[-3])
+            v = np.array([q[0] - p[0], q[2] - p[2]])
+            return v / (np.linalg.norm(v) or 1)
+        best = min(((x, y) for i, x in enumerate(grp) for y in grp[i + 1:] if x[0] is not y[0]),
+                   key=lambda xy: float(out_dir(xy[0]) @ out_dir(xy[1])), default=None)
+        if best and float(out_dir(best[0]) @ out_dir(best[1])) < -0.5:  # (runs on; two decks side by side do not)
+            pair[(id(best[0][0]), best[0][1])] = best[1]
+            pair[(id(best[1][0]), best[1][1])] = best[0]
+    if not joint:
+        return set()
+    done = set()
+
+    def ground(d):
+        rs = R[d['of']]['s']
+        return [rs[min(len(rs) - 1, d['from'] + j)][1] for j in range(len(d['s']))]
+
+    def regrade(rows, gnd, y0, y1, names, r0, cc=None):
+        pd = dict(s=rows, _y0=y0, _y1=y1, _gnd=gnd, _names=names, **{'from': 0, 'to': len(rows) - 1})
+        if cc:
+            pd['_c'] = cc
+        res = _deck_try(pd, r0, lines, tree)
+        short = res is None
+        if short:
+            res = _deck_try(pd, r0, lines, tree, steep=True)
+        if res is None:
+            return None, short
+        v = res[0]
+        v[0], v[-1] = y0, y1
+        for q, y in zip(rows, v):
+            q[1] = round(float(y), 3)
+        return res, short
+    def at_joint(e, k):  # the height a done deck holds at this end's joint, else None
+        return next((x[0]['s'][x[1]][1] for x in joint.get((id(e), k), ()) if x[0] is not e and id(x[0]) in done), None)
+    # chains: walk from a deck end that is not paired onward
+    seqs, seen = [], set()
+    for d in D:
+        if id(d) in seen or ((id(d), 0) in pair) == ((id(d), -1) in pair):
+            continue  # a middle link (reached from a chain's end), or no joint at all
+        k = 0 if (id(d), 0) not in pair else -1  # the chain's free end
+        seq, cur, ck = [], d, k
+        while cur is not None and id(cur) not in seen:
+            seq.append((cur, ck))
+            seen.add(id(cur))
+            nxt = pair.get((id(cur), -1 if ck == 0 else 0))
+            cur, ck = (nxt[0], nxt[1]) if nxt else (None, None)
+        seqs.append(seq)
+    # chains whose outer ends are real feet first: a chain ending at another's joint takes that height
+    seqs.sort(key=lambda q: ((id(q[0][0]), q[0][1]) in joint) + ((id(q[-1][0]), -1 if q[-1][1] == 0 else 0) in joint))
+    def build(seq):
+        rows, gnd, link, cc = [], [], [], []
+        for n_, (e, ek) in enumerate(seq):
+            es, eg = (e['s'], ground(e)) if ek == 0 else (e['s'][::-1], ground(e)[::-1])
+            st = [0.0] + [math.hypot(b[0] - a[0], b[2] - a[2]) for a, b in zip(es, es[1:])]
+            if n_:  # (the joint: one chainage for both decks' end rows, a fork's branch end lies off to the side)
+                link.append((rows[-1], es[0]))
+                es, eg, st = es[1:], eg[1:], st[1:]
+            for x in st:
+                cc.append((cc[-1] if cc else 0.0) + x)
+            rows += es
+            gnd += eg
+        build.c = cc
+        return rows, gnd, link
+    for seq in seqs:
+        f, l = seq[0], seq[-1]
+        y0 = at_joint(f[0], f[1])
+        y1 = at_joint(l[0], -1 if l[1] == 0 else 0)
+        rows, gnd, link = build(seq)
+        names = {e['of'] for e, _ in seq}
+        try_ = lambda: _deck_try(dict(s=rows, _y0=gnd[0] if y0 is None else y0, _y1=gnd[-1] if y1 is None else y1, _c=build.c,
+                                      _gnd=gnd, _names=names, **{'from': 0, 'to': len(rows) - 1}), R[f[0]['of']], lines, tree)
+        # (J16) too short: the chain's free outer feet grow along their roads (longer ramps, not steeper ones)
+        ext, ends_ = [0, 0], [(f[0], 0 if f[1] == 0 else 1), (l[0], 1 if l[1] == 0 else 0)]
+        if try_() is None:
+            while max(ext) < DECK_EXT:
+                g_ = False
+                for side, ((e, es), yj) in enumerate(zip(ends_, (y0, y1))):
+                    if yj is not None or e.get('sides'):
+                        continue  # a foot held at another chain's joint, or a flyover with side lanes: never grows
+                    for _ in range(4):
+                        if not grow(e, es):
+                            break
+                        ext[side] += 1
+                        g_ = True
+                if not g_:
+                    break
+                rows, gnd, link = build(seq)
+                if try_() is not None:
+                    break
+            for (e, _), n_ in zip(ends_, ext):
+                if n_:
+                    grown(e)
+            rows, gnd, link = build(seq)
+        y0, y1 = gnd[0] if y0 is None else y0, gnd[-1] if y1 is None else y1
+        res, short = regrade(rows, gnd, y0, y1, names, R[f[0]['of']], build.c)
+        for x, y in link:
+            y[1] = x[1]
+        done.update(id(e) for e, _ in seq)
+        out.append(dict(chain=[e['name'] for e, _ in seq], top=round(max(q[1] for q in rows), 1), short=short, grown=ext,
+                        grade=round(res[1], 3) if res else None, crossings=len(res[2]) if res else 0))
+    # fork branches: decks with an end at a joint that is not in a chain
+    for d in D:
+        if id(d) in done or not ((id(d), 0) in joint or (id(d), -1) in joint):
+            continue
+        j0, j1 = at_joint(d, 0), at_joint(d, -1)
+        ext = [0, 0]
+        while not d.get('sides') and max(ext) < DECK_EXT:
+            g = ground(d)
+            pd = dict(s=d['s'], _y0=g[0] if j0 is None else j0, _y1=g[-1] if j1 is None else j1, _gnd=g, **{'from': 0, 'to': len(g) - 1})
+            if _deck_try(pd, R[d['of']], lines, tree) is not None:
+                break
+            g_ = False
+            for side, jy in ((0, j0), (1, j1)):
+                for _ in range(4 if jy is None else 0):  # (only its free foot grows)
+                    if not grow(d, side):
+                        break
+                    ext[side] += 1
+                    g_ = True
+            if not g_:
+                break
+        if ext != [0, 0]:
+            grown(d)
+        g = ground(d)
+        y0, y1 = g[0] if j0 is None else j0, g[-1] if j1 is None else j1
+        done.add(id(d))
+        res, short = regrade(d['s'], g, y0, y1, (d['of'],), R[d['of']])
+        out.append(dict(branch=d['name'], foot=[round(y0, 1), round(y1, 1)], short=short, grown=ext, grade=round(res[1], 3) if res else None))
+    return done
 
 
 def deck_regrade(data):
@@ -650,51 +855,63 @@ def deck_regrade(data):
     for dk in data['decks']:
         taken.setdefault(dk['of'], []).append(dk)
     out = []
+
+    def grow(dk, side):
+        """(J16: shared with _deck_chains) one more road sample onto the deck's start (side 0) / end (1), when no
+        other deck, cut, road end or crossing road is there (a junction stays on the ground); False when blocked"""
+        r = R[dk['of']]
+        rs, cut = r['s'], set(data['cut'].get(r['name'], ()))
+        i = dk['from'] - 1 if side == 0 else dk['to'] + 1
+        if i <= 0 or i >= len(rs) - 1 or i in cut:
+            return False
+        if any(o is not dk and o['from'] - 2 <= i <= o['to'] + 2 for o in taken[r['name']]):
+            return False
+        p = Point(rs[i][0], rs[i][2])
+        zone = p.buffer(max(rs[i][6], rs[i][7]) + 12)
+        if any(end_of[int(k)] != r['name'] for k in ends.query(zone)):
+            return False  # another road ends here: a junction stays on the ground
+        if any(lines[int(k)][0]['name'] != r['name'] and lines[int(k)][1].intersects(zone) for k in tree.query(zone)):
+            return False
+        q = [float(v) for v in rs[i]]
+        if side == 0:
+            dk['from'] -= 1
+            dk['s'].insert(0, q)
+            if '_old' in dk:
+                dk['_old'].insert(0, q[1])
+        else:
+            dk['to'] += 1
+            dk['s'].append(q)
+            if '_old' in dk:
+                dk['_old'].append(q[1])
+        return True
+
+    def grown(dk):
+        r = R[dk['of']]
+        data['cut'][r['name']] = sorted(set(data['cut'].get(r['name'], ())) | set(range(dk['from'] + 1, dk['to'])))
+        _smooth_one(dk)
+
+    done = _deck_chains(data, R, lines, tree, out, grow, grown)
     for dk in data['decks']:
         r = R.get(dk['of'])
-        if r is None or len(dk['s']) < 3:
+        if r is None or len(dk['s']) < 3 or id(dk) in done:
             continue
         res = _deck_try(dk, r, lines, tree)
         ext = [0, 0]
         if res is None and not dk.get('sides'):
             dk['_old'] = [q[1] for q in dk['s']]
-            rs, cut = r['s'], set(data['cut'].get(r['name'], ()))
-
-            def free(i):
-                if i <= 0 or i >= len(rs) - 1 or i in cut:
-                    return False
-                if any(o is not dk and o['from'] - 2 <= i <= o['to'] + 2 for o in taken[r['name']]):
-                    return False
-                p = Point(rs[i][0], rs[i][2])
-                zone = p.buffer(max(rs[i][6], rs[i][7]) + 12)
-                if any(end_of[int(k)] != r['name'] for k in ends.query(zone)):
-                    return False  # another road ends here: a junction stays on the ground
-                return not any(lines[int(k)][0]['name'] != r['name'] and lines[int(k)][1].intersects(zone)
-                               for k in tree.query(zone))
             while res is None and max(ext) < DECK_EXT:
                 grew = False
                 for side in (0, 1):
                     for _ in range(4):
-                        i = dk['from'] - 1 if side == 0 else dk['to'] + 1
-                        if not free(i):
+                        if not grow(dk, side):
                             break
-                        q = [float(v) for v in rs[i]]
-                        if side == 0:
-                            dk['from'] -= 1
-                            dk['s'].insert(0, q)
-                            dk['_old'].insert(0, q[1])
-                        else:
-                            dk['to'] += 1
-                            dk['s'].append(q)
-                            dk['_old'].append(q[1])
                         ext[side] += 1
                         grew = True
                 if not grew:
                     break
                 res = _deck_try(dk, r, lines, tree)
             if ext != [0, 0]:
-                data['cut'][r['name']] = sorted(cut | set(range(dk['from'] + 1, dk['to'])))
-                _smooth_one(dk)
+                grown(dk)
                 res = _deck_try(dk, r, lines, tree) or res
             dk.pop('_old', None)
         s = dk['s']
@@ -864,6 +1081,59 @@ def _smooth_one(d, KEEP=3):
         v /= (np.linalg.norm(v) or 1)
         q[3], q[4] = round(float(v[0]), 4), round(float(v[1]), 4)
     return 1
+
+
+WOBBLE_LAT = 0.15   # (J16) deck_fair's target (QA deck_wobble flags 0.2 lateral / 0.15 vertical)
+WOBBLE_VER = 0.14
+
+
+def _wobble(A, i):
+    """QA deck_wobble at sample i of A (n x 3: x, y, z): (lateral, vertical)"""
+    offs = []
+    for j in (i - 1, i, i + 1):
+        a, b, p = A[j - 4][[0, 2]], A[j + 4][[0, 2]], A[j][[0, 2]]
+        t = b - a
+        offs.append(((p - a)[0] * t[1] - (p - a)[1] * t[0]) / (np.linalg.norm(t) or 1))
+    return abs(offs[1] - (offs[0] + offs[2]) / 2), abs(A[i - 1][1] - 2 * A[i][1] + A[i + 1][1])
+
+
+def deck_fair(data):
+    """(J16, QA deck_wobble 24: a sideways kink a few samples in from a deck end, where the plan smoothing's cap meets
+    the fixed end samples / an OSM corner, and crests just over 0.15 high) every deck faired after deck_regrade: each
+    sample but the 2 at each end moves half way toward its neighbours' middle, sideways only (lateral) and in height
+    (vertical) separately, only while QA's measure is over the target (a few passes; moves stay ~1-3 studs)."""
+    out = 0
+    for d in data['decks']:
+        A = np.array([[q[0], q[1], q[2]] for q in d['s']], float)
+        n = len(A)
+        if n < 17:
+            continue
+        moved = False
+        for _ in range(60):
+            bad = [i for i in range(8, n - 8) for lat, ver in [_wobble(A, i)] if lat > WOBBLE_LAT or ver > WOBBLE_VER]
+            if not bad:
+                break
+            moved = True
+            B = A.copy()
+            for i in range(2, n - 2):
+                m = (A[i - 1] + A[i + 1]) / 2
+                t = A[i + 1][[0, 2]] - A[i - 1][[0, 2]]
+                t /= (np.linalg.norm(t) or 1)
+                nv = np.array([-t[1], t[0]])
+                B[i][[0, 2]] = A[i][[0, 2]] + nv * float((m - A[i])[[0, 2]] @ nv) * 0.5
+                B[i][1] = A[i][1] + (m[1] - A[i][1]) * 0.5
+            A = B
+        if not moved:
+            continue
+        out += 1
+        for i, q in enumerate(d['s']):
+            q[0], q[1], q[2] = round(float(A[i, 0]), 2), round(float(A[i, 1]), 3), round(float(A[i, 2]), 2)
+        for i, q in enumerate(d['s']):
+            a, b = A[max(0, i - 1)], A[min(n - 1, i + 1)]
+            v = np.array([b[0] - a[0], b[2] - a[2]])
+            v /= (np.linalg.norm(v) or 1)
+            q[3], q[4] = round(float(v[0]), 4), round(float(v[1]), 4)
+    return out
 
 
 WIDTH_RATE = 0.15   # (J14) widest change of a kerb's offset per stud along the road (6 studs over 40)
@@ -1139,6 +1409,7 @@ def main():
     chained['deck_butt'] = deck_butt(data)
     chained['deck_smooth'] = deck_smooth(data)
     chained['deck_regrade'] = deck_regrade(data)  # (J15) last: on the final plan's chainage
+    chained['deck_fair'] = deck_fair(data)  # (J16) deck_wobble
     print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}
@@ -1268,6 +1539,7 @@ def main():
     geoms = [unary_union(quads(r['s'], cutd.get(r['name'], ()))) for r in roads]
     tree = STRtree(geoms)
     # 2. medians end before any other carriageway / ring
+    dtree, dsegs = deck_segs(data)
     for ri, r in enumerate(roads):
         s = r['s']
         if not any(q[8] > 0 for q in s):
@@ -1281,6 +1553,12 @@ def main():
             if not hit:
                 for j in tree.query(p.buffer(MED_GAP + q[8])):
                     if names[int(j)] != r['name'] and geoms[int(j)].distance(p) < MED_GAP:
+                        hit = True
+                        break
+            if not hit:  # (J16, QA median_cross 3: medians running into a deck's foot, where the deck is at grade)
+                for j in dtree.query(p.buffer(MED_GAP + q[8])):
+                    g, y, _, of, md = dsegs[int(j)]
+                    if abs(y - q[1]) < AT_GRADE and g.distance(p) < MED_GAP and not (of == r['name'] and md > 0):
                         hit = True
                         break
             if hit:

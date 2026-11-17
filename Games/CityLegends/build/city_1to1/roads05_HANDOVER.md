@@ -1,3 +1,48 @@
+# roads05 handover (18 Nov 2026, twelfth pass: J16, GEOMETRY agent; DATA + QA, no builder change, no Studio)
+
+## J16 geometry -- counts J15 -> J16 (full net, `J16_qa.log`; mouthsim 0 failed of 11,592)
+deck_wobble 24 -> 0, deck_clear (new) 5 -> 1, deck_grade 8 -> 7, deck_foot 0 -> 0, median_cross 3 -> 0, overlap 1 -> 0,
+kerb_cross 17 -> 17, mouth_short real 2, mouth_over real 1. paint_off_centre 1 -> 68 and stack_paint 0 -> 7 come with the
+paint agent's newer roads05_paint.py (not checked by me). Backups: `roads_J15.json`, `qa_J15.json`, `qa_J16a.json`.
+- **Bridge heights (`roads05_fix._deck_chains`, `_rail_water`, `_deck_try`):** the low bridges were ONE structure cut
+  into named decks (Thaketa Bridge -> Set Yone St, Lanmadaw Rd -> Myoma Kyaung St, Sule Pagoda Rd -> Gyophyu / Alan Pya
+  Pagoda Rd, also U Chit Maung -> Banyar Dala, Hledan x3, Bayint Naung Bridge 2 -> Thamaing Station Rd, Khayaypin x3),
+  each pinned to the ground at the joint, next to the railway. Deck ends within max(6, the end's width) are a joint; the
+  two that run on straightest are one chain, regraded as one deck (its own chainage: no sideways jump across a fork);
+  other decks there are fork branches, their joint foot held at the chain's height. Hard needs now: CLEAR_RAIL 13.5
+  (4.5 m) over every OSM railway=rail, CLEAR_WATER 9 (3 m) over river / canal / water areas, ground = the road's own
+  sample heights; away from DECK_FLAT + 10 of the outer feet. Too short: the chain's / branch's FREE feet grow (shared
+  `grow` with the single-deck path, DECK_EXT 48); only when a junction blocks it, the least steeper grade that clears
+  (steep mode no longer chases the old top: that gave 0.27). Results: Lanmadaw / Myoma top 63.1 (grew 4, 7.8%), Sule /
+  Alan Pya 54.4 (7.8%), Gyophyu branch 7.8%, Thaketa / Set Yone 49.1 but 10.8% (Thaketa's foot is at a junction:
+  could grow 1 sample only). QA `deck_clear` (roads05_qa): 1 left = Pinlon Road Flyover over water (short by 8.1; its
+  deck is `kept`: no profile clears the water within 7.8% even grown 48; real bridge? check the satellite).
+  deck_foot skips joints (another deck's end within the width at the same height).
+- **deck_wobble (`roads05_fix.deck_fair`, after deck_regrade):** lateral + vertical Laplacian fairing (ends + 2 kept)
+  only while the QA measure is over 0.15 / 0.14; plan moves ~0.3-2.7 studs.
+- **median_cross 3 -> 0:** step 2 of fix clears a median MED_GAP before a deck segment that is AT GRADE (|y| < 3) unless it
+  is the road's own deck carrying a median; QA median_cross counts a deck only at grade (a median under a deck is fine).
+  `roads05_qa.deck_segs` / `AT_GRADE` shared.
+- **overlap 1 -> 0 (`roads05_absorb`, BESIDE_GAP 3):** Bogyoke Aung San Road #2's middle (0-1 stud beside the road, its
+  ends absorbed) is absorbed too; the road widens over it. Tried and turned off: ALONG_SHARE (pair any road with 25% of
+  its area on another): kerb_cross 17 -> 23.
+- **Deck_grade 7 left (all `short`, blocked by junctions):** Set Yone / Thaketa 0.108, Shwedagon Pagoda Rd 0.088,
+  Thamaing Station Rd #2 0.119, Baho Rd 0.139, Parami Rd 0.088, Pansodan Bridge 0.098 (side lanes: never grows).
+- **Studio test J16 (fc5f8868) builder bugs, geometry side, NOT done:** (1) Bahan / Roundabout 1 regression (holes at
+  Lane #4701 x the ring arm, sawtooth nose, two kerbs): suspects ring_level / osm_joins / absorb near (35390, 37990);
+  (2) kerb stubs inside the Kun Chan x Gyophyu box and a kerb scrap at the double junction (kerb_cross does not list
+  them: kerbsim misses them; check scrub); (3) a 250-stud pavement strip with no road W of the double junction;
+  (4) deck seams: the Sule fork joint (heights should now match: chain regrade) and the Shwedagon landing, slab joints in
+  boxes; (5) Sule Pagoda Rd deck 93 wide = OSM: two one-ways tagged lanes 3 and 4 (x 10.5) + median; the deck takes 4 a
+  side (should be 3 + 4 = ~84). deck_butt's fork widening is NOT what makes it wide (the raw deck is 41 / 52).
+- **Block 2 builder items and corner radii (task items 3, 4) NOT started:** road_gap, kerb_gap, box_hole, fillet_no_kerb,
+  flare_kerb_gap, corner_pave_gap, buried edges, open ends, corner pavement as one curved piece (YangonRoads.buildCorners:
+  with r < walk the pavement's back edge collapses to the corner centre (math.max(r - w, 0)); the straight pavements are
+  trimmed by inCorner piece by piece -> staircase / notch), bigger corner radii from the satellite (Sule Shangri-La / DBS
+  first; CORNER_T 16 gives r = T tan(theta / 2), ~16 at 90 degrees: downtown wants 24-36 studs = 8-12 m).
+- kerb_cross 17: mostly lanes at a shallow crossing with a route that outranks them by "ends on" rank, or lying a few
+  studs along it (Lane #5208, #1426, #3486, #2693, #3130); see `qa.json`. Not fixed.
+
 # Paint (PAINT agent): rules, QA counts, previews and what is left are in `roads05_HANDOVER_paint.md`.
 
 # Studio test harness (J16, 18 Nov 2026, STUDIO TEST agent)

@@ -10,7 +10,8 @@ Types:
   median_box    a median sample on another main road's carriageway (a median through a junction box)
   zebra_median  a zebra or stop line crossing a median
   deck_grade    a deck steeper than 8% anywhere, or a step over 1.5 studs between samples
-  deck_foot     a deck end not on its road's height (more than 0.3 studs off)
+  deck_foot     a deck end not on its road's height (more than 0.3 studs off; a joint with another deck's end is not a foot)
+  deck_clear    (J16) a deck under 4.5 m over a railway (OSM railway=rail) or 3 m over water, away from its feet
   stack_paint   three or more paint polygons piled on one spot (arrows / lines piled at a junction)
 Friday-level junction checks (17 Nov, owner: kerbs lying diagonally across a junction, a median through a junction):
   mouth_short   a road end on another road that stops more than 1 stud short of its carriageway (gap)
@@ -58,6 +59,24 @@ def quads(s, cut=(), lo=6, hi=7, inner=None):
     return out
 
 
+AT_GRADE = 3.0  # (J16) a deck surface this close to a ground sample's height is at grade there (a deck foot)
+
+
+def deck_segs(data):
+    """(J16) every deck segment's carriageway quad, its mean height, deck, road, median: (STRtree, [(Polygon, y, deck
+    name, road name, median half)])"""
+    segs = []
+    for d in data['decks']:
+        s = d['s']
+        for a, b in zip(s, s[1:]):
+            ra, rb = np.array([-a[4], a[3]]), np.array([-b[4], b[3]])
+            pa, pb = np.array([a[0], a[2]]), np.array([b[0], b[2]])
+            P = Polygon([pa - ra * a[6], pa + ra * a[7], pb + rb * b[7], pb - rb * b[6]])
+            if P.is_valid and P.area > 0.01:
+                segs.append((P, (a[1] + b[1]) / 2, d['name'], d['of'], min(a[8], b[8])))
+    return STRtree([x[0] for x in segs]), segs
+
+
 def strip(s, cut, side, walk):
     """the kerb + pavement band on one side: carriageway edge .. edge + walk (side -1 left, +1 right)"""
     out = []
@@ -90,6 +109,8 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
     byname = {r['name']: r for r in data['roads']}
     rank = {r['name']: r['rank'] for r in data['roads']}
     name_i = set(names)
+    deck_names = {d['name'] for d in data['decks']}
+    dtree, dsegs = deck_segs(data)
     lines = {r['name']: LineString([(q[0], q[2]) for q in r['s']]) for r in data['roads'] if len(r['s']) > 1}
     for n_, cs_ in cutd.items():  # a road cut where it crosses a bigger one: both sides of the cut are mouths
         if n_ in byname:
@@ -183,9 +204,17 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
                 hit = None
                 for j in tree.query(p.buffer(s[i][8])):
                     o = names[int(j)]
+                    if o in deck_names:
+                        continue  # (J16) a deck: only where it is at grade (below); a median under a deck is fine
                     if o != n and geoms[int(j)].distance(p) < 0.5:
                         hit = o
                         break
+                if hit is None:
+                    for j in dtree.query(p.buffer(0.5)):
+                        g, y, o, of, md = dsegs[int(j)]
+                        if abs(y - s[i][1]) < AT_GRADE and g.distance(p) < 0.5 and not (of == n and md > 0):
+                            hit = o
+                            break
                 if hit is None and ringU.distance(p) < 0.5:
                     hit = 'ring'
                 if hit:
@@ -256,7 +285,7 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals')}
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals', 'deck_clear')}
     if not PAINT_ONLY:
         junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
         if not OLD:
@@ -475,8 +504,43 @@ def main():
         if r:
             for k, i in ((0, d['from']), (-1, d['to'])):
                 dy = abs(s[k][1] - r['s'][i][1])
-                if dy > 0.3:
+                # (J16) a joint with another deck's end (one bridge in named pieces) is not a foot
+                joint = any(o is not d and any(math.hypot(o['s'][kk][0] - s[k][0], o['s'][kk][2] - s[k][2]) < max(6.0, s[k][6] + s[k][7])
+                                               and abs(o['s'][kk][1] - s[k][1]) < 0.3 for kk in (0, -1)) for o in data['decks'] if len(o['s']) > 1)
+                if dy > 0.3 and not joint:
                     issues['deck_foot'].append(dict(deck=d['name'], dy=round(float(dy), 2), x=round(s[k][0], 1), z=round(s[k][2], 1)))
+    # (J16) deck_clear: a deck under CLEAR_RAIL (4.5 m) over a railway or CLEAR_WATER (3 m) over water, away from its
+    # feet (the abutments stand on the banks): heights against its road's own ground samples
+    if not PAINT_ONLY:
+        from roads05_fix import _rail_water, DECK_FLAT
+        from shapely.geometry import LineString as _LS, Point as _Pt
+        rwt, rw = _rail_water()
+        for d in data['decks']:
+            r = roadby.get(d['of'])
+            if not r or len(d['s']) < 3:
+                continue
+            s = d['s']
+            c = np.r_[0, np.cumsum([math.hypot(b[0] - a[0], b[2] - a[2]) for a, b in zip(s, s[1:])])]
+            gnd = [r['s'][min(len(r['s']) - 1, d['from'] + j)][1] for j in range(len(s))]
+            DL = _LS([(q[0], q[2]) for q in s])
+            worst = None
+            for k in rwt.query(DL):
+                G, clr = rw[int(k)]
+                if not DL.intersects(G):
+                    continue
+                if G.geom_type == 'Polygon':
+                    ccs = [c[j] for j, q in enumerate(s) if G.contains(_Pt(q[0], q[2]))]
+                else:
+                    X = DL.intersection(G)
+                    ccs = [DL.project(P) for P in (list(X.geoms) if hasattr(X, 'geoms') else [X]) if P.geom_type == 'Point']
+                for cc in ccs:
+                    if DECK_FLAT + 10 <= cc <= c[-1] - DECK_FLAT - 10:
+                        m = float(np.interp(cc, c, [q[1] for q in s])) - float(np.interp(cc, c, gnd)) - clr
+                        if m < -0.05 and (worst is None or m < worst[0]):
+                            worst = (m, cc, 'rail' if clr > 10 else 'water')
+            if worst:
+                P = DL.interpolate(worst[1])
+                issues['deck_clear'].append(dict(deck=d['name'], over=worst[2], short_by=round(-worst[0], 1), x=round(P.x, 1), z=round(P.y, 1)))
     json.dump(issues, open(os.path.join(D, 'qa_paint.json' if PAINT_ONLY else 'qa.json'), 'w'), indent=1)
     print(json.dumps({k: len(v) for k, v in issues.items() if k != 'real'}))
     if issues.get('real'):
