@@ -24,7 +24,7 @@ Friday-level junction checks (17 Nov, owner: kerbs lying diagonally across a jun
   overlap       two roads whose carriageways overlap far more than a crossing would (a doubled road)
   rank_dup      two roads with one rank
 """
-import json, os, sys
+import json, math, os, sys
 
 import numpy as np
 from scipy.spatial import cKDTree
@@ -256,7 +256,7 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble')}
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals')}
     if not PAINT_ONLY:
         junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
         if not OLD:
@@ -327,6 +327,40 @@ def main():
             if dw > 0.3 and dw / ds > 0.2:
                 issues['width_wobble'].append(dict(road=r['name'], dw=round(dw, 2), ds=round(ds, 2), x=round(s[i][0], 1), z=round(s[i][2], 1)))
                 break
+    # (J15) seam_step: a continuation (startsOnEnd / endsOnEnd) whose joint sample differs from its host's end sample
+    # by more than 0.1 in height or 0.5 in a kerb offset (a step / notch where two records meet)
+    byname = {r['name']: r for r in data['roads']}
+    for r in (data['roads'] if not PAINT_ONLY else ()):
+        for f, k in (('startsOnEnd', 0), ('endsOnEnd', -1)):
+            h = byname.get(r.get(f)) if isinstance(r.get(f), str) else None
+            if not h:
+                continue
+            q = r['s'][k]
+            e = min((h['s'][0], h['s'][-1]), key=lambda x: (x[0] - q[0]) ** 2 + (x[2] - q[2]) ** 2)
+            if math.hypot(e[0] - q[0], e[2] - q[2]) > 3:
+                continue
+            dy = abs(e[1] - q[1])
+            if dy > 0.1:
+                issues['seam_step'].append(dict(road=r['name'], host=h['name'], dy=round(dy, 2), x=round(q[0], 1), z=round(q[2], 1)))
+    # (J15) median_broken: a divided road's median gone for 1-3 samples between two median runs, away from any
+    # cut / other road's carriageway (the medians step clears 6 studs before a junction: those gaps are real)
+    for r in (data['roads'] if not PAINT_ONLY else ()):
+        s, cut = r['s'], cutd.get(r['name'], set())
+        on = [q[8] > 0.15 for q in s]
+        i = 1
+        while i < len(s) - 1:
+            if on[i - 1] and not on[i]:
+                j = i
+                while j < len(s) and not on[j]:
+                    j += 1
+                if j < len(s) and j - i <= 3 and not any(x in cut for x in range(i - 1, j + 1)):
+                    p = Point(s[i][0], s[i][2])
+                    if not any(names[int(k)] != r['name'] and geoms[int(k)].distance(p) < 8 for k in tree.query(p.buffer(8))):
+                        issues['median_broken'].append(dict(road=r['name'], gap=j - i, x=round(s[i][0], 1), z=round(s[i][2], 1)))
+                i = j
+            i += 1
+    # (J15) signals: the signalled junctions in data.junctions (a count, not a fault)
+    issues['signals'] = [dict(x=j['x'], z=j['z'], arms=len(j['arms'])) for j in data.get('junctions', [])]
     # paint off the asphalt
     med = []
     for r in data['roads']:

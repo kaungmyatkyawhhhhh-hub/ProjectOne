@@ -1,3 +1,74 @@
+# roads05 handover (18 Nov 2026, eleventh pass: J15, GEOMETRY agent; DATA + BUILDER CODE, no Studio test: context)
+
+## J15 geometry (this pass) -- counts J14 -> J15: see the table at the end of this section (`J15_qa.log`)
+- Backups: `roads_unfixed_J14.json` (roads05.py output of J14), `qa_J14.json`.
+- Deck grade (`roads05_fix`): WHY it jumped 7 -> 24 in J14: `deck_regrade` ran BEFORE `deck_smooth`, and the plan
+  smoothing padded each deck end by repeating its end point, which bunched the samples next to it (same heights over
+  a shorter run = steeper; all rows were at deck ends, grade 0.083 / step 0.62). Now: order deck_butt -> deck_smooth ->
+  deck_regrade; the smoothing pads by point reflection (each end sample stays exact, spacing even), 3 passes, its
+  3-stud cap itself smoothed, no ease back to OSM at the ends (that ease was a kink: lateral deck_wobble).
+  `deck_regrade` rewritten: ramps at `DECK_G` 7% (raised to `DECK_MAX` 7.8% only for a crossing's clearance or the
+  old top), the profile rounded by `_vcurve` (two 60-stud box filters on a 2-stud grid = vertical curves, no kink),
+  the old top kept within 1 stud where 7.8% allows (rail / water bridges), clearance DECK_CLEAR over every ground road
+  it crosses. A simple bridge (no side lanes) too short for that GROWS along its road (4 samples an end at a time, up
+  to `DECK_EXT` 48) where no other road ends or crosses within its half + 12; the road's cut list grows with it. Still
+  too short: the least grade over 7.8% that keeps the clearance, rounded (listed as `short` in fix.json chain.deck_regrade).
+- Shwedagon Pagoda Road (`roads05.py` + `roads05_absorb.py`): OSM tags its southbound carriageway `lanes=4` (the whole
+  road's count) and the northbound `lanes=2`, so the merged pair was 22.5 / 43.5 and the Phaya Lan bridge (own width)
+  43.5 a side. A merged pair whose one side has >= 2x the other's lanes takes the smaller count both ways. absorb now
+  picks the bigger road by OSM class first (rank only between equals): Shwedagon (primary) went INTO Lane #427
+  (service) by "ends on" rank in J14; now the lane's alongside samples go into Shwedagon (service never widens).
+- Block 2 (data side): `drop_stubs` (QA stub_in_grass: a road < 30 studs with an end on nothing goes; deck roads /
+  side lanes kept), `width_taper` run again at the end (mouths / butts / repair changed widths after the first run).
+  NOT done: road_gap, kerb_gap, box_hole, fillet_no_kerb, flare_kerb_gap, corner_pave_gap, seam_step, median_broken,
+  buried-edge rule, kerb_cross 14 / median_cross 2 / overlap 1 / open ends, corner pavement as one curved piece.
+- Flyovers (`YangonRoads.luau`): a pier is tested only on its own footprint (12 x 5 + 1 stud), not across the whole
+  deck width (that found the ground side lanes under the deck edges and skipped piers over every median), and
+  `onRoad` treats a spot on a divided road's median (s[9]) as not a lane: piers stand on medians, never in a lane.
+  Ground junctions under flyovers: with v3 data only the deck's own road samples are cut (no 70-stud corridor), so the
+  side lanes x crossing roads are ordinary junctions already; NOT checked in Studio.
+- Downtown P3 (`roads05_fix.downtown_walks`, `median_styles`; builder `M.medianLook.paved / barrier / rail`): each P3
+  road side's pavement runs to the building line (40th percentile of the kerb -> OSM building distance, rays 45 studs,
+  kept <= 30 studs = 10 m; sides with buildings on < half the samples keep their walk). P3 medians: built half <= 2.25
+  -> `medianStyle = "barrier"` (white concrete barrier 2.4 over the kerb top on a paved fill, a railing bar + a post
+  per piece), < 6 -> `"paved"` (terrazzo-grey Concrete fill, paved noses), >= 6 stays grass. shortcut: by width, not by
+  the satellite's colour. NOT done: bigger corner radii at Sule Shangri-La / DBS (builder corners).
+- Traffic lights (`roads05_fix.signals`, last step): `data.junctions` = every junction (a road end on another road, or
+  two centre lines crossing) within 25 m (75 studs) of an OSM highway=traffic_signals node, points within 40 studs one
+  junction, >= 3 arms: `{x, z, signals: true, arms: [{road, i, dir}]}` (arm = sample i leaving the junction + unit
+  direction away). Count: fix.json `signals`. Heads / phases not built yet (street_kit SGL poles at each arm's stop line).
+- NOT run: the Studio J15 test (none of the brief's junction list, no shots), so the builder changes (median styles,
+  piers, wide downtown pavements) are UNTESTED in Studio. The test harness (J7load / J7run / J7queue / J7pick) lives
+  only in earlier transcripts: next pass, rebuild it into `tools/yangon/RoadsTest.luau` first.
+
+- QA (`roads05_qa.py`): new `seam_step` (a continuation's joint vs its host's end: height > 0.1), `median_broken`
+  (a median gone 1-3 samples away from any junction / cut), `signals` (a count of data.junctions).
+- Counts J14 -> J15 (full net P1-P12, `J15_qa.log`; mouthsim 0 failed of 11,594): deck_grade 24 -> 8, deck_wobble
+  29 -> 24, stub_in_grass 9 -> 0 (10 stubs dropped), width_wobble 3 -> 0, kerb_cross 14 -> 17, median_cross 2 -> 3,
+  overlap 1 -> 1, paint_off_centre 2 -> 1, mouth_short real 2, mouth_over real 1, seam_step 0, median_broken 0,
+  signalled junctions 247 (291 OSM signal nodes, 1,038 arms), downtown pavement sides widened 354, P3 medians barrier
+  6 / paved 2. Shwedagon Pagoda Road: 21 / 21 two-way, 27 / 27 on the divided stretch and on the Phaya Lan bridge (was
+  22.5 / 43.5), no absorb into Lane #427.
+- Left in deck_grade 8 (all `short`, smoothed steep profile kept for clearance): Bayint Naung Bridge 2 (0.088, grew
+  48 at one end), Shwedagon Pagoda Road (0.088, could not grow: junctions at both feet), Thamaing Station Road #2
+  (0.138), Baho Road (0.169), Parami Road (0.088), Pansodan Bridge (0.098, has side lanes: never grows), Khayaypin
+  Road (0.128), Hledan Pass Over Bridge (0.098). deck_wobble 24: now mostly LATERAL 0.2-0.6 a few samples in from a
+  deck end (the plan smoothing's 3-stud cap + OSM corners); vertical rows only 0.15-0.153 (threshold 0.15).
+- PROBLEM found after the run, NOT fixed (code tried and reverted, untested): where 7.8% cannot keep a bridge's old
+  top, deck_regrade now LOWERS it (Thaketa Bridge -17.8, Myoma Kyaung -13.4, Lanmadaw -13.2, Set Yone -10.8, Alan Pya
+  -10.3, Gyophyu -9.9, Sule Pagoda -7.7; no road under them). Over rail / water that may be too low: next pass, grow
+  those decks too (treat "top kept" as a need that triggers growth, fall back to the lowered top only when growth is
+  blocked), and check the railway clearance with the rail job.
+- kerb_cross +3 / median_cross +1: not looked at (suspects: the wider downtown pavements, the Shwedagon re-pairing).
+
+## Next (in order) -- plan is NOT ready for owner approval
+1. Studio J15 test (main "City Legends" 121430381830562, no-terrain builder copy, lifted, scratch folder): the
+   handover junctions + Yangon Central, Kun Chan x Gyophyu, a double junction, Sule Shangri-La corner, a downtown
+   straight (barrier median + pavement to the facades), 2 under-flyover junctions (piers on medians), a deck run
+   (Shwedagon at Phaya Lan: one width over the railway); overview / close-up / driver's-eye each.
+2. Block 2 QA rules (list above) + corner pavement as one curved piece; Sule corner radii.
+3. The decks still `short` (fix.json): longer decks need the ground profile fixed (Arzani's feet differ ~53 studs).
+
 # roads05 handover (18 Nov 2026, tenth pass: J14, DATA + QA RULES ONLY: no Studio test this pass, context ran out)
 
 ## J14 (this pass) -- counts: see `J14_qa.log` (filled in below); backup of the J13 data: `roads_J13.json`, `qa_J13.json`
