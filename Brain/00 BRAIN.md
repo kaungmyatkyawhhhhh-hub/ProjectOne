@@ -56,6 +56,7 @@ Use the method when its trigger fits. Each one lists its steps, its tools and an
 ## Rules for Claude
 - Before planning any game work: check this note's Methods table. If a method fits, follow it (and say which one in one line).
 - After any owner correction: add a Lessons entry (what felt bad / cause / fix / rule).
+- If the correction is about a skill's output: also write the fix into that skill and its `Brain/Skills/<name>/` copy, plus a line in `Brain/Skills/00 Skills index.md` (owner, 18 Nov).
 - New repeatable way of thinking from the owner → a new method note from [[Brain/Method template]], add it to the table, and offer to make it a skill.
 - Keep this index short: details live in the method notes.
 - **Skills live in the vault too:** every new or updated skill is copied to [[Brain/Skills/00 Skills index|Brain/Skills]] (`<name>/SKILL.md`) in the same turn, and the index is updated (owner, 13 Nov 2026).
