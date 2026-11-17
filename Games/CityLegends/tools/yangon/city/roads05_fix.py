@@ -1499,6 +1499,80 @@ def deck_joints(data):
     return n
 
 
+def crossings(data):
+    """(J19, owner's drawn corners at Sule Pagoda Rd x Bogyoke: a crossroads where neither road ends got square
+    corners; YangonRoads.findCorners only rounded mouths) every at-grade crossing of two built centre lines, both
+    running on past the other's carriageway (an end on it is a mouth): data.crossings = [[small, i, big, j, x, z]]
+    (small = the road with the larger rank number; i / j = its / big's sample nearest the crossing)"""
+    from shapely.geometry import LineString
+    cutd = {k: set(v) for k, v in data['cut'].items()}
+    dk = {}
+    for d in data['decks']:
+        dk.setdefault(d['of'], set()).update(range(d['from'], d['to'] + 1))
+    rings = [(g['c'][0], g['c'][2], g['r_out'] + 12) for g in data['roundabouts']]
+    R = [r for r in data['roads'] if r['kind'] in ('route', 'street', 'side') and len(r['s']) > 2]
+    L = [LineString([(q[0], q[2]) for q in r['s']]) for r in R]
+    tree = STRtree(L)
+    out, seen = [], set()
+
+    def near(r, x, z):
+        return min(range(len(r['s'])), key=lambda i: (r['s'][i][0] - x) ** 2 + (r['s'][i][2] - z) ** 2)
+
+    for a, ra in enumerate(R):
+        for b in tree.query(L[a]):
+            b = int(b)
+            if b <= a:
+                continue
+            rb = R[b]
+            X = L[a].intersection(L[b])
+            for p in getattr(X, 'geoms', [X]):
+                if p.geom_type != 'Point' or any(math.hypot(p.x - cx, p.y - cz) < rr for cx, cz, rr in rings):
+                    continue
+                ia, ib = near(ra, p.x, p.y), near(rb, p.x, p.y)
+                qa, qb = ra['s'][ia], rb['s'][ib]
+                bad = abs(qa[1] - qb[1]) > 1.5
+                for r, i, o, j in ((ra, ia, rb, ib), (rb, ib, ra, ia)):
+                    c, d = cutd.get(r['name'], set()), dk.get(r['name'], set())
+                    reach = max(o['s'][j][6], o['s'][j][7]) + 16  # runs on past the other's kerb both ways
+                    rng = [k for k in range(max(0, i - 40), min(len(r['s']), i + 41))
+                           if math.hypot(r['s'][k][0] - p.x, r['s'][k][2] - p.y) < reach]
+                    if not rng or rng[0] == 0 or rng[-1] == len(r['s']) - 1 or any(k in c or k in d for k in rng):
+                        bad = True
+                if bad:
+                    continue
+                small, big, i, j = (ra, rb, ia, ib) if ra['rank'] > rb['rank'] else (rb, ra, ib, ia)
+                key = (small['name'], big['name'], i // 6)
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append([small['name'], i + 1, big['name'], j + 1, round(p.x, 1), round(p.y, 1)])
+    data['crossings'] = out
+    return len(out)
+
+
+def walk_match(data):
+    """(J19, owner "pavements not smoothly connected", Kun Chan x Gyophyu: downtown_walks gives each record its own
+    walk, so a road carried on by another record changed pavement width in one step) both records of every
+    continuation joint take the NARROWER walk on each side (the wider one, spread along a chain, paved under buildings
+    and made Kun Chan Road's 28.7 slab longer), until no joint changes (a chain ends up one width); forks: the
+    straightest record only"""
+    from roads05_qa import cont_pairs
+    n = 0
+    for _ in range(50):
+        ch = 0
+        for r, h, q, e, same in list(cont_pairs(data)):
+            for a, b in (('walkL', 'walkL'), ('walkR', 'walkR')) if same else (('walkL', 'walkR'), ('walkR', 'walkL')):
+                w = min(r.get(a) or 7.5, h.get(b) or 7.5)
+                for o, k in ((r, a), (h, b)):
+                    if (o.get(k) or 7.5) > w + 1e-6:
+                        o[k] = w
+                        ch += 1
+        n += ch
+        if not ch:
+            break
+    return n
+
+
 def corner_radii(data):
     """(J18) downtown main roads (OSM trunk .. tertiary, not links) carry cornerR: where two of them meet the builder's
     round corner gets that radius (YangonRoads.buildCorners) instead of r = CORNER_T tan(theta / 2) (~16 at 90 deg)"""
@@ -1792,6 +1866,7 @@ def main():
     print('islands', st['islands'])
     st['stubs_dropped'] = drop_stubs(data)
     st['downtown_walks'] = downtown_walks(data)
+    st['walk_match'] = walk_match(data)  # (J19) after every walk change
     st['corner_radii'] = corner_radii(data)
     st['median_styles'] = median_styles(data)
     st['width_taper_end'] = width_taper(data)  # (J15) again: mouths / butts / repair changed widths after the first
@@ -1799,6 +1874,7 @@ def main():
     st['width_taper_unfold'] = width_taper(data)  # (J19) dropped samples shortened chords: ease the steps again
     st['deck_joints'] = deck_joints(data)  # (J18) last width / direction change before the checks
     st['checks'] = check(data)
+    st['crossings'] = crossings(data)  # (J19) after every index change: 1-based sample indices for Luau
     st['signals'] = signals(data)  # last: arms keep their sample indices
     txt = json.dumps(data, separators=(',', ':'))
     open(os.path.join(D, 'roads.json'), 'w', encoding='utf-8').write(txt)

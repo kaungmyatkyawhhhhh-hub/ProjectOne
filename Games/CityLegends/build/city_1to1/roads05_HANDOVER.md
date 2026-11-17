@@ -1,3 +1,48 @@
+# roads05 handover (18 Nov 2026, fifteenth pass: J19, GEOMETRY agent; DATA + BUILDER + QA + Studio; stopped: context)
+
+## J19 geometry -- counts J18 -> J19 (full net, `J19_qa.log`; `J19a_qa.log` = item 1 alone)
+width_wobble 14 -> 0, kerb_cross 13 -> 12, pave_width_jump (new) 200 -> 0, pave_step (new) 0 -> 0, centre_fold 1 -> 1,
+mouthsim 0 failed of 11,564; overlap / median_cross / zero_width / rank_dup / seam_step / deck_wobble 0; deck_clear 1,
+deck_grade 7, mouth_short real 3, mouth_over real 1, stack_paint 8 (paint): unchanged. Backup `qa_J18.json`.
+- **Item 1 width_wobble 14 -> 0 (commit 2bbf686f):** `width_taper` runs again right after `unfold` (dropped samples
+  shortened chords: Pyay #6 / #2, Min Nandar #2, Parami, Hledan #3, Kun Chan); `deck_joints` no longer cuts the joint
+  sample in one step: walking away from the deck each ground sample is capped at WIDTH_RATE per stud (Kabar Aye 53 -> 24
+  over ~200 studs, Bayint Naung Bridge 2, Pansodan, Nga Moe Yeik, E Horse Race Course, Lay Daungkan #2, Shwedagon,
+  Bo Min Gaung). centre_fold stays 1, mouthsim 0 failed.
+- **Item 2 seams (Studio-measured, Kun Chan x Gyophyu):** a ray grid (0.5 studs, jump beyond the local slope) showed the
+  lines were STEPS, not gaps: Kun Chan x Gyophyu is a CROSSING (Gyophyu x Kun Chan Road #4) and both carriageways ran
+  through the box 0.05 apart (crossing line + z-fight). Fix (YangonRoads): a crossing's smaller road lays no slab on the
+  bigger one (`noSlab` from its crossing sample to k each way) and `buildRoads` lays its two arms as mouths cut on the
+  bigger road's kerb line (`M.crossings`). Gyophyu|Kun Chan #4 seam points 26 -> 3. Fills: no "flatten" on fill
+  triangles any more (it stepped them). **Left:** Lane #3414 lies on Kun Chan Road #3 within 0.05 for ~40 studs (both
+  start on Kun Chan Road's end: a fork; z-fight arcs in the box); single-sample cracks between wedge triangles (rays fall
+  through, 6 spots in Fills, a few in Gyophyu): the fills' outline heights jump (0.5 over 6 studs) and steep triangles are
+  skipped by `Roads.sliver`. Next: grade-clamp fill outline heights; fork overlap = drop the smaller fork record's slab
+  where it lies on the bigger one (or absorb the fork in data).
+- **Item 3 crossing corners (new builder feature):** `roads05_fix.crossings` -> `data.crossings` [[small, i, big, j, x, z]]
+  (1-based; at-grade, both run on past the other's kerb by 16, no cut / deck / ring): 1,726. `YangonRoads.crossMouths`
+  makes two mouth-like records per crossing (each way from the crossing sample to its first sample off the bigger road);
+  `findCorners` treats them like mouths (four corners: kerb arc, asphalt fillet, pavement arc; cornerR 30 = 10 m where
+  both roads carry it, else CORNER_T; the 2T+4 clamp skips the same crossing's corners across the road). Studio: Sule
+  Pagoda Rd x Bogyoke r 30 / 30 / 30 / 15.6 (the SW one is clamped by Sule Pagoda Road #5's slip corner); Lake Kan Road x
+  U Shwe Gwun Street 4 corners r 14-17; 221 crossings / 420 crossing corners in the 16 test spots, no mouth failures.
+  Street radii are CORNER_T (r ~16 at 90 deg), NOT measured per corner on the satellite.
+- **ADD (owner, "pavements not smoothly connected", ref `Owner ref - pavements not smoothly connected (new build).webp`
+  = Kun Chan x Gyophyu):** cause: `downtown_walks` gives each record its own walk, so a road split into records changed
+  pavement width in one step (Kun Chan Road walkR 28.7 = the raised grey slab top right; Lane #3414 4.0 beside 7.5).
+  `roads05_fix.walk_match` (after downtown_walks): both records of every continuation joint take the NARROWER walk per
+  side until stable (forks: only the straightest record pairs); 98 sides changed. New QA `pave_width_jump` (joint walk
+  differs > 0.5) and `pave_step` (joint height > 0.1) via `roads05_qa.cont_pairs`. Studio (Kun Chan, after): the slab
+  is gone; pavement steps left: the crossing's corner pavement vs Kun Chan Road #4's straight pavement 0.11-0.13 (corner
+  yB vs the straight band's height) and one 0.54 inside Kun Chan Road #4 (not traced). The green block bottom right is a
+  building roof, not a road part. Corner arcs shorter than 20 studs still change walk wA -> wB over the arc.
+- **NOT done:** item 4 kerb_cross (12 left, list in qa.json), item 5 block 2 rules (road_gap, kerb_gap, box_hole,
+  fillet_no_kerb, flare_kerb_gap, corner_pave_gap, buried edges), item 6 Pinlon Road Flyover top over Pazundaung Creek
+  (`deck_regrade` has no "top at the water line" input yet: add one, then check on the satellite).
+- Shots: `City Legends/2026-11-18 roads05 J19 geo - Sule Shangri-La crossroads.jpg`, `... - Lake Kan Road x U Shwe Gwun
+  Street crossroads.jpg`, `... - Kun Chan x Gyophyu (seams).jpg` (after walk_match). Studio: main "City Legends", scratch
+  cleaned, saved (version 1199), lock released; asset 133014134133489 rev 168 = the J19 test pack.
+
 # roads05 handover (18 Nov 2026, fourteenth pass: J18, GEOMETRY agent; DATA + BUILDER + QA; stopped: context)
 
 ## J18 geometry -- counts J17 -> J18 (full net, `J18_qa.log`; mouthsim 0 failed of 11,564)

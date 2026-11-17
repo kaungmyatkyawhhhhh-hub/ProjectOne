@@ -238,6 +238,28 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
                 issues['overlap'].append(dict(a=a, b=b, area=round(inter), x=round(c.x, 1), z=round(c.y, 1)))
 
 
+def cont_pairs(data):
+    """(J19) continuation joints: (road, host, joint sample, same direction?) for startsOnEnd / endsOnEnd within 3 studs"""
+    byname = {r['name']: r for r in data['roads']}
+    best = {}
+    for r in data['roads']:
+        for f, k in (('startsOnEnd', 0), ('endsOnEnd', -1)):
+            h = byname.get(r.get(f)) if isinstance(r.get(f), str) else None
+            if not h:
+                continue
+            q = r['s'][k]
+            ke = min((0, -1), key=lambda j: (h['s'][j][0] - q[0]) ** 2 + (h['s'][j][2] - q[2]) ** 2)
+            e = h['s'][ke]
+            if math.hypot(e[0] - q[0], e[2] - q[2]) <= 3:
+                same = ke != k  # start on the host's end (or end on its start) runs the same way
+                al = abs(q[3] * e[3] + q[4] * e[4])
+                # (a fork: several records on one host end: only the one running on most straight carries its pavement)
+                if al > best.get((h['name'], ke), (-1,))[0]:
+                    best[(h['name'], ke)] = (al, r, h, q, e, same)
+    for v in best.values():
+        yield v[1:]
+
+
 def folds(s):
     """(J18, paint agent's roads05_paint.folds) samples where a road's centre line steps back: a chord against the
     sample's own direction, or two chords turning more than ~107 degrees"""
@@ -303,7 +325,7 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals', 'deck_clear', 'centre_fold')}
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals', 'deck_clear', 'centre_fold', 'pave_width_jump', 'pave_step')}
     if not PAINT_ONLY:
         junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
         if not OLD:
@@ -393,6 +415,16 @@ def main():
             dy = abs(e[1] - q[1])
             if dy > 0.1:
                 issues['seam_step'].append(dict(road=r['name'], host=h['name'], dy=round(dy, 2), x=round(q[0], 1), z=round(q[2], 1)))
+    # (J19, owner "pavements not smoothly connected", Kun Chan x Gyophyu) pave_width_jump: a continuation joint whose
+    # pavement (walkL / walkR, constant along a record) changes by more than 0.5 on a side: a step with no taper;
+    # pave_step: the joint's pavement (on the kerb-line height) more than 0.1 off its host's
+    for r, h, q, e, same in (cont_pairs(data) if not PAINT_ONLY else ()):
+        for a, b in (('walkL', 'walkL'), ('walkR', 'walkR')) if same else (('walkL', 'walkR'), ('walkR', 'walkL')):
+            wa, wb = r.get(a) or 7.5, h.get(b) or 7.5
+            if abs(wa - wb) > 0.5:
+                issues['pave_width_jump'].append(dict(road=r['name'], host=h['name'], side=a, w=wa, host_w=wb, x=round(q[0], 1), z=round(q[2], 1)))
+        if abs(e[1] - q[1]) > 0.1:
+            issues['pave_step'].append(dict(road=r['name'], host=h['name'], dy=round(abs(e[1] - q[1]), 2), x=round(q[0], 1), z=round(q[2], 1)))
     # (J15) median_broken: a divided road's median gone for 1-3 samples between two median runs, away from any
     # cut / other road's carriageway (the medians step clears 6 studs before a junction: those gaps are real)
     for r in (data['roads'] if not PAINT_ONLY else ()):

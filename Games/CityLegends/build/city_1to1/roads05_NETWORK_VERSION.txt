@@ -1,1 +1,2 @@
 25569611 2026-11-17 16:10 geometry J18: roads.json from fix (merges Bahan Road #2 + Lane #8112 into Bahan Road; side_clear 47 lanes incl. Lane #7108; unfold 103; deck_joints 46; downtown cornerR 30 on 70 roads); paint.json from the pipeline run with the paint code of that moment; QA J18_qa.log
+2bbf686f 2026-11-17 18:13 geometry J19: roads.json from fix (re-taper after unfold, deck_joints taper: width_wobble 0; walk_match 98 sides; data.crossings 1726 for the builder's crossing corners / crossing mouths); paint.json from the pipeline run; QA J19_qa.log

@@ -1028,12 +1028,62 @@ local function cross2(ax: number, az: number, bx: number, bz: number): number
 	return ax * bz - az * bx
 end
 
+-- (J19, owner's drawn corners at Sule Pagoda Rd x Bogyoke) a crossroads (data.crossings: neither road ends) gives
+-- the smaller road two mouth-like records, one each way from the crossing sample i0 to its first sample k wholly off
+-- the bigger road; findCorners finds their four corners like a mouth's, buildRoads lays their mouths.
+function M.crossMouths(): { any }
+	local out = {}
+	for xi, x in M.data.crossings or {} do
+		local A, B = M.R[x[1]], M.R[x[3]]
+		if not (A and B and M.noSlab[x[1]] and M.noSlab[x[3]]) then
+			continue
+		end
+		for _, step in { 1, -1 } do
+			local m = { road = x[1], i0 = x[2], step = step, big = B, bigI = x[4], on = x[3], xid = xi }
+			local k = x[2]
+			while k and k >= 1 and k <= A.n do
+				local lx, lz = edgeXZ(A, k, -1)
+				local rx, rz = edgeXZ(A, k, 1)
+				local all = not M.cut[x[1]][k]
+				for t = 0, 8 do
+					local px, pz = lx + (rx - lx) * t / 8, lz + (rz - lz) * t / 8
+					local b = M.near(px, pz, 3)[B.index]
+					if b and polyDist(B, b[2], px, pz) <= M.halfAt(B, b[2]) + 0.5 then
+						all = false
+						break
+					end
+				end
+				if all then
+					break
+				end
+				k += step
+			end
+			if k and k >= 1 and k <= A.n and math.abs(k - x[2]) <= 40 then
+				m.k = k
+				-- (J19, Kun Chan x Gyophyu seam lines: both carriageways ran through the box at slightly different
+				-- heights: crossing lines and z-fight. The smaller road lays no slab on the bigger one; buildRoads
+				-- lays each arm's mouth polygon cut on the bigger road's kerb line, as at a T)
+				for i = math.min(x[2], k), math.max(x[2], k) - 1 do
+					M.noSlab[x[1]][i] = true
+				end
+				table.insert(out, m)
+			end
+		end
+	end
+	return out
+end
+
 function M.findCorners()
 	M.corners, M.cornerSpan, M.cornerGrid, M.cutPair = {}, {}, {}, {}
 	local cands = {}
 	local ringPts = nil
 	local pass = {}
-	for mi, m in M.mouths do
+	local mouths = table.clone(M.mouths)
+	M.crossings = M.crossMouths()
+	for _, m in M.crossings do
+		table.insert(mouths, m)
+	end
+	for mi, m in mouths do
 		if mi % 100 == 0 then
 			M.step("findCorners " .. mi .. " / " .. #M.mouths)
 		end
@@ -1138,11 +1188,11 @@ function M.findCorners()
 			if sideP[side] then
 				local key = math.floor(sideP[side].px / 48) .. "," .. math.floor(sideP[side].pz / 48)
 				allP[key] = allP[key] or {}
-				table.insert(allP[key], { mi = mi, px = sideP[side].px, pz = sideP[side].pz })
+				table.insert(allP[key], { mi = mi, xid = mouths[mi].xid, px = sideP[side].px, pz = sideP[side].pz })
 			end
 		end
 	end
-	for mi, m in M.mouths do
+	for mi, m in mouths do
 		local sideP = pass[mi]
 		if not sideP then
 			continue
@@ -1188,7 +1238,8 @@ function M.findCorners()
 			for dx = -1, 1 do
 				for dz = -1, 1 do
 					for _, q in allP[(gx + dx) .. "," .. (gz + dz)] or {} do
-						if q.mi ~= mi then
+						-- (J19: a crossing's corners across the bigger road are not on the same kerb)
+						if q.mi ~= mi and not (m.xid and q.xid == m.xid) then
 							local gap = hyp(q.px - c.px, q.pz - c.pz)
 							if gap < 2 * T + 4 then
 								T = math.min(T, 0.45 * gap)
@@ -1326,7 +1377,7 @@ function M.findCorners()
 		if M.inIsland(corner.px + (corner.ox - corner.px) / gl * 1.5, corner.pz + (corner.oz - corner.pz) / gl * 1.5, "fills") then
 			continue
 		end
-		local m, side, ox, oz, tax, taz, tbx, tbz = M.mouths[corner.mouth], corner.side, corner.ox, corner.oz, corner.tax, corner.taz, corner.tbx, corner.tbz
+		local m, side, ox, oz, tax, taz, tbx, tbz = mouths[corner.mouth], corner.side, corner.ox, corner.oz, corner.tax, corner.taz, corner.tbx, corner.tbz
 		table.insert(M.corners, corner)
 		-- (P3, 16 Nov: inCorner / ownedBy ran over every corner of the network for each piece; a 64-stud
 		-- grid of the corners each spot can see: the wedge (O, rout) and the 60 studs past TA)
@@ -1907,7 +1958,9 @@ function M.buildIslands(which: string?)
 				local a, b, c3 = tr[1], tr[2], tr[3]
 				local span = math.max(hyp(a.X - b.X, a.Z - b.Z), hyp(b.X - c3.X, b.Z - c3.Z), hyp(c3.X - a.X, c3.Z - a.Z))
 				local lo, hi = math.min(a.Y, b.Y, c3.Y), math.max(a.Y, b.Y, c3.Y)
-				if hi - lo > 0.15 * span + 0.02 then
+				-- (J19: never on a fill: its triangles share their corners, a flattened one stepped up to 1.4 off its
+				-- neighbours: the seam lines across the Kun Chan box)
+				if which ~= "fills" and hi - lo > 0.15 * span + 0.02 then
 					local y = (a.Y + b.Y + c3.Y) / 3
 					a, b, c3 = Vector3.new(a.X, y, a.Z), Vector3.new(b.X, y, b.Z), Vector3.new(c3.X, y, c3.Z)
 				end
@@ -2282,7 +2335,11 @@ function M.buildRoads(names: { string })
 		boxMid = M.box ~= nil,
 	})
 	local lines = { string.format("Roads.build: %d parts", count) }
-	for _, m in M.mouths do
+	local all = table.clone(M.mouths)
+	for _, m in M.crossings or {} do
+		table.insert(all, m)
+	end
+	for _, m in all do
 		local e = M.R[m.road].s[m.i0]
 		if only[m.road] and own(e[1], e[3]) then
 			local mf = parent:FindFirstChild(m.road)

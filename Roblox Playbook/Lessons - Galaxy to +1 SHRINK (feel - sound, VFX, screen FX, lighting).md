@@ -646,3 +646,11 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Rule:** a "merge" (a one-way converging onto the road it ends on) is its own case: pair by "my end lies on you", absorb the gore under 2 kerbs + 2, and run a second pass for slips that ended on the absorbed road.
 - **What happened (3):** the Sule Shangri-La corners the owner drew are where two roads CROSS; the builder rounds corners only where a road ENDS on another (mouths). A bigger radius setting cannot reach them.
 - **Rule:** before tuning a builder number for an owner ref, check which builder path draws that spot.
+
+### 2026-11-18 City Legends roads05 J19 (geometry: width_wobble, crossing corners, seams, pavements)
+- **What happened:** two J18 passes (drop fold-back samples, cut a road's flare to the deck at a deck joint) each changed widths after the width-taper pass, so QA width_wobble went 0 -> 14.
+- **Rule:** any pass that edits widths or deletes samples runs BEFORE the taper pass, or the taper runs again after it; a cut at one sample is a taper walked outward, never a one-sample step.
+- **What happened (2):** the "seam lines" across the Kun Chan box were not cracks: both crossing roads laid full carriageway through the box at heights 0.05 apart (crossing lines, z-fight). A raycast grid with a second-difference test told steps, slopes and cracks apart; a plain neighbour difference counted slopes as steps.
+- **Rule:** at a crossing only the bigger road lays the box; the smaller road's arms are built as mouths cut on the bigger road's kerb line. Measure a seam in Studio (grid of rays, jump beyond the local slope) before changing builder code.
+- **What happened (3, owner "pavements not smoothly connected"):** a per-record setting (downtown pavement width) made a road change pavement width in one step wherever OSM splits the road into two records (Kun Chan Road 28.7 next to 7.5).
+- **Rule:** any per-record width must match across continuation joints (take the narrower so no pavement runs under a building); QA `pave_width_jump` / `pave_step` watch it.
