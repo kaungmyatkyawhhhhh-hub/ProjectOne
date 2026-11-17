@@ -10,6 +10,7 @@
   - `mockups/`: the A/B and v2 mockups
   - `scripts/`: the cut and compose Python
   - `chatgpt-prompts.txt`: the 4 exact prompts
+  - `scripts/EvolutionUI.luau`: a copy of the final in-game UI script, in case the unsaved place is lost
 
 ## Style block (reuse for any new piece)
 The piece list is in the prompts. This is the style part:
