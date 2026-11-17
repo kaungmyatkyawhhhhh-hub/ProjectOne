@@ -654,3 +654,13 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Rule:** at a crossing only the bigger road lays the box; the smaller road's arms are built as mouths cut on the bigger road's kerb line. Measure a seam in Studio (grid of rays, jump beyond the local slope) before changing builder code.
 - **What happened (3, owner "pavements not smoothly connected"):** a per-record setting (downtown pavement width) made a road change pavement width in one step wherever OSM splits the road into two records (Kun Chan Road 28.7 next to 7.5).
 - **Rule:** any per-record width must match across continuation joints (take the narrower so no pavement runs under a building); QA `pave_width_jump` / `pave_step` watch it.
+
+### 2026-11-18 City Legends roads05 J20 (geometry: forks, crossing kerbs, corner arcs in the road, flyover crest)
+- **What happened:** Lane #3414 lay on Kun Chan Road #3 for ~40 studs: both "carried on" from Kun Chan Road's widened end, 25-31 studs off its end sample, so the fork test (joint within 3 studs) never saw them, and the alignment tie went to the record listed first.
+- **Rule:** a fork is every record joining one host end within that end's half width + 3; the widest record carries on, a record lying inside it is trimmed back and starts as a mouth on it. Break ties toward the wider road.
+- **What happened (2):** QA kerb_cross counted 10 kerbs at crossings that the builder already removes (J19 made crossing arms mouths), so the count looked stuck at 12.
+- **Rule:** when the builder learns a new junction type, teach the QA's builder simulation the same day, or the QA reports work that is already done.
+- **What happened (3, owner "random pavements in the middle" by Yangon Central):** a crossing corner's arc landed on another road's asphalt and was built as a floating quarter-ring of kerb and pavement; the stray clean-up probed from a WedgePart's box centre, which lies on the triangle's long side, so curved pieces escaped it.
+- **Rule:** before building any corner, test its whole kerb arc and pavement against every carriageway and gore, and drop it if any point is on asphalt (QA corner_in_road). Clean-up probes start at a triangle's centroid, never at a wedge's box centre.
+- **What happened (4):** the Pinlon Road Flyover's water clearance was asked at every deck sample inside the OSM river area, which runs up to the east foot, so no ramp could give it and the deck kept OSM's profile (peak 200 studs before the creek).
+- **Rule:** a water or rail AREA asks for its clearance at the middle of the deck's run over it (the channel), and the crest goes there; the feet stand on the banks.

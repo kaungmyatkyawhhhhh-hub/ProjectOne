@@ -990,6 +990,7 @@ end
 -- the other): the kerb follows the arc from TA to TB, asphalt fills the space between the arc and P, the
 -- pavement follows the arc on the inside. r = T * tan(theta / 2), so every corner starts about T studs
 -- before P: a narrow nose (the New Road fork) gets a small r, a wide elbow a big one.
+M.TAPER_MIN = 20 -- (J20) a pavement changes width over this many studs at least
 M.CORNER_T = 16 -- studs from P to where the curve starts, road on road...
 M.CORNER_T_RING = 22 -- ...and on the roundabout
 M.CORNER_R_MIN = 3 -- (J9) a ring corner's smallest radius...
@@ -1075,6 +1076,7 @@ end
 
 function M.findCorners()
 	M.corners, M.cornerSpan, M.cornerGrid, M.cutPair = {}, {}, {}, {}
+	M.cornerInRoadList, M.cornerInRoadDropped = {}, 0
 	local cands = {}
 	local ringPts = nil
 	local pass = {}
@@ -1279,13 +1281,19 @@ function M.findCorners()
 				-- at TA / TB. It now runs from this road's walk at TA to the other road's at TB.)
 				local wA = (if side < 0 then S.walkL else S.walkR) or M.WALK
 				local wB = if m.ring then M.WALK else ((if c.sb < 0 then m.big.walkL else m.big.walkR) or M.WALK)
+				-- (J20, owner "pavements not smoothly connected": an arc under TAPER_MIN changed wA -> wB in a few studs)
+				-- a short arc keeps the wider walk; buildCorners tapers the narrower straight down over TAPER_MIN
+				local wA0, wB0 = wA, wB
+				if math.abs(sweep) * r < M.TAPER_MIN and math.abs(wA - wB) > 0.3 then
+					wA, wB = math.max(wA0, wB0), math.max(wA0, wB0)
+				end
 				local corner = {
 					road = m.road, side = side, on = m.on, ring = m.ring, ringR = m.ringR, big = m.big, sb = c.sb,
 					r = r, theta = theta, ox = ox, oz = oz, px = c.px, pz = c.pz,
 					tax = tax, taz = taz, tbx = tbx, tbz = tbz, aA = aA, sweep = sweep,
 					ePts = c.ePts, bPts = c.bPts, ka = c.ka, ta = c.ta, kb = c.kb, tb = c.tb, sa = sa, sta = sta, sbb = sbb, stb = stb,
 					rin = math.max(r - math.max(wA, wB), 0) - 0.3, rout = hyp(c.px - ox, c.pz - oz) + M.WALK + 2, err = math.max(math.abs(dA - r), math.abs(dB - r)),
-					wA = wA, wB = wB,
+					wA = wA, wB = wB, wA0 = wA0, wB0 = wB0,
 				}
 				corner.mouth, corner.iP, corner.iT = mi, c.ePts[c.ka].i + c.ta * m.step, c.ePts[sa].i + sta * m.step
 				return corner
@@ -1377,6 +1385,14 @@ function M.findCorners()
 		if M.inIsland(corner.px + (corner.ox - corner.px) / gl * 1.5, corner.pz + (corner.oz - corner.pz) / gl * 1.5, "fills") then
 			continue
 		end
+		-- (J20, owner "random pavements in the middle" of the Kun Chan x Gyophyu x Sule Pagoda junction: a crossing
+		-- corner whose arc landed on another road's asphalt) a corner is built only if its whole kerb arc and pavement
+		-- lie off every road's carriageway (0.5 in) and off the asphalt gores; otherwise it is dropped (QA corner_in_road)
+		if M.cornerInRoad(corner) then
+			M.cornerInRoadDropped = (M.cornerInRoadDropped or 0) + 1
+			table.insert(M.cornerInRoadList, string.format("%s %s (%.0f, %.0f)", corner.road, corner.on or "?", corner.px, corner.pz))
+			continue
+		end
 		local m, side, ox, oz, tax, taz, tbx, tbz = mouths[corner.mouth], corner.side, corner.ox, corner.oz, corner.tax, corner.taz, corner.tbx, corner.tbz
 		table.insert(M.corners, corner)
 		-- (P3, 16 Nov: inCorner / ownedBy ran over every corner of the network for each piece; a 64-stud
@@ -1405,6 +1421,36 @@ function M.findCorners()
 		end
 	end
 	return #M.corners
+end
+
+-- (J20) QA corner_in_road: true when a point of the corner's kerb arc or pavement (middle and back line) lies 0.5 or
+-- more inside any road's carriageway or in an asphalt gore (data.fills)
+M.cornerInRoadList = {}
+function M.cornerInRoad(c): boolean
+	local w = math.max(c.wA or M.WALK, c.wB or M.WALK)
+	-- (the corner's own two roads: built kerb lines sit up to a stud off the data's edges near TA / TB, so only a
+	-- point 2 studs inside counts; a road more than 4 studs above or below (a deck over it) is not this asphalt)
+	local S = M.R[c.road]
+	local yRef = if S and c.ePts[1] then S.s[c.ePts[1].i][2] else nil
+	local bigName = if c.big then c.big.name else nil
+	for q = 1, 15 do
+		local a = c.aA + c.sweep * q / 16
+		local ca, sa = math.cos(a), math.sin(a)
+		for _, rho in { c.r + 0.05, c.r - 0.45, math.max(c.r - w / 2, 0), math.max(c.r - w, 0) } do
+			local x, z = c.ox + rho * ca, c.oz + rho * sa
+			if M.inIsland(x, z, "fills") then
+				return true
+			end
+			for li, b in M.near(x, z, 3) do
+				local o = M.list[li]
+				local own = o and (o.name == c.road or o.name == bigName)
+				if o and (not yRef or math.abs(o.s[b[2]][2] - yRef) < 4) and M.onCarriageway(o, b[2], x, z, if own then 2 else 0.5) then
+					return true
+				end
+			end
+		end
+	end
+	return false
 end
 
 -- is a flat point inside a corner's wedge (between the rays O->TA and O->TB, on P's side), at a distance
@@ -1694,6 +1740,59 @@ function M.buildCorners()
 					if not M.Roads.sliver(t[1], t[2], t[3]) then
 						made += M.Roads.triangle(t[1], t[2], t[3], 6, pave, folder)
 					end
+				end
+			end
+		end
+		-- (J20) the taper on the narrower straight: from the arc's walk at T down to the straight's own walk TAPER_MIN
+		-- along its kerb line, laid behind the straight pavement's back edge (butting it, nothing on top of it).
+		-- shortcut: the pavement normal at T is used along the whole strip (kerb lines are straight over 20 studs here)
+		for _, sd in { "A", "B" } do
+			local w0 = if sd == "A" then c.wA0 else c.wB0
+			local wc = if sd == "A" then c.wA else c.wB
+			if not w0 or wc - w0 < 0.3 or (sd == "B" and c.ring) then
+				continue
+			end
+			local tx, tz = if sd == "A" then c.tax else c.tbx, if sd == "A" then c.taz else c.tbz
+			local nx, nz = (c.ox - tx) / math.max(c.r, 1e-6), (c.oz - tz) / math.max(c.r, 1e-6)
+			-- kerb line points from T outward (away from P), with their built heights
+			local run = { { tx, tz, if sd == "A" then yA else yB } }
+			if sd == "A" then
+				for k = c.sa + 1, #c.ePts do
+					local p = c.ePts[k]
+					table.insert(run, { p[1], p[2], ES[p.i].Y })
+				end
+			else
+				local stepB = if c.sbb > c.kb then 1 else -1
+				local k = if stepB > 0 then c.sbb + 1 else c.sbb
+				while k >= 1 and k <= #c.bPts do
+					local p = c.bPts[k]
+					table.insert(run, { p[1], p[2], ebY(p.j) })
+					k += stepB
+				end
+			end
+			local d = 0
+			for k = 2, #run do
+				local a, b = run[k - 1], run[k]
+				local seg = hyp(b[1] - a[1], b[2] - a[2])
+				if seg < 0.05 then
+					continue
+				end
+				local d1 = math.min(d + seg, M.TAPER_MIN)
+				local f = (d1 - d) / seg
+				local bx, bz, by = a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f, a[3] + (b[3] - a[3]) * f
+				local wa, wb = wc - (wc - w0) * d / M.TAPER_MIN, wc - (wc - w0) * d1 / M.TAPER_MIN
+				local i0 = Vector3.new(a[1] + nx * w0, a[3] + M.CURB_UP, a[2] + nz * w0)
+				local i1 = Vector3.new(bx + nx * w0, by + M.CURB_UP, bz + nz * w0)
+				local o0 = Vector3.new(a[1] + nx * wa, a[3] + M.CURB_UP, a[2] + nz * wa)
+				local o1 = Vector3.new(bx + nx * wb, by + M.CURB_UP, bz + nz * wb)
+				for _, tri in { { i0, o0, o1 }, { i0, o1, i1 } } do
+					if not M.Roads.sliver(tri[1], tri[2], tri[3]) then
+						made += M.Roads.triangle(tri[1], tri[2], tri[3], 6, pave, folder)
+					end
+				end
+				d = d1
+				if d >= M.TAPER_MIN - 1e-3 then
+					break
 				end
 			end
 		end
@@ -2917,10 +3016,32 @@ function M.scrub(remove: boolean)
 		return false
 	end
 	local stray, strayBy = 0, {}
+	local stubParams = OverlapParams.new()
+	stubParams.FilterType = Enum.RaycastFilterType.Include
+	stubParams.FilterDescendantsInstances = { roadsF }
 	for _, f in roadsF:GetChildren() do
 		for _, p in f:GetChildren() do
 			if (p.Name == "Kerb" or p.Name == "Pavement") and p:IsA("BasePart") then
-				local c = p.Position
+				-- (J20: arcs and curved pieces are WedgeParts: their box centre lies on the triangle's long side, the
+				-- probes then ran onto the neighbouring arc piece; the triangle's centroid is the piece's middle)
+				local c = if p:IsA("WedgePart") then p.CFrame:PointToWorldSpace(Vector3.new(0, -p.Size.Y / 6, p.Size.Z / 6)) else p.Position
+				-- (J20, owner "random pavements in the middle" by Yangon Central: kerb stubs left in an asphalt gore
+				-- (data.fills: one road surface, no kerb or pavement in it) where its corner was dropped)
+				-- (a fill is a hole in the carriageways' union: every kerb within 1.5 of it faces into the gore)
+				local inFill = M.inIsland(c.X, c.Z, "fills") or M.inIsland(c.X + 1.5, c.Z, "fills") or M.inIsland(c.X - 1.5, c.Z, "fills")
+					or M.inIsland(c.X, c.Z + 1.5, "fills") or M.inIsland(c.X, c.Z - 1.5, "fills")
+				-- (the "island tip" by the zebra: a cluster of tiny cut-off kerb triangles at a dropped corner's P, with
+				-- no whole piece of their kind within 1.5: a stub, not a kerb)
+				if not inFill and p:IsA("WedgePart") and p.Size.Y * p.Size.Z / 2 < 0.3 then
+					local whole = false
+					for _, q in workspace:GetPartBoundsInRadius(p.Position, 1.5, stubParams) do
+						if q ~= p and q.Name == p.Name and not (q:IsA("WedgePart") and q.Size.Y * q.Size.Z / 2 < 0.3) then
+							whole = true
+							break
+						end
+					end
+					inFill = not whole
+				end
 				local all = true
 				for k = 0, 7 do
 					local a = k * math.pi / 4
@@ -2948,7 +3069,7 @@ function M.scrub(remove: boolean)
 					end
 					all = not any
 				end
-				if all then
+				if all or inFill then
 					stray += 1
 					strayBy[f.Name] = (strayBy[f.Name] or 0) + 1
 					if remove then
@@ -4146,6 +4267,99 @@ function M.checkMainMain()
 		table.insert(out, string.format("%s on %s: %d spots (2-stud grid), two roads' slabs on one spot %d, holes %d%s%s", m.road, m.on, spots, double, holes, hNote, if firstBad then " | first: " .. firstBad else ""))
 	end
 	return table.concat(out, "\n")
+end
+
+-- (J20) QA on the BUILT surface (block 2 + pave_step everywhere): a ray grid (step g) over [x0, x1] x [z0, z1] of
+-- `root` (the built folder), top hit per cell. Spots are counted once per 4-stud cell:
+--   box_hole     no surface, with asphalt ("Road") on 3+ of the 4 neighbours (a hole / slit in a junction box)
+--   kerb_gap     asphalt next to a pavement or to nothing with no kerb between (fillet_no_kerb, flare_kerb_gap,
+--                corner_pave_gap and road_gap edges all show as this)
+--   road_step    two neighbouring asphalt cells more than STEP apart in height (a seam step / crack)
+--   pave_step    two neighbouring pavement cells more than STEP apart (corner vs straight, inside a road)
+--   buried       a kerb top under 0.3 over the asphalt next to it (a buried edge)
+-- returns counts and the first few spots (x, z) of each
+function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: number, g: number?, yTop: number?)
+	local G = g or 0.5
+	local STEP = 0.1 + 0.19 * G -- (Roads' edge GRADE 0.19 per stud is a real slope, not a step)
+	local P = RaycastParams.new()
+	P.FilterType = Enum.RaycastFilterType.Include
+	P.FilterDescendantsInstances = { root }
+	local nx, nz = math.floor((x1 - x0) / G), math.floor((z1 - z0) / G)
+	local Y0 = yTop or 3000
+	local kind, hy = {}, {}
+	for i = 0, nx do
+		for j = 0, nz do
+			local r = workspace:Raycast(Vector3.new(x0 + i * G, Y0, z0 + j * G), Vector3.new(0, -Y0 - 500, 0), P)
+			local k = i * (nz + 1) + j
+			if r then
+				local n = r.Instance.Name
+				kind[k] = if n == "Road" or n == "Kerb" or n == "Pavement" then n else "Other"
+				hy[k] = r.Position.Y
+			else
+				kind[k] = "None"
+			end
+		end
+		if i % 20 == 0 then
+			task.wait()
+		end
+	end
+	local out, seen = {}, {}
+	local function add(what: string, i: number, j: number)
+		local x, z = x0 + i * G, z0 + j * G
+		local key = what .. math.floor(x / 4) .. "," .. math.floor(z / 4)
+		if seen[key] then
+			return
+		end
+		seen[key] = true
+		out[what] = out[what] or { n = 0, at = {} }
+		out[what].n += 1
+		if #out[what].at < 12 then
+			table.insert(out[what].at, string.format("(%.0f, %.0f)", x, z))
+		end
+	end
+	local function K(i, j)
+		if i < 0 or j < 0 or i > nx or j > nz then
+			return nil
+		end
+		return i * (nz + 1) + j
+	end
+	for i = 1, nx - 1 do
+		for j = 1, nz - 1 do
+			local k = K(i, j) :: number
+			local a = kind[k]
+			local nb = { K(i + 1, j), K(i - 1, j), K(i, j + 1), K(i, j - 1) }
+			if a == "None" then
+				local c = 0
+				for _, q in nb do
+					if kind[q] == "Road" then
+						c += 1
+					end
+				end
+				if c >= 3 then
+					add("box_hole", i, j)
+				end
+			end
+			for d, q in { K(i + 1, j), K(i, j + 1) } do
+				local b = kind[q]
+				if (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
+					add("kerb_gap", i, j)
+				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > STEP then
+					add("road_step", i, j)
+				elseif a == "Pavement" and b == "Pavement" and math.abs(hy[k] - hy[q]) > STEP then
+					add("pave_step", i, j)
+				elseif (a == "Kerb" and b == "Road" and hy[k] - hy[q] < 0.3) or (b == "Kerb" and a == "Road" and hy[q] - hy[k] < 0.3) then
+					add("buried", i, j)
+				end
+			end
+		end
+	end
+	local t = {}
+	for _, w in { "box_hole", "kerb_gap", "road_step", "pave_step", "buried" } do
+		local o = out[w]
+		table.insert(t, string.format("%s %d%s", w, if o then o.n else 0, if o then " " .. table.concat(o.at, " ") else ""))
+	end
+	table.insert(t, string.format("corner_in_road dropped %d%s", M.cornerInRoadDropped or 0, if M.cornerInRoadList and #M.cornerInRoadList > 0 then ": " .. table.concat(M.cornerInRoadList, "; ") else ""))
+	return table.concat(t, "\n")
 end
 
 function M.partCount()
