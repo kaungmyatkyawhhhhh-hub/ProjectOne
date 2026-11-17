@@ -94,6 +94,9 @@ def cams(d, R, J, name, spot):
         while j < len(s) - 1 and run < back and math.hypot(s[j + 1][0] - x, s[j + 1][2] - z) < h * 0.55:
             run += math.hypot(s[j + 1][0] - s[j][0], s[j + 1][2] - s[j][2])
             j += 1
+    # (J23: never inside a roundabout's island: a ring arm's nearest sample to the centre lies in the ring)
+    while 0 < j < len(s) - 1 and math.hypot(s[j][0] - x, s[j][2] - z) < h * 0.35:
+        j = j + 1 if math.hypot(s[j + 1][0] - x, s[j + 1][2] - z) > math.hypot(s[j - 1][0] - x, s[j - 1][2] - z) else j - 1
     q = s[j]
     # the middle of the right-hand carriageway (Yangon drives on the right; past the median on a divided road)
     dx, dz = x - q[0], z - q[2]

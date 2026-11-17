@@ -2170,9 +2170,9 @@ function M.buildIslands(which: string?)
 		-- 0.85 in, top CURB_UP + 0.1) and its fill moves in 0.85 off it (nothing under the kerb)
 		local kerbed = {}
 		if which ~= "fills" and #clean >= 3 then
-			local op = OverlapParams.new()
-			op.FilterType = Enum.RaycastFilterType.Include
-			op.FilterDescendantsInstances = { M.folder() }
+			local rp = RaycastParams.new()
+			rp.FilterType = Enum.RaycastFilterType.Include
+			rp.FilterDescendantsInstances = { M.folder() }
 			local kp: { [string]: any } = { Name = "Kerb", Material = pal.kerbMaterial, Color = pal.kerb, CastShadow = false }
 			local m = #clean
 			for i = 1, m do
@@ -2180,15 +2180,21 @@ function M.buildIslands(which: string?)
 				local L = hyp(b.X - a.X, b.Z - a.Z)
 				local mid = (a + b) / 2
 				local has = L < 0.3
-				for _, q in (if has then {} else workspace:GetPartBoundsInRadius(mid - Vector3.new(0, UP, 0), 1.0, op)) do
-					if q.Name == "Kerb" then
-						has = true
-						break
+				local nx, nz = 0, 0
+				if not has then
+					nx, nz = -(b.Z - a.Z) / L * sg, (b.X - a.X) / L * sg -- (inward)
+					-- (a band or corner kerb lies just inside the outline: a ray there, not a bounding box: a wedge's box
+					-- reaches far past its triangle and hid gaps)
+					for _, d in { 0.45, 0.2, 0.7 } do
+						local r = workspace:Raycast(mid + Vector3.new(nx * d, 3, nz * d), Vector3.new(0, -8, 0), rp)
+						if r and r.Instance.Name == "Kerb" then
+							has = true
+							break
+						end
 					end
 				end
 				if not has then
 					kerbed[i] = true
-					local nx, nz = -(b.Z - a.Z) / L * sg, (b.X - a.X) / L * sg -- (inward)
 					local k = M.CURB_UP + 0.1 - UP
 					local o0, o1 = a + Vector3.new(-nx * 0.05, k, -nz * 0.05), b + Vector3.new(-nx * 0.05, k, -nz * 0.05)
 					local i0, i1 = a + Vector3.new(nx * 0.85, k, nz * 0.85), b + Vector3.new(nx * 0.85, k, nz * 0.85)
