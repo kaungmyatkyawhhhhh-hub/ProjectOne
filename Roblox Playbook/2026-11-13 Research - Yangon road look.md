@@ -49,3 +49,15 @@ Hanthawaddy roundabout (2 ground photos, 2014 and 2018): red and white kerb roun
 - University Avenue Road at No. 54, 2013 (the whole road): https://www.flickr.com/photos/27214509@N00/9104310714/
 - University Avenue Road, red and white kerb, 2014: https://www.flickr.com/photos/83101443@N00/18585185499/
 - University Avenue Road at the US Embassy, 2021: https://commons.wikimedia.org/wiki/File:Police_in_front_of_US_Embassy_Yangon_1.png
+
+## Check of two J15 paint choices (17 Nov 2026, PAINT agent, roads05 J17)
+How: 24 Wikimedia Commons photos from 2018 to 2021 (Streets / Traffic in Yangon, the 2021 street photos at Hledan, Sule Pagoda Road, Bogyoke Road, Shwedagon Pagoda Road; Moe Kaung Road 2018; Kabar Aye 2018), each looked at in close-up crops. No Street View: it can't be fetched from here.
+
+| Choice | What the photos show | Verdict |
+|---|---|---|
+| **Two solid white lines along a painted (flush) median** on undivided roads | Hledan 2021 (*Protestors on bikes and cars at Hledan Yangon 4*): a double solid white centre line on a 2 + 2 road. Bogyoke Road 2021 (*A Monk Walking by Bogyoke Road*): a painted middle strip with lamp posts on it, a solid pale line on each side. Shwedagon Pagoda Road 2021 and Moe Kaung Road 2018 (no painted median): one solid white centre line, as we paint them | **Keep** |
+| **Stop lines and turn arrows on every main-road approach, signals or not** | Arrows (left / through / right per lane) and stop lines show at signalled junctions: Sule Pagoda Road 2021 (*Sule Pagoda - Traffic - Yangon 1 / 2*), at the Sule crossing (*A man crossing Sule pagoda Road*), the 2018 Sakura Tower views. At the unsignalled corners and mid-block spots (downtown corner *A Woman crossing road Yangon downtown* 2021, Moe Kaung Road 2018, *Road from Shwedagon Pagoda East Gate* 2021, *Yangon Street View* 2018) there are no arrows and no stop lines; where people cross there is the yellow zebra only (Bogyoke Road, Pansodan junction 2021) | **Change**: stop lines + arrows only on the approaches of a signalled junction (`roads.json` `junctions`, OSM traffic signals within 25 m); an unsignalled arm keeps its zebra only |
+
+Also seen (keeps the J15 yellow kerb line): a yellow line along the kerb at a downtown corner (2021) and along the red-and-white kerb on Sule Pagoda Road (2021).
+Photos: https://commons.wikimedia.org/wiki/File:Protestors_on_bikes_and_cars_at_Hledan_Yangon_4.png , https://commons.wikimedia.org/wiki/File:A_Monk_Walking_by_Bogyoke_Road_Yangon.jpg , https://commons.wikimedia.org/wiki/File:Sule_Pagoda_-_Traffic_-_Yangon_1.jpg , https://commons.wikimedia.org/wiki/File:A_man_crossing_SUle_pagoda_Road_Yangon.jpg , https://commons.wikimedia.org/wiki/File:A_Woman_crossing_road_Yangon_downtown.jpg , https://commons.wikimedia.org/wiki/File:Shwedagon_Pagoda_Road_at_Cloudy_day.jpg , https://commons.wikimedia.org/wiki/File:Sule_Pagoda_Road_from_Sakura_Tower.jpg
+Limits: few photos show an unsignalled junction of two MAIN roads up close; the protest-time photos (2021) have little traffic, so markings show well, but some lines are worn.
