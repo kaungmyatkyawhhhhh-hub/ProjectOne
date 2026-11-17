@@ -704,3 +704,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Mistake:** ending a crossing arm at the last uncut sample before a deck made the mouth fail ("an edge never meets"), because that cross-section still lay on the other road. **Rule:** stop the arm at the first cut sample (the deck foot), and always re-run the spot and read the log for MOUTH FAILED before counting faults.
 - **Rule:** a road that "owns" the strip past its corner may take another road's kerb only where its own carriageway or kerb is. Elsewhere the other kerb stays and the owner's pavement stops at it (no overlap).
 - **Rule (speed):** to try builder changes in Studio, apply small text patches to the stored module Source and re-require it, instead of re-packing and re-uploading (about 5 s, not 2 min).
+
+### 2026-11-18 City Legends roads05 J27 (geometry: "is this point on that road?")
+- **Rule:** a road's "is it on me" test must use its width AT that sample and on that side, not its nominal half: junction flares make a side 2-3x the half (Hledan 44 vs 21, Bahan 78 vs 22.5), and a mouth's edge there was never pinned (0.5-1.1 steps).
+- **Mistake:** widening the reach without widening the nearest-sample search: the search found nothing within 2 cells, the default "sample 1" won, and a lane took a height 1 stud off. **Rule:** any reach change must change every search that depends on it; a default index must never stand in for "not found".
+- **Rule:** when several bigger roads qualify, take the one the point lies deepest in (distance past its edge), not the nearest centre line.
+- **Rule (measuring):** the same build gives 1-3 different counts per spot from run to run; judge a change by its traced clusters, not by +1s.

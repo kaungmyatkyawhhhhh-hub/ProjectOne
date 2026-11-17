@@ -1,3 +1,27 @@
+# roads05 handover (18 Nov 2026, twenty-third pass: J27, GEOMETRY agent; BUILDER (Roads.luau, Yangon path) + paint QA + Studio 17 spots)
+
+## J27 -- built-surface totals J26 -> J27 (17 spots): 67 / 394 / 107 / 110 / 5 -> 63 / 385 / 58 / 102 / 7
+Note + table + 5 shots: vault `City Legends/2026-11-18 roads05 J27 studio check.md`. Studio: main "City Legends", ClaudeTools.Roads = repo
+(915171076), YangonRoads unchanged (1585396069), scratch cleaned, version 1263, lock released. Asset 133014134133489 = the J27 test pack
+(J26 builder + data J23; the Roads.luau change went in by text patch: re-pack before the next test).
+- **Edge pins (item 1, Roads.luau, `wide` = opts.edgeSurface only, Monaco path unchanged):** `otherNear(..., wide)` takes a bigger road
+  whose SAMPLE side width (wl / wr on the point's side) + (radius - HALF) reaches the point, keyed by depth past its edge (d - side
+  width), not the nearest centre line; `bigSurface(..., wide)` searches its nearest sample over the widest side (2 cells missed Bahan
+  Road's 78-wide side: best stayed sample 1, Lane #3790 pinned 1.1 low). Lane #118 / Hledan Road #3 mouth step gone, slip_triangle
+  road_step 31 -> 3, bahan_ring 9 -> 0. Tried + dropped: "on the carriageway only" (+0.5): slip_triangle stayed 21.
+- **lanes_unmarked (item 6, roads05_paint_qa.py):** a zebra or another road's carriageway within the reach is a break: 3 -> 0.
+- **Debug kit (scratchpad, not committed):** `mkpatch.py` (difflib grouped hunks -> Luau find/replace on ClaudeTools.<name>.Source,
+  prints the repo checksum), `_G.RELOAD` (no-terrain YangonRoads copy re-required, Roads.build wrapped to keep the edgeSurface call's
+  debugEdges in `_G.DE`: later builds of decks reset Roads.debugEdges), `_G.RUNALL(list)` / `_G.SHOWTAB()`, `_G.COL` (height + part
+  columns), `_G.ZF(x, z, R)` (coplanar-top probe: second cast excluding the first hit, < 0.05 apart = overlap).
+- **Next (in order):** (1) pyay_univ road_step 27: Insein Road's first cross-section spans Hledan #3 (48.2) / Pyay (Prome) (48.4) / the
+  Pyay Road #9 ramp (48.6-49.2) as one straight line (16 cells along z 27852-27859): end strip with points pinned per road, or a mouth;
+  (2) Gyophyu ramp foot west: ground Gyophyu Road ends 2-4 short of the deck foot (hole (36180, 42610), a 32.16 dip at (36174, 42620)),
+  no kerb at x ~36172 z 42610-42620; (3) rounded kerb noses (double_junction kerb_gap 86); (4) double_junction 12 hole cells; (5) Bahan
+  hole strip (open slot between two pavement blocks, shot); (6) overlaps from the flicker probe: Kun Chan Road #3 kerb pairs (36351,
+  42414), (36360, 42419), pavement (36378, 42421); Yawmingyi Street pavement pairs (34535 / 34552, 42645); (7) slip_triangle buried
+  1 -> 3 (Lane #15 kerb (43464, 29305)), univ_kabaraye pave_step 3 -> 6, slip_triangle pavement slot by the kerb (shot).
+
 # roads05 handover (18 Nov 2026, twenty-second pass: J26, GEOMETRY agent; BUILDER + Studio 17 spots; data J23 / paint J25 unchanged)
 
 ## J26 -- built-surface totals J25 -> J26 (17 spots): 66 / 446 / 107 / 143 / 5 -> 67 / 394 / 107 / 110 / 5

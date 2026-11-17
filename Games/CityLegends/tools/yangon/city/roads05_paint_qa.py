@@ -22,7 +22,8 @@ and stop lines', 'Sule Square road', 'junction box grass hole', 'broken median p
   zebra_torn          a zebra bar touched / cut by other paint, or not a whole rectangle
   lanes_unmarked      (J25, owner paint 'median road dead end, missing lanes') a run of 30+ studs of a carriageway with 2+
                       lanes a direction (roads05_paint.neff), any kind, no lane dash of that road within 14 studs (12 off
-                      each end, 8 off any other road's carriageway, 20 off boxes / rings)
+                      each end, 8 off any other road's carriageway, 20 off boxes / rings; J27: and none where a zebra or
+                      another road's carriageway lies within the same reach: a zebra zone, a shallow side-road mouth)
 """
 import json, math, os, sys
 
@@ -440,6 +441,14 @@ def main():
                 bad.append(False)
                 continue
             g = p.buffer(max(q[6], q[7]) + 14)
+            # (J27, the 3 traced in J26) no lane dash is wanted in a zebra's no-paint zone (Strand Road) or where another
+            # road's carriageway joins across this one at a shallow angle (Min Nandar Road #2 / Lane #2708, Shwe Gone Dine
+            # Road #2 / Old Yay Ta Shay Street #2): a zebra or another carriageway within the same reach is a break
+            if (zgtree is not None and any(zgroups[int(j)].intersects(g) for j in zgtree.query(g))) or any(
+                    roads[int(j)]['name'] != r['name'] and cw[roads[int(j)]['name']].distance(p) < max(q[6], q[7]) + 8
+                    for j in tree.query(p.buffer(max(q[6], q[7]) + 8))):
+                bad.append(False)
+                continue
             bad.append(lt is None or not any(lt.geometries[int(j)].intersects(g) for j in lt.query(g)))
         for a, b in runs(bad):
             if ds[b] - ds[a] >= 30:

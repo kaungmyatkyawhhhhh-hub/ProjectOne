@@ -129,6 +129,7 @@ end
 
 -- (Yangon 2026-11-13) the widest road's half width over HALF: how much further "near" can reach
 local maxDh = 0
+local maxW = 0 -- (widest sample side - HALF, for otherNear's `wide`)
 
 -- the part of a polygon outside a zone (inside(p) -> boolean): every corner outside comes back as it
 -- is, and each side that crosses the zone's edge is cut on the edge (found by halving).
@@ -226,7 +227,7 @@ Roads.sliver = sliver
 -- samples as vectors, per road
 local function prepare(data, cut)
 	local roads = {}
-	maxDh = 0
+	maxDh, maxW = 0, 0
 	for ri, r in data.roads do
 		-- (r.half: this road's own half carriageway, Yangon; without it every road is HALF wide)
 		local half = r.half
@@ -237,6 +238,9 @@ local function prepare(data, cut)
 		end
 		roads[ri] = { name = r.name, kind = r.kind, rank = r.rank, closed = r.closed, pts = pts, aligned = r.aligned, half = half, dh = (half or HALF) - HALF, cut = if cut then cut[r.name] else nil, walkL = r.walkL, walkR = r.walkR }
 		maxDh = math.max(maxDh, roads[ri].dh)
+		for _, p in pts do
+			maxW = math.max(maxW, p.wl - HALF, p.wr - HALF)
+		end
 	end
 	-- a 24-stud grid of every sample, for "is this point on another road?"
 	local grid = {}
@@ -262,10 +266,10 @@ end
 -- nearest sample of another road (optionally only bigger roads) within radius of a point.
 -- (the radius is written for a road HALF wide: for a road with its own half it is that much less or
 -- more, `dh`, so "HALF + 6" always means "6 past that road's edge")
-local function otherNear(roads, grid, pos: Vector3, self: number, radius: number, biggerThan: number?): (number?, number?)
+local function otherNear(roads, grid, pos: Vector3, self: number, radius: number, biggerThan: number?, wide: boolean?): (number?, number?)
 	local best, bestD = nil, math.huge
 	local cx, cz = math.floor(pos.X / 24), math.floor(pos.Z / 24)
-	local reach = math.ceil((radius + maxDh) / 24)
+	local reach = math.ceil((if wide then math.max(radius + maxDh, HALF + maxW + 0.5) else radius + maxDh) / 24)
 	for dx = -reach, reach do
 		for dz = -reach, reach do
 			local cell = grid[(cx + dx) .. "," .. (cz + dz)]
@@ -273,10 +277,22 @@ local function otherNear(roads, grid, pos: Vector3, self: number, radius: number
 				for _, e in cell do
 					local rj = e[1]
 					if rj ~= self and (biggerThan == nil or roads[rj].rank < biggerThan) then
-						local q = roads[rj].pts[e[2]].pos
+						local qp = roads[rj].pts[e[2]]
+						local q = qp.pos
 						local d = Vector2.new(q.X - pos.X, q.Z - pos.Z).Magnitude
-						if d < radius + roads[rj].dh and d < bestD then
-							best, bestD = rj, d
+						local lim, key = radius + roads[rj].dh, d
+						if wide then
+							-- (Yangon J27: the radius past that sample's own edge on pos's side: Hledan Road #3 is 44 wide on one
+							-- side at Lane #118's mouth (half 21), so the lane's edge on it was never pinned: a 0.5 step.
+							-- The road picked is the one the point lies deepest in (distance past its edge), not the
+							-- nearest centre line: Lane #3790 at Bahan Road took a lower road's height, a 1.1 step)
+							local side = (pos.X - q.X) * -qp.dir.Z + (pos.Z - q.Z) * qp.dir.X
+							local sw = if side > 0 then qp.wr else qp.wl
+							lim = math.max(lim, sw + radius - HALF)
+							key = d - sw
+						end
+						if d < lim and key < bestD then
+							best, bestD = rj, key
 						end
 					end
 				end
@@ -312,8 +328,8 @@ end
 -- the surface height of a bigger road (rank below `rank`) at a point on its carriageway, or nil.
 -- Roads are flat side to side, so it is the centre line's height where the point meets it square-on.
 local finalEdges: { [number]: { L: { Vector3 }, R: { Vector3 } } }? = nil
-local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number, radius: number?): number?
-	local rj = otherNear(roads, grid, pos, self, radius or (HALF - 0.5), rank)
+local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number, radius: number?, wide: boolean?): number?
+	local rj = otherNear(roads, grid, pos, self, radius or (HALF - 0.5), rank, wide)
 	if rj == nil then
 		return nil
 	end
@@ -321,8 +337,11 @@ local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number,
 	-- nearest sample of that road, then project onto the segments either side of it
 	local best, bestD = 1, math.huge
 	local cx, cz = math.floor(pos.X / 24), math.floor(pos.Z / 24)
-	for dx = -2, 2 do
-		for dz = -2, 2 do
+	-- (J27, `wide`: the point can lie up to the widest side from the centre line: Bahan Road is 78 wide on one side at
+	-- Roundabout 1, its nearest sample was outside a 2-cell search and best stayed 1: Lane #3790 pinned 1 stud low)
+	local reach = if wide then math.ceil((HALF + math.max(maxDh, maxW) + 8) / 24) else 2
+	for dx = -reach, reach do
+		for dz = -reach, reach do
 			local cell = grid[(cx + dx) .. "," .. (cz + dz)]
 			if cell then
 				for _, e in cell do
@@ -668,7 +687,7 @@ function Roads.build(data, opts)
 				if (if side == 1 then pts[i].wl else pts[i].wr) < H - 0.5 then
 					continue -- a narrowed edge stops at the wall between this road and the next
 				end
-				local y = bigSurface(roads, grid, edge[i], ri, r.rank, if r.aligned then HALF + 1 else HALF + 8) -- (a little past its edge: the joint stays level)
+				local y = bigSurface(roads, grid, edge[i], ri, r.rank, if r.aligned then HALF + 1 else HALF + 8, finalEdges ~= nil) -- (a little past its edge: the joint stays level)
 				if y then
 					edge[i] = Vector3.new(edge[i].X, y, edge[i].Z)
 					;(if side == 1 then pinL else pinR)[i] = true
