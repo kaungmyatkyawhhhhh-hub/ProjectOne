@@ -1,4 +1,55 @@
-# roads05 handover (18 Nov 2026, seventh pass: J11)
+# roads05 handover (18 Nov 2026, eighth pass: J12)
+
+## J12 (this pass)
+- `YangonRoads.luau`:
+  - `findCorners`: a road-on-road corner whose arc leaves either kerb polyline's pavement side by > 0.3 is made again
+    with T x 0.75 (up to 8 times, `M.crossShort`). A radius cap (r <= 30) was tried and REVERTED: in a shallow merge
+    both straight kerbs are cut round P anyway, and only the long arc covers that stretch (a 30-stud kerb gap).
+  - `buildCorners`: `ebY(j)`: a cut sample's edge height = the nearest uncut edge + the change of the data's centre
+    height (bPts can hold cut samples via cutPair: Bahan's corner pavement was ~4 low). Used for yB and the asphalt.
+  - `scrub`: a kerb / pavement piece inside one of its own road's corners (inCornerPoly, tol 1.2) is not scrubbed
+    against that corner's big road. The big road's built edge runs in chords between samples, onCarriageway uses the
+    true width: Lane #4701's merge arc on Kan Yeiktha (68 wide, bending) lost its last kerb pieces = the Bahan notch.
+  - `RING_RAMP` 104 -> 144 (verge air clear follows ring_level).
+- `roads05_fix.py` `ring_level`: flat at c.y out to r_out + 4 + `RING_FLAT` 40, then the 100 ramp (Sule max change
+  4.99 -> 6.55). Sule's "seam" was a crease: 32nd Street crosses Maha Bandula #2 ~30 off the ring at +1.3, the
+  builder's junction height held Maha Bandula 0.7 over the ring until 4 studs from its edge. The two dark wedges on
+  32nd Street went with it.
+- Tried and reverted in roads05_fix: running OSM-joined unreached ends on along their own direction (34 ends): no
+  QA row went (they meet the road side-on), +2 rows.
+- QA (full net, after fix / mouthsim / paint / QA): mouthsim 0 failed of 7,926; mouth_short 46, mouth_over 38,
+  kerb_cross 22, median_cross 1, deck_grade 24, deck_foot 1 (unchanged). Paint rows all 0.
+  `qa_J12_osm.json` = every mouth row vs OSM (nearest OSM way end within 3 studs; shared node = join):
+  mouth_short 14 OSM dead ends (real, explained) + 30 OSM joins + 2 not at an OSM end; mouth_over 19 OSM dead-end
+  stubs past a road (real) + 19 OSM joins. The OSM-join rows are the work left: mostly a street ending beside or
+  across a merged dual carriageway (it joins the FAR carriageway in OSM, or meets a frontage road side-on), and
+  rank-inverted Ts (Independence Street r4373 on Bayint Naung r4702: the builder only mouths a smaller road on a
+  bigger). University x Kabar Aye's Lane #1013 / #1008 / #1014 / #961: OSM joins them to Kabar Aye's carriageways
+  (2 secondaries share the end node); in our data they end 6-7 studs beside the frontage side lanes #5 / #6 and the
+  end direction runs along them (no run-on reaches): needs a merge taper (bend the last ~40 studs onto the frontage).
+  kerb_cross 22, median_cross 1, deck_grade 24, deck_foot 1: not worked on.
+- Overlays regenerated (`overlay_J12.log`), paint regenerated.
+- Studio J12 (no-terrain copy, lifted 400, bahan_ring +-300; saved v1181, "Saved new changes" 02:00:02Z, lock
+  released, no data modules / scratch / scraps / YangonRoadsJ7 left; ClaudeTools.YangonRoads = repo, checksum
+  1343122940). Shots `City Legends/2026-11-18 roads05 J12 test - *.jpg` (final build only). 0 MOUTH FAILED everywhere.
+  - PASS: Bahan (kerb continuous through the merge, pavement level), Sule (seam + wedges gone), Hanthawaddy,
+    Waizayandar slips, Bogyoke x Pazundaung Y (a ~1-stud pavement notch on the NW corner's back edge, as in J11).
+  - Pyay x University: the SE "gap" is the open gore between Pyay (Prome) Road's and Pyay Road #9's pavements as they
+    diverge (4 studs, opening to the south): the verge (terrain, skipped in the test) fills it with grass in the game.
+    Left: a ~1-stud notch on the north pavement's back edge (by the grass).
+  - University x Kabar Aye: NOT clean: a 1-stud hole between Lane #1013's kerb (0..0.9) and the west island's fill
+    (starts ~1.5-2 in, 0.5 under the kerb top) along island 7's SW edge (islandOutlines[7] runs ON the kerb line, so
+    the gap comes after the outline: earClip / loop cut / heights? check the Islands parts there), plus the lane ends
+    by the deck (above). The same marks are in the J11 shot that was called a pass.
+
+## Next (in order)
+1. University x Kabar Aye island-7 hole (buildIslands); then the merge taper for the 4 Kabar Aye lanes in roads05_fix
+   (OSM join beside the road: bend the end onto the frontage, then mouthsim / repair).
+2. The other OSM-join mouth rows (qa_J12_osm.json), kerb_cross 22, median_cross 1, deck_grade 24, deck_foot 1.
+3. Studio again (same 7). Plan is NOT ready for owner approval.
+
+# (J11 pass below)
+
 
 ## J11 (this pass; YangonRoads + kerbsim only, no data change: roads.json / qa.json are the J9 ones)
 - `YangonRoads.luau`:

@@ -1220,6 +1220,37 @@ function M.findCorners()
 				return corner
 			end
 			local corner = build(T)
+			-- (J12, Bahan: Lane #4701's shallow merge into Kan Yeiktha, r 101: Kan Yeiktha's kerb line bends towards
+			-- the ring, so the arc crossed it before TB and ran onto its carriageway (16 corner pieces scrubbed, a
+			-- notch). An arc that leaves either kerb line's pavement side by over 0.3 is made again with a shorter T)
+			local function crosses(cc): boolean
+				for q = 1, 15 do
+					local a = cc.aA + cc.sweep * q / 16
+					local x, z = cc.ox + cc.r * math.cos(a), cc.oz + cc.r * math.sin(a)
+					for _, pts in { c.ePts, c.bPts } do
+						local d, fx, fz, sg = footOn(pts, x, z)
+						if d > 0.3 then
+							local p1, p2 = pts[sg], pts[sg + 1]
+							local sx = cross2(p2[1] - p1[1], p2[2] - p1[2], x - fx, z - fz)
+							local so = cross2(p2[1] - p1[1], p2[2] - p1[2], cc.ox - fx, cc.oz - fz)
+							if sx * so < 0 then
+								return true
+							end
+						end
+					end
+				end
+				return false
+			end
+			if not m.ring then
+				for _ = 1, 8 do
+					if not crosses(corner) then
+						break
+					end
+					T *= 0.75
+					corner = build(T)
+					M.crossShort = (M.crossShort or 0) + 1
+				end
+			end
 			corner.rebuild, corner.T = build, T
 			table.insert(cands, corner)
 		end
@@ -1472,13 +1503,30 @@ function M.buildCorners()
 			local a, b = c.ePts[seg], c.ePts[seg + 1]
 			return ES[a.i].Y + (ES[b.i].Y - ES[a.i].Y) * t
 		end
+		-- (J12, Bahan: bPts may take cut samples (cutPair); their edge heights are not the built ones (the corner
+		-- pavement sat ~4 low): a cut sample's edge = the nearest uncut edge + the change of the data's centre height)
+		local function ebY(j: number): number
+			local B = c.big
+			local EB = E[B.name][if c.sb < 0 then "L" else "R"]
+			local cb = M.cut[B.name]
+			if not cb[j] and EB[j] then
+				return EB[j].Y
+			end
+			for d = 1, 40 do
+				for _, k in { j - d, j + d } do
+					if k >= 1 and k <= B.n and not cb[k] and EB[k] then
+						return EB[k].Y + B.s[j][2] - B.s[k][2]
+					end
+				end
+			end
+			return B.s[j][2]
+		end
 		local function bY(seg: number, t: number): number
 			if c.ring then
 				return C.Y
 			end
-			local EB = E[c.big.name][if c.sb < 0 then "L" else "R"]
 			local a, b = c.bPts[seg], c.bPts[seg + 1]
-			return EB[a.j].Y + (EB[b.j].Y - EB[a.j].Y) * t
+			return ebY(a.j) + (ebY(b.j) - ebY(a.j)) * t
 		end
 		local yA, yB = sY(c.sa, c.sta), bY(c.sbb, c.stb)
 		c.yA, c.yB = yA, yB -- (J10: the island fill meets this pavement at its height)
@@ -1500,7 +1548,7 @@ function M.buildCorners()
 			local k = if stepB > 0 then c.kb + 1 else c.kb
 			while (stepB > 0 and k <= c.sbb) or (stepB < 0 and k > c.sbb) do
 				local p = c.bPts[k]
-				local y = if c.ring then C.Y else E[c.big.name][if c.sb < 0 then "L" else "R"][p.j].Y
+				local y = if c.ring then C.Y else ebY(p.j)
 				table.insert(poly, Vector3.new(p[1], y, p[2]))
 				k += stepB
 			end
@@ -1853,7 +1901,7 @@ M.VERGE_W = 16
 -- (the box's top under the road: smooth terrain shows about 2 studs over a FillBlock's top, less where
 -- lower ground pulls the surface down; -1.7 puts the grass 0.1 to 0.5 under the pavement's top)
 M.VERGE_TOP = -1.7
-M.RING_RAMP = 104 -- roads05_fix.ring_level: r_out + 4 + RING_RAMP 100
+M.RING_RAMP = 144 -- roads05_fix.ring_level: r_out + 4 + RING_FLAT 40 + RING_RAMP 100
 function M.verge(names: { string })
 	local made = 0
 	-- (the ring's carriageway and its kerb and pavement between the arms; an arm's gap is the arm's)
@@ -2638,7 +2686,18 @@ function M.scrub(remove: boolean)
 				local pos = p.Position
 				for oi, b in M.near(pos.X, pos.Z, 2) do
 					local o = M.list[oi]
-					if o.name ~= f.Name and M.onCarriageway(o, b[2], pos.X, pos.Z, 0.6) then
+					-- (J12, Bahan: a long merge corner hugs the big road's built edge, which runs in chords between its
+					-- samples; onCarriageway measures the true width (Kan Yeiktha 68 studs, bending): its last kerb
+					-- pieces near TB were "on" Kan Yeiktha by up to 1 stud and went: a kerb notch. A piece inside
+					-- one of this road's corners on that same road is the corner's own)
+					local mine = false
+					for _, c in cornersAt(pos.X, pos.Z) do
+						if c.road == f.Name and c.big == o and inCornerPoly(c, pos.X, pos.Z, 1.2) then
+							mine = true
+							break
+						end
+					end
+					if not mine and o.name ~= f.Name and M.onCarriageway(o, b[2], pos.X, pos.Z, 0.6) then
 						found += 1
 						local key = f.Name .. " on " .. o.name
 						byRoad[key] = (byRoad[key] or 0) + 1

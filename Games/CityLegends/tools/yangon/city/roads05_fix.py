@@ -181,6 +181,9 @@ MORPH = 40.0
 
 
 RING_RAMP = 100.0
+RING_FLAT = 40.0  # (J12, Sule west: 32nd Street crosses Maha Bandula #2 30 studs off the ring at 1.3 over it; the
+# builder's junction height left Maha Bandula 0.7 over the ring 4 studs from its edge: a crease (the "seam").
+# Flat at c.y out to r_out + 4 + RING_FLAT, then the ramp)
 
 
 def ring_level(data):
@@ -195,9 +198,9 @@ def ring_level(data):
         for r in data['roads']:
             for q in r['s']:
                 rad = math.hypot(q[0] - cx, q[2] - cz)
-                if rad >= ro + 4 + RING_RAMP or q[1] - cy > 12:
+                if rad >= ro + 4 + RING_FLAT + RING_RAMP or q[1] - cy > 12:
                     continue
-                w = min(1.0, max(0.0, (rad - ro - 4) / RING_RAMP))
+                w = min(1.0, max(0.0, (rad - ro - 4 - RING_FLAT) / RING_RAMP))
                 ny = round(cy + (q[1] - cy) * w, 3)
                 worst = max(worst, abs(ny - q[1]))
                 q[1] = ny
