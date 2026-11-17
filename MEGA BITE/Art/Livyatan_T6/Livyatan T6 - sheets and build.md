@@ -42,3 +42,8 @@ ChatGPT chat: https://chatgpt.com/c/6afc9c72-7c10-83ec-9c87-8c299adf9bc6
 ## Still open
 - Top/front IoU under 0.90 = the sheet's views disagree (fins, fluke); kept the split-the-difference fins. Owner can pick a view to win.
 - Not done: rig (8 spine + Jaw), Swim, texture bake, FBX, Roblox (Highlight outline, Neon runes/eye, aura + sparkle emitters).
+
+## v1.2 (18 Nov, owner asked "are these normal" about blocky shapes in solid view)
+- The blocky shells were the PREVIEW glow helpers (`L6_OutlineShell`, `L6_AuraShell`: voxel-remeshed, pushed-out copies of the body). They now live in their own collection **L6_PreviewFX**, hidden in the viewport while modelling; turn it on for the rendered look. They are never exported.
+- Real fix found while checking: the tail stock ended in a flat stub over the fluke root; it now runs out to x70 and tapers onto the fluke. Gates PASS, side IoU 0.878.
+- The small round bumps on the body in solid view are the sparkle particles, not geometry.

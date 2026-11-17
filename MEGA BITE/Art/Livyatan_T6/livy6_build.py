@@ -124,7 +124,7 @@ for n, (a, b) in enumerate(reversed(list(zip(G[:-1], G[1:]))), 1):
         return jit(P['groove'], p.index, 0.05) if not X(a + 3) < p.center.x < X(b - 3) else skin(key)(p)
     loft('ArmourSegment%d' % n, xs, body, nr=14, pex=2.9, scale=seg_scale(xs), colour=seg_col)
 # tail stock: from the fluke root to the first groove, tapering
-xs = [150.0] + xs_between(160, G[0] - 7, 30)[1:] + [G[0] - 1, G[0] + 2]
+xs = [70.0, 110.0] + xs_between(150, G[0] - 7, 30)[1:] + [G[0] - 1, G[0] + 2]   # runs out over the fluke root: no flat stub
 loft('TailStock', xs, body, nr=12, scale=lambda i, x: 0.86 if x > G[0] - 2 else 1.0)
 
 # ---------- head ----------

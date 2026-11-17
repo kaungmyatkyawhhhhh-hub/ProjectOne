@@ -43,7 +43,9 @@ for nm, th, mt in (('L6_OutlineShell', 0.03, OUTLINE), ('L6_AuraShell', 0.13, AU
     bm = bmesh.new()
     for o in body: bm.from_mesh(o.data)
     me = bpy.data.meshes.new(nm); bm.to_mesh(me); bm.free(); me.materials.append(mt)
-    sh = bpy.data.objects.new(nm, me); col.objects.link(sh)
+    fx = bpy.data.collections.get('L6_PreviewFX') or bpy.data.collections.new('L6_PreviewFX')   # glow shells only: hide this while modelling
+    if fx.name not in col.children: col.children.link(fx)
+    sh = bpy.data.objects.new(nm, me); fx.objects.link(sh)
     rm = sh.modifiers.new('Remesh', 'REMESH'); rm.mode = 'VOXEL'; rm.voxel_size = 0.05
     dp = sh.modifiers.new('Push', 'DISPLACE'); dp.strength = th; dp.mid_level = 0.0
 
