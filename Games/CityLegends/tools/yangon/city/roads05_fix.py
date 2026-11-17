@@ -1803,6 +1803,7 @@ def downtown_walks(data):
     decks = {d.get('name') for d in data['decks']}
     cw = [(nm, g) for nm, g in road_polys(data)[0] if nm not in decks]
     cw_tree = STRtree([g for _, g in cw])
+    R_by = {q['name']: q for q in data['roads']}
     n = 0
     for r in data['roads']:
         s = r['s']
@@ -1828,12 +1829,16 @@ def downtown_walks(data):
                     if not X.is_empty:
                         dd = Point(a).distance(X)
                         best = dd if best is None else min(best, dd)
-                for k in cw_tree.query(ray):
-                    if cw[int(k)][0] != r['name']:
+                # (only limits a side that has a building line: a road alone never widens a walk; its own pavement
+                # band (walk) and kerb are kept clear too)
+                for k in (cw_tree.query(ray) if best is not None else ()):
+                    nm = cw[int(k)][0]
+                    if nm != r['name']:
                         X = ray.intersection(cw[int(k)][1])
                         if not X.is_empty:
-                            dd = max(Point(a).distance(X) - 1.0, 0.0)
-                            best = dd if best is None else min(best, dd)
+                            ow = R_by.get(nm, {})
+                            dd = max(Point(a).distance(X) - 1.0 - max(ow.get('walkL') or 0, ow.get('walkR') or 0), 0.0)
+                            best = min(best, dd)
                 ds.append(best)
             hit = [x for x in ds if x is not None]
             if len(hit) < 0.5 * len(ds):
