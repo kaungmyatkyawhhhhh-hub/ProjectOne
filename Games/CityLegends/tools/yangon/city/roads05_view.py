@@ -167,7 +167,7 @@ def render(data, name, cx, cz, size, paint=None, out=None, title=None):
                 continue
             if not view.buffer(40).intersects(Polygon(pts).buffer(0)):
                 continue
-            col = {'LW': '#ebebe6', 'LY': '#e8b834'}[it['k']]
+            col = {'LW': '#ebebe6', 'LY': '#e8b834', 'LZ': '#e6be6e'}[it['k']]
             z = 6 if not it.get('deck') else 9
             ax.add_patch(MPoly(pts, closed=True, fc=col, ec='none', zorder=z))
     # decks

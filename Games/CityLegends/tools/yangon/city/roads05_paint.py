@@ -36,6 +36,13 @@ STOP_W, STOP_GAP = 1.2, 3.0
 GIVE_ON, GIVE_OFF, GIVE_W = 1.8, 1.8, 0.6
 HATCH_W, HATCH_PITCH = 0.6, 3.0
 BOX_GROW = 1.5
+DOUBLE_GAP = 40.0     # (J15) two parallel roads closer than this crossing one road: ONE box
+LANE_RATE = 0.15      # (J15) a lane line moves at most this many studs sideways per stud along (a taper, never a jog)
+EDGE_IN = 0.9         # (J15) yellow kerb lines: middle this far in from the kerb
+ARROW_S = 2.0         # (J15) arrows 12 studs long (real ones ~5 m)
+ARROW_L = 6.0 * ARROW_S
+ARROW_BACK = 8.0      # (J15) arrow tip this far behind the stop line
+MIN_PIECE = 3.0       # (J15) a clipped lane / edge piece shorter than this is dropped (clean line ends)
 
 
 def runs(mask):
@@ -59,7 +66,24 @@ def offset_line(s, off_f, rng):
         rx, rz = -q[4], q[3]
         o = off_f(q)
         pts.append((q[0] + rx * o, q[2] + rz * o))
-    return LineString(pts) if len(pts) >= 2 else None
+    return smooth(pts)
+
+
+def smooth(pts, it=2):
+    """(J15, paint_snake) Chaikin corner cutting, ends kept: lines follow a smooth curve, not the 8-stud sample polygon"""
+    pts = [tuple(p) for p in pts]
+    if len(pts) < 2:
+        return None
+    for _ in range(it):
+        if len(pts) < 3:
+            break
+        out = [pts[0]]
+        for (x0, z0), (x1, z1) in zip(pts[:-1], pts[1:]):
+            out.append((0.75 * x0 + 0.25 * x1, 0.75 * z0 + 0.25 * z1))
+            out.append((0.25 * x0 + 0.75 * x1, 0.25 * z0 + 0.75 * z1))
+        out.append(pts[-1])
+        pts = out
+    return LineString(pts)
 
 
 def strip(s, lo_f, hi_f, rng):
@@ -152,14 +176,14 @@ class Paint:
                 it['deck'] = True
             self.items.append(it)
 
-    def line(self, kind, ln, width, what, road=None, clip=None, deck=False):
+    def line(self, kind, ln, width, what, road=None, clip=None, deck=False, min_len=0.6):
         for l in lines_of(ln):
             if clip is not None and not clip.is_empty:
                 l2 = l.difference(clip.local(l) if isinstance(clip, Clip) else clip)
             else:
                 l2 = l
             for x in lines_of(l2):
-                if x.length < 0.6:
+                if x.length < min_len:
                     continue
                 self.poly(kind, x.buffer(width / 2, cap_style=2, join_style=2), what, road, deck)
 
@@ -169,6 +193,124 @@ def neff(q, one):
     lanes a side, more where a direction's asphalt holds more 12-stud lanes (a parking shoulder gets its own line)"""
     span = (q[6] + q[7]) if one else ((q[6] if q[8] > 0.3 else (q[6] + q[7]) / 2) - q[11])
     return max(1, int(q[9]), int(round(span / 12.0)))
+
+
+def raw_boxes(roads, main, cw, tree):
+    """overlaps of two main roads' carriageways: [(hull, bigger road, smaller road)]"""
+    out = []
+    for r in main:
+        g = cw[r['name']]
+        if g.is_empty:
+            continue
+        for j in tree.query(g):
+            o = roads[int(j)]
+            if o['name'] == r['name'] or o['kind'] not in ('route', 'side') or o['rank'] < r['rank']:
+                continue
+            # a side lane starting on its road's end is not a junction
+            if r.get('name') in (o.get('startsOnEnd'), o.get('endsOnEnd')) or o['name'] in (r.get('startsOnEnd'), r.get('endsOnEnd')):
+                continue
+            x = g.intersection(cw[o['name']])
+            if not x.is_empty and x.area > 20:
+                out.append((x.convex_hull, r['name'], o['name']))
+    return out
+
+
+def heading_at(r, pt):
+    s = r['s']
+    S = np.array([(q[0], q[2]) for q in s])
+    i = int(np.argmin(((S - np.asarray(pt)) ** 2).sum(1)))
+    return np.array([s[i][3], s[i][4]])
+
+
+def double_pairs(raw, R):
+    """(J15, owner ref 'double junction zebras and stop lines') pairs of boxes (i, j) where two parallel roads under
+    DOUBLE_GAP apart cross one road (a dual carriageway as two one-ways, two streets side by side)"""
+    out = []
+    tr = STRtree([b[0] for b in raw]) if raw else None
+    for i, (h, a, b) in enumerate(raw):
+        for j in tr.query(h.buffer(DOUBLE_GAP)):
+            j = int(j)
+            if j <= i:
+                continue
+            h2, c, d = raw[j]
+            sh = {a, b} & {c, d}
+            if len(sh) != 1 or h.distance(h2) > DOUBLE_GAP:
+                continue
+            x, y = ({a, b} - sh).pop(), ({c, d} - sh).pop()
+            if x == y:
+                continue
+            if abs(heading_at(R[x], h.centroid.coords[0]) @ heading_at(R[y], h2.centroid.coords[0])) < 0.9:
+                continue
+            out.append((i, j))
+    return out
+
+
+def merged_boxes(raw, R):
+    """the junction boxes: each double pair joined into ONE box (the hull of both: nothing painted between them)"""
+    par = list(range(len(raw)))
+
+    def f(i):
+        while par[i] != i:
+            par[i] = par[par[i]]
+            i = par[i]
+        return i
+    pairs = double_pairs(raw, R)
+    for i, j in pairs:
+        par[f(i)] = f(j)
+    groups = {}
+    for i in range(len(raw)):
+        groups.setdefault(f(i), []).append(raw[i][0])
+    return [unary_union(g).convex_hull if len(g) > 1 else g[0] for g in groups.values()], len(pairs)
+
+
+def limit_rate(t, ds, rate):
+    for i in range(1, len(t)):
+        t[i] = min(max(t[i], t[i - 1] - rate * ds[i]), t[i - 1] + rate * ds[i])
+    for i in range(len(t) - 2, -1, -1):
+        t[i] = min(max(t[i], t[i + 1] - rate * ds[i + 1]), t[i + 1] + rate * ds[i + 1])
+    return t
+
+
+def lane_lines(s, a, b, one):
+    """(J15, owner ref 'road markings messed up 5': dashes jogging sideways and side by side where a lane starts) the
+    lane structure of built samples a..b, per side sg: (inner, outer, n, [line k offsets (nan = no line)]). Each line is
+    spread evenly over its direction's half (J14) but moves at most LANE_RATE studs sideways per stud along: where a
+    lane is added it tapers out of the kerb, where one ends it tapers into it (one offset per boundary, never a jump)"""
+    idx = list(range(a, b + 1))
+    Q = [s[i] for i in idx]
+    ds = [0.0] + [math.hypot(Q[i][0] - Q[i - 1][0], Q[i][2] - Q[i - 1][2]) for i in range(1, len(Q))]
+    out = {}
+    for sg in ((1,) if one else (-1, 1)):
+        inner, outer, nn = [], [], []
+        for q in Q:
+            if one:
+                lo, hi = -q[6], q[7]
+            elif q[8] > 0.3:
+                lo, hi = (q[11], q[7]) if sg > 0 else (-q[11], -q[6])
+            else:
+                c0 = (q[7] - q[6]) / 2
+                lo, hi = c0 + sg * q[11], (q[7] if sg > 0 else -q[6])
+            inner.append(lo)
+            outer.append(hi)
+            nn.append(neff(q, one))
+        inner, outer, nn = np.array(inner), np.array(outer), np.array(nn)
+        lines = []
+        for k in range(1, int(nn.max())):
+            t = np.where(k < nn, inner + (outer - inner) * k / nn, outer)
+            t = limit_rate(t.astype(float), ds, LANE_RATE)
+            lines.append(np.where(np.abs(t - outer) > 1.5, t, np.nan))
+        out[sg] = (inner, outer, nn, lines)
+    return idx, out
+
+
+def bounds_at(LL, name, i, sg):
+    """lane boundaries (inner .. outer: left to right for the driver) at sample i on side sg, or None"""
+    for idx, out in LL.get(name, ()):
+        if idx[0] <= i <= idx[-1] and sg in out:
+            j = i - idx[0]
+            inner, outer, nn, lines = out[sg]
+            return [inner[j]] + [ln[j] for k, ln in enumerate(lines) if k + 1 < nn[j] and not np.isnan(ln[j])] + [outer[j]]
+    return None
 
 
 def build(data, signals=None):
@@ -191,37 +333,30 @@ def build(data, signals=None):
     geoms = [cw[n] for n in names]
     tree = STRtree(geoms)
     R = {r['name']: r for r in roads}
-    # junction boxes: overlaps of two main roads' carriageways (+ every ring)
-    boxes = []
+    # lane structure of every main road (lane lines, stop lines and arrows share it)
+    LL = {}
     for r in main:
-        g = cw[r['name']]
-        if g.is_empty:
-            continue
-        for j in tree.query(g):
-            o = roads[int(j)]
-            if o['name'] == r['name'] or o['kind'] not in ('route', 'side') or o['rank'] < r['rank']:
-                continue
-            # a side lane starting on its road's end is not a junction
-            if r.get('name') in (o.get('startsOnEnd'), o.get('endsOnEnd')) or o['name'] in (r.get('startsOnEnd'), r.get('endsOnEnd')):
-                continue
-            x = g.intersection(cw[o['name']])
-            if not x.is_empty and x.area > 20:
-                boxes.append(x.convex_hull)
+        s = r['s']
+        c = cut.get(r['name'], set())
+        for a, b in runs([i not in c for i in range(len(s))]):
+            if b - a >= 2:
+                LL.setdefault(r['name'], []).append(lane_lines(s, a, b, bool(r.get('oneway'))))
+    # junction boxes: overlaps of two main roads' carriageways (double junctions joined), + every ring
+    raw = raw_boxes(roads, main, cw, tree)
+    boxes, ndouble = merged_boxes(raw, R)
     box_u = unary_union(boxes).buffer(BOX_GROW) if boxes else Polygon()
     main_names = [r['name'] for r in main]
     main_tree = STRtree([cw[n] for n in main_names])
     sxz = {r['name']: np.array([(q[0], q[2]) for q in r['s']]) for r in main}
     ring_disks = unary_union([Point(g['c'][0], g['c'][2]).buffer(g['r_out'] + 0.5, 96) for g in rings]) if rings else Polygon()
     no_paint = box_u.union(ring_disks)
-    # zebras / stop lines per main x main box
-    zebra_zone = []
-    sig = [Point(x, z) for x, z in (signals or [])]
-    for bx in polys_of(box_u):
-        signalled = any(bx.distance(p) < 60 for p in sig)
+    # arms: every main road leaving every box (first sample whose whole cross-section is outside it)
+    arms = []
+    arm_fill = []
+    for bi, bx in enumerate(polys_of(box_u)):
         for j in main_tree.query(bx):
             r = main[int(j)]
-            g = cw[r['name']]
-            if not g.intersects(bx):
+            if not cw[r['name']].intersects(bx):
                 continue
             s = r['s']
             n = len(s)
@@ -231,12 +366,10 @@ def build(data, signals=None):
             near = (P_[:, 0] > x0 - 1) & (P_[:, 0] < x1 + 1) & (P_[:, 1] > z0 - 1) & (P_[:, 1] < z1 + 1)
             inb = [bool(near[i]) and (bx.contains(Point(q[0], q[2])) or bx.distance(Point(q[0], q[2])) < 0.5) for i, q in enumerate(s)]
             for a, b in runs(inb):
-                for side, k0, step in ((-1, a - 1, -1), (1, b + 1, 1)):
-                    # walk out of the box along the road; the arm must go on 30 studs
+                for k0, step in ((a - 1, -1), (b + 1, 1)):
                     k = k0
                     if k < 0 or k >= n or k in c:
                         continue
-                    # first sample whose whole cross-section is outside the box
                     while 0 <= k < n and k not in c:
                         q = s[k]
                         rx, rz = -q[4], q[3]
@@ -247,10 +380,13 @@ def build(data, signals=None):
                         k += step
                     if not (0 <= k < n) or k in c:
                         continue
-                    # chainage along the road from k outward
+                    # (J15, owner ref 'junction box grass hole') the road from the box to its arm's zebra is box too
+                    k_in = k0 - step
+                    if abs(k - k_in) >= 1:
+                        arm_fill.append(strip(s, lambda q: -q[6], lambda q: q[7], range(min(k, k_in), max(k, k_in) + 1)))
                     pts = []
                     kk = k
-                    while 0 <= kk < n and kk not in c and len(pts) < 8:
+                    while 0 <= kk < n and kk not in c and len(pts) < 10:
                         pts.append(kk)
                         kk += step
                     if len(pts) < 5:
@@ -258,51 +394,70 @@ def build(data, signals=None):
                     line = LineString([(s[i][0], s[i][2]) for i in pts])
                     if line.length < 30:
                         continue
-                    z0, z1 = 2.0, 2.0 + ZEBRA_L
-                    zline = substring(line, z0, z1)
-                    q = s[k]
-                    D = np.array([q[3], q[4]])
-                    if step < 0:
-                        D = -D
-                    rgt = np.array([-q[4], q[3]])
-                    half_l, half_r, mb = q[6], q[7], q[8]
-                    # bars across, each ZEBRA_L long along the road
-                    zp = []
-                    o = -half_l + 1.0
-                    while o + ZEBRA_BAR <= half_r - 1.0 + 1e-6:
-                        if not (abs(o) < mb + 0.3 or abs(o + ZEBRA_BAR) < mb + 0.3 or (o < 0 < o + ZEBRA_BAR and mb > 0)):
-                            a0 = np.array(zline.coords[0]) + rgt * o
-                            a1 = np.array(zline.coords[-1]) + rgt * o
-                            b0 = a0 + rgt * ZEBRA_BAR
-                            b1 = a1 + rgt * ZEBRA_BAR
-                            zp.append(Polygon([a0, a1, b1, b0]))
-                        o += ZEBRA_PITCH
-                    if r['kind'] == 'route' and (signalled or True):
-                        P.poly('LZ', unary_union(zp), 'zebra', r['name'])
-                        zebra_zone.append(strip(s, lambda q: -q[6] - 1, lambda q: q[7] + 1, sorted(pts[:4])) )
-                    # stop line on the approach lanes, signalled junctions only
-                    if signalled:
-                        sp = np.array(zline.coords[-1]) + D * (STOP_GAP)
-                        # approach side: traffic heading into the box. Walking outward along +step, the box is behind:
-                        # the forward lanes (right side) head into it when step < 0
-                        lo, hi = (max(mb, 0.0), half_r - 0.5) if step < 0 else (-half_l + 0.5, -max(mb, 0.0))
-                        if r.get('oneway'):
-                            lo, hi = (-half_l + 0.5, half_r - 0.5) if step < 0 else (0, 0)
-                        if hi - lo > 2:
-                            a0 = sp + rgt * lo
-                            a1 = sp + rgt * hi
-                            b0 = a0 + D * STOP_W
-                            b1 = a1 + D * STOP_W
-                            P.poly('LW', Polygon([a0, a1, b1, b0]), 'stop', r['name'])
-                            zebra_zone.append(Polygon([a0 - D * 0.5, a1 - D * 0.5, b1 + D * 6, b0 + D * 6]).buffer(0.5))
+                    D = np.array([s[k][3], s[k][4]]) * (-1 if step < 0 else 1)   # outward
+                    arms.append(dict(box=bi, r=r, k=k, step=step, pts=pts, line=line, D=D))
+    no_paint = unary_union([no_paint] + [p for p in arm_fill if p is not None])
+    by_box = {}
+    for am in arms:
+        by_box.setdefault(am['box'], []).append(am)
+    # zebras, stop lines per arm
+    zebra_zone = []
+    arrow_jobs = []
+    for am in arms:
+        r, k, step, pts, line, D = am['r'], am['k'], am['step'], am['pts'], am['line'], am['D']
+        s = r['s']
+        q = s[k]
+        rgt = np.array([-q[4], q[3]])
+        half_l, half_r, mb = q[6], q[7], q[8]
+        zline = substring(line, 2.0, 2.0 + ZEBRA_L)
+        if r['kind'] == 'route':
+            o = -half_l + 1.0
+            while o + ZEBRA_BAR <= half_r - 1.0 + 1e-6:
+                # (J15) bars keep 1.3 off a median (its nose cap): no bar is cut
+                if not (mb > 0.3 and (o + ZEBRA_BAR > -mb - 1.3 and o < mb + 1.3)):
+                    a0 = np.array(zline.coords[0]) + rgt * o
+                    a1 = np.array(zline.coords[-1]) + rgt * o
+                    bar = Polygon([a0, a1, a1 + rgt * ZEBRA_BAR, a0 + rgt * ZEBRA_BAR])
+                    # (J15) a whole bar or none: one the kerb would cut is left out
+                    if unary_union([geoms[int(j)] for j in tree.query(bar)]).buffer(-0.1).contains(bar):
+                        P.poly('LZ', bar, 'zebra', r['name'])
+                o += ZEBRA_PITCH
+            zebra_zone.append(strip(s, lambda q: -q[6] - 1, lambda q: q[7] + 1, sorted(pts[:4])))
+        # incoming side: traffic heading into the box (right-hand traffic: the driver's right side)
+        if r.get('oneway'):
+            if step > 0:
+                continue
+            sg = 1
+        else:
+            sg = 1 if step < 0 else -1
+        # (J15) stop line: across the incoming lanes only (centre line / median .. kerb), just before the zebra, on the
+        # lane structure of the sample at the stop line itself (a flaring mouth moves the centre)
+        c_stop = 2.0 + ZEBRA_L + STOP_GAP
+        if line.length < c_stop + STOP_W + 2:
+            continue
+        sp = np.array(line.interpolate(c_stop).coords[0])
+        ks = min(pts, key=lambda i: (s[i][0] - sp[0]) ** 2 + (s[i][2] - sp[1]) ** 2)
+        bd = bounds_at(LL, r['name'], ks, sg)
+        if bd is None:
+            continue
+        lo, hi = sorted((bd[0] + sg * 0.45, bd[-1] - sg * 0.5))
+        if hi - lo < 2:
+            continue
+        qs = s[ks]
+        rgt = np.array([-qs[4], qs[3]])
+        lat = (sp[0] - qs[0]) * rgt[0] + (sp[1] - qs[2]) * rgt[1]
+        sp = sp - rgt * lat
+        a0, a1 = sp + rgt * lo, sp + rgt * hi
+        b0, b1 = a0 + D * STOP_W, a1 + D * STOP_W
+        P.poly('LW', Polygon([a0, a1, b1, b0]), 'stop', r['name'])
+        zebra_zone.append(Polygon([a0 - D * 0.5, a1 - D * 0.5, b1 + D * 6, b0 + D * 6]).buffer(0.5))
+        arrow_jobs.append(dict(am, sg=sg, c=c_stop + STOP_W + ARROW_BACK))
     zz = unary_union([z for z in zebra_zone if z is not None]) if zebra_zone else Polygon()
     clip_all = Clip(no_paint, zz)
-    # mouths of smaller roads on each main road (lane lines break there)
+    fills = unary_union([Polygon([(p[0], p[2]) for p in f]).buffer(0) for f in data.get('fills', []) if len(f) >= 3])
+    # mouths of smaller roads on each main road (lane and edge lines break there)
     for r in main:
         s = r['s']
-        n = len(s)
-        c = cut.get(r['name'], set())
-        built = [i not in c for i in range(n)]
         g = cw[r['name']]
         mouths = []
         for j in tree.query(g):
@@ -314,72 +469,57 @@ def build(data, signals=None):
                 mouths.append(cw[o['name']].buffer(4))
         mouth_u = unary_union(mouths) if mouths else Polygon()
         clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
-        deck = False
-        for a, b in runs(built):
-            if b - a < 2:
-                continue
+        clip_edge = Clip(clip_road, fills.buffer(2)) if not fills.is_empty else clip_road
+        one = bool(r.get('oneway'))
+        for idx, out in LL.get(r['name'], ()):
+            a, b = idx[0], idx[-1]
             rng = range(a, b + 1)
-            q0 = s[a]
-            lm = max(q[11] for q in s[a:b + 1])
-            one = r.get('oneway')
-            # yellow lines along the built median
+            # yellow lines along the built median, EDGE_IN from its kerb
             mbm = [s[i][8] > 0.3 for i in rng]
             for m0, m1 in runs(mbm):
                 if m1 - m0 < 2:
                     continue
                 sub = range(a + m0, a + m1 + 1)
                 for sg in (-1, 1):
-                    ln = offset_line(s, lambda q, sg=sg: sg * (q[8] + 0.6), sub)
-                    P.line('LY', ln, YELLOW_W, 'median', r['name'], clip_all)
-            # centre: undivided two-way
+                    ln = offset_line(s, lambda q, sg=sg: sg * (q[8] + EDGE_IN), sub)
+                    P.line('LY', ln, YELLOW_W, 'median', r['name'], clip_all, min_len=MIN_PIECE)
+            # (J15, owner ref 'Sule Square road') a yellow edge line along each outer kerb of a main road
+            edges = [(outer, -sg) for sg, (inner, outer, nn, lines) in out.items()]
+            if one:
+                edges.append((out[1][0], 1))
+            for off, sgn in edges:
+                ln = smooth([(s[i][0] - s[i][4] * (off[j] + sgn * EDGE_IN), s[i][2] + s[i][3] * (off[j] + sgn * EDGE_IN))
+                             for j, i in enumerate(idx)])
+                P.line('LY', ln, YELLOW_W, 'edge', r['name'], clip_edge, min_len=MIN_PIECE)
+            # centre: undivided two-way, on the carriageway's middle (J14), rate-limited like the lane lines
             if not one:
-                und = [s[i][11] < 1.2 for i in rng]
+                und = [s[i][11] < 1.2 and s[i][8] <= 0.3 for i in rng]
+                ds = [0.0] + [math.hypot(s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2]) for i in range(a + 1, b + 1)]
+                c0 = limit_rate(np.array([(s[i][7] - s[i][6]) / 2 for i in rng], float), ds, LANE_RATE)
                 for u0, u1 in runs(und):
                     if u1 - u0 < 2:
                         continue
-                    # (J14, owner: centre line far to the right) on the carriageway's middle, not the data centre line
-                    ln = offset_line(s, lambda q: (q[7] - q[6]) / 2, range(a + u0, a + u1 + 1))
+                    ln = smooth([(s[a + j][0] - s[a + j][4] * c0[j], s[a + j][2] + s[a + j][3] * c0[j]) for j in range(u0, u1 + 1)])
                     P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_all)
-            # lane dividers
-            nmax = max(neff(q, one) for q in s[a:b + 1])
-            for k in range(1, int(nmax)):
-                for sg in ((1,) if one else (-1, 1)):
-                    def off(q, k=k, sg=sg):
-                        n_ = neff(q, one)
-                        if k >= n_:
-                            return None
-                        if one:
-                            W = (q[6] + q[7]) / n_
-                            return -q[6] + W * k
-                        # (J14) lanes spread evenly over each direction's real half, measured from the middle
-                        if q[8] > 0.3:
-                            half, c0 = (q[7] if sg > 0 else q[6]), 0.0
-                        else:
-                            half, c0 = (q[6] + q[7]) / 2, (q[7] - q[6]) / 2
-                        W = (half - q[11]) / n_
-                        return c0 + sg * (q[11] + W * k)
-                    seg = [off(s[i]) is not None for i in rng]
-                    for v0, v1 in runs(seg):
-                        if v1 - v0 < 2:
+            # lane dividers: one smooth offset per boundary
+            for sg, (inner, outer, nn, lines) in out.items():
+                for t in lines:
+                    for v0, v1 in runs([not np.isnan(x) for x in t]):
+                        if v1 - v0 < 1:
                             continue
-                        ln = offset_line(s, off, range(a + v0, a + v1 + 1))
+                        ln = smooth([(s[idx[j]][0] - s[idx[j]][4] * t[j], s[idx[j]][2] + s[idx[j]][3] * t[j]) for j in range(v0, v1 + 1)])
                         for d in dashes(ln, DASH_ON, DASH_OFF):
-                            P.line('LW', d, LINE_W, 'lane', r['name'], clip_road)
+                            P.line('LW', d, LINE_W, 'lane', r['name'], clip_road, min_len=MIN_PIECE)
     # roundabouts
     for g in rings:
         C = np.array([g['c'][0], g['c'][2]])
         W = g['laneW']
-        circle_clip = Polygon()
-        # entries: each arm end in the ring
-        arms = [R[a] for a in g['arms'] if a in R]
-        entry_zone = []
-        for o in arms:
+        for o in [R[a] for a in g['arms'] if a in R]:
             s = o['s']
             for end in (0, -1):
                 q = s[end]
                 if np.linalg.norm(np.array([q[0], q[2]]) - C) > g['r_out']:
                     continue
-                # the sample where the arm crosses r_out + 1.5
                 idx = range(len(s)) if end == 0 else range(len(s) - 1, -1, -1)
                 k = None
                 for i in idx:
@@ -414,16 +554,13 @@ def build(data, signals=None):
                         j += step
                     sub = sorted(range(min(k, j), max(k, j) + 1))
                     sp = strip(s, lambda q: -q[11], lambda q: q[11], sub)
-                    # cut it off at the ring
                     if sp is not None:
                         sp = sp.difference(Point(*C).buffer(g['r_out'] + 0.5, 96))
                         hatch(P, sp, o['name'])
-        # ring lane lines (dashed circles), broken where arms enter
-        mouths = unary_union([cw[a.get('name')].buffer(2) for a in arms]) if arms else Polygon()
+        # ring lane lines (dashed circles)
         for k in range(1, g['lanes']):
             rr = g['r_in'] + W * k
-            ring = Point(*C).buffer(rr, 128).exterior
-            ln = LineString(ring.coords)
+            ln = LineString(Point(*C).buffer(rr, 128).exterior.coords)
             for d in dashes(ln, DASH_ON, DASH_OFF):
                 P.line('LW', d, LINE_W, 'ring lane', g['name'])
     # decks: 2 + 2, a solid white centre line and dashed lane lines (no zebras, no boxes up there)
@@ -435,11 +572,81 @@ def build(data, signals=None):
             ln = offset_line(s, lambda q, sg=sg: sg * q[10], rng)
             for dd in dashes(ln, DASH_ON, DASH_OFF):
                 P.line('LW', dd, LINE_W, 'deck lane', d['name'], None, deck=True)
-    # turn arrows
-    for r in main:
-        for t in r.get('turn', []):
-            arrows(P, r, t, clip_all)
+    # (J15) turn arrows: one per incoming lane at every approach, ARROW_BACK behind the stop line, for the turns the box
+    # really offers (OSM turn:lanes where they fit)
+    for job in arrow_jobs:
+        approach_arrows(P, job, by_box, LL, clip_all)
+    P.stats = dict(double=ndouble, boxes=len(boxes), approaches=len(arrow_jobs))
     return P
+
+
+def turns_of(job, by_box):
+    """left / through / right the box offers an approach heading into it"""
+    h = -job['D']
+    rgt = np.array([-h[1], h[0]])
+    have = set()
+    for o in by_box.get(job['box'], ()):
+        if o['r']['name'] == job['r']['name'] and o['k'] == job['k']:
+            continue
+        if o['r'].get('oneway') and o['step'] < 0:      # a one-way running into the box: no way out there
+            continue
+        d = o['D']
+        if d @ h > 0.7:
+            have.add('through')
+        elif d @ rgt > 0:
+            have.add('right')
+        else:
+            have.add('left')
+    return have
+
+
+def lane_kinds(n, have):
+    """per lane, left to right: the leftmost lane turns left, the rightmost right, all go through where it can"""
+    ks = [set() for _ in range(n)]
+    if 'through' in have:
+        for x in ks:
+            x.add('through')
+    if 'left' in have:
+        ks[0].add('left')
+    if 'right' in have:
+        ks[-1].add('right')
+    for j, x in enumerate(ks):
+        if not x:
+            x.add(('left' if 'left' in have else 'right') if j < n / 2 else ('right' if 'right' in have else 'left'))
+    return ks
+
+
+def approach_arrows(P, job, by_box, LL, clip):
+    r, line, sg, step = job['r'], job['line'], job['sg'], job['step']
+    s = r['s']
+    if line.length < job['c'] + ARROW_L + 1:
+        return
+    tail = np.array(line.interpolate(job['c'] + ARROW_L).coords[0])
+    i = min(job['pts'], key=lambda i: (s[i][0] - tail[0]) ** 2 + (s[i][2] - tail[1]) ** 2)
+    bd = bounds_at(LL, r['name'], i, sg)
+    have = turns_of(job, by_box)
+    if bd is None or not have:
+        return
+    n = len(bd) - 1
+    kinds = lane_kinds(n, have)
+    hs = 1 if step < 0 else -1          # heading along (+1) or against (-1) the data direction
+    for t in r.get('turn', []):
+        if t['dir'] == hs and abs(t['i'] - i) < 10 and len(t['lanes']) == n:
+            kinds = [set(x for x in (k.strip().replace('slight_', '').replace('sharp_', '') for k in ln.split(';'))
+                         if x in ('left', 'through', 'right')) or {'through'} for ln in t['lanes']]
+            break
+    q = s[i]
+    h = np.array([q[3], q[4]]) * hs
+    rgt = np.array([-h[1], h[0]])
+    rq = np.array([-q[4], q[3]])
+    lat = (tail[0] - q[0]) * rq[0] + (tail[1] - q[2]) * rq[1]
+    for j in range(n):
+        c = tail + rq * ((bd[j] + bd[j + 1]) / 2 - lat)
+        pg = unary_union([Polygon([c + rgt * x * ARROW_S + h * y * ARROW_S for x, y in arrow_shape(k)]).buffer(0)
+                          for k in sorted(kinds[j])])
+        if clip.intersects(pg):
+            continue
+        P.poly('LW', pg, 'arrow', r['name'])
 
 
 def hatch(P, pg, road):
@@ -474,49 +681,40 @@ def min_width(p):
     return min(a, b)
 
 
-ARROW = {  # unit arrow shapes (x across, y along, pointing +y), studs
-    'through': [(-0.25, 0), (0.25, 0), (0.25, 4.2), (0.75, 4.2), (0, 6), (-0.75, 4.2), (-0.25, 4.2)],
-}
-
-
-def arrows(P, r, t, clip):
-    s = r['s']
-    i = t['i']
-    if i < 0 or i >= len(s):
-        return
-    q = s[i]
-    D = np.array([q[3], q[4]]) * t['dir']
-    rgt = np.array([-q[4], q[3]]) * t['dir']
-    base = np.array([q[0], q[2]])
-    for lane, kinds in enumerate(t['lanes']):
-        off = t['offs'][lane]
-        c = base + rgt * off
-        for kind in kinds.split(';'):
-            shape = arrow_shape(kind)
-            if shape is None:
-                continue
-            pts = [c + rgt * x * 1.0 + D * y * 1.0 for x, y in shape]
-            pg = Polygon(pts).buffer(0)
-            if clip is not None and (clip.intersects(pg) if isinstance(clip, Clip) else pg.intersects(clip)):
-                continue
-            P.poly('LW', pg, 'arrow', r['name'])
-
-
 def arrow_shape(kind):
     kind = kind.strip()
+    # one stem (x -0.25 .. 0.25) for every kind, so a combined arrow is their union
     if kind in ('through', ''):
         return [(-0.25, 0), (0.25, 0), (0.25, 4.2), (0.75, 4.2), (0, 6), (-0.75, 4.2), (-0.25, 4.2)]
     if kind in ('left', 'slight_left', 'sharp_left'):
-        return [(0.25, 0), (0.75, 0), (0.75, 3.6), (-1.2, 3.6), (-1.2, 4.3), (-2.2, 3.35), (-1.2, 2.4), (-1.2, 3.1), (0.25, 3.1)]
+        return [(-0.25, 0), (0.25, 0), (0.25, 3.6), (-1.2, 3.6), (-1.2, 4.3), (-2.2, 3.35), (-1.2, 2.4), (-1.2, 3.1), (-0.25, 3.1)]
     if kind in ('right', 'slight_right', 'sharp_right'):
-        return [(-0.25, 0), (-0.75, 0), (-0.75, 3.6), (1.2, 3.6), (1.2, 4.3), (2.2, 3.35), (1.2, 2.4), (1.2, 3.1), (-0.25, 3.1)]
+        return [(0.25, 0), (-0.25, 0), (-0.25, 3.6), (1.2, 3.6), (1.2, 4.3), (2.2, 3.35), (1.2, 2.4), (1.2, 3.1), (0.25, 3.1)]
     if kind in ('reverse',):
         return None
     return None
 
 
-ORDER = ['stop', 'zebra', 'giveway', 'centre', 'deck centre', 'median', 'lane', 'deck lane', 'ring lane', 'hatch edge',
+ORDER = ['stop', 'zebra', 'giveway', 'centre', 'deck centre', 'median', 'edge', 'lane', 'deck lane', 'ring lane', 'hatch edge',
          'hatch', 'arrow']
+
+
+def nose_caps(data):
+    """a box round each median end: 1.5 back along the median, 1.0 past its nose, the median half + 1.2 to each side"""
+    cut = {k: set(v) for k, v in data['cut'].items()}
+    out = []
+    for r in data['roads']:
+        s = r['s']
+        c = cut.get(r['name'], set())
+        for a, b in runs([s[i][8] > 0.3 and i not in c for i in range(len(s))]):
+            for e, sgn in ((a, -1), (b, 1)):
+                q = s[e]
+                u = np.array([q[3], q[4]]) * sgn
+                rg = np.array([-q[4], q[3]])
+                p = np.array([q[0], q[2]])
+                w = q[8] + EDGE_IN + 0.3
+                out.append(Polygon([p - u * 1.5 - rg * w, p + u * 1.0 - rg * w, p + u * 1.0 + rg * w, p - u * 1.5 + rg * w]))
+    return out
 
 
 def tidy(data, items):
@@ -534,6 +732,11 @@ def tidy(data, items):
             med.extend(quads(r['s'], c, inner=8))
     for g in data['roundabouts']:
         ground.append(Point(g['c'][0], g['c'][2]).buffer(g['r_out'], 96))
+    # (J15) paint stops short of island noses: a cap EDGE_IN + 0.3 wide past each median end, and the islands
+    med.extend(nose_caps(data))
+    for isl in data.get('islands', []):
+        if len(isl) >= 3:
+            med.append(Polygon([(p[0], p[2]) for p in isl]).buffer(0).buffer(0.8))
     deck = []
     for d in data['decks']:
         deck.extend(quads(d['s']))
@@ -607,4 +810,4 @@ if __name__ == '__main__':
     for it in P.items:
         kinds[it['w']] = kinds.get(it['w'], 0) + 1
     json.dump(dict(items=P.items, signals=sig), open(os.path.join(od, 'paint.json'), 'w'))
-    print(len(P.items), kinds, 'signals', len(sig))
+    print(len(P.items), kinds, 'signals', len(sig), P.stats)
