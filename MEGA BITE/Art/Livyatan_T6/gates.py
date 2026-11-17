@@ -5,7 +5,6 @@ from mathutils import Vector
 objs=[o for o in bpy.data.objects if o.name.startswith('L6_')]
 bad=0
 for o in objs:
-    if 'Runes' in o.name: continue   # flat decals hugging the skin: open by design
     bm=bmesh.new(); bm.from_mesh(o.data)
     ob=[e for e in bm.edges if not e.is_manifold]
     seen=set(); inward=0; islands=0

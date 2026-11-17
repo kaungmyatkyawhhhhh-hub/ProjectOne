@@ -256,7 +256,9 @@ faces = [tuple(t) for t in tris] + [tuple(nv + i for i in reversed(t)) for t in 
 faces += [(i, (i + 1) % nv, nv + (i + 1) % nv, nv + i) for i in range(nv)]
 make('TailFluke', verts, faces, lambda p: jit(P['belly'] if p.normal.z < -0.2 else P['top'], p.index, 0.08))
 
-# ---------- runes: traced from the sheet, ray-cast onto the skin as thin glowing decals ----------
+# ---------- runes: traced from the sheet, ray-cast onto the skin, then MODELLED as solid raised inlays ----------
+# (owner 18 Nov: flat decals read as a texture slapped on; each stroke is a closed strip proud of the armour, root sunk in)
+RUNE_UP, RUNE_SINK = 2.5, 1.5   # px proud of the skin / sunk below it
 RUNES = json.load(open(os.path.join(HERE, 'runes_2d.json')))   # traced by runes.py (outside Blender: needs cv2)
 skin_objs = [o for o in col.objects if o.name.startswith(PRE) and ('Segment' in o.name or o.name in (PRE + 'UpperHead', PRE + 'TailStock'))]
 bm_all = bmesh.new()
@@ -269,35 +271,43 @@ VIEWS = {   # view -> (component label, px->(origin, dir) per mirror side, keep-
   'front': (3, lambda u, w, s: (Vector((10, (u - FP['cx']) / FP['k'] * S, Z(40 + (w - FP['y0']) / FP['k']))), Vector((-1, 0, 0))), lambda n, s: n.x > 0.45),
 }
 for cname in ('Cyan', 'Gold'):
-    verts, faces = [], []
+    hits, faces, key = [], [], {}   # hits[i] = (skin point, skin normal); welded by the 2D sheet point
+    def vid(k, hit):
+        if k not in key: key[k] = len(hits); hits.append((hit[0], hit[1].normalized()))
+        return key[k]
     for vname, (L, ray, keep) in VIEWS.items():
         for loops in RUNES['%s_%s' % (cname, vname)]:
             flat = [[Vector((float(p[0]), float(p[1]), 0)) for p in l] for l in loops]
             tri = geometry.tessellate_polygon(flat)
             pts = [p for l in flat for p in l]
-            # split every triangle into a ~6 px grid so no chord cuts into the curved skin
+            # ONE grid density per glyph: shared triangle edges then split at the same points (no T-junction holes)
+            nsub = max(1, int(max(max((pts[t_[0]] - pts[t_[1]]).length, (pts[t_[1]] - pts[t_[2]]).length, (pts[t_[2]] - pts[t_[0]]).length) for t_ in tri) / 12)) if tri else 1
             for s in ((1, -1) if vname == 'side' else (1,)):   # side runes go on both flanks
-                for t in tri:
-                    a, b, cc = (pts[k] for k in t)
-                    nsub = max(1, int(max((a - b).length, (b - cc).length, (cc - a).length) / 10))
+                for t_ in tri:
+                    a, b, cc = (pts[k] for k in t_)
                     grid = {}
                     for ii in range(nsub + 1):
                         for jj in range(nsub + 1 - ii):
                             q = a + (b - a) * (ii / nsub) + (cc - a) * (jj / nsub)
                             o_, d_ = ray(q.x, q.y, s); hit = BVH.ray_cast(o_, d_)
-                            grid[ii, jj] = None if hit[0] is None or not keep(hit[1], s) else len(verts)
-                            if grid[ii, jj] is not None: verts.append(hit[0] + hit[1] * 0.9 * S)
+                            grid[ii, jj] = None if hit[0] is None or not keep(hit[1], s) else vid((vname, s, round(q.x, 2), round(q.y, 2)), hit)
                     for ii in range(nsub):
                         for jj in range(nsub - ii):
                             for f in ((grid[ii, jj], grid[ii + 1, jj], grid[ii, jj + 1]),
                                       (grid[ii + 1, jj], grid[ii + 1, jj + 1], grid[ii, jj + 1]) if jj < nsub - ii - 1 else (None,)):
-                                if None not in f: faces.append(f)
-    o = make('Runes' + cname, verts, faces, P['cyan' if cname == 'Cyan' else 'gold'], glow=True, closed=False)
-    me = o.data; bm = bmesh.new(); bm.from_mesh(me)   # face the decal outward: along the skin normal under it
-    for f in bm.faces:
-        h = BVH.find_nearest(f.calc_center_median())
-        if h[0] is not None and f.normal.dot(h[1]) < 0: f.normal_flip()
-    bm.to_mesh(me); bm.free()
+                                if None not in f and len(set(f)) == 3: faces.append(f)
+    # orient each top face outward (along the skin normal), then extrude: top = proud, floor = sunk, walls on boundary edges
+    for i, f in enumerate(faces):
+        a, b, c = (hits[k][0] for k in f)
+        if (b - a).cross(c - a).dot(hits[f[0]][1] + hits[f[1]][1] + hits[f[2]][1]) < 0: faces[i] = (f[0], f[2], f[1])
+    n = len(hits)
+    verts = [p + nn * RUNE_UP * S for p, nn in hits] + [p - nn * RUNE_SINK * S for p, nn in hits]
+    edges = {}
+    for f in faces:
+        for e in ((f[0], f[1]), (f[1], f[2]), (f[2], f[0])): edges[e] = edges.get(e, 0) + 1
+    walls = [(b_, a_, a_ + n, b_ + n) for (a_, b_) in edges if (b_, a_) not in edges]
+    allf = faces + [(c + n, b_ + n, a_ + n) for a_, b_, c in faces] + walls
+    o = make('Runes' + cname, verts, allf, P['cyan' if cname == 'Cyan' else 'gold'], glow=True, closed=False)
 bm_all.free()
 
 objs = [o for o in col.objects if o.name.startswith(PRE)]
