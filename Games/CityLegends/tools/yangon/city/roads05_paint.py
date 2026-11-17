@@ -164,6 +164,13 @@ class Paint:
                 self.poly(kind, x.buffer(width / 2, cap_style=2, join_style=2), what, road, deck)
 
 
+def neff(q, one):
+    """(J14, owner: no bare asphalt strip wider than one lane without a line) the lanes painted at sample q: the data's
+    lanes a side, more where a direction's asphalt holds more 12-stud lanes (a parking shoulder gets its own line)"""
+    span = (q[6] + q[7]) if one else ((q[6] if q[8] > 0.3 else (q[6] + q[7]) / 2) - q[11])
+    return max(1, int(q[9]), int(round(span / 12.0)))
+
+
 def build(data, signals=None):
     P = Paint()
     roads = data['roads']
@@ -271,7 +278,7 @@ def build(data, signals=None):
                             zp.append(Polygon([a0, a1, b1, b0]))
                         o += ZEBRA_PITCH
                     if r['kind'] == 'route' and (signalled or True):
-                        P.poly('LY', unary_union(zp), 'zebra', r['name'])
+                        P.poly('LZ', unary_union(zp), 'zebra', r['name'])
                         zebra_zone.append(strip(s, lambda q: -q[6] - 1, lambda q: q[7] + 1, sorted(pts[:4])) )
                     # stop line on the approach lanes, signalled junctions only
                     if signalled:
@@ -330,22 +337,27 @@ def build(data, signals=None):
                 for u0, u1 in runs(und):
                     if u1 - u0 < 2:
                         continue
-                    ln = offset_line(s, lambda q: 0.0, range(a + u0, a + u1 + 1))
+                    # (J14, owner: centre line far to the right) on the carriageway's middle, not the data centre line
+                    ln = offset_line(s, lambda q: (q[7] - q[6]) / 2, range(a + u0, a + u1 + 1))
                     P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_all)
             # lane dividers
-            nmax = max(q[9] for q in s[a:b + 1])
+            nmax = max(neff(q, one) for q in s[a:b + 1])
             for k in range(1, int(nmax)):
                 for sg in ((1,) if one else (-1, 1)):
                     def off(q, k=k, sg=sg):
-                        n_ = max(1, q[9])
+                        n_ = neff(q, one)
                         if k >= n_:
                             return None
                         if one:
                             W = (q[6] + q[7]) / n_
                             return -q[6] + W * k
-                        half = q[7] if sg > 0 else q[6]
-                        W = min(q[10], (half - q[11]) / n_)
-                        return sg * (q[11] + W * k)
+                        # (J14) lanes spread evenly over each direction's real half, measured from the middle
+                        if q[8] > 0.3:
+                            half, c0 = (q[7] if sg > 0 else q[6]), 0.0
+                        else:
+                            half, c0 = (q[6] + q[7]) / 2, (q[7] - q[6]) / 2
+                        W = (half - q[11]) / n_
+                        return c0 + sg * (q[11] + W * k)
                     seg = [off(s[i]) is not None for i in rng]
                     for v0, v1 in runs(seg):
                         if v1 - v0 < 2:

@@ -732,6 +732,67 @@ def _shift_idx(data, name, n, cutd):
             dk['to'] += n
 
 
+DECK_SMOOTH_WIN = 7     # (J14) samples each side in the deck's plan / profile smoothing
+DECK_SMOOTH_MAX = 3.0   # 1 m: the smoothed plan line stays this close to OSM
+
+
+def deck_smooth(data):
+    """(J14, owner: "the overhead roads ... zigzag") a deck's plan line smoothed (smoothing the profile too broke
+    deck_regrade's <= 7.8% at the kept ends: deck_grade 7 -> 26) (moving average, ends and
+    the KEEP samples at each end fixed so the feet still meet their road), plan moves capped at DECK_SMOOTH_MAX; the
+    directions s[3] / s[4] taken again from the smoothed line. QA deck_wobble checks the result."""
+    KEEP, n = 3, 0
+    for d in data['decks']:
+        S = np.array([[q[0], q[1], q[2]] for q in d['s']], float)
+        if len(S) < 2 * KEEP + 3:
+            continue
+        k = DECK_SMOOTH_WIN
+        pad = np.vstack([np.repeat(S[:1], k, 0), S, np.repeat(S[-1:], k, 0)])
+        A = np.stack([np.convolve(pad[:, c], np.ones(2 * k + 1) / (2 * k + 1), mode='valid') for c in range(3)], 1)
+        mv = A[:, [0, 2]] - S[:, [0, 2]]
+        L = np.linalg.norm(mv, axis=1, keepdims=True)
+        A[:, [0, 2]] = S[:, [0, 2]] + mv * np.minimum(1.0, DECK_SMOOTH_MAX / np.maximum(L, 1e-9))
+        A[:KEEP], A[-KEEP:] = S[:KEEP], S[-KEEP:]
+        for i, q in enumerate(d['s']):
+            q[0], q[2] = round(float(A[i, 0]), 2), round(float(A[i, 2]), 2)   # plan only: deck_regrade owns the profile
+        for i, q in enumerate(d['s']):
+            a, b = A[max(0, i - 1)], A[min(len(A) - 1, i + 1)]
+            v = np.array([b[0] - a[0], b[2] - a[2]])
+            v /= (np.linalg.norm(v) or 1)
+            q[3], q[4] = round(float(v[0]), 4), round(float(v[1]), 4)
+        n += 1
+    return n
+
+
+WIDTH_RATE = 0.15   # (J14) widest change of a kerb's offset per stud along the road (6 studs over 40)
+
+
+def width_taper(data):
+    """(J14, owner refs `road width jumps`, `wavy road edges`; QA width_wobble) a road's width changes only as a taper:
+    each side's half (s[6] / s[7]) is eased out from the wider stretch at WIDTH_RATE, never stepped in blocks. Cut
+    (ring / deck) samples are left alone."""
+    cutd = {k: set(v) for k, v in data['cut'].items()}
+    n = 0
+    for r in data['roads']:
+        s, cut = r['s'], cutd.get(r['name'], set())
+        if len(s) < 3:
+            continue
+        c = [0.0]
+        for i in range(len(s) - 1):
+            c.append(c[-1] + math.hypot(s[i + 1][0] - s[i][0], s[i + 1][2] - s[i][2]))
+        for k in (6, 7):
+            for order in (range(1, len(s)), range(len(s) - 2, -1, -1)):
+                for i in order:
+                    j = i - 1 if order.step == 1 else i + 1
+                    if i in cut or j in cut:
+                        continue
+                    lo = s[j][k] - WIDTH_RATE * abs(c[i] - c[j])
+                    if s[i][k] < lo - 0.01:
+                        s[i][k] = round(lo, 2)
+                        n += 1
+    return n
+
+
 def main():
     tag = sys.argv[1]
     D = os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag)
@@ -744,12 +805,14 @@ def main():
     chained['continuations'] = roads05_chain.continuations(data)
     import roads05_absorb
     chained['absorb'] = roads05_absorb.absorb(data)
+    chained['width_taper'] = width_taper(data)
     chained['duplicates_dropped'] = drop_dups(data)
     chained['ring_clear'] = ring_clear(data)
     chained['ring_level'] = ring_level(data)
     chained['osm_joins'] = osm_joins(data)
     chained['deck_regrade'] = deck_regrade(data)
     chained['deck_butt'] = deck_butt(data)
+    chained['deck_smooth'] = deck_smooth(data)
     print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}

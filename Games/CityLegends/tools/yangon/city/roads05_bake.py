@@ -414,7 +414,7 @@ def densify_ring(coords, step=3.0):
 
 
 def paint_tris(items, surf, deck_surf, refy=None):
-    out = {'L': [], 'LY': []}
+    out = {'L': [], 'LY': [], 'LZ': []}
     dropped = 0
     for it in items:
         pg = Polygon(it['p'])
@@ -434,7 +434,7 @@ def paint_tris(items, surf, deck_surf, refy=None):
             except Exception:
                 tri = shapely.ops.triangulate(g)
             parts = list(tri.geoms) if hasattr(tri, 'geoms') else [tri]
-            kind = 'L' if it['k'] == 'LW' else 'LY'
+            kind = {'LW': 'L', 'LZ': 'LZ'}.get(it['k'], 'LY')
             S = deck_surf if it.get('deck') else surf
             for t in parts:
                 if t.area < 1e-4:

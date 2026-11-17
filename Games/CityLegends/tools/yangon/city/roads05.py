@@ -125,23 +125,39 @@ def region_of(tags):
     return unary_union([geo.batch_poly(t) for t in tags])
 
 
+TRACK_PAVED = {'asphalt', 'concrete', 'paved', 'paving_stones', 'sett', 'concrete:plates', 'concrete:lanes'}
+DRIVE_LINK_MIN = 180.0   # (J14) a driveway is kept when it is over ~60 m and links two kept roads (load())
+
+
 def keep_way(r, paved):
+    """(J14, owner: "every way a car can drive") residential / unclassified / living_street / public classes, every
+    service way but parking aisles and drive-throughs (driveways: load() keeps the long ones linking two roads), tracks
+    only where paved. Private / access=no compound and campus roads count (a paved car road; owner draws them as
+    missing); motor_vehicle=no does not.
+    shortcut: a track's paving is read from its surface tag, not the satellite; untagged tracks stay out."""
     t = r['t']
     hw = t.get('highway')
-    if r['id'] in paved:
+    if r['id'] in paved or t.get('area') == 'yes' or len(r['p']) < 2:
+        return False
+    if t.get('motor_vehicle') == 'no':
         return False
     if hw in RN.LINKS:  # owner 17 Nov: OSM's slip roads are real (University Ave x Kabar Aye): one-way roads of their own
-        return t.get('access') not in ('private', 'no') and t.get('area') != 'yes' and len(r['p']) >= 2
+        return True
     if hw == 'service':
-        if not (t.get('name') or t.get('name:en') or t.get('service') == 'alley'):
-            return False
-        if t.get('service') in ('driveway', 'parking_aisle', 'drive-through'):
-            return False
-    elif hw not in RN.PUBLIC:
+        return t.get('service') not in ('driveway', 'parking_aisle', 'drive-through')
+    if hw == 'track':
+        return t.get('surface') in TRACK_PAVED
+    return hw in RN.PUBLIC
+
+
+def drive_link(r, nodes):
+    """a long driveway whose both ends sit on kept roads' nodes"""
+    t = r['t']
+    if t.get('highway') != 'service' or t.get('service') != 'driveway' or t.get('access') == 'no' or len(r['p']) < 2:
         return False
-    if t.get('access') in ('private', 'no') or t.get('area') == 'yes' or t.get('motor_vehicle') == 'no':
+    if key_of(r['p'][0]) not in nodes or key_of(r['p'][-1]) not in nodes:
         return False
-    return len(r['p']) >= 2
+    return LineString(geo.proj(r['p'])).length >= DRIVE_LINK_MIN
 
 
 class Edge:
@@ -164,6 +180,8 @@ def load(tags):
         if max(xs) < lon0 or min(xs) > lon1 or max(ys) < lat0 or min(ys) > lat1:
             continue
         ways.append(r)
+    nodes = {key_of(q) for r in ways for q in r['p']}
+    ways += [r for r in geo.load('roads') if r['id'] not in paved and drive_link(r, nodes)]
     count = collections.Counter()
     for r in ways:
         for i, q in enumerate(r['p']):
@@ -1036,6 +1054,60 @@ def inside0(px, pz, o, margin=0.0):
     return None
 
 
+DECK_SPAN_MIN = 75.0   # (J14) 25 m: a shorter raised run is a culvert / drain bridge, built as ground road
+_UNDER = None
+
+
+def _under():
+    """railways and rivers / canals / lakes a deck may cross (streams, drains, ditches are not: culverts)"""
+    global _UNDER
+    if _UNDER is None:
+        g = []
+        for l in geo.load('lines'):
+            t = l['t']
+            if t.get('railway') in ('rail', 'tram', 'disused', 'light_rail', 'subway') or t.get('waterway') in ('river', 'canal'):
+                if len(l['p']) >= 2:
+                    g.append(LineString(geo.proj(l['p'])))
+        for a in geo.load('areas'):
+            t = a['t']
+            if t.get('natural') == 'water' or t.get('water') in ('river', 'reservoir', 'lake') or t.get('waterway') == 'riverbank':
+                try:
+                    P = Polygon(geo.proj(a['p']))
+                    if P.is_valid and P.area > 0:
+                        g.append(P)
+                except Exception:
+                    pass
+        _UNDER = (STRtree(g), g) if g else None
+    return _UNDER
+
+
+DECK_REACH = 150.0      # the raised run is only where the profile is 6+ over the ground: the structure reaches past it
+
+
+def deck_crosses(r, i0, i1, roads):
+    """(J14, owner: "not a bridge in real life" / "never drop a deck that runs over a ground road") a deck only where
+    the raised run is >= DECK_SPAN_MIN and the structure (the run + DECK_REACH each way, 30 studs wide) meets another
+    road, a railway, a river / canal or a lake -> 'road' (a flyover over a ground road), 'rail / water' (a simple
+    bridge), or None (a culvert hump: built as ground road)"""
+    if r['c'][i1] - r['c'][i0] < DECK_SPAN_MIN:
+        return None
+    run = LineString(r['P'][i0:i1 + 1])
+    for o in roads:
+        if o is not r and norm(o['name']) != norm(r['name']) and run.crosses(LineString(o['P'])):
+            return 'road'
+    k = [i for i in range(len(r['P'])) if r['c'][i0] - DECK_REACH <= r['c'][i] <= r['c'][i1] + DECK_REACH]
+    zone = LineString(r['P'][k[0]:k[-1] + 1]).buffer(30)
+    u = _under()
+    if u:
+        for j in u[0].query(zone):
+            if zone.intersects(u[1][int(j)]):
+                return 'rail / water'
+    for o in roads:
+        if o is not r and norm(o['name']) != norm(r['name']) and zone.intersects(LineString(o['P'])):
+            return 'road'
+    return None
+
+
 DECK_GAP = 400.0     # ground this long between two raised runs of one road = two decks
 DECK_FLAT = 24.0    # a deck starts level off its ramp foot (owner's bug 2: the ramp rose out of the junction box)
 DECK_GRADE = 0.05
@@ -1094,7 +1166,15 @@ def finish(net):
                 runs[-1][1] = i
         for i0, i1 in runs:
             if i1 - i0 >= 5:
-                decks.append(dict(road=r, i0=int(i0), i1=int(i1)))
+                why = deck_crosses(r, int(i0), int(i1), roads)
+                if why:
+                    decks.append(dict(road=r, i0=int(i0), i1=int(i1), over=why))
+                else:
+                    a, b = r['P'][int(i0)], r['P'][int(i1)]
+                    net.setdefault('decks_dropped', []).append(dict(road=r['name'], x=round(float((a[0] + b[0]) / 2), 1),
+                                                                    z=round(float((a[1] + b[1]) / 2), 1),
+                                                                    span=round(float(r['c'][int(i1)] - r['c'][int(i0)]), 1)))
+                    r['yr'][int(i0):int(i1) + 1] = np.nan   # a ground road at full width
     net['decks'] = decks
     # side lanes of a deck: other roads of the deck's name running beside it
     for dk in decks:
@@ -1337,6 +1417,17 @@ def finish(net):
     for dk in decks:
         r = dk['road']
         dh = 2 * DECK_LANE_W                 # 2 + 2 on the deck
+        if not dk['sides']:
+            # (J14, owner: Shwedagon Pagoda Rd over the railway at Phaya Lan) a bridge with no ground lanes beside it
+            # carries its road's own full width, lanes and median: no gore widening, no narrowing
+            dk['own'] = True
+            # each side capped at its lanes x lane width + median (a fork's / an absorb's widening is not the bridge)
+            cap = r['lanes'] * r['lw'] + r['mb'] + r['lm']
+            r['dwl'], r['dwr'] = np.minimum(r['wl'], cap), np.minimum(r['wr'], cap)
+            dh = float(max(r['dwl'][dk['from']:dk['to'] + 1].max(), r['dwr'][dk['from']:dk['to'] + 1].max()))
+            dk['half'] = dh
+            dk['from_half'] = dk['to_half'] = dh
+            continue
         dk['half'] = dh
         side_w = 0.0
         for o in dk['sides']:
@@ -1508,6 +1599,12 @@ def write(net):
         D = dirs(r['P'])
         s = []
         for q, i in enumerate(range(dk['from'], dk['to'] + 1)):
+            if dk.get('own'):
+                s.append([round(float(r['P'][i][0]), 2), round(float(dk['y'][q]), 2), round(float(r['P'][i][1]), 2),
+                          round(float(D[i][0]), 4), round(float(D[i][1]), 4), 0, round(float(r['dwl'][i]), 2),
+                          round(float(r['dwr'][i]), 2), round(float(r['mb'][i]), 2), int(r['lanes'][i]),
+                          round(float(r['lw'][i]), 2), round(float(r['lm'][i]), 2)])
+                continue
             s.append([round(float(r['P'][i][0]), 2), round(float(dk['y'][q]), 2), round(float(r['P'][i][1]), 2),
                       round(float(D[i][0]), 4), round(float(D[i][1]), 4), 0, dk['half'], dk['half'], 0, 2, DECK_LANE_W, 0])
         nm = '%s Flyover' % (r['name'] or 'Road')
@@ -1568,7 +1665,7 @@ def write(net):
               samples=sum(len(r['s']) for r in out_roads), decks=len(out_decks), roundabouts=len(out_rings),
               ranks_unique=len(set(ranks)) == len(ranks), rank_cycles_broken=net['rank_cycles'],
               ends_on_smaller=net['ends_on_smaller'], dropped_fillers=net.get('dropped_fillers'), json_chars=len(txt), modules=k,
-              divided_roads=sum(1 for r in out_roads if r['median'] > 1.2))
+              divided_roads=sum(1 for r in out_roads if r['median'] > 1.2), decks_dropped=net.get('decks_dropped', []))
     json.dump(st, open(os.path.join(od, 'stats.json'), 'w'), indent=1)
     return data, st
 

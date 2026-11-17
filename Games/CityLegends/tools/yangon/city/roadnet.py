@@ -45,7 +45,7 @@ MAIN = {'motorway', 'trunk', 'primary', 'secondary', 'tertiary'}
 LINKS = {'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link'}
 RANK = {'motorway': 0, 'trunk': 0, 'primary': 1, 'secondary': 2, 'tertiary': 3, 'motorway_link': 4, 'trunk_link': 4,
         'primary_link': 4, 'secondary_link': 4, 'tertiary_link': 5, 'unclassified': 6, 'residential': 6, 'road': 6,
-        'living_street': 7, 'service': 8}
+        'living_street': 7, 'service': 8, 'track': 8}
 LANE_W = {1: 10.0, 2: 16.0, 3: 13.0}
 # OSM way ids built whole past the batch outline (a bridge leaving over a river to land where no batch lies)
 REACH_OUT = {'2': (1219935185,)}
@@ -149,7 +149,7 @@ def cross_section_1to1(t):
     one = oneway_of(t)
     total, fw, bw = _num(t, 'lanes'), _num(t, 'lanes:forward'), _num(t, 'lanes:backward')
     w = width_m(t)
-    narrow = (hw == 'living_street' or hw == 'service' or (w is not None and w < 5.5)) and hw not in MAIN | LINKS
+    narrow = (hw in ('living_street', 'service', 'track') or (w is not None and w < 5.5)) and hw not in MAIN | LINKS
     dflt = 2 if hw in ('trunk', 'primary', 'motorway', 'secondary') else 1
     tagged = total is not None or fw is not None
     if one:
@@ -194,7 +194,8 @@ def cross_section_1to1(t):
             return float(min(LANE_MAX, max(LANE_MIN, geo.m(LANE_REAL_M))))
         if narrow:
             # an alley / living street: one shared lane, its real width (a 4 m alley when untagged), at least 10 studs
-            tot = max(LANE_MIN, geo.m(w if w else 4.0))
+            # (J14) at least one car lane of asphalt: 10.5 studs one-way, 16.5 two-way (QA carriageway_too_narrow)
+            tot = max(10.5 if one else 16.5, geo.m(w if w else 4.0))
             return tot if one else tot / 2
         if one:
             return LANE_MAX          # a one-way street lane: 3.5-4 m
@@ -213,7 +214,7 @@ def cross_section(t):
     one = oneway_of(t)
     total, fw, bw = _num(t, 'lanes'), _num(t, 'lanes:forward'), _num(t, 'lanes:backward')
     w = width_m(t)
-    narrow = (hw == 'living_street' or hw == 'service' or (w is not None and w < 5.5)) and hw not in MAIN | LINKS
+    narrow = (hw in ('living_street', 'service', 'track') or (w is not None and w < 5.5)) and hw not in MAIN | LINKS
     if hw in ('trunk', 'primary', 'motorway'):
         dflt = 2
     elif hw == 'secondary':

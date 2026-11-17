@@ -93,6 +93,10 @@ def absorb(data, min_area=None):
                 continue  # beside, not on it
             along[i] = True
             need = abs(off) + hb
+            # (J14, owner ref `road width jumps`) a service / track way alongside never widens the road (its strip
+            # stays verge: the alongside part of the service way still goes)
+            if B.get('hw') in ('service', 'track') or (A.get('hw') in ('service', 'track')):
+                continue
             if need > ha + 0.5 and need > widen.get(j, (side, 0.0))[1]:
                 widen[j] = (side, need)
         # runs of alongside samples

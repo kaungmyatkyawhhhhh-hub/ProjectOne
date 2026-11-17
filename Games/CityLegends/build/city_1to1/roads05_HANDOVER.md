@@ -1,3 +1,69 @@
+# roads05 handover (18 Nov 2026, tenth pass: J14, DATA + QA RULES ONLY: no Studio test this pass, context ran out)
+
+## J14 (this pass) -- counts: see `J14_qa.log` (filled in below); backup of the J13 data: `roads_J13.json`, `qa_J13.json`
+- Pipeline in one script now: `tools/yangon/city/roads05_pipeline.sh <label> [skip]` (skip = start at roads05_fix).
+- Coverage (`roads05.keep_way` + `drive_link`): every service way but parking_aisle / drive-through (unnamed too),
+  private and access=no compound / campus roads (motor_vehicle=no stays out), paved tracks (surface tag only:
+  shortcut, the satellite was not checked; 73 untagged tracks stay out), driveways >= 180 studs (60 m) whose both ends
+  are nodes of kept roads. Yangon Central station streets (186939494/5, 525722124, 614704889) are in.
+  Dropped-ways overlays: `tools/yangon/city/dropped_overlay.py` -> `City Legends/2026-11-18 roads05 J14 dropped ways -
+  P1..P12.png` + `- Yangon Central.png` (grey built before, green added, red still out). Added per district: P1 463,
+  P2 438, P3 439, P4 537, P5 152, P6 515, P7 420, P8 462, P9 108, P10 157, P11 362, P12 194. Red left: parking aisles,
+  short driveways, drive-throughs, untagged tracks. The owner's "big hall" and "lake" drawings were NOT located on the
+  overlays (no coordinates in the vault): next pass, find them and check they are green.
+- `roadnet.cross_section_1to1`: a narrow (alley / living / service / track) carriageway is at least 10.5 one-way, 16.5
+  two-way. QA `carriageway_too_narrow` (per sample: one-way when its lanes fill its width; tapers left out).
+- `roads05_absorb`: a service / track way alongside a road never widens it (its strip stays verge; owner ref `road
+  width jumps`).
+- `roads05_fix.width_taper` (WIDTH_RATE 0.15: a kerb offset changes <= 6 studs over 40) + QA `width_wobble`.
+- Decks (`roads05.deck_crosses`): a raised run is a deck only when >= 75 studs (25 m) and its reach (run +- 150, 30
+  wide) meets another road, a railway (rail / tram / disused / light_rail / subway) or a river / canal / lake; else it
+  is ground road (stats.json `decks_dropped`). A deck with NO ground side lanes (a simple bridge: Shwedagon Pagoda Rd
+  over the Circular railway at Phaya Lan) carries its road's own per-sample width / lanes / median (capped at lanes x
+  laneW + median), no gore widening; flyovers (deck + side lanes) are unchanged (checked: 0 of the flyovers changed).
+  The Circular railway itself is a LATER job: decks over it must leave room for the line underneath (DECK_CLEAR).
+- `roads05_fix.deck_smooth`: deck plan line moving average (7 each side, ends + 3 samples fixed, <= 3 studs = 1 m from
+  OSM), directions recomputed. Profile NOT smoothed (it broke deck_regrade). QA `deck_wobble` (lateral 2nd difference
+  over 0.2 against a 4-sample chord, vertical over 0.15).
+- Paint (`roads05_paint`): an undivided two-way road's centre line on the carriageway's middle ((wr - wl) / 2, not the
+  data centre line); lane lines spread evenly over each direction's real half; `neff`: more lane lines where a
+  direction holds more 12-stud lanes (no bare strip). QA `paint_off_centre`, `unmarked_strip`.
+- Zebras: owner decided YELLOW faded ochre (230, 190, 110): paint kind `LZ` (roads05_paint, roads05_bake,
+  YangonRoadMeshes). Noted in the Playbook research note.
+
+## Next (in order) -- plan is NOT ready for owner approval
+1. Shwedagon Pagoda Road: raw roads05 makes 137 samples (22.5 / 43.5, 4 lanes, mb 1.5): a one-sided pair merge, and
+   roads05_absorb then absorbs Shwedagon Pagoda Road INTO Lane #427 (rank inverted). Its bridge deck is 43.5 a side.
+   Owner: one constant width along it, verge strips green. Same family: QA width_wobble rows, paint_off_centre rows.
+2. Owner ADDs not started (coordinator, 18 Nov):
+   - Sule Shangri-La / DBS junction (refs `Owner ref - Sule Shangri-La corner (...)`): big sweeping corner radii
+     (OSM kerb / turn radius, else satellite: 8-12 m downtown), side street flaring, kerbed triangle island (red / white
+     kerb, red paving), wide tiled forecourt to the building; no loose slab / kerb scraps. Add to the Studio test with a
+     driver's-eye shot next to real 1.
+   - Downtown (P3 and wherever the satellite is grey to the facade): pave kerb -> building line (grey / white tiles,
+     trees in pits at the kerb), no grass verges.
+   - Ground junctions UNDER flyovers (Univ x Kabar Aye, Hledan, Bayint Naung, Pyay Rd): a full ground junction
+     (box, corners, kerbs, pavements, zebras, stops) from ground roads only; a deck removes only its pier footprints and
+     ramp walls; no ground paint / kerb / pavement inside a ramp footprint; piers on medians / between carriageways,
+     never in a lane. Studio test: + Hledan or Pyay Rd flyover, a low shot under the deck + overview with deck hidden.
+   - Decks: parapet follows the deck edge at constant height; QA `paint_snake` (not written yet); a driver's-eye shot
+     along each test deck. Deck pieces join with no gaps; a split deck splits cleanly.
+   - All of the original block 2-6 list (task brief): road_gap, kerb_gap, box_hole, fillet_no_kerb, flare_kerb_gap,
+     corner_pave_gap, seam_step, median_broken, buried edges; arrow_missing, stopline_wrong_side, dash_jog,
+     dash_side_by_side, paint_in_median, zebras inside a double junction; downtown barrier / terrazzo medians, yellow
+     kerb edge lines; 7 steep decks (now see deck_grade), open ends, kerb_cross 14, median_cross, 4 merged
+     different-named pairs; traffic signals in roads.json; Studio test + shots; overlays (road_overlay.py).
+3. J14 counts (J13 -> J14, full net, `J14_qa.log`): roads 5,589 -> 8,565, mouths 7,934 -> 11,582 (mouthsim 0 failed),
+   carriageway_too_narrow (new) 0 (570 under the first, wrong rule; real narrow alleys fixed in roadnet),
+   paint_off_centre (new) 2, unmarked_strip (new) 0, width_wobble (new) 3, deck_wobble (new) 29 (plan smoothed; the
+   rows are mostly VERTICAL: the profile is per-sample; with the profile smoothed it was 7 but deck_grade went to 26),
+   deck_grade 7 -> 24 (NOT the smoothing: the rows have grade 0.089 / step 0.98 at deck ends; check deck_regrade with
+   the new deck set / own-width bridges FIRST), deck_foot 0, kerb_cross 14 -> 14, median_cross 1 -> 2, overlap 0 -> 1
+   (Bogyoke Aung San Road x Bogyoke Aung San Road #2 ~2), mouth_short real 2 -> 2, mouth_over real 1 -> 1,
+   stub_in_grass 7 -> 9, street_no_pave 0. Decks 53 -> 52: 5 flyovers (deck + side lanes, unchanged) + 47 simple
+   bridges; dropped as ground road: Thamaing Station Road (95-stud hump, no road / rail / water within reach).
+
+# (J13 pass below)
 # roads05 handover (18 Nov 2026, ninth pass: J13, DATA ONLY: no Studio test this pass, context ran out)
 
 ## J13 (this pass)

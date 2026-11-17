@@ -32,6 +32,7 @@ Hanthawaddy roundabout (2 ground photos, 2014 and 2018): red and white kerb roun
 - **University Avenue's kerb** is mostly plain concrete in real life. We paint it red and white like the other two so the map has one look.
 - **The median**: Pyay Road and parts of Kabar Aye have one in real life; the design (step 2) has none.
 - **Zebra crossings**: yellow at Hledan (2021), white near Hanthawaddy (2018). Not built yet.
+  - **Decided 18 Nov 2026 (owner, from his own 2018 downtown photos at Sule Shangri-La):** zebras are YELLOW, a pale faded ochre (about RGB 230, 190, 110), not bright lemon. Built as paint kind `LZ` (roads05_paint / roads05_bake / YangonRoadMeshes). The white-zebra research is closed.
 - **Edge lines** rest on 1 photo per road; most photos show none. The step 3 prompt asks for solid edge lines, so they are in.
 - **Give-way and stop lines** rest on 1 photo each.
 - **Age**: nothing newer than 2018 for Kabar Aye; University Avenue's full views are 2010 to 2016. Colours are good to about plus or minus 20 (phone photos, mixed light).

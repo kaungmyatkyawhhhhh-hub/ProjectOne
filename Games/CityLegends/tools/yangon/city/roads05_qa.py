@@ -27,6 +27,7 @@ Friday-level junction checks (17 Nov, owner: kerbs lying diagonally across a jun
 import json, os, sys
 
 import numpy as np
+from scipy.spatial import cKDTree
 from shapely.geometry import Polygon, Point, LineString
 from shapely.ops import unary_union
 from shapely.strtree import STRtree
@@ -255,7 +256,7 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave')}
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble')}
     if not PAINT_ONLY:
         junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
         if not OLD:
@@ -293,6 +294,39 @@ def main():
             issues['stub_in_grass'].append(dict(road=r['name'], length=round(float(L), 1), x=round(s[0][0], 1), z=round(s[0][2], 1)))
         if r['kind'] in ('street', 'route') and not ((r.get('walkL') or 0) > 0 and (r.get('walkR') or 0) > 0):
             issues['street_no_pave'].append(dict(road=r['name'], walkL=r.get('walkL'), walkR=r.get('walkR'), x=round(s[0][0], 1), z=round(s[0][2], 1)))
+    # (J14, owner ref `lane with no carriageway`) every road has at least one car lane of asphalt: 10.5 studs one-way,
+    # 16.5 two-way (a divided road: each carriageway 10.5); the 40-stud taper at each end and cut samples are left out
+    for r in (data['roads'] if not PAINT_ONLY else ()):
+        s, cut = r['s'], cutd.get(r['name'], set())
+        c = np.r_[0, np.cumsum([np.hypot(s[i + 1][0] - s[i][0], s[i + 1][2] - s[i][2]) for i in range(len(s) - 1)])]
+        # a chain can hold one-way and two-way pieces: a sample is one-way when its lanes fill its whole width; the
+        # taper between two pieces (any width change within 5 samples) is left out
+        ow = [abs(q[6] + q[7] - q[9] * q[10]) < 0.5 for q in s]
+        for i, q in enumerate(s):
+            if i in cut or c[i] < 40 or c[-1] - c[i] < 40:
+                continue
+            win = s[max(0, i - 5):i + 6]
+            if len(set(ow[max(0, i - 5):i + 6])) > 1 or max(x[6] + x[7] for x in win) - min(x[6] + x[7] for x in win) > 0.05:
+                continue
+            if q[8] > 0:
+                w, need = min(q[6], q[7]) - q[8], 10.5
+            else:
+                w, need = q[6] + q[7], 10.5 if (r.get('oneway') or ow[i]) else 16.5
+            if w < need - 0.05:
+                issues['carriageway_too_narrow'].append(dict(road=r['name'], w=round(w, 2), need=need, x=round(q[0], 1), z=round(q[2], 1)))
+                break
+    # (J14, owner refs `road width jumps`, `wavy road edges`) width_wobble: a kerb's offset stepping faster than 0.2 per
+    # stud along the road (a block change, not a taper); cut samples left out
+    for r in (data['roads'] if not PAINT_ONLY else ()):
+        s, cut = r['s'], cutd.get(r['name'], set())
+        for i in range(len(s) - 1):
+            if i in cut or i + 1 in cut:
+                continue
+            ds = max(np.hypot(s[i + 1][0] - s[i][0], s[i + 1][2] - s[i][2]), 0.5)
+            dw = max(abs(s[i + 1][6] - s[i][6]), abs(s[i + 1][7] - s[i][7]))
+            if dw > 0.3 and dw / ds > 0.2:
+                issues['width_wobble'].append(dict(road=r['name'], dw=round(dw, 2), ds=round(ds, 2), x=round(s[i][0], 1), z=round(s[i][2], 1)))
+                break
     # paint off the asphalt
     med = []
     for r in data['roads']:
@@ -315,6 +349,39 @@ def main():
             c = P.centroid
             issues['zebra_median'].append(dict(what=it.get('w'), road=it.get('r'), x=round(c.x, 1), z=round(c.y, 1)))
         pts.append((P.centroid.x, P.centroid.y))
+    # (J14, owner shot: centre line far right, bare left half) paint_off_centre: a centre line more than 1 stud off its
+    # undivided two-way road's carriageway middle; unmarked_strip: a lane strip (kerb or line to the next line) wider
+    # than one lane + 1 with no line, on a marked road (a 1-lane-a-side road's halves, a one-way's lanes)
+    rby = {r['name']: r for r in data['roads']}
+    lines_by = {}
+    for it, P in zip(paint, polys):
+        if it.get('w') in ('centre', 'lane') and it.get('r') in rby:
+            lines_by.setdefault(it['r'], []).append((it['w'], P.representative_point()))  # (a curved line's centroid is off it)
+    for name, L in lines_by.items():
+        r = rby[name]
+        S = np.array([[q[0], q[2]] for q in r['s']])
+        kd = cKDTree(S)
+        bad_c = bad_u = None
+        for w, c in L:
+            i = int(kd.query([c.x, c.y])[1])
+            q = r['s'][i]
+            off = (c.x - q[0]) * -q[4] + (c.y - q[2]) * q[3]
+            if w == 'centre' and q[8] <= 0.3 and abs(off - (q[7] - q[6]) / 2) > 1.0 and bad_c is None:
+                bad_c = dict(road=name, off=round(off, 2), mid=round((q[7] - q[6]) / 2, 2), x=round(c.x, 1), z=round(c.y, 1))
+        # strips: the paint rule's lanes (roads05_paint.neff) at every 4th sample; a strip over 1.5 lanes is unmarked
+        from roads05_paint import neff
+        for q in r['s'][::4]:
+            if q[8] > 0.3 or q[9] < 1:
+                continue
+            one = bool(r.get('oneway'))
+            span = (q[6] + q[7]) if one else ((q[6] + q[7]) / 2 - q[11])
+            strip = span / neff(q, one)
+            if strip > 18.0 and bad_u is None:
+                bad_u = dict(road=name, strip=round(strip, 2), x=round(q[0], 1), z=round(q[2], 1))
+        if bad_c:
+            issues['paint_off_centre'].append(bad_c)
+        if bad_u:
+            issues['unmarked_strip'].append(bad_u)
     # piles of paint
     pt = STRtree(polys)
     seen = set()
@@ -341,6 +408,25 @@ def main():
                         issues['median_box'].append(dict(road=r['name'], other=n, x=round(q[0], 1), z=round(q[2], 1)))
                     last = i
                     break
+    # (J14, owner: decks "zigzag") deck_wobble: a deck's lateral offset from the chord of its neighbours 4 samples each
+    # way over 0.2 studs (on a curve the chord offset is smooth: a jump between neighbours' offsets over 0.2), or a
+    # vertical second difference over 0.15
+    for d in data['decks']:
+        s = np.array(d['s'])
+        bad = None
+        for i in range(8, len(s) - 8):
+            offs = []
+            for j in (i - 1, i, i + 1):
+                a, b, p = s[j - 4][[0, 2]], s[j + 4][[0, 2]], s[j][[0, 2]]
+                t = b - a
+                offs.append(((p - a)[0] * t[1] - (p - a)[1] * t[0]) / (np.linalg.norm(t) or 1))
+            lat = abs(offs[1] - (offs[0] + offs[2]) / 2)
+            ver = abs(s[i - 1][1] - 2 * s[i][1] + s[i + 1][1])
+            if lat > 0.2 or ver > 0.15:
+                bad = dict(deck=d['name'], lat=round(float(lat), 3), ver=round(float(ver), 3), x=round(s[i][0], 1), z=round(s[i][2], 1))
+                break
+        if bad:
+            issues['deck_wobble'].append(bad)
     # decks
     roadby = {r['name']: r for r in data['roads']}
     for d in data['decks']:
