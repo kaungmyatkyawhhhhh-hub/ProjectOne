@@ -30,6 +30,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
+- 2026-11-18 (late): **roblox-3d-model-from-sheet** step 1a now covers EVERY model, creatures included (owner: "cover them"): split the creature into body, head, jaws, teeth, eyes, each fin and the tail, label them, mark hinge points for moving parts, and make the exploded sheet in the same turn as the turnaround sheet. Vault copy only: the installed plugin copy needs a re-upload.
 - 2026-11-18 (later): owner corrections on the Evolution UI written into the skills (new core rule: corrections go into the skill):
   - **roblox-ui-pro** (local + vault): code-built UI still looks AI, so make the art outside Studio (ChatGPT art won an A/B against Figma); size text in phone points (1334x750 mock = 2x); shops are item cards with big art, not text rows.
   - **roblox-chatgpt-art-pipeline** (vault copy only; the installed plugin copy needs a re-upload): new 18 Nov lessons section (themed frames, corner-only ornaments, the 4 sheets that make a whole shop, phone-point mockups, reliable ChatGPT typing via execCommand).

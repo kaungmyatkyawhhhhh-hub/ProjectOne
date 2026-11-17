@@ -1,6 +1,6 @@
 ---
 name: "roblox-3d-model-from-sheet"
-description: "Use when making a 3D model (shark, fish, creature, prop) for a Roblox game in the owner's Blender: ChatGPT design sheet first, then trace, check face landmarks and look, then export."
+description: "Use when making a 3D model (shark, fish, creature, prop) for a Roblox game in the owner's Blender: ChatGPT turnaround sheet AND an exploded-view sheet first, then trace, check face landmarks and look, then export."
 ---
 
 # Roblox 3D model from a design sheet
@@ -23,7 +23,14 @@ Toolkit: roble3/cc-blender-skill (MIT) is unpacked in the vault at `Tools\cc-ble
 - Then a second **head close-up sheet**: side and front of the head only, big, the same style, so the face can be measured accurately. The head is where players judge quality.
 - Download it via fetch(blob) and an `<a download>` link into the owner's Downloads. Copy it into the vault with the Blender Python (Downloads is not a connected folder), then stage it.
 
-## 1a. Hard-surface props made of parts (guns, tools, vehicles, machines): add an EXPLODED-VIEW sheet
+## 1a. EVERY model gets an EXPLODED-VIEW sheet (props AND creatures; owner, 18 Nov 2026: "cover them")
+This step is NOT optional and not only for hard-surface props: make the exploded sheet for sharks, fish and every creature too, in the same turn as the turnaround sheet (step 1), before any modelling.
+- **Creatures split into their real parts**, each drawn separately and labelled: body/torso, head, upper jaw, lower jaw, teeth row, eyes, each fin (dorsal, pectoral L/R, pelvic, anal), tail/caudal fin, gills, horns/spikes/accessories. Pull them apart along the body axis (nose to tail) with dashed alignment lines.
+- Parts that move (jaw, tail, fins) must be separate objects so they can be rigged and animated; the exploded sheet is what shows their true shape and hinge position.
+- Mark each part's hinge/attach point on the sheet if it moves (a dot and a short label), and measure it in the landmarks JSON.
+- Everything below (prompt, analysis, one Blender object per part, names, image routes) applies to creatures unchanged.
+
+### Original method (from props)
 From the "Exploded Diagram Method" (@oddblockstudios, 16 Nov watch study: a turkey-gun "GOBBLE RAIL" prop, Blender to in-game in ~20 min). A turnaround sheet hides parts behind each other. An exploded view shows **every part separately, at its true shape, pulled apart along its assembly axis, with a label**.
 - **One-try ChatGPT prompt:**
   - "technical exploded-view diagram of <prop>, <style> (e.g. Roblox low-poly, flat colours, 2-4 colours per part)";
