@@ -1906,12 +1906,17 @@ function M.buildIslands(which: string?)
 			if ed then
 				for _, sd in { "L", "R" } do
 					local arr = ed[sd]
-					for i = math.max(1, b[2] - 3), math.min(o.n, b[2] + 3) do
-						local q = arr and arr[i]
-						if q then
-							local d = hyp(q.X - x, q.Z - z)
+					-- (J22: on the edge's segments, not only at its samples (7.5 apart: a point between them fell back
+					-- to the island's data height and its fill stood up to 1 stud over the kerbs, Roundabout 4)
+					for i = math.max(1, b[2] - 3), math.min(o.n - 1, b[2] + 3) do
+						local q, q2 = arr and arr[i], arr and arr[i + 1]
+						if q and q2 then
+							local vx, vz = q2.X - q.X, q2.Z - q.Z
+							local L2 = vx * vx + vz * vz
+							local u = if L2 > 1e-9 then math.clamp(((x - q.X) * vx + (z - q.Z) * vz) / L2, 0, 1) else 0
+							local d = hyp(q.X + vx * u - x, q.Z + vz * u - z)
 							if d < best then
-								best, by = d, q.Y
+								best, by = d, q.Y + (q2.Y - q.Y) * u
 							end
 						end
 					end
@@ -2059,6 +2064,23 @@ function M.buildIslands(which: string?)
 			if not hit then
 				break
 			end
+		end
+		-- (J22, Roundabout 4: an outline side 100 studs long between two roads' heights stood its fill up to 1 stud
+		-- over the kerbs along it, burying them (kerb_gap): sides cut into 4-stud pieces, each point on its edge height)
+		do
+			local dense = {}
+			for i = 1, #clean do
+				local a, b = clean[i], clean[i % #clean + 1]
+				table.insert(dense, a)
+				local L = hyp(b.X - a.X, b.Z - a.Z)
+				local k = math.floor(L / 4)
+				for q = 1, k do
+					local u = q / (k + 1)
+					local x, z = a.X + (b.X - a.X) * u, a.Z + (b.Z - a.Z) * u
+					table.insert(dense, Vector3.new(x, edgeY(x, z, a.Y + (b.Y - a.Y) * u - UP) + UP, z))
+				end
+			end
+			clean = dense
 		end
 		M.islandOutlines[ii] = clean
 		local a2 = 0
@@ -4350,6 +4372,15 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 			while r and r.Normal.Y < 0.5 and nudge < 3 do
 				nudge += 1
 				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.04 * nudge, Y0, z0 + j * G + 0.03 * nudge), Vector3.new(0, -Y0 - 500, 0), P)
+			end
+			-- (J22: a ray exactly down the shared edge of two touching wedges can miss both: Roundabout 4's 48
+			-- "box holes" were nearly all such rays on whole-stud grid points. A miss is cast again 0.003 / 0.006 off;
+			-- a gap narrower than that cannot be seen)
+			for t = 1, 2 do
+				if r then
+					break
+				end
+				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.003 * t, Y0, z0 + j * G + 0.002 * t), Vector3.new(0, -Y0 - 500, 0), P)
 			end
 			local k = i * (nz + 1) + j
 			if r then
