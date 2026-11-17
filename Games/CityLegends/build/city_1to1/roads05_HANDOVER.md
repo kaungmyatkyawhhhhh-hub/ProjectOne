@@ -1,3 +1,40 @@
+# roads05 handover (18 Nov 2026, seventeenth pass: J21, GEOMETRY agent; DATA + BUILDER + QA + Studio 16 spots)
+
+## J21 geometry -- counts J20 -> J21 (full net, `J21_qa.log`; backups `qa_J20.json`, `qa_J21a.json`, `roads_J20b.json`)
+COUNTS_LINE
+Built check (Studio, all 16 spots, table in vault `City Legends/2026-11-18 roads05 J21 studio check.md`).
+- **Item 1 pavement steps:** NOT a builder step. Every "thin wedge 0.29-0.41 lower" checked has a flat top at the right height:
+  qaBuilt's ray ran down the WedgePart's vertical slanted face. qaBuilt now casts again a hair off when the hit normal is
+  not up (Kun Chan +-220: pave_step 64 -> 17, road_step 50 -> 13). Also done (the handover's suspect, kept: correct and
+  harmless): `Roads.build` `opts.edgeSurface` (YangonRoads.buildRoads sets it): roads built bigger first, a mouth's
+  pinned edge takes the bigger road's FINAL edge / cross-section height (`finalEdges`), not its centre line. Roads.luau
+  is now packed into the Studio test (Roads05StudioTest installs it into ClaudeTools).
+- **Item 2 dropped corners:** `findCorners` tries a corner that lies on a road again with T x 0.7 (up to 8 times) before
+  dropping it (`M.cornerInRoadShort`; Kun Chan pack: 15 tightened, 6 still dropped incl. Gyophyu x Kun Chan #4 at
+  (36276, 42539)). Scrub: a stray kerb / pavement with nothing under its middle leaves its own shape as asphalt at the
+  asphalt height round it (`M.strayPatched`, 130 in the Kun Chan cell). Kun Chan box_hole 8 -> 8 (NOT closed: the
+  holes at (36196, 42584), (36244, 42510), (36334-36397, 42418-42494) remain); kerb_gap cluster at (36180-36196,
+  42584-42608) still there (the corner there stays dropped).
+- **Item 3 gore cracks:** NOT fixed. A thin dark seam still crosses the Kun Chan box (shot `... kunchan_gyophyu - driver`).
+- **Item 4 kerb_cross:** `fork_trim` re-ranks after trimming (a trimmed fork that ENDS inside its sibling outranked it:
+  Lane #679 on Bo Min Gaung Street, no mouth); new `kiss_clear` (after crossings): a kerb kerbsim still finds at most
+  KISS_MAX 4 inside another carriageway is a graze: the road is pushed off (depth + 1 + kerb, tapering 0.15 / stud),
+  4 passes (Lane #2945 at the Bayint Naung Road #11 flyover foot). KERB_LINE
+- **Item 5 Road Flyover:** its ramp was regraded at 7.8% on the plan before deck_fair / unfold / deck_joints moved the
+  samples (spacing 7.85 -> 7.59): 8.1%. New `deck_recap` runs after the LAST plan change (before check): a non-chain deck
+  over 8% is re-profiled by _deck_try on the final plan (same crest / clearances), kept only within DECK_MAX. DECK_LINE
+  Pinlon Road Flyover on the satellite (`City Legends/Road plan - Close-up Pinlon Road Flyover overlay.png`): a real twin
+  bridge over the creek; the crest over the water is right.
+- **Item 6 Studio:** all 16 spots built + qaBuilt (QA now skips 20 studs at the test box edge and subset deck ends: they
+  are the test's own cuts). Clean: downtown_straight, lane_taper (all 0). Worst: roundabout4 / bahan_ring (box_hole 48 /
+  43, kerb_gap 166 / 160), double_junction (holes in the box between the triangle islands: real), deck feet road_step
+  (univ_kabaraye 50, pyay_univ 35, slip_triangle 35). Shots: 5 spots overview + driver (`City Legends/2026-11-18 roads05
+  J21 test - <spot> - <view>.jpg`); the other 11 QA only. Studio: main "City Legends", scratch cleaned, saved version
+  1208, lock released; asset 133014134133489 rev 175 = the J21 test pack (data from the first J21 run).
+- **Next:** box holes / kerb gaps at the roundabouts and the double junction (look at each cluster with the probe: part,
+  normal, corners); deck-foot road_step; the Kun Chan seam (gore crack) and the 6 corners still dropped (try rounded
+  noses on the square kerb ends); shots for the other 11 spots.
+
 # roads05 handover (18 Nov 2026, sixteenth pass: J20, GEOMETRY agent; DATA + BUILDER + QA + Studio; stopped: context)
 
 ## J20 geometry -- counts J19 -> J20 (full net, `J20_qa.log`; backup `qa_J19.json`, `roads_J19.json`, data `roads_J20.json`)

@@ -1258,6 +1258,38 @@ def deck_fair(data):
     return out
 
 
+def deck_recap(data, QA_MAX=DECK_MAX + 0.001):
+    """(J21, "Road Flyover" 8.1%) deck_fair's sideways moves shorten the plan spacing a few % (7.85 -> 7.59 studs), so a
+    ramp regraded at DECK_MAX on the old chainage ends just over QA's 8%. A deck now over QA_MAX (DECK_MAX + 0.1%: QA rounds
+    the written plan, 0.0799 here read 0.081 there) is re-profiled once
+    more by _deck_try on the faired plan (heights only; the same crest / clearances); kept only when it comes out
+    within DECK_MAX."""
+    R = {r['name']: r for r in data['roads']}
+    lines = [(r, LineString([(q[0], q[2]) for q in r['s']])) for r in data['roads'] if len(r['s']) > 1]
+    tree = STRtree([l for _, l in lines])
+    out = []
+    for dk in data['decks']:
+        r, s = R.get(dk['of']), dk['s']
+        if r is None or len(s) < 3:
+            continue
+        gm = max(abs(b[1] - a[1]) / max(math.hypot(b[0] - a[0], b[2] - a[2]), 1e-6) for a, b in zip(s, s[1:]))
+        if gm <= QA_MAX:
+            continue
+        ends = [(s[0][0], s[0][2]), (s[-1][0], s[-1][2])]
+        if any(o is not dk and math.hypot(o['s'][k][0] - x, o['s'][k][2] - z) < DECK_JOIN + 2
+               for o in data['decks'] for k in (0, -1) for x, z in ends):
+            continue  # (a chain joint: its feet are the chain's, not this road's)
+        res = _deck_try(dk, r, lines, tree)
+        if res is None or res[1] > DECK_MAX + 1e-6:
+            out.append(dict(deck=dk['name'], grade=round(gm, 3), kept=True))
+            continue
+        top0 = max(q[1] for q in s)
+        for q, y in zip(s, res[0]):
+            q[1] = round(float(y), 3)
+        out.append(dict(deck=dk['name'], grade=round(gm, 3), now=round(res[1], 3), top=round(max(res[0]) - top0, 2)))
+    return out
+
+
 WIDTH_RATE = 0.15   # (J14) widest change of a kerb's offset per stud along the road (6 studs over 40)
 
 
@@ -1428,6 +1460,59 @@ def fork_trim(data, IN=2.0):
                 r['turn'] = [tn for tn in r['turn'] if 0 <= tn['i'] < len(r['s'])]
             del r[f]
             out.append(dict(road=r['name'], on=o['name'], dropped=last))
+    if out:
+        # (J21, kerb_cross Lane #679 on Bo Min Gaung Street) a trimmed fork now ENDS inside its wider sibling: ranks again,
+        # or it can outrank the sibling (no mouth is built; its kerb stays on the sibling's asphalt)
+        import roads05_chain
+        roads05_chain.rerank(data)
+    return out
+
+
+KISS_MAX = 4.0   # (J21) a kept kerb at most this far inside another carriageway is a graze, pushed off
+
+
+def kiss_clear(data, passes=4):
+    """(J21, kerb_cross Lane #2945: the loop ramp grazes Bayint Naung Road #11 at the flyover's foot, 1.4 inside its
+    carriageway, no junction there) every kerb roads05_kerbsim still finds on another road's asphalt (no mouth, crossing
+    or zone takes it) at most KISS_MAX inside is a graze: the road is pushed away from the other one until its kerb's
+    back clears the other's edge by 1.0, the push tapering off at TAPER (0.15) a stud along it."""
+    import roads05_kerbsim
+    byname = {r['name']: r for r in data['roads']}
+    out = []
+    for _ in range(passes):
+        ks = roads05_kerbsim.run(data)['kerb_cross']
+        moved = 0
+        for k in ks:
+            A, B = byname.get(k['road']), byname.get(k['other'])
+            if A is None or B is None:
+                continue
+            s, sb = A['s'], B['s']
+            p = Point(k['x'], k['z'])
+            cw = unary_union(quads(sb, set(data['cut'].get(B['name'], ()))))
+            depth = cw.boundary.distance(p) if cw.contains(p) else 0.0
+            if depth <= 0 or depth > KISS_MAX:
+                continue
+            i0 = min(range(len(s)), key=lambda i: (s[i][0] - p.x) ** 2 + (s[i][2] - p.y) ** 2)
+            bl = LineString([(q[0], q[2]) for q in sb])
+            f = bl.interpolate(bl.project(Point(s[i0][0], s[i0][2])))
+            vx, vz = s[i0][0] - f.x, s[i0][2] - f.y
+            L = math.hypot(vx, vz) or 1
+            vx, vz = vx / L, vz / L
+            push = depth + 1.0 + roads05_kerbsim.KERB_W
+            idx = []
+            for i in range(len(s)):
+                dd = math.hypot(s[i][0] - s[i0][0], s[i][2] - s[i0][2])
+                w = 1 - dd * 0.15 / push
+                if w <= 0 or i in (0, len(s) - 1):
+                    continue
+                s[i][0] = round(s[i][0] + vx * push * w, 2)
+                s[i][2] = round(s[i][2] + vz * push * w, 2)
+                idx.append(i)
+            _set_dirs(s, idx)
+            moved += 1
+            out.append(dict(road=A['name'], other=B['name'], depth=round(depth, 2), samples=len(idx)))
+        if not moved:
+            break
     return out
 
 
@@ -1962,8 +2047,10 @@ def main():
     st['unfold'] = unfold(data)  # (J18) before the deck joints: indices settle
     st['width_taper_unfold'] = width_taper(data)  # (J19) dropped samples shortened chords: ease the steps again
     st['deck_joints'] = deck_joints(data)  # (J18) last width / direction change before the checks
+    st['deck_recap'] = deck_recap(data)  # (J21) last plan change done (deck_fair, unfold, deck_joints): a ramp over 8% re-profiled
     st['checks'] = check(data)
     st['crossings'] = crossings(data)  # (J19) after every index change: 1-based sample indices for Luau
+    st['kiss_clear'] = kiss_clear(data)  # (J21) kerb_cross: a graze pushed off (needs data.crossings)
     st['signals'] = signals(data)  # last: arms keep their sample indices
     txt = json.dumps(data, separators=(',', ':'))
     open(os.path.join(D, 'roads.json'), 'w', encoding='utf-8').write(txt)
