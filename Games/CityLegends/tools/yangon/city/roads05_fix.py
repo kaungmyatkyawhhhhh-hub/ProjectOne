@@ -1796,6 +1796,13 @@ def downtown_walks(data):
     side_inner = set()
     for d in data['decks']:
         side_inner.update(d.get('sides', ()))
+    # (J22, Roundabout 4: Lane #7793 took walkR 24.6 from the building line past 32nd Street, its pavement lay across
+    # 32nd's carriageway; scrub then cut it to teeth and buried kerbs: kerb_gap / pave_step) another road's ground
+    # carriageway on the ray is a building line too, 1 stud (its kerb) before it
+    from roads05_clear import road_polys
+    decks = {d.get('name') for d in data['decks']}
+    cw = [(nm, g) for nm, g in road_polys(data)[0] if nm not in decks]
+    cw_tree = STRtree([g for _, g in cw])
     n = 0
     for r in data['roads']:
         s = r['s']
@@ -1821,6 +1828,12 @@ def downtown_walks(data):
                     if not X.is_empty:
                         dd = Point(a).distance(X)
                         best = dd if best is None else min(best, dd)
+                for k in cw_tree.query(ray):
+                    if cw[int(k)][0] != r['name']:
+                        X = ray.intersection(cw[int(k)][1])
+                        if not X.is_empty:
+                            dd = max(Point(a).distance(X) - 1.0, 0.0)
+                            best = dd if best is None else min(best, dd)
                 ds.append(best)
             hit = [x for x in ds if x is not None]
             if len(hit) < 0.5 * len(ds):
