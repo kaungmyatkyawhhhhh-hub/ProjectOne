@@ -144,6 +144,14 @@ local function label(parent, text, size, props)
 	return l
 end
 
+-- one sound per moment (kid sim: 5-6-year-olds read too slowly, a sound tells them big news landed)
+local SoundService = game:GetService("SoundService")
+local SFX = {}
+for _, k in { "click", "pickup", "evolve", "news" } do -- inserted in SoundService (Creator Store audio must be in the place to load)
+	SFX[k] = SoundService:WaitForChild("SFX_" .. k, 10)
+end
+local function play(k) if SFX[k] then SoundService:PlayLocalSound(SFX[k]) end end
+
 local function pressable(b) -- squish on press = the tap is felt
 	local s = new("UIScale", {}, b)
 	b.MouseButton1Down:Connect(function() TweenService:Create(s, TweenInfo.new(0.06), { Scale = 0.93 }):Play() end)
@@ -159,7 +167,7 @@ local function button(parent, key, text, size, props, onClick)
 	local l = label(b, text, size, { ZIndex = (b.ZIndex or 1) + 2 })
 	pressable(b)
 	local enabled = true
-	b.Activated:Connect(function() if enabled then onClick() end end)
+	b.Activated:Connect(function() if enabled then play("click") onClick() end end)
 	return {
 		Button = b, Label = l,
 		SetText = function(t) l.Text = t end,
@@ -566,6 +574,7 @@ local function showNext()
 		task.delay(0.22, function() t:Destroy() showNext() end)
 	end
 	showing = cur
+	if item.priority >= 7 then play("news") end
 	local hold = item.hold or 2.2
 	if item.priority >= 7 then hold = math.max(hold, #item.text:split(" ") / 1.2 + 0.5) end -- slowest 7-year-old: ~1.2 words/s
 	task.delay(hold, cur.hide)
@@ -594,7 +603,8 @@ remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stag
 	news.bannerAt = os.clock()
 	news.pause()
 	news.banner = true
-	local b = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.55), Size = UDim2.fromOffset(330, 112), ZIndex = 20 })
+	play("evolve")
+	local b = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.62), Size = UDim2.fromOffset(330, 112), ZIndex = 20 })
 	img(b, portraitKey(speciesName), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
 	label(b, "EVOLVED!", 30, { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 36), TextColor3 = GOLD, ZIndex = 22 })
 	label(b, speciesName, 22, { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 28), ZIndex = 22, TextTruncate = Enum.TextTruncate.AtEnd })
@@ -624,6 +634,7 @@ remotes:WaitForChild("Pickup").OnClientEvent:Connect(function(gain, pos)
 		end
 	end)
 	task.delay(1, function() bb:Destroy() at:Destroy() end)
+	play("pickup")
 	if not GuiService.ReducedMotionEnabled then
 		pillScale.Scale = 1.12
 		TweenService:Create(pillScale, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Scale = 1 }):Play()
