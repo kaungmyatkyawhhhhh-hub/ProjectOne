@@ -19,7 +19,7 @@ For each dead game (aim 8-12 new ones per pass, mix kids' worlds, co-op, PvP, MM
 
 ## 3. Reinvent as ORIGINAL Roblox concepts
 - Borrow the mechanic and the feeling, never names, characters, art or story.
-- Per concept: hook in one line, core loop, the round or session shape, what it borrows from which game, how it avoids that game's death, money (fixed prices, max 449 R$, no paid random items), and a 1-week prototype scope.
+- Per concept: hook in one line, core loop, the round or session shape, what it borrows from which game, how it avoids that game's death, money (fixed prices, no paid random items), and a 1-week prototype scope.
 - Score for the owner's goals (kids, phones, 1K CCU, small team strong at incrementals) and pick one.
 
 ## 4. Steal for the current game
