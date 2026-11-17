@@ -1,3 +1,26 @@
+# roads05 handover (18 Nov 2026, twentieth pass: J24, GEOMETRY agent; Studio 16 spots + 32 shots; NO code / data change kept)
+
+## J24 -- built-surface totals J23 -> J24 (16 spots): unchanged, 66 / 446 / 107 / 143 / 5 (same code repeats exactly)
+Note + table + 32 shots: vault `City Legends/2026-11-18 roads05 J24 studio check.md`. Data = J23 (pipeline not re-run: nothing
+changed; `J23_qa.log` stands). Studio: main "City Legends", scratch cleaned, saved version 1237, lock released; asset 133014134133489 =
+the J23 pack again (YangonRoads checksum 1649648240).
+- **Item 1 deck_run pave_step 23 is NOT a J23 builder regression:** square ends / T clip / cut-sample change each turned off in a
+  Studio test copy -> still 23; data heights the same as J22. J23's QA (side faces = edge) made it countable. Cause: Lane #4610
+  (walk 30) x Yawmingyi (York) Street (walk 18), corner r 15.9 < walk -> `buildCorners` chip reaches ~30 studs along Yawmingyi at the
+  corner END heights yA..yB, 0.24-0.27 under Yawmingyi's straight pavement (street climbs ~1%) along its back line (z 42636,
+  x 34542-34556). Tried + reverted: Roads.luau `opts.paveSnap` raycast snap of cut pieces (23), snap of arc / taper / chip vertices
+  reach 2 (32), chip vertices = nearer road's edge height (26), only bigger-road-side chip vertices (23, step moved inside).
+  **Next for it:** ONE height rule for every pavement piece of a corner (straight band ends near T, arc pavement fan to O, chip,
+  taper), e.g. the nearer road's straight-pavement height at the point, set together in buildCorners.
+- **Debug tools that worked (Studio, test copy):** patch `ClaudeTools.YangonRoads.Source` with gsub, clone, `require`, `Y.load()`,
+  set `T.Y` -> A/B a builder change without a repack; wrap `Y.Roads.triangle` and log `debug.traceback` for triangles in a fault box
+  to find which function made a part. A full repack + PATCH + LoadAsset is ~2 min; LoadAsset sometimes answers HTTP 502: retry.
+- Driver cameras at bahan_ring / hanthawaddy / roundabout4 sit inside the island mound (grass shots): fix in roads05_studiotest.py.
+- **Next (in order, unchanged from J23):** corner pavement height rule (item 1); rounded kerb noses at the 6 dropped corners; deck-foot
+  road_step pyay_univ 37 / slip 32; double_junction box_hole 12 (single cells round the box, not one patch: (39906-39940,
+  32838-32898), (39972-39988, 32914-32944)); Kun Chan seam + Gyophyu ramp-foot strip (36150, 42666); Bahan Kan Yeiktha hole strip;
+  kerb_gap patterns biggest first. Plan is NOT ready for owner approval.
+
 # roads05 handover (18 Nov 2026, nineteenth pass: J23, GEOMETRY agent; DATA + BUILDER + QA + Studio 16 spots + 32 shots)
 
 ## J23 geometry -- built-surface totals J22 -> J23 (16 spots): box_hole 77 -> 66, kerb_gap 639 -> 446, road_step 148 -> 107, pave_step 308 -> 143, buried 14 -> 5
