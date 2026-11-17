@@ -4318,8 +4318,12 @@ end
 --   pave_step    two neighbouring pavement cells more than STEP apart (corner vs straight, inside a road)
 --   buried       a kerb top under 0.3 over the asphalt next to it (a buried edge)
 -- returns counts and the first few spots (x, z) of each
-function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: number, g: number?, yTop: number?)
+function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: number, g: number?, yTop: number?, margin: number?)
 	local G = g or 0.5
+	-- (J21) the test cell is clipped at its box (roads end square there) and decks of the subset end in the air: cells
+	-- within `margin` (20) of the box and a deck's open end next to nothing are not faults of the builder
+	local MG = math.floor((margin or 20) / G)
+	local deckCell = {}
 	local STEP = 0.1 + 0.19 * G -- (Roads' edge GRADE 0.19 per stud is a real slope, not a step)
 	local P = RaycastParams.new()
 	P.FilterType = Enum.RaycastFilterType.Include
@@ -4330,11 +4334,20 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 	for i = 0, nx do
 		for j = 0, nz do
 			local r = workspace:Raycast(Vector3.new(x0 + i * G, Y0, z0 + j * G), Vector3.new(0, -Y0 - 500, 0), P)
+			-- (J21: a ray down a WedgePart's vertical slanted face hits it part way down: the "thin pavement wedges
+			-- 0.29-0.41 under their neighbours" of J20 were such grazes, not built steps. A hit on a side face is cast
+			-- again a hair off, up to 3 times)
+			local nudge = 0
+			while r and r.Normal.Y < 0.5 and nudge < 3 do
+				nudge += 1
+				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.04 * nudge, Y0, z0 + j * G + 0.03 * nudge), Vector3.new(0, -Y0 - 500, 0), P)
+			end
 			local k = i * (nz + 1) + j
 			if r then
 				local n = r.Instance.Name
 				kind[k] = if n == "Road" or n == "Kerb" or n == "Pavement" then n else "Other"
 				hy[k] = r.Position.Y
+				deckCell[k] = M.deckHalf ~= nil and M.deckHalf[r.Instance.Parent.Name] ~= nil
 			else
 				kind[k] = "None"
 			end
@@ -4363,8 +4376,8 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 		end
 		return i * (nz + 1) + j
 	end
-	for i = 1, nx - 1 do
-		for j = 1, nz - 1 do
+	for i = math.max(1, MG), math.min(nx - 1, nx - MG) do
+		for j = math.max(1, MG), math.min(nz - 1, nz - MG) do
 			local k = K(i, j) :: number
 			local a = kind[k]
 			local nb = { K(i + 1, j), K(i - 1, j), K(i, j + 1), K(i, j - 1) }
@@ -4381,7 +4394,9 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 			end
 			for d, q in { K(i + 1, j), K(i, j + 1) } do
 				local b = kind[q]
-				if (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
+				if (a == "Road" and b == "None" and deckCell[k]) or (b == "Road" and a == "None" and deckCell[q]) then
+					-- (a deck's open end in the test subset)
+				elseif (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
 					add("kerb_gap", i, j)
 				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > STEP then
 					add("road_step", i, j)
