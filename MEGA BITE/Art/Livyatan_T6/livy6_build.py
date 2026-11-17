@@ -134,17 +134,22 @@ def skull(x):
     elif x < CX: bot = B(HX + 5) + (CY - B(HX + 5)) * (x - HX - 5) / (CX - HX - 5)
     else: bot = line(H['upper_lip'], x)
     return (T(x), bot, HW(x))
-hxs = [HX - 2, HX + 1, HX + 7] + xs_between(HX + 7, 1480, 16)[1:] + [1495, 1507, 1515]
-head = loft('UpperHead', hxs, skull, nr=20, pex=(2.0, 2.8), scale=lambda i, x: 0.86 if x < HX + 3 else (0.93 if x > 1510 else 1.0),
+hxs = sorted(set([HX - 2, HX + 1, HX + 7] + xs_between(HX + 7, 1480, 16)[1:] + [1495, 1507, 1515]
+               + [float(x) for x in range(int(D['head']['eye']['x']) - 48, int(D['head']['eye']['x']) + 49, 8)]))   # dense round the eye for the carve
+head = loft('UpperHead', hxs, skull, nr=32, pex=(2.0, 2.8), scale=lambda i, x: 0.86 if x < HX + 3 else (0.93 if x > 1510 else 1.0),
             tip_end=Vector((X(X1), 0, Z((T(1517) + line(H['upper_lip'], 1517)) / 2))))
 # eye socket CARVED into the head: verts inside the eye ellipse pushed in, deepest at the back
 E = H['eye']
 ex, ey, erx, ery = E['x'], E['y'], E['w'] * 0.95, E['h'] * 1.25
 for v in head.data.vertices:
     u = ((v.co.x - X(ex)) / (erx * S)) ** 2 + ((v.co.z - Z(ey)) / (ery * S)) ** 2
-    if u < 1 and abs(v.co.y) > 0.6 * HW(ex) * S:
-        d = (1 - u) * 9 * S * (1.2 if v.co.x < X(ex) else 0.8)
+    if abs(v.co.y) < 0.6 * HW(ex) * S: continue
+    if u < 1:
+        d = (1 - u) * 10 * S * (1.2 if v.co.x < X(ex) else 0.8)
         v.co.y -= math.copysign(d, v.co.y)
+    bx = (v.co.x - X(ex)) / (erx * 1.25 * S); bz = (v.co.z - Z(ey)) / S - ery * 0.9   # brow band just above the socket
+    if abs(bx) < 1 and 0 < bz < 22:
+        v.co.y += math.copysign((1 - bx * bx) * (1 - abs(bz - 8) / 14 if bz > 8 else bz / 8) * 9 * S, v.co.y)
 head.data.update()
 def head_col(p):
     c = p.center; u = ((c.x - X(ex)) / (erx * S)) ** 2 + ((c.z - Z(ey)) / (ery * S)) ** 2
@@ -179,7 +184,7 @@ def teeth(name, spec, lip, up, wk):
             x = x0 + (x1 - x0) * i / (n - 1); pts.append((x, side * wk(x), i))
     hw1 = wk(x1); nf = max(2, int(2 * hw1 / ((x1 - x0) / (n - 1))) - 1)
     for i in range(1, nf + 1):
-        pts.append((x1 + 2, -hw1 + 2 * hw1 * i / (nf + 1), n + i))
+        pts.append((x1 - 4, -hw1 + 2 * hw1 * i / (nf + 1), n + i))
     for x, yl, i in pts:
         L = spec['len'] * (0.6 + 0.4 * math.sin(i * 1.9) ** 2) * (0.85 if abs(yl) < hw1 * 0.8 and x > x1 else 1.0) * S
         y0 = line(lip, min(x, x1)) + (2 if up else -2)
@@ -189,19 +194,19 @@ def teeth(name, spec, lip, up, wk):
                   base + Vector((0, 0, -L if up else L))]
         faces += [(b, b + 1, b + 2, b + 3), (b, b + 1, b + 4), (b + 1, b + 2, b + 4), (b + 2, b + 3, b + 4), (b + 3, b, b + 4)]
     return make(name, verts, faces, lambda p: jit(P['teeth'], p.index, 0.04))
-teeth('UpperTeethRow', H['up_teeth'], H['upper_lip'], True, lambda x: 0.9 * HW(x))
+teeth('UpperTeethRow', H['up_teeth'], H['upper_lip'], True, lambda x: 0.82 * HW(min(X1, x + 18)))   # inset: the snout narrows ahead of each tooth
 teeth('LowerTeethRow', H['lo_teeth'], H['lower_lip'], False, lambda x: 0.8 * jaw(x)[2])
 
 # ---------- eye: domed glowing lens seated in the socket, turned 35 deg forward ----------
 def eye():
     top, bot, hw = skull(ex); verts, faces = [], []
     for side in (1, -1):
-        p = Vector((X(ex), side * (hw * S - 8 * S), Z(ey)))   # seated in the carved socket, not a bead on the skin
+        p = Vector((X(ex), side * (hw * S - 5 * S), Z(ey)))   # seated in the carved socket, not a bead on the skin
         n = Matrix.Rotation(math.radians(30) * side, 3, 'Z') @ Vector((0, side, 0))
         u = Vector((1, 0, 0)); u = (u - n * u.dot(n)).normalized(); v = n.cross(u).normalized()
-        a, b, h = E['w'] / 2 / math.cos(math.radians(30)) * 0.8 * S, E['h'] / 2 * S, 5 * S
+        a, b, h = E['w'] / 2 / math.cos(math.radians(30)) * S, E['h'] / 2 * S, 10 * S
         b0 = len(verts); K = 12
-        cl = lambda s_: min(s_, 0.25)   # sheet: a half-dome, flat along the top under the brow
+        cl = lambda s_: min(s_, 0.45)   # sheet: a half-dome, flat along the top under the brow
         for k in range(K):
             t = 2 * math.pi * k / K; verts.append(p + u * a * math.cos(t) + v * b * cl(math.sin(t)) - n * 3 * S)
         for k in range(K):
@@ -210,7 +215,9 @@ def eye():
         for k in range(K):
             k2 = (k + 1) % K
             faces += [(b0 + k, b0 + k2, b0 + K + k2, b0 + K + k), (b0 + K + k, b0 + K + k2, ap), (b0 + k2, b0 + k, bc)]
-    return make('Eye', verts, faces, P['eye'], glow=True)
+    o = make('Eye', verts, faces, P['eye'], glow=True)   # card: hot white-cyan centre, cyan rim
+    recolour(o, lambda p: (0.75, 1, 1, 1) if p.index % 3 == 1 else P['eye'])
+    return o
 eye()
 
 # ---------- pectoral fins: faceted paddles, roots sunk into the lower flank ----------

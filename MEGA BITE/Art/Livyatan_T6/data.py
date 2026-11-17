@@ -1,4 +1,5 @@
 # Livyatan T6: measurements from livyatan_turnaround_v1.png -> livy6_data.json (all in SIDE-view px)
+# eye w/h: the card's eye is bigger than the turnaround draws it
 import numpy as np, json, cv2
 from scipy.ndimage import median_filter
 from PIL import Image
@@ -42,7 +43,7 @@ D=dict(src='livyatan_turnaround_v1.png', side_x=[X0,X1], len_m=8.0, yc=276, top=
   head=dict(corner=[1188,300], upper_lip=[[1188,300],[1240,285],[1300,256],[1400,250],[1500,248],[1519,240]],
      lower_lip=[[1110,300],[1200,333],[1300,368],[1400,402],[1442,414]], jaw_bot=[[1100,418],[1200,448],[1300,468],[1400,474],[1438,452],[1446,428]],
      up_teeth=dict(n=9,x=[1228,1478],len=56), lo_teeth=dict(n=8,x=[1230,1420],len=46),
-     eye=dict(x=1182,y=230,w=56,h=32)),
+     eye=dict(x=1182,y=230,w=66,h=40)),
   fins=dict(root=[930,385],tip=[825,500],spread=265,width=85,len_k=1.0),
   fluke=fluke, palette=pal)
 json.dump(D,open('livy6_data.json','w'),indent=1)

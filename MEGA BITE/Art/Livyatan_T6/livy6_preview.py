@@ -60,6 +60,7 @@ for src, nm, n in (('L6_ArmourSegment4', 'L6_SparkGold', 700), ('L6_ArmourSegmen
     o = bpy.data.objects[src]
     for mod in [m for m in o.modifiers if m.type == 'PARTICLE_SYSTEM' and m.name.startswith('Spark')]: o.modifiers.remove(mod)
     ps = o.modifiers.new('Spark_' + nm[3:], 'PARTICLE_SYSTEM').particle_system; s = ps.settings
+    ps.point_cache.frame_start = -80   # the cache starts at 1 by default: the pre-roll was never simulated
     s.count = n; s.frame_start = -80; s.frame_end = 200; s.lifetime = 70; s.lifetime_random = 0.6
     s.emit_from = 'FACE'; s.normal_factor = 0.3; s.object_align_factor = (-1.4, 0, -0.5); s.factor_random = 0.25
     s.effector_weights.gravity = 0.0; s.render_type = 'OBJECT'; s.instance_object = bpy.data.objects[nm]
@@ -85,5 +86,12 @@ if cam.name not in sc.collection.objects: sc.collection.objects.link(cam)
 cam.data.lens = 50; cam.location = (9.5, -9.0, 2.2)
 cam.rotation_euler = (Vector((0.6, 0, -0.1)) - cam.location).to_track_quat('-Z', 'Y').to_euler(); sc.camera = cam
 sc.render.resolution_x, sc.render.resolution_y = 1280, 960
+# eye: its own hotter glow + a small cyan light so it reads like the card (Roblox: Neon + PointLight)
+eye = bpy.data.objects['L6_Eye']; em = emit_mat('L6_EyeGlow', (0.45, 1.0, 1.0), 7.0); eye.data.materials.clear(); eye.data.materials.append(em)
+for sd in (1, -1):
+    nm = 'L6_EyeLight%s' % ('L' if sd > 0 else 'R'); L_ = bpy.data.objects.get(nm) or bpy.data.objects.new(nm, bpy.data.lights.new(nm, 'POINT'))
+    if L_.name not in col.objects: col.objects.link(L_)
+    vs = [v.co for v in eye.data.vertices if v.co.y * sd > 0]; c = sum(vs, Vector()) / len(vs)
+    L_.location = c + Vector((0.05, sd * 0.12, 0)); L_.data.energy = 25; L_.data.color = (0.3, 0.95, 1.0); L_.data.shadow_soft_size = 0.05
 for f in range(-80, 1): sc.frame_set(f)   # particle pre-roll: step frames in order or the trail won't form
 print('preview ready', len(body), 'outlined parts')
