@@ -1885,7 +1885,8 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
     the host's carriageway sit at the host's height (it is flat across), the step left at the first sample off it fades
     along the road over |step| / GRADE (20 .. 120 studs). Cut (deck) samples and deck hosts stay."""
     cutd = {k: set(v) for k, v in data['cut'].items()}
-    decks = {d.get('name') for d in data['decks']} | {d.get('of') for d in data['decks']}
+    # (a deck's own road ('of') stays a host: its deck samples are cut, its ground samples are what a mouth meets)
+    decks = {d.get('name') for d in data['decks']}
     R = data['roads']
     grid = collections.defaultdict(list)
     for k, r in enumerate(R):
