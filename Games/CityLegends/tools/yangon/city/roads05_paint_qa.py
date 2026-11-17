@@ -20,6 +20,9 @@ and stop lines', 'Sule Square road', 'junction box grass hole', 'broken median p
   edge_missing        a stretch of 24+ studs of kerb on a main road (outer or median) with no yellow line along it
   zebra_colour        a zebra not in the faded ochre paint (kind LZ = 230, 190, 110)
   zebra_torn          a zebra bar touched / cut by other paint, or not a whole rectangle
+  lanes_unmarked      (J25, owner paint 'median road dead end, missing lanes') a run of 30+ studs of a carriageway with 2+
+                      lanes a direction (roads05_paint.neff), any kind, no lane dash of that road within 14 studs (12 off
+                      each end, 8 off any other road's carriageway, 20 off boxes / rings)
 """
 import json, math, os, sys
 
@@ -35,7 +38,7 @@ from roads05_qa import quads
 from roads05_paint import raw_boxes, double_pairs, merged_boxes, neff, runs, nose_caps, SIG_BOX, folds
 
 RULES = ('arrow_missing', 'stopline_missing', 'stopline_wrong_side', 'dash_jog', 'dash_side_by_side', 'paint_in_median',
-         'double_box', 'box_paint', 'paint_snake', 'edge_missing', 'zebra_colour', 'zebra_torn')
+         'double_box', 'box_paint', 'paint_snake', 'edge_missing', 'zebra_colour', 'zebra_torn', 'lanes_unmarked')
 LINES = ('lane', 'centre', 'median', 'edge', 'deck centre', 'deck lane', 'ring lane')
 DASHES = ('lane', 'deck lane', 'ring lane')
 JOG = 1.5      # a visible step (owner ref 5 was a whole lane line); under it is a taper on a curve
@@ -419,6 +422,29 @@ def main():
             why = 'not a rectangle'
         if why:
             iss['zebra_torn'].append(dict(why=why, road=it.get('r'), **xz(P.centroid.coords[0])))
+    # --- 10. (J25) lanes_unmarked: 2+ lanes a direction, no lane dash of the road near (ends / cut / boxes / rings left out)
+    lane_i = by.get('lane', []) + by.get('deck lane', [])
+    lane_by = {}
+    for i in lane_i:
+        lane_by.setdefault(items[i].get('r'), []).append(polys[i])
+    for r in roads:
+        s, c, one = r['s'], cutd.get(r['name'], set()), bool(r.get('oneway'))
+        ds = np.r_[0, np.cumsum(np.hypot(np.diff(S[r['name']][:, 0]), np.diff(S[r['name']][:, 1])))]
+        lt = STRtree(lane_by[r['name']]) if r['name'] in lane_by else None
+        bad = []
+        for i, q in enumerate(s):
+            p = Point(q[0], q[2])
+            if (i in c or ds[i] < 12 or ds[-1] - ds[i] < 12 or neff(q, one) < 2 or rawU.distance(p) < 20
+                    or rings.distance(p) < 20 or any(roads[int(j)]['name'] != r['name'] and cw[roads[int(j)]['name']].distance(p) < 8
+                                                     for j in tree.query(p.buffer(8)))):
+                bad.append(False)
+                continue
+            g = p.buffer(max(q[6], q[7]) + 14)
+            bad.append(lt is None or not any(lt.geometries[int(j)].intersects(g) for j in lt.query(g)))
+        for a, b in runs(bad):
+            if ds[b] - ds[a] >= 30:
+                iss['lanes_unmarked'].append(dict(road=r['name'], kind=r['kind'], med=round(max(x[8] for x in s), 1), len=round(float(ds[b] - ds[a]), 1),
+                                                  **xz((s[a][0], s[a][2]))))
     out = os.path.join(D, 'qa_paint_J15.json')
     json.dump(iss, open(out, 'w'), indent=1)
     print(json.dumps({k: len(v) for k, v in iss.items()}))

@@ -2,7 +2,7 @@
 "Research - Yangon road look"), as paint polygons the preview draws and the Studio build lays (0.08 over the road):
 
   * lane lines: white, dashed 3 m on / 6 m off (9 / 18 studs), 0.15 m wide (0.45 studs); none on small streets (real
-    residential streets are unmarked). (J15) One smooth offset per boundary: the lane count is a 9-sample median, each
+    residential streets are unmarked); (J25) a street with 2+ lanes a direction gets them (and its centre line). (J15) One smooth offset per boundary: the lane count is a 9-sample median, each
     line moves at most LANE_RATE sideways per stud, so a new lane tapers out of the kerb (no jogs, no side-by-side
     dashes); all lines are Chaikin-smoothed (no sample corners); clipped pieces under 3 studs are dropped
   * centre: one solid white line on an undivided main road (never broken by a smaller road's mouth)
@@ -437,8 +437,12 @@ def build(data, signals=None):
     tree = STRtree(geoms)
     R = {r['name']: r for r in roads}
     # lane structure of every main road (lane lines, stop lines and arrows share it)
+    # (J25, owner paint 'median road dead end, missing lanes'; paint QA lanes_unmarked) a street with 2+ lanes a direction
+    # anywhere gets lane dividers (and its centre line) too: no yellow kerb lines, no boxes / zebras / stops (a street's)
+    wide = [r for r in roads if r['kind'] not in ('route', 'side')
+            and any(neff(q, bool(r.get('oneway'))) >= 2 for i, q in enumerate(r['s']) if i not in cut.get(r['name'], ()))]
     LL = {}
-    for r in main:
+    for r in main + wide:
         s = r['s']
         c = cut.get(r['name'], set())
         for a, b in runs([i not in c for i in range(len(s))]):
@@ -609,8 +613,9 @@ def build(data, signals=None):
     clip_all = Clip(no_paint, zz)
     fills = unary_union([Polygon([(p[0], p[2]) for p in f]).buffer(0) for f in data.get('fills', []) if len(f) >= 3])
     # mouths of smaller roads on each main road (lane and edge lines break there)
-    for r in main:
+    for r in main + wide:
         s = r['s']
+        is_main = r['kind'] in ('route', 'side')
         g = cw[r['name']]
         mouths = []
         for j in tree.query(g):
@@ -642,7 +647,7 @@ def build(data, signals=None):
             # yellow lines along the built median, EDGE_IN from its kerb
             mbm = [s[i][8] > 0.3 for i in rng]
             dsr = [0.0] + [math.hypot(s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2]) for i in range(a + 1, b + 1)]
-            for m0, m1 in runs(mbm):
+            for m0, m1 in (runs(mbm) if is_main else ()):
                 if m1 - m0 < 2:
                     continue
                 sub = list(range(a + m0, a + m1 + 1))
@@ -654,7 +659,7 @@ def build(data, signals=None):
             edges = [(outer, -sg) for sg, (inner, outer, nn, lines) in out.items()]
             if one:
                 edges.append((out[1][0], 1))
-            for off, sgn in edges:
+            for off, sgn in (edges if is_main else ()):
                 o = steady(off, dsr, sgn)
                 ln = smooth([(s[i][0] - s[i][4] * o[j], s[i][2] + s[i][3] * o[j]) for j, i in enumerate(idx)])
                 P.line('LY', ln, YELLOW_W, 'edge', r['name'], clip_edge, min_len=MIN_PIECE)
