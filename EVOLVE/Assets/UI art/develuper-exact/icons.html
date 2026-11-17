@@ -1,0 +1,176 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:transparent;overflow:hidden}</style>
+</head><body>
+<script>
+// EVOLVE icons + item art in Develuper's item style: navy silhouette outline, cel shading lit from the
+// top-left, gloss streak, soft ground shadow. Each icon is drawn in a 100x100 box.
+// Usage: icons.html#<name>  (export.py renders each at 2x with a margin)
+const L = '#2B1B3D';            // outline colour of his item art
+let uid = 0;
+const g = (stops, x1 = 0, y1 = 0, x2 = 0, y2 = 1) => {
+  const id = 'g' + (uid++);
+  defs.push(`<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient>`);
+  return `url(#${id})`;
+};
+const rg = (stops, cx = .35, cy = .3, r = .8) => {
+  const id = 'g' + (uid++);
+  defs.push(`<radialGradient id="${id}" cx="${cx}" cy="${cy}" r="${r}">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</radialGradient>`);
+  return `url(#${id})`;
+};
+let defs = [];
+// silhouette: draw shapes thick in the outline colour first, then the coloured fills on top
+const sil = (shapes, w = 9) => `<g fill="${L}" stroke="${L}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round">${shapes}</g>`;
+const shadow = (cx = 50, cy = 92, rx = 34) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="5" fill="#000" opacity=".2"/>`;
+const gloss = d => `<path d="${d}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".85"/>`;
+
+const ICONS = {
+  shop: [100, 100, () => {
+    const body = `<path d="M17 44 L83 44 L75 86 L25 86 Z"/>`, rim = `<rect x="11" y="37" width="78" height="13" rx="5"/>`;
+    const handle = `<path d="M30 40 C30 12 70 12 70 40" fill="none"/>`;
+    return shadow(50, 92, 32) + `<g stroke="${L}" stroke-width="15" fill="none" stroke-linecap="round">${handle}</g>`
+      + `<g stroke="#C8D4E4" stroke-width="7" fill="none" stroke-linecap="round">${handle}</g>`
+      + `<path d="M33 24 C38 18 46 16 52 16" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>`
+      + sil(body + rim) + `<path d="M17 44 L83 44 L75 86 L25 86 Z" fill="${g([[0, '#FF5C7A'], [1, '#C8102E']])}"/>`
+      + `<g stroke="#A00C25" stroke-width="3" stroke-linecap="round"><line x1="38" y1="52" x2="40" y2="80"/><line x1="50" y1="52" x2="50" y2="80"/><line x1="62" y1="52" x2="60" y2="80"/></g>`
+      + `<rect x="11" y="37" width="78" height="13" rx="5" fill="${g([[0, '#FF8FA3'], [1, '#E8264A']])}"/>`
+      + gloss('M18 41 L50 41') + `<path d="M22 50 L27 80" stroke="#fff" stroke-width="3" opacity=".6" stroke-linecap="round"/>`;
+  }],
+  diet: [100, 100, () => {
+    const apple = `<path d="M50 30 C36 20 14 26 15 50 C16 72 32 90 42 88 C46 87 48 85 50 85 C52 85 54 87 58 88 C68 90 84 72 85 50 C86 26 64 20 50 30 Z"/>`;
+    return shadow(50, 93, 30) + sil(apple + `<path d="M50 30 C50 22 52 14 56 9" fill="none"/><path d="M54 22 C62 10 76 10 80 16 C74 26 62 28 54 22 Z"/>`)
+      + apple.replace('/>', ` fill="${rg([[0, '#FF8A7A'], [.5, '#F2312B'], [1, '#B3121A']])}"/>`)
+      + `<path d="M50 30 C50 22 52 14 56 9" fill="none" stroke="#8A4B1F" stroke-width="5" stroke-linecap="round"/>`
+      + `<path d="M54 22 C62 10 76 10 80 16 C74 26 62 28 54 22 Z" fill="${g([[0, '#9BFF5A'], [1, '#2DB82E']])}"/>`
+      + gloss('M24 44 C25 36 31 31 38 30') + `<circle cx="27" cy="55" r="3" fill="#fff" opacity=".8"/>`;
+  }],
+  index: [100, 100, () => {
+    const book = `<path d="M18 22 L72 16 C78 15 82 19 82 25 L82 80 L28 86 C22 87 18 83 18 77 Z"/>`;
+    return shadow(50, 93, 32) + sil(book)
+      + `<path d="M24 80 L80 74 L80 84 L28 89 C24 89 22 86 24 80 Z" fill="#FFF4D8" stroke="${L}" stroke-width="3" stroke-linejoin="round"/>`
+      + `<path d="M18 22 L72 16 C78 15 82 19 82 25 L82 74 L26 80 C21 80 18 78 18 74 Z" fill="${g([[0, '#5E8BFF'], [1, '#3A3FD6']], 0, 0, .4, 1)}"/>`
+      + `<path d="M18 22 L28 21 L28 79 L18 80 Z" fill="#2A2BA8" opacity=".6"/>`
+      + `<path d="M60 18 L70 17 L70 46 L65 41 L60 46 Z" fill="#FF3B5C" stroke="${L}" stroke-width="2.5" stroke-linejoin="round"/>`
+      + `<path d="M52 40 l4 8 9 1 -7 6 2 9 -8 -5 -8 5 2 -9 -7 -6 9 -1 Z" fill="#FFD23F" stroke="${L}" stroke-width="2.5" stroke-linejoin="round"/>`
+      + gloss('M33 26 L56 23');
+  }],
+  dna: [100, 100, () => helix('#4CFF8A', '#2EB8FF')],
+  dna2: [100, 100, () => helix('#FFD23F', '#FF8A00') + `<g transform="translate(58 64)">${badge('x2')}</g>`],
+  brain: [100, 100, () => {
+    const b = `<path d="M50 20 C40 12 24 16 22 28 C10 32 10 48 18 54 C14 66 26 78 38 74 C42 82 58 82 62 74 C74 78 86 66 82 54 C90 48 90 32 78 28 C76 16 60 12 50 20 Z"/>`;
+    return shadow(50, 90, 32) + sil(b) + b.replace('/>', ` fill="${rg([[0, '#FFC2DA'], [.6, '#FF7FB0'], [1, '#E0457F']])}"/>`)
+      + `<g fill="none" stroke="#C2346A" stroke-width="3.5" stroke-linecap="round">
+          <path d="M50 22 L50 74"/><path d="M30 34 C36 34 38 40 34 46"/><path d="M24 56 C32 54 38 58 36 66"/>
+          <path d="M70 34 C64 34 62 40 66 46"/><path d="M76 56 C68 54 62 58 64 66"/><path d="M40 26 C44 30 44 36 40 40"/><path d="M60 26 C56 30 56 36 60 40"/></g>`
+      + gloss('M28 28 C32 22 40 20 44 22');
+  }],
+  hourglass: [100, 100, () => {
+    const glass = `<path d="M30 20 L70 20 C70 40 56 44 56 50 C56 56 70 60 70 80 L30 80 C30 60 44 56 44 50 C44 44 30 40 30 20 Z"/>`;
+    const caps = `<rect x="20" y="10" width="60" height="12" rx="5"/><rect x="20" y="78" width="60" height="12" rx="5"/>`;
+    return shadow(50, 94, 32) + sil(glass + caps)
+      + glass.replace('/>', ` fill="#D8F3FF" opacity=".95"/>`)
+      + `<path d="M36 30 L64 30 C62 40 52 44 50 48 C48 44 38 40 36 30 Z" fill="${g([[0, '#FFE27A'], [1, '#F5B400']])}"/>`
+      + `<path d="M50 52 L50 66" stroke="#F5B400" stroke-width="3"/><path d="M34 78 C38 66 62 66 66 78 Z" fill="${g([[0, '#FFE27A'], [1, '#F5B400']])}"/>`
+      + caps.replace(/\/>/g, ` fill="${g([[0, '#C98A4B'], [1, '#8A5226']])}"/>`)
+      + gloss('M36 24 C36 32 40 38 44 42') + `<rect x="24" y="12" width="30" height="3" rx="1.5" fill="#fff" opacity=".6"/>`;
+  }],
+  cradle: [100, 100, () => {
+    const base = `<path d="M14 50 L86 50 C86 72 72 80 50 80 C28 80 14 72 14 50 Z"/>`;
+    const hood = `<path d="M14 52 C14 26 36 16 54 18 L54 52 Z"/>`;
+    const rock = `<path d="M18 84 C36 94 64 94 82 84" fill="none"/>`;
+    return shadow(50, 94, 34) + sil(base + hood + rock + `<rect x="24" y="76" width="7" height="12"/><rect x="69" y="76" width="7" height="12"/>`)
+      + `<path d="M18 84 C36 94 64 94 82 84" fill="none" stroke="#B0723A" stroke-width="6" stroke-linecap="round"/>`
+      + `<rect x="24" y="76" width="7" height="12" fill="#B0723A"/><rect x="69" y="76" width="7" height="12" fill="#B0723A"/>`
+      + base.replace('/>', ` fill="${g([[0, '#E9A866'], [1, '#B0723A']])}"/>`)
+      + hood.replace('/>', ` fill="${g([[0, '#7FC8FF'], [1, '#3E8BEA']])}"/>`)
+      + `<path d="M50 50 C56 42 76 42 86 50 Z" fill="#FFF4D8" stroke="${L}" stroke-width="3"/>`
+      + `<path d="M20 60 C34 64 66 64 80 60" fill="none" stroke="#8A5226" stroke-width="3"/>`
+      + gloss('M22 40 C24 30 32 24 40 22');
+  }],
+  asteroid: [100, 100, () => {
+    const rock = `<path d="M52 30 C68 26 84 38 84 56 C84 74 70 86 54 84 C38 86 26 74 28 58 C26 42 38 32 52 30 Z"/>`;
+    const flame = (x, y, len, wd, rot) => `<path transform="translate(${x} ${y}) rotate(${rot})" d="M0 ${-wd} C${-len * .5} ${-wd} ${-len} ${-wd * .3} ${-len} 0 C${-len} ${wd * .3} ${-len * .5} ${wd} 0 ${wd} Z"/>`;
+    const fl = flame(46, 46, 44, 14, 38) + flame(40, 60, 34, 9, 30) + flame(52, 36, 30, 8, 48);
+    return `<g fill="${L}" stroke="${L}" stroke-width="8" stroke-linejoin="round">${fl}</g>`
+      + `<g fill="${g([[0, '#FF3B1C'], [.6, '#FF8A00'], [1, '#FFE27A']], 0, 0, 1, 1)}">${fl}</g>`
+      + sil(rock) + rock.replace('/>', ` fill="${rg([[0, '#B9A08A'], [.6, '#8C6E58'], [1, '#5C4434']])}"/>`)
+      + `<circle cx="64" cy="50" r="8" fill="#5C4434" stroke="${L}" stroke-width="2.5"/><circle cx="48" cy="68" r="6" fill="#5C4434" stroke="${L}" stroke-width="2.5"/><circle cx="70" cy="70" r="4" fill="#5C4434" stroke="${L}" stroke-width="2"/>`
+      + gloss('M42 38 C48 34 56 33 62 34');
+  }],
+  stopwatch: [100, 100, () => stopwatch(50, 58, 72)],
+  crown: [100, 100, () => {
+    const c = `<path d="M14 34 L32 54 L50 22 L68 54 L86 34 L80 76 L20 76 Z"/>`;
+    return shadow(50, 90, 34) + sil(c + `<rect x="18" y="72" width="64" height="12" rx="4"/>`)
+      + c.replace('/>', ` fill="${g([[0, '#FFF07A'], [.6, '#FFC21A'], [1, '#E08A00']])}"/>`)
+      + `<rect x="18" y="72" width="64" height="12" rx="4" fill="${g([[0, '#FFD23F'], [1, '#D07A00']])}"/>`
+      + `<circle cx="50" cy="56" r="7" fill="#FF3B5C" stroke="${L}" stroke-width="3"/><circle cx="31" cy="64" r="5" fill="#3DB2FF" stroke="${L}" stroke-width="3"/><circle cx="69" cy="64" r="5" fill="#4CFF8A" stroke="${L}" stroke-width="3"/>`
+      + [[14, 34], [50, 22], [86, 34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#FFF07A" stroke="${L}" stroke-width="3"/>`).join('')
+      + gloss('M24 46 L32 56') + `<rect x="22" y="74" width="26" height="3" rx="1.5" fill="#fff" opacity=".7"/>`;
+  }],
+  moon: [100, 100, () => {
+    const m = `<path d="M60 14 C34 12 14 32 16 56 C18 80 42 94 66 86 C46 82 32 66 34 46 C36 30 46 18 60 14 Z"/>`;
+    return sil(m) + m.replace('/>', ` fill="${rg([[0, '#FFF6B0'], [.6, '#FFD84A'], [1, '#E8A800']], .3, .4, .8)}"/>`)
+      + `<circle cx="28" cy="58" r="4" fill="#E8A800"/><circle cx="36" cy="74" r="3" fill="#E8A800"/>`
+      + `<g font-family="Arial Black,Arial" font-weight="900" fill="#fff" stroke="${L}" stroke-width="3" paint-order="stroke">
+          <text x="62" y="40" font-size="20">Z</text><text x="76" y="26" font-size="14">z</text></g>`
+      + gloss('M30 30 C36 22 44 18 52 16');
+  }],
+  skip: [100, 100, () => {
+    const t1 = `<path d="M14 24 L48 50 L14 76 Z"/>`, t2 = `<path d="M46 24 L80 50 L46 76 Z"/>`, bar = `<rect x="80" y="24" width="10" height="52" rx="3"/>`;
+    return shadow(50, 90, 36) + sil(t1 + t2 + bar, 10)
+      + [t1, t2].map(t => t.replace('/>', ` fill="${g([[0, '#9BF4FF'], [1, '#1E9BEA']])}"/>`)).join('')
+      + bar.replace('/>', ` fill="${g([[0, '#9BF4FF'], [1, '#1E9BEA']])}"/>`)
+      + gloss('M20 34 L32 43') + gloss('M52 34 L64 43');
+  }],
+  jar: [100, 100, () => {
+    const body = `<path d="M26 34 C20 40 20 80 30 86 L70 86 C80 80 80 40 74 34 Z"/>`, lid = `<rect x="24" y="16" width="52" height="18" rx="5"/>`;
+    return shadow(50, 94, 32) + sil(body + lid)
+      + body.replace('/>', ` fill="#DFF6FF"/>`)
+      + `<path d="M24 52 C40 46 60 58 76 52 C78 66 78 80 70 84 L30 84 C22 80 22 66 24 52 Z" fill="${g([[0, '#7DFFB0'], [1, '#1FC46A']])}"/>`
+      + `<g transform="translate(50 66) scale(.42) translate(-50 -50)">${helixCore('#FFFFFF', '#E9FFF2')}</g>`
+      + lid.replace('/>', ` fill="${g([[0, '#FF8FA3'], [1, '#D61F45']])}"/>`)
+      + gloss('M30 42 C28 54 28 66 32 76') + `<rect x="30" y="19" width="26" height="3" rx="1.5" fill="#fff" opacity=".7"/>`;
+  }],
+};
+
+function helixCore(a, b) {
+  // two strands: x = 50 +- 22 sin(t); draw back halves first, rungs, then front halves (real twist, 1.5 turns)
+  const N = 60, pts = k => [...Array(N + 1)].map((_, i) => { const t = i / N, y = 10 + 80 * t, ph = t * Math.PI * 3;
+    return [50 + k * 22 * Math.sin(ph), y, Math.cos(ph) * k]; });
+  const A = pts(1), B = pts(-1);
+  const seg = (P, front) => { let d = '', on = false;
+    P.forEach(([x, y, z], i) => { const vis = front ? z >= 0 : z < 0;
+      if (vis) { d += (on ? ' L' : ' M') + x.toFixed(1) + ' ' + y.toFixed(1); on = true; } else on = false; }); return d; };
+  const stroke = (d, c) => d ? `<path d="${d}" fill="none" stroke="${L}" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>` : '';
+  const rungs = [6, 14, 26, 34, 46, 54].map(i => { const [x1, y] = A[i], [x2] = B[i];
+    return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${L}" stroke-width="8" stroke-linecap="round"/><line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/>`; }).join('');
+  return stroke(seg(A, false), a) + stroke(seg(B, false), b) + rungs + stroke(seg(A, true), a) + stroke(seg(B, true), b);
+}
+function helix(a, b) { return shadow(50, 94, 26) + helixCore(a, b) + `<path d="M34 16 C40 19 44 22 48 26" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".9"/>`; }
+function badge(t) {
+  return `<text x="0" y="0" font-family="Fredoka One,Arial Black" font-size="30" fill="${L}" stroke="${L}" stroke-width="8" stroke-linejoin="round" transform="translate(0 3)">${t}</text>
+          <text x="0" y="0" font-family="Fredoka One,Arial Black" font-size="30" fill="#fff" stroke="${L}" stroke-width="8" stroke-linejoin="round" paint-order="stroke">${t}</text>`;
+}
+function stopwatch(cx, cy, s) {
+  const body = `<circle cx="${cx}" cy="${cy}" r="${s * .48}"/>`;
+  const knob = `<rect x="${cx - s * .10}" y="${cy - s * .64}" width="${s * .20}" height="${s * .18}" rx="${s * .03}"/>`;
+  const cap = `<rect x="${cx - s * .21}" y="${cy - s * .76}" width="${s * .42}" height="${s * .15}" rx="${s * .07}"/>`;
+  const side = `<rect x="${cx - s * .08}" y="${cy - s * .62}" width="${s * .16}" height="${s * .14}" rx="${s * .03}" transform="rotate(45 ${cx} ${cy})"/>`;
+  const ticks = [...Array(12)].map((_, i) => { const a = i * Math.PI / 6, r1 = s * (i % 3 ? .30 : .27), r2 = s * .33;
+    return `<line x1="${cx + r1 * Math.sin(a)}" y1="${cy - r1 * Math.cos(a)}" x2="${cx + r2 * Math.sin(a)}" y2="${cy - r2 * Math.cos(a)}" stroke="${L}" stroke-width="${s * (i % 3 ? .018 : .03)}" stroke-linecap="round"/>`; }).join('');
+  return shadow(cx, cy + s * .56, s * .4) + sil(side + knob + cap + body, s * .09)
+    + `<g fill="${g([[0, '#FFE680'], [1, '#F0A000']])}">${side}${knob}${cap}</g>`
+    + `<circle cx="${cx}" cy="${cy}" r="${s * .48}" fill="${rg([[0, '#FFC94D'], [.55, '#FF8A00'], [1, '#D45A00']])}"/>`
+    + `<circle cx="${cx}" cy="${cy}" r="${s * .36}" fill="${L}"/><circle cx="${cx}" cy="${cy}" r="${s * .335}" fill="${rg([[.5, '#FFFFFF'], [1, '#D3E2F2']], .4, .35, .75)}"/>`
+    + ticks + `<line x1="${cx}" y1="${cy}" x2="${cx - s * .06}" y2="${cy - s * .22}" stroke="${L}" stroke-width="${s * .05}" stroke-linecap="round"/>`
+    + `<line x1="${cx}" y1="${cy}" x2="${cx + s * .2}" y2="${cy + s * .1}" stroke="#E8341C" stroke-width="${s * .03}" stroke-linecap="round"/>`
+    + `<circle cx="${cx}" cy="${cy}" r="${s * .045}" fill="#E8341C" stroke="${L}" stroke-width="${s * .015}"/>`
+    + `<path d="M ${cx - s * .40} ${cy - s * .12} A ${s * .42} ${s * .42} 0 0 1 ${cx - s * .16} ${cy - s * .39}" fill="none" stroke="#fff" stroke-width="${s * .055}" stroke-linecap="round" opacity=".85"/>`;
+}
+
+const name = decodeURIComponent(location.hash.slice(1));
+const S = 2, M = 6, [w, h, draw] = ICONS[name];
+const body = draw();
+document.body.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${(w + 2 * M) * S}" height="${(h + 2 * M) * S}">
+  <defs>${defs.join('')}</defs><g transform="scale(${S}) translate(${M},${M})">${body}</g></svg>`;
+</script></body></html>

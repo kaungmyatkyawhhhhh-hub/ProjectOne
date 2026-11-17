@@ -1,0 +1,117 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:transparent;overflow:hidden}</style>
+</head><body>
+<script>
+// EVOLVE UI kit in Develuper's style. Every value below was measured off his video frames
+// (see the vault note "2026-11-18 Watch study - Develuper UI 10x" and roblox-ui-pro).
+// Usage: kitgen.html#<pieceName>  -> renders that one piece at 2x its in-game size, transparent background.
+const INK = '#000', S = 2;            // export scale: 2 px per design point
+let uid = 0;
+
+// --- his proportions, per recipe (all relative to the piece height h, or width w for cards)
+const RECIPE = {
+  pill:   h => ({outline: .089 * h, r: .164 * h, lip: .233 * h, edge: .082 * h}),          // his green price pill 250x73
+  button: h => ({outline: .031 * h * 1.6, r: .095 * h, lip: .109 * h, edge: .054 * h}),    // his RETRY 509x147 (outline x1.6 so small sizes still read)
+  card:   (h, w) => ({outline: .0217 * w, r: .053 * w, lip: .05 * w * 1.0, edge: .027 * w, line: .06 * w}), // his card 300x397
+};
+// --- his colours
+const C = {
+  yellowBtn: {stops: [[0,'#F8FE10'],[.29,'#F6EE08'],[.45,'#F7E408'],[.58,'#F7D708'],[.71,'#F5BD06'],[.84,'#F3A307'],[.93,'#F09605'],[1,'#EE8E05']],
+              lip: '#A04C04', edge: ['#F8F00A', '#F8F00A'], dot: {kind: 'diamond', color: '#FFF000'}},
+  greenPill: {stops: [[0,'#5CFF06'],[.4,'#36FF00'],[.75,'#1DFF0D'],[1,'#21EA08']], lip: '#089E02', edge: ['#B2FF44', '#4DFE40'],
+              dot: {kind: 'diamond', color: '#9CFF40', opacity: .3}},
+  greenBar:  {stops: [[0,'#86FF16'],[.2,'#5AFF23'],[.4,'#3FFF2B'],[.6,'#1CFF34'],[.8,'#12FF29'],[1,'#10F928']], lip: '#0C900D',
+              edge: ['#FEFF0D', '#5CFF30'], dot: {kind: 'diamond', color: '#C5FF1D', opacity: .4}},
+  red:       {stops: [[0,'#E200C7'],[.1,'#E90080'],[.2,'#E80068'],[.3,'#E7004D'],[.4,'#E8003A'],[.5,'#E70023'],[.6,'#E80016'],[.7,'#E60004'],[.8,'#D30001'],[.9,'#C50002'],[1,'#AC0001']],
+              lip: '#410001', edge: ['#A501A9', '#B20002'], dot: {kind: 'diamond', color: '#FF3060', opacity: .35}},
+  purple:    {stops: [[0,'#8A00F4'],[.07,'#7800F0'],[.25,'#6000EE'],[.46,'#5000EE'],[.6,'#4400EA'],[.75,'#3000ED'],[.83,'#2600F4'],[.91,'#1C04F2'],[1,'#1406F4']],
+              dir: .25, lip: '#0B216A', edge: ['#D500FD', '#2B8EFF'], line: '#2E9AFF', dot: {kind: 'round', color: '#E040FF', opacity: .7}},
+  magenta:   {stops: [[0,'#C800E6'],[.3,'#D70BD8'],[.5,'#D2158F'],[.7,'#E01A68'],[1,'#E5154B']], dir: .25, lip: '#7D010F',
+              edge: ['#D800F0', '#EB2066'], line: '#EB2066', dot: {kind: 'round', color: '#FF40E0', opacity: .6}},
+  green:     {stops: [[0,'#7AFF26'],[.3,'#72FF70'],[.5,'#68FFA8'],[.7,'#5DFFCA'],[1,'#52FFE3']], dir: .25, lip: '#137C6E',
+              edge: ['#D0FF27', '#6AFFEF'], line: '#6AFFEF', dot: {kind: 'round', color: '#C8FF60', opacity: .6}},
+  cyan:      {stops: [[0,'#17FFFA'],[.3,'#14F4F8'],[.5,'#13E2F5'],[.7,'#13D4F2'],[1,'#18C7F6']], dir: .25, lip: '#0C409A',
+              edge: ['#2AF8F1', '#1AC8F0'], line: '#3CD8FF', dot: {kind: 'round', color: '#80FFFF', opacity: .6}},
+  yellow:    {stops: [[0,'#FAFE60'],[.5,'#F6E43A'],[.85,'#EED015'],[1,'#EECB12']], dir: .25, lip: '#A03200',
+              edge: ['#FFFFC0', '#FAFE11'], line: '#FAFE11', dot: {kind: 'round', color: '#FFFFA0', opacity: .7}},
+  navy:      {stops: [[0,'#140E38'],[1,'#241A5C']], lip: '#0A0720', edge: ['#000000', '#3A2E80'], dot: null},
+};
+
+function piece(w, h, recipe, col, o = {}) {
+  const id = 'p' + (uid++), R = RECIPE[recipe](h, w), FH = h - R.lip, ew = R.edge, ol = R.outline;
+  const stops = col.stops.map(([f, c]) => `<stop offset="${f}" stop-color="${c}"/>`).join('');
+  let dots = '';
+  if (col.dot) {
+    const g = Math.max(6, Math.min(w, h) * (recipe === 'card' ? .047 : .1)), sz = g * .57;
+    const shape = col.dot.kind === 'round'
+      ? `<circle cx="${g / 2}" cy="${g / 2}" r="${sz / 2}" fill="${col.dot.color}"/>`
+      : `<rect x="${(g - sz) / 2}" y="${(g - sz) / 2}" width="${sz}" height="${sz}" fill="${col.dot.color}"/>`;
+    const fade = col.dot.kind === 'round'
+      ? `<radialGradient id="${id}f" cx=".9" cy=".2" r=".75"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
+      : `<linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset=".2" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff"/></linearGradient>`;
+    dots = `<defs><pattern id="${id}d" width="${g}" height="${g}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">${shape}</pattern>${fade}
+      <mask id="${id}m"><rect width="${w}" height="${FH}" fill="url(#${id}f)"/></mask></defs>
+      <rect width="${w}" height="${FH}" fill="url(#${id}d)" mask="url(#${id}m)" opacity="${col.dot.opacity ?? .6}"/>`;
+  }
+  // his five soft-light shine bands, positioned as fractions of the width, slant .4 of the face height
+  const BANDS = {button: [[.18, .153], [.387, .084], [.75, .084], [.876, .028], [.959, .07]], pill: [[.24, .08], [.72, .12]], card: [[.12, .12], [.62, .07]]};
+  const slant = recipe === 'card' ? .3 : .4;
+  const bands = o.noShine ? '' : BANDS[recipe].map(([x, wd]) =>
+    `<polygon points="${x * w},-5 ${(x + wd) * w},-5 ${(x + wd) * w - FH * slant},${FH + 5} ${x * w - FH * slant},${FH + 5}"/>`).join('');
+  const line = R.line && col.line ? `<rect y="${FH - R.line}" width="${w}" height="${R.line}" fill="${col.line}"/>` : '';
+  return `<defs>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="${col.dir || 0}" y2="1">${stops}</linearGradient>
+    <clipPath id="${id}c"><rect width="${w}" height="${FH}" rx="${R.r}"/></clipPath>
+    <linearGradient id="${id}e" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col.edge[0]}"/><stop offset="1" stop-color="${col.edge[1]}"/></linearGradient>
+  </defs>
+  <rect width="${w}" height="${h}" rx="${R.r}" fill="none" stroke="${INK}" stroke-width="${ol * 2}"/>
+  <rect width="${w}" height="${h}" rx="${R.r}" fill="${col.lip}"/>
+  <g clip-path="url(#${id}c)">
+    <rect width="${w}" height="${FH}" fill="url(#${id}g)"/>
+    ${dots}
+    <g fill="#fff" opacity=".8" style="mix-blend-mode:soft-light">${bands}</g>
+    ${line}
+    <rect x="${ew / 2}" y="${ew / 2}" width="${w - ew}" height="${FH - ew}" rx="${Math.max(0, R.r - ew / 2)}" fill="none" stroke="url(#${id}e)" stroke-width="${ew}"/>
+  </g>`;
+}
+
+// his white panel: black outline, white face, a light grey inner ring ("white with some details")
+function panel(w, h) {
+  const r = 18, ol = 4;
+  return `<rect width="${w}" height="${h}" rx="${r}" fill="#FEFEFE" stroke="${INK}" stroke-width="${ol * 2}"/>
+          <rect x="10" y="10" width="${w - 20}" height="${h - 20}" rx="${r - 8}" fill="none" stroke="#E9E9E9" stroke-width="5"/>`;
+}
+
+// name: [width, height (design points), draw(), margin for the outline] ; insets for 9-slice are reported per piece
+const PIECES = {
+  btnGreen:   [92, 44,  () => piece(92, 44, 'pill', C.greenPill)],
+  btnGreenW:  [104, 42, () => piece(104, 42, 'pill', C.greenPill)],
+  btnGreenSq: [56, 56,  () => piece(56, 56, 'pill', C.greenPill, {noShine: false})],
+  btnYellowW: [104, 42, () => piece(104, 42, 'pill', C.yellowBtn)],
+  btnYellowSq:[56, 56,  () => piece(56, 56, 'pill', C.yellowBtn)],
+  tab:        [124, 36, () => piece(124, 36, 'pill', C.yellowBtn)],
+  close:      [96, 40,  () => piece(96, 40, 'pill', C.red)],
+  header:     [230, 52, () => piece(230, 52, 'pill', C.greenBar)],
+  window:     [200, 140, () => panel(200, 140)],
+  cardYellow: [110, 196, () => piece(110, 196, 'card', C.yellow)],
+  cardMagenta:[110, 196, () => piece(110, 196, 'card', C.magenta)],
+  cardPurple: [110, 196, () => piece(110, 196, 'card', C.purple)],
+  cardGreen:  [110, 196, () => piece(110, 196, 'card', C.green)],
+  cardCyan:   [110, 196, () => piece(110, 196, 'card', C.cyan)],
+  cardHero:   [170, 196, () => piece(170, 196, 'card', C.yellow)],
+  dnaPill:    [176, 46, () => piece(176, 46, 'pill', C.purple)],
+  status:     [316, 92, () => piece(316, 92, 'button', C.purple)],
+  row:        [480, 58, () => piece(480, 58, 'button', C.cyan)],
+  toast:      [380, 52, () => piece(380, 52, 'button', C.purple)],
+  barTrack:   [256, 22, () => piece(256, 22, 'pill', C.navy, {noShine: true})],
+};
+
+const name = decodeURIComponent(location.hash.slice(1));
+const [w, h, draw] = PIECES[name];
+const M = 6;                                   // margin in points so the outside outline and lip are not cut off
+document.title = JSON.stringify({w: (w + 2 * M) * S, h: (h + 2 * M) * S, margin: M * S});
+document.body.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${(w + 2 * M) * S}" height="${(h + 2 * M) * S}">
+  <g transform="scale(${S}) translate(${M},${M})">${draw()}</g></svg>`;
+window.PIECE_NAMES = Object.keys(PIECES);
+</script></body></html>
