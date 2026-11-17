@@ -160,6 +160,24 @@ class Clip:
         return self.tree is not None and any(self.polys[int(j)].intersects(g) for j in self.tree.query(g))
 
 
+class Grid:
+    """polygons laid so far, by 64-stud cell"""
+    def __init__(self):
+        self.cells = {}
+
+    def _cells(self, b):
+        for i in range(int(math.floor(b[0] / 64)), int(math.floor(b[2] / 64)) + 1):
+            for j in range(int(math.floor(b[1] / 64)), int(math.floor(b[3] / 64)) + 1):
+                yield (i, j)
+
+    def add(self, g):
+        for c in self._cells(g.bounds):
+            self.cells.setdefault(c, []).append(g)
+
+    def hits(self, g, d):
+        return any(x.distance(g) < d for c in self._cells(g.buffer(d).bounds) for x in self.cells.get(c, ()))
+
+
 class Paint:
     def __init__(self):
         self.items = []
@@ -403,26 +421,35 @@ def build(data, signals=None):
     # zebras, stop lines per arm
     zebra_zone = []
     arrow_jobs = []
+    laid = Grid()           # (J15, zebra_torn) bars and stop lines laid so far: nothing is laid over another
+    boxc = Clip(no_paint)
     for am in arms:
-        r, k, step, pts, line, D = am['r'], am['k'], am['step'], am['pts'], am['line'], am['D']
+        r, k, pts, line = am['r'], am['k'], am['pts'], am['line']
+        if r['kind'] != 'route':
+            continue
         s = r['s']
         q = s[k]
         rgt = np.array([-q[4], q[3]])
         half_l, half_r, mb = q[6], q[7], q[8]
         zline = substring(line, 2.0, 2.0 + ZEBRA_L)
-        if r['kind'] == 'route':
-            o = -half_l + 1.0
-            while o + ZEBRA_BAR <= half_r - 1.0 + 1e-6:
-                # (J15) bars keep 1.3 off a median (its nose cap): no bar is cut
-                if not (mb > 0.3 and (o + ZEBRA_BAR > -mb - 1.3 and o < mb + 1.3)):
-                    a0 = np.array(zline.coords[0]) + rgt * o
-                    a1 = np.array(zline.coords[-1]) + rgt * o
-                    bar = Polygon([a0, a1, a1 + rgt * ZEBRA_BAR, a0 + rgt * ZEBRA_BAR])
-                    # (J15) a whole bar or none: one the kerb would cut is left out
-                    if unary_union([geoms[int(j)] for j in tree.query(bar)]).buffer(-0.1).contains(bar):
-                        P.poly('LZ', bar, 'zebra', r['name'])
-                o += ZEBRA_PITCH
-            zebra_zone.append(strip(s, lambda q: -q[6] - 1, lambda q: q[7] + 1, sorted(pts[:4])))
+        o = -half_l + 1.0
+        while o + ZEBRA_BAR <= half_r - 1.0 + 1e-6:
+            # (J15) bars keep 1.3 off a median (its nose cap): no bar is cut
+            if not (mb > 0.3 and (o + ZEBRA_BAR > -mb - 1.3 and o < mb + 1.3)):
+                a0 = np.array(zline.coords[0]) + rgt * o
+                a1 = np.array(zline.coords[-1]) + rgt * o
+                bar = Polygon([a0, a1, a1 + rgt * ZEBRA_BAR, a0 + rgt * ZEBRA_BAR])
+                # (J15) a whole bar or none: one the kerb would cut, inside a junction box or on another arm's zebra
+                # is left out
+                if (unary_union([geoms[int(j)] for j in tree.query(bar)]).buffer(-0.1).contains(bar)
+                        and boxc.local(bar).intersection(bar).area < 0.1 and not laid.hits(bar, 0.3)):
+                    P.poly('LZ', bar, 'zebra', r['name'])
+                    laid.add(bar)
+            o += ZEBRA_PITCH
+        zebra_zone.append(strip(s, lambda q: -q[6] - 1, lambda q: q[7] + 1, sorted(pts[:4])))
+    for am in arms:
+        r, k, step, pts, line, D = am['r'], am['k'], am['step'], am['pts'], am['line'], am['D']
+        s = r['s']
         # incoming side: traffic heading into the box (right-hand traffic: the driver's right side)
         if r.get('oneway'):
             if step > 0:
@@ -431,27 +458,33 @@ def build(data, signals=None):
         else:
             sg = 1 if step < 0 else -1
         # (J15) stop line: across the incoming lanes only (centre line / median .. kerb), just before the zebra, on the
-        # lane structure of the sample at the stop line itself (a flaring mouth moves the centre)
-        c_stop = 2.0 + ZEBRA_L + STOP_GAP
-        if line.length < c_stop + STOP_W + 2:
-            continue
-        sp = np.array(line.interpolate(c_stop).coords[0])
-        ks = min(pts, key=lambda i: (s[i][0] - sp[0]) ** 2 + (s[i][2] - sp[1]) ** 2)
-        bd = bounds_at(LL, r['name'], ks, sg)
-        if bd is None:
-            continue
-        lo, hi = sorted((bd[0] + sg * 0.45, bd[-1] - sg * 0.5))
-        if hi - lo < 2:
-            continue
-        qs = s[ks]
-        rgt = np.array([-qs[4], qs[3]])
-        lat = (sp[0] - qs[0]) * rgt[0] + (sp[1] - qs[2]) * rgt[1]
-        sp = sp - rgt * lat
-        a0, a1 = sp + rgt * lo, sp + rgt * hi
-        b0, b1 = a0 + D * STOP_W, a1 + D * STOP_W
-        P.poly('LW', Polygon([a0, a1, b1, b0]), 'stop', r['name'])
-        zebra_zone.append(Polygon([a0 - D * 0.5, a1 - D * 0.5, b1 + D * 6, b0 + D * 6]).buffer(0.5))
-        arrow_jobs.append(dict(am, sg=sg, c=c_stop + STOP_W + ARROW_BACK))
+        # lane structure of the sample at the stop line itself (a flaring mouth moves the centre); moved back up to 6
+        # studs where another arm's zebra lies on that spot
+        for c_stop in [2.0 + ZEBRA_L + STOP_GAP + e for e in (0.0, 2.0, 4.0, 6.0)]:
+            if line.length < c_stop + STOP_W + 2:
+                break
+            sp = np.array(line.interpolate(c_stop).coords[0])
+            ks = min(pts, key=lambda i: (s[i][0] - sp[0]) ** 2 + (s[i][2] - sp[1]) ** 2)
+            bd = bounds_at(LL, r['name'], ks, sg)
+            if bd is None:
+                break
+            lo, hi = sorted((bd[0] + sg * 0.45, bd[-1] - sg * 0.5))
+            if hi - lo < 2:
+                break
+            qs = s[ks]
+            rgt = np.array([-qs[4], qs[3]])
+            lat = (sp[0] - qs[0]) * rgt[0] + (sp[1] - qs[2]) * rgt[1]
+            sp = sp - rgt * lat
+            a0, a1 = sp + rgt * lo, sp + rgt * hi
+            b0, b1 = a0 + D * STOP_W, a1 + D * STOP_W
+            st = Polygon([a0, a1, b1, b0])
+            if laid.hits(st, 0.5) or boxc.local(st).intersection(st).area > 0.1:
+                continue
+            P.poly('LW', st, 'stop', r['name'])
+            laid.add(st)
+            zebra_zone.append(Polygon([a0 - D * 0.5, a1 - D * 0.5, b1 + D * 6, b0 + D * 6]).buffer(0.5))
+            arrow_jobs.append(dict(am, sg=sg, c=c_stop + STOP_W + ARROW_BACK))
+            break
     zz = unary_union([z for z in zebra_zone if z is not None]) if zebra_zone else Polygon()
     clip_all = Clip(no_paint, zz)
     fills = unary_union([Polygon([(p[0], p[2]) for p in f]).buffer(0) for f in data.get('fills', []) if len(f) >= 3])
@@ -619,14 +652,23 @@ def lane_kinds(n, have):
 def approach_arrows(P, job, by_box, LL, clip):
     r, line, sg, step = job['r'], job['line'], job['sg'], job['step']
     s = r['s']
-    if line.length < job['c'] + ARROW_L + 1:
-        return
-    tail = np.array(line.interpolate(job['c'] + ARROW_L).coords[0])
+    for back in (0.0, 6.0, 12.0):
+        if line.length < job['c'] + back + ARROW_L + 1:
+            return
+        if approach_arrows_at(P, job, by_box, LL, clip, job['c'] + back):
+            return
+
+
+def approach_arrows_at(P, job, by_box, LL, clip, c_tip):
+    """one arrow per lane with its tip at chainage c_tip; False (nothing laid) when one would touch a zebra / box"""
+    r, line, sg, step = job['r'], job['line'], job['sg'], job['step']
+    s = r['s']
+    tail = np.array(line.interpolate(c_tip + ARROW_L).coords[0])
     i = min(job['pts'], key=lambda i: (s[i][0] - tail[0]) ** 2 + (s[i][2] - tail[1]) ** 2)
     bd = bounds_at(LL, r['name'], i, sg)
     have = turns_of(job, by_box)
     if bd is None or not have:
-        return
+        return True
     n = len(bd) - 1
     kinds = lane_kinds(n, have)
     hs = 1 if step < 0 else -1          # heading along (+1) or against (-1) the data direction
@@ -640,13 +682,17 @@ def approach_arrows(P, job, by_box, LL, clip):
     rgt = np.array([-h[1], h[0]])
     rq = np.array([-q[4], q[3]])
     lat = (tail[0] - q[0]) * rq[0] + (tail[1] - q[2]) * rq[1]
+    pgs = []
     for j in range(n):
         c = tail + rq * ((bd[j] + bd[j + 1]) / 2 - lat)
         pg = unary_union([Polygon([c + rgt * x * ARROW_S + h * y * ARROW_S for x, y in arrow_shape(k)]).buffer(0)
                           for k in sorted(kinds[j])])
         if clip.intersects(pg):
-            continue
+            return False
+        pgs.append(pg)
+    for pg in pgs:
         P.poly('LW', pg, 'arrow', r['name'])
+    return True
 
 
 def hatch(P, pg, road):
