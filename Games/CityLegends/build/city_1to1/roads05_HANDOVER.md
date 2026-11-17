@@ -1,3 +1,35 @@
+# roads05 handover (18 Nov 2026, thirteenth pass: J17, GEOMETRY agent; BUILDER CODE only, data = J16 bd770808; stopped: context)
+
+## J17 geometry -- done (YangonRoads.luau, Studio-checked lifted, no terrain)
+1. **Corner pavement (commit 766ad367).** `buildCorners`: corner asphalt now runs 0.3 under the kerb (arc points at r - 0.3) and
+   kerb bands are <= 20 degrees (no slit between kerb chords); when r < walk a back-corner "chip" (`c.chip`) paves the tip of
+   the sharp L where the two straight pavements' back lines meet: the back edge = the kerb arc moved by P' - P (one curve
+   parallel to the kerb). `verge`: the corner grass starts 4 studs UNDER the pavement at the corner's built edge heights
+   (c.yA / c.yB; it ended at the back edge at centre-line heights = the owner's voxel "staircase"); straight verges use each
+   side's own walk (walkL / walkR) instead of M.WALK. NOT verifiable in the no-terrain test: check the steps in a real build.
+2. **Strays (commit 270191d2).** `scrub` second pass on the BUILT parts: a Kerb / Pavement with asphalt ("Road") under all 8
+   probes 1.6 out (rays look through kerbs and pavers) goes; a Pavement with no asphalt within 1.5 x its road's walk + 4
+   (16 directions, rings of 4) goes. Kun Chan x Gyophyu: 892 stray pieces removed (the buried kerb lines + the stubs; shot
+   before / after). Double junction: 116 removed. The 250-stud loose strip W of the double junction is NOT in J16 data any
+   more (it came from J15 data). Left there: Lane #7108 lies along Shwe Gone Dine Road's north edge (centre 3-9 studs past
+   its kerb): its kerb + Shwe's kerb run side by side with a sliver gap: a data job (absorb / drop the lane alongside).
+- Shots: `City Legends/2026-11-18 roads05 J17 geo - Kun Chan x Gyophyu (before scrub).jpg`, `... - Kun Chan x Gyophyu.jpg`,
+  `... - Double junction.jpg`, `... - Bahan Road at Roundabout 1 (not fixed).jpg`, `... - Sule Shangri-La round corners.jpg`.
+  Studio: scratch cleaned, saved (version 1191), lock released; ClaudeTools.YangonRoads = the repo file (sum 1648252319).
+
+## NOT done (next pass, in order)
+3. **Bahan / Roundabout 1.** Lane #4701 is now **Lane #8112** (starts on Kan Yeiktha, ends at (35321, 37933) ON Bahan Road #2's
+   centre line). Cause of the regression: J13/J14 absorbed **Bahan Road #2** (one-way ring arm, 7 samples) into Bahan Road;
+   since J15 it is 25 samples, half 21, edge-to-edge beside Bahan Road (half 48.6 symmetric at its start), so absorb no
+   longer pairs it (no overlap area). Lane #8112 converges into Bahan Road #2 at a shallow angle (gore 5 -> 0 studs from
+   z 38011 to 37987): the thin nose with two kerbs and a sawtooth pavement (shot). Fix idea: absorb pairs roads that
+   ABUT (edge gap < 1) and are parallel (Bahan Road #2 into Bahan Road), and a gore narrower than 2 kerbs + 2 between a
+   merging lane and its road becomes asphalt (fills) up to where it is wide enough for a kerbed nose. No holes seen in J17's run.
+4. Seams (Shwedagon landing crease + wedge, thin dark slab joints in boxes: visible in the Kun Chan shot).
+5. Corner radii from the satellite (Sule Shangri-La / DBS first): CORNER_T 16 -> r ~16 at 90 deg; downtown wants 24-36.
+6. kerb_cross 17, block 2 QA rules, Pinlon Road Flyover clearance (satellite).
+- roads05_kerbsim does not model the new scrub pass: QA kerb_cross may now over-count what the builder leaves.
+
 # roads05 handover (18 Nov 2026, twelfth pass: J16, GEOMETRY agent; DATA + QA, no builder change, no Studio)
 
 ## J16 geometry -- counts J15 -> J16 (full net, `J16_qa.log`; mouthsim 0 failed of 11,592)
