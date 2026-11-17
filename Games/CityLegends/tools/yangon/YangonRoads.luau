@@ -1166,7 +1166,10 @@ function M.ownedBy(px: number, pz: number): (string?, any)
 				local s = S.s[b[2]]
 				local rx, rz = rightOf(s)
 				local h = M.halfAt(S, b[2]) -- (v5: a road's width changes along it)
-				if fx and fz and d > h - 0.3 and d < h + M.WALK + 0.5 and ((px - fx) * rx + (pz - fz) * rz) * c.side > 0 then
+				-- (J10: its own walk on that side; M.WALK 7.5 took 3.5 studs of the other road's band past a
+				-- 4-stud street walk: a hole at the tip of a Pyay x University Ave island)
+				local w = (if c.side < 0 then S.walkL else S.walkR) or M.WALK
+				if fx and fz and d > h - 0.3 and d < h + w + 0.5 and ((px - fx) * rx + (pz - fz) * rz) * c.side > 0 then
 					return c.road, c
 				end
 			end
@@ -1176,9 +1179,69 @@ function M.ownedBy(px: number, pz: number): (string?, any)
 end
 
 -- in any corner's way (for the kerbs, pavements and edge lines of the straight roads)?
+-- (J10) the corner's kerb chain TA -> P -> TB (this road's kerb line, then the other road's): the wedge's
+-- rout reaches past it, across a narrow joining road onto its far kerb (Lane #468 at Hledan: a 9-stud gap)
+local function kerbChain(c): { { number } }
+	if c.chain then
+		return c.chain
+	end
+	local ch = { { c.tax, c.taz } }
+	if c.ePts and c.sa and c.ka then
+		for k = c.sa, c.ka + 1, -1 do
+			if (k ~= c.sa or (c.sta or 1) < 1) and c.ePts[k] then
+				table.insert(ch, { c.ePts[k][1], c.ePts[k][2] })
+			end
+		end
+	end
+	table.insert(ch, { c.px, c.pz })
+	if c.bPts and c.kb and c.sbb and c.kb ~= c.sbb then
+		local stepB = if c.sbb > c.kb then 1 else -1
+		local k = if stepB > 0 then c.kb + 1 else c.kb
+		while (stepB > 0 and k <= c.sbb) or (stepB < 0 and k > c.sbb) do
+			if c.bPts[k] then
+				table.insert(ch, { c.bPts[k][1], c.bPts[k][2] })
+			end
+			k += stepB
+		end
+	end
+	table.insert(ch, { c.tbx, c.tbz })
+	c.chain = ch
+	return ch
+end
+
+-- inside the polygon O, TA .. P .. TB, or within `tol` of the kerb chain
+local function inCornerPoly(c, px: number, pz: number, tol: number): boolean
+	local ch = kerbChain(c)
+	local inside = false
+	local n = #ch + 1
+	local function pt(k: number): (number, number)
+		if k == n then
+			return c.ox, c.oz
+		end
+		return ch[k][1], ch[k][2]
+	end
+	for k = 1, n do
+		local ax, az = pt(k)
+		local bx, bz = pt(k % n + 1)
+		if (az > pz) ~= (bz > pz) and px < ax + (pz - az) / (bz - az) * (bx - ax) then
+			inside = not inside
+		end
+	end
+	if inside then
+		return true
+	end
+	for k = 1, #ch - 1 do
+		if segDist(px, pz, ch[k][1], ch[k][2], ch[k + 1][1], ch[k + 1][2]) < tol then
+			return true
+		end
+	end
+	return false
+end
+M.inCornerPoly = inCornerPoly
+
 function M.inCorner(px: number, pz: number): boolean
 	for _, c in cornersAt(px, pz) do
-		if inWedge(c, px, pz, c.rin, c.rout) then
+		if inWedge(c, px, pz, c.rin, c.rout) and (c.ring or inCornerPoly(c, px, pz, 1.0)) then
 			return true
 		end
 	end
@@ -1226,6 +1289,7 @@ function M.buildCorners()
 			return EB[a.j].Y + (EB[b.j].Y - EB[a.j].Y) * t
 		end
 		local yA, yB = sY(c.sa, c.sta), bY(c.sbb, c.stb)
+		c.yA, c.yB = yA, yB -- (J10: the island fill meets this pavement at its height)
 		local yP = sY(c.ka, c.ta)
 		-- the asphalt: TA, this road's kerb line back to P, P, the other road's kerb line on to TB, the arc back
 		local poly = { Vector3.new(c.tax, yA, c.taz) }
@@ -1338,9 +1402,43 @@ function M.buildIslands()
 				return c
 			end
 		end
+		-- (J10: a kerb-line vertex between T and P, on THIS corner's kerb chain (not the far kerb of the same
+		-- street), is the corner's too: its mitre point landed on the corner pavement and folded the outline
+		-- back, a square hole at Pyay x University Ave)
+		for _, c in cornersAt(x, z) do
+			if c.yA and hyp(x - c.px, z - c.pz) < math.min(hyp(c.tax - c.px, c.taz - c.pz), hyp(c.tbx - c.px, c.tbz - c.pz)) - 0.3
+				and inCornerPoly(c, x, z, 0.6) then
+				return c
+			end
+		end
 		return nil
 	end
-	for _, isl in list do
+	-- (J10) the builder's kerb-line height there (the bands sit on it; the sample's centre y left steps)
+	local E = M.Roads.debugEdges
+	local function edgeY(x: number, z: number, y0: number): number
+		local best, by = 3, y0
+		for oi, b in M.near(x, z, 3) do
+			local o = M.list[oi]
+			local ed = E and E[o.name]
+			if ed then
+				for _, sd in { "L", "R" } do
+					local arr = ed[sd]
+					for i = math.max(1, b[2] - 3), math.min(o.n, b[2] + 3) do
+						local q = arr and arr[i]
+						if q then
+							local d = hyp(q.X - x, q.Z - z)
+							if d < best then
+								best, by = d, q.Y
+							end
+						end
+					end
+				end
+			end
+		end
+		return by
+	end
+	M.islandOutlines = {} -- (debug: each island's fill outline, by its index in data.islands)
+	for ii, isl in list do
 		local n = #isl
 		if n < 3 or not own(isl[1][1], isl[1][3]) then
 			continue
@@ -1380,8 +1478,25 @@ function M.buildIslands()
 					local nseg = math.max(4, math.ceil(math.abs(c.sweep) * c.r / 2))
 					for q = 0, nseg do
 						local u = if fwd then q / nseg else 1 - q / nseg
-						local x, z = arcPoint(c, u, math.max(c.r - (c.wA + (c.wB - c.wA) * u), 0))
-						table.insert(out, Vector3.new(x, v[2] + M.CURB_UP, z))
+						local rho = c.r - (c.wA + (c.wB - c.wA) * u)
+						-- (J10: a walk wider than r: the pavement ends at O, the straight band's inner edge
+						-- starts on past it on the same line: go on to that point, no overlap, no gap)
+						local yA, yB = c.yA or v[2], c.yB or v[2]
+						local y = yA + (yB - yA) * u + M.CURB_UP
+						if rho < 0 and (q == 0 or q == nseg) then
+							local ox, oz = arcPoint(c, u, 0)
+							if q == nseg then
+								table.insert(out, Vector3.new(ox, y, oz))
+							end
+							local x, z = arcPoint(c, u, rho)
+							table.insert(out, Vector3.new(x, y, z))
+							if q == 0 then
+								table.insert(out, Vector3.new(ox, y, oz))
+							end
+						else
+							local x, z = arcPoint(c, u, math.max(rho, 0))
+							table.insert(out, Vector3.new(x, y, z))
+						end
 					end
 				end
 			else
@@ -1396,7 +1511,7 @@ function M.buildIslands()
 					local tt = ((bx - ax) * wz - (bz - az) * wx) / den
 					x, z = ax + ux * tt, az + uz * tt
 				end
-				table.insert(out, Vector3.new(x, v[2] + M.CURB_UP, z))
+				table.insert(out, Vector3.new(x, edgeY(v[1], v[3], v[2]) + M.CURB_UP, z))
 			end
 			lastC = c
 		end
@@ -1410,6 +1525,55 @@ function M.buildIslands()
 		if #clean > 1 and hyp(clean[1].X - clean[#clean].X, clean[1].Z - clean[#clean].Z) <= 0.05 then
 			table.remove(clean)
 		end
+		-- (J10: where two bands' inner edges cross before the corner (Pyay x University Ave, island 5) the
+		-- outline loops back over them: cut every loop at the crossing, keep the bigger part)
+		local function areaOf(ps)
+			local s = 0
+			for i = 1, #ps do
+				local p, q = ps[i], ps[i % #ps + 1]
+				s += p.X * q.Z - q.X * p.Z
+			end
+			return s
+		end
+		for _ = 1, 20 do
+			local m, hit = #clean, false
+			for i = 1, m do
+				for j = i + 2, m do
+					if not (i == 1 and j == m) then
+						local a, b, c2, d = clean[i], clean[i % m + 1], clean[j], clean[j % m + 1]
+						local den = (b.X - a.X) * (d.Z - c2.Z) - (b.Z - a.Z) * (d.X - c2.X)
+						if math.abs(den) > 1e-9 then
+							local s = ((c2.X - a.X) * (d.Z - c2.Z) - (c2.Z - a.Z) * (d.X - c2.X)) / den
+							local u = ((c2.X - a.X) * (b.Z - a.Z) - (c2.Z - a.Z) * (b.X - a.X)) / den
+							if s > 1e-4 and s < 1 - 1e-4 and u > 1e-4 and u < 1 - 1e-4 then
+								local X = a:Lerp(b, s)
+								local inner, outer = { X }, {}
+								for k = i + 1, j do
+									table.insert(inner, clean[k])
+								end
+								for k = 1, i do
+									table.insert(outer, clean[k])
+								end
+								table.insert(outer, X)
+								for k = j + 1, m do
+									table.insert(outer, clean[k])
+								end
+								clean = if math.abs(areaOf(inner)) > math.abs(areaOf(outer)) then inner else outer
+								hit = true
+								break
+							end
+						end
+					end
+				end
+				if hit then
+					break
+				end
+			end
+			if not hit then
+				break
+			end
+		end
+		M.islandOutlines[ii] = clean
 		local a2 = 0
 		for i = 1, #clean do
 			local p, q = clean[i], clean[i % #clean + 1]
@@ -1429,7 +1593,15 @@ function M.buildIslands()
 		end
 		for _, tr in earClip(clean) do
 			if not M.Roads.sliver(tr[1], tr[2], tr[3]) then
-				made += M.Roads.triangle(tr[1], tr[2], tr[3], 6, pave, folder)
+				-- (a tiny triangle with its corners at different heights stands nearly on edge: flatten it)
+				local a, b, c3 = tr[1], tr[2], tr[3]
+				local span = math.max(hyp(a.X - b.X, a.Z - b.Z), hyp(b.X - c3.X, b.Z - c3.Z), hyp(c3.X - a.X, c3.Z - a.Z))
+				local lo, hi = math.min(a.Y, b.Y, c3.Y), math.max(a.Y, b.Y, c3.Y)
+				if hi - lo > 0.15 * span + 0.02 then
+					local y = (a.Y + b.Y + c3.Y) / 3
+					a, b, c3 = Vector3.new(a.X, y, a.Z), Vector3.new(b.X, y, b.Z), Vector3.new(c3.X, y, c3.Z)
+				end
+				made += M.Roads.triangle(a, b, c3, 6, pave, folder)
 			end
 		end
 		built += 1
@@ -1485,6 +1657,7 @@ M.VERGE_W = 16
 -- (the box's top under the road: smooth terrain shows about 2 studs over a FillBlock's top, less where
 -- lower ground pulls the surface down; -1.7 puts the grass 0.1 to 0.5 under the pavement's top)
 M.VERGE_TOP = -1.7
+M.RING_RAMP = 104 -- roads05_fix.ring_level: r_out + 4 + RING_RAMP 100
 function M.verge(names: { string })
 	local made = 0
 	-- (the ring's carriageway and its kerb and pavement between the arms; an arm's gap is the arm's)
@@ -1562,6 +1735,12 @@ function M.verge(names: { string })
 					-- lies in the road's cleared trench pulls the surface down right at the pavement's edge,
 					-- 1 to 2 studs of pavement side showing. Under the pavement the grass is hidden.)
 					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (hw + M.WALK - 4 + (M.VERGE_W + 4) / 2), 0, 0)
+					-- (J10: roads05_fix.ring_level lowers arms up to 5 studs onto a ring's height; the ground
+					-- beside them stood over the pavement there: clear it down to the verge, as the corners do)
+					local R = M.nearRing(mid.X, mid.Z)
+					if R and hyp(mid.X - R.C.X, mid.Z - R.C.Z) < R.R_OUT + M.RING_RAMP + 8 then
+						workspace.Terrain:FillBlock(cf * CFrame.new(0, 5 - 1.3 + 12.5, 0), Vector3.new(M.VERGE_W + 4, 25, len + 1), Enum.Material.Air)
+					end
 					workspace.Terrain:FillBlock(cf, Vector3.new(M.VERGE_W + 4, 10, len + 1), Enum.Material.Grass)
 					made += 1
 				end

@@ -1,4 +1,57 @@
-# roads05 handover (18 Nov 2026, fifth pass: J9)
+# roads05 handover (18 Nov 2026, sixth pass: J10)
+
+## J10 (this pass; YangonRoads only, no data change: roads.json / qa.json are the J9 ones)
+- `YangonRoads.luau`:
+  - `inCorner`: the wedge test (rin .. rout = |P-O| + margin) reached across a narrow joining street onto its FAR
+    kerb (Lane #468 at Hledan: a 9-stud kerb + pavement gap on the slip). Now also inside the polygon O, TA .. P .. TB
+    (the corner's kerb chain, `kerbChain` / `M.inCornerPoly`) or within 1 stud of the chain (ring corners as before).
+  - `ownedBy`: the "past the corner this road owns its band" width used M.WALK 7.5 for a 4-stud street: it deleted
+    3.5 studs of the other road's band at an island tip (a hole). Uses the road's own walkL / walkR now.
+  - `buildIslands`: a kerb-line vertex between T and P (on that corner's own kerb chain) is the corner's (a mitre point
+    on the corner pavement folded the outline: the square hole); where a walk is wider than r the outline goes on past
+    O to the straight band's inner corner (Q); fill heights = the builder's kerb-line heights (`debugEdges`) and the
+    corner's yA..yB (were the sample's centre y: 0.2 steps); loops where two bands' inner edges cross before a corner
+    are cut at the crossing (island 5 at Pyay was hollow); tiny triangles standing on edge are flattened.
+    `M.islandOutlines[i]` keeps each fill outline (debug).
+  - `verge`: within r_out + RING_RAMP + 8 of a ring the straight verge also clears the air above it (as the corners
+    do): ring_level lowered Sule's west arms up to 4.4 studs, the ground beside them stood over the pavement.
+- ring_level vs terrain (check 5): 135 moved samples raycast against the main place's terrain: road - terrain is 1 to 6
+  studs (main place terrain was carved for the OLD roads, ~3 under them). Raised samples (up to +5, Sule east) sit
+  within the verge fill's reach (10 studs under the road top - 1.7): no float. Lowered samples (up to -4.4, Sule west,
+  Bahan -2.4) had ground standing over the pavement: fixed by the verge air clear above. Not checked in a real build.
+- Studio J10 (same harness as J9: `_G.J7load/J7run/J7queue`, code in the J9 subagent transcript; no-terrain copy,
+  lifted 400). Shots `City Legends/2026-11-18 roads05 J10 test - *.jpg`. 0 MOUTH FAILED everywhere.
+  - Pyay x University: the slip pavement gap, the square hole and both tip holes are gone, all 5 islands paved.
+    LEFT (close-up `... J10 test - Pyay west close-up.jpg`): Lane #470's corner kerb meets Hledan's straight kerb with
+    a notch and the two kerbs run side by side for a few studs (north-west corner); a dark streak inside island 4
+    (a steep fill triangle?); a white kerb speck on the asphalt west of island 4; faint seam lines in island fills.
+  - Waizayandar slips, Sule, Bahan: see the shots. Not worked on in close-up this pass except as below.
+- Diagnosed, not fixed:
+  - Bahan nose: Lane #4701's side -1 edge crosses Bahan Road's right edge between Bahan samples 7 and 8 (Bahan 1-7 are
+    the ring cut; its right half is 76 there, the absorbed second carriageway), slip samples 28-29. findCorners only
+    takes uncut big-road samples into bPts, so that side has no corner and the slip's kerb runs across Bahan
+    (QA kerb_cross row "Lane #4701 on Bahan Road side -1 (35358, 38004)"). debugEdges exist for cut samples, so
+    letting bPts take the one cut sample next to an uncut one is possible, but TB then lies inside the ring's zone:
+    needs the ring's kerb as the corner's B side there (or end the slip before the ring cut in roads05_fix).
+  - Sule west (OSM close-up `Road plan - Close-up Sule Roundabout (Roundabout 4) overlay.png`): 32nd Street really
+    runs ~30 studs west of the ring with two real diagonal links (Lane #2533, Lane #4568) and Maha Bandula from the
+    west; the satellite shows two small kerbed green triangles there. So the islands are real; the scrub moved
+    153 + 264 pieces of those links' kerbs off 32nd Street / Maha Bandula #2 (their bands cross the other roads).
+  - QA mouth_short: 4 of the 46 rows (Lane #1013 / #1008 / #1014 / #961) are at University x Kabar Aye, which PASSES in
+    Studio: kerbsim's no-join rule disagrees with the builder there (MOUTH_SNAP?). Check kerbsim against Y.mouths before
+    "fixing" the data.
+- QA counts unchanged (no data change): mouth_short 46, mouth_over 38, kerb_cross 22, median_cross 1, deck_grade 24,
+  deck_foot 1. Plan is NOT ready for owner approval.
+
+## Next (in order)
+1. Pyay north-west corner (Lane #470 on Hledan: two kerbs side by side + notch), island 4 streak, the kerb speck.
+2. Slip triangle and the other shots' marks (list them with `_G.J7pick(campos, target, {{px,py}...}, folder)`:
+   it turns screenshot pixels into world points + the part hit: define it again, it is in this pass's transcript).
+3. Bahan nose (above), Sule west links' bands.
+4. kerbsim vs builder on mouth_short; then the QA rows, deck_grade / deck_foot.
+
+# (J9 pass below)
+
 
 ## J9 (this pass)
 - `YangonRoads.luau`:
