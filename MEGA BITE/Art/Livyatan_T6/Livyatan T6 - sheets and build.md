@@ -41,7 +41,7 @@ ChatGPT chat: https://chatgpt.com/c/6afc9c72-7c10-83ec-9c87-8c299adf9bc6
 
 ## Still open
 - Top/front IoU under 0.90 = the sheet's views disagree (fins, fluke); kept the split-the-difference fins. Owner can pick a view to win.
-- Not done: rig (8 spine + Jaw), Swim, texture bake, FBX, Roblox (Highlight outline, Neon runes/eye, aura + sparkle emitters).
+- Rig + FBX done in v1.4 (below). Not done: upload + Studio install (owner approves in Blender first).
 
 ## v1.2 (18 Nov, owner asked "are these normal" about blocky shapes in solid view)
 - The blocky shells were the PREVIEW glow helpers (`L6_OutlineShell`, `L6_AuraShell`: voxel-remeshed, pushed-out copies of the body). They now live in their own collection **L6_PreviewFX**, hidden in the viewport while modelling; turn it on for the rendered look. They are never exported.
@@ -52,3 +52,12 @@ ChatGPT chat: https://chatgpt.com/c/6afc9c72-7c10-83ec-9c87-8c299adf9bc6
 - `RunesCyan` / `RunesGold` are now solid raised inlays, not flat decals: each traced glyph outline is resampled every ~6 px, filled (no inner verts), ray-cast onto the skin, pushed 2.5 px proud and 1.5 px sunk into the skin, with walls. One winding per glyph; normals blended with the glyph's mean so glyphs over a groove don't fold; vertices the outline passes twice drop their fan; inside-out glyph shells are flipped.
 - Gates now check the runes too: zero open edges, every glyph's signed volume positive. **Gates PASS.** 19 parts, 16,656 tris (RunesCyan 4,220, RunesGold 3,959; each under Roblox's 20K per mesh). IoU side 0.877 (no-tail 0.944), top 0.888, front 0.836.
 - In Roblox the rune meshes become Neon parts, so the glow comes from real geometry.
+
+## v1.4 rig + export (18 Nov)
+`livy6_export.py` (adapted from the Mosasaurus T6): `blender -b livyatan_t6.blend -P livy6_export.py -- livy6_data.json export`
+- **`export/Livyatan_T6.fbx`** (686 KB, texture embedded and packed) + `export/Livyatan_T6_tex.png` (512 px palette atlas, 227 colours, 8 px cells) + `export/Livyatan_T6_rigged.blend` (with the Swim action).
+- 4 skinned meshes: `Livyatan_T6` body 5,408 tris, `Livyatan_T6_RunesCyan` 5,760, `Livyatan_T6_RunesGold` 5,392, `Livyatan_T6_Eye` 96 (each under 20K; the modelled runes are the heavy part). Max 3 bone influences, nothing unweighted.
+- Rig: Root, Spine0-7 (the old Leviathan's bone layout from `Leviathan_hse/rig.json`, stretched x8/7 to 8 m, so the Leviathan clips can play on it), Jaw under Spine0, hinged at the jaw's back end (x1100, the exploded sheet). Swim = carangiform S-wave, frames 0-23.
+- Checked: FBX re-import (`fbxcheck.py`), bite pose (Jaw -22 deg opens cleanly), swim from above. Picture `checks/livy6_poses.jpg`.
+- Owner's Blender: collection `Livyatan_T6_Rigged` (rig moved 4.5 m to the side of the parts), runes + eye with glow materials, Swim playing. Saved in `livyatan_t6_preview.blend`.
+- `install_serverstorage.luau`: NOT run. Parks `MB_Livyatan_T6` in ServerStorage at 165 studs: runes + eye Neon, gold + cyan sparkle trails, blue aura emitter, rune/eye PointLights, cyan Highlight outline. Needs the FBX uploaded first (set ASSET_ID).
