@@ -3,7 +3,7 @@ tags: [brain, skills]
 updated: 2026-11-16
 ---
 # Skills index (Brain/Skills)
-Back to [[00 BRAIN]]. Each folder holds the CURRENT copy of one of the owner's Claude skills (`<name>/SKILL.md` + any helper files).
+Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are in [[00 Plugins index]]. Each folder holds the CURRENT copy of one of the owner's Claude skills (`<name>/SKILL.md` + any helper files).
 
 **RULE (owner, 13 Nov 2026):** whenever a skill is created or updated, copy the new SKILL.md (and its files) into `Brain/Skills/<name>/` in the same turn and update this index. The vault is the brain; a skill that lives only in Claude is lost knowledge.
 
