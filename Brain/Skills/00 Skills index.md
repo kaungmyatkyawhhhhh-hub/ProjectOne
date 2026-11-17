@@ -30,6 +30,13 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
+- 2026-11-17 (late): roblox-vfx-reveal updated from the 16 Nov TikTok search rounds ([[Brain/Training inbox]], creators' claims, unverified):
+  - Section 1: small moments get timing + sound + a small reaction ("make simple actions satisfying").
+  - Section 2: pool frequent effects instead of create/destroy.
+  - New section 2b "Don't look AI-made": what reads as AI VFX and the fixes.
+  - Section 7: post work-in-progress VFX clips too.
+  - Section 6: `starburst` breaks the owner's no-sunburst rule (kit change still pending).
+  - Local and vault copies match.
 - 2026-11-17: full check of every installed skill against the vault.
   - The 5 local skills in `~/.claude/skills` (play-roblox, roblox-game-lighting, roblox-organic-marketing, roblox-ui-pro, roblox-vfx-reveal) match the vault exactly, file for file.
   - All synced skills are in the vault. **The vault is NEWER** for pro-video-editing, roblox-3d-model-from-sheet, roblox-chatgpt-art-pipeline, roblox-game-sounds, roblox-icon-thumbnail and ytdlp-video-watch. The installed copies date from 7–10 Nov, so the owner still needs to re-upload those 6 to Claude.

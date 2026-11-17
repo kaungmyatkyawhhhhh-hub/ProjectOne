@@ -5,7 +5,7 @@ description: "Use for Roblox VFX and big-moment effects: combat hit VFX (impact 
 
 # Roblox VFX + rarity reveals
 
-Big moments sell the game in play and in TikToks. The two most-watched Roblox dev clips in the 16 Nov watch study were both VFX: a Claude-made combat VFX clip (324K views, 8 s) and a Roll a Ball RNG reveal ladder (628K views). Research note: vault `Roblox Playbook\Research notes\2026-11-16 Watch study - Claude Roblox VFX, exploded-diagram 3D, RNG reveal, UI design hacks.md`.
+Big moments sell the game in play and in TikToks. The two most-watched Roblox dev clips in the 16 Nov watch study were both VFX: a Claude-made combat VFX clip (324K views, 8 s) and a Roll a Ball RNG reveal ladder (628K views). Research note: vault `Roblox Playbook\Research notes\2026-11-16 Watch study - Claude Roblox VFX, exploded-diagram 3D, RNG reveal, UI design hacks.md`. The 16 Nov TikTok search rounds (vault `Brain/Training inbox.md`, "roblox vfx game feel tips" and others; creators' claims, unverified) added sections 2b, the frequent-moment rule in 1, pooling in 2, and the WIP clip format in 7.
 
 | File | Use |
 |---|---|
@@ -19,6 +19,8 @@ Write one line per moment: **event | what the player must feel | length | who se
 
 Repeating a big effect too often kills it. Budget it like currency.
 
+**Small moments are where the feel lives** ("make simple actions satisfying", a TikTok clip with about 8.6K likes on Nintendo-style timing). Every tap, jump, pickup and hit gets three things: a timing curve (quick anticipation, snappy action, soft settle), a short sound, and a small reaction (a squash, pop or puff). Big reveals don't make up for basic actions that feel dead.
+
 ## 2. Architecture (the rules)
 - **The server decides, every client plays.** The server rolls or validates the hit, then fires a RemoteEvent (`VFX:FireAllClients("HeavyHit", attacker, victim)`) or `FireClient` for self-only reveals. VFX are built on the client (local parts in `workspace.ClientVFX`), so the server never replicates hundreds of parts.
 - **Never trust the client** for the result. The client only shows what the server sent.
@@ -27,6 +29,25 @@ Repeating a big effect too often kills it. Budget it like currency.
 - **Max 31 Highlights render at once**: impact frames only highlight the fighters, never every NPC.
 - Honour `GuiService.ReducedMotionEnabled`: no shake, no FOV punch, flashes become ≤ 0.1 s fades. The kit does this.
 - Shake runs at `RenderPriority.Camera + 1` (after the camera scripts), or the camera module overwrites it.
+- **Pool frequent effects** (every hit, coin and footstep puff). Keep a small stash of hidden parts and emitters and reuse them instead of `Instance.new` + `Debris` each time. Constant create/destroy makes Roblox allocate and clean up memory over and over (TikTok dev tip, 16 Nov). Use `Emit(n)` on a parked emitter for bursts. Rare moments (reveals, cutscenes) can still build and destroy.
+
+## 2b. Don't look AI-made
+Viewers call out obvious AI output fast: "soulless AI slop" on an AI map clip, "using AI for animations is so lazy" on an AI-cutscene skills video, and "the UI is NOT good" on an AI shop. The top comment on a popular VFX tutorial (about 15K likes) says people prompt Claude to "make awesome VFX and make it not look like AI". TikTok rounds, 16 Nov; creators' and commenters' claims.
+
+What reads as AI-made, from our own vault rules (Lessons: Galaxy to +1 SHRINK; K06):
+- the same effect on every event, with no tier budget;
+- default Roblox `Sparkles`/`Fire`/`Smoke` or plain neon blocks as the whole effect;
+- a spiky sunburst ring (owner rule: never; use a soft radial glow, light shafts or a themed ring);
+- effects with no sound;
+- linear tweens with no anticipation or settle;
+- a cutscene with no camera intent.
+
+Instead:
+- **One grammar for everything** (anticipation, then a white-hot impact, then a short fade), sized to how much the moment matters.
+- **The game's own art** in the effect (custom flipbook/texture sprites from `roblox-chatgpt-art-pipeline`, themed shapes: bubbles for an ocean game, sparks for a forge).
+- **Timing with intent:** hold on the impact frame, ease out of it.
+- **A sound on frame 0** for every effect.
+- **Before calling it done, ask:** could this exact effect be dropped into ten other games unchanged? If yes, add the game's art or theme.
 
 ## 3. Combat hit recipe (the "pro dev" clip look)
 Order matters. The hit lands on frame 0:
@@ -104,9 +125,11 @@ Order matters. The hit lands on frame 0:
 ## 6. Known limits of the kit (16 Nov)
 - The shockwave is a filled neon disc. For a ring, use a torus MeshPart or a circle of Beams.
 - Starburst spikes are world parts, so an active impact-frame tint colours them too. Play them after the frame, as `heavyHit` does.
+- **`starburst` is a spike ring, which breaks the owner's no-sunburst rule** (section 2b). `Tiers` and `heavyHit` still call it. Until the kit is changed, swap it for `uiBurst` (over UI) or a soft glow plus shockwave (in the world).
 - No flipbook or texture VFX (slashes, smoke, energy swirls) yet. Make the sprites with the `roblox-chatgpt-art-pipeline` skill (flipbook sheets), then use `ParticleEmitter` with `FlipbookLayout`.
 - Not tested on a real phone. Many neon parts at once can cost frames on low-end phones: keep starbursts ≤ 24 spikes.
 
 ## 7. Report + save
 - A table: moment | tier/frequency | effects used | length | sound | screenshot.
 - Save screenshots and the change log in the game's vault notes. If the effect is TikTok-worthy, hand an 8-second Studio capture idea to `roblox-game-video-pipeline`. A claim caption over a raw Studio capture is the format that worked.
+- **Post work in progress too, not only the polished result.** On the 16 Nov For You scroll, Roblox VFX process clips captioned like "work in progress, not proud of the end" drew thousands of likes and hundreds of comments, and "Claude + Blender makes you tuff aura" VFX clips were a trend with this audience. Save a raw before/after capture while iterating (first version, then fixed), so there's a clip ready.
