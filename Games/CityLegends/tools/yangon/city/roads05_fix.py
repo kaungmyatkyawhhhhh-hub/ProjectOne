@@ -1484,6 +1484,17 @@ def deck_joints(data):
                 if b[k] > a[k] + 0.05:
                     b[k] = a[k]
                     ch = True
+                    # (J19, QA width_wobble: the cut stepped the road's width one sample out) the road narrows into
+                    # the joint as a taper: walking away from the deck no sample is wider than WIDTH_RATE per stud
+                    st = -1 if e == 0 else 1  # away from the deck
+                    for j in range(g + st, len(s) if st == 1 else -1, st):
+                        if j in cr:
+                            break
+                        q, p = s[j], s[j - st]
+                        cap = p[k] + WIDTH_RATE * math.hypot(q[0] - p[0], q[2] - p[2])
+                        if q[k] <= cap + 0.01:
+                            break
+                        q[k] = round(cap, 2)
             n += ch
     return n
 
@@ -1785,6 +1796,7 @@ def main():
     st['median_styles'] = median_styles(data)
     st['width_taper_end'] = width_taper(data)  # (J15) again: mouths / butts / repair changed widths after the first
     st['unfold'] = unfold(data)  # (J18) before the deck joints: indices settle
+    st['width_taper_unfold'] = width_taper(data)  # (J19) dropped samples shortened chords: ease the steps again
     st['deck_joints'] = deck_joints(data)  # (J18) last width / direction change before the checks
     st['checks'] = check(data)
     st['signals'] = signals(data)  # last: arms keep their sample indices
