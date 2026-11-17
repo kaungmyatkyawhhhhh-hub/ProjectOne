@@ -133,6 +133,17 @@ function stall() { // shop: market stall with a striped awning, read as "shop" a
   return s;
 }
 
+function magnet() { // DNA Magnet pass: red horseshoe magnet with silver tips and pull lines
+  const U = 'M22 18 H42 V56 C42 66 58 66 58 56 V18 H78 V56 C78 90 22 90 22 56 Z';
+  return `<ellipse cx="50" cy="93" rx="30" ry="5" fill="#000" opacity=".2"/>`
+    + `<path d="${U}" fill="${L}" stroke="${L}" stroke-width="9" stroke-linejoin="round"/>`
+    + `<path d="${U}" fill="${lin([[0, '#FF6A6A'], [1, '#C8102E']], 1, 1)}"/>`
+    + `<rect x="22" y="18" width="20" height="14" fill="${lin([[0, '#FFFFFF'], [1, '#AEB8C8']])}" stroke="${L}" stroke-width="3"/>`
+    + `<rect x="58" y="18" width="20" height="14" fill="${lin([[0, '#FFFFFF'], [1, '#AEB8C8']])}" stroke="${L}" stroke-width="3"/>`
+    + `<path d="M28 44 V58 C28 76 44 82 50 82" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".7"/>`
+    + `<g stroke="#5CF2FF" stroke-width="4" stroke-linecap="round" fill="none"><path d="M30 8 L32 2"/><path d="M50 8 V1"/><path d="M70 8 L68 2"/></g>`;
+}
+
 const PIECES = {
   hudPlate:  [330, 128, () => plate(330, 128), null],
   dnaPlate:  [176, 46, () => plate(176, 46, {c: 10, deco: false, lip: 3}) + slashes(108, 13, 2, 20, '#3A6AD8'), null],
@@ -146,6 +157,7 @@ const PIECES = {
   sqPurple:  [60, 60, () => sq(60, '#BE92FF', '#6C34DC', '#36168A', '#E2CCFF'), null],
   chevron:   [100, 100, chevron, null],
   stall:     [100, 100, stall, null],
+  magnet:    [100, 100, magnet, null],
 };
 SPECIES.forEach((_, i) => PIECES['port' + (i + 1)] = [64, 70, () => portrait(i), null]);
 

@@ -76,6 +76,7 @@ local ART = {
 	sqPurple = { id = 83791679223440, rect = { 7, 7, 130, 130 } },
 	chevron = { id = 130338925901928, rect = { 18, 34, 148, 156 } },
 	stall = { id = 90821629593898, rect = { 26, 26, 172, 182 } },
+	magnet = { id = 134837634359789, rect = { 47, 10, 130, 198 } },
 	port1 = { id = 83511662512157, rect = { 7, 7, 138, 150 } },
 	port2 = { id = 101610475812861, rect = { 7, 7, 138, 150 } },
 	port3 = { id = 139949073882603, rect = { 7, 7, 138, 150 } },
@@ -377,12 +378,12 @@ local ROBUX_ART = {
 	-- colour = tier, like his store: hero yellow, epic magenta, rare purple, cash-style cyan, common green
 	DoubleDNA = { "cardMagenta", "dna2" }, FastLife = { "cardPurple", "stopwatch" }, VIP = { "cardHero", "crown" },
 	OfflinePlus = { "cardPurple", "moon" }, Skip5 = { "cardCyan", "skip" }, Skip20 = { "cardCyan", "skip" }, DNAPack = { "cardGreen", "jar" },
-	SuperGenes = { "cardMagenta", "clover" },
+	SuperGenes = { "cardMagenta", "clover" }, Magnet = { "cardCyan", "magnet" },
 }
 local SHORT = { DoubleDNA = "Double DNA forever", FastLife = "Lives 30% shorter", VIP = "+25% DNA, gold graves",
 	OfflinePlus = "Evolve 24h offline", Skip5 = "5 lives right now", Skip20 = "20 lives, best value", DNAPack = "10 minutes of DNA",
-	SuperGenes = "2x mutations, keep good genes" }
-local CARD_NAME = { FastLife = "Fast Life", OfflinePlus = "Long Nap", SuperGenes = "Super Genes" } -- cards fit ~12 letters at 15 pt
+	SuperGenes = "2x mutations, keep good genes", Magnet = "Pulls in orbs near you" }
+local CARD_NAME = { FastLife = "Fast Life", OfflinePlus = "Long Nap", SuperGenes = "Super Genes", Magnet = "DNA Magnet", Skip5 = "Skip 5 Lives", Skip20 = "Skip 20 Lives" } -- cards fit ~12 letters at 15 pt
 local robuxCards = {}
 local VIP_FIRST = { VIP = 0 } -- hero item first
 for i, entry in (remotes:GetAttribute("Store") or ""):split(";") do
@@ -527,7 +528,7 @@ refresh = function()
 			if got then found += 1 end
 			e.label.Text = if e.desc then e.name .. "\n" .. e.desc else (got and e.name or "???")
 			e.label.TextColor3 = got and e.color or MUTED
-			if e.port then e.port.ImageColor3, e.port.ImageTransparency = got and Color3.new(1, 1, 1) or Color3.new(0, 0, 0), got and 0 or 0.45 end
+			if e.port then e.port.ImageColor3, e.port.ImageTransparency = got and Color3.new(1, 1, 1) or Color3.fromRGB(50, 60, 100), 0 end -- locked: navy shadow, face just visible
 		end
 		sec.header.Text = ("%s  %d/%d"):format(sec.title, found, #sec.tiles)
 	end
@@ -628,10 +629,10 @@ remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stag
 end)
 
 ---------------------------------------------------------------- DNA orb pickup: "+N" floats up where the orb was, the DNA pill pops
-remotes:WaitForChild("Pickup").OnClientEvent:Connect(function(gain, pos)
+remotes:WaitForChild("Pickup").OnClientEvent:Connect(function(gain, pos, golden)
 	local at = new("Attachment", { WorldPosition = pos }, workspace.Terrain)
-	local bb = new("BillboardGui", { Adornee = at, Size = UDim2.fromOffset(120, 40), AlwaysOnTop = true, LightInfluence = 0 }, playerGui)
-	label(bb, "+" .. Kit.abbrev(gain) .. " DNA", 22, { TextColor3 = DNA_C })
+	local bb = new("BillboardGui", { Adornee = at, Size = UDim2.fromOffset(golden and 200 or 120, golden and 56 or 40), AlwaysOnTop = true, LightInfluence = 0 }, playerGui)
+	label(bb, (golden and "GOLDEN +" or "+") .. Kit.abbrev(gain) .. " DNA", golden and 28 or 22, { TextColor3 = golden and GOLD or DNA_C })
 	TweenService:Create(bb, TweenInfo.new(0.9), { StudsOffset = Vector3.new(0, 4, 0) }):Play()
 	task.delay(0.6, function()
 		for _, o in bb:GetDescendants() do
@@ -646,3 +647,23 @@ remotes:WaitForChild("Pickup").OnClientEvent:Connect(function(gain, pos)
 		TweenService:Create(pillScale, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 	end
 end)
+
+-- orbs bob and spin on each client (server keeps them still at BaseY, so touches stay fair)
+local orbFolder = workspace:WaitForChild("DNAOrbs", 30)
+if orbFolder then
+	game:GetService("RunService").Heartbeat:Connect(function()
+		local t = os.clock()
+		for _, mine in orbFolder:GetChildren() do
+			for _, orb in mine:GetChildren() do
+				local y = orb:GetAttribute("BaseY")
+				if y then
+					local p = orb.Position
+					local cf = CFrame.new(p.X, y + math.sin(t * 2.2 + p.X) * 0.45, p.Z) * CFrame.Angles(0, t * 1.5, 0)
+					orb.CFrame = cf
+					local core = orb:FindFirstChild("Core")
+					if core then core.CFrame = cf end
+				end
+			end
+		end
+	end)
+end
