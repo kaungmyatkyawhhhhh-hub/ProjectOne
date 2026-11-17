@@ -333,6 +333,12 @@ def lane_lines(s, a, b, one):
             # never off the asphalt where the kerb pulls in faster than the line may move
             t = np.where(outer > inner, np.minimum(np.maximum(t, inner + 1.5), outer), np.maximum(np.minimum(t, inner - 1.5), outer))
             lines.append(np.where(np.abs(t - outer) > 1.5, t, np.nan))
+        # (J15, dash_side_by_side) where a lane ends its line tapers out while the next one spreads: a line closer
+        # than 4 studs to the one inside it gives way (never two dashes side by side)
+        for k in range(len(lines) - 1, -1, -1):
+            prev = lines[k - 1] if k > 0 else inner
+            close = np.abs(lines[k] - np.where(np.isnan(prev), inner, prev)) < 4.0
+            lines[k] = np.where(close, np.nan, lines[k])
         out[sg] = (inner, outer, nn, lines)
     return idx, out
 
@@ -626,7 +632,7 @@ def build(data, signals=None):
             rr = g['r_in'] + W * k
             ln = LineString(Point(*C).buffer(rr, 128).exterior.coords)
             for d in dashes(ln, DASH_ON, DASH_OFF):
-                P.line('LW', d, LINE_W, 'ring lane', g['name'])
+                P.line('LW', d, LINE_W, 'ring lane', g['name'], box_u)   # (J15) none in an arm's junction box
     # decks: 2 + 2, a solid white centre line and dashed lane lines (no zebras, no boxes up there)
     for d in data.get('decks', []):
         s = d['s']
