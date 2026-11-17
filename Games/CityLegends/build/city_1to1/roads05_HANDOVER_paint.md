@@ -1,38 +1,41 @@
-# roads05 paint handover (J15 / J16, 18 Nov 2026, PAINT agent)
+# roads05 paint handover (J17, 17 Nov 2026, PAINT agent)
 
-These are the paint rules and their QA. The geometry handover is `roads05_HANDOVER.md`. Only the paint files were changed: `tools/yangon/city/roads05_paint.py`, `roads05_paint_qa.py` and one line in `roads05_view.py` (it can now draw `LZ` zebras).
+These are the paint rules and their QA. The geometry handover is `roads05_HANDOVER.md`. Only the paint files were changed: `tools/yangon/city/roads05_paint.py`, `roads05_paint_qa.py` (and, J17, one line in `roads05_pipeline.sh`).
 
 ## How to run
-- `YANGON_SCALE=1to1 python roads05_paint.py <tag>` (about 4 minutes on P1-P12) writes `paint.json`. Then run `roads05_paint_qa.py <tag>` (about 2 minutes), which writes `qa_paint_J15.json` and prints the counts.
-- The pipeline (`roads05_pipeline.sh`) runs the paint script but not the paint QA. Run the QA by hand after it.
-- These runs used a private copy of the network, `build/city_1to1/roads05_J15P/` (`roads.json` from 13:43). That kept them separate from the geometry agent's runs.
+- `YANGON_SCALE=1to1 python roads05_paint.py <tag>` (about 6 minutes on P1-P12) writes `paint.json`. Then `roads05_paint_qa.py <tag>` (about 2 minutes) writes `qa_paint_J15.json` and prints the counts.
+- J17: the pipeline (`roads05_pipeline.sh`) now runs the paint QA too (`<label>_paint_qa.log`).
+- J17 runs used a private copy of the network: `build/city_1to1/roads05_J17P/roads.json` = the P1-P12 `roads.json` of 17 Nov 13:38 (the J16 network; there is no `roads05_NETWORK_VERSION.txt`). QA files per run: `qa_base.json` (J16 paint on it), `qa_r1.json` .. `qa_r6.json` (r6 = final).
 
-## Rules (QA name: J14 paint -> final)
-| rule | before | after | how |
+## J17 counts (same network, J16 paint -> J17 paint)
+| rule | J16 | J17 | what changed |
 |---|---|---|---|
-| arrow_missing | 1100 | 52 | arrows at every approach for the turns the box allows (a T takes them from the through road); OSM turn:lanes used where the lane count fits; an arrow moves back 6 or 12 studs if a zebra is in the way |
-| stopline_missing | 637 | 29 | a stop line on every approach (it used to be signals only) |
-| stopline_wrong_side | 65 | 14 | crosses only the incoming lanes, measured at the stop line's own sample; moves back up to 6 studs if another arm's zebra is there; never inside a box; cut back at a deck edge |
-| dash_jog | 1283 | 76 | lane count is the median over 9 samples; offsets averaged over 9 samples, rate-limited to 0.08 per stud and clamped to the asphalt; Chaikin smoothing; the QA counts a step of 1.5 studs or more |
-| dash_side_by_side | 32 | 4 | a line closer than 4 studs to the line inside it is dropped |
-| paint_in_median | 1245 | 0 | nose caps (1.5 back and 1.0 past each median end) and islands are no-paint areas in `tidy` |
-| double_box | 225 | 0 | two parallel roads under 40 studs apart crossing one road form ONE box, and so do any two junctions under 60 apart on one road. The stretch of each road from the box out to its zebra is box too. |
-| box_paint | 149 | 0 | the same, plus ring lanes are clipped by boxes |
-| paint_snake | 439 | 91 | Chaikin smoothing on every line; the rows that are left are mostly edge or median lines following wavy kerbs (geometry `width_wobble`) |
-| edge_missing (yellow kerb line) | 5323 | 291 | yellow lines along every outer and median kerb of main roads, 0.9 in from the kerb; a smaller road lying inside a road is no mouth; no lines of one road on a bigger road |
-| zebra_colour | 0 | 0 | LZ (230, 190, 110) kept |
-| zebra_torn | 347 | 2 | whole bars only: a bar the kerb would cut, or one that lies in a box, on a median nose, under a deck or on another arm's zebra, is dropped. `tidy` closes the seams between roads before clipping, and deck paint is no longer cut by ground paint |
+| arrow_missing | 52 | 6 | arrows only at signalled approaches (photo check); arrows sit between the PAINTED lines (a lane still tapering out counts); QA: lanes = the painted dashes of that road, an arrow anywhere in its lane counts, arrow spots under a deck skipped |
+| stopline_missing | 29 | 1 | stop lines only at signalled junctions (`roads.json` `junctions`, a box within `SIG_BOX` 30); QA counts signalled arms only and an outgoing zebra half before a median starts |
+| stopline_wrong_side | 14 | 3 | one stop line piece per approach (no stub past a median nose); the 3 left are `short`: cut back at a deck edge (Kabar Aye Pagoda Road #4, Pyay Road #14, Pyay Road #12 ~2) |
+| dash_jog | 76 | 20 | QA took dash ends from the minimum rectangle (a sagitta off on curved dashes): now from each flat cap. Most left: Baho Road #3, Than Thu Mar Road, Bo Min Gaung Street lane-count changes |
+| dash_side_by_side | 4 | 1 | the Kabar Aye ones were a centre-line fold (below). Left: Road Flyover #2 deck lanes |
+| paint_snake | 91 | 22 | kerb / median lines from a smoothed kerb (`steady`: 9-sample mean, rate-limited, kept 0.5-1.6 in from the real kerb); no paint at fold-backs |
+| edge_missing | 291 | 193 | stacked roads (> 6 studs apart in height: `STACK`) are no mouth and no box; a smaller road wipes kerb lines only round the overlap itself (+4), not along its whole carriageway; kerb lines run on from the box to the zebra. Left (r6): 107 next to another road's carriageway (mouths, flares), 30 under a deck, 17 within 15 of a zebra / stop line, 39 other |
+| zebra_torn | 2 | 0 | a zebra is whole or none: an arm left with under 3 bars or under half its bars gets none (Studio test "stray bars"); lines stop 0.6 short of a zebra / stop line |
+| paint_in_median, double_box, box_paint, zebra_colour | 0 | 0 | |
 
-## J16 Studio test fixes (commit 5a3877d0)
-- Pazundaung Y: a main road that ends at a box (a continuation whose centre line never enters the box) now gets its arm, with zebra, stop line and arrows. Singapore Kyaung Street, the east approach, is a `street`. Streets get no zebras or stop lines (rule: residential streets are unmarked). Whether that street should be marked is a data or owner question.
-- Pyay x University: no zebra bar under a deck's footprint (+1 stud), because the ground under it can be an open gap. Stop lines are cut back to the deck edge, or dropped if under half of the line is left.
+Also new: a line that crosses itself loses its loops before buffering (a loop buffered to a ring and the paint list painted the hole solid yellow), and any "line" polygon fatter than 1.6x its width is dropped.
 
-## Previews (vault `City Legends/2026-11-18 roads05 J15 paint - *.png`)
-Crossroads Waizayandar, Pazundaung Y, Pyay Road x University Avenue, Double junction Maha Bandula x Lan Thit. In the newest network the last one is a T plus a through road, not a double junction. For the double-junction rule, see the QA rows (double_box 0) and the Strand Road / Pyay Road #14 areas.
+## Photo check (Playbook `2026-11-13 Research - Yangon road look.md`, J17 section)
+- Two solid white lines along a painted median: KEEP (Hledan 2021 double solid centre; Bogyoke Road 2021 painted strip with a line each side).
+- Stop lines + arrows on every main approach: CHANGED to signalled junctions only. Photos 2018-2021 show them at signals (Sule Pagoda Road); unsignalled corners have only the yellow zebra. 140 of 302 boxes are signalled; approaches with stop line + arrows 912 -> 494.
+
+## Singapore Kyaung Street at the Pazundaung Y (OSM API 0.6, 17 Nov)
+Way 547765387 (`highway=service`) has no crossing tag on any of its nodes. The only crossing nearby is node 2212217914 (`crossing=traffic_signals`, 13 m west), the Bogyoke Aung San Road / Upper and Lower Pazundaung Road junction, which already gets its zebras. So the street stays unmarked (residential streets get no zebra).
+
+## Geometry faults found by paint (for the GEOMETRY agent)
+Centre lines that step back on themselves: 71 samples on 52 roads (`roads05_paint.folds`), e.g. Kabar Aye Pagoda Road 1201-1204 and 1326-1327, Hanthawaddy Road 39-42, Hledan Road #3 231-232 / 319-320, Min Nandar Road #2 125-126 / 160-161, Pyay Road #2 1101-1102, Pyay Road #6 366-367, Strand Road 1360-1363, Parami Road 3065-3067, Old Yay Ta Shay Street #2 24-25, Bo Min Gaung Street 360-363. Paint leaves the road's width + 6 round each one empty, so those stretches are bare until the data is fixed.
+
+## Previews (vault `City Legends/2026-11-18 roads05 J17 paint - *.png`)
+Pazundaung Y; Crossroads Waizayandar (signalled: stop lines + arrows); Pyay Road x Ma Kyee Kyee Street (no signals: zebras only); Kabar Aye Pagoda Road fold (Bahan: no paint at the data fault).
 
 ## Left
-- edge_missing 291: mostly kerbs next to another road's carriageway with a gap under 4 studs (paint breaks for the mouth buffer), or roads under decks.
-- paint_snake 91: kerb wobble in the geometry.
-- arrow_missing 52 / stopline_missing 29: messy flyover junctions (Pyay Road #14, Hledan), where arms are short and zebras crowd.
-- The `stopline_wrong_side` rows marked "short" are stop lines cut back at deck edges.
-- Not done: a Studio look at the newest paint (the geometry agent's job); paint on flush medians is two solid white lines (new J15, not checked against photos).
+- edge_missing 193 (above), dash_jog 20, paint_snake 22: lane-count changes and kerb notches in the data; the fold-backs.
+- arrow_missing 6: lanes that end at the stop line (a taper: the QA sees one dash fewer than the arrows). stopline_missing 1: Pyay Road #13 (29131, 35461), an arm squeezed between a deck and the box, no room behind its zebra.
+- Not done: a Studio look at the J17 paint; the geometry network moves on (a J16 fix was running at 14:01), so rerun paint + QA on the newest `roads.json`.
