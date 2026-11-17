@@ -234,6 +234,236 @@ function T.run(name: string)
 	return "spawned " .. name
 end
 
+-- (J28 QA) the built-surface check, deterministic: T.qa(name) = YangonRoads.qaBuilt's rules on the spot just built
+-- (T.run), but the same build always gives the same counts:
+--   * fixed grid: cell (i, j) casts at x0 + i G + OX, z0 + j G + OZ; the small fixed offsets keep rays off the whole /
+--     half-stud lines where piece edges lie (a ray down a shared edge hit or missed by float luck);
+--   * fixed re-cast rules: a side-face hit is cast again at 3 fixed offsets, a miss at 2 (as qaBuilt);
+--   * the top is chosen, not taken: every up-facing part within TIE of the first hit is gathered (short rays, the found
+--     parts excluded) and the one first by (Kerb, Pavement, Road, other; highest; road name; part position) is the cell's
+--     top, so an overlap never depends on which part the engine's tree returns first;
+--   * one fixed scan order (i, then j), 4-stud dedup as qaBuilt.
+-- Each fault keeps both cells (kind, road = part's folder, part name, height) in T.faults[name] for the census.
+-- T.fingerprint(name) hashes the built parts (sorted), to tell a changed build from a changed check.
+T.QA_G, T.QA_OX, T.QA_OZ, T.QA_TIE, T.QA_MARGIN = 0.5, 0.0173, 0.0311, 0.011, 20
+T.faults, T.qaLog = {}, {}
+local ORDER = { Kerb = 1, Pavement = 2, Road = 3 }
+local function topKey(r)
+	local p = r.Instance
+	return string.format("%d|%09.3f|%s|%s|%.3f,%.3f,%.3f", ORDER[p.Name] or 9, 9999 - r.Position.Y, p.Parent and p.Parent.Name or "", p.Name, p.Position.X, p.Position.Y, p.Position.Z)
+end
+
+function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number)
+	local Y = T.Y
+	local G, OX, OZ, TIE = T.QA_G, T.QA_OX, T.QA_OZ, T.QA_TIE
+	local MG = math.floor(T.QA_MARGIN / G)
+	local STEP = 0.1 + 0.19 * G
+	local P = RaycastParams.new()
+	P.FilterType = Enum.RaycastFilterType.Include
+	P.FilterDescendantsInstances = { root }
+	local nx, nz = math.floor((x1 - x0) / G), math.floor((z1 - z0) / G)
+	local Y0, DOWN = 3000, Vector3.new(0, -3500, 0)
+	local kind, hy, inst, deckCell = {}, {}, {}, {}
+	local function cast(x, z)
+		return workspace:Raycast(Vector3.new(x, Y0, z), DOWN, P)
+	end
+	for i = 0, nx do
+		for j = 0, nz do
+			local x, z = x0 + i * G + OX, z0 + j * G + OZ
+			local r = cast(x, z)
+			local t = 0
+			while r and r.Normal.Y < 0.5 and t < 3 do
+				t += 1
+				r = cast(x + 0.04 * t, z + 0.03 * t)
+			end
+			for u = 1, 2 do
+				if r and r.Normal.Y >= 0.5 then
+					break
+				end
+				r = cast(x + 0.003 * u, z + 0.002 * u) or r
+			end
+			if r and r.Normal.Y >= 0.5 then
+				local best, bk = r, topKey(r)
+				local ex = { r.Instance }
+				for _ = 1, 6 do
+					local P2 = RaycastParams.new()
+					P2.FilterType = Enum.RaycastFilterType.Exclude
+					P2.FilterDescendantsInstances = ex
+					local r2 = workspace:Raycast(r.Position + Vector3.new(0, TIE, 0), Vector3.new(0, -2 * TIE, 0), P2)
+					if not (r2 and r2.Instance:IsDescendantOf(root)) then
+						break
+					end
+					table.insert(ex, r2.Instance)
+					if r2.Normal.Y >= 0.5 then
+						local k2 = topKey(r2)
+						if k2 < bk then
+							best, bk = r2, k2
+						end
+					end
+				end
+				r = best
+			end
+			local k = i * (nz + 1) + j
+			if r and r.Normal.Y < 0.5 then
+				kind[k] = "Edge"
+			elseif r then
+				local n = r.Instance.Name
+				kind[k] = if n == "Road" or n == "Kerb" or n == "Pavement" then n else "Other"
+				hy[k] = r.Position.Y
+				inst[k] = r.Instance
+				deckCell[k] = Y.deckHalf ~= nil and Y.deckHalf[r.Instance.Parent.Name] ~= nil
+			else
+				kind[k] = "None"
+			end
+		end
+		if i % 20 == 0 then
+			task.wait()
+		end
+	end
+	local out, seen, list = {}, {}, {}
+	local function cell(k)
+		local p = inst[k]
+		-- kind, road (part's folder), the folder above it (Roads / a mouth's / Decks ...), part class, height (data)
+		return { kind[k], p and p.Parent.Name or "", p and p.Parent.Parent and p.Parent.Parent.Name or "", p and p.ClassName or "", hy[k] and math.floor((hy[k] - T.LIFT) * 1000 + 0.5) / 1000 or false }
+	end
+	local function add(what, i, j, k, q)
+		local x, z = x0 + i * G + OX, z0 + j * G + OZ
+		local key = what .. math.floor(x / 4) .. "," .. math.floor(z / 4)
+		if seen[key] then
+			return
+		end
+		seen[key] = true
+		out[what] = (out[what] or 0) + 1
+		local nb = {}
+		if q == nil then -- a hole: its 4 neighbours
+			for _, d in { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } } do
+				table.insert(nb, cell((i + d[1]) * (nz + 1) + j + d[2]))
+			end
+		else
+			nb = { cell(k), cell(q) }
+		end
+		table.insert(list, { t = what, x = math.floor(x * 100 + 0.5) / 100, z = math.floor(z * 100 + 0.5) / 100, c = nb, edge = math.floor(math.min(x - x0, x1 - x, z - z0, z1 - z)) })
+	end
+	local function K(i, j)
+		return i * (nz + 1) + j
+	end
+	local freeC = {}
+	local function freeEnd(p: Instance?, x: number, z: number): boolean
+		local o = p and p.Parent and Y.R[p.Parent.Name]
+		if not o then
+			return false
+		end
+		for _, e in { o.s[1], o.s[o.n] } do
+			if math.sqrt((e[1] - x) ^ 2 + (e[3] - z) ^ 2) < o.half + 4 then
+				local key = o.name .. e[1]
+				if freeC[key] == nil then
+					freeC[key] = true
+					for oi, b in Y.near(e[1], e[3], 2) do
+						local q = Y.list[oi]
+						if q ~= o and Y.polyDist(q, b[2], e[1], e[3]) < Y.sideHalf(q, b[2], e[1], e[3]) + 2 then
+							freeC[key] = false
+							break
+						end
+					end
+				end
+				if freeC[key] then
+					return true
+				end
+			end
+		end
+		return false
+	end
+	for i = math.max(1, MG), math.min(nx - 1, nx - MG) do
+		for j = math.max(1, MG), math.min(nz - 1, nz - MG) do
+			local k = K(i, j)
+			local a = kind[k]
+			if a == "None" then
+				local c = 0
+				for _, q in { K(i + 1, j), K(i - 1, j), K(i, j + 1), K(i, j - 1) } do
+					if kind[q] == "Road" then
+						c += 1
+					end
+				end
+				if c >= 3 then
+					add("box_hole", i, j, k, nil)
+				end
+			end
+			for _, q in { K(i + 1, j), K(i, j + 1) } do
+				local b = kind[q]
+				local x, z = x0 + i * G + OX, z0 + j * G + OZ
+				if (a == "Road" and b == "None" and deckCell[k]) or (b == "Road" and a == "None" and deckCell[q]) then
+					-- a deck's open end in the test subset
+				elseif (a == "Road" and b == "None" and freeEnd(inst[k], x, z)) or (b == "Road" and a == "None" and freeEnd(inst[q], x, z)) then
+					-- a dead end
+				elseif (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
+					add("kerb_gap", i, j, k, q)
+				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > STEP then
+					add("road_step", i, j, k, q)
+				elseif a == "Pavement" and b == "Pavement" and math.abs(hy[k] - hy[q]) > STEP then
+					add("pave_step", i, j, k, q)
+				elseif (a == "Kerb" and b == "Road" and hy[k] - hy[q] < 0.3) or (b == "Kerb" and a == "Road" and hy[q] - hy[k] < 0.3) then
+					add("buried", i, j, k, q)
+				end
+			end
+		end
+	end
+	return out, list
+end
+
+function T.qa(name: string)
+	local f = workspace.Roads05Test:FindFirstChild(name)
+	local b = T.spots[name].box
+	T.qaLog[name] = "running"
+	task.spawn(function()
+		local ok, out, list = pcall(T.qaCore, f, b[1], b[2], b[3], b[4])
+		if not ok then
+			T.qaLog[name] = "ERR " .. tostring(out)
+			return
+		end
+		T.faults[name] = list
+		local s = {}
+		for _, w in { "box_hole", "kerb_gap", "road_step", "pave_step", "buried" } do
+			table.insert(s, tostring(out[w] or 0))
+		end
+		T.qaLog[name] = table.concat(s, " / ")
+	end)
+	return "spawned qa " .. name
+end
+
+function T.fingerprint(name: string)
+	local rows = {}
+	for _, d in workspace.Roads05Test[name]:GetDescendants() do
+		if d:IsA("BasePart") and d.CanQuery then
+			local p, s = d.Position, d.Size
+			table.insert(rows, string.format("%s%s%.3f%.3f%.3f%.3f%.3f%.3f%.3f", d.Parent.Name, d.Name, p.X, p.Y, p.Z, s.X, s.Y, s.Z, d.CFrame.LookVector.X + d.CFrame.UpVector.Z))
+		end
+	end
+	table.sort(rows)
+	return #rows, sum(table.concat(rows))
+end
+
+-- every spot in turn (spawned): build, check, fingerprint; T.allLog = { name = "bh / kg / rs / ps / bu | parts hash" }
+function T.runAll(names)
+	T.allLog, T.allState = {}, "running"
+	task.spawn(function()
+		for _, name in names do
+			T.allState = "running " .. name
+			T.run(name)
+			while T.log[name] == "running" do
+				task.wait(0.5)
+			end
+			T.qa(name)
+			while T.qaLog[name] == "running" do
+				task.wait(0.5)
+			end
+			local n, h = T.fingerprint(name)
+			T.allLog[name] = string.format("%s | %d parts %d", T.qaLog[name], n, h)
+		end
+		T.allState = "done"
+	end)
+	return "spawned"
+end
+
 function T.cam(name: string, view: string)
 	local c = T.spots[name].cams[view]
 	return { c.pos[1], c.pos[2] + T.LIFT, c.pos[3] }, { c.at[1], c.at[2] + T.LIFT, c.at[3] }
