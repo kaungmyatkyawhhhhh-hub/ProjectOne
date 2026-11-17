@@ -183,7 +183,7 @@ def main():
     # spots as a Luau module too (the runner reads it)
     open(os.path.join(OUT, 'Roads05Spots.luau'), 'w', encoding='utf-8', newline='\n').write('return [==[' + json.dumps(spots) + ']==]')
     nr = len([f for f in os.listdir(OUT) if f.startswith('Roads05_')])
-    files = [os.path.join(GAME, 'tools', 'yangon', 'YangonRoads.luau'), os.path.join(HERE, 'Roads05StudioTest.luau'), os.path.join(OUT, 'Roads05Spots.luau')]
+    files = [os.path.join(GAME, 'tools', 'yangon', 'YangonRoads.luau'), os.path.join(GAME, 'tools', 'riviera', 'Roads.luau'), os.path.join(HERE, 'Roads05StudioTest.luau'), os.path.join(OUT, 'Roads05Spots.luau')]
     files += [os.path.join(OUT, 'Roads05_%d.luau' % i) for i in range(1, nr + 1)]
     files += [os.path.join(OUT, 'Roads05Paint_%d.luau' % i) for i in range(1, k + 1)]
     subprocess.run([sys.executable, os.path.join(GAME, 'tools', 'yangon', 'pack_tools.py'), RBX] + files, check=True, stdout=subprocess.DEVNULL)

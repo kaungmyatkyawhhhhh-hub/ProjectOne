@@ -311,6 +311,7 @@ end
 
 -- the surface height of a bigger road (rank below `rank`) at a point on its carriageway, or nil.
 -- Roads are flat side to side, so it is the centre line's height where the point meets it square-on.
+local finalEdges: { [number]: { L: { Vector3 }, R: { Vector3 } } }? = nil
 local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number, radius: number?): number?
 	local rj = otherNear(roads, grid, pos, self, radius or (HALF - 0.5), rank)
 	if rj == nil then
@@ -336,17 +337,31 @@ local function bigSurface(roads, grid, pos: Vector3, self: number, rank: number,
 			end
 		end
 	end
+	-- (opts.edgeSurface, Yangon J21: the bigger road's FINAL edges are known (built first): the height
+	-- is its real surface across, held at its edge height past the edge. The centre line's height put
+	-- a mouth's pinned edge 0.3-0.4 off the bigger road's own edge and pavement: the thin wedge steps)
+	local fe = finalEdges and finalEdges[rj]
+	local function across(k0: number, k1: number, t: number): number?
+		if not fe then
+			return nil
+		end
+		local L0, L1, R0, R1 = fe.L[k0], fe.L[k1], fe.R[k0], fe.R[k1]
+		local L, R = L0:Lerp(L1, t), R0:Lerp(R1, t)
+		local w = Vector2.new(R.X - L.X, R.Z - L.Z)
+		local s = math.clamp(Vector2.new(pos.X - L.X, pos.Z - L.Z):Dot(w) / math.max(w:Dot(w), 1e-9), 0, 1)
+		return L.Y + (R.Y - L.Y) * s
+	end
 	for _, pair in { { best - 1, best }, { best, best + 1 } } do
 		local a, b = pts[pair[1]], pts[pair[2]]
 		if a and b then
 			local v = Vector2.new(b.pos.X - a.pos.X, b.pos.Z - a.pos.Z)
 			local t = Vector2.new(pos.X - a.pos.X, pos.Z - a.pos.Z):Dot(v) / math.max(v:Dot(v), 1e-9)
 			if t >= 0 and t <= 1 then
-				return a.pos.Y + (b.pos.Y - a.pos.Y) * t
+				return across(pair[1], pair[2], t) or (a.pos.Y + (b.pos.Y - a.pos.Y) * t)
 			end
 		end
 	end
-	return pts[best].pos.Y
+	return across(best, best, 0) or pts[best].pos.Y
 end
 
 local function inBox(box, p: Vector3): boolean
@@ -535,7 +550,19 @@ function Roads.build(data, opts)
 	if opts.keepEdges then
 		Roads.debugEdges = {}
 	end
-	for ri, r in roads do
+	-- (opts.edgeSurface: bigger roads first, each road's final edges kept for bigSurface)
+	finalEdges = if opts.edgeSurface then {} else nil
+	local order = {}
+	for ri in roads do
+		table.insert(order, ri)
+	end
+	if finalEdges then
+		table.sort(order, function(a, b)
+			return roads[a].rank < roads[b].rank
+		end)
+	end
+	for _, ri in order do
+		local r = roads[ri]
 		local buildIt = not (opts.only and not opts.only[r.name])
 		if not buildIt and not (opts.keepEdges and opts.edgesFor and opts.edgesFor[r.name]) then
 			continue
@@ -726,6 +753,9 @@ function Roads.build(data, opts)
 					end
 				end
 			end
+		end
+		if finalEdges then
+			finalEdges[ri] = { L = edgeL, R = edgeR }
 		end
 		if opts.debug or opts.keepEdges then
 			Roads.debugEdges = Roads.debugEdges or {}

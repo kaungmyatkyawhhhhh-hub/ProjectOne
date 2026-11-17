@@ -1076,7 +1076,7 @@ end
 
 function M.findCorners()
 	M.corners, M.cornerSpan, M.cornerGrid, M.cutPair = {}, {}, {}, {}
-	M.cornerInRoadList, M.cornerInRoadDropped = {}, 0
+	M.cornerInRoadList, M.cornerInRoadDropped, M.cornerInRoadShort = {}, 0, 0
 	local cands = {}
 	local ringPts = nil
 	local pass = {}
@@ -1388,6 +1388,25 @@ function M.findCorners()
 		-- (J20, owner "random pavements in the middle" of the Kun Chan x Gyophyu x Sule Pagoda junction: a crossing
 		-- corner whose arc landed on another road's asphalt) a corner is built only if its whole kerb arc and pavement
 		-- lie off every road's carriageway (0.5 in) and off the asphalt gores; otherwise it is dropped (QA corner_in_road)
+		-- (J21, kerb_gap: a dropped corner left both kerb ends square with open asphalt between them) a tighter
+		-- corner (shorter T) is tried first: a short arc that clears the other road joins the kerbs
+		if M.cornerInRoad(corner) and corner.rebuild then
+			local T = corner.T
+			for _ = 1, 8 do
+				T *= 0.7
+				local c2 = corner.rebuild(T)
+				if c2.r < 1 then
+					break
+				end
+				if not M.cornerInRoad(c2) then
+					c2.rebuild, c2.T = corner.rebuild, T
+					cands[k] = c2
+					corner = c2
+					M.cornerInRoadShort = (M.cornerInRoadShort or 0) + 1
+					break
+				end
+			end
+		end
 		if M.cornerInRoad(corner) then
 			M.cornerInRoadDropped = (M.cornerInRoadDropped or 0) + 1
 			table.insert(M.cornerInRoadList, string.format("%s %s (%.0f, %.0f)", corner.road, corner.on or "?", corner.px, corner.pz))
@@ -2427,6 +2446,7 @@ function M.buildRoads(names: { string })
 		live = true,
 		keepEdges = true,
 		edgesFor = edgesFor,
+		edgeSurface = true, -- (J21: a mouth's edge pins to the bigger road's real edge, not its centre line)
 		-- (step 7, LaneCheck: Yangon is flat. Monaco's 19% cap on how fast a road's edge may climb from a
 		-- junction onto its own height left New Road climbing 1.1 studs in 6 at its fork off the loop)
 		edgeGrade = M.EDGE_GRADE,
@@ -3001,6 +3021,7 @@ function M.scrub(remove: boolean)
 	local P = RaycastParams.new()
 	P.FilterType = Enum.RaycastFilterType.Include
 	P.FilterDescendantsInstances = { roadsF }
+	local lastY = 0 -- (J21: the asphalt height asphaltAt last hit)
 	local function asphaltAt(x: number, y: number, z: number): boolean
 		local from = Vector3.new(x, y + 4, z)
 		for _ = 1, 6 do
@@ -3009,6 +3030,7 @@ function M.scrub(remove: boolean)
 				return false
 			end
 			if r.Instance.Name ~= "Kerb" and r.Instance.Name ~= "Pavement" then -- (a lane's whole band on a road: its pieces hide each other)
+				lastY = r.Position.Y
 				return r.Instance.Name == "Road"
 			end
 			from = r.Position - Vector3.new(0, 0.02, 0)
@@ -3043,11 +3065,13 @@ function M.scrub(remove: boolean)
 					inFill = not whole
 				end
 				local all = true
+				local ys = {}
 				for k = 0, 7 do
 					local a = k * math.pi / 4
 					if not asphaltAt(c.X + 1.6 * math.cos(a), c.Y, c.Z + 1.6 * math.sin(a)) then
 						all = false
-						break
+					else
+						table.insert(ys, lastY)
 					end
 				end
 				-- (J17, owner: a loose pavement strip with no road beside it, W of the double junction: a pavement
@@ -3073,6 +3097,22 @@ function M.scrub(remove: boolean)
 					stray += 1
 					strayBy[f.Name] = (strayBy[f.Name] or 0) + 1
 					if remove then
+						-- (J21, box_hole (36276, 42538): the island tip had no slab under it; taking it away opened a
+						-- hole in the junction box) a stray with no asphalt under its middle leaves its own shape as
+						-- asphalt, moved down to the asphalt round it
+						local top = workspace:Raycast(Vector3.new(c.X, c.Y + 8, c.Z), Vector3.new(0, -16, 0), P)
+						p.Parent = nil
+						if #ys >= 3 and top and top.Instance == p and not asphaltAt(c.X, c.Y, c.Z) then
+							table.sort(ys)
+							local q = p:Clone()
+							q.Name = "Road"
+							q.Material = Enum.Material.Asphalt
+							q.Color = M.palette.asphalt
+							q.MaterialVariant = ""
+							q.CFrame -= Vector3.new(0, top.Position.Y - ys[#ys // 2 + 1], 0)
+							q.Parent = f
+							M.strayPatched = (M.strayPatched or 0) + 1
+						end
 						p:Destroy()
 					end
 				end
@@ -4358,7 +4398,7 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 		local o = out[w]
 		table.insert(t, string.format("%s %d%s", w, if o then o.n else 0, if o then " " .. table.concat(o.at, " ") else ""))
 	end
-	table.insert(t, string.format("corner_in_road dropped %d%s", M.cornerInRoadDropped or 0, if M.cornerInRoadList and #M.cornerInRoadList > 0 then ": " .. table.concat(M.cornerInRoadList, "; ") else ""))
+	table.insert(t, string.format("corner_in_road dropped %d (tightened %d)%s", M.cornerInRoadDropped or 0, M.cornerInRoadShort or 0, if M.cornerInRoadList and #M.cornerInRoadList > 0 then ": " .. table.concat(M.cornerInRoadList, "; ") else ""))
 	return table.concat(t, "\n")
 end
 

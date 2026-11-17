@@ -63,8 +63,9 @@ function T.install(model: Instance)
 					paint[tonumber(c.Name:match("%d+$"))] = require(c)
 				elseif c.Name == "Roads05Spots" then
 					spots = Http:JSONDecode(require(c))
-				elseif c.Name == "YangonRoads" then
-					local o = SS.ClaudeTools:FindFirstChild("YangonRoads")
+				elseif c.Name == "YangonRoads" or c.Name == "Roads" then
+					-- (J21: Roads.luau is packed too: the builder's edge pin lives there)
+					local o = SS.ClaudeTools:FindFirstChild(c.Name)
 					if o then
 						o:Destroy()
 					end
