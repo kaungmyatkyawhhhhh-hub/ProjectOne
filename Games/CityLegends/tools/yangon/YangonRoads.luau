@@ -2831,11 +2831,80 @@ function M.scrub(remove: boolean)
 			end
 		end
 	end
+	-- (J17, owner: kerb stubs / buried kerb lines inside junction boxes (Kun Chan x Gyophyu, the double junction):
+	-- pieces lying on their OWN road, on cut samples or under a mouth's slab, which the data test above cannot see.
+	-- The built surface decides: a kerb or pavement piece with asphalt ("Road") all round it, 1.6 studs out in 8
+	-- directions (kerbs under the probe looked through), is a stray)
+	local roadsF = M.folder()
+	local P = RaycastParams.new()
+	P.FilterType = Enum.RaycastFilterType.Include
+	P.FilterDescendantsInstances = { roadsF }
+	local function asphaltAt(x: number, y: number, z: number): boolean
+		local from = Vector3.new(x, y + 4, z)
+		for _ = 1, 6 do
+			local r = workspace:Raycast(from, Vector3.new(0, -12, 0), P)
+			if not r then
+				return false
+			end
+			if r.Instance.Name ~= "Kerb" and r.Instance.Name ~= "Pavement" then -- (a lane's whole band on a road: its pieces hide each other)
+				return r.Instance.Name == "Road"
+			end
+			from = r.Position - Vector3.new(0, 0.02, 0)
+		end
+		return false
+	end
+	local stray, strayBy = 0, {}
+	for _, f in roadsF:GetChildren() do
+		for _, p in f:GetChildren() do
+			if (p.Name == "Kerb" or p.Name == "Pavement") and p:IsA("BasePart") then
+				local c = p.Position
+				local all = true
+				for k = 0, 7 do
+					local a = k * math.pi / 4
+					if not asphaltAt(c.X + 1.6 * math.cos(a), c.Y, c.Z + 1.6 * math.sin(a)) then
+						all = false
+						break
+					end
+				end
+				-- (J17, owner: a loose pavement strip with no road beside it, W of the double junction: a pavement
+				-- piece with no asphalt within 1.5 walks + 4 of it, 16 directions)
+				local o = M.R[f.Name]
+				if not all and p.Name == "Pavement" and o then
+					local W = math.max(o.walkL or M.WALK, o.walkR or M.WALK)
+					local any = false
+					local rr = 4
+					while not any and rr <= 1.5 * W + 4 do
+						for k = 0, 15 do
+							local a = k * math.pi / 8
+							if asphaltAt(c.X + rr * math.cos(a), c.Y, c.Z + rr * math.sin(a)) then
+								any = true
+								break
+							end
+						end
+						rr += 4
+					end
+					all = not any
+				end
+				if all then
+					stray += 1
+					strayBy[f.Name] = (strayBy[f.Name] or 0) + 1
+					if remove then
+						p:Destroy()
+					end
+				end
+			end
+		end
+		task.wait()
+	end
+	for k, v in strayBy do
+		byRoad[k .. " stray on asphalt"] = v
+	end
+	found += stray
 	local t = {}
 	for k, v in byRoad do
 		table.insert(t, k .. " " .. v)
 	end
-	return string.format("scrub: %d kerb / pavement pieces, %d on another road's carriageway%s%s", n, found, if remove then " (moved to ServerStorage.YangonScraps)" else "", if #t > 0 then ": " .. table.concat(t, "; ") else "")
+	return string.format("scrub: %d kerb / pavement pieces, %d on another road's carriageway or stray on asphalt%s%s", n, found, if remove then " (moved to ServerStorage.YangonScraps)" else "", if #t > 0 then ": " .. table.concat(t, "; ") else "")
 end
 
 -- every mouth: nothing of a kerb or pavement on the joining road's carriageway from its end to 3
