@@ -76,7 +76,7 @@ def ring_pt(x, top, bot, hw, th, pex=2.4):
     z = zc + hz * math.copysign(abs(cz) ** (2 / pex), cz)
     return Vector((X(x), y, z))
 
-def loft(name, xs, prof, nr=16, pex=2.4, scale=None, colour=None, glow=False, jitter=0.025, tip_end=None):
+def loft(name, xs, prof, nr=16, pex=2.4, scale=None, colour=None, glow=False, jitter=0.01, tip_end=None):
     rings = []
     for i, x in enumerate(xs):
         top, bot, hw = prof(x); k = scale(i, x) if scale else 1.0
@@ -102,7 +102,7 @@ def loft(name, xs, prof, nr=16, pex=2.4, scale=None, colour=None, glow=False, ji
 def skin(key):   # indigo top, lavender lower flank / belly, by facet normal (flat facets give a clean faceted edge)
     def f(p):
         base = P['belly'] if p.normal.z < -0.32 else P['top']
-        return jit(base, p.index // 2 * 7 + len(key), 0.045)   # one shade per quad (tri pair), not per tri
+        return jit(base, p.index // 2 * 7 + len(key), 0.03)   # one shade per quad (tri pair), not per tri
     return f
 
 def xs_between(a, b, step=12):
@@ -118,12 +118,12 @@ def seg_scale(xs):
         d = min(x - a, b - x); return 0.86 + 0.14 * min(1.0, d / 7.0) + 0.025 * math.sin(math.pi * (x - a) / (b - a))
     return f
 for n, (a, b) in enumerate(reversed(list(zip(G[:-1], G[1:]))), 1):
-    xs = [a - 2, a + 1, a + 7] + [x for x in xs_between(a + 7, b - 7, 14)][1:-1] + [b - 7, b - 1, b + 2]
+    xs = [a - 2, a + 1, a + 7] + [x for x in xs_between(a + 7, b - 7, 30)][1:-1] + [b - 7, b - 1, b + 2]   # few big facets, like the sheet
     def seg_col(p, a=a, b=b, key='Seg%d' % n):   # the V groove at each end is dark
         return jit(P['groove'], p.index, 0.05) if not X(a + 3) < p.center.x < X(b - 3) else skin(key)(p)
-    loft('ArmourSegment%d' % n, xs, body, pex=2.9, scale=seg_scale(xs), colour=seg_col)
+    loft('ArmourSegment%d' % n, xs, body, nr=14, pex=2.9, scale=seg_scale(xs), colour=seg_col)
 # tail stock: from the fluke root to the first groove, tapering
-xs = [150.0] + xs_between(160, G[0] - 7, 14)[1:] + [G[0] - 1, G[0] + 2]
+xs = [150.0] + xs_between(160, G[0] - 7, 30)[1:] + [G[0] - 1, G[0] + 2]
 loft('TailStock', xs, body, nr=12, scale=lambda i, x: 0.86 if x > G[0] - 2 else 1.0)
 
 # ---------- head ----------
@@ -133,8 +133,8 @@ def skull(x):
     elif x < CX: bot = B(HX + 5) + (CY - B(HX + 5)) * (x - HX - 5) / (CX - HX - 5)
     else: bot = line(H['upper_lip'], x)
     return (T(x), bot, HW(x))
-hxs = [HX - 2, HX + 1, HX + 7] + xs_between(HX + 7, 1480, 9)[1:] + [1495, 1507, 1515]
-head = loft('UpperHead', hxs, skull, nr=24, pex=3.2, scale=lambda i, x: 0.86 if x < HX + 3 else (0.93 if x > 1510 else 1.0),
+hxs = [HX - 2, HX + 1, HX + 7] + xs_between(HX + 7, 1480, 16)[1:] + [1495, 1507, 1515]
+head = loft('UpperHead', hxs, skull, nr=20, pex=2.3, scale=lambda i, x: 0.86 if x < HX + 3 else (0.93 if x > 1510 else 1.0),
             tip_end=Vector((X(X1), 0, Z((T(1517) + line(H['upper_lip'], 1517)) / 2))))
 # eye socket CARVED into the head: verts inside the eye ellipse pushed in, deepest at the back
 E = H['eye']
@@ -155,7 +155,7 @@ recolour(head, head_col)
 JX0, JX1 = 1100, H['jaw_bot'][-1][0]
 def jaw(x):
     t = (x - JX0) / (JX1 - JX0)
-    return (line(H['lower_lip'], x), line(H['jaw_bot'], x), max(10, HW(min(x, 1300)) * (0.86 - 0.26 * max(0, t - 0.5) * 2)))
+    return (line(H['lower_lip'], x), line(H['jaw_bot'], x), max(10, HW(min(x, 1300)) * (0.95 - 0.3 * max(0, t - 0.5) * 2)))
 def jaw_col(p):
     c = p.center
     if p.normal.z > 0.45:
@@ -219,8 +219,9 @@ for side, sname in ((1, 'Left'), (-1, 'Right')):
     R = R - Vector((0, side * 22 * S, -4 * S))
     Tp = Vector((X(F['tip'][0]), side * F['spread'] * S, Z(F['tip'][1])))
     A = (Tp - R) * F['len_k']; Ah = A.normalized()
-    W = Vector((1, 0, 0)); W = (W - Ah * W.dot(Ah)).normalized(); N = Ah.cross(W).normalized()
-    secs = ((0.0, 0.6, 16), (0.2, 1.0, 13), (0.55, 0.95, 9), (0.85, 0.6, 5), (1.0, 0.18, 2))
+    W = Vector((1, 0, 0)); W = (W - Ah * W.dot(Ah)).normalized()
+    W = (Matrix.Rotation(math.radians(40) * side, 3, Ah) @ W).normalized(); N = Ah.cross(W).normalized()   # twisted so the front view sees the paddle too
+    secs = ((0.0, 0.7, 16), (0.2, 1.0, 13), (0.55, 1.0, 10), (0.85, 0.85, 7), (1.0, 0.45, 4))   # sheet: broad paddle, blunt end
     verts, faces = [], []
     for t, wf, th in secs:
         c = R + A * t; w = F['width'] / 2 * wf * S; h = th / 2 * S
@@ -299,7 +300,7 @@ if RENDER:
     sc = bpy.context.scene
     try: sc.render.engine = 'BLENDER_WORKBENCH'
     except TypeError as e: print(e)
-    sh = sc.display.shading; sh.light = 'FLAT'; sh.color_type = 'VERTEX'
+    sh = sc.display.shading; sh.light = 'STUDIO'; sh.color_type = 'VERTEX'
     sh.background_type = 'VIEWPORT'; sh.background_color = (1, 0, 1)
     sc.view_settings.view_transform = 'Standard'
     sc.render.resolution_x, sc.render.resolution_y = 1536, 1024; sc.render.resolution_percentage = 100

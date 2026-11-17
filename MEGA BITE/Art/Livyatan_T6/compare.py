@@ -22,6 +22,8 @@ for k,L in (('side',1),('top',2),('front',3)):
     a=sheet[box].astype(np.uint8); b=r[box]
     diff=np.full_like(a,40); diff[sm[box]&~rm[box]]=(255,80,80); diff[rm[box]&~sm[box]]=(80,160,255); diff[sm[box]&rm[box]]=(200,200,200)
     out.append(np.concatenate([a,b,diff],1))
+sm=(lab==1); rs=fgm(np.array(Image.open('out/render_side.png').convert('RGB')).astype(int)); sm[:, :240]=0; rs[:, :240]=0
+res['side_no_tail']=round(float((sm&rs).sum()/(sm|rs).sum()),3)   # the sheet's side view draws an upright fish tail; we build a whale fluke
 print('IoU',res)
 W=max(o.shape[1] for o in out)
 Image.fromarray(np.concatenate([np.pad(o,((0,10),(0,W-o.shape[1]),(0,0))) for o in out],0)).save('checks/compare.png')

@@ -41,7 +41,7 @@ D=dict(src='livyatan_turnaround_v1.png', side_x=[X0,X1], len_m=8.0, yc=276, top=
      lower_lip=[[1110,300],[1200,333],[1300,368],[1400,402],[1442,414]], jaw_bot=[[1100,418],[1200,440],[1300,455],[1400,462],[1438,446],[1446,425]],
      up_teeth=dict(n=9,x=[1228,1478],len=46), lo_teeth=dict(n=8,x=[1230,1420],len=38),
      eye=dict(x=1182,y=230,w=50,h=26)),
-  fins=dict(root=[880,385],tip=[778,490],spread=265,width=70,len_k=1.0),
+  fins=dict(root=[930,385],tip=[825,490],spread=265,width=82,len_k=1.0),
   fluke=fluke, palette=pal)
 json.dump(D,open('livy6_data.json','w'),indent=1)
 print(pal); print('fluke pts',len(fluke)); [print(s) for s in D['stations'][::12]]
