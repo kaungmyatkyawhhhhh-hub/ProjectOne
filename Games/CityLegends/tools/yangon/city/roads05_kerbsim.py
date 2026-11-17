@@ -24,6 +24,7 @@ from roads05_qa import quads
 
 KERB_W = 0.9
 STEP = 3.2
+SCRUB_R = 1.6  # (J18) YangonRoads.scrub: probes 1.6 studs out in 8 directions
 
 
 def poly_dist(net, oi, i, px, pz, a=None, n=None):
@@ -115,6 +116,18 @@ def run(data):
     ringU = unary_union(rings) if rings else None
     out = dict(kerb_cross=[], mouth_short=[], mouth_over=[], mouth_edge=[], dropped=[])
     mouths, dropped = net.find_mouths()
+
+    def asphalt(x, z):
+        q = Point(x, z)
+        if ringU is not None and ringU.contains(q):
+            return True
+        return any(cw[int(j)].contains(q) for j in tree.query(q))
+
+    def scrubbed(p):
+        # (J18) YangonRoads.scrub's second pass on the built parts: a kerb piece with asphalt ("Road") under all 8
+        # probes SCRUB_R out (rays look through kerbs and pavers) is removed: the QA must not count it
+        return all(asphalt(p.x + SCRUB_R * math.cos(k * math.pi / 4), p.y + SCRUB_R * math.sin(k * math.pi / 4))
+                   for k in range(8))
     # (J13) a road mouthing onto a bigger one is built only up to that road's edge (YangonRoads.buildMouth): its data
     # carriageway running on past the bigger road's far edge carries no slab, so the far kerb there is no fault
     mouth_on = {}
@@ -161,6 +174,8 @@ def run(data):
                         if b and net.poly_dist(ri, b[1], p.x, p.y) < net.half_at(ri, b[1]) + 2:
                             continue
                     if side_zone(net, ri, p.x, p.y, 'Kerb'):
+                        continue
+                    if scrubbed(p):  # (J18) the builder's scrub pass removes it (YangonRoads.scrub, 2nd pass)
                         continue
                     if i - last[side] > 6:
                         out['kerb_cross'].append(dict(road=r['name'], other=on, side=side, x=round(p.x, 1), z=round(p.y, 1)))

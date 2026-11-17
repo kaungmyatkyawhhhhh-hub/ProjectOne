@@ -238,6 +238,24 @@ def junction_checks(data, cutd, cw, names, geoms, tree, rings, issues):
                 issues['overlap'].append(dict(a=a, b=b, area=round(inter), x=round(c.x, 1), z=round(c.y, 1)))
 
 
+def folds(s):
+    """(J18, paint agent's roads05_paint.folds) samples where a road's centre line steps back: a chord against the
+    sample's own direction, or two chords turning more than ~107 degrees"""
+    out = []
+    for i in range(1, len(s)):
+        ax, az = s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2]
+        L = math.hypot(ax, az)
+        if L < 1e-6:
+            continue
+        if ax * s[i][3] + az * s[i][4] < -0.3 * L:
+            out.append(i)
+        elif i + 1 < len(s):
+            bx, bz = s[i + 1][0] - s[i][0], s[i + 1][2] - s[i][2]
+            if ax * bx + az * bz < -0.3 * L * math.hypot(bx, bz):
+                out.append(i)
+    return out
+
+
 def osm_mark(issues):
     """(J13) each mouth_short / mouth_over row against OSM: `osm` = "dead end" (the nearest OSM way end, within 3
     studs, is shared by no other way that roads05 builds: a real dead end, explained, not a fault; a join only to a
@@ -285,7 +303,7 @@ def main():
     allg = geoms + rings
     alltree = STRtree(allg)
     issues = {k: [] for k in ('dead_end', 'paint_off', 'median_box', 'zebra_median', 'deck_grade', 'deck_foot', 'stack_paint',
-                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals', 'deck_clear')}
+                              'mouth_short', 'mouth_over', 'mouth_edge', 'kerb_cross', 'median_cross', 'zero_width', 'overlap', 'rank_dup', 'dropped', 'real', 'stub_in_grass', 'street_no_pave', 'carriageway_too_narrow', 'paint_off_centre', 'unmarked_strip', 'width_wobble', 'deck_wobble', 'seam_step', 'median_broken', 'signals', 'deck_clear', 'centre_fold')}
     if not PAINT_ONLY:
         junction_checks(data, cutd, cw, names, geoms, tree, rings, issues)
         if not OLD:
@@ -295,6 +313,10 @@ def main():
                 issues[k] = ks[k]
             issues['dropped'] = ks['dropped']
             osm_mark(issues)
+    # (J18) centre lines that fold back on themselves (paint leaves them bare)
+    for r in (data['roads'] if not PAINT_ONLY else ()):
+        for i in folds(r['s']):
+            issues['centre_fold'].append(dict(road=r['name'], i=i, x=round(r['s'][i][0], 1), z=round(r['s'][i][2], 1)))
     # dead ends
     for r in (data['roads'] if not PAINT_ONLY else ()):
         s = r['s']

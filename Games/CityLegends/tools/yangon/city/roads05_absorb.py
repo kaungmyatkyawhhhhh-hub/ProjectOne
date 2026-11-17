@@ -26,6 +26,11 @@ MIN_PIECE = 8       # a leftover shorter than this goes (3 samples by Sule's rin
 MIN_RUN = 6         # alongside runs shorter than this are a junction, not a doubled road
 ALONG_SHARE = 0     # (J16) off: see absorb()
 BESIDE_GAP = 3.0    # (J16) 1 m: a stretch this close beside the bigger road, between two absorbed stretches, goes too
+NOSE_MIN = 6.0      # (J18) a merging one-way's gore narrower than this (2 kerbs + 2) is asphalt: the bigger road widens over it
+MERGE_HW = ('motorway', 'trunk', 'primary', 'secondary', 'tertiary')  # (J18) carriageways and slip roads, not lanes
+MERGE_SHARE = 0.15
+PARALLEL_MERGE2 = 0.75  # (J18) second pass: a slip road joining the widened merge (Lane #8112 at 37 degrees)
+PARALLEL_MERGE = 0.85  # (J18) a merge curves off at its far end (Bahan Road #2 leaves the ring at cos 0.89)  # (J18) a one-way whose end lies on another road and this share of its area on it is a merge
 
 
 def unit(x, z):
@@ -33,7 +38,9 @@ def unit(x, z):
     return x / L, z / L
 
 
-def absorb(data, min_area=None):
+def absorb(data, min_area=None, merge_into=None):
+    """merge_into (J18, a second pass): only merges into these roads (a slip road that ended on a merge absorbed in the
+    first pass: Lane #8112 on Bahan Road #2, now Bahan Road)"""
     roads = data['roads']
     cut = {k: set(v) for k, v in data['cut'].items()}
     deck_of = set(d['of'] for d in data['decks'])
@@ -58,14 +65,28 @@ def absorb(data, min_area=None):
             # (J16 tried pairing any road with a quarter of its area on another (ALONG_SHARE 0.25, QA kerb_cross lanes
             # along a road): kerb_cross 17 -> 23 (the cut lanes' pieces ended alongside the road): off)
             strong = inter > 2.5 * wid[a] * wid[b] + 500 or (one.get('oneway') and one['kind'] == 'route' and inter > 0.5 * small)
-            if strong or (ALONG_SHARE and inter > ALONG_SHARE * small):
-                pairs.append((inter, a, b, strong))
+            # (J18, Bahan Road #2 into Bahan Road, Lane #8112 into both: a one-way converging at a shallow angle
+            # onto a road it ends on, its edge abutting the road's: no overlap area, so never paired: thin kerbed
+            # nose, two kerbs side by side, sawtooth pavement) a merge: the road widens over the merge and the gore
+            merge = False
+            if (not strong and one.get('oneway') and one['kind'] in ('route', 'street') and inter > MERGE_SHARE * small
+                    and (one.get('hw') or '').split('_')[0] in MERGE_HW):
+                other = geoms[b] if one is roads[a] else geoms[a]
+                ka = (RN.RANK.get(roads[a].get('hw'), 9), roads[a]['rank'])
+                kb = (RN.RANK.get(roads[b].get('hw'), 9), roads[b]['rank'])
+                big = roads[a] if ka < kb else roads[b]
+                merge = (big is not one and (merge_into is None or big['name'] in merge_into)
+                         and any(other.contains(Point(one['s'][e][0], one['s'][e][2])) for e in (0, -1)))
+            if merge_into is not None and not merge:
+                continue
+            if strong or merge or (ALONG_SHARE and inter > ALONG_SHARE * small):
+                pairs.append((inter, a, b, strong or merge, merge))
     pairs.sort(reverse=True)
     st = dict(pairs=len(pairs), absorbed=[], skipped=[])
     gone = set()
     out_extra = []
     newcut = {}
-    for inter, a, b, strong in pairs:
+    for inter, a, b, strong, merge in pairs:
         if a in gone or b in gone:
             continue
         # (J15) the bigger road by OSM class first, rank only between equals: "ends on" ranks can invert (Shwedagon
@@ -93,7 +114,7 @@ def absorb(data, min_area=None):
                 continue
             qa = sa[j]
             ta, tb = unit(qa[3], qa[4]), unit(q[3], q[4])
-            if abs(ta[0] * tb[0] + ta[1] * tb[1]) < PARALLEL:
+            if abs(ta[0] * tb[0] + ta[1] * tb[1]) < ((PARALLEL_MERGE2 if merge_into is not None else PARALLEL_MERGE) if merge else PARALLEL):
                 continue
             rx, rz = -ta[1], ta[0]
             off = (q[0] - qa[0]) * rx + (q[2] - qa[2]) * rz  # B's centre right of A's
@@ -101,7 +122,7 @@ def absorb(data, min_area=None):
             side = 1 if off > 0 else -1
             ha = qa[7] if side > 0 else qa[6]
             if abs(off) - hb >= ha - 0.5:
-                if abs(off) - hb < ha + BESIDE_GAP:
+                if abs(off) - hb < ha + (NOSE_MIN if merge else BESIDE_GAP):
                     near[i] = (j, side, abs(off) + hb, ha)
                 continue  # beside, not on it
             along[i] = True
@@ -133,6 +154,16 @@ def absorb(data, min_area=None):
                                 and need > ha + 0.5 and need > widen.get(ja, (side, 0.0))[1]):
                             widen[ja] = (side, need)
                 i = j
+            if merge:  # (J18) the gore next to the merge (near samples running on from the alongside run) goes too
+                for rng in (range(int(idx[0]) - 1, -1, -1), range(int(idx[-1]) + 1, len(sb))):
+                    for k in rng:
+                        if k not in near:
+                            break
+                        along[k] = True
+                        ja, side, need, ha = near[k]
+                        if (not (B.get('hw') in ('service', 'track') or A.get('hw') in ('service', 'track'))
+                                and need > ha + 0.5 and need > widen.get(ja, (side, 0.0))[1]):
+                            widen[ja] = (side, need)
         # runs of alongside samples
         runs, i = [], 0
         while i < len(sb):
@@ -190,7 +221,7 @@ def absorb(data, min_area=None):
                     tgt = sa[jj][k] + (need - sa[jj][k]) * u
                     if tgt > sa[jj][k]:
                         sa[jj][k] = round(tgt, 2)
-        st['absorbed'].append(dict(into=A['name'], road=B['name'], samples=int((~keep).sum()), pieces=len(pieces)))
+        st['absorbed'].append(dict(into=A['name'], road=B['name'], samples=int((~keep).sum()), pieces=len(pieces), merge=merge))
         gone.add(b if roads[b] is B else a)
         for n, (i, j) in enumerate(pieces):
             P = {k: v for k, v in B.items() if k not in ('s', 'startsOnEnd', 'endsOnEnd', 'edgeStart', 'edgeEnd')}

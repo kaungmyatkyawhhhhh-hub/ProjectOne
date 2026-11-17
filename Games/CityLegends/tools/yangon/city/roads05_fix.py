@@ -155,6 +155,107 @@ def drop_dups(data):
 RING_WALK, KERB_W = 7.5, 0.9  # YangonRoads 1:1 ring pavement / kerb
 
 
+SIDE_HW = ('service', 'residential', 'unclassified', 'living_street', 'track')  # (J18) lanes, not carriageways / slips
+
+
+def side_clear(data, MIN_RUN=6, TAPER=0.15):
+    """(J18, the double junction: Lane #7108, a one-way service lane, runs 290 studs along Shwe Gone Dine Road's north
+    edge 2-8 studs off it: its kerb and Shwe's kerb side by side with a sliver of pavement between) a smaller road running
+    parallel beside a bigger one closer than the two pavements (walk + walk) is pushed out until the pavements just
+    meet (kerb, pavement, kerb: a frontage road), the shift tapering off at TAPER a stud along it. Its ends stay; an end
+    may only be in the taper when the road leaves the bigger one square there (the push then slides along it)."""
+    roads = data['roads']
+    cut = {k: set(v) for k, v in data['cut'].items()}
+    geoms = [unary_union(quads(r['s'], cut.get(r['name'], ()))) for r in roads]
+    tree = STRtree(geoms)
+    moved = []
+    lines = {}
+    deck_of = set(d['of'] for d in data['decks'])
+    for bi, B in enumerate(roads):
+        sb = B['s']
+        if (len(sb) < MIN_RUN + 2 or B.get('closed') or B['kind'] != 'street' or B.get('hw') not in SIDE_HW
+                or B['name'] in deck_of):
+            continue
+        best = None
+        for j in tree.query(geoms[bi].buffer(12)):
+            A = roads[int(j)]
+            if A is B or A['rank'] >= B['rank'] or A.get('closed') or A['kind'] == 'side':
+                continue
+            sa = A['s']
+            if int(j) not in lines:
+                lines[int(j)] = (LineString([(q[0], q[2]) for q in sa]),
+                                 np.r_[0, np.cumsum(np.hypot(np.diff([q[0] for q in sa]), np.diff([q[2] for q in sa])))])
+            LA, ca = lines[int(j)]
+            push = [0.0] * len(sb)
+            dirs = [None] * len(sb)
+            for i, q in enumerate(sb):
+                t = LA.project(Point(q[0], q[2]))
+                if t <= 0 or t >= LA.length:
+                    continue
+                k = int(np.clip(np.searchsorted(ca, t), 0, len(sa) - 1))
+                if k > 0 and abs(ca[k - 1] - t) < abs(ca[k] - t):
+                    k -= 1
+                qa = sa[k]
+                if abs(qa[1] - q[1]) > 3:
+                    continue  # a deck over it / under it
+                La, Lb = math.hypot(qa[3], qa[4]) or 1, math.hypot(q[3], q[4]) or 1
+                c = (qa[3] * q[3] + qa[4] * q[4]) / La / Lb
+                if abs(c) < 0.9:
+                    continue
+                rx, rz = -qa[4] / La, qa[3] / La
+                off = (q[0] - qa[0]) * rx + (q[2] - qa[2]) * rz
+                side = 1 if off > 0 else -1
+                ha = qa[7] if side > 0 else qa[6]
+                wa = A.get('walkR' if side > 0 else 'walkL', 0) or 0
+                # B's side facing A: A right of B's centre when (B left of A) == (same direction)
+                facing_right = (side < 0) == (c > 0)
+                hb = q[7] if facing_right else q[6]
+                wb = B.get('walkR' if facing_right else 'walkL', 0) or 0
+                gap = abs(off) - hb - ha
+                need = wa + wb
+                if -0.5 < gap < need - 0.5:
+                    push[i] = need - gap
+                    dirs[i] = (rx * side, rz * side)
+            runs = sum(1 for p in push if p > 0)
+            if runs >= MIN_RUN and (best is None or runs > best[0]):
+                best = (runs, A['name'], push, dirs)
+        if best is None:
+            continue
+        _, an, push, dirs = best
+        along = [0.0]
+        for a, b in zip(sb, sb[1:]):
+            along.append(along[-1] + math.hypot(b[0] - a[0], b[2] - a[2]))
+        hit = [i for i, p in enumerate(push) if p > 0]
+        disp, dv = [0.0] * len(sb), [None] * len(sb)
+        for i in range(len(sb)):
+            for j in hit:
+                v = push[j] - abs(along[i] - along[j]) * TAPER
+                if v > disp[i]:
+                    disp[i], dv[i] = v, dirs[j]
+        ok = True
+        for e, e2 in ((0, 1), (len(sb) - 1, len(sb) - 2)):
+            if disp[e] > 0.01:
+                q, q2 = sb[e], sb[e2]
+                d = (q2[0] - q[0], q2[2] - q[2])
+                L = math.hypot(*d) or 1
+                if abs(d[0] * dv[e][0] + d[1] * dv[e][1]) / L < 0.8:
+                    ok = False  # the end would slide sideways off its junction
+                disp[e] = 0.0
+        if not ok:
+            continue
+        for q, dd, v in zip(sb, disp, dv):
+            if dd > 0:
+                q[0] = round(q[0] + v[0] * dd, 2)
+                q[2] = round(q[2] + v[1] * dd, 2)
+        for i in range(len(sb)):
+            if disp[i] > 0 or (i > 0 and disp[i - 1] > 0) or (i + 1 < len(sb) and disp[i + 1] > 0):
+                a, b = sb[max(i - 1, 0)], sb[min(i + 1, len(sb) - 1)]
+                L = math.hypot(b[0] - a[0], b[2] - a[2]) or 1
+                sb[i][3], sb[i][4] = round((b[0] - a[0]) / L, 4), round((b[2] - a[2]) / L, 4)
+        moved.append(dict(road=B['name'], beside=an, samples=len(hit), max_shift=round(max(disp), 2)))
+    return moved
+
+
 def ring_clear(data):
     """A road passing a roundabout without joining it (a slip like Lane #4701 by Roundabout 1, 2-3 m off the ring in
     OSM) had its kerb inside the ring's kerb / pavement band: the builder cut it piece by piece (a sawtooth). Its
@@ -1304,6 +1405,104 @@ DT_WALK_MAX = 30.0     # 10 m: a forecourt wider than this keeps its verge (a pl
 DT_PROBE = 45.0        # how far past the kerb a building line is looked for
 
 
+CORNER_R_DT = 30.0  # (J18) 10 m: downtown main-road corners measure 8-12 m on the satellite (Sule Shangri-La / DBS)
+CORNER_HW = ('trunk', 'primary', 'secondary', 'tertiary')
+
+
+def unfold(data):
+    """(J18, paint agent: 71 fold-backs on 52 roads, paint left them bare) a centre-line sample that steps back
+    (roads05_qa.folds) goes; a protected one (an end, a cut sample, a deck's range) keeps its place and only takes its
+    direction from its neighbours. Cut / deck indices follow the dropped samples."""
+    from roads05_qa import folds
+    st = dict(dropped=0, redirected=0, left=[])
+    for r in data['roads']:
+        s = r['s']
+        if not folds(s):
+            continue
+        nm = r['name']
+        cut = set(data['cut'].get(nm, ()))
+        dks = [dk for dk in data['decks'] if dk['of'] == nm]
+        for _ in range(40):
+            f = folds(s)
+            if not f:
+                break
+            i = f[0]
+            prot = i == 0 or i == len(s) - 1 or i in cut or any(dk['from'] <= i <= dk['to'] for dk in dks)
+            if not prot:
+                del s[i]
+                cut = set(c - (c > i) for c in cut)
+                for dk in dks:
+                    dk['from'] -= dk['from'] > i
+                    dk['to'] -= dk['to'] > i
+                st['dropped'] += 1
+                for k in (i - 1, i):
+                    if 0 <= k < len(s):
+                        a, b = s[max(k - 1, 0)], s[min(k + 1, len(s) - 1)]
+                        L = math.hypot(b[0] - a[0], b[2] - a[2]) or 1
+                        s[k][3], s[k][4] = round((b[0] - a[0]) / L, 4), round((b[2] - a[2]) / L, 4)
+            else:
+                a, b = s[max(i - 1, 0)], s[min(i + 1, len(s) - 1)]
+                L = math.hypot(b[0] - a[0], b[2] - a[2]) or 1
+                nd = (round((b[0] - a[0]) / L, 4), round((b[2] - a[2]) / L, 4))
+                if (s[i][3], s[i][4]) == nd:
+                    st['left'].append(dict(road=nm, i=i))
+                    break
+                s[i][3], s[i][4] = nd
+                st['redirected'] += 1
+        if nm in data['cut']:
+            data['cut'][nm] = sorted(cut)
+    return st
+
+
+def deck_joints(data):
+    """(J18, the Shwedagon landing crease and its dark wedge) where a deck lands on its own ground road, the deck's end
+    cross-section and the road's first built one are one line: same direction (the plan smoothing turned deck ends up
+    to 3.5 degrees off the road's sample: a wedge gap / overlap up to 1.6 studs at the edges), same height, and the
+    road no wider there than the deck (a flare starting on the joint line left a wedge of road beside the deck's end)"""
+    R = {r['name']: r for r in data['roads']}
+    cut = {k: set(v) for k, v in data['cut'].items()}
+    n = 0
+    for dk in data['decks']:
+        r = R.get(dk['of'])
+        if r is None:
+            continue
+        s, ds, cr = r['s'], dk['s'], cut.get(dk['of'], set())
+        for e, g, out in ((0, dk['from'], dk['from'] - 1), (-1, dk['to'], dk['to'] + 1)):
+            if not (0 <= out < len(s)) or out in cr or g >= len(s):
+                continue  # no ground road on past this end (a butt onto another deck / a road end)
+            a, b = ds[e], s[g]
+            if math.hypot(a[0] - b[0], a[2] - b[2]) > 0.5 or abs(a[1] - b[1]) > 1.0:
+                continue
+            ch = False
+            if abs(a[3] * b[4] - a[4] * b[3]) > 1e-3:
+                a[3], a[4] = b[3], b[4]
+                ch = True
+            if abs(a[1] - b[1]) > 1e-3:
+                b[1] = a[1]
+                ch = True
+            for k in (6, 7):
+                if b[k] > a[k] + 0.05:
+                    b[k] = a[k]
+                    ch = True
+            n += ch
+    return n
+
+
+def corner_radii(data):
+    """(J18) downtown main roads (OSM trunk .. tertiary, not links) carry cornerR: where two of them meet the builder's
+    round corner gets that radius (YangonRoads.buildCorners) instead of r = CORNER_T tan(theta / 2) (~16 at 90 deg)"""
+    try:
+        area = unary_union([geo.batch_poly(t) for t in DOWNTOWN])
+    except Exception:
+        return 0
+    n = 0
+    for r in data['roads']:
+        if r.get('hw') in CORNER_HW and r['kind'] == 'route' and any(area.contains(Point(q[0], q[2])) for q in r['s'][::4]):
+            r['cornerR'] = CORNER_R_DT
+            n += 1
+    return n
+
+
 def downtown_walks(data):
     """(J15) in DOWNTOWN districts each road side's pavement (walkL / walkR) reaches the building line: the 40th
     percentile over the road's samples of the distance from its carriageway edge to the nearest OSM building
@@ -1401,9 +1600,13 @@ def main():
     chained['continuations'] = roads05_chain.continuations(data)
     import roads05_absorb
     chained['absorb'] = roads05_absorb.absorb(data)
+    # (J18) slip roads that ended on a merge absorbed just now (Lane #8112 on Bahan Road #2) merge into the widened road
+    chained['absorb_merge2'] = roads05_absorb.absorb(data, merge_into=set(
+        x['into'] for x in chained['absorb']['absorbed'] if x.get('merge')))
     chained['width_taper'] = width_taper(data)
     chained['duplicates_dropped'] = drop_dups(data)
     chained['ring_clear'] = ring_clear(data)
+    chained['side_clear'] = side_clear(data)
     chained['ring_level'] = ring_level(data)
     chained['osm_joins'] = osm_joins(data)
     chained['deck_butt'] = deck_butt(data)
@@ -1577,8 +1780,11 @@ def main():
     print('islands', st['islands'])
     st['stubs_dropped'] = drop_stubs(data)
     st['downtown_walks'] = downtown_walks(data)
+    st['corner_radii'] = corner_radii(data)
     st['median_styles'] = median_styles(data)
     st['width_taper_end'] = width_taper(data)  # (J15) again: mouths / butts / repair changed widths after the first
+    st['unfold'] = unfold(data)  # (J18) before the deck joints: indices settle
+    st['deck_joints'] = deck_joints(data)  # (J18) last width / direction change before the checks
     st['checks'] = check(data)
     st['signals'] = signals(data)  # last: arms keep their sample indices
     txt = json.dumps(data, separators=(',', ':'))
