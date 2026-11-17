@@ -227,7 +227,8 @@ function M.load()
 			-- (v5, d23_lanes_v5.py: the real lane counts. Road level: lanes = most lanes a side, median = the
 			-- median half where divided, laneW; per sample s[9] built median half, s[10] lanes a side, s[11]
 			-- lane width, s[12] the lanes' median half. All nil before v5)
-			lanes = r.lanes, median = r.median, laneW = r.laneW, lanesV5 = r.s[1] ~= nil and r.s[1][10] ~= nil }
+			lanes = r.lanes, median = r.median, laneW = r.laneW, lanesV5 = r.s[1] ~= nil and r.s[1][10] ~= nil,
+			medianStyle = r.medianStyle }
 		M.R[r.name] = o
 		M.list[ri] = o
 	end
@@ -2403,7 +2404,9 @@ function M.buildDecks()
 	local function onRoad(x: number, z: number, margin: number): string?
 		for oi, b in M.near(x, z, 3) do
 			local o = M.list[oi]
-			if polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + margin then
+			local d = polyDist(o, b[2], x, z)
+			-- (J15) a spot on a divided road's median (s[9] = its built half) is not in a lane: piers stand there
+			if d < M.halfAt(o, b[2]) + margin and not (d < (o.s[b[2]][9] or 0) - 1) then
 				return o.name
 			end
 		end
@@ -2540,9 +2543,12 @@ function M.buildDecks()
 				local L = hyp(c[4], c[5])
 				local fx, fz = c[4] / L, c[5] / L
 				local hit = nil
-				for _, lat in { -(DH - 2), -(DH - 2) / 2, 0, (DH - 2) / 2, DH - 2 } do
-					for _, along in { -4, 0, 4 } do
-						hit = hit or onRoad(c[1] + rx * lat + fx * along, c[3] + rz * lat + fz * along, 3)
+				-- (J15, owner: piers on medians / between carriageways, never in a lane) only the column's own
+				-- footprint (12 x 5) + 1 stud is tested: testing the whole deck width found the ground side lanes
+				-- under the deck edges and skipped every pier of a flyover whose median lies under its middle
+				for _, lat in { -6, -3, 0, 3, 6 } do
+					for _, along in { -2.5, 0, 2.5 } do
+						hit = hit or onRoad(c[1] + rx * lat + fx * along, c[3] + rz * lat + fz * along, 1)
 					end
 				end
 				if hit then
@@ -2966,7 +2972,14 @@ end
 M.MEDIAN_KERB_W = 0.9
 M.medianLook = {
 	fill = { Material = Enum.Material.Grass, Color = Color3.fromRGB(84, 108, 56) },
+	-- (J15, owner ADD: downtown medians are paved terrazzo noses or a white concrete barrier with a railing; the
+	-- data's medianStyle from roads05_fix.median_styles; grass stays the default)
+	paved = { Material = Enum.Material.Concrete, Color = Color3.fromRGB(176, 170, 160) },
+	barrier = { Material = Enum.Material.Concrete, Color = Color3.fromRGB(226, 224, 218) },
+	rail = { Material = Enum.Material.Metal, Color = Color3.fromRGB(150, 152, 156) },
 }
+M.BARRIER_UP = 2.4  -- a barrier's top over the median kerb (0.8 m)
+M.RAIL_UP = 1.2     -- the railing bar over the barrier top
 function M.buildMedians(names: { string })
 	local pal = M.palette
 	local made, roadsWith, pieces = 0, 0, 0
@@ -3078,10 +3091,28 @@ function M.buildMedians(names: { string })
 					end
 				end
 				local fw = 2 * (m - KW + 0.1) -- (its sides 0.05 under the kerbs)
+				local style = o.medianStyle
 				if fw > 0.3 then
-					local props = table.clone(M.medianLook.fill)
+					local props = table.clone(M.medianLook[if style == "paved" or style == "barrier" then "paved" else "fill"])
 					props.Name = "Median"
 					block(props, P, Q, fw, fTop, 3)
+				end
+				if style == "barrier" and fw > 0.9 then
+					-- a barrier wall on the paved fill's middle (its faces 0.25 inside the fill's: no shared plane) and a
+					-- railing bar over it, ends trimmed with the piece (neighbours butt, never overlap)
+					local bw = math.min(1.2, fw - 0.5)
+					local props = table.clone(M.medianLook.barrier)
+					props.Name = "Median"
+					props.CastShadow = false
+					-- (block spans -depth .. top over the line: a negative depth lifts its bottom)
+					local bTop = kTop + M.BARRIER_UP
+					block(props, P, Q, bw, bTop, -fTop) -- standing on the fill's top
+					local rp = table.clone(M.medianLook.rail)
+					rp.Name = "Median"
+					rp.CastShadow = false
+					local rTop = bTop + M.RAIL_UP
+					block(rp, P, Q, 0.2, rTop, -(rTop - 0.2)) -- the bar
+					block(rp, P + dir * 0.3, P + dir * 0.5, 0.16, rTop - 0.2, -bTop) -- a post, barrier top to bar
 				end
 			else
 				-- a nose: exact, its width changing from ma to mb
@@ -3096,7 +3127,7 @@ function M.buildMedians(names: { string })
 						local props = { Name = "MedianKerb", Material = pal.kerbMaterial, Color = band, CastShadow = false }
 						quad(props, at(A, rA, side * (ma - KW + 0.05), kTop), at(A, rA, side * ma, kTop), at(B, rB, side * mb, kTop), at(B, rB, side * (mb - KW + 0.05), kTop), kTop + 3)
 					end
-					local props = table.clone(M.medianLook.fill)
+					local props = table.clone(M.medianLook[if o.medianStyle == "paved" or o.medianStyle == "barrier" then "paved" else "fill"])
 					props.Name = "Median"
 					props.CastShadow = false
 					local fa, fb = ma - KW + 0.1, mb - KW + 0.1

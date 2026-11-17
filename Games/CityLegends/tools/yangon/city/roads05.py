@@ -503,6 +503,12 @@ def build_pieces(edges, rings):
             nl.append(et.cs['nf'])
             Wl.append(et.cs['Wf'])
         nr, nl, Wr, Wl = map(np.array, (nr, nl, Wr, Wl))
+        # (J15, owner: Shwedagon Pagoda Road "one constant width"; OSM tags its southbound carriageway lanes=4, the
+        # whole road's count, the northbound one lanes=2: a 22.5 / 43.5 one-sided road and bridge) a carriageway
+        # tagged with twice its partner's lanes or more carries the partner's count
+        lo = np.minimum(nr, nl)
+        odd = (lo > 0) & (np.maximum(nr, nl) >= 2 * lo)
+        nr, nl = np.where(odd, lo, nr), np.where(odd, lo, nl)
         med = np.maximum(MED_MIN, Gg / 2 - np.maximum(nr * Wr, nl * Wl) / 2)
         p = piece_from(M, nl, nr, Wl, Wr, med, S['name'], S['hw'], srcS, 0, [None, None],
                        bridge=any(edges[e].bridge for e in srcS))

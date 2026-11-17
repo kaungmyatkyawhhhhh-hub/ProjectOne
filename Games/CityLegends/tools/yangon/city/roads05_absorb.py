@@ -16,6 +16,7 @@ from shapely.geometry import LineString, Point
 from shapely.ops import unary_union
 from shapely.strtree import STRtree
 
+import roadnet as RN
 from roads05_qa import quads
 
 PARALLEL = 0.9      # |cos| between the two directions
@@ -62,7 +63,11 @@ def absorb(data, min_area=None):
     for inter, a, b in pairs:
         if a in gone or b in gone:
             continue
-        A, B = (roads[a], roads[b]) if roads[a]['rank'] < roads[b]['rank'] else (roads[b], roads[a])
+        # (J15) the bigger road by OSM class first, rank only between equals: "ends on" ranks can invert (Shwedagon
+        # Pagoda Road, a primary, was absorbed INTO Lane #427, a service lane, J14)
+        ka = (RN.RANK.get(roads[a].get('hw'), 9), roads[a]['rank'])
+        kb = (RN.RANK.get(roads[b].get('hw'), 9), roads[b]['rank'])
+        A, B = (roads[a], roads[b]) if ka < kb else (roads[b], roads[a])
         if B['name'] in side_of or B['kind'] == 'side' or A.get('closed') or B.get('closed') or A['name'] in side_of:
             st['skipped'].append([A['name'], B['name']])
             continue
