@@ -1576,7 +1576,9 @@ function M.buildCorners()
 		local n = math.max(4, math.ceil(math.abs(c.sweep) * c.r / 2))
 		for q = n - 1, 1, -1 do
 			local u = q / n
-			local x, z = arcPoint(c, u, c.r)
+			-- (J17, owner "gaps between kerb pieces": the kerb bands are chords; the asphalt now runs 0.3 under
+			-- the kerb (as the straight roads' 0.05 overlap), so no chord's sag opens a slit between them)
+			local x, z = arcPoint(c, u, math.max(c.r - 0.3, 0))
 			table.insert(poly, Vector3.new(x, yA + (yB - yA) * u, z))
 		end
 		local clean = {}
@@ -1609,7 +1611,7 @@ function M.buildCorners()
 		-- the kerb (bands about 3.2 long) and the pavement along the arc: the kerb from 0.05 on the road
 		-- side of the arc to 0.85 inside it, the pavement from there to WALK inside (or to the centre)
 		local len = math.abs(c.sweep) * c.r
-		local nb = math.max(1, math.floor(len / 3.2 + 0.5))
+		local nb = math.max(1, math.floor(len / 3.2 + 0.5), math.ceil(math.abs(c.sweep) / 0.35)) -- (J17: <= 20 degrees a band: a chord sags under 0.3)
 		local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
 		for q = 0, nb - 1 do
 			local u0, u1 = q / nb, (q + 1) / nb
@@ -1636,6 +1638,38 @@ function M.buildCorners()
 						made += M.Roads.triangle(t[1], t[2], t[3], 6, pave, folder)
 					end
 				end
+			end
+		end
+		-- (J17, owner "jagged corner pavement": with r under the walk the corner's pavement ends in a point at O and
+		-- the two straight pavements' back edges meet in a sharp L at P' (both walks in from P): its tip is paved
+		-- too, up to the kerb arc moved by P' - P, so the back edge is one curve parallel to the kerb)
+		if c.r < math.max(c.wA, c.wB) - 0.5 and c.theta < math.rad(150) then
+			local ux, uz = (c.tax - c.px) / math.max(hyp(c.tax - c.px, c.taz - c.pz), 1e-6), (c.taz - c.pz) / math.max(hyp(c.tax - c.px, c.taz - c.pz), 1e-6)
+			local vx, vz = (c.tbx - c.px) / math.max(hyp(c.tbx - c.px, c.tbz - c.pz), 1e-6), (c.tbz - c.pz) / math.max(hyp(c.tbx - c.px, c.tbz - c.pz), 1e-6)
+			local r = math.max(c.r, 1e-6)
+			local nax, naz = (c.ox - c.tax) / r, (c.oz - c.taz) / r
+			local nbx, nbz = (c.ox - c.tbx) / r, (c.oz - c.tbz) / r
+			-- P + nA wA + s u = P + nB wB + t v
+			local rx, rz = nbx * c.wB - nax * c.wA, nbz * c.wB - naz * c.wA
+			local det = cross2(ux, uz, -vx, -vz)
+			if math.abs(det) > 0.2 then
+				local sA = cross2(rx, rz, -vx, -vz) / det
+				local dx, dz = nax * c.wA + ux * sA, naz * c.wA + uz * sA -- D = P' - P
+				local yM = (yA + yB) / 2 + M.CURB_UP
+				local chip = { Vector3.new(c.px + dx, yM, c.pz + dz), Vector3.new(c.tax + dx, yA + M.CURB_UP, c.taz + dz) }
+				local nq = math.max(4, math.ceil(math.abs(c.sweep) * c.r / 2))
+				for q = 1, nq - 1 do
+					local x, z = arcPoint(c, q / nq, c.r)
+					table.insert(chip, Vector3.new(x + dx, yA + (yB - yA) * q / nq + M.CURB_UP, z + dz))
+				end
+				table.insert(chip, Vector3.new(c.tbx + dx, yB + M.CURB_UP, c.tbz + dz))
+				local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
+				for k = 2, #chip - 1 do
+					if not M.Roads.sliver(chip[1], chip[k], chip[k + 1]) then
+						made += M.Roads.triangle(chip[1], chip[k], chip[k + 1], 6, pave, folder)
+					end
+				end
+				c.chip = chip
 			end
 		end
 		table.insert(lines, string.format("%s %s side %d: theta %.0f, r %.1f (fit %.2f), %d corners in the asphalt", c.road, c.on, c.side, math.deg(c.theta), c.r, c.err, #clean))
@@ -1955,7 +1989,7 @@ function M.verge(names: { string })
 		end
 		return false
 	end
-	local function clear(x: number, z: number, self): boolean
+	local function clear(x: number, z: number, self, selfW: number?): boolean
 		if onRing(x, z) then
 			return false
 		end
@@ -1964,7 +1998,7 @@ function M.verge(names: { string })
 		end
 		for oi, b in M.near(x, z, 3) do
 			local o = M.list[oi]
-			if not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + M.WALK + (if o == self then -0.2 else 1) then
+			if not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.halfAt(o, b[2]) + (if o == self then (selfW or M.WALK) - 0.2 else M.WALK + 1) then
 				return false
 			end
 		end
@@ -1987,11 +2021,12 @@ function M.verge(names: { string })
 				local rx, rz = rightOf(a)
 				local ok = true
 				local hw = math.max(M.halfAt(o, i), M.halfAt(o, i + 1)) -- (a widened end: the verge moves out with it)
+				local WK = (if side < 0 then o.walkL else o.walkR) or M.WALK -- (J17: this side's own walk: a 4-stud street walk left 2 studs bare, a 30-stud downtown walk had grass over it)
 				for _, f in { 0, 0.5, 1 } do
-					for _, lat in { hw + M.WALK + 0.5, hw + M.WALK + M.VERGE_W / 2, hw + M.WALK + M.VERGE_W } do
+					for _, lat in { hw + WK + 0.5, hw + WK + M.VERGE_W / 2, hw + WK + M.VERGE_W } do
 						local x = a[1] + (b[1] - a[1]) * f + rx * side * lat
 						local z = a[3] + (b[3] - a[3]) * f + rz * side * lat
-						if not clear(x, z, o) then
+						if not clear(x, z, o, WK) then
 							ok = false
 						end
 					end
@@ -2004,7 +2039,7 @@ function M.verge(names: { string })
 					-- (from 4 studs under the pavement out: smooth terrain is 4-stud voxels, and one whose centre
 					-- lies in the road's cleared trench pulls the surface down right at the pavement's edge,
 					-- 1 to 2 studs of pavement side showing. Under the pavement the grass is hidden.)
-					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (hw + M.WALK - 4 + (M.VERGE_W + 4) / 2), 0, 0)
+					local cf = CFrame.lookAt(mid, Vector3.new(b[1], mid.Y, b[3])) * CFrame.new(side * (hw + WK - 4 + (M.VERGE_W + 4) / 2), 0, 0)
 					-- (J10: roads05_fix.ring_level lowers arms up to 5 studs onto a ring's height; the ground
 					-- beside them stood over the pavement there: clear it down to the verge, as the corners do)
 					local R = M.nearRing(mid.X, mid.Z)
@@ -2053,11 +2088,14 @@ function M.verge(names: { string })
 			M.useRing(c.ringR)
 		end
 		if inner > 0.5 and own(c.px, c.pz) and not (M.vergeSkip and M.vergeSkip(c.px, c.pz)) then
-			local w = math.min(M.VERGE_W, inner)
-			local rho = inner - w / 2
+			-- (J17, owner "jagged corner pavement": the grass ended right at the pavement's back edge, at the centre
+			-- lines' heights: 4-stud voxels stood over the pavement there in steps. Now it starts 4 under the
+			-- pavement like the straight verges, at the corner's built edge heights)
+			local w = math.min(M.VERGE_W, inner) + 4
+			local rho = inner + 4 - w / 2
 			local S = M.R[c.road]
-			local yA = S.s[c.ePts[c.sa].i][2]
-			local yB = if c.ring then C.Y else c.big.s[c.bPts[c.sbb].j][2]
+			local yA = c.yA or S.s[c.ePts[c.sa].i][2]
+			local yB = c.yB or (if c.ring then C.Y else c.big.s[c.bPts[c.sbb].j][2])
 			local n = math.max(2, math.ceil(math.abs(c.sweep) * inner / 6))
 			for q = 0, n - 1 do
 				local u0, u1 = q / n, (q + 1) / n
