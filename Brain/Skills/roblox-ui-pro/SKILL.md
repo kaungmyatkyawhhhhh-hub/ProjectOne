@@ -89,6 +89,16 @@ Numbers and presets: `references/design-tokens.md`. Ready-made pieces: `referenc
     - The black outline goes Outside, 4.5 px on a 509 px button.
     - The lip is about 14% of the height, in a darker shade.
     - Export each piece just under 1024 px.
+    - **Owner tweak, 18 Nov, on the code-drawn samples: "Depth, not thicker outlines".** Keep the 4.5 px outline and get the 3D look from depth instead:
+      - lip about 20% of the height;
+      - text depth copy about 14% of the font size;
+      - icon depth copy about 13% of the icon size.
+    - **Colours (also from that tweak):**
+      - Gradients keep the bright colour until about 45%, e.g. yellow `#FFF200` → `#FFE200` → `#FF9600`.
+      - Halftone dots are small: a 10 px grid with 4.5 px diamonds.
+    - **Item art (also from that tweak):** a navy `#2B1B3D` silhouette outline, cel shading lit from the top-left, a rim highlight and a gloss streak.
+    - **Robux icon:** nested hexes, black → white → black → white, with a black square in the centre and a depth copy.
+    - **Building without Figma:** with the Figma MCP capped, drawing the pieces in code (SVG, rendered by headless Chrome) matched his frames.
   - Build each piece as a Figma component that exports alone, then 9-slice it in Studio.
   - Use ChatGPT art only for things vectors can't do (scenes, thumbnails), never for the UI frames.
   - The Figma MCP on the Starter plan runs out of calls fast. Batch the whole kit into 2-3 `use_figma` calls, and read results back through the Figma tab in Chrome instead of spending calls on screenshots.
