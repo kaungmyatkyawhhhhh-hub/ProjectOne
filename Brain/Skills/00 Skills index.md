@@ -30,7 +30,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
-- 2026-11-18: owner dropped the "nothing over 449 R$" rule. Removed from dead-game-method (vault copy; the installed plugin copy still says it until re-uploaded) and from [[K04 Monetization and economy]]. "No paid random items" stays.
+- 2026-11-18: owner dropped the "nothing over 449 R$" rule. Removed from dead-game-method (vault copy; the installed plugin copy still says it until re-uploaded) and from [[K04 Monetization and economy]]. Same day: "no paid random items" changed to "paid random items allowed, odds must be shown" (dead-game-method vault copy, K01, K04).
 - 2026-11-17 (night): roblox-vfx-reveal kit fix (owner's no-sunburst rule):
   - VFXKit: the spike `starburst` is replaced by `glowBurst` (soft camera-facing halo, light pulse, drifting motes); `starburst` stays as an alias. `reveal()` uses it.
   - `uiBurst` lost its rays: soft glow, one thin ring, random motes.

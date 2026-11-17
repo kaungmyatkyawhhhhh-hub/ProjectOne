@@ -18,7 +18,7 @@ Back to [[00 BRAIN]] · Sources: [[Roblox Playbook - Rules for every game]], [[P
 - Notifications, social links and rewarded ads only reach 13+/16+. For kids the levers are in-game (offline progress, streaks, quests, friend boost, invites, a weekly event).
 
 ## Rules that get games hidden or removed
-- Exact % odds behind a button before any paid random item (also when bought with Robux-bought currency) + PolicyService alternative. Our rule: no paid random items at all.
+- Exact % odds behind a button before any paid random item (also when bought with Robux-bought currency) + PolicyService alternative. Our rule (owner, 18 Nov): paid random items are allowed, but the exact odds must be shown.
 - No fake sales/timers, no links/QR codes in game, filter all player text, no real brands/people/copyrighted music, don't look like another big game (copycat flag).
 - Duplicate games get reduced exposure ("non-unique"): **never re-upload a game to reset likes** (you also lose saves, badges, favorites, visits).
 - Rewarding likes/favorites is not allowed; asking without a reward is fine.

@@ -6,7 +6,7 @@ updated: 2026-11-18
 Back to [[00 BRAIN]] · Sources: [[Playbook notes - Monetization]], [[Playbook notes - Passes and products catalogue]], [[2026-10-29 GYM ARC Prices - every coin and Robux item]], [[2026-11-09 Galaxy Incremental - Growth plan to 1k CCU (marketing, economy, retention, LiveOps)]]
 
 ## Owner's rules
-- **No paid random items** (no Robux crates; Robux → currency → random rolls counts too). VIP gives no Essence for that reason.
+- **Paid random items are allowed only with the odds shown** (owner, 18 Nov; replaces the old "no paid random items" rule). Show the exact % of every result before the player pays, on the button or one tap away; this also counts when Robux buys a currency that is spent on random rolls. Respect PolicyService `ArePaidRandomItemsRestricted` (offer a non-random path where it is restricted).
 - No fake timers, no "was" prices, no countdown pressure, never weaken what players own, no paid power in competitions.
 - GYM ARC stance: paying players should feel boosts clearly pay off.
 
@@ -27,4 +27,4 @@ Back to [[00 BRAIN]] · Sources: [[Playbook notes - Monetization]], [[Playbook n
 - 1 R$ spent ≈ 0.7 × $0.0038 = $0.00266 to us.
 
 ## From TikTok creators (16 Nov, claims, not verified; from [[Brain/Training inbox]])
-- **Sell developer products, not only gamepasses.** A gamepass sells once; a dev product (boosts, spins, characters, skips) can be bought again and again. Keep the owner's rule above: **no paid random items**, so "spins" only as a free or earned reward, never sold for Robux.
+- **Sell developer products, not only gamepasses.** A gamepass sells once; a dev product (boosts, spins, characters, skips) can be bought again and again. Spins can be sold too, under the owner's rule above: **show the odds**.
