@@ -236,7 +236,9 @@ def main():
             rq = np.array([-q[4], q[3]])
             c0 = 0.0 if q[8] > 0.3 else (q[7] - q[6]) / 2
             rg = np.array([-h[1], h[0]])
-            if (c - np.array([q[0], q[2]]) - rq * c0) @ rg < -1.0 and q[8] > 0.3:
+            # (J17) also before the median starts (the zebra's own sample can be undivided): a zebra group lying wholly
+            # on the outgoing side of the centre is an outgoing half
+            if (c - np.array([q[0], q[2]]) - rq * c0) @ rg < -1.0:
                 continue
         if stree is None or not any(stops[int(j)].distance(g) < 8 for j in stree.query(g.buffer(8))):
             iss['stopline_missing'].append(dict(road=r['name'], **xz(c)))

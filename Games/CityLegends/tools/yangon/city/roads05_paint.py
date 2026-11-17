@@ -127,6 +127,17 @@ def substring(line, a, b):
     return ss(line, a, b)
 
 
+def deloop(l):
+    """(J17) a line that crosses itself (an offset round a tight kerb notch makes a swallowtail loop) without its loops:
+    its buffer would be a ring, and a ring's hole is lost in the paint list (it painted the whole hole solid yellow)"""
+    if l.is_simple:
+        return [l]
+    from shapely.ops import linemerge
+    pieces = [p for p in lines_of(unary_union(l)) if Point(p.coords[0]).distance(Point(p.coords[-1])) > 1e-6]
+    m = linemerge(pieces) if pieces else None
+    return [x for x in lines_of(m) if x.is_simple] if m is not None else []
+
+
 def lines_of(g):
     if g is None or g.is_empty:
         return []
@@ -206,7 +217,7 @@ class Paint:
             self.items.append(it)
 
     def line(self, kind, ln, width, what, road=None, clip=None, deck=False, min_len=0.6):
-        for l in lines_of(ln):
+        for l in [x for l0 in lines_of(ln) for x in deloop(l0)]:
             if clip is not None and not clip.is_empty:
                 l2 = l.difference(clip.local(l) if isinstance(clip, Clip) else clip)
             else:
@@ -829,6 +840,7 @@ def arrow_shape(kind):
     return None
 
 
+LINE_KINDS = ('centre', 'median', 'edge', 'lane', 'ring lane')
 ORDER = ['stop', 'zebra', 'giveway', 'centre', 'deck centre', 'median', 'edge', 'lane', 'deck lane', 'ring lane', 'hatch edge',
          'hatch', 'arrow']
 
@@ -907,10 +919,16 @@ def tidy(data, items):
         near = []
         for c in cells(P.bounds):
             near.extend(kept.get((c, bool(it.get("deck"))), ()))
-        near = [k for k in set(near) if k.intersects(Q)] if not Q.is_empty else []
+        near = [k for k in set(near) if k[0].intersects(Q.buffer(0.6))] if not Q.is_empty else []
         if near:
-            Q = Q.difference(unary_union(near).buffer(0.05))
+            Q = Q.difference(unary_union([k[0] for k in near]).buffer(0.05))
+            # (J17, zebra_torn) a line stops 0.6 short of a zebra bar or stop line, never runs into it
+            zs = [k[0] for k in near if k[1] in ('zebra', 'stop')]
+            if zs and it['w'] in LINE_KINDS:
+                Q = Q.difference(unary_union(zs).buffer(0.6))
         ps = [p for p in polys_of(Q) if p.area >= 0.3 and not p.interiors and p.area / max(p.length, 1e-6) > 0.1]
+        if it['w'] == 'stop' and len(ps) > 1:
+            ps = [max(ps, key=lambda p: p.area)]     # (J17) one stop line, no stub past a median nose
         if abs(sum(p.area for p in ps) - a0) > 0.05:
             st['clipped'] += 1
         if not ps:
@@ -924,7 +942,7 @@ def tidy(data, items):
             n = dict(it, p=c)
             out.append(n)
             for cc in cells(p.bounds):
-                kept.setdefault((cc, bool(it.get("deck"))), []).append(p)
+                kept.setdefault((cc, bool(it.get("deck"))), []).append((p, it['w']))
     return out, st
 
 
