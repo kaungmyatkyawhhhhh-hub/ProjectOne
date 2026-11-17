@@ -8,7 +8,7 @@ from mathutils import Vector, Matrix, geometry
 from mathutils.bvhtree import BVHTree
 
 argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else globals().get('ARGS', [])
-DATA, OUT = argv[0], argv[1]
+DATA, OUT = argv[0], os.path.abspath(argv[1])   # Blender resolves relative render paths against C:\, not the cwd
 RENDER = 'render' in argv
 HERE = os.path.dirname(os.path.abspath(DATA))
 D = json.load(open(DATA))
@@ -102,7 +102,7 @@ def loft(name, xs, prof, nr=16, pex=2.4, scale=None, colour=None, glow=False, ji
 def skin(key):   # indigo top, lavender lower flank / belly, by facet normal (flat facets give a clean faceted edge)
     def f(p):
         base = P['belly'] if p.normal.z < -0.32 else P['top']
-        return jit(base, p.index * 7 + len(key), 0.07)
+        return jit(base, p.index // 2 * 7 + len(key), 0.045)   # one shade per quad (tri pair), not per tri
     return f
 
 def xs_between(a, b, step=12):
@@ -119,7 +119,9 @@ def seg_scale(xs):
     return f
 for n, (a, b) in enumerate(reversed(list(zip(G[:-1], G[1:]))), 1):
     xs = [a - 2, a + 1, a + 7] + [x for x in xs_between(a + 7, b - 7, 14)][1:-1] + [b - 7, b - 1, b + 2]
-    loft('ArmourSegment%d' % n, xs, body, scale=seg_scale(xs))
+    def seg_col(p, a=a, b=b, key='Seg%d' % n):   # the V groove at each end is dark
+        return jit(P['groove'], p.index, 0.05) if not X(a + 3) < p.center.x < X(b - 3) else skin(key)(p)
+    loft('ArmourSegment%d' % n, xs, body, pex=2.9, scale=seg_scale(xs), colour=seg_col)
 # tail stock: from the fluke root to the first groove, tapering
 xs = [150.0] + xs_between(160, G[0] - 7, 14)[1:] + [G[0] - 1, G[0] + 2]
 loft('TailStock', xs, body, nr=12, scale=lambda i, x: 0.86 if x > G[0] - 2 else 1.0)
@@ -164,7 +166,7 @@ loft('LowerJaw', xs_between(JX0, JX1, 10), jaw, nr=16, pex=2.8, colour=jaw_col)
 def mouth(x):
     top = line(H['upper_lip'], x) + 2; bot = line(H['lower_lip'], x) + 6
     return (top, bot, 0.84 * HW(x))
-loft('MouthInterior', xs_between(CX - 20, 1470, 12), mouth, nr=12, colour=lambda p: jit(P['maroon'], p.index, 0.1))
+loft('MouthInterior', xs_between(CX - 20, 1290, 12), mouth, nr=12, colour=lambda p: jit(P['maroon'], p.index, 0.1))   # sheet: the gape in front of x1290 is see-through
 
 # ---------- teeth: U rows (both sides + across the front), 4-sided cones ----------
 def teeth(name, spec, lip, up, wk):
@@ -267,7 +269,7 @@ for cname in ('Cyan', 'Gold'):
             for s in ((1, -1) if vname == 'side' else (1,)):   # side runes go on both flanks
                 for t in tri:
                     a, b, cc = (pts[k] for k in t)
-                    nsub = max(1, int(max((a - b).length, (b - cc).length, (cc - a).length) / 6))
+                    nsub = max(1, int(max((a - b).length, (b - cc).length, (cc - a).length) / 10))
                     grid = {}
                     for ii in range(nsub + 1):
                         for jj in range(nsub + 1 - ii):

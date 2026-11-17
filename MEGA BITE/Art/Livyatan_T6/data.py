@@ -28,7 +28,7 @@ for x in range(X0,250):
 st=list(range(X0,X1+1,10))+[X1]
 def med(x0,x1,y0,y1): return [int(v) for v in np.median(im[y0:y1,x0:x1].reshape(-1,3),0)]
 pal=dict(top=med(520,600,262,280), belly=med(520,600,330,350), jaw=med(1290,1340,425,445), groove=med(632,640,250,300),
-         maroon=[120,30,70], teeth=[238,228,200], cyan=[40,240,255], gold=[255,196,70], eye=[60,250,255], socket=[28,24,60])
+         maroon=[95,22,55], teeth=[238,228,200], cyan=[40,240,255], gold=[255,196,70], eye=[60,250,255], socket=[28,24,60])
 # fluke outline from the top view (tx<205) in side px: (x, lateral)
 fl=(lab==2).astype(np.uint8); fl[:, 205:]=0
 cs,_=cv2.findContours(fl,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE); c=max(cs,key=cv2.contourArea)

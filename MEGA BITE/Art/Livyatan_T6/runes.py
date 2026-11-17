@@ -15,7 +15,7 @@ for cn,cm in MASK.items():
         for i,c in enumerate(cs):
             if h[0][i][3]!=-1 or cv2.contourArea(c)<6: continue
             loops=[c]+[cs[j] for j in range(len(cs)) if h[0][j][3]==i]
-            loops=[cv2.approxPolyDP(l,0.7,True)[:,0].tolist() for l in loops]
+            loops=[cv2.approxPolyDP(l,1.0,True)[:,0].tolist() for l in loops]
             polys.append([l for l in loops if len(l)>=3])
         out[f'{cn}_{vn}']=polys; print(cn,vn,len(polys))
 json.dump(out,open('runes_2d.json','w'))
