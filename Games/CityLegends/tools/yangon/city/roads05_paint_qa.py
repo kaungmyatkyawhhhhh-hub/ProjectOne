@@ -31,7 +31,7 @@ from shapely.strtree import STRtree
 sys.stdout.reconfigure(encoding='utf-8')
 import geo
 from roads05_qa import quads
-from roads05_paint import raw_boxes, double_pairs, neff, runs, nose_caps
+from roads05_paint import raw_boxes, double_pairs, merged_boxes, neff, runs, nose_caps
 
 RULES = ('arrow_missing', 'stopline_missing', 'stopline_wrong_side', 'dash_jog', 'dash_side_by_side', 'paint_in_median',
          'double_box', 'box_paint', 'paint_snake', 'edge_missing', 'zebra_colour', 'zebra_torn')
@@ -289,7 +289,7 @@ def main():
     zs_ = [polys[i] for w in ('zebra', 'stop', 'giveway') for i in by.get(w, [])]
     ztree = STRtree(zs_) if zs_ else None
     fills = unary_union([Polygon([(p[0], p[2]) for p in f]).buffer(0) for f in data.get('fills', []) if len(f) >= 3])
-    skipU = unary_union([rawU.buffer(4), rings, fills.buffer(2)])
+    skipU = unary_union([unary_union(merged_boxes(raw, R)[0]).buffer(4) if raw else Polygon(), rings, fills.buffer(2)])
     skip_t = STRtree(list(skipU.geoms) if hasattr(skipU, 'geoms') else [skipU])
     skip_g = list(skipU.geoms) if hasattr(skipU, 'geoms') else [skipU]
 

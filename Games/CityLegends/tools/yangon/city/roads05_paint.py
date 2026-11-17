@@ -45,7 +45,8 @@ GIVE_ON, GIVE_OFF, GIVE_W = 1.8, 1.8, 0.6
 HATCH_W, HATCH_PITCH = 0.6, 3.0
 BOX_GROW = 1.5
 DOUBLE_GAP = 40.0     # (J15) two parallel roads closer than this crossing one road: ONE box
-LANE_RATE = 0.15      # (J15) a lane line moves at most this many studs sideways per stud along (a taper, never a jog)
+CLOSE_GAP = 60.0      # (J15) two junctions closer than this along one road: ONE box
+LANE_RATE = 0.08      # (J15) a lane line moves at most this many studs sideways per stud along (a taper, never a jog)
 EDGE_IN = 0.9         # (J15) yellow kerb lines: middle this far in from the kerb
 ARROW_S = 2.0         # (J15) arrows 12 studs long (real ones ~5 m)
 ARROW_L = 6.0 * ARROW_S
@@ -248,24 +249,24 @@ def heading_at(r, pt):
     return np.array([s[i][3], s[i][4]])
 
 
-def double_pairs(raw, R):
+def double_pairs(raw, R, parallel=True, gap=DOUBLE_GAP):
     """(J15, owner ref 'double junction zebras and stop lines') pairs of boxes (i, j) where two parallel roads under
     DOUBLE_GAP apart cross one road (a dual carriageway as two one-ways, two streets side by side)"""
     out = []
     tr = STRtree([b[0] for b in raw]) if raw else None
     for i, (h, a, b) in enumerate(raw):
-        for j in tr.query(h.buffer(DOUBLE_GAP)):
+        for j in tr.query(h.buffer(gap)):
             j = int(j)
             if j <= i:
                 continue
             h2, c, d = raw[j]
             sh = {a, b} & {c, d}
-            if len(sh) != 1 or h.distance(h2) > DOUBLE_GAP:
+            if len(sh) != 1 or h.distance(h2) > gap:
                 continue
             x, y = ({a, b} - sh).pop(), ({c, d} - sh).pop()
             if x == y:
                 continue
-            if abs(heading_at(R[x], h.centroid.coords[0]) @ heading_at(R[y], h2.centroid.coords[0])) < 0.9:
+            if parallel and abs(heading_at(R[x], h.centroid.coords[0]) @ heading_at(R[y], h2.centroid.coords[0])) < 0.9:
                 continue
             out.append((i, j))
     return out
@@ -280,7 +281,9 @@ def merged_boxes(raw, R):
             par[i] = par[par[i]]
             i = par[i]
         return i
-    pairs = double_pairs(raw, R)
+    # double junctions, and (J15) any two junctions under CLOSE_GAP apart along one road (a short link between them
+    # has no room for two zebras, stop lines and arrows: real ones are one box)
+    pairs = double_pairs(raw, R) + double_pairs(raw, R, parallel=False, gap=CLOSE_GAP)
     for i, j in pairs:
         par[f(i)] = f(j)
     groups = {}
@@ -325,8 +328,10 @@ def lane_lines(s, a, b, one):
         lines = []
         for k in range(1, int(nn.max())):
             t = np.where(k < nn, inner + (outer - inner) * k / nn, outer)
-            t = np.convolve(np.pad(t.astype(float), 2, mode='edge'), np.ones(5) / 5, mode='valid')
+            t = np.convolve(np.pad(t.astype(float), 4, mode='edge'), np.ones(9) / 9, mode='valid')
             t = limit_rate(t, ds, LANE_RATE)
+            # never off the asphalt where the kerb pulls in faster than the line may move
+            t = np.where(outer > inner, np.minimum(np.maximum(t, inner + 1.5), outer), np.maximum(np.minimum(t, inner - 1.5), outer))
             lines.append(np.where(np.abs(t - outer) > 1.5, t, np.nan))
         out[sg] = (inner, outer, nn, lines)
     return idx, out
@@ -436,6 +441,7 @@ def build(data, signals=None):
     arrow_jobs = []
     laid = Grid()           # (J15, zebra_torn) bars and stop lines laid so far: nothing is laid over another
     boxc = Clip(no_paint)
+    medc = Clip(*medians(data))
     for am in arms:
         r, k, pts, line = am['r'], am['k'], am['pts'], am['line']
         if r['kind'] != 'route':
@@ -455,7 +461,8 @@ def build(data, signals=None):
                 # (J15) a whole bar or none: one the kerb would cut, inside a junction box or on another arm's zebra
                 # is left out
                 if (unary_union([geoms[int(j)] for j in tree.query(bar)]).buffer(-0.1).contains(bar)
-                        and boxc.local(bar).intersection(bar).area < 0.1 and not laid.hits(bar, 0.3)):
+                        and boxc.local(bar).intersection(bar).area < 0.1 and not laid.hits(bar, 0.3)
+                        and not medc.intersects(bar.buffer(0.1))):
                     P.poly('LZ', bar, 'zebra', r['name'])
                     laid.add(bar)
             o += ZEBRA_PITCH
@@ -624,7 +631,7 @@ def build(data, signals=None):
     # really offers (OSM turn:lanes where they fit)
     for job in arrow_jobs:
         approach_arrows(P, job, (by_box, box_roads), LL, clip_all)
-    P.stats = dict(double=ndouble, boxes=len(boxes), approaches=len(arrow_jobs))
+    P.stats = dict(joined=ndouble, boxes=len(boxes), approaches=len(arrow_jobs))
     return P
 
 
@@ -790,6 +797,21 @@ def nose_caps(data):
     return out
 
 
+def medians(data):
+    """no paint here: the medians, (J15) a cap past each median nose (paint stops short of it) and the islands"""
+    from roads05_qa import quads
+    cut = {k: set(v) for k, v in data['cut'].items()}
+    med = []
+    for r in data['roads']:
+        if any(q[8] > 0 for q in r['s']):
+            med.extend(quads(r['s'], cut.get(r['name'], ()), inner=8))
+    med.extend(nose_caps(data))
+    for isl in data.get('islands', []):
+        if len(isl) >= 3:
+            med.append(Polygon([(p[0], p[2]) for p in isl]).buffer(0).buffer(0.8))
+    return med
+
+
 def tidy(data, items):
     """final pass (17 Nov, paint QA: paint_off 438, zebra_median 129, stack_paint 89): every polygon clipped to its own
     surface (ground paint to the carriageways and rings, deck paint to the decks), off the medians, and never on a
@@ -797,19 +819,12 @@ def tidy(data, items):
     median, no two paint polygons on one spot (they would z-fight)"""
     from roads05_qa import quads
     cut = {k: set(v) for k, v in data['cut'].items()}
-    ground, med = [], []
+    ground = []
     for r in data['roads']:
-        c = cut.get(r['name'], ())
-        ground.extend(quads(r['s'], c))
-        if any(q[8] > 0 for q in r['s']):
-            med.extend(quads(r['s'], c, inner=8))
+        ground.extend(quads(r['s'], cut.get(r['name'], ())))
     for g in data['roundabouts']:
         ground.append(Point(g['c'][0], g['c'][2]).buffer(g['r_out'], 96))
-    # (J15) paint stops short of island noses: a cap EDGE_IN + 0.3 wide past each median end, and the islands
-    med.extend(nose_caps(data))
-    for isl in data.get('islands', []):
-        if len(isl) >= 3:
-            med.append(Polygon([(p[0], p[2]) for p in isl]).buffer(0).buffer(0.8))
+    med = medians(data)
     deck = []
     for d in data['decks']:
         deck.extend(quads(d['s']))
@@ -837,7 +852,7 @@ def tidy(data, items):
             Q = Q.difference(M.local(Q).buffer(0.05)) if not Q.is_empty else Q
         near = []
         for c in cells(P.bounds):
-            near.extend(kept.get(c, ()))
+            near.extend(kept.get((c, bool(it.get("deck"))), ()))
         near = [k for k in set(near) if k.intersects(Q)] if not Q.is_empty else []
         if near:
             Q = Q.difference(unary_union(near).buffer(0.05))
@@ -855,7 +870,7 @@ def tidy(data, items):
             n = dict(it, p=c)
             out.append(n)
             for cc in cells(p.bounds):
-                kept.setdefault(cc, []).append(p)
+                kept.setdefault((cc, bool(it.get("deck"))), []).append(p)
     return out, st
 
 
