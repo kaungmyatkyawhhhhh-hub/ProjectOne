@@ -91,7 +91,7 @@ Tier colours on the store follow his layout:
 - Price text: Fredoka 44 at x 148.
 - Currency icon: 46, centred at (107.5, 303.5).
 
-## Layout (phone points; root is a 720×360 design scaled by `clamp(min(W/720, H/360), .75, 1.8)`)
+## Layout (phone points; root is a 720×360 design scaled by `clamp(min(W/760, H/400), .72, 1.2)`. It was capped at 1.8, which buried the game on PC. Persistent plates go in the top-left corner cluster, never the centre)
 
 **HUD:**
 

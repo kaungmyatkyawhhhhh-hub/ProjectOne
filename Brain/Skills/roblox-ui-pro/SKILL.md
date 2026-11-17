@@ -71,9 +71,13 @@ Details: `references/roblox-ui-api.md`.
   - One `ScreenGui` per role, with `ResetOnSpawn = false` and `ZIndexBehavior = Sibling`.
   - `DisplayOrder` bands, lowest to highest: HUD (10), toasts (15), menus (20), modals and reveals above.
 - **Safe areas:** interactive UI keeps `ScreenInsets = CoreUISafeInsets`. Nothing goes under the notch, the topbar, the thumbstick or the jump button.
+- **Don't cover the game (owner + friends, 18 Nov 2026, EVOLVE).** A 1.7x HUD in the top centre plus a toast over the character got "i cannot see at all, so annoying". Their tests: "every user's experience" wants the middle clear. So:
+  - Persistent plates (status, currency, menu) go in the **top-left corner cluster**, never centred.
+  - Toasts go under that cluster. Frequent celebrations (every life) go in the **lower third**, off the character.
+  - **Cap the scale at 1.2**, so PC gets more game, not a bigger UI. Shrink corner plates to about 0.8 on PC, and keep them at 1 on phones so text stays at 13 px or more.
 - **One design size, scaled:**
   - Put everything in a 720×360-point root.
-  - The root gets a `UIScale` of `k = clamp(min(W/720, H/360), .75, 1.8)` and a size of `(W/k, H/k)`.
+  - The root gets a `UIScale` of `k = clamp(min(W/760, H/400), .72, 1.2)` (it was `clamp(min(W/720, H/360), .75, 1.8)`; at 1.8x the HUD buried the game on PC) and a size of `(W/k, H/k)`.
   - Lay out in points.
   - Design the narrow case explicitly, switching on `AbsoluteSize`.
 - **Text:** Fredoka One only.

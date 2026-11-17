@@ -191,7 +191,7 @@ local function scaledRoot(gui)
 	local s = new("UIScale", {}, root)
 	local function fit()
 		local v = gui.AbsoluteSize
-		local k = math.clamp(math.min(v.X / 720, v.Y / 360), 0.75, 1.8)
+		local k = math.clamp(math.min(v.X / 760, v.Y / 400), 0.72, 1.2) -- owner on PC: "i cannot see at all" at 1.7x; big screens get more game, not bigger UI
 		s.Scale = k
 		root.Size = UDim2.fromOffset(v.X / k, v.Y / k)
 	end
@@ -217,6 +217,8 @@ end)
 
 -- status plate: gold hex portrait of your species, title on a brush band, two slot rows with icons
 local status = img(hud, "hudPlate", { Size = UDim2.fromOffset(335, 133) })
+local statusScale = new("UIScale", {}, status) -- 0.8 on big screens (PC), 1 on phones so row text stays >= 13 px
+local toastX, toastY = 214, 118 -- news sits under the status plate in the top-left corner; set by layout()
 local portrait = img(status, "port1", { Position = UDim2.fromOffset(-8, -8), Size = UDim2.fromOffset(66, 72), ZIndex = 4 })
 img(status, "titleBand", { Position = UDim2.fromOffset(62, 12), Size = UDim2.fromOffset(250, 34), ZIndex = 2 })
 local title = label(status, "", 22, { Position = UDim2.fromOffset(62, 12), Size = UDim2.fromOffset(250, 32), RichText = true })
@@ -231,9 +233,7 @@ local ageFill = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScal
 img(ageFill, "fillGold", { Size = UDim2.fromOffset(110, 14), ZIndex = 4 })
 local ageText = label(ageRow, "", 14, { Position = UDim2.fromOffset(146, 0), Size = UDim2.new(1, -150, 1, 0), ZIndex = 5 })
 local evoText = label(evoRow, "", 15, { Position = UDim2.fromOffset(32, 0), Size = UDim2.new(1, -40, 1, 0), ZIndex = 5, RichText = true })
-local SPECIES_ORDER = { "Monkey", "Ape", "Australopithecus", "Homo habilis", "Homo erectus", "Neanderthal", "Homo sapiens",
-	"Modern Human", "Cyborg", "Space Colonist", "Digital Mind", "Cosmic Being" } -- port1..port12 in hud.html
-local function portraitKey(name) return "port" .. (table.find(SPECIES_ORDER, name) or 1) end
+local function portraitKey(g) return "port" .. math.clamp(tonumber(g) or 1, 1, 12) end -- species group 1..12 (server "Portrait")
 
 -- one colour per menu button, like the mock: green shop, blue diet, purple index
 local menuRow = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(8, 66), Size = UDim2.fromOffset(194, 65) }, hud)
@@ -254,13 +254,11 @@ menuButton(3, "sqPurple", "index", "Index", "Index")
 
 -- wide: status centred; narrow: status sits right of the left column so they never touch
 local function layout()
-	local w = hud.AbsoluteSize.X / hud:FindFirstChildOfClass("UIScale").Scale
 	local left = 8 + 194 + 12
-	if w / 2 - 168 >= left then
-		status.AnchorPoint, status.Position = Vector2.new(0.5, 0), UDim2.new(0.5, 0, 0, 6)
-	else
-		status.AnchorPoint, status.Position = Vector2.zero, UDim2.fromOffset(left, 6)
-	end
+	statusScale.Scale = hud:FindFirstChildOfClass("UIScale").Scale >= 1.1 and 0.8 or 1
+	toastX, toastY = left, 6 + math.ceil(133 * statusScale.Scale) + 6
+	-- top-left corner, never centred: the owner's friends found a big plate in the middle of the screen annoying
+	status.AnchorPoint, status.Position = Vector2.zero, UDim2.fromOffset(left, 6)
 end
 hud:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
 layout()
@@ -417,9 +415,9 @@ refreshRobux()
 local diet = window("Diet", "Diet", "diet")
 local DIETS = {
 	{ id = "Fruit", info = "Shorter kids. Risk: malnutrition", unlock = "Monkey" },
-	{ id = "Meat", info = "Taller kids. Risk: parasites", unlock = "Ape" },
+	{ id = "Meat", info = "Taller kids. Risk: parasites", unlock = "Gibbon" },
 	{ id = "Cooked", info = "Tallest kids. Low risk", unlock = "Homo erectus" },
-	{ id = "Farmed", info = "Tall kids. Safest", unlock = "Homo sapiens" },
+	{ id = "Farmed", info = "Tall kids. Safest", unlock = "Farmer" },
 	{ id = "Synthetic", info = "Giant kids. Risk: nanobot glitch", unlock = "Cyborg" },
 }
 local dietList = vscroll(diet.Content)
@@ -447,7 +445,10 @@ local function section(order, titleText, entries, cellW)
 	local sec = { header = header, title = titleText, tiles = {} }
 	for i, e in entries do
 		local tile = img(grid, "row", { LayoutOrder = i, ZIndex = 3 })
-		e.label = label(tile, "", 13, { Position = UDim2.fromOffset(8, 0), Size = UDim2.new(1, -16, 1, 0), ZIndex = 5, TextWrapped = true })
+		if e.g then -- species: group portrait, a dark silhouette until found (dex-style "who's that?")
+			e.port = img(tile, "port" .. e.g, { Position = UDim2.fromOffset(4, 3), Size = UDim2.fromOffset(34, 37), ZIndex = 4 })
+		end
+		e.label = label(tile, "", 13, { Position = UDim2.fromOffset(e.g and 40 or 8, 0), Size = UDim2.new(1, e.g and -44 or -16, 1, 0), ZIndex = 5, TextWrapped = true })
 		table.insert(sec.tiles, e)
 	end
 	table.insert(sections, sec)
@@ -460,7 +461,11 @@ local function entries(attr, sep, prefix, color)
 	end
 	return out
 end
-section(1, "Species", entries("AllSpecies", ",", "S:", Color3.fromRGB(150, 230, 110)), 4)
+local speciesList = entries("AllSpecies", ",", "S:", Color3.fromRGB(150, 230, 110))
+for i, g in (remotes:GetAttribute("SpeciesGroups") or ""):split(",") do
+	if speciesList[i] then speciesList[i].g = math.clamp(tonumber(g) or 1, 1, 12) end
+end
+section(1, "Species", speciesList, 4)
 section(2, "Mutations", entries("AllTraits", ",", "T:", Color3.fromRGB(205, 150, 255)), 4)
 section(3, "Diseases", entries("AllDiseases", ",", "D:", Color3.fromRGB(255, 130, 110)), 4)
 section(4, "Badges", entries("AllBadges", ";", "B:", GOLD), 2)
@@ -470,7 +475,7 @@ refresh = function()
 	local a = player:GetAttributes()
 	if not a.Species then return end
 	title.Text = ('%s · <font color="#FFD23F">Gen %d</font>'):format(a.Species, a.Gen)
-	local pk = ART[portraitKey(a.Species)]
+	local pk = ART[portraitKey(a.Portrait)]
 	portrait.Image, portrait.ImageRectOffset, portrait.ImageRectSize = uri(pk), Vector2.new(pk.rect[1], pk.rect[2]), Vector2.new(pk.rect[3], pk.rect[4])
 	if a.NextSpecies == "" then
 		evoText.Text = "Fully evolved!"
@@ -522,6 +527,7 @@ refresh = function()
 			if got then found += 1 end
 			e.label.Text = if e.desc then e.name .. "\n" .. e.desc else (got and e.name or "???")
 			e.label.TextColor3 = got and e.color or MUTED
+			if e.port then e.port.ImageColor3, e.port.ImageTransparency = got and Color3.new(1, 1, 1) or Color3.new(0, 0, 0), got and 0 or 0.45 end
 		end
 		sec.header.Text = ("%s  %d/%d"):format(sec.title, found, #sec.tiles)
 	end
@@ -562,15 +568,15 @@ local function showNext()
 	if showing or #queue == 0 or openName or news.banner then return end
 	table.sort(queue, byPriority)
 	local item = table.remove(queue, 1)
-	local t = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, -70), Size = UDim2.fromOffset(380, 52), ZIndex = 10 })
-	label(t, item.text, 17, { Position = UDim2.fromOffset(14, 0), Size = UDim2.new(1, -28, 1, 0), TextColor3 = item.color or CREAM, ZIndex = 12, TextTruncate = Enum.TextTruncate.AtEnd })
-	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0.5, 0, 0, 146) }):Play()
+	local t = img(toastRoot, "plate9", { Position = UDim2.new(0, toastX, 0, -70), Size = UDim2.fromOffset(300, 40), ZIndex = 10 })
+	label(t, item.text, 15, { Position = UDim2.fromOffset(14, 0), Size = UDim2.new(1, -28, 1, 0), TextColor3 = item.color or CREAM, ZIndex = 12, TextTruncate = Enum.TextTruncate.AtEnd })
+	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0, toastX, 0, toastY) }):Play()
 	local cur = {}
 	function cur.hide(requeue)
 		if showing ~= cur then return end
 		showing = nil
 		if requeue then table.insert(queue, item) end
-		TweenService:Create(t, TweenInfo.new(0.2), { Position = UDim2.new(0.5, 0, 0, -70) }):Play()
+		TweenService:Create(t, TweenInfo.new(0.2), { Position = UDim2.new(0, toastX, 0, -70) }):Play()
 		task.delay(0.22, function() t:Destroy() showNext() end)
 	end
 	showing = cur
@@ -599,18 +605,18 @@ remotes.Notify.OnClientEvent:Connect(function(msg)
 end)
 
 ---------------------------------------------------------------- evolve banner: the biggest moment gets its own plate, news waits behind it
-remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stage, total)
+remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stage, total, group)
 	news.bannerAt = os.clock()
 	news.pause()
 	news.banner = true
 	play("evolve")
-	local b = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.62), Size = UDim2.fromOffset(330, 112), ZIndex = 20 })
-	img(b, portraitKey(speciesName), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
+	local b = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.76), Size = UDim2.fromOffset(330, 112), ZIndex = 20 })
+	img(b, portraitKey(group), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
 	label(b, "EVOLVED!", 30, { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 36), TextColor3 = GOLD, ZIndex = 22 })
 	label(b, speciesName, 22, { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 28), ZIndex = 22, TextTruncate = Enum.TextTruncate.AtEnd })
 	label(b, ("Species %d / %d"):format(stage, total), 14, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 20), TextColor3 = DNA_C, ZIndex = 22 })
 	local sc = new("UIScale", { Scale = 0.6 }, b)
-	TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Scale = 0.85 }):Play() -- lower third, off the character: it fires most lives early on
 	task.delay(math.max(3, #speciesName:split(" ") / 1.2 + 2), function() -- 2 words of title + the name, slowest 7-year-old
 		TweenService:Create(sc, TweenInfo.new(0.15), { Scale = 0.01 }):Play()
 		task.delay(0.16, function()
