@@ -64,9 +64,15 @@ def poly_dist(net, oi, i, px, pz, a=None, n=None):
         d = math.hypot(px - x1 - t * vx, pz - z1 - t * vz)
         if (t >= 1 - 1e-9 and j + 2 <= N - 1 and (j + 2) in cut) or (t <= 1e-9 and j - 1 >= 0 and (j - 1) in cut):
             skipped, d = True, math.inf
+        # (J23, as YangonRoads.polyDist: a road ends square at its first / last sample, no round cap)
+        if (j == 0 and t <= 1e-9) or (j == N - 2 and t >= 1 - 1e-9):
+            Ls = math.sqrt(L) if L > 1e-12 else 0.0
+            u = ((px - x1) * vx + (pz - z1) * vz) / Ls if Ls > 1e-9 else 0.0
+            if (j == 0 and u < -0.5) or (j == N - 2 and u > Ls + 0.5):
+                skipped, d = True, math.inf
         if d < best:
             best, fx, fz = d, x1 + vx * t, z1 + vz * t
-    if best == math.inf and a is None and not skipped:
+    if best == math.inf and a is None and not skipped and i not in cut and not ((i == 0 or i - 1 in cut) and (i == N - 1 or i + 1 in cut)):  # (J23: a cut / lone sample is no road)
         q = s[i]
         best, fx, fz = math.hypot(px - q[0], pz - q[2]), q[0], q[2]
     return best, fx, fz
@@ -101,7 +107,8 @@ def side_zone(net, me, px, pz, what='Kerb'):
                 if fx is not None:
                     L = math.hypot(px - fx, pz - fz)
                     if L > 1e-6:
-                        a, n = (fx, fz), ((px - fx) / L, (pz - fz) / L)
+                        n = ((px - fx) / L, (pz - fz) / L)
+                        a = (fx + n[0], fz + n[1])  # (J23: 1 stud on my side, as YangonRoads.sideZone)
             if poly_dist(net, oi, bi, px, pz, a, n)[0] < oh - 0.01:
                 return True
     return False

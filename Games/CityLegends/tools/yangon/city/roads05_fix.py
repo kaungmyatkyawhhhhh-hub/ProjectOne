@@ -1893,8 +1893,12 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
         for i, q in enumerate(r['s']):
             grid[(int(q[0] // 64), int(q[2] // 64))].append((k, i))
 
-    def host_at(r, x, z, y):
+    def host_at(r, x, z, y, q=None):
+        # (J23, Lane #1256 / #1257 / #1248 on Hledan Road #3: the lane climbed while its edge still lay on the host's
+        # flat carriageway (crease). A sample is on the host while ANY of its cross-section is: its half projected
+        # across the host, half * |t . t_host|)
         best = None
+        rh = max(q[6], q[7]) if q is not None and len(q) > 7 else 0.0
         for gx in (-1, 0, 1):
             for gz in (-1, 0, 1):
                 for k, j in grid.get((int(x // 64) + gx, int(z // 64) + gz), ()):
@@ -1918,7 +1922,8 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
                         h = (a[7] if right else a[6]) if len(a) > 7 else o.get('half', 6)
                         hy = a[1] + (b[1] - a[1]) * u
                         # (a road passing over / under, not joining: Lane #4687 was pulled 13 studs)
-                        if d < h + 0.5 and abs(hy - y) < MAX_GAP and (best is None or o['rank'] < best[0]):
+                        ext = rh * abs((q[3] * vx + q[4] * vz) / math.sqrt(L2)) if q is not None else 0.0
+                        if d - ext < h + 0.5 and abs(hy - y) < MAX_GAP and (best is None or o['rank'] < best[0]):
                             best = (o['rank'], hy, o['name'])
         return best
     out, worst = 0, (0.0, None)
@@ -1926,12 +1931,13 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
         s, cut = r['s'], cutd.get(r['name'], set())
         if r['name'] in decks or len(s) < 3:
             continue
-        for idx in (list(range(len(s))), list(range(len(s) - 1, -1, -1))):
-            if idx[0] in cut:
+        for idx, cf in ((list(range(len(s))), 'startsOnEnd'), (list(range(len(s) - 1, -1, -1)), 'endsOnEnd')):
+            # (J23: a continuation joint keeps its partner's height: moving one side made seam_step / pave_step 3)
+            if idx[0] in cut or isinstance(r.get(cf), str):
                 continue
             on = []
             for i in idx:
-                h = host_at(r, s[i][0], s[i][2], s[i][1]) if i not in cut else None
+                h = host_at(r, s[i][0], s[i][2], s[i][1], s[i]) if i not in cut else None
                 if not h:
                     break
                 on.append((i, h))
@@ -1942,6 +1948,10 @@ def mouth_level(data, MIN_GAP=0.15, GRADE=0.03, MAX_GAP=2.5):
             rest = idx[len(on):]
             gap = s[last][1] - new[last]
             L = min(120.0, max(20.0, abs(gap) / GRADE))
+            # (J23: the fade ends by the record's far end: that end keeps its height (its joint))
+            rest_len = sum(math.hypot(s[b][0] - s[a][0], s[b][2] - s[a][2]) for a, b in zip([last] + rest[:-1], rest)) if rest else 0.0
+            if 0 < rest_len < L:
+                L = rest_len
             along, prev = 0.0, last
             for i in rest:
                 if i in cut:
@@ -2150,8 +2160,6 @@ def main():
                     if math.hypot(q[0] - mx, q[2] - mz) < rr and q[8] > 0:
                         q[8] = 0
                         st['median_samples_cleared'] += 1
-    st['islands'] = islands(data)
-    print('islands', st['islands'])
     st['stubs_dropped'] = drop_stubs(data)
     st['downtown_walks'] = downtown_walks(data)
     st['walk_match'] = walk_match(data)  # (J19) after every walk change
@@ -2165,6 +2173,9 @@ def main():
     st['checks'] = check(data)
     st['crossings'] = crossings(data)  # (J19) after every index change: 1-based sample indices for Luau
     st['kiss_clear'] = kiss_clear(data)  # (J21) kerb_cross: a graze pushed off (needs data.crossings)
+    # (J23: islands / fills last, on the final plan: taper, unfold, deck joints, mouth_level and kiss_clear all move edges)
+    st['islands'] = islands(data)
+    print('islands', st['islands'])
     st['signals'] = signals(data)  # last: arms keep their sample indices
     txt = json.dumps(data, separators=(',', ':'))
     open(os.path.join(D, 'roads.json'), 'w', encoding='utf-8').write(txt)

@@ -470,13 +470,27 @@ local function polyDist(o, i: number, px, pz, ax: number?, az: number?, nx: numb
 					skipped = true
 					d = math.huge
 				end
+				-- (J23: Roads.build ends a road square at its first / last sample too: a round cap of its half there
+				-- took the kerbs of the road it forks from (Kan Yeiktha Road's start ate Kan Yeiktha's island kerb, Bahan))
+				if (j == 1 and t <= 1e-9) or (j == o.n - 1 and t >= 1 - 1e-9) then
+					local vx, vz = x2 - x1, z2 - z1
+					local L = math.sqrt(vx * vx + vz * vz)
+					local u = if L > 1e-9 then ((px - x1) * vx + (pz - z1) * vz) / L else 0
+					if (j == 1 and u < -0.5) or (j == o.n - 1 and u > L + 0.5) then
+						skipped = true
+						d = math.huge
+					end
+				end
 				if d < best then
 					best, fx, fz = d, x1 + (x2 - x1) * t, z1 + (z2 - z1) * t
 				end
 			end
 		end
 	end
-	if best == math.huge and not nx and not skipped then
+	-- (J23: a cut sample (under a deck, its ground not built) is no road: its side lanes kept no inner kerb / walk)
+	-- (J23, double junction: Bo Min Gaung Street's one uncut sample between two deck cuts (45 wide) is no road either:
+	-- Roads.build lays segments; its 45-stud circle took Horse Race Course Road (Bridge)'s kerb, water in the box)
+	if best == math.huge and not nx and not skipped and not cut[i] and not ((i == 1 or cut[i - 1]) and (i == o.n or cut[i + 1])) then
 		local a = o.s[i]
 		best, fx, fz = hyp(px - a[1], pz - a[3]), a[1], a[3]
 	end
@@ -637,7 +651,10 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 				if fx and fz then
 					local L = hyp(px - fx, pz - fz)
 					if L > 1e-6 then
-						ax, az, nx, nz = fx, fz, (px - fx) / L, (pz - fz) / L
+						-- (J23: the line 1 stud on my side: a T ending a hair past my centre (Lane #4245 on Kabar Aye
+						-- Pagoda Road #5, 0.1) took my FAR kerb and walk in a circle of its half round its end)
+						nx, nz = (px - fx) / L, (pz - fz) / L
+						ax, az = fx + nx, fz + nz
 					end
 				end
 			end
@@ -1862,6 +1879,72 @@ function M.buildCorners()
 	return string.format("corners: %d parts\n  %s", made, table.concat(lines, "\n  "))
 end
 
+-- (J23, double junction / Bahan / Kun Chan kerb_gap "END": a road end that is no mouth, no continuation and no dead end
+-- (it stops among other roads, e.g. under a deck) ended square with nothing past it: open asphalt edge, water in the
+-- test). Its end line gets a kerb (0.9 out, corner kerb top) wherever nothing is built just past it
+function M.endKerbs(names: { string })
+	local mouthEnd, made = {}, 0
+	for _, m in M.mouths do
+		mouthEnd[m.road .. "@" .. m.i0] = true
+	end
+	local P = RaycastParams.new()
+	P.FilterType = Enum.RaycastFilterType.Include
+	P.FilterDescendantsInstances = { M.folder() }
+	local pal = M.palette
+	local kp: { [string]: any } = { Name = "Kerb", Material = pal.kerbMaterial, Color = pal.kerb, CastShadow = false }
+	for _, name in names do
+		local o = M.R[name]
+		local folder = M.folder():FindFirstChild(name)
+		if not o or not folder or o.n < 2 then
+			continue
+		end
+		for _, e in { { 1, 1, "startsOnEnd" }, { o.n, -1, "endsOnEnd" } } do
+			local i0, step = e[1], e[2]
+			local s, q = o.s[i0], o.s[i0 + step]
+			if o[e[3]] or M.cut[name][i0] or mouthEnd[name .. "@" .. i0] or radius(s) < M.R_OUT or not own(s[1], s[3]) then
+				continue
+			end
+			local free = true
+			for oi, b in M.near(s[1], s[3], 2) do
+				local w = M.list[oi]
+				if w ~= o and polyDist(w, b[2], s[1], s[3]) < M.sideHalf(w, b[2], s[1], s[3]) + 2 then
+					free = false
+					break
+				end
+			end
+			if free then
+				continue -- (an OSM dead end: the street ends at the ground)
+			end
+			local ux, uz = s[1] - q[1], s[3] - q[3]
+			local L = math.max(hyp(ux, uz), 1e-6)
+			ux, uz = ux / L, uz / L
+			local lx, lz = edgeXZ(o, i0, -1)
+			local rx, rz = edgeXZ(o, i0, 1)
+			local W = hyp(rx - lx, rz - lz)
+			local nk = math.max(1, math.floor(W + 0.5))
+			for k = 0, nk - 1 do
+				local a = Vector3.new(lx + (rx - lx) * k / nk, s[2], lz + (rz - lz) * k / nk)
+				local b = Vector3.new(lx + (rx - lx) * (k + 1) / nk, s[2], lz + (rz - lz) * (k + 1) / nk)
+				local m = (a + b) / 2
+				local road = workspace:Raycast(m + Vector3.new(-ux * 0.3, 3, -uz * 0.3), Vector3.new(0, -6, 0), P)
+				local past = workspace:Raycast(m + Vector3.new(ux * 0.45, 3, uz * 0.45), Vector3.new(0, -6, 0), P)
+				if road and road.Instance.Name == "Road" and not past and not M.inIsland(m.X + ux * 0.45, m.Z + uz * 0.45, "fills") then
+					local y = road.Position.Y + M.CURB_UP + 0.1
+					local o0, o1 = Vector3.new(a.X - ux * 0.05, y, a.Z - uz * 0.05), Vector3.new(b.X - ux * 0.05, y, b.Z - uz * 0.05)
+					local i1, i2 = Vector3.new(b.X + ux * 0.85, y, b.Z + uz * 0.85), Vector3.new(a.X + ux * 0.85, y, a.Z + uz * 0.85)
+					kp.Color = if k % 4 < 2 and pal.kerbBand then pal.kerbBand else pal.kerb
+					for _, tr in { { o0, o1, i1 }, { o0, i1, i2 } } do
+						if not M.Roads.sliver(tr[1], tr[2], tr[3]) then
+							made += M.Roads.triangle(tr[1], tr[2], tr[3], 6.04, kp, folder)
+						end
+					end
+				end
+			end
+		end
+	end
+	return "end kerbs: " .. made .. " parts"
+end
+
 -- (18 Nov, J9) small traffic islands (roads05_fix islands: kerb-line outlines with each edge's walk): the part the
 -- straight bands and the round corners leave open is paved, its edge exactly on theirs (nothing on top of them):
 -- each edge moved in by its own walk, each corner's run replaced by its pavement's inner curve
@@ -2081,6 +2164,69 @@ function M.buildIslands(which: string?)
 				end
 			end
 			clean = dense
+		end
+		-- (J23, Bahan Kan Yeiktha gore / kerb_gap "Road | Islands": an outline side along a road's END line (a split's
+		-- gore, a dropped corner) has no band kerb: the island lays its own there (corner kerb section: 0.05 out to
+		-- 0.85 in, top CURB_UP + 0.1) and its fill moves in 0.85 off it (nothing under the kerb)
+		local kerbed = {}
+		if which ~= "fills" and #clean >= 3 then
+			local op = OverlapParams.new()
+			op.FilterType = Enum.RaycastFilterType.Include
+			op.FilterDescendantsInstances = { M.folder() }
+			local kp: { [string]: any } = { Name = "Kerb", Material = pal.kerbMaterial, Color = pal.kerb, CastShadow = false }
+			local m = #clean
+			for i = 1, m do
+				local a, b = clean[i], clean[i % m + 1]
+				local L = hyp(b.X - a.X, b.Z - a.Z)
+				local mid = (a + b) / 2
+				local has = L < 0.3
+				for _, q in (if has then {} else workspace:GetPartBoundsInRadius(mid - Vector3.new(0, UP, 0), 1.0, op)) do
+					if q.Name == "Kerb" then
+						has = true
+						break
+					end
+				end
+				if not has then
+					kerbed[i] = true
+					local nx, nz = -(b.Z - a.Z) / L * sg, (b.X - a.X) / L * sg -- (inward)
+					local k = M.CURB_UP + 0.1 - UP
+					local o0, o1 = a + Vector3.new(-nx * 0.05, k, -nz * 0.05), b + Vector3.new(-nx * 0.05, k, -nz * 0.05)
+					local i0, i1 = a + Vector3.new(nx * 0.85, k, nz * 0.85), b + Vector3.new(nx * 0.85, k, nz * 0.85)
+					kp.Color = if i % 2 == 1 and pal.kerbBand then pal.kerbBand else pal.kerb
+					local folder = M.folder():FindFirstChild("Islands") or Instance.new("Folder")
+					folder.Name = "Islands"
+					folder.Parent = M.folder()
+					for _, tr in { { o0, o1, i1 }, { o0, i1, i0 } } do
+						if not M.Roads.sliver(tr[1], tr[2], tr[3]) then
+							made += M.Roads.triangle(tr[1], tr[2], tr[3], 6.04, kp, folder)
+						end
+					end
+				end
+			end
+			if next(kerbed) then
+				local moved = {}
+				for i = 1, m do
+					local pi = (i - 2) % m + 1
+					local p = clean[i]
+					local sx, sz = 0, 0
+					for _, si in { pi, i } do
+						if kerbed[si] then
+							local a, b = clean[si], clean[si % m + 1]
+							local L = math.max(hyp(b.X - a.X, b.Z - a.Z), 1e-6)
+							sx += -(b.Z - a.Z) / L * sg * 0.85
+							sz += (b.X - a.X) / L * sg * 0.85
+						end
+					end
+					if kerbed[pi] and kerbed[i] then
+						-- (a mitre: the sum of the two moves has to reach both offset lines)
+						local L2 = sx * sx + sz * sz
+						local f = if L2 > 1e-6 then 0.85 * 0.85 * 2 / L2 else 1
+						sx, sz = sx * math.min(f, 4), sz * math.min(f, 4)
+					end
+					moved[i] = p + Vector3.new(sx, 0, sz)
+				end
+				clean = moved
+			end
 		end
 		M.islandOutlines[ii] = clean
 		local a2 = 0
@@ -2551,6 +2697,7 @@ function M.step3()
 	table.insert(log, M.buildCorners())
 	table.insert(log, M.buildIslands())
 	table.insert(log, M.buildIslands("fills"))
+	table.insert(log, M.endKerbs(M.MAIN))
 	task.wait()
 	table.insert(log, M.verge(M.MAIN))
 	task.wait()
@@ -4361,7 +4508,7 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 	P.FilterDescendantsInstances = { root }
 	local nx, nz = math.floor((x1 - x0) / G), math.floor((z1 - z0) / G)
 	local Y0 = yTop or 3000
-	local kind, hy = {}, {}
+	local kind, hy, inst = {}, {}, {}
 	for i = 0, nx do
 		for j = 0, nz do
 			local r = workspace:Raycast(Vector3.new(x0 + i * G, Y0, z0 + j * G), Vector3.new(0, -Y0 - 500, 0), P)
@@ -4377,16 +4524,21 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 			-- "box holes" were nearly all such rays on whole-stud grid points. A miss is cast again 0.003 / 0.006 off;
 			-- a gap narrower than that cannot be seen)
 			for t = 1, 2 do
-				if r then
+				if r and r.Normal.Y >= 0.5 then
 					break
 				end
-				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.003 * t, Y0, z0 + j * G + 0.002 * t), Vector3.new(0, -Y0 - 500, 0), P)
+				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.003 * t, Y0, z0 + j * G + 0.002 * t), Vector3.new(0, -Y0 - 500, 0), P) or r
 			end
 			local k = i * (nz + 1) + j
-			if r then
+			if r and r.Normal.Y < 0.5 then
+				-- (J23: only side faces here = the outer edge of a piece: the J22 retry took a pavement's 4.7-stud side
+				-- face as a "pavement 4.7 lower" (deck-spot pave_step 5 -> 35). An edge cell is no fault either way)
+				kind[k] = "Edge"
+			elseif r then
 				local n = r.Instance.Name
 				kind[k] = if n == "Road" or n == "Kerb" or n == "Pavement" then n else "Other"
 				hy[k] = r.Position.Y
+				inst[k] = r.Instance
 				deckCell[k] = M.deckHalf ~= nil and M.deckHalf[r.Instance.Parent.Name] ~= nil
 			else
 				kind[k] = "None"
@@ -4416,6 +4568,34 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 		end
 		return i * (nz + 1) + j
 	end
+	-- (J23) a road's free end (no other road within its half + 2 of the end sample: an OSM dead end) meets the ground,
+	-- not a kerb: asphalt next to nothing there is no kerb_gap
+	local freeC = {}
+	local function freeEnd(inst: Instance?, x: number, z: number): boolean
+		local o = inst and inst.Parent and M.R[inst.Parent.Name]
+		if not o then
+			return false
+		end
+		for _, e in { o.s[1], o.s[o.n] } do
+			if hyp(e[1] - x, e[3] - z) < o.half + 4 then
+				local key = o.name .. e[1]
+				if freeC[key] == nil then
+					freeC[key] = true
+					for oi, b in M.near(e[1], e[3], 2) do
+						local q = M.list[oi]
+						if q ~= o and polyDist(q, b[2], e[1], e[3]) < M.sideHalf(q, b[2], e[1], e[3]) + 2 then
+							freeC[key] = false
+							break
+						end
+					end
+				end
+				if freeC[key] then
+					return true
+				end
+			end
+		end
+		return false
+	end
 	for i = math.max(1, MG), math.min(nx - 1, nx - MG) do
 		for j = math.max(1, MG), math.min(nz - 1, nz - MG) do
 			local k = K(i, j) :: number
@@ -4436,6 +4616,8 @@ function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: numbe
 				local b = kind[q]
 				if (a == "Road" and b == "None" and deckCell[k]) or (b == "Road" and a == "None" and deckCell[q]) then
 					-- (a deck's open end in the test subset)
+				elseif (a == "Road" and b == "None" and freeEnd(inst[k], x0 + i * G, z0 + j * G)) or (b == "Road" and a == "None" and freeEnd(inst[q], x0 + i * G, z0 + j * G)) then
+					-- (a dead end)
 				elseif (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
 					add("kerb_gap", i, j)
 				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > STEP then
@@ -4595,6 +4777,7 @@ function M.stepCell(box: { number }, root: Instance)
 	M.step("cell: islands")
 	table.insert(log, M.buildIslands())
 	table.insert(log, M.buildIslands("fills"))
+	table.insert(log, M.endKerbs(names))
 	M.step("cell: verge")
 	table.insert(log, M.verge(names))
 	M.step("cell: roundabouts")

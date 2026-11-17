@@ -85,12 +85,13 @@ def cams(d, R, J, name, spot):
     i = nearest(r, x, z)
     s = r['s']
     j, run = i, 0.0
-    while j > 0 and run < back:
+    # (J23: the driver stands inside the spot (0.55 of the half box), not at the test box edge where roads end)
+    while j > 0 and run < back and math.hypot(s[j - 1][0] - x, s[j - 1][2] - z) < h * 0.55:
         run += math.hypot(s[j][0] - s[j - 1][0], s[j][2] - s[j - 1][2])
         j -= 1
     if run < back * 0.6:  # too near the road's start: come from the other end
         j, run = i, 0.0
-        while j < len(s) - 1 and run < back:
+        while j < len(s) - 1 and run < back and math.hypot(s[j + 1][0] - x, s[j + 1][2] - z) < h * 0.55:
             run += math.hypot(s[j + 1][0] - s[j][0], s[j + 1][2] - s[j][2])
             j += 1
     q = s[j]
