@@ -18,7 +18,7 @@ only when every built-surface count at all 17 spots and every QA rule is 0.
 - **Deterministic check (owner):** `qaBuilt` takes every top within 0.01 of the first hit (exclude-and-recast, up to 3) and keeps one by
   TOP_ORDER Kerb < Pavement < Road < other. The ±1-3 noise was the engine returning either of two coplanar parts. Same build twice:
   kunchan_gyophyu 3/42/2/15/0 twice, double_junction 12/86/1/23/2 twice. The QA agent owns the census now (`T.qa` in Roads05StudioTest).
-- **Pipeline:** `J28a_fix.log` / `J28a_mouthsim.log`, then paint / QA / paint QA as `J28_*.log` (see the version line). roads_J27.json = backup.
+- **Pipeline:** `J28a_fix.log` / `J28a_mouthsim.log` (0 failed), `J28_paint.log` (83,914 items) / `J28_qa.log` / `J28_paint_qa.log` = J27 exactly. roads.json md5 7c84f19f, paint.json b2536f41; roads_J27.json = backup. Version line written.
 - **Next (in order, findings in the note):** (3) double_junction kerb_gap 86 / box_hole 12: corner-arc kerb chords leave 1-stud slits
   against the next road's edge ((39930, 32838), (39941, 32839)); (5) Bahan: 15 "None between pavements" slots ((35387, 37898), (35406,
   38080), (35470, 38138)), not counted by qaBuilt; (6) overlaps: Yawmingyi corner wedge on a straight block (34552, 42646); Hledan Road #3
