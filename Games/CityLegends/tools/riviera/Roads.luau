@@ -954,6 +954,15 @@ function Roads.build(data, opts)
 								count += 1
 							else
 								for _, poly in pieces do
+									-- (Yangon J26, opts.paveY: a cut vertex on a bigger road's pavement edge takes its height)
+									if opts.paveY and not whole then
+										for k, v in poly do
+											local y = opts.paveY(r.name, v)
+											if y then
+												poly[k] = Vector3.new(v.X, y, v.Z)
+											end
+										end
+									end
 									for k = 2, #poly - 1 do
 										if not sliver(poly[1], poly[k], poly[k + 1]) then
 											count += triangle(poly[1], poly[k], poly[k + 1], 6, paveProps, folder)

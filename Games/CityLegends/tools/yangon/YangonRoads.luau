@@ -544,6 +544,33 @@ function M.inIsland(px: number, pz: number, which: string?): boolean
 	return false
 end
 
+-- (J26) a road's built edge height at the foot of (x, z) on its edge line (nearest uncut segment; the end segments
+-- run on past the ends): the height of that road's straight pavement at (x, z), less CURB_UP
+local function edgeAt(EL, cut, x: number, z: number): (number?, number)
+	if not EL then
+		return nil, math.huge
+	end
+	local best, by = math.huge, nil :: number?
+	for k = 1, #EL - 1 do
+		local a, b = EL[k], EL[k + 1]
+		if a and b and not (cut and (cut[k] or cut[k + 1])) then
+			local sx, sz = b.X - a.X, b.Z - a.Z
+			local L2 = sx * sx + sz * sz
+			if L2 > 1e-9 then
+				local t = ((x - a.X) * sx + (z - a.Z) * sz) / L2
+				local tc = math.clamp(t, 0, 1)
+				local d = hyp(x - (a.X + sx * tc), z - (a.Z + sz * tc))
+				if d < best then
+					local te = if (k == 1 and t < 0) or (k == #EL - 1 and t > 1) then t else tc
+					best, by = d, a.Y + (b.Y - a.Y) * te
+				end
+			end
+		end
+	end
+	return by, best
+end
+M.edgeAt = edgeAt
+
 function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local px, pz = pos.X, pos.Z
 	-- a driveway mouth (fuel station entry / exit, roads05 data.driveways): no kerb across it
@@ -664,6 +691,49 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 		end
 	end
 	return false
+end
+
+-- (J26, corner pavement height rule; Roads.build's opts.paveY) a vertex of my cut pavement piece on the edge of a
+-- zone (sideZone true within 0.2 of it) where a bigger road's pavement lies takes THAT road's straight-pavement
+-- height there, so the two pavements meet with no step (deck_run: Lane #4610's 30-wide walk stood 0.25-0.3 under
+-- Yawmingyi Street's along the corner's ownership line). Vertices within 1.5 of my own kerb keep my height (they meet
+-- my kerb top), and so do vertices on a round corner's zone (the corner's own pieces meet them). nil = keep.
+function M.paveY(name: string, v: Vector3): number?
+	local px, pz = v.X, v.Z
+	local me = M.R[name]
+	local near = M.near(px, pz, 3)
+	local mine = near[me.index]
+	if not mine or polyDist(me, mine[2], px, pz) < M.halfAt(me, mine[2]) + 1.5 or M.inCorner(px, pz) then
+		return nil
+	end
+	local edge = false
+	for _, d in { { 0.2, 0 }, { -0.2, 0 }, { 0, 0.2 }, { 0, -0.2 } } do
+		if not M.inCorner(px + d[1], pz + d[2]) and M.sideZone(name, Vector3.new(px + d[1], 0, pz + d[2]), "Pavement") then
+			edge = true
+			break
+		end
+	end
+	if not edge then
+		return nil
+	end
+	local E = M.Roads.debugEdges
+	local best, by = math.huge, nil
+	for oi, b in near do
+		local o = M.list[oi]
+		if oi ~= me.index and o.rank < me.rank and E[o.name] and o.kind ~= "side" then
+			local oh = M.sideHalf(o, b[2], px, pz)
+			local d = polyDist(o, b[2], px, pz)
+			if d > oh + 0.5 and d < oh + math.max(o.walkL or M.WALK, o.walkR or M.WALK) + 0.3 and d < best then
+				local yl, dl = edgeAt(E[o.name].L, M.cut[o.name], px, pz)
+				local yr, dr = edgeAt(E[o.name].R, M.cut[o.name], px, pz)
+				local y = if dl < dr then yl else yr
+				if y then
+					best, by = d, y + M.CURB_UP
+				end
+			end
+		end
+	end
+	return by
 end
 
 ------------------------------------------------------------------------------------------------
@@ -1698,6 +1768,19 @@ function M.buildCorners()
 		local yA, yB = sY(c.sa, c.sta), bY(c.sbb, c.stb)
 		c.yA, c.yB = yA, yB -- (J10: the island fill meets this pavement at its height)
 		local yP = sY(c.ka, c.ta)
+		-- (J26, corner pavement height rule, deck_run pave_step) every corner pavement vertex off the kerb (the arc
+		-- pavement's inner points, the chip) at arc share u is (1 - u) x A's straight-pavement height at the vertex +
+		-- u x B's (each = that road's built edge height at the vertex's foot on its edge line), so the corner meets
+		-- both straight pavements however far it reaches along them; the kerb-side points keep the kerb's yA..yB
+		local function hAt(x: number, z: number, u: number): number
+			local y0 = yA + (yB - yA) * u
+			if c.ring then
+				return y0 + M.CURB_UP
+			end
+			local ha = edgeAt(ES, M.cut[c.road], x, z) or y0
+			local hb = edgeAt(E[c.big.name][if c.sb < 0 then "L" else "R"], M.cut[c.big.name], x, z) or y0
+			return ha + (hb - ha) * u + M.CURB_UP
+		end
 		-- the asphalt: TA, this road's kerb line back to P, P, the other road's kerb line on to TB, the arc back
 		local poly = { Vector3.new(c.tax, yA, c.taz) }
 		for k = c.sa, c.ka + 1, -1 do -- (ePts run outward from the road's end: TA is further out than P)
@@ -1779,8 +1862,9 @@ function M.buildCorners()
 			end
 			if c.r - 0.85 > 0.05 then
 				local a0, a1 = pt(u0, c.r - 0.85, y0 + M.CURB_UP), pt(u1, c.r - 0.85, y1 + M.CURB_UP)
-				local b0 = pt(u0, math.max(c.r - (c.wA + (c.wB - c.wA) * u0), 0), y0 + M.CURB_UP)
-				local b1 = pt(u1, math.max(c.r - (c.wA + (c.wB - c.wA) * u1), 0), y1 + M.CURB_UP)
+				local b0 = pt(u0, math.max(c.r - (c.wA + (c.wB - c.wA) * u0), 0), 0)
+				local b1 = pt(u1, math.max(c.r - (c.wA + (c.wB - c.wA) * u1), 0), 0)
+				b0, b1 = Vector3.new(b0.X, hAt(b0.X, b0.Z, u0), b0.Z), Vector3.new(b1.X, hAt(b1.X, b1.Z, u1), b1.Z)
 				for _, t in { { a0, a1, b1 }, { a0, b1, b0 } } do
 					if not M.Roads.sliver(t[1], t[2], t[3]) then
 						made += M.Roads.triangle(t[1], t[2], t[3], 6, pave, folder)
@@ -1856,14 +1940,15 @@ function M.buildCorners()
 			if math.abs(det) > 0.2 then
 				local sA = cross2(rx, rz, -vx, -vz) / det
 				local dx, dz = nax * c.wA + ux * sA, naz * c.wA + uz * sA -- D = P' - P
-				local yM = (yA + yB) / 2 + M.CURB_UP
-				local chip = { Vector3.new(c.px + dx, yM, c.pz + dz), Vector3.new(c.tax + dx, yA + M.CURB_UP, c.taz + dz) }
+				-- (J26: the chip reaches ~wB along B's back line, where B's straight pavement stands at B's edge height
+				-- THERE, not at TB's: hAt, the corner's one height rule; P' (on both back lines) the mean)
+				local chip = { Vector3.new(c.px + dx, hAt(c.px + dx, c.pz + dz, 0.5), c.pz + dz), Vector3.new(c.tax + dx, hAt(c.tax + dx, c.taz + dz, 0), c.taz + dz) }
 				local nq = math.max(4, math.ceil(math.abs(c.sweep) * c.r / 2))
 				for q = 1, nq - 1 do
 					local x, z = arcPoint(c, q / nq, c.r)
-					table.insert(chip, Vector3.new(x + dx, yA + (yB - yA) * q / nq + M.CURB_UP, z + dz))
+					table.insert(chip, Vector3.new(x + dx, hAt(x + dx, z + dz, q / nq), z + dz))
 				end
-				table.insert(chip, Vector3.new(c.tbx + dx, yB + M.CURB_UP, c.tbz + dz))
+				table.insert(chip, Vector3.new(c.tbx + dx, hAt(c.tbx + dx, c.tbz + dz, 1), c.tbz + dz))
 				local pave: { [string]: any } = { Name = "Pavement", Material = pal.paverMaterial, Color = pal.paver, CastShadow = false }
 				for k = 2, #chip - 1 do
 					if not M.Roads.sliver(chip[1], chip[k], chip[k + 1]) then
@@ -2626,6 +2711,7 @@ function M.buildRoads(names: { string })
 		cut = M.cut,
 		noSlab = M.noSlab,
 		sideZone = M.sideZone,
+		paveY = M.paveY,
 		live = true,
 		keepEdges = true,
 		edgesFor = edgesFor,
