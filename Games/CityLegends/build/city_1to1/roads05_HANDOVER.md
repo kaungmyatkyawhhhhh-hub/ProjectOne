@@ -1,3 +1,28 @@
+# roads05 handover (18 Nov 2026, nineteenth pass: J23, GEOMETRY agent; DATA + BUILDER + QA + Studio 16 spots + 32 shots)
+
+## J23 geometry -- built-surface totals J22 -> J23 (16 spots): box_hole 77 -> 66, kerb_gap 639 -> 446, road_step 148 -> 107, pave_step 308 -> 143, buried 14 -> 5
+Per spot + shots: vault `City Legends/2026-11-18 roads05 J23 studio check.md`. Python QA (`J23_qa.log`): seam_step 3 -> 0, pave_step 3 -> 0, kerb_cross 0,
+mouthsim 0 failed of 11,569, deck_grade 7. Backups `roads_J22final.json`, `qa_J22.json`.
+- **qaBuilt:** keeps only up-facing hits; a cell with only side faces = "Edge" (no fault): the J22 retry had taken pavement side
+  faces for "pavements 4.7 lower" (the deck-spot pave_step rise was QA, not the builder). Asphalt next to nothing at a free (OSM
+  dead) end is not a kerb_gap.
+- **polyDist (builder + kerbsim):** cut samples and a lone uncut sample between cuts are no road; road ends are square (no round
+  cap). **sideZone:** a smaller road is clipped 1 stud on my side of my centre (T ending 0.1 past it took my far kerb).
+- **buildIslands:** an outline side with no band kerb just inside it (ray, not bounding box) gets its own kerb, fill moved in 0.85.
+  **endKerbs** (new, after islands, in stepCell and step3): a non-mouth, non-continuation, non-dead end gets a kerb where nothing is
+  built just past it.
+- **roads05_fix:** islands / fills computed last (after kiss_clear); `mouth_level`: one host per run, skips continuation joints,
+  "on" while any of the cross-section lies on the host, two runs blend linearly, abutting runs leave 3 samples for the climb,
+  the fade ends by the far end.
+- **roads05_studiotest.py:** driver camera within 0.55 of the half box and never inside a ring island.
+- **Next (in order):** (1) deck_run pave_step 0 -> 23 (Lane #4610 / #4611 x Yawmingyi (York) Street wide pavements, 0.27-0.38:
+  builder, data unchanged): find which J23 builder change; (2) double_junction water south of the box (East Horse Race Course Road
+  (Bridge)'s ground start under the Bo Min Gaung bridge: data); (3) rounded noses at the 6 dropped corners + Kun Chan Gyophyu ramp
+  foot strip (kerb_gap 30 at (36150, 42666)); (4) deck-foot road_step pyay_univ 37 / slip 32; (5) Bahan Kan Yeiktha split (two
+  island pieces, hole strip, START-line kerb); (6) a lane wider than its host (Lane #1256 on Kabar Aye Pagoda Road #6).
+- Studio: main "City Legends", scratch cleaned, saved version 1229, lock released; ClaudeTools.YangonRoads = repo file (checksum
+  1649648240); asset 133014134133489 = the J23 pack. Plan is NOT ready for owner approval.
+
 # roads05 handover (18 Nov 2026, eighteenth pass: J22, GEOMETRY agent; DATA + BUILDER + QA + Studio 16 spots; stopped: context)
 
 ## J22 geometry -- built-surface totals J21 -> J22 (16 spots): box_hole 234 -> 77, kerb_gap 937 -> 639, road_step 168 -> 148, pave_step 211 -> 308 (UP), buried 15 -> 14
