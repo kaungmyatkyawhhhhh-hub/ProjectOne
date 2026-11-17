@@ -33,8 +33,12 @@ ChatGPT chat: https://chatgpt.com/c/6afc9c72-7c10-83ec-9c87-8c299adf9bc6
 - Gates PASS: zero open edges on every solid part (runes are flat decals by design), outward normals, fins + fluke + jaw rooted in the body.
 - Preview look (EEVEE, `livy6_hero.png`): cyan-white OUTLINE + BLUE AURA (one voxel-remeshed copy of the body pushed out, only its back faces glow, BLENDED; per-part shells drew a ring at every groove; the shells must not cast shadows or the body goes black), gold + cyan sparkles.
 
-## Known gaps (v1)
-- Eye smaller and less striking than the card.
-- Front-row upper teeth poke ahead of the snout from the 3/4 view.
-- Sparkles sit on the skin instead of trailing behind (Blender preview only; Roblox uses ParticleEmitters).
+## v1.1 gap fixes (owner: "Fix the gaps", 18 Nov)
+- **Eye:** bigger (66 x 40 px, the card's size, not the turnaround's), less clipped half-dome, hot white-cyan centre, sits proud of a carved socket under a carved **brow ledge** (head now 32 ring verts + 8 px stations round the eye so the carve has geometry). Preview: own glow material (7) + two small cyan point lights (Roblox: Neon + PointLight).
+- **Teeth:** upper row inset to 0.82 of the head width 18 px AHEAD of each tooth, front row moved back 6 px: the cones poked out of the narrowing snout's sides.
+- **Sparkles:** now trail behind and below. Cause: a particle point cache can't start before frame 1, so the -80 pre-roll was never simulated. Emission now starts at frame 1 and the preview sits at frame 80. Emission 2.5 (8 blew them out to white).
+- 19 parts, 9,471 tris, gates PASS, IoU unchanged (side 0.871 / no-tail 0.946, top 0.887, front 0.837). Picture `checks/livy6_hero_v2.png`.
+
+## Still open
+- Top/front IoU under 0.90 = the sheet's views disagree (fins, fluke); kept the split-the-difference fins. Owner can pick a view to win.
 - Not done: rig (8 spine + Jaw), Swim, texture bake, FBX, Roblox (Highlight outline, Neon runes/eye, aura + sparkle emitters).

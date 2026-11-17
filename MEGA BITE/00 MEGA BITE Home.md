@@ -32,7 +32,7 @@ A Roblox shark eat-and-evolve game for kids on phones (friend Zev's idea): start
 7. [[2026-11-09 MEGA BITE - Path to 10K CCU]]: what 10K needs (~350-580K players a day), the stages and gates, the 6 levers.
 8. [[2026-11-09 MEGA BITE - Shark art research (models, animation, assets)]]: how every shark/fish must look and swim, Roblox import rules, budgets, the full asset list. READ BEFORE ANY MODEL.
 - Code: `MEGA BITE/Calc` (mapsim.py, exptune.py, debatekids.py).
-- **18 Nov:** Livyatan Tier 6 model v1 in Blender (scene Livyatan T6, outline + blue aura + sparkle preview), waiting for owner review: [[Livyatan T6 - sheets and build]].
+- **18 Nov:** Livyatan Tier 6 model v1.1 (eye, teeth, sparkle trail fixed) in Blender (scene Livyatan T6, outline + blue aura + sparkle preview), waiting for owner review: [[Livyatan T6 - sheets and build]].
 - Methods used: [[Impatient kid simulation]], [[Quality-nerd kid simulation]], [[Dead game method]], [[Debate kids simulation]].
 
 ## Next

@@ -5,7 +5,7 @@ import bpy, math
 from mathutils import Vector
 sc = bpy.context.scene
 col = bpy.data.collections['Livyatan_T6']
-parts = [o for o in col.objects if o.name.startswith('L6_') and 'Shell' not in o.name and 'Spark' not in o.name]
+parts = [o for o in col.objects if o.type == 'MESH' and o.name.startswith('L6_') and 'Shell' not in o.name and 'Spark' not in o.name]
 body = [o for o in parts if not o.name.startswith('L6_Runes') and o.name not in ('L6_Eye', 'L6_MouthInterior', 'L6_UpperTeethRow', 'L6_LowerTeethRow')]
 
 def emit_mat(name, rgb, strength, alpha=1.0, back_only=False):
@@ -54,14 +54,14 @@ for nm, rgb in (('L6_SparkGold', (1.0, 0.75, 0.25)), ('L6_SparkCyan', (0.3, 0.95
         bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.045); sp = bpy.context.object; sp.name = nm
         for c in sp.users_collection: c.objects.unlink(sp)
         col.objects.link(sp)
-    sp.data.materials.clear(); sp.data.materials.append(emit_mat(nm + 'Mat', rgb, 8.0)); sp.hide_render = sp.hide_viewport = False
+    sp.data.materials.clear(); sp.data.materials.append(emit_mat(nm + 'Mat', rgb, 2.5)); sp.hide_render = sp.hide_viewport = False
     sp.location = (0, 0, -50)
 for src, nm, n in (('L6_ArmourSegment4', 'L6_SparkGold', 700), ('L6_ArmourSegment6', 'L6_SparkCyan', 700), ('L6_TailStock', 'L6_SparkCyan', 400), ('L6_ArmourSegment2', 'L6_SparkGold', 500), ('L6_PectoralFinLeft', 'L6_SparkGold', 200), ('L6_PectoralFinRight', 'L6_SparkCyan', 200)):
     o = bpy.data.objects[src]
     for mod in [m for m in o.modifiers if m.type == 'PARTICLE_SYSTEM' and m.name.startswith('Spark')]: o.modifiers.remove(mod)
     ps = o.modifiers.new('Spark_' + nm[3:], 'PARTICLE_SYSTEM').particle_system; s = ps.settings
-    ps.point_cache.frame_start = -80   # the cache starts at 1 by default: the pre-roll was never simulated
-    s.count = n; s.frame_start = -80; s.frame_end = 200; s.lifetime = 70; s.lifetime_random = 0.6
+    s.count = n; s.frame_start = 1; s.frame_end = 400;   # point caches can't start before frame 1, so the pre-roll runs 1..80
+    s.lifetime = 70; s.lifetime_random = 0.6
     s.emit_from = 'FACE'; s.normal_factor = 0.3; s.object_align_factor = (-1.4, 0, -0.5); s.factor_random = 0.25
     s.effector_weights.gravity = 0.0; s.render_type = 'OBJECT'; s.instance_object = bpy.data.objects[nm]
     s.particle_size = 1.0; s.size_random = 0.7; s.use_rotations = True; s.use_dynamic_rotation = True
@@ -93,5 +93,6 @@ for sd in (1, -1):
     if L_.name not in col.objects: col.objects.link(L_)
     vs = [v.co for v in eye.data.vertices if v.co.y * sd > 0]; c = sum(vs, Vector()) / len(vs)
     L_.location = c + Vector((0.05, sd * 0.12, 0)); L_.data.energy = 25; L_.data.color = (0.3, 0.95, 1.0); L_.data.shadow_soft_size = 0.05
-for f in range(-80, 1): sc.frame_set(f)   # particle pre-roll: step frames in order or the trail won't form
+sc.frame_end = max(sc.frame_end, 200)
+for f in range(1, 81): sc.frame_set(f)   # particle pre-roll: step frames in order or the trail won't form
 print('preview ready', len(body), 'outlined parts')
