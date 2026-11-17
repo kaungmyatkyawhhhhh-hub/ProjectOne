@@ -152,8 +152,9 @@ def deloop(l):
         return [l]
     from shapely.ops import linemerge
     pieces = [p for p in lines_of(unary_union(l)) if Point(p.coords[0]).distance(Point(p.coords[-1])) > 1e-6]
-    m = linemerge(pieces) if pieces else None
-    return [x for x in lines_of(m) if x.is_simple] if m is not None else []
+    m = lines_of(linemerge(pieces)) if pieces else []
+    # merged lines that still cross (two loops sharing a node) fall back to their simple noded pieces
+    return m if all(x.is_simple for x in m) else pieces
 
 
 def lines_of(g):

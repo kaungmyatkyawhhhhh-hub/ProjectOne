@@ -226,8 +226,10 @@ def main():
             lc = e0 + ue * (bnd[j] + bnd[j + 1]) / 2
             if deckc.intersects(Point(lc - h * 15)):
                 continue                # (J17) that lane's arrow spot is under a deck (its ground is cut there)
-            probe = LineString([lc - h * 5, lc - h * 40]).buffer(1.5)
-            if not near(probe, 0.0, ('arrow',)):
+            # the lane itself (0.5 in from its two lines), 5-40 studs behind the stop line
+            a, b = e0 + ue * (bnd[j] + 0.5), e0 + ue * (bnd[j + 1] - 0.5)
+            probe = Polygon([a - h * 5, b - h * 5, b - h * 40, a - h * 40])
+            if not probe.is_valid or not near(probe, 0.0, ('arrow',)):
                 iss['arrow_missing'].append(dict(road=r['name'], lane=j, n=n, **xz(lc - h * 15)))
     # --- 2b. zebra arms with incoming traffic and no stop line (signalled junctions only)
     sigp = [Point(j['x'], j['z']) for j in data.get('junctions', []) if j.get('signals')]
