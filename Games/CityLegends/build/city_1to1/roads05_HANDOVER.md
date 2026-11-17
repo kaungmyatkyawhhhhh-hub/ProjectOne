@@ -1,3 +1,11 @@
+# Studio test harness (J16, 18 Nov 2026, STUDIO TEST agent)
+- Committed tool, no transcripts needed: `tools/yangon/city/roads05_studiotest.py [net dir] [paint.json]` (spots + cameras in its
+  `SPOTS` / `CLOSE`, roads via roads05_jsubset, paint triangles clipped to each box, pack -> `imports/sync/roads05_studiotest.rbxmx`)
+  + `tools/yangon/city/Roads05StudioTest.luau` (install / run / layPaint / cam / pick / clean; steps in its header). PATCH asset
+  133014134133489, LoadAsset, `T.install(m)`, `T.run(spot)` one spot at a time (lifted 400, terrain fills to a no-op), `T.clean()`.
+- J16 results, faults and builder bugs: `City Legends/2026-11-18 roads05 J16 studio test.md` (Bahan regression: 2 holes + side-by-side
+  kerbs at Lane #4701; stray kerb stubs at Kun Chan and the double junction; deck fork / landing creases; Pazundaung Y sparse paint).
+
 # roads05 handover (18 Nov 2026, eleventh pass: J15, GEOMETRY agent; DATA + BUILDER CODE, no Studio test: context)
 
 ## J15 geometry (this pass) -- counts J14 -> J15: see the table at the end of this section (`J15_qa.log`)
