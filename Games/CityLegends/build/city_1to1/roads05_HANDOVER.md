@@ -71,6 +71,11 @@
      photos (downtown, Pyay Rd, Kabar Aye) and note it in `Roblox Playbook/2026-11-13 Research - Yangon road look.md`;
      the median-end lamp poles belong to the street-detail layer.
 3. Remaining J13 rows above, the 7 decks, the 4 different-named absorbs.
+4. Traffic lights (owner: "we need traffic lights too"), the step right after the road rebuild: mark each junction
+   with an OSM highway=traffic_signals / crossing=traffic_signals node within ~25 m of its box as `signals: true` with
+   its arms in roads.json (roads05_paint.py already finds them: "signals 291" in its log, P1-P12), heads at each
+   approach's stop line from `city/street_kit.py` SGL poles, phases as the old map's (`CityLayout` phases,
+   `Traffic.lua` red-light stops). Not recorded in roads.json yet.
 
 # (J12 pass below)
 
