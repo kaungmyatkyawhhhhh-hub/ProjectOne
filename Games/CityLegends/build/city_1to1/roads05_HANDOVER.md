@@ -1,3 +1,5 @@
+# Paint (PAINT agent): rules, QA counts, previews and what is left are in `roads05_HANDOVER_paint.md`.
+
 # Studio test harness (J16, 18 Nov 2026, STUDIO TEST agent)
 - Committed tool, no transcripts needed: `tools/yangon/city/roads05_studiotest.py [net dir] [paint.json]` (spots + cameras in its
   `SPOTS` / `CLOSE`, roads via roads05_jsubset, paint triangles clipped to each box, pack -> `imports/sync/roads05_studiotest.rbxmx`)

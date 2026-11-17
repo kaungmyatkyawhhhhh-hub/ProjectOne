@@ -14,4 +14,5 @@ python roads05_fix.py $T > $N/${L}_fix.log 2>&1 || exit 2
 python roads05_mouthsim.py $N > $N/${L}_mouthsim.log 2>&1 || exit 3
 python roads05_paint.py $T > $N/${L}_paint.log 2>&1 || exit 4
 python roads05_qa.py $T > $N/${L}_qa.log 2>&1 || exit 5
-tail -n 2 $N/${L}_mouthsim.log $N/${L}_qa.log
+python roads05_paint_qa.py $T > $N/${L}_paint_qa.log 2>&1 || exit 6
+tail -n 2 $N/${L}_mouthsim.log $N/${L}_qa.log $N/${L}_paint_qa.log
