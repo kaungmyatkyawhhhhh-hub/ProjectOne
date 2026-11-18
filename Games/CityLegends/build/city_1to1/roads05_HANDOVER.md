@@ -14,6 +14,7 @@ Fixed run order (alphabetical), fresh `Y.load()` first. No data change: the pipe
   The leak is in the Roads module copy (not found inside it: maxDh / maxW / finalEdges / debugEdges are all reset per build). `stepCell` now
   takes `M.Roads = require(ClaudeTools.Roads:Clone())` and `M.useRing(nil)` per cell; `buildMouth` uses `m.ringR` for a ring outline.
 - **Studio 200k limit:** Source over 200,000 chars cannot be set; YangonRoads was 199,8xx. `qaBuilt` removed (T.qa replaced it): 192,796.
+- **QA (census refresh, bc4cc89d):** same totals and parts twice; new T.qa open-ground rule: pave_gap 188 -> 105 (re-pack the runner). Pipeline = J29 (no data change).
 - **Next (in order):** (1) pave_gap 188: mostly the narrow ends of open ground between two pavements (block interiors, islands), not
   two-road slots: needs a QA + builder rule ("ground under X between pavements is paved"); (2) kerb_gap 253 (not reached; seen: Lane #3357
   south kerb missing by its ring corner, roundabout4 (35812-35830, 45048-45063)); (3) buried 11 + the Bridge start: East Horse Race Course

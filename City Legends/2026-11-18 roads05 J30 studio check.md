@@ -41,6 +41,10 @@ Main Studio "City Legends". Pack = asset 133014134133489 revision 201 (J29 data 
 
 The J29 column was measured in a different order, before the state leak was fixed, so a spot can move by a few cells for that reason alone. Worse at one spot: kunchan_gyophyu road_step 2 -> 3 and buried 0 -> 1, both at the Lane #3414 / Kun Chan Road #3 nose (36355, 42408), a spot that was already faulty in J28 (pave_step + kerb_gap there). univ_kabaraye pave_step 7 -> 8: not traced.
 
+QA agent check (census refresh, version 1311): the same totals in the same order, and two runs gave the same parts at all 17 spots, so the state-leak fix holds. Its new rule (open ground that widens into a block within 6 studs is not a slot) takes pave_gap 188 -> **105**. The runner needs a re-pack to get the rule.
+
+Pipeline re-run (no data change): roads.json 95dfb789 / paint.json 84b94130 = J29, mouthsim 0 failed of 11,570, QA mouth_short real 4 (incl. the Bridge start).
+
 The owner's target is 0 on every count at all 17 spots. Not there yet.
 
 ## Shot
