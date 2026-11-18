@@ -102,6 +102,7 @@ local paths = {
 	RewardsPalace = "src/server/RewardsPalace.lua",
 	EntranceRamp = "src/server/EntranceRamp.lua",
 	Cars = "src/shared/Cars.lua",
+	CarMeta = "src/shared/CarMeta.lua",
 	GemShowcase = "src/server/GemShowcase.lua",
 	Luxe = "src/server/Luxe.lua",
 }

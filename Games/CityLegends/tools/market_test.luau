@@ -13,7 +13,11 @@ end
 
 local baseEnv = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, UDim2 = roblox.UDim2, Enum = roblox.Enum, CFrame = roblox.CFrame }
 local Config = load("src/shared/Config.lua", baseEnv)
-local Cars = load("src/shared/Cars.lua", baseEnv)
+-- (19 Nov 2026) Cars.lua requires shared/CarMeta (the fair prices, Local / Import, rarity)
+local carsEnv = table.clone(baseEnv)
+carsEnv.script = { Parent = { WaitForChild = function(_, n) return n end } }
+carsEnv.require = function(n) return load("src/shared/" .. n .. ".lua", baseEnv) end
+local Cars = load("src/shared/Cars.lua", carsEnv)
 
 -- PlayerData stub
 local profiles = {}
@@ -132,11 +136,14 @@ end
 r = invoke("open")
 check(#r.state.stash == Config.Market.StashSlots, "stash capped at " .. Config.Market.StashSlots)
 -- redeem a showroom unit, refuse others
-local showroom, other
+local showroom, other, import
 for _, x in r.state.stash do
-	if x.cond == "Showroom" and not profiles[player].Owned[x.car] then showroom = showroom or x elseif x.cond ~= "Showroom" then other = other or x end
+	if x.cond == "Showroom" and not profiles[player].Owned[x.car] then
+		if Cars.isImport(x.car) then import = import or x else showroom = showroom or x end
+	elseif x.cond ~= "Showroom" then other = other or x end
 end
 if other then check(not invoke("redeem", { u = other.u }).ok, "non-showroom delivery refused") end
+if import then check(not invoke("redeem", { u = import.u }).ok, "an Import is never delivered for cash (19 Nov)") end
 if showroom then
 	local res = invoke("redeem", { u = showroom.u })
 	check(res.ok and profiles[player].Owned[showroom.car] == true, "showroom unit delivered to garage")

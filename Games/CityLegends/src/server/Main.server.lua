@@ -630,6 +630,10 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 	if not Cars.forSale(carId) then
 		return { ok = false, message = "Not for sale" }
 	end
+	-- (owner, 19 Nov 2026) an Import-only car is never sold for cash: crates only
+	if Cars.isImport(carId) then
+		return { ok = false, message = "Import only: from crates" }
+	end
 	-- (19 Nov, owner: the HUD's DEALER button opens the dealer from anywhere) bought anywhere now;
 	-- the server still checks the car, the level, the price and the cash
 	-- (2026-11-03) cars cost money only; class X also needs a player level (CarStats.requiredLevel)

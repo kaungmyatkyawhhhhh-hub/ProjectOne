@@ -441,7 +441,8 @@ for _, series in oldTrimSeries do
 	table.insert(allSeries, series)
 end
 
--- trims that land in class S2 or R on a cheap base car (owner, 2026-11-07, see PriceSource above)
+-- trims that land in class S2 or R on a cheap base car (owner, 2026-11-07, see PriceSource above; since
+-- 19 Nov the CarMeta price wins for the cars on sale: these stay for the retired 991.2 trims and the model)
 Cars.TrimPrices = {
 	mclaran_12c_sport = 850000, mclaran_12c_top = 950000,
 	porsha_gt3_sport = 350000, porsha_gt3_top = 850000,

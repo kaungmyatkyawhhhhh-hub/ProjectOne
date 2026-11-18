@@ -16,7 +16,11 @@ local function load(path: string, env: { [string]: any }): any
 	return luau.load(fs.readFile(root .. "/" .. path), { debugName = path, environment = env })()
 end
 local Config = load("src/shared/Config.lua", baseEnv)
-local Cars = load("src/shared/Cars.lua", baseEnv)
+-- (19 Nov 2026) Cars.lua requires shared/CarMeta (the fair prices, Local / Import, rarity)
+local carsEnv = table.clone(baseEnv)
+carsEnv.script = { Parent = { WaitForChild = function(_, n) return n end } }
+carsEnv.require = function(n) return load("src/shared/" .. n .. ".lua", baseEnv) end
+local Cars = load("src/shared/Cars.lua", carsEnv)
 local env = table.clone(baseEnv)
 local function waitFor(_, name)
 	return { name = name }

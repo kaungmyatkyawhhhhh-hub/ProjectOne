@@ -971,7 +971,8 @@ local function build(root: Frame)
 				local row = rowBase(i, L.rowH, id == s.id)
 				thumb(row, id, Vector2.new(thumbW, thumbH), UDim2.fromOffset(8, (L.rowH - thumbH) // 2))
 				text({ Text = Cars.trimLabel(id), FontFace = HEAVY, TextSize = 16, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(tx, 9), Size = UDim2.new(1, -tx - 8, 0, fs(19)), Parent = row })
-				text({ Text = money(priceOf(id)), FontFace = BOLD, TextSize = 14, TextColor3 = GREEN, Position = UDim2.fromOffset(tx, 9 + fs(20)), Size = UDim2.new(1, -tx - 8, 0, fs(16)), Parent = row })
+				local imp = Cars.isImport(id) -- (19 Nov 2026) Import-only: shown, never sold here
+				text({ Text = if imp then "IMPORT ONLY · CRATES" else money(priceOf(id)), FontFace = BOLD, TextSize = if imp then 12 else 14, TextColor3 = if imp then GOLD else GREEN, Position = UDim2.fromOffset(tx, 9 + fs(20)), Size = UDim2.new(1, -tx - 8, 0, fs(16)), Parent = row })
 				local need = needFor(id)
 				UI.classBadgeFor(id, nil, { Height = fs(17), Position = UDim2.new(0, tx, 1, -fs(17) - 9), Parent = row })
 				local state = if s.owned[id] then "owned" elseif lv < need then "locked" else ""
@@ -1004,7 +1005,13 @@ local function build(root: Frame)
 				local row = rowBase(i, L.rowH, seriesOf(s.id) == ser)
 				thumb(row, baseId, Vector2.new(thumbW, thumbH), UDim2.fromOffset(8, (L.rowH - thumbH) // 2))
 				text({ Text = modelName(ser), FontFace = HEAVY, TextSize = 16, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(tx, 9), Size = UDim2.new(1, -tx - 8, 0, fs(19)), Parent = row })
-				text({ Text = "from " .. money(Cars.get(baseId).Price), FontFace = BOLD, TextSize = 13, TextColor3 = GREEN, Position = UDim2.fromOffset(tx, 9 + fs(20)), Size = UDim2.new(1, -tx - 8, 0, fs(16)), Parent = row })
+				local from: number? = nil
+				for _, sid in idsOf(ser) do
+					if not Cars.isImport(sid) then
+						from = math.min(from or math.huge, Cars.get(sid).Price)
+					end
+				end
+				text({ Text = if from then "from " .. money(from) else "IMPORT ONLY · CRATES", FontFace = BOLD, TextSize = 13, TextColor3 = if from then GREEN else GOLD, Position = UDim2.fromOffset(tx, 9 + fs(20)), Size = UDim2.new(1, -tx - 8, 0, fs(16)), Parent = row })
 				UI.classBadgeFor(baseId, nil, { Height = fs(17), Position = UDim2.new(0, tx, 1, -fs(17) - 9), Parent = row })
 				local sx = tx + math.floor(fs(17) * 2.9) + 8
 				text({ Text = #idsOf(ser) .. " trim" .. (if #idsOf(ser) == 1 then "" else "s"), FontFace = BOLD, TextSize = 12, TextColor3 = GREY, Position = UDim2.new(0, sx, 1, -fs(16) - 9), Size = UDim2.new(1, -sx - 24, 0, fs(15)), Parent = row })
@@ -1065,7 +1072,14 @@ local function build(root: Frame)
 			priceText.Text = money(priceOf(id))
 			priceText.TextColor3 = if (s.data.Cash or 0) >= priceOf(id) then GREEN else WHITE
 			priceNote.Text = if off > 0 then string.format("-%d%% BRAND BONUS", math.floor(off * 100 + 0.5)) else towTag(id)
-			if locked then
+			if Cars.isImport(id) then
+				-- (owner, 19 Nov 2026) an Import-only car: crates only, never for cash here (BuyCar refuses it too)
+				priceCap.Text = "IMPORT ONLY"
+				priceText.Text = "FROM CRATES"
+				priceText.TextColor3 = GOLD
+				priceNote.Text = "Value " .. money(spec.Price) .. (if spec.Rarity then "  ·  " .. string.upper(spec.Rarity) else "")
+				buyBtn.set("IMPORT", "off", "lock")
+			elseif locked then
 				buyBtn.set("LEVEL " .. need, "off", "lock")
 			else
 				buyBtn.set("BUY", "gold", "tag")
@@ -1432,6 +1446,10 @@ local function build(root: Frame)
 			local cb = s.callbacks
 			DealerMenu.close()
 			cb.drive(id)
+			return
+		end
+		if Cars.isImport(id) then
+			showMsg("Import only: from crates", GOLD, "lock")
 			return
 		end
 		local need = needFor(id)

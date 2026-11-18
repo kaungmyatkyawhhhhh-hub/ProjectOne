@@ -14,7 +14,11 @@ local function load(path: string, env: { [string]: any }): any
 end
 local baseEnv = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, UDim2 = roblox.UDim2, Enum = roblox.Enum, CFrame = roblox.CFrame }
 local Config = load("src/shared/Config.lua", baseEnv)
-local Cars = load("src/shared/Cars.lua", baseEnv)
+-- (19 Nov 2026) Cars.lua requires shared/CarMeta (the fair prices, Local / Import, rarity)
+local carsEnv = table.clone(baseEnv)
+carsEnv.script = { Parent = { WaitForChild = function(_, n) return n end } }
+carsEnv.require = function(n) return load("src/shared/" .. n .. ".lua", baseEnv) end
+local Cars = load("src/shared/Cars.lua", carsEnv)
 local function waitFor(_, name)
 	return { name = name, WaitForChild = waitFor }
 end
@@ -61,7 +65,7 @@ for _, spec in Cars.List do
 	end
 end
 table.sort(xCars)
-check(#xCars == 5 and table.concat(xCars, ",") == "bugotti_chiron,bugotti_chiron_pursport,bugotti_chiron_supersport,lambrini_revuelto_sport,lambrini_revuelto_top", "only the Chirouns and the top two Revuelto trims are class X (" .. table.concat(xCars, ",") .. ")")
+check(#xCars == 3 and table.concat(xCars, ",") == "bugotti_chiron,bugotti_chiron_pursport,bugotti_chiron_supersport", "only the Chirouns are class X (the Revuelto trims are deleted, 19 Nov) (" .. table.concat(xCars, ",") .. ")")
 check(rCars.bugotti_veyron and rCars.bugotti_veyron_sport and rCars.bugotti_veyron_top, "the Veyruns are class R")
 check(rCars.lambrini_svj, "the SVJ is class R")
 check(CarStats.classOf("bnw_m5_f90") == "A", "the M5 F90 is class A")
@@ -579,7 +583,7 @@ check(#pr.PartBag.in_cold == 1 and pr.PartBag.nothing == nil and pr.CarSetup.suz
 -- one Urus only, two 458s (2026-11-07): the old Urus's owners get the new one on load
 ---------------------------------------------------------------------
 check(not Cars.forSale("lambrini_urus") and Cars.forSale("lambrini_urusp") and Cars.get("lambrini_urusp").Name == "Enfurecido Brava", "one Urus on sale, named Enfurecido Brava")
-check(Cars.ById.lambrini_urusp_sport == nil and Cars.ById.lambrini_urusp_top == nil and Cars.get("lambrini_urusp").Price == 285000, "no Urus trims, price kept")
+check(Cars.ById.lambrini_urusp_sport == nil and Cars.ById.lambrini_urusp_top == nil and Cars.get("lambrini_urusp").Price == 1200000, "no Urus trims, the 19 Nov price")
 for _, series in Cars.Series do
 	if series.Name == "ENFURECIDO BRAVA" then
 		check(#series.Ids == 1 and series.Ids[1] == "lambrini_urusp", "the Brava line has one car")
@@ -588,7 +592,25 @@ for _, series in Cars.Series do
 	end
 	check(series.Name ~= "ROSSO RAMPANTE F142 COUPE" and series.Name ~= "ENFURECIDO BRAVA OLD", "no retired line on sale: " .. series.Name)
 end
-check(not Cars.forSale("ferrara_458") and Cars.ById.ferrara_458 ~= nil, "the 458 Italia is off sale, owners keep it")
+check(Cars.ById.ferrara_458 == nil and Cars.ById.ferrara_458_sport == nil, "the 458 Italia is deleted (19 Nov)")
+-- the economy (owner approved 19 Nov 2026): CarMeta prices, Local / Import, the "?" cars' decisions, deleted trims
+for _, id in { "bentz_190e", "dearb_focus_rs", "bentz_e63s", "ferrara_458speciale", "bugotti_veyron", "lambrini_revuelto" } do
+	check(Cars.isImport(id), "an Import: " .. id)
+end
+for _, id in { "maseroti_levante", "toyoka_supra_mk4", "lexis_lc500", "nisun_r34", "xiaomo_su7", "bentz_e400", "nisun_gtr", "nisun_gtr_nismo", "lambrini_urusp", "rolls_wraith", "bentlee_contgt", "ferrara_458spider" } do
+	check(Cars.ById[id].Source == "Local", "Local: " .. id)
+end
+for _, id in { "bentz_190e", "maseroti_levante", "toyoka_supra_mk4", "lexis_lc500", "xiaomo_su7", "rolls_wraith", "bentlee_contgt", "lambrini_revuelto" } do
+	check(Cars.ById[id .. "_sport"] == nil and Cars.ById[id .. "_top"] == nil, "trims deleted: " .. id)
+end
+check(Cars.get("nisun_gtr").Trim == "2010" and Cars.get("nisun_gtr_nismo").Model == "nisun_gtr" and CarStats.pi("nisun_gtr_nismo") > CarStats.pi("nisun_gtr"), "the R35's two trims, the Zenith above")
+for _, spec in Cars.List do
+	check(spec.Source ~= nil and spec.Rarity ~= nil, "Source and Rarity on every car on sale: " .. spec.Id)
+	if spec.Rarity == "Hypercar" then
+		check(spec.Source == "Import", "hypercars are imports (crates only): " .. spec.Id)
+	end
+end
+check(Cars.get("toyoka_camri").Price == 93000 and Cars.get("kio_ev6").Price == 0 and Cars.get("nisun_350z").Price == 210000, "the 19 Nov prices")
 for _, spec in Cars.List do
 	check(spec.Id ~= "lambrini_urus" and spec.Id ~= "ferrara_458", "not in the list: " .. spec.Id)
 end
@@ -596,13 +618,16 @@ check(Config.Chauffeur.Fleet.lambrini_urus == nil and Config.Chauffeur.Fleet.lam
 
 for _, spec in Cars.List do
 	local letter = CarStats.classOf(spec.Id)
-	if letter == "S2" and spec.Price < 350000 then
-		check(false, "class S2 from $350,000: " .. spec.Id)
-	elseif letter == "R" and spec.Price < 850000 then
-		check(false, "class R from $850,000: " .. spec.Id)
+	-- (19 Nov 2026: the floors raised to the price curve's own)
+	if letter == "S2" and spec.Price < 1800000 then
+		check(false, "class S2 from $1,800,000: " .. spec.Id)
+	elseif letter == "R" and spec.Price < 3100000 then
+		check(false, "class R from $3,100,000: " .. spec.Id)
+	elseif letter == "X" and spec.Price < 8700000 then
+		check(false, "class X from $8,700,000: " .. spec.Id)
 	end
 end
-check(Cars.get("mclaran_12c_top").Price == 950000 and Cars.get("mclaran_12c_sport").Price == 850000, "the fast trims have their own prices")
+check(Cars.get("mclaran_12c_top").Price == 6800000 and Cars.get("mclaran_12c_sport").Price == 4000000, "the fast trims have their own prices (CarMeta)")
 
 -- towing (2026-11-07)
 for id, kg in Config.Towing.Cars do
@@ -620,7 +645,7 @@ end
 
 saved = {
 	Claimed = true,
-	Owned = { "kio_ev6", "lambrini_urus", "ferrara_458" },
+	Owned = { "kio_ev6", "lambrini_urus", "ferrara_458", "lambrini_revuelto_top" },
 	Selected = "lambrini_urus",
 	CarLevels = { lambrini_urus = 20 },
 	CarXP = { lambrini_urus = 33 },
@@ -633,7 +658,7 @@ saved = {
 	Settings = { Favs = { "lambrini_urus", "kio_ev6" } },
 }
 local one = RealPlayerData.load({ UserId = 43, Name = "OneUrus", Parent = {} })
-check(one.Owned.lambrini_urusp and not one.Owned.lambrini_urus and one.Owned.ferrara_458, "the old Urus becomes the new one, the 458 Italia stays")
+check(one.Owned.lambrini_urusp and not one.Owned.lambrini_urus and not one.Owned.ferrara_458 and not one.Owned.lambrini_revuelto_top, "the old Urus becomes the new one, deleted cars are dropped")
 check(one.Selected == "lambrini_urusp", "selected moves too")
 check(one.CarLevels.lambrini_urusp == 20 and one.CarXP.lambrini_urusp == 33 and one.CarCP.lambrini_urusp == 5, "level, XP and CP move")
 check(one.CarParts.lambrini_urusp and one.CarParts.lambrini_urusp.tyres == "ty_road" and one.CarSetup.lambrini_urusp.final == 1 and one.Customs.lambrini_urusp.paint == "red", "parts, tune and look move")
@@ -653,6 +678,9 @@ saved = {
 	Customs = { lambrini_urus = { paint = "red" }, lambrini_urusp = { paint = "blue" } },
 }
 local both = RealPlayerData.load({ UserId = 44, Name = "BothUrus", Parent = {} })
+saved = { Claimed = true, Owned = { "kio_ev6", "xiaomo_su7_top" }, Selected = "xiaomo_su7_top", CarLevels = { xiaomo_su7_top = 9 } }
+local tester = RealPlayerData.load({ UserId = 45, Name = "Tester", Parent = {} })
+check(tester.Owned.kio_ev6 and not tester.Owned.xiaomo_su7_top and tester.Selected == "kio_ev6" and tester.CarLevels.xiaomo_su7_top == nil, "a deleted trim is dropped; the selected car falls back to one they own")
 check(both.Owned.lambrini_urusp and not both.Owned.lambrini_urus, "owning both ends up with one")
 check(both.CarLevels.lambrini_urusp == 30 and both.CarXP.lambrini_urusp == 7 and both.Customs.lambrini_urusp.paint == "red", "the better car's progress stays")
 check(both.CarCP.lambrini_urusp == 4 + 10, "the other car's level CP is added")

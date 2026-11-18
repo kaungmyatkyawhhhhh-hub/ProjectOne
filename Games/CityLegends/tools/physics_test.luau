@@ -45,7 +45,11 @@ senv.game = {
 	end,
 }
 mods.Config = load("src/shared/Config.lua", baseEnv)
-mods.Cars = load("src/shared/Cars.lua", baseEnv)
+-- (19 Nov 2026) Cars.lua requires shared/CarMeta (the fair prices, Local / Import, rarity)
+local carsEnv = table.clone(baseEnv)
+carsEnv.script = { Parent = { WaitForChild = function(_, n) return n end } }
+carsEnv.require = function(n) return load("src/shared/" .. n .. ".lua", baseEnv) end
+mods.Cars = load("src/shared/Cars.lua", carsEnv)
 mods.PartData = load("src/shared/PartData.lua", senv)
 mods.CarPhysicsData = load("src/shared/CarPhysicsData.lua", senv)
 mods.CarStats = load("src/shared/CarStats.lua", senv)

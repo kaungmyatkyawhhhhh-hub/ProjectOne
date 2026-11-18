@@ -11,7 +11,11 @@ local function load(path: string, env: { [string]: any }): any
 end
 local baseEnv = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, UDim2 = roblox.UDim2, Enum = roblox.Enum, CFrame = roblox.CFrame }
 local Config = load("src/shared/Config.lua", baseEnv)
-local Cars = load("src/shared/Cars.lua", baseEnv)
+-- (19 Nov 2026) Cars.lua requires shared/CarMeta (the fair prices, Local / Import, rarity)
+local carsEnv = table.clone(baseEnv)
+carsEnv.script = { Parent = { WaitForChild = function(_, n) return n end } }
+carsEnv.require = function(n) return load("src/shared/" .. n .. ".lua", baseEnv) end
+local Cars = load("src/shared/Cars.lua", carsEnv)
 local function waitFor(_, name)
 	return { name = name, WaitForChild = waitFor }
 end
