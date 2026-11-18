@@ -13,7 +13,8 @@ What it turns down (measured 19 Nov, vault note "2026-11-19 Performance - low-en
 Auto: phones (touch, no keyboard) start low-end, because the load is the moment a 3 GB phone runs out
 of memory; after 25 s in the world a phone that holds ~55 fps under 1,000 MB goes back to normal
 (traffic counts stay until the next join). Any device that runs under 28 fps for 25 s goes low-end.
-Studio: player attribute TestLowEnd = true forces it on (false forces it off).
+Studio: player attribute TestLowEnd = true forces it on (false forces it off); workspace attribute
+TestLowEnd (set in Edit) does the same from the start.
 Not game look on PC: a PC on Auto stays normal unless it is that slow. ]]
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -116,7 +117,7 @@ local function autoWatch()
 	end)
 	task.wait(25)
 	conn:Disconnect()
-	if LowEnd.mode ~= "Auto" or (player and player:GetAttribute("TestLowEnd") ~= nil) then
+	if LowEnd.mode ~= "Auto" or (player and player:GetAttribute("TestLowEnd") ~= nil) or workspace:GetAttribute("TestLowEnd") ~= nil then
 		return
 	end
 	local fps = frames / (os.clock() - t0)
@@ -131,6 +132,9 @@ end
 
 local function decide()
 	local test = player and player:GetAttribute("TestLowEnd")
+	if test == nil and RunService:IsStudio() then
+		test = workspace:GetAttribute("TestLowEnd") -- (Studio: set in Edit before Play, so counts follow it)
+	end
 	if type(test) == "boolean" then
 		set(test)
 	elseif LowEnd.mode == "Low" then

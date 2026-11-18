@@ -652,6 +652,15 @@ return {
 		},
 		hub = { at = Vector3.new(-0.0045, -0.0108, 0.0617), face = Vector3.new(0.0001, -0.008, 0.9999), r = 0.03, color = Color3.fromRGB(0, 0, 0) },
 	},
+	-- built in Roblox, not converted (2026-11-19): its badges are cut into big chrome meshes, so they are
+	-- covered by MarkPatch parts saved in CarModels (tools/brand_marks/RobloxBuiltPatches.luau); this only
+	-- keeps the tailgate's ALPHARD lettering part away if an older copy of the model comes back
+	toyoka_alfard = {
+		wb = 3,
+		hide = { { name = "MeshPart", size = Vector3.new(1.0649, 0.2134, 0.055) } },
+		covers = {},
+		caps = {},
+	},
 	toyoka_lc300 = {
 		wb = 2.85,
 		hide = {},

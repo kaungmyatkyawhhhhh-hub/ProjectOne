@@ -8365,6 +8365,22 @@
    ]
   }
  },
+ "toyoka_alfard": {
+  "wb": 3.0,
+  "brand": null,
+  "hide": [
+   {
+    "name": "MeshPart",
+    "size": [
+     1.0649,
+     0.2134,
+     0.055
+    ]
+   }
+  ],
+  "covers": [],
+  "caps": {}
+ },
  "toyoka_lc300": {
   "wb": 2.85,
   "brand": null,
