@@ -3454,6 +3454,34 @@ end
 -- Scraps go to ServerStorage.YangonScraps (kept, not deleted), so nothing is lost.
 function M.scrub(remove: boolean)
 	local found, byRoad, n = 0, {}, 0
+	-- (J36, double_junction buried 3: East Horse Race Course Road #3's deck-side kerb under the Bridge Flyover's foot,
+	-- the ramp's top 0.0-0.3 under the kerb's top for ~10 studs: a kerb flush with the asphalt) a kerb block a deck's
+	-- road lies over, less than 0.35 under its top, is raised to stand 0.35 over that deck road
+	do
+		local dp = RaycastParams.new()
+		dp.FilterType = Enum.RaycastFilterType.Include
+		dp.FilterDescendantsInstances = { M.decksFolder() }
+		for _, f in M.folder():GetChildren() do
+			for _, p in f:GetChildren() do
+				if p.Name == "Kerb" and p.ClassName == "Part" then
+					local top = p.Position.Y + p.Size.Y / 2
+					local hi = nil
+					for _, u in { -0.5, 0, 0.5 } do
+						local q = p.CFrame:PointToWorldSpace(Vector3.new(0, 0, u * p.Size.Z))
+						local r = workspace:Raycast(Vector3.new(q.X, top + 3, q.Z), Vector3.new(0, -6, 0), dp)
+						if r and r.Instance.Name == "Road" and r.Position.Y > top - 0.35 then
+							hi = math.max(hi or -math.huge, r.Position.Y)
+						end
+					end
+					if hi and hi < top + 0.35 then
+						local d = hi + 0.35 - top
+						p.Size += Vector3.new(0, d, 0)
+						p.CFrame += Vector3.new(0, d / 2, 0)
+					end
+				end
+			end
+		end
+	end
 	local keep = SS:FindFirstChild("YangonScraps")
 	if remove and not keep and not M.v05 then
 		keep = Instance.new("Folder")
@@ -3530,6 +3558,7 @@ function M.scrub(remove: boolean)
 		return false
 	end
 	local stray, strayBy = 0, {}
+	local patches = {} -- (J36) the asphalt patches laid for strays, for the kerb lift below
 	local stubParams = OverlapParams.new()
 	stubParams.FilterType = Enum.RaycastFilterType.Include
 	stubParams.FilterDescendantsInstances = { roadsF }
@@ -3601,8 +3630,11 @@ function M.scrub(remove: boolean)
 							q.Material = Enum.Material.Asphalt
 							q.Color = M.palette.asphalt
 							q.MaterialVariant = ""
-							q.CFrame -= Vector3.new(0, top.Position.Y - ys[#ys // 2 + 1], 0)
+							-- (J36, kunchan Lane #3414's nose: a patch lifted 1.7 over the kerb it replaced, onto the patches
+							-- laid before it: a spike) a patch never rises
+							q.CFrame -= Vector3.new(0, math.max(0, top.Position.Y - ys[#ys // 2 + 1]), 0)
 							q.Parent = f
+							table.insert(patches, q)
 							M.strayPatched = (M.strayPatched or 0) + 1
 						end
 						p:Destroy()
@@ -3611,6 +3643,50 @@ function M.scrub(remove: boolean)
 			end
 		end
 		task.wait()
+	end
+	-- (J36, buried 6: slip_triangle Lane #15, pyay_univ Lane #588, kunchan Lane #3414's nose) a kerb whose own road's
+	-- asphalt beside it lies within 0.33 under its top (a pinned or steep edge, a stray's asphalt patch) reads as
+	-- flush: the kerb piece is raised to stand 0.33 over it
+	local raised = 0
+	for _, f in roadsF:GetChildren() do
+		for _, p in f:GetChildren() do
+			if p.Name == "Kerb" and p:IsA("BasePart") then
+				local c = if p:IsA("WedgePart") then p.CFrame:PointToWorldSpace(Vector3.new(0, -p.Size.Y / 6, p.Size.Z / 6)) else p.Position
+				local h = workspace:Raycast(Vector3.new(c.X, c.Y + 8, c.Z), Vector3.new(0, -16, 0), P)
+				if not (h and h.Instance.Name == "Kerb" and h.Instance.Parent == f) then
+					continue
+				end
+				local top, need = h.Position.Y, 0
+				for k = 0, 23 do
+					local a, rr = (k % 8) * math.pi / 4, 0.5 + 0.35 * (k // 8)
+					local r = workspace:Raycast(Vector3.new(c.X + rr * math.cos(a), top + 2, c.Z + rr * math.sin(a)), Vector3.new(0, -4, 0), P)
+					if r and r.Instance.Name == "Road" and r.Instance.Parent == f and r.Position.Y > top - 0.33 and r.Position.Y < top + 0.1 then
+						need = math.max(need, r.Position.Y + 0.33 - top)
+					end
+				end
+				if need > 0 then
+					p.CFrame += Vector3.new(0, need, 0)
+					raised += 1
+				end
+			end
+		end
+	end
+	-- (a stray's patch at a nose sits among kerb slivers the probes above miss: probe from each patch too)
+	for _, q in patches do
+		local c = if q:IsA("WedgePart") then q.CFrame:PointToWorldSpace(Vector3.new(0, -q.Size.Y / 6, q.Size.Z / 6)) else q.Position
+		-- (a laid-flat kerb triangle: its top face is half its 6.04 depth over its centre; kerb slivers may cover it)
+		local qy = if math.abs(q.CFrame.RightVector.Y) > 0.99 then q.Position.Y + q.Size.X / 2 else c.Y
+		for k = 0, 23 do
+			local a, rr = (k % 8) * math.pi / 4, 0.5 + 0.35 * (k // 8)
+			local r = workspace:Raycast(Vector3.new(c.X + rr * math.cos(a), qy + 2, c.Z + rr * math.sin(a)), Vector3.new(0, -4, 0), P)
+			if r and r.Instance.Name == "Kerb" and r.Instance.Parent == q.Parent and r.Position.Y < qy + 0.33 and r.Position.Y > qy - 0.1 then
+				r.Instance.CFrame += Vector3.new(0, qy + 0.33 - r.Position.Y, 0)
+				raised += 1
+			end
+		end
+	end
+	if raised > 0 then
+		byRoad["kerbs raised over their own asphalt"] = raised
 	end
 	for k, v in strayBy do
 		byRoad[k .. " stray on asphalt"] = v
