@@ -1,6 +1,6 @@
 ---
 name: "roblox-3d-model-from-sheet"
-description: "Use when making a 3D model (shark, fish, creature, prop) for a Roblox game in the owner's Blender: ChatGPT turnaround sheet AND an exploded-view sheet first, then trace, check face landmarks and look, then export."
+description: "Use when making a 3D model (shark, fish, creature, prop) for a Roblox game in the owner's Blender: ChatGPT turnaround, exploded-view and face detail (eye + mouth cutaway) sheets first, then trace, check face landmarks and look, then export."
 ---
 
 # Roblox 3D model from a design sheet
@@ -25,7 +25,7 @@ Toolkit: roble3/cc-blender-skill (MIT) is unpacked in the vault at `Tools\cc-ble
 
 ## 1a. EVERY model gets an EXPLODED-VIEW sheet (props AND creatures; owner, 18 Nov 2026: "cover them")
 This step is NOT optional and not only for hard-surface props: make the exploded sheet for sharks, fish and every creature too, in the same turn as the turnaround sheet (step 1), before any modelling.
-- **Creatures split into their real parts**, each drawn separately and labelled: body/torso, head, upper jaw, lower jaw, teeth row, eyes, each fin (dorsal, pectoral L/R, pelvic, anal), tail/caudal fin, gills, horns/spikes/accessories. Pull them apart along the body axis (nose to tail) with dashed alignment lines.
+- **Creatures split into their real parts**, each drawn separately and labelled: body/torso, head, upper jaw, lower jaw, teeth row, tongue and gums (open mouths), eyes, each fin (dorsal, pectoral L/R, pelvic, anal), tail/caudal fin, gills, horns/spikes/accessories. Pull them apart along the body axis (nose to tail) with dashed alignment lines.
 - Parts that move (jaw, tail, fins) must be separate objects so they can be rigged and animated; the exploded sheet is what shows their true shape and hinge position.
 - Mark each part's hinge/attach point on the sheet if it moves (a dot and a short label), and measure it in the landmarks JSON.
 - Everything below (prompt, analysis, one Blender object per part, names, image routes) applies to creatures unchanged.
@@ -40,6 +40,14 @@ From the "Exploded Diagram Method" (@oddblockstudios, 16 Nov watch study: a turk
 - Analyse each labelled part on its own: key the magenta, take its silhouette, and use the label as the part name.
 - **Build one Blender object per part, named after its label.** Model each from its own silhouette, then slide it back along the explosion axis to the turnaround's assembled position. The part names become the Roblox MeshPart names, ready for VFX attachments (muzzle, hopper) and for animating moving parts.
 - **Image routes (owner, 16 Nov 2026: "using chatgpt and building a couple of exploded diagrams reference images for the 3d model and using openrouter"):** (1) ChatGPT in the owner's Chrome (works now); (2) OpenRouter with the OWNER's key: the owner sets `OPENROUTER_API_KEY` once with `setx` and tops up credit; Claude never types or sees the key, and the script caps calls per run (`Games/CityLegends/tools/exploded/openrouter_exploded.py`, job json with real reference photos). **Real places (City Legends 1:1):** always ATTACH the real photos and say "copied exactly from the attached photos"; the sheet gives the PARTS and their shapes, real sizes / colours / counts still come from the photos and research notes.
+
+## 1c. FACE DETAIL sheets: EYE AREA + MOUTH CUTAWAY (owner, 18 Nov 2026)
+Why: the exploded view fixed the PARTS, but the eye area and the front-view mouth, tongue and teeth stayed wrong (Livyatan T6). Turnaround and exploded sheets show OUTLINES only; they never show DEPTH: how deep the socket sits, how far the brow overhangs, what is inside an open mouth seen from the front. A cut-through SECTION does for depth what the exploded view does for parts. Make both sheets in the same ChatGPT chat right after step 1a, attaching the card and the turnaround, before any modelling.
+- **EYE AREA sheet, one-try prompt:** "technical detail sheet of the EYE AREA of the creature in the attached images, copied exactly (same style and colours). Four panels, same scale, each labelled: SIDE (eye seen straight on, brow, socket, cheek), FRONT (face seen from the front, both eyes), HORIZONTAL SECTION cut through the eye centre seen from above (socket depth, lens dome, brow overhang), VERTICAL SECTION cut front-to-back through the eye (brow ledge profile, socket floor, cheek). Cut faces filled flat WHITE. Flat MAGENTA #FF00FF background, orthographic, no shadows, no perspective, 1536x1024."
+- **MOUTH sheet, one-try prompt:** "technical detail sheet of the OPEN MOUTH of the creature in the attached images, copied exactly (same style, colours, tooth count). Four panels, same scale, each labelled: FRONT (looking straight into the open mouth: both tooth rows across the front, gums, tongue, roof, dark throat), SIDE CUTAWAY (the head cut in half down the middle: palate, tongue shape and position, tooth roots in the gums, throat depth, jaw thickness), LOWER JAW FROM ABOVE (tooth U-row, tongue outline), UPPER JAW FROM BELOW (palate, tooth U-row). Cut faces filled flat WHITE. Flat MAGENTA #FF00FF background, orthographic, no shadows, no perspective, 1536x1024."
+- The exploded sheet (1a) must also list **TONGUE** and **UPPER/LOWER GUMS** for any creature with an open mouth. The tongue is its own part and rides on the Jaw bone.
+- **Measure:** scale every panel by the head height shared with the turnaround. Eye sections give the socket depth, brow overhang and lens dome height (no guessed push distances). The side cutaway gives the tongue loft, the palate, the throat depth (the mouth interior must reach that deep: NO see-through gape from the front) and how far the tooth roots sink into the gums. Tooth COUNT: the turnaround wins if the sheets disagree; tooth SHAPE and the U-row layout come from the jaw panels.
+- **Gates (add to step 4):** render the model in the same panels at the sheet's framing (section renders: bisect a copy of the head and fill the cut white). Colour-region IoU at least 0.85 per region (lens, socket, teeth, tongue, mouth interior), and crop each panel side by side with the sheet and look. Front view: no magenta shows through the gape.
 
 ## 1b. Check the sheet is consistent BEFORE modelling
 - Scale the side and front views to the same head height and draw horizontal guide lines (eye centre, top of mouth, lower jaw top, chin). If the front puts features at different heights than the side, NO 3D model can match both 1:1. Show the owner the guide-line image and ask which view wins (default: split the difference).
@@ -67,6 +75,7 @@ From the "Exploded Diagram Method" (@oddblockstudios, 16 Nov watch study: a turk
 - **Fin attachment gate (owner, 10 Nov: "the side fins ... like levitating")**: every fin island must have vertices INSIDE the body, measured per fin with `MEGA BITE\Art\fincheck.py`. Sink the roots 15-25 px into the body; side fins start from the body's real width at that height (ray-cast), never a constant offset; side fins drawn ON the flank have their front third rooted in the body. Look from BELOW and the FRONT too, never only the side view.
 - **Face landmarks checked separately** (landmark_fit_report.py): eye, brow, lip line, mouth corner and teeth within ~2% of the head length. A passing body outline does not mean the face is right.
 - Look calibration last (look_fit_report.py): camera framing → background → base colours → glow → exposure. Never hide bad shapes with lighting.
+- **Face detail gates (step 1c):** eye-area and mouth panels rendered at the sheet's framing, colour-region IoU at least 0.85, no see-through gape from the front.
 - Crop the HEAD from both images side by side and look at it. If it doesn't read as the same character, fix it before showing anything.
 - Then load into the owner's Blender (exec the vault script) and use `look` with angles.
 
