@@ -11,7 +11,7 @@ from shapely.geometry import Point
 from shapely.ops import unary_union
 import geo
 
-GROW = 600
+GROW = float(os.environ.get("R05_GROW", 600))  # R05_GROW: wider reach (seam cells rebuilt whole, P7 18 Nov)
 CHUNK = 185000
 src, dst, ds = sys.argv[1], sys.argv[2], sys.argv[3:]
 S = os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + src)

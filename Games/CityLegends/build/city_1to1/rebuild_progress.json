@@ -143,5 +143,16 @@
   "Sule Pagoda Road box hole (36092, 43529)",
   "P4+ districts"
  ],
- "mc_ramps": "DONE 18 Nov: ramp_mouths.json + roads05_ramps.py (Lane #4080/#4081 dropped, #4082 cut 11 samples, 2 ramp driveways), YangonRoads.sideZone ramp drops pavement (179623 chars, checksum 221012820, in Studio ClaudeTools), bake ramp_gaps; cells 22x17+22x18 rebuilt (subset roads05_RBM, glb assets 116769588627695/122257664879454/117456821135757, 1811 boxes), aprons MCRampAprons (Landmarks.MyanmarCentre.RampAprons, re-run after rebuilding those cells), trenches cleared; Play PASS all 3 ramps in+out, parking 207 bays/8 cars, bay park ok; saved v1445, backup deleted"
+ "mc_ramps": "DONE 18 Nov: ramp_mouths.json + roads05_ramps.py (Lane #4080/#4081 dropped, #4082 cut 11 samples, 2 ramp driveways), YangonRoads.sideZone ramp drops pavement (179623 chars, checksum 221012820, in Studio ClaudeTools), bake ramp_gaps; cells 22x17+22x18 rebuilt (subset roads05_RBM, glb assets 116769588627695/122257664879454/117456821135757, 1811 boxes), aprons MCRampAprons (Landmarks.MyanmarCentre.RampAprons, re-run after rebuilding those cells), trenches cleared; Play PASS all 3 ramps in+out, parking 207 bays/8 cars, bay park ok; saved v1445, backup deleted",
+ "P7": {
+  "status": "IN PROGRESS (DISTRICT REBUILD agent, 18 Nov night)",
+  "plan": "3072-col x9..11; step boxes per col: z 32256..33792 (1536 row 21, label <x>x10), 3072 rows z11 z12 (labels <x>x11/<x>x12), z 39936..41472 (1536 row 26, label <x>x13). Swap 1536 cells x19..23 z21..26 whole (z21 = P1 cells, z26 = P3 cells rebuilt whole: subset.json clip = P7+P1+P3 boxes).",
+  "data": "roads05_subset.py net RB7 P7 with R05_GROW=1700 (1279 roads, 36 modules, checksums roads05_RB7/pack_checksums.txt) -> imports/sync/rebuild_RB7_data.rbxmx -> asset 133014134133489 rev 218",
+  "buildings": "district_files.sh P7 --no-roads buildings re-run vs J37 net f1332665 (old files build/city_1to1/_pre_rebuild_P7)",
+  "exported": [],
+  "baked": false,
+  "uploaded": false,
+  "swapped": false,
+  "district_moved": false
+ }
 }
