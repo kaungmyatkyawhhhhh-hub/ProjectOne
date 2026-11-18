@@ -111,7 +111,7 @@
   ],
   "swap_cells": "1536 x19..27 z26..31",
   "pages": "build/city_1to1/roads05_RB3/pages (python tools/yangon/city/roads05_grab.py RB3 mcp-Roblox_Studio-execute_luau-1794997735733.txt; that file = first slice of this run)",
-  "left_cells": "13x13, 13x14, 13x15: the _G.RB3 job was building them when the agent stopped; their slices sit in _G.RB3.slices (export with _G.RB3Z(cell, k) -> 99k-char results, then grab). If Studio was restarted: LoadAsset of asset 133014134133489 rev 213 is NOT the data any more (rev 214 = RoadVerge05 only) -> re-pack roads05_RB3 (pack_tools.py imports/sync/rebuild_RB3_data.rbxmx ...) -> PATCH -> move Roads05_* into YangonData -> _G.RY = require(YangonRoads clone); _G.RY.load() -> delete modules -> stepCell those 3 cells only (box = {x*3072, z*3072, (x+1)*3072, (z+1)*3072}).",
+  "left_cells": "13x13 (17 slices), 13x14 (13), 13x15 (8): BUILT; slices waiting in Studio _G.RB3.slices (export with _G.RB3Z(cell,k) then roads05_grab.py RB3 <first file of the new run>; free with _G.RB3.slices[c]=nil). Build log page counts: 13x15 22 pages. If Studio was restarted, rebuild these 3 cells (see the older note in this field's history / handover).",
   "next": "roads05_bake.py RB3 collect pages -> R05_ONLY=<the 41 swap cells x19..27 z26..31 that exist> bake -> upload glbs (Open Cloud Model, group 33151111) + collide pages as RColRB_P3_k (PATCH asset 133014134133489) -> YangonRoadMeshes.place (LOOK needs LZ) + RoadBake05.collide into ServerStorage -> old P3 Cell_ + boxes (by box-centre cell) to ServerStorage.RB_OldP3 -> new in -> save -> trees off carriageways -> Play test -> delete backup -> save."
  },
  "note2": "pages: zstd+base64 slices (@Z) since 9x9 p8; grabber tools/yangon/city/roads05_grab.py",
@@ -124,5 +124,6 @@
  },
  "ycc_ramp": "DONE (Edit): Landmarks.YangonConventionCentre.DriveRamps = 12 WedgeParts (asphalt 46,47,50, CanCollide), 3 ramps 8.5% grade from the driveway (road top + 0.06) to the plate top 54.82 at (33791,21917) drop 3.75 len 44, (33925,22036) drop 4.41 len 52, (33955,22105) drop 4.53 len 53; two triangles each (oblique edge)",
  "verge": "RoadVerge05 installed in ClaudeTools (9631 chars, checksum 1491299135; asset 133014134133489 rev 214 holds only it). Not run yet: run for P1-P3 after the P3 swap (V.spawn(x0,z0,x1,z1) then V.spawn(..., \"trim\")), by district box.",
- "lane_gaps": "Not done. Finding so far: NPC traffic is kinematic (Traffic.lua PivotTo / BulkMoveTo at the lane points' heights, no raycast), so NPC cars cannot drop at junction gaps; only player cars can dip there. Next: Play test a player car through a few gap points; if it dips, add RoadBox R patch boxes at the junction squares."
+ "lane_gaps": "Not done. Finding so far: NPC traffic is kinematic (Traffic.lua PivotTo / BulkMoveTo at the lane points' heights, no raycast), so NPC cars cannot drop at junction gaps; only player cars can dip there. Next: Play test a player car through a few gap points; if it dips, add RoadBox R patch boxes at the junction squares.",
+ "saves": "Place version 1418 (18 Nov 11:23 UTC) after the P3 build + P1/P2 props + YCC ramps (save timed out, then NotNeeded; asset versions API confirmed 1418). P2 save confirmed: versions went past 1400 (1416-1418)."
 }
