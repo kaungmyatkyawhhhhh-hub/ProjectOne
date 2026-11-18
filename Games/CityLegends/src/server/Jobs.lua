@@ -280,9 +280,12 @@ function Jobs.task(player: Player, kind: string, cash: number)
 		return 0
 	end
 	L(player).lastTask = os.clock()
+	-- (the delivery's own cash already has Double Pay, 2x Cash and Premium in it: Activities.lua)
 	local r = JobRules.rank(J, s.xp[job.id] or 0)
-	local extra = math.max(0, math.floor(cash * (JobRules.mult(J, r, double(player)) - 1) + 0.5))
-	extra = pay(player, extra)
+	local extra = math.max(0, math.floor(cash * (JobRules.mult(J, r) - 1) + 0.5))
+	if extra > 0 then
+		PlayerData.addCash(player, extra)
+	end
 	addXp(player, s, job, job.taskXp)
 	ctx.note(player, "jobtasks", 1)
 	pushState(player)

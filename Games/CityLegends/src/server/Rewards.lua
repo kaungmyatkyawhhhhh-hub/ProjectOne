@@ -26,7 +26,6 @@
 ]]
 
 local CollectionService = game:GetService("CollectionService")
-local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local PolicyService = game:GetService("PolicyService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -602,7 +601,9 @@ type Data = {
 	ReturnReady: boolean, -- the welcome back gift is waiting
 	Spins: { [string]: number }, -- bought spins left, per wheel
 	FreeLast: { [string]: number }, -- os.time() of each wheel's last free spin
-	Receipts: { string }, -- the last Robux purchase ids granted (never twice)
+	Receipts: { string }, -- the last Robux purchase ids granted (never twice; Store.lua)
+	StarterPack: boolean, -- the Robux Starter Pack was bought (once per player; Store.lua)
+	StarterPick: boolean, -- its car is still to be picked (Main.server ClaimStarter)
 }
 
 local deps: any = {} -- Goals, Towers, Hotel (from Main: no require loops)
@@ -674,6 +675,8 @@ local function data(profile: any): Data
 		Spins = nums(raw.Spins, 100000),
 		FreeLast = nums(raw.FreeLast, os.time()),
 		Receipts = receipts,
+		StarterPack = raw.StarterPack == true,
+		StarterPick = raw.StarterPick == true,
 	}
 	-- (the welcome back gift is decided once, when the save loads)
 	profile.Away = 0
@@ -1225,44 +1228,7 @@ local function call(player: Player, what: any, arg: any): { [string]: any }
 	return result
 end
 
----------------------------------------------------------------------
--- Robux spins (developer products; Config.Rewards.Wheels[...].productId)
----------------------------------------------------------------------
-local function wheelForProduct(productId: number): string?
-	for id, w in R.Wheels do
-		if w.productId ~= 0 and w.productId == productId then
-			return id
-		end
-	end
-	return nil
-end
-
-local function processReceipt(info: any): Enum.ProductPurchaseDecision
-	local player = Players:GetPlayerByUserId(info.PlayerId)
-	local id = wheelForProduct(info.ProductId)
-	local profile = player and PlayerData.get(player) :: any
-	if not (player and id and profile and profile.Loaded) then
-		return Enum.ProductPurchaseDecision.NotProcessedYet
-	end
-	local d = data(profile)
-	local pid = tostring(info.PurchaseId)
-	if table.find(d.Receipts, pid) then
-		return Enum.ProductPurchaseDecision.PurchaseGranted
-	end
-	d.Spins[id] = (d.Spins[id] or 0) + 1
-	table.insert(d.Receipts, pid)
-	while #d.Receipts > 50 do
-		table.remove(d.Receipts, 1)
-	end
-	if not PlayerData.save(player) then
-		d.Spins[id] -= 1
-		table.remove(d.Receipts, table.find(d.Receipts, pid) or #d.Receipts)
-		return Enum.ProductPurchaseDecision.NotProcessedYet
-	end
-	send(player, { kind = "bought", what = "1 " .. R.Wheels[id].name .. " SPIN" })
-	refresh(player)
-	return Enum.ProductPurchaseDecision.PurchaseGranted
-end
+-- (Robux spins: the receipt is Store.lua's, the game's only ProcessReceipt; it adds to d.Spins)
 
 ---------------------------------------------------------------------
 -- Start
@@ -1324,7 +1290,6 @@ function Rewards.init(ctx: any, d: any)
 	local fn: RemoteFunction = ctx.remote("RemoteFunction", "RewardsCall")
 	push = ctx.remote("RemoteEvent", "RewardsPush")
 	fn.OnServerInvoke = call
-	MarketplaceService.ProcessReceipt = processReceipt
 	local function watch(player: Player)
 		task.spawn(function()
 			local deadline = os.clock() + 60
@@ -1379,6 +1344,10 @@ function Rewards.init(ctx: any, d: any)
 		end
 	end)
 end
+
+-- (Store.lua: the saved Rewards table, cleaned)
+Rewards.data = data
+Rewards.send = send
 
 -- (for the rest of the game: a level gained or a property change may open something)
 function Rewards.refresh(player: Player)

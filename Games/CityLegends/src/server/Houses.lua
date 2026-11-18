@@ -437,6 +437,8 @@ local function publish(player: Player)
 	player:SetAttribute("HouseLot", placed[player])
 	local rec = if placed[player] then recs[placed[player]] else nil
 	player:SetAttribute("HouseDesign", if rec then rec.design else nil)
+	-- (the STORE's Garage Space is offered only while the placed house has room for one more)
+	player:SetAttribute("BayRoom", rec ~= nil and rec.design ~= nil and usableBays(profile, rec.design) < H.ById[rec.design].maxBays)
 end
 
 -- (2026-11-04) Monaco: a High lot stands on a stone plate (Riviera.Sites, 4 thick), which lay over the
@@ -1581,6 +1583,30 @@ function Houses.homeSpot(player: Player): (CFrame?, CFrame?)
 		return nil, nil
 	end
 	return rec.info.spawn, rec.info.door
+end
+
+-- (Store.lua, the Robux Garage Space) the placed house's design if it has room for a space, and
+-- the rebuild once the space is saved
+function Houses.bayRoom(player: Player): string?
+	local lotId = placed[player]
+	local rec = lotId and recs[lotId]
+	local profile = PlayerData.get(player)
+	if not (rec and profile and rec.design) then
+		return nil
+	end
+	return if usableBays(profile, rec.design) < H.ById[rec.design].maxBays then rec.design else nil
+end
+
+function Houses.rebuild(player: Player)
+	local lotId = placed[player]
+	local rec = lotId and recs[lotId]
+	if not (rec and rec.design) then
+		return
+	end
+	takeDown(rec)
+	build(rec, player, rec.design)
+	placed[player] = lotId :: string
+	publish(player)
 end
 
 function Houses.placedLot(player: Player): string?

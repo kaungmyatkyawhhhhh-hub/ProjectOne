@@ -33,6 +33,7 @@ local Chauffeur = require(script.Parent:WaitForChild("Chauffeur"))
 local Goals = require(script.Parent:WaitForChild("Goals"))
 local Brands = require(script.Parent:WaitForChild("Brands"))
 local CarLevels = require(script.Parent:WaitForChild("CarLevels"))
+local Store = require(script.Parent:WaitForChild("Store")) -- (18 Nov) passes, products, the only ProcessReceipt
 
 Players.CharacterAutoLoads = false
 
@@ -420,7 +421,11 @@ Customs.init(ctx)
 -- Rewards (the daily reward, gifts, the wheels; it replaced the casino, 2026-11-03)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 Luxe.init(ctx)
-require(script.Parent:WaitForChild("Rewards")).init(ctx, { Goals = Goals, Towers = Towers, Hotel = Hotel, Luxe = Luxe, CarLevels = CarLevels, PartData = require(Shared:WaitForChild("PartData")) })
+local Rewards = require(script.Parent:WaitForChild("Rewards"))
+Rewards.init(ctx, { Goals = Goals, Towers = Towers, Hotel = Hotel, Luxe = Luxe, CarLevels = CarLevels, PartData = require(Shared:WaitForChild("PartData")) })
+Store.init(ctx, { Rewards = Rewards, Houses = Houses, Cars = Cars, notify = function(player: Player, msg: string)
+	Towers.send(player, { kind = "toast", text = msg, color = "accent" })
+end })
 require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe)
 
 local function despawn(player: Player)
@@ -829,10 +834,25 @@ ClaimStarter.OnServerInvoke = function(player: Player, carId: any)
 	if not pick or not Cars.ById[carId] then
 		return { ok = false, message = "Pick one of the three" }
 	end
-	if profile.Claimed or claiming[player] then
+	-- (18 Nov) the Robux Starter Pack's car: one more pick of the three, one you don't own yet
+	local rd = if profile.Claimed and profile.Loaded then Rewards.data(profile) else nil
+	local packPick = rd ~= nil and rd.StarterPick == true
+	if packPick and profile.Owned[carId] then
+		return { ok = false, message = "You own that one: pick another" }
+	end
+	if (profile.Claimed and not packPick) or claiming[player] then
 		return { ok = false, message = "Your first car is already claimed" }
 	end
 	claiming[player] = true
+	if packPick then
+		profile.Owned[carId] = true
+		profile.Selected = carId
+		rd.StarterPick = false
+		player:SetAttribute("StarterPick", false)
+		claiming[player] = nil
+		task.spawn(PlayerData.save, player)
+		return { ok = true, data = PlayerData.snapshot(player) }
+	end
 	-- (a new profile holds only the default starter: swap it for the one picked)
 	if carId ~= Cars.StarterId then
 		local others = 0
@@ -978,7 +998,8 @@ CutUp.OnServerEvent:Connect(function(player: Player, info: any)
 	if car:GetAttribute("TestEnds") then
 		amount *= Config.Dealership.TestPay -- (a test drive pays less)
 	end
-	amount = math.floor(amount)
+	local xpBase = amount -- (XP from the cut itself: the passes multiply cash only)
+	amount = math.floor(amount * Store.earnMult(player, "cut")) -- (2x Cash, VIP, Premium)
 	PlayerData.addCash(player, amount)
 
 	local label = if thread then "THREAD THE NEEDLE" elseif oncoming then "ONCOMING CUT" elseif closeness > 0.75 then "INSANE CUT" elseif closeness > 0.4 then "CLOSE CUT" else "CUT UP"
@@ -988,7 +1009,7 @@ CutUp.OnServerEvent:Connect(function(player: Player, info: any)
 	Brands.add(player, car:GetAttribute("CarId") :: string, Config.Brands.XpPerCut)
 
 	local P = Config.Progression
-	grantXp(player, math.clamp(math.floor(amount * P.CutXpPerCash + 0.5), 1, P.CutXpMax), "cut")
+	grantXp(player, math.clamp(math.floor(xpBase * P.CutXpPerCash + 0.5), 1, P.CutXpMax), "cut")
 end)
 
 ---------------------------------------------------------------------
@@ -1021,7 +1042,7 @@ RunService.Heartbeat:Connect(function(dt)
 				car:SetAttribute("TestEnds", nil)
 			end
 			if mph >= E.DriveMinMph then
-				s.incomeCarry += mph * E.DrivePerSecond * step * (if ends then Config.Dealership.TestPay else 1)
+				s.incomeCarry += mph * E.DrivePerSecond * step * (if ends then Config.Dealership.TestPay else 1) * Store.earnMult(player, "drive")
 				local whole = math.floor(s.incomeCarry)
 				if whole >= 1 then
 					s.incomeCarry -= whole

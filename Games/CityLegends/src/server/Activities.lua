@@ -18,6 +18,7 @@ local ActivityData = require(Shared:WaitForChild("ActivityData"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+local Store = require(script.Parent:WaitForChild("Store")) -- (2x Cash / Premium on jobs; never on races or duels)
 
 local A = Config.Activities
 
@@ -514,7 +515,7 @@ handlers.jobFinish = function(player)
 		return { ok = true, late = true, cash = 0 }
 	end
 	local left = (run.deadline :: number) - now
-	local cash = math.floor((run.dist :: number) * A.JobPayPerStud + math.max(0, left) * A.JobTimeBonus)
+	local cash = math.floor(((run.dist :: number) * A.JobPayPerStud + math.max(0, left) * A.JobTimeBonus) * Store.earnMult(player, "job") * (if player:GetAttribute("DoublePay") == true then 2 else 1))
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, 80, "job")
 	ctx.note(player, "jobs", 1)

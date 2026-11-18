@@ -211,7 +211,11 @@ function Parking.init(ctx: any, Police: any, Towers: any)
 					local rel = bay.CFrame:PointToObjectSpace(pos)
 					if math.abs(rel.X) < bay.Size.X / 2 + 1 and math.abs(rel.Z) < bay.Size.Z / 2 + 1 and math.abs(rel.Y) < 8 then
 						local profile = PlayerData.get(player)
-						if profile and profile.Cash >= P.VipFee then
+						if player:GetAttribute("Vip") == true then
+							-- (the VIP pass parks free)
+							car:SetAttribute("VipPaid", true)
+							Towers.send(player, { kind = "toast", text = "VIP parking: free with your VIP pass", color = "accent" })
+						elseif profile and profile.Cash >= P.VipFee then
 							PlayerData.addCash(player, -P.VipFee)
 							car:SetAttribute("VipPaid", true)
 							Towers.send(player, { kind = "toast", text = "VIP parking: -$" .. P.VipFee, color = "accent" })
