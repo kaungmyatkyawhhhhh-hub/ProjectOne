@@ -244,3 +244,20 @@ Owner: "Swimming for sea lanes".
   - Strokes don't count toward the "Jump 8 times" goal; only jumps off the floor do.
   - No swim animation or body tilt.
   - Not tested on a phone.
+
+## Swim animation (v52, 18 Nov 2026)
+Owner: "just do animation" (skipped the phone performance check).
+
+- **What it does (EraWorld, in the sea world only):**
+  - The body tips nose-up while rising, up to about 15°.
+  - It tips nose-down while sinking, about 8°.
+  - It wiggles side to side while moving.
+  - It eases back to level on the floor and on land.
+- **How it works:**
+  - The server welds each body part ("Form") to the root with a WeldConstraint.
+  - On your own client, each one is swapped for a Weld whose C0 is turned every frame.
+- **Only you see your own tilt.** Other players see the body level, because the server's welds are unchanged.
+- **Play test (Great White Shark):** all 10 parts converted. The traced tilt was +0.27 rad rising and -0.14 rad sinking, and no part lagged behind.
+- **Known gaps:**
+  - The wiggle was not seen in a screenshot.
+  - The phone performance check is still not done.
