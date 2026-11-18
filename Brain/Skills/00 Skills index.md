@@ -108,3 +108,4 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 - 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau now includes the music player (Back/Play-Pause/Skip, volume slider, top right).
 - 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau rebirth card text now says DNA is kept.
 - 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau has an owner-only Admin window (button shown by a server attribute, every press checked on the server).
+- 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau admin window gained World Age +1/-1 rows.

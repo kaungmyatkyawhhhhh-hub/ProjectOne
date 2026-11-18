@@ -513,6 +513,8 @@ for i, act in {
 	{ "Goal", "Finish this life's goal" },
 	{ "NewLife", "Die now: next generation" },
 	{ "Cold", "Cold snap (whole server)" },
+	{ "WorldUp", "World Age +1 (all servers)" },
+	{ "WorldDown", "World Age -1 (all servers)" },
 } do
 	local r = img(adminList, "row", { LayoutOrder = i, Size = UDim2.new(1, -8, 0, 50), ZIndex = 3 })
 	label(r, act[2], 16, { Position = UDim2.fromOffset(16, 0), Size = UDim2.new(1, -140, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 5 })

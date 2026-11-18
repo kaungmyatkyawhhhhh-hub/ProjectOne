@@ -349,3 +349,9 @@ Owner: "make admin panel for me too (username is HEINHEIN1922)".
 - **Tested in Play:** button visible for HEINHEIN1922, window renders, DNA +100K, Cell Colony → Dickinsonia → Pederpes (Gen unchanged), goal done, an unknown action is ignored.
 - **Not tested:** a non-admin can't see or use it. That needs a second account; the code check is a single `ADMINS[player.UserId]` line.
 - **Note:** a family that carries a branch trait (e.g. Filter Pores → Sponges) keeps landing on that branch. A finished branch needs a rebirth.
+- **World Age buttons (v63):** "World Age +1 (all servers)" and "World Age -1 (all servers)".
+  - They move the shared `EvolveWorld_v1/Gens` total to the next Age's threshold, or to just below the current one. They take effect at once through `worldTick()`, which is the minute loop's body pulled out into a function.
+  - **This changes the real world for every server.** −1 at Age 0 does nothing.
+  - Going down announces "The world went back to Age N". The total never goes below 0.
+  - Tested: 124 → Age 1 (300) → Age 0 (299). The total was then set back to 124 by hand.
+  - Backup: `Evolution_backup_before_adminworld`.
