@@ -762,7 +762,7 @@ local function racerBeside(npc: Npc, dir: number): boolean
 end
 
 -- the car a racer's box (plus a hair) would overlap at pos / fwd, using each car's latest place this frame
-local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obstacle }, m: number): (Obstacle?, number)
+local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obstacle }, m: number, aheadOnly: boolean): (Obstacle?, number)
 	local r = fwd:Cross(Vector3.yAxis)
 	local hl, hw = npc.halfLen + 0.4 * m, npc.width / 2 + 0.25 * m
 	for _, o in obstacles do
@@ -771,7 +771,7 @@ local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obsta
 			local op = if me then me.pos else o.pos
 			local of = if me then me.fwd else o.fwd
 			local d = op - pos
-			if math.abs(d.Y) < 8 and d.Magnitude < hl + o.halfLen + 12 then
+			if math.abs(d.Y) < 8 and d.Magnitude < hl + o.halfLen + 12 and not (aheadOnly and d:Dot(fwd) <= 0) then
 				local orr = of:Cross(Vector3.yAxis)
 				local ol, ow = o.halfLen + 0.4 * m, o.width / 2 + 0.25 * m
 				local sep = false
@@ -790,6 +790,27 @@ local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obsta
 		end
 	end
 	return nil, 0
+end
+
+-- the car a racer's step from (op, of) to (pos, fwd) runs into: a new car within a hair, or a deeper real overlap
+-- with one already that close. aheadOnly: a straight step only answers for cars ahead (the car behind keeps its
+-- own gap; two racers side by side at a merge each saw the other and both stood for good)
+local function racerBlocked(npc: Npc, pos: Vector3, fwd: Vector3, op: Vector3, of: Vector3, obstacles: { Obstacle }, aheadOnly: boolean): Obstacle?
+	local hit = racerHit(npc, pos, fwd, obstacles, 1, aheadOnly)
+	if not hit then
+		return nil
+	end
+	if racerHit(npc, op, of, obstacles, 1, aheadOnly) ~= hit then
+		return hit
+	end
+	local real, d = racerHit(npc, pos, fwd, obstacles, 0, aheadOnly)
+	if real then
+		local was, d0 = racerHit(npc, op, of, obstacles, 0, aheadOnly)
+		if was ~= real or d < d0 then
+			return real
+		end
+	end
+	return nil
 end
 
 -- where a racer can be sideways: its lane, the same-way lanes beside it (by their real offsets) and the line
@@ -1380,35 +1401,21 @@ function Traffic.update(dt: number)
 				fwd = (fwd * npc.speed + right * math.sign(slide) * math.clamp(npc.speed * RACER.SideRate, 7, 22)).Unit
 			end
 		end
-		-- racers never move into another car: a step that comes within a hair of a new car, or into a real overlap
-		-- with one already that close (two racers nose to nose at a turn may still creep apart), is undone and the
-		-- racer takes that car's speed
+		-- racers never move into another car: a step that comes within a hair of a new car, or deeper into a real
+		-- overlap, is undone and the racer takes that car's speed; a slide sideways is checked all round, and when
+		-- only the slide touches the racer drives on straight while the slide waits
 		if snap then
-			local hit = racerHit(npc, pos, fwd, obstacleList, 1)
-			local block = false
-			if hit then
-				if racerHit(npc, snap[7], snap[8], obstacleList, 1) ~= hit then
-					block = true
-				else
-					local real, d = racerHit(npc, pos, fwd, obstacleList, 0)
-					if real then
-						local was, d0 = racerHit(npc, snap[7], snap[8], obstacleList, 0)
-						block = was ~= real or d < d0
-						hit = real
-					end
-				end
-			end
-			if hit and block and npc.off ~= snap[5] then
-				-- (only the slide sideways touches: drive on straight in the old strip; the slide waits)
+			local slid = npc.off ~= snap[5]
+			local hit = racerBlocked(npc, pos, fwd, snap[7], snap[8], obstacleList, not slid)
+			if hit and slid then
 				local p2, f2 = CityLayout.sample(npc.seg, npc.s)
 				p2 += f2:Cross(Vector3.yAxis) * (snap[5] :: number)
-				local h2 = racerHit(npc, p2, f2, obstacleList, 0)
-				if h2 == nil and racerHit(npc, p2, f2, obstacleList, 1) == racerHit(npc, snap[7], snap[8], obstacleList, 1) then
+				if not racerBlocked(npc, p2, f2, snap[7], snap[8], obstacleList, true) then
 					npc.off, npc.offTo = snap[5], snap[5]
-					pos, fwd, block = p2, f2, false
+					pos, fwd, hit = p2, f2, nil
 				end
 			end
-			if hit and block then
+			if hit then
 				npc.seg, npc.s, npc.nextSeg, npc.plan, npc.off, npc.offTo = snap[1], snap[2], snap[3], snap[4], snap[5], snap[5]
 				pos, fwd = snap[7], snap[8]
 				npc.speed = math.min(npc.speed, math.max(0, hit.speed * hit.fwd:Dot(fwd)) * 0.9)
