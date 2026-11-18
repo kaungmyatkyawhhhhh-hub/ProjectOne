@@ -51,8 +51,7 @@ TrafficMix.Entries = {
 	{ id = "carry", kind = "H", len = 10.2, w = 6, paint = LIGHT }, -- Carry / Hijet kei trucks
 	{ id = "ybs", kind = "D", len = 33.0, w = 6, paint = YBS, main = true }, -- YBS buses, main roads only
 	{ id = "toyoka_lc200", kind = "F", len = 14.9, w = 4, paint = { WHITE, BLACK, SILVER, PEARL } }, -- Land Cruiser / Hilux Surf / Prado
-	{ id = "byt_seal", kind = "E", len = 14.4, w = 3, paint = { WHITE, SILVER, BLUE, GREY } }, -- BYD: top new-car brand 2024-25
-	{ id = "kio_ev6", kind = "F", len = 14.0, w = 2, paint = { WHITE, GREY, SILVER } },
+	{ id = "byt_seal", kind = "E", len = 14.4, w = 5, paint = { WHITE, SILVER, BLUE, GREY } }, -- BYD and the other EVs: top new-car brand 2024-25 (the EV6 copy came out with holes: left out)
 	{ id = "toyoka_lc300", kind = "F", len = 15.0, w = 2, paint = { WHITE, BLACK, PEARL } }, -- the few luxury SUVs
 	{ id = "lexis_lx700", kind = "F", len = 15.3, w = 1, paint = { BLACK, WHITE, PEARL } },
 	-- rare supercars (owner, 19 Nov): racers, capped per group (Rare)
