@@ -1,3 +1,30 @@
+# roads05 handover (18 Nov 2026, twenty-seventh pass: J31, BUILDER agent; YangonRoads only + Studio 17 spots; stopped: context)
+
+## J31 -- built-surface totals, T.qa (QA's J30 open-ground rule, runner re-packed = asset rev 202), J30 -> J31 (17 spots): 20 / 253 / 37 / 76 / 11 (pave_gap 105) -> 19 / 253 / 37 / 77 / 11 (pave_gap 105)
+Note + table: vault `City Legends/2026-11-18 roads05 J31 studio check.md`. Studio: main "City Legends", pack rev 202 (J29 data + J30 builder +
+QA's runner), builder by text patch: ClaudeTools.YangonRoads 1234869083 (= repo, 193,294 chars), Roads 1407280218 (unchanged). Fixed order, fresh load.
+- **Baseline on rev 202 (before any change):** 20 / 253 / 37 / 76 / 11, pave_gap 105 (= QA's census refresh; part hashes = J30's where checked, e.g. roundabout4 290473333).
+- **Kept (sideZone, bigger-road branch):** in a bigger road's kerb band my KERB stays where that road's kerb is not built (its kerb cut by my
+  carriageway: one recursive `sideZone(o, foot + oh + KERB_W/2, "Kerb")`, depth bounded by rank). pyay_univ 2/18 -> 1/17 (bh / kg);
+  univ_kabaraye kerb_gap +1 / pave_step +1 at the known three-pavement island (34396, 28831). Aimed at the merging links Lane #7108 into
+  Lane #5482 (double_junction (39896-39908, 32865-32892), 12 cells): NO change there.
+- **Tried + reverted:** the same rule for a corner owner's kerb band (ownedBy branch): no change at double_junction / slip_triangle.
+- **What the double_junction "corner" cells really are (close-up):** the two links MERGE into one end point; past the gore's kerb nose,
+  pavement wedges of both roads run on 2-10 studs over the other's asphalt with no kerb (each road's pavement next to the other's road,
+  both directions). Fix belongs in the gore nose: a pavement piece must end where its own kerb ends (the nose), not at the sideZone line.
+- **Not reached (in order for the next pass):** (1) gore-nose pavement past the kerb nose (above; also the census "junction corner" cells at
+  slip_triangle Lane #17 / #15 / #16 with r 1.9-2.0 corners: look at one close-up first); (2) buried: Bridge Flyover foot over East Horse Race
+  Course Road #3's kerb (39995-39997, 32698-32702), double_junction Lane #3308 x Banyar Dala #3 (39984, 32911), slip_triangle Lane #15, pyay_univ
+  Lane #588 (27036, 27670; kerb under its own road), Kun Chan Lane #3414 nose; (3) Bridge start (roads05_fix.py): the start (39962.8, 32873.2) lies
+  between Banyar Dala Road #2 (west, its edge ~1 stud short of the Bridge's west edge) and #3 (east, covers the east edge); the fix's host
+  search wants ONE bigger road within 12 of the centre and finds none (Bo Min Gaung Street samples 601-699 cut). A union host (both side
+  lanes) would run it on ~15 studs north, but YangonRoads.buildMouth needs one host too: decide the join (or make Road #18 / one side lane the
+  host) before coding it; (4) pave_gap 105 merge rule (walk is per road side in the data, so "merge pavements under 2 apart" has to be a
+  builder fill); (5) Hledan #3 under Insein / Pyay: Roads.luau already lowers the inner eighths PIN_UNDER in a junction; the pyay_univ
+  road_step cells left are Hledan #3 / Pyay #9's continuation joint (0.2, (27036, 27888)) and Lane #588; (6) kunchan / univ regressions not traced.
+- **Debug kit (scratchpad, not committed):** `mkpatch.py` (CR-stripped difflib hunks -> find / replace Luau on ClaudeTools.<name>.Source, prints
+  the repo checksum), `_G.RELOAD(after)` (fresh no-terrain copy + Y.load + DECK_TOUCH, then `after`). `T.faults` is overwritten per run: copy it.
+
 # roads05 handover (18 Nov 2026, twenty-sixth pass: J30, BUILDER agent; YangonRoads only + Studio 17 spots)
 
 ## J30 -- built-surface totals, T.qa, J29 -> J30 (17 spots): 20 / 256 / 36 / 76 / 10 -> 20 / 253 / 37 / 76 / 11 (pave_gap 231 -> 188)

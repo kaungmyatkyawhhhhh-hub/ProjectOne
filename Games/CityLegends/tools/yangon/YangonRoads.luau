@@ -729,8 +729,15 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 			if not mineOnly then
 				-- (J30, pave_gap) my pavement stops exactly on its built pavement's outer edge
 				local on = if what == "Kerb" then nil else onBuilt(o, b[2], px, pz)
-				if on == true or (on == nil and polyDist(o, b[2], px, pz) < reach) then
-					return true
+				local d, fx, fz = polyDist(o, b[2], px, pz)
+				if on == true or (on == nil and d < reach) then
+					-- (J31, kerb_gap at merging links: Lane #7108 into Lane #5482) in its kerb band my kerb stays where
+					-- its kerb is not built (my carriageway cut it): its pavement met my asphalt with no kerb
+					local L = if fx then hyp(px - fx, pz - fz) else 0
+					if not (what == "Kerb" and d >= oh - 0.01 and L > 1e-6
+						and M.sideZone(o.name, Vector3.new(fx + (px - fx) / L * (oh + M.KERB_W * 0.5), 0, fz + (pz - fz) / L * (oh + M.KERB_W * 0.5)), "Kerb")) then
+						return true
+					end
 				end
 			end
 			-- (J11, Bahan nose: my corner on o was found on o's cut samples; my band past P lies on o's
