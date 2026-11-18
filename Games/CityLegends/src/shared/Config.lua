@@ -3262,7 +3262,7 @@ Config.Jobs = (function()
 		List = {
 			{ id = "delivery", name = "Delivery", kind = "active", where = "Dispatch rings (Myanmar Plaza, Kabar Aye)", paycheck = 100, taskXp = 25,
 				ranks = { "Parcel Runner", "Van Driver", "Senior Courier", "Route Boss", "Express Chief" } },
-			{ id = "taxi", name = "Taxi", kind = "active", where = "Fares all over town", paycheck = 100, base = 150, perStud = 0.3, taskXp = 20,
+			{ id = "taxi", name = "Taxi", kind = "active", where = "Fares all over town", paycheck = 100, base = 100, perStud = 0.22, taskXp = 20,
 				ranks = { "Night Cabbie", "City Driver", "Airport Regular", "Top Fare", "Taxi Legend" } },
 			{ id = "bus", name = "YBS Bus Driver", kind = "active", where = "7 stops: Kabar Aye, Kamayut, Mayangone", paycheck = 100, base = 50, perStud = 0.12, taskXp = 6,
 				ranks = { "Spare Boy", "Bus Driver", "Line Driver", "Route Captain", "YBS Legend" } },
