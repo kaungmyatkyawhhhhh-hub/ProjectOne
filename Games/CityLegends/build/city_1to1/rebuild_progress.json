@@ -147,12 +147,26 @@
  "P7": {
   "status": "IN PROGRESS (DISTRICT REBUILD agent, 18 Nov night)",
   "plan": "3072-col x9..11; step boxes per col: z 32256..33792 (1536 row 21, label <x>x10), 3072 rows z11 z12 (labels <x>x11/<x>x12), z 39936..41472 (1536 row 26, label <x>x13). Swap 1536 cells x19..23 z21..26 whole (z21 = P1 cells, z26 = P3 cells rebuilt whole: subset.json clip = P7+P1+P3 boxes).",
-  "data": "roads05_subset.py net RB7 P7 with R05_GROW=1700 (1279 roads, 36 modules, checksums roads05_RB7/pack_checksums.txt) -> imports/sync/rebuild_RB7_data.rbxmx -> asset 133014134133489 rev 218",
+  "data": "roads05_subset.py net RB7 P7 with R05_GROW=1700 (1279 roads, 36 modules, checksums roads05_RB7/pack_checksums.txt) -> imports/sync/rebuild_RB7_data.rbxmx -> asset 133014134133489 rev 218 | rev 218 was overwritten by another agent's sync: data in NEW asset 117092137372695 (loaded, Y.load ok: 1279 roads, 1514 mouths; modules deleted)",
   "buildings": "district_files.sh P7 --no-roads buildings re-run vs J37 net f1332665 (old files build/city_1to1/_pre_rebuild_P7)",
-  "exported": [],
+  "exported": [
+   "9x11:38",
+   "10x11:36",
+   "11x11:47",
+   "9x12:28",
+   "10x12:32",
+   "11x12:23",
+   "9x10:14",
+   "10x10:19",
+   "11x10:19",
+   "9x13:13",
+   "10x13:19",
+   "11x13:17"
+  ],
   "baked": false,
   "uploaded": false,
   "swapped": false,
-  "district_moved": "DONE v1450: DistrictPlace P7 packs 79021963633938/128053610201688/87141674653732 (J37 clear), night 125319529830179 (24 cells), terrain 862 tiles, green paint 719 tiles + far 2952 parts (Green.Far renamed, merged back: 184 cells, 0 dups) + Data_P7G 705 tiles, Data_P7 527 tiles (all 429 kit ids in Templates), shells 4760 + roofs 1589, 10 pagodas re-placed (old ones + Shwedagon_Hill_TEMP + MahaWizayaPlate_TEMP in ServerStorage.RB_OldP7.Temps until the Play test; then delete). Packs + Terrain modules removed. Studio's ClaudeTools.PagodaPlace is the landmarks3d one: the rows one is ClaudeTools.PagodaPlaceRows (DistrictPlace.pagodas needs it named PagodaPlace for the call)."
+  "district_moved": "DONE v1450: DistrictPlace P7 packs 79021963633938/128053610201688/87141674653732 (J37 clear), night 125319529830179 (24 cells), terrain 862 tiles, green paint 719 tiles + far 2952 parts (Green.Far renamed, merged back: 184 cells, 0 dups) + Data_P7G 705 tiles, Data_P7 527 tiles (all 429 kit ids in Templates), shells 4760 + roofs 1589, 10 pagodas re-placed (old ones + Shwedagon_Hill_TEMP + MahaWizayaPlate_TEMP in ServerStorage.RB_OldP7.Temps until the Play test; then delete). Packs + Terrain modules removed. Studio's ClaudeTools.PagodaPlace is the landmarks3d one: the rows one is ClaudeTools.PagodaPlaceRows (DistrictPlace.pagodas needs it named PagodaPlace for the call).",
+  "export_note": "all 12 step boxes exported (labels: x10 = z 32256..33792, x13 = z 39936..41472 bands) -> roads05_RB7/pages (305 pages); 11x11 log has one MOUTH FAILED; Studio slices freed; terrain beds written; saved (v1450+)"
  }
 }
