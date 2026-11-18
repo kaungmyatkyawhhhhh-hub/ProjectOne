@@ -90,7 +90,9 @@ end
 -- the template name to spawn: a rare car now and then (group under its cap), else the everyday mix. `have` = the
 -- names that exist in TrafficModels, `counts` = live cars per rare group, `main` = the spot is on a main road
 function TrafficMix.pick(rng: Random, have: { [string]: boolean }, counts: { [string]: number }, main: boolean): string?
-	if rng:NextNumber() < TrafficMix.RareChance then
+	-- (Studio test hook: workspace attribute TestRareChance, e.g. 1 to fill every rare cap)
+	local chance = workspace:GetAttribute("TestRareChance")
+	if rng:NextNumber() < (if type(chance) == "number" then chance else TrafficMix.RareChance) then
 		local open = {}
 		for name, e in TrafficMix.byName do
 			if e.rare and have[name] and (counts[e.rare] or 0) < (TrafficMix.Rare[e.rare] or 0) then
