@@ -1,7 +1,7 @@
 """Pack Studio tools (Luau ModuleScripts) into one .rbxmx for upload + insert_asset (13 Nov 2026).
 
 Studio's execute_luau cannot fetch from the web here, so tool sources travel as a Model asset:
-  python tools/yangon/pack_tools.py imports/sync/yangon_tools_1.rbxmx tools/riviera/Roads.luau tools/riviera/RoadLines.luau tools/yangon/YangonRoads.luau
+  python tools/yangon/pack_tools.py imports/sync/yangon_tools_1.rbxmx tools/riviera/Roads.luau tools/riviera/RoadLines.luau tools/yangon/YangonRoads.luau tools/yangon/YangonRoadsChecks.luau
 then upload the file (open_cloud_invoke POST /assets/v1/assets, group 33151111), insert_asset into
 ServerStorage, move the ModuleScripts into ServerStorage.ClaudeTools and delete the PackageLink.
 It prints each module's length and checksum with line ends as LF: the Studio copy must give the same
