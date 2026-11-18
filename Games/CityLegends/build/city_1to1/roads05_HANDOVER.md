@@ -1,3 +1,27 @@
+# roads05 handover (18 Nov 2026, twenty-sixth pass: J30, BUILDER agent; YangonRoads only + Studio 17 spots)
+
+## J30 -- built-surface totals, T.qa, J29 -> J30 (17 spots): 20 / 256 / 36 / 76 / 10 -> 20 / 253 / 37 / 76 / 11 (pave_gap 231 -> 188)
+Note + table + shot: vault `City Legends/2026-11-18 roads05 J30 studio check.md`. Studio: main "City Legends", pack = rev 201 (J29 data, unchanged),
+builder by text patch: ClaudeTools.YangonRoads 2122460250 / Roads 1407280218 (= repo), scratch cleaned, version 1304, lock released.
+Fixed run order (alphabetical), fresh `Y.load()` first. No data change: the pipeline re-run is a check only.
+- **pave_gap root (sideZone):** `onBuilt(o, k, x, z)` = is the point on o's BUILT surface (Roads.debugEdges edge points + o's walk on that
+  side, the same quads Roads lays). Used for my PAVEMENT against a bigger road and against a corner's owner road (the owner zone ran past the
+  owner's pavement: Lane #3186 x Sule 0.5 slot). nil (old polyDist reach) near o's ends (k < 4 or > n - 3: the round cap covers a
+  continuation joint; without it deck_run kerb_gap 10 -> 13 at U Wisara #2 / #5) and on o's cut stretches (decks, ring).
+- **Corner zone:** `inCorner` = wedge (0 .. rout) + `pastInner` (the corner pavement's inner chords, buildCorners' own bands), not rin =
+  r - w - 0.3 (a 0.3 slot to the next pavement). roundabout4 pave_gap 49 -> 27 for both.
+- **State leak (QA):** bisected by reloading one module before bahan_ring: fresh YangonRoads + load = equal; fresh Roads copy only = equal.
+  The leak is in the Roads module copy (not found inside it: maxDh / maxW / finalEdges / debugEdges are all reset per build). `stepCell` now
+  takes `M.Roads = require(ClaudeTools.Roads:Clone())` and `M.useRing(nil)` per cell; `buildMouth` uses `m.ringR` for a ring outline.
+- **Studio 200k limit:** Source over 200,000 chars cannot be set; YangonRoads was 199,8xx. `qaBuilt` removed (T.qa replaced it): 192,796.
+- **Next (in order):** (1) pave_gap 188: mostly the narrow ends of open ground between two pavements (block interiors, islands), not
+  two-road slots: needs a QA + builder rule ("ground under X between pavements is paved"); (2) kerb_gap 253 (not reached; seen: Lane #3357
+  south kerb missing by its ring corner, roundabout4 (35812-35830, 45048-45063)); (3) buried 11 + the Bridge start: East Horse Race Course
+  Road (Bridge) starts under the Banyar Dala (bridge) Flyover where Bo Min Gaung Street samples 601-699 are cut (its host is gone, so the
+  fix's run-on never sees it): join it to Banyar Dala #2 / #3 or Road #18 in roads05_fix; double_junction deck foot over East Horse Race
+  Course Road #3's kerb; (4) Hledan #3 under Insein / Pyay (lower 0.06 idea not tried); (5) kunchan Lane #3414 / Kun Chan #3 nose (36355,
+  42408) road_step +1 / buried +1 this pass; (6) the Roads.luau leak itself (which upvalue).
+
 # roads05 handover (18 Nov 2026, twenty-fifth pass: J29, BUILDER agent; YangonRoads + roads05.py + roads05_fix.py + Studio 17 spots)
 
 ## J29 -- built-surface totals, QA's final T.qa, J28 -> J29 (17 spots): 26 / 308 / 36 / 99 / 7 -> 20 / 256 / 36 / 76 / 10 (pave_gap 233 -> 231)

@@ -581,8 +581,12 @@ local function onBuilt(o, k0: number, px: number, pz: number): boolean?
 	if not E then
 		return nil
 	end
-	local cut = M.cut[o.name]
+	if k0 < 4 or k0 > o.n - 3 then
+		return nil -- (near its end: the old reach test, whose round cap covers a continuation's joint)
+	end
+	local cut, sawCut = M.cut[o.name], false
 	for k = math.max(1, k0 - 3), math.min(o.n - 1, k0 + 2) do
+		sawCut = sawCut or (cut ~= nil and (cut[k] ~= nil or cut[k + 1] ~= nil))
 		if not (cut and (cut[k] or cut[k + 1])) then
 			local a, b = o.s[k], o.s[k + 1]
 			for _, sd in { { E.L, o.walkL }, { E.R, o.walkR } } do
@@ -615,7 +619,8 @@ local function onBuilt(o, k0: number, px: number, pz: number): boolean?
 			end
 		end
 	end
-	return false
+	-- (a cut stretch (deck corridor, ring) is someone else's surface: keep the old reach test there)
+	return if sawCut then nil else false
 end
 M.onBuilt = onBuilt
 
