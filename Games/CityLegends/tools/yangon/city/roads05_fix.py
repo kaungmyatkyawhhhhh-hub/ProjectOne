@@ -33,6 +33,32 @@ OWNER_GORES = [(36350.0, 42490.0, 'Kun Chan Road x Gyophyu Road (Zoological Gard
 OWNER_MEDIAN_OFF = [('Kun Chan Road', 36395.0, 42482.0, 140.0)]  # studs^2: a traffic island (real ones are paved concrete: Pyay x University Ave, satellite)
 
 
+def built_quads(s, cut=()):
+    """(J33, bahan_ring Kan Yeiktha Road s1-s2) the carriageway as Roads.build lays it: on a bend tighter than the half
+    width the inner edge point WAITS at its last point (it would run backwards and fold the quad); quads() used the raw
+    edges, so a sharp turn's quad came out a bow-tie and was dropped, and the island hole ran under that asphalt"""
+    n = len(s)
+    L, R = [None] * n, [None] * n
+    for i, q in enumerate(s):
+        L[i] = (q[0] + q[4] * q[6], q[2] - q[3] * q[6])
+        R[i] = (q[0] - q[4] * q[7], q[2] + q[3] * q[7])
+        if i:
+            dx, dz = q[0] - s[i - 1][0], q[2] - s[i - 1][2]
+            dm = math.hypot(dx, dz)
+            for E in (L, R):
+                if (E[i][0] - E[i - 1][0]) * dx + (E[i][1] - E[i - 1][1]) * dz <= 0.05 * dm:
+                    E[i] = E[i - 1]
+    out, cut = [], set(cut)
+    for i in range(n - 1):
+        if i in cut or i + 1 in cut:
+            continue
+        for t in ((L[i], R[i], R[i + 1]), (L[i], R[i + 1], L[i + 1])):
+            P = Polygon(t)
+            if P.is_valid and P.area > 0.01:
+                out.append(P)
+    return out
+
+
 def islands(data):
     """(J9) Small traffic islands (a hole in the union of every carriageway and ring, under ISLAND_MAX) that the
     kerb + pavement bands round them do not cover were left unpaved (ground showed). Each such island goes to the
@@ -41,7 +67,7 @@ def islands(data):
     cutd = {k: set(v) for k, v in data['cut'].items()}
     polys, owner = [], []
     for r in data['roads']:
-        g = unary_union(quads(r['s'], cutd.get(r['name'], ())))
+        g = unary_union(built_quads(r['s'], cutd.get(r['name'], ())))
         if not g.is_empty:
             polys.append(g)
             owner.append(r)
@@ -54,38 +80,43 @@ def islands(data):
     out = []
     for poly in getattr(allg, 'geoms', [allg]):
         for ring in poly.interiors:
-            H = Polygon(ring)
-            if H.area >= ISLAND_MAX or H.area < 4:
+            H0 = Polygon(ring)
+            if H0.area >= ISLAND_MAX or H0.area < 4:
                 continue
-            pts = list(Polygon(ring).simplify(0.15).exterior.coords)[:-1]
-            if len(pts) < 3:
-                continue
-            rows, wmin = [], 99.0
-            for k, (x, z) in enumerate(pts):
-                x2, z2 = pts[(k + 1) % len(pts)]
-                mid = Point((x + x2) / 2, (z + z2) / 2)
-                best, bo = 1e9, None
-                for i in tree.query(mid.buffer(1.0)):
-                    d = polys[i].distance(mid)
-                    if d < best:
-                        best, bo = d, owner[i]
-                if bo is None:
-                    rows = None
-                    break
-                if 'r_out' in bo:
-                    walk, y = RING_WALK, bo['c'][1]
-                else:
-                    s = bo['s']
-                    j = min(range(len(s)), key=lambda j: (s[j][0] - mid.x) ** 2 + (s[j][2] - mid.y) ** 2)
-                    q = s[j]
-                    right = (-q[4]) * (mid.x - q[0]) + q[3] * (mid.y - q[2]) > 0
-                    walk = (bo.get('walkR') if right else bo.get('walkL')) or RING_WALK
-                    y = q[1]
-                wmin = min(wmin, walk)
-                rows.append([round(x, 2), round(y, 3), round(z, 2), walk])
-            # only an island the bands leave open
-            if rows and not H.buffer(-wmin - 0.3).is_empty:
-                out.append(rows)
+            # (J33, bahan_ring Kan Yeiktha: two islands either side of a road end touch at one corner: the hole came
+            # out as one outline pinched to a 0-width neck; cut necks under 1 stud, each side is its own island)
+            Op = H0.buffer(-0.5, join_style=2).buffer(0.5, join_style=2).intersection(H0)
+            parts = [g for g in getattr(Op, "geoms", [Op]) if g.geom_type == "Polygon" and g.area >= 4]
+            for H in (parts if len(parts) > 1 else [H0]):
+                pts = list(H.simplify(0.15).exterior.coords)[:-1]
+                if len(pts) < 3:
+                    continue
+                rows, wmin = [], 99.0
+                for k, (x, z) in enumerate(pts):
+                    x2, z2 = pts[(k + 1) % len(pts)]
+                    mid = Point((x + x2) / 2, (z + z2) / 2)
+                    best, bo = 1e9, None
+                    for i in tree.query(mid.buffer(1.0)):
+                        d = polys[i].distance(mid)
+                        if d < best:
+                            best, bo = d, owner[i]
+                    if bo is None:
+                        rows = None
+                        break
+                    if 'r_out' in bo:
+                        walk, y = RING_WALK, bo['c'][1]
+                    else:
+                        s = bo['s']
+                        j = min(range(len(s)), key=lambda j: (s[j][0] - mid.x) ** 2 + (s[j][2] - mid.y) ** 2)
+                        q = s[j]
+                        right = (-q[4]) * (mid.x - q[0]) + q[3] * (mid.y - q[2]) > 0
+                        walk = (bo.get('walkR') if right else bo.get('walkL')) or RING_WALK
+                        y = q[1]
+                    wmin = min(wmin, walk)
+                    rows.append([round(x, 2), round(y, 3), round(z, 2), walk])
+                # only an island the bands leave open
+                if rows and not H.buffer(-wmin - 0.3).is_empty:
+                    out.append(rows)
     data['islands'] = out
     # (J13) owner-drawn asphalt gores (OWNER_GORES): the hole round each point is one road surface (data.fills)
     fills = []
@@ -453,8 +484,16 @@ def butt_match(data):
         cutn = set(data['cut'].get(r['name'], ())) | set(data['cut'].get(hn, ()))
         if cutn and (0 in cutn or len(r['s']) - 1 in cutn or 0 in set(data['cut'].get(hn, ())) or len(R[hn]['s']) - 1 in set(data['cut'].get(hn, ()))):
             continue
-        if any(q[8] > 0 for q in s[:8]):
-            continue  # (a median at the joint: leave it)
+        # (a median at the joint: leave it. J33: only one within the morph + 8 counts: Lower Pazundaung's median starts
+        # 57 studs on, and s[:8] (65 studs) kept the Y's 9-stud step on both sides, kerb_gap at pazundaung_y)
+        acc, near = 0.0, []
+        for i, q in enumerate(s):
+            acc += math.hypot(q[0] - s[i - 1][0], q[2] - s[i - 1][2]) if i else 0.0
+            if acc > MORPH + 8:
+                break
+            near.append(q)
+        if any(q[8] > 0 for q in near):
+            continue
         along = 0.0
         for i, q in enumerate(s):
             if i:

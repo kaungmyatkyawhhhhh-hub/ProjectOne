@@ -1022,6 +1022,24 @@ local function earClip(poly: { Vector3 }): { { Vector3 } }
 end
 M.earClip = earClip
 
+-- (J33, pazundaung_y: Bogyoke ends on the Y where Lower Pazundaung starts on Upper Pazundaung's end: B stopped at that
+-- end, the other edge snapped across, a gore was left) roads going on from big's ends (continuation flag, within 3)
+local function contsOf(big)
+	local out = {}
+	for _, e in { 1, big.n } do
+		for _, c in M.list do
+			if c ~= big and (c.startsOnEnd == big.name or c.endsOnEnd == big.name or big.startsOnEnd == c.name or big.endsOnEnd == c.name) then
+				for _, ce in { 1, c.n } do
+					if hyp(c.s[ce][1] - big.s[e][1], c.s[ce][3] - big.s[e][3]) < 3 then
+						table.insert(out, { e = e, c = c, ce = ce })
+					end
+				end
+			end
+		end
+	end
+	return out
+end
+
 -- the slab between a road's cross-section k and the edge of what it ends on. Needs Roads.debugEdges
 -- (Roads.build with keepEdges) for this road and, for a road mouth, the bigger road.
 function M.buildMouth(m, folder: Instance)
@@ -1063,6 +1081,22 @@ function M.buildMouth(m, folder: Instance)
 		end
 		for i = lo, hi do
 			table.insert(B, EB[side][i])
+		end
+		-- (J33) B goes on along the continuation's edge on this side (far end first at big's start)
+		for _, k in contsOf(big) do
+			local EC, P0 = M.Roads.debugEdges[k.c.name], EB[side][k.e]
+			if EC and P0 and ((k.e == 1 and lo == 1) or (k.e == big.n and hi == big.n)) then
+				local dL = if EC.L[k.ce] then (EC.L[k.ce] - P0).Magnitude else math.huge
+				local dR = if EC.R[k.ce] then (EC.R[k.ce] - P0).Magnitude else math.huge
+				local arr, run, i, st = EC[if dL < dR then "L" else "R"], {}, k.ce, if k.ce == 1 then 1 else -1
+				while #run < 60 and i >= 1 and i <= k.c.n and not M.cut[k.c.name][i] and arr[i] do
+					table.insert(run, arr[i])
+					i += st
+				end
+				for _, p in run do
+					table.insert(B, if k.e == 1 then 1 else #B + 1, p)
+				end
+			end
 		end
 	end
 	local nB = #B
@@ -2855,6 +2889,9 @@ function M.buildRoads(names: { string })
 	for _, m in M.mouths do
 		if m.big then
 			edgesFor[m.big.name] = true
+			for _, k in contsOf(m.big) do
+				edgesFor[k.c.name] = true
+			end
 		end
 	end
 	local count = M.Roads.build(M.data, {
