@@ -70,5 +70,5 @@ Builds on [[2026-11-18 Jobs - ranks and paychecks]] (ranks, paychecks, Double Pa
 - No team colour in the player list: Teams were not used (they change spawns and the player list); the job is a player attribute plus the overhead tag.
 - The tea shop post stands on the pavement in front of a shop, not inside a tea shop building (no tea shop interior exists). The real tea set prop nearest to it is 86 studs north by the "Tea Shop Corner" stop.
 - The 24-stud gold post ring is big on screen.
-- At phone size the HUD's icon column (now 6+ icons) ran into the steering buttons; the discoverability job is making it wrap into a second column.
+- At phone size the HUD's icon column (now 6+ icons) ran into the steering buttons. Fixed the same night by the discoverability job (in Studio, saved): a grid, phone column 1 Dealer, Shop, Jobs, Menu, Cars; column 2 Goals, Chauffeur, House. Not re-shot here.
 - No fast travel to a workplace (the gold waypoint only).
