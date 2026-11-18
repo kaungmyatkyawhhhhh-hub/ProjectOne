@@ -168,8 +168,7 @@ function M.build(): string
 		local d0, d1 = zf + 0.02, zf + 0.14
 		part(L, "DoorL" .. i, ox0, CX, s[2], s[2] + OPEN_H, d0, d1, STEEL, { Reflectance = 0.08 })
 		part(L, "DoorR" .. i, CX, ox1, s[2], s[2] + OPEN_H, d0, d1, STEEL, { Reflectance = 0.08 })
-		-- call panel to the right of the door, with the prompt; a LIFT sign over the door (not in the basement: its
-		-- own "LIFT MALL" sign is there)
+		-- a LIFT sign over the door on the mall floors (the basement has its own "LIFT MALL" sign)
 		-- call panel clear of the opened doors: in the basement on the core face right of the door, on the mall
 		-- floors on the shaft's right side wall by the front corner
 		local panel, lightCF
