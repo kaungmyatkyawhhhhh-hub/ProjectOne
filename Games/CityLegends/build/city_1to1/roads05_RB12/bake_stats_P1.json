@@ -1,0 +1,25 @@
+{
+ "parts": 985159,
+ "scraps_dropped": {
+  "on_carriageway": 36,
+  "lone": 12
+ },
+ "paint_steep": 104,
+ "unknown": 0,
+ "meshes": 276,
+ "files": 26,
+ "triangles": {
+  "B": 7080,
+  "KR": 594531,
+  "KW": 593521,
+  "L": 50606,
+  "LY": 72400,
+  "LZ": 3417,
+  "MG": 9354,
+  "P": 561180,
+  "R": 237292
+ },
+ "paint_dropped": 2148701,
+ "collision_boxes": 14479,
+ "collide_files": 7
+}

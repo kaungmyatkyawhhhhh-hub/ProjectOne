@@ -1,0 +1,70 @@
+{
+ "note": "ROAD REBUILD (J37 roads05 -> game). Data subset roads05_RB12 (P1+P2 boxes, from net md5 c34a1111 / paint b6c2ba15), Studio modules YangonData.Roads05_1..50 (pack rev 209 of asset 133014134133489; DELETE after P2). Build root Workspace.Yangon1to1.RoadsBuildRB. P1 = 3072 cells x9..11 z8..10 -> 1536 swap cells x18..23 z16..21. Pages land in the session tool-results folder; copied to build/city_1to1/roads05_RB12/pages/.",
+ "builder": "YangonRoads 179431/1843759058, YangonRoadsChecks 27754/1841289662, Roads 55521/1407280218",
+ "P1": {
+  "cells3072": [
+   "9x8",
+   "9x9",
+   "9x10",
+   "10x8",
+   "10x9",
+   "10x10",
+   "11x8",
+   "11x9",
+   "11x10"
+  ],
+  "exported": [
+   "9x8:21",
+   "9x9:28",
+   "10x8:3",
+   "10x9:31",
+   "9x10:32",
+   "10x10:35",
+   "11x8:32",
+   "11x9:40",
+   "11x10:38"
+  ],
+  "baked": true,
+  "uploaded": "all 26 glbs: roads05_RB12/upload_ids_P1.json; collide pack = asset 133014134133489 rev 210",
+  "placed_staging": false,
+  "swapped": true,
+  "saved_version": 1398,
+  "lanes": "L123 (P1+P2+P3 cut, J37 data): 630 lanes, 1447 links, 0 dead ends; src/shared + Studio Shared synced (checksums equal)",
+  "playtest": null,
+  "glb": "imports/sync/rebuild_P1_glb (26), collide rbxmx imports/sync/rebuild_P1_collide.rbxmx (7 modules RColRB_P1_k)",
+  "note": "old P1 cells/boxes backup in ServerStorage.RB_OldP1 until Play test passes; YangonData.Roads05_* deleted (re-PATCH imports/sync/rebuild_RB12_data.rbxmx + LoadAsset to rebuild); CollisionFidelity on road meshes does not stick (892 meshes incl. old ones are Default)",
+  "trees_on_road": "147 far-tree / bank-tree parts on new carriageways moved to ServerStorage.RB_OldP1.TreesOnRoad"
+ },
+ "P2": {
+  "exported": [
+   "9x7:12",
+   "10x7:6",
+   "11x7:25",
+   "12x7:22"
+  ],
+  "baked": false,
+  "swapped": false,
+  "cells3072": [
+   "9x5",
+   "9x6",
+   "9x7",
+   "10x5",
+   "10x6",
+   "10x7",
+   "11x5",
+   "11x6",
+   "11x7",
+   "12x5",
+   "12x6",
+   "12x7",
+   "12x8"
+  ],
+  "swap_cells": "1536 cols 18..24 rows 10..15 + 24x16 (+any old Cell_ in that range)"
+ },
+ "P3": {
+  "exported": [],
+  "baked": false,
+  "swapped": false
+ },
+ "note2": "pages: zstd+base64 slices (@Z) since 9x9 p8; grabber tools/yangon/city/roads05_grab.py"
+}
