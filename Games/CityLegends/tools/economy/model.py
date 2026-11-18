@@ -38,7 +38,7 @@ for line in CARS.splitlines():
     c["Electric"] = bool(field(line, "Electric", bool))
     c["Pending"] = bool(field(line, "Pending", bool))
     c["Retired"] = False
-    c["BaseId"] = None
+    c["BaseId"] = field(line, "BaseId")  # (a trim written out in the list: the R35 Zenith, 19 Nov)
     cars[c["Id"]] = c
     order.append(c["Id"])
 retired_block = re.search(r"Cars\.RETIRED = \{(.*?)\} ::", CARS, re.S).group(1)
@@ -341,17 +341,24 @@ LOCAL_IDS = {  # id (base car) -> reason
     "bentz_gls": "GLS Maybach: a few", "bentz_190e": "old Mercedes, the Evo II is rare?", "dearb_focus_rs": "Ford: sold, the RS is rare?",
     "ronin_cp9a": "Mitsubishi: JDM used import", "ronin_ct9a": "JDM", "ronin_cz4a": "JDM", "pleiad_gc8": "Subaru: JDM", "pleiad_gdb": "JDM", "pleiad_zc6": "JDM",
     "rolls_cullinan": "a few Rolls in Yangon", "rolls_wraith": "a few Rolls in Yangon?", "bentlee_bentayga": "a few Bentleys", "lambrini_urusp": "one or two Urus in Yangon?",
-    "porsha_panamera": "Porsche dealer in Yangon", "porsha_boxster": "Porsche dealer in Yangon", "maseroti_levante": "rare?",
+    "porsha_panamera": "Porsche dealer in Yangon", "porsha_boxster": "Porsche dealer in Yangon", "maseroti_levante": "owner: Local",
+    "bentlee_contgt": "owner: Local", "ferrara_458spider": "owner: Local (the 458 Spider)",
 }
+# owner decisions, 19 Nov 2026 (the "?" cars)
+for _i in ("nisun_r34", "nisun_gtr", "lexis_lc500", "rolls_wraith", "lambrini_urusp", "xiaomo_su7", "toyoka_supra_mk4"):
+    LOCAL_IDS[_i] = "owner: Local"
+for _i in ("bentz_190e", "dearb_focus_rs", "bentz_e63s"):
+    LOCAL_IDS.pop(_i, None)
 IMPORT_IDS = {"bnw_m3_e92": "M cars not sold in MM", "bnw_m3_f80": "M cars not sold in MM", "bnw_m4_f82": "M cars not sold in MM",
               "bnw_m5_e60": "M cars not sold in MM", "bnw_m6_v10": "M cars not sold in MM", "bnw_m5_f10": "M cars not sold in MM",
               "bnw_m5_f90": "M cars not sold in MM", "bnw_m8gc": "M cars not sold in MM", "bentz_cls63s": "AMG import",
               "bentz_gt63s": "AMG GT import", "bentz_sl65bs": "Black Series: collector", "bentz_sls": "collector supercar",
               "dodger_challenger": "US muscle, LHD import", "chevo_camaro": "US muscle", "chevo_c7": "US muscle",
               "porsha_gt3": "track car", "bentlee_contgt": "rare?", "brabos_g63": "tuner G: import", "lexis_lfa": "collector, 500 built",
-              "lexis_lfa_circuit": "collector", "ronin_cp9a_champ": "rare JDM edition", "astin_dbx": "British Vanguard brand"}
-UNSURE = {"nisun_r34", "nisun_gtr", "lexis_lc500", "bentz_e63s", "bentz_190e", "dearb_focus_rs", "rolls_wraith", "lambrini_urusp",
-          "maseroti_levante", "xiaomo_su7", "bentlee_contgt", "toyoka_supra_mk4"}
+              "lexis_lfa_circuit": "collector", "ronin_cp9a_champ": "rare JDM edition", "astin_dbx": "British Vanguard brand",
+              "bentz_190e": "owner: Import", "dearb_focus_rs": "owner: Import", "bentz_e63s": "owner: Import"}
+IMPORT_IDS.pop("bentlee_contgt")
+UNSURE = set()  # (all decided by the owner, 19 Nov 2026)
 
 def source(cid):
     c = cars[cid]; base = c["BaseId"] or cid; mk = make_of(c["Name"])
@@ -479,8 +486,25 @@ def main():
     if "--md" in args:
         Path(args[args.index("--md") + 1]).write_text(text, encoding="utf-8")
     print(text)
+    if "--lua" in args:  # src/shared/CarMeta.lua: price, Local / Import, rarity per car on sale
+        lua(Path(args[args.index("--lua") + 1]), rows)
     if "--chart" in args:
         chart(Path(args[args.index("--chart") + 1]), rows, curves)
+
+def lua(path, rows):
+    head = """--[[
+	CarMeta (made by tools/economy/model.py --lua; do not edit by hand): the fair price, Local / Import and
+	rarity of every car on sale (owner approved 19 Nov 2026, vault "2026-11-19 Economy - fair car prices proposal").
+	  p = price ($; for an Import: its value, crates / refunds), s = "L" Local (the dealer sells it) or "I"
+	  Import (crates only), r = rarity. Cars.lua puts these on the specs (Price, Source, Rarity).
+	The prices are frozen at the approved run (before the delivery 7 -> 4 and post changes): re-running the
+	model after those changes gives lower numbers.
+]]
+return {
+"""
+    body = "".join('\t%s = { p = %d, s = "%s", r = "%s" },\n' % (cid, rows[cid]["price"], rows[cid]["source"][0], rows[cid]["rarity"])
+                   for cid in sorted(rows))
+    path.write_text(head + body + "}\n", encoding="utf-8", newline="\n")
 
 def chart(path, rows, curves):
     import matplotlib

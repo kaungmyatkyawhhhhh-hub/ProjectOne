@@ -38,6 +38,8 @@ export type CarSpec = {
 	-- price, "used" the US used market, "collector" the market value
 	StatPrice: number?, -- the old game price: the show numbers worked from it stay the same (CarStats)
 	RearBias: boolean?, -- an all-wheel-drive car that sends more to the rear and slides like a rear-drive one
+	Source: string?, -- "Local" (sold at Legends Motors for cash) or "Import" (crates only, never the dealer); CarMeta
+	Rarity: string?, -- Common / Uncommon / Rare / Epic / Legendary / Mythic / Hypercar (crate tiers); CarMeta
 }
 
 local Cars = {}
@@ -125,7 +127,9 @@ local list: { CarSpec } = {
 	{ Id = "bentz_gt63s", Name = "Ironclad Supercharged", Class = "Sedan", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.6, Handling = 0.8, Price = 72500, PriceSource = "used", StatPrice = 320000, Color = Color3.fromRGB(88, 92, 98), Order = 42 },
 
 	-- High tier
-	{ Id = "nisun_gtr", Name = "Horizon R35", Class = "Coupe", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 2.9, Handling = 0.86, Price = 105000, PriceSource = "used", StatPrice = 420000, Color = Color3.fromRGB(235, 236, 238), Order = 43 },
+	{ Id = "nisun_gtr", Name = "Horizon R35", Class = "Coupe", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 2.9, Handling = 0.86, Price = 105000, PriceSource = "used", StatPrice = 420000, Color = Color3.fromRGB(235, 236, 238), Order = 43, Trim = "2010" },
+	-- (owner, 19 Nov 2026: the R35 gets two trims, a "2010" and a "2017 Nismo"-style one) the Zenith: on the R35 model
+	{ Id = "nisun_gtr_nismo", Name = "Horizon R35 Zenith", Class = "Coupe", Tier = "High", TopSpeed = 205, ZeroToSixty = 2.5, Handling = 0.9, Price = 210000, PriceSource = "used", StatPrice = 520000, Color = Color3.fromRGB(88, 92, 98), Accent = Color3.fromRGB(200, 16, 16), Order = 43.1, Model = "nisun_gtr", BaseId = "nisun_gtr", Trim = "ZENITH" },
 	{ Id = "astin_db9", Name = "British Vanguard Vanta V12", Class = "Coupe", Tier = "Mid", TopSpeed = 201, ZeroToSixty = 3.8, Handling = 0.76, Price = 50000, PriceSource = "used", StatPrice = 450000, Color = Color3.fromRGB(26, 44, 82), Order = 44 },
 	{ Id = "astin_vantage", Name = "British Vanguard Vela V12", Class = "Coupe", Tier = "Mid", TopSpeed = 195, ZeroToSixty = 3.5, Handling = 0.82, Price = 125000, PriceSource = "used", StatPrice = 500000, Color = Color3.fromRGB(36, 70, 52), Order = 45 },
 	{ Id = "ferrara_f430", Name = "Rosso Rampante F131", Class = "Supercar", Tier = "Mid", TopSpeed = 196, ZeroToSixty = 3.6, Handling = 0.86, Price = 130000, PriceSource = "used", StatPrice = 600000, Color = Color3.fromRGB(200, 10, 20), Order = 46 },
@@ -138,7 +142,6 @@ local list: { CarSpec } = {
 	{ Id = "audy_r8_4s", Name = "Precision 4S V10", Class = "Supercar", Tier = "High", TopSpeed = 205, ZeroToSixty = 2.9, Handling = 0.9, Price = 350000, PriceSource = "used", StatPrice = 700000, Color = Color3.fromRGB(200, 28, 24), Accent = Color3.fromRGB(16, 16, 18), Order = 49.7 },
 	{ Id = "mclaran_12c", Name = "Speedmark P11 Spider", Class = "Supercar", Tier = "High", TopSpeed = 207, ZeroToSixty = 3.1, Handling = 0.9, Price = 350000, PriceSource = "used", StatPrice = 800000, Color = Color3.fromRGB(226, 84, 8), Order = 50 },
 	{ Id = "ferrara_599", Name = "Rosso Rampante F141", Class = "Supercar", Tier = "High", TopSpeed = 205, ZeroToSixty = 3.5, Handling = 0.84, Price = 165000, PriceSource = "used", StatPrice = 850000, Color = Color3.fromRGB(20, 21, 24), Order = 51 },
-	{ Id = "ferrara_458", Name = "Rosso Rampante F142", Class = "Supercar", Tier = "High", TopSpeed = 202, ZeroToSixty = 3.3, Handling = 0.9, Price = 900000, Color = Color3.fromRGB(200, 10, 20), Order = 52 },
 	{ Id = "bentz_sls", Name = "Tri-Star Silber C197 Wingdoor", Class = "Supercar", Tier = "High", TopSpeed = 197, ZeroToSixty = 3.7, Handling = 0.86, Price = 250000, PriceSource = "collector", StatPrice = 950000, Color = Color3.fromRGB(235, 236, 238), Order = 53 },
 	{ Id = "porsha_gt3", Name = "Stuttgart 991.2 Track", Class = "Supercar", Tier = "High", TopSpeed = 193, ZeroToSixty = 3.2, Handling = 0.95, Price = 190000, PriceSource = "used", StatPrice = 1000000, Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 54 },
 	{ Id = "bentlee_contgt", Name = "Sovereign Grand Tourer", Class = "Coupe", Tier = "High", TopSpeed = 198, ZeroToSixty = 3.6, Handling = 0.74, Price = 345000, PriceSource = "new", StatPrice = 1100000, Color = Color3.fromRGB(26, 44, 82), Order = 55 },
@@ -220,7 +223,6 @@ local list: { CarSpec } = {
 Cars.RETIRED = {
 	suzaki_swift = true, toyoka_belta = true, toyoka_crown = true, byt_seal = true, mazdo_rx8 = true,
 	bentz_e300 = true, bnw_530i = true, bentz_cla45 = true, chevo_c6 = true, -- (2026-11-06: the G20 is back, a starter pick)
-	ferrara_458 = true, -- owner (2026-11-05): "remove 458 italia"
 	lambrini_urus = true, -- owner (2026-11-06): one Urus only, see Cars.Swapped
 } :: { [string]: boolean }
 
@@ -276,7 +278,9 @@ Cars.Series = {
 	{ Name = "APEX GRAND LOUNGE", Ids = { "toyoka_alfard" } },
 	{ Name = "APEX J-SERIES", Ids = { "toyoka_lc200", "toyoka_lc300" } },
 	{ Name = "APEX JZX100", Ids = { "toyoka_chaser" } },
-	{ Name = "APEX JZA80", Ids = { "toyoka_supra_mk4" } },
+	-- (owner, 19 Nov 2026: the "?" cars are base only; their SPORT / TOP trims and the Revuelto's are DELETED,
+	-- not retired: only testers owned them, PlayerData drops unknown ids on load)
+	{ Name = "APEX JZA80", Ids = { "toyoka_supra_mk4" }, NoTrims = true },
 	-- (2026-11-14, the JDM imports: real models, so no made-up SPORT / TOP trims, as the owner took off the
 	-- Countach's and the 991.2's on 2026-11-13)
 	{ Name = "APEX AE86", Ids = { "toyoka_ae86" }, NoTrims = true },
@@ -289,7 +293,8 @@ Cars.Series = {
 	{ Name = "ORIENT VOLTRA", Ids = { "kio_ev6" } },
 	{ Name = "DREAM-BUILD VOLT TITAN", Ids = { "byt_u8" } },
 	{ Name = "HORIZON Z33", Ids = { "nisun_350z" } },
-	{ Name = "HORIZON BNR34 & R35", Ids = { "nisun_r34", "nisun_gtr" } },
+	{ Name = "HORIZON BNR34", Ids = { "nisun_r34" }, NoTrims = true },
+	{ Name = "HORIZON R35", Ids = { "nisun_gtr", "nisun_gtr_nismo" } },
 	{ Name = "AHURA FD ROTARY", Ids = { "mazdo_rx7" } },
 	{ Name = "BAVARICA WERKZ F80", Ids = { "bnw_m3_f80" } },
 	{ Name = "BAVARICA WERKZ E92 & F82", Ids = { "bnw_m3_e92", "bnw_m4_f82" } },
@@ -300,7 +305,7 @@ Cars.Series = {
 	{ Name = "BAVARICA WERKZ G12", Ids = { "bnw_750li" } },
 	{ Name = "BAVARICA WERKZ G06", Ids = { "bnw_x6" } },
 	{ Name = "BAVARICA WERKZ G07", Ids = { "bnw_x7" } },
-	{ Name = "TRI-STAR SILBER W201", Ids = { "bentz_190e" } },
+	{ Name = "TRI-STAR SILBER W201", Ids = { "bentz_190e" }, NoTrims = true },
 	{ Name = "TRI-STAR SILBER W177", Ids = { "bentz_a45s" } },
 	{ Name = "TRI-STAR SILBER C218", Ids = { "bentz_cls63s" } },
 	{ Name = "TRI-STAR SILBER W213", Ids = { "bentz_e400", "bentz_e63s" } },
@@ -314,11 +319,11 @@ Cars.Series = {
 	{ Name = "IRONCLAD SUPERCHARGED", Ids = { "bentz_gt63s" } },
 	{ Name = "GOLDEN SIX", Ids = { "chevo_camaro" } },
 	{ Name = "GOLDEN STING", Ids = { "chevo_c7" } },
-	{ Name = "HYPERSPEED TECH S7", Ids = { "xiaomo_su7" } },
-	{ Name = "STEALTH-APEX Z100", Ids = { "lexis_lc500" } },
+	{ Name = "HYPERSPEED TECH S7", Ids = { "xiaomo_su7" }, NoTrims = true },
+	{ Name = "STEALTH-APEX Z100", Ids = { "lexis_lc500" }, NoTrims = true },
 	{ Name = "STEALTH-APEX J310", Ids = { "lexis_lx700" } },
 	{ Name = "STEALTH-APEX V10 HALO", Ids = { "lexis_lfa", "lexis_lfa_circuit" } },
-	{ Name = "TRIDENT MOTORS MAESTRALE", Ids = { "maseroti_levante" } },
+	{ Name = "TRIDENT MOTORS MAESTRALE", Ids = { "maseroti_levante" }, NoTrims = true },
 	{ Name = "STUTTGART 982", Ids = { "porsha_boxster" } },
 	{ Name = "STUTTGART 971", Ids = { "porsha_panamera" } },
 	{ Name = "STUTTGART 991.2", Ids = { "porsha_gt3" }, OldTrims = true },
@@ -336,13 +341,13 @@ Cars.Series = {
 	{ Name = "ENFURECIDO LB724", Ids = { "lambrini_huracan", "lambrini_performante", "lambrini_sto", "lambrini_sterrato" } },
 	{ Name = "ENFURECIDO L147", Ids = { "lambrini_lp640", "lambrini_lp670" } },
 	{ Name = "ENFURECIDO LB834", Ids = { "lambrini_lp700", "lambrini_lp750", "lambrini_svj", "lambrini_svj63" } },
-	{ Name = "ENFURECIDO LB744", Ids = { "lambrini_revuelto" } },
+	{ Name = "ENFURECIDO LB744", Ids = { "lambrini_revuelto" }, NoTrims = true },
 	{ Name = "ENFURECIDO BRAVA", Ids = { "lambrini_urusp" }, NoTrims = true },
 	{ Name = "ENFURECIDO CLASSICO", Ids = { "lambrini_countach" }, OldTrims = true },
 	{ Name = "SPEEDMARK P11", Ids = { "mclaran_12c" } },
-	{ Name = "SOVEREIGN GRAND TOURER", Ids = { "bentlee_contgt" } },
+	{ Name = "SOVEREIGN GRAND TOURER", Ids = { "bentlee_contgt" }, NoTrims = true },
 	{ Name = "SOVEREIGN HIGHLANDS", Ids = { "bentlee_bentayga" } },
-	{ Name = "ECSTASY NOCTURNE", Ids = { "rolls_wraith" } },
+	{ Name = "ECSTASY NOCTURNE", Ids = { "rolls_wraith" }, NoTrims = true },
 	{ Name = "ECSTASY GRANDEUR", Ids = { "rolls_cullinan" } },
 	{ Name = "VELOCITÉ NOIR ORIGINE", Ids = { "bugotti_veyron" } },
 	{ Name = "VELOCITÉ NOIR ÉCLAIR", Ids = { "bugotti_chiron", "bugotti_chiron_pursport", "bugotti_chiron_supersport" } },
@@ -360,7 +365,6 @@ local RETIRED_SERIES = {
 	{ Name = "BAVARICA WERKZ G30", Ids = { "bnw_530i" }, NoTrims = true },
 	{ Name = "TRI-STAR SILBER W213 2.0", Ids = { "bentz_e300" }, NoTrims = true },
 	{ Name = "GOLDEN STING 6", Ids = { "chevo_c6" }, NoTrims = true },
-	{ Name = "ROSSO RAMPANTE F142 COUPE", Ids = { "ferrara_458" } },
 	{ Name = "ENFURECIDO BRAVA OLD", Ids = { "lambrini_urus" }, NoTrims = true },
 }
 
@@ -467,6 +471,26 @@ do
 		gsv.Trim = "ROADSTER VITESSE"
 		gsv.TopSpeed, gsv.ZeroToSixty, gsv.Handling = 254, 2.6, 0.87
 	end
+end
+
+-- (owner approved 19 Nov 2026, vault "2026-11-19 Economy - fair car prices proposal") the fair prices, Local /
+-- Import and rarity come from shared/CarMeta.lua (made by tools/economy/model.py --lua). The Price on each
+-- line above is the old real-world price: the show numbers (weight, so the PI and class) keep working from
+-- it as StatPrice, so a new price never moves a car's class. An Import's Price is its value (crates, refunds)
+local Meta = require(script.Parent:WaitForChild("CarMeta")) :: { [string]: { p: number, s: string, r: string } }
+for _, spec in list do
+	spec.StatPrice = spec.StatPrice or spec.Price
+	local m = Meta[spec.Id]
+	if m then
+		spec.Price, spec.Rarity = m.p, m.r
+		spec.Source = if m.s == "I" then "Import" else "Local"
+	end
+end
+
+-- an Import-only car: never sold for cash at the dealer (the market can't deliver one either)
+function Cars.isImport(id: string): boolean
+	local spec = Cars.ById[id]
+	return spec ~= nil and spec.Source == "Import"
 end
 
 -- brand XP is saved by brand name: the old names it was saved under (Brands.lua moves them)
