@@ -65,3 +65,25 @@ Rules that make the hybrid work:
   - The client presses a virtual button on `player.Idled`, so the 20-minute kick never fires.
   - Lives already loop on their own, so an AFK lineage keeps evolving slowly and active play is about 2x faster.
 - Backup: ServerStorage `Evolution_backup_before_coldsnap`.
+
+## Traits decide the branch (v42, 18 Nov 2026)
+- **Body-plan traits per lane:**
+
+  | Split | Lanes and their traits |
+  |---|---|
+  | F1 | Fish = Backbone, Bugs = Jointed Legs, Shells = Soft Body |
+  | F2 | Bony = Bony Skeleton, Sharks = Cartilage |
+  | F3 | Synapsids = **Thick Skin** (so cold snaps push families toward mammals), Reptiles = Scales |
+  | F4 | Dinosaurs = Gigantism, Birds = Feathers |
+  | F5 | Primates = Grabbing Hands, Whales = Flippers |
+  | F6 | Sapiens = Sharp Mind, Neanderthals = Stocky Build |
+
+- **How a branch is chosen:**
+  - From 2 stages before a split, each birth has a 50% chance to mutate a lane trait. The main lane is 2x as likely.
+  - The trait the family carries picks the branch ("New branch! Fur line").
+  - With no fitting trait, evolution waits 3 lives ("Waiting for a new trait..."), then nature picks.
+- Body-plan traits are never lost.
+- The menu remains only for the imagined future split (F7).
+- Self-check: about 50% of F1 runs go to Fish (400 runs).
+- Play test: Backbone → Haikouichthys, then Bony Skeleton → Arandaspis.
+- Backup: `Evolution_backup_before_traitforks`.
