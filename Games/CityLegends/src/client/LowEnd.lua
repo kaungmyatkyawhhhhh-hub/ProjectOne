@@ -11,7 +11,7 @@ What it turns down (measured 19 Nov, vault note "2026-11-19 Performance - low-en
   * terrain decoration off; the shells' roof Textures hidden
 
 Auto: phones (touch, no keyboard) start low-end, because the load is the moment a 3 GB phone runs out
-of memory; after 25 s in the world a phone that holds ~55 fps under 1,000 MB goes back to normal
+of memory; after 25 s in the world a phone that holds ~55 fps under 1,800 MB goes back to normal
 (traffic counts stay until the next join). Any device that runs under 28 fps for 25 s goes low-end.
 Studio: player attribute TestLowEnd = true forces it on (false forces it off); workspace attribute
 TestLowEnd (set in Edit) does the same from the start.
@@ -122,7 +122,7 @@ local function autoWatch()
 	end
 	local fps = frames / (os.clock() - t0)
 	local mem = Stats:GetTotalMemoryUsageMb()
-	if LowEnd.on and fps >= 55 and mem < 1000 then
+	if LowEnd.on and fps >= 55 and mem < 1800 then
 		set(false)
 	elseif not LowEnd.on and fps < 28 then
 		set(true)
