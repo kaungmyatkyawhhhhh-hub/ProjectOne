@@ -1,6 +1,6 @@
 {
  "note": "ROAD REBUILD (J37 roads05 -> game). Data subset roads05_RB12 (P1+P2 boxes, from net md5 c34a1111 / paint b6c2ba15), Studio modules YangonData.Roads05_1..50 (pack rev 209 of asset 133014134133489; DELETE after P2). Build root Workspace.Yangon1to1.RoadsBuildRB. P1 = 3072 cells x9..11 z8..10 -> 1536 swap cells x18..23 z16..21. Pages land in the session tool-results folder; copied to build/city_1to1/roads05_RB12/pages/.",
- "builder": "YangonRoads 179431/1843759058, YangonRoadsChecks 27754/1841289662, Roads 55521/1407280218",
+ "builder": "YangonRoads 179623/221012820 (J37 + ramp pavement drop), YangonRoadsChecks 27754/1841289662, Roads 55521/1407280218",
  "P1": {
   "cells3072": [
    "9x8",
@@ -142,5 +142,6 @@
   "terrain road bed poking through meshes at some P3 junctions (verge check above)",
   "Sule Pagoda Road box hole (36092, 43529)",
   "P4+ districts"
- ]
+ ],
+ "mc_ramps": "DONE 18 Nov: ramp_mouths.json + roads05_ramps.py (Lane #4080/#4081 dropped, #4082 cut 11 samples, 2 ramp driveways), YangonRoads.sideZone ramp drops pavement (179623 chars, checksum 221012820, in Studio ClaudeTools), bake ramp_gaps; cells 22x17+22x18 rebuilt (subset roads05_RBM, glb assets 116769588627695/122257664879454/117456821135757, 1811 boxes), aprons MCRampAprons (Landmarks.MyanmarCentre.RampAprons, re-run after rebuilding those cells), trenches cleared; Play PASS all 3 ramps in+out, parking 207 bays/8 cars, bay park ok; saved v1445, backup deleted"
 }

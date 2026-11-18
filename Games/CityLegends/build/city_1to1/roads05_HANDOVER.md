@@ -59,6 +59,17 @@ State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp
   differed). A regenerate (buildings_1to1 / green_1to1 / street_1to1 / places_1to1) still reads the OLD roads: re-run KF / KW after.
 - **Open:** terrain road bed through P3 junction meshes (above); the Sule Pagoda Road junction box hole; P4+ districts; CollisionFidelity on road meshes (Default, harmless).
 
+## MC basement ramps (18 Nov, after P3): ramp mouths kept open by data; cells 22x17 + 22x18 re-swapped
+- `build/city_1to1/ramp_mouths.json` -> `tools/yangon/city/roads05_ramps.py` (called by roads05_fix.py before its checks;
+  standalone on a fixed net in place, backups `*_preramps.json`): drops Lane #4080 / #4081 (basement aisles), cuts roads
+  on a ramp's footprint to their far end (Lane #4082), adds driveways kind `ramp`. The net roads.json is now md5 f1332665...
+  (paint unchanged in content). YangonRoads.sideZone: kind `ramp` drops the pavement too (179,623 chars, checksum
+  221012820; Studio ClaudeTools has it). roads05_bake.py `ramp_gaps` splits P collision boxes at a ramp mouth.
+- Rebuild of only two 1536 cells: `roads05_jsubset.py` with a grid of points (`roads05_RBM`), one `stepCell` over the
+  1536 x 3072 box (cells may be any box; pages labelled 22x17), `R05_ONLY=22x17,22x18` bake, swap by box centre cell.
+- After any rebuild of those cells: run `ClaudeTools.MCRampAprons` (the slope from the J37 carriageway, ~1.4 under the
+  site plane, to each ramp top) and clear the trenches (MCBasement.terrain + up to the coping: a road bed filled them).
+
 ## REBUILD progress 2 (18 Nov evening, ROAD REBUILD agent 2): P3 built, 12/15 cells exported; YCC ramps + P1/P2 props done
 State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp", "verge", "lane_gaps").
 - **P3 data:** `roads05_subset.py P1_..._P12 RB3 P3` (clip = P3 box only: no P6-P8 roads in the game; 901 roads, 34 modules,

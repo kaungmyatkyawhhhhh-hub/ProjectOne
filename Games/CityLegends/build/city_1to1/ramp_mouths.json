@@ -1,0 +1,11 @@
+{
+ "note": "Landmark ramps the roads05 build must keep open (tools/yangon/city/roads05_ramps.py; 18 Nov 2026, owner: 'the myanmar plaza underground parking is gone, its blocked off by road'). Each ramp: top = where the ramp meets the street (world x, z; measured in Studio from the ramp side-wall collision boxes in Landmarks.MyanmarCentre.Collide), axis = down the ramp, len, w = outer width. mouth = a driveway of kind 'ramp' on the street (no kerb and no pavement within hw along the street, across studs out from the point). drop = OSM ways that are the basement's own aisles (they run through the building at street level).",
+ "ramps": [
+  {"name": "MC ramp_in", "top": [34625.9, 27605.3], "axis": [0.990, 0.138], "len": 43.3, "w": 24.0,
+   "mouth": {"x": 34620.0, "z": 27604.5, "hw": 12.5, "across": 8}},
+  {"name": "MC ramp_out", "top": [34630.8, 27567.3], "axis": [0.993, 0.120], "len": 38.2, "w": 24.0,
+   "mouth": {"x": 34624.8, "z": 27566.6, "hw": 12.5, "across": 8}},
+  {"name": "MC Melia ramp", "top": [34689.4, 27671.2], "axis": [0.959, 0.284], "len": 52.8, "w": 22.5}
+ ],
+ "drop": ["Lane #4080", "Lane #4081"]
+}

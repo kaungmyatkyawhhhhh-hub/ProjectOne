@@ -76,3 +76,9 @@ This note is the fix. It works in three parts:
 | Frame inside a frame | plain screen part + framed art (rule 8) |
 | Prop in the walkway | paths at least 10 wide; audit UNREACHABLE; move props to path edges |
 | Floating / sunk props | place with pivot on groundTop; audit FLOAT/SUNK |
+
+## Lesson (18 Nov 2026, City Legends: road rebuild covered the Myanmar Plaza basement ramps)
+- A generated layer (roads, terrain, verge) rebuilt over hand-made openings (ramps, gates, drive-ins) will close them unless the openings live in the generator's DATA. Put every opening into the generator's input (cut zones / driveways) and its collision step, not only into the visuals: the visual pavement was cut but one 72-stud collision box still lay across both mouths.
+- OSM ways that are really underground (basement aisles, parking ramps) come in at street level: drop them by name in the data.
+- After any rebuild near a landmark, drive in and out of every opening in Play before reporting.
+
