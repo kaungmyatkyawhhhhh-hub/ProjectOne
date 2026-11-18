@@ -154,3 +154,37 @@ Owner: "Species to 250".
 **Known gap:** a whole lane shares one part-built body (Diplodocus looks like T. rex). Bodies made from traits are the next step before "1000+" can be honest.
 
 **Backup:** `Evolution_backup_before_species250`.
+
+## Trait bodies (v47, 18 Nov 2026)
+Owner: "Yes, trait bodies".
+
+**Each body is built from the species' look**, not one shape per lane:
+- `LANE_LOOK` gives a lane its body plan, e.g. Sauropods `quad neck`, Horned `quad frill horns`, Penguins `penguin`.
+- `SPECIES_LOOK` adds the species' own features and size, e.g. Triceratops `horns=3 size=1.4`, Stegosaurus `plates`, Woolly Mammoth `tusks woolly size=1.8`.
+- `lookOf(node)` merges the two.
+
+**What the looks build:**
+- **New body kinds:** snake (+ cobra hood), jellyfish, sea star, sponge, clam, snail, ray, spider, penguin, giant runner bird.
+- **Dinosaurs:** one body shaped by the look: biped or four legs, neck length, duck bill, plates and tail spikes, armor studs, club, frill + spikes, 1 or 3 horns, crest, sail.
+- **Extras on other kinds:**
+  - Mammals: wool, mane, trunk, big ears, tusks, horn, fangs, teeth, bill, spines, big tail.
+  - Birds: owl face, crest, hooked beak.
+  - Reptiles and amphibians: shell, croc snout, boomerang head, gills, frog.
+  - Fish: bill, sail.
+  - Sea reptiles: neck, paddles, dorsal fin.
+  - Bugs: claws, stinger.
+
+**Play test (screenshots):**
+- Read well: Triceratops, Kentrosaurus, Patagotitan, Woolly Mammoth, Lion, King Cobra, Emperor Penguin, Lion's Mane Jellyfish, Manta Ray, Emperor Scorpion.
+- Fixed after the first look:
+  - The frill stood up like a sail; the brow horns pointed up.
+  - The sauropod neck was a dotted line.
+  - The mammoth wool was black.
+- No script errors.
+
+**Known gaps:**
+- Legs are still plain dark boxes.
+- The ray is a plain oval.
+- About 100 species have no own look and use their lane's body.
+
+**Backup:** `Evolution_backup_before_traitbodies`.
