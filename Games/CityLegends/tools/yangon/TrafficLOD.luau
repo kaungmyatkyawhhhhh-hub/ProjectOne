@@ -28,13 +28,17 @@ local DROP_GROUPS = {
 }
 -- part names (lower case patterns)
 local DROP_PARTS = { "cabin", "leather", "suede", "^steeringwheel", "_engine", "^engine", "^lampfx_", "plate", "seat", "^drag$", "^downforce", "^smoke$",
-	"^hitbox", "^cam$", "^engine", "screenlit", "^tk$", "handle", "pedal", "^body_exhausthole" }
+	"^hitbox", "^cam$", "^engine", "screenlit", "^tk$", "handle", "pedal", "^body_exhausthole",
+	"badge", "logo", "emblem", "lettering" }
 
 local function lower(s: string): string
 	return string.lower(s)
 end
 
 local function dropped(p: Instance, root: Instance): boolean
+	if p.Name == "MarkPatch" then
+		return false -- (badge covers from tools/brand_marks/RobloxBuiltPatches.luau: always kept)
+	end
 	local n = lower(p.Name)
 	for _, pat in DROP_PARTS do
 		if string.find(n, pat) then
@@ -160,6 +164,11 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 		while #parts > 3 do
 			table.remove(parts)
 		end
+		for _, d in w:GetDescendants() do
+			if d.Name == "MarkPatch" and d:IsA("BasePart") and not table.find(parts, d) then
+				table.insert(parts, d) -- (the wheel-cap badge covers)
+			end
+		end
 		if #parts == 0 then
 			return nil, id .. ": empty wheel " .. c
 		end
@@ -215,7 +224,9 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 		local inside = math.abs(q.X) + ex < track * 0.42 and math.abs(q.Z) + ez < wb * 0.62
 			and q.Y - ey > groundY + height * 0.22 and q.Y + ey < hi.Y - height * 0.06
 		local n = lower(p.Name)
-		if inside and not isGlass(p, n) then
+		if p.Name == "MarkPatch" then
+			table.insert(keep, p)
+		elseif inside and not isGlass(p, n) then
 			droppedInside += 1
 		elseif math.max(p.Size.X, p.Size.Y, p.Size.Z) < length * 0.02 then
 			droppedTiny += 1

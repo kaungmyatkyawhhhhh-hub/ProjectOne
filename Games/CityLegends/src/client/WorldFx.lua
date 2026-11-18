@@ -303,7 +303,7 @@ local function startLod(scale: number)
 		end
 		return false
 	end
-	local function venueLight(l: Instance)
+	local function venueLight(l: Instance, range: number?)
 		if not l:IsA("Light") or l:GetAttribute("NoLod") or l:GetAttribute("LodRange") then
 			return
 		end
@@ -312,7 +312,7 @@ local function startLod(scale: number)
 		end
 		-- (exterior floods and lamps, DayOff: they keep the 300 of the street lamps, seen from the road at night)
 		if not l:HasTag("DayOff") then
-			l:SetAttribute("LodRange", VENUE_LIGHT_RANGE)
+			l:SetAttribute("LodRange", range or VENUE_LIGHT_RANGE)
 		end
 		if (l :: Light).Shadows or l:HasTag("ShadowLight") then
 			l:SetAttribute("ShadowRange", VENUE_SHADOW_RANGE)
@@ -322,14 +322,16 @@ local function startLod(scale: number)
 			l:AddTag("LODLight")
 		end
 	end
-	local function watchVenues(root: Instance?)
+	local function watchVenues(root: Instance?, range: number?)
 		if not root then
 			return
 		end
-		root.DescendantAdded:Connect(venueLight)
+		root.DescendantAdded:Connect(function(d)
+			venueLight(d, range)
+		end)
 		task.spawn(function()
 			for i, d in root:GetDescendants() do
-				venueLight(d)
+				venueLight(d, range)
 				if i % 2000 == 0 then
 					task.wait()
 				end
@@ -340,6 +342,10 @@ local function startLod(scale: number)
 		watchVenues(workspace:WaitForChild("City", 30))
 		local y = Config.mapRoot()
 		watchVenues(y and y:WaitForChild("CarCare", 30))
+		-- (2026-11-19, phones) the Persistent landmarks' ~280 small interior / facade lights (Bogyoke Market 112,
+		-- Myanmar Centre 144) and the 60 Legends chips were all on from anywhere on the map: by distance now
+		watchVenues(workspace:WaitForChild("Activities", 30))
+		watchVenues(y and y:WaitForChild("Landmarks", 30), 320)
 	end)
 	-- the light ranges (worked out each sweep from lightScale, which follows the menu's Graphics choice):
 	-- 560 wide enough that lights never visibly pop on/off block by block (past that a lamp's own glowing
