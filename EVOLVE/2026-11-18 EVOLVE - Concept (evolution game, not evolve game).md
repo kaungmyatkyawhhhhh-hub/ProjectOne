@@ -299,3 +299,59 @@ Owner: "i can hear roblox walking sound".
   - At a fork, an AFK player waits at most `FORK_PATIENCE` = 3 lives, then takes the first path.
   - Offline time earns DNA only, not evolution (by design: "evolving needs you playing").
   - The Long Nap pass text said "Keep evolving up to 24h while away", which was a false promise. It now says "Earn DNA up to 24h while away" (v57).
+
+## Top Playtime board (v58, 18 Nov 2026)
+- **What it is:** `workspace.PlaytimeBoard` is a copy of TopBoard, 20 studs to its left, with the title "TOP PLAYTIME". It shows the top 10 as "#1 Name · 2h 5m".
+- **Tracking:**
+  - `d.Playtime` counts seconds played ever. It's in `newData`, so rebirth doesn't reset it.
+  - It goes up 60 s for each minute a player is in the server.
+  - It's saved in minutes to the ordered DataStore `EvolvePlaytime_v1` with every save.
+- **Code:** both boards are built by one `makeBoard()` and filled by `topRows()` + `fill()` in `Evolution`.
+- **Backup:** `ServerStorage.Evolution_backup_before_playtime`.
+- **Tested in Play:** both boards render side by side, and the playtime row ticked from 0m to 1m.
+
+## Leaderstats = flex stats (v59, 18 Nov 2026)
+- **Columns:** Species | Rebirths | Time (e.g. "2h 5m"). These replaced Gen | Species.
+- **Why Gen went:** it resets on every rebirth, so it's no lasting flex. It stays in the HUD.
+- **Updates:** Time refreshes every minute, in the same loop as the Playtime board. `timeText()` is shared by the board and leaderstats.
+- **Tested in Play:** Species=Cell Colony, Rebirths=0, Time=1m (the playtime from the last test had saved).
+- **Open:** the Roblox player list on PC (top right) may cover the music player. Screenshots don't capture CoreGui, so this isn't checked.
+
+## Rebirth keeps DNA (v60, 18 Nov 2026)
+Owner: "make it so that players dont lose dna when rebirth".
+- **Server:** the rebirth handler saves `d.DNA` before `freshRun()` and puts it back.
+- **Still reset:** species, path, traits, Gen and upgrades.
+- **Kept:** DNA, plus Ancestors, Rebirths, Index, badges and Playtime as before.
+- **Rebirth card text:** "Start over, keep all DNA" / "Keep DNA, +N Ancestor DNA".
+- **Trade-off:** rebirth is now nearly free, so expect earlier and more frequent rebirths. Upgrade costs grow 1.6x per level, so saved DNA buys back the first levels quickly.
+- **Backup:** `ServerStorage.Evolution_backup_before_keepdna`.
+- **Tested in Play:** 77,777 DNA before the rebirth and 77,837 after, back to First Cell, Rebirths 4 → 5. The card text fits (86/120 px).
+
+## Admin panel (v61, 18 Nov 2026)
+Owner: "make admin panel for me too (username is HEINHEIN1922)".
+- **Who:** `ADMINS = { [848360565] = true }` (HEINHEIN1922's UserId) in `Evolution`.
+  - It goes by UserId, so a name change doesn't break it.
+  - Every press is checked on the server. The client only shows the button when the player has the `Admin` attribute.
+  - To add someone, add their UserId to `ADMINS`.
+- **Button:** a blue "Admin" button with the DNA icon, right of Index, opening an "Admin!" window.
+
+  | Action | What it does |
+  |---|---|
+  | +100K DNA | Adds 100,000 DNA |
+  | Evolve +1 / +10 species | Same generation, new body at once; unpicked splits on the way take the first path; stops at the end of a branch that stops |
+  | Jump to rebirth ready | Goes to Modern Human, or the end of your branch |
+  | Finish this life's goal | Completes the current goal |
+  | Die now | Normal death, next generation |
+  | Cold snap | Whole server; ignored if one is already running |
+
+- **Refactor:** the cold snap loop body became `coldSnap()` so the admin button can start one.
+- **Backups:** `Evolution_backup_before_admin`, `EvolutionUI_backup_before_admin`.
+- **Tested in Play:** button visible for HEINHEIN1922, window renders, DNA +100K, Cell Colony → Dickinsonia → Pederpes (Gen unchanged), goal done, an unknown action is ignored.
+- **Not tested:** a non-admin can't see or use it. That needs a second account; the code check is a single `ADMINS[player.UserId]` line.
+- **Note:** a family that carries a branch trait (e.g. Filter Pores → Sponges) keeps landing on that branch. A finished branch needs a rebirth.
+- **World Age buttons (v63):** "World Age +1 (all servers)" and "World Age -1 (all servers)".
+  - They move the shared `EvolveWorld_v1/Gens` total to the next Age's threshold, or to just below the current one. They take effect at once through `worldTick()`, which is the minute loop's body pulled out into a function.
+  - **This changes the real world for every server.** −1 at Age 0 does nothing.
+  - Going down announces "The world went back to Age N". The total never goes below 0.
+  - Tested: 124 → Age 1 (300) → Age 0 (299). The total was then set back to 124 by hand.
+  - Backup: `Evolution_backup_before_adminworld`.

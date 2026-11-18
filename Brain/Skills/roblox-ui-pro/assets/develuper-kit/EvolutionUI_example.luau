@@ -255,6 +255,8 @@ end
 local shopButton = menuButton(1, "sqGreen", "stall", "Shop", "Shop")
 local dietButton = menuButton(2, "sqBlue", "diet", "Diet", "Diet")
 local indexButton = menuButton(3, "sqPurple", "index", "Index", "Index")
+local adminButton = menuButton(4, "sqBlue", "dna", "Admin", "Admin") -- owner only (server "Admin" attribute; the server checks every press)
+adminButton.Button.Visible = false
 -- Owner: "this game is a bit complex". New players see only Shop + Index; the rest appears when it starts to matter,
 -- with a small pop so the kid notices one new thing at a time.
 local function reveal(gui, show)
@@ -382,7 +384,7 @@ for i, u in UPGRADES do
 end
 local refresh
 local confirmUntil = 0
-local rebirthCard = card(pages.Upgrades, 9, "cardMagenta", "asteroid", "Extinction", "Start over, keep Ancestor DNA", function()
+local rebirthCard = card(pages.Upgrades, 9, "cardMagenta", "asteroid", "Extinction", "Start over, keep all DNA", function()
 	if os.clock() < confirmUntil then -- second tap within 3 s confirms: this wipes the run
 		confirmUntil = 0
 		remotes.Rebirth:FireServer()
@@ -499,6 +501,28 @@ section(2, "Mutations", entries("AllTraits", ",", "T:", Color3.fromRGB(205, 150,
 section(3, "Diseases", entries("AllDiseases", ",", "D:", Color3.fromRGB(255, 130, 110)), 4)
 section(4, "Badges", entries("AllBadges", ";", "B:", GOLD), 2)
 section(5, "Secrets", secretList, 2) -- riddle clues only, until found
+
+---------------------------------------------------------------- Admin (owner only: the button shows for admins, the server checks every press)
+local admin = window("Admin", "Admin", "dna")
+local adminList = vscroll(admin.Content)
+for i, act in {
+	{ "DNA", "+100K DNA" },
+	{ "Evolve", "Evolve +1 species" },
+	{ "Evolve10", "Evolve +10 species" },
+	{ "RebirthReady", "Jump to rebirth ready" },
+	{ "Goal", "Finish this life's goal" },
+	{ "NewLife", "Die now: next generation" },
+	{ "Cold", "Cold snap (whole server)" },
+	{ "WorldUp", "World Age +1 (all servers)" },
+	{ "WorldDown", "World Age -1 (all servers)" },
+} do
+	local r = img(adminList, "row", { LayoutOrder = i, Size = UDim2.new(1, -8, 0, 50), ZIndex = 3 })
+	label(r, act[2], 16, { Position = UDim2.fromOffset(16, 0), Size = UDim2.new(1, -140, 1, 0), TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 5 })
+	button(r, "btnGreenW", "Go", 16, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -10, 0.5, 0), Size = UDim2.fromOffset(90, 38), ZIndex = 4 }, function()
+		local rem = remotes:FindFirstChild("Admin")
+		if rem then rem:FireServer(act[1]) end
+	end)
+end
 
 -- "Build camp" prompts sit on every character (server); hide the one on your own body
 local function hideOwnCampPrompt(char)
@@ -654,6 +678,8 @@ refresh = function()
 	local stage = a.StageNum or 1
 	reveal(dietButton.Button, stage >= 9) -- only Fruit before that: nothing to choose yet
 	indexButton.Button.Position = UDim2.fromOffset(dietButton.Button.Visible and 132 or 66, 0)
+	adminButton.Button.Position = UDim2.fromOffset(indexButton.Button.Position.X.Offset + 66, 0)
+	adminButton.Button.Visible = player:GetAttribute("Admin") == true
 	reveal(worldPill, stage >= 5)
 	reveal(rebirthCard.Card, a.CanRebirth == true)
 	for u, c in upgradeCards do
@@ -670,7 +696,7 @@ refresh = function()
 		end
 	end
 	if a.CanRebirth then
-		rebirthCard.Info.Text = ("Restart, keep +%d Ancestor DNA"):format(a.RebirthGain or 0)
+		rebirthCard.Info.Text = ("Keep DNA, +%d Ancestor DNA"):format(a.RebirthGain or 0)
 		rebirthCard.Buy.SetEnabled(true, os.clock() < confirmUntil and "Sure?" or "Rebirth")
 	else
 		rebirthCard.Info.Text = "Unlocks at Modern Human"
