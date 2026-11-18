@@ -75,3 +75,4 @@ created: 2026-11-16
 
 - 2026-11-17: [[2026-11-17 Concrete blobs on the grass removed (P1-P3)]] (no terrain concrete; paved ground = part slabs)
 - 2026-11-18: [[2026-11-18 Minimap 1 to 1 (new map pictures)]] (minimap + world map redrawn from the J37 roads; blank-map cause; players-not-spawning fix)
+- 2026-11-19: [[2026-11-19 Loading scenes - fixed]] (loading / menu shots out of the buildings; MenuShots checked in open air at server start)
