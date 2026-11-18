@@ -109,6 +109,18 @@ Audio.init() -- test-loads the Creator Store sounds (falls back to built-in ones
 UI.showLoading("Building the city...")
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
+-- (19 Nov, owner: "stuck with no GUI after pressing skip") a remote the server never made (one of its
+-- systems failed at start) used to hold this script forever, before the main menu: wait 10 s at
+-- most, report it, and go on with a stand-in that never fires
+local function remote(name: string, className: string): any
+	local r = remotes:WaitForChild(name, 10)
+	if not r then
+		warn("[CityLegends] startup: remote " .. name .. " missing after 10 s, going on without it")
+		r = Instance.new(className)
+		r.Name = name
+	end
+	return r
+end
 local GetData = remotes:WaitForChild("GetData") :: RemoteFunction
 local BuyCar = remotes:WaitForChild("BuyCar") :: RemoteFunction
 local SpawnCar = remotes:WaitForChild("SpawnCar") :: RemoteEvent
@@ -206,7 +218,7 @@ end
 
 -- settings kept with the profile: speed units (HUD + clusters) and the gearbox
 local settings = if type(data.Settings) == "table" then data.Settings else {}
-local SaveSettings = remotes:WaitForChild("SaveSettings") :: RemoteEvent
+local SaveSettings = remote("SaveSettings", "RemoteEvent") :: RemoteEvent
 Driving.setUnits(if settings.Units == "kmh" then "kmh" else "mph")
 Driving.setGearbox(if settings.Gearbox == "Manual" then "Manual" else "Auto")
 UI.setGearboxLabel(Driving.gearbox)
@@ -518,9 +530,11 @@ playerCars.ChildAdded:Connect(function(model)
 end)
 
 local arrivedYet = false
+local attaching = false -- (the watchdog waits while a car is being put on)
 local function tryAttach(model: Instance)
 	if model:IsA("Model") and driveNow(model) then
 		pendingAttach = false
+		attaching = true
 		waitWhole(model)
 		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
 		if not okSkin then
@@ -529,7 +543,15 @@ local function tryAttach(model: Instance)
 		stopOrbit()
 		OnFoot.reset()
 		Traffic.clearAround(model:GetPivot().Position, 35)
-		Driving.attach(model)
+		local okAttach, errAttach = pcall(Driving.attach, model)
+		if not okAttach then
+			attaching = false
+			warn("[CityLegends] getting into the car failed:", errAttach)
+			UI.hideLoading()
+			UI.fade(false, 0.3)
+			UI.toast("Could not get into the car, try again", Config.Theme.Danger)
+			return -- (the watchdog brings the menu back)
+		end
 		-- (the streets round the car finish loading behind the loading screen, the car held)
 		Driving.loadHold = true
 		waitForMap("Loading the streets...")
@@ -543,6 +565,7 @@ local function tryAttach(model: Instance)
 		end
 		UI.hideLoading()
 		UI.showHud(true)
+		attaching = false
 		UI.setCameraLabel(Driving.cameraMode)
 		UI.fade(false, 0.5)
 	end
@@ -644,11 +667,19 @@ game:GetService("ProximityPromptService").PromptTriggered:Connect(function(promp
 end)
 
 -- the Legends Grand Hotel: the valet takes your car at the bay and brings it back to the door
-require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
-require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (after the hotel: it chains the drive action)
+startStep("Hotel", function()
+	require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
+end)
+startStep("Customs", function()
+	require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (after the hotel: it chains the drive action)
+end)
 -- car levels, Car Points and the parts screen (2026-11-03; the garage's UPGRADE, the HUD strip)
-require(script.Parent:WaitForChild("CarUpgrades")).init()
-require(script.Parent:WaitForChild("Workshop")).init() -- the parts screen, its room and the Part Shop (2026-11-06)
+startStep("CarUpgrades", function()
+	require(script.Parent:WaitForChild("CarUpgrades")).init()
+end)
+startStep("Workshop", function()
+	require(script.Parent:WaitForChild("Workshop")).init() -- the parts screen, its room and the Part Shop (2026-11-06)
+end)
 
 -- island houses: a bay car's "Drive" spawns it on the driveway (the server picks the spot)
 task.spawn(HouseClient.init, function(id: string)
@@ -657,8 +688,8 @@ task.spawn(HouseClient.init, function(id: string)
 end)
 
 -- Legends Motors, the dealership: its prompts open the buy screen, and cars leave by its bay
-local DealerOpen = remotes:WaitForChild("DealerOpen") :: RemoteEvent
-local DealerCall = remotes:WaitForChild("DealerCall") :: RemoteFunction
+local DealerOpen = remote("DealerOpen", "RemoteEvent") :: RemoteEvent
+local DealerCall = remote("DealerCall", "RemoteFunction") :: RemoteFunction
 
 -- the garage: "my cars" from the HUD (CARS, G), or every car to buy at the dealership
 local function openGarage(fromMenu: boolean, dealer: boolean?, focus: string?)
@@ -800,8 +831,8 @@ end)
 -- the main menu (owner, 2026-11-02: big tiles, CAMPAIGN / CARS / STORE): the start screen, and
 -- from the HUD's MENU button (it replaced SETTINGS) while you play
 local MainMenu = require(script.Parent:WaitForChild("MainMenu"))
-local FastTravel = remotes:WaitForChild("FastTravel") :: RemoteFunction
-local ClaimStarter = remotes:WaitForChild("ClaimStarter") :: RemoteFunction
+local FastTravel = remote("FastTravel", "RemoteFunction") :: RemoteFunction
+local ClaimStarter = remote("ClaimStarter", "RemoteFunction") :: RemoteFunction
 MainMenu.init({
 	getData = function()
 		return data
@@ -968,13 +999,13 @@ end
 -- the car stock market (K or the MARKET button)
 if Config.Market.Enabled then
 	local MarketUI = require(script.Parent:WaitForChild("MarketUI"))
-	MarketUI.init()
+	startStep("Market", MarketUI.init)
 	UI.onMarketButton = MarketUI.toggle
 end
 
 -- put your car away (owner, 2026-10-23: "add a function to despawn car"): out of it first if
 -- you're in it, then the server removes it; G brings one back from the garage
-local despawnRemote = remotes:WaitForChild("DespawnCar") :: RemoteEvent
+local despawnRemote = remote("DespawnCar", "RemoteEvent") :: RemoteEvent
 local function despawnCar()
 	if Driving.isDriving() then
 		OnFoot.getOut()
@@ -1002,3 +1033,31 @@ UserInputService.InputBegan:Connect(function(input, processed)
 end)
 
 showMenu()
+
+-- Watchdog (19 Nov, owner: "the loading screen sometimes doesnt load in and i get stuck with no GUI
+-- after pressing skip / waiting a while"): once nothing is loading or on its way, there must be
+-- something to use on screen: the HUD, the main menu or a full screen (garage, dealer, customs,
+-- workshop; photo mode hides everything on purpose). Nothing for WATCHDOG_AFTER seconds: the black
+-- fade goes and the HUD (in a car or on foot) or the main menu comes back
+local WATCHDOG_AFTER = 6
+task.spawn(function()
+	local idle = 0
+	local hudFrame = UI.screen():FindFirstChild("HUD") :: Frame
+	while true do
+		task.wait(1)
+		local fine = UI.loadingVisible() or pendingAttach or attaching or hudFrame.Visible or MainMenu.isOpen()
+			or UI.isGarageOpen() or not UI.screen().Enabled
+		idle = if fine then 0 else idle + 1
+		if idle >= WATCHDOG_AFTER then
+			idle = 0
+			local inGame = Driving.isDriving() or (OnFoot.active and player.Character ~= nil)
+			warn("[CityLegends] watchdog: no GUI for " .. WATCHDOG_AFTER .. " s, showing the " .. (if inGame then "HUD" else "main menu"))
+			task.spawn(UI.fade, false, 0.3)
+			if inGame then
+				UI.showHud(true)
+			else
+				showMenu()
+			end
+		end
+	end
+end)

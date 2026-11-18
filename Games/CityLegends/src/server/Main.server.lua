@@ -394,39 +394,50 @@ local ctx = {
 	care = nil :: any, -- (Care, set below)
 	jobs = nil :: any, -- (Jobs, set below)
 }
-Goals.init(ctx)
-CarLevels.init(ctx)
-OnFoot.init(ctx)
-require(script.Parent:WaitForChild("Doors")).init(ctx) -- (2026-11-08) scissor doors (Config.Doors)
-Police.init(ctx)
-Bank.init(ctx, Police)
-Activities.init(ctx)
-Houses.init(ctx)
-require(script.Parent:WaitForChild("Realty")).init(ctx) -- Legends Realty: the house catalogue
-require(script.Parent:WaitForChild("HairpinHotel")).init() -- the Grand Hairpin Hotel's roof terrace
+-- (19 Nov, owner: stuck with no GUI) each system starts in its own guard: one that errors is
+-- reported and the rest still start, so the remotes and handlers made after it (SpawnCar,
+-- ClaimStarter, FastTravel, MenuFocus) always exist and no client waits on them forever
+local function guard(name: string, fn: () -> ())
+	local ok, err = pcall(fn)
+	if not ok then
+		warn(string.format("[CityLegends] server start: %s failed: %s", name, tostring(err)))
+	end
+end
+guard("Goals", function() Goals.init(ctx) end)
+guard("CarLevels", function() CarLevels.init(ctx) end)
+guard("OnFoot", function() OnFoot.init(ctx) end)
+guard("Doors", function() require(script.Parent:WaitForChild("Doors")).init(ctx) end) -- (2026-11-08) scissor doors (Config.Doors)
+guard("Police", function() Police.init(ctx) end)
+guard("Bank", function() Bank.init(ctx, Police) end)
+guard("Activities", function() Activities.init(ctx) end)
+guard("Houses", function() Houses.init(ctx) end)
+guard("Realty", function() require(script.Parent:WaitForChild("Realty")).init(ctx) end) -- Legends Realty: the house catalogue
+guard("HairpinHotel", function() require(script.Parent:WaitForChild("HairpinHotel")).init() end) -- the Grand Hairpin Hotel's roof terrace
 -- the Summit's gate on Legends Isle (residents only)
-require(script.Parent:WaitForChild("Gate")).init(ctx)
-Hotel.init(ctx)
-Chauffeur.init(ctx)
+guard("Gate", function() require(script.Parent:WaitForChild("Gate")).init(ctx) end)
+guard("Hotel", function() Hotel.init(ctx) end)
+guard("Chauffeur", function() Chauffeur.init(ctx) end)
 -- Legends Motors: new cars are bought there only (owner, 2026-10-23)
 local Dealership = require(script.Parent:WaitForChild("Dealership"))
-Dealership.init(ctx)
+guard("Dealership", function() Dealership.init(ctx) end)
 -- drift scoring, speed traps, jumps and the leaderboard
-require(script.Parent:WaitForChild("Challenges")).init(ctx)
+guard("Challenges", function() require(script.Parent:WaitForChild("Challenges")).init(ctx) end)
 -- (2026-11-17) GG Gaming Fest at YCC: the screens' countdown and the GG Quest's place steps (Config.GGFest)
-require(script.Parent:WaitForChild("GGFest")).init(ctx)
+guard("GGFest", function() require(script.Parent:WaitForChild("GGFest")).init(ctx) end)
 local Customs = require(script.Parent:WaitForChild("Customs"))
-Customs.init(ctx)
+guard("Customs", function() Customs.init(ctx) end)
 -- the Legends Gem Showcase, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
 -- Rewards (the daily reward, gifts, the wheels; it replaced the casino, 2026-11-03)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
-Luxe.init(ctx)
+guard("Luxe", function() Luxe.init(ctx) end)
 local Rewards = require(script.Parent:WaitForChild("Rewards"))
-Rewards.init(ctx, { Goals = Goals, Towers = Towers, Hotel = Hotel, Luxe = Luxe, CarLevels = CarLevels, PartData = require(Shared:WaitForChild("PartData")) })
-Store.init(ctx, { Rewards = Rewards, Houses = Houses, Cars = Cars, notify = function(player: Player, msg: string)
-	Towers.send(player, { kind = "toast", text = msg, color = "accent" })
-end })
-require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe)
+guard("Rewards", function() Rewards.init(ctx, { Goals = Goals, Towers = Towers, Hotel = Hotel, Luxe = Luxe, CarLevels = CarLevels, PartData = require(Shared:WaitForChild("PartData")) }) end)
+guard("Store", function()
+	Store.init(ctx, { Rewards = Rewards, Houses = Houses, Cars = Cars, notify = function(player: Player, msg: string)
+		Towers.send(player, { kind = "toast", text = msg, color = "accent" })
+	end })
+end)
+guard("GemShowcase", function() require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe) end)
 
 local function despawn(player: Player)
 	local s = getSession(player)
@@ -693,16 +704,16 @@ ctx.isRacing = Activities.isRacing
 local Trailers = require(script.Parent:WaitForChild("Trailers"))
 ctx.isTowing = Trailers.isTowing
 ctx.isBusy = Activities.isBusy
-Trailers.init(ctx)
+guard("Trailers", function() Trailers.init(ctx) end)
 -- (2026-11-18) jobs with ranks and paychecks (the Job Center); Activities' delivery reports to it
 local Jobs = require(script.Parent:WaitForChild("Jobs"))
 ctx.jobs = Jobs
-Jobs.init(ctx)
+guard("Jobs", function() Jobs.init(ctx) end)
 -- (2026-11-07) mileage, wear, fuel, the service book
 local Care = require(script.Parent:WaitForChild("Care"))
 ctx.care = Care
-Care.init(ctx)
-require(script.Parent:WaitForChild("Parking")).init(ctx, Police, Towers)
+guard("Care", function() Care.init(ctx) end)
+guard("Parking", function() require(script.Parent:WaitForChild("Parking")).init(ctx, Police, Towers) end)
 
 SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
 	if type(carId) ~= "string" then
