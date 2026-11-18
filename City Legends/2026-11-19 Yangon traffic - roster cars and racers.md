@@ -74,6 +74,12 @@ The `kio_ev6` light copy came out with holes (its body is many small pieces), so
 - **After**: 28 cars, 675-743 parts. GraphicsMeshParts stayed at 43 MB, GraphicsParts went from 19 to 23 MB, total client memory did not rise (12.4 GB before, 12.2-12.4 GB after, in Studio). The part count about doubled because the roster cars are 22-61 parts each instead of 5.
 - **Wheels:** 112 wheel motors on 28 cars (4 each), and they turn.
 - **Caps:** with `TestRareChance` 1, the live count matched the caps exactly (bugatti 1, R34 3, GT-R 10, ferrari 2, lambo 2). 20,000 pure `pick` calls against random live counts never went over a cap.
+- **Racers** (`TestRareChance` 1, about 30 s windows):
+  - Top speeds reached: Bugatti 218, Lamborghini-style 184-195, Ferrari-style 173-190, GT-R 154, R34 133 mph.
+  - 65-84 lane changes per window, so they do overtake and weave.
+  - **Not clean yet:** 6 overlap events in one window after the first fix, with a racer running into the car ahead after cutting in. With the "room to brake" gate added, two GT-Rs ended up inside each other once and a GT-R touched a Swift. Everyday cars had 0 overlaps.
+  - Splits between two side-by-side cars never happen on the 12-stud 1:1 lanes: two 6.5-stud-wide cars leave no room. Splits only happen when the cars are staggered.
+- **Not done:** P3 shots, a close-up of each type in Play, badge patches, and a check that the switch back to `CityLegends_v1` shows on the Server in a Play (the Edit source is checked). See below.
 - **Racer shots:** [[2026-11-19 Yangon traffic - racer weaving 1.jpg]], [[2026-11-19 Yangon traffic - racer weaving 2.jpg]], [[2026-11-19 Yangon traffic - P1 racer and Swift (Play).jpg]].
 - **Close-up (Edit):** [[2026-11-19 Yangon traffic - close-up Swift Belta Camry (Edit).jpg]].
 
@@ -83,3 +89,12 @@ The `kio_ev6` light copy came out with holes (its body is many small pieces), so
 - RenderFidelity `Performance` crumpled the kit cars' shells even up close. Use `Automatic`.
 - The 1:1 lanes come in short pieces. A "near the end of the piece" test is always true, so a racer never changed lanes until the test looked for the next real junction (a turn piece or a light).
 - Python written through a bash heredoc ate `"\n"` into a real newline again, and the module failed to load. Use `string.char(10)`.
+
+## Left to do
+1. **Racer collisions:** add a sweep on the racer's own path for the next frame (its box against every car in the strip) and a hard stop when it would overlap. Also don't let a racer slide while another racer is beside it. Test again with `TestRareChance` 1.
+2. **Badges on traffic copies:**
+   - Converted cars (GT-R, 599, California, Huracan, LP570, Chiron, R34, Seal, Chaser, LC300, LX) get BrandMarks' covers only through CarSkin. Bring `CarSkin.addPatches` / BrandMarks into `TrafficLOD.make`, or bake the covers into the copies.
+   - Baked emblems seen close up: the Belta's front grille emblem and the TOYOTA / VIOS letters on its boot, and the Camry's boot emblem. These need `MarkPatch` entries in `tools/brand_marks/RobloxBuiltPatches.luau` (badge agent), then `TrafficLOD.install` again.
+   - Swift: its 2 badges and 2 plates are dropped in traffic, but the player car still has them.
+3. **Shots:** P3 traffic and a close-up of each type in Play.
+4. **After the owner's phone test:** delete `ServerStorage.TrafficModels_old`.
