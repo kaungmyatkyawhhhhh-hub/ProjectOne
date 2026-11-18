@@ -27,6 +27,10 @@ for k, en, my, rev in rows:
     # Unicode order: a medial ya / ra / wa / ha never comes before its consonant, e ( U+1031) never first
     if re.search(r"(^|[^က-အဿင်္ျ-ှ])ေ", my):
         bad.append("%s: U+1031 typed before its consonant (Zawgyi order)" % k)
+# Roblox does not shape kinzi (U+1004 U+103A U+1039): it draws a loose mark and a visible virama (19 Nov test)
+for k, en, my, rev in rows:
+    if "င်္" in my:
+        bad.append("%s: kinzi (Roblox draws it broken): reword" % k)
 total = len(rows)
 review = sum(1 for r in rows if r[3])
 print("entries %d, to review %d, bad %d" % (total, review, len(bad)))

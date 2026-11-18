@@ -105,6 +105,7 @@ Traffic uses the "lite" runtime meshes first. The owner thinks the procedural ca
 ## Rules and decisions
 
 - **Mobile first (owner, 2026-11-19):** "93% of the players are gonna be mobile" (Myanmar players are mostly on phones). Design and test every screen, control and feature on a phone first (812x375 landscape), PC second. Phone HUD follows the Driving Empire layout (vault `City Legends/2026-11-19 Mobile pass - loading fix and phone HUD.md`).
+- **Burmese language (owner, 2026-11-19: "for burmese language u need to use unicode"; vault `City Legends/2026-11-19 Burmese language.md`):** every player-facing UI string lives in `src/shared/Strings.lua` (`S.get(key, ...)`, `S.setLang("auto"|"en"|"my")`, `S.rank(job, n)`; English + Myanmar Unicode, never Zawgyi; check `python tools/strings_check.py`). New UI text = a new key there, one template per sentence (no joining English pieces). Roblox draws Burmese with its own fallback font, but kinzi (င်္) comes out broken: no kinzi words (the check fails on them). Phase B (wiring the screens, the Language setting) not done yet: plan in the vault note.
 
 > Before planning any City Legends feature, read `City Legends/Research - Driving games.md` (the lessons from the top driving games).
 
