@@ -299,3 +299,20 @@ Owner: "i can hear roblox walking sound".
   - At a fork, an AFK player waits at most `FORK_PATIENCE` = 3 lives, then takes the first path.
   - Offline time earns DNA only, not evolution (by design: "evolving needs you playing").
   - The Long Nap pass text said "Keep evolving up to 24h while away", which was a false promise. It now says "Earn DNA up to 24h while away" (v57).
+
+## Top Playtime board (v58, 18 Nov 2026)
+- **What it is:** `workspace.PlaytimeBoard` is a copy of TopBoard, 20 studs to its left, with the title "TOP PLAYTIME". It shows the top 10 as "#1 Name · 2h 5m".
+- **Tracking:**
+  - `d.Playtime` counts seconds played ever. It's in `newData`, so rebirth doesn't reset it.
+  - It goes up 60 s for each minute a player is in the server.
+  - It's saved in minutes to the ordered DataStore `EvolvePlaytime_v1` with every save.
+- **Code:** both boards are built by one `makeBoard()` and filled by `topRows()` + `fill()` in `Evolution`.
+- **Backup:** `ServerStorage.Evolution_backup_before_playtime`.
+- **Tested in Play:** both boards render side by side, and the playtime row ticked from 0m to 1m.
+
+## Leaderstats = flex stats (v59, 18 Nov 2026)
+- **Columns:** Species | Rebirths | Time (e.g. "2h 5m"). These replaced Gen | Species.
+- **Why Gen went:** it resets on every rebirth, so it's no lasting flex. It stays in the HUD.
+- **Updates:** Time refreshes every minute, in the same loop as the Playtime board. `timeText()` is shared by the board and leaderstats.
+- **Tested in Play:** Species=Cell Colony, Rebirths=0, Time=1m (the playtime from the last test had saved).
+- **Open:** the Roblox player list on PC (top right) may cover the music player. Screenshots don't capture CoreGui, so this isn't checked.
