@@ -234,7 +234,10 @@ local ageFill = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScal
 img(ageFill, "fillGold", { Size = UDim2.fromOffset(110, 14), ZIndex = 4 })
 local ageText = label(ageRow, "", 14, { Position = UDim2.fromOffset(146, 0), Size = UDim2.new(1, -150, 1, 0), ZIndex = 5 })
 local evoText = label(evoRow, "", 15, { Position = UDim2.fromOffset(32, 0), Size = UDim2.new(1, -40, 1, 0), ZIndex = 5, RichText = true })
-local function portraitKey(g) return "port" .. math.clamp(tonumber(g) or 1, 1, 12) end -- species group 1..12 (server "Portrait")
+local function portraitKey(g) -- species group 1..12 (server "Portrait"); 0 = cells, fish, reptiles... (no portrait art yet: DNA icon)
+	g = tonumber(g) or 1
+	return g < 1 and "dna" or "port" .. math.min(g, 12)
+end
 
 -- one colour per menu button, like the mock: green shop, blue diet, purple index
 local menuRow = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(8, 66), Size = UDim2.fromOffset(194, 65) }, hud)
@@ -464,7 +467,7 @@ local function section(order, titleText, entries, cellW)
 	for i, e in entries do
 		local tile = img(grid, "row", { LayoutOrder = i, ZIndex = 3 })
 		if e.g then -- species: group portrait, a dark silhouette until found (dex-style "who's that?")
-			e.port = img(tile, "port" .. e.g, { Position = UDim2.fromOffset(4, 3), Size = UDim2.fromOffset(34, 37), ZIndex = 4 })
+			e.port = img(tile, portraitKey(e.g), { Position = UDim2.fromOffset(4, 3), Size = UDim2.fromOffset(34, 37), ZIndex = 4 })
 		end
 		e.label = label(tile, "", 13, { Position = UDim2.fromOffset(e.g and 40 or 8, 0), Size = UDim2.new(1, e.g and -44 or -16, 1, 0), ZIndex = 5, TextWrapped = true })
 		table.insert(sec.tiles, e)
@@ -564,7 +567,7 @@ local function showFork(id)
 		if f.id == id then
 			pathTitle.Text = f.title
 			for i, l in f.lanes do
-				local c = card(pathList, i, LANE_FRAMES[i] or "cardGreen", "port" .. l.g, l.name, l.info .. "\n" .. l.first, function()
+				local c = card(pathList, i, LANE_FRAMES[i] or "cardGreen", portraitKey(l.g), l.name, l.info .. "\n" .. l.first, function()
 					remotes.ChooseFork:FireServer(id, l.key)
 					pathWin.Close()
 				end)
@@ -613,7 +616,7 @@ refresh = function()
 	elseif (a.FrontierAge or 0) > 0 then -- at the world's frontier: everyone waits for the same "???"
 		evoText.Text = ('Next: ??? opens at <font color="#FFD23F">World Age %d</font>'):format(a.FrontierAge)
 	elseif a.NextSpecies == "" then
-		evoText.Text = "Fully evolved!"
+		evoText.Text = a.LineEnd and 'Branch complete! <font color="#FFD23F">Rebirth</font> to try another' or "Fully evolved!"
 	elseif not a.GoalDone and (a.GoalText or "") ~= "" then -- your child only evolves once this life's goal is done
 		evoText.Text = ('Goal: %s   <font color="#5CF2FF">%d/%d</font>'):format(a.GoalText, math.floor(a.GoalProg or 0), a.GoalNeed or 1)
 	else
@@ -776,17 +779,20 @@ remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stag
 	local face = img(b, portraitKey(group), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
 	label(b, "EVOLVED!", 30, { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 36), TextColor3 = GOLD, ZIndex = 22 })
 	local nameText = label(b, "???", 22, { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 28), ZIndex = 22, TextTruncate = Enum.TextTruncate.AtEnd })
+	local stageText -- set below; the reveal swaps it for the real date
 	-- a beat of suspense: a dark silhouette and ???, then the new face pops in
 	face.ImageColor3 = Color3.new(0, 0, 0)
 	task.delay(GuiService.ReducedMotionEnabled and 0 or 0.8, function()
 		face.ImageColor3 = Color3.new(1, 1, 1)
 		nameText.Text = speciesName
+		local when = player:GetAttribute("SpeciesWhen") or ""
+		if when ~= "" then stageText.Text = when end -- the real date: "375 million years ago"
 		if not GuiService.ReducedMotionEnabled then
 			local pop = new("UIScale", { Scale = 1.35 }, face)
 			TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 		end
 	end)
-	label(b, ("Stage %d / %d"):format(stage, total), 14, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 20), TextColor3 = DNA_C, ZIndex = 22 })
+	stageText = label(b, ("Stage %d / %d"):format(stage, total), 14, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 20), TextColor3 = DNA_C, ZIndex = 22 })
 	local sc = new("UIScale", { Scale = 0.6 }, b)
 	TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Scale = 0.85 }):Play() -- lower third, off the character: it fires most lives early on
 	task.delay(math.max(3, #speciesName:split(" ") / 1.2 + 2) + 0.8, function() -- 2 words of title + the name, slowest 7-year-old, + the reveal beat

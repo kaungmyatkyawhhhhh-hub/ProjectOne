@@ -273,3 +273,31 @@ These are Creator Store audio, inserted into `SoundService` as `SFX_*`. Audio cr
 - Evolve banner: a black silhouette and "???" for 0.8 s, then the face pops in and the name appears (instant with Reduced Motion).
 - Genetic LEAP: each child that evolves has a 1 in 12 chance to get double evolution and skip a stage, with the toast "LEAP! Your child skipped ahead!". It still respects the world frontier.
 - Tested in Play: "???" before, silhouette at 0.0 s, "Tree Monkey" revealed at 0.8 s. The LEAP is random and wasn't seen in the test.
+
+## Tree of life (v38)
+- Owner: "as realistic as possible ... like how the first evolution started but then started splitting up slowly into different species".
+- The past is now the real fossil record, with dates on the evolve card:
+  - First Cell (4 billion years ago) → bacteria → complex cell → colony → Dickinsonia → Ikaria worm → fish → Tiktaalik → tetrapods → synapsids → early mammals → Purgatorius → primates → hominins → Homo sapiens → history → Modern Human (Today).
+  - The future (stage 61 and up) is labelled "The future (imagined)".
+- Splits, oldest first:
+
+  | Split | Branches | Where a side branch ends |
+  |---|---|---|
+  | F1 Cambrian | Backbone / Armor + legs / Soft + shell | Honey Bee / Octopus |
+  | F2 | Bony fish / Sharks | Great White Shark |
+  | F3 | Fur line / Scale line | (scale line continues) |
+  | F4 (scale line only) | Dinosaurs / Birds | Tyrannosaurus (extinct) / Bald Eagle |
+  | F5 | Trees / Back to the sea | Blue Whale |
+  | F6 | Sapiens / Neanderthals | Last Neanderthal (extinct) |
+  | F7 | Future: Machines / Space / Digital | — |
+
+- A finished side branch stops evolving and shows "Branch complete! Rebirth to try another". Rebirth is allowed there (minimum +1 Ancestor DNA).
+- Bodies: stages that aren't primates get a creature made of parts and the avatar is hidden. The forms are cell, colony, blob, worm, fish, shark, tetrapod, reptile, sail, mammal, dino, bird, whale, bug, flybug, shell and octopus.
+- Old saves are migrated (`TreeV` = 2): they keep their depth and take the main line.
+- Backup: `Evolution_backup_before_treeoflife`.
+- Engine gotcha: a split inside a branch must have `need = "<parent split>=<branch>"`, and nodeOf checks the newest split first. Without both, the shark branch showed the main-line species.
+- Verified: the self-checks pass, the First Cell looks right, and the shark branch gives Cretoxyrhina.
+- Not done yet:
+  - The part-built bodies are rough.
+  - Early sea life walks on grass; there is no ocean start.
+  - No portrait art for non-primates (they show the DNA icon).
