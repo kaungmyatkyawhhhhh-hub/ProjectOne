@@ -47,3 +47,4 @@ P7 scripts (12 lane modules L1237 + YangonMapArt) asset 104399539049085
 P7 pbox clip diff module 129781434746515; MapBugScan P7 copy 98545280123101
 P7 KD sync asset 115556805610024 (YangonKitData 33827/69121963)
 RB4 data (P4 rebuild, 19 Nov) 72548567115317
+P4J (J37 re-clear, 19 Nov rebuild) place 112634691968549 133835486464710 132541429421726 124971106822088 night 109064376622785 + (b pending op cbecf47c)

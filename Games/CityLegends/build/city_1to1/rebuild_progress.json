@@ -187,5 +187,13 @@
    "x19 z22..25 and x23 z22..25 cells hold only P7 roads: P6 / P8 must re-bake them whole (clip P7+P6 / P7+P8)"
   ]
  },
- "next_district": "P4 (Hledan, Kamayut): 3072 x7..9 z5..10 / 1536 x14..18 z11..21; seam cells x18 (P1/P2) rebuild whole like P7 (subset R05_GROW, subset.json boxes P4+P1+P2)"
+ "next_district": "P4 (Hledan, Kamayut): 3072 x7..9 z5..10 / 1536 x14..18 z11..21; seam cells x18 (P1/P2) rebuild whole like P7 (subset R05_GROW, subset.json boxes P4+P1+P2)",
+ "P4": {
+  "status": "IN PROGRESS 19 Nov (DISTRICT REBUILD agent 2)",
+  "plan": "swap 1536 cells x14..18 z11..21 whole (x18 = P1/P2 seam: subset.json clip = P4+P1+P2); step boxes: x 21504..24576 / 24576..27648 / 27648..29184 (labels 7/8/9) x rows z 16896..18432 (label 5), 3072 z6..z10 (labels 6..10) = 18 boxes",
+  "data": "R05_GROW=1700 roads05_subset.py net RB4 P4 (1569 roads, 49 modules, roads05_RB4/pack_checksums.txt) -> imports/sync/rebuild_RB4_data.rbxmx -> NEW asset 72548567115317",
+  "buildings": "district_files.sh P4 --no-roads buildings vs J37 net: 11209 buildings (805 dropped / 3843 clipped by roads), shells 14113, roofs 6410; old files build/city_1to1/_pre_rebuild_P4",
+  "packs": "place 112634691968549 133835486464710 132541429421726 124971106822088; night cells_1.glb (23 MB) split -> cells_1_a 109064376622785, cells_1_b (op cbecf47c)",
+  "lanes_ready": "roads05_lanesubset L12347 (P1 P2 P3 P4 P7): 923 lanes, 2100 links, 0 dead ends (build dir only, NOT installed)"
+ }
 }
