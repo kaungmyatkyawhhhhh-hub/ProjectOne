@@ -82,3 +82,9 @@ This note is the fix. It works in three parts:
 - OSM ways that are really underground (basement aisles, parking ramps) come in at street level: drop them by name in the data.
 - After any rebuild near a landmark, drive in and out of every opening in Play before reporting.
 
+
+## Lesson (19 Nov 2026, City Legends: invisible bumps, signs and walls on the road, grass over roads after the road rebuild)
+- **Collision made from DATA, visuals made by the BUILDER, drift apart.** The road bake laid a pavement collision box (0.5 over the road) along every road's whole length from the road data, while the builder cut the visible pavement at junction mouths, driveways and side lanes. Result: invisible kerbs across driving lanes. Rule: a collision box is only laid where the visible piece it stands for was really built (test against the built parts), and every rebuild runs a "box over bare surface" check.
+- **Props placed from the OLD layout must be re-filtered by FOOTPRINT, not by centre point.** A centre ray missed name plates (their record sits at plate height, the post below), wall runs that only partly cross the new carriageway and their invisible collision (WCOL). Test the ground footprint of each piece (poles: a small square at the base; walls / stalls / drains: the whole base; plates: a ray 12 down) against the carriageway boxes.
+- **Terrain is not rebuilt with the roads.** Old embankments, verge fills and hillsides stay where the old roads were and end up over or beside the new ones (grass ridges and arches by flyovers, roads buried under a hill). After any road rebuild: scan terrain over every road / pavement box and stray terrain near decks (over local ground + 4, or floating), and clear only those.
+- Scan the whole district for each class first, then fix at the root (builder, bake, data or filter); never fix one spot the owner happened to see.
