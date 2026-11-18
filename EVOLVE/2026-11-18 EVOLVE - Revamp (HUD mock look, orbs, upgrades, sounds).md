@@ -92,6 +92,18 @@ The 100-stage ladder is unchanged, so pacing stays the same. At three forks you 
 - a "what's at the end?" teaser on the fork cards;
 - secrets that change your body, not just the Index.
 
+## Global layer (owner: "the entire game is like a global game instead of progressing solo?")
+**Decision:** keep your own family (kids need progress that's theirs) and add a shared world on top.
+- **World Age:** every life anyone lives, on any server, is summed once a minute in DataStore `EvolveWorld_v1` under key `Gens`. Age thresholds are 0 / 500 / 2k / 6k / 15k / 40k / 100k / 250k / 600k / 1.5M / 4M. Each Age gives **every player +5% DNA**, up to +50% at Age 10. When the world reaches a new Age, every server announces it. The HUD shows a World pill under the menu buttons: "World Age N +X% DNA" with a gold bar to the next Age.
+- **World firsts:** the first player ever to find each species or secret gets their name saved forever (key `Firsts`, written with UpdateAsync so two servers can't both claim it). Every server is told through MessagingService: "World first! NAME found Grass Monkey (+N more)". Found Index tiles show "1st: NAME".
+- **Global already:** the Top Evolvers board (OrderedDataStore).
+- **In Studio** (DataStore off), everything falls back to this server only. Tested: the World pill draws, firsts are claimed, and the Index shows "1st: …".
+- **Shortcut:** if the minute's DataStore write fails, those lives aren't added to the world total, and lives lived in a server's last minute before it shuts down aren't sent either.
+- **Untested until publish:** real cross-server messages and the real global total.
+- **Backup:** `ServerStorage.Evolution_backup_before_world`. Place saved as v26.
+
+**Ideas for later:** a weekly world goal with a reward chest, and a world Index page showing how many players found each species.
+
 ## Growth teleport bug fixed
 "When I get taller, I teleport back to the place I was 0.5 seconds ago." The cause was the server's `Model:ScaleTo`, which re-pivots at the lagging server position.
 

@@ -477,6 +477,29 @@ section(3, "Diseases", entries("AllDiseases", ",", "D:", Color3.fromRGB(255, 130
 section(4, "Badges", entries("AllBadges", ";", "B:", GOLD), 2)
 section(5, "Secrets", secretList, 2) -- riddle clues only, until found
 
+---------------------------------------------------------------- World pill: everyone, on every server, grows one world together
+-- The bar fills with every life anyone lives; each World Age = +5% DNA for all players.
+local worldPill = img(hud, "slot", { Position = UDim2.fromOffset(8, 134), Size = UDim2.fromOffset(194, 44), ZIndex = 2 })
+local worldText = label(worldPill, "", 14, { Position = UDim2.fromOffset(8, 3), Size = UDim2.fromOffset(178, 20), RichText = true, ZIndex = 5 })
+local worldTrack = img(worldPill, "miniTrack", { Position = UDim2.fromOffset(8, 24), Size = UDim2.fromOffset(178, 14), ZIndex = 3 })
+local worldFill = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(0, 1), ClipsDescendants = true, ZIndex = 4 }, worldTrack)
+img(worldFill, "fillGold", { Size = UDim2.fromOffset(178, 14), ZIndex = 4 })
+local worldFirsts = {}
+local function refreshWorld()
+	local age, g = remotes:GetAttribute("WorldAge") or 0, remotes:GetAttribute("WorldGens") or 0
+	local prev, nxt = remotes:GetAttribute("WorldPrev") or 0, remotes:GetAttribute("WorldNext") or -1
+	worldText.Text = ('World Age %d   <font color="#FFD23F">+%d%% DNA</font>'):format(age, age * 5)
+	worldFill.Size = UDim2.fromScale(nxt > prev and math.clamp((g - prev) / (nxt - prev), 0, 1) or 1, 1)
+	pcall(function() worldFirsts = game:GetService("HttpService"):JSONDecode(remotes:GetAttribute("WorldFirsts") or "{}") end)
+end
+refreshWorld()
+remotes.AttributeChanged:Connect(function(k)
+	if k:sub(1, 5) == "World" then
+		refreshWorld()
+		if k == "WorldFirsts" and refresh then refresh() end
+	end
+end)
+
 ---------------------------------------------------------------- Path picker: the forks of the evolution tree
 -- Opens by itself (once per life) while you can pick, never over another window or the evolve banner.
 local FORKS = {}
@@ -588,7 +611,7 @@ refresh = function()
 			if got then found += 1 end
 			e.label.Text = if e.secret then (got and e.name or "???") .. "\n" .. e.desc
 				elseif e.desc then e.name .. "\n" .. e.desc
-				elseif got then e.name
+				elseif got then (worldFirsts[e.key] and e.name .. "\n1st: " .. worldFirsts[e.key] or e.name)
 				elseif e.path then "???\n" .. e.path .. " path"
 				else "???"
 			e.label.TextColor3 = got and e.color or MUTED
@@ -619,6 +642,8 @@ local STYLES = {
 	{ find = "evolved", priority = 10, color = GOLD, hold = 3.5 },
 	{ find = "path", priority = 9, color = GOLD, hold = 3 },
 	{ find = "SECRET", priority = 10, color = Color3.fromRGB(255, 120, 220), hold = 4 },
+	{ find = "World first", priority = 8, color = Color3.fromRGB(140, 200, 255), hold = 3.5 },
+	{ find = "world reached", priority = 9, color = Color3.fromRGB(140, 200, 255), hold = 4 },
 	{ find = "Badge", priority = 9, color = GOLD, hold = 3 },
 	{ find = "Thank you", priority = 9, color = DNA_C, hold = 3 },
 	{ find = "Daily streak", priority = 8, color = DNA_C, hold = 3 },
