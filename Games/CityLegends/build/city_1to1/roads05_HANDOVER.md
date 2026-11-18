@@ -35,7 +35,8 @@
   with such points. Root fix: `roads05_pbox_clip.py` (called at the end of `collision()`, so every new bake is clipped): each P box
   is kept only over 1-stud x 1/3-width slices that a built pavement / kerb / median part covers (bridge parts only within +-1 of
   the box top; the bake's `drop_scraps` first). In the place: the same clip applied to the swapped rows (`mapbugs/pbox_*.txt`,
-  "-" old row / "+" pieces; Studio swap code in `tools/yangon/MapBugScan.luau` `S.pboxSwap`). Self-check `roads05_pbox_clip_test.py`.
+  "-" old row / "+" pieces; Studio swap code in `tools/yangon/MapBugScan.luau` `S.pboxSwap`): 5,625 P boxes -> 8,770 pieces,
+  P boxes now 14,587 (saved v1471, Play-tested). Self-check `roads05_pbox_clip_test.py`. A future rebuild's bake does this itself.
   Other invisible collidables over R boxes: only landmark collision under landmark grounds (MC plaza, Sedona lawn, Bogyoke market,
   Strand, YCC, Sule, Holy Trinity, a pagoda base) = visible surfaces, kept. Roads.Collide had no boxes outside the new mesh cells.
 - **(b) Kit props on the road (client data):** footprint test (poles r 0.45 at the base, trees r 0.8, walls / stalls / drains: the

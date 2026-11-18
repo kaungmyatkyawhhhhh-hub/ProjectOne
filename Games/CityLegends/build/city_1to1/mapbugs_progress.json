@@ -1,0 +1,12 @@
+{
+ "task": "18-19 Nov map bug fixes P1-P3 (MAP BUGS agent): terrain under flyovers, kit props on road, invisible collidables, island/median kerbs",
+ "area_1536": "x18..24 z10..21 (P1+P2) and x19..27 z26..31 (P3)",
+ "scan_c_invisible": "DONE read-only: Roads.Collide = 51,072 boxes, every one in a cell with new meshes (no old-build leftovers). Invisible collidables over R boxes: only landmark collision under landmark grounds (MC plaza 145, Sedona lawn/drive 105, Bogyoke market 42, Strand 18, YCC 5, Sule 5, Holy Trinity 1, pagoda 1) = visible surfaces, kept. Server Play: none from runtime. Real invisible bumps = client WCOL kit records on R (79) -> fixed with (b).",
+ "scan_b_props": "DONE read-only (footprint rule: poles r0.45 at origin, trees r0.8, ground props/walls full rect >25% on R, plates + T labels ray 12 down): P1S 52 tiles (splate 13, T 26, drains 76, litter 3, tri3 1, teachair 1); P1 54 tiles walls + WCOL 35; P2 49 tiles + WCOL 25; P3 31 tiles + WCOL 12; P2P 5 tiles (WCOL 7); P1G 1, P3G 2. APPLY: todo (needs lock).",
+ "scan_a_terrain": "DONE read-only: 39 R boxes with terrain over (Shwedagon-side 32.2-32.9k x 40.3-40.8k, 30.4k x 33.5k, MC 34.9k x 28.3k); near decks 3,791 stray voxels in 1,748 columns (univ_kabaraye park 34.4k x 28.6k, P3 bridge approach 31.5k x 45.6k). APPLY: todo.",
+ "scan_d_kerbs": "todo",
+ "lock": "P7 district agent + store agent hold it in turns; queue.txt note left",
+ "applied_1": "v1461: kit filter applied (194 tiles, 396 records: P1S 120 incl. 13 name plates + 26 labels, WCOL 79 ...) + repo copies patched; pavement boxes round 1 (5,100 old P boxes -> ServerStorage.MB_OldPBoxes, 2,960 clipped pieces with attr MBNew); terrain: 39 R boxes carved + 1,748 near-deck columns cleared above G+3.",
+ "next": "median nose (bug 1) + small junction (bug 5) not located: builder look faults; kerb_cross clusters list candidates. Buildings / landmark grounds over J37 road boxes: data (roads through compounds).",
+ "applied_2": "v1471+: pavement boxes round 2 (thirds + scraps + bridge rule): 5,625 old P boxes replaced by 8,770 clipped pieces (195 P1 rows in the MC re-swapped cells skipped as expected); backup deleted, MBNew attrs removed; P boxes now 14,587. Play test on CityLegends_test PASS (Univ x Kabar Aye under the flyover, Sule ring west mouth, P3 bridge ramp deck: max |vy| 1.3-2.1, no plates / WCOL left near the Univ x Kabar Aye spot), store back on CityLegends_v1 read on the Server. Lock released."
+}
