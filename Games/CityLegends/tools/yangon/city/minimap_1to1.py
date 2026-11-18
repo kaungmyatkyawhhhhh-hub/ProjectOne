@@ -15,7 +15,8 @@ Two sets of 1024 x 512 tiles:
 import json, math, os, sys
 
 from PIL import Image, ImageDraw, ImageFilter, ImageOps
-from shapely.geometry import Polygon, box as sbox
+from shapely.affinity import translate
+from shapely.geometry import LineString, Polygon, box as sbox
 from shapely.ops import unary_union
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -36,6 +37,7 @@ GREEN, GREEN_EDGE = (36, 60, 44), (44, 72, 52)
 BUILDING, BUILDING_EDGE, SHADOW = (60, 68, 84), (92, 102, 122), (18, 22, 28)
 SHRINE, SHRINE_EDGE = (96, 84, 60), (170, 146, 92)
 PAVEMENT, EDGE = (64, 68, 80), (12, 14, 18)
+GREY_WATER = (20, 34, 50)
 STREET, MINOR, ROUTE = (156, 164, 180), (118, 126, 142), (222, 184, 98)
 MAJOR_HW = ('trunk', 'primary', 'secondary', 'tertiary', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link')
 GREEN_TAGS = {('leisure', 'park'), ('leisure', 'garden'), ('leisure', 'golf_course'), ('leisure', 'pitch'), ('leisure', 'stadium'),
@@ -133,7 +135,7 @@ def render(D, spp, x0, z0, W, H):
         d = ImageDraw.Draw(im)
     for pts in shown:
         pp = [px(*q) for q in pts]
-        d.polygon(pp, fill=BUILDING_EDGE)
+        d.polygon(pp, fill=BUILDING_EDGE if spp < 8 else BUILDING)
         if spp < 8:
             cx = sum(q[0] for q in pp[:-1]) / (len(pp) - 1)
             cy = sum(q[1] for q in pp[:-1]) / (len(pp) - 1)
@@ -159,17 +161,21 @@ def render(D, spp, x0, z0, W, H):
         if len(s) < 2:
             continue
         half = max(max(q[6], q[7]) for q in s)
-        for off, wid, colr in (((6, 8), 2 * half + 8, SHADOW), ((0, 0), 2 * half + 6, EDGE), ((0, 0), 2 * half - 3, ROUTE)):
-            pts = [px(q[0] + off[0], q[2] + off[1]) for q in s]
-            w = max(1, int(round(wid * k)))
-            d.line(pts, fill=colr, width=w, joint='curve')
-    return im
+        line = LineString([(q[0], q[2]) for q in s])
+        if not line.intersects(view):
+            continue
+        for off, grow, colr in (((6, 8), half + 4, SHADOW), ((0, 0), half + 3, EDGE), ((0, 0), half - 1.5, ROUTE)):
+            g = translate(line, *off).buffer(grow, 8, cap_style=2)
+            for p in polys_of(g):
+                d.polygon([px(*q) for q in p.exterior.coords], fill=colr)
+    return im, mask
 
 
-def grey_of(im):
-    """the districts not in the game: dim and colourless, the water still a little blue"""
+def grey_of(im, water):
+    """the districts not in the game: dim and colourless, the water still a dim blue"""
     g = ImageOps.grayscale(im).convert('RGB')
     g = Image.blend(Image.new('RGB', im.size, GROUND), g, 0.42)
+    g.paste(Image.new('RGB', im.size, GREY_WATER), (0, 0), water)
     return g
 
 
@@ -195,8 +201,8 @@ def tileset(D, name, spp, x0, z0, cols, rows, keep):
             continue
         r0, r1 = band[0], band[-1] + 1
         bz0 = z0 + r0 * ts[1]
-        im = render(D, spp, x0, bz0, cols * TW, (r1 - r0) * TH)
-        im = Image.composite(im, grey_of(im), full_mask(spp, x0, bz0, im.size))
+        im, water = render(D, spp, x0, bz0, cols * TW, (r1 - r0) * TH)
+        im = Image.composite(im, grey_of(im, water), full_mask(spp, x0, bz0, im.size))
         im = im.resize((cols * TW, (r1 - r0) * TH), Image.LANCZOS)
         for rr in range(r0, r1):
             for c in range(cols):
