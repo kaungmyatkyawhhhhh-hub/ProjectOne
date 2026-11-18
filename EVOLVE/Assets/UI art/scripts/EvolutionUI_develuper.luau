@@ -887,3 +887,92 @@ game:GetService("RunService").Heartbeat:Connect(function()
 		o.part.Core.CFrame = cf
 	end
 end)
+
+---------------------------------------------------------------- music player, top right (owner, 18 Nov: "a music player on the top right
+-- that allows u to pause, skip, go back, volume slider"). Tracks: APM Music from the Creator Store, inserted in SoundService.Music.
+-- Only this player hears their music; pause/volume are theirs alone.
+local musicFolder = SoundService:WaitForChild("Music", 10)
+local tracks = {}
+for _, s in musicFolder and musicFolder:GetChildren() or {} do if s:IsA("Sound") then table.insert(tracks, s) end end
+table.sort(tracks, function(a, b) return a.Name < b.Name end)
+if #tracks > 0 then
+	local UIS = game:GetService("UserInputService")
+	local MAX_VOL = 0.8
+	local group = new("SoundGroup", { Name = "MusicGroup", Volume = 0.4 }, SoundService) -- music sits ~0.4 under the SFX
+	for _, t in tracks do t.SoundGroup, t.Looped, t.Volume = group, false, 0.5 end
+	local panel = img(hud, "plate9", { Name = "MusicPlayer", AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -8, 0, 8), Size = UDim2.fromOffset(214, 64) })
+	local songName = label(panel, "", 13, { Position = UDim2.fromOffset(14, 6), Size = UDim2.new(1, -28, 0, 18), TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd })
+	local current, paused = math.random(#tracks), false
+
+	local function arrows(b, n, flip) -- chevron art: one = play, two = skip, two flipped = back
+		for k = 1, n do
+			img(b, "chevron", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, (k - (n + 1) / 2) * 8, 0.5, -1), Size = UDim2.fromOffset(16, 18), Rotation = flip and 180 or 0, ZIndex = 4, Name = "Icon" })
+		end
+	end
+	local function bars(b) -- the pause sign: two white bars with the black text outline
+		local f = new("Frame", { Name = "Bars", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 4 }, b)
+		for _, x in { -4, 4 } do
+			local bar = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(0.5, x, 0.5, -1), Size = UDim2.fromOffset(5, 14), BackgroundColor3 = CREAM, ZIndex = 4 }, f)
+			new("UICorner", { CornerRadius = UDim.new(0, 2) }, bar)
+			new("UIStroke", { Color = INK, Thickness = 1.5 }, bar)
+		end
+		return f
+	end
+
+	local function start(k)
+		tracks[current]:Stop()
+		current = (k - 1) % #tracks + 1
+		songName.Text = tracks[current].Name
+		if not paused then tracks[current]:Play() end
+	end
+	for _, t in tracks do t.Ended:Connect(function() if t == tracks[current] then start(current + 1) end end) end
+
+	local y, s = 28, 28
+	button(panel, "sqBlue", "", 13, { Position = UDim2.fromOffset(12, y), Size = UDim2.fromOffset(s, s), ZIndex = 3 }, function()
+		if tracks[current].TimePosition > 3 then tracks[current].TimePosition = 0 else start(current - 1) end -- like any player: back = restart, twice = previous
+	end).Button.Name = "Back"
+	local playPause
+	playPause = button(panel, "sqGreen", "", 13, { Position = UDim2.fromOffset(44, y), Size = UDim2.fromOffset(s, s), ZIndex = 3 }, function()
+		paused = not paused
+		if paused then tracks[current]:Pause() elseif tracks[current].TimePosition > 0 then tracks[current]:Resume() else tracks[current]:Play() end
+		playPause.Button.Bars.Visible = not paused
+		for _, c in playPause.Button:GetChildren() do if c.Name == "Icon" then c.Visible = paused end end
+	end)
+	playPause.Button.Name = "PlayPause"
+	bars(playPause.Button)
+	arrows(playPause.Button, 1)
+	for _, c in playPause.Button:GetChildren() do if c.Name == "Icon" then c.Visible = false end end
+	arrows(button(panel, "sqBlue", "", 13, { Position = UDim2.fromOffset(76, y), Size = UDim2.fromOffset(s, s), ZIndex = 3 }, function() start(current + 1) end).Button, 2)
+	arrows(panel:FindFirstChild("Back"), 2, true)
+	panel:FindFirstChild("sqBlue").Name = "Skip"
+
+	-- volume slider: gold fill + a round knob; drag or tap anywhere on it (mouse and touch)
+	local track = img(panel, "miniTrack", { Position = UDim2.fromOffset(114, y + 7), Size = UDim2.fromOffset(86, 14), ZIndex = 3 })
+	local fill = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(0.5, 1), ClipsDescendants = true, ZIndex = 4 }, track)
+	img(fill, "fillGold", { Size = UDim2.fromOffset(86, 14), ZIndex = 4 })
+	local knob = new("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(16, 16), BackgroundColor3 = CREAM, ZIndex = 5 }, track)
+	new("UICorner", { CornerRadius = UDim.new(1, 0) }, knob)
+	new("UIStroke", { Color = INK, Thickness = 2 }, knob)
+	local hit = new("TextButton", { Name = "Volume", Text = "", BackgroundTransparency = 1, Position = UDim2.fromOffset(-8, -9), Size = UDim2.new(1, 16, 1, 18), ZIndex = 6 }, track)
+	local function setVolume(f)
+		f = math.clamp(f, 0, 1)
+		group.Volume = f * MAX_VOL
+		fill.Size, knob.Position = UDim2.fromScale(f, 1), UDim2.fromScale(f, 0.5)
+	end
+	local dragging = false
+	local function at(x) setVolume((x - track.AbsolutePosition.X) / track.AbsoluteSize.X) end
+	hit.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			at(input.Position.X)
+		end
+	end)
+	UIS.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then at(input.Position.X) end
+	end)
+	UIS.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+	end)
+	setVolume(0.5)
+	start(current)
+end

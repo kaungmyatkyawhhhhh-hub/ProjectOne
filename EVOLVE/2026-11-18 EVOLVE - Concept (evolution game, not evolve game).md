@@ -271,3 +271,29 @@ Owner: "i can hear roblox walking sound".
   - Walking 30 studs and jumping played no sound.
   - After a respawn, the new body had no default sounds at all.
 - **Next, if wanted:** our own creature sounds (splash strokes, stomps for big animals) using the roblox-game-sounds skill.
+
+## Movement sounds + music player (v54, 18 Nov 2026)
+- **Movement SFX:** our own, synthesised in `EVOLVE/Audio/make_moves.py` and uploaded to group 947215423. They are wired in `EraWorld` (`MOVE_SOUNDS`).
+
+  | Sound | Asset ids |
+  |---|---|
+  | step_small | 127521599602224, 72066563392714, 118475161030831 |
+  | step_mid | 136503552963955, 130897330270749, 116262435041797 |
+  | step_big | 112387779457047, 72300185311559, 131118480778541 |
+  | swim | 92086636252929, 74933962244943, 108983690361664 |
+  | jump | 138704544348101 |
+  | land | 86370231275212 |
+
+  - The creature's size picks small, mid or big.
+  - There is no back-to-back repeat, and pitch varies ±6%.
+  - Swim checked loaded in Play.
+- **Music:** Creator Store APM tracks are in `SoundService.Music` (Fun Day, Game On, World Colours, Funny Playground, Children At Play, Hey Kids).
+  - They play through `MusicGroup` (0.4 default, max 0.8).
+  - The first track is random; then they play in order and loop.
+- **Music player** (top right, in `EvolutionUI`): Back, Play/Pause, Skip and a volume slider.
+  - Back restarts the song; a tap in the first 3 s goes to the previous song.
+  - All controls were tested in Play, and the layout was checked at the 667x375 phone size.
+  - Backup: `ServerStorage.EvolutionUI_backup_before_music`.
+- **AFK note (owner asked):** goals are not required.
+  - An idle life still evolves 50% of the time ("Goals make evolution faster!").
+  - Offline time counts too (the Long Nap pass makes it 24h).
