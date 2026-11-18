@@ -414,7 +414,7 @@ local function spawnNpc(center: Vector3?, highway: boolean): Npc?
 	end
 	-- the imported low-poly traffic cars when the place has them, else our own built ones
 	-- (2026-11-19: the Yangon mix, rare supercars under their caps, buses on main roads only)
-	local model = TrafficBodies.build(rng, Traffic.rareCounts(), besideOf(seg) ~= nil)
+	local model = TrafficBodies.build(rng, Traffic.rareCounts(), besideMap == nil or besideOf(seg) ~= nil)
 	if not model then
 		local spec = CarBuilder.randomTrafficSpec(rng)
 		local color = Cars.TrafficColors[rng:NextInteger(1, #Cars.TrafficColors)]
@@ -755,6 +755,7 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 		npc.offTo = 0
 	elseif npc.sideT <= 0 then
 		npc.sideT = 0.2
+		npc.model:SetAttribute("RacerSpeed", math.floor(npc.speed / Config.mphToSps(1)))
 		local reach = math.max(T.LookAhead, npc.speed * RACER.LookAheadS)
 		local here = stripGap(npc, npc.off, obstacles, reach)
 		if here < npc.speed * 1.6 + 20 then
@@ -800,6 +801,7 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 				npc.seg = o
 				npc.nextSeg = chooseNext(o)
 				npc.plan = nil
+				npc.model:SetAttribute("LaneSwaps", (npc.model:GetAttribute("LaneSwaps") or 0) + 1)
 				break
 			end
 		end

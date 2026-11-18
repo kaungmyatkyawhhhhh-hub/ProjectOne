@@ -347,6 +347,8 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 		end
 		wm.Parent = out
 	end
+	-- (a plain pivot: TrafficBodies' PivotTo(CFrame.new()) turned the cars with a half-turn pivot round, back first)
+	out.WorldPivot = CFrame.new((out:GetBoundingBox()).Position)
 	out:SetAttribute("KeepColors", true)
 	out:SetAttribute("SourceCar", id)
 	src:Destroy()
@@ -384,6 +386,7 @@ function T.newSet(holding: Instance, turn: boolean?): { string }
 				local cf = car:GetPivot()
 				car:PivotTo(cf * CFrame.Angles(0, math.pi, 0))
 			end
+			car.WorldPivot = CFrame.new((car:GetBoundingBox()).Position)
 			car:SetAttribute("KeepColors", true)
 			table.insert(report, car.Name)
 			car.Parent = holding
