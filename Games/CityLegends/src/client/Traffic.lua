@@ -1398,6 +1398,16 @@ function Traffic.update(dt: number)
 					end
 				end
 			end
+			if hit and block and npc.off ~= snap[5] then
+				-- (only the slide sideways touches: drive on straight in the old strip; the slide waits)
+				local p2, f2 = CityLayout.sample(npc.seg, npc.s)
+				p2 += f2:Cross(Vector3.yAxis) * (snap[5] :: number)
+				local h2 = racerHit(npc, p2, f2, obstacleList, 0)
+				if h2 == nil and racerHit(npc, p2, f2, obstacleList, 1) == racerHit(npc, snap[7], snap[8], obstacleList, 1) then
+					npc.off, npc.offTo = snap[5], snap[5]
+					pos, fwd, block = p2, f2, false
+				end
+			end
 			if hit and block then
 				npc.seg, npc.s, npc.nextSeg, npc.plan, npc.off, npc.offTo = snap[1], snap[2], snap[3], snap[4], snap[5], snap[5]
 				pos, fwd = snap[7], snap[8]
