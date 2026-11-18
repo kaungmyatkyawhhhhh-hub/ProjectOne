@@ -1,7 +1,7 @@
 # roads05 handover (18 Nov 2026, thirty-third pass: J37, BUILDER agent; YangonRoads.kerbSeal + Studio 17 spots)
 
 ## REBUILD (owner decision 18 Nov: the game road rebuild starts right after J37, whatever the counts)
-- **Build from:** the commit "City Legends roads05 J37" on master (`git log --grep "roads05 J37"`), data
+- **Build from:** commit 4edc2d9c ("City Legends roads05 J37", master; builder unchanged after it) (`git log --grep "roads05 J37"`), data
   `build/city_1to1/roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12/roads.json` md5 c34a1111..., `paint.json` md5 b6c2ba15...
   (J35 data, unchanged since; pipeline re-run J37 = same md5s, logs `J37_*.log`). Builder: `tools/yangon/YangonRoads.luau`
   179,431 chars (Studio checksum 1843759058), `tools/yangon/YangonRoadsChecks.luau` 27,754 (1841289662), `tools/riviera/Roads.luau`
