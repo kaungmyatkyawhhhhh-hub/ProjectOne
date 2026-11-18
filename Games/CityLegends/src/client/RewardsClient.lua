@@ -603,7 +603,7 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 	end
 	-- the odds (Roblox's rule: shown before you spin)
 	local oddsPanel: Frame? = nil
-	oddsBtn.Activated:Connect(function()
+	local function toggleOdds()
 		if oddsPanel then
 			oddsPanel:Destroy()
 			oddsPanel = nil
@@ -617,7 +617,8 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 			label({ Text = prize, TextSize = 12, Font = Enum.Font.GothamBold, TextColor3 = Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(14, 32 + (k - 1) * 21), Size = UDim2.new(1, -110, 0, 20), ZIndex = 91, Parent = op })
 			label({ Text = tostring(o.percent) .. "%", TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 32 + (k - 1) * 21), Size = UDim2.fromOffset(80, 20), ZIndex = 91, Parent = op })
 		end
-	end)
+	end
+	oddsBtn.Activated:Connect(toggleOdds)
 	-- the buttons under the stage
 	local spin = button("SPIN", Theme.Money, { Position = UDim2.new(0, 0, 1, -50), Size = UDim2.new(0.5, -4, 0, 48), TextSize = 20, ZIndex = 74, Parent = body })
 	local buyRow = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 1, -50), Size = UDim2.new(0.5, -4, 0, 48), ZIndex = 74, Parent = body })
@@ -632,7 +633,26 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 		end)
 		if hasRobux then
 			local buyRobux = button("BUY 1  ·  ROBUX", Theme.Accent, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.fromScale(1, 0), Size = UDim2.new(0.5, -3, 1, 0), TextSize = 13, ZIndex = 74, Parent = buyRow })
+			-- the price from Roblox (never typed in: Playbook)
+			local robuxText = "ROBUX"
+			task.spawn(function()
+				local ok, info = pcall(function()
+					return MarketplaceService:GetProductInfo(w.productId, Enum.InfoType.Product)
+				end)
+				if ok and info and info.PriceInRobux then
+					robuxText = "R$ " .. tostring(info.PriceInRobux)
+					if buyRobux.Parent then
+						buyRobux.Text = "BUY 1  ·  " .. robuxText
+					end
+				end
+			end)
+			-- (owner rule: the odds are on screen before a Robux buy) the first tap opens them
 			buyRobux.Activated:Connect(function()
+				if not oddsPanel then
+					toggleOdds()
+					buyRobux.Text = "ODDS SHOWN  ·  BUY " .. robuxText
+					return
+				end
 				MarketplaceService:PromptProductPurchase(player, w.productId)
 			end)
 		end

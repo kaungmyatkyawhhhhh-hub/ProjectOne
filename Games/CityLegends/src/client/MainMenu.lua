@@ -1556,11 +1556,19 @@ local function carStats(parent: Instance, y: number, spec: any)
 end
 
 openClaim = function()
-	if claimed() then
+	-- (18 Nov) the Robux Starter Pack's car opens this same pick, for a car not owned yet
+	local pack = player:GetAttribute("StarterPick") == true
+	if claimed() and not pack then
 		return
 	end
-	local page = openSub("Pick your first car")
-	text({ Text = "It's yours for good. You can buy more at Legends Motors.", FontFace = MEDIUM, TextSize = 17, TextColor3 = SUB, Position = UDim2.fromOffset(136, 34), Size = UDim2.fromOffset(700, 22), Parent = page })
+	local owned: { [string]: boolean } = {}
+	if pack then
+		for _, id in ownedList() do
+			owned[id] = true
+		end
+	end
+	local page = openSub(if pack then "Starter Pack: pick your car" else "Pick your first car")
+	text({ Text = if pack then "One of these, yours for good. Cars you own are greyed out." else "It's yours for good. You can buy more at Legends Motors.", FontFace = MEDIUM, TextSize = 17, TextColor3 = SUB, Position = UDim2.fromOffset(136, 34), Size = UDim2.fromOffset(700, 22), Parent = page })
 	local picked: string? = nil
 	local cards: { [string]: TextButton } = {}
 	local confirm: TextButton
@@ -1575,6 +1583,7 @@ openClaim = function()
 		if not spec then
 			continue
 		end
+		local have = owned[carId] == true
 		local card: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = WHITE, Position = UDim2.fromOffset((k - 1) * (cw + 16), 66), Size = UDim2.fromOffset(cw, 268), Parent = page }, {
 			corner(10),
 			gradient(Color3.fromRGB(38, 42, 56), PANEL, 115),
@@ -1591,7 +1600,15 @@ openClaim = function()
 		text({ Text = "“" .. feel .. "”", FontFace = BOLD, TextSize = 18, TextColor3 = MINT, Position = UDim2.fromOffset(0, 58), Size = UDim2.new(1, 0, 0, 24), Parent = body })
 		carStats(body, 96, spec)
 		cards[carId] = card
+		if have then
+			card.BackgroundTransparency = 0.6
+			text({ Text = "OWNED", FontFace = HEAVY, TextSize = 16, TextColor3 = SUB, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -20, 0, 16), Size = UDim2.fromOffset(90, 20), TextXAlignment = Enum.TextXAlignment.Right, Parent = card })
+		end
 		focusable(card, function()
+			if have then
+				UI.toast("You own the " .. spec.Name .. ": pick another", SUB)
+				return
+			end
 			picked = carId
 			for id, c in cards do
 				(c:FindFirstChild("Pick") :: UIStroke).Transparency = if id == picked then 0 else 1
@@ -1609,7 +1626,7 @@ openClaim = function()
 		confirm.Text = "ONE MOMENT..."
 		local result = api.claim(picked)
 		if result.ok then
-			UI.popup("YOUR FIRST CAR", 0, GOLD)
+			UI.popup(if pack then "STARTER PACK CAR" else "YOUR FIRST CAR", 0, GOLD)
 			local id = picked
 			closeMenu()
 			api.drive(id)
@@ -2120,6 +2137,8 @@ local function buildCars(page: Frame)
 end
 
 local STORE_ICON = { store_vip = "crown", store_cash2x = "cash", store_starter = "gift", store_bundle = "cash", store_garage = "garage" }
+-- the pass tiles' owned flags (player attributes set by server/Store.lua)
+local STORE_PASS_ATTR: { [string]: string } = { cash2x = "Cash2x", vip = "Vip", doublepay = "DoublePay" }
 
 local function buildStore(page: Frame)
 	local items = Config.Menu.Store
@@ -2143,6 +2162,32 @@ local function buildStore(page: Frame)
 		subLabel.Position = UDim2.new(0, 20, 1, -58)
 		local price = new("Frame", { BackgroundColor3 = if live then GREEN else GREY, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -14, 1, -14), Size = UDim2.fromOffset(130, 34), ZIndex = 4, Parent = b }, { corner(8) })
 		local priceText = text({ Text = if live then "..." else "COMING SOON", FontFace = HEAVY, TextSize = 14, TextColor3 = if live then NAVY0 else WHITE, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), ZIndex = 5, Parent = price })
+		local robux: string? = nil
+		-- (18 Nov) what the tile can do now: buy, OWNED (a pass, the Starter Pack), PICK YOUR CAR
+		-- (the pack's car still to pick), NEED A HOUSE (Garage Space with no room); the server's
+		-- attributes (Store.lua, Houses.lua) decide
+		local function status(): string?
+			local attr = STORE_PASS_ATTR[item.key]
+			if attr and player:GetAttribute(attr) == true then
+				return "OWNED"
+			elseif item.key == "starter" and player:GetAttribute("StarterPick") == true then
+				return "PICK YOUR CAR"
+			elseif item.key == "starter" and player:GetAttribute("StarterPack") == true then
+				return "OWNED"
+			elseif item.key == "garage" and player:GetAttribute("BayRoom") ~= true then
+				return "NEED A HOUSE"
+			end
+			return nil
+		end
+		local function paint()
+			if not live then
+				return
+			end
+			local st = status()
+			price.BackgroundColor3 = if st == "PICK YOUR CAR" then GOLD elseif st then GREY else GREEN
+			priceText.TextColor3 = if st and st ~= "PICK YOUR CAR" then WHITE else NAVY0
+			priceText.Text = st or robux or "..."
+		end
 		if not live then
 			-- greyed until the owner gives the id
 			local art = b:FindFirstChild("Art") :: ImageLabel?
@@ -2151,20 +2196,34 @@ local function buildStore(page: Frame)
 				art.ImageColor3 = SUB
 			end
 		else
+			for _, attr in { STORE_PASS_ATTR[item.key] or "", "StarterPick", "StarterPack", "BayRoom" } do
+				if attr ~= "" then
+					player:GetAttributeChangedSignal(attr):Connect(paint)
+				end
+			end
+			paint()
 			task.spawn(function()
 				local ok, info = pcall(function()
 					return MarketplaceService:GetProductInfo(item.id, if item.kind == "Pass" then Enum.InfoType.GamePass else Enum.InfoType.Product)
 				end)
-				if ok and info and info.PriceInRobux then
-					priceText.Text = "R$ " .. tostring(info.PriceInRobux)
-				else
-					priceText.Text = "UNAVAILABLE"
-				end
+				robux = if ok and info and info.PriceInRobux then "R$ " .. tostring(info.PriceInRobux) else "UNAVAILABLE"
+				paint()
 			end)
 		end
 		focusable(b, function()
 			if not live then
 				UI.toast(item.name .. ": coming soon", SUB)
+				return
+			end
+			local st = status()
+			if st == "PICK YOUR CAR" then
+				openClaim()
+				return
+			elseif st == "OWNED" then
+				UI.toast(item.name .. ": you own it", GREEN)
+				return
+			elseif st == "NEED A HOUSE" then
+				UI.toast("Garage Space: place a house with room for one more space first (Legends Realty)", SUB)
 				return
 			end
 			if item.kind == "Pass" then
@@ -2541,6 +2600,12 @@ function MainMenu.init(a: Api)
 	api = a
 	loadFavs()
 	build()
+	-- (18 Nov) a Starter Pack bought from the STORE tab: its car pick opens right away
+	player:GetAttributeChangedSignal("StarterPick"):Connect(function()
+		if player:GetAttribute("StarterPick") == true and isOpen then
+			openClaim()
+		end
+	end)
 end
 
 -- start: the menu as the start screen (no car out yet: nothing to close back to)

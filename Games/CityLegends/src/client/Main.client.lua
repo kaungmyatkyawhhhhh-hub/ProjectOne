@@ -418,6 +418,17 @@ end)
 startStep("Chauffeur", ChauffeurClient.init)
 startStep("Luxe", function()
 	require(script.Parent:WaitForChild("LuxeClient")).init() -- the gem shop and VIP cards, smash-and-grab messages
+	-- (18 Nov) the VIP pass's chat tag (the server sets the speaker's "Vip" attribute: Store.lua)
+	local TextChatService = game:GetService("TextChatService")
+	TextChatService.OnIncomingMessage = function(message: TextChatMessage)
+		local props = Instance.new("TextChatMessageProperties")
+		local src = message.TextSource
+		local who = src and Players:GetPlayerByUserId(src.UserId)
+		if who and who:GetAttribute("Vip") == true then
+			props.PrefixText = '<font color="#FFD66E">[VIP]</font> ' .. message.PrefixText
+		end
+		return props
+	end
 end)
 startStep("Minimap", function()
 	require(script.Parent:WaitForChild("Minimap")).start() -- round minimap, top right (N toggles)
