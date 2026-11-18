@@ -91,7 +91,14 @@ local function graph(): Graph
 	local function key(p: Vector3): (number, number)
 		return math.floor(p.X / CELL), math.floor(p.Z / CELL)
 	end
+	-- (2026-11-18: with the P1-P3 1:1 lanes this ran past the script timeout inside Chauffeur.init's task.spawn,
+	-- which killed the server's Main before players spawned: yield now and then)
+	local n = 0
 	for _, seg in all do
+		n += 1
+		if n % 2000 == 0 then
+			task.wait()
+		end
 		if seg.kind ~= "turn" then
 			local bx, bz = key(midpoint(seg))
 			local k = bx .. "," .. bz
@@ -105,6 +112,10 @@ local function graph(): Graph
 	end
 	local beside: { [Segment]: { Segment } } = {}
 	for _, seg in all do
+		n += 1
+		if n % 2000 == 0 then
+			task.wait()
+		end
 		if seg.kind == "turn" then
 			continue
 		end
