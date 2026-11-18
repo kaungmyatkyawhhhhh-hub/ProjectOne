@@ -88,3 +88,11 @@ This note is the fix. It works in three parts:
 - **Props placed from the OLD layout must be re-filtered by FOOTPRINT, not by centre point.** A centre ray missed name plates (their record sits at plate height, the post below), wall runs that only partly cross the new carriageway and their invisible collision (WCOL). Test the ground footprint of each piece (poles: a small square at the base; walls / stalls / drains: the whole base; plates: a ray 12 down) against the carriageway boxes.
 - **Terrain is not rebuilt with the roads.** Old embankments, verge fills and hillsides stay where the old roads were and end up over or beside the new ones (grass ridges and arches by flyovers, roads buried under a hill). After any road rebuild: scan terrain over every road / pavement box and stray terrain near decks (over local ground + 4, or floating), and clear only those.
 - Scan the whole district for each class first, then fix at the root (builder, bake, data or filter); never fix one spot the owner happened to see.
+
+## Lesson (19 Nov 2026, City Legends: district P7 moved in after the road rebuild)
+- **A shared upload slot gets overwritten.** Two agents sent different files as new versions of one asset id. The other agent's upload replaced mine before I loaded it. Give each data pack its own new asset.
+- **Two tools with the same name.** A Studio tool had the same name as a different tool, so the district mover failed. Check a tool's functions before calling it, and keep different tools under different names.
+- **A new data format needs its decoder in the live place.** The district data used a newer, smaller format, but the place still had the old reader, so the building detail would not have shown. Before moving data in, check that the place's reader is the repo version (compare a hash).
+- **More data can break code that ran fine.** The traffic graph grew from 630 to 797 lanes. Server setup then passed the script time limit, and no car spawned. A long loop pauses on a time budget (every 30 ms), not after a fixed count.
+- **Edge cells are rebuilt whole.** A road cell shared with an earlier district is rebuilt from both districts' data and swapped in one piece. Never paste half a cell next to an old half.
+- **Minimap pictures go up as Image, not Decal.** An ImageLabel cannot use a Decal id ("Asset type does not match").

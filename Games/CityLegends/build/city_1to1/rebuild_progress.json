@@ -145,7 +145,7 @@
  ],
  "mc_ramps": "DONE 18 Nov: ramp_mouths.json + roads05_ramps.py (Lane #4080/#4081 dropped, #4082 cut 11 samples, 2 ramp driveways), YangonRoads.sideZone ramp drops pavement (179623 chars, checksum 221012820, in Studio ClaudeTools), bake ramp_gaps; cells 22x17+22x18 rebuilt (subset roads05_RBM, glb assets 116769588627695/122257664879454/117456821135757, 1811 boxes), aprons MCRampAprons (Landmarks.MyanmarCentre.RampAprons, re-run after rebuilding those cells), trenches cleared; Play PASS all 3 ramps in+out, parking 207 bays/8 cars, bay park ok; saved v1445, backup deleted",
  "P7": {
-  "status": "IN PROGRESS (DISTRICT REBUILD agent, 18 Nov night)",
+  "status": "DONE 19 Nov (DISTRICT REBUILD agent): district moved (J37 re-clear), roads swapped, cleaned, Play-tested, backup deleted, saved v1479. Studio restart recommended (was ~11 GB in Play; undo history).",
   "plan": "3072-col x9..11; step boxes per col: z 32256..33792 (1536 row 21, label <x>x10), 3072 rows z11 z12 (labels <x>x11/<x>x12), z 39936..41472 (1536 row 26, label <x>x13). Swap 1536 cells x19..23 z21..26 whole (z21 = P1 cells, z26 = P3 cells rebuilt whole: subset.json clip = P7+P1+P3 boxes).",
   "data": "roads05_subset.py net RB7 P7 with R05_GROW=1700 (1279 roads, 36 modules, checksums roads05_RB7/pack_checksums.txt) -> imports/sync/rebuild_RB7_data.rbxmx -> asset 133014134133489 rev 218 | rev 218 was overwritten by another agent's sync: data in NEW asset 117092137372695 (loaded, Y.load ok: 1279 roads, 1514 mouths; modules deleted)",
   "buildings": "district_files.sh P7 --no-roads buildings re-run vs J37 net f1332665 (old files build/city_1to1/_pre_rebuild_P7)",
@@ -176,6 +176,16 @@
   "pbox_clip": "roads05_pbox_clip.py RB7 re-run on the bake's collide: 1011 P rows -> 970 pieces swapped in Studio (old in RB_OldP7.PBoxes)",
   "terrain_scan": "MapBugScan copy (AREAS = 1536 x19..23 z21..26): 80 R boxes with terrain over carved; nearDecks applied (2347 stray voxel entries near Kabar Aye / Arzani decks)",
   "kit_walls": "Studio's YangonKitData was the OLD 14306-char decoder (no compact FORMAT=2: Data_P7 detail would not build!) -> synced to git 33827/69121963 (asset 115556805610024; old copy RB_OldP7.YangonKitData_old14306). Wall records on R in Data_P7 (expanded compact): 18 removed in 16 tiles (stored expanded), 0 left",
-  "saved": "v1476 after verge/pbox/terrain; then kit walls + KD saved (save timed out -> NotNeeded)"
- }
+  "saved": "v1476 after verge/pbox/terrain; then kit walls + KD saved (save timed out -> NotNeeded)",
+  "playtest": "PASS 19 Nov (store CityLegends_test -> back to CityLegends_v1, read in Edit after Stop): player car (TestDrive + TestThrottle 0.7, 9 s each) on R boxes gap 2.9-3.0: U Wisara 299 studs, Shwe Gone Dine #2 218, U Htaung Bo 164, Manawhari 159, Dhamma Seti 128, Arzani Street deck 122 (R/P), Kabar Aye flyover deck both ways 287/299 (D boxes); 28/28 NPC on road boxes (26 moving), 7/7 y1_ fast-travel spots on R (y1_sule 4.0 over its box, outside P7, as before); no script errors (CDN 502/503, EditableMesh budget, asset-fork noise only). First Play hit the ChauffeurRoute.graph script timeout with the 797 lanes (server Main stopped, no car): fixed (yield on os.clock every 30 ms; src/shared/ChauffeurRoute.lua + Studio, hash 420222808). Minimap tiles first uploaded as Decal ids ('Asset type does not match'): re-uploaded as Image (imports/sync/minimap_1to1/ids_P7_images.txt), YangonMapArt synced (3686 / 2097737906).",
+  "shots": "vault City Legends/2026-11-18 rebuild P7 - {Shwedagon hill (before = copy place 16 Nov, after), U Wisara Road - after, Kabar Aye flyover - after}.jpg",
+  "backup_deleted": true,
+  "ramps": "none added: P7 landmarks (Shwedagon on its 172 pad, Maha Wizaya plaza) have no car-park ramp mouths in the data; not checked by driving up",
+  "open": [
+   "Shwedagon / Maha Wizaya car access (real terrace car parks) not built",
+   "11x11 export log had one MOUTH FAILED (not located)",
+   "x19 z22..25 and x23 z22..25 cells hold only P7 roads: P6 / P8 must re-bake them whole (clip P7+P6 / P7+P8)"
+  ]
+ },
+ "next_district": "P4 (Hledan, Kamayut): 3072 x7..9 z5..10 / 1536 x14..18 z11..21; seam cells x18 (P1/P2) rebuild whole like P7 (subset R05_GROW, subset.json boxes P4+P1+P2)"
 }

@@ -50,6 +50,29 @@
 - **(d) Kerb overlaps:** `roads05_kerb_cross.py <tag>` (kerb pieces crossing > 25 deg, >= 30% overlap, after drop_scraps) lists
   clusters; not fixed in the builder this pass (see vault note).
 
+## REBUILD P7 (19 Nov, DISTRICT REBUILD agent): Shwedagon / Maha Wizaya / People's Park / Bahan IN, Play-tested, saved v1479
+State: `rebuild_progress.json` "P7". Order used (it works; copy it for P4, P6, P8):
+1. **District re-clear vs J37:** `district_files.sh P7 --no-roads buildings` (buildings 3,573, 159 dropped / 905 clipped by roads; old files
+   `build/city_1to1/_pre_rebuild_P7`) -> POST the 3 place packs + night cells as NEW Models (ids in `districts_assets.txt` "P7J").
+2. **Move first, roads after** (stepCell writes the road beds over the district terrain): `DistrictPlace` (load, kit(nil, cells), terrain,
+   green with `Green.Far` renamed Far_keep and merged back, shells, pagodas, cleanup). Delete `Shwedagon_Hill_TEMP`, `MahaWizayaPlate_TEMP`
+   and the district's old pagodas first. **Trap:** Studio's `ClaudeTools.PagodaPlace` is the landmarks3d one; the rows tool DistrictPlace
+   needs is now `ClaudeTools.PagodaPlaceRows` (rename it to PagodaPlace for the `pagodas()` call, then back).
+3. **Seam cells rebuilt whole:** `R05_GROW=1700 roads05_subset.py <net> RB7 P7` (1,279 roads), then subset.json boxes = P7 + P1 + P3 so the
+   1536 rows shared with P1 (z21) and P3 (z26) bake complete; step boxes: 3072 columns x9..11, rows z 32256..33792 / z11 / z12 /
+   39936..41472 (labels <x>x10 .. <x>x13). Swap = every Cell_ and box (by centre) in 1536 x19..23 z21..26.
+4. **Don't PATCH 133014134133489 for data:** another agent's script sync replaced it between my PATCH and LoadAsset. POST a new Model per pack.
+5. **Slice grabbing (180 calls) and asset uploads went to helper subagents** (keeps the main context free).
+6. After the swap: `roads05_pbox_clip.py RB7 <collide> <out>` (1,011 -> 970 P boxes; MAP BUGS rule), MapBugScan copy with AREAS = the
+   district (80 R boxes with terrain over, near-deck strays), RoadVerge05 + trim per 3072 tile, KF on Data_P7G, wall records of the
+   compact Data_P7 (expanded with KD.expand: 18 removed).
+7. **Studio's YangonKitData was the old 14,306-char decoder** (no FORMAT=2): compact districts (P4-P12) show no building detail without
+   git's 33,827 one: synced (69121963).
+8. Lanes `roads05_lanesubset.py <net> L1237 P1 P2 P3 P7` -> `roads05_lanes.py L1237 --install` (797 lanes, 0 dead ends, 12 modules).
+   **ChauffeurRoute.graph timed out with them** (no spawn): now yields on time (30 ms).
+9. Minimap: FULL += P7, only the tiles over P7 re-uploaded, as **Image** (a Decal id fails: "Asset type does not match").
+10. Play test: player attribute `TestDrive` = true is needed for TestThrottle; the car is held ~3.5 s after a TestTeleport.
+
 ## REBUILD progress 3 (18 Nov night, ROAD REBUILD agent 3): P3 SWAPPED, cleaned, Play-tested; verge P1-P3; kit data synced
 State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp", "verge", "kit_sync").
 - **Export:** 13x13 / 13x14 / 13x15 slices pulled from `_G.RB3` (34 / 29 / 22 pages): all 15 P3 cells on disk. `roads05_grab.py` now
