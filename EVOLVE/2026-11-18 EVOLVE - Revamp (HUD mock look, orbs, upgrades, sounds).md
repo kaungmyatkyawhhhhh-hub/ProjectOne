@@ -70,6 +70,28 @@ The 100-stage ladder is unchanged, so pacing stays the same. At three forks you 
 
 **Backup:** `ServerStorage.Evolution_backup_before_tree`.
 
+## Curiosity hooks (owner: "bring in as much curiosity as possible")
+- **Locked Index tiles say where to look.** A forked species shows "??? / River path", so kids can see that other paths exist and come back to try them.
+- **Secrets section** (8 entries, `X:` in Index): each shows only a riddle clue until found. Finding one gives a pink "SECRET FOUND: … +N DNA" toast (priority 10, plays the news sound) and 2 minutes of DNA. Saved as `SECRETS` in the server script.
+
+| Secret | Clue |
+|---|---|
+| Golden Monkey | A monkey that grabs gold |
+| Giant Ape | An ape born a giant |
+| Tiny Titan | Very small, very far in the future |
+| Mutant King | Born with 3 mutations |
+| Survivor | Get sick 5 times |
+| Orb Hoarder | Grab 200 DNA orbs (new `d.Orbs` counter) |
+| Path Walker | Live in forest, grass AND river |
+| Time Traveler | Start over 3 times |
+
+**Tested in Play:** Golden Monkey was found on a golden orb, the toast showed, and the Index read Secrets 1/8. Place saved as v25.
+
+**Next curiosity ideas, not built yet:**
+- per-path portraits;
+- a "what's at the end?" teaser on the fork cards;
+- secrets that change your body, not just the Index.
+
 ## Growth teleport bug fixed
 "When I get taller, I teleport back to the place I was 0.5 seconds ago." The cause was the server's `Model:ScaleTo`, which re-pivots at the lagging server position.
 

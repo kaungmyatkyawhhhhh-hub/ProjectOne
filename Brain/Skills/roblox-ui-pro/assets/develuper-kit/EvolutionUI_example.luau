@@ -416,10 +416,10 @@ refreshRobux()
 local diet = window("Diet", "Diet", "diet")
 local DIETS = {
 	{ id = "Fruit", info = "Shorter kids. Risk: malnutrition", unlock = "Monkey" },
-	{ id = "Meat", info = "Taller kids. Risk: parasites", unlock = "Gibbon" },
+	{ id = "Meat", info = "Taller kids. Risk: parasites", unlock = "stage 9" },
 	{ id = "Cooked", info = "Tallest kids. Low risk", unlock = "Homo erectus" },
 	{ id = "Farmed", info = "Tall kids. Safest", unlock = "Farmer" },
-	{ id = "Synthetic", info = "Giant kids. Risk: nanobot glitch", unlock = "Cyborg" },
+	{ id = "Synthetic", info = "Giant kids. Risk: nanobot glitch", unlock = "stage 61" },
 }
 local dietList = vscroll(diet.Content)
 local dietRows = {}
@@ -466,10 +466,67 @@ local speciesList = entries("AllSpecies", ",", "S:", Color3.fromRGB(150, 230, 11
 for i, g in (remotes:GetAttribute("SpeciesGroups") or ""):split(",") do
 	if speciesList[i] then speciesList[i].g = math.clamp(tonumber(g) or 1, 1, 12) end
 end
+for i, p in (remotes:GetAttribute("SpeciesPaths") or ""):split(",") do -- locked tiles say which path to try
+	if speciesList[i] and p ~= "" then speciesList[i].path = p end
+end
+local secretList = entries("AllSecrets", ";", "X:", Color3.fromRGB(255, 120, 220))
+for _, e in secretList do e.secret = true end
 section(1, "Species", speciesList, 4)
 section(2, "Mutations", entries("AllTraits", ",", "T:", Color3.fromRGB(205, 150, 255)), 4)
 section(3, "Diseases", entries("AllDiseases", ",", "D:", Color3.fromRGB(255, 130, 110)), 4)
 section(4, "Badges", entries("AllBadges", ";", "B:", GOLD), 2)
+section(5, "Secrets", secretList, 2) -- riddle clues only, until found
+
+---------------------------------------------------------------- Path picker: the forks of the evolution tree
+-- Opens by itself (once per life) while you can pick, never over another window or the evolve banner.
+local FORKS = {}
+pcall(function() FORKS = game:GetService("HttpService"):JSONDecode(remotes:GetAttribute("Forks") or "[]") end)
+local pathWin = window("Path", "Pick a path", "chevron")
+local pathTitle = label(pathWin.Content, "", 18, { Size = UDim2.new(1, 0, 0, 26), TextColor3 = GOLD, ZIndex = 5 })
+local pathList = hscroll(pathWin.Content, { Position = UDim2.fromOffset(0, 32), Size = UDim2.new(1, 0, 1, -32) })
+pathList:FindFirstChildOfClass("UIListLayout").HorizontalAlignment = Enum.HorizontalAlignment.Center
+local LANE_FRAMES = { "cardGreen", "cardCyan", "cardPurple" }
+local function showFork(id)
+	for _, c in pathList:GetChildren() do
+		if c:IsA("GuiObject") then c:Destroy() end
+	end
+	for _, f in FORKS do
+		if f.id == id then
+			pathTitle.Text = f.title
+			for i, l in f.lanes do
+				local c = card(pathList, i, LANE_FRAMES[i] or "cardGreen", "port" .. l.g, l.name, l.info .. "\nFirst: " .. l.first, function()
+					remotes.ChooseFork:FireServer(id, l.key)
+					pathWin.Close()
+				end)
+				c.Art.Size = UDim2.fromOffset(64, 70)
+				c.Buy.SetEnabled(true, "Pick!")
+			end
+		end
+	end
+end
+local function openPath()
+	local id = player:GetAttribute("ForkPending") or ""
+	if id == "" then return false end
+	showFork(id)
+	pathWin.Open()
+	return true
+end
+local evoTap = new("TextButton", { Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 6, Visible = false }, evoRow)
+evoTap.Activated:Connect(openPath)
+local pathShownFor
+player:GetAttributeChangedSignal("Gen"):Connect(function() pathShownFor = nil end)
+task.spawn(function()
+	while true do
+		task.wait(1.5)
+		local id = player:GetAttribute("ForkPending") or ""
+		if id ~= "" and pathShownFor ~= id and not openName and not news.banner then
+			pathShownFor = id
+			openPath()
+		elseif id == "" and openName == "Path" then
+			pathWin.Close()
+		end
+	end
+end)
 
 ---------------------------------------------------------------- refresh (on attribute change, not every frame)
 refresh = function()
@@ -478,7 +535,10 @@ refresh = function()
 	title.Text = ('%s · <font color="#FFD23F">Gen %d</font>'):format(a.Species, a.Gen)
 	local pk = ART[portraitKey(a.Portrait)]
 	portrait.Image, portrait.ImageRectOffset, portrait.ImageRectSize = uri(pk), Vector2.new(pk.rect[1], pk.rect[2]), Vector2.new(pk.rect[3], pk.rect[4])
-	if a.NextSpecies == "" then
+	evoTap.Visible = (a.ForkPending or "") ~= ""
+	if evoTap.Visible then
+		evoText.Text = 'Next: <font color="#FFD23F">tap to pick a path!</font>'
+	elseif a.NextSpecies == "" then
 		evoText.Text = "Fully evolved!"
 	else
 		evoText.Text = ('Next: %s   <font color="#5CF2FF">%d/%d</font>'):format(a.NextSpecies, a.Evo, a.NextAt)
@@ -526,7 +586,11 @@ refresh = function()
 		for _, e in sec.tiles do
 			local got = if e.key:sub(1, 2) == "B:" then has(a.Badges, e.name) else has(a.Index, e.key)
 			if got then found += 1 end
-			e.label.Text = if e.desc then e.name .. "\n" .. e.desc else (got and e.name or "???")
+			e.label.Text = if e.secret then (got and e.name or "???") .. "\n" .. e.desc
+				elseif e.desc then e.name .. "\n" .. e.desc
+				elseif got then e.name
+				elseif e.path then "???\n" .. e.path .. " path"
+				else "???"
 			e.label.TextColor3 = got and e.color or MUTED
 			if e.port then e.port.ImageColor3, e.port.ImageTransparency = got and Color3.new(1, 1, 1) or Color3.fromRGB(50, 60, 100), 0 end -- locked: navy shadow, face just visible
 		end
@@ -553,6 +617,8 @@ local toastRoot = scaledRoot(toastGui)
 local STYLES = {
 	{ find = "asteroid", priority = 10, color = Color3.fromRGB(255, 130, 110), hold = 3.5 },
 	{ find = "evolved", priority = 10, color = GOLD, hold = 3.5 },
+	{ find = "path", priority = 9, color = GOLD, hold = 3 },
+	{ find = "SECRET", priority = 10, color = Color3.fromRGB(255, 120, 220), hold = 4 },
 	{ find = "Badge", priority = 9, color = GOLD, hold = 3 },
 	{ find = "Thank you", priority = 9, color = DNA_C, hold = 3 },
 	{ find = "Daily streak", priority = 8, color = DNA_C, hold = 3 },
@@ -615,7 +681,7 @@ remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stag
 	img(b, portraitKey(group), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
 	label(b, "EVOLVED!", 30, { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 36), TextColor3 = GOLD, ZIndex = 22 })
 	label(b, speciesName, 22, { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 28), ZIndex = 22, TextTruncate = Enum.TextTruncate.AtEnd })
-	label(b, ("Species %d / %d"):format(stage, total), 14, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 20), TextColor3 = DNA_C, ZIndex = 22 })
+	label(b, ("Stage %d / %d"):format(stage, total), 14, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 20), TextColor3 = DNA_C, ZIndex = 22 })
 	local sc = new("UIScale", { Scale = 0.6 }, b)
 	TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Scale = 0.85 }):Play() -- lower third, off the character: it fires most lives early on
 	task.delay(math.max(3, #speciesName:split(" ") / 1.2 + 2), function() -- 2 words of title + the name, slowest 7-year-old
