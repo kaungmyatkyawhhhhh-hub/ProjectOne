@@ -1,27 +1,33 @@
 --[[
 	Jobs (server; owner approved 18 Nov 2026: "job ranks + paychecks", Southwest Florida style)
 	Numbers in Config.Jobs, sums in shared/JobRules.lua, screens in client/JobsClient.lua.
-	  * the Job Center kiosk on Myanmar Plaza's forecourt: pick or quit a job there (quit anywhere)
+	  * (19 Nov, owner: "like roblox southwest florida") pick or quit a job anywhere, from the main menu's
+	    JOBS tab (the Job Center kiosk on Myanmar Plaza's forecourt opens that tab too); the job shows over
+	    your head and car ("YBS Bus Driver · R2"); field jobs get a job vehicle (shared/JobsData.lua)
 	  * active jobs (delivery, taxi, YBS bus, traffic police): on duty while you do the job; pay per
 	    stop / fare / patrol point / ticket, plus a small paycheck every PaycheckSeconds on duty.
 	    Delivery is the old dispatch-ring job (Activities.lua calls Jobs.task when one is done)
-	  * posts (tea shop, fuel station, dealership, mall shop): stand at the post; a paycheck every
-	    PaycheckSeconds, for at most PostCapSeconds a day
+	  * posts (tea shop, fuel station, dealership, mall shop): AFK jobs: stand at the post; a paycheck every
+	    PaycheckSeconds, no daily cap; a "Still on shift?" check every JobsData.ShiftCheck; a serve prompt
+	    at the post for tips; auto-rejoin before the 20-minute idle kick (see rejoin below)
 	  * 5 ranks per job from job XP (duty minutes + tasks), saved per job in profile.Activities.jobs
 	Everything is decided here: the client only asks ("take", "quit", "arrive") and shows.
 	Remotes: JobCall (RemoteFunction), JobPush (RemoteEvent: state, paid, task, promoted, open, ticketed).
 	Studio test hooks (server player attributes, Studio only): TestDoublePay = true, TestJobXp = n (adds n XP
-	to the current job once), TestPaycheckSeconds = n (a shorter paycheck).
+	to the current job once), TestPaycheckSeconds = n (a shorter paycheck), TestShiftSeconds = n (a shorter shift check),
+TestRejoin = true (the idle rejoin without the teleport: saves, builds the teleport data, restores it).
 ]]
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local ActivityData = require(Shared:WaitForChild("ActivityData"))
 local JobRules = require(Shared:WaitForChild("JobRules"))
+local JD = require(Shared:WaitForChild("JobsData"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local J = Config.Jobs
@@ -30,7 +36,8 @@ local GOLD = Config.Theme.Accent2
 local Jobs = {}
 
 type Task = { kind: string, pos: Vector3, name: string, from: Vector3, t0: number, stop: number? }
-type Live = { duty: number, task: Task?, lastTask: number, lastCall: number, tickets: { [Player]: number }, pushAt: number }
+type Live = { duty: number, task: Task?, lastTask: number, lastCall: number, tickets: { [Player]: number }, pushAt: number, onDuty: boolean?,
+	shift: number, askAt: number?, asleep: boolean?, serveAt: number, vehAt: number, rejoining: boolean? }
 local live: { [Player]: Live } = {}
 local ctx: any
 local Push: RemoteEvent
@@ -43,7 +50,7 @@ end
 local function L(player: Player): Live
 	local s = live[player]
 	if not s then
-		s = { duty = 0, task = nil, lastTask = os.clock(), lastCall = 0, tickets = {}, pushAt = 0 }
+		s = { duty = 0, task = nil, lastTask = os.clock(), lastCall = 0, tickets = {}, pushAt = 0, shift = 0, serveAt = 0, vehAt = 0 }
 		live[player] = s
 	end
 	return s
@@ -122,7 +129,6 @@ local function stateOf(player: Player): { [string]: any }
 	for _, job in J.List do
 		st.ranks[job.id] = (JobRules.rank(J, s.xp[job.id] or 0))
 	end
-	st.postLeft = JobRules.postLeft(J, s, os.time())
 	local job = JobRules.byId(J, s.cur)
 	if job then
 		local r, into, span = JobRules.rank(J, s.xp[job.id] or 0)
@@ -134,6 +140,9 @@ local function stateOf(player: Player): { [string]: any }
 		st.paycheck = JobRules.paycheck(J, job, r, st.double)
 		st.payIn = math.max(0, Jobs.paySeconds(player) - lv.duty)
 		st.onDuty = lv.onDuty == true
+		st.ask = lv.askAt ~= nil
+		st.asleep = lv.asleep == true
+		st.vehicle = JD.Vehicles[job.id] ~= nil
 		local t = lv.task
 		if t then
 			st.task = { kind = t.kind, pos = t.pos, name = t.name }
@@ -411,19 +420,33 @@ handlers.state = function(player)
 	return stateOf(player)
 end
 
+-- the job vehicle goes when you quit or change job: back into your own car if you were driving it
+local function dropJobCar(player: Player, keep: string?)
+	local car = ctx.getCar(player)
+	local id = car and car:GetAttribute("JobCar")
+	if not id or id == keep then
+		return
+	end
+	local profile = PlayerData.get(player) :: any
+	local back = profile and (if profile.Owned[profile.Selected] then profile.Selected else next(profile.Owned))
+	if back and not player.Character then
+		ctx.spawnCar(player, back)
+	else
+		ctx.despawn(player)
+	end
+end
+
 handlers.take = function(player, id)
 	local s = saved(player)
 	local job = JobRules.byId(J, id)
 	if not (s and job) then
 		return { ok = false }
 	end
-	local pos = where(player)
-	if not pos or flat(pos, J.Center.Position) > J.CenterRange then
-		return { ok = false, message = "Take jobs at the Job Center (Myanmar Plaza)" }
-	end
+	-- (19 Nov: from anywhere, like Southwest Florida's team change)
+	dropJobCar(player, job.id)
 	s.cur = job.id
 	local lv = L(player)
-	lv.duty, lv.lastTask = 0, os.clock()
+	lv.duty, lv.lastTask, lv.shift, lv.askAt, lv.asleep = 0, os.clock(), 0, nil, false
 	lv.task = newTask(player, job.id, nil)
 	task.spawn(PlayerData.save, player)
 	pushState(player)
@@ -437,24 +460,253 @@ handlers.quit = function(player)
 	end
 	s.cur = nil
 	local lv = L(player)
-	lv.task, lv.duty, lv.onDuty = nil, 0, false
+	lv.task, lv.duty, lv.onDuty, lv.shift, lv.askAt, lv.asleep = nil, 0, false, 0, nil, false
+	dropJobCar(player)
 	pushState(player)
 	return { ok = true, state = stateOf(player) }
 end
 
 handlers.arrive = arrive
 
+-- the job vehicle (field jobs): spawned in front of you, or swapped in where your car is
+handlers.vehicle = function(player)
+	local s = saved(player)
+	local v = s and JD.Vehicles[s.cur]
+	local lv = L(player)
+	if not v then
+		return { ok = false, message = "This job has no vehicle" }
+	end
+	if os.clock() - lv.vehAt < JD.VehicleCooldown then
+		return { ok = false, message = "One moment..." }
+	end
+	if ((player:GetAttribute("Wanted") :: number?) or 0) > 0 then
+		return { ok = false, message = "Not while the police want you" }
+	end
+	lv.vehAt = os.clock()
+	-- (stolen: the skips a car that isn't yours gets: no wear, fuel or parts on your save)
+	ctx.spawnCar(player, v.car, { stolen = true, job = s.cur, look = v.look })
+	return { ok = true }
+end
+
+-- a post's serve prompt (tea, a tank, a buyer, a shopper): a tip and XP for the job holder on duty there
+local function serve(player: Player, jobId: string)
+	local s = saved(player)
+	local lv = L(player)
+	local job = s and JobRules.byId(J, s.cur)
+	if not (job and job.id == jobId and lv.onDuty) then
+		push(player, { kind = "toast", text = if job and job.id == jobId then "Stand at your post first" else "Only on this job (JOBS in the menu)" })
+		return
+	end
+	if os.clock() - lv.serveAt < JD.ServeCooldown then
+		push(player, { kind = "toast", text = "Next customer in " .. math.ceil(JD.ServeCooldown - (os.clock() - lv.serveAt)) .. " s" })
+		return
+	end
+	lv.serveAt = os.clock()
+	local r = JobRules.rank(J, s.xp[job.id] or 0)
+	local tip = JD.ServeTip
+	local who = "a customer"
+	-- the fuel post: a real player's car stopped at the pumps is a customer (double tip, full tank for them)
+	if JD.Serve[jobId] and JD.Serve[jobId].car then
+		for _, other in Players:GetPlayers() do
+			local car = if other ~= player then ctx.getCar(other) else nil
+			if car and car.PrimaryPart and flat(car.PrimaryPart.Position, job.post) < JD.ServeCarRange and car.PrimaryPart.AssemblyLinearVelocity.Magnitude < 3 then
+				tip *= 2
+				who = other.DisplayName
+				local c = ctx.care and ctx.care.record(other, car:GetAttribute("CarId"))
+				if c then
+					c.f = 1
+				end
+				push(other, { kind = "toast", text = player.DisplayName .. " filled your tank: on the house" })
+				break
+			end
+		end
+	end
+	local cash = pay(player, math.floor(tip * JobRules.mult(J, r, double(player)) + 0.5))
+	addXp(player, s, job, JD.ServeXp)
+	ctx.note(player, "jobtasks", 1)
+	push(player, { kind = "task", what = string.upper(JD.Serve[jobId].action), name = "Tip from " .. who, cash = cash })
+end
+
+local function buildServePrompts()
+	for _, job in J.List do
+		local sv = JD.Serve[job.id]
+		if job.kind == "post" and sv then
+			local p = part(workspace, Vector3.new(1, 1, 1), CFrame.new(job.post + Vector3.new(0, 3, 0)), GOLD, Enum.Material.SmoothPlastic, { Transparency = 1, CanCollide = false, CanQuery = false, CanTouch = false, Name = "JobServe_" .. job.id })
+			local prompt = Instance.new("ProximityPrompt")
+			prompt.ActionText = sv.action
+			prompt.ObjectText = sv.object
+			prompt.KeyboardKeyCode = Enum.KeyCode.E
+			prompt.HoldDuration = 0.6
+			prompt.MaxActivationDistance = J.PostRadius
+			prompt.RequiresLineOfSight = false
+			prompt.Parent = p
+			prompt.Triggered:Connect(function(who: Player)
+				serve(who, job.id)
+			end)
+		end
+	end
+end
+
+---------------------------------------------------------------------
+-- Auto-rejoin before Roblox's 20-minute idle kick (owner approved 19 Nov; design of 17 Nov).
+-- NOT officially approved by Roblox: watch moderation. Only a player on duty at a post: the client
+-- reports Players.LocalPlayer.Idled; the server saves, then teleports to this same server (any
+-- server if that fails) with the job in the teleport data; on arrival they stand at their post, on duty.
+-- (the car is not brought back: getting into a car takes you off your feet; the garage has it)
+---------------------------------------------------------------------
+local OnFoot: any = nil
+
+local function restore(player: Player, d: any): boolean
+	if type(d) ~= "table" or d.v ~= 1 or type(d.at) ~= "number" or math.abs(os.time() - d.at) > JD.RejoinMaxAge then
+		return false
+	end
+	local s = nil
+	local deadline = os.clock() + 30
+	repeat
+		s = saved(player)
+		if not s then
+			task.wait(0.5)
+		end
+	until s or os.clock() > deadline or not player.Parent
+	local job = s and JobRules.byId(J, s.cur)
+	-- (teleport data passes through the client: only the job already on the save counts)
+	if not (job and job.kind == "post" and job.id == d.job) then
+		return false
+	end
+	local lv = L(player)
+	lv.shift = math.clamp(tonumber(d.shift) or 0, 0, JD.ShiftCheck)
+	lv.duty, lv.askAt, lv.asleep = 0, nil, false
+	if OnFoot and OnFoot.standUp then
+		OnFoot.standUp(player, CFrame.new(job.post + Vector3.new(0, 3, 0)))
+	end
+	player:SetAttribute("JobRejoined", true) -- (Main.client: menu shut, on-foot HUD)
+	pushState(player)
+	return true
+end
+
+local function rejoinData(player: Player): any
+	local s = saved(player)
+	local car = ctx.getCar(player)
+	return { v = 1, job = s and s.cur, shift = L(player).shift, at = os.time(), car = car and car:GetAttribute("CarId") }
+end
+
+handlers.idle = function(player, seconds)
+	local s = saved(player)
+	local job = s and JobRules.byId(J, s.cur)
+	local lv = L(player)
+	local test = RunService:IsStudio() and player:GetAttribute("TestRejoin") == true
+	if not test and (type(seconds) ~= "number" or seconds < JD.RejoinIdle) then
+		return { ok = false }
+	end
+	if not (job and job.kind == "post" and lv.onDuty) or lv.rejoining then
+		return { ok = false }
+	end
+	lv.rejoining = true
+	PlayerData.save(player)
+	local data = rejoinData(player)
+	if test then
+		player:SetAttribute("TestRejoin", nil)
+		lv.rejoining = false
+		local ok = restore(player, data) -- (Studio has no TeleportService: the restore path only)
+		return { ok = ok, test = true }
+	end
+	task.spawn(function()
+		for try = 1, JD.RejoinTries do
+			local ok, err = pcall(function()
+				local opts = Instance.new("TeleportOptions")
+				if try < JD.RejoinTries then
+					opts.ServerInstanceId = game.JobId -- (this same server; the last try: any server)
+				end
+				opts:SetTeleportData(data)
+				TeleportService:TeleportAsync(game.PlaceId, { player }, opts)
+			end)
+			if ok then
+				return
+			end
+			warn("[CityLegends] Jobs rejoin try " .. try .. " failed:", err)
+			task.wait(3)
+		end
+		lv.rejoining = false
+	end)
+	return { ok = true }
+end
+
+-- "Still on shift?": KEEP WORKING
+handlers.keep = function(player)
+	local lv = L(player)
+	lv.shift, lv.askAt, lv.asleep = 0, nil, false
+	pushState(player)
+	return { ok = true }
+end
+
 ---------------------------------------------------------------------
 -- The duty clock (once a second): paychecks, duty XP, post caps, police tickets
 ---------------------------------------------------------------------
+local function shiftSeconds(player: Player): number
+	local t = if RunService:IsStudio() then player:GetAttribute("TestShiftSeconds") else nil
+	return if type(t) == "number" and t >= 5 then t else JD.ShiftCheck
+end
+
+-- the job over your head and over your car ("YBS Bus Driver · R2"); nil takes it off
+local function tagOn(part: BasePart?, text: string?, hideFrom: Player?, up: number)
+	if not part then
+		return
+	end
+	local bb = part:FindFirstChild("JobTag") :: BillboardGui?
+	if not text then
+		if bb then
+			bb:Destroy()
+		end
+		return
+	end
+	if not bb then
+		local b = Instance.new("BillboardGui")
+		b.Name = "JobTag"
+		b.Size = UDim2.fromScale(4.2, 0.6)
+		b.StudsOffset = Vector3.new(0, up, 0)
+		b.MaxDistance = 140
+		b.LightInfluence = 0
+		b.PlayerToHideFrom = hideFrom
+		local l = Instance.new("TextLabel")
+		l.Name = "Text"
+		l.BackgroundTransparency = 1
+		l.Size = UDim2.fromScale(1, 1)
+		l.Font = Enum.Font.GothamBlack
+		l.TextScaled = true
+		l.TextColor3 = GOLD
+		l.TextStrokeColor3 = Color3.new(0, 0, 0)
+		l.TextStrokeTransparency = 0.35
+		l.Parent = b
+		b.Parent = part
+		bb = b
+	end
+	local l = (bb :: BillboardGui):FindFirstChild("Text") :: TextLabel
+	if l.Text ~= text then
+		l.Text = text
+	end
+end
+
+local function tags(player: Player, text: string?)
+	player:SetAttribute("JobTag", text)
+	local head = player.Character and player.Character:FindFirstChild("Head") :: BasePart?
+	tagOn(head, text, nil, 4.7) -- (over the VIP tag at 3.9)
+	local car = ctx.getCar(player)
+	if car and car.PrimaryPart then
+		local h = (car:GetAttribute("Height") :: number?) or 5
+		tagOn(car.PrimaryPart, text, player, h * 0.5 + 3) -- (not for the driver: it sits in their view)
+	end
+end
+
 local function tick(player: Player)
 	local s = saved(player)
 	local job = s and JobRules.byId(J, s.cur)
 	local lv = L(player)
 	if not (s and job) then
 		lv.onDuty = false
+		tags(player, nil)
 		return
 	end
+	tags(player, job.name .. " · R" .. tostring((JobRules.rank(J, s.xp[job.id] or 0))))
 	-- Studio: the XP hook
 	if RunService:IsStudio() then
 		local add = player:GetAttribute("TestJobXp")
@@ -466,8 +718,24 @@ local function tick(player: Player)
 	local wanted = ((player:GetAttribute("Wanted") :: number?) or 0) > 0
 	local onDuty = false
 	if job.kind == "post" then
+		-- (19 Nov, owner: AFK posts like Southwest Florida) no daily cap; a soft "Still on shift?" check
 		local pos = where(player)
-		onDuty = pos ~= nil and flat(pos, job.post) <= J.PostRadius and math.abs(pos.Y - job.post.Y) < 14 and JobRules.postLeft(J, s, os.time()) > 0
+		local atPost = pos ~= nil and flat(pos, job.post) <= J.PostRadius and math.abs(pos.Y - job.post.Y) < 14
+		if not atPost then
+			lv.shift, lv.askAt, lv.asleep = 0, nil, false -- (walking off and back is not AFK)
+		end
+		onDuty = atPost and not lv.asleep
+		if onDuty then
+			lv.shift += 1
+			if not lv.askAt and lv.shift >= shiftSeconds(player) then
+				lv.askAt = os.clock()
+				push(player, { kind = "stillthere", seconds = JD.ShiftAnswer })
+				lv.pushAt = 0
+			elseif lv.askAt and os.clock() - lv.askAt > JD.ShiftAnswer then
+				lv.askAt, lv.asleep, onDuty = nil, true, false
+				push(player, { kind = "offshift" })
+			end
+		end
 	else
 		local root = carRoot(player)
 		if root and not lv.task and job.id ~= "delivery" then
@@ -503,9 +771,6 @@ local function tick(player: Player)
 	lv.onDuty = onDuty
 	if onDuty then
 		lv.duty += 1
-		if job.kind == "post" then
-			s.post += 1
-		end
 		addXp(player, s, job, J.DutyXpPerMinute / 60)
 		if lv.duty >= Jobs.paySeconds(player) then
 			lv.duty = 0
@@ -545,6 +810,21 @@ function Jobs.init(c: any)
 		return h(player, arg)
 	end
 	buildCenter()
+	buildServePrompts()
+	OnFoot = require(script.Parent:WaitForChild("OnFoot"))
+	-- back from the idle rejoin: at your post, on duty
+	local function joined(player: Player)
+		local ok, d = pcall(function()
+			return player:GetJoinData().TeleportData
+		end)
+		if ok and d then
+			task.spawn(restore, player, d)
+		end
+	end
+	Players.PlayerAdded:Connect(joined)
+	for _, player in Players:GetPlayers() do
+		joined(player)
+	end
 	Players.PlayerRemoving:Connect(function(player)
 		live[player] = nil
 		for _, lv in live do

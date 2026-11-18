@@ -50,6 +50,7 @@ UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (Chauffeu
 UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
+UI.onJobsButton = nil :: (() -> ())? -- (19 Nov) the main menu's JOBS tab (Main.client)
 UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
 UI.onMenuButton = nil :: (() -> ())? -- the main menu (MainMenu; the MENU button replaced SETTINGS, 2026-11-02)
 UI.onCashPlus = nil :: (() -> ())? -- the "+" on the cash pill: the main menu's STORE (2026-11-04)
@@ -810,6 +811,15 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 				end
 			end
 		end
+	elseif kind == "jobs" then
+		-- a briefcase (jobs): handle, case, clasp band
+		local handle = box(11, 3, 10, 7, 2)
+		handle.BackgroundTransparency = 1
+		new("UIStroke", { Color = col, Thickness = math.max(1.5, 3 * k), Parent = handle })
+		box(3, 9, 26, 19, 3)
+		local band = box(3, 16, 26, 2.4, 0)
+		band.BackgroundTransparency = 0.6
+		box(14, 14.5, 4, 5, 1)
 	elseif kind == "house" then
 		-- a house: a pitched roof over a body with a door (housing)
 		box(2.5, 9, 17, 3.4, 1.7, -38) -- roof
@@ -1272,6 +1282,14 @@ local function buildSideButtons()
 		closePanels()
 		if UI.onHouseButton then
 			UI.onHouseButton()
+		end
+	end)
+	-- (19 Nov, owner: jobs like Southwest Florida) JOBS: the main menu's JOBS tab
+	local jobsBtn = sideButton("jobs", "JOBS", -1)
+	jobsBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onJobsButton then
+			UI.onJobsButton()
 		end
 	end)
 	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
