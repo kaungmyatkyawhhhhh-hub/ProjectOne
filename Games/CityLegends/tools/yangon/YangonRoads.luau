@@ -571,6 +571,54 @@ local function edgeAt(EL, cut, x: number, z: number): (number?, number)
 end
 M.edgeAt = edgeAt
 
+-- (J30, pave_gap) is (px, pz) on o's BUILT surface (carriageway + kerb + pavement)? The quads Roads.build lays from
+-- o's kept edges (Roads.debugEdges, bigger roads are built first) straight out along each sample's edge direction to
+-- o's walk on that side (Roads' pavement quad). A zone edge drawn with this lies exactly on o's pavement's outer edge;
+-- the plain polyDist reach (centre line, the wider side's walk) stood up to 0.5 off it and left slots between two
+-- roads' pavements. nil = o's edges are not built yet (keep the old test).
+local function onBuilt(o, k0: number, px: number, pz: number): boolean?
+	local E = M.Roads.debugEdges and M.Roads.debugEdges[o.name]
+	if not E then
+		return nil
+	end
+	local cut = M.cut[o.name]
+	for k = math.max(1, k0 - 3), math.min(o.n - 1, k0 + 2) do
+		if not (cut and (cut[k] or cut[k + 1])) then
+			local a, b = o.s[k], o.s[k + 1]
+			for _, sd in { { E.L, o.walkL }, { E.R, o.walkR } } do
+				local ea, eb = sd[1][k], sd[1][k + 1]
+				if ea and eb then
+					local SW = sd[2] or M.WALK
+					local la, lb = hyp(ea.X - a[1], ea.Z - a[3]), hyp(eb.X - b[1], eb.Z - b[3])
+					if la > 1e-6 and lb > 1e-6 then
+						local q = {
+							{ a[1], a[3] },
+							{ ea.X + (ea.X - a[1]) / la * SW, ea.Z + (ea.Z - a[3]) / la * SW },
+							{ eb.X + (eb.X - b[1]) / lb * SW, eb.Z + (eb.Z - b[3]) / lb * SW },
+							{ b[1], b[3] },
+						}
+						local pos, neg = false, false
+						for m = 1, 4 do
+							local u, v = q[m], q[m % 4 + 1]
+							local c = (v[1] - u[1]) * (pz - u[2]) - (v[2] - u[2]) * (px - u[1])
+							if c > 1e-9 then
+								pos = true
+							elseif c < -1e-9 then
+								neg = true
+							end
+						end
+						if not (pos and neg) then
+							return true
+						end
+					end
+				end
+			end
+		end
+	end
+	return false
+end
+M.onBuilt = onBuilt
+
 function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local px, pz = pos.X, pos.Z
 	-- a driveway mouth (fuel station entry / exit, roads05 data.driveways): no kerb across it
@@ -621,6 +669,11 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 		if what == "Kerb" and ow then
 			local b = M.near(px, pz, 3)[ow.index]
 			keep = not b or polyDist(ow, b[2], px, pz) > M.sideHalf(ow, b[2], px, pz) + M.KERB_W + 0.05
+		elseif ow then
+			-- (J30, pave_gap: Lane #3186 by Sule Pagoda Road) my pavement stays where the owner's built surface is not
+			-- (its zone ran past its pavement's outer edge: a 0.5 slot between the two pavements)
+			local b = M.near(px, pz, 3)[ow.index]
+			keep = b ~= nil and onBuilt(ow, b[2], px, pz) == false
 		end
 		if not keep then
 			return true
@@ -668,8 +721,12 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 		if o.rank < me.rank then
 			-- a bigger road: my kerb stops at its kerb, my pavement at its pavement's far edge
 			local reach = oh + (if what == "Kerb" then M.KERB_W else math.max(o.walkL or M.WALK, o.walkR or M.WALK))
-			if not mineOnly and polyDist(o, b[2], px, pz) < reach then
-				return true
+			if not mineOnly then
+				-- (J30, pave_gap) my pavement stops exactly on its built pavement's outer edge
+				local on = if what == "Kerb" then nil else onBuilt(o, b[2], px, pz)
+				if on == true or (on == nil and polyDist(o, b[2], px, pz) < reach) then
+					return true
+				end
 			end
 			-- (J11, Bahan nose: my corner on o was found on o's cut samples; my band past P lies on o's
 			-- carriageway there, which polyDist does not see behind the cut end: its plain centre line does)
@@ -961,6 +1018,7 @@ function M.buildMouth(m, folder: Instance)
 	assert(E, "buildMouth: no edges kept for " .. m.road)
 	local B: { Vector3 }, closed = {}, false
 	if m.ring then
+		M.useRing(m.ringR) -- (J30 state leak: the outline was the ring the last spot used)
 		B, closed = M.ringOuter(), true
 	else
 		local big = m.big
@@ -1728,19 +1786,41 @@ local function inCornerPoly(c, px: number, pz: number, tol: number): boolean
 end
 M.inCornerPoly = inCornerPoly
 
-function M.inCorner(px: number, pz: number): boolean
-	for _, c in cornersAt(px, pz) do
-		if inWedge(c, px, pz, c.rin, c.rout) and (c.ring or inCornerPoly(c, px, pz, 1.0)) then
-			return true
-		end
-	end
-	return false
-end
-
 -- a point on a corner's arc at fraction u (0 at TA, 1 at TB), radius rho, and its road height
 local function arcPoint(c, u: number, rho: number): (number, number)
 	local a = c.aA + c.sweep * u
 	return c.ox + rho * math.cos(a), c.oz + rho * math.sin(a)
+end
+-- (J30, pave_gap) past the corner pavement's inner edge: buildCorners' chords exactly (same bands), not the circle
+-- rin 0.3 inside it (another road's pavement cut on that circle left a 0.3 slot: Lane #3186 at Roundabout 4)
+local function pastInner(c, px: number, pz: number): boolean
+	local sw = math.abs(c.sweep)
+	if sw < 1e-9 then
+		return true
+	end
+	local nb = math.max(1, math.floor(sw * c.r / 3.2 + 0.5), math.ceil(sw / 0.35))
+	local f = (math.atan2(pz - c.oz, px - c.ox) - c.aA) % TAU
+	local u = math.clamp(if c.sweep >= 0 then f / sw else (TAU - f) / sw, 0, 1)
+	local q = math.min(nb - 1, math.floor(u * nb))
+	local u0, u1 = q / nb, (q + 1) / nb
+	local r0 = math.max(c.r - (c.wA + (c.wB - c.wA) * u0), 0)
+	local r1 = math.max(c.r - (c.wA + (c.wB - c.wA) * u1), 0)
+	if r0 < 1e-6 or r1 < 1e-6 then
+		return true
+	end
+	local ax, az = arcPoint(c, u0, r0)
+	local bx, bz = arcPoint(c, u1, r1)
+	local sO = cross2(bx - ax, bz - az, c.ox - ax, c.oz - az)
+	return sO * cross2(bx - ax, bz - az, px - ax, pz - az) <= 0
+end
+
+function M.inCorner(px: number, pz: number): boolean
+	for _, c in cornersAt(px, pz) do
+		if inWedge(c, px, pz, 0, c.rout) and pastInner(c, px, pz) and (c.ring or inCornerPoly(c, px, pz, 1.0)) then
+			return true
+		end
+	end
+	return false
 end
 
 -- the asphalt between the arc and P, the kerb and pavement along the arc, an edge line along it
@@ -4640,180 +4720,7 @@ function M.checkMainMain()
 	return table.concat(out, "\n")
 end
 
--- (J20) QA on the BUILT surface (block 2 + pave_step everywhere): a ray grid (step g) over [x0, x1] x [z0, z1] of
--- `root` (the built folder), top hit per cell. Spots are counted once per 4-stud cell:
---   box_hole     no surface, with asphalt ("Road") on 3+ of the 4 neighbours (a hole / slit in a junction box)
---   kerb_gap     asphalt next to a pavement or to nothing with no kerb between (fillet_no_kerb, flare_kerb_gap,
---                corner_pave_gap and road_gap edges all show as this)
---   road_step    two neighbouring asphalt cells more than STEP apart in height (a seam step / crack)
---   pave_step    two neighbouring pavement cells more than STEP apart (corner vs straight, inside a road)
---   buried       a kerb top under 0.3 over the asphalt next to it (a buried edge)
--- returns counts and the first few spots (x, z) of each
-local TOP_ORDER = { Kerb = 1, Pavement = 2, Road = 3 }
-function M.qaBuilt(root: Instance, x0: number, z0: number, x1: number, z1: number, g: number?, yTop: number?, margin: number?)
-	local G = g or 0.5
-	-- (J21) the test cell is clipped at its box (roads end square there) and decks of the subset end in the air: cells
-	-- within `margin` (20) of the box and a deck's open end next to nothing are not faults of the builder
-	local MG = math.floor((margin or 20) / G)
-	local deckCell = {}
-	local STEP = 0.1 + 0.19 * G -- (Roads' edge GRADE 0.19 per stud is a real slope, not a step)
-	local P = RaycastParams.new()
-	P.FilterType = Enum.RaycastFilterType.Include
-	P.FilterDescendantsInstances = { root }
-	local nx, nz = math.floor((x1 - x0) / G), math.floor((z1 - z0) / G)
-	local Y0 = yTop or 3000
-	local kind, hy, inst = {}, {}, {}
-	for i = 0, nx do
-		for j = 0, nz do
-			local r = workspace:Raycast(Vector3.new(x0 + i * G, Y0, z0 + j * G), Vector3.new(0, -Y0 - 500, 0), P)
-			-- (J21: a ray down a WedgePart's vertical slanted face hits it part way down: the "thin pavement wedges
-			-- 0.29-0.41 under their neighbours" of J20 were such grazes, not built steps. A hit on a side face is cast
-			-- again a hair off, up to 3 times)
-			local nudge = 0
-			while r and r.Normal.Y < 0.5 and nudge < 3 do
-				nudge += 1
-				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.04 * nudge, Y0, z0 + j * G + 0.03 * nudge), Vector3.new(0, -Y0 - 500, 0), P)
-			end
-			-- (J22: a ray exactly down the shared edge of two touching wedges can miss both: Roundabout 4's 48
-			-- "box holes" were nearly all such rays on whole-stud grid points. A miss is cast again 0.003 / 0.006 off;
-			-- a gap narrower than that cannot be seen)
-			for t = 1, 2 do
-				if r and r.Normal.Y >= 0.5 then
-					break
-				end
-				r = workspace:Raycast(Vector3.new(x0 + i * G + 0.003 * t, Y0, z0 + j * G + 0.002 * t), Vector3.new(0, -Y0 - 500, 0), P) or r
-			end
-			-- (J28, owner "0 everywhere": the same build counted ±1-3 per spot from run to run. Two tops in one plane
-			-- (an overlap) gave whichever part the engine's tree returned first: the top here is every part within 0.01
-			-- of the first hit, the one taken by a fixed order (Kerb, Pavement, Road, other), so a count is repeatable)
-			if r and r.Normal.Y >= 0.5 then
-				local ex = { r.Instance }
-				for _ = 1, 3 do
-					local P2 = RaycastParams.new()
-					P2.FilterType = Enum.RaycastFilterType.Exclude
-					P2.FilterDescendantsInstances = ex
-					local o = r.Position + Vector3.new(0, 0.011, 0)
-					local r2 = workspace:Raycast(o, Vector3.new(0, -0.022, 0), P2)
-					if not (r2 and r2.Normal.Y >= 0.5 and r2.Instance:IsDescendantOf(root)) then
-						break
-					end
-					if (TOP_ORDER[r2.Instance.Name] or 9) < (TOP_ORDER[r.Instance.Name] or 9) then
-						r = r2
-					end
-					table.insert(ex, r2.Instance)
-				end
-			end
-			local k = i * (nz + 1) + j
-			if r and r.Normal.Y < 0.5 then
-				-- (J23: only side faces here = the outer edge of a piece: the J22 retry took a pavement's 4.7-stud side
-				-- face as a "pavement 4.7 lower" (deck-spot pave_step 5 -> 35). An edge cell is no fault either way)
-				kind[k] = "Edge"
-			elseif r then
-				local n = r.Instance.Name
-				kind[k] = if n == "Road" or n == "Kerb" or n == "Pavement" then n else "Other"
-				hy[k] = r.Position.Y
-				inst[k] = r.Instance
-				deckCell[k] = M.deckHalf ~= nil and M.deckHalf[r.Instance.Parent.Name] ~= nil
-			else
-				kind[k] = "None"
-			end
-		end
-		if i % 20 == 0 then
-			task.wait()
-		end
-	end
-	local out, seen = {}, {}
-	M.qaLast = out
-	local function add(what: string, i: number, j: number)
-		local x, z = x0 + i * G, z0 + j * G
-		local key = what .. math.floor(x / 4) .. "," .. math.floor(z / 4)
-		if seen[key] then
-			return
-		end
-		seen[key] = true
-		out[what] = out[what] or { n = 0, at = {}, all = {} }
-		out[what].n += 1
-		table.insert(out[what].all, { x, z }) -- (J26: every spot, M.qaLast, for clustering by hand)
-		if #out[what].at < 12 then
-			table.insert(out[what].at, string.format("(%.0f, %.0f)", x, z))
-		end
-	end
-	local function K(i, j)
-		if i < 0 or j < 0 or i > nx or j > nz then
-			return nil
-		end
-		return i * (nz + 1) + j
-	end
-	-- (J23) a road's free end (no other road within its half + 2 of the end sample: an OSM dead end) meets the ground,
-	-- not a kerb: asphalt next to nothing there is no kerb_gap
-	local freeC = {}
-	local function freeEnd(inst: Instance?, x: number, z: number): boolean
-		local o = inst and inst.Parent and M.R[inst.Parent.Name]
-		if not o then
-			return false
-		end
-		for _, e in { o.s[1], o.s[o.n] } do
-			if hyp(e[1] - x, e[3] - z) < o.half + 4 then
-				local key = o.name .. e[1]
-				if freeC[key] == nil then
-					freeC[key] = true
-					for oi, b in M.near(e[1], e[3], 2) do
-						local q = M.list[oi]
-						if q ~= o and polyDist(q, b[2], e[1], e[3]) < M.sideHalf(q, b[2], e[1], e[3]) + 2 then
-							freeC[key] = false
-							break
-						end
-					end
-				end
-				if freeC[key] then
-					return true
-				end
-			end
-		end
-		return false
-	end
-	for i = math.max(1, MG), math.min(nx - 1, nx - MG) do
-		for j = math.max(1, MG), math.min(nz - 1, nz - MG) do
-			local k = K(i, j) :: number
-			local a = kind[k]
-			local nb = { K(i + 1, j), K(i - 1, j), K(i, j + 1), K(i, j - 1) }
-			if a == "None" then
-				local c = 0
-				for _, q in nb do
-					if kind[q] == "Road" then
-						c += 1
-					end
-				end
-				if c >= 3 then
-					add("box_hole", i, j)
-				end
-			end
-			for d, q in { K(i + 1, j), K(i, j + 1) } do
-				local b = kind[q]
-				if (a == "Road" and b == "None" and deckCell[k]) or (b == "Road" and a == "None" and deckCell[q]) then
-					-- (a deck's open end in the test subset)
-				elseif (a == "Road" and b == "None" and freeEnd(inst[k], x0 + i * G, z0 + j * G)) or (b == "Road" and a == "None" and freeEnd(inst[q], x0 + i * G, z0 + j * G)) then
-					-- (a dead end)
-				elseif (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
-					add("kerb_gap", i, j)
-				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > STEP then
-					add("road_step", i, j)
-				elseif a == "Pavement" and b == "Pavement" and math.abs(hy[k] - hy[q]) > STEP then
-					add("pave_step", i, j)
-				elseif (a == "Kerb" and b == "Road" and hy[k] - hy[q] < 0.3) or (b == "Kerb" and a == "Road" and hy[q] - hy[k] < 0.3) then
-					add("buried", i, j)
-				end
-			end
-		end
-	end
-	local t = {}
-	for _, w in { "box_hole", "kerb_gap", "road_step", "pave_step", "buried" } do
-		local o = out[w]
-		table.insert(t, string.format("%s %d%s", w, if o then o.n else 0, if o then " " .. table.concat(o.at, " ") else ""))
-	end
-	table.insert(t, string.format("corner_in_road dropped %d (tightened %d)%s", M.cornerInRoadDropped or 0, M.cornerInRoadShort or 0, if M.cornerInRoadList and #M.cornerInRoadList > 0 then ": " .. table.concat(M.cornerInRoadList, "; ") else ""))
-	return table.concat(t, "\n")
-end
+-- (J30) M.qaBuilt is gone: the built-surface check is T.qa in city/Roads05StudioTest.luau
 
 function M.partCount()
 	local roads = M.folder()
@@ -4924,6 +4831,10 @@ end
 function M.stepCell(box: { number }, root: Instance)
 	M.box = box
 	M.ROOT = root
+	M.useRing(nil) -- (J30) no ring state carried over from the last cell
+	-- (J30, QA: a cell's build depended on the cell built before it, bahan_ring after long_median vs after ycentral,
+	-- Lane #3789: 199 parts) the leak is in the Roads module copy (a fresh copy alone made both orders equal): one per cell
+	M.Roads = require(SS.ClaudeTools.Roads:Clone())
 	M.noLines = true
 	M.VERGE_W = 6
 	local names = {}
