@@ -1,6 +1,7 @@
 # City Legends
 
 > **JOBS BUILT (2026-11-19, in Studio, not published):** Job Center on Myanmar Plaza's forecourt, 8 jobs (Delivery, Taxi, YBS Bus, Traffic Police; Tea Shop, Fuel Station, Dealership, Mall Shop posts), 5 ranks each, a paycheck every minute, a job bar under the level bar, Double Pay x2. See [[2026-11-18 Jobs - ranks and paychecks]].
+> **MAP BUG FIXES (2026-11-19, P1-P3, in Studio):** invisible kerbs (pavement collision over bare asphalt) clipped, street signs / walls / invisible wall collision taken off the roads, terrain ridges by the flyovers and grass over roads cleared. See [[2026-11-18 Map bug fixes P1-P3 (after the J37 road rebuild)]].
 
 > **CAR MEET NEXT WEEK (owner, 2026-11-13):** "next week, we have to show our game in car meet and burmese kids and race car owners will come and play our game". So the game is shown in person, in the week of 16 Nov 2026 (exact day not given yet), to Burmese kids and race car owners who will play it. Everything shown there must work and look finished.
 
