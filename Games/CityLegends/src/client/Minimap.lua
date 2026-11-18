@@ -951,6 +951,18 @@ function Minimap.start()
 		-- (2026-11-19, owner: "zoom out all the way to see the entire map") out to the whole P1-P12, in to street level
 		fscale = math.clamp(fscale * k, Minimap.fitScale(winSize), winSize / 400)
 	end
+	-- the view stays on the map; fully zoomed out it shows the whole map in the middle
+	local function keepOnMap()
+		local m = YArt and YArt.map
+		if not m then
+			return
+		end
+		if fscale <= Minimap.fitScale(winSize) * 1.001 then
+			center = Vector3.new((m.x0 + m.x1) / 2, 0, (m.z0 + m.z1) / 2)
+		else
+			center = Vector3.new(math.clamp(center.X, m.x0, m.x1), 0, math.clamp(center.Z, m.z0, m.z1))
+		end
+	end
 	local function myPart(): BasePart?
 		local model = Driving.getModel()
 		if model and model.PrimaryPart then
@@ -1033,6 +1045,7 @@ function Minimap.start()
 		if not fullGui.Enabled then
 			return
 		end
+		keepOnMap()
 		fzoom.Scale = fscale
 		fmap.Position = UDim2.fromOffset(-center.X, -center.Z)
 		-- the sharp tiles in view (dragged or zoomed to) get their pictures; far out the overview is enough
