@@ -494,6 +494,15 @@ section(3, "Diseases", entries("AllDiseases", ",", "D:", Color3.fromRGB(255, 130
 section(4, "Badges", entries("AllBadges", ";", "B:", GOLD), 2)
 section(5, "Secrets", secretList, 2) -- riddle clues only, until found
 
+-- "Build camp" prompts sit on every character (server); hide the one on your own body
+local function hideOwnCampPrompt(char)
+	local root = char:WaitForChild("HumanoidRootPart", 10)
+	local p = root and root:WaitForChild("BuildCamp", 10)
+	if p then p.Enabled = false end
+end
+player.CharacterAdded:Connect(hideOwnCampPrompt)
+if player.Character then task.spawn(hideOwnCampPrompt, player.Character) end
+
 ---------------------------------------------------------------- World pill: everyone, on every server, grows one world together
 -- The bar fills with every life anyone lives; each World Age = +5% DNA for all players.
 local worldPill = img(hud, "slot", { Position = UDim2.fromOffset(8, 134), Size = UDim2.fromOffset(194, 44), ZIndex = 2 })
@@ -534,11 +543,12 @@ local function showFork(id)
 		if f.id == id then
 			pathTitle.Text = f.title
 			for i, l in f.lanes do
-				local c = card(pathList, i, LANE_FRAMES[i] or "cardGreen", "port" .. l.g, l.name, l.info .. "\nFirst: " .. l.first, function()
+				local c = card(pathList, i, LANE_FRAMES[i] or "cardGreen", "port" .. l.g, l.name, l.info .. "\n" .. l.first, function()
 					remotes.ChooseFork:FireServer(id, l.key)
 					pathWin.Close()
 				end)
 				c.Art.Size = UDim2.fromOffset(64, 70)
+				c.Info.Size = UDim2.new(1, -10, 0, 38) -- two lines: what the path is, its first species
 				c.Buy.SetEnabled(true, "Pick!")
 			end
 		end
@@ -671,6 +681,7 @@ local STYLES = {
 	{ find = "path", priority = 9, color = GOLD, hold = 3 },
 	{ find = "SECRET", priority = 10, color = Color3.fromRGB(255, 120, 220), hold = 4 },
 	{ find = "tribe", priority = 8, color = Color3.fromRGB(124, 255, 107), hold = 3.5 },
+	{ find = "camp", priority = 7, color = Color3.fromRGB(255, 170, 80), hold = 3.5 },
 	{ find = "World first", priority = 8, color = Color3.fromRGB(140, 200, 255), hold = 3.5 },
 	{ find = "world reached", priority = 9, color = Color3.fromRGB(140, 200, 255), hold = 4 },
 	{ find = "Badge", priority = 9, color = GOLD, hold = 3 },
