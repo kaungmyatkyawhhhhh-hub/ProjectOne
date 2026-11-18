@@ -1,4 +1,42 @@
-# roads05 fault census (18 Nov 2026, QA agent, J28 pack)
+# roads05 fault census (18 Nov 2026, QA agent, J28 pack; J30 refresh on top)
+
+## J30 refresh (07:25-07:50)
+- **Setup:** J30 builder (YangonRoads 2122460250, Roads 1407280218), pack rev 201 data, `T.qa` with the open-ground rule below. Studio scratch was removed and the place saved as version 1311. Dumps (on disk only, `build/` is gitignored): `build/city_1to1/roads05_studiotest/J30_qa_faults.json` (final) and `J28_qa_faults.json`.
+- **Totals:** **20 / 253 / 37 / 76 / 11**, pave_gap **105**.
+  - The builder's own run on J30 gave 20 / 253 / 37 / 76 / 11 with pave_gap 188, the same five counts.
+  - My two J30 runs gave the same part hash at all 17 spots and the same non-pave_gap cells. The builder's state-leak fix (a fresh Roads copy per cell) holds.
+- **New QA false positive, pave_gap at a block interior's apex:** 83 cells removed (188 -> 105).
+  - Where a pavement wraps a corner nose, the open ground behind it is narrow at its tip, so it has pavement on both sides. It widens into the block, so it is not a slot.
+  - Example: bahan_ring (35539, 38067), Lane #6610. A ray map shows the gap is the tip of a wedge of ground that keeps widening.
+  - Close-up: `2026-11-18 roads05 census - J30 bahan_ring - FALSE POSITIVE pave_gap block interior apex.jpg`.
+  - Rule: open ground connected to the cell within 6 studs of more than 150 cells (a 2-stud slot holds about 100) is not a gap.
+- **A real pave_gap that stays:** double_junction (39844, 32840), a tapering open slot between two side-by-side roads' pavements. Close-up: `2026-11-18 roads05 census - J30 double_junction - real pave_gap slot between two pavements.jpg`.
+
+| pattern (J30) | faults | bh / kg / rs / ps / bu | pave_gap |
+|---|---|---|---|
+| junction corner zone | 108 | 3 / 59 / 11 / 30 / 5 | 13 |
+| roundabout (ring / arm mouth) | 71 | 3 / 68 / 0 / 0 / 0 | 28 |
+| mouth end (smaller road ends on a bigger one) | 70 | 5 / 47 / 15 / 3 / 0 | 16 |
+| deck foot | 37 | 4 / 30 / 0 / 0 / 3 | 2 |
+| two roads side by side | 28 | 1 / 8 / 1 / 18 / 0 | 17 |
+| along one road | 28 | 1 / 11 / 3 / 10 / 3 | 19 |
+| continuation joint | 28 | 3 / 18 / 3 / 4 / 0 | 1 |
+| island | 17 | 0 / 11 / 0 / 6 / 0 | 7 |
+| near the test box (20-30 in) | 10 | 0 / 1 / 4 / 5 / 0 | 2 |
+| **total** | **397** | **20 / 253 / 37 / 76 / 11** | **105** |
+
+- **J28 -> J30 changes by pattern:**
+  - Deck feet fell 66 -> 37: DECK_TOUCH, and the side-lane fix in roads05_fix (deck_foot_ends). The 3 buried cells are East Horse Race Course Road #3's kerb under the Bridge Flyover foot.
+  - Mouth ends fell 94 -> 70.
+  - Roundabouts fell 80 -> 71 (island kerbs).
+  - Corners are unchanged at 108-111.
+  - Two roads side by side fell 33 -> 28.
+- **Biggest pave_gap groups left:**
+  - The Bahan island slot, Bahan Road x Lane #3790 (35387, 37898): 16.
+  - Roundabout 1's island vs ring pavement (35394, 38167): 13.
+  - Roundabout 4's Lane #3357 (35811, 45059): 10.
+  - U Wisara Ein Yar St #2's mouth (34108, 42435): 10.
+- Root causes for each pattern are as in the J28 table below.
 
 Every built-surface fault cell at the 17 Studio test spots, put into one pattern each. Pack: asset 133014134133489 rev 200 (J28 data, Roads.luau 1407280218, YangonRoads.luau 1416678337). Main Studio "City Legends". Scratch removed, saved as version 1291. Terrain was never written.
 

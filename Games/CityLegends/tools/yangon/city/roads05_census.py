@@ -111,6 +111,11 @@ CAUSE = {
 
 
 def sub(f):
+    if f['t'] == 'pave_gap':  # whose pavements face each other across the slot
+        rs = sorted({c[1] for c in f['c'] if c[0] == 'Pavement'})
+        if 'Islands' in rs or 'Fills' in rs:
+            return ' (island / fill vs road pavement)'
+        return " (one road's pavement)" if len(rs) == 1 else " (two roads' pavements)" if len(rs) > 1 else ""
     k = sorted({c[0] for c in f['c']} - {'Road'}) if f['t'] == 'kerb_gap' else []
     return f" ({'asphalt next to nothing' if k == ['None'] else 'asphalt next to pavement' if k == ['Pavement'] else '/'.join(k)})" if k else ''
 
@@ -150,8 +155,18 @@ def main():
     print('|---|---|---|---|---|')
     for key, n in sorted(table.items(), key=lambda kv: -kv[1]):
         s, x, z, rs = ex[key]
-        base = key[1].split(' (asphalt')[0]
+        base = next((c for c in CAUSE if key[1].startswith(c)), '')
         print(f'| {n} | {key[0]} | {key[1]} | {s} ({x:.0f}, {z:.0f}) {", ".join(rs)[:60]} | {CAUSE.get(base, "")} |')
+    # merged: pattern x fault type (the note's table)
+    T = ['box_hole', 'kerb_gap', 'road_step', 'pave_step', 'buried', 'pave_gap']
+    M = defaultdict(Counter)
+    for f in out:
+        M[next((c for c in CAUSE if f['pattern'].startswith(c)), f['pattern'])][f['t']] += 1
+    print()
+    print('| pattern | faults | bh / kg / rs / ps / bu | pave_gap |')
+    print('|---|---|---|---|')
+    for p, v in sorted(M.items(), key=lambda kv: -sum(kv[1][t] for t in T[:5])):
+        print(f"| {p} | {sum(v[t] for t in T[:5])} | {' / '.join(str(v[t]) for t in T[:5])} | {v['pave_gap']} |")
     json.dump(out, open(os.path.splitext(src)[0] + '_census.json', 'w', encoding='utf-8'), indent=0)
 
 

@@ -400,6 +400,28 @@ function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number
 		end
 		return false
 	end
+	-- (J30 QA false positive) the narrow apex of open ground behind a pavement that wraps a corner nose (block interior,
+	-- bahan_ring Lane #6610 (35539, 38067)) has pavement on both sides too, but it widens into open ground: a slot stays
+	-- narrow. The nothing connected to the cell within 6 studs: over 150 cells (a 2-stud slot holds about 100) = open ground
+	local function openGround(i, j): boolean
+		local seenN, stack, n = { [K(i, j)] = true }, { { i, j } }, 0
+		while #stack > 0 do
+			local c = table.remove(stack)
+			n += 1
+			if n > 150 then
+				return true
+			end
+			for _, d in { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } } do
+				local a2, b2 = c[1] + d[1], c[2] + d[2]
+				local q = K(a2, b2)
+				if math.abs(a2 - i) <= 12 and math.abs(b2 - j) <= 12 and not seenN[q] and kind[q] == "None" then
+					seenN[q] = true
+					table.insert(stack, { a2, b2 })
+				end
+			end
+		end
+		return false
+	end
 	-- pave_gap (J29 builder ask): an open slot (1-4 cells of nothing) with pavement on both sides, along x or z
 	local function paveGap(i, j): boolean
 		for _, d in { { 1, 0 }, { 0, 1 } } do
@@ -418,7 +440,7 @@ function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number
 					break
 				end
 			end
-			if a == "Pavement" and b == "Pavement" then
+			if a == "Pavement" and b == "Pavement" and not openGround(i, j) then
 				return true
 			end
 		end
