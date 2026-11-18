@@ -192,6 +192,68 @@ function S.nearDecks(apply: boolean)
 	return { columns = ncol, stray = nstray, ridge = ridge, float = float, list = stray }
 end
 
+------------------------------------------------------------------------------------------------------------------------
+-- (c) pavement boxes over bare asphalt / ground (roads05_pbox_clip.py output: "-" old row, then its "+" pieces)
+------------------------------------------------------------------------------------------------------------------------
+local function rowCF(line: string)
+	local v = {}
+	for w in string.gmatch(string.sub(line, 4), "%S+") do
+		table.insert(v, tonumber(w))
+	end
+	local c, R, U = Vector3.new(v[1], v[2], v[3]), Vector3.new(v[4], v[5], v[6]), Vector3.new(v[7], v[8], v[9])
+	return CFrame.fromMatrix(c, R, U, R:Cross(U)), Vector3.new(v[10], v[11], v[12])
+end
+
+function S.pboxSwap(text: string)
+	-- old boxes go to ServerStorage.MB_OldPBoxes (undo: move them back, delete the new ones with attribute MBNew)
+	local bk = game.ServerStorage:FindFirstChild("MB_OldPBoxes") or Instance.new("Folder")
+	bk.Name = "MB_OldPBoxes"
+	bk.Parent = game.ServerStorage
+	local idx = {}
+	for _, b in roads():GetChildren() do
+		if b:GetAttribute("RoadBox") == "P" then
+			local k = math.floor(b.Position.X) .. "_" .. math.floor(b.Position.Z)
+			idx[k] = idx[k] or {}
+			table.insert(idx[k], b)
+		end
+	end
+	local function find(cf: CFrame)
+		local p = cf.Position
+		for dx = -1, 1 do
+			for dz = -1, 1 do
+				for _, b in idx[(math.floor(p.X) + dx) .. "_" .. (math.floor(p.Z) + dz)] or {} do
+					if b.Parent and (b.Position - p).Magnitude < 0.05 then
+						return b
+					end
+				end
+			end
+		end
+		return nil
+	end
+	local old, removed, added, missing = nil, 0, 0, 0
+	for line in string.gmatch(text, "[^\n]+") do
+		local sg = string.sub(line, 1, 1)
+		if sg == "-" then
+			old = find((rowCF(line)))
+			if old then
+				old.Parent = bk
+				removed += 1
+			else
+				missing += 1
+			end
+		elseif sg == "+" and old then
+			local cf, size = rowCF(line)
+			local q = old:Clone()
+			q.CFrame = cf
+			q.Size = size
+			q:SetAttribute("MBNew", true)
+			q.Parent = roads()
+			added += 1
+		end
+	end
+	return removed, added, missing
+end
+
 function S.terrainScan(apply: boolean)
 	_G.MBS = { status = "start" }
 	task.spawn(function()
