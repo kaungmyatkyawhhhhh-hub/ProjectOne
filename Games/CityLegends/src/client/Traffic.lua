@@ -761,8 +761,10 @@ local function racerBeside(npc: Npc, dir: number): boolean
 	return false
 end
 
--- the car a racer's box (plus a hair) would overlap at pos / fwd, using each car's latest place this frame
-local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obstacle }, m: number, aheadOnly: boolean): (Obstacle?, number)
+-- the car a racer's box (plus m x a hair) would overlap at pos / fwd, using each car's latest place this frame.
+-- mode "ahead": only cars ahead; "prio": all but racers behind. Between two racers "ahead" is along their mean
+-- heading, so of two side by side at a merge exactly one has the way (each saw the other ahead and both stood)
+local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obstacle }, m: number, mode: string?): (Obstacle?, number)
 	local r = fwd:Cross(Vector3.yAxis)
 	local hl, hw = npc.halfLen + 0.4 * m, npc.width / 2 + 0.25 * m
 	for _, o in obstacles do
@@ -771,7 +773,12 @@ local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obsta
 			local op = if me then me.pos else o.pos
 			local of = if me then me.fwd else o.fwd
 			local d = op - pos
-			if math.abs(d.Y) < 8 and d.Magnitude < hl + o.halfLen + 12 and not (aheadOnly and d:Dot(fwd) <= 0) then
+			local skip = false
+			if mode then
+				local along = if me and me.racer then d:Dot(fwd + of) else (if mode == "ahead" then d:Dot(fwd) else 1)
+				skip = along <= 0
+			end
+			if not skip and math.abs(d.Y) < 8 and d.Magnitude < hl + o.halfLen + 12 then
 				local orr = of:Cross(Vector3.yAxis)
 				local ol, ow = o.halfLen + 0.4 * m, o.width / 2 + 0.25 * m
 				local sep = false
@@ -792,20 +799,18 @@ local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obsta
 	return nil, 0
 end
 
--- the car a racer's step from (op, of) to (pos, fwd) runs into: a new car within a hair, or a deeper real overlap
--- with one already that close. aheadOnly: a straight step only answers for cars ahead (the car behind keeps its
--- own gap; two racers side by side at a merge each saw the other and both stood for good)
-local function racerBlocked(npc: Npc, pos: Vector3, fwd: Vector3, op: Vector3, of: Vector3, obstacles: { Obstacle }, aheadOnly: boolean): Obstacle?
-	local hit = racerHit(npc, pos, fwd, obstacles, 1, aheadOnly)
-	if not hit then
-		return nil
-	end
-	if racerHit(npc, op, of, obstacles, 1, aheadOnly) ~= hit then
+-- the car a racer's step from (op, of) to (pos, fwd) runs into: a new car within a hair (a straight step: only
+-- cars ahead, the car behind keeps its own gap), or a deeper real overlap (a hair less: the counted box) with any
+-- car but a racer behind
+local function racerBlocked(npc: Npc, pos: Vector3, fwd: Vector3, op: Vector3, of: Vector3, obstacles: { Obstacle }, slid: boolean): Obstacle?
+	local mode = if slid then nil else "ahead"
+	local hit = racerHit(npc, pos, fwd, obstacles, 1, mode)
+	if hit and racerHit(npc, op, of, obstacles, 1, mode) ~= hit then
 		return hit
 	end
-	local real, d = racerHit(npc, pos, fwd, obstacles, 0, aheadOnly)
+	local real, d = racerHit(npc, pos, fwd, obstacles, 0.4, "prio")
 	if real then
-		local was, d0 = racerHit(npc, op, of, obstacles, 0, aheadOnly)
+		local was, d0 = racerHit(npc, op, of, obstacles, 0.4, "prio")
 		if was ~= real or d < d0 then
 			return real
 		end
@@ -1406,11 +1411,11 @@ function Traffic.update(dt: number)
 		-- only the slide touches the racer drives on straight while the slide waits
 		if snap then
 			local slid = npc.off ~= snap[5]
-			local hit = racerBlocked(npc, pos, fwd, snap[7], snap[8], obstacleList, not slid)
+			local hit = racerBlocked(npc, pos, fwd, snap[7], snap[8], obstacleList, slid)
 			if hit and slid then
 				local p2, f2 = CityLayout.sample(npc.seg, npc.s)
 				p2 += f2:Cross(Vector3.yAxis) * (snap[5] :: number)
-				if not racerBlocked(npc, p2, f2, snap[7], snap[8], obstacleList, true) then
+				if not racerBlocked(npc, p2, f2, snap[7], snap[8], obstacleList, false) then
 					npc.off, npc.offTo = snap[5], snap[5]
 					pos, fwd, hit = p2, f2, nil
 				end
