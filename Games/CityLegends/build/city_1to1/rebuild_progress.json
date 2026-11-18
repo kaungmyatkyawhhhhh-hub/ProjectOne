@@ -77,7 +77,7 @@
   "saved": "saved after swap and after backup delete (save calls timed out, then NotNeeded)"
  },
  "P3": {
-  "status": "BAKED + UPLOADED; swap in progress (staging in ServerStorage.RB_NewP3Hold / RB_NewP3). Old P3 cells still in place until swap.",
+  "status": "SWAPPED + SAVED (1419). Old in ServerStorage.RB_OldP3 until Play test. Next: trees, props, Play test.",
   "cells3072": [
    "9x13",
    "9x14",
@@ -117,7 +117,10 @@
   "left_cells": "none (13x13/13x14/13x15 exported by agent 3; Studio slices freed)",
   "next": "roads05_bake.py RB3 collect pages -> R05_ONLY=<the 41 swap cells x19..27 z26..31 that exist> bake -> upload glbs (Open Cloud Model, group 33151111) + collide pages as RColRB_P3_k (PATCH asset 133014134133489) -> YangonRoadMeshes.place (LOOK needs LZ) + RoadBake05.collide into ServerStorage -> old P3 Cell_ + boxes (by box-centre cell) to ServerStorage.RB_OldP3 -> new in -> save -> trees off carriageways -> Play test -> delete backup -> save.",
   "baked": "461 meshes / 44 glbs / 25094 boxes (R05_ONLY 1536 x19..27 z26..31, 21 min); roads05_RB3/bake_stats_P3.json",
-  "uploaded": "44 glbs: roads05_RB3/upload_ids_P3.txt; collide pack imports/sync/rebuild_P3_collide.rbxmx = asset 133014134133489 rev 215 (12 modules RColRB_P3_k)"
+  "uploaded": "44 glbs: roads05_RB3/upload_ids_P3.txt; collide pack imports/sync/rebuild_P3_collide.rbxmx = asset 133014134133489 rev 215 (12 modules RColRB_P3_k)",
+  "swapped": "old 47 cells + 18323 boxes (by box centre cell) -> ServerStorage.RB_OldP3; new 51 cells 461 meshes + 25094 boxes (RoadBox P/R/M/D/W) into Roads.Meshes / Roads.Collide",
+  "saved_version": "1419 (after swap)",
+  "backup_deleted": false
  },
  "note2": "pages: zstd+base64 slices (@Z) since 9x9 p8; grabber tools/yangon/city/roads05_grab.py",
  "cleanup": "Studio: no Roads05 data modules, no RB_ folders, no build root, YangonScraps gone; store CityLegends_v1",
