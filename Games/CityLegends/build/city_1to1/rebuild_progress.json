@@ -194,6 +194,8 @@
   "data": "R05_GROW=1700 roads05_subset.py net RB4 P4 (1569 roads, 49 modules, roads05_RB4/pack_checksums.txt) -> imports/sync/rebuild_RB4_data.rbxmx -> NEW asset 72548567115317",
   "buildings": "district_files.sh P4 --no-roads buildings vs J37 net: 11209 buildings (805 dropped / 3843 clipped by roads), shells 14113, roofs 6410; old files build/city_1to1/_pre_rebuild_P4",
   "packs": "place 112634691968549 133835486464710 132541429421726 124971106822088; night cells_1.glb (23 MB) split -> cells_1_a 109064376622785, cells_1_b 74148654220601",
-  "lanes_ready": "roads05_lanesubset L12347 (P1 P2 P3 P4 P7): 923 lanes, 2100 links, 0 dead ends (build dir only, NOT installed)"
+  "lanes_ready": "roads05_lanesubset L12347 (P1 P2 P3 P4 P7): 923 lanes, 2100 links, 0 dead ends (build dir only, NOT installed)",
+  "district_moved": "DONE v1499: DistrictPlace P4 load 4 packs, night 37 cells, terrain 1554 tiles, green paint 1371 tiles + far 3932 parts (Far_keep merge: 51 moved 10 merged, 0 dups), Data_P4 1150 tiles (451 kit ids, 0 missing) + Data_P4G 1348, shells 14113 + roof parts 7259, 4 pagodas re-placed (old 4 in ServerStorage.RB_OldP4.Temps until Play test). Packs removed (cleanup 33).",
+  "next": "road build job (_G.RB4, 18 step boxes) -> grab slices -> bake -> upload -> swap"
  }
 }
