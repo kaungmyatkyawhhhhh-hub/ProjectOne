@@ -238,6 +238,12 @@ local function hookCharacter(char)
 	for _, d in char:GetDescendants() do take(d) end
 	char.DescendantAdded:Connect(take)
 end
+task.spawn(function() -- owner, 18 Nov 2026: "i can hear roblox walking sound". Our creatures aren't people: no default footsteps/jump/splash
+	local sounds = player:WaitForChild("PlayerScripts"):WaitForChild("RbxCharacterSounds", 30)
+	if sounds then sounds.Enabled = false end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if root then for _, s in root:GetChildren() do if s:IsA("Sound") then s:Stop() end end end
+end)
 if player.Character then task.spawn(hookCharacter, player.Character) end
 player.CharacterAdded:Connect(hookCharacter)
 local pitch, posed = 0, false
