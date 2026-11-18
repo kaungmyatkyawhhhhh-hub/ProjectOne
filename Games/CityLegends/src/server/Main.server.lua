@@ -457,8 +457,9 @@ end)
 
 -- opts.stolen: a car taken from a garage (Parking): not theirs, never saved or selected;
 -- opts.test: a dealer test drive (not theirs either, for Config.Dealership.TestSeconds);
--- opts.at: where it starts (ground level, facing the way out)
-local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?, test: boolean?, at: CFrame? }?)
+-- opts.at: where it starts (ground level, facing the way out);
+-- opts.job / opts.look (19 Nov): a job vehicle (server/Jobs.lua): its job id and its livery (a Customs look)
+local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?, test: boolean?, at: CFrame?, job: string?, look: any? }?)
 	local profile = PlayerData.get(player)
 	local stolen = opts and opts.stolen
 	local test = opts and opts.test
@@ -492,6 +493,10 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
 	model:SetAttribute("Plate", string.upper(player.Name):gsub("[^%w]", ""):sub(1, 7))
 	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (and its own plate)
+	if opts and opts.job then
+		Customs.setOn(model, opts.look or {})
+		model:SetAttribute("JobCar", opts.job)
+	end
 	if not stolen and not test then
 		CarLevels.applyTo(player, model, carId) -- its performance parts (Driving drives them)
 	end

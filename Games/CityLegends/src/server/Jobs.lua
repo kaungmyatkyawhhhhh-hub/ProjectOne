@@ -512,7 +512,7 @@ local function serve(player: Player, jobId: string)
 			if car and car.PrimaryPart and flat(car.PrimaryPart.Position, job.post) < JD.ServeCarRange and car.PrimaryPart.AssemblyLinearVelocity.Magnitude < 3 then
 				tip *= 2
 				who = other.DisplayName
-				local c = ctx.care and ctx.care.record(other, car:GetAttribute("CarId"))
+				local c = ctx.care and not car:GetAttribute("Stolen") and ctx.care.record(other, car:GetAttribute("CarId"))
 				if c then
 					c.f = 1
 				end

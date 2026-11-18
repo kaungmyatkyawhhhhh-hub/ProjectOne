@@ -87,12 +87,8 @@ end
 check(R.paycheck(J, tea, 1) * 3 <= busMin * 1.4 and R.paycheck(J, tea, 1) * 2.5 >= busMin * 0.6, "posts pay about a third of active")
 check(perMinute(bus, 1400, 0) * J.RankMult[5] * 60 >= 80000, "rank 5 active about 100k an hour")
 
--- anti-teleport and the post cap
+-- anti-teleport (19 Nov: posts have no daily cap any more: JobsData's shift check)
 check(R.minLegSeconds(J, 3000) == 3000 / J.MaxSps, "a 3000-stud leg can't take under 10 s")
-local now = 1_800_000_000
-check(R.postLeft(J, { day = R.day(now), post = J.PostCapSeconds - 5 }, now) == 5, "post cap: 5 s left")
-check(R.postLeft(J, { day = R.day(now), post = J.PostCapSeconds + 99 }, now) == 0, "post cap: none left, never negative")
-check(R.postLeft(J, { day = R.day(now) - 1, post = J.PostCapSeconds }, now) == J.PostCapSeconds, "post cap: a new day starts full")
 
 -- the bus line: every leg a real drive (not two stops on top of each other)
 local short = 0

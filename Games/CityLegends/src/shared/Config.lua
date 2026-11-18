@@ -3228,8 +3228,8 @@ end
 -- does the sums, client/JobsClient.lua shows the Job Center and the HUD bar. Yangon only.
 --   * active jobs: on duty = doing the job (in your car with a stop to reach); pay is mostly per
 --     stop / fare / ticket plus a small paycheck every PaycheckSeconds
---   * posts: stand at the post; a bigger paycheck (about 1/3 of active per minute), paid for at most
---     PostCapSeconds a day (UTC)
+--   * posts: AFK jobs, stand at the post; a bigger paycheck (about 1/3 of active per minute), no cap
+--     (19 Nov: the shift check and idle rejoin are in shared/JobsData.lua)
 --   * 5 ranks per job: RankXp (XP from time on duty and tasks) and RankMult (all its pay)
 --   * Double Pay pass (499 R$): x2 on all job pay. Read from the player's "DoublePay" attribute
 --     (server/Store.lua); Studio test: server player attribute TestDoublePay = true
@@ -3243,13 +3243,11 @@ Config.Jobs = (function()
 		On = true,
 		-- the Job Center kiosk on Myanmar Plaza's forecourt, facing Kabar Aye Pagoda Road (spawn is just south)
 		Center = CFrame.lookAt(v(34742, 40.6, 27586), v(34700, 40.6, 27586)),
-		CenterRange = 26, -- studs: take a job only this close to the kiosk
 		PaycheckSeconds = 60,
 		DoublePayMult = 2,
 		RankMult = { 1, 1.3, 1.65, 2.1, 2.7 }, -- every pay of the job at rank 1..5
 		RankXp = { 0, 250, 800, 2000, 4500 }, -- XP to reach rank 1..5 (per job)
 		DutyXpPerMinute = 6,
-		PostCapSeconds = 2 * 60 * 60, -- paid post time per day
 		PostRadius = 12, -- studs from the post (flat)
 		IdleSeconds = 150, -- an active job with no task done this long: off duty (no AFK pay)
 		ArriveRadius = 30, -- studs from a stop / fare / patrol point

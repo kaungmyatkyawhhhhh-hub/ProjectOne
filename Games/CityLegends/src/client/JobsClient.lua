@@ -1,7 +1,7 @@
 --[[
 	JobsClient (see server/Jobs.lua; owner approved 18 Nov 2026: jobs with ranks and paychecks)
-	  * the Job Center screen (E at the kiosk on Myanmar Plaza's forecourt, or tap the job bar):
-	    every job with your rank in it, TAKE / QUIT
+	  * (19 Nov) the job list is the main menu's JOBS tab (E at the kiosk, the job bar or the HUD's
+	    JOBS icon open it); this module gives it the state and the calls
 	  * the job bar under the level bar: job, rank title, progress to the next rank, the next
 	    paycheck (it ticks only while you're on duty)
 	  * the target of an active job (bus stop, fare, patrol point) or your post: a ring on the
@@ -40,7 +40,7 @@ local bar: TextButton? = nil
 local barLeft: TextLabel? = nil
 local barRight: TextLabel? = nil
 local barFill: Frame? = nil
-local screen: Frame? = nil
+local refreshAsk: () -> () = function() end -- (the shift card, below)
 local ring: BasePart? = nil
 local ringLabel: TextLabel? = nil
 local targetKey = ""
@@ -113,12 +113,12 @@ local function refreshBar()
 	local k = if (state.span or 0) > 0 then math.clamp((state.into or 0) / state.span, 0, 1) else 1
 	tween(f, 0.3, { Size = UDim2.fromScale(k, 1) })
 	if not state.onDuty then
-		local why = if job.kind == "post" then (if (state.postLeft or 1) <= 0 then "Shift done today" else "Go to your post") else "Off duty: drive the job"
+		local why = if job.kind == "post" then (if state.asleep then "Off duty: keep working?" else "Go to your post") else "Off duty: drive the job"
 		r.Text = why
 		r.TextColor3 = Theme.SubText
 	else
 		local left = (state.payIn or 0) - (os.clock() - stateAt)
-		r.Text = UI.formatCash(state.paycheck or 0) .. " in " .. clock(left)
+		r.Text = "ON DUTY · " .. UI.formatCash(state.paycheck or 0) .. " in " .. clock(left)
 		r.TextColor3 = Theme.Money
 	end
 end
@@ -227,6 +227,7 @@ local function setState(st: any)
 	stateAt = os.clock()
 	refreshBar()
 	refreshTarget()
+	refreshAsk()
 end
 
 -- stopped in the ring: report it (police hold still RadarSeconds: the radar check)
@@ -265,135 +266,67 @@ local function update(dt: number)
 end
 
 ---------------------------------------------------------------------
--- The Job Center screen (the GOALS screen's panel, rows and buttons)
+-- (19 Nov, owner: jobs like Southwest Florida) the job list is the main menu's JOBS tab now
+-- (MainMenu buildJobs); the old JOB CENTER screen is gone. The kiosk, the job bar and the HUD's
+-- JOBS icon open that tab through UI.onJobsButton (set in Main.client)
 ---------------------------------------------------------------------
-local function closeScreen()
-	if screen then
-		screen:Destroy()
-		screen = nil
-	end
-end
-
-local function fill()
-	local f = screen and screen:FindFirstChild("Panel")
-	local body = f and f:FindFirstChild("Body")
-	if not (f and body) then
-		return
-	end
-	body:ClearAllChildren()
-	local sub = f:FindFirstChild("Sub") :: TextLabel?
-	if sub then
-		sub.Text = if state.double then "DOUBLE PAY ON: x2 ALL JOB PAY" else "PAYCHECK EVERY MINUTE ON DUTY · 5 RANKS PER JOB"
-		sub.TextColor3 = if state.double then GOLD else Theme.SubText
-	end
-	local list = new("ScrollingFrame", {
-		Size = UDim2.fromScale(1, 1),
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		ScrollBarThickness = 4,
-		ScrollBarImageColor3 = Theme.Stroke,
-		AutomaticCanvasSize = Enum.AutomaticSize.Y,
-		CanvasSize = UDim2.new(),
-		ZIndex = 73,
-		Parent = body,
-	})
-	new("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder, Parent = list })
-	local order = 0
-	local function heading(text: string)
-		order += 1
-		label({ Text = text, TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Left, Size = UDim2.new(1, -8, 0, 18), LayoutOrder = order, ZIndex = 74, Parent = list })
-	end
-	local function row(job: any)
-		order += 1
-		local mine = state.job == job.id
-		local r = (state.ranks and state.ranks[job.id]) or 1
-		local f2 = new("Frame", {
-			Size = UDim2.new(1, -8, 0, 62),
-			BackgroundColor3 = if mine then GOLD:Lerp(Theme.PanelLight, 0.85) else Theme.PanelLight,
-			BackgroundTransparency = 0.1,
-			LayoutOrder = order,
-			ZIndex = 73,
-			Parent = list,
-		}, { corner(10), stroke(if mine then GOLD else Theme.Stroke, 1, if mine then 0.2 else 0.4) })
-		label({ Text = string.upper(job.name) .. "   ·   " .. job.ranks[r] .. "  R" .. r .. "/5", TextSize = 15, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(12, 7), Size = UDim2.new(1, -130, 0, 18), ZIndex = 74, Parent = f2 })
-		label({ Text = job.where, TextSize = 12, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(12, 25), Size = UDim2.new(1, -130, 0, 15), ZIndex = 74, Parent = f2 })
-		local pay = UI.formatCash(JobRules.paycheck(J, job, r, state.double)) .. " a minute"
-		pay ..= if job.kind == "post" then " at the post" else " + pay per " .. (if job.id == "bus" then "stop" elseif job.id == "taxi" then "fare" elseif job.id == "police" then "patrol / ticket" else "delivery")
-		label({ Text = pay, TextSize = 12, Font = Enum.Font.GothamBold, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Left, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(12, 41), Size = UDim2.new(1, -130, 0, 15), ZIndex = 74, Parent = f2 })
-		local b = button(if mine then "QUIT" else "TAKE", if mine then Theme.Danger else Theme.Money, {
-			AnchorPoint = Vector2.new(1, 0.5),
-			Position = UDim2.new(1, -10, 0.5, 0),
-			Size = UDim2.fromOffset(104, 44),
-			TextSize = 16,
-			TextColor3 = if mine then Theme.Danger else Theme.Money,
-			ZIndex = 74,
-			Parent = f2,
-		})
-		b.Activated:Connect(function()
-			local res = invoke(if mine then "quit" else "take", job.id)
-			if type(res) == "table" and res.ok then
-				setState(res.state)
-				if not mine then
-					UI.toast(string.upper(job.name) .. ": you're a " .. job.ranks[r] .. (if job.kind == "post" then ". Go to the gold ring" else ". Follow the gold ring"), GOLD)
-					closeScreen()
-					return
-				end
-				fill()
-			else
-				UI.toast(if type(res) == "table" and res.message then res.message else "Try again", Theme.Warning)
-			end
-		end)
-	end
-	heading("ACTIVE JOBS · PAID PER TASK, PLUS A PAYCHECK")
-	for _, job in J.List do
-		if job.kind == "active" then
-			row(job)
-		end
-	end
-	heading("POSTS · STAND AT YOUR POST · " .. math.floor((state.postLeft or J.PostCapSeconds) / 60) .. " MIN PAID TIME LEFT TODAY")
-	for _, job in J.List do
-		if job.kind == "post" then
-			row(job)
-		end
-	end
-end
-
 function JobsClient.open()
-	if screen then
-		closeScreen()
+	if UI.onJobsButton then
+		UI.onJobsButton()
+	end
+end
+
+function JobsClient.getState(): { [string]: any }
+	return state
+end
+
+-- a JobCall from the JOBS tab (take / quit / vehicle / keep); its new state goes on the bar too
+function JobsClient.call(what: string, arg: any?): any
+	local res = invoke(what, arg)
+	if type(res) == "table" and res.state then
+		setState(res.state)
+	end
+	return res
+end
+
+-- "Still on shift?" under the job bar: the AFK post check (no tap in JobsData.ShiftAnswer: off duty)
+local askCard: Frame? = nil
+refreshAsk = function()
+	local show = state.ask == true or state.asleep == true
+	if not show then
+		if askCard then
+			askCard.Visible = false
+		end
 		return
 	end
-	local root = UI.screen()
-	local back = new("Frame", { Name = "JobCenter", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 70, Parent = root })
-	screen = back
-	-- (19 Nov, owner: mobile) shorter on a phone (the list scrolls), so it's drawn ~20% bigger there
-	local w, h = 560, if UI.isTouch then 380 else 470
-	local f = new("Frame", {
-		Name = "Panel",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromOffset(w, h),
-		BackgroundColor3 = Theme.Panel,
-		BackgroundTransparency = 0.04,
-		ZIndex = 71,
-		Parent = back,
-	}, { corner(14), stroke(Theme.Stroke, 1.5, 0.1) })
-	local sc = new("UIScale", { Parent = f })
-	local vp = camera.ViewportSize
-	sc.Scale = math.min(1, (vp.X - 24) / w, (vp.Y - 24) / h)
-	label({ Text = "JOB CENTER", TextSize = 26, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(20, 14), Size = UDim2.new(1, -90, 0, 30), ZIndex = 72, Parent = f })
-	label({ Name = "Sub", Text = "", TextSize = 13, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(20, 46), Size = UDim2.new(1, -90, 0, 16), ZIndex = 72, Parent = f })
-	local x = button("×", Theme.Danger, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -12, 0, 12), Size = UDim2.fromOffset(44, 44), TextSize = 20, ZIndex = 72, Parent = f })
-	x.Activated:Connect(closeScreen)
-	new("Frame", { Name = "Body", BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 74), Size = UDim2.new(1, -40, 1, -90), ZIndex = 72, Parent = f })
-	fill()
-	task.spawn(function()
-		local st = invoke("state")
-		if type(st) == "table" and screen == back then
-			setState(st)
-			fill()
+	local card = askCard
+	if not card then
+		local hud = UI.screen():FindFirstChild("HUD")
+		if not hud then
+			return
 		end
-	end)
+		local c: Frame = new("Frame", {
+			Name = "JobShiftCheck",
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.new(0.5, 0, 0, if UI.isTouch then 82 else 92),
+			Size = UDim2.fromOffset(if UI.isTouch then 250 else 300, 44),
+			BackgroundColor3 = Theme.Panel,
+			BackgroundTransparency = 0.08,
+			ZIndex = 20,
+			Parent = hud,
+		}, { corner(12), stroke(GOLD, 1, 0.4) })
+		label({ Name = "Q", Text = "", TextSize = 13, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(12, 0), Size = UDim2.new(1, -140, 1, 0), ZIndex = 21, Parent = c })
+		local b = button("KEEP WORKING", Theme.Money, { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -6, 0.5, 0), Size = UDim2.fromOffset(124, 34), TextSize = 13, TextColor3 = Theme.Money, ZIndex = 21, Parent = c })
+		b.Activated:Connect(function()
+			Audio.click()
+			JobsClient.call("keep")
+		end)
+		askCard, card = c, c
+	end
+	local f = card :: Frame
+	f.Visible = true
+	local q = f:FindFirstChild("Q") :: TextLabel
+	q.Text = if state.asleep then "OFF DUTY · STILL ON SHIFT?" else "STILL ON SHIFT?"
 end
 
 function JobsClient.init()
@@ -412,9 +345,14 @@ function JobsClient.init()
 			if msg.kind == "state" then
 				setState(msg.state)
 			elseif msg.kind == "open" then
-				if not screen then
-					JobsClient.open()
-				end
+				JobsClient.open()
+			elseif msg.kind == "toast" then
+				UI.toast(tostring(msg.text), GOLD)
+			elseif msg.kind == "stillthere" then
+				UI.toast("Still on shift? Tap KEEP WORKING within " .. math.floor((tonumber(msg.seconds) or 300) / 60) .. " min, or you go off duty", GOLD)
+				Audio.play("tick", 0.7, 1.2)
+			elseif msg.kind == "offshift" then
+				UI.toast("Off duty: no answer. Tap KEEP WORKING to start again", Theme.Warning)
 			elseif msg.kind == "paid" then
 				UI.popup(if msg.double then "PAYCHECK x2" else "PAYCHECK", tonumber(msg.cash) or 0, Theme.Money)
 				Audio.cutUp(4, "PAY")
@@ -432,6 +370,14 @@ function JobsClient.init()
 	end
 	setState(invoke("state"))
 	RunService.Heartbeat:Connect(update)
+	-- (19 Nov) Roblox kicks after 20 idle minutes: a player on duty at a post is rejoined first (the
+	-- server decides and teleports; not officially approved by Roblox: watch moderation)
+	player.Idled:Connect(function(seconds: number)
+		local job = JobRules.byId(J, state.job)
+		if job and job.kind == "post" and state.onDuty then
+			invoke("idle", seconds)
+		end
+	end)
 	-- the paycheck countdown ticks between server updates
 	task.spawn(function()
 		while true do

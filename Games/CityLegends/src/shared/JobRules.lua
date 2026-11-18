@@ -43,14 +43,6 @@ function JobRules.day(t: number): number
 	return math.floor(t / 86400)
 end
 
--- paid post seconds left today for a saved jobs table { day, post }
-function JobRules.postLeft(J: any, saved: any, now: number): number
-	if saved.day ~= JobRules.day(now) then
-		return J.PostCapSeconds
-	end
-	return math.max(0, J.PostCapSeconds - (saved.post or 0))
-end
-
 function JobRules.byId(J: any, id: any): any
 	for _, job in J.List do
 		if job.id == id then
