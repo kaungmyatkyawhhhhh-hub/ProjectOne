@@ -536,6 +536,26 @@ def _set_dirs(s, idx):
         s[i][3], s[i][4] = round((b[0] - a[0]) / L, 4), round((b[2] - a[2]) / L, 4)
 
 
+def edge_ends(data):
+    """(J34) roads05.py flags a road end edgeStart / edgeEnd only within 1.0 of the districts' outline; Insein Road's
+    south end lies 1.36 off it (mouth_short 'off'). Ends within EDGE_TOL of the outline are map-edge ends too."""
+    EDGE_TOL = 3.0
+    try:
+        bnd = unary_union([geo.batch_poly(t) for t in data.get('tags', [])]).boundary
+    except Exception:
+        return []
+    out = []
+    for r in data['roads']:
+        s = r['s']
+        if len(s) < 2 or r.get('closed'):
+            continue
+        for k, fl, ed in ((0, 'startsOnEnd', 'edgeStart'), (-1, 'endsOnEnd', 'edgeEnd')):
+            if not r.get(fl) and not r.get(ed) and bnd.distance(Point(s[k][0], s[k][2])) < EDGE_TOL:
+                r[ed] = True
+                out.append(r['name'])
+    return out
+
+
 def osm_joins(data):
     """(J13) A road end that OSM joins to another way (shared end node) but that ours leaves open: it stops 1-12 studs
     beside a carriageway (a street meeting a merged dual road's far carriageway, a slip ending beside a frontage
@@ -2140,6 +2160,7 @@ def main():
     # (J18) slip roads that ended on a merge absorbed just now (Lane #8112 on Bahan Road #2) merge into the widened road
     chained['absorb_merge2'] = roads05_absorb.absorb(data, merge_into=set(
         x['into'] for x in chained['absorb']['absorbed'] if x.get('merge')))
+    chained['edge_ends'] = edge_ends(data)  # (J34) map-edge ends roads05.py missed (1-3 studs off the region line)
     chained['width_taper'] = width_taper(data)
     chained['duplicates_dropped'] = drop_dups(data)
     chained['ring_clear'] = ring_clear(data)
@@ -2153,6 +2174,9 @@ def main():
     chained['deck_feet'] = deck_feet(data)  # (J28) the road's cut stretch follows its deck's plan
     chained['deck_foot_ends'] = deck_foot_ends(data)  # (J29) no road ends on a deck's foot
     chained['fork_trim'] = fork_trim(data)  # (J20) before the mouths: a trimmed fork record is a mouth now
+    # (J34) again on the final plan: the deck / side / fork steps moved ends after the first pass (Lane #544 on Dhobi
+    # Street 3 #2's U-turn, Lane #5161 on Lane #5162's bend stayed 8.5 / 1.2 short: QA mouth_short)
+    chained['osm_joins2'] = osm_joins(data)
     print('chain', json.dumps(chained))
     roads = data['roads']
     cutd = {k: set(v) for k, v in data['cut'].items()}
@@ -2232,7 +2256,8 @@ def main():
             need = 0.0
             reach = max(max(x[6] + x[7] for x in roads[big]['s']), 20.0)
             ok = True
-            for side, h in ((-1, q[6]), (1, q[7])):
+            # (J34) the centre too: an end whose edges lie on the bigger road but whose centre sits in a concave bend 1-2 off it
+            for side, h in ((-1, q[6]), (0, 0.0), (1, q[7])):
                 e = np.array([q[0], q[2]]) + right * side * h
                 if G.contains(Point(e)):
                     continue

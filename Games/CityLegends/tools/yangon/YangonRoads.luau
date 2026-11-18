@@ -1860,9 +1860,15 @@ local function pastInner(c, px: number, pz: number): boolean
 	return sO * cross2(bx - ax, bz - az, px - ax, pz - az) <= 0
 end
 
+-- (J34) a ring corner's wedge reached across its narrow arm to the far kerb (Lane #3357 at Roundabout 4): only up to the arm's centre line
+local function armNear(c, px: number, pz: number): boolean
+	local ux, uz = c.tax - c.ox, c.taz - c.oz
+	local L = hyp(ux, uz)
+	return L < 1e-6 or ((px - c.ox) * ux + (pz - c.oz) * uz) / L <= L + M.halfAt(M.R[c.road], c.ka or 1)
+end
 function M.inCorner(px: number, pz: number): boolean
 	for _, c in cornersAt(px, pz) do
-		if inWedge(c, px, pz, 0, c.rout) and pastInner(c, px, pz) and (c.ring or inCornerPoly(c, px, pz, 1.0)) then
+		if inWedge(c, px, pz, 0, c.rout) and pastInner(c, px, pz) and (if c.ring then armNear(c, px, pz) else inCornerPoly(c, px, pz, 1.0)) then
 			return true
 		end
 	end
@@ -3454,6 +3460,14 @@ function M.scrub(remove: boolean)
 		keep.Name = "YangonScraps"
 		keep.Parent = SS
 	end
+	-- (J34, univ_kabaraye: Kabar Aye #6's kerb went as "on Lane #1256", whose data runs on past its mouth on #6) a mouth
+	-- road's data past its mouth is not built: never scrub its host's pieces with it
+	local mOn = {}
+	for _, m in M.mouths do
+		if not m.ring then
+			mOn[m.road .. "|" .. tostring(m.on)] = true
+		end
+	end
 	for _, f in M.folder():GetChildren() do
 		for _, p in f:GetChildren() do
 			if (p.Name == "Kerb" or p.Name == "Pavement") and p:IsA("BasePart") then
@@ -3472,7 +3486,7 @@ function M.scrub(remove: boolean)
 							break
 						end
 					end
-					if not mine and o.name ~= f.Name and M.onCarriageway(o, b[2], pos.X, pos.Z, 0.6) then
+					if not mine and o.name ~= f.Name and not mOn[o.name .. "|" .. f.Name] and M.onCarriageway(o, b[2], pos.X, pos.Z, 0.6) then
 						found += 1
 						local key = f.Name .. " on " .. o.name
 						byRoad[key] = (byRoad[key] or 0) + 1

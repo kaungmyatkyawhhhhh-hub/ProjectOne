@@ -1,3 +1,38 @@
+# roads05 handover (18 Nov 2026, thirtieth pass: J34, BUILDER agent; YangonRoads + roads05_fix + Studio 17 spots)
+
+## J34 -- built-surface totals, T.qa, J33 real-data baseline (rev 203) -> J34 (rev 204), 17 spots: 18 / 191 / 37 / 77 / 11 (pave_gap 104) -> 18 / 177 / 37 / 77 / 11 (pave_gap 97)
+Note + table + shot: vault `City Legends/2026-11-18 roads05 J34 studio check.md`. J33's reported 17 / 193 / 107 used injected data; the real J33
+data (991fe6e6) measures 18 / 191 / 104 (pazundaung_y 1 / 3 / 0 / 0 / 0 / 3). Studio: main "City Legends", rev 204 = J34 data + repo builder
+(ClaudeTools.YangonRoads 1649579739, 196,364 chars: ~3.6k left under 200k; a helper module is next if more goes in). Scratch cleaned,
+saved as version 1347, lock released. Data backups `roads_J33.json` / `paint_J33.json`.
+- **Kept (YangonRoads.inCorner `armNear`):** a ring corner's zone stops at its arm's centre line (the ring branch skipped inCornerPoly, so the
+  wedge alone reached across narrow Lane #3357 and took its far kerb + pavement). roundabout4 kg 38 -> 25, pave_gap 21 -> 14 (Lane #3357, #115).
+- **Kept (YangonRoads.scrub `mOn`):** a non-ring mouth road's data past its mouth no longer scrubs its host's kerb / pavement (Kabar Aye #6's
+  east kerb by Lane #1256: univ_kabaraye kg 31 -> 29). With ring mouths included roundabout4 went 25 -> 30: ring mouths keep the old rule.
+  deck_run kg 9 -> 10 = one U Wisara #2 / #3 cell moved half a stud.
+- **Kept (roads05_fix, pipeline J34a):** `edge_ends` (ends within 3 of the district outline are map-edge ends: Insein Road + 4), mouth run-on
+  also tests the end's centre (Lane #5161), `osm_joins2` after fork_trim (Lane #35, Tha Yat Taw 4 Street cut back). roads.json ca2aa236,
+  paint.json 1d4e6c10, mouthsim 0 failed of 11571, QA mouth_short real 4 -> 2, the rest + paint QA = J33. Version line written.
+- **Tried + reverted:** Pazundaung Y west corner: continuations of the bigger road not counted as "a third road" under P: no change (the
+  corner is lost elsewhere: not overlapDropped, not noCorner; next: log every `continue` in findCorners for that mouth, i0 79 on Upper #3 bigI 1).
+- **Bridge / Road #18 (OSM decided, not coded):** OSM: the Bridge (463191695) is layer 1, one-way, leaving the Banyar Dala bridge (= our Bo Min
+  Gaung Street deck, 60.6 high); Road #18 (478882258 -> 617123000 -> 685773003 ...) is the real GROUND road, one-way south. At the crossing the
+  ground carriageway is Road #18. Our Bridge samples 0-19 sit at ground (30.0) under the deck between Banyar Dala #2 / #3 and flare to half 35
+  (the Thamein Ba Yan junction): road on road with Road #18 for ~70 studs. A ramp off the deck would be 19% (60.6 -> 29.8 in ~160 studs).
+  Proposal: drop the Bridge's samples 0..~9 (inside the flare / under the deck) and start it as a continuation or mouth off the junction's
+  ground asphalt, with Road #18 kept whole; check rank order (a road that ends on another must be the smaller one).
+- **Lane #544 (mouth_short 8.5):** roads05_chain joins Dhobi Street 3 #2 through a ~140 deg U-turn node (TURN_ALONE 150; the OSM node is a
+  4-way with Lane #544's link 12.6 away, outside NODE 8), so the link never exists. Fix in chain: no join where another road's end lies
+  within ~15 of the node, then re-run the fix.
+- **Seen, not fixed:** univ_kabaraye Lane #1256 merge-nose notch (34433-34436, 28990); roundabout4 Sule Pagoda Road kerb cracks on the curve
+  (44927, 44912, 44895-44899: pavement shows through kerb-piece joins); Maha Bandula #2 / Lane #3357 / 32nd St island mess (35795-35823,
+  45072-45099); univ_kabaraye side lanes #1247 / #1248 / #1257 onto Kabar Aye #5 / #6.
+- **Not reached:** bahan NE island strip, Y east nose, deck_run U Wisara #5, kunchan Gyophyu Flyover, buried 11, pave_gap fill rule, pyay_univ
+  road steps, univ / kunchan regressions.
+- **Kit (Studio _G, lost on restart):** `_G.PATCH(find, repl)`, `_G.RELOAD()`, `_G.ONE(names)` (= T.runAll), `_G.SHOW()` (vs `_G.BASE`),
+  `_G.GN(x0, z0, x1, z1, step)` ray map (upper = road, lower = pavement, # kerb, + other), `_G.FL(spot, kind, box)` faults with both cells.
+  Calls over ~3 s of wait get cut ("Target is not reachable"): poll with task.wait(2-3).
+
 # roads05 handover (18 Nov 2026, twenty-ninth pass: J33, BUILDER agent; YangonRoads + roads05_fix + Studio 17 spots)
 
 ## J33 -- built-surface totals, T.qa (runner rev 202), J32 -> J33 (17 spots): 19 / 214 / 37 / 77 / 11 (pave_gap 105) -> 17 / 193 / 37 / 77 / 11 (pave_gap 107)
