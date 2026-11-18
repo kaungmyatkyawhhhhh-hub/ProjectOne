@@ -16,35 +16,30 @@
 local M = {}
 local MC = workspace.Yangon1to1.Landmarks.MyanmarCentre
 
-local function prefixOf(name: string): string
+-- the placed MeshParts are named by group only ("STL"): match a patched mesh by group + its old box centre (the patch
+-- keeps each mesh's box, so the name's centre is the placed part's position)
+local function boxOf(name: string): (string, Vector3, Vector3)
 	local p = string.split(name, "_")
-	return p[1] .. "_" .. (p[2] or "") .. "_"
+	return p[1], Vector3.new(tonumber(p[3]) / 100, tonumber(p[4]) / 100, tonumber(p[5]) / 100),
+		Vector3.new(tonumber(p[6]) / 100, tonumber(p[7]) / 100, tonumber(p[8]) / 100)
 end
 
 function M.swap(holding: Instance): string
-	local placed = {}
-	for _, d in MC.Meshes:GetDescendants() do
-		if d:IsA("MeshPart") then
-			placed[prefixOf(d.Name)] = d
-		end
-	end
 	local done = {}
 	for _, src in holding:GetDescendants() do
 		if src:IsA("MeshPart") then
-			local nm = src.Name:gsub("_Node$", "")
-			local dst = placed[prefixOf(nm)]
-			if dst then
-				local p = string.split(nm, "_")
-				local c = Vector3.new(tonumber(p[3]) / 100, tonumber(p[4]) / 100, tonumber(p[5]) / 100)
-				local s = Vector3.new(tonumber(p[6]) / 100, tonumber(p[7]) / 100, tonumber(p[8]) / 100)
-				if dst:GetAttribute("OldMeshId_esc") == nil then
-					dst:SetAttribute("OldMeshId_esc", dst.MeshId)
+			local grp, c, s = boxOf((src.Name:gsub("_Node$", "")))
+			for _, dst in MC.Meshes:GetDescendants() do
+				if dst:IsA("MeshPart") and dst.Name == grp and (dst.Position - c).Magnitude < 0.05 and (dst.Size - s).Magnitude < 0.05 then
+					if dst:GetAttribute("OldMeshId_esc") == nil then
+						dst:SetAttribute("OldMeshId_esc", dst.MeshId)
+					end
+					dst:ApplyMesh(src)
+					dst.Size = s
+					dst.CFrame = CFrame.new(c)
+					table.insert(done, grp)
+					break
 				end
-				dst:ApplyMesh(src)
-				dst.Size = s
-				dst.CFrame = CFrame.new(c)
-				dst.Name = nm
-				table.insert(done, nm)
 			end
 		end
 	end
