@@ -1836,6 +1836,17 @@ function M.inCorner(px: number, pz: number): boolean
 end
 
 -- the asphalt between the arc and P, the kerb and pavement along the arc, an edge line along it
+-- (J32) on another road's carriageway or kerb (not `own`'s, not a cut stretch)?
+local function onOther(own: string?, x: number, z: number): boolean
+	for oi, b in M.near(x, z, 3) do
+		local o = M.list[oi]
+		if o.name ~= own and not M.cut[o.name][b[2]] and polyDist(o, b[2], x, z) < M.sideHalf(o, b[2], x, z) + M.KERB_W then
+			return true
+		end
+	end
+	return false
+end
+
 function M.buildCorners()
 	local E = M.Roads.debugEdges
 	local pal = M.palette
@@ -2003,6 +2014,7 @@ function M.buildCorners()
 				continue
 			end
 			local tx, tz = if sd == "A" then c.tax else c.tbx, if sd == "A" then c.taz else c.tbz
+			local own = if sd == "A" then c.road else (c.big and c.big.name)
 			local nx, nz = (c.ox - tx) / math.max(c.r, 1e-6), (c.oz - tz) / math.max(c.r, 1e-6)
 			-- kerb line points from T outward (away from P), with their built heights
 			local run = { { tx, tz, if sd == "A" then yA else yB } }
@@ -2035,9 +2047,15 @@ function M.buildCorners()
 				local i1 = Vector3.new(bx + nx * w0, by + M.CURB_UP, bz + nz * w0)
 				local o0 = Vector3.new(a[1] + nx * wa, a[3] + M.CURB_UP, a[2] + nz * wa)
 				local o1 = Vector3.new(bx + nx * wb, by + M.CURB_UP, bz + nz * wb)
-				for _, tri in { { i0, o0, o1 }, { i0, o1, i1 } } do
-					if not M.Roads.sliver(tri[1], tri[2], tri[3]) then
-						made += M.Roads.triangle(tri[1], tri[2], tri[3], 6, pave, folder)
+				-- (J32, kerb_gap at merging links: Lane #7108 / #5482 into Banyar Dala #2) the taper widens towards a
+				-- 7.5 walk; in a narrow gore it ran over the next road's carriageway and kerb: cut it off there
+				for _, piece in (M.Roads.clipPieces({ i0, o0, o1, i1 }, function(v)
+					return onOther(own, v.X, v.Z)
+				end, 7)) do
+					for k = 2, #piece - 1 do
+						if not M.Roads.sliver(piece[1], piece[k], piece[k + 1]) then
+							made += M.Roads.triangle(piece[1], piece[k], piece[k + 1], 6, pave, folder)
+						end
 					end
 				end
 				d = d1
@@ -2049,7 +2067,7 @@ function M.buildCorners()
 		-- (J17, owner "jagged corner pavement": with r under the walk the corner's pavement ends in a point at O and
 		-- the two straight pavements' back edges meet in a sharp L at P' (both walks in from P): its tip is paved
 		-- too, up to the kerb arc moved by P' - P, so the back edge is one curve parallel to the kerb)
-		if c.r < math.max(c.wA, c.wB) - 0.5 and c.theta < math.rad(150) then
+		if c.r < math.max(c.wA, c.wB) - 0.5 and c.theta < math.rad(150) and c.theta > math.rad(60) then
 			local ux, uz = (c.tax - c.px) / math.max(hyp(c.tax - c.px, c.taz - c.pz), 1e-6), (c.taz - c.pz) / math.max(hyp(c.tax - c.px, c.taz - c.pz), 1e-6)
 			local vx, vz = (c.tbx - c.px) / math.max(hyp(c.tbx - c.px, c.tbz - c.pz), 1e-6), (c.tbz - c.pz) / math.max(hyp(c.tbx - c.px, c.tbz - c.pz), 1e-6)
 			local r = math.max(c.r, 1e-6)
