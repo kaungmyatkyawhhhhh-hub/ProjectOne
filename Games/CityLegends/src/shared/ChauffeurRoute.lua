@@ -65,10 +65,23 @@ local function midpoint(seg: Segment): Vector3
 	return CityLayout.sample(seg, seg.length / 2)
 end
 
+local building = false
 local function graph(): Graph
 	if cached then
 		return cached
 	end
+	-- (2026-11-19) yield before the heavy part: Chauffeur.init's task.spawn ran it inline, so RivieraTraffic.build
+	-- (4-5 s with the 1:1 lanes) counted against the server Main's own run and Studio's script timeout killed Main
+	-- (no spawn, no GUI); one build at a time, later callers wait for it
+	if building then
+		local t = os.clock()
+		repeat
+			task.wait()
+		until cached or os.clock() - t > 30
+		return cached :: Graph
+	end
+	building = true
+	task.wait()
 	local g = CityLayout.buildGraph()
 	local all = g.all
 	-- (owner, 2026-11-02: in Monaco the chauffeur said "Walk to a road first") the Riviera's lanes too,
