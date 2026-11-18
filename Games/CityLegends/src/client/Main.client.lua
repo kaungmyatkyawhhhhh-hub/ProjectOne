@@ -457,6 +457,9 @@ end)
 startStep("Jobs", function()
 	require(script.Parent:WaitForChild("JobsClient")).init() -- the Job Center screen, the job bar, job targets (2026-11-18)
 end)
+startStep("Offers", function()
+	require(script.Parent:WaitForChild("OffersClient")).init() -- (19 Nov) Starter Pack card, Double Pay link, store measuring
+end)
 startStep("Housing", function()
 	require(script.Parent:WaitForChild("HousingClient")).init() -- Legends Realty, claiming lots, the house menu
 end)
@@ -791,7 +794,7 @@ end)
 
 -- the dealer menu (owner, 2026-10-31: like Midnight Racing's, DealerMenu)
 local DealerMenu = require(script.Parent:WaitForChild("DealerMenu"))
-DealerOpen.OnClientEvent:Connect(function(carId: any)
+local function openDealer(carId: any)
 	if DealerMenu.isOpen() or UI.isGarageOpen() then
 		return
 	end
@@ -826,7 +829,13 @@ DealerOpen.OnClientEvent:Connect(function(carId: any)
 			requestDrive(id)
 		end,
 	}, if type(carId) == "string" then carId else nil)
-end)
+end
+DealerOpen.OnClientEvent:Connect(openDealer)
+-- (19 Nov, owner: easy to find) the HUD's DEALER button: the same screen from anywhere (buying and
+-- test drives are allowed away from the showroom; the server still checks them)
+UI.onDealerButton = function()
+	openDealer(nil)
+end
 
 -- the main menu (owner, 2026-11-02: big tiles, CAMPAIGN / CARS / STORE): the start screen, and
 -- from the HUD's MENU button (it replaced SETTINGS) while you play
@@ -967,6 +976,10 @@ if settings.HideKeys then
 	UI.toggleControls(false)
 end
 UI.onMenuButton = MainMenu.toggle
+-- (19 Nov) the HUD's SHOP button: the same as the cash pill's +
+UI.onShopButton = function()
+	UI.onCashPlus()
+end
 UI.onCashPlus = function()
 	if not MainMenu.isOpen() then
 		MainMenu.open(false)

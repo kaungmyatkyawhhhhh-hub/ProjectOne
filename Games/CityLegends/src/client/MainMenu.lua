@@ -55,6 +55,8 @@ local CareClient = require(script.Parent:WaitForChild("CareClient"))
 local CarUpgrades = require(script.Parent:WaitForChild("CarUpgrades"))
 
 local MainMenu = {}
+-- (19 Nov) the STORE's measuring and its "!" (OffersClient): ("tab") the tab shown, ("prompted", key) a buy window
+MainMenu.onStore = nil :: ((string, string?) -> ())?
 
 local player = Players.LocalPlayer
 
@@ -2232,6 +2234,9 @@ local function buildStore(page: Frame)
 				UI.toast("Garage Space: place a house with room for one more space first (Legends Realty)", SUB)
 				return
 			end
+			if MainMenu.onStore then
+				MainMenu.onStore("prompted", item.key)
+			end
 			if item.kind == "Pass" then
 				MarketplaceService:PromptGamePassPurchase(player, item.id)
 			else
@@ -2541,6 +2546,9 @@ switchTab = function(name: string)
 		end
 		setFocus(playFocus)
 	elseif name == "STORE" then
+		if MainMenu.onStore then
+			MainMenu.onStore("tab")
+		end
 		for _, f in storeFocus do
 			table.insert(focusList, f)
 		end

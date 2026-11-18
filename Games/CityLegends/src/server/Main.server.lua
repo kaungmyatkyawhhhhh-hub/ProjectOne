@@ -437,6 +437,8 @@ guard("Store", function()
 		Towers.send(player, { kind = "toast", text = msg, color = "accent" })
 	end })
 end)
+-- (19 Nov) the Starter Pack card at a right moment, the STORE's "!", Seen / Prompted / Bought events
+guard("Offers", function() require(script.Parent:WaitForChild("Offers")).init(ctx) end)
 guard("GemShowcase", function() require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe) end)
 
 local function despawn(player: Player)
@@ -665,10 +667,10 @@ end
 local tested: { [Player]: { [string]: boolean } } = {}
 local lastTest: { [Player]: number } = {}
 -- where a test from afar started: your own car comes back there
-testHome = {}
+local testHome: { [Player]: CFrame? } = {}
 -- a test car beside you (19 Nov): on the ground under your car, in front of you on foot, else on
 -- the nearest lane of the map
-testSpot = function(player: Player): CFrame?
+local function testSpot(player: Player): CFrame?
 	local car = getSession(player).car
 	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	if car and car.Parent and not player.Character then
@@ -730,6 +732,8 @@ TestDrive.OnServerInvoke = function(player: Player, carId: any)
 	local car = getSession(player).car
 	if not atDealer and not (car and car:GetAttribute("TestEnds")) then
 		testHome[player] = at
+	elseif atDealer then
+		testHome[player] = nil
 	end
 	spawnFor(player, carId, { test = true, at = at })
 	return { ok = true, seconds = Config.Dealership.TestSeconds }
@@ -1090,7 +1094,10 @@ RunService.Heartbeat:Connect(function(dt)
 				-- (2026-11-04: any car you own if the selected one is gone, or you'd be left with none)
 				local back = if profile then (if profile.Owned[profile.Selected] then profile.Selected else next(profile.Owned)) else nil
 				if back then
-					task.defer(spawnFor, player, back)
+					-- (a test from afar: back where you were when it started)
+					local home = testHome[player]
+					testHome[player] = nil
+					task.defer(spawnFor, player, back, if home then { at = home } else nil)
 				else
 					task.defer(despawn, player)
 				end

@@ -94,10 +94,13 @@ local function graph(): Graph
 	-- (2026-11-18: with the P1-P3 1:1 lanes this ran past the script timeout inside Chauffeur.init's task.spawn,
 	-- which killed the server's Main before players spawned: yield now and then)
 	local n = 0
+	-- (19 Nov, P7 lanes: 2,000 lanes between yields still hit the timeout) yield on time, not on a count
+	local t0 = os.clock()
 	for _, seg in all do
 		n += 1
-		if n % 2000 == 0 then
+		if os.clock() - t0 > 0.03 then
 			task.wait()
+			t0 = os.clock()
 		end
 		if seg.kind ~= "turn" then
 			local bx, bz = key(midpoint(seg))
@@ -113,8 +116,9 @@ local function graph(): Graph
 	local beside: { [Segment]: { Segment } } = {}
 	for _, seg in all do
 		n += 1
-		if n % 2000 == 0 then
+		if os.clock() - t0 > 0.03 then
 			task.wait()
+			t0 = os.clock()
 		end
 		if seg.kind == "turn" then
 			continue

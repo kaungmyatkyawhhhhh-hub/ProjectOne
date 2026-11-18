@@ -22,7 +22,7 @@ from shapely.ops import unary_union
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from geom3d import Geo, ccw, offset_poly, outward, ellipse, raster_boxes  # noqa: E402
+from geom3d import Geo, ccw, offset_poly, outward, ellipse, raster_boxes, _keep_spans  # noqa: E402
 import landmark_glb3d as LG  # noqa: E402
 
 ROOT = os.path.join(HERE, "..", "..", "..", "build", "landmarks", "myanmar_centre")
@@ -2008,6 +2008,136 @@ def shop_fit(name, area, front, centre, z, top_z, seed):
 
 OPEN_FLOORS = 4          # GF, 1F, 2F, 3F open onto the atrium; the 4th (rooftop level) is closed above it
 GALLERY = 8.0            # gallery walkway between the void and the shop fronts
+TONGUE_GAP = 0.15        # true studs between an escalator's end and its landing tongue (no face shared with the truss)
+ESC_HW = 3.0             # half an escalator's width (true studs)
+TONGUE_RAIL_CLEAR = 1.2  # true studs of tongue edge left without rail where the escalator's handrail curls over
+
+
+def landing_tongues(runs, slab, hole):
+    """1:1 (owner, 19 Nov 2026: "in myanmar plaza, some part of the elevator is not collidable and i fall off"): the
+    true-size escalators end 3-6 studs inside the 1.875x void, short of the gallery. Each upper-floor end gets a landing
+    tongue, the floor carried out from the gallery to the escalator's end, as wide as the escalator (ends side by side
+    share one). -> {floor k: [tongue]}, old frame; a tongue: "o" end point, "u" away from the escalator, "n" across,
+    "s" (s0, s1) across, "g0" / "L" its near / far end along u, "poly" the part over the void."""
+    S_ = X1.S
+    ends = {}
+    for p_lo, p_hi, z0, z1 in runs:
+        d = unit((p_hi[0] - p_lo[0], p_hi[1] - p_lo[1]))
+        for E, u, z in ((p_lo, (-d[0], -d[1]), z0), (p_hi, d, z1)):
+            if POD_Z.index(z) > 0:
+                ends.setdefault(POD_Z.index(z), []).append((E, u))
+    inner = slab.buffer(-0.45)
+    out = {}
+    for k, lst in sorted(ends.items()):
+        groups = []
+        for E, u in lst:
+            for gp in groups:
+                (E2, u2), n = gp[0], (-u[1], u[0])
+                dx, dy = E2[0] - E[0], E2[1] - E[1]
+                if u[0] * u2[0] + u[1] * u2[1] > 0.999 and abs(dx * u[0] + dy * u[1]) < 0.05 and \
+                        abs(dx * n[0] + dy * n[1]) < (2 * ESC_HW + 1.5) / S_:
+                    gp.append((E, u))
+                    break
+            else:
+                groups.append([(E, u)])
+        for gp in groups:
+            o, u = gp[0]
+            n = (-u[1], u[0])
+            ss = [(E[0] - o[0]) * n[0] + (E[1] - o[1]) * n[1] for E, _ in gp]
+            s0, s1 = min(ss) - ESC_HW / S_, max(ss) + ESC_HW / S_
+            g0 = TONGUE_GAP / S_
+
+            def P(t, s):
+                return (o[0] + u[0] * t + n[0] * s, o[1] + u[1] * t + n[1] * s)
+            L = g0 + 0.5
+            while L < 40 and not inner.contains(LineString([P(L, s0), P(L, s1)])):
+                L += 0.25
+            L += 0.5
+            poly = Polygon([P(g0, s0), P(L, s0), P(L, s1), P(g0, s1)]).intersection(hole)
+            if poly.geom_type != "Polygon":
+                poly = max(poly.geoms, key=lambda G: G.area)
+            out.setdefault(k, []).append({"o": o, "u": u, "n": n, "s": (s0, s1), "g0": g0, "L": L, "poly": poly})
+    return out
+
+
+def tongue_skip(tongues, inset):
+    """skip(p, q) for the void's ring at a tongue's root: the spans inside a tongue's band (its width less `inset` each
+    side) are left open."""
+    bands = []
+    for T in tongues:
+        o, u, n, (s0, s1), L = T["o"], T["u"], T["n"], T["s"], T["L"]
+        bands.append(Polygon([(o[0] + u[0] * t + n[0] * s, o[1] + u[1] * t + n[1] * s)
+                              for t, s in ((0.0, s0 + inset), (L + 2.0, s0 + inset), (L + 2.0, s1 - inset), (0.0, s1 - inset))]))
+
+    def skip(p, q):
+        seg = LineString([p, q])
+        spans = []
+        for B in bands:
+            hit = seg.intersection(B)
+            for G in getattr(hit, "geoms", [hit]):
+                if G.is_empty or G.geom_type != "LineString":
+                    continue
+                ts = sorted(seg.project(Point(c)) / seg.length for c in G.coords)
+                spans.append((ts[0], ts[-1]))
+        return spans
+    return skip
+
+
+def tongue_build(T, z, rail_ring):
+    """One landing tongue at floor height z (old frame): marble top, ceiling under it, the slab-edge fascia round its
+    open sides and end, the lit strip, posts, rail tube and glass along its two sides (glass 0.3 in, up to the void's
+    own glass ring `rail_ring`), and its collision (a slab box reaching back over the gallery, walls along the sides)."""
+    S_ = X1.S
+    o, u, n, (s0, s1), g0, L = T["o"], T["u"], T["n"], T["s"], T["g0"], T["L"]
+    poly = T["poly"]
+    g.capshape("MAR", poly, z)
+    g.capshape("CEL", poly, z - 1.5, down=True)
+    pts = ccw(list(poly.exterior.coords)[:-1])
+    hole_edge = LineString(list(rail_ring.exterior.coords))
+    for i in range(len(pts)):
+        p, q = pts[i], pts[(i + 1) % len(pts)]
+        m = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2)
+        tm = (m[0] - o[0]) * u[0] + (m[1] - o[1]) * u[1]
+        sm = (m[0] - o[0]) * n[0] + (m[1] - o[1]) * n[1]
+        if abs(tm - g0) < 1e-4:
+            g.wall("GFA", p, q, z - 1.5, z)                # the end, facing the escalator
+            continue
+        if min(abs(sm - s0), abs(sm - s1)) > 1e-4:
+            continue                                        # the root on the gallery's edge
+        g.wall("GFA", p, q, z - 1.5, z)
+        g.wall("LIT", p, q, z - 1.7, z - 1.5)
+        coll_wall(p, q, z, 2.4, 0.3)
+        # posts / tube along the edge, glass 0.3 in; all start clear of the escalator's handrail curl
+        e = unit((q[0] - p[0], q[1] - p[1]))
+        if (p[0] - o[0]) * u[0] + (p[1] - o[1]) * u[1] > (q[0] - o[0]) * u[0] + (q[1] - o[1]) * u[1]:
+            p, q, e = q, p, (-e[0], -e[1])                  # p at the escalator end
+        a = g0 + TONGUE_RAIL_CLEAR / S_
+        pa = (o[0] + u[0] * a + (p[0] - o[0] - u[0] * ((p[0] - o[0]) * u[0] + (p[1] - o[1]) * u[1])),
+              o[1] + u[1] * a + (p[1] - o[1] - u[1] * ((p[0] - o[0]) * u[0] + (p[1] - o[1]) * u[1])))
+        g.tube("STL", (pa[0], pa[1], z + 2.05), (q[0], q[1], z + 2.05), 0.22)
+        seg = math.dist(pa, q)
+        s = 0.0
+        while s < seg:
+            pp = (pa[0] + e[0] * s, pa[1] + e[1] * s)
+            g.box("STL", pp[0], pp[1], z, 0.15, 0.15, 2.0, math.atan2(e[1], e[0]), faces=("+x", "-x", "+y", "-y"))
+            s += 2.6
+        side = 1 if abs(sm - s1) < 1e-4 else -1             # glass 0.3 in from the edge, to the void's glass ring
+        gl = LineString([(pa[0] - n[0] * side * 0.3, pa[1] - n[1] * side * 0.3),
+                         (q[0] - n[0] * side * 0.3 + e[0] * 2.0, q[1] - n[1] * side * 0.3 + e[1] * 2.0)])
+        cut = gl.intersection(hole_edge)
+        if not cut.is_empty:
+            c = min(getattr(cut, "geoms", [cut]), key=lambda P_: gl.project(P_))
+            gc = list(gl.coords)
+            gb = (c.x, c.y)
+            # one-sided like the void's ring: the face looks out over the void
+            if side > 0:
+                g.wall("RAL", gc[0], gb, z, z + 1.9, inward=True)
+            else:
+                g.wall("RAL", gc[0], gb, z, z + 1.9)
+    # walkable: the slab reaching back over the gallery (the gallery's raster boxes stop up to 2 short of the edge)
+    tc = (g0 + L + 2.0) / 2
+    c = (o[0] + u[0] * tc + n[0] * (s0 + s1) / 2, o[1] + u[1] * tc + n[1] * (s0 + s1) / 2)
+    COLL.append((c[0], c[1], z - 1.5, L + 2.0 - g0, s1 - s0, 1.5, math.atan2(u[1], u[0])))
 
 
 def interior():
@@ -2087,22 +2217,33 @@ def interior():
         for G in ([slab] if slab.geom_type == "Polygon" else list(slab.geoms)):
             for h in G.interiors:
                 hh = ccw(list(h.coords)[:-1])
-                # a light-grey fascia 1.5 deep, a warm strip under it, frameless glass on top with steel posts and rail
+                # a light-grey fascia 1.5 deep, a warm strip under it, frameless glass on top with steel posts and rail;
+                # open where an escalator's landing tongue leaves the gallery (the fascia stays: hidden in the tongue)
+                tg = TONGUES.get(k, [])
+                cut_w, cut_g = tongue_skip(tg, 0.0), tongue_skip(tg, 0.3)
                 g.ring("GFA", hh, z - 1.5, z, inward=True)
-                g.ring("LIT", hh, z - 1.7, z - 1.5, inward=True)
-                g.ring("RAL", offset_poly(hh, 0.3), z, z + 1.9, inward=True)
+                g.ring("LIT", hh, z - 1.7, z - 1.5, inward=True, skip=cut_w)
+                g.ring("RAL", offset_poly(hh, 0.3), z, z + 1.9, inward=True, skip=cut_g)
                 perim = 0.0
                 for i in range(len(hh)):
                     p, q = hh[i], hh[(i + 1) % len(hh)]
-                    g.tube("STL", (p[0], p[1], z + 2.05), (q[0], q[1], z + 2.05), 0.22)
+                    spans = cut_w(p, q)
+                    for a_, b_ in _keep_spans(spans):
+                        pa_ = (p[0] + (q[0] - p[0]) * a_, p[1] + (q[1] - p[1]) * a_)
+                        pb_ = (p[0] + (q[0] - p[0]) * b_, p[1] + (q[1] - p[1]) * b_)
+                        g.tube("STL", (pa_[0], pa_[1], z + 2.05), (pb_[0], pb_[1], z + 2.05), 0.22)
+                        coll_wall(pa_, pb_, z, 2.4, 0.3)
                     seg = math.dist(p, q)
                     s = 0.0
                     while s < seg:
                         u = s / seg
                         pp = (p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u)
-                        g.box("STL", pp[0], pp[1], z, 0.15, 0.15, 2.0, math.atan2(q[1] - p[1], q[0] - p[0]), faces=("+x", "-x", "+y", "-y"))
+                        if not any(a_ - 1e-6 <= u <= b_ + 1e-6 for a_, b_ in spans):
+                            g.box("STL", pp[0], pp[1], z, 0.15, 0.15, 2.0, math.atan2(q[1] - p[1], q[0] - p[0]), faces=("+x", "-x", "+y", "-y"))
                         s += 2.6
-                    coll_wall(p, q, z, 2.4, 0.3)
+                for T in tg:
+                    if Polygon(hh).contains(T["poly"].representative_point()):
+                        tongue_build(T, z, Polygon(offset_poly(hh, 0.3)))
     # the void's ceiling under the closed 4th level: a beige-gold grid with big round lights, ringed by a wood cove
     zc = POD_Z[OPEN_FLOORS] - 1.5
     ring_pts = ccw(ellipse(cx, cy, ATR_RX, ATR_RY, 40))
@@ -2118,7 +2259,7 @@ def interior():
     g.ring("WOD", ring_pts, zc - 2.8, zc, inward=True)
     g.annulus("WOD", offset_poly(ring_pts, 0.01), offset_poly(ring_pts, -1.2), zc - 2.8, down=True) if False else None
 
-    # escalators: a side-by-side up / down pair GF-1F, then single runs crossing the void, direction alternating
+    # the escalators (RUNS, above)
     def escalator(p_lo, p_hi, z0, z1, wdt=6.0):
         if ONE:
             # 1:1: built at true size in a KEEP frame at the bottom landing, reaching the scaled top landing
@@ -2209,48 +2350,27 @@ def interior():
         # landing plates on the floors
         g.box("STL", p_lo[0] - d[0] * 1.6, p_lo[1] - d[1] * 1.6, z0, wdt, 3.2, 0.12, yaw + math.pi / 2)
         g.box("STL", p_hi[0] + d[0] * 1.6, p_hi[1] + d[1] * 1.6, z1, wdt, 3.2, 0.12, yaw + math.pi / 2)
-        # collision: a ramp of steps and the two sides
-        for k in range(nst):
-            t = flat + (k + 0.5) * tread
-            c = P(t, 0, 0)
-            zz = z0 + rise * (k + 1) / nst
-            COLL.append((c[0], c[1], zz - 2.0, tread + 0.3, 2 * step_hw, 2.0, yaw))
+        # collision (owner, 19 Nov 2026: "some part of the elevator is not collidable and i fall off"): one smooth ramp
+        # whose top runs through the middle of the step faces and meets each flat end flush, a landing box under the
+        # floor plate and the two flat steps at each end, and the two sides
+        TH = 1.5
+        slope = math.atan2(rise, slope_run)
+        ta, tb = flat - tread / 2, run - flat - tread / 2         # the ramp top is at z0 + 0.1 / z1 + 0.1 there
+        tm = (ta + tb) / 2 + math.sin(slope) * TH / 2
+        zm = z0 + 0.1 + rise / 2 - math.cos(slope) * TH / 2
+        c = P(tm, 0, 0)
+        COLL.append((c[0], c[1], zm - TH / 2, (tb - ta) / math.cos(slope), 2 * step_hw, TH, yaw, slope))
+        for t0, t1, zl in ((-3.2, flat, z0), (run - flat, run + 3.2, z1)):
+            c = P((t0 + t1) / 2, 0, 0)
+            COLL.append((c[0], c[1], zl + 0.1 - 1.0, t1 - t0, wdt, 1.0, yaw))
         for sgn in (1, -1):
             for a, b in zip(ts, ts[1:]):
                 c = P((a + b) / 2, sgn * (hw - 0.4), 0)
                 zl = min(line_z(a), line_z(b))
                 COLL.append((c[0], c[1], zl, b - a, 0.8, abs(line_z(b) - line_z(a)) + DECK + 2.0, yaw))
 
-    def chord(phi, run, off=0.0, r_out=1.8):
-        """Endpoints of a chord of the void (pushed r_out outside the ellipse at each end) centred at angle phi."""
-        best = None
-        for k in range(1, 400):
-            dlt = k * 0.0025
-            pa = (cx + (ATR_RX + r_out) * math.cos(phi - dlt), cy + (ATR_RY + r_out) * math.sin(phi - dlt))
-            pb = (cx + (ATR_RX + r_out) * math.cos(phi + dlt), cy + (ATR_RY + r_out) * math.sin(phi + dlt))
-            if math.dist(pa, pb) >= run:
-                best = (pa, pb)
-                break
-        pa, pb = best
-        nrm = unit(((pa[0] + pb[0]) / 2 - cx, (pa[1] + pb[1]) / 2 - cy))
-        return ((pa[0] - nrm[0] * off, pa[1] - nrm[1] * off), (pb[0] - nrm[0] * off, pb[1] - nrm[1] * off))
-    rise1, rise = POD_Z[1] - POD_Z[0], POD_Z[2] - POD_Z[1]
-    run1, run2 = rise1 * 1.73 + 4.8, rise * 1.73 + 4.8  # 30 degrees plus the two flat steps at each end
-    offs = (3.4, 9.8)
-    if ONE:
-        # true rises (16.5 / 15 studs), runs at 30 degrees, as old-frame chord lengths; the pair side by side
-        run1 = ((g.f(POD_Z[1]) - g.f(POD_Z[0])) * 1.73 + 4.8) / X1.S
-        run2 = ((g.f(POD_Z[2]) - g.f(POD_Z[1])) * 1.73 + 4.8) / X1.S
-        offs = (3.4, 3.4 + 6.6 / X1.S)
-    # GF-1F pair at the void's south end (up and down, side by side)
-    for off in offs:
-        pa, pb = chord(-math.pi / 2, run1, off=off)
-        escalator(pa, pb, POD_Z[0], POD_Z[1])
-    # 1F-2F at the north end (the other way), 2F-3F back at the south end
-    pa, pb = chord(math.pi / 2, run2, off=3.4)
-    escalator(pb, pa, POD_Z[1], POD_Z[2])
-    pa, pb = chord(-math.pi / 2, run2, off=3.4)
-    escalator(pb, pa, POD_Z[2], POD_Z[3])
+    for p_lo, p_hi, z0, z1 in RUNS:
+        escalator(p_lo, p_hi, z0, z1)
 
     # shops round the galleries on GF-3F: glass fronts (door in the middle), white fascia with a warm strip and a sign,
     # charcoal square columns, partitions to the outer wall, a caramel floor border, downlights in the gallery ceiling
