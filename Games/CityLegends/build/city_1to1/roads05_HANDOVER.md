@@ -1,3 +1,26 @@
+# roads05 handover (18 Nov 2026, twenty-eighth pass: J32, BUILDER agent; YangonRoads only + Studio 17 spots)
+
+## J32 -- built-surface totals, T.qa (runner rev 202), J31 -> J32 (17 spots): 19 / 253 / 37 / 77 / 11 (pave_gap 105) -> 19 / 214 / 37 / 77 / 11 (pave_gap 105)
+Note + table + 2 shots: vault `City Legends/2026-11-18 roads05 J32 studio check.md`. Studio: main "City Legends", rev 202 installed with the repo
+builder swapped into the pack before `T.install`; patches by find / replace: ClaudeTools.YangonRoads 1688280175 (= repo, 194,095 chars), Roads
+1407280218 (unchanged). Baseline re-measured = J31 exactly. Scratch cleaned, saved as version 1327. Commit 2787ab27.
+- **What the double_junction gore faults really were (ray map + the piece's triangle corners):** NOT the straight pavement (its sideZone there
+  already said drop). They were buildCorners' extras at each lane's corner onto Banyar Dala Road #2: the J20 TAPER (short arc keeps the wider
+  7.5 walk, the lane's 3-4 walk tapered back over 20 studs, laid with no zone) and the J17 CHIP (theta 32-33, r 0.5-3).
+- **Kept:** (1) no chip when theta <= 60 deg (a gore nose; slip_triangle kg 25 -> 15 alone); (2) the taper is cut by `onOther(own, x, z)` (another
+  road's carriageway + kerb, not cut) with `Roads.clipPieces` (double_junction kg 35 -> 24, slip_triangle 15 -> 10). Full run: deck_run 10 -> 9,
+  pyay_univ 17 -> 13, roundabout4 40 -> 38, univ_kabaraye 37 -> 31; nothing went up.
+- **Seen, not fixed:** bahan_ring Kan Yeiktha island (35407-35420, 38138-38153): the island fill has a 2-4 stud spike south into the asphalt and
+  no kerb on its road sides (data islands outline or buildIslands' ray kerb test); pazundaung_y (40981-40990, 43397-43412): a gore between
+  Bogyoke Aung San Road #2 ~2 / Upper Pazundaung #3 / Lower Pazundaung with nothing built (road next to empty ground).
+- **Not reached (in order):** those two; other kerb_gap clusters by close-up (roundabout4 Lane #3357 / Maha Bandula #2 and Lane #115,
+  univ_kabaraye Lane #1256, deck_run U Wisara #5, kunchan Gyophyu Flyover / Kun Chan #4); buried 11; Bridge start join to Road #18
+  (roads05_fix + builder road-end join; Road #18 starts at (39975.75, 32865.79), 14.9 east of the Bridge start, both running SW: a parallel
+  pair, so the fix's backward ray never meets it); pave_gap 105 fill; pyay_univ road_step; univ / kunchan regressions.
+- **Kit (in Studio _G, lost on restart):** `_G.PATCH(find, repl)` (unique find/replace on ClaudeTools.YangonRoads, prints length + checksum),
+  `_G.RELOAD2(after)`, `_G.GO(names)`, `_G.SHOW()` (base -> now per spot), `_G.GRID(spot, x0, z0, x1, z1, step, {folder = upper})` ray map.
+  To install rev 202 with the repo builder: LoadAsset, set `YangonToolsIn.YangonRoads.Source` to the current one, then `T.install(m)`.
+
 # roads05 handover (18 Nov 2026, twenty-seventh pass: J31, BUILDER agent; YangonRoads only + Studio 17 spots; stopped: context)
 
 ## J31 -- built-surface totals, T.qa (QA's J30 open-ground rule, runner re-packed = asset rev 202), J30 -> J31 (17 spots): 20 / 253 / 37 / 76 / 11 (pave_gap 105) -> 19 / 253 / 37 / 77 / 11 (pave_gap 105)
