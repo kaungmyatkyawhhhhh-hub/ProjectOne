@@ -28,6 +28,35 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## REBUILD progress (18 Nov, ROAD REBUILD agent): P1 + P2 swapped and saved, P3 not started
+State file: `build/city_1to1/rebuild_progress.json` (cells exported / baked / uploaded / swapped, Play tests). Vault note:
+`City Legends/2026-11-18 Road rebuild P1 P2 (J37 into the game).md`.
+- **Data:** `roads05_subset.py <net> RB12 P1 P2` (clip = P1 + P2 boxes, 1,783 roads) -> 50 `Roads05_*` modules (pack
+  `imports/sync/rebuild_RB12_data.rbxmx`, asset rev 209; checksums in `roads05_RB12/pack_checksums.txt`), `Y.load()` once,
+  then the modules were DELETED from the place (the loaded `_G.RY` kept building). Builder = J37 (checksums as above).
+- **Build:** real `YangonRoads.stepCell` (terrain writes as the builder does) per 3072 cell into
+  `Workspace.Yangon1to1.RoadsBuildRB`, `RoadBake05.collect`, pages out as zstd + base64 slices (`@Z<cell>_<first>_<k>_<n>@`,
+  EncodingService) -> `tools/yangon/city/roads05_grab.py` (only files newer than this run's first page!) ->
+  `roads05_RB12/pages/` as normal `@Q` pages. P1 = 3072 cells x9-11 z8-10 (985,207 parts); P2 = x9-12 z5-7 + 12x8.
+- **Bake:** `roads05_bake.py RB12 collect pages` then `R05_ONLY=<swap cells> ... bake`. P1 swap cells = 1536 cells x18-23
+  z16-21 (276 meshes, 26 glbs, 14,479 boxes); P2 = x18-24 z10-15 + 24x16 (304 meshes, 26 glbs, 11,516 boxes). A district's
+  edge does not fall on a 1536 cell: the cells are swapped whole, with the neighbour strip built from the same subset.
+- **Swap:** glbs -> Open Cloud Models (ids `roads05_RB12/upload_ids_P1.json`, `_P2.json`), collide pages as
+  `RColRB_<P>_k` modules (asset 133014134133489 rev 210 / 212) -> `YangonRoadMeshes.place` + `RoadBake05.collide` into
+  ServerStorage, then old cells + their boxes (by box centre cell) to `ServerStorage.RB_Old<P>`, new in, save, Play test,
+  backup deleted, save. Studio's `YangonRoadMeshes.LOOK` had no `LZ`: added in Studio (zebras).
+- **Trees:** 147 (P1) + 99 (P2) far-tree / bank-tree parts stood on the new carriageways: removed (ray to `RoadBox` R).
+- **Lanes:** `roads05_lanesubset.py <net> L123 P1 P2 P3` (roads cut to the districts) -> `roads05_lanes.py L123 --install`:
+  630 lanes, 1,447 links, 0 dead ends, Studio Shared synced (checksums equal). **P3 uses them on its OLD meshes: 6.6% of P3
+  lane points miss the old boxes** (P1 1.4%, P2 1.6% on the new ones): rebuild P3 next.
+- **Play tests (store CityLegends_test, put back, checked on the Server):** P1 and P2 PASS: cars on the new boxes (gap
+  1.3-2.0, Hledan deck, Pyay Road #7, YCC arrive spot), 28/28 NPC cars moving over road boxes, 53 EntranceRamps, 7/7 y1_
+  fast-travel spots on ground, no script errors.
+- **Open:** P3 (15 cells x9-13 z13-15; subset with P3 + neighbours); the client kit data (street props `Data_P*S`, kit trees
+  `Data_P*G`, walls) was made from the OLD road layout and can stand on the moved roads: regenerate from the J37 roads;
+  CollisionFidelity Box does not stick on road meshes (all 892 Default, harmless: no collision / query); the YCC lot
+  driveways now meet the raised YCC car-park plate at a step (YCC after shot); RoadVerge05 not re-run (grass edges).
+
 ## J37 -- built-surface totals, T.qa, J36 -> J37, 17 spots: 16 / 161 / 36 / 77 / 0 (pave_gap 95) -> 14 / 84 / 36 / 77 / 0 (pave_gap 94)
 Note + table + shot: vault `City Legends/2026-11-18 roads05 J37 studio check.md`. No data change. Nothing rose at any spot.
 - **Kept (`YangonRoads.kerbSeal`, after scrub in stepCell and step5):** every Pavement part's top triangle / face is read back

@@ -28,22 +28,32 @@
   "uploaded": "all 26 glbs: roads05_RB12/upload_ids_P1.json; collide pack = asset 133014134133489 rev 210",
   "placed_staging": false,
   "swapped": true,
-  "saved_version": 1398,
+  "saved_version": "1400 + backup delete save (save timed out then NotNeeded)",
   "lanes": "L123 (P1+P2+P3 cut, J37 data): 630 lanes, 1447 links, 0 dead ends; src/shared + Studio Shared synced (checksums equal)",
-  "playtest": null,
+  "playtest": "PASS 18 Nov (store CityLegends_test, put back to v1, checked on Server): car drove P1 roads + Hledan deck on new RCol (gap 1.3-2.0), 28/28 NPC cars moving over road boxes in P1, 53 EntranceRamps, 7 y1_ fast-travel spots on ground, no script errors (only CDN HTTP 502). Lane check: 8853 P1 lane points, 126 without a box (junction gaps, terrain within 3 for 93), 5 height-off.",
   "glb": "imports/sync/rebuild_P1_glb (26), collide rbxmx imports/sync/rebuild_P1_collide.rbxmx (7 modules RColRB_P1_k)",
   "note": "old P1 cells/boxes backup in ServerStorage.RB_OldP1 until Play test passes; YangonData.Roads05_* deleted (re-PATCH imports/sync/rebuild_RB12_data.rbxmx + LoadAsset to rebuild); CollisionFidelity on road meshes does not stick (892 meshes incl. old ones are Default)",
-  "trees_on_road": "147 far-tree / bank-tree parts on new carriageways moved to ServerStorage.RB_OldP1.TreesOnRoad"
+  "trees_on_road": "147 far-tree / bank-tree parts on new carriageways moved to ServerStorage.RB_OldP1.TreesOnRoad",
+  "backup_deleted": true
  },
  "P2": {
   "exported": [
    "9x7:12",
    "10x7:6",
    "11x7:25",
-   "12x7:22"
+   "12x7:22",
+   "9x6:23",
+   "10x6:18",
+   "11x6:27",
+   "12x6:25",
+   "9x5:31",
+   "10x5:15",
+   "11x5:27",
+   "12x5:9",
+   "12x8:14"
   ],
-  "baked": false,
-  "swapped": false,
+  "baked": "304 meshes / 26 glbs / 11516 boxes",
+  "swapped": "old 39 cells + 9126 boxes -> ServerStorage.RB_OldP2; new 42 cells 304 meshes + 11516 boxes; 99 tree parts off new carriageways",
   "cells3072": [
    "9x5",
    "9x6",
@@ -59,12 +69,17 @@
    "12x7",
    "12x8"
   ],
-  "swap_cells": "1536 cols 18..24 rows 10..15 + 24x16 (+any old Cell_ in that range)"
+  "swap_cells": "1536 cols 18..24 rows 10..15 + 24x16 (+any old Cell_ in that range)",
+  "uploaded": "roads05_RB12/upload_ids_P2.json; collide = asset 133014134133489 rev 212",
+  "lanes": "L123 installed with P1 (covers P2)",
+  "playtest": "PASS 18 Nov (store test -> v1, checked on Server): car at YCC GGFest arrive spot on ground, drove YCC lot + Pyay Road #7 on new R boxes (gap 1.7), 28/28 NPC moving, 53 EntranceRamps, 7/7 y1_ fast travel on ground, no script errors. Lane check P2: 10721 points, 176 without a box (135 with terrain within 3).",
+  "backup_deleted": true,
+  "saved": "saved after swap and after backup delete (save calls timed out, then NotNeeded)"
  },
  "P3": {
-  "exported": [],
-  "baked": false,
-  "swapped": false
+  "status": "NOT STARTED (context). Old P3 cells still in place. Lanes L123 already use J37 data for P3: 6.6% of P3 lane points are not on the old P3 boxes -> rebuild P3 next.",
+  "cells3072": "x9..13 z13..15 (old 16 Nov build: 15 cells); new subset needed: roads05_subset.py <net> RB3 P3; swap set = old Cell_ with z 26..31 (check the list in Studio)"
  },
- "note2": "pages: zstd+base64 slices (@Z) since 9x9 p8; grabber tools/yangon/city/roads05_grab.py"
+ "note2": "pages: zstd+base64 slices (@Z) since 9x9 p8; grabber tools/yangon/city/roads05_grab.py",
+ "cleanup": "Studio: no Roads05 data modules, no RB_ folders, no build root, YangonScraps gone; store CityLegends_v1"
 }

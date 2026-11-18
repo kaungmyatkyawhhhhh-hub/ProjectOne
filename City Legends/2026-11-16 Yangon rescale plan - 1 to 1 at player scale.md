@@ -769,3 +769,9 @@ Rules for every step:
   - Studio test build of 3 junctions (scratch folder 400 studs up, deleted after, place saved v1155): builder mouth failures 2 (University Ave x Kabar Aye), 1 (Hanthawaddy: Hanthawaddy Road #2 on Hanthawaddy Road), 3 (Pyay Road x University Ave: Insein Road, Hledan Road #3, University Avenue Road on the side lane Pyay Road #11); grass scraps poke out round the Pyay x University junction. Pictures: [[2026-11-17 Junction test - University Ave x Kabar Aye (Studio, from above).jpg]], [[2026-11-17 Junction test - Hanthawaddy Roundabout (Studio, from above).jpg]], [[2026-11-17 Junction test - Pyay Road x University Ave (Studio, from above).jpg]].
   - Next: mouths onto side lanes and end-to-end joins the builder treats as mouths (roads05_fix skips them), kerb_cross spots, the 12 overlaps; paint + paint checks on the new network were still running.
 
+
+## Road rebuild from J37 (18 Nov 2026, P1 + P2 swapped and saved; P3 next)
+- **Done:** the game's 1:1 roads in **P1** (Myanmar Plaza, Kabar Aye, Hledan, Inya) and **P2** (YCC / GGFest, Pyay Road south) are the J37 roads05 build now: 78 mesh cells (580 meshes) and 25,995 collision boxes replaced whole, old ones deleted after the Play tests passed. Lanes for P1-P3 from the J37 data (630 lanes, 0 dead ends). Trees that stood on the moved carriageways taken out (246 parts).
+- **Play tests (test store, put back):** P1 and P2 pass: driving on the new roads (flyover included), 28 NPC cars moving, 53 entrance ramps, all 7 fast-travel spots on ground, no script errors.
+- **Next:** P3 (downtown, 15 cells); its lanes already use the new data and 6.6% of them miss the old P3 roads until it is rebuilt. Then the street props / kit trees from the new road layout.
+- Details: [[2026-11-18 Road rebuild P1 P2 (J37 into the game)]], `build/city_1to1/roads05_HANDOVER.md` (REBUILD progress), `build/city_1to1/rebuild_progress.json`.
