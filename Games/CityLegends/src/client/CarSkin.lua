@@ -28,6 +28,7 @@ local CarMesh = require(Shared:WaitForChild("CarMesh"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local Config = require(Shared:WaitForChild("Config"))
+local Plates = require(Shared:WaitForChild("Plates"))
 local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
 local TailLights = require(script.Parent:WaitForChild("TailLights"))
@@ -3029,15 +3030,10 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		sg.LightInfluence = 1
 		sg.MaxDistance = 90
 		sg.Parent = plate
-		local text = Instance.new("TextLabel")
-		text.BackgroundTransparency = 1
-		text.Size = UDim2.fromScale(1, 1)
-		text.Font = Enum.Font.GothamBlack
-		text.TextScaled = true
-		text.TextColor3 = Color3.fromRGB(20, 26, 60)
+		-- (2026-11-19) the Myanmar plate (Plates.draw); a car with no Plate (showcases) gets a random one
 		local plateText = model:GetAttribute("Plate")
-		text.Text = if type(plateText) == "string" then plateText else "CTYLGND"
-		text.Parent = sg
+		local kind = model:GetAttribute("PlateKind")
+		Plates.draw(sg, if type(plateText) == "string" then plateText else Plates.roll(Random.new()), if type(kind) == "string" then kind else nil)
 	end
 
 	-- exhaust tips in root space (Driving puts the backfire flames there)

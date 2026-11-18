@@ -426,6 +426,8 @@ guard("Challenges", function() require(script.Parent:WaitForChild("Challenges"))
 guard("GGFest", function() require(script.Parent:WaitForChild("GGFest")).init(ctx) end)
 local Customs = require(script.Parent:WaitForChild("Customs"))
 guard("Customs", function() Customs.init(ctx) end)
+local PlateShop = require(script.Parent:WaitForChild("PlateShop"))
+guard("PlateShop", function() PlateShop.init(ctx) end) -- (2026-11-19) Myanmar number plates, the Plate Office
 -- the Legends Gem Showcase, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
 -- Rewards (the daily reward, gifts, the wheels; it replaced the casino, 2026-11-03)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
@@ -493,11 +495,12 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 
 	local spec = Cars.get(carId)
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
-	model:SetAttribute("Plate", string.upper(player.Name):gsub("[^%w]", ""):sub(1, 7))
-	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (and its own plate)
+	PlateShop.applyTo(player, model, carId, opts) -- (2026-11-19) its Myanmar number plate
+	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (an event plate goes over it)
 	if opts and opts.job then
 		Customs.setOn(model, opts.look or {})
 		model:SetAttribute("JobCar", opts.job)
+		PlateShop.applyJob(model, opts.job) -- (taxis / YBS: red hire plates)
 	end
 	if not stolen and not test then
 		CarLevels.applyTo(player, model, carId) -- its performance parts (Driving drives them)

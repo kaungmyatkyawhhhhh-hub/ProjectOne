@@ -23,6 +23,8 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Plates = require(Shared:WaitForChild("Plates"))
+local Strings = require(Shared:WaitForChild("Strings"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
@@ -324,9 +326,10 @@ local function paintCar(model: Model, look: Look)
 	local plate = model:GetAttribute("Plate")
 	local plateText = model:FindFirstChild("PlateText", true)
 	if plateText and type(plate) == "string" then
-		local label = plateText:FindFirstChildWhichIsA("TextLabel", true)
-		if label then
-			label.Text = plate
+		local sg = plateText:FindFirstChildWhichIsA("SurfaceGui")
+		local kind = model:GetAttribute("PlateKind")
+		if sg then
+			Plates.draw(sg, plate, if type(kind) == "string" then kind else nil) -- (2026-11-19 Myanmar plates)
 		end
 	end
 	-- headlights
@@ -841,27 +844,22 @@ local function open()
 	end
 	choices(section("HEADLIGHTS", CU.Prices.head), headItems)
 
-	local plateSec = section("NUMBER PLATE", CU.Prices.plate)
-	local box = new("TextBox", {
-		LayoutOrder = 1,
-		Size = UDim2.new(1, 0, 0, 36),
-		BackgroundColor3 = Color3.fromRGB(236, 236, 230),
+	-- (2026-11-19) number plates: their own screen (PlateClient; fancy numbers at the Plate Office)
+	order += 1
+	local plateBtn = new("TextButton", {
+		LayoutOrder = order,
+		Size = UDim2.new(1, -6, 0, 44),
+		BackgroundColor3 = Theme.PanelLight,
 		Font = Enum.Font.GothamBlack,
-		PlaceholderText = "YOUR PLATE",
-		Text = if type(look.plate) == "string" then look.plate else "",
-		TextSize = 20,
-		TextColor3 = Color3.fromRGB(20, 26, 60),
-		ClearTextOnFocus = false,
-	}, plateSec)
-	corner(box, 6)
-	box:GetPropertyChangedSignal("Text"):Connect(function()
-		local t = string.upper(box.Text):gsub("[^%w ]", ""):sub(1, 8)
-		if t ~= box.Text then
-			box.Text = t
-			return
-		end
-		look.plate = if #t > 0 then t else nil
-		changed()
+		Text = Strings.get("plates.customsButton"),
+		TextSize = 15,
+		TextColor3 = Theme.Accent2,
+		AutoButtonColor = true,
+	}, list)
+	corner(plateBtn, 8)
+	new("UIStroke", { Color = Theme.Accent2, Thickness = 1.5, Transparency = 0.3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, plateBtn)
+	plateBtn.Activated:Connect(function()
+		require(script.Parent:WaitForChild("PlateClient")).open()
 	end)
 
 	local busy = false
@@ -919,7 +917,6 @@ local function open()
 	end)
 	resetBtn.Activated:Connect(function()
 		look = copy(saved)
-		box.Text = if type(look.plate) == "string" then look.plate else ""
 		changed()
 	end)
 	closeBtn.Activated:Connect(finish)

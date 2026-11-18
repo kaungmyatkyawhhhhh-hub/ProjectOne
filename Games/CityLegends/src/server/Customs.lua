@@ -21,6 +21,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local WestLayout = require(Shared:WaitForChild("WestLayout"))
+local Plates = require(Shared:WaitForChild("Plates"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 local EntranceRamp = require(script.Parent:WaitForChild("EntranceRamp"))
 
@@ -65,7 +66,8 @@ local function plateText(v: any): string?
 	end
 	local t = string.upper(v):gsub("[^%w ]", ""):sub(1, 8)
 	t = t:gsub("^%s+", ""):gsub("%s+$", "")
-	return if #t > 0 then t else nil
+	-- (2026-11-19) number plates are the Plate Office's now (PlateShop): a look keeps only an event plate
+	return if Plates.EVENT[t] then t else nil
 end
 
 -- a look from anywhere (a save, a client) with only valid fields left
@@ -233,8 +235,12 @@ handlers.buy = function(player, raw, pay)
 	all[carId] = if next(new) then new else nil
 	Customs.setOn(car, new)
 	if not new.plate then
-		-- back to the player's own name plate
-		car:SetAttribute("Plate", string.upper(player.Name):gsub("[^%w]", ""):sub(1, 7))
+		-- back to the car's registered plate
+		local PlateShop = require(script.Parent:WaitForChild("PlateShop")) :: any
+		local plate = PlateShop.plateFor(player, carId)
+		if plate then
+			car:SetAttribute("Plate", plate)
+		end
 	end
 	task.spawn(PlayerData.save, player)
 	return { ok = true, cost = cost, cpCost = cpCost, cash = profile.Cash, look = new }

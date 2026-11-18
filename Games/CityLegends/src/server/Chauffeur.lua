@@ -102,7 +102,8 @@ local function buildCar(player: Player, carId: string, at: CFrame): Model
 	model.Name = "Chauffeur_" .. player.Name
 	model:SetAttribute("Rider", player.UserId)
 	model:SetAttribute("Chauffeur", true)
-	model:SetAttribute("Plate", "VIP")
+	model:SetAttribute("PlateKind", "taxi") -- (2026-11-19) a hire car: red Myanmar hire plate
+	model:SetAttribute("Plate", require(Shared:WaitForChild("Plates")).taxi(Random.new()))
 	local root = model.PrimaryPart :: BasePart
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") then
