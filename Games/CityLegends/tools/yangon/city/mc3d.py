@@ -2008,6 +2008,35 @@ def shop_fit(name, area, front, centre, z, top_z, seed):
 
 OPEN_FLOORS = 4          # GF, 1F, 2F, 3F open onto the atrium; the 4th (rooftop level) is closed above it
 GALLERY = 8.0            # gallery walkway between the void and the shop fronts
+# the car-park lift (owner, 19 Nov 2026: "make the escalators & elevators work ... also the one from underground
+# parking"): a shaft from the basement core (tools/yangon/MCBasement.luau) up through GF-3F. The floors and ceilings are
+# cut here; its walls, doors and car are Parts (tools/yangon/MCLift.luau) run by src/server/MallMovers.lua.
+LIFT_W = (20.2, 6.95, 27.8, 14.55)   # 1:1 model x0, y0, x1, y1 (world X 34895.2-34902.8, Z 27454.2-27461.8)
+
+
+def lift_rect():
+    return sbox(*[v / X1.S for v in LIFT_W]) if ONE and LIFT_W else Polygon()
+
+
+def cut_rect(boxes, r):
+    """Axis boxes (cx, cy, z0, sx, sy, sz, 0) with the rectangle r cut out exactly (up to 4 pieces each)."""
+    if r.is_empty:
+        return boxes
+    x0, y0, x1, y1 = r.bounds
+    out = []
+    for b in boxes:
+        cx, cy, z0, sx, sy, sz, yaw = b
+        bx0, by0, bx1, by1 = cx - sx / 2, cy - sy / 2, cx + sx / 2, cy + sy / 2
+        if bx1 <= x0 or bx0 >= x1 or by1 <= y0 or by0 >= y1:
+            out.append(b)
+            continue
+        mx0, mx1 = max(bx0, x0), min(bx1, x1)
+        for ax0, ay0, ax1, ay1 in ((bx0, by0, x0, by1), (x1, by0, bx1, by1), (mx0, by0, mx1, y0), (mx0, y1, mx1, by1)):
+            if ax1 - ax0 > 1e-6 and ay1 - ay0 > 1e-6:
+                out.append(((ax0 + ax1) / 2, (ay0 + ay1) / 2, z0, ax1 - ax0, ay1 - ay0, sz, yaw))
+    return out
+
+
 TONGUE_GAP = 0.15        # true studs between an escalator's end and its landing tongue (no face shared with the truss)
 ESC_HW = 3.0             # half an escalator's width (true studs)
 TONGUE_RAIL_CLEAR = 1.2  # true studs of tongue edge left without rail where the escalator's handrail curls over
@@ -2198,8 +2227,9 @@ def interior():
     TONGUES = landing_tongues(RUNS, IB.difference(ATR), ATR) if ONE else {}
 
     # floors: GF marble; slabs at 1F-3F with the void (1F also open over the lobby); the slab at the 4th level closed
-    g.capshape("MAR", IB, 0.05)
-    COLL.extend(raster_boxes(IB, -1.0, 0.05, 6.0))
+    LIFT = lift_rect()
+    g.capshape("MAR", IB.difference(LIFT), 0.05)
+    COLL.extend(cut_rect(raster_boxes(IB, -1.0, 0.05, 6.0), LIFT))
     for k, z in enumerate(POD_Z):
         if k == 0:
             continue
@@ -2209,9 +2239,10 @@ def interior():
                 slab = slab.difference(lobby)
         else:
             slab = IB
-        g.capshape("MAR", slab, z)
-        g.capshape("CEL", slab, z - 1.5, down=True)
-        COLL.extend(raster_boxes(slab, z - 1.5, z, 4.0))
+        lift_cut = LIFT if k < OPEN_FLOORS else Polygon()   # the shaft stops under the closed 4th level
+        g.capshape("MAR", slab.difference(lift_cut), z)
+        g.capshape("CEL", slab.difference(lift_cut), z - 1.5, down=True)
+        COLL.extend(cut_rect(raster_boxes(slab, z - 1.5, z, 4.0), lift_cut))
         if k >= OPEN_FLOORS:
             continue
         for G in ([slab] if slab.geom_type == "Polygon" else list(slab.geoms)):

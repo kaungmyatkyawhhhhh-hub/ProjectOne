@@ -9,7 +9,9 @@ it touches (MAR, CEL, GFA, LIT, RAL, STL; each is one interior mesh in mc1.glb) 
 the old / new escalator and ring collision boxes for Studio.
     git show 6a3ddcca:./mc3d.py > _mc3d_old.py   (the placed version, before this fix; delete it after)
     YANGON_SCALE=1to1 python mc_escalator_patch.py -> imports/sync/landmarks/mc1/mc1_escalators.glb (+ .json)
-Studio: tools/yangon/MCEscalators.luau swaps the meshes (MeshPart:ApplyMesh) and the collision boxes."""
+Studio: tools/yangon/MCEscalators.luau swaps the meshes (MeshPart:ApplyMesh) and the collision boxes.
+Lift mode (same day, the car-park lift's shaft cut through the floors / ceilings, mc3d.LIFT_W), on top of the above:
+    PATCH=lift YANGON_SCALE=1to1 python mc_escalator_patch.py -> mc1_lift.glb (+ .json), same Studio swap."""
 import importlib, json, math, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -24,9 +26,21 @@ GROUPS = {"CEL": "CEL_mc1s7_", "GFA": "GFA_mc1s15_", "LIT": "LIT_mc1s28_", "MAR"
           "RAL": "RAL_mc1s60_", "STL": "STL_mc1s74_"}
 
 
+LIFT = os.environ.get("PATCH") == "lift"
+BASE = os.path.join(D, "mc1_escalators.glb" if LIFT else "mc1.glb")
+OUT = os.path.join(D, "mc1_lift.glb" if LIFT else "mc1_escalators.glb")
+
+
 def build(tongues):
-    """tongues False: the mall as placed (mc3d.py of git HEAD~ before this fix, given as OLD_MC, a copy in this folder)."""
-    MC = importlib.import_module("mc3d" if tongues else os.environ.get("OLD_MC", "_mc3d_old"))
+    """tongues False: the mall as placed (mc3d.py of git HEAD~ before this fix, given as OLD_MC, a copy in this folder;
+    lift mode: mc3d.py without the shaft)."""
+    if LIFT:
+        import mc3d as MC
+        MC = importlib.reload(MC)
+        if not tongues:
+            MC.LIFT_W = None
+    else:
+        MC = importlib.import_module("mc3d" if tongues else os.environ.get("OLD_MC", "_mc3d_old"))
     assert MC.ONE, "run with YANGON_SCALE=1to1"
     MC.build()
     y0 = MC.LAY["ground"]["y0"]
@@ -52,6 +66,8 @@ def main():
     new, new_coll, _ = build(True)
     out, report = [], {}
     for grp, prefix in GROUPS.items():
+        if old[grp] == new[grp]:
+            continue
         so, sn = set(old[grp]), set(new[grp])
         removed = [t for t in old[grp] if t not in sn]
         added = [t for t in new[grp] if t not in so]
@@ -60,7 +76,7 @@ def main():
         for t in removed:
             c = cen(t)
             grid.setdefault((round(c[0]), round(c[2])), []).append(c)
-        name, c0, P, N, U, C, T = read(os.path.join(D, "mc1.glb"), prefix)
+        name, c0, P, N, U, C, T = read(BASE, prefix)
         m = Mesh()
         gone = kept = 0
         for k in range(0, len(T), 3):
@@ -102,7 +118,7 @@ def main():
     gone_b = [box_world(b, y0) for b in old_coll if tuple(round(v, 3) for v in b) not in kn]
     add_b = [box_world(b, y0) for b in new_coll if tuple(round(v, 3) for v in b) not in ko]
     print("collision boxes: drop", len(gone_b), "add", len(add_b))
-    path = os.path.join(D, "mc1_escalators.glb")
+    path = OUT
     info = write_glb(path, out)
     json.dump({"meshes": report, "info": info, "drop": gone_b, "add": add_b, "y0": y0}, open(path + ".json", "w"))
     for k, v in info.items():
