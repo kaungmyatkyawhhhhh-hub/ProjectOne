@@ -47,10 +47,10 @@ end)
 if not okArt then
 	Art = nil
 end
--- the Yangon map (build step 9, 2026-11-13; tools/yangon/d12_minimap.py), drawn beside Monaco's in the
--- same world-stud space while both maps are in the place
+-- the 1:1 Yangon map (2026-11-18, tools/yangon/city/minimap_1to1.py): detail tiles over an overview, in the
+-- same world-stud space (it is only data: loaded whether or not the map has streamed in yet)
 local okYArt, YArt = pcall(function()
-	return if Config.mapRoot() then require(script.Parent:WaitForChild("YangonMapArt", 3)) :: any else nil
+	return require(script.Parent:WaitForChild("YangonMapArt", 3)) :: any
 end)
 if not okYArt then
 	YArt = nil
@@ -131,12 +131,15 @@ local function ringRoad(parent: Instance, c: Vector3, r: number, width: number, 
 	s.Parent = f
 end
 
-type Tile = { label: ImageLabel, image: string, centre: Vector3 }
--- picture tiles of a map art module (MinimapArt's format) into `list`, over its backing colour
-local function artTiles(map: Frame, art: any, back: Color3, list: { Tile })
+type Tile = { label: ImageLabel, image: string, centre: Vector3, half: Vector2, whole: boolean }
+-- picture tiles of a map art module (MinimapArt's format) into `list`, over its backing colour (nil: no backing);
+-- `whole` marks the set the whole-map views load at once
+local function artTiles(map: Frame, art: any, back: Color3?, list: { Tile }, z: number?, whole: boolean?)
 	local x1 = art.x0 + art.tileStuds.X * art.cols
 	local z1 = art.z0 + art.tileStuds.Y * art.rows
-	rect(map, art.x0 - 6000, art.z0 - 6000, x1 + 6000, z1 + 6000, back, 1)
+	if back then
+		rect(map, art.x0 - 6000, art.z0 - 6000, x1 + 6000, z1 + 6000, back, 1)
+	end
 	for _, t in art.tiles do
 		local img = Instance.new("ImageLabel")
 		img.Name = "Tile"
@@ -145,16 +148,37 @@ local function artTiles(map: Frame, art: any, back: Color3, list: { Tile })
 		img.Position = UDim2.fromOffset(art.x0 + t.col * art.tileStuds.X, art.z0 + t.row * art.tileStuds.Y)
 		img.Size = UDim2.fromOffset(art.tileStuds.X + 1, art.tileStuds.Y + 1)
 		img.ScaleType = Enum.ScaleType.Stretch
-		img.ZIndex = 2
+		img.ZIndex = z or 2
 		img.Parent = map
-		table.insert(list, { label = img, image = t.image, centre = Vector3.new(art.x0 + (t.col + 0.5) * art.tileStuds.X, 0, art.z0 + (t.row + 0.5) * art.tileStuds.Y) })
+		table.insert(list, { label = img, image = t.image, centre = Vector3.new(art.x0 + (t.col + 0.5) * art.tileStuds.X, 0, art.z0 + (t.row + 0.5) * art.tileStuds.Y), half = art.tileStuds / 2, whole = whole ~= false })
+	end
+end
+-- the 1:1 Yangon map: the overview (whole P1-P12) under the sharp detail tiles of the districts in the game
+local function yangonTiles(map: Frame, list: { Tile })
+	if YArt.detail then
+		artTiles(map, YArt.overview, YArt.back, list, 2, true)
+		artTiles(map, YArt.detail, nil, list, 3, false)
+	else
+		artTiles(map, YArt, YArt.back, list)
+	end
+end
+-- puts the picture on each tile whose box comes within `reach` of `here` (a tile keeps it once loaded)
+local function loadNear(list: { Tile }, here: Vector3, reach: number)
+	for _, t in list do
+		if t.label.Image == "" then
+			local dx = math.max(math.abs(here.X - t.centre.X) - t.half.X, 0)
+			local dz = math.max(math.abs(here.Z - t.centre.Z) - t.half.Y, 0)
+			if dx * dx + dz * dz < reach * reach then
+				t.label.Image = t.image
+			end
+		end
 	end
 end
 local function drawMap(map: Frame): { Tile }
 	-- Yangon on its own (Monaco moved out, build step 11)
 	if YArt and not workspace:FindFirstChild("Riviera") then
 		local list = {}
-		artTiles(map, YArt, YArt.back, list)
+		yangonTiles(map, list)
 		return list
 	end
 	-- (Monaco only: just Monaco)
@@ -239,7 +263,7 @@ local function drawMap(map: Frame): { Tile }
 		local list = {}
 		artTiles(map, Art, COL.water, list)
 		if YArt then
-			artTiles(map, YArt, YArt.back, list)
+			yangonTiles(map, list)
 		end
 		return list
 	elseif workspace:FindFirstChild("Riviera") then
@@ -268,8 +292,13 @@ end
 -- instead just add a loading screen of the map"): returns the middle and size of what's worth
 -- showing (Legends Isle in the west to the Legends Loop in the east), in world studs
 function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
+	-- (the overview only: the detail tiles are for the minimap, and 30 more pictures would be a phone's memory)
 	for _, t in drawMap(frame) do
-		t.label.Image = t.image
+		if t.whole then
+			t.label.Image = t.image
+		else
+			t.label:Destroy()
+		end
 	end
 	-- the places' names, in world studs like the map (so they scale with it)
 	local function name(text: string, x: number, z: number)
@@ -289,7 +318,9 @@ function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 	-- Yangon (build step 9): its own frame
 	if YArt and Config.activeMap() == "Yangon" then
 		local m = YArt.map
-		name("INYA LAKE", 31600, 25000) -- (1:1, 2026-11-17)
+		name("INYA LAKE", 31500, 22600) -- (1:1, 2026-11-18)
+		name("KANDAWGYI", 37960, 37300)
+		name("DOWNTOWN", 36000, 41700)
 		return Vector2.new((m.x0 + m.x1) / 2, (m.z0 + m.z1) / 2), Vector2.new(m.x1 - m.x0, m.z1 - m.z0)
 	end
 	local z0 = CityLayout.roadCoord(0)
@@ -347,6 +378,17 @@ local LANDMARKS: { [string]: { glyph: string, color: Color3 } } = {
 	beach = { glyph = "☀", color = Color3.fromRGB(255, 220, 110) },
 	downtown = { glyph = "D", color = Color3.fromRGB(200, 200, 210) },
 	ggfest = { glyph = "G", color = Color3.fromRGB(236, 38, 150) }, -- (2026-11-17) GG Gaming Fest at YCC
+	-- the 1:1 Yangon landmarks (2026-11-18): pagodas gold, markets / malls pink, the roundabout white
+	y1_mmplaza = { glyph = "◆", color = Color3.fromRGB(255, 130, 200) },
+	y1_bogyoke = { glyph = "◆", color = Color3.fromRGB(255, 130, 200) },
+	y1_sule = { glyph = "▲", color = Color3.fromRGB(255, 205, 80) },
+	y1_kabaaye = { glyph = "▲", color = Color3.fromRGB(255, 205, 80) },
+	y1_botataung = { glyph = "▲", color = Color3.fromRGB(255, 205, 80) },
+	y1_roundabout = { glyph = "○", color = Color3.fromRGB(230, 230, 240) },
+}
+-- landmarks with no fast-travel spot (world studs, 1:1 frame: city/landmarks.json through geo.world)
+local MAP_ONLY = {
+	{ glyph = "▲", color = Color3.fromRGB(255, 205, 80), pos = Vector3.new(32989, 0, 37246) }, -- Shwedagon Pagoda
 }
 
 ---------------------------------------------------------------------
@@ -455,13 +497,6 @@ function Minimap.start()
 	local tiles = drawMap(map)
 	-- only the tiles near you get their picture (checked twice a second), and keep it once loaded
 	local tileCheck = 0
-	local function loadTilesNear(here: Vector3, reach: number)
-		for _, t in tiles do
-			if t.label.Image == "" and (Vector3.new(here.X, 0, here.Z) - t.centre).Magnitude < reach then
-				t.label.Image = t.image
-			end
-		end
-	end
 
 	-- blips (upright, placed by hand each frame)
 	local layer = Instance.new("Frame")
@@ -481,6 +516,11 @@ function Minimap.start()
 		end
 		if style then
 			table.insert(fixed, { frame = makeBlip(layer, style.glyph, style.color, 14, 21), pos = pl.cf.Position, edge = false })
+		end
+	end
+	if YArt and YArt.detail then
+		for _, m in MAP_ONLY do
+			table.insert(fixed, { frame = makeBlip(layer, m.glyph, m.color, 14, 21), pos = m.pos, edge = false })
 		end
 	end
 	-- Legends Service and the Riviera Fuel stations
@@ -865,13 +905,16 @@ function Minimap.start()
 		return if character then character:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
 	end
 	local function openFull()
-		for _, t in fullTiles do
-			t.label.Image = t.image
-		end
 		fitWindow()
 		local part = myPart()
 		center = if part then part.Position else Vector3.zero
 		fscale = winSize / 2600
+		for _, t in fullTiles do
+			if t.whole then
+				t.label.Image = t.image
+			end
+		end
+		loadNear(fullTiles, center, winSize / fscale)
 		fullGui.Enabled = true
 	end
 	local function closeFull()
@@ -928,6 +971,10 @@ function Minimap.start()
 		end
 		fzoom.Scale = fscale
 		fmap.Position = UDim2.fromOffset(-center.X, -center.Z)
+		-- the detail tiles in view (dragged or zoomed to) get their pictures; far out the overview is enough
+		if fscale > 0.08 then
+			loadNear(fullTiles, center, winSize / fscale)
+		end
 		local function put(f: GuiObject, p: Vector3)
 			local x, y = (p.X - center.X) * fscale, (p.Z - center.Z) * fscale
 			f.Visible = math.abs(x) < winSize / 2 and math.abs(y) < winSize / 2
@@ -1007,7 +1054,8 @@ function Minimap.start()
 		tileCheck -= dt
 		if tileCheck <= 0 then
 			tileCheck = 0.5
-			loadTilesNear(here, 2600)
+			-- (2026-11-18: by the tile's box, not its middle; the 1:1 tiles are 5,120 studs wide and never came near)
+			loadNear(tiles, here, 2600)
 		end
 		-- zoom out with speed
 		local mph = Config.spsToMph(Driving.getSpeed())

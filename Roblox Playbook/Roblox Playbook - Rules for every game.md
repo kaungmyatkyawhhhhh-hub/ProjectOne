@@ -41,6 +41,7 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 ## 6. Performance (cheap Android phones are most players)
 - Targets: ~1,000 draw calls, ~1M triangles, 16.7 ms/frame. Test on a real low-end phone (emulator lies about memory).
 - No Glass, no partly-transparent parts (0 or 1), few lights and only in the area you're in, no shadows on props, textures ≤512 px, streaming on, SurfaceGui MaxDistance set, reuse meshes.
+- Map pictures (minimap / world map, 18 Nov 2026, City Legends): tiles 1024 x 512 or smaller (1024 x 1024 never loaded); load a tile when your position is near its BOX, not its middle (big tiles never came near and the map stayed blank); the whole-map view loads only a small overview set, the minimap only the sharp tiles around you. 3-6 studs a pixel near roads stays sharp.
 - Scripts: no loops over everything every frame; check "player still here?" after waits; disconnect what you connect; clear tables on leave.
 - Data: ProfileStore (session lock), save on leave/shutdown/purchase, `pcall` + retries. Server decides everything; check every remote (types, `math.isfinite`, rate limits).
 
