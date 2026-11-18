@@ -51,6 +51,7 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 - Read prices from Roblox (`GetProductInfo`), never type them in (Managed Pricing changes them).
 - Grant developer products only in `ProcessReceipt`, save before confirming, never twice.
 - Small catalogue with clear benefit names ("2x Coins", "Auto Train"), exact effect in the description, first pass under 400 Robux (the 400-Robux bundle), icons 512x512 (passes show as a circle). Never sell race wins or paid luck that decides fights.
+- Jobs / paychecks (18 Nov 2026, City Legends): the server runs the duty clock and pays. Active jobs pay mostly per task, with a small paycheck that only ticks while you do the job and stops after ~2.5 min with no task done, so there's no AFK pay. Posts pay ~1/3 of active, need the player within ~12 studs of the post (server check every second), and are capped per day. A task leg done faster than distance / top car speed is refused (stops teleport farming). Read a pass from a player attribute the store module sets, nil-safe, plus a Studio-only test attribute.
 
 ## 8. Updates and live ops
 - One fixed weekly slot: **Saturday 15:00 UTC (21:30 Myanmar)**. Ship the build early with new content hidden behind a **Config**, switch it on at the time (Configs go live in 15-60 s).

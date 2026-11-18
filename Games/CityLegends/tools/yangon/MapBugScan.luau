@@ -93,8 +93,8 @@ function S.overRoads(apply: boolean)
 	return found, cleared
 end
 
--- near the flyovers: every 4-stud column within REACH of a deck (D box) in the area. Ground level G = the highest
--- R / P box top (not a deck) within 24 studs of the column, else the lowest within REACH. Terrain voxels whose
+-- near the flyovers: every 4-stud column within REACH of a deck (D box) in the area. Ground level G = the lowest
+-- R / P / M box top within 24 studs of the column (columns with none are left). Terrain voxels whose
 -- middle is over G + 4, or that sit on air (a gap of 4+ studs under them), are stray.
 local REACH = 60
 function S.nearDecks(apply: boolean)
@@ -147,17 +147,8 @@ function S.nearDecks(apply: boolean)
 					lowest = if lowest then math.min(lowest, top) else top
 				end
 			end
+			-- only columns with a road / pavement within 24 studs: open ground further out keeps its own shape
 			G = lowest
-			if not G then
-				local wide = workspace:GetPartBoundsInBox(CFrame.new(x + 2, 100, z + 2), Vector3.new(2 * REACH, 400, 2 * REACH), op)
-				for _, b in wide do
-					local t = b:GetAttribute("RoadBox")
-					if t == "R" or t == "P" or t == "M" then
-						local top = b.Position.Y + b.Size.Y / 2
-						G = if G then math.min(G, top) else top
-					end
-				end
-			end
 			if G then
 				local col, yb = column(x, z, G - 16, G + 80)
 				local seenAir = false
