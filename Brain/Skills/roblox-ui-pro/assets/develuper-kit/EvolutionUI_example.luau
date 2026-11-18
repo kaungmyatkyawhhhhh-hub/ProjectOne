@@ -250,8 +250,22 @@ local function menuButton(i, key, icon, text, menuName)
 	return b
 end
 local shopButton = menuButton(1, "sqGreen", "stall", "Shop", "Shop")
-menuButton(2, "sqBlue", "diet", "Diet", "Diet")
-menuButton(3, "sqPurple", "index", "Index", "Index")
+local dietButton = menuButton(2, "sqBlue", "diet", "Diet", "Diet")
+local indexButton = menuButton(3, "sqPurple", "index", "Index", "Index")
+-- Owner: "this game is a bit complex". New players see only Shop + Index; the rest appears when it starts to matter,
+-- with a small pop so the kid notices one new thing at a time.
+local function reveal(gui, show)
+	if show and not gui.Visible then
+		gui.Visible = true
+		if not GuiService.ReducedMotionEnabled then
+			local sc = gui:FindFirstChild("RevealScale") or new("UIScale", { Name = "RevealScale" }, gui)
+			sc.Scale = 0.5
+			TweenService:Create(sc, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+	elseif not show then
+		gui.Visible = false
+	end
+end
 
 -- wide: status centred; narrow: status sits right of the left column so they never touch
 local function layout()
@@ -353,8 +367,8 @@ local UPGRADES = {
 	{ id = "Brain", name = "Bigger Brain", info = "+1 DNA every second", art = "brain" },
 	{ id = "Aging", name = "Faster Aging", info = "Shorter lives, faster gens", art = "hourglass" },
 	{ id = "Family", name = "Big Family", info = "+1 evolution each gen", art = "cradle" },
-	{ id = "Luck", name = "Lucky Genes", short = "Luck", info = "+4% mutation chance", art = "clover" },
-	{ id = "Immunity", name = "Immunity", info = "Less disease each level", art = "shield" },
+	{ id = "Luck", name = "Lucky Genes", short = "Luck", info = "+4% mutation chance", art = "clover", at = 9 },
+	{ id = "Immunity", name = "Immunity", info = "Less disease each level", art = "shield", at = 9 },
 }
 local upgradeCards = {}
 for i, u in UPGRADES do
@@ -466,6 +480,9 @@ local speciesList = entries("AllSpecies", ",", "S:", Color3.fromRGB(150, 230, 11
 for i, g in (remotes:GetAttribute("SpeciesGroups") or ""):split(",") do
 	if speciesList[i] then speciesList[i].g = math.clamp(tonumber(g) or 1, 1, 12) end
 end
+for i, ag in (remotes:GetAttribute("SpeciesAge") or ""):split(",") do -- beyond the world's frontier: "World Age N"
+	if speciesList[i] then speciesList[i].age = tonumber(ag) or 0 end
+end
 for i, p in (remotes:GetAttribute("SpeciesPaths") or ""):split(",") do -- locked tiles say which path to try
 	if speciesList[i] and p ~= "" then speciesList[i].path = p end
 end
@@ -496,7 +513,7 @@ refreshWorld()
 remotes.AttributeChanged:Connect(function(k)
 	if k:sub(1, 5) == "World" then
 		refreshWorld()
-		if k == "WorldFirsts" and refresh then refresh() end
+		if (k == "WorldFirsts" or k == "WorldAge") and refresh then refresh() end
 	end
 end)
 
@@ -537,12 +554,13 @@ end
 local evoTap = new("TextButton", { Text = "", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 6, Visible = false }, evoRow)
 evoTap.Activated:Connect(openPath)
 local pathShownFor
+local joinedAt = os.clock()
 player:GetAttributeChangedSignal("Gen"):Connect(function() pathShownFor = nil end)
 task.spawn(function()
 	while true do
 		task.wait(1.5)
 		local id = player:GetAttribute("ForkPending") or ""
-		if id ~= "" and pathShownFor ~= id and not openName and not news.banner then
+		if id ~= "" and pathShownFor ~= id and not openName and not news.banner and os.clock() - joinedAt > 20 then -- let a new kid look around first
 			pathShownFor = id
 			openPath()
 		elseif id == "" and openName == "Path" then
@@ -561,17 +579,26 @@ refresh = function()
 	evoTap.Visible = (a.ForkPending or "") ~= ""
 	if evoTap.Visible then
 		evoText.Text = 'Next: <font color="#FFD23F">tap to pick a path!</font>'
+	elseif (a.FrontierAge or 0) > 0 then -- at the world's frontier: everyone waits for the same "???"
+		evoText.Text = ('Next: ??? opens at <font color="#FFD23F">World Age %d</font>'):format(a.FrontierAge)
 	elseif a.NextSpecies == "" then
 		evoText.Text = "Fully evolved!"
 	else
-		evoText.Text = ('Next: %s   <font color="#5CF2FF">%d/%d</font>'):format(a.NextSpecies, a.Evo, a.NextAt)
+		evoText.Text = ('Next: %s   <font color="#5CF2FF">%d/%d</font>%s'):format(a.NextSpecies, a.Evo, a.NextAt,
+			a.Trail and '  <font color="#7CFF6B">2x</font>' or "") -- catching up on the trail others blazed
 	end
 	dnaText.Text = Kit.abbrev(a.DNA or 0)
 	local mult = a.DnaMult or 1
 	multText.Text = mult > 1 and ("x%.2g"):format(mult) or ""
 
 	local canBuy = false
+	local stage = a.StageNum or 1
+	reveal(dietButton.Button, stage >= 9) -- only Fruit before that: nothing to choose yet
+	indexButton.Button.Position = UDim2.fromOffset(dietButton.Button.Visible and 132 or 66, 0)
+	reveal(worldPill, stage >= 5)
+	reveal(rebirthCard.Card, a.CanRebirth == true)
 	for u, c in upgradeCards do
+		c.Card.Visible = stage >= (u.at or 1)
 		local cost = a[u.id .. "Cost"] or 0
 		c.Name.Text = ("%s %d"):format(u.short or u.name:match("%S+$"), a[u.id] or 0) -- "Brain 3": short enough for the card
 		if cost < 0 then
@@ -612,6 +639,7 @@ refresh = function()
 			e.label.Text = if e.secret then (got and e.name or "???") .. "\n" .. e.desc
 				elseif e.desc then e.name .. "\n" .. e.desc
 				elseif got then (worldFirsts[e.key] and e.name .. "\n1st: " .. worldFirsts[e.key] or e.name)
+				elseif (e.age or 0) > (remotes:GetAttribute("WorldAge") or 0) then "???\nWorld Age " .. e.age
 				elseif e.path then "???\n" .. e.path .. " path"
 				else "???"
 			e.label.TextColor3 = got and e.color or MUTED
@@ -642,6 +670,7 @@ local STYLES = {
 	{ find = "evolved", priority = 10, color = GOLD, hold = 3.5 },
 	{ find = "path", priority = 9, color = GOLD, hold = 3 },
 	{ find = "SECRET", priority = 10, color = Color3.fromRGB(255, 120, 220), hold = 4 },
+	{ find = "tribe", priority = 8, color = Color3.fromRGB(124, 255, 107), hold = 3.5 },
 	{ find = "World first", priority = 8, color = Color3.fromRGB(140, 200, 255), hold = 3.5 },
 	{ find = "world reached", priority = 9, color = Color3.fromRGB(140, 200, 255), hold = 4 },
 	{ find = "Badge", priority = 9, color = GOLD, hold = 3 },
