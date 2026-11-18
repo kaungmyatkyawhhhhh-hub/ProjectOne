@@ -729,7 +729,9 @@ def collision(data, surf, parts):
         if p[0] == 'B' and p[1] == 'B':
             c, R, U, Bk = frame(p[2], p[3], p[4])
             rows.append(box_row('W', c, R, U, p[5]))
-    return rows
+    # (19 Nov, owner: cars hit things you can't see) pavement boxes only over pavement the builder really laid
+    import roads05_pbox_clip
+    return roads05_pbox_clip.clip(rows, parts)
 
 
 def ramp_gaps(a, b, lo, hi, ramps):
