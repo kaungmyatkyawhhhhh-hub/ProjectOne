@@ -6,6 +6,8 @@ created: 2026-11-18
 
 Built from the approved proposal in [[2026-11-18 Research - Southwest Florida jobs]] and the 17 Nov targets in [[2026-11-17 Car economy and Skyfreight crate design]].
 
+> **Changed 19 Nov:** jobs are taken from the main menu's JOBS tab anywhere (the kiosk opens it), posts have no daily cap (a "Still on shift?" check instead), field jobs get vehicles. See [[2026-11-19 Jobs SWFL - jobs menu, workplaces, vehicles, AFK posts]].
+
 ## What players get
 - **Job Center** on Myanmar Plaza's forecourt (Kabar Aye Pagoda Road, by spawn). It's a lit board with a counter and a glass canopy (Legends Chauffeur style). Press **E** to open the JOB CENTER screen, which uses the GOALS screen's style. TAKE a job there; QUIT works anywhere (tap the job bar).
 - **Job bar** under the level bar: job · rank title · R2/5, a gold fill toward the next rank, and "$X in 0:42" to the next paycheck. It says "Off duty" when you aren't working.

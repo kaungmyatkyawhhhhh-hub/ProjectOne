@@ -45,3 +45,4 @@ The owner said "ok sure" to this:
 - No daily cap. A "still on shift?" tap appears every 2 h.
 - Auto-rejoin to the same server at 19 min idle (before Roblox's 20-min kick). This is not officially approved by Roblox, so watch moderation.
 - Post pay stays at about 1/3 of active jobs. Active jobs keep the no-AFK rule.
+- **Built 19 Nov** with the owner's "u should make jobs like in roblox southwest florida" (JOBS tab from anywhere, the job over your head, job vehicles, serve prompts at the posts): [[2026-11-19 Jobs SWFL - jobs menu, workplaces, vehicles, AFK posts]].

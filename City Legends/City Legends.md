@@ -71,6 +71,11 @@
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
+## Jobs like Southwest Florida (2026-11-19, owner: "u should make jobs like in roblox southwest florida")
+- A JOBS tab in the main menu (and a JOBS icon on the HUD): take or quit any of the 8 jobs from anywhere. Your job shows over your head and car ("Taxi · R1").
+- Field jobs get a job vehicle (YBS van, yellow taxi, white patrol car); post jobs (tea shop, fuel, dealership, mall) are AFK jobs with tips from a serve prompt and a "Still on shift?" check every 2 h; post workers idle 18 min are rejoined to the same server (not officially approved by Roblox: watch moderation).
+- Details, tests and what is left: [[2026-11-19 Jobs SWFL - jobs menu, workplaces, vehicles, AFK posts]].
+
 ## Render distance setting (2026-11-18, owner: "add render distance to the settings")
 Settings > Graphics now has **Render distance**: Low / Medium / High / Ultra. It changes how far your own game builds the city detail (building detail, street props, places, trees) and how far venue lights stay on: half, three quarters, today's distance, one and a half times. High is the default, so the game looks as before; phones (and Low graphics) start on Medium. It changes live and is saved. In Studio and saved; not published. Tested in Play: High 4,915 detail parts near the spawn, Low 644, Ultra 12,029; the setting came back after a restart. On Low the far city ends sooner (the server only sends buildings within 640 studs).
 ![[2026-11-18 Render distance - settings page.jpg]]
