@@ -487,6 +487,6 @@ Local means the car is sold at the dealership. Import means it only comes from c
 **Trims:**
 - **E-class (#8):** keep only the E400 and the E63.
 - **R35 (#9):** gets 2 trims, a "2010" GT-R and a "2017 Nismo". Fictional names in game.
-- **All the other cars in this list:** base only. Their Sport and Top trims come off sale. Players who own them keep them (Retired).
+- **All the other cars in this list:** base only. Their Sport and Top trims come off sale. **They are deleted outright, not kept as Retired (owner: only testers own them).**
 
 The rest of the proposal (prices and the 5 open questions) is still waiting for the owner's check.
