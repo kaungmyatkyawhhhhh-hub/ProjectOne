@@ -94,6 +94,9 @@ function T.install(model: Instance)
 			T.yrSum = sum(SS.ClaudeTools.YangonRoads.Source)
 			local Y = require(j)
 			Y.load()
+			-- (J29) a deck is built when any of its samples is in the box (the bake keeps one owner cell per deck): a
+			-- deck whose middle lay outside a test box was never built and its ground road met nothing (double_junction)
+			Y.DECK_TOUCH = true
 			T.Y = Y
 			T.state = string.format("loaded %d roads, %d data modules, %d paint tris, %d fill calls swapped, YR %d", #Y.list, n, #T.paint, k, T.yrSum)
 		end)
@@ -248,6 +251,7 @@ end
 T.QA_G, T.QA_OX, T.QA_OZ, T.QA_TIE, T.QA_MARGIN = 0.5, 0.0173, 0.0311, 0.011, 20
 T.faults, T.qaLog = {}, {}
 local ORDER = { Kerb = 1, Pavement = 2, Road = 3 }
+local MISS_RING = { { 0.003, 0.002 }, { 0.006, 0.004 }, { 0.03, 0 }, { 0, 0.03 }, { -0.03, 0 }, { 0, -0.03 }, { 0.05, 0.05 }, { -0.05, -0.05 } }
 local function topKey(r)
 	local p = r.Instance
 	return string.format("%d|%09.3f|%s|%s|%.3f,%.3f,%.3f", ORDER[p.Name] or 9, 9999 - r.Position.Y, p.Parent and p.Parent.Name or "", p.Name, p.Position.X, p.Position.Y, p.Position.Z)
@@ -276,11 +280,14 @@ function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number
 				t += 1
 				r = cast(x + 0.04 * t, z + 0.03 * t)
 			end
-			for u = 1, 2 do
+			-- a miss is cast again at fixed offsets up to 0.05 (J28 QA false positive: long_median (42920, 28124) and 38 more
+			-- 'pave_gap' pinholes were rays through a < 0.005 crack where pavement wedges meet: invisible, and narrower than
+			-- the 0.05 flicker gap)
+			for _, o in MISS_RING do
 				if r and r.Normal.Y >= 0.5 then
 					break
 				end
-				r = cast(x + 0.003 * u, z + 0.002 * u) or r
+				r = cast(x + o[1], z + o[2]) or r
 			end
 			if r and r.Normal.Y >= 0.5 then
 				local best, bk = r, topKey(r)
@@ -373,10 +380,57 @@ function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number
 		end
 		return false
 	end
+	-- (J28 QA false positive) the test box clips a road square across its own direction, so where a road crosses the
+	-- box edge at an angle its clipped end reaches up to half + walk further in than the box margin: open asphalt there
+	-- is the clip, not a builder fault (hledan_flyover, slip_triangle, bahan_ring, hanthawaddy shots)
+	local function clipped(p: Instance?, x: number, z: number): boolean
+		local o = p and p.Parent and Y.R[p.Parent.Name]
+		if not o then
+			return false
+		end
+		local d = math.min(x - x0, x1 - x, z - z0, z1 - z)
+		local reach = T.QA_MARGIN + o.half + math.max(o.walkL or 0, o.walkR or 0) + 2
+		if d >= reach then
+			return false
+		end
+		for _, e in { o.s[1], o.s[o.n] } do
+			if e[1] < x0 or e[1] > x1 or e[3] < z0 or e[3] > z1 then
+				return true -- the road runs out of the box: its end here is the box's cut
+			end
+		end
+		return false
+	end
+	-- pave_gap (J29 builder ask): an open slot (1-4 cells of nothing) with pavement on both sides, along x or z
+	local function paveGap(i, j): boolean
+		for _, d in { { 1, 0 }, { 0, 1 } } do
+			local a, b = nil, nil
+			for s = 1, 4 do
+				local q = kind[K(i - d[1] * s, j - d[2] * s)]
+				if q ~= "None" then
+					a = q
+					break
+				end
+			end
+			for s = 1, 4 do
+				local q = kind[K(i + d[1] * s, j + d[2] * s)]
+				if q ~= "None" then
+					b = q
+					break
+				end
+			end
+			if a == "Pavement" and b == "Pavement" then
+				return true
+			end
+		end
+		return false
+	end
 	for i = math.max(1, MG), math.min(nx - 1, nx - MG) do
 		for j = math.max(1, MG), math.min(nz - 1, nz - MG) do
 			local k = K(i, j)
 			local a = kind[k]
+			if a == "None" and paveGap(i, j) then
+				add("pave_gap", i, j, k, nil)
+			end
 			if a == "None" then
 				local c = 0
 				for _, q in { K(i + 1, j), K(i - 1, j), K(i, j + 1), K(i, j - 1) } do
@@ -395,6 +449,11 @@ function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number
 					-- a deck's open end in the test subset
 				elseif (a == "Road" and b == "None" and freeEnd(inst[k], x, z)) or (b == "Road" and a == "None" and freeEnd(inst[q], x, z)) then
 					-- a dead end
+				elseif (a == "Road" and b == "None" and clipped(inst[k], x, z)) or (b == "Road" and a == "None" and clipped(inst[q], x, z)) then
+					-- the test box's cut of a road crossing its edge at an angle
+				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > 3 and (deckCell[k] or deckCell[q]) then
+					-- (J28 QA false positive) two levels: a deck's top beside the road under / beside it (a deck clipped
+					-- in mid-air by the test box, hledan_flyover). A deck's real foot lands on its road (< 3 apart)
 				elseif (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
 					add("kerb_gap", i, j, k, q)
 				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > STEP then
@@ -422,7 +481,7 @@ function T.qa(name: string)
 		end
 		T.faults[name] = list
 		local s = {}
-		for _, w in { "box_hole", "kerb_gap", "road_step", "pave_step", "buried" } do
+		for _, w in { "box_hole", "kerb_gap", "road_step", "pave_step", "buried", "pave_gap" } do
 			table.insert(s, tostring(out[w] or 0))
 		end
 		T.qaLog[name] = table.concat(s, " / ")
