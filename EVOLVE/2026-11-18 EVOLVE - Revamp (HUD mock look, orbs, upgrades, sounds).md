@@ -36,6 +36,40 @@ The owner and their friends tested it. The 1.7x HUD in the top centre covered th
 - The banner says "Species N / 100" with the group's portrait.
 - Old saves are migrated: "S:Monkey" → every species up to your current stage is marked found.
 
+## Evolution tree (owner: "multiple evolution tree?")
+The 100-stage ladder is unchanged, so pacing stays the same. At three forks you pick a path, and each path has its own species for that stretch.
+
+| Fork | Stages | Paths (first species) |
+|---|---|---|
+| F1 "Where will your family live?" | 2–16 | Forest (Tree Monkey, the old line) · Savanna (Grass Monkey, sandy fur) · River (Swamp Monkey, wet grey fur) |
+| F2 "The Ice Age is coming!" | 37–41 | Ice Age (Heidelbergensis) · Sea Coast (Shore Gatherer) |
+| F3 "Choose your future!" | 61–90 | Machines (Cyborg, port9) · Space (Rocket Kid, port10) · Digital (Smart Glasses, port11) |
+
+**How picking works**
+- You pick while you're the species just before the fork.
+- The picker window opens by itself once per life, but never over another window or the evolve banner. The HUD row says "Next: tap to pick a path!", and tapping it also opens the picker.
+- Evolution waits up to 3 lives for your pick, then takes the first path ("Your family took the Forest path"). Idle and offline players never get stuck.
+
+**Replay value**
+- Rebirth resets your path, so you can take a different one next run.
+- The Index now has **195 species** (it was 100), so filling it takes several runs.
+
+**Code changes**
+- Server: `FORKS`, `nodeOf(d, depth)`, `pendingFork`, the `ChooseFork` remote, and `d.Path` (e.g. "F1=Savanna"). The Index order comes from `ALL_SPECIES`.
+- Old saves are migrated: Forest, Ice Age, and the future path that matches the species they already are (stages 71–80 → Space, 81–90 → Digital).
+- The banner now says "Stage N / 100".
+- Diet unlock labels now say "stage 9" and "stage 61", because Gibbon and Cyborg are only on some paths.
+
+**Tested:** the picker opens at the start, picking Savanna leads to a Grass Monkey with sandy fur, and the Index reads 2/195.
+
+**Not tested in Play:**
+- the F2 and F3 pickers;
+- the 3-life auto-pick. The server's 1100-generation self-check passes through it.
+
+**Still open:** paths share one portrait per group, so the F1 cards all show a monkey face. Per-path portraits would make the choice pop more.
+
+**Backup:** `ServerStorage.Evolution_backup_before_tree`.
+
 ## Growth teleport bug fixed
 "When I get taller, I teleport back to the place I was 0.5 seconds ago." The cause was the server's `Model:ScaleTo`, which re-pivots at the lagging server position.
 
