@@ -28,6 +28,7 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 - First action within ~10-15 s, first reward within 60 s, first big goal (first rebirth/spurt) inside session one (~10-20 min).
 - Show, don't tell. Hints only when the player is stuck, and they stay until done. Nothing stacked on top of a hint. No shop offers in the tutorial.
 - Loading: preload only what the first minute needs, SKIP after ~5 s, keep loading behind.
+- **SKIP must land somewhere usable (lesson 19 Nov, City Legends):** after the loading screen goes there must be a menu or HUD within seconds. Guard every server system's init (one error must not stop the remotes made after it), give every client `WaitForChild` on a remote a timeout with a stand-in, and run a watchdog: no GUI for ~6 s -> show the menu (or HUD in a car). Test by making one server module error on purpose.
 - Track it: onboarding funnel (`AnalyticsService:LogOnboardingFunnelStepEvent`, server only, once per player).
 
 ## 5. Quality bar (definition of done for every task)
@@ -37,6 +38,7 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 - **VFX:** ~300 particles on screen max, 100/s per emitter on mobile, pool everything, respect `GuiService.ReducedMotionEnabled` (no shake/flash).
 - **Cameras/cutscenes:** client only; set `Camera.Focus` every frame (or shadows/detail break); always skippable after ~1 s; never a reward that needs watching to the end.
 - **Test before reporting:** 2-player test in Studio, no console errors, phone-size screenshot (667x375), FPS/part numbers. Test on a test save, never real player data.
+- **Phone HUD (lesson 19 Nov, City Legends; owner's ref: Driving Empire, ~80% of its players on phones):** the middle of the screen stays empty while playing. Small readouts, never a big dial over the view; controls in the bottom corners (steer left, tall gas / wide brake right, round secondary buttons), menu icons as a slim column at the far left, cash small top right, top bars hidden while moving, rarely used actions in one ••• menu. Every PC key needs a touch control. Use `ScreenInsets = CoreUISafeInsets` for touch layers and turn Roblox's thumbstick / jump off in vehicles. Check at 667x375 and 812x375.
 
 ## 6. Performance (cheap Android phones are most players)
 - Targets: ~1,000 draw calls, ~1M triangles, 16.7 ms/frame. Test on a real low-end phone (emulator lies about memory).
