@@ -16,7 +16,7 @@ Studio: main "City Legends", test re-packed (asset 133014134133489 revision 201 
 - **Pipeline (`sh roads05_pipeline.sh J29`):** roads.json md5 95dfb789, paint.json 84b94130; J28 backups roads_J28.json / paint_J28.json /
   roads_unfixed_J28.json. mouthsim 0 failed of 11,570. QA: mouth_short real 3 -> 4 (East Horse Race Course Road (Bridge) start (39963, 32873)
   5.3 short: the wider gore reaches it), mouth_over 1 -> 0; paint QA unchanged. Version line written.
-- **Next (in order):** (1) buried 10 (double_junction Banyar Dala #3 x Lane #3308 5 at (39984, 32907): Lane #3308 runs under the Banyar Dala deck
+- **Next (in order):** (1) buried 10 (3 new = double_junction (39995-39997, 32698-32702): East Horse Race Course Road #3's deck-side kerb 30.55 under the Bridge Flyover's foot surface 30.47-30.56, the deck foot still laps the side lane; double_junction Banyar Dala #3 x Lane #3308 5 at (39984, 32907): Lane #3308 runs under the Banyar Dala deck
   beside Banyar Dala #3, a 1-stud road strip between two kerbs; slip_triangle Lane #15 3; pyay_univ Lane #588 2); (2) the Bridge start mouth_short;
   (3) census patterns 1-3 (junction corners, mouth ends, roundabout gores; e.g. the Pazundaung Y wedge (40983-40990, 43398-43414) between Bogyoke
   #2 ~2's end and Upper Pazundaung #3's start: no corner, open triangle); (4) Hledan #3 under Insein / Pyay with a built-face test; (5) builder state

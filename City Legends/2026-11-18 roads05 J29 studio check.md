@@ -58,7 +58,7 @@ The owner's target is 0 on every count at all 17 spots. Not there yet.
 - `2026-11-18 roads05 J29 test - double_junction - deck foot.jpg`: East Horse Race Course Road (Bridge) Flyover now built at its foot, the side lanes beside it.
 
 ## Open (next pass, biggest first; patterns from the census)
-- **buried 10:** double_junction Banyar Dala Road #3 x Lane #3308 (39984, 32907) 5; slip_triangle Lane #15 3 (its kerb and pavement stand 0.1 over its own pinned edge at (43464, 29305)); pyay_univ Lane #588 2 (kerb 0.2-0.26 over its own road at (27036, 27670)). The total rose 7 -> 10 against the QA run; not traced.
+- **buried 10:** double_junction Banyar Dala Road #3 x Lane #3308 (39984, 32907) 5; slip_triangle Lane #15 3 (its kerb and pavement stand 0.1 over its own pinned edge at (43464, 29305)); pyay_univ Lane #588 2 (kerb 0.2-0.26 over its own road at (27036, 27670)). The 3 new ones (7 -> 10) are all at double_junction (39995-39997, 32698-32702): East Horse Race Course Road #3's deck-side kerb (30.55) under the now-built Bridge Flyover's foot surface (30.47-30.56). The deck foot still laps that side lane's kerb, so the gore change (item 2) is not enough there.
 - **New in the data QA:** mouth_short 3 -> 4: East Horse Race Course Road (Bridge)'s start at (39963, 32873) is 5.3 short of the road it joins (the wider gore of item 2 reaches its start). mouth_over 1 -> 0.
 - **Junction corners, mouth ends, roundabout gores** (census 1-3): e.g. the Pazundaung Y wedge (40983-40990, 43398-43414): an open triangle between Bogyoke Aung San Road #2 ~2's end and Upper Pazundaung Road #3's start, no corner built there.
 - **Hledan Road #3 under Insein / Pyay** (item 2): needs a "covered" test against the bigger road's built faces or its end lines.
