@@ -96,3 +96,33 @@ Pictures: [[2026-11-17 MP drone view - before (photo vs game).jpg]], [[2026-11-1
 - No flicker: every new part butts or sinks 0.2 into what it stands on; no coplanar visible faces.
 
 **For the roads agent (not done here):** the owner's [[Owner ref - planters on the road by Myanmar Plaza.webp]] boxes are not Myanmar Centre meshes nor Green planters (none of the 45 PLANTER models stand on a road): they look like roads05 islands in the lay-by by the mall's west front.
+
+## Escalators fixed, working escalators and the car-park lift (19 Nov 2026)
+Owner: "in myanmar plaza, some part of the elevator is not collidable and i fall off", then "make the escalators & elevators work when there is a player on it. also the one from underground parking elevator too".
+
+**What was wrong:** at 1:1 the escalators stay true size while the atrium void is 1.875x wider, so 4 of the 6 upper-floor escalator ends stopped 3-6 studs inside the void, short of the galleries and behind the void's glass rail. Their floor plates had no collision: stepping off the top (1F, 2F, 3F) or onto the bottom of the 1F-2F / 2F-3F runs dropped a player 1-3 floors. The escalators were also 90 separate step boxes. No lifts existed in the mall or the Melia; the basement's "LIFT MALL" door was a dummy on a solid core.
+
+**Fix (in the generator, so a rerun keeps it):**
+- `mc3d.py`: `landing_tongues` / `tongue_build` carry the floor out from the gallery to each upper escalator end (marble top, ceiling, fascia, lit strip, posts, rail, glass along both sides; the side-by-side GF-1F pair shares one), and the void's ring (glass, posts, rail, light strip, collision) opens there (`tongue_skip`). Each escalator's collision is one smooth pitched ramp (8th number in the collide line = pitch; `onetoone.collide_text`, `P1Refit.collide`) plus a landing box at each end. `LIFT_W` / `cut_rect` cut the lift shaft out of the floors, ceilings and floor collision.
+- Placed without a full re-export: `city/mc_escalator_patch.py` (two builds, triangle diff) -> `mc1_escalators.glb` (Model 102202175667163: MAR, CEL, GFA, LIT, RAL, STL) and `PATCH=lift` -> `mc1_lift.glb` (Model 103488751038879: MAR, CEL), swapped with `tools/yangon/MCEscalators.luau` (old mesh ids in attributes `OldMeshId_esc` / `OldMeshId_lift`, old boxes in `ServerStorage.MCEscalatorsOld`). Collision: 110 boxes out, 52 in. Flicker check near the change: 0.
+- Working escalators: the 4 ramp boxes are tagged `MallEscalator` (attributes `Up`, `Speed` 2 studs/s). GF-1F north up, south down; 1F-2F up; 2F-3F up. `src/server/MallMovers.server.lua` gives a ramp its conveyor velocity only while a player is within 160 studs.
+- The car-park lift (`tools/yangon/MCLift.luau`, `Landmarks.MyanmarCentre.Lift`, tag `MallLift`): no public plan of the real basement, so the shaft rises from the basement's lift core (SE corner) through G, 1, 2, 3. It has stops B1 / G / 1 / 2 / 3, steel sliding landing and car doors, a "Call lift" prompt at every stop, a LIFT sign on the mall floors and a lit car. The basement Core and Ceiling are split round the shaft (old parts in `ServerStorage.MCLiftOld`). The server moves the car (smooth start and stop, 9 studs/s), closes the doors before every move and keeps one queue per shaft. Riders get the floor's velocity and are snapped back if they drift. `src/client/MallLift.client.lua` is the floor picker (round 56 px buttons) shown while you stand in the car.
+
+**Tested in Play** (test store, then the live store on the Server):
+- Walk up and down all 4 escalators, plus 14 studs past each end: no falls.
+- Side guards on the landings hold.
+- Standing still: the up escalators carry you up at about 2 studs/s, the down one down. At the top you step off with no fling (max speed 3.1).
+- Lift: called at B1, rode B1 -> 3, 3 -> G and G -> B1. The rider stayed on the floor (height above the floor 2.6-3.3 the whole ride).
+- Closed doors block the shaft. The floor picker shows in the car.
+- Live store on the Server: 1,512 down-rays along every escalator, 0 holes. Car stops exactly on the floor.
+- Not tested: two players at once (the MCP runs one client).
+- Known: a thin light seam right of the basement lift door, where the slightly tilted core meets the shaft wall.
+
+Pictures:
+- [[2026-11-19 MP escalators and lifts collision - 1 before.jpg]] (before: the bottom of the 1F escalator floats in the void)
+- [[2026-11-19 MP escalators and lifts collision - 2.jpg]] (the gallery now opens onto the escalator)
+- [[2026-11-19 MP escalators and lifts collision - 3.jpg]] (a player on the 2F landing)
+- [[2026-11-19 MP escalators and lifts collision - 4.jpg]] (riding)
+- [[2026-11-19 MP escalators and lifts collision - 5.jpg]] (the 1F landing)
+- [[2026-11-19 MP escalators and lifts - 1.jpg]] (the lift at G with the floor picker)
+- [[2026-11-19 MP escalators and lifts - 2.jpg]] (the basement lift)

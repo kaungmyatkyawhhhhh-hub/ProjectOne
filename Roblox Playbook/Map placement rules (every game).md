@@ -96,3 +96,9 @@ This note is the fix. It works in three parts:
 - **More data can break code that ran fine.** The traffic graph grew from 630 to 797 lanes. Server setup then passed the script time limit, and no car spawned. A long loop pauses on a time budget (every 30 ms), not after a fixed count.
 - **Edge cells are rebuilt whole.** A road cell shared with an earlier district is rebuilt from both districts' data and swapped in one piece. Never paste half a cell next to an old half.
 - **Minimap pictures go up as Image, not Decal.** An ImageLabel cannot use a Decal id ("Asset type does not match").
+
+## Lesson (19 Nov 2026, City Legends: players fell off the Myanmar Plaza escalators)
+- **Rescaling a building but keeping player-size pieces breaks their joints.** At 1:1 the mall was stretched 1.875x but the escalators kept true size (right), so their ends no longer reached the galleries: they hung in the void, behind the glass rail, with no floor under the plates. After any rescale, check every place where a kept-size piece must meet the scaled building: escalator and stair ends, doors, bridges, lift doors.
+- **Walk test every walkable piece in data, before Studio:** sample each run and 10+ studs past both ends, and check two things: ground within a step under the expected surface, and nothing solid at body height. It found all 12 holes before anything was placed. Then walk it in Play.
+- **Stairs and escalators collide as one smooth ramp plus flat landings**, not one box per step. The ramp's top runs through the middle of the step faces and meets each landing flush. A ramp tagged as a conveyor (anchored, `AssemblyLinearVelocity` along the slope) then works as a moving escalator without flinging anyone at the ends.
+- **A moving lift on an anchored car:** move it with PivotTo every Heartbeat, give its floor the same vertical velocity, and snap riders back if they drift. Doors close before every move, and closed landing doors are the shaft guard.
