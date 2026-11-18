@@ -411,8 +411,9 @@ def crate_check(rows):
     return avg, out
 
 # proposed cash crates (EST, our numbers; the 17 Nov design had Basic $5,000 and Premium $40,000, no odds for them)
-CRATES = [("Basic", 60000, {"Common": 70, "Uncommon": 25, "Rare": 5}),
-          ("Premium", 500000, {"Rare": 60, "Epic": 33, "Legendary": 6, "Mythic": 1})]
+DUP_REFUND = 0.3  # proposed: a duplicate from a CASH crate refunds 30% of its value (the design said ~50%: with fair crate prices that prints money)
+CRATES = [("Basic", 90000, {"Common": 70, "Uncommon": 25, "Rare": 5}),
+          ("Premium", 750000, {"Rare": 60, "Epic": 33, "Legendary": 6, "Mythic": 1})]
 
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
@@ -461,7 +462,18 @@ def main():
         pr("- %s from PI %d: %s (%s)" % (l, lo, money(nice(ref[int(target_hours(lo) * 60)])), hfmt(target_hours(lo))))
     pr("\n## Crates with cash (free path to an import)\n")
     for name, cost in (("Basic", 5000), ("Premium", 40000)):
-        pr("- %s crate %s: casual %s, mid %s, grinder %s" % (name, money(cost), *(hfmt(hours_to(curves[(t, "free")], cost)) for t in ("casual", "mid", "grinder"))))
+        pr("- Designed %s crate %s (17 Nov): casual %s, mid %s, grinder %s" % (name, money(cost), *(hfmt(hours_to(curves[(t, "free")], cost)) for t in ("casual", "mid", "grinder"))))
+    avg, crates = crate_check(rows)
+    pr("- Average value by rarity: " + ", ".join("%s %s" % (k, money(avg[k])) for k in ("Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Hypercar") if k in avg))
+    for name, price, odds, ev in crates:
+        pr("- Proposed %s crate %s (%s): average car value %s, a duplicate refunds %s at 30%% (%.0f%% of the price; 50%% would be %.0f%%); casual %s, mid %s, grinder %s"
+           % (name, money(price), ", ".join("%s %g%%" % kv for kv in odds.items()), money(ev), money(ev * DUP_REFUND), 100 * DUP_REFUND * ev / price, 50 * ev / price,
+              *(hfmt(hours_to(curves[(t, "free")], price)) for t in ("casual", "mid", "grinder"))))
+    pr("\n## Per play-day (AFK check)\n")
+    pr("| Player | Hours a day | Free / day | Both passes / day |\n|---|---|---|---|")
+    for t in TYPES:
+        h = TYPES[t]["hpd"]
+        pr("| %s | %g | %s | %s |" % (TYPES[t]["label"], h, money(per_hour(t) * h), money(per_hour(t, "both") * h)))
     text = "\n".join(out)
     args = sys.argv[1:]
     if "--md" in args:
