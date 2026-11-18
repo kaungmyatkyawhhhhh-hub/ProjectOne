@@ -119,15 +119,17 @@
   "baked": "461 meshes / 44 glbs / 25094 boxes (R05_ONLY 1536 x19..27 z26..31, 21 min); roads05_RB3/bake_stats_P3.json",
   "uploaded": "44 glbs: roads05_RB3/upload_ids_P3.txt; collide pack imports/sync/rebuild_P3_collide.rbxmx = asset 133014134133489 rev 215 (12 modules RColRB_P3_k)",
   "swapped": "old 47 cells + 18323 boxes (by box centre cell) -> ServerStorage.RB_OldP3; new 51 cells 461 meshes + 25094 boxes (RoadBox P/R/M/D/W) into Roads.Meshes / Roads.Collide",
-  "saved_version": "1419 (after swap)",
-  "backup_deleted": false
+  "saved_version": "1419 swap, 1420 trees + props",
+  "backup_deleted": false,
+  "trees_on_road": "140 Green.Far tree meshes (OKA_ot1 73, OKB_ot1 67) on new RoadBox R -> ServerStorage.RB_OldP3.TreesOnRoad (of 3306 Far parts + BANKTREE models tested in P3)",
+  "playtest": "IN PROGRESS: PlayerData store switched to CityLegends_test (PUT BACK to CityLegends_v1 if this run stops)"
  },
  "note2": "pages: zstd+base64 slices (@Z) since 9x9 p8; grabber tools/yangon/city/roads05_grab.py",
  "cleanup": "Studio: no Roads05 data modules, no RB_ folders, no build root, YangonScraps gone; store CityLegends_v1",
  "props_cleanup": {
   "how": "Studio _G.KF / _G.KW (raycast 3 up / 8 down from each record to Roads.Collide; RoadBox R hit -> record removed from the tile StringValue; K cables kept; L spans tested at both poles). Building data Data_P1..3: only compound walls (B WCOL / KW*, P pieces whose template kind is KWX).",
   "P1P2_done": "Data_P1S 636 (drains 232, lamps 50, poles 104, median fence 67, L spans 134 ...), P1P 30, P2P 99 (lot asphalt / lines PAS PLN on the road), P1G 814 + P2G 924 kit trees, Data_P1 918 + Data_P2 1021 wall records (WCOL 264 + 299 = invisible wall collision on the new roads). Left on road after: 0. Saved with the place (see saves).",
-  "P3": "to do after the P3 swap (Data_P3G, Data_P3; no P3S / P3P exist)",
+  "P3": "DONE in place: Data_P3G 857 kit tree records, Data_P3 752 wall records (KF / KW); left on road 0/0; saved 1420",
   "note": "the repo / build sources of these Data_ folders still hold the removed records: a regenerate (street_1to1 / green_1to1 / places / buildings_1to1) must read the J37 roads or re-run this filter"
  },
  "ycc_ramp": "DONE (Edit): Landmarks.YangonConventionCentre.DriveRamps = 12 WedgeParts (asphalt 46,47,50, CanCollide), 3 ramps 8.5% grade from the driveway (road top + 0.06) to the plate top 54.82 at (33791,21917) drop 3.75 len 44, (33925,22036) drop 4.41 len 52, (33955,22105) drop 4.53 len 53; two triangles each (oblique edge)",
