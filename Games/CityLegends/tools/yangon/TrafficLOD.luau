@@ -101,6 +101,45 @@ local function badgeLike(p: BasePart, length: number): boolean
 	return tex and mn < 0.09 * length / 15 and mx < 0.16 * length
 end
 
+-- (2026-11-19) the game's runtime badge covers for converted cars (client BrandMarks, as CarSkin lays them; cars in
+-- CarFinish.CARS have their logos out of the model and get none), baked into the traffic copy as MarkPatch parts
+local function clientModule(name: string): any
+	local m = game:GetService("StarterPlayer"):FindFirstChild(name, true)
+	if not m then
+		return nil
+	end
+	local ok, v = pcall(require, m:Clone())
+	return if ok then v else nil
+end
+
+local function marksFor(id: string): any
+	local finish = clientModule("CarFinish")
+	if finish and finish.CARS and finish.CARS[id] then
+		return nil
+	end
+	local bm = clientModule("BrandMarks")
+	return bm and bm[id]
+end
+
+-- a plain cover (CarSkin.coverParts' shape): `cf` on the surface looking out of it, the back face on the surface
+local function coverPart(cf: CFrame, w: number, h: number, color: Color3, disc: boolean, covers: string): BasePart
+	local thick = math.max(0.004, w * 0.04)
+	local p = Instance.new("Part")
+	p.Name = "MarkPatch"
+	p:SetAttribute("Covers", covers)
+	p.Color = color
+	p.Material = Enum.Material.SmoothPlastic
+	if disc then
+		p.Shape = Enum.PartType.Cylinder
+		p.Size = Vector3.new(thick, w, w)
+		p.CFrame = cf * CFrame.new(0, 0, -thick / 2) * CFrame.Angles(0, math.pi / 2, 0)
+	else
+		p.Size = Vector3.new(w, h, thick)
+		p.CFrame = cf * CFrame.new(0, 0, -thick / 2)
+	end
+	return p
+end
+
 local function volume(p: BasePart): number
 	return p.Size.X * p.Size.Y * p.Size.Z
 end
@@ -209,10 +248,53 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 		wheelR = math.max(wheelR, math.max(p.Size.X, p.Size.Y, p.Size.Z) / 2)
 	end
 
+	-- the converted car's measured badge spots (metres from the wheel centres' middle: right / up / back)
+	local marks = marksFor(id)
+	local spm = if marks then wb / marks.wb else 1
+	local function markHidden(d: BasePart): boolean
+		if not marks then
+			return false
+		end
+		if marks.keep and table.find(marks.keep, d.Name) then
+			return false
+		end
+		for _, h in marks.hide do
+			if d.Name == h.name and (h.size == nil or (d.Size - h.size).Magnitude < 0.01) then
+				return true
+			end
+		end
+		return false
+	end
+	local addedCovers: { BasePart } = {}
+	if marks then
+		for _, cv in marks.covers do
+			local face = (frame.Rotation * cv.face).Unit
+			local pos = frame * (cv.at * spm) + face * 0.003 * spm
+			local up = if math.abs(face.Y) > 0.95 then frame.LookVector else Vector3.yAxis
+			table.insert(addedCovers, coverPart(CFrame.lookAt(pos, pos + face, up), cv.w * spm, cv.h * spm, cv.color, cv.disc, "BrandMarks cover"))
+		end
+		for _, c in CORNERS do
+			local cap = marks.caps and marks.caps[c]
+			if cap then
+				local side = if (hub[c] - mid):Dot(frame.RightVector) < 0 then -1 else 1
+				local look = frame.RightVector * side
+				local pos = hub[c] + look * (cap.surface + 0.003) * spm
+				local p = coverPart(CFrame.lookAt(pos, pos + look), cap.r * 2 * spm, cap.r * 2 * spm, cap.color, true, "BrandMarks cap")
+				p.Parent = src.Wheels:FindFirstChild(c)
+				table.insert(wheel[c], p)
+			end
+		end
+	end
+
 	-- body: everything visible outside the wheels, minus the dropped groups / names
 	local body: { BasePart } = {}
+	for _, p in addedCovers do
+		p.Parent = src
+		table.insert(body, p)
+	end
 	for _, d in src:GetDescendants() do
-		if d:IsA("BasePart") and not d:IsDescendantOf(wheelsFolder) and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
+		if d:IsA("BasePart") and not d:IsDescendantOf(wheelsFolder) and not d:IsA("Seat") and not d:IsA("VehicleSeat") and not markHidden(d)
+			and not table.find(addedCovers, d) then
 			local n = lower(d.Name)
 			if d.Transparency < 0.95 or isGlass(d, n) then
 				if not dropped(d, src) then

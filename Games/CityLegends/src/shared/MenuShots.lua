@@ -20,10 +20,12 @@ MenuShots.SHOT_TIME = 4.6 -- seconds per loading shot (the drift is checked at b
 local CLEAR_RADIUS = 12
 local TARGET_SLACK = 0.12 -- the line may meet something in the last 12% of the way (the target itself)
 local CELL = 256
+MenuShots.STREAMED_PARTS = 300 -- queryable parts within 400 studs of a shot's target before it is cut to
 
 -- the first ones sit by the spawn (Myanmar Plaza, Persistent landmarks): they show at once on a phone
 MenuShots.SHOTS = {
 	{ name = "Myanmar Plaza from above Kabar Aye", subject = "MyanmarCentre", from = Vector3.new(34150, 330, 28150), at = Vector3.new(34845, 120, 27534), drift = Vector3.new(6, 0, -4), fov = 58 },
+	{ name = "Inya Lake to Myanmar Plaza and the flyover", subject = "MyanmarCentre", from = Vector3.new(33700, 140, 27000), at = Vector3.new(34845, 160, 27534), drift = Vector3.new(3, 0, -4), fov = 60 },
 	{ name = "Sedona over Inya Lake", subject = "Sedona", from = Vector3.new(35600, 380, 25900), at = Vector3.new(34983, 220, 26798), drift = Vector3.new(-6, 0, 3), fov = 60 },
 	{ name = "YCC, GGFest", subject = "YangonConventionCentre", from = Vector3.new(33700, 240, 22750), at = Vector3.new(33706, 71, 21990), drift = Vector3.new(6, 0, 0), fov = 58 },
 	{ name = "Shwedagon from People's Park", subject = "Shwedagon", from = Vector3.new(32300, 260, 38250), at = Vector3.new(33107, 330, 37198), drift = Vector3.new(5, 0, 2), fov = 55 },
@@ -251,9 +253,17 @@ function MenuShots.orbit()
 	return if workspace:GetAttribute("MenuOrbit") == "low" then MenuShots.ORBIT else MenuShots.ORBIT_FALLBACK
 end
 
--- (client) has the ground under a shot's target streamed in yet?
+-- (client) has the shot's spot streamed in yet: its landmark and the city round it (a far shot only gets
+-- RequestStreamAroundAsync's small bubble, so it shows once the player has been near it; the shots by the
+-- spawn always pass)
 function MenuShots.streamed(shot): boolean
-	return workspace:Raycast(shot.at + Vector3.new(0, 1500, 0), Vector3.new(0, -3000, 0)) ~= nil
+	local root = workspace:FindFirstChild("Yangon1to1") or workspace:FindFirstChild("Yangon")
+	local marks = root and root:FindFirstChild("Landmarks")
+	local m = shot.subject and marks and marks:FindFirstChild(shot.subject)
+	if shot.subject and not (m and m:FindFirstChildWhichIsA("BasePart", true)) then
+		return false
+	end
+	return #workspace:GetPartBoundsInRadius(Vector3.new(shot.at.X, 60, shot.at.Z), 400) >= MenuShots.STREAMED_PARTS
 end
 
 -- every shot's result, one line each (true when all pass)
