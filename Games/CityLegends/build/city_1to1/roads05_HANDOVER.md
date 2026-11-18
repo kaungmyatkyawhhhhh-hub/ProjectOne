@@ -28,6 +28,28 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## REBUILD progress 2 (18 Nov evening, ROAD REBUILD agent 2): P3 built, 12/15 cells exported; YCC ramps + P1/P2 props done
+State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp", "verge", "lane_gaps").
+- **P3 data:** `roads05_subset.py P1_..._P12 RB3 P3` (clip = P3 box only: no P6-P8 roads in the game; 901 roads, 34 modules,
+  asset rev 213, checksums `roads05_RB3/pack_checksums.txt`), loaded into `_G.RY`, modules deleted. Builder checksums as J37.
+- **Build job `_G.RB3`** (Studio _G, lost on restart): per 3072 cell x9..13 z13..15 `stepCell` -> `RoadBake05.collect` ->
+  zstd+base64 slices of 99,000 in `_G.RB3.slices[cell].sl`, parts cleared. `_G.RB3Z(cell, k)` returns slice k as
+  `@Z<cell>_01_<k>_<n>@...@END@` padded to 99k (lands in a tool-results file). `roads05_grab.py` now takes `<tag> <first file>`.
+  12 cells are on disk (`roads05_RB3/pages`, page counts match the build log); 13x13 / 13x14 / 13x15 were building when the
+  agent stopped. Cells 10x14 (Sule) and 11x14 are the biggest (222k / 203k parts, ~3.5 min each).
+- **Not done for P3:** bake, upload, swap, Play test, after shots, P3 props filter, verge run, lane-gap check (steps in the json).
+- **Props on the moved roads (P1 + P2 done, in the place):** `_G.KF(folder, apply)` / `_G.KW(...)` (Studio): each record of a
+  `ReplicatedStorage.YgnKit.Data_*` tile is ray-tested 3 up / 8 down against `Roads.Collide`; a hit on RoadBox "R" removes it.
+  Removed: P1S 636, P1P 30, P2P 99, P1G 814, P2G 924, compound walls in Data_P1 918 / Data_P2 1,021 (incl. 563 invisible WCOL
+  wall collisions standing on the new carriageways). P3 (Data_P3G, Data_P3) after its swap. Repo sources of those Data folders
+  are now older than the place.
+- **YCC car park:** 3 driveway ramps (12 WedgeParts, `Landmarks.YangonConventionCentre.DriveRamps`, 8.5% from road + 0.06 up to
+  the plate top 54.82; two triangles each because the drives meet the plate's diagonal edge at an angle). Roads that run along /
+  under the plate's edge (not drives) were left.
+- **Lane gaps:** NPC traffic is kinematic (no raycast): NPC cars cannot drop at the 1.5% junction gaps. Player-car check open.
+- **Memory:** Studio was at 18-19 GB during the build; nothing of this run left in ServerStorage / Workspace (RoadsBuildRB empty).
+  Restart Studio after the P3 swap (undo history).
+
 ## REBUILD progress (18 Nov, ROAD REBUILD agent): P1 + P2 swapped and saved, P3 not started
 State file: `build/city_1to1/rebuild_progress.json` (cells exported / baked / uploaded / swapped, Play tests). Vault note:
 `City Legends/2026-11-18 Road rebuild P1 P2 (J37 into the game).md`.

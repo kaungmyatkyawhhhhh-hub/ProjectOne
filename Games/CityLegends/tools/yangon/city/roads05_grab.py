@@ -1,12 +1,14 @@
+# (RB3 / any tag: python roads05_grab.py [tag] [first result file])
 # copy complete @Q pages and zipped @Z slices (zstd + base64 of pages joined by \n) from this run's tool-results
 # into roads05_RB12/pages as plain @Q page files (roads05_bake.py collect reads them); print counts per cell
 import base64, collections, glob, json, os, re, sys
 import zstandard
 
 TR = r"C:/Users/kaung/.claude/projects/D--ObsidianOne-Claude-Obsidian/8dbf212d-129a-4909-ba7d-ab448f73c052/tool-results"
-OUT = r"D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/city_1to1/roads05_RB12/pages"
+TAG = sys.argv[1] if len(sys.argv) > 1 else "RB12"
+OUT = r"D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/city_1to1/roads05_%s/pages" % TAG
 os.makedirs(OUT, exist_ok=True)
-SINCE = os.path.getmtime(os.path.join(TR, 'mcp-Roblox_Studio-execute_luau-1794989639494.txt')) - 2
+SINCE = os.path.getmtime(os.path.join(TR, sys.argv[2] if len(sys.argv) > 2 else 'mcp-Roblox_Studio-execute_luau-1794989639494.txt')) - 2
 Z = collections.defaultdict(dict)
 for p in sorted(glob.glob(os.path.join(TR, '*')), key=os.path.getmtime):
     if os.path.getmtime(p) < SINCE or not (p.endswith('.txt') or p.endswith('.json')) or os.path.getsize(p) < 1000:
