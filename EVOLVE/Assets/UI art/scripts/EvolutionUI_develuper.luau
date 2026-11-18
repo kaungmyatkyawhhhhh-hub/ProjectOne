@@ -382,7 +382,7 @@ for i, u in UPGRADES do
 end
 local refresh
 local confirmUntil = 0
-local rebirthCard = card(pages.Upgrades, 9, "cardMagenta", "asteroid", "Extinction", "Start over, keep Ancestor DNA", function()
+local rebirthCard = card(pages.Upgrades, 9, "cardMagenta", "asteroid", "Extinction", "Start over, keep all DNA", function()
 	if os.clock() < confirmUntil then -- second tap within 3 s confirms: this wipes the run
 		confirmUntil = 0
 		remotes.Rebirth:FireServer()
@@ -670,7 +670,7 @@ refresh = function()
 		end
 	end
 	if a.CanRebirth then
-		rebirthCard.Info.Text = ("Restart, keep +%d Ancestor DNA"):format(a.RebirthGain or 0)
+		rebirthCard.Info.Text = ("Keep DNA, +%d Ancestor DNA"):format(a.RebirthGain or 0)
 		rebirthCard.Buy.SetEnabled(true, os.clock() < confirmUntil and "Sure?" or "Rebirth")
 	else
 		rebirthCard.Info.Text = "Unlocks at Modern Human"

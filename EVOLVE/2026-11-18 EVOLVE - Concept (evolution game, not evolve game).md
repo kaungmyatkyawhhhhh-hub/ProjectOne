@@ -316,3 +316,13 @@ Owner: "i can hear roblox walking sound".
 - **Updates:** Time refreshes every minute, in the same loop as the Playtime board. `timeText()` is shared by the board and leaderstats.
 - **Tested in Play:** Species=Cell Colony, Rebirths=0, Time=1m (the playtime from the last test had saved).
 - **Open:** the Roblox player list on PC (top right) may cover the music player. Screenshots don't capture CoreGui, so this isn't checked.
+
+## Rebirth keeps DNA (v60, 18 Nov 2026)
+Owner: "make it so that players dont lose dna when rebirth".
+- **Server:** the rebirth handler saves `d.DNA` before `freshRun()` and puts it back.
+- **Still reset:** species, path, traits, Gen and upgrades.
+- **Kept:** DNA, plus Ancestors, Rebirths, Index, badges and Playtime as before.
+- **Rebirth card text:** "Start over, keep all DNA" / "Keep DNA, +N Ancestor DNA".
+- **Trade-off:** rebirth is now nearly free, so expect earlier and more frequent rebirths. Upgrade costs grow 1.6x per level, so saved DNA buys back the first levels quickly.
+- **Backup:** `ServerStorage.Evolution_backup_before_keepdna`.
+- **Tested in Play:** 77,777 DNA before the rebirth and 77,837 after, back to First Cell, Rebirths 4 → 5. The card text fits (86/120 px).
