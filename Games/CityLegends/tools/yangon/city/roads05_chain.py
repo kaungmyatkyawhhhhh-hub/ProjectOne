@@ -19,6 +19,8 @@ from roads05_mouthsim import Net
 
 NODE = 8.0          # ends this close are one node (OSM corners whose two ways stop a few studs apart)
 TURN_ALONE = 150.0  # degree-2 node: join unless it turns back more than this
+TURN_SHARP = 100.0  # (J35) a turn sharper than this is not chained when another road's end lies within NEAR_END of the node
+NEAR_END = 15.0     # (Lane #544: Dhobi Street 3 #2 chained through a 140 deg U-turn, OSM's short link to Lane #544 never existed)
 TURN_MANY = 135.0   # 3+ ends: the straightest pair if it turns no more than this (a Y fork too: the third road then ends on a bend, which the edge walk meets)
 MITRE_MAX = 1.6
 
@@ -99,6 +101,7 @@ def chain(data):
         z = sum(ends[i][3] for i in members) / len(members)
         mine = set(ends[i][0] for i in members)
         onother = any(oi not in mine and net.poly_dist(oi, b[1], x, z) < net.half_at(oi, b[1]) for oi, b in net.near(x, z, 2).items())
+        near_end = any(j not in members for j in T.query_ball_point((x, z), NEAR_END))
         cand = []
         for a in members:
             for b in members:
@@ -120,6 +123,9 @@ def chain(data):
                     continue
                 da, db = out_dir(A['s'], ka), out_dir(B['s'], kb)
                 turn = math.degrees(math.acos(max(-1.0, min(1.0, -(da[0] * db[0] + da[1] * db[1])))))
+                if turn > TURN_SHARP and near_end:
+                    skipped['sharp_near_end'] += 1
+                    continue
                 cand.append((turn, min(A['rank'], B['rank']), a, b))
         if not cand:
             continue

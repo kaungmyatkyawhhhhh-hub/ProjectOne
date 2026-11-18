@@ -1,3 +1,32 @@
+# roads05 handover (18 Nov 2026, thirty-first pass: J35, BUILDER agent; YangonRoads split + roads05_fix / chain + Studio 17 spots)
+
+## J35 -- built-surface totals, T.qa, J34 (rev 204) -> J35 (rev 205), 17 spots: 18 / 177 / 37 / 77 / 11 (pave_gap 97) -> 16 / 177 / 36 / 77 / 9 (pave_gap 95)
+Note + table + shot: vault `City Legends/2026-11-18 roads05 J35 studio check.md`. Only double_junction moved (3/24/1/0/5/18 -> 1/24/0/0/3/16).
+Studio: main "City Legends", rev 205 = J35 data (roads c34a1111, paint b6c2ba15) + split builder. Scratch cleaned, saved as version 1358, lock released.
+- **Kept (split):** `tools/yangon/YangonRoadsChecks.luau` = the old checks section (checkBumps .. stepCell). YangonRoads (169,545 chars, sum
+  348673078) ends with `require(SS.ClaudeTools.YangonRoadsChecks:Clone())(M, { file locals })`. Runner `T.install` moves it to ClaudeTools,
+  `roads05_studiotest.py` + `pack_tools.py` ship it. Main place ClaudeTools has both now. Byte-identical on roundabout4 / univ_kabaraye / deck_run.
+  ~30k chars free. Next split candidate if needed: buildIslands (2215-2561) or buildCorners.
+- **Kept (roads05_fix.deck_foot_ends):** an OSM "(Bridge)" road's end at ground under ANOTHER deck is cut back to that deck's footprint edge
+  (East Horse Race Course Road (Bridge): 5 samples under the Banyar Dala Road deck, on Road #18). The start-cut now shifts the road's own deck
+  (`_shift_idx`; before only `cut` moved). Road #18's start: repair "square end under the deck" (was "run on 32" into the Bridge).
+- **Kept (roads05_chain):** TURN_SHARP 100 / NEAR_END 15: no join through a turn sharper than 100 deg when another road's end lies within 15
+  of the node (5 joins skipped). Dhobi Street 3 #2's U-turn split -> Lane #2914; Lane #544 starts on it. QA mouth_short real 2 -> 0.
+- Pipeline J35a (fix -> mouthsim -> paint -> QA -> paint QA): mouthsim 0 failed of 11570; paint QA arrow_missing 9 -> 10, edge 178; QA = J34 except mouth_short real 0, dead_end 4451,
+  signals 243. Backups `roads_J34.json` / `paint_J34.json`.
+- **Tried + reverted:** Pazundaung Y round corner (Bogyoke Aung San Road #2 ~2 mouth on Upper Pazundaung Road #3 bigI 1): lost at findCorners
+  noCorner (`if not px` ~line 1388; J34's "not noCorner" was wrong; found by logging every `continue` in findCorners in a Studio copy).
+  The kerb window stops at Upper #3's sample 1; the kerb runs on along Lower Pazundaung (continuation). Extending the window along
+  `contsOf(B)` built both corners (r 30) but pazundaung_y kg 3 -> 29 (Y nose 13 + Lake Kan x U Shwe Gwun 14, though no other corner changed);
+  plain corner size: 25. Next: find why kerbs at Lake Kan (200 studs away) break when this mouth gets corners (sideZone / scrub of
+  Bogyoke #2 ~2 past P?).
+- **Buried left (double_junction 3):** Lane #3308's road 0.8 over its own / Banyar Dala #3's kerb (39984, 32911; also in cornerInRoadList);
+  Bridge flyover foot vs East Horse Race Course Road #3's kerb (39996, 32701).
+- **Not reached:** bahan NE island strip, Y east nose, kerb_gap (U Wisara #5, Gyophyu Flyover, Lane #1256 notch, Sule Pagoda Rd curve cracks,
+  Maha Bandula #2 / Lane #3357 island), buried rest, pave_gap fill rule (< 2 studs = one surface), pyay_univ road steps, univ / kunchan.
+- **Kit (Studio _G, lost on restart):** `_G.P(find, repl)` plain replace on ClaudeTools.YangonRoads.Source (asserts one match, returns T.sum),
+  `_G.RL()` = no-terrain copy + Y.load + DECK_TOUCH into _G.RT.Y. The J34 kit (`_G.FL`, `_G.GN` ...) still works.
+
 # roads05 handover (18 Nov 2026, thirtieth pass: J34, BUILDER agent; YangonRoads + roads05_fix + Studio 17 spots)
 
 ## J34 -- built-surface totals, T.qa, J33 real-data baseline (rev 203) -> J34 (rev 204), 17 spots: 18 / 191 / 37 / 77 / 11 (pave_gap 104) -> 18 / 177 / 37 / 77 / 11 (pave_gap 97)

@@ -1363,8 +1363,9 @@ def deck_foot_ends(data, AT_GRADE=3.0, PAD=0.5):
                     continue  # (a continuation joint is not a mouth)
                 t = L.project(Point(q[0], q[2]))
                 dy = abs(q[1] - S[min(int(round(t / max(L.length / (len(S) - 1), 1e-6))), len(S) - 1)][1])
-                if dy > AT_GRADE:
-                    continue
+                if dy > AT_GRADE and '(bridge)' not in r['name'].lower():
+                    continue  # (J35) an OSM bridge's end at ground under ANOTHER deck is cut back too: East Horse Race Course
+                    # Road (Bridge) started under the Banyar Dala Road deck on Road #18 (the real ground road): road on road
                 # walk back from the end to the first sample outside the footprint, then put the end on the edge
                 idx = list(range(len(s))) if k == 0 else list(range(len(s) - 1, -1, -1))
                 j = next((i for i in idx if not foot.contains(Point(s[i][0], s[i][2]))), None)
@@ -1384,8 +1385,8 @@ def deck_foot_ends(data, AT_GRADE=3.0, PAD=0.5):
                 if k == 0:
                     r['s'] = [nq] + s[j:]
                     sh = n0 - len(r['s'])
-                    if r['name'] in cut and sh:
-                        cut[r['name']] = sorted(i - sh for i in cut[r['name']] if i - sh >= 0)
+                    if sh:  # (J35) the road's own deck moves too (the Bridge's flyover: from 19 -> 14)
+                        _shift_idx(data, r['name'], -sh, {k: set(v) for k, v in cut.items()})
                 else:
                     r['s'] = s[:j + 1] + [nq]
                 out.append(dict(road=r['name'], deck=d['name'], end='start' if k == 0 else 'end', dropped=n0 - len(r['s'])))
