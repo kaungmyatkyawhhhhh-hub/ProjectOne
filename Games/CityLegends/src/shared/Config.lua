@@ -68,16 +68,32 @@ Config.Menu = {
 	},
 	FastTravelCooldown = 30, -- seconds between trips
 	-- the store (Playbook money rules): names and exact effects here, prices read from Roblox.
-	-- Ids are the owner's to give: until then the tiles show greyed, "Coming soon"
+	-- (owner, 18 Nov: the ids made in Creator Hub; no cash for Robux, so the two cash packs are gone)
 	Store = {
-		{ key = "vip", name = "VIP", kind = "Pass", id = nil, art = "store_vip", effect = "A VIP tag, the VIP bays in every tower garage and +10% cash from cut-ups" },
-		{ key = "cash2x", name = "2x Cash", kind = "Pass", id = nil, art = "store_cash2x", effect = "Double the cash from driving, cut-ups and jobs, for good" },
-		{ key = "starter", name = "Starter Pack", kind = "Product", id = nil, art = "store_starter", effect = "$50,000 and a car of your choice, once per player" },
-		{ key = "cash_s", name = "Cash: $25,000", kind = "Product", id = nil, art = "store_bundle", effect = "$25,000 added to your cash" },
-		{ key = "cash_m", name = "Cash: $100,000", kind = "Product", id = nil, art = "store_bundle", effect = "$100,000 added to your cash" },
-		{ key = "garage", name = "Garage Space", kind = "Product", id = nil, art = "store_garage", effect = "One more garage space at your house" },
+		{ key = "cash2x", name = "2x Cash", kind = "Pass", id = 2094087139, art = "store_cash2x", effect = "Double the cash from driving, cut-ups and jobs, for good" },
+		{ key = "vip", name = "VIP", kind = "Pass", id = 2094033148, art = "store_vip", effect = "A VIP tag, free VIP bays in every tower garage and +10% cash from cut-ups" },
+		{ key = "doublepay", name = "Double Pay", kind = "Pass", id = 2094591074, art = "store_cash2x", effect = "Double the pay from every job, for good" },
+		{ key = "starter", name = "Starter Pack", kind = "Product", id = 3733093451, art = "store_starter", effect = "$50,000 and a starter car of your choice, once per player" },
+		{ key = "garage", name = "Garage Space", kind = "Product", id = 3733093637, art = "store_garage", effect = "One more garage space at the house you live in" },
 	},
 }
+
+-- the game passes (Store.lua caches ownership as player attributes of the same name: Cash2x, Vip,
+-- DoublePay). Paid power never reaches races or duels: their prizes are not multiplied
+Config.Passes = {
+	Cash2x = 2094087139,
+	Vip = 2094033148,
+	DoublePay = 2094591074,
+}
+-- developer products (Store.lua's ProcessReceipt is the only handler)
+Config.Products = {
+	StarterPack = 3733093451,
+	GarageSpace = 3733093637,
+	Spin = 3733093797,
+}
+Config.StarterPackCash = 50000
+Config.VipCutBonus = 1.1 -- VIP: +10% cut-up cash
+Config.PremiumBonus = 1.1 -- Roblox Premium: +10% cash (driving, cut-ups, jobs)
 
 Config.Testing = {
 	StudioUnlockAll = true,
@@ -2404,7 +2420,7 @@ Config.Rewards = {
 			reels = 1,
 			freeEvery = 24 * 60 * 60,
 			cashPrice = 50000,
-			productId = 0, -- the Robux developer product for 1 spin (0: hidden)
+			productId = 3733093797, -- the Robux developer product for 1 spin (Config.Products.Spin; 0: hidden)
 			prizes = {
 				{ cash = 5000, weight = 22 },
 				{ cash = 8000, weight = 18 },
@@ -3204,5 +3220,73 @@ function Config.ggLive(now: number?): boolean
 	end
 	return game:GetService("RunService"):IsStudio() and workspace:GetAttribute("GGFestForce") == true
 end
+
+---------------------------------------------------------------------
+-- Jobs with ranks and paychecks (owner approved 18 Nov 2026, Southwest Florida style; vault
+-- "City Legends/2026-11-18 Jobs - ranks and paychecks.md"). server/Jobs.lua pays, shared/JobRules.lua
+-- does the sums, client/JobsClient.lua shows the Job Center and the HUD bar. Yangon only.
+--   * active jobs: on duty = doing the job (in your car with a stop to reach); pay is mostly per
+--     stop / fare / ticket plus a small paycheck every PaycheckSeconds
+--   * posts: stand at the post; a bigger paycheck (about 1/3 of active per minute), paid for at most
+--     PostCapSeconds a day (UTC)
+--   * 5 ranks per job: RankXp (XP from time on duty and tasks) and RankMult (all its pay)
+--   * Double Pay pass (499 R$): x2 on all job pay. Read from the player's "DoublePay" attribute
+--     (server/Store.lua); Studio test: server player attribute TestDoublePay = true
+-- (a function: Config's main chunk is at its constant limit)
+---------------------------------------------------------------------
+Config.Jobs = (function()
+	local function v(x: number, y: number, z: number): Vector3
+		return Vector3.new(x, y, z)
+	end
+	return {
+		On = true,
+		-- the Job Center kiosk on Myanmar Plaza's forecourt, facing Kabar Aye Pagoda Road (spawn is just south)
+		Center = CFrame.lookAt(v(34742, 40.6, 27586), v(34700, 40.6, 27586)),
+		CenterRange = 26, -- studs: take a job only this close to the kiosk
+		PaycheckSeconds = 60,
+		DoublePayMult = 2,
+		RankMult = { 1, 1.3, 1.65, 2.1, 2.7 }, -- every pay of the job at rank 1..5
+		RankXp = { 0, 250, 800, 2000, 4500 }, -- XP to reach rank 1..5 (per job)
+		DutyXpPerMinute = 6,
+		PostCapSeconds = 2 * 60 * 60, -- paid post time per day
+		PostRadius = 12, -- studs from the post (flat)
+		IdleSeconds = 150, -- an active job with no task done this long: off duty (no AFK pay)
+		ArriveRadius = 30, -- studs from a stop / fare / patrol point
+		StopSps = 14, -- you must be (nearly) stopped there
+		MaxSps = 300, -- no car is faster: a leg done quicker than distance / MaxSps is refused
+		RadarSeconds = 3, -- police: hold still this long at a patrol point (the client waits, the server checks the time)
+		Ticket = { Range = 90, Pay = 250, Xp = 10, Cooldown = 45 }, -- police: a real player speeding past (Police.SpeedLimitKmh)
+		Taxi = { PickupMin = 250, PickupMax = 1400, FareMin = 900 }, -- studs
+		Patrol = { Min = 600, Max = 1800 },
+		List = {
+			{ id = "delivery", name = "Delivery", kind = "active", where = "Dispatch rings (Myanmar Plaza, Kabar Aye)", paycheck = 100, taskXp = 25,
+				ranks = { "Parcel Runner", "Van Driver", "Senior Courier", "Route Boss", "Express Chief" } },
+			{ id = "taxi", name = "Taxi", kind = "active", where = "Fares all over town", paycheck = 100, base = 150, perStud = 0.3, taskXp = 20,
+				ranks = { "Night Cabbie", "City Driver", "Airport Regular", "Top Fare", "Taxi Legend" } },
+			{ id = "bus", name = "YBS Bus Driver", kind = "active", where = "7 stops: Kabar Aye, Kamayut, Mayangone", paycheck = 100, base = 50, perStud = 0.12, taskXp = 6,
+				ranks = { "Spare Boy", "Bus Driver", "Line Driver", "Route Captain", "YBS Legend" } },
+			{ id = "police", name = "Traffic Police", kind = "active", where = "Patrol points + speeders", paycheck = 100, base = 80, perStud = 0.15, taskXp = 8,
+				ranks = { "Cadet", "Constable", "Sergeant", "Inspector", "Traffic Chief" } },
+			{ id = "tea", name = "Tea Shop", kind = "post", where = "Shwe Lahpet Tea Shop, Inya Lake", post = v(35553.1, 36.92, 27386.1), paycheck = 200,
+				ranks = { "Table Boy", "Tea Maker", "Head Brewer", "Shop Manager", "Tea House Owner" } },
+			{ id = "fuel", name = "Fuel Station", kind = "post", where = "Kabar Aye Fuel (the flyover station)", post = v(34600, 62.31, 29131), paycheck = 200,
+				ranks = { "Pump Attendant", "Cashier", "Shift Lead", "Station Manager", "Station Owner" } },
+			{ id = "dealer", name = "Dealership Staff", kind = "post", where = "Legends Motors, Kabar Aye", post = v(35424.4, 38.56, 22405.2), paycheck = 200,
+				ranks = { "Car Washer", "Sales Associate", "Senior Sales", "Sales Manager", "General Manager" } },
+			{ id = "mall", name = "Mall Shop", kind = "post", where = "Golden Thread Boutique, Myanmar Plaza", post = v(34778, 40.5, 27640), paycheck = 200,
+				ranks = { "Shop Helper", "Sales Clerk", "Senior Clerk", "Floor Manager", "Boutique Owner" } },
+		},
+		-- the YBS line: real bus stops on the map (street kit), driven in this order, then round again
+		BusStops = {
+			{ name = "Myanmar Plaza", pos = v(34538.1, 40.36, 27663.0) },
+			{ name = "Inya Lake", pos = v(34598.9, 45.33, 27203.8) },
+			{ name = "9 Mile", pos = v(34837.1, 45.21, 25409.4) },
+			{ name = "Tea Shop Corner", pos = v(35524.6, 36.61, 27491.4) },
+			{ name = "Kamayut Flats", pos = v(35805.6, 34.62, 27942.5) },
+			{ name = "Mayangone", pos = v(34923.0, 74.74, 29784.6) },
+			{ name = "Pyay Road", pos = v(34178.9, 60.18, 28812.6) },
+		},
+	}
+end)()
 
 return Config
