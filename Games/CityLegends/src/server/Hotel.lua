@@ -1341,7 +1341,8 @@ function Hotel.init(c: any)
 			task.wait(STEP)
 			for _, player in Players:GetPlayers() do
 				local profile = PlayerData.get(player)
-				if profile and profile.Loaded then
+				-- (owner, 19 Nov 2026: AFK limits) no suite pay while on duty at an AFK post (Jobs sets OnPost)
+				if profile and profile.Loaded and player:GetAttribute("OnPost") ~= true then
 					local rate = suiteIncome(profile)
 					if rate > 0 then
 						carry[player] = (carry[player] or 0) + STEP

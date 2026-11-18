@@ -67,7 +67,8 @@ check(r == 5 and span == 0, "top rank: nothing more to reach")
 -- pay
 local taxi, bus, police, tea = R.byId(J, "taxi"), R.byId(J, "bus"), R.byId(J, "police"), R.byId(J, "tea")
 check(R.paycheck(J, tea, 1) == 200 and R.paycheck(J, tea, 1, true) == 400, "post paycheck 200, Double Pay 400")
-check(R.paycheck(J, tea, 5) == math.floor(200 * J.RankMult[5] + 0.5), "rank 5 paycheck uses RankMult")
+check(R.paycheck(J, tea, 5) == math.floor(200 * J.RankMult[3] + 0.5) and R.paycheck(J, tea, 3) == R.paycheck(J, tea, 5), "a post's pay stops rising after rank 3 (19 Nov)")
+check(R.paycheck(J, taxi, 5) == math.floor(taxi.paycheck * J.RankMult[5] + 0.5), "a field job's rank 5 paycheck uses RankMult")
 check(R.taskPay(J, bus, 1, -50) == bus.base, "a negative leg pays just the base")
 
 -- per-minute targets at rank 1 (design: active about 600 a minute, posts about 200, 17 Nov note)

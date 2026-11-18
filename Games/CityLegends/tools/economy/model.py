@@ -146,7 +146,7 @@ POT_PER_RACER = cash(4000, ACTIVE)
 BAG = cash(60000, HEIST)
 DRIVE_PER_S = 1 / 18 * ACTIVE  # $ per mph per second above 40 mph
 CUT_BASE = 120 * ACTIVE
-DELIV_PER_STUD, DELIV_TIME_BONUS = 7 * JOBMULT, cash(40, JOBMULT)
+DELIV_PER_STUD, DELIV_TIME_BONUS = 4 * JOBMULT, cash(40, JOBMULT)  # (19 Nov 2026: 7 -> 4, owner approved)
 STREAK = [cash(v, GIFT) for v in (5000, 8000, 12000, 18000, 25000, 35000)]
 WEEKLY = cash(150000, GIFT)
 PLAYTIME = [(5, 500), (15, 1000), (30, 1500), (60, 3000)]
@@ -221,8 +221,9 @@ def job_per_hour(job, rank, cash2x=False, dpay=False):
     return tasks + paycheck + drive
 
 def post_per_hour(rank, cash2x=False, dpay=False, tips=False):
-    m = RANK_MULT[rank - 1] * (2 if dpay else 1) * (2 if cash2x else 1)
-    return 60 * POST_PAY * m + (180 * 40 * m if tips else 0)  # tips: a tap every 20 s (not AFK)
+    # (19 Nov 2026, owner approved) post pay stops rising after R3; 2x Cash only on the tips, not the paycheck
+    m = RANK_MULT[min(rank, 3) - 1] * (2 if dpay else 1)
+    return 60 * POST_PAY * m + (180 * 40 * m * (2 if cash2x else 1) if tips else 0)  # tips: a tap every 20 s (not AFK)
 
 # EST: free roam and races
 def cut_per_hour(cuts_min, combo, mph=110, closeness=0.5, cash2x=False):
@@ -486,7 +487,10 @@ def main():
     if "--md" in args:
         Path(args[args.index("--md") + 1]).write_text(text, encoding="utf-8")
     print(text)
-    if "--lua" in args:  # src/shared/CarMeta.lua: price, Local / Import, rarity per car on sale
+    # src/shared/CarMeta.lua: price, Local / Import, rarity per car on sale. The live CarMeta was written from the
+    # run BEFORE the 19 Nov job changes (git d7888d47 + the deleted trims): a run now prices lower, so only
+    # write it again on purpose (a new price table the owner approved)
+    if "--lua" in args:
         lua(Path(args[args.index("--lua") + 1]), rows)
     if "--chart" in args:
         chart(Path(args[args.index("--chart") + 1]), rows, curves)

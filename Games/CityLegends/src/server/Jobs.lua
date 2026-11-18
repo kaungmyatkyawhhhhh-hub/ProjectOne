@@ -110,9 +110,10 @@ local function double(player: Player): boolean
 	return player:GetAttribute("DoublePay") == true or (RunService:IsStudio() and player:GetAttribute("TestDoublePay") == true)
 end
 
--- pays a job amount: 2x Cash / Premium on top (Store.earnMult "job"), like the delivery job
-local function pay(player: Player, amount: number): number
-	local cash = math.floor(amount * (if earnMult then earnMult(player, "job") else 1) + 0.5)
+-- pays a job amount: 2x Cash / Premium on top (Store.earnMult "job"), like the delivery job; noPass: a
+-- post's AFK paycheck (owner, 19 Nov 2026: 2x Cash doesn't apply there; Double Pay still does)
+local function pay(player: Player, amount: number, noPass: boolean?): number
+	local cash = math.floor(amount * (if earnMult and not noPass then earnMult(player, "job") else 1) + 0.5)
 	if cash > 0 then
 		PlayerData.addCash(player, cash)
 	end
@@ -521,7 +522,7 @@ local function serve(player: Player, jobId: string)
 			end
 		end
 	end
-	local cash = pay(player, math.floor(tip * JobRules.mult(J, r, double(player)) + 0.5))
+	local cash = pay(player, math.floor(tip * JobRules.mult(J, JobRules.payRank(J, job, r), double(player)) + 0.5))
 	addXp(player, s, job, JD.ServeXp)
 	ctx.note(player, "jobtasks", 1)
 	push(player, { kind = "task", what = string.upper(JD.Serve[jobId].action), name = "Tip from " .. who, cash = cash })
@@ -703,6 +704,7 @@ local function tick(player: Player)
 	local lv = L(player)
 	if not (s and job) then
 		lv.onDuty = false
+		player:SetAttribute("OnPost", nil)
 		tags(player, nil)
 		return
 	end
@@ -769,13 +771,14 @@ local function tick(player: Player)
 	end
 	local changed = onDuty ~= (lv.onDuty == true)
 	lv.onDuty = onDuty
+	player:SetAttribute("OnPost", if onDuty and job.kind == "post" then true else nil) -- (Hotel: no suite pay on an AFK post)
 	if onDuty then
 		lv.duty += 1
 		addXp(player, s, job, J.DutyXpPerMinute / 60)
 		if lv.duty >= Jobs.paySeconds(player) then
 			lv.duty = 0
 			local r = JobRules.rank(J, s.xp[job.id] or 0)
-			local cash = pay(player, JobRules.paycheck(J, job, r, double(player)))
+			local cash = pay(player, JobRules.paycheck(J, job, r, double(player)), job.kind == "post")
 			ctx.note(player, "paychecks", 1)
 			push(player, { kind = "paid", cash = cash, title = job.ranks[r], double = double(player) })
 			changed = true

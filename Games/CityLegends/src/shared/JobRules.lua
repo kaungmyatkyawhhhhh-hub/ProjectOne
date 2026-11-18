@@ -24,8 +24,14 @@ function JobRules.mult(J: any, rank: number, double: boolean?): number
 	return (J.RankMult[rank] or 1) * (if double then J.DoublePayMult else 1)
 end
 
+-- (owner, 19 Nov 2026: AFK limits) a post's pay stops rising after rank 3 (J.PostRankCap: not in Config,
+-- its size limit); the rank title and XP still go on
+function JobRules.payRank(J: any, job: any, rank: number): number
+	return if job.kind == "post" then math.min(rank, J.PostRankCap or 3) else rank
+end
+
 function JobRules.paycheck(J: any, job: any, rank: number, double: boolean?): number
-	return math.floor(job.paycheck * JobRules.mult(J, rank, double) + 0.5)
+	return math.floor(job.paycheck * JobRules.mult(J, JobRules.payRank(J, job, rank), double) + 0.5)
 end
 
 -- a bus stop, taxi fare or patrol point: the job's base plus its rate per stud of the leg
