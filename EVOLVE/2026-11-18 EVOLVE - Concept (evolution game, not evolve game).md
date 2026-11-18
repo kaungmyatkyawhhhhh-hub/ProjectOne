@@ -261,3 +261,13 @@ Owner: "just do animation" (skipped the phone performance check).
 - **Known gaps:**
   - The wiggle was not seen in a screenshot.
   - The phone performance check is still not done.
+
+## Default walking sounds off (v53, 18 Nov 2026)
+Owner: "i can hear roblox walking sound".
+
+- **Fix:** EraWorld switches off Roblox's `RbxCharacterSounds` script on each client and stops any sound it already started. That removes the footsteps, jump, land, fall and splash sounds.
+- **Tried first:** an empty `RbxCharacterSounds` override in StarterPlayerScripts. Roblox still inserted its own copy, so the override was removed.
+- **Play test:**
+  - Walking 30 studs and jumping played no sound.
+  - After a respawn, the new body had no default sounds at all.
+- **Next, if wanted:** our own creature sounds (splash strokes, stomps for big animals) using the roblox-game-sounds skill.
