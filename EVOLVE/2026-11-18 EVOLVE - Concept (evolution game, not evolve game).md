@@ -326,3 +326,26 @@ Owner: "make it so that players dont lose dna when rebirth".
 - **Trade-off:** rebirth is now nearly free, so expect earlier and more frequent rebirths. Upgrade costs grow 1.6x per level, so saved DNA buys back the first levels quickly.
 - **Backup:** `ServerStorage.Evolution_backup_before_keepdna`.
 - **Tested in Play:** 77,777 DNA before the rebirth and 77,837 after, back to First Cell, Rebirths 4 → 5. The card text fits (86/120 px).
+
+## Admin panel (v61, 18 Nov 2026)
+Owner: "make admin panel for me too (username is HEINHEIN1922)".
+- **Who:** `ADMINS = { [848360565] = true }` (HEINHEIN1922's UserId) in `Evolution`.
+  - It goes by UserId, so a name change doesn't break it.
+  - Every press is checked on the server. The client only shows the button when the player has the `Admin` attribute.
+  - To add someone, add their UserId to `ADMINS`.
+- **Button:** a blue "Admin" button with the DNA icon, right of Index, opening an "Admin!" window.
+
+  | Action | What it does |
+  |---|---|
+  | +100K DNA | Adds 100,000 DNA |
+  | Evolve +1 / +10 species | Same generation, new body at once; unpicked splits on the way take the first path; stops at the end of a branch that stops |
+  | Jump to rebirth ready | Goes to Modern Human, or the end of your branch |
+  | Finish this life's goal | Completes the current goal |
+  | Die now | Normal death, next generation |
+  | Cold snap | Whole server; ignored if one is already running |
+
+- **Refactor:** the cold snap loop body became `coldSnap()` so the admin button can start one.
+- **Backups:** `Evolution_backup_before_admin`, `EvolutionUI_backup_before_admin`.
+- **Tested in Play:** button visible for HEINHEIN1922, window renders, DNA +100K, Cell Colony → Dickinsonia → Pederpes (Gen unchanged), goal done, an unknown action is ignored.
+- **Not tested:** a non-admin can't see or use it. That needs a second account; the code check is a single `ADMINS[player.UserId]` line.
+- **Note:** a family that carries a branch trait (e.g. Filter Pores → Sponges) keeps landing on that branch. A finished branch needs a rebirth.
