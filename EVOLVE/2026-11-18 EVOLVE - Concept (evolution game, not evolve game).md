@@ -296,4 +296,6 @@ Owner: "i can hear roblox walking sound".
   - Backup: `ServerStorage.EvolutionUI_backup_before_music`.
 - **AFK note (owner asked):** goals are not required.
   - An idle life still evolves 50% of the time ("Goals make evolution faster!").
-  - Offline time counts too (the Long Nap pass makes it 24h).
+  - At a fork, an AFK player waits at most `FORK_PATIENCE` = 3 lives, then takes the first path.
+  - Offline time earns DNA only, not evolution (by design: "evolving needs you playing").
+  - The Long Nap pass text said "Keep evolving up to 24h while away", which was a false promise. It now says "Earn DNA up to 24h while away" (v57).
