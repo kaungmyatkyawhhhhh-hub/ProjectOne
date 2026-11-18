@@ -32,3 +32,10 @@ Our plan of 17 Nov already has a Job Center with active jobs (delivery, taxi, ~6
 The Southwest Florida idea that would add the most is **job ranks with promotions + a paycheck**, with Yangon workplaces.
 
 Sources: [Official Southwest Florida Roblox Wiki: Police](https://strigid.miraheze.org/wiki/Police), [Cafe Worker](https://strigid.miraheze.org/wiki/Cafe_Worker), [Dealership Employee](https://strigid.miraheze.org/wiki/Dealership_Employee), [Fintech Employee](https://strigid.miraheze.org/wiki/Fintech_Employee), [RobloxDen: best paying jobs](https://robloxden.com/game-codes/southwest-florida/guides/southwest-florida-best-paying-jobs), [GamerJournalist](https://gamerjournalist.com/roblox-southwest-florida-best-paying-jobs/)
+
+## Owner decision (18 Nov 2026): APPROVED
+The proposal is approved: every job gets ranks with a paycheck and a visible promotion bar.
+- Active jobs pay more than posts: delivery, taxi, YBS bus driver, traffic police (speed cameras).
+- Posts are capped per hour: tea shop, fuel station, dealership staff, Myanmar Plaza shop.
+- The Double Pay pass (499 R$) doubles job paychecks.
+- Workplaces are real Yangon places with fictional names.
