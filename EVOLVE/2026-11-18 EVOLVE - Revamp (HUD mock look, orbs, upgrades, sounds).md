@@ -1,6 +1,6 @@
 # EVOLVE revamp, 18 Nov 2026
 
-This was the "work on the game for 4 hours" session, followed by the owner's "3 more hours, think of yourself as the owner" session. The place was saved in Studio as **version 21**. The owner publishes.
+This was the "work on the game for 4 hours" session, followed by the owner's "3 more hours, think of yourself as the owner" session. The place was saved in Studio as **version 30**. The owner publishes.
 
 ## HUD: the owner's ChatGPT mock look
 The owner compared our Neon HUD with a ChatGPT mock and said the mock was "SIGNIFICANTLY WAY BETTER". So the HUD was rebuilt to match the mock.
@@ -103,6 +103,63 @@ The 100-stage ladder is unchanged, so pacing stays the same. At three forks you 
 - **Backup:** `ServerStorage.Evolution_backup_before_world`. Place saved as v26.
 
 **Ideas for later:** a weekly world goal with a reward chest, and a world Index page showing how many players found each species.
+
+## Shared frontier (owner: "if 1 guy progresses alone and the others are maxed out, he won't be curious")
+**The fix:** nobody can max out ahead of the world. The furthest open stage depends on World Age:
+- Age 0: stage 60 (Superhuman, so rebirth works from day one)
+- Age 1: stage 70
+- Age 2: stage 80
+- Age 3: stage 90
+- Age 4: stage 95
+- Age 5: all 100 stages
+
+World Age thresholds were lowered to 300 / 1.2k / 4k / 10k / 25k / 60k / … lives.
+
+At the frontier, the HUD says "Next: ??? opens at World Age N", and locked Index tiles say "??? World Age N". Newcomers and veterans chase the same mystery.
+
+**Trail:** after the first fork, if you're more than 20 stages behind the frontier, you evolve 2x. The HUD shows a green "2x". New players quickly catch up to where everyone else is.
+
+**Age announcement:** "The world reached Age N! New species opened! +X% DNA for everyone".
+
+**Tested:** the Index shows "World Age 1" past stage 60, and the self-check runs a full game in a fully aged world.
+
+## Simpler for new players (owner: "this game is a bit complex")
+New players see only Shop and Index. Other things appear with a small pop when they start to matter:
+
+| Feature | Appears when |
+|---|---|
+| Diet button | stage 9 (the Index button slides over until then) |
+| World pill | stage 5 |
+| Lucky Genes and Immunity cards | stage 9 |
+| Extinction card | once rebirth is possible (before that it isn't shown at all) |
+
+The path picker doesn't open by itself during a new player's first 20 seconds.
+
+## Camps: how new players are born (owner wanted "new players spawn when 2 people…")
+**Rejected:** I turned down a mating mechanic because it breaks Roblox's rules on romantic and sexual content. The owner then turned down "high five" as childish.
+
+**Built:** "Build camp" ProximityPrompt on every character (each client hides its own).
+- One player presses it on another, and the other has 15 s to press it back. This lights a campfire between them: a stone ring, crossed logs and a Fire effect.
+- Both players get 20 s of DNA. The same pair has to wait 60 s before building another camp.
+
+**Births:**
+- The next 3 brand-new players who join the server are born at that camp ("born into A & B's tribe"), and both builders get 60 s of DNA each time.
+- Joins are never blocked. If there are more newcomers than camps, the extras are born next to a random player, who gets the gift.
+- If there are more camps than newcomers, camps wait and burn out after 10 minutes. A server holds at most 6 camps; a 7th removes the oldest.
+
+**Not tested in Play:** needs 2 players. A solo Studio test confirmed the prompt is on the character and hidden for its owner, and the camp visual was checked.
+
+## Light enough for huge servers (owner: "if the game is light to run, there can be huge player servers")
+- **DNA orbs have no server parts any more.** The server keeps orb spots in a table, tells only the owner through the `Orbs` remote ("add" / "del"), and checks pickups by distance 5x a second (5 studs). The client draws and bobs its own orbs in `workspace.MyDNAOrbs`. Before this, every player's 5 glowing orbs (with light, sparks and a label) were sent to every client, and every client animated all of them each frame. Tested: walking into an orb picked it up (DNA 105 → 110), and no server orb folder exists.
+- **Graves:** 6 per player instead of 15.
+- **Towns:** 16 plots. Players past 16 keep their civilization progress but get no physical town. Code marks this as `shortcut:`.
+- **MaxPlayers is currently 60.** Raising it is a Creator Hub setting (Places → Server size, up to 700). That's the owner's call. Test with ~50 first, using the Studio local server test with 8–10 players, to watch server heartbeat.
+- **Backups:** `ServerStorage.Evolution_backup_before_frontier`, `Evolution_backup_before_light`. Place saved as v30.
+
+**Still heavy at big sizes (next):**
+- every life reloads the character with `LoadCharacterWithHumanoidDescription`;
+- the evolve beam and burst are seen by everyone;
+- the per-player town models.
 
 ## Growth teleport bug fixed
 "When I get taller, I teleport back to the place I was 0.5 seconds ago." The cause was the server's `Model:ScaleTo`, which re-pivots at the lagging server position.
