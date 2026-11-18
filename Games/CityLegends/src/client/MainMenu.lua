@@ -1236,9 +1236,17 @@ local function openSettings()
 		local keep = { Time = LookFx.state.Time, Weather = LookFx.state.Weather, Sky = LookFx.state.Sky }
 		WorldFx.setQuality(name)
 		LookFx.state.Time, LookFx.state.Weather, LookFx.state.Sky = keep.Time, keep.Weather, keep.Sky
+		MainMenu.applyRenderDistance(st) -- (an unset Render distance follows Low graphics to Medium)
 		for _, f in refreshers do
 			f()
 		end
+	end)
+	-- (2026-11-18, owner: "add render distance to the settings") how far the client builds detail
+	choices(row("Render distance"), { "LOW", "MEDIUM", "HIGH", "ULTRA" }, function()
+		return string.upper(MainMenu.renderDistanceOf(st))
+	end, function(v)
+		st.RenderDistance = string.sub(v, 1, 1) .. string.lower(string.sub(v, 2))
+		MainMenu.applyRenderDistance(st)
 	end)
 	-- (2026-11-06) one setting of the picture, kept in the save with the rest of the look
 	local function look(key: string, value: any)
@@ -2636,8 +2644,22 @@ function MainMenu.applyAids(st: { [string]: any })
 	Driving.assist = if a.ESC == "Off" then 0 elseif a.ESC == "Sport" then 0.5 else 1
 end
 
+-- (2026-11-18) Render distance: a multiplier on the client detail radii (YangonKitStream's LOADs, WorldFx's
+-- LodRange lights), shared as player attribute RenderDist. High = the old distances; phones / Low graphics start on Medium.
+local RENDER_MULT = { Low = 0.5, Medium = 0.75, High = 1, Ultra = 1.5 }
+function MainMenu.renderDistanceOf(st: { [string]: any }): string
+	if RENDER_MULT[st.RenderDistance] then
+		return st.RenderDistance
+	end
+	return if UI.isTouch or st.Graphics == "Low" then "Medium" else "High"
+end
+function MainMenu.applyRenderDistance(st: { [string]: any })
+	player:SetAttribute("RenderDist", RENDER_MULT[MainMenu.renderDistanceOf(st)])
+end
+
 -- the saved settings at start (minimap, graphics, sound)
 function MainMenu.applySettings(st: { [string]: any })
+	MainMenu.applyRenderDistance(st)
 	if type(st.Minimap) == "table" then
 		Minimap.setVisible(st.Minimap.on ~= false)
 		Minimap.setCorner(st.Minimap.corner or "TopRight")

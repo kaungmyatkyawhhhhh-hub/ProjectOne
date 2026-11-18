@@ -9,6 +9,8 @@
 	nearest tiles first. While a tile is built its shells are hidden on this client only (LocalTransparencyModifier;
 	collision and camera rays still use them). Visual parts only: no collision, no rays, no touches.
 	Studio test hook: player attribute KitStreamOff = true takes everything down and stops.
+	(2026-11-18, Settings > Render distance) player attribute RenderDist (MainMenu: 0.5 / 0.75 / 1 / 1.5, nil = 1)
+	multiplies every folder's LOAD; a change re-checks the tiles at once (loads or takes down).
 	(2026-11-16, the street detail layer) a data folder whose Meta has LOAD=<studs> (Data_<district>S: poles, cables,
 	lamps, signals, stops, stalls ...) is built within its own radius; its tiles are keyed "S<i>_<j>" and hide no shells.
 ]]
@@ -193,6 +195,17 @@ end
 
 local stopped = false
 local lastPos: Vector3? = nil
+local mult = 1
+local function readMult()
+	local plr = Players.LocalPlayer
+	local v = plr and plr:GetAttribute("RenderDist")
+	mult = if type(v) == "number" and v > 0 then v else 1
+	lastPos = nil -- (re-check the tiles on the next beat)
+end
+if Players.LocalPlayer then
+	readMult()
+	Players.LocalPlayer:GetAttributeChangedSignal("RenderDist"):Connect(readMult)
+end
 local function refresh()
 	local cam = workspace.CurrentCamera
 	if not cam then
@@ -202,18 +215,18 @@ local function refresh()
 	lastPos = p
 	local here = Vector2.new(p.X, p.Z)
 	for key in folders do
-		if (centre[key] - here).Magnitude > loadOf[key] + (UNLOAD - LOAD) then
+		if (centre[key] - here).Magnitude > loadOf[key] * mult + (UNLOAD - LOAD) then
 			unload(key)
 		end
 	end
 	table.clear(queue)
-	local r = math.ceil(LOAD / tileSize) + 1
+	local r = math.ceil(LOAD * mult / tileSize) + 1
 	local ci, cj = math.floor(p.X / tileSize), math.floor(p.Z / tileSize)
 	for i = ci - r, ci + r do
 		for j = cj - r, cj + r do
 			for pre in prefixes do
 				local key = pre .. i .. "_" .. j
-				if tiles[key] and not folders[key] and (centre[key] - here).Magnitude <= loadOf[key] then
+				if tiles[key] and not folders[key] and (centre[key] - here).Magnitude <= loadOf[key] * mult then
 					table.insert(queue, key)
 				end
 			end
@@ -239,7 +252,7 @@ RunService.Heartbeat:Connect(function(dt)
 	end
 	acc += dt
 	local cam = workspace.CurrentCamera
-	if acc > 0.3 and cam and (not lastPos or (cam.CFrame.Position - lastPos).Magnitude > 24) then
+	if (acc > 0.3 or not lastPos) and cam and (not lastPos or (cam.CFrame.Position - lastPos).Magnitude > 24) then
 		acc = 0
 		refresh()
 	end

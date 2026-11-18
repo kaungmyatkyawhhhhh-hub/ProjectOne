@@ -371,6 +371,9 @@ local function startLod(scale: number)
 			end
 		end
 		local s = lightScale or scale
+		-- (2026-11-18) Settings > Render distance scales the venue lights' LodRange too (MainMenu's player attribute)
+		local rd = game:GetService("Players").LocalPlayer:GetAttribute("RenderDist")
+		local lodS = s * (if type(rd) == "number" then rd else 1)
 		local lightRangeNow = 560 * s
 		local rivieraLightRangeNow = 300 * s
 		local shadowRangeNow = if s >= 0.85 then 170 else 0
@@ -397,7 +400,7 @@ local function startLod(scale: number)
 				local dist = (part.Position - camPos).Magnitude
 				-- the Riviera's dense lamps: only those near the camera light the street (phones)
 				local own = l:GetAttribute("LodRange")
-				local range = if type(own) == "number" then own * s elseif part.Position.X > 9000 then rivieraLightRangeNow else lightRangeNow
+				local range = if type(own) == "number" then own * lodS elseif part.Position.X > 9000 then rivieraLightRangeNow else lightRangeNow
 				local on = dist < range and (lampsLit or not l:HasTag("DayOff"))
 				if l.Enabled ~= on then
 					l.Enabled = on
