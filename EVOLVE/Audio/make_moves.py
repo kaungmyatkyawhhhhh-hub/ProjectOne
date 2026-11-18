@@ -23,9 +23,10 @@ def band(x, lo, hi):
     return sosfilt(butter(2, [lo, hi], btype="band", fs=SR, output="sos"), x)
 
 
-def sweep(f0, f1, sec):  # sine sliding from f0 to f1
+def sweep(f0, f1, sec, drive=1):  # sine sliding from f0 to f1; drive > 1 saturates it so a low thump gets harmonics a phone can play
     f = np.geomspace(f0, f1, int(SR * sec))
-    return np.sin(2 * np.pi * np.cumsum(f) / SR)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR)
+    return np.tanh(drive * x) / np.tanh(drive)
 
 
 def mix(*parts):
@@ -55,11 +56,11 @@ for v in range(1, 4):
     finish(mix(band(rng.standard_normal(n), 2000 * j, 5500), 0.5 * sweep(520 * j, 300, 0.07)) * env(n, 0.001, 0.018), f"step_small_{v}")
     # medium: padded thud + grass crunch
     n = len(t(0.14))
-    finish(mix(sweep(150 * j, 70, 0.14) * env(n, 0.002, 0.05), 0.55 * band(rng.standard_normal(n), 900 * j, 3500) * env(n, 0.001, 0.025)), f"step_mid_{v}")
+    finish(mix(sweep(150 * j, 70, 0.14, 4) * env(n, 0.002, 0.05), 1.6 * band(rng.standard_normal(n), 900 * j, 3500) * env(n, 0.001, 0.025)), f"step_mid_{v}")
     # big: deep stomp, dirt crunch, short rumble tail
     n = len(t(0.45))
-    finish(mix(sweep(85 * j, 38, 0.45) * env(n, 0.003, 0.14),
-               0.6 * band(rng.standard_normal(n), 1000 * j, 4000) * env(n, 0.001, 0.05),
+    finish(mix(sweep(85 * j, 38, 0.45, 5) * env(n, 0.003, 0.14),
+               1.8 * band(rng.standard_normal(n), 1000 * j, 4000) * env(n, 0.001, 0.05),
                0.25 * band(rng.standard_normal(n), 120, 400) * env(n, 0.01, 0.2)), f"step_big_{v}")
     # swim stroke: water swish rising + a few bubbles
     n = len(t(0.42))
@@ -73,7 +74,7 @@ for v in range(1, 4):
 
 # jump: springy little "fwip" up
 n = len(t(0.2))
-finish(mix(sweep(280, 760, 0.2) * env(n, 0.004, 0.07), 0.35 * band(rng.standard_normal(n), 1500, 5000) * env(n, 0.002, 0.04)), "jump")
+finish(mix(sweep(280, 760, 0.2, 3) * env(n, 0.004, 0.07), 0.9 * band(rng.standard_normal(n), 1500, 5000) * env(n, 0.002, 0.04)), "jump")
 # land: soft thump with a puff
 n = len(t(0.18))
-finish(mix(sweep(140, 55, 0.18) * env(n, 0.002, 0.06), 0.4 * band(rng.standard_normal(n), 700, 3000) * env(n, 0.001, 0.03)), "land")
+finish(mix(sweep(140, 55, 0.18, 4) * env(n, 0.002, 0.06), 1.3 * band(rng.standard_normal(n), 700, 3000) * env(n, 0.001, 0.03)), "land")
