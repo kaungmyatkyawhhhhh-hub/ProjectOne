@@ -111,3 +111,46 @@ New LocalScript `StarterPlayerScripts.EraWorld` (copy in `Assets/UI art/scripts/
   - Whales and sharks get the land era for their depth; it should be sea by lane.
   - No era-specific props yet (huts, fields, city).
   - Phone not checked.
+
+## 250+ species (v45, 18 Nov 2026)
+Owner: "Species to 250".
+
+**Index count:** 392 names in total.
+- 90 are the imagined future (Machines, Space, Digital).
+- About 25 are human eras (Shell Diver … Knight).
+- That leaves **about 277 real species** with real dates.
+
+**New splits.** Each one needs the lane it grows from, and traits decide the branch.
+
+| Split | Grows from | Branches |
+|---|---|---|
+| F20 (depth 6) | the first animals | Jellyfish, Sponges, Sea stars |
+| F8 (10) | bony fish | Ray fins (11), Coelacanths, Lungfish |
+| F9 (15) | lobe fins | Amphibians (Eryops … Axolotl) |
+| F10 (18) | reptiles | Turtles, Lizards + snakes, Sea reptiles, Pterosaurs, Crocodiles |
+| F11 (23) | dinosaurs | Long necks, Armored, Horned, Duckbills |
+| F12 (25) | birds | Penguins, Giant runners, Owls |
+| F13 (21) | mammals | Egg-laying mammals (Platypus), Pouch mammals (Kangaroo) |
+| F5 (23, extended) | placentals | Dogs, Cats, Horses, Elephants, Rodents, Bats, Rhinos |
+| F15 (27) | primates | Orangutans, Gorillas, Monkeys |
+| F16 (31) | hominins | Paranthropus |
+| F6 (35, extended) | Homo | Denisovans, Homo floresiensis |
+| F17, F18, F19 | inside Bugs, Shells, Sharks | Spiders, Crustaceans, Scorpions; Snails, Clams; Rays |
+
+**Engine changes:**
+- A lane with no names continues the line it grew from (nodeOf falls through).
+- lineEnd: the newest split wins.
+- natureLane: the main lane gets 50% of the chances.
+- Load migration TreeV 3: splits a player is already past take the main lane.
+- inherit runs 5 passes.
+
+**Self-checks pass:**
+- Triceratops, T. rex, Lion and jellyfish ends.
+- Every inner split starts before its branch ends.
+- At least 250 species.
+
+**Play test:** the Sauropods path at depth 26 gives Diplodocus, "154 million years ago".
+
+**Known gap:** a whole lane shares one part-built body (Diplodocus looks like T. rex). Bodies made from traits are the next step before "1000+" can be honest.
+
+**Backup:** `Evolution_backup_before_species250`.
