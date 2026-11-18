@@ -2360,7 +2360,7 @@ def interior():
         zm = z0 + 0.1 + rise / 2 - math.cos(slope) * TH / 2
         c = P(tm, 0, 0)
         COLL.append((c[0], c[1], zm - TH / 2, (tb - ta) / math.cos(slope), 2 * step_hw, TH, yaw, slope))
-        for t0, t1, zl in ((-3.2, flat, z0), (run - flat, run + 3.2, z1)):
+        for t0, t1, zl in ((-3.2, flat, z0), (tb, run + 3.2, z1)):
             c = P((t0 + t1) / 2, 0, 0)
             COLL.append((c[0], c[1], zl + 0.1 - 1.0, t1 - t0, wdt, 1.0, yaw))
         for sgn in (1, -1):
