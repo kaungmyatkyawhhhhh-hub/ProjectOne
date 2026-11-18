@@ -1,3 +1,25 @@
+# roads05 handover (18 Nov 2026, thirty-second pass: J36, BUILDER agent; YangonRoads.scrub kerb lifts + Studio 17 spots)
+
+## J36 -- built-surface totals, T.qa (QA's kerbBetween check, asset rev 206), J35 -> J36, 17 spots: 16 / 161 / 36 / 77 / 9 (pave_gap 95) -> 16 / 161 / 36 / 77 / 0 (pave_gap 95)
+Note + table + shot: vault `City Legends/2026-11-18 roads05 J36 studio check.md`. No data change (roads c34a1111, paint b6c2ba15).
+Studio: main "City Legends", ClaudeTools.YangonRoads 661359068 (173,337 chars, ~26.6k left under 200k) = repo; test asset re-packed with it
+after the commit. Scratch cleaned, saved as version 1377, lock released.
+- **Kept (scrub, top):** a kerb Part a deck's Road lies over, < 0.35 under its top, is raised to deck + 0.35 (EHRC Road #3's deck-side kerb
+  under the Bridge Flyover foot: double_junction buried 3 -> 0).
+- **Kept (scrub, end):** a kerb whose OWN road's asphalt (probes 0.5 / 0.85 / 1.2 out, 8 directions) lies within 0.33 under its top is
+  raised to that + 0.33; the same probe runs from each stray patch (nose slivers hide the patch from the kerb's probe). slip_triangle
+  Lane #15 3, pyay_univ Lane #588 2, kunchan Lane #3414 nose 1 -> 0.
+- **Kept (scrub, stray patch):** a patch never rises (`math.max(0, ...)`): one went 1.7 UP onto earlier patches (spike at (36354.5, 42408)).
+- **Tried + reverted:** patch at the lowest asphalt round it (univ road_step +1). Paint QA dash projection along the road heading / dash
+  axis for the new arrow_missing (Banyar Dala #3 (39994, 32900): paint has 2 arrows for 2 lanes, QA splits one drifting dash line into
+  two): 10 -> 16 / 17. Next: chain dashes into lane lines before clustering (paint QA, `roads05_paint_qa.py` ~line 212).
+- **Not reached (in order):** pave_step 77 (QA: 40% two roads' pavements back to back 0.2-0.7 apart, 30% 0.2 steps inside one road /
+  island), road_step 36, box_hole 16, kerb_gap 161 (QA audit patterns, `City Legends/2026-11-18 roads05 fault audit.md`), pave_gap fill
+  rule, Road #18 square end, arrow_missing 10.
+- **Kit (Studio _G, lost on restart):** `_G.P(mod, find, repl)` (unique plain replace on ClaudeTools[mod], returns T.sum), `_G.RL()`
+  (no-terrain copy + load + DECK_TOUCH into _G.RT.Y), `_G.GO(names)` / `_G.ST()` (run + qa + hash, faults kept in `_G.F[name]`),
+  `_G.FX(spot, kind)` (fault rows with both cells). A full 17-spot run takes ~12 min.
+
 # roads05 handover (18 Nov 2026, thirty-first pass: J35, BUILDER agent; YangonRoads split + roads05_fix / chain + Studio 17 spots)
 
 ## J35 -- built-surface totals, T.qa, J34 (rev 204) -> J35 (rev 205), 17 spots: 18 / 177 / 37 / 77 / 11 (pave_gap 97) -> 16 / 177 / 36 / 77 / 9 (pave_gap 95)
