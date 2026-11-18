@@ -51,6 +51,7 @@ created: 2026-11-16
 | District P3 downtown (colonial shophouse rows, river quay + jetties, Sule / Botataung pads, empty landmark lots; built in the copy place, roads pending) | [[2026-11-16 Yangon rescale plan - 1 to 1 at player scale#Step 6 progress: P3]] |
 | Districts P4-P12 up to batch 3 (Hledan, Hlaing, Sanchaung, Shwedagon / Bahan, Kandawgyi, batch 3 east; seams, landmark pads, empty landmark lots, roads05 clearance; built in the copy place) | [[2026-11-16 Yangon rescale plan - 1 to 1 at player scale#Step 7 progress: up to batch 3 (P4-P12)]] |
 | Downtown landmarks (City Hall, High Court, Strand Hotel, Immanuel Baptist, Holy Trinity, Central Station, Secretariat, Bogyoke Market, Independence Monument): built offline, Studio placement pending | [[2026-11-16 Downtown landmarks 1 to 1 (P3)]] |
+| roads05 fault audit (J35): is the check right? kerb_gap / pave_step / pave_gap sampled, false class fixed (kerb_gap 177 -> 161), real patterns for the builder (18 Nov) | [[2026-11-18 roads05 fault audit]] |
 | roads05 fault census: every built-surface fault at the 17 Studio spots by pattern, root cause, close-ups; deterministic check, false positives removed (18 Nov, J28) | [[2026-11-18 roads05 fault census]] |
 | Yangon Convention Centre (P2) + GG Gaming Fest dressing, GG Quest, GGFest look (17 Nov, in the main place) | [[2026-11-17 GGFest at YCC (in game)]] |
 

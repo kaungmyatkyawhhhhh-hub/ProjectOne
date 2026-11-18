@@ -422,6 +422,18 @@ function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number
 		end
 		return false
 	end
+	-- (J36 QA audit false positive) a kerb crossing the grid at a slant can be thinner than the 0.5 cell diagonal, so a
+	-- road cell and a pavement cell touch past it although the kerb is whole (bahan_ring island (35423, 37888): shots
+	-- 'fault audit - keg6'). Fixed probes at 0.1 / 0.2 / 0.3 / 0.4 along the pair: any kerb top there = no gap
+	local function kerbBetween(x: number, z: number, alongX: boolean): boolean
+		for _, f in { 0.1, 0.2, 0.3, 0.4 } do
+			local r = cast(x + (if alongX then f else 0), z + (if alongX then 0 else f))
+			if r and r.Normal.Y >= 0.5 and r.Instance.Name == "Kerb" then
+				return true
+			end
+		end
+		return false
+	end
 	-- pave_gap (J29 builder ask): an open slot (1-4 cells of nothing) with pavement on both sides, along x or z
 	local function paveGap(i, j): boolean
 		for _, d in { { 1, 0 }, { 0, 1 } } do
@@ -476,7 +488,7 @@ function T.qaCore(root: Instance, x0: number, z0: number, x1: number, z1: number
 				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > 3 and (deckCell[k] or deckCell[q]) then
 					-- (J28 QA false positive) two levels: a deck's top beside the road under / beside it (a deck clipped
 					-- in mid-air by the test box, hledan_flyover). A deck's real foot lands on its road (< 3 apart)
-				elseif (a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None")) then
+				elseif ((a == "Road" and (b == "Pavement" or b == "None")) or (b == "Road" and (a == "Pavement" or a == "None"))) and not kerbBetween(x, z, q == K(i + 1, j)) then
 					add("kerb_gap", i, j, k, q)
 				elseif a == "Road" and b == "Road" and math.abs(hy[k] - hy[q]) > STEP then
 					add("road_step", i, j, k, q)
