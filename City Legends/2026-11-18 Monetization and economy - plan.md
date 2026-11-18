@@ -24,9 +24,9 @@ Many car models are **CC-BY-NC (non-commercial)** and most likely ripped from ra
 2. **Starting prices** (K04: auto/2x is the hero; small impulse items):
    | Item | Type | Price | Note |
    |---|---|---|---|
-   | 2x Cash | Pass | 299 R$ | hero |
-   | VIP | Pass | 199 R$ | tag, VIP bays, +10% cut-ups |
-   | Double Pay (jobs) | Pass | 199 R$ | from the 17 Nov design; or merge into 2x Cash |
+   | 2x Cash | Pass | 499 R$ (owner) | hero |
+   | VIP | Pass | 399 R$ (owner) | tag, VIP bays, +10% cut-ups |
+   | Double Pay (jobs) | Pass | 499 R$ (owner) | from the 17 Nov design; or merge into 2x Cash |
    | Starter Pack | Product, once | 49 R$ | $50k + a choice of a safe-licence car; offered after the first race or job, never in the tutorial |
    | Garage Space | Product | 49 R$ | |
    | Spin | Product | 25 R$ | odds shown on the button |
