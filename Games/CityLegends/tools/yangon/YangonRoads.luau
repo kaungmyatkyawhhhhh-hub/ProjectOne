@@ -2292,26 +2292,45 @@ function M.buildIslands(which: string?)
 			for i = 1, m do
 				local a, b = clean[i], clean[i % m + 1]
 				local L = hyp(b.X - a.X, b.Z - a.Z)
-				local mid = (a + b) / 2
-				local has = L < 0.3
-				local nx, nz = 0, 0
-				if not has then
-					nx, nz = -(b.Z - a.Z) / L * sg, (b.X - a.X) / L * sg -- (inward)
-					-- (a band or corner kerb lies just inside the outline: a ray there, not a bounding box: a wedge's box
-					-- reaches far past its triangle and hid gaps)
+				if L < 0.3 then
+					continue
+				end
+				local nx, nz = -(b.Z - a.Z) / L * sg, (b.X - a.X) / L * sg -- (inward)
+				-- (a band or corner kerb lies just inside the outline: a ray there, not a bounding box: a wedge's box
+				-- reaches far past its triangle and hid gaps)
+				-- (J29, census "island nose with no kerb" (Bahan Kan Yeiktha arm, Roundabout 4): one ray at the side's
+				-- middle called a side kerbed when a band kerb covered only its middle, so its ends (the nose) had none.
+				-- Now every 0.5 along the side is tested and only the open runs get a kerb (no kerb on a kerb); the fill
+				-- still moves in off the whole side, butting the band kerbs where they are)
+				local m = math.max(1, math.ceil(L / 0.5))
+				local open = {}
+				for q = 1, m do
+					local p = a:Lerp(b, (q - 0.5) / m)
+					local has = false
 					for _, d in { 0.45, 0.2, 0.7 } do
-						local r = workspace:Raycast(mid + Vector3.new(nx * d, 3, nz * d), Vector3.new(0, -8, 0), rp)
+						local r = workspace:Raycast(p + Vector3.new(nx * d, 3, nz * d), Vector3.new(0, -8, 0), rp)
 						if r and r.Instance.Name == "Kerb" then
 							has = true
 							break
 						end
 					end
+					open[q] = not has
 				end
-				if not has then
+				local q = 1
+				while q <= m do
+					if not open[q] then
+						q += 1
+						continue
+					end
+					local q1 = q
+					while q1 < m and open[q1 + 1] do
+						q1 += 1
+					end
 					kerbed[i] = true
+					local a1, b1 = a:Lerp(b, (q - 1) / m), a:Lerp(b, q1 / m)
 					local k = M.CURB_UP + 0.1 - UP
-					local o0, o1 = a + Vector3.new(-nx * 0.05, k, -nz * 0.05), b + Vector3.new(-nx * 0.05, k, -nz * 0.05)
-					local i0, i1 = a + Vector3.new(nx * 0.85, k, nz * 0.85), b + Vector3.new(nx * 0.85, k, nz * 0.85)
+					local o0, o1 = a1 + Vector3.new(-nx * 0.05, k, -nz * 0.05), b1 + Vector3.new(-nx * 0.05, k, -nz * 0.05)
+					local i0, i1 = a1 + Vector3.new(nx * 0.85, k, nz * 0.85), b1 + Vector3.new(nx * 0.85, k, nz * 0.85)
 					kp.Color = if i % 2 == 1 and pal.kerbBand then pal.kerbBand else pal.kerb
 					local folder = M.folder():FindFirstChild("Islands") or Instance.new("Folder")
 					folder.Name = "Islands"
@@ -2321,6 +2340,7 @@ function M.buildIslands(which: string?)
 							made += M.Roads.triangle(tr[1], tr[2], tr[3], 6.04, kp, folder)
 						end
 					end
+					q = q1 + 1
 				end
 			end
 			if next(kerbed) then
@@ -2890,7 +2910,19 @@ function M.buildDecks()
 	M.deckHalf = {}
 	for k, d in M.data.decks do
 		local mid = d.s[math.floor(#d.s / 2) + 1]
-		if own(mid[1], mid[3]) then
+		-- (J29, test spots: a deck whose middle lies outside the spot was never built, so the ground roads at its foot
+		-- met nothing (double_junction kerb_gap "deck foot" 45). M.DECK_TOUCH (the Studio test only: the bake keeps one
+		-- owner cell per deck) builds every deck with a sample in the box)
+		local touch = false
+		if M.DECK_TOUCH and M.box then
+			for _, q in d.s do
+				if own(q[1], q[3]) then
+					touch = true
+					break
+				end
+			end
+		end
+		if own(mid[1], mid[3]) or touch then
 			table.insert(data.roads, { name = d.name, kind = "deck", rank = -k, half = d.half or 32, closed = false, s = d.s })
 			M.deckHalf[d.name] = d.half or 32
 		end

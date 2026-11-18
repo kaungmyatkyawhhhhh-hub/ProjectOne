@@ -1278,6 +1278,61 @@ def deck_feet(data):
     return moved
 
 
+def deck_foot_ends(data, AT_GRADE=3.0, PAD=0.5):
+    """(J29, double_junction: Lane #3309, a link OSM draws merging 12 studs past the East Horse Race Course Road (Bridge)
+    deck's start, ended ON the deck's foot: its kerbs buried under the deck slab, its pavement in it) a road end at grade
+    inside a deck's footprint (its line buffered by half + PAD, flat ends) is cut back along itself to the footprint's
+    edge, so it meets the ground road (or the side lane) before the deck, as every other mouth. Roads passing under a
+    deck (more than AT_GRADE below it), the deck's own road and its side lanes are left alone."""
+    out = []
+    cut = data.get('cut', {})
+    for d in data['decks']:
+        S = d['s']
+        L = LineString([(q[0], q[2]) for q in S])
+        if L.length < 1:
+            continue
+        foot = L.buffer(d.get('half', 24) + PAD, cap_style=2)
+        skip = {d.get('of'), *d.get('sides', ())}
+        for r in data['roads']:
+            if r['name'] in skip or r.get('closed') or len(r['s']) < 3:
+                continue
+            cs = set(cut.get(r['name'], ()))
+            for k in (0, -1):
+                s = r['s']
+                q = s[k]
+                if (len(s) - 1 if k == -1 else 0) in cs or r.get('startsOnEnd' if k == 0 else 'endsOnEnd')                         or not foot.contains(Point(q[0], q[2])):
+                    continue  # (a continuation joint is not a mouth)
+                t = L.project(Point(q[0], q[2]))
+                dy = abs(q[1] - S[min(int(round(t / max(L.length / (len(S) - 1), 1e-6))), len(S) - 1)][1])
+                if dy > AT_GRADE:
+                    continue
+                # walk back from the end to the first sample outside the footprint, then put the end on the edge
+                idx = list(range(len(s))) if k == 0 else list(range(len(s) - 1, -1, -1))
+                j = next((i for i in idx if not foot.contains(Point(s[i][0], s[i][2]))), None)
+                if j is None or j in cs or abs(j - (0 if k == 0 else len(s) - 1)) > len(s) - 3:
+                    continue
+                inner = s[j - 1] if k == 0 else s[j + 1]  # the neighbour still inside the footprint
+                seg = LineString([(s[j][0], s[j][2]), (inner[0], inner[2])])
+                x = seg.intersection(foot.exterior)
+                pts = [x] if x.geom_type == 'Point' else list(getattr(x, 'geoms', []))
+                nq = list(inner)
+                if pts:
+                    p = min(pts, key=lambda g: g.distance(Point(s[j][0], s[j][2])))
+                    f = Point(s[j][0], s[j][2]).distance(p) / max(seg.length, 1e-6)
+                    nq = [s[j][c] + (inner[c] - s[j][c]) * f if c < 3 else inner[c] for c in range(len(inner))]
+                    nq[0], nq[1], nq[2] = round(nq[0], 2), round(nq[1], 2), round(nq[2], 2)
+                n0 = len(s)
+                if k == 0:
+                    r['s'] = [nq] + s[j:]
+                    sh = n0 - len(r['s'])
+                    if r['name'] in cut and sh:
+                        cut[r['name']] = sorted(i - sh for i in cut[r['name']] if i - sh >= 0)
+                else:
+                    r['s'] = s[:j + 1] + [nq]
+                out.append(dict(road=r['name'], deck=d['name'], end='start' if k == 0 else 'end', dropped=n0 - len(r['s'])))
+    return out
+
+
 def deck_recap(data, QA_MAX=DECK_MAX + 0.001):
     """(J21, "Road Flyover" 8.1%) deck_fair's sideways moves shorten the plan spacing a few % (7.85 -> 7.59 studs), so a
     ramp regraded at DECK_MAX on the old chainage ends just over QA's 8%. A deck now over QA_MAX (DECK_MAX + 0.1%: QA rounds
@@ -2057,6 +2112,7 @@ def main():
     chained['deck_regrade'] = deck_regrade(data)  # (J15) last: on the final plan's chainage
     chained['deck_fair'] = deck_fair(data)  # (J16) deck_wobble
     chained['deck_feet'] = deck_feet(data)  # (J28) the road's cut stretch follows its deck's plan
+    chained['deck_foot_ends'] = deck_foot_ends(data)  # (J29) no road ends on a deck's foot
     chained['fork_trim'] = fork_trim(data)  # (J20) before the mouths: a trimmed fork record is a mouth now
     print('chain', json.dumps(chained))
     roads = data['roads']

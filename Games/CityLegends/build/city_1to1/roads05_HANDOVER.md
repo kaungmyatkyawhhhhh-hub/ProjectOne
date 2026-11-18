@@ -1,3 +1,28 @@
+# roads05 handover (18 Nov 2026, twenty-fifth pass: J29, BUILDER agent; YangonRoads + roads05.py + roads05_fix.py + Studio 17 spots)
+
+## J29 -- built-surface totals, QA's final T.qa, J28 -> J29 (17 spots): 26 / 308 / 36 / 99 / 7 -> 20 / 256 / 36 / 76 / 10 (pave_gap 233 -> 231)
+Note + table + shot: vault `City Legends/2026-11-18 roads05 J29 studio check.md`. Census (QA): `City Legends/2026-11-18 roads05 fault census.md`.
+Studio: main "City Legends", test re-packed (asset 133014134133489 revision 201 = J29 data + builder + QA's final runner), ClaudeTools.YangonRoads
+2108652449 / Roads 1407280218 (= repo), scratch cleaned, saved version 1294, lock released. Measure with `T.runAll(names)` in the runner's fixed order (state leak below).
+- **DECK_TOUCH (YangonRoads.buildDecks):** a test spot built a deck only when its middle sample was in the box (double_junction's East Horse
+  Race Course Road (Bridge) Flyover never built: 45 "deck foot" kerb gaps were the test). Flag on in T.install only; the bake keeps one owner cell.
+- **Side-lane gore (roads05.py):** gore = deck half + side width + SIDE_INNER_WALK (the sides' deck-side walk + kerb lay under the deck foot).
+- **deck_foot_ends (roads05_fix.py, after deck_feet):** a road end at grade inside a deck footprint (half + 0.5, flat ends) is cut back to its
+  edge (6 roads, Lane #3309 at double_junction). Continuation ends skipped.
+- **Island kerbs (buildIslands):** every 0.5 of each outline side tested for a kerb, kerb laid on open runs only (bahan_ring kerb_gap 50 -> 40 with the rest).
+- **Tried + reverted:** (a) Roads.luau `underBig`: strips of a smaller road wholly under a bigger road's face not laid -> holes where Pyay (Prome)
+  ENDS (bigSurface's reach runs past end lines): pyay_univ kerb_gap 21 -> 42. Needs a built-face or end-line test. (b) inner pins not raised within
+  2.5 of an unpinned edge: no effect, slip_triangle Lane #15's R edge is pinned (19.13-19.23) and its kerb / pavement stand 0.1 over it.
+- **Pipeline (`sh roads05_pipeline.sh J29`):** roads.json md5 95dfb789, paint.json 84b94130; J28 backups roads_J28.json / paint_J28.json /
+  roads_unfixed_J28.json. mouthsim 0 failed of 11,570. QA: mouth_short real 3 -> 4 (East Horse Race Course Road (Bridge) start (39963, 32873)
+  5.3 short: the wider gore reaches it), mouth_over 1 -> 0; paint QA unchanged. Version line written.
+- **Next (in order):** (1) buried 10 (double_junction Banyar Dala #3 x Lane #3308 5 at (39984, 32907): Lane #3308 runs under the Banyar Dala deck
+  beside Banyar Dala #3, a 1-stud road strip between two kerbs; slip_triangle Lane #15 3; pyay_univ Lane #588 2); (2) the Bridge start mouth_short;
+  (3) census patterns 1-3 (junction corners, mouth ends, roundabout gores; e.g. the Pazundaung Y wedge (40983-40990, 43398-43414) between Bogyoke
+  #2 ~2's end and Upper Pazundaung #3's start: no corner, open triangle); (4) Hledan #3 under Insein / Pyay with a built-face test; (5) builder state
+  leak between stepCell calls (QA: bahan_ring after ycentral vs after long_median, 199 parts, Lane #3789 kerbs 0.004-0.007); (6) not reached:
+  Yawmingyi corner wedge, Kun Chan #3 kerb pairs, flicker probe at other junctions, Bahan pave_gap strip, univ_kabaraye three-pavement island.
+
 # roads05 handover (18 Nov 2026, twenty-fourth pass: J28, GEOMETRY agent; BUILDER (Roads.luau, Yangon path) + DATA (fix deck_feet) + Studio 17 spots)
 
 ## J28 -- built-surface totals J27 -> J28 (17 spots): 63 / 385 / 58 / 102 / 7 -> 57 / 364 / 40 / 101 / 7

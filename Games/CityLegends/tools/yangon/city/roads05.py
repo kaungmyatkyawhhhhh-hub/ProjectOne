@@ -1438,7 +1438,9 @@ def finish(net):
         side_w = 0.0
         for o in dk['sides']:
             side_w = max(side_w, float((o['wl'] + o['wr']).max()))
-        gore = dh + side_w
+        # (J29, double_junction: the side lanes' deck-side walk + kerb (SIDE_INNER_WALK) lay on the deck's foot: kerbs
+        # buried under the deck slab, pavement in it) the gore leaves room for that walk, as `need` below does mid-deck
+        gore = dh + side_w + SIDE_INNER_WALK
         for end in ('from', 'to'):
             i = dk[end]
             for k in range(len(r['P'])):
