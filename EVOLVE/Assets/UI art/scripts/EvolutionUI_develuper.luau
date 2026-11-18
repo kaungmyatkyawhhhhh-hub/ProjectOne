@@ -550,7 +550,7 @@ task.spawn(function() workspace:WaitForChild("Mysteries", 30) markMysteries() en
 
 ---------------------------------------------------------------- World pill: everyone, on every server, grows one world together
 -- The bar fills with every life anyone lives; each World Age = +5% DNA for all players.
-local worldPill = img(menuRow, "slot", { Position = UDim2.fromOffset(202, 9), Size = UDim2.fromOffset(194, 44), ZIndex = 2 })
+local worldPill = img(hud, "slot", { AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(194, 44), ZIndex = 2 }) -- owner: "put this on the right middle"
 local worldText = label(worldPill, "", 14, { Position = UDim2.fromOffset(8, 3), Size = UDim2.fromOffset(178, 20), RichText = true, ZIndex = 5 })
 local worldTrack = img(worldPill, "miniTrack", { Position = UDim2.fromOffset(8, 24), Size = UDim2.fromOffset(178, 14), ZIndex = 3 })
 local worldFill = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(0, 1), ClipsDescendants = true, ZIndex = 4 }, worldTrack)

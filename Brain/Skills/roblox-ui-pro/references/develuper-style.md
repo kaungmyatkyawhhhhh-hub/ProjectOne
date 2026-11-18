@@ -136,6 +136,7 @@ Tier colours on the store follow his layout:
 - A status plate placed to the RIGHT of the left button column still reads as "the middle" to the owner ("this ui being at the middle is very annoying"). Stack every persistent plate in ONE top-left column: status, then currency, then the menu buttons. Small pills go beside the buttons.
 - News toasts belong in a slim strip at the TOP MIDDLE ("put this notification at the top middle"). Nudge it right on narrow screens so it never touches the corner plate: `x = max(-150, 16 + plateW*scale - rootW/2)` from the centre.
 - Toasts are one line and truncate, so news lines must stay at or under ~34 characters.
+- Info-only pills (World Age and similar, nothing to tap) go on the RIGHT edge, vertically centred (`AnchorPoint (1, 0.5)`, `Position (1, -8, 0.5, 0)`), not beside the menu buttons ("put this on the right middle"). The middle of the right edge is clear of the phone jump button, which sits bottom-right.
 
 ## Pipeline (all in `assets/develuper-kit/`)
 

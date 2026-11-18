@@ -30,6 +30,8 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
+- 2026-11-18: roblox-ui-pro develuper-style.md: info-only pills go on the right-middle edge (owner correction)
+- 2026-11-18: roblox-ui-pro example HUD: World Age pill moved to the right-middle edge (owner: "put this on the right middle")
 - 2026-11-18: roblox-ui-pro example HUD refreshed (cold-snap icy tint via ColorCorrection, COLD SNAP/colder toast styles, anti-idle-kick for AFK players)
 - 2026-11-18: roblox-ui-pro example HUD refreshed again (unseen next species shows ???, silhouette-then-reveal evolve banner, LEAP toast style)
 - 2026-11-18: roblox-ui-pro develuper-style.md gets the owner's layout corrections: all persistent plates in one top-left column, news as a top-middle strip, toast lines kept to 34 characters or fewer.

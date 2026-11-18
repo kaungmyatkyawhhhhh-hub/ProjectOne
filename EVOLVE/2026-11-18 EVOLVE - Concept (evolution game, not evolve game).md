@@ -87,3 +87,27 @@ Rules that make the hybrid work:
 - Self-check: about 50% of F1 runs go to Fish (400 runs).
 - Play test: Backbone → Haikouichthys, then Bony Skeleton → Arandaspis.
 - Backup: `Evolution_backup_before_traitforks`.
+
+## Per-player era world (v43, 18 Nov 2026)
+Owner: "the world looks futuristic but not for all".
+
+New LocalScript `StarterPlayerScripts.EraWorld` (copy in `Assets/UI art/scripts/EraWorld.luau`). Each player sees the world of their own depth on the tree (`StageNum`):
+
+| Depths | Era | Look |
+|---|---|---|
+| 1–11 | Ancient Sea | Teal underwater fog, sand floor, round trees hidden, palms = kelp, bushes = coral |
+| 12–16 | First Forests | Misty green swamp, dark moss, round trees hidden (palms read as tree ferns) |
+| 17–29 | Age of Reptiles | Warm haze, olive ground, dark conifer green |
+| 30–37 | Savanna | Tan grass, olive trees, palms hidden |
+| 38–60 | Today | The map as built |
+| 61+ | Future | Sunset dusk, pastel cyan/magenta trees. Neon blew out in testing, so it was dropped. |
+
+- Only looks change: Atmosphere, an "EraTint" ColorCorrection, ClockTime, terrain grass colour, and the World folder's part colours and visibility.
+- Hidden parts lose collision locally only.
+- Streamed-in parts are restyled as they arrive (StreamingEnabled is on).
+- Everyone still shares the same ground, players, mysteries and events, and the server decides gameplay.
+- World Age pill moved to the right-middle edge (owner request).
+- **Known gaps:**
+  - Whales and sharks get the land era for their depth; it should be sea by lane.
+  - No era-specific props yet (huts, fields, city).
+  - Phone not checked.
