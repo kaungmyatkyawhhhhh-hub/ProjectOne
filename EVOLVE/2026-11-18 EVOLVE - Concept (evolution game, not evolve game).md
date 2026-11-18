@@ -1,0 +1,50 @@
+# EVOLVE - Concept: an evolution game, not an "evolve" game
+
+Owner, 18 Nov 2026: "i wanna be a evolution game, not like a evolve game like others".
+
+## The difference
+- **Evolve games (everyone else):** one creature levels up (eat, XP, a bigger skin), and you pick what you become.
+- **Ours:** change happens across **generations**, by the real rules: variation → selection → inheritance → splitting → deep time. You can't buy or pick your evolution. Nature does it, and you live through it.
+
+## Pillars
+1. **You are a lineage.** Each life you play one member. At birth you see your mutations ("longer fins", "thick skin", "sees in the dark").
+2. **The environment tests you.** Cold snaps, droughts, predators, oxygen spikes. Traits that fit help you survive and leave more children.
+3. **Speciation is automatic.** When enough traits pile up: "Your lineage has changed so much it's a new species: Tiktaalik!" There's no menu and no shop.
+4. **Branches come from what happened to you.** Two players who start the same can end as different species.
+5. **Deep time.** Real species with real dates (the tree of life, v38, already built).
+
+## Shared or per player? (decided 18 Nov 2026)
+A **hybrid**:
+
+| What | Where | Why |
+|---|---|---|
+| Your lineage: genes, mutations, species, date, tree position | **Per player**, on the server, saved | It's your story. A newcomer has to start at the first cell, not in the Jurassic. |
+| Environment events (cold snap, drought, predator wave, the big extinction) | **Shared per server**: everyone in the server is hit at once | The social moment: "we all survived the ice age". It's a reason to play with friends. |
+| World counter (species found, extinctions survived by everyone) | **Global**, across all servers (the existing World pill) | Cosmetic pride only. It never touches anyone's survival. |
+
+Rules that make the hybrid work:
+- **Events test traits, not eras.** A cold snap hurts a cell with no "thick membrane" and a mammal with no fur alike, so every stage plays the same event.
+- **Newborn shelter.** Nobody gets hit by an event in their first ~3 minutes in the server.
+- **Server-side only.** Every test and outcome is decided by the server. The client only shows it: the warning, the sky change, the reveal. Never trust the client for survival.
+- **Not truly global.** A worldwide event clock would land the big extinction on a kid who joined 10 seconds ago. Cross-server sync is also cost with no fun in it.
+
+## The first five minutes
+1. Spawn as First Cell. The birth card shows 2 mutations (e.g. "Thick membrane", "Fast flagellum").
+2. Eat orbs and survive. A pulsing sky tint warns: "The water is getting colder…"
+3. Cold snap (shared, 20 s). Cells with Thick membrane stay fine; others slow down and lose orbs. Toast: "Your Thick membrane saved you!"
+4. Die of old age, and a child is born. The card shows inherited traits plus 1 new mutation ("???" → reveal).
+5. Around minute 4–5, traits pile up and you speciate: "Blue-Green Bacteria", with the date.
+
+## Keep / cut
+- **Keep:** generations, inheritance, mutations, the tree of life with dates, the world counter.
+- **Cut:**
+  - Shop "Family +1 evolution": buying evolution breaks the concept. Robux sells cosmetics or lineage slots instead.
+  - Goals-to-evolve: evolution comes from traits, not chores.
+  - Path-picking menus: branches come from traits.
+- **Shelve:** town building, cyborg/space futures.
+
+## Build order
+1. Visible mutations at birth (2–3 traits from a small pool, shown on the birth card, inherited by children).
+2. One shared environment event (a cold snap) that tests one trait, decided on the server.
+3. Speciation from traits instead of Evo points; tree forks are chosen by which traits you carry.
+4. More events (drought, predator, oxygen spike, extinction), then cut the shop evolution item and goals.
