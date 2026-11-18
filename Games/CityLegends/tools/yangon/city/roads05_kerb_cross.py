@@ -17,6 +17,10 @@ CELL = 1536.0
 
 def main(tag, cells):
     parts = pickle.load(open(BUILD + 'roads05_%s/parts.pkl' % tag, 'rb'))
+    # the bake's scrap filter first: dropped scraps are not in the meshes (needs YANGON_SCALE=1to1)
+    import roads05_bake as RB
+    tris = [t for p in parts if p[0] == 'R' for t in RB.faces_of(p)]
+    parts, _ = RB.drop_scraps(parts, json.load(open(BUILD + 'roads05_%s/roads.json' % tag, encoding='utf-8')), RB.Surface(tris))
     ks = [p for p in parts if p[0] in ('r', 'w')]
     if cells:
         ks = [p for p in ks if '%dx%d' % (math.floor(p[2][0] / CELL), math.floor(p[2][2] / CELL)) in cells]

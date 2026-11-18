@@ -67,30 +67,40 @@ class Cover:
 
 
 def clip_row(row, cover):
-    """the row's pieces over built pavement: [] (none), [row] (all of it) or the pieces"""
+    """the row's pieces over built pavement: [] (none), [row] (all of it) or the pieces. 1-stud slices along, each
+    cut in 3 across; a piece = a run of slices with the same covered thirds, one box per covered band of thirds"""
     kind, c, R, U, S = parse(row)
     Bk = np.cross(R, U)
     top = c + U * S[1] / 2
-    L = S[2]
+    L, W = S[2], S[0]
     n = max(1, int(math.ceil(L)))
     t = (np.arange(n) + 0.5) / n * L - L / 2  # slice middles along
-    pts = np.array([top + R * a * S[0] + Bk * ti for ti in t for a in (-0.35, 0, 0.35)])
-    cov = cover.covered(pts).reshape(n, 3).sum(1) >= 2
+    across = (-W / 3, 0.0, W / 3)
+    pts = np.array([top + R * a + Bk * ti for ti in t for a in across])
+    cov = cover.covered(pts).reshape(n, 3)
     if cov.all():
         return [row]
     out = []
     i = 0
     while i < n:
-        if not cov[i]:
-            i += 1
-            continue
+        pat = tuple(cov[i])
         j = i
-        while j + 1 < n and cov[j + 1]:
+        while j + 1 < n and tuple(cov[j + 1]) == pat:
             j += 1
         a0, a1 = i / n * L - L / 2, (j + 1) / n * L - L / 2
-        if a1 - a0 >= 1.0:
-            mid = c + Bk * ((a0 + a1) / 2)
-            out.append(fmt(kind, mid, R, U, (S[0], S[1], a1 - a0)))
+        if any(pat) and a1 - a0 >= 1.0:
+            k = 0
+            while k < 3:  # bands of covered thirds
+                if not pat[k]:
+                    k += 1
+                    continue
+                m = k
+                while m + 1 < 3 and pat[m + 1]:
+                    m += 1
+                l0, l1 = -W / 2 + k * W / 3, -W / 2 + (m + 1) * W / 3
+                mid = c + Bk * ((a0 + a1) / 2) + R * ((l0 + l1) / 2)
+                out.append(fmt(kind, mid, R, U, (l1 - l0, S[1], a1 - a0)))
+                k = m + 1
         i = j + 1
     return out
 
