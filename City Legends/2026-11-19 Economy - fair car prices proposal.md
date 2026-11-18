@@ -490,3 +490,16 @@ Local means the car is sold at the dealership. Import means it only comes from c
 - **All the other cars in this list:** base only. Their Sport and Top trims come off sale. **They are deleted outright, not kept as Retired (owner: only testers own them).**
 
 The rest of the proposal (prices and the 5 open questions) is still waiting for the owner's check.
+
+## Owner approval (19 Nov 2026): APPLY
+- **All 6 suggestions approved:**
+  1. The new prices.
+  2. Delivery per-stud pay 7 → 4.
+  3. AFK limits: 2x Cash doesn't apply at posts, post rank pay stops at R3, and hotel suite AFK pay is capped.
+  4. 30% duplicate refund from cash crates.
+  5. The Revuelto Sport and Top trims are deleted.
+  6. Hypercars come from crates only (no airport cash buy), with a pity guarantee.
+- **458 changes:**
+  - The old-model Ferrara 458 Italia (`ferrara_458`) is deleted.
+  - The 458 Speciale is Import.
+  - The 458 Spider is Local (dealership).
