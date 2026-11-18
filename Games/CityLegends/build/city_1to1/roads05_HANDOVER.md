@@ -1,3 +1,24 @@
+# roads05 handover (18 Nov 2026, twenty-ninth pass: J33, BUILDER agent; YangonRoads + roads05_fix + Studio 17 spots)
+
+## J33 -- built-surface totals, T.qa (runner rev 202), J32 -> J33 (17 spots): 19 / 214 / 37 / 77 / 11 (pave_gap 105) -> 17 / 193 / 37 / 77 / 11 (pave_gap 107)
+Note + table + 2 shots: vault `City Legends/2026-11-18 roads05 J33 studio check.md`. Studio: main "City Legends", rev 202 installed with the repo
+builder; ClaudeTools.YangonRoads = repo 419443297 (195,605 chars), Roads unchanged. The DATA changes were tested by replacing records after
+`Y.load()` (8 island records; Lower Pazundaung s1-5 and Upper Pazundaung #3 s1932-1936 from the new butt_match). Scratch cleaned, saved, lock released.
+- **bahan_ring Kan Yeiktha island (kerb_gap 37 -> 26):** roads05_fix `islands` took the hole from `roads05_qa.quads()`, which DROPS a bow-tie
+  quad; Roads.build lays that bend (its inner edge point waits, Roads.luau ~641). New `built_quads()` copies the wait; a hole pinched to a
+  < 1 stud neck is split (open 0.5 mitre). Whole net: 79 island records change, 316 -> 318.
+- **pazundaung_y gore (kerb_gap 15 -> 5, box_hole 2 -> 0):** buildMouth's B (bigger road's edge) stopped at Upper Pazundaung #3's end; it now
+  runs on along a continuation's same-side edge (`contsOf`; buildRoads keeps those edges too). `butt_match`'s median check is now within
+  MORPH + 8 studs (was s[:8] = 65 studs: Lower Pazundaung's median starts at 57).
+- **Left (seen):** bahan NE island strip by Kan Yeiktha Road's s1 cap (pave_gap +1); pazundaung_y west corner Bogyoke x Upper (no round corner)
+  and the east nose kerb ends (41038-41042, 43411-43416).
+- **Bridge vs Road #18 (looked, not coded):** the Bridge flares from half 24.5 to 31.7 over its first 6 samples and Road #18 (one-way, half 10.5)
+  starts inside that flare and crosses it at z ~32850: road on road. A join must first decide which carriageway is real there (OSM).
+- **Not reached:** remaining kerb_gap clusters (roundabout4 Lane #3357 / #115, univ_kabaraye Lane #1256, deck_run U Wisara #5, kunchan Gyophyu
+  Flyover), buried 11, pave_gap fill rule, pyay_univ road steps, univ / kunchan regressions.
+- **Kit (Studio _G, lost on restart):** `_G.ONE(names)` build + qa + copy faults, `_G.SHOW()`, `_G.GN(spot, x0, z0, x1, z1, step)` ray map by
+  road/part name, `_G.PATCH(find, repl)`, `_G.RELOAD` (+ `_G.ISLDIFF` / `_G.SPATCH` data overrides after load).
+
 # roads05 handover (18 Nov 2026, twenty-eighth pass: J32, BUILDER agent; YangonRoads only + Studio 17 spots)
 
 ## J32 -- built-surface totals, T.qa (runner rev 202), J31 -> J32 (17 spots): 19 / 253 / 37 / 77 / 11 (pave_gap 105) -> 19 / 214 / 37 / 77 / 11 (pave_gap 105)
