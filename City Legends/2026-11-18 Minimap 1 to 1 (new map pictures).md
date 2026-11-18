@@ -20,5 +20,18 @@ Owner: "redo the viewable map because on the new yangon map, there isnt a viewab
 
 Preview: [[2026-11-18 Minimap 1to1 - overview preview.png]]
 
-## Play test
-(see below)
+## Also fixed: players did not spawn (found in the test)
+- In Play the server's `Main` died with "Script timeout" in `Chauffeur.init` -> `ChauffeurRoute.graph` (the lane graph got bigger with the P1-P3 1:1 lanes; `task.spawn` runs it inline until it yields, so the timeout killed Main itself). No character, endless loading screen.
+- Fix: `ChauffeurRoute.graph` yields every 2,000 lanes. After that the server started normally.
+
+## Play test (test store, put back to CityLegends_v1, place saved v1437)
+- Main menu world map tile: shows the map round Myanmar Plaza. [[2026-11-18 Minimap 1to1 - main menu.jpg]]
+- World map page: map + fast-travel icons on the right roads (hotel, delivery, fuel, races on Kabar Aye Pagoda Road). [[2026-11-18 Minimap 1to1 - world map.jpg]]
+- Minimap P1 (Kabar Aye by Myanmar Plaza, facing south): Inya Lake side on the right, Myanmar Plaza icon on the left: correct. [[2026-11-18 Minimap 1to1 - P1 Kabar Aye.jpg]]
+- Minimap P3 (Sule roundabout, facing north-east): N on the upper left, the ring drawn. [[2026-11-18 Minimap 1to1 - P3 Sule.jpg]]
+- Minimap P2 (Kaba Aye Pagoda Road, facing west): N on the right. [[2026-11-18 Minimap 1to1 - P2 Kaba Aye.jpg]]
+- All 43 pictures approved at once by Open Cloud; they loaded in Play the first time. No Minimap errors in the Output.
+- Not checked: the full-screen map (tap on the minimap) and the loading screen map by eye (same code path as the menu); live markers (no bank robbery / race running during the test, code unchanged).
+
+## Rerun
+`YANGON_SCALE=1to1 python minimap_1to1.py build P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12` (about 1.5 min) -> upload `imports/sync/minimap_1to1/{d,o}_*.png` (Image, group 33151111) -> `ids.json` -> `--lua ids.json`. When a new district is built, add it to `FULL` and rerun.
