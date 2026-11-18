@@ -78,7 +78,11 @@ local HEAVY = Font.new(FAMILY, Enum.FontWeight.ExtraBold)
 local BOLD = Font.new(FAMILY, Enum.FontWeight.Bold)
 local MEDIUM = Font.new(FAMILY, Enum.FontWeight.Medium)
 
-local W, H = 1180, 640 -- the design canvas (scaled to the screen)
+-- the design canvas (scaled to the screen). (19 Nov, owner: "the mobile interface is bad") phones
+-- get a smaller canvas, so the whole menu is drawn about 20% bigger there: text and buttons readable
+local PHONE = (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled)
+	or (RunService:IsStudio() and workspace:GetAttribute("PreviewPhone") == true)
+local W, H = if PHONE then 1000 else 1180, if PHONE then 540 else 640
 
 ---------------------------------------------------------------------
 -- Helpers
@@ -814,7 +818,7 @@ end
 ---------------------------------------------------------------------
 local function openWorldMap()
 	local page = openSub("World Map")
-	local paneW, paneH = 800, 368
+	local paneW, paneH = W - 380, H - 272 -- (800, 368 on the PC canvas)
 	local pane = new("Frame", { Name = "Pane", BackgroundColor3 = Color3.fromRGB(14, 34, 58), Position = UDim2.fromOffset(0, 46), Size = UDim2.fromOffset(paneW, paneH), ClipsDescendants = true, Parent = page }, {
 		corner(10),
 		new("UIStroke", { Color = GOLD, Thickness = 2, Transparency = 0.3 }),
@@ -1665,7 +1669,7 @@ end
 local function buildCampaign(page: Frame)
 	local y0 = 0
 	local hTall = page.Size.Y.Offset
-	local c1, c2 = 300, 520
+	local c1, c2 = math.floor(W * 0.2545), math.floor(W * 0.441) -- (300, 520 on the PC canvas; the phone one is narrower)
 	local c3 = W - c1 - c2 - 24
 	local x2, x3 = c1 + 12, c1 + c2 + 24
 	local topH = 196

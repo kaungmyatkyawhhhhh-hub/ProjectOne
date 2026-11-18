@@ -1014,8 +1014,8 @@ local function buildCashTab()
 	local tab = new("Frame", {
 		Name = "Cash",
 		AnchorPoint = if UI.isTouch then Vector2.new(1, 0) else Vector2.new(0.5, 1),
-		Position = if UI.isTouch then UDim2.new(1, -14, 0, -14) else UDim2.new(0.5, 0, 1, 14),
-		Size = UDim2.fromOffset(width, height + 14),
+		Position = if UI.isTouch then UDim2.new(1, -14, 0, 6) else UDim2.new(0.5, 0, 1, 14),
+		Size = UDim2.fromOffset(width, height + (if UI.isTouch then 0 else 14)),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.12,
 		Parent = hud,
