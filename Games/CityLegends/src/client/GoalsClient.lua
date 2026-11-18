@@ -312,7 +312,8 @@ function GoalsClient.open(tab: string?)
 	local root = UI.screen()
 	local back = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ZIndex = 70, Parent = root })
 	screen = back
-	local w, h = 560, 470
+	-- (19 Nov, owner: mobile) shorter on a phone (the list scrolls), so it's drawn ~20% bigger there
+	local w, h = 560, if UI.isTouch then 380 else 470
 	local f = new("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
