@@ -27,8 +27,9 @@ local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local PlateShop = {}
 
--- the office counter (ground level, facing the street); measured in Studio 19 Nov
-PlateShop.OFFICE = CFrame.lookAt(Vector3.new(35500, 41.08, 21960), Vector3.new(35400, 41.08, 21946))
+-- the office counter on the empty grass lot between Legends Customs and the realty, facing Kabar Aye
+-- Pagoda Road (Studio 19 Nov: pavement edge x 35398 at y 40.6, grass 38.5); its slab runs to the pavement
+PlateShop.OFFICE = CFrame.lookAt(Vector3.new(35414, 40.0, 22010), Vector3.new(35414 - 0.991, 40.0, 22010 - 0.136))
 local OFFICE_REACH = 30 -- studs from the counter for a claim
 
 local ctx: any = nil
@@ -451,7 +452,7 @@ local function buildOffice()
 	local navy = Color3.fromRGB(18, 40, 84)
 	local white = Color3.fromRGB(236, 236, 230)
 	local black = Color3.fromRGB(14, 14, 18)
-	part(model, Vector3.new(14, 0.5, 7), at(0, 0.25, 0.5), Color3.fromRGB(150, 146, 138), Enum.Material.Concrete)
+	part(model, Vector3.new(14, 2.9, 18.5), at(0, -0.95, -5), Color3.fromRGB(150, 146, 138), Enum.Material.Concrete)
 	-- the board behind the counter: a big sample plate and the office's name
 	local board = part(model, Vector3.new(9, 8, 0.8), at(0, 5.0, 2.6), navy, Enum.Material.SmoothPlastic)
 	local gui = Instance.new("SurfaceGui")
@@ -511,6 +512,17 @@ local function buildOffice()
 	end)
 	model.Parent = workspace
 	workspace:SetAttribute("PlateOffice", base.Position) -- (the minimap's "#")
+	-- no client trees / street props on the office (YangonKitStream reads these boxes)
+	local kit = ReplicatedStorage:FindFirstChild("YgnKit")
+	local keep = kit and kit:FindFirstChild("KeepOut")
+	if keep and not keep:FindFirstChild("plateoffice") then
+		local box = Instance.new("Part")
+		box.Name = "plateoffice"
+		box.Anchored = true
+		box.Size = Vector3.new(18, 20, 24)
+		box.CFrame = base * CFrame.new(0, 8, -4)
+		box.Parent = keep
+	end
 end
 
 function PlateShop.init(c: any)
