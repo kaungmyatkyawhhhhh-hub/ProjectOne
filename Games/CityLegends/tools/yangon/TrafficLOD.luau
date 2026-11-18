@@ -27,7 +27,7 @@ local DROP_GROUPS = {
 	accessories = true, lns = true, ["liftgate hydraulic arm part"] = true,
 }
 -- part names (lower case patterns)
-local DROP_PARTS = { "^body_cabin", "^steeringwheel", "^lampfx_", "plate", "seat", "^drag$", "^downforce", "^smoke$",
+local DROP_PARTS = { "cabin", "leather", "suede", "^steeringwheel", "_engine", "^engine", "^lampfx_", "plate", "seat", "^drag$", "^downforce", "^smoke$",
 	"^hitbox", "^cam$", "^engine", "screenlit", "^tk$", "handle", "pedal", "^body_exhausthole" }
 
 local function lower(s: string): string
@@ -115,7 +115,7 @@ local function visible(inst: Instance): { BasePart }
 	return out
 end
 
-local function tidy(p: BasePart)
+local function tidy(p: BasePart, keepLook: boolean?)
 	p.Anchored = true
 	p.CanCollide = false
 	p.CanQuery = false
@@ -129,7 +129,9 @@ local function tidy(p: BasePart)
 		end)
 	end
 	for _, c in p:GetChildren() do
-		c:Destroy() -- welds, decals, SurfaceAppearances, lights, attachments, meshes' extras
+		if not (keepLook and c:IsA("SurfaceAppearance")) then
+			c:Destroy() -- welds, decals, SurfaceAppearances, lights, attachments, meshes' extras
+		end
 	end
 end
 
@@ -234,6 +236,15 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 	local out = Instance.new("Model")
 	out.Name = "Traffic_" .. kind .. "_" .. id
 	local place = CFrame.new(0, wheelR, 0) * CFrame.Angles(0, math.pi, 0) * frame:Inverse()
+	-- a rip with no paint parts by name (the R34, the Chiron) keeps its own pictures: plain colours by role would
+	-- turn it black
+	local keepLook = true
+	for _, p in keep do
+		if string.find(lower(p.Name), "paint") or under(p, src, "paint") or under(p, src, "^color$") then
+			keepLook = false
+			break
+		end
+	end
 	local bodyM = Instance.new("Model")
 	bodyM.Name = "Body"
 	bodyM.Parent = out
@@ -241,8 +252,8 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 	for _, p in keep do
 		local c = p:Clone()
 		local n = lower(p.Name)
-		local hadLook = p:FindFirstChildOfClass("SurfaceAppearance") ~= nil
-		tidy(c)
+		local hadLook = p:FindFirstChildOfClass("SurfaceAppearance") ~= nil and not keepLook
+		tidy(c, keepLook)
 		c.CFrame = place * p.CFrame
 		if isGlass(p, n) then
 			c.Transparency = 0
@@ -282,8 +293,8 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 		wm.Name = corner
 		for _, p in wheel[corner] do
 			local c = p:Clone()
-			local hadLook = p:FindFirstChildOfClass("SurfaceAppearance") ~= nil
-			tidy(c)
+			local hadLook = p:FindFirstChildOfClass("SurfaceAppearance") ~= nil and not keepLook
+			tidy(c, keepLook)
 			c.CFrame = place * p.CFrame
 			if hadLook then
 				local col, mat = roleColor(lower(p.Name))

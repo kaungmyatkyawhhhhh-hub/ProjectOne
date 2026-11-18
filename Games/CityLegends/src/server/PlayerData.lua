@@ -79,6 +79,7 @@ export type Settings = {
 	-- the main menu's settings (2026-11-02)
 	Minimap: { on: boolean, corner: string }?, -- shown, and which corner ("TopRight" ...)
 	Graphics: string?, -- "Low" | "Medium" | "High" | "Ultra"
+	Performance: string?, -- (2026-11-19) "Auto" | "Low" | "Normal": low-end mode for cheap phones
 	RenderDistance: string?, -- (2026-11-18) "Low" | "Medium" | "High" | "Ultra": client detail radius x0.5 / 0.75 / 1 / 1.5
 	Music: number?, -- 0..1
 	Sfx: number?, -- 0..1
@@ -922,6 +923,9 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if raw.Graphics == "Low" or raw.Graphics == "Medium" or raw.Graphics == "High" or raw.Graphics == "Ultra" then
 		profile.Settings.Graphics = raw.Graphics
+	end
+	if raw.Performance == "Auto" or raw.Performance == "Low" or raw.Performance == "Normal" then
+		profile.Settings.Performance = raw.Performance -- (2026-11-19) low-end mode
 	end
 	if raw.RenderDistance == "Low" or raw.RenderDistance == "Medium" or raw.RenderDistance == "High" or raw.RenderDistance == "Ultra" then
 		profile.Settings.RenderDistance = raw.RenderDistance -- (2026-11-18) client detail distance

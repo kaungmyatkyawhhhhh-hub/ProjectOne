@@ -15,6 +15,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local LookFx = require(script.Parent:WaitForChild("LookFx"))
+local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
 
 local WorldFx = {}
 
@@ -176,6 +177,9 @@ local QUALITY = { Low = 0.6, Medium = 0.8, High = 1, Ultra = 1.15 }
 -- (2026-11-14) the scale the light sweep uses; startLod sets it, a Graphics change in the menu updates it
 local lightScale: number? = nil
 function WorldFx.setQuality(name: string)
+	if LowEnd.on then
+		name = "Low" -- (2026-11-19) low-end mode keeps the Low look whatever Quality says
+	end
 	qualityPick = QUALITY[name]
 	if lightScale then
 		lightScale = WorldFx.qualityScale()
@@ -193,6 +197,7 @@ function WorldFx.setQuality(name: string)
 	pcall(function()
 		workspace.Terrain.Decoration = name == "High" or name == "Ultra"
 	end)
+	LowEnd.applyWorld()
 end
 
 -- a player with no saved choice: phones start on Medium, the rest on High
@@ -201,7 +206,7 @@ function WorldFx.defaultQuality(): string
 	return if UIS.TouchEnabled and not UIS.KeyboardEnabled then "Medium" else "High"
 end
 
-function WorldFx.qualityScale(): number
+local function normalScale(): number
 	if qualityPick then
 		local touch = game:GetService("UserInputService").TouchEnabled and not game:GetService("UserInputService").KeyboardEnabled
 		return qualityPick * (if touch then 0.85 else 1)
@@ -219,6 +224,11 @@ function WorldFx.qualityScale(): number
 		scale *= 0.8
 	end
 	return scale
+end
+function WorldFx.qualityScale(): number
+	-- (2026-11-19) low-end mode (cheap phones) caps every count / range that follows this
+	local s = normalScale()
+	return if LowEnd.on then math.min(s, LowEnd.SCALE) else s
 end
 
 ---------------------------------------------------------------------

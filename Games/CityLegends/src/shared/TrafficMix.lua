@@ -58,7 +58,7 @@ TrafficMix.Entries = {
 	-- rare supercars (owner, 19 Nov): racers, capped per group (Rare)
 	{ id = "nisun_gtr", kind = "R", len = 14.1, w = 0, paint = { WHITE, SILVER, BLACK, rgb(200, 90, 20) }, rare = "gtr", mph = 150 },
 	{ id = "nisun_r34", kind = "R", len = 13.8, w = 0, paint = { rgb(40, 60, 150), SILVER, WHITE }, rare = "r34", mph = 130 },
-	{ id = "ferrara_f430", kind = "R", len = 13.5, w = 0, paint = SUPER, rare = "ferrari", mph = 175 },
+	{ id = "ferrara_599", kind = "R", len = 14.0, w = 0, paint = SUPER, rare = "ferrari", mph = 185 },
 	{ id = "ferrara_california", kind = "R", len = 13.9, w = 0, paint = SUPER, rare = "ferrari", mph = 170 },
 	{ id = "lambrini_huracan", kind = "R", len = 13.4, w = 0, paint = SUPER, rare = "lambo", mph = 185 },
 	{ id = "lambrini_lp570", kind = "R", len = 13.1, w = 0, paint = SUPER, rare = "lambo", mph = 190 },

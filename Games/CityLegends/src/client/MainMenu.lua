@@ -47,6 +47,7 @@ local Minimap = require(script.Parent:WaitForChild("Minimap"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local Weather = require(script.Parent:WaitForChild("Weather"))
 local LookFx = require(script.Parent:WaitForChild("LookFx"))
+local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
 local DayCycle = require(script.Parent:WaitForChild("DayCycle"))
 local MenuArt = require(script.Parent:WaitForChild("MenuArt"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
@@ -1236,6 +1237,18 @@ local function openSettings()
 	end)
 
 	heading("GRAPHICS")
+	-- (2026-11-19) low-end mode for cheap phones: AUTO picks it on phones that need it
+	local PERF = { AUTO = "Auto", ["LOW-END"] = "Low", NORMAL = "Normal" }
+	choices(row("Performance"), { "AUTO", "LOW-END", "NORMAL" }, function()
+		local m = LowEnd.mode
+		return if m == "Low" then "LOW-END" elseif m == "Normal" then "NORMAL" else "AUTO"
+	end, function(v)
+		st.Performance = PERF[v]
+		LowEnd.setMode(PERF[v])
+		for _, f in refreshers do
+			f()
+		end
+	end)
 	choices(row("Quality"), { "LOW", "MEDIUM", "HIGH", "ULTRA" }, function()
 		return string.upper(st.Graphics or WorldFx.defaultQuality())
 	end, function(v)
@@ -2838,6 +2851,9 @@ end
 -- LodRange lights), shared as player attribute RenderDist. High = the old distances; phones / Low graphics start on Medium.
 local RENDER_MULT = { Low = 0.5, Medium = 0.75, High = 1, Ultra = 1.5 }
 function MainMenu.renderDistanceOf(st: { [string]: any }): string
+	if LowEnd.on then
+		return "Low" -- (2026-11-19) low-end mode
+	end
 	if RENDER_MULT[st.RenderDistance] then
 		return st.RenderDistance
 	end
@@ -2848,7 +2864,9 @@ function MainMenu.applyRenderDistance(st: { [string]: any })
 end
 
 -- the saved settings at start (minimap, graphics, sound)
+local lastSettings: { [string]: any }? = nil
 function MainMenu.applySettings(st: { [string]: any })
+	lastSettings = st
 	MainMenu.applyRenderDistance(st)
 	if type(st.Minimap) == "table" then
 		Minimap.setVisible(st.Minimap.on ~= false)
@@ -2856,6 +2874,7 @@ function MainMenu.applySettings(st: { [string]: any })
 	end
 	WorldFx.setQuality(if type(st.Graphics) == "string" then st.Graphics else WorldFx.defaultQuality())
 	LookFx.load(st.Look)
+	LowEnd.applyWorld() -- (after the saved look: low-end keeps glow / rays / depth of field off)
 	UI.setSpeedoStyle(if st.Speedo == "Digital" then "Digital" else "Analogue")
 	MainMenu.applyAids(st)
 	Driving.smoke = if st.Smoke == "Off" then 0 elseif st.Smoke == "Low" then 0.5 else 1
@@ -2867,6 +2886,19 @@ function MainMenu.applySettings(st: { [string]: any })
 		Audio.setSfxLevel(st.Sfx)
 	end
 end
+-- low-end on / off (Settings, Auto's check): the picture and the render distance follow at once
+LowEnd.changed(function()
+	local st = lastSettings
+	if st then
+		local keep = { Time = LookFx.state.Time, Weather = LookFx.state.Weather, Sky = LookFx.state.Sky }
+		WorldFx.setQuality(if type(st.Graphics) == "string" then st.Graphics else WorldFx.defaultQuality())
+		if not LowEnd.on then
+			LookFx.load(st.Look)
+		end
+		LookFx.state.Time, LookFx.state.Weather, LookFx.state.Sky = keep.Time, keep.Weather, keep.Sky
+		MainMenu.applyRenderDistance(st)
+	end
+end)
 
 local _ = RunService
 return MainMenu

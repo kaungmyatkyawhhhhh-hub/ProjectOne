@@ -218,6 +218,8 @@ end
 
 -- settings kept with the profile: speed units (HUD + clusters) and the gearbox
 local settings = if type(data.Settings) == "table" then data.Settings else {}
+-- (2026-11-19) low-end mode, decided before traffic / pedestrians start so their counts follow it
+require(script.Parent:WaitForChild("LowEnd")).init(settings)
 local SaveSettings = remote("SaveSettings", "RemoteEvent") :: RemoteEvent
 Driving.setUnits(if settings.Units == "kmh" then "kmh" else "mph")
 Driving.setGearbox(if settings.Gearbox == "Manual" then "Manual" else "Auto")
