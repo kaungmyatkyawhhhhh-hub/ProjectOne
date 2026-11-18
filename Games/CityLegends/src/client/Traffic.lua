@@ -745,7 +745,8 @@ local function racerSweep(npc: Npc, obstacles: { Obstacle }): (number, number)
 	return best, bestV
 end
 
--- another racer beside this one on the side it would slide to (the two yield: neither slides into the other)
+-- another racer beside this one on the side it would slide to, level or ahead along the two's mean heading: this
+-- one yields (the one ahead has the way, so two side by side never both wait)
 local function racerBeside(npc: Npc, dir: number): boolean
 	local fwd = npc.fwd
 	local right = fwd:Cross(Vector3.yAxis)
@@ -753,7 +754,8 @@ local function racerBeside(npc: Npc, dir: number): boolean
 		if o ~= npc and o.racer then
 			local rel = o.pos - npc.pos
 			local lat = rel:Dot(right)
-			if math.abs(rel.Y) < 12 and math.abs(rel:Dot(fwd)) < npc.halfLen + o.halfLen + 8 and lat * dir > 0 and math.abs(lat) < 16 then
+			if math.abs(rel.Y) < 12 and math.abs(rel:Dot(fwd)) < npc.halfLen + o.halfLen + 8 and lat * dir > 0 and math.abs(lat) < 16
+				and rel:Dot(fwd + o.fwd) >= 0 then
 				return true
 			end
 		end
@@ -1248,7 +1250,7 @@ function Traffic.update(dt: number)
 			-- top speed on straights, slowed in time for every bend, turn and red light ahead
 			target = math.min(npc.racer * (1 + 0.03 * math.sin(now * npc.wanderRate + npc.wanderPhase)), racerCap(npc, now))
 			if (npc :: any).holdMerge then
-				target = math.min(target, npc.speed * 0.9) -- (let the lane we must merge into go by)
+				target = math.min(target, math.max(npc.speed * 0.9, 4)) -- (let the lane we must merge into go by; creep, never stand for good)
 			end
 		end
 		local remaining = seg.length - npc.s
