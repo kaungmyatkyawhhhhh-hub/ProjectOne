@@ -57,7 +57,8 @@ class Cover:
         g = shapely.points(pts[:, [0, 2]])
         cov = np.zeros(len(pts), bool)
         a, b = self.tree.query(g, predicate='intersects')
-        ok = (self.tops[b] > pts[a, 1] - 2.5) & (self.tops[b] < pts[a, 1] + 1.5)
+        # (wide on purpose: a built piece 6 under to 3 over still keeps the box; only bare asphalt / ground loses it)
+        ok = (self.tops[b] > pts[a, 1] - 6.0) & (self.tops[b] < pts[a, 1] + 3.0)
         cov[a[ok]] = True
         return cov
 
