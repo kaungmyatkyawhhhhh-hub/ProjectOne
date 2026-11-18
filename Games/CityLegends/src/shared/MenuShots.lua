@@ -23,18 +23,18 @@ local CELL = 256
 
 -- the first ones sit by the spawn (Myanmar Plaza, Persistent landmarks): they show at once on a phone
 MenuShots.SHOTS = {
-	{ name = "Myanmar Plaza from above Kabar Aye", from = Vector3.new(34150, 330, 28150), at = Vector3.new(34845, 120, 27534), drift = Vector3.new(6, 0, -4), fov = 58 },
-	{ name = "Sedona and Myanmar Centre over Inya", from = Vector3.new(35650, 300, 26300), at = Vector3.new(34920, 140, 27150), drift = Vector3.new(-6, 0, 3), fov = 60 },
-	{ name = "YCC, GGFest", from = Vector3.new(34200, 200, 22450), at = Vector3.new(33706, 71, 21990), drift = Vector3.new(-5, 0, 3), fov = 58 },
-	{ name = "Shwedagon from People's Park", from = Vector3.new(32300, 260, 38250), at = Vector3.new(33107, 330, 37198), drift = Vector3.new(5, 0, 2), fov = 55 },
-	{ name = "Sule Pagoda roundabout from above", from = Vector3.new(36250, 260, 44850), at = Vector3.new(35999, 85, 45119), drift = Vector3.new(-4, 0, 3), fov = 56 },
-	{ name = "Strand Road along the river", from = Vector3.new(37700, 220, 47100), at = Vector3.new(36900, 40, 46600), drift = Vector3.new(-8, 0, -1), fov = 58 },
+	{ name = "Myanmar Plaza from above Kabar Aye", subject = "MyanmarCentre", from = Vector3.new(34150, 330, 28150), at = Vector3.new(34845, 120, 27534), drift = Vector3.new(6, 0, -4), fov = 58 },
+	{ name = "Sedona and Myanmar Centre over Inya", subject = "MyanmarCentre", from = Vector3.new(35650, 300, 26300), at = Vector3.new(34920, 140, 27150), drift = Vector3.new(-6, 0, 3), fov = 60 },
+	{ name = "YCC, GGFest", subject = "YangonConventionCentre", from = Vector3.new(34200, 200, 22450), at = Vector3.new(33706, 71, 21990), drift = Vector3.new(-5, 0, 3), fov = 58 },
+	{ name = "Shwedagon from People's Park", subject = "Shwedagon", from = Vector3.new(32300, 260, 38250), at = Vector3.new(33107, 330, 37198), drift = Vector3.new(5, 0, 2), fov = 55 },
+	{ name = "Sule Pagoda roundabout from above", subject = "Sule", from = Vector3.new(36250, 260, 44850), at = Vector3.new(35999, 85, 45119), drift = Vector3.new(-4, 0, 3), fov = 56 },
+	{ name = "Strand Road along the river", subject = "strand_hotel", from = Vector3.new(37750, 150, 47150), at = Vector3.new(37295, 50, 46671), drift = Vector3.new(-6, 0, -1), fov = 58 },
 }
-MenuShots.FALLBACK = { name = "high over Myanmar Plaza", from = Vector3.new(34300, 620, 28400), at = Vector3.new(34845, 120, 27534), drift = Vector3.new(4, 0, -3), fov = 60 }
+MenuShots.FALLBACK = { name = "high over Myanmar Plaza", subject = "MyanmarCentre", from = Vector3.new(34300, 620, 28400), at = Vector3.new(34845, 120, 27534), drift = Vector3.new(4, 0, -3), fov = 60 }
 
 -- the menu's slow circle (Main.client's startOrbit): centre, radius, height over the centre, seconds a turn
-MenuShots.ORBIT = { centre = Vector3.new(34845, 150, 27534), radius = 760, height = 260, period = 150 }
-MenuShots.ORBIT_FALLBACK = { centre = Vector3.new(34845, 150, 27534), radius = 900, height = 520, period = 150 }
+MenuShots.ORBIT = { subject = "MyanmarCentre", centre = Vector3.new(34845, 150, 27534), radius = 760, height = 260, period = 150 }
+MenuShots.ORBIT_FALLBACK = { subject = "MyanmarCentre", centre = Vector3.new(34845, 150, 27534), radius = 900, height = 520, period = 150 }
 
 local function solid(p: BasePart): boolean
 	return p.Transparency < 0.6 or (p.Transparency < 0.95 and p.CanCollide)
@@ -118,11 +118,15 @@ local function segHitsBox(p: BasePart, a: Vector3, d: Vector3, maxT: number, pad
 	return true
 end
 
--- nil when the camera at `from` sees `at` in open air, else why not
-function MenuShots.blocked(from: Vector3, at: Vector3): string?
+-- nil when the camera at `from` sees `at` in open air, else why not; `subject` (a landmark's name) is what the
+-- shot looks at: the line may run into its boxes (they are the target), the camera may not sit in them
+function MenuShots.blocked(from: Vector3, at: Vector3, subject: string?): string?
 	if not grid then
 		buildGrid()
 	end
+	local root = workspace:FindFirstChild("Yangon1to1") or workspace:FindFirstChild("Yangon")
+	local marks = root and root:FindFirstChild("Landmarks")
+	local target = subject and marks and marks:FindFirstChild(subject)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	local skip = ignoreList()
@@ -155,7 +159,7 @@ function MenuShots.blocked(from: Vector3, at: Vector3): string?
 				for _, part in cell or {} do
 					if not seen[part] then
 						seen[part] = true
-						if part.Parent and segHitsBox(part, from, dir, reach, 0) then
+						if part.Parent and not (target and part:IsDescendantOf(target)) and segHitsBox(part, from, dir, reach, 0) then
 							return "view through the box of " .. part:GetFullName()
 						end
 					end
@@ -185,8 +189,8 @@ function MenuShots.blocked(from: Vector3, at: Vector3): string?
 end
 
 function MenuShots.shotBlocked(shot): string?
-	return MenuShots.blocked(shot.from, shot.at)
-		or MenuShots.blocked(shot.from + shot.drift * MenuShots.SHOT_TIME, shot.at + shot.drift * MenuShots.SHOT_TIME)
+	return MenuShots.blocked(shot.from, shot.at, shot.subject)
+		or MenuShots.blocked(shot.from + shot.drift * MenuShots.SHOT_TIME, shot.at + shot.drift * MenuShots.SHOT_TIME, shot.subject)
 end
 
 -- the orbit's camera and target at angle a
@@ -197,7 +201,7 @@ end
 function MenuShots.orbitBlocked(o): string?
 	for i = 0, 23 do
 		local pos, at = MenuShots.orbitAt(o, i / 24 * math.pi * 2)
-		local why = MenuShots.blocked(pos, at)
+		local why = MenuShots.blocked(pos, at, o.subject)
 		if why then
 			return ("at %d deg: %s"):format(i * 15, why)
 		end
