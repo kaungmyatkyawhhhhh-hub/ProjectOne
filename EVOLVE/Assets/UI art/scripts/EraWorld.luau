@@ -220,10 +220,40 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
 	local v = root.AssemblyLinearVelocity
 	root.AssemblyLinearVelocity = Vector3.new(v.X, STROKE, v.Z)
 end)
-game:GetService("RunService").Heartbeat:Connect(function() -- water drag: sink, don't drop
-	local root = current == ERAS[1] and player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	local v = root and root.AssemblyLinearVelocity
-	if v and v.Y < -SINK then root.AssemblyLinearVelocity = Vector3.new(v.X, -SINK, v.Z) end
+-- Swim pose: the server welds each body part ("Form") to the root. On this client those become Welds we can turn,
+-- so the body tips nose-up when rising, nose-down when sinking, and wiggles while moving. Only you see it.
+-- shortcut: offsets are taken once per part; if body parts are ever resized after spawn (R6 ScaleTo), re-take them.
+local swimWelds = {} -- [Weld] = C0 at rest
+local function hookCharacter(char)
+	table.clear(swimWelds)
+	local root = char:WaitForChild("HumanoidRootPart")
+	local function take(wc)
+		if not (wc:IsA("WeldConstraint") and wc.Part0 == root and wc.Part1 and wc.Part1.Name == "Form") then return end
+		local w = Instance.new("Weld")
+		w.Part0, w.Part1, w.C0 = root, wc.Part1, root.CFrame:ToObjectSpace(wc.Part1.CFrame)
+		w.Parent = wc.Part1
+		wc.Enabled = false
+		swimWelds[w] = w.C0
+	end
+	for _, d in char:GetDescendants() do take(d) end
+	char.DescendantAdded:Connect(take)
+end
+if player.Character then task.spawn(hookCharacter, player.Character) end
+player.CharacterAdded:Connect(hookCharacter)
+local pitch, posed = 0, false
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not root then return end
+	local sea, v = current == ERAS[1], root.AssemblyLinearVelocity
+	if sea and v.Y < -SINK then root.AssemblyLinearVelocity = Vector3.new(v.X, -SINK, v.Z) end -- water drag: sink, don't drop
+	if not sea and not posed then return end
+	pitch += ((sea and math.clamp(v.Y / STROKE, -1, 1) * 0.4 or 0) - pitch) * math.min(dt * 6, 1)
+	local wiggle = (sea and Vector3.new(v.X, 0, v.Z).Magnitude > 2) and math.sin(os.clock() * 8) * 0.12 or 0
+	posed = sea or math.abs(pitch) > 0.01
+	local turn = posed and CFrame.Angles(pitch, wiggle, 0) or CFrame.identity
+	for w, c0 in swimWelds do
+		if w.Parent then w.C0 = turn * c0 else swimWelds[w] = nil end
+	end
 end)
 
 local function apply(era)
