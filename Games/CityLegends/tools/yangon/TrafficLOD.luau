@@ -91,6 +91,16 @@ local function isGlass(p: BasePart, n: string): boolean
 		or p.Material == Enum.Material.Glass or (p.Transparency > 0.05 and p.Transparency < 0.95)
 end
 
+-- a flat little part wearing a picture: a badge, a name plate or a number plate (no real lettering in traffic)
+local function badgeLike(p: BasePart, length: number): boolean
+	local sz = p.Size
+	local mn, mx = math.min(sz.X, sz.Y, sz.Z), math.max(sz.X, sz.Y, sz.Z)
+	local mesh = p:FindFirstChildWhichIsA("SpecialMesh")
+	local tex = (p:IsA("MeshPart") and p.TextureID ~= "") or p:FindFirstChildWhichIsA("Decal") ~= nil
+		or (mesh ~= nil and mesh.TextureId ~= "")
+	return tex and mn < 0.09 * length / 15 and mx < 0.16 * length
+end
+
 local function volume(p: BasePart): number
 	return p.Size.X * p.Size.Y * p.Size.Z
 end
@@ -110,7 +120,17 @@ end
 local function visible(inst: Instance): { BasePart }
 	local out = {}
 	local all = inst:GetDescendants()
-	table.insert(all, inst)
+	-- (a kit wheel's own Part is the physics cylinder; its looks are the parts inside it)
+	local inner = false
+	for _, d in all do
+		if d:IsA("BasePart") then
+			inner = true
+			break
+		end
+	end
+	if not inner then
+		table.insert(all, inst)
+	end
 	for _, d in all do
 		if d:IsA("BasePart") and d.Transparency < 0.95 and not d:IsA("Seat") and not d:IsA("VehicleSeat") then
 			table.insert(out, d)
@@ -128,7 +148,9 @@ local function tidy(p: BasePart, keepLook: boolean?)
 	p.Massless = true
 	if p:IsA("MeshPart") then
 		pcall(function()
-			p.RenderFidelity = Enum.RenderFidelity.Performance
+			-- (Automatic: full detail close, Roblox's own lower levels far; Performance crumpled the kit cars' shells
+			-- even up close)
+			p.RenderFidelity = Enum.RenderFidelity.Automatic
 			p.CollisionFidelity = Enum.CollisionFidelity.Box
 		end)
 	end
@@ -227,6 +249,8 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 		local n = lower(p.Name)
 		if p.Name == "MarkPatch" then
 			table.insert(keep, p)
+		elseif badgeLike(p, length) then
+			droppedTiny += 1
 		elseif inside and not isGlass(p, n) then
 			droppedInside += 1
 		elseif math.max(p.Size.X, p.Size.Y, p.Size.Z) < length * 0.02 then
@@ -398,6 +422,58 @@ function T.install(list: { { string } }, newSet: Instance?, maxBody: number?): s
 	end
 	folder.Parent = RS
 	return table.concat(lines, "\n")
+end
+
+-- a check stage at (-2000, 2600, 2000): the cars in threes, each at its real length (TrafficMix), front +Z
+T.LIST = {
+	{ "suzaki_swift", "A" }, { "toyoka_belta", "E" }, { "toyoka_camri", "E" }, { "toyoka_lc200", "F" }, { "byt_seal", "E" },
+	{ "kio_ev6", "F" }, { "toyoka_chaser", "E" }, { "toyoka_crown", "E" }, { "toyoka_alfard", "B" }, { "toyoka_lc300", "F" },
+	{ "lexis_lx700", "F" }, { "nisun_gtr", "R" }, { "nisun_r34", "R" }, { "ferrara_599", "R" }, { "ferrara_california", "R" },
+	{ "lambrini_huracan", "R" }, { "lambrini_lp570", "R" }, { "bugotti_chiron", "R" },
+}
+function T.stage(maxBody: number?, extra: Instance?): string
+	local Mix = require(game:GetService("ReplicatedStorage").Shared.TrafficMix:Clone())
+	local st = workspace:FindFirstChild("_TrafficStage")
+	if st then
+		st:Destroy()
+	end
+	st = Instance.new("Model")
+	st.Name = "_TrafficStage"
+	st.Parent = workspace
+	local base = Instance.new("Part")
+	base.Anchored = true
+	base.Size = Vector3.new(420, 1, 120)
+	base.Position = Vector3.new(-1830, 2599.5, 2000)
+	base.Color = Color3.fromRGB(70, 70, 72)
+	base.Material = Enum.Material.SmoothPlastic
+	base.Parent = st
+	local models, out = {}, {}
+	for _, row in T.LIST do
+		local m, msg = T.make(row[1], row[2], maxBody)
+		table.insert(out, msg)
+		if m then
+			table.insert(models, m)
+		end
+	end
+	if extra then
+		for _, m in extra:GetChildren() do
+			if m:IsA("Model") then
+				table.insert(models, m:Clone())
+			end
+		end
+	end
+	for i, m in models do
+		local e = Mix.byName[m.Name]
+		local _, sz = m:GetBoundingBox()
+		if e then
+			m:ScaleTo(m:GetScale() * e.len / sz.Z)
+		end
+		local k, g = (i - 1) % 3, math.floor((i - 1) / 3)
+		local cf, b = m:GetBoundingBox()
+		m:PivotTo(m:GetPivot() + (Vector3.new(-2000 + g * 60 + k * 9, 2600 + b.Y / 2, 2000) - cf.Position))
+		m.Parent = st
+	end
+	return table.concat(out, string.char(10))
 end
 
 function T.undo()
