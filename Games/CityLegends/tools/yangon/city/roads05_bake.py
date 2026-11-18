@@ -667,6 +667,7 @@ def collision(data, surf, parts):
     from their surface, bridge pieces (walls, piers) as their own boxes"""
     rows = []
     cut = {k: set(v) for k, v in data['cut'].items()}
+    ramps = [d for d in data.get('driveways', []) if d.get('kind') == 'ramp']  # (18 Nov) no pavement box across a ramp mouth
     THK = 2.0
     for r in data['roads']:
         s = r['s']
@@ -693,7 +694,8 @@ def collision(data, surf, parts):
             if r['kind'] != 'street':
                 spans += [(-a[6] - r.get('walkL', 7.5), -a[6], 'P', 0.5), (a[7], a[7] + r.get('walkR', 7.5), 'P', 0.5)]
             for lat_lo, lat_hi, kind, up in spans:
-                rows.extend(strip_box(a, b, lat_lo, lat_hi, kind, up, surf, THK))
+                for a2, b2 in (ramp_gaps(a, b, lat_lo, lat_hi, ramps) if kind == 'P' else [(a, b)]):
+                    rows.extend(strip_box(a2, b2, lat_lo, lat_hi, kind, up, surf, THK))
             i = j
     # roundabouts: 48 boxes round the ring, 48 round the pavement, an island disc of boxes
     for g in data.get('roundabouts', []):
@@ -728,6 +730,31 @@ def collision(data, surf, parts):
             c, R, U, Bk = frame(p[2], p[3], p[4])
             rows.append(box_row('W', c, R, U, p[5]))
     return rows
+
+
+def ramp_gaps(a, b, lo, hi, ramps):
+    """(18 Nov, MC basement ramps) the run a -> b of a pavement strip (lateral lo .. hi) minus each ramp mouth (a
+    driveway of kind "ramp": YangonRoads.sideZone lays no kerb / pavement within hw along the road and `across` out
+    from its point), as (a, b) sample pairs interpolated linearly"""
+    out = [(0.0, 1.0)]
+    ax, az, bx, bz = a[0], a[2], b[0], b[2]
+    L = math.hypot(bx - ax, bz - az)
+    if L < 1e-6 or not ramps:
+        return [(a, b)]
+    ux, uz = (bx - ax) / L, (bz - az) / L
+    mid = (lo + hi) / 2
+    for d in ramps:
+        dx, dz = d['x'] - ax, d['z'] - az
+        al = dx * ux + dz * uz
+        lat = dz * ux - dx * uz  # + = the right side, like the spans' lateral (right = (-fwd.z, 0, fwd.x))
+        if abs(lat - mid) > d.get('across', 18) or al < -d['hw'] or al > L + d['hw']:
+            continue
+        g0, g1 = (al - d['hw']) / L, (al + d['hw']) / L
+        out = [q for t0, t1 in out for q in ((t0, min(t1, g0)), (max(t0, g1), t1)) if q[1] - q[0] > 1e-6]
+
+    def at(t):
+        return [x + (y - x) * t if isinstance(x, (int, float)) and isinstance(y, (int, float)) else x for x, y in zip(a, b)]
+    return [(at(t0), at(t1)) for t0, t1 in out]
 
 
 def strip_box(a, b, lo, hi, kind, up, surf, thick, prefer='min'):
