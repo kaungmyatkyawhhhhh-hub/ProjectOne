@@ -434,7 +434,7 @@ local function startStep(name: string, fn: () -> ())
 	end
 end
 startStep("Traffic", function()
-	Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualityScale(), 0.6, 1)), focusPoint)
+	Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualityScale(), 0.5, 1)), focusPoint) -- (low-end: 0.5 -> 14 cars)
 end)
 startStep("Police", Police.init)
 startStep("Bank", BankClient.init)

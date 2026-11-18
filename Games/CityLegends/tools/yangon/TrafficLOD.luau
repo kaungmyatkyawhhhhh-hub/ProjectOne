@@ -236,6 +236,10 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 	end
 	if maxBody and #keep > maxBody then
 		table.sort(keep, function(a, b)
+			local pa, pb = a.Name == "MarkPatch", b.Name == "MarkPatch"
+			if pa ~= pb then
+				return pa -- (badge covers first: never trimmed)
+			end
 			return volume(a) > volume(b)
 		end)
 		while #keep > maxBody do
