@@ -62,6 +62,7 @@ export type Npc = {
 	offTo: number,
 	sideT: number, -- time to the next overtaking look
 	plan: { CityLayout.Segment }?, -- the way chosen past nextSeg (racers brake for bends far ahead)
+	holdMerge: boolean?, -- a racer waiting to merge back before a junction
 }
 
 type Obstacle = { pos: Vector3, fwd: Vector3, speed: number, halfLen: number, width: number, self: Npc? }
@@ -799,14 +800,24 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 			npc.offTo = near
 		end
 	end
-	-- slide, but only into a strip that is clear right now
+	-- slide, but only into a strip that is clear beside us and has room ahead to brake in (sliding in at speed
+	-- right behind a slow car rear-ended it in the first test); if a merge back before a junction can't be made,
+	-- hold back (holdMerge) until it can
 	local delta = npc.offTo - npc.off
+	npc.holdMerge = nil
 	if math.abs(delta) > 0.01 then
 		local step = math.clamp(npc.speed * RACER.SideRate, 7, 22) * dt
 		local to = npc.off + math.clamp(delta, -step, step)
-		local _, clear = stripGap(npc, to, obstacles, T.LookAhead)
-		if clear then
+		local reach = math.max(T.LookAhead, npc.speed * RACER.LookAheadS)
+		local ahead, clear = stripGap(npc, npc.offTo, obstacles, reach)
+		local _, clearNow = stripGap(npc, to, obstacles, T.LookAhead)
+		local room = npc.speed * npc.speed / (2 * RACER.Brake) * 0.6 + 12
+		if clear and clearNow and ahead > room then
 			npc.off = to
+		elseif settle then
+			npc.holdMerge = true
+		else
+			npc.offTo = npc.off -- (that gap closed: stay)
 		end
 	end
 	-- over another lane's middle: that lane is ours now (its way on through the next junction)
@@ -1126,6 +1137,9 @@ function Traffic.update(dt: number)
 		if npc.racer then
 			-- top speed on straights, slowed in time for every bend, turn and red light ahead
 			target = math.min(npc.racer * (1 + 0.03 * math.sin(now * npc.wanderRate + npc.wanderPhase)), racerCap(npc, now))
+			if (npc :: any).holdMerge then
+				target = math.min(target, npc.speed * 0.9) -- (let the lane we must merge into go by)
+			end
 		end
 		local remaining = seg.length - npc.s
 
