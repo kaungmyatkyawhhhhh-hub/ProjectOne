@@ -493,6 +493,11 @@ function UI.buildTouchControls()
 		steerR = false
 		updSteer()
 	end)
+	for _, b in left:GetChildren() do
+		if b:IsA("TextButton") then
+			b.TextSize = 32 -- (the arrows read at a glance)
+		end
+	end
 	touchButton(left, "CAM", at(188, 50), UDim2.fromOffset(52, 44), BLUE, function()
 		if UI.onCameraButton then
 			UI.onCameraButton()
@@ -624,7 +629,7 @@ function UI.buildTouchControls()
 	end
 	local function setOpen(open: boolean)
 		panel.Visible = open
-		moreBtn.Text = if open then "✕" else "•••"
+		moreBtn.Text = if open then "X" else "•••"
 	end
 	UI.closeCarMenu = function()
 		setOpen(false)

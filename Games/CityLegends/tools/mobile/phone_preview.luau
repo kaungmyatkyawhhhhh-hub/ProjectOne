@@ -8,7 +8,7 @@ local pg = game:GetService("Players").LocalPlayer.PlayerGui
 local cam = workspace.CurrentCamera.ViewportSize
 for _, g in pg:GetChildren() do
 	if g:IsA("ScreenGui") then
-		local phone = g:FindFirstChild("Phone")
+		local phone = g:FindFirstChild("PhonePreview")
 		if UNDO then
 			if phone then
 				for _, c in phone:GetChildren() do
@@ -19,7 +19,7 @@ for _, g in pg:GetChildren() do
 		else
 			if not phone then
 				phone = Instance.new("Frame")
-				phone.Name = "Phone"
+				phone.Name = "PhonePreview"
 				phone.BackgroundTransparency = 1
 				phone.AnchorPoint = Vector2.new(0.5, 0.5)
 				phone.Position = UDim2.fromScale(0.5, 0.5)
