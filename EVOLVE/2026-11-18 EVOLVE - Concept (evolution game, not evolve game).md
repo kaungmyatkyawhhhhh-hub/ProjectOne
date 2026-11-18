@@ -228,3 +228,19 @@ Today and the human eras get nothing new; the server's town already covers them.
 - Terrain that hasn't streamed in yet makes a prop fall back to y = 1, so it can be buried inside a hill.
 - About 1,000 parts per era. Not checked on a phone.
 - No sway or animation.
+
+## Swimming in the sea world (v51, 18 Nov 2026)
+Owner: "Swimming for sea lanes".
+
+- Swimming applies to everyone in the sea world: depth 1–11 (cells, first animals, first fish) and all sea branches (whales, sharks, rays and the rest).
+- **How it works (EraWorld, client only):**
+  - Gravity drops to 35 (normally 196.2).
+  - Each jump press (Space or the phone jump button) is a stroke that lifts about 7 studs, at most one every 0.25 s.
+  - Water drag caps sinking at 7 studs/s.
+  - Nobody can swim above y = 90.
+  - `workspace.Gravity` set on a client only affects that player's own character, so land players are unaffected.
+- **Play test:** 5 strokes went from y 4 to 38, then a slow sink back down over about 5 s. A land era restores gravity to 196.2. A shark at depth 20 gets sea gravity.
+- **Known gaps:**
+  - Strokes don't count toward the "Jump 8 times" goal; only jumps off the floor do.
+  - No swim animation or body tilt.
+  - Not tested on a phone.

@@ -30,7 +30,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
-- 2026-11-18 (night): owner: "actually aim for 5-15k". **roblox-3d-model-from-sheet** (vault copy): triangle aim for a whole creature is now 5-15K (was 1-3K); 20K per mesh stays the Roblox limit. Installed copy (v7) still says 1-3K until re-uploaded.
+- 2026-11-18 (night): owner: "actually aim for 5-15k". **roblox-3d-model-from-sheet** (vault copy): triangle aim for a whole creature is now 5-15K (was 1-3K); 20K per mesh stays the Roblox limit. Uploaded as v8 the same day; plugin and vault copies match.
 - 2026-11-18: roblox-ui-pro develuper-style.md: info-only pills go on the right-middle edge (owner correction)
 - 2026-11-18: roblox-ui-pro example HUD: World Age pill moved to the right-middle edge (owner: "put this on the right middle")
 - 2026-11-18: roblox-ui-pro example HUD refreshed (cold-snap icy tint via ColorCorrection, COLD SNAP/colder toast styles, anti-idle-kick for AFK players)
