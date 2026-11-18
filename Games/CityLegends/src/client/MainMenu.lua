@@ -2461,15 +2461,17 @@ local function buildJobs(page: Frame)
 		title.TextTruncate = Enum.TextTruncate.AtEnd
 		local y = if small then 42 else 50
 		local rankLine = text({ Text = "", FontFace = HEAVY, TextSize = if small then 15 else 17, TextColor3 = GOLD, Position = UDim2.fromOffset(20, y), Size = UDim2.new(1, -40, 0, 18), TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 3, Parent = b })
-		text({ Text = job.where, FontFace = BOLD, TextSize = if small then 13 else 15, TextColor3 = WHITE, Position = UDim2.fromOffset(20, y + 21), Size = UDim2.new(1, -40, 0, 17), TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 3, Parent = b })
-		text({ Text = JD.What[job.id] or "", FontFace = MEDIUM, TextSize = if small then 13 else 15, TextColor3 = SUB, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(20, y + 40), Size = UDim2.new(1, -40, 0, if small then 34 else 40), ZIndex = 3, Parent = b })
-		local pill = new("Frame", { BackgroundColor3 = GREEN, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -12, 1, -12), Size = UDim2.fromOffset(if small then 104 else 116, 32), ZIndex = 4, Parent = b }, { corner(8) })
+		local payLine = text({ Text = "", FontFace = HEAVY, TextSize = if small then 14 else 16, TextColor3 = GREEN, Position = UDim2.fromOffset(20, y + 19), Size = UDim2.new(1, -40, 0, 17), TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 3, Parent = b })
+		text({ Text = job.where, FontFace = BOLD, TextSize = if small then 13 else 15, TextColor3 = WHITE, Position = UDim2.fromOffset(20, y + 38), Size = UDim2.new(1, -40, 0, 17), TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 3, Parent = b })
+		-- (one line on a phone: the tile is ~150 high there)
+		text({ Text = JD.What[job.id] or "", FontFace = MEDIUM, TextSize = if small then 13 else 15, TextColor3 = SUB, TextWrapped = not small, TextTruncate = if small then Enum.TextTruncate.AtEnd else Enum.TextTruncate.None, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(20, y + 56), Size = UDim2.new(1, -40, 0, if small then 16 else 40), ZIndex = 3, Parent = b })
+		local pill = new("Frame", { BackgroundColor3 = GREEN, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -12, 1, -12), Size = UDim2.fromOffset(if small then 104 else 116, if small then 28 else 32), ZIndex = 4, Parent = b }, { corner(8) })
 		local pillText = text({ Text = "TAKE JOB", FontFace = HEAVY, TextSize = 14, TextColor3 = NAVY0, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), ZIndex = 5, Parent = pill })
 		-- the job vehicle (field jobs, on this job only)
 		local v = JD.Vehicles[job.id]
 		local vb: TextButton? = nil
 		if v then
-			local vbtn = button("GET " .. v.label, GOLD, { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 12, 1, -12), Size = UDim2.fromOffset(if small then 112 else 130, 32), TextSize = 13, Visible = false, ZIndex = 5, Parent = b })
+			local vbtn = button("GET " .. v.label, GOLD, { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 12, 1, -12), Size = UDim2.fromOffset(if small then 112 else 130, if small then 28 else 32), TextSize = 13, Visible = false, ZIndex = 5, Parent = b })
 			vbtn.Activated:Connect(function()
 				local res = JC and JC.call("vehicle")
 				if type(res) == "table" and res.ok then
@@ -2486,7 +2488,8 @@ local function buildJobs(page: Frame)
 			local mine = st.job == job.id
 			local r = (st.ranks and st.ranks[job.id]) or 1
 			local pay = JobRules.paycheck(J, job, r, st.double)
-			rankLine.Text = string.format("R%d/%d %s  ·  %s a paycheck%s", r, #job.ranks, job.ranks[r], money(pay), if st.double then " (x2)" else "")
+			rankLine.Text = string.format("R%d/%d  %s", r, #job.ranks, job.ranks[r])
+			payLine.Text = money(pay) .. " a paycheck" .. (if st.double then " (Double Pay)" elseif job.kind == "post" then " at the post" else " + per task")
 			pill.BackgroundColor3 = if mine then RED else GREEN
 			pillText.Text = if mine then "QUIT" else "TAKE JOB"
 			pillText.TextColor3 = if mine then WHITE else NAVY0
