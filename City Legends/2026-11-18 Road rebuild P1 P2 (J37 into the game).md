@@ -7,7 +7,7 @@ Owner's order (18 Nov): rebuild the game's 1:1 Yangon roads from the J37 roads05
 |---|---|---|---|---|---|
 | P1 (Myanmar Plaza, Kabar Aye, Hledan, Inya) | 36 (1536-stud) | 276 | 14,479 | yes (v1400 + later) | pass |
 | P2 (YCC / GGFest, Pyay Road south) | 42 | 304 | 11,516 | yes | pass |
-| P3 (downtown) | built, 12 of 15 build cells exported; not swapped yet (old P3 roads still in the game) | | | | |
+| P3 (downtown: Sule, Bogyoke, Strand) | 51 | 461 | 25,094 | yes (v1419-1424) | pass |
 
 - Lanes: P1-P3 from the J37 data, 630 lanes, 1,447 links, 0 dead ends (installed in `src/shared` and in Studio).
 - Trees standing on the moved carriageways removed: 147 (P1) + 99 (P2).
@@ -28,3 +28,14 @@ Owner's order (18 Nov): rebuild the game's 1:1 Yangon roads from the J37 roads05
 
 ## How (for the next run)
 `build/city_1to1/roads05_HANDOVER.md` "REBUILD progress" has every step, tool and id; lessons in the Playbook lessons note (18 Nov, road rebuild).
+
+
+## P3 (downtown), 18 Nov night
+- Swapped whole (old 47 cells and 18,323 boxes out), 140 trees and the P3 kit trees / compound walls on the new carriageways removed, then saved.
+- Play test pass: Bogyoke through the Sule Pagoda junction, Strand Road, Sule Pagoda Road, the Sule roundabout, the 3 YCC car-park ramps; 28/28 NPC cars moving; fast travel to Sule, Bogyoke and Botataung lands on road. Lane points without road under them in P3: 1.3% (6.6% before).
+- YCC ramps: the thin ramp triangles showed a dark band hanging beside the car-park wall; they are solid down to the ground now.
+- Grass verges (RoadVerge05) run over P3, P1 and P2: grass comes up flush to the pavement edge.
+- Before / after: ![[2026-11-18 rebuild P3 - Sule roundabout - before.jpg]] ![[2026-11-18 rebuild P3 - Sule roundabout - after.jpg]]
+  ![[2026-11-18 rebuild P3 - Bogyoke x Sule Pagoda - before.jpg]] ![[2026-11-18 rebuild P3 - Bogyoke x Sule Pagoda - after.jpg]]
+  ![[2026-11-18 rebuild P3 - Strand Road - before.jpg]] ![[2026-11-18 rebuild P3 - Strand Road - after.jpg]]
+- Still open: one small collision hole at the Sule Pagoda Road junction (36092, 43529) (cars pass it).
