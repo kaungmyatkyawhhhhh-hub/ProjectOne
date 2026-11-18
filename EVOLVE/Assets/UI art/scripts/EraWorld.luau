@@ -209,10 +209,28 @@ local function showProps(era)
 	end
 end
 
+-- Swimming: in the sea world you sink slowly, and every jump press (Space or the phone jump button) is a stroke upward.
+local baseGravity = workspace.Gravity
+local SEA_GRAVITY, STROKE, SINK, SURFACE = 35, 22, 7, 90 -- a stroke lifts about 7 studs, you sink at 7 studs/s, nobody swims above y = 90
+local lastStroke = 0
+game:GetService("UserInputService").JumpRequest:Connect(function()
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if current ~= ERAS[1] or not root or root.Position.Y > SURFACE or os.clock() - lastStroke < 0.25 then return end
+	lastStroke = os.clock()
+	local v = root.AssemblyLinearVelocity
+	root.AssemblyLinearVelocity = Vector3.new(v.X, STROKE, v.Z)
+end)
+game:GetService("RunService").Heartbeat:Connect(function() -- water drag: sink, don't drop
+	local root = current == ERAS[1] and player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local v = root and root.AssemblyLinearVelocity
+	if v and v.Y < -SINK then root.AssemblyLinearVelocity = Vector3.new(v.X, -SINK, v.Z) end
+end)
+
 local function apply(era)
 	if era == current then return end
 	current = era
 	showProps(era)
+	workspace.Gravity = era == ERAS[1] and SEA_GRAVITY or baseGravity -- local: only your own character feels it
 	local fade = TweenInfo.new(2)
 	if atmo then TweenService:Create(atmo, fade, era.atmo or baseAtmo):Play() end
 	TweenService:Create(tint, fade, { TintColor = era.tint or Color3.new(1, 1, 1), Saturation = era.sat or 0 }):Play()
