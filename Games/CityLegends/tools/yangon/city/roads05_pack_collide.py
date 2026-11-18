@@ -1,7 +1,7 @@
-# collide/Collide05_k.txt -> RColRB_<tag>_k.luau (return [==[...]==]) in roads05_RB12/collide_mods/<tag>, then pack_tools
+# (python roads05_pack_collide.py <P> [build tag]) collide/Collide05_k.txt -> RColRB_<tag>_k.luau (return [==[...]==]) in roads05_RB12/collide_mods/<tag>, then pack_tools
 import glob, os, re, subprocess, sys
 tag = sys.argv[1]
-D = r"D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/city_1to1/roads05_RB12"
+D = r"D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/city_1to1/roads05_" + (sys.argv[2] if len(sys.argv) > 2 else "RB12")  # [build tag]
 out = os.path.join(D, 'collide_mods', tag)
 os.makedirs(out, exist_ok=True)
 for f in glob.glob(os.path.join(out, '*.luau')):
