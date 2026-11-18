@@ -3008,17 +3008,17 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 	end
 
 	-- licence plate text (the plate itself is part of the mesh)
-	if meta and meta.plate and not liteMode then
+	local function plateAt(cf: CFrame, size: Vector3, canvas: Vector2)
 		local plate = Instance.new("Part")
 		plate.Name = "PlateText"
-		plate.Size = Vector3.new(1.16, 0.36, 0.02)
+		plate.Size = size
 		plate.Transparency = 1
 		plate.CanCollide = false
 		plate.CanQuery = false
 		plate.CanTouch = false
 		plate.Massless = true
 		plate.CastShadow = false
-		plate.CFrame = groundCF * (meta.plate :: CFrame) -- front face looks out of the car
+		plate.CFrame = cf -- front face looks out of the car
 		plate.Parent = skin
 		local weld = Instance.new("WeldConstraint")
 		weld.Part0 = root
@@ -3026,7 +3026,7 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		weld.Parent = plate
 		local sg = Instance.new("SurfaceGui")
 		sg.Face = Enum.NormalId.Front
-		sg.CanvasSize = Vector2.new(232, 72)
+		sg.CanvasSize = canvas
 		sg.LightInfluence = 1
 		sg.MaxDistance = 90
 		sg.Parent = plate
@@ -3034,6 +3034,39 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		local plateText = model:GetAttribute("Plate")
 		local kind = model:GetAttribute("PlateKind")
 		Plates.draw(sg, if type(plateText) == "string" then plateText else Plates.roll(Random.new()), if type(kind) == "string" then kind else nil)
+	end
+	if meta and meta.plate and not liteMode then
+		plateAt(groundCF * (meta.plate :: CFrame), Vector3.new(1.16, 0.36, 0.02), Vector2.new(232, 72))
+	elseif imported and not liteMode then
+		-- (2026-11-19) imported models carry no plate mark (their plates were painted out): a real-size
+		-- Myanmar plate (358 x 162 mm) front and back where a ray at bumper height first meets the body
+		local parts = {}
+		for _, d in skin:GetDescendants() do
+			if d:IsA("BasePart") and not d.CanQuery and d.Transparency < 0.5 then
+				d.CanQuery = true
+				table.insert(parts, d)
+			end
+		end
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Include
+		params.FilterDescendantsInstances = { skin }
+		local up = root.CFrame.UpVector
+		for _, side in { { -1, { 1.5, 1.8, 1.25, 2.1 } }, { 1, { 2.3, 2.0, 2.7, 1.7 } } } do
+			local out = root.CFrame:VectorToWorldSpace(Vector3.new(0, 0, side[1])) -- -Z is the front
+			for _, y in side[2] do
+				local from = (groundCF * CFrame.new(0, y, side[1] * 20)).Position
+				local hit = workspace:Raycast(from, -out * 20, params)
+				if hit and hit.Normal:Dot(out) > 0.6 then
+					local n = (hit.Normal - up * hit.Normal:Dot(up) * 0.3).Unit -- (follows a sloped bumper, a bit less)
+					local pos = hit.Position + n * 0.05
+					plateAt(CFrame.lookAt(pos, pos + n, up), Vector3.new(1.07, 0.49, 0.02), Vector2.new(220, 100))
+					break
+				end
+			end
+		end
+		for _, d in parts do
+			d.CanQuery = false
+		end
 	end
 
 	-- exhaust tips in root space (Driving puts the backfire flames there)

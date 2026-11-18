@@ -324,12 +324,13 @@ local function paintCar(model: Model, look: Look)
 	end
 	-- the number plate's text
 	local plate = model:GetAttribute("Plate")
-	local plateText = model:FindFirstChild("PlateText", true)
-	if plateText and type(plate) == "string" then
-		local sg = plateText:FindFirstChildWhichIsA("SurfaceGui")
+	if type(plate) == "string" then
 		local kind = model:GetAttribute("PlateKind")
-		if sg then
-			Plates.draw(sg, plate, if type(kind) == "string" then kind else nil) -- (2026-11-19 Myanmar plates)
+		for _, plateText in model:GetDescendants() do -- (front and back since 2026-11-19)
+			local sg = plateText.Name == "PlateText" and plateText:FindFirstChildWhichIsA("SurfaceGui")
+			if sg then
+				Plates.draw(sg, plate, if type(kind) == "string" then kind else nil) -- (2026-11-19 Myanmar plates)
+			end
 		end
 	end
 	-- headlights
