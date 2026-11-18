@@ -16,6 +16,11 @@ builder; ClaudeTools.YangonRoads = repo 419443297 (195,605 chars), Roads unchang
   starts inside that flare and crosses it at z ~32850: road on road. A join must first decide which carriageway is real there (OSM).
 - **Not reached:** remaining kerb_gap clusters (roundabout4 Lane #3357 / #115, univ_kabaraye Lane #1256, deck_run U Wisara #5, kunchan Gyophyu
   Flyover), buried 11, pave_gap fill rule, pyay_univ road steps, univ / kunchan regressions.
+- **Pipeline (`sh roads05_pipeline.sh J33 skip`):** roads.json md5 991fe6e6 (backup roads_J32.json = J29 data), paint.json 0e0fcb1c (backup
+  paint_J32.json), mouthsim 0 failed of 11570, QA + paint QA = J30. Only Lower Pazundaung's samples and the island records changed. The real
+  taper of Lower Pazundaung is gentler than the one injected in Studio (width_taper smooths it over ~55 studs: 31.5, 30.3, 29.0 ... 22.9), and
+  the injected Upper Pazundaung #3 s1932-1936 change is NOT in the data (its end there is unchanged). **First step next pass:** re-pack the test
+  asset with this data (`roads05_studiotest.py` -> PATCH 133014134133489) and re-measure the 17 spots as the J33 baseline.
 - **Kit (Studio _G, lost on restart):** `_G.ONE(names)` build + qa + copy faults, `_G.SHOW()`, `_G.GN(spot, x0, z0, x1, z1, step)` ray map by
   road/part name, `_G.PATCH(find, repl)`, `_G.RELOAD` (+ `_G.ISLDIFF` / `_G.SPATCH` data overrides after load).
 
