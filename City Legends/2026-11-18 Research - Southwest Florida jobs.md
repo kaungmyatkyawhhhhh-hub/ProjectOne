@@ -39,3 +39,9 @@ The proposal is approved: every job gets ranks with a paycheck and a visible pro
 - Posts are capped per hour: tea shop, fuel station, dealership staff, Myanmar Plaza shop.
 - The Double Pay pass (499 R$) doubles job paychecks.
 - Workplaces are real Yangon places with fictional names.
+
+## Owner decision (19 Nov 2026): post jobs are AFK jobs
+The owner said "ok sure" to this:
+- No daily cap. A "still on shift?" tap appears every 2 h.
+- Auto-rejoin to the same server at 19 min idle (before Roblox's 20-min kick). This is not officially approved by Roblox, so watch moderation.
+- Post pay stays at about 1/3 of active jobs. Active jobs keep the no-AFK rule.
