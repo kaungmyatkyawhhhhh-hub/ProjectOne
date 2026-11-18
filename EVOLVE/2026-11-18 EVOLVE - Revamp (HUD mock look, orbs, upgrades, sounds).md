@@ -225,3 +225,44 @@ These are Creator Store audio, inserted into `SoundService` as `SFX_*`. Audio cr
 - `ServerStorage.Evolution_backup_before_revamp`
 - `ServerStorage.Evolution_backup_before_100`
 - `ServerStorage.LightingBackup_before_world`
+
+## Genetics: newcomers are born ahead (v33)
+- A new player born at a camp inherits from the two builders. They start one stage past the best parent (capped at the world frontier), and each parent mutation passes on with a 50% chance.
+- Backup: `ServerStorage.Evolution_backup_before_genes`.
+
+## Life goals: evolving is earned (v33)
+- Owner: "the evolving should take longer and have people to do more activities".
+- Each life has one goal, shown in the HUD row. The goals are: Grab 3 DNA orbs, Walk 150 studs, Jump 8 times, or Build a camp (only offered when 2 or more players are on).
+- Finish the goal and your child evolves. Otherwise the child is the same species, with the toast "No evolution this life". An unfinished goal carries its progress into the next life.
+- Short lives (Aging upgrade) get smaller goals.
+- A finished goal waits if a path pick is pending, so it isn't wasted.
+- Time away still earns DNA but no evolution.
+- Backup: `Evolution_backup_before_goals`.
+
+## HUD moved out of the middle (v33)
+- Owner: "this ui being at the middle is very annoying" → one top-left column: status plate, DNA, buttons. The World pill sits beside the buttons.
+- Owner: "put this notification at the top middle" → news is a slim strip at the top centre, nudged right on narrow screens so it never touches the plate.
+
+## Mysteries in the wild (v35)
+- Owner: "i want the game to spark more curiosity". The diagnosis: the map was an empty field, so there was nothing to wonder about.
+- `workspace.Mysteries` holds 6 part-built spots, which the owner can move freely. Each one has a gold "?" you can see from far away; once you've found it, the "?" becomes its name in green (client side).
+  - Ancient Bones (near spawn)
+  - Glowing Tree
+  - Fallen Star
+  - Strange Egg (stage 5)
+  - Stone Circle (stage 9)
+  - Crystal Heart (stage 17, far west)
+- How a find works:
+  - Inspect (ProximityPrompt, 0.4 s hold).
+  - First find: +2 min of DNA, the Index Secrets entry (with clue), a lore line that points to the next spot, and "Your child will evolve!" (it completes the life goal).
+  - Locked spot: "Too small to understand this / Come back as a <species>!"
+- Backup: `Evolution_backup_before_mysteries`.
+- Gotcha: a BillboardGui with AlwaysOnTop did not draw in Play here, so the marks use AlwaysOnTop = false and Adornee = Anchor.
+- Tested in Play:
+  - Bones gave DNA, completed the goal, added the Index entry, and the mark turned green.
+  - The stone circle prompt worked, but the locked toast was not seen (it was queued behind other news).
+  - Not tested: the 2-player camp goal, and the far spots' look at a distance.
+- Next curiosity ideas, not built:
+  - silhouette of the next species in the HUD;
+  - night-only mysteries;
+  - a server-wide "someone found the Crystal Heart!" broadcast.

@@ -132,6 +132,11 @@ Tier colours on the store follow his layout:
 
 **Toast:** a purple `toast` plate, 380×52, that slides in from the top.
 
+**Owner corrections, 18 Nov 2026 (EVOLVE):**
+- A status plate placed to the RIGHT of the left button column still reads as "the middle" to the owner ("this ui being at the middle is very annoying"). Stack every persistent plate in ONE top-left column: status, then currency, then the menu buttons. Small pills go beside the buttons.
+- News toasts belong in a slim strip at the TOP MIDDLE ("put this notification at the top middle"). Nudge it right on narrow screens so it never touches the corner plate: `x = max(-150, 16 + plateW*scale - rootW/2)` from the centre.
+- Toasts are one line and truncate, so news lines must stay at or under ~34 characters.
+
 ## Pipeline (all in `assets/develuper-kit/`)
 
 1. **Draw.** Edit `PIECES` in `kitgen.html` and `ICONS` in `icons.html`. Sizes are in design points.
