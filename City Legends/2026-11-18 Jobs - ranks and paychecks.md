@@ -77,3 +77,4 @@ Built from the approved proposal in [[2026-11-18 Research - Southwest Florida jo
 - Speed cameras are still off (owner, 3 Nov), so police tickets come only from real players.
 - The 2x Cash pass also multiplies job pay (store module), so 2x Cash + Double Pay = x4. The other store session says this is intended.
 - `Config.lua` is 198,898 bytes, just under `pack_sync.py`'s 199,000 limit. The next big Config addition needs the packer limit raised, or the table moved to its own module.
+- Store module synced into Studio by the store session (19 Nov): Jobs uses its 2x Cash / Premium share and the DoublePay attribute there now.
