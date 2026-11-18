@@ -628,7 +628,8 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 	local px, pz = pos.X, pos.Z
 	-- a driveway mouth (fuel station entry / exit, roads05 data.driveways): no kerb across it
 	-- (the drive's point sits ~12 studs out, past the pavement: measured along the road, within 18 across: the far kerb is 24+ away)
-	if what == "Kerb" and M.data.driveways then
+	-- (18 Nov, owner: MC basement ramps blocked) kind "ramp" (data/ramp_mouths.json): no pavement across it either
+	if M.data.driveways and (what == "Kerb" or what == "Pavement") then
 		local me = M.R[name]
 		local b = M.near(px, pz, 2)[me.index]
 		if b then
@@ -640,7 +641,7 @@ function M.sideZone(name: string, pos: Vector3, what: string): boolean
 					local dx, dz = d.x - px, d.z - pz
 					local along = dx * tx + dz * tz
 					local across = math.abs(dx * tz - dz * tx)
-					if math.abs(along) < d.hw and across < 18 then
+					if (what == "Kerb" or d.kind == "ramp") and math.abs(along) < d.hw and across < (d.across or 18) then
 						return true
 					end
 				end

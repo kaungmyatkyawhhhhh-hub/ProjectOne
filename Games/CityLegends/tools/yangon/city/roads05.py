@@ -1647,6 +1647,10 @@ def write(net):
             for d in json.load(open(p)):
                 drives.append(dict(x=round(d['at'][0], 2), z=round(d['at'][1], 2), hw=round(geo.m(d['width_m']) / 2, 2),
                                    kind=d['kind']))
+    # landmark ramp mouths (18 Nov: Myanmar Centre basement ramps): no kerb and no pavement across them
+    p = os.path.join(geo.BUILD, 'city_1to1', 'ramp_mouths.json')
+    if os.path.exists(p):
+        drives += [dict(x=d['x'], z=d['z'], hw=d['hw'], across=d['across'], kind='ramp') for d in json.load(open(p))['mouths']]
     data = dict(roads=out_roads, cut=cut, decks=out_decks, roundabouts=out_rings, driveways=drives, spm=geo.SPM,
                 ox=geo.OX, oz=geo.OZ, tags=net['tags'],
                 note='roads05.py (%s): the 1:1 districts %s in the batch 0.5 format (v5 sample fields; roundabouts list)'
