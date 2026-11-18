@@ -18,6 +18,7 @@ from shapely.ops import unary_union
 from shapely.strtree import STRtree
 
 import geo
+import roads05_ramps
 from roads05_qa import quads, deck_segs, AT_GRADE
 
 STEP = 8.0
@@ -2354,6 +2355,7 @@ def main():
     st['width_taper_unfold'] = width_taper(data)  # (J19) dropped samples shortened chords: ease the steps again
     st['deck_joints'] = deck_joints(data)  # (J18) last width / direction change before the checks
     st['deck_recap'] = deck_recap(data)  # (J21) last plan change done (deck_fair, unfold, deck_joints): a ramp over 8% re-profiled
+    st['ramps'] = roads05_ramps.apply(data)  # (18 Nov) landmark ramps kept open (paint follows: roads05_paint skips cut samples)
     st['checks'] = check(data)
     st['crossings'] = crossings(data)  # (J19) after every index change: 1-based sample indices for Luau
     st['kiss_clear'] = kiss_clear(data)  # (J21) kerb_cross: a graze pushed off (needs data.crossings)
