@@ -55,16 +55,23 @@ do
 	-- { from, look at, drift per second, field of view }
 	local shots = {}
 	local far = if workspace:FindFirstChild("Riviera") and not workspace:FindFirstChild("Yangon") then ReplicatedStorage:WaitForChild("RivieraFar", 3) else nil
+	local ready: { (() -> boolean)? } = {} -- (Yangon: a shot is cut to only once its ground has streamed in)
 	if Config.activeMap() == "Yangon" then
-		-- Yangon (build step 9): the server streams the city in round Optima Werkz (the start), and the
-		-- far city and Shwedagon are always there (Yangon.Far is Persistent): close shots round Optima,
-		-- one across the city to the pagoda
-		-- (1:1, 2026-11-17: round Myanmar Plaza on Kabar Aye Pagoda Road, where players start)
-		shots = {
-			{ Vector3.new(34400, 140, 27300), Vector3.new(34897, 60, 27549), Vector3.new(8, 0, -4), 58 }, -- over Myanmar Plaza
-			{ Vector3.new(34560, 70, 28000), Vector3.new(34616, 42, 27560), Vector3.new(-10, 0, 0), 56 }, -- along Kabar Aye Pagoda Road
-			{ Vector3.new(35200, 230, 27000), Vector3.new(34983, 60, 26798), Vector3.new(0, 0, 8), 62 }, -- high over Sedona
-		}
+		-- (owner, 19 Nov: "the scenes are inside of the buildings") the 1:1 shots live in Shared.MenuShots:
+		-- the server checks each one in open air at start and the server streams their spots in for us
+		local MenuShots = require(Shared:WaitForChild("MenuShots"))
+		local function fill()
+			table.clear(shots)
+			table.clear(ready)
+			for _, s in MenuShots.good() do
+				table.insert(shots, { s.from, s.at, s.drift, s.fov })
+				table.insert(ready, function()
+					return MenuShots.streamed(s)
+				end)
+			end
+		end
+		fill() -- (the fallback until the server's check is in: a first player in a fresh server)
+		workspace:GetAttributeChangedSignal("MenuShots"):Connect(fill)
 	elseif workspace:FindFirstChild("Riviera") and far then
 		far.Parent = workspace -- (WorldFx's far-city switch picks it up from here later)
 		shots = {
@@ -84,20 +91,29 @@ do
 	local SHOT = 4.6
 	local t0 = os.clock()
 	local lastShot = 0
+	local at = 1 -- the shot on screen
 	camera.CameraType = Enum.CameraType.Scriptable
 	loadingShotsConn = RunService.RenderStepped:Connect(function()
 		local t = os.clock() - t0
 		local k = math.floor(t / SHOT)
-		local shot = shots[k % #shots + 1]
 		local shotT = t - k * SHOT
 		if k ~= lastShot then
 			lastShot = k
+			-- the next shot whose spot has streamed in (the first, by the spawn, always has)
+			for n = 1, #shots do
+				local i = (at + n - 1) % #shots + 1
+				if not ready[i] or (ready[i] :: () -> boolean)() or n == #shots then
+					at = i
+					break
+				end
+			end
 			-- (a quick dip to black between shots, under the title)
 			task.spawn(function()
 				UI.fade(true, 0.01)
 				UI.fade(false, 0.45)
 			end)
 		end
+		local shot = shots[at] or shots[1]
 		local drift = shot[3] * shotT
 		camera.CFrame = CFrame.lookAt(shot[1] + drift, shot[2] + drift)
 		camera.FieldOfView = shot[4]
@@ -351,14 +367,14 @@ local function startOrbit()
 			return
 		end
 		if Config.activeMap() == "Yangon" then
-			-- Yangon (build step 9): a slow circle round Optima Werkz, where players start, looking in at
-			-- it and the loop; the server streams the city in round it (MenuFocus)
+			-- Yangon: a slow circle round Myanmar Plaza, where players start (the server streams it in:
+			-- MenuFocus). (19 Nov) The old 150-stud circle ran through the 1:1 Myanmar Centre: the circle is
+			-- Shared.MenuShots' ORBIT, checked in open air by the server (a higher one if it fails)
 			travel += dt
-			local a = travel * (math.pi * 2 / 150)
-			local centre = Vector3.new(34897, 47, 27549) -- (1:1: Myanmar Plaza, 2026-11-17)
-			local off = Vector3.new(math.cos(a), 0, math.sin(a))
-			local pos = centre + off * 150 + Vector3.new(0, 70 + math.sin(travel / 9) * 6, 0)
-			camera.CFrame = CFrame.lookAt(pos, centre + Vector3.new(0, 8, 0))
+			local MS = require(Shared:WaitForChild("MenuShots"))
+			local o = MS.orbit()
+			local pos, centre = MS.orbitAt(o, travel * (math.pi * 2 / o.period))
+			camera.CFrame = CFrame.lookAt(pos + Vector3.new(0, math.sin(travel / 9) * 6, 0), centre)
 			camera.FieldOfView = 60
 			return
 		end

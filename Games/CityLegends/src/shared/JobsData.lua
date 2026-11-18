@@ -18,12 +18,13 @@ return {
 		mall = "Work the boutique counter. Serve shoppers for tips.",
 	},
 	-- field jobs' vehicles: an existing car re-painted (fictional livery, no logos), driven only by the
-	-- job holder (it is their car slot), gone when they quit. shortcut: the YBS "bus" is the Grand
-	-- Lounge van, no bus model exists yet; give it a real bus body when one is imported
+	-- job holder (it is their car slot), gone when they quit. The car's model must have Customs paint
+	-- parts (Body_Paint*): the Apex Regent Sport (toyoka_crown) has none and stayed white. shortcut: the
+	-- YBS "bus" is the Grand Lounge van, no bus model exists yet; give it a real bus body when one is imported
 	Vehicles = {
 		bus = { car = "toyoka_alfard", label = "YBS VAN", look = { paint = { 238, 238, 232 }, accent = { 196, 36, 44 }, finish = "gloss", plate = "YBS 36" } },
-		taxi = { car = "toyoka_crown", label = "TAXI", look = { paint = { 236, 186, 34 }, accent = { 24, 24, 26 }, finish = "gloss", plate = "TAXI" } },
-		police = { car = "toyoka_crown", label = "PATROL CAR", look = { paint = { 244, 246, 250 }, accent = { 28, 56, 138 }, finish = "gloss", plate = "POLICE" } },
+		taxi = { car = "toyoka_chaser", label = "TAXI", look = { paint = { 236, 186, 34 }, accent = { 24, 24, 26 }, finish = "gloss", plate = "TAXI" } },
+		police = { car = "toyoka_chaser", label = "PATROL CAR", look = { paint = { 244, 246, 250 }, accent = { 28, 56, 138 }, finish = "gloss", plate = "POLICE" } },
 	},
 	VehicleCooldown = 10, -- seconds between two job vehicle spawns
 	-- post actions (a prompt at the post, only for the job holder on duty): an NPC customer for a small

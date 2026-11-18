@@ -1285,6 +1285,36 @@ local function menuFocus(player: Player)
 	if not player.ReplicationFocus then
 		player.ReplicationFocus = p
 	end
+	-- (19 Nov) stream in the loading / menu shots' spots (Shared.MenuShots, checked at start below), so a
+	-- phone sees the city there and not empty ground
+	if Config.activeMap() == "Yangon" then
+		task.spawn(function()
+			local MenuShots = require(Shared.MenuShots)
+			for _ = 1, 100 do
+				if workspace:GetAttribute("MenuShots") ~= nil then
+					break
+				end
+				task.wait(0.2)
+			end
+			for _, s in MenuShots.good() do
+				if not player.Parent then
+					return
+				end
+				pcall(player.RequestStreamAroundAsync, player, s.at, 8)
+			end
+		end)
+	end
+end
+-- (owner, 19 Nov: "the scenes are inside of the buildings") check every loading / menu shot in open air once
+-- on the whole map; the clients take the good ones from workspace attribute MenuShots
+if Config.activeMap() == "Yangon" then
+	task.spawn(function()
+		local ok, err = pcall(require(Shared:WaitForChild("MenuShots")).publish)
+		if not ok then
+			warn("[CityLegends] menu shot check failed: " .. tostring(err))
+			workspace:SetAttribute("MenuShots", "")
+		end
+	end)
 end
 
 local function onPlayerAdded(player: Player)
