@@ -465,3 +465,28 @@ The Orient Voltra stays the free starter.
 - A one-time "prices changed" message. Nobody loses an owned car.
 - Sell-back (`Config.Value.SellShare` 0.6) works from the car's price, so old owners would gain: decide whether it uses the price they paid.
 - Re-run `tools/economy/model.py` after any change.
+
+## Owner decisions (19 Nov 2026) on the "?" cars
+Local means the car is sold at the dealership. Import means it only comes from crates or the airport.
+
+| # | Car | Decision |
+|---|---|---|
+| 1 | Tri-Star W201 Evo II | Import |
+| 2 | Trident Maestrale GTS | Local |
+| 3 | Dearborn C346 Rallye | Import |
+| 4 | Apex JZA80 | Local |
+| 5 | Stealth-Apex Z100 V8 | Local |
+| 6 | Horizon BNR34 | Local |
+| 7 | HyperSpeed S7 | Local |
+| 8 | Tri-Star W213 E | E400 Local, E63 Import |
+| 9 | Horizon R35 | Local |
+| 10 | Enfurecido Brava | Local |
+| 11 | Ecstasy Nocturne | Local |
+| 12 | Sovereign Grand Tourer | Local |
+
+**Trims:**
+- **E-class (#8):** keep only the E400 and the E63.
+- **R35 (#9):** gets 2 trims, a "2010" GT-R and a "2017 Nismo". Fictional names in game.
+- **All the other cars in this list:** base only. Their Sport and Top trims come off sale. Players who own them keep them (Retired).
+
+The rest of the proposal (prices and the 5 open questions) is still waiting for the owner's check.
