@@ -18,7 +18,7 @@ import numpy as np
 import shapely
 from shapely.strtree import STRtree
 
-VIS = ('P', 'r', 'w', 'm')
+VIS = ('P', 'r', 'w', 'm', 'B')  # B: bridge walkways / parapet bases keep their boxes too
 
 
 def footprints(parts, kinds):
