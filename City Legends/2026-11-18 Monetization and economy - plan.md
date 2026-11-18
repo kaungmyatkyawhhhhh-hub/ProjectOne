@@ -20,6 +20,7 @@ Many car models are **CC-BY-NC (non-commercial)** and most likely ripped from ra
 - **Owner decision (18 Nov): "the cars in the game are already good"**: keep the current cars, in crates too. The licence risk is accepted. If a takedown claim ever comes, swap that one model (the game works with any model).
 
 ## Phase 1: sell what is already built (laptop, about 1 day)
+> **Done in code 19 Nov:** [[2026-11-18 Store live - passes and products]] (ids in Config, one ProcessReceipt, pass effects, odds before Robux spins, cash packs dropped). Measuring (step 5) not built yet.
 1. **Make the passes and products on Roblox** (owner: Creator Hub, about 15 min) and put the ids in `Config.Menu.Store` + spin `productId`.
 2. **Starting prices** (K04: auto/2x is the hero; small impulse items):
    | Item | Type | Price | Note |

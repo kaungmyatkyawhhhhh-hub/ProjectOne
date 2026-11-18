@@ -36,7 +36,16 @@ Phase 1 of [[2026-11-18 Monetization and economy - plan]]. The owner made the pa
 ## Tests
 - Lune `tools/store_test.luau` (receipt idempotency, rollback, not-loaded wait, Starter Pack once, multipliers). Lune and luau-lsp are not installed on this PC: run it on the other PC (`lune run tools/store_test.luau .`).
 - All changed files compile (Studio `loadstring` check on commit 6eca8857).
-- Studio: see the results section below.
+- Studio (main place, 19 Nov, Play on `CityLegends_test`, then back on `CityLegends_v1`, checked on the Server; place saved, not published):
+  - Receipts through `ServerStorage.StoreTestReceipt`: unknown player and unknown product -> NotProcessedYet; Spin -> granted, the SAME PurchaseId again -> granted with no second spin (1, then a new id -> 2); Starter Pack -> $50k + the car's cash (the tester owns every car), the same id again -> nothing, a second buy -> $50k only; Garage Space with no house -> $50k.
+  - Passes: the owner's account owns all 3, so `Cash2x` / `Vip` / `DoublePay` came on at join; the STORE shows OWNED, NEED A HOUSE for Garage Space.
+  - Prices from Roblox: R$ 499 / 399 / 499 / 49 / 49 (shot with the owned flags cleared on the client).
+  - No script errors from the store at start.
 
-## Results
-(filled in below)
+![[2026-11-18 Store live - prices.jpg]]
+![[2026-11-18 Store live - owned.jpg]]
+
+## Not tested yet
+- A real Studio test purchase through Roblox's buy window (MCP clicks don't reach it): try once by hand (STORE -> Starter Pack -> Buy) on a test save.
+- The Starter Pack's car pick (the Studio tester owns every car), Garage Space on a placed house, the VIP tag / chat tag and free VIP bay in Play, the spin page's odds-first Robux button.
+- Lune `tools/store_test.luau` and `luau-lsp` (not on this PC).
