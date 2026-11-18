@@ -267,13 +267,16 @@ local function reveal(gui, show)
 	end
 end
 
--- wide: status centred; narrow: status sits right of the left column so they never touch
+-- one column in the top-left corner: status, DNA, buttons, news. Owner (18 Nov): "this ui being at the middle is
+-- very annoying" (the plate sat right of the buttons, which read as top-centre). The centre stays clear for the game.
 local function layout()
-	local left = 8 + 194 + 12
 	statusScale.Scale = hud:FindFirstChildOfClass("UIScale").Scale >= 1.1 and 0.8 or 1
-	toastX, toastY = left, 6 + math.ceil(133 * statusScale.Scale) + 6
-	-- top-left corner, never centred: the owner's friends found a big plate in the middle of the screen annoying
-	status.AnchorPoint, status.Position = Vector2.zero, UDim2.fromOffset(left, 6)
+	local y = 6 + math.ceil(133 * statusScale.Scale) + 12 -- +12: the DNA helix pokes 9 above its plate
+	status.AnchorPoint, status.Position = Vector2.zero, UDim2.fromOffset(8, 6)
+	pill.Position = UDim2.fromOffset(8, y)
+	menuRow.Position = UDim2.fromOffset(8, y + 57)
+	-- owner: news "at the top middle"; on narrow screens nudge right so it never touches the status plate
+	toastX, toastY = math.max(-150, 16 + math.ceil(335 * statusScale.Scale) - hud.Size.X.Offset / 2), 8
 end
 hud:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
 layout()
@@ -503,9 +506,27 @@ end
 player.CharacterAdded:Connect(hideOwnCampPrompt)
 if player.Character then task.spawn(hideOwnCampPrompt, player.Character) end
 
+-- mysteries in the wild: a gold "?" floats over each until you've found it, then its name in green
+local function markMysteries()
+	local folder = workspace:FindFirstChild("Mysteries")
+	if not folder then return end
+	local idx = "," .. (player:GetAttribute("Index") or "") .. ","
+	for _, m in folder:GetChildren() do
+		local q = m:FindFirstChild("Q", true)
+		if q then
+			local found = idx:find(",X:" .. m.Name .. ",", 1, true) ~= nil
+			q.Text = found and m.Name or "?"
+			q.TextSize = found and 18 or 44
+			q.TextColor3 = found and Color3.fromRGB(124, 255, 107) or Color3.fromRGB(255, 210, 63)
+		end
+	end
+end
+player:GetAttributeChangedSignal("Index"):Connect(markMysteries)
+task.spawn(function() workspace:WaitForChild("Mysteries", 30) markMysteries() end)
+
 ---------------------------------------------------------------- World pill: everyone, on every server, grows one world together
 -- The bar fills with every life anyone lives; each World Age = +5% DNA for all players.
-local worldPill = img(hud, "slot", { Position = UDim2.fromOffset(8, 134), Size = UDim2.fromOffset(194, 44), ZIndex = 2 })
+local worldPill = img(menuRow, "slot", { Position = UDim2.fromOffset(202, 9), Size = UDim2.fromOffset(194, 44), ZIndex = 2 })
 local worldText = label(worldPill, "", 14, { Position = UDim2.fromOffset(8, 3), Size = UDim2.fromOffset(178, 20), RichText = true, ZIndex = 5 })
 local worldTrack = img(worldPill, "miniTrack", { Position = UDim2.fromOffset(8, 24), Size = UDim2.fromOffset(178, 14), ZIndex = 3 })
 local worldFill = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(0, 1), ClipsDescendants = true, ZIndex = 4 }, worldTrack)
@@ -593,6 +614,8 @@ refresh = function()
 		evoText.Text = ('Next: ??? opens at <font color="#FFD23F">World Age %d</font>'):format(a.FrontierAge)
 	elseif a.NextSpecies == "" then
 		evoText.Text = "Fully evolved!"
+	elseif not a.GoalDone and (a.GoalText or "") ~= "" then -- your child only evolves once this life's goal is done
+		evoText.Text = ('Goal: %s   <font color="#5CF2FF">%d/%d</font>'):format(a.GoalText, math.floor(a.GoalProg or 0), a.GoalNeed or 1)
 	else
 		evoText.Text = ('Next: %s   <font color="#5CF2FF">%d/%d</font>%s'):format(a.NextSpecies, a.Evo, a.NextAt,
 			a.Trail and '  <font color="#7CFF6B">2x</font>' or "") -- catching up on the trail others blazed
@@ -681,7 +704,11 @@ local STYLES = {
 	{ find = "path", priority = 9, color = GOLD, hold = 3 },
 	{ find = "SECRET", priority = 10, color = Color3.fromRGB(255, 120, 220), hold = 4 },
 	{ find = "tribe", priority = 8, color = Color3.fromRGB(124, 255, 107), hold = 3.5 },
+	{ find = "MYSTERY", priority = 9, color = Color3.fromRGB(200, 150, 255), hold = 4 },
+	{ find = "Too small", priority = 7, color = Color3.fromRGB(200, 150, 255), hold = 3 },
 	{ find = "camp", priority = 7, color = Color3.fromRGB(255, 170, 80), hold = 3.5 },
+	{ find = "Goal done", priority = 7, color = Color3.fromRGB(124, 255, 107), hold = 2.5 },
+	{ find = "No evolution", priority = 7, color = Color3.fromRGB(255, 170, 80), hold = 3.5 },
 	{ find = "World first", priority = 8, color = Color3.fromRGB(140, 200, 255), hold = 3.5 },
 	{ find = "world reached", priority = 9, color = Color3.fromRGB(140, 200, 255), hold = 4 },
 	{ find = "Badge", priority = 9, color = GOLD, hold = 3 },
@@ -700,15 +727,15 @@ local function showNext()
 	if showing or #queue == 0 or openName or news.banner then return end
 	table.sort(queue, byPriority)
 	local item = table.remove(queue, 1)
-	local t = img(toastRoot, "plate9", { Position = UDim2.new(0, toastX, 0, -70), Size = UDim2.fromOffset(300, 40), ZIndex = 10 })
+	local t = img(toastRoot, "plate9", { Position = UDim2.new(0.5, toastX, 0, -70), Size = UDim2.fromOffset(300, 40), ZIndex = 10 })
 	label(t, item.text, 15, { Position = UDim2.fromOffset(14, 0), Size = UDim2.new(1, -28, 1, 0), TextColor3 = item.color or CREAM, ZIndex = 12, TextTruncate = Enum.TextTruncate.AtEnd })
-	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0, toastX, 0, toastY) }):Play()
+	TweenService:Create(t, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Position = UDim2.new(0.5, toastX, 0, toastY) }):Play()
 	local cur = {}
 	function cur.hide(requeue)
 		if showing ~= cur then return end
 		showing = nil
 		if requeue then table.insert(queue, item) end
-		TweenService:Create(t, TweenInfo.new(0.2), { Position = UDim2.new(0, toastX, 0, -70) }):Play()
+		TweenService:Create(t, TweenInfo.new(0.2), { Position = UDim2.new(0.5, toastX, 0, -70) }):Play()
 		task.delay(0.22, function() t:Destroy() showNext() end)
 	end
 	showing = cur
