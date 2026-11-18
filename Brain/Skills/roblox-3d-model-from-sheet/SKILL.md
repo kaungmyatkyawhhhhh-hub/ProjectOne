@@ -78,7 +78,7 @@ Reference generators to copy from: `MEGA BITE\Art\GreatWhite\greatwhite_v2.py` (
 - Clip modules: reuse the shared clips re-scaled by SEG and add only the model's ability clip (6 KB instead of 16 KB to paste into Studio).
 
 ## 5. Roblox export
-- Triangles under 20K per mesh (aim 1-3K for a creature). One material: bake the colours into one 512 px texture. Up to 4 bone influences per vertex; the root bone at the origin. FBX with Add Leaf Bones off and embedded textures; import with the 3D Importer.
+- Triangles under 20K per mesh (Roblox limit); **aim 5-15K for the whole creature** (owner, 18 Nov). One material: bake the colours into one 512 px texture. Up to 4 bone influences per vertex; the root bone at the origin. FBX with Add Leaf Bones off and embedded textures; import with the 3D Importer.
 - Rig: 8 spine bones plus a Jaw bone, weights by position along the body, a Swim action (carangiform; thunniform for big sharks).
 
 ## 5b. Owner's device
