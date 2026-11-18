@@ -75,6 +75,11 @@ local function showStarter()
 	if card or not it or not hud or player:GetAttribute("StarterPack") == true then
 		return
 	end
+	-- (one thing at a time: the card takes the slot from a Double Pay link)
+	local link = hud:FindFirstChild("DoublePayLink")
+	if link then
+		link:Destroy()
+	end
 	local touch = UI.isTouch
 	local w, h = if touch then 330 else 380, if touch then 84 else 92
 	local c: Frame = new("Frame", {
