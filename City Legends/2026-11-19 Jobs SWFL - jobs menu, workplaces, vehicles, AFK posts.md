@@ -65,7 +65,7 @@ Builds on [[2026-11-18 Jobs - ranks and paychecks]] (ranks, paychecks, Double Pa
 ![[2026-11-19 Jobs SWFL - phone HUD JOBS icon (before the column wrap).jpg]]
 
 ## Left to do
-- **The YBS van (Apex Grand Lounge) shows its real maker's badge on the tailgate**, and the Apex Regent Sport (`toyoka_crown`, also the police NPC car) shows a badge and "CROWN" / "Athlete" letters. These are the existing car models, not new. They need BrandMarks covers, or another van for YBS. A real bus body is still missing.
+- **The YBS van (Apex Grand Lounge) shows its real maker's badge on the tailgate**, and the Apex Regent Sport (`toyoka_crown`, also the police NPC car) shows a badge and "CROWN" / "Athlete" letters. These are the existing car models, not new. They need BrandMarks covers, or another van for YBS. **Fixed 19 Nov:** [[2026-11-19 Badge removal - van and Regent Sport]]. A real bus body is still missing.
 - No radar gun, cones or taser for police (the patrol points' 3-second "radar" stop and the speeder tickets stay). No police-gear gamepass.
 - No team colour in the player list: Teams were not used (they change spawns and the player list); the job is a player attribute plus the overhead tag.
 - The tea shop post stands on the pavement in front of a shop, not inside a tea shop building (no tea shop interior exists). The real tea set prop nearest to it is 86 studs north by the "Tea Shop Corner" stop.

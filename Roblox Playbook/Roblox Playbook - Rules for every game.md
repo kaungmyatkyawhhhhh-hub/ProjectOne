@@ -22,6 +22,7 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 - **Filter every player-typed text** (pet names, crew names, signs) with `TextService` on the server, again when loaded.
 - **No links or QR codes inside the game**, not even "check our socials".
 - No real brands, logos, real people, copyrighted music. Icons/thumbnails must not look like another big game (copycat flag hides you from Home).
+- **Badges hide inside big meshes (19 Nov 2026, City Legends van + police car):** on store / free car models the maker's badge, grille emblem, model lettering, "HYBRID" plates and wheel-cap logos are often cut into one big chrome or trim mesh, so a search for parts named badge / logo finds nothing. Check every car by eye from front, back, both sides and each wheel before it goes in the game (or gets a new job, like a police or taxi body). To find which part carries a mark: tint the candidate parts in bright colours and take a shot (raycasts hit rough collision, not the letters). A separate letter part: delete it (keep a backup). A mark inside a big mesh: a thin patch part in the colour round it, saved in the model's own group so it moves with that panel; make it a little bigger than the mark and check from two angles (raised badges peek round the edge). Patches on paint must sit in the paint group so a repaint covers them too.
 - Thumbnails must show the real game. No "FREE ROBUX", no "BEST GAME".
 
 ## 4. First session
