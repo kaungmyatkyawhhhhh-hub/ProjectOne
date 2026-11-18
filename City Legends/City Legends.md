@@ -67,6 +67,11 @@
 
 A Roblox night-city driving game. The code is in this vault, folder `Games/CityLegends`; its `CLAUDE.md` has the full technical notes.
 
+## Render distance setting (2026-11-18, owner: "add render distance to the settings")
+Settings > Graphics now has **Render distance**: Low / Medium / High / Ultra. It changes how far your own game builds the city detail (building detail, street props, places, trees) and how far venue lights stay on: half, three quarters, today's distance, one and a half times. High is the default, so the game looks as before; phones (and Low graphics) start on Medium. It changes live and is saved. In Studio and saved; not published. Tested in Play: High 4,915 detail parts near the spawn, Low 644, Ultra 12,029; the setting came back after a restart. On Low the far city ends sooner (the server only sends buildings within 640 studs).
+![[2026-11-18 Render distance - settings page.jpg]]
+Low, then Ultra, same spot: ![[2026-11-18 Render distance - Low.jpg]] ![[2026-11-18 Render distance - Ultra.jpg]]
+
 ## Pleiad GC8 Wide, a new car (2026-11-15, `Prompts/New imports - JDM (Evos, Imprezas, BRZ, AE86, Supra, Chaser).md`, car 8)
 **Licence:** "1998 Subaru Impreza 22B STi" by Ddiaz Design, **CC-BY-NC-SA 4.0** (non-commercial; credited in `Config.Credits` as "Pleiad GC8 Wide model by Ddiaz Design (CC BY-NC-SA 4.0)"). It is a racing game's car (the same layout as the CP9A Champion's): nodes `impreza_sti_22b:LOD_A_BODY_mm_ext`, `_mm_badges`, `LOD_A_BONNETCAM_BODY` (a bonnet-camera copy of the front), `impreza_sti_22b_int:LOD_A_INT_NEEDLE_RPM_mm_int`, root `FINAL_MODEL_22b.fbx`. Game not found. None of those names reach the game. The owner decides (LICENCE WARNING at the top).
 
