@@ -84,7 +84,7 @@ local function buildBar()
 		BackgroundTransparency = 0.18,
 		ClipsDescendants = true,
 		Visible = false,
-		Parent = hud,
+		Parent = hud:FindFirstChild("TopBars") or hud, -- (19 Nov: with the level bar, hidden on a phone while driving)
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(GOLD, 1, 0.55) })
 	local fill = new("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = GOLD, BackgroundTransparency = 0.78, BorderSizePixel = 0, Parent = b })
 	new("UIGradient", { Color = ColorSequence.new(Color3.fromRGB(255, 214, 110), GOLD), Parent = fill })

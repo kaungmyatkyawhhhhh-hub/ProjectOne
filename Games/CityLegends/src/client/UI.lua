@@ -378,18 +378,23 @@ end
 local touchHolder: Frame? = nil
 local touchPillParent: Frame? = nil
 local touchOnFoot = true
+local touchReadout: ((number, number, string) -> ())? = nil -- speed, rev share, gear (the phone's speed box)
+local touchFuel: Frame? = nil
 UI.onCarKey = nil :: ((Enum.KeyCode) -> ())? -- a driving key from the phone's buttons (Driving sets it)
 UI.onNitroTouch = nil :: ((boolean) -> ())? -- the N2O button held / let go (Driving sets it)
 UI.showNitroButton = function(_on: boolean) end
 UI.closeCarMenu = function() end
--- (19 Nov, owner: "the driving buttons are so messy ... some important buttons in mobile driving are
--- missing") one layout for phones and tablets, drawn for a 375-high phone and scaled up on bigger
--- screens, on its own layer inside the notch and Roblox's top bar (ScreenInsets): steering bottom
--- left (where Roblox's thumbstick sits on foot), GAS and BRAKE big on the right with DRIFT
--- (handbrake) and N2O above them and the gearbox paddles beside them in sequential, CAM and the •••
--- car menu beside the steering. The ••• menu holds every other driving key (lights, signals, first
--- person, radio, gearbox, park brake, TC, cruise, engine, reset, photo, doors). Roblox's own touch
--- thumbstick and jump button are off in a car (touchVisible).
+-- (19 Nov, owner: "the driving buttons are so messy and cant see anything while driving ... some
+-- important buttons in mobile driving are missing"; his reference: Driving Empire, where 80% play on
+-- phones) the middle of the screen stays clear for the car and the road. Drawn for a 375-high phone,
+-- scaled up on tablets, inside the notch and Roblox's top bar (ScreenInsets):
+--   bottom left:   ◀ ▶ steering (where Roblox's thumbstick sits on foot), the round N2O above ▶
+--   bottom right:  GAS as a tall pedal, BRAKE as a wide one, a small speed box (speed, gear, revs,
+--                  fuel) over BRAKE, the round DRIFT (handbrake) over GAS, ▼ ▲ round paddles in sequential
+--   bottom middle: the GET OUT / GET IN pill (faded while moving) over CAM, LIGHTS, RADIO and •••, the
+--                  car menu with every other driving key (signals, first person, gearbox, park brake,
+--                  TC, cruise, engine, reset, photo, doors, put the car away)
+-- Roblox's own thumbstick and jump button are off in a car (touchVisible).
 function UI.buildTouchControls()
 	local preview = RunService:IsStudio() and workspace:GetAttribute("PreviewPhone") == true
 	local sg = new("ScreenGui", {
@@ -404,31 +409,28 @@ function UI.buildTouchControls()
 	touchHolder = holder
 	local GREEN = Color3.fromRGB(70, 230, 110)
 	local BLUE = Color3.fromRGB(110, 170, 255)
-	local function cluster(anchorX: number, w: number): (Frame, UIScale)
-		local f = new("Frame", {
-			BackgroundTransparency = 1,
-			AnchorPoint = Vector2.new(anchorX, 1),
-			Position = UDim2.new(anchorX, if anchorX == 0 then 14 else -14, 1, -12),
-			Size = UDim2.fromOffset(w, 180),
-			Parent = holder,
-		})
-		return f, new("UIScale", { Parent = f })
+	local scales: { UIScale } = {}
+	local function cluster(parent: Instance, anchor: Vector2, pos: UDim2, w: number, h: number): Frame
+		local f = new("Frame", { BackgroundTransparency = 1, AnchorPoint = anchor, Position = pos, Size = UDim2.fromOffset(w, h), Parent = parent })
+		table.insert(scales, new("UIScale", { Parent = f }))
+		return f
 	end
-	local left, leftScale = cluster(0, 240)
-	local right, rightScale = cluster(1, 236)
-	-- the GET OUT / GET IN pills sit over the right cluster's BRAKE column, under the minimap; this
-	-- twin of it shows on foot too
-	local pills = new("Frame", { Name = "Pills", BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 1), Position = right.Position, Size = right.Size, Parent = sg })
-	local pillScale = new("UIScale", { Parent = pills })
-	touchPillParent = pills
+	local left = cluster(holder, Vector2.new(0, 1), UDim2.new(0, 14, 1, -12), 180, 150)
+	local right = cluster(holder, Vector2.new(1, 1), UDim2.new(1, -14, 1, -12), 230, 204)
+	-- (the middle shows on foot too: the GET IN pill lives there)
+	local middle = cluster(sg, Vector2.new(0.5, 1), UDim2.new(0.5, 0, 1, -8), 172, 90)
+	touchPillParent = middle
 	local function fit()
 		local h = if preview then 375 else sg.AbsoluteSize.Y
 		local k = math.clamp(h / 375, 1, 1.5) -- phones as drawn, tablets up to 1.5x
-		leftScale.Scale, rightScale.Scale, pillScale.Scale = k, k, k
+		for _, s in scales do
+			s.Scale = k
+		end
 	end
 	sg:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
 	fit()
-	local function touchButton(parent: Instance, text: string, pos: UDim2, size: UDim2, color: Color3, onDown: () -> (), onUp: () -> ()): TextButton
+	-- a held button in the HUD's style (dark panel, coloured outline): round = a circle
+	local function touchButton(parent: Instance, text: string, pos: UDim2, size: UDim2, color: Color3, onDown: () -> (), onUp: () -> (), round: boolean?): TextButton
 		local b: TextButton = new("TextButton", {
 			AutoButtonColor = false,
 			Text = text,
@@ -441,7 +443,7 @@ function UI.buildTouchControls()
 			Position = pos,
 			Size = size,
 			Parent = parent,
-		}, { corner(14), stroke(color, 2, 0.2) })
+		}, { if round then new("UICorner", { CornerRadius = UDim.new(1, 0) }) else corner(14), stroke(color, 2, 0.2) })
 		-- (2026-11-04) the touch holding this button: it lets go when that touch ends, wherever the
 		-- thumb slid to (the button's own InputEnded can miss it, and GAS or the steering stayed on)
 		local held: InputObject? = nil
@@ -461,6 +463,18 @@ function UI.buildTouchControls()
 		end)
 		return b
 	end
+	-- a pedal: the same button with ridges across it and its name small at the foot
+	local function pedal(parent: Instance, name: string, pos: UDim2, size: UDim2, color: Color3, onDown: () -> (), onUp: () -> ()): TextButton
+		local b = touchButton(parent, "", pos, size, color, onDown, onUp)
+		local ridges = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(12, 10), Size = UDim2.new(1, -24, 1, -34), Parent = b }, {
+			new("UIListLayout", { Padding = UDim.new(0, 7), VerticalAlignment = Enum.VerticalAlignment.Center }),
+		})
+		for _ = 1, math.max(3, math.floor((size.Y.Offset - 34) / 14)) do
+			new("Frame", { Size = UDim2.new(1, 0, 0, 5), BackgroundColor3 = color, BackgroundTransparency = 0.55, BorderSizePixel = 0, Parent = ridges }, { corner(3) })
+		end
+		label({ Text = name, TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = color, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, 0, 0, 16), Parent = b })
+		return b
+	end
 	local noop = function() end
 	local function key(k: Enum.KeyCode): () -> ()
 		return function()
@@ -474,54 +488,27 @@ function UI.buildTouchControls()
 		return UDim2.new(0, x, 1, -bottom)
 	end
 
-	-- left: steering, then CAM over ••• beside it
+	-- left: steering, the round N2O over ▶
 	local steerL, steerR = false, false
 	local function updSteer()
 		UI.touch.steer = (if steerR then 1 else 0) - (if steerL then 1 else 0)
 	end
-	touchButton(left, "◀", at(0, 0), UDim2.fromOffset(86, 94), Theme.Accent, function()
+	local sl = touchButton(left, "◀", at(0, 0), UDim2.fromOffset(86, 84), Theme.Accent, function()
 		steerL = true
 		updSteer()
 	end, function()
 		steerL = false
 		updSteer()
 	end)
-	touchButton(left, "▶", at(94, 0), UDim2.fromOffset(86, 94), Theme.Accent, function()
+	local sr = touchButton(left, "▶", at(94, 0), UDim2.fromOffset(86, 84), Theme.Accent, function()
 		steerR = true
 		updSteer()
 	end, function()
 		steerR = false
 		updSteer()
 	end)
-	for _, b in left:GetChildren() do
-		if b:IsA("TextButton") then
-			b.TextSize = 32 -- (the arrows read at a glance)
-		end
-	end
-	touchButton(left, "CAM", at(188, 50), UDim2.fromOffset(52, 44), BLUE, function()
-		if UI.onCameraButton then
-			UI.onCameraButton()
-		end
-	end, noop)
-	local moreBtn = touchButton(left, "•••", at(188, 0), UDim2.fromOffset(52, 44), Theme.Accent2, noop, noop)
-
-	-- right: GAS at the edge, BRAKE beside it, DRIFT and N2O above them, the paddles beside BRAKE
-	touchButton(right, "GAS", at(144, 0), UDim2.fromOffset(92, 116), Theme.Money, function()
-		UI.touch.throttle = 1
-	end, function()
-		UI.touch.throttle = 0
-	end)
-	touchButton(right, "BRAKE", at(52, 0), UDim2.fromOffset(84, 84), Theme.Danger, function()
-		UI.touch.brake = 1
-	end, function()
-		UI.touch.brake = 0
-	end)
-	touchButton(right, "DRIFT", at(52, 92), UDim2.fromOffset(84, 50), Theme.Accent2, function()
-		UI.touch.handbrake = true
-	end, function()
-		UI.touch.handbrake = false
-	end)
-	local nitroBtn = touchButton(right, "N2O", at(144, 124), UDim2.fromOffset(92, 50), BLUE, function()
+	sl.TextSize, sr.TextSize = 32, 32
+	local nitroBtn = touchButton(left, "N2O", at(110, 92), UDim2.fromOffset(56, 56), BLUE, function()
 		if UI.onNitroTouch then
 			UI.onNitroTouch(true)
 		end
@@ -529,61 +516,120 @@ function UI.buildTouchControls()
 		if UI.onNitroTouch then
 			UI.onNitroTouch(false)
 		end
-	end)
+	end, true)
 	nitroBtn.Visible = false
 	UI.showNitroButton = function(on: boolean)
 		nitroBtn.Visible = on
 	end
-	-- (2026-11-08) the manual gearbox on a phone: shift paddles, up and down (shown while it's sequential)
-	local shiftUp = touchButton(right, "▲", at(0, 50), UDim2.fromOffset(44, 44), BLUE, function()
-		if UI.onShift then
-			UI.onShift(1)
-		end
-	end, noop)
-	local shiftDown = touchButton(right, "▼", at(0, 0), UDim2.fromOffset(44, 44), BLUE, function()
+
+	-- right: the pedals, the speed box, DRIFT and the paddles
+	pedal(right, "GAS", at(146, 0), UDim2.fromOffset(84, 140), Theme.Money, function()
+		UI.touch.throttle = 1
+	end, function()
+		UI.touch.throttle = 0
+	end)
+	pedal(right, "BRAKE", at(8, 0), UDim2.fromOffset(130, 80), Theme.Danger, function()
+		UI.touch.brake = 1
+	end, function()
+		UI.touch.brake = 0
+	end)
+	touchButton(right, "DRIFT", at(160, 148), UDim2.fromOffset(56, 56), Theme.Accent2, function()
+		UI.touch.handbrake = true
+	end, function()
+		UI.touch.handbrake = false
+	end, true).TextSize = 11
+	local box = new("Frame", {
+		Name = "SpeedBox",
+		AnchorPoint = Vector2.new(0, 1),
+		Position = at(8, 88),
+		Size = UDim2.fromOffset(130, 42),
+		BackgroundColor3 = Theme.Panel,
+		BackgroundTransparency = 0.2,
+		Parent = right,
+	}, { corner(10), stroke(Theme.Stroke, 1.2, 0.2) })
+	local speedText = label({ Text = "0", TextSize = 24, Font = Enum.Font.GothamBlack, TextXAlignment = Enum.TextXAlignment.Right, Position = UDim2.fromOffset(6, 3), Size = UDim2.fromOffset(56, 28), Parent = box })
+	local unitText = label({ Text = "MPH", TextSize = 10, Font = Enum.Font.GothamBlack, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(66, 12), Size = UDim2.fromOffset(30, 14), Parent = box })
+	local gearText = label({ Text = "N", TextSize = 16, Font = Enum.Font.GothamBlack, BackgroundColor3 = Theme.PanelLight, BackgroundTransparency = 0, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -6, 0, 5), Size = UDim2.fromOffset(26, 24), Parent = box })
+	corner(6).Parent = gearText
+	local revBack = new("Frame", { Position = UDim2.new(0, 8, 1, -9), Size = UDim2.new(1, -16, 0, 3), BackgroundColor3 = Theme.Stroke, BorderSizePixel = 0, Parent = box }, { corner(2) })
+	local revFill = new("Frame", { Size = UDim2.fromScale(0, 1), BackgroundColor3 = Theme.Accent, BorderSizePixel = 0, Parent = revBack }, { corner(2) })
+	touchFuel = new("Frame", { Position = UDim2.new(0, 8, 1, -4), Size = UDim2.new(1, -16, 0, 2), BackgroundColor3 = GREEN, BorderSizePixel = 0, Parent = box })
+	touchReadout = function(speed: number, rev: number, gear: string)
+		speedText.Text = tostring(math.floor(speed + 0.5))
+		unitText.Text = if speedKmh then "KM/H" else "MPH"
+		gearText.Text = gear
+		revFill.Size = UDim2.fromScale(math.clamp(rev, 0, 1), 1)
+		revFill.BackgroundColor3 = if rev > 0.9 then Theme.Danger else Theme.Accent
+	end
+	-- (2026-11-08) the manual gearbox on a phone: shift paddles, down and up (shown while it's sequential)
+	local shiftDown = touchButton(right, "▼", at(8, 138), UDim2.fromOffset(44, 44), BLUE, function()
 		if UI.onShift then
 			UI.onShift(-1)
 		end
-	end, noop)
+	end, noop, true)
+	local shiftUp = touchButton(right, "▲", at(60, 138), UDim2.fromOffset(44, 44), BLUE, function()
+		if UI.onShift then
+			UI.onShift(1)
+		end
+	end, noop, true)
 	shiftUp.Visible, shiftDown.Visible = false, false
 	UI.showShiftPaddles = function(on: boolean)
 		shiftUp.Visible, shiftDown.Visible = on, on
 	end
 
-	-- the ••• car menu: a panel over the steering in the side panels' style; ••• (now ✕) closes it
-	local COLS, TW, TH, GAP, TOP = 6, 64, 44, 6, 26
+	-- middle: CAM, LIGHTS, RADIO, ••• under the GET OUT pill (makePill puts it here)
+	local icons = new("Frame", { Name = "Icons", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, 0), Size = UDim2.fromOffset(172, 44), Parent = holder })
+	icons.Parent = middle
+	local function small(text: string, x: number, color: Color3, onDown: () -> (), onUp: (() -> ())?): TextButton
+		local b = touchButton(icons, text, at(x, 0), UDim2.fromOffset(40, 40), color, onDown, onUp or noop)
+		b.TextSize = 10
+		return b
+	end
+	small("CAM", 0, BLUE, function()
+		if UI.onCameraButton then
+			UI.onCameraButton()
+		end
+	end)
+	-- (2026-11-07) the new models' headlights: tap = next mode, hold = flash (Driving.lampPress / lampRelease)
+	lampButton = small("LIGHTS", 44, GREEN, key(Enum.KeyCode.L), function()
+		if UI.onLampRelease then
+			UI.onLampRelease()
+		end
+	end)
+	lampButton.TextSize = 8
+	small("RADIO", 88, BLUE, key(Enum.KeyCode.R)).TextSize = 9
+	local moreBtn = small("•••", 132, Theme.Accent2, noop)
+	moreBtn.TextSize = 14
+
+	-- the ••• car menu: a panel over the middle, in the side panels' style; ••• (now X) closes it
+	local COLS, TW, TH, GAP, TOP = 5, 64, 44, 6, 26
 	local panel = new("Frame", {
 		Name = "CarMenu",
-		AnchorPoint = Vector2.new(0, 1),
-		Position = UDim2.new(0, 0, 1, -(94 + 10)),
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 0, -52),
 		Size = UDim2.fromOffset(COLS * TW + (COLS - 1) * GAP + 16, TOP + 3 * TH + 2 * GAP + 8),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.08,
 		Active = true,
 		Visible = false,
-		Parent = left,
+		ZIndex = 20,
+		Parent = icons,
 	}, { corner(14), stroke(Theme.Stroke, 1.5, 0.15) })
-	label({ Text = "CAR", TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(12, 4), Size = UDim2.new(1, -24, 0, 18), Parent = panel })
+	label({ Text = "CAR", TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = Theme.SubText, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(12, 4), Size = UDim2.new(1, -24, 0, 18), ZIndex = 21, Parent = panel })
 	local slot = 0
-	local function tile(text: string, color: Color3, onDown: () -> (), onUp: (() -> ())?): TextButton
+	local function tile(text: string, color: Color3, onDown: () -> ()): TextButton
 		local x, y = slot % COLS, math.floor(slot / COLS)
 		slot += 1
-		local b = touchButton(panel, text, UDim2.fromOffset(8 + x * (TW + GAP), TOP + TH + y * (TH + GAP)), UDim2.fromOffset(TW, TH), color, onDown, onUp or noop)
+		local b = touchButton(panel, text, UDim2.fromOffset(8 + x * (TW + GAP), TOP + TH + y * (TH + GAP)), UDim2.fromOffset(TW, TH), color, onDown, noop)
 		b.TextSize = 11
 		b.TextWrapped = true
+		b.ZIndex = 21
 		return b
 	end
-	-- (2026-11-07) the new models' headlights: tap = next mode, hold = flash (Driving.lampPress / lampRelease)
-	lampButton = tile("LIGHTS", GREEN, key(Enum.KeyCode.L), function()
-		if UI.onLampRelease then
-			UI.onLampRelease()
-		end
-	end)
 	tile("◀ SIGNAL", Theme.Warning, key(Enum.KeyCode.Z))
 	tile("HAZARD", Theme.Warning, key(Enum.KeyCode.X))
 	tile("SIGNAL ▶", Theme.Warning, key(Enum.KeyCode.C))
 	tile("1ST PERSON", BLUE, key(Enum.KeyCode.V))
-	tile("RADIO", BLUE, key(Enum.KeyCode.R))
 	tile("GEARBOX", BLUE, key(Enum.KeyCode.M))
 	tile("PARK BRAKE", Theme.Danger, key(Enum.KeyCode.P))
 	tile("TRACTION", Theme.Accent, key(Enum.KeyCode.T))
@@ -615,6 +661,12 @@ function UI.buildTouchControls()
 			UI.onPhotoButton()
 		end
 	end)
+	tile("PUT AWAY", Theme.Danger, function()
+		UI.closeCarMenu()
+		if UI.onDespawnButton then
+			UI.onDespawnButton()
+		end
+	end)
 	-- (2026-11-08) scissor doors up / down while parked (client/CarDoors shows it on a car that has them)
 	local doorsBtn = tile("DOORS", GREEN, function()
 		if UI.onDoors then
@@ -643,6 +695,10 @@ end
 local function touchVisible()
 	if touchHolder then
 		touchHolder.Visible = hud.Visible and not touchOnFoot
+		local icons = touchPillParent and touchPillParent:FindFirstChild("Icons")
+		if icons then
+			(icons :: Frame).Visible = touchHolder.Visible
+		end
 		if not touchHolder.Visible then
 			UI.closeCarMenu()
 		end
@@ -876,6 +932,8 @@ local levelBadge: TextLabel
 local function buildLevelBar()
 	local barWidth = if UI.isTouch then 250 else 360
 	local h = if UI.isTouch then 40 else 46
+	-- (19 Nov) the level bar and JobsClient's job bar share a layer, hidden on a phone while you drive
+	local bars = new("Frame", { Name = "TopBars", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Parent = hud })
 	local top = new("Frame", {
 		Name = "Level",
 		AnchorPoint = Vector2.new(0.5, 0),
@@ -883,7 +941,7 @@ local function buildLevelBar()
 		Size = UDim2.fromOffset(barWidth, h),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.18,
-		Parent = hud,
+		Parent = bars,
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Stroke, 1, 0.5) })
 	-- the badge
 	local badge = new("Frame", {
@@ -952,10 +1010,11 @@ local function buildCashTab()
 	local width = if UI.isTouch then 160 else 240
 	local height = if UI.isTouch then 32 else 46
 	-- the pill extends below the screen edge so only its top corners round
+	-- (19 Nov) phones: small, top right (Roblox's top bar has nothing there), the minimap under it
 	local tab = new("Frame", {
 		Name = "Cash",
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, 14),
+		AnchorPoint = if UI.isTouch then Vector2.new(1, 0) else Vector2.new(0.5, 1),
+		Position = if UI.isTouch then UDim2.new(1, -14, 0, -14) else UDim2.new(0.5, 0, 1, 14),
 		Size = UDim2.fromOffset(width, height + 14),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.12,
@@ -1139,20 +1198,20 @@ end
 local claimDaily: () -> ()
 
 local function buildSideButtons()
-	local size = if UI.isTouch then 48 else 64
+	local size = if UI.isTouch then 40 else 64
 	-- (2026-11-04) on a phone seven in one column ran off the top (MENU under Roblox's own icon) and
-	-- down under the steering buttons: three across, under Roblox's top bar, above the steering
+	-- down under the steering buttons. (19 Nov, owner's Driving Empire reference) a slim column at the
+	-- far left again, under Roblox's top bar and above the steering: 40 px icons, five of them (the
+	-- car's DESPAWN is PUT AWAY in the phone's ••• car menu)
 	local column = new("Frame", {
 		Name = "SideButtons",
 		AnchorPoint = if UI.isTouch then Vector2.zero else Vector2.new(0, 0.5),
-		Position = if UI.isTouch then UDim2.fromOffset(14, 56) else UDim2.new(0, 20, 0.5, 0),
-		Size = if UI.isTouch then UDim2.fromOffset(size * 3 + 16, size * 3 + 16) else UDim2.fromOffset(size, size * 6 + 50),
+		Position = if UI.isTouch then UDim2.fromOffset(10, 52) else UDim2.new(0, 20, 0.5, 0),
+		Size = if UI.isTouch then UDim2.fromOffset(size, size * 5 + 16) else UDim2.fromOffset(size, size * 6 + 50),
 		BackgroundTransparency = 1,
 		Parent = hud,
 	}, {
-		if UI.isTouch
-			then new("UIGridLayout", { CellSize = UDim2.fromOffset(size, size), CellPadding = UDim2.fromOffset(8, 8), FillDirectionMaxCells = 3, SortOrder = Enum.SortOrder.LayoutOrder })
-			else new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder }),
+		new("UIListLayout", { Padding = UDim.new(0, if UI.isTouch then 4 else 10), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
 	local function sideButton(kind: string, caption: string, order: number): TextButton
 		local b: TextButton = new("TextButton", {
@@ -1200,6 +1259,7 @@ local function buildSideButtons()
 	end)
 	-- owner (2026-10-23): "add a function to despawn car"
 	local despawnBtn = sideButton("despawn", "DESPAWN", 6)
+	despawnBtn.Visible = not UI.isTouch
 	despawnBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onDespawnButton then
@@ -2589,8 +2649,24 @@ end
 -- mph, speed fraction of top speed (unused), gear ("N", "R", "1".."7"), rpm 0..1 (1 = the car's
 -- redline), launch control held, manual gearbox
 local manualBox = false
-function UI.setSpeed(mph: number, _frac: number, gear: string, rpm: number, launch: boolean?, manual: boolean?)
+local touchMoving = false
+local pillFade = function(_moving: boolean) end -- (set with the pills, below)
+function UI.setSpeed(mph: number, frac: number, gear: string, rpm: number, launch: boolean?, manual: boolean?)
 	HudSpeedo.update(mph, gear, rpm, speedKmh, if manual ~= nil then manual else manualBox, launch == true)
+	if touchReadout then
+		touchReadout(if speedKmh then mph * 1.609 else mph, frac, gear)
+		-- (19 Nov) on a phone the level and job bars go while you drive (back when you stop) and
+		-- the GET OUT pill fades, so the road stays clear
+		local moving = math.abs(mph) > (if touchMoving then 4 else 8)
+		if moving ~= touchMoving then
+			touchMoving = moving
+			local bars = hud:FindFirstChild("TopBars")
+			if bars then
+				(bars :: Frame).Visible = not moving
+			end
+			pillFade(moving)
+		end
+	end
 end
 
 -- the car's own rev scale (CarStats.redline, x1000 rpm), when a car is attached
@@ -2664,6 +2740,11 @@ function UI.setFuel(share: number?, electric: boolean?)
 	end
 ;
 	(fuelBack :: Frame).Visible = share ~= nil
+	if touchFuel then
+		touchFuel.Visible = share ~= nil
+		touchFuel.Size = UDim2.new(math.clamp(share or 0, 0, 1), -16 * math.clamp(share or 0, 0, 1), 0, 2)
+		touchFuel.BackgroundColor3 = if share and share <= Config.Fuel.Low then Theme.Warning else Color3.fromRGB(70, 230, 110)
+	end
 	if not share then
 		if lowFuelLamp then
 			lowFuelLamp.Visible = false
@@ -2732,7 +2813,8 @@ local speedoOnFoot, speedoInterior = false, false
 local function speedoVisible()
 	local speedo = hud and hud:FindFirstChild("Speedometer")
 	if speedo and speedo:IsA("GuiObject") then
-		speedo.Visible = not speedoOnFoot and not speedoInterior
+		-- (19 Nov) phones: no dial over the road, the speed box over BRAKE shows the speed
+		speedo.Visible = not speedoOnFoot and not speedoInterior and not UI.isTouch
 	end
 end
 function UI.setOnFoot(onFoot: boolean)
@@ -2757,6 +2839,12 @@ UI.showShiftPaddles = function(_on: boolean) end -- (set when the touch controls
 UI.showDoorsButton = nil :: ((boolean) -> ())?
 type Pill = { b: TextButton, key: TextLabel, text: TextLabel }
 local actionPill: Pill? = nil
+pillFade = function(moving: boolean)
+	if actionPill then
+		actionPill.b.BackgroundTransparency = if moving then 0.6 else 0.15
+		actionPill.text.TextTransparency = if moving then 0.5 else 0
+	end
+end
 local towPill: Pill? = nil
 local function makePill(name: string, liftY: number, leftX: number, tap: () -> ()): Pill
 	do
@@ -2764,14 +2852,15 @@ local function makePill(name: string, liftY: number, leftX: number, tap: () -> (
 			Name = name,
 			AutoButtonColor = false,
 			Text = "",
-			AnchorPoint = Vector2.new(1, 1),
-			-- (19 Nov) phones: over the BRAKE column, under the minimap (buildTouchControls' Pills)
+			AnchorPoint = if UI.isTouch then Vector2.new(0.5, 1) else Vector2.new(1, 1),
+			-- (19 Nov) phones: bottom middle over CAM / LIGHTS / RADIO / ••• (buildTouchControls), the
+			-- trailer's pill above it
 			-- (owner, 2026-11-03: "move the Get out button, it's in the way") a slim pill on the right,
 			-- above the speedometer and its warning lights, under the minimap's cards; on phones above
 			-- the steering buttons on the right, clear of the speedometer in the middle. (2026-11-04) PC:
 			-- 28 higher, over the car strip (class badge + car level) that sits above the analogue dial
-			Position = if UI.isTouch then UDim2.new(0, 136 - leftX, 1, -152) else UDim2.new(1, -24, 1, -24 - 224 - 34 - 28 - liftY),
-			Size = UDim2.fromOffset(if UI.isTouch then 132 else 168, if UI.isTouch then 36 else 40),
+			Position = if UI.isTouch then UDim2.new(0.5, 0, 0, 40 - liftY) else UDim2.new(1, -24, 1, -24 - 224 - 34 - 28 - liftY),
+			Size = UDim2.fromOffset(if UI.isTouch then 150 else 168, if UI.isTouch then 40 else 40),
 			BackgroundColor3 = Theme.Panel,
 			BackgroundTransparency = 0.15,
 			Visible = false,
