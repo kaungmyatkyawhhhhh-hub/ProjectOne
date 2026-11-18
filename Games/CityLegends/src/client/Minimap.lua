@@ -66,7 +66,7 @@ local N = C.Blocks
 local HR = C.RoadWidth / 2
 local HW = C.HighwayWidth / 2
 
-local isTouch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local isTouch = (UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled) or (RunService:IsStudio() and workspace:GetAttribute("PreviewPhone") == true)
 
 -- colours: a dark night map with light roads (like the HUD)
 local COL = {
@@ -704,9 +704,13 @@ function Minimap.start()
 	local function layout()
 		local cam = workspace.CurrentCamera
 		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)
+		if RunService:IsStudio() and workspace:GetAttribute("PreviewPhone") then
+			vp = Vector2.new(812, 375) -- (the phone preview, tools/mobile/phone_preview.luau)
+		end
 		local size, right
 		if isTouch then
-			size = math.clamp(vp.Y * 0.3, 90, 130)
+			-- (19 Nov, owner: "cant see anything while driving") a little smaller on phones
+			size = math.clamp(vp.Y * 0.26, 90, 130)
 			right = 14
 		else
 			size = math.clamp(vp.Y * 0.26, 130, 220)

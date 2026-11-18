@@ -528,32 +528,9 @@ local function nitroHud(): (ScreenGui, Frame)
 	label.TextXAlignment = Enum.TextXAlignment.Right
 	label.TextColor3 = Color3.fromRGB(150, 200, 255)
 	label.Parent = back
-	if UI.isTouch then
-		local b = Instance.new("TextButton")
-		b.Name = "NitroButton"
-		b.AnchorPoint = Vector2.new(1, 1)
-		b.Position = UDim2.new(1, -24, 1, -252)
-		b.Size = UDim2.fromOffset(64, 64)
-		b.BackgroundColor3 = Color3.fromRGB(30, 70, 160)
-		b.BackgroundTransparency = 0.15
-		b.Font = Enum.Font.GothamBlack
-		b.Text = "N2O"
-		b.TextSize = 16
-		b.TextColor3 = Color3.new(1, 1, 1)
-		b.Parent = gui
-		local bc = Instance.new("UICorner")
-		bc.CornerRadius = UDim.new(1, 0)
-		bc.Parent = b
-		b.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-				nitroTouch = true
-			end
-		end)
-		b.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-				nitroTouch = false
-			end
-		end)
+	-- (19 Nov) the phone's N2O button is in the touch layout now (UI.buildTouchControls), over GAS
+	UI.onNitroTouch = function(on: boolean)
+		nitroTouch = on
 	end
 	nitroGui, nitroFill = gui, fill
 	return gui, fill
@@ -931,6 +908,7 @@ function Driving.detach()
 	if nitroGui then
 		nitroGui.Enabled = false
 	end
+	UI.showNitroButton(false)
 	nitroTouch = false
 	UI.startPrompt(false)
 	UI.setSpeedLines(0)
@@ -2679,6 +2657,7 @@ function Driving.attach(model: Model)
 		if nitroGui then
 			nitroGui.Enabled = s.nitroOn or DFeel.NitroEnabled
 		end
+		UI.showNitroButton(s.nitroOn or DFeel.NitroEnabled)
 		-- a swapped engine sounds like its layout, and revs to its own limit
 		UI.setSpeedoCar(CarStats.redlineOf(id, parts), spec.Electric == true)
 		local layout = if tune.engine then tune.engine.layout else nil
@@ -4622,25 +4601,32 @@ function Driving.init()
 
 	RunService.Heartbeat:Connect(updateOthers)
 
-	UserInputService.InputBegan:Connect(function(input, processed)
-		if processed or not state or UI.modalOpen then
+	-- a driving key, from the keyboard or the phone's buttons (UI.onCarKey: the touch layout's car menu)
+	local function driveKey(key: Enum.KeyCode)
+		if not state or UI.modalOpen then
 			return
 		end
-		if input.KeyCode == Enum.KeyCode.V then
+		if key == Enum.KeyCode.V then
 			if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
 				Driving.toggleCamera()
 			else
 				Driving.toggleFirstPerson()
 			end
-		elseif input.KeyCode == Enum.KeyCode.ButtonY then
+		elseif key == Enum.KeyCode.ButtonY then
 			Driving.toggleCamera()
-		elseif input.KeyCode == Enum.KeyCode.R then
+		elseif key == Enum.KeyCode.R then
 			-- the radio's next station (Driving Empire's R)
 			UI.toast("Radio: " .. Audio.nextStation())
-		elseif input.KeyCode == Enum.KeyCode.Backspace or input.KeyCode == Enum.KeyCode.ButtonSelect then
+		elseif key == Enum.KeyCode.Backspace or key == Enum.KeyCode.ButtonSelect then
 			Driving.reset()
 		elseif Driving.inputEnabled and not UI.isGarageOpen() then
-			carKey(state, input.KeyCode)
+			carKey(state, key)
+		end
+	end
+	UI.onCarKey = driveKey
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if not processed then
+			driveKey(input.KeyCode)
 		end
 	end)
 	UserInputService.InputEnded:Connect(function(input)

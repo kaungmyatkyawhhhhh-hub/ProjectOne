@@ -132,7 +132,7 @@ local function buildDial()
 	table.clear(aRed)
 	local D = analogue.AbsoluteSize.X
 	if D < 10 then
-		D = if isTouch then 170 else 224
+		D = if isTouch then 120 else 224
 	end
 	local R = D / 2 - 8
 	local redFrac = redline / dialMax
@@ -433,13 +433,13 @@ end
 
 function HudSpeedo.build(parent: Instance, touch: boolean): Frame
 	isTouch = touch
-	local D = if touch then 170 else 224
-	local W, H = if touch then 236 else 300, if touch then 92 else 116
+	local D = if touch then 120 else 224
+	local W, H = if touch then 172 else 300, if touch then 66 else 116
 	holder = new("Frame", {
 		Name = "Speedometer",
 		AnchorPoint = if touch then Vector2.new(0.5, 1) else Vector2.new(1, 1),
 		-- (on phones bottom-middle, between the pedals and the steering buttons, above the cash tab)
-		Position = if touch then UDim2.new(0.5, 0, 1, -48) else UDim2.new(1, -24, 1, -24),
+		Position = if touch then UDim2.new(0.5, 0, 1, -38) else UDim2.new(1, -24, 1, -24),
 		Size = UDim2.fromOffset(D, D),
 		BackgroundTransparency = 1,
 		Parent = parent,
