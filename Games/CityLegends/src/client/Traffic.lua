@@ -747,15 +747,34 @@ end
 -- pick where to be sideways (overtake, weave, split) a few times a second, slide there, take the new lane over
 local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 	local seg = npc.seg
-	local remaining = seg.length - npc.s
-	-- junctions and roundabouts as everyone else: back in a lane's middle before the end of the piece
-	local settle = seg.kind == "turn" or remaining < 30 + npc.speed * 0.9 or besideMap == nil
+	-- junctions and roundabouts as everyone else: back in a lane's middle before the next junction (a turn piece
+	-- or a light ahead; the 1:1 lanes come in short pieces, so the end of this piece is no junction)
+	local toJunction = seg.length - npc.s
+	local need = 30 + npc.speed * 0.9
+	if seg.kind ~= "turn" and not seg.signal then
+		local q, i = npc.nextSeg, 0
+		while q and q.kind ~= "turn" and toJunction < need and i < 12 do
+			i += 1
+			if q.signal then
+				toJunction += q.length
+				break
+			end
+			toJunction += q.length
+			q = planNext(npc, i, q)
+		end
+	end
+	local settle = seg.kind == "turn" or toJunction < need or besideMap == nil
 	npc.sideT -= dt
+	if npc.sideT <= 0 then
+		npc.model:SetAttribute("RacerSpeed", math.floor(npc.speed / Config.mphToSps(1)))
+	end
 	if settle then
 		npc.offTo = 0
+		if npc.sideT <= 0 then
+			npc.sideT = 0.2
+		end
 	elseif npc.sideT <= 0 then
 		npc.sideT = 0.2
-		npc.model:SetAttribute("RacerSpeed", math.floor(npc.speed / Config.mphToSps(1)))
 		local reach = math.max(T.LookAhead, npc.speed * RACER.LookAheadS)
 		local here = stripGap(npc, npc.off, obstacles, reach)
 		if here < npc.speed * 1.6 + 20 then
