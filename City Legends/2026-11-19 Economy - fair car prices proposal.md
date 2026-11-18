@@ -1,13 +1,13 @@
 ---
 tags: [city-legends, economy, cars, proposal]
 created: 2026-11-19
-status: proposal - nothing changed in the game
+status: applied 19 Nov 2026 (see [[2026-11-19 Economy applied]])
 ---
 # City Legends: fair car prices from real earnings (proposal, 19 Nov 2026)
 
 > Owner, 19 Nov: "we can fix the economy if we want because try to calculate a fair price for the vehicles with the job earnings".
 > Owner reminder, same day: import cars can't be bought at the dealership (the rule from [[2026-11-17 Car economy and Skyfreight crate design]]).
-> **Nothing in the game is changed.** `Cars.lua` and Studio stay untouched until the owner approves.
+> **APPLIED 19 Nov 2026** (owner approved): see [[2026-11-19 Economy applied]].
 
 Model: `Games/CityLegends/tools/economy/model.py`. Run `python tools/economy/model.py --md out.md --chart out.png` from `Games/CityLegends`. It reads the real numbers from `Cars.lua`, `CarStats.lua`, `Config.lua` and `YangonWorld.lua`. It ports the PI, the trims, the job pay sums and the "Harder cash" multipliers, and it checks its PI against the 3 Nov PI table. Builds on [[2026-11-18 Monetization and economy - plan]], [[2026-11-18 Jobs - ranks and paychecks]] and [[K04 Monetization and economy]].
 
