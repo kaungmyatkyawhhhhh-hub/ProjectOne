@@ -176,7 +176,6 @@
   "pbox_clip": "roads05_pbox_clip.py RB7 re-run on the bake's collide: 1011 P rows -> 970 pieces swapped in Studio (old in RB_OldP7.PBoxes)",
   "terrain_scan": "MapBugScan copy (AREAS = 1536 x19..23 z21..26): 80 R boxes with terrain over carved; nearDecks applied (2347 stray voxel entries near Kabar Aye / Arzani decks)",
   "kit_walls": "Studio's YangonKitData was the OLD 14306-char decoder (no compact FORMAT=2: Data_P7 detail would not build!) -> synced to git 33827/69121963 (asset 115556805610024; old copy RB_OldP7.YangonKitData_old14306). Wall records on R in Data_P7 (expanded compact): 18 removed in 16 tiles (stored expanded), 0 left",
-  "saved": "v1476 after verge/pbox/terrain; then kit walls + KD saved (save timed out -> NotNeeded)",
-  "STORE": "!! PlayerData store switched to CityLegends_test for the P7 Play test (19 Nov ~02:40). If this run is cut: put it back to CityLegends_v1 first."
+  "saved": "v1476 after verge/pbox/terrain; then kit walls + KD saved (save timed out -> NotNeeded)"
  }
 }
