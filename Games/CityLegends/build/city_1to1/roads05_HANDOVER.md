@@ -48,14 +48,16 @@ State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp
   unchanged, attribute OldThick = 1), version 1423. Old-road backup deleted, saved 1424.
 - **Shots:** vault `City Legends/2026-11-18 rebuild P3 - <Sule roundabout | Bogyoke x Sule Pagoda | Strand Road> - <before|after>.jpg`
   (before = the old cells swapped back in for the shot only, then out again).
-- **Verge:** `RoadVerge05` run + trim per 3072 tile over the P3, P1, P2 boxes (37 tiles, driver `_G.VDRIVE`, log `_G.VLOG`); see
-  the json "verge" for where it got to.
+- **Verge (done, saved 1434):** `RoadVerge05` run + trim per 3072 tile over P3, P1, P2 (37 tiles, ~1.5 min each): 414k cells
+  filled, 790k carved. Edge check (68,640 points 0.5 in from every P box edge): 123 still have terrain over the pavement (0.18%), mostly
+  the builder's asphalt / rock road-bed terrain poking through junction meshes (worst +1.36 at (35682, 24.6, 45097), Sule ring west
+  arm; 1536 cells 23x29, 20x29, 23x28), not grass. Next: carve terrain over R and P boxes at those junctions.
 - **Kit data sync:** the place's Data_P1/P2/P3, P1G/P2G/P3G, P1S, P1P, P2P (all tiles, zstd+base64, 74 slices) written into
   `imports/sync/ygn1to1_p1|p2|p3/ygnkit_*.rbxmx`, `ygn1to1_green/green_p1|p2|p3.rbxmx`, `ygn1to1_street/ygnstreet_p1.rbxmx`,
   `places_P1|P2/ygnplaces_*.rbxmx` (old files kept as `*.before_18nov`; whole JSON in `build/city_1to1/kit_place_P123/`). Each file
   verified tile by tile against Studio's hashes. Data_P1 / P2 / P2G in the repo were stale before the filter (nearly every tile
   differed). A regenerate (buildings_1to1 / green_1to1 / street_1to1 / places_1to1) still reads the OLD roads: re-run KF / KW after.
-- **Open:** the Sule Pagoda Road junction box hole; P4+ districts; CollisionFidelity on road meshes (Default, harmless).
+- **Open:** terrain road bed through P3 junction meshes (above); the Sule Pagoda Road junction box hole; P4+ districts; CollisionFidelity on road meshes (Default, harmless).
 
 ## REBUILD progress 2 (18 Nov evening, ROAD REBUILD agent 2): P3 built, 12/15 cells exported; YCC ramps + P1/P2 props done
 State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp", "verge", "lane_gaps").
