@@ -51,6 +51,8 @@ def fmt(kind, c, R, U, S):
 class Cover:
     def __init__(self, parts):
         self.polys, self.tops = footprints(parts, VIS)
+        # bridge pieces (deck walls, girders, piers) count only as a walkway level with the box top (+-1)
+        self.bridge = np.array([k == 'B' for k, *_ in parts if k in VIS])
         self.tree = STRtree(self.polys)
 
     def covered(self, pts):
@@ -59,6 +61,7 @@ class Cover:
         a, b = self.tree.query(g, predicate='intersects')
         # (wide on purpose: a built piece 6 under to 3 over still keeps the box; only bare asphalt / ground loses it)
         ok = (self.tops[b] > pts[a, 1] - 6.0) & (self.tops[b] < pts[a, 1] + 3.0)
+        ok &= ~self.bridge[b] | (np.abs(self.tops[b] - pts[a, 1]) < 1.0)
         cov[a[ok]] = True
         return cov
 
