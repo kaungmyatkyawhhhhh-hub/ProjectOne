@@ -196,6 +196,8 @@
   "packs": "place 112634691968549 133835486464710 132541429421726 124971106822088; night cells_1.glb (23 MB) split -> cells_1_a 109064376622785, cells_1_b 74148654220601",
   "lanes_ready": "roads05_lanesubset L12347 (P1 P2 P3 P4 P7): 923 lanes, 2100 links, 0 dead ends (build dir only, NOT installed)",
   "district_moved": "DONE v1499: DistrictPlace P4 load 4 packs, night 37 cells, terrain 1554 tiles, green paint 1371 tiles + far 3932 parts (Far_keep merge: 51 moved 10 merged, 0 dups), Data_P4 1150 tiles (451 kit ids, 0 missing) + Data_P4G 1348, shells 14113 + roof parts 7259, 4 pagodas re-placed (old 4 in ServerStorage.RB_OldP4.Temps until Play test). Packs removed (cleanup 33).",
-  "next": "road build job (_G.RB4, 18 step boxes) -> grab slices -> bake -> upload -> swap"
+  "next": "roads05_bake.py RB4 collect -> R05_ONLY=1536 x14..18 z11..21 bake -> upload glbs + collide (NEW assets) -> swap",
+  "exported": "all 18 step boxes (7x5..9x10) -> roads05_RB4/pages, page counts match (first slice file mcp-Roblox_Studio-execute_luau-1795037967459.txt); 9x9 log: MOUTH FAILED Lane #1255 on Lane #7606 (edge never meets); terrain beds written; _G freed; saved v1510",
+  "studio_memory": "Studio restart needed: 16.8 GB after the P4 road build (19 Nov 04:5x)"
  }
 }
