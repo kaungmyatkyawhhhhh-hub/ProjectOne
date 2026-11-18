@@ -1,3 +1,49 @@
+# roads05 handover (18 Nov 2026, thirty-third pass: J37, BUILDER agent; YangonRoads.kerbSeal + Studio 17 spots)
+
+## REBUILD (owner decision 18 Nov: the game road rebuild starts right after J37, whatever the counts)
+- **Build from:** the commit "City Legends roads05 J37" on master (`git log --grep "roads05 J37"`), data
+  `build/city_1to1/roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12/roads.json` md5 c34a1111..., `paint.json` md5 b6c2ba15...
+  (J35 data, unchanged since; pipeline re-run J37 = same md5s, logs `J37_*.log`). Builder: `tools/yangon/YangonRoads.luau`
+  179,431 chars (Studio checksum 1843759058), `tools/yangon/YangonRoadsChecks.luau` 27,754 (1841289662), `tools/riviera/Roads.luau`
+  55,521 (1407280218). Studio's main place ClaudeTools holds exactly these (saved version 1384).
+- **Pack:** test asset 133014134133489 (`roads05_studiotest.py` -> `imports/sync/roads05_studiotest.rbxmx` -> Open Cloud PATCH,
+  `model/x-rbxm`; `LoadAsset`, `T.install(m)`); rev 208 = J37 builder. The game build uses the full net / subset modules
+  (`roads05_subset.py <net> <sub> <districts>`, `pack_tools.py` -> same asset id -> `YangonSync`); check the printed checksums.
+- **200k limit:** Studio refuses a Source over 200,000 chars. YangonRoads is 179,431 (about 20k left); the checks / stepCell
+  live in `YangonRoadsChecks` (a ModuleScript in ClaudeTools that YangonRoads' last line requires with its file locals): ship and
+  install BOTH (`T.install` moves it; `pack_tools.py` packs it). Next split candidate: buildIslands or buildCorners.
+- **Kerb raise caveat (J36 scrub) and the seal (J37):** both probe only the parts in the build root (`M.folder()` = the cell's
+  root in stepCell). A kerb next to another cell's asphalt is not raised / sealed when that asphalt is not built in this cell:
+  stepCell builds every road within 140 of the box, so inside the box this holds; the bake must clip each cell to its box
+  (it does: roads05_bake.py clips to the subset's boxes) so the margins (unsealed) are never kept. kerbSeal runs ~10-40 s a cell.
+- **Steps (from the 16 Nov rebuild, vault `City Legends/2026-11-16 Yangon rescale plan - 1 to 1 at player scale.md` "Roads05
+  step 2" and "Not done yet"):** per 3072 cell `YangonRoads.stepCell(box, root)` (no-terrain copy for tests only; the real build
+  writes terrain) -> `RoadBake05.collect` -> `@Q` pages (kept in `ServerStorage.R05Pages`) -> wipe the cell; offline
+  `roads05_bake.py <tag> collect <pages>` then `bake` (scrap filters: drop_scraps, paint_steep) -> glbs (<= 1536-stud cells) +
+  `Collide05_*` pages -> Open Cloud upload -> swap `Workspace.Yangon1to1.Roads.Meshes.Cell_*` and `Roads.Collide` (collision boxes
+  carry attribute `RoadBox` "R" carriageway / "P" pavement: EntranceRamp and the pavement tools read it) -> delete data modules ->
+  save; lanes `roads05_lanes.py <tag> --install` (one-way directions changed since the last lanes); then checkMouths, LaneCheck,
+  flicker check, drive test, after shots.
+- **Known look faults the rebuild will carry (J37 counts 14 / 84 / 36 / 77 / 0 / 94, arrow_missing 10):** open road edges
+  (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
+  pavement steps between roads, the univ_kabaraye side-lane road steps.
+
+## J37 -- built-surface totals, T.qa, J36 -> J37, 17 spots: 16 / 161 / 36 / 77 / 0 (pave_gap 95) -> 14 / 84 / 36 / 77 / 0 (pave_gap 94)
+Note + table + shot: vault `City Legends/2026-11-18 roads05 J37 studio check.md`. No data change. Nothing rose at any spot.
+- **Kept (`YangonRoads.kerbSeal`, after scrub in stepCell and step5):** every Pavement part's top triangle / face is read back
+  (WedgePart: the side face whose normal points up; flat Part: its top), each edge walked every 0.4: lower asphalt (Road or Paint,
+  0.15+ under) 0.2 outside -> a kerb along the run (0.9 out, less where anything starts first; back over the pavement to an own
+  kerb within 1.5); nothing 0.2 outside but lower asphalt within 2 -> the slot is filled (kerb edge: kerb runs on; pavement edge:
+  pavement runs on + a kerb). Kerb top = max(pavement + 0.1, asphalt + CURB_UP + 0.1). Runs re-probed just before laying.
+- **Tried + changed:** v1 without the asphalt floor: buried 0 -> 3 (pyay_univ Lane #588, univ_kabaraye); v1 had no slot fill.
+- **Not reached (in order):** road edge next to nothing (seal from Road edges like endKerbs, but only where the road has a walk);
+  deck foot vs pavement (0.13 apart, under the 0.15 threshold); pave_step 77 (idea: a weld pass, smaller road's pavement + kerb
+  vertices moved by a field dh * (1 - d / 8) from each contact with a bigger road's pavement, clamped so the pavement stays 0.2+
+  over its own asphalt; same-road steps Lane #588 / Maha Bandula #2 / Lane #4239 need their own look); pave_gap fill rule; road_step
+  (pyay_univ Hledan #3 / Pyay #9 joint, univ_kabaraye Lane #1256 / #1257); box_hole 14; arrow_missing 10 (paint QA: chain dashes).
+- **Kit (Studio _G, lost on restart):** as J36 (`_G.P`, `_G.RL`, `_G.GO`, `_G.ST`, `_G.FX`); the pack must be installed first
+  (`T.clean` removes the data modules: LoadAsset + `T.install` again).
+
 # roads05 handover (18 Nov 2026, thirty-second pass: J36, BUILDER agent; YangonRoads.scrub kerb lifts + Studio 17 spots)
 
 ## J36 -- built-surface totals, T.qa (QA's kerbBetween check, asset rev 206), J35 -> J36, 17 spots: 16 / 161 / 36 / 77 / 9 (pave_gap 95) -> 16 / 161 / 36 / 77 / 0 (pave_gap 95)

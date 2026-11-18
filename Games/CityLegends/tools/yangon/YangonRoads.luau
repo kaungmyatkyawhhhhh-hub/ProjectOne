@@ -3699,6 +3699,174 @@ function M.scrub(remove: boolean)
 	return string.format("scrub: %d kerb / pavement pieces, %d on another road's carriageway or stray on asphalt%s%s", n, found, if remove then " (moved to ServerStorage.YangonScraps)" else "", if #t > 0 then ": " .. table.concat(t, "; ") else "")
 end
 
+-- (J37) kerb seal, after scrub: every pavement edge that meets lower asphalt (kerb stopped short at a corner, nose or
+-- mouth; pavement past its own kerb) gets a kerb along it: from the edge out over the asphalt (0.9, less where
+-- something else starts first), and back over the pavement to an own kerb within 1.5 (covers the overhang).
+-- Laid one run at a time and probed again just before, so no two new kerbs lie on each other. An open slot (nothing,
+-- then lower asphalt within 2) past a kerb's or a pavement's edge is closed: past a kerb the kerb runs on to the
+-- asphalt; past a pavement the pavement does, with a kerb on its new edge.
+function M.kerbSeal()
+	local root = M.folder()
+	local P = RaycastParams.new()
+	P.FilterType = Enum.RaycastFilterType.Include
+	P.FilterDescendantsInstances = { root }
+	local function top(p: Vector3)
+		return workspace:Raycast(Vector3.new(p.X, p.Y + 3, p.Z), Vector3.new(0, -6, 0), P)
+	end
+	local function low(p: Vector3, y: number)
+		local h = top(p)
+		return h ~= nil and (h.Instance.Name == "Road" or h.Instance.Name == "Paint") and h.Position.Y < y - 0.15
+	end
+	local polys = {}
+	for _, d in root:GetDescendants() do
+		if (d.Name ~= "Pavement" and d.Name ~= "Kerb") or not d:IsA("BasePart") then
+			continue
+		end
+		local cf, s = d.CFrame, d.Size
+		if d:IsA("WedgePart") then
+			local x = (if cf.RightVector.Y >= 0 then 1 else -1) * s.X / 2
+			table.insert(polys, { d, cf:PointToWorldSpace(Vector3.new(x, -s.Y / 2, -s.Z / 2)), cf:PointToWorldSpace(Vector3.new(x, -s.Y / 2, s.Z / 2)), cf:PointToWorldSpace(Vector3.new(x, s.Y / 2, s.Z / 2)) })
+		elseif cf.UpVector.Y > 0.99 then
+			local h = s.Y / 2
+			table.insert(polys, { d, cf:PointToWorldSpace(Vector3.new(-s.X / 2, h, -s.Z / 2)), cf:PointToWorldSpace(Vector3.new(s.X / 2, h, -s.Z / 2)), cf:PointToWorldSpace(Vector3.new(s.X / 2, h, s.Z / 2)), cf:PointToWorldSpace(Vector3.new(-s.X / 2, h, s.Z / 2)) })
+		end
+	end
+	local runs = {}
+	for k, pl in polys do
+		if k % 500 == 0 then
+			task.wait()
+		end
+		local nv = #pl - 1
+		local cen = Vector3.zero
+		for i = 2, #pl do
+			cen += pl[i] / nv
+		end
+		for e = 1, nv do
+			local a, b = pl[e + 1], pl[e % nv + 2]
+			local ab = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+			local L = ab.Magnitude
+			if L < 0.3 then
+				continue
+			end
+			local n = Vector3.new(ab.Z / L, 0, -ab.X / L)
+			if n:Dot(Vector3.new(cen.X - a.X, 0, cen.Z - a.Z)) > 0 then
+				n = -n
+			end
+			local kerb = pl[1].Name == "Kerb"
+			local function gap(t: number)
+				local p = a:Lerp(b, t / L)
+				local h = top(p + n * 0.2)
+				if h then
+					return not kerb and (h.Instance.Name == "Road" or h.Instance.Name == "Paint") and h.Position.Y < p.Y - 0.15
+				end
+				for d = 0.4, 2, 0.2 do
+					h = top(p + n * d)
+					if h then
+						return (h.Instance.Name == "Road" or h.Instance.Name == "Paint") and h.Position.Y < p.Y - 0.15
+					end
+				end
+				return false
+			end
+			local ns = math.max(1, math.floor(L / 0.4))
+			local t0 = nil
+			local function close(t1: number)
+				while t0 - 0.05 > 0 and gap(t0 - 0.05) do
+					t0 -= 0.05
+				end
+				while t1 + 0.05 < L and gap(t1 + 0.05) do
+					t1 += 0.05
+				end
+				if t1 - t0 > 0.08 then
+					table.insert(runs, { pl[1], a:Lerp(b, t0 / L), a:Lerp(b, t1 / L), n })
+				end
+				t0 = nil
+			end
+			for i = 0, ns do
+				local t = (i + 0.5) * L / (ns + 1)
+				if gap(t) then
+					t0 = t0 or t
+				elseif t0 then
+					close((i - 0.5) * L / (ns + 1))
+				end
+			end
+			if t0 then
+				close((ns + 0.5) * L / (ns + 1))
+			end
+		end
+	end
+	local pal = M.palette
+	local kp: { [string]: any } = { Name = "Kerb", Material = pal.kerbMaterial, Color = pal.kerb, CastShadow = false }
+	local made, laid = 0, 0
+	for ri, r in runs do
+		if ri % 60 == 0 then
+			task.wait()
+		end
+		local w, a, b, n = r[1], r[2], r[3], r[4]
+		local mid = (a + b) / 2
+
+		if not top(mid + n * 0.2) then
+			-- a slot: where the asphalt starts at each end (0.05 steps), nothing else in between
+			local function start(p: Vector3)
+				for d = 0.25, 2.05, 0.05 do
+					local h = top(p + n * d)
+					if h then
+						return if (h.Instance.Name == "Road" or h.Instance.Name == "Paint") and h.Position.Y < p.Y - 0.15 then d else nil
+					end
+				end
+				return nil
+			end
+			local sa, sb = start(a), start(b)
+			if not sa or not sb then
+				continue
+			end
+			local fa, fb = a + n * sa, b + n * sb
+			local fill = if w.Name == "Kerb" then { Name = "Kerb", Material = pal.kerbMaterial, Color = w.Color, CastShadow = false } else { Name = "Pavement", Material = pal.paverMaterial, Color = w.Color, CastShadow = false }
+			for _, tr in { { a, b, fb }, { a, fb, fa } } do
+				if not M.Roads.sliver(tr[1], tr[2], tr[3]) then
+					made += M.Roads.triangle(tr[1], tr[2], tr[3], 6, fill, w.Parent)
+				end
+			end
+			laid += 1
+			if w.Name == "Kerb" then
+				continue
+			end
+			a, b, mid = fa, fb, (fa + fb) / 2
+		elseif w.Name == "Kerb" or not low(mid + n * 0.2, mid.Y) then
+			continue -- (an earlier run's kerb covers it)
+		end
+		local inn = 0
+		for d = 0.3, 1.5, 0.3 do
+			local h = top(mid - n * d)
+			if h and h.Instance.Name == "Kerb" then
+				inn = d
+				break
+			end
+		end
+		local out = 0.9
+		for d = 0.3, 0.9, 0.1 do
+			if not (low(a + n * d, a.Y) and low(mid + n * d, mid.Y) and low(b + n * d, b.Y)) then
+				out = d - 0.1
+				break
+			end
+		end
+		-- the kerb top: 0.1 over the pavement, and never under CURB_UP + 0.1 over the asphalt it stands on
+		local function lift(p: Vector3)
+			local h = top(p + n * 0.25)
+			return Vector3.new(0, math.max(0.1, (if h then h.Position.Y + M.CURB_UP + 0.1 - p.Y else 0.1)), 0)
+		end
+		local ua, ub = lift(a), lift(b)
+		local o0, o1, i0, i1 = a + n * out + ua, b + n * out + ub, a - n * inn + ua, b - n * inn + ub
+		kp.Color = if math.floor((mid.X + mid.Z) / 3.2) % 2 == 0 and pal.kerbBand then pal.kerbBand else pal.kerb
+		laid += 1
+		for _, tr in { { i0, i1, o1 }, { i0, o1, o0 } } do
+			if not M.Roads.sliver(tr[1], tr[2], tr[3]) then
+				made += M.Roads.triangle(tr[1], tr[2], tr[3], 6.04, kp, w.Parent)
+			end
+		end
+	end
+	return string.format("kerb seal: %d runs, %d laid, %d parts", #runs, laid, made)
+end
+
 -- every mouth: nothing of a kerb or pavement on the joining road's carriageway from its end to 3
 -- samples past where it leaves the bigger road (inside the ring only the ring's carriageway counts)
 function M.checkMouths()
@@ -3854,6 +4022,7 @@ function M.step5()
 	table.insert(log, M.buildBarriers())
 	table.insert(log, M.edgeFill(M.MAIN))
 	table.insert(log, M.scrub(true))
+	table.insert(log, M.kerbSeal())
 	return table.concat(log, "\n")
 end
 
