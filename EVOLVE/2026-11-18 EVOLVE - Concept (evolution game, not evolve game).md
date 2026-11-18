@@ -199,3 +199,32 @@ Owner: "Sea era by lane".
 - The world refreshes when either `StageNum` or `Path` changes.
 - **Play test:** Herpetocetus (whale, depth 28) sees the ocean. Lion at the same depth sees the land world.
 - **Not done:** whales still walk on the sea floor (no swimming).
+
+## Era props (v50, 18 Nov 2026)
+Owner: "Era props".
+
+EraWorld now scatters each era's own plants and landmarks, built from parts on the client:
+
+| Era | Props |
+|---|---|
+| Ancient Sea | Kelp (45), coral fans (25), anemones (25) |
+| First Forests | Giant clubmoss trees with forked tops (35), tree ferns (35), horsetail clumps (30) |
+| Age of Reptiles | Cycads (40), monkey-puzzle conifers (25), a smoking volcano outside the map edge |
+| Savanna | Acacias (30), termite mounds (20), grass tufts (50) |
+| Future | Glass domes (14), white pylons (20) |
+
+Today and the human eras get nothing new; the server's town already covers them.
+
+**How it works:**
+- Props are built only on that player's client, so other players never see them.
+- They have no collision, no touch and no query.
+- Each era is built the first time a player enters it, then shown or hidden.
+- The layout is the same every time (fixed seed).
+- Props sit on the ground using a terrain raycast; spots on water are skipped.
+
+**Play test:** all five eras screenshotted. Only one era's props are visible at a time. No errors. The volcano was smoothed from 6 steps to 12.
+
+**Known gaps:**
+- Terrain that hasn't streamed in yet makes a prop fall back to y = 1, so it can be buried inside a hill.
+- About 1,000 parts per era. Not checked on a phone.
+- No sway or animation.

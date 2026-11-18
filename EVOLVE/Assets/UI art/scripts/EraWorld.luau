@@ -164,9 +164,9 @@ local PROPS = {
 local LANDMARKS = { -- one big thing far out, so the era reads from anywhere
 	volcano = function(m)
 		local base = CFrame.new(40, 0, -360)
-		for k = 0, 5 do piece(m, Vector3.new(14, 150 - k * 22, 150 - k * 22), rgb(80 - k * 4, 70 - k * 4, 65 - k * 4), base * CFrame.new(0, 7 + k * 13, 0) * UP, CYL, Enum.Material.Slate) end
-		piece(m, Vector3.new(2, 30, 30), rgb(230, 90, 40), base * CFrame.new(0, 85, 0) * UP, CYL) -- no Neon: it blew out in testing
-		for k = 1, 4 do piece(m, Vector3.one * (16 + k * 6), rgb(120, 115, 110), base * CFrame.new(k * 6, 90 + k * 16, 0), BALL, nil, 0.35) end
+		for k = 0, 11 do piece(m, Vector3.new(8, 150 - k * 11, 150 - k * 11), rgb(80 - k * 2, 70 - k * 2, 65 - k * 2), base * CFrame.new(0, 4 + k * 6.5, 0) * UP, CYL, Enum.Material.Slate) end
+		piece(m, Vector3.new(2, 28, 28), rgb(230, 90, 40), base * CFrame.new(0, 76.5, 0) * UP, CYL) -- no Neon: it blew out in testing
+		for k = 1, 4 do piece(m, Vector3.one * (16 + k * 6), rgb(120, 115, 110), base * CFrame.new(k * 6, 80 + k * 16, 0), BALL, nil, 0.35) end
 	end,
 }
 local ERA_PROPS = { -- what each era scatters, and how many
