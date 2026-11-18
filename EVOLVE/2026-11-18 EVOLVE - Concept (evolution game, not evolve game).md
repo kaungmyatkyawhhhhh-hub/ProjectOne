@@ -48,3 +48,20 @@ Rules that make the hybrid work:
 2. One shared environment event (a cold snap) that tests one trait, decided on the server.
 3. Speciation from traits instead of Evo points; tree forks are chosen by which traits you carry.
 4. More events (drought, predator, oxygen spike, extinction), then cut the shop evolution item and goals.
+
+## Built 18 Nov 2026 (v41)
+- **Thick Skin** trait ("warm in cold") joined the mutation pool.
+- **Cold-birth selection:**
+  - A child born during a cold snap has a 35% chance the Thick Skin sibling is the one that lived ("Only the Thick Skin sibling lived!").
+  - Thick Skin is never lost during a snap.
+- **Cold snap, shared per server:**
+  - Every 5–8 minutes: "It's getting colder..." (20 s of warning, icy tint), then 30 s of cold.
+  - Players without Thick Skin move at 0.6x and get 0.5x orb DNA. Players with it get 2x orb DNA.
+  - Players new to the server are sheltered for 180 s.
+  - Everything is decided on the server; the client only shows the tint (ColorCorrection "ColdSnap", tint 150,195,255, saturation -0.6).
+  - Tested in Play: speed 16 → 9.6, the tint reads as cold, and the self-check passes.
+- **AFK (owner: "i want like some part of target audience to afk"):**
+  - An idle life (goal not done) still evolves 50% of the time.
+  - The client presses a virtual button on `player.Idled`, so the 20-minute kick never fires.
+  - Lives already loop on their own, so an AFK lineage keeps evolving slowly and active play is about 2x faster.
+- Backup: ServerStorage `Evolution_backup_before_coldsnap`.

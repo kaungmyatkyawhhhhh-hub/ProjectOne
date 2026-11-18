@@ -525,6 +525,27 @@ local function markMysteries()
 	end
 end
 player:GetAttributeChangedSignal("Index"):Connect(markMysteries)
+
+-- the cold snap (a server event everyone lives through): the world cools to icy blue, then warms back
+local function coldLook()
+	local left = (workspace:GetAttribute("ColdUntil") or 0) - workspace:GetServerTimeNow()
+	if left <= 0 then return end
+	local Lighting = game:GetService("Lighting")
+	local cc = Lighting:FindFirstChild("ColdSnap") or new("ColorCorrectionEffect", { Name = "ColdSnap" }, Lighting)
+	TweenService:Create(cc, TweenInfo.new(math.min(20, left)), { TintColor = Color3.fromRGB(150, 195, 255), Saturation = -0.6 }):Play()
+	task.delay(left, function()
+		TweenService:Create(cc, TweenInfo.new(3), { TintColor = Color3.new(1, 1, 1), Saturation = 0 }):Play()
+	end)
+end
+workspace:GetAttributeChangedSignal("ColdUntil"):Connect(coldLook)
+task.spawn(coldLook)
+
+-- owner: part of the audience AFKs. Lives keep looping on their own, so stop Roblox's 20-minute idle kick.
+player.Idled:Connect(function()
+	local vu = game:GetService("VirtualUser")
+	vu:CaptureController()
+	vu:ClickButton2(Vector2.zero)
+end)
 task.spawn(function() workspace:WaitForChild("Mysteries", 30) markMysteries() end)
 
 ---------------------------------------------------------------- World pill: everyone, on every server, grows one world together
@@ -710,6 +731,9 @@ local STYLES = {
 	{ find = "SECRET", priority = 10, color = Color3.fromRGB(255, 120, 220), hold = 4 },
 	{ find = "tribe", priority = 8, color = Color3.fromRGB(124, 255, 107), hold = 3.5 },
 	{ find = "LEAP!", priority = 9, color = Color3.fromRGB(255, 210, 63), hold = 3 },
+	{ find = "COLD SNAP", priority = 9, color = Color3.fromRGB(140, 220, 255), hold = 4 },
+	{ find = "colder", priority = 8, color = Color3.fromRGB(140, 220, 255), hold = 3.5 },
+	{ find = "sibling lived", priority = 8, color = Color3.fromRGB(140, 220, 255), hold = 4 },
 	{ find = "MYSTERY", priority = 9, color = Color3.fromRGB(200, 150, 255), hold = 4 },
 	{ find = "Too small", priority = 7, color = Color3.fromRGB(200, 150, 255), hold = 3 },
 	{ find = "camp", priority = 7, color = Color3.fromRGB(255, 170, 80), hold = 3.5 },
