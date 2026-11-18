@@ -28,6 +28,35 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## REBUILD progress 3 (18 Nov night, ROAD REBUILD agent 3): P3 SWAPPED, cleaned, Play-tested; verge P1-P3; kit data synced
+State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp", "verge", "kit_sync").
+- **Export:** 13x13 / 13x14 / 13x15 slices pulled from `_G.RB3` (34 / 29 / 22 pages): all 15 P3 cells on disk. `roads05_grab.py` now
+  reads several `@Z` slices per file, but a result over 100k is CUT (2 slices in one call lost the second): one slice per call.
+- **Bake:** `roads05_bake.py RB3 collect roads05_RB3/pages` (1,548,970 parts) + `R05_ONLY=<1536 x19..27 z26..31> bake` (21 min):
+  461 meshes, 44 glbs, 25,094 boxes (`roads05_RB3/bake_stats_P3.json`). Uploads: `roads05_RB3/upload_ids_P3.txt` (44 Models,
+  group 33151111; ops in `upload_ops_P3.txt`); collide = `roads05_pack_collide.py P3 RB3` (now takes the build tag) ->
+  `imports/sync/rebuild_P3_collide.rbxmx` -> asset 133014134133489 rev 215 (12 modules RColRB_P3_k).
+- **Swap (version 1419):** old 47 Cell_ + 18,323 boxes (box centre in 1536 x19..27 z26..31) out, new 51 Cell_ (461 meshes) +
+  25,094 boxes (RoadBox P/R/M/D/W) in, in one spawned task (~5 s). Trees: 140 Green.Far meshes (OKA/OKB_ot1) on new R boxes
+  removed; props: `_G.KF(Data_P3G)` 857 tree records, `_G.KW(Data_P3)` 752 wall records, 0 left (version 1420).
+- **Play test PASS** (store CityLegends_test -> v1, read back on the Server in Play): Bogyoke 449 studs through Sule Pagoda jn,
+  Strand 440, Sule Pagoda #2, Sule ring tangents: gap 1.8-2.1 on R boxes; 3 YCC ramps up onto the plate; 4 junction lane-gap points
+  driven (no drop; Sule Pagoda Road (36092, 43529) has a box hole under the car centre for one sample); 28/28 NPC moving; 53
+  EntranceRamps; 7/7 y1_ fast-travel spots on R boxes; no script errors. Lane check P3: 460 of 34,826 points without a box (1.3%,
+  was 6.6% on the old meshes). Test kit: client `TestEngine` + `TestCar` + `TestTeleport` (a client PivotTo is overwritten).
+- **YCC ramp "dark thing":** the 1-stud triangles' undersides hung beside the plate wall: all 12 thickened to 5 downward (top
+  unchanged, attribute OldThick = 1), version 1423. Old-road backup deleted, saved 1424.
+- **Shots:** vault `City Legends/2026-11-18 rebuild P3 - <Sule roundabout | Bogyoke x Sule Pagoda | Strand Road> - <before|after>.jpg`
+  (before = the old cells swapped back in for the shot only, then out again).
+- **Verge:** `RoadVerge05` run + trim per 3072 tile over the P3, P1, P2 boxes (37 tiles, driver `_G.VDRIVE`, log `_G.VLOG`); see
+  the json "verge" for where it got to.
+- **Kit data sync:** the place's Data_P1/P2/P3, P1G/P2G/P3G, P1S, P1P, P2P (all tiles, zstd+base64, 74 slices) written into
+  `imports/sync/ygn1to1_p1|p2|p3/ygnkit_*.rbxmx`, `ygn1to1_green/green_p1|p2|p3.rbxmx`, `ygn1to1_street/ygnstreet_p1.rbxmx`,
+  `places_P1|P2/ygnplaces_*.rbxmx` (old files kept as `*.before_18nov`; whole JSON in `build/city_1to1/kit_place_P123/`). Each file
+  verified tile by tile against Studio's hashes. Data_P1 / P2 / P2G in the repo were stale before the filter (nearly every tile
+  differed). A regenerate (buildings_1to1 / green_1to1 / street_1to1 / places_1to1) still reads the OLD roads: re-run KF / KW after.
+- **Open:** the Sule Pagoda Road junction box hole; P4+ districts; CollisionFidelity on road meshes (Default, harmless).
+
 ## REBUILD progress 2 (18 Nov evening, ROAD REBUILD agent 2): P3 built, 12/15 cells exported; YCC ramps + P1/P2 props done
 State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp", "verge", "lane_gaps").
 - **P3 data:** `roads05_subset.py P1_..._P12 RB3 P3` (clip = P3 box only: no P6-P8 roads in the game; 901 roads, 34 modules,
