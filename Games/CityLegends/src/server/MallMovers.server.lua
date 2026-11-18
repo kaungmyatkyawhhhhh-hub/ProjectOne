@@ -214,7 +214,7 @@ local function setup(model: Model)
 	for _, s in stopsF:GetChildren() do
 		local i = tonumber(s.Name:match("^Stop(%d+)$"))
 		if i then
-			L.stops[i] = { y = s.Position.Y, label = s:GetAttribute("Label") or tostring(i) }
+			L.stops[i] = { y = s.Position.Y - L.floor.Size.Y / 2, label = s:GetAttribute("Label") or tostring(i) } -- car pivot = floor centre
 			n = math.max(n, i)
 			local l, r = model:FindFirstChild("DoorL" .. i), model:FindFirstChild("DoorR" .. i)
 			if l and r then
