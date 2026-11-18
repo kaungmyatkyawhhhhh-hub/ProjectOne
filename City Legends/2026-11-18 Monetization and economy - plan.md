@@ -17,7 +17,7 @@ Builds on [[2026-11-17 Car economy and Skyfreight crate design]] and [[K04 Monet
 ## Blocker to settle first: car licences
 Many car models are **CC-BY-NC (non-commercial)** and most likely ripped from racing games (list in [[City Legends]]). Selling Robux while using them is a licence risk, and selling **those cars in Robux crates** is the worst case.
 - **Rule for the plan:** Robux crates and paid offers contain only cars whose licence allows it (our own or CC-BY), until the NC cars are replaced.
-- Owner decides: replace the NC models over time, or accept the risk.
+- **Owner decision (18 Nov): "the cars in the game are already good"**: keep the current cars, in crates too. The licence risk is accepted. If a takedown claim ever comes, swap that one model (the game works with any model).
 
 ## Phase 1: sell what is already built (laptop, about 1 day)
 1. **Make the passes and products on Roblox** (owner: Creator Hub, about 15 min) and put the ids in `Config.Menu.Store` + spin `productId`.
