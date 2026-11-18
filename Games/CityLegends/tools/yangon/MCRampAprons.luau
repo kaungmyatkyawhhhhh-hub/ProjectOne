@@ -109,7 +109,10 @@ function M.run(): string
 			local t0 = (e - r.top):Dot(r.axis)
 			local k = -t0 / inward:Dot(r.axis)
 			local p = e + inward * k
-			local q = workspace:Raycast(Vector3.new(p.X, 100, p.Z) + r.axis * 0.3, Vector3.new(0, -150, 0), pM)
+			-- (the floor's height from inside the walls: a corner past a wall would read the site's other boxes)
+			local s = math.clamp((p - r.top):Dot(nrm), -9, 9)
+			local f = r.top + nrm * s + r.axis * 0.3
+			local q = workspace:Raycast(Vector3.new(f.X, 100, f.Z), Vector3.new(0, -150, 0), pM)
 			assert(q, r.name .. ": no ramp floor")
 			return Vector3.new(p.X, q.Position.Y, p.Z)
 		end
