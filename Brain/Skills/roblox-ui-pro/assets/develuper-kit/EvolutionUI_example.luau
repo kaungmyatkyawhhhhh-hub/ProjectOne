@@ -617,7 +617,9 @@ refresh = function()
 	elseif not a.GoalDone and (a.GoalText or "") ~= "" then -- your child only evolves once this life's goal is done
 		evoText.Text = ('Goal: %s   <font color="#5CF2FF">%d/%d</font>'):format(a.GoalText, math.floor(a.GoalProg or 0), a.GoalNeed or 1)
 	else
-		evoText.Text = ('Next: %s   <font color="#5CF2FF">%d/%d</font>%s'):format(a.NextSpecies, a.Evo, a.NextAt,
+		-- owner: "need more curiosity in the evolution": a species you've never been stays a ??? until you become it
+		local seen = ("," .. (a.Index or "") .. ","):find(",S:" .. a.NextSpecies .. ",", 1, true)
+		evoText.Text = ('Next: %s   <font color="#5CF2FF">%d/%d</font>%s'):format(seen and a.NextSpecies or '<font color="#C896FF">???</font>', a.Evo, a.NextAt,
 			a.Trail and '  <font color="#7CFF6B">2x</font>' or "") -- catching up on the trail others blazed
 	end
 	dnaText.Text = Kit.abbrev(a.DNA or 0)
@@ -704,6 +706,7 @@ local STYLES = {
 	{ find = "path", priority = 9, color = GOLD, hold = 3 },
 	{ find = "SECRET", priority = 10, color = Color3.fromRGB(255, 120, 220), hold = 4 },
 	{ find = "tribe", priority = 8, color = Color3.fromRGB(124, 255, 107), hold = 3.5 },
+	{ find = "LEAP!", priority = 9, color = Color3.fromRGB(255, 210, 63), hold = 3 },
 	{ find = "MYSTERY", priority = 9, color = Color3.fromRGB(200, 150, 255), hold = 4 },
 	{ find = "Too small", priority = 7, color = Color3.fromRGB(200, 150, 255), hold = 3 },
 	{ find = "camp", priority = 7, color = Color3.fromRGB(255, 170, 80), hold = 3.5 },
@@ -770,13 +773,23 @@ remotes:WaitForChild("Evolved").OnClientEvent:Connect(function(speciesName, stag
 	news.banner = true
 	play("evolve")
 	local b = img(toastRoot, "plate9", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.76), Size = UDim2.fromOffset(330, 112), ZIndex = 20 })
-	img(b, portraitKey(group), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
+	local face = img(b, portraitKey(group), { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 0, 14), Size = UDim2.fromOffset(64, 70), ZIndex = 23 })
 	label(b, "EVOLVED!", 30, { Position = UDim2.fromOffset(0, 14), Size = UDim2.new(1, 0, 0, 36), TextColor3 = GOLD, ZIndex = 22 })
-	label(b, speciesName, 22, { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 28), ZIndex = 22, TextTruncate = Enum.TextTruncate.AtEnd })
+	local nameText = label(b, "???", 22, { Position = UDim2.fromOffset(0, 50), Size = UDim2.new(1, 0, 0, 28), ZIndex = 22, TextTruncate = Enum.TextTruncate.AtEnd })
+	-- a beat of suspense: a dark silhouette and ???, then the new face pops in
+	face.ImageColor3 = Color3.new(0, 0, 0)
+	task.delay(GuiService.ReducedMotionEnabled and 0 or 0.8, function()
+		face.ImageColor3 = Color3.new(1, 1, 1)
+		nameText.Text = speciesName
+		if not GuiService.ReducedMotionEnabled then
+			local pop = new("UIScale", { Scale = 1.35 }, face)
+			TweenService:Create(pop, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+	end)
 	label(b, ("Stage %d / %d"):format(stage, total), 14, { Position = UDim2.fromOffset(0, 80), Size = UDim2.new(1, 0, 0, 20), TextColor3 = DNA_C, ZIndex = 22 })
 	local sc = new("UIScale", { Scale = 0.6 }, b)
 	TweenService:Create(sc, TweenInfo.new(GuiService.ReducedMotionEnabled and 0 or 0.25, Enum.EasingStyle.Back), { Scale = 0.85 }):Play() -- lower third, off the character: it fires most lives early on
-	task.delay(math.max(3, #speciesName:split(" ") / 1.2 + 2), function() -- 2 words of title + the name, slowest 7-year-old
+	task.delay(math.max(3, #speciesName:split(" ") / 1.2 + 2) + 0.8, function() -- 2 words of title + the name, slowest 7-year-old, + the reveal beat
 		TweenService:Create(sc, TweenInfo.new(0.15), { Scale = 0.01 }):Play()
 		task.delay(0.16, function()
 			b:Destroy()

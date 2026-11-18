@@ -266,3 +266,10 @@ These are Creator Store audio, inserted into `SoundService` as `SFX_*`. Audio cr
   - silhouette of the next species in the HUD;
   - night-only mysteries;
   - a server-wide "someone found the Crystal Heart!" broadcast.
+
+## Curiosity in the evolution itself (v36)
+- Owner: "need more curiosity in the evolution".
+- The HUD row reads "Next: ??? 0/1" for any species you've never been. The name only shows once it's in your Index.
+- Evolve banner: a black silhouette and "???" for 0.8 s, then the face pops in and the name appears (instant with Reduced Motion).
+- Genetic LEAP: each child that evolves has a 1 in 12 chance to get double evolution and skip a stage, with the toast "LEAP! Your child skipped ahead!". It still respects the world frontier.
+- Tested in Play: "???" before, silhouette at 0.0 s, "Tree Monkey" revealed at 0.8 s. The LEAP is random and wasn't seen in the test.

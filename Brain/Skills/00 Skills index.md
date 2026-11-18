@@ -30,6 +30,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
+- 2026-11-18: roblox-ui-pro example HUD refreshed again (unseen next species shows ???, silhouette-then-reveal evolve banner, LEAP toast style)
 - 2026-11-18: roblox-ui-pro develuper-style.md gets the owner's layout corrections: all persistent plates in one top-left column, news as a top-middle strip, toast lines kept to 34 characters or fewer.
 - 2026-11-18: roblox-ui-pro example HUD refreshed (life-goal row, top-left column layout, top-middle news strip, mystery "?" marks)
 - 2026-11-18: roblox-ui-pro EvolutionUI_example.luau refreshed from EVOLVE after the owner said "this game is a bit complex". It now uses progressive reveal: a `reveal(gui, show)` pop for buttons and cards that appear once they matter (Diet at stage 9, the World pill at stage 5, extra upgrades at stage 9, rebirth only once possible), and auto-popups wait 20 s after joining.
