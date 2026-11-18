@@ -779,22 +779,41 @@ remotes:WaitForChild("Pickup").OnClientEvent:Connect(function(gain, pos, golden)
 	end
 end)
 
--- orbs bob and spin on each client (server keeps them still at BaseY, so touches stay fair)
-local orbFolder = workspace:WaitForChild("DNAOrbs", 30)
-if orbFolder then
-	game:GetService("RunService").Heartbeat:Connect(function()
-		local t = os.clock()
-		for _, mine in orbFolder:GetChildren() do
-			for _, orb in mine:GetChildren() do
-				local y = orb:GetAttribute("BaseY")
-				if y then
-					local p = orb.Position
-					local cf = CFrame.new(p.X, y + math.sin(t * 2.2 + p.X) * 0.45, p.Z) * CFrame.Angles(0, t * 1.5, 0)
-					orb.CFrame = cf
-					local core = orb:FindFirstChild("Core")
-					if core then core.CFrame = cf end
-				end
-			end
-		end
-	end)
+-- DNA orbs are drawn only here, for you (the server keeps their spots and checks pickups by distance),
+-- so a 100+ player server never sends anyone else's orbs to your device.
+local myOrbFolder = new("Folder", { Name = "MyDNAOrbs" }, workspace)
+local myOrbs = {}
+local function orbModel(pos, golden)
+	local color = golden and Color3.fromRGB(255, 205, 60) or Color3.fromRGB(80, 255, 190)
+	local shell = new("Part", { Name = "Orb", Shape = Enum.PartType.Ball, Size = Vector3.one * (golden and 2.8 or 2.2),
+		Material = Enum.Material.ForceField, Color = color, Anchored = true, CanCollide = false, CanQuery = false, CanTouch = false,
+		CastShadow = false, Position = pos })
+	new("Part", { Name = "Core", Shape = Enum.PartType.Ball, Size = Vector3.one * (golden and 1.3 or 1), Material = Enum.Material.Neon,
+		Color = color, Anchored = true, CanCollide = false, CanQuery = false, CanTouch = false, CastShadow = false, Position = pos }, shell)
+	new("PointLight", { Color = color, Range = golden and 14 or 9, Brightness = golden and 2 or 1.2 }, shell)
+	new("ParticleEmitter", { Color = ColorSequence.new(color), LightEmission = 1, Size = NumberSequence.new(0.25, 0),
+		Rate = golden and 12 or 4, Lifetime = NumberRange.new(0.6, 1), Speed = NumberRange.new(1, 2), SpreadAngle = Vector2.new(180, 180) }, shell)
+	local bb = new("BillboardGui", { Size = UDim2.fromOffset(34, 34), StudsOffset = Vector3.new(0, 2.4, 0), LightInfluence = 0, MaxDistance = 80 }, shell)
+	new("ImageLabel", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), ScaleType = Enum.ScaleType.Fit,
+		Image = "rbxassetid://121018262359959", ImageRectOffset = Vector2.new(52, 16), ImageRectSize = Vector2.new(120, 194) }, bb)
+	shell.Parent = myOrbFolder
+	return shell
 end
+remotes:WaitForChild("Orbs").OnClientEvent:Connect(function(op, id, pos, golden)
+	if op == "add" then
+		myOrbs[id] = { part = orbModel(pos, golden), base = pos }
+	elseif myOrbs[id] then
+		myOrbs[id].part:Destroy()
+		myOrbs[id] = nil
+	end
+end)
+game:GetService("RunService").Heartbeat:Connect(function()
+	if not next(myOrbs) then return end
+	local t = os.clock()
+	for _, o in myOrbs do
+		local p = o.base
+		local cf = CFrame.new(p.X, p.Y + math.sin(t * 2.2 + p.X) * 0.45, p.Z) * CFrame.Angles(0, t * 1.5, 0)
+		o.part.CFrame = cf
+		o.part.Core.CFrame = cf
+	end
+end)
