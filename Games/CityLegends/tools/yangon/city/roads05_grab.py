@@ -19,11 +19,12 @@ for p in sorted(glob.glob(os.path.join(TR, '*')), key=os.path.getmtime):
             raw = ''.join(x.get('text', '') for x in json.loads(raw))
         except Exception:
             pass
-    z = re.search(r'@Z([0-9]+x[0-9]+)_(\d\d)_(\d\d)_(\d\d)@', raw[:200])
-    if z:
+    zs = list(re.finditer(r'@Z([0-9]+x[0-9]+)_(\d\d)_(\d\d)_(\d\d)@', raw))  # one file may hold several slices
+    for z in zs:
         e = raw.find('@END@', z.end())
         if e > 0:
             Z[(z.group(1), int(z.group(2)), int(z.group(4)))][int(z.group(3))] = raw[z.end():e]
+    if zs:
         continue
     m = re.search(r'@Q([0-9]+x[0-9]+)_(\d\d)@', raw[:200])
     if not m or raw.find('@END@', m.end()) < 0:
