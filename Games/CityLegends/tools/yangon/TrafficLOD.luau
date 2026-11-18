@@ -133,7 +133,8 @@ local function tidy(p: BasePart, keepLook: boolean?)
 		end)
 	end
 	for _, c in p:GetChildren() do
-		if not (keepLook and c:IsA("SurfaceAppearance")) then
+		-- (a kit car's shape is often a SpecialMesh / FileMesh child of a plain Part: always kept)
+		if not (keepLook and c:IsA("SurfaceAppearance")) and not c:IsA("DataModelMesh") then
 			c:Destroy() -- welds, decals, SurfaceAppearances, lights, attachments, meshes' extras
 		end
 	end
