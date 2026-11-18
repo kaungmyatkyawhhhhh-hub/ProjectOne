@@ -179,11 +179,11 @@ def grey_of(im, water):
     return g
 
 
-def full_mask(spp, x0, z0, size):
+def full_mask(spp, x0, z0, size, tags=FULL):
     m = Image.new('L', size, 0)
     md = ImageDraw.Draw(m)
     k = SS / spp
-    for t in FULL:
+    for t in tags:
         bx0, bz0, bx1, bz1 = district_box(t)
         md.rectangle(((bx0 - x0) * k, (bz0 - z0) * k, (bx1 - x0) * k, (bz1 - z0) * k), fill=255)
     return m.filter(ImageFilter.GaussianBlur(6))
@@ -203,6 +203,8 @@ def tileset(D, name, spp, x0, z0, cols, rows, keep):
         bz0 = z0 + r0 * ts[1]
         im, water = render(D, spp, x0, bz0, cols * TW, (r1 - r0) * TH)
         im = Image.composite(im, grey_of(im, water), full_mask(spp, x0, bz0, im.size))
+        # (past P1-P12 the OSM cut leaves torn shapes: plain ground there)
+        im = Image.composite(im, Image.new('RGB', im.size, GROUND), full_mask(spp, x0, bz0, im.size, ALL))
         im = im.resize((cols * TW, (r1 - r0) * TH), Image.LANCZOS)
         for rr in range(r0, r1):
             for c in range(cols):
