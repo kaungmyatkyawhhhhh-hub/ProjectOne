@@ -54,6 +54,7 @@ UI.onJobsButton = nil :: (() -> ())? -- (19 Nov) the main menu's JOBS tab (Main.
 UI.onDealerButton = nil :: (() -> ())? -- (19 Nov) the dealer menu from anywhere (Main.client)
 UI.onShopButton = nil :: (() -> ())? -- (19 Nov) the main menu's STORE tab (Main.client)
 UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
+UI.onPlatesButton = nil :: (() -> ())? -- (19 Nov) the NUMBER PLATES screen (PlateClient)
 UI.onMenuButton = nil :: (() -> ())? -- the main menu (MainMenu; the MENU button replaced SETTINGS, 2026-11-02)
 UI.onCashPlus = nil :: (() -> ())? -- the "+" on the cash pill: the main menu's STORE (2026-11-04)
 -- (2026-11-03, car levels: CarUpgrades sets these) a car's level, CP and parts, and its parts screen
@@ -610,7 +611,7 @@ function UI.buildTouchControls()
 		Name = "CarMenu",
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 0, -52),
-		Size = UDim2.fromOffset(COLS * TW + (COLS - 1) * GAP + 16, TOP + 3 * TH + 2 * GAP + 8),
+		Size = UDim2.fromOffset(COLS * TW + (COLS - 1) * GAP + 16, TOP + 4 * TH + 3 * GAP + 8), -- (4 rows since PLATES, 19 Nov)
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.08,
 		Active = true,
@@ -668,6 +669,13 @@ function UI.buildTouchControls()
 		UI.closeCarMenu()
 		if UI.onDespawnButton then
 			UI.onDespawnButton()
+		end
+	end)
+	-- (2026-11-19) number plates (PlateClient)
+	tile("PLATES", Theme.Accent2, function()
+		UI.closeCarMenu()
+		if UI.onPlatesButton then
+			UI.onPlatesButton()
 		end
 	end)
 	-- (2026-11-08) scissor doors up / down while parked (client/CarDoors shows it on a car that has them)

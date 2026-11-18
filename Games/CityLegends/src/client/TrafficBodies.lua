@@ -15,6 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local TrafficMix = require(Shared:WaitForChild("TrafficMix"))
+local Plates = require(Shared:WaitForChild("Plates"))
 
 local TrafficBodies = {}
 
@@ -90,6 +91,45 @@ local function weld(a: BasePart, b: BasePart)
 	w.Parent = b
 end
 
+-- (2026-11-19) a rear Myanmar plate (real 358 x 162 mm at 3 studs a metre) where a ray from behind first
+-- meets the body at bumper height; the model is parented for a moment so the ray can see it (nil: no hit)
+local function rearPlate(m: Model, cf: CFrame, box: Vector3): Part?
+	local away = Vector3.new(0, 20000, 0)
+	m:PivotTo(CFrame.new(away))
+	m.Parent = workspace
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { m }
+	local hit: RaycastResult? = nil
+	for _, k in { 0.3, 0.36, 0.24, 0.42 } do
+		local from = cf.Position + away + Vector3.new(0, -box.Y / 2 + box.Y * k, -box.Z / 2 - 4)
+		local r = workspace:Raycast(from, Vector3.new(0, 0, box.Z), params)
+		if r and r.Normal.Z < -0.6 then
+			hit = r
+			break
+		end
+	end
+	m.Parent = nil
+	m:PivotTo(CFrame.new())
+	if not hit then
+		return nil
+	end
+	local pos = hit.Position - away + Vector3.new(0, 0, -0.06)
+	local plate = Instance.new("Part")
+	plate.Name = "PlateText"
+	plate.Size = Vector3.new(1.07, 0.49, 0.02)
+	plate.Transparency = 1
+	plate.CFrame = CFrame.lookAt(pos, pos - Vector3.zAxis) -- (its front face looks back out of the car)
+	plate.Parent = m
+	local sg = Instance.new("SurfaceGui")
+	sg.Face = Enum.NormalId.Front
+	sg.CanvasSize = Vector2.new(220, 100)
+	sg.LightInfluence = 1
+	sg.MaxDistance = 70
+	sg.Parent = plate
+	return plate
+end
+
 local function prepare(template: Model): Model
 	local m = template:Clone()
 	m:PivotTo(CFrame.new())
@@ -101,6 +141,8 @@ local function prepare(template: Model): Model
 	local _, size = m:GetBoundingBox()
 	m:ScaleTo(m:GetScale() * target / math.max(size.Z, 0.1))
 	local cf, box = m:GetBoundingBox()
+	pcall(rearPlate, m, cf, box)
+	m.Parent = nil
 	cf = CFrame.new(cf.Position) * CFrame.Angles(0, math.pi, 0) -- the root's front (-Z) is the car's +Z
 
 	local root = Instance.new("Part")
@@ -187,6 +229,14 @@ local function buildFrom(list: { Model }, rng: Random, pick: Model?): Model?
 		ready[template] = done
 	end
 	local car = done:Clone()
+	-- (2026-11-19) its number plate: private black, a share of Probox / small cars as red taxis
+	local plate = car:FindFirstChild("PlateText")
+	local sg = plate and plate:FindFirstChildOfClass("SurfaceGui")
+	if sg then
+		local e = TrafficMix.byName[template.Name]
+		local taxi = e ~= nil and not e.rare and rng:NextNumber() < (if e.id == "probox" then 0.5 else 0.12)
+		Plates.draw(sg, if taxi then Plates.taxi(rng) else Plates.roll(rng), if taxi then "taxi" else "private")
+	end
 	-- livery: the parts marked TrafficPaint take one of the car's colours (TrafficMix)
 	local entry = TrafficMix.byName[template.Name]
 	if entry and #entry.paint > 0 then

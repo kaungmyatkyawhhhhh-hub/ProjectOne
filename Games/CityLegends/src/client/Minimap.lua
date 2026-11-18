@@ -607,6 +607,11 @@ function Minimap.start()
 	if typeof(meetAt) == "Vector3" then
 		table.insert(fixed, { frame = makeBlip(layer, "M", Color3.fromRGB(255, 110, 220), 13, 21), pos = meetAt, edge = false })
 	end
+	-- (2026-11-19) the Plate Office
+	local plateAt = workspace:GetAttribute("PlateOffice")
+	if typeof(plateAt) == "Vector3" then
+		table.insert(fixed, { frame = makeBlip(layer, "#", Color3.fromRGB(70, 130, 255), 13, 21), pos = plateAt, edge = false })
+	end
 	local dropBlip = makeBlip(layer, "$", Color3.fromRGB(80, 255, 140), 16, 23)
 	local wayBlip = makeBlip(layer, "W", Color3.fromRGB(74, 234, 172), 15, 24)
 	local targetBlip = makeBlip(layer, "", Color3.fromRGB(255, 214, 40), 13, 24)
