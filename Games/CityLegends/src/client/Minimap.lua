@@ -162,16 +162,50 @@ local function yangonTiles(map: Frame, list: { Tile })
 		artTiles(map, YArt, YArt.back, list)
 	end
 end
--- puts the picture on each tile whose box comes within `reach` of `here` (a tile keeps it once loaded)
-local function loadNear(list: { Tile }, here: Vector3, reach: number)
+-- puts the picture on each tile whose box comes within `reach` of `here`; a sharp (not `whole`) tile whose box is
+-- further than `drop` loses it again (2026-11-19: phones' memory; a negative reach / drop loads none / drops all)
+local function loadNear(list: { Tile }, here: Vector3, reach: number, drop: number?)
 	for _, t in list do
+		local dx = math.max(math.abs(here.X - t.centre.X) - t.half.X, 0)
+		local dz = math.max(math.abs(here.Z - t.centre.Z) - t.half.Y, 0)
+		local d = math.sqrt(dx * dx + dz * dz)
 		if t.label.Image == "" then
-			local dx = math.max(math.abs(here.X - t.centre.X) - t.half.X, 0)
-			local dz = math.max(math.abs(here.Z - t.centre.Z) - t.half.Y, 0)
-			if dx * dx + dz * dz < reach * reach then
+			if d < reach then
 				t.label.Image = t.image
 			end
+		elseif drop and not t.whole and d > drop then
+			t.label.Image = ""
 		end
+	end
+end
+-- the whole-map set (the overview) on at once and fetched ahead, so a view is never an empty rectangle
+-- (2026-11-19, owner: "the minimap rarely loads all of it"); the sharp tiles come on top as they load
+local ContentProvider = game:GetService("ContentProvider")
+local preloaded = false
+local function showWhole(list: { Tile })
+	local want = {}
+	for _, t in list do
+		if t.whole then
+			t.label.Image = t.image
+			table.insert(want, t.label)
+		end
+	end
+	if not preloaded and #want > 0 then
+		preloaded = true
+		task.spawn(function()
+			pcall(function()
+				ContentProvider:PreloadAsync(want)
+			end)
+		end)
+	end
+end
+-- a view `span` studs across shows the sharp tiles only when it is close enough to need them
+local SHARP_SPAN = 9000
+local function sharpen(list: { Tile }, here: Vector3, span: number)
+	if span < SHARP_SPAN then
+		loadNear(list, here, span * 0.75, span * 2)
+	else
+		loadNear(list, here, -1, -1)
 	end
 end
 local function drawMap(map: Frame): { Tile }
@@ -291,15 +325,12 @@ end
 -- the whole world drawn into `frame` for the loading screen (owner, 2026-10-30: "remove the intro
 -- instead just add a loading screen of the map"): returns the middle and size of what's worth
 -- showing (Legends Isle in the west to the Legends Loop in the east), in world studs
+local wholeLists: { [Frame]: { Tile } } = setmetatable({}, { __mode = "k" }) :: any
 function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
-	-- (the overview only: the detail tiles are for the minimap, and 30 more pictures would be a phone's memory)
-	for _, t in drawMap(frame) do
-		if t.whole then
-			t.label.Image = t.image
-		else
-			t.label:Destroy()
-		end
-	end
+	-- the overview at once; the sharp tiles only through Minimap.sharpen (a zoomed-in menu map)
+	local list = drawMap(frame)
+	showWhole(list)
+	wholeLists[frame] = list
 	-- the places' names, in world studs like the map (so they scale with it)
 	local function name(text: string, x: number, z: number)
 		local l = Instance.new("TextLabel")
@@ -333,6 +364,23 @@ function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 	local x1 = C.LoopHalf + 200
 	local zr = math.max(C.LoopHalf, W.HalfZ) + 200
 	return Vector2.new((x0 + x1) / 2, 0), Vector2.new(x1 - x0, zr * 2)
+end
+
+-- a drawWhole frame's sharp tiles for a view centred on world (x, z), `span` studs across: loaded near the view
+-- when zoomed in, dropped when zoomed out (the main menu's world map calls it on every redraw)
+function Minimap.sharpen(frame: Frame, x: number, z: number, span: number)
+	local list = wholeLists[frame]
+	if list then
+		sharpen(list, Vector3.new(x, 0, z), span)
+	end
+end
+-- the zoom that fits the whole map into `size` pixels (the full map's and the menu's furthest zoom-out)
+function Minimap.fitScale(size: number): number
+	if YArt and YArt.map then
+		local m = YArt.map
+		return size / (math.max(m.x1 - m.x0, m.z1 - m.z0) * 1.05)
+	end
+	return size / 16000
 end
 
 ---------------------------------------------------------------------
@@ -495,7 +543,9 @@ function Minimap.start()
 	map.Size = UDim2.fromOffset(0, 0)
 	map.Parent = pivot
 	local tiles = drawMap(map)
-	-- only the tiles near you get their picture (checked twice a second), and keep it once loaded
+	-- the overview always underneath; the sharp tiles near you get their picture (checked twice a second) and
+	-- lose it again far behind you
+	showWhole(tiles)
 	local tileCheck = 0
 
 	-- blips (upright, placed by hand each frame)
@@ -898,7 +948,8 @@ function Minimap.start()
 		win.Size = UDim2.fromOffset(winSize, winSize)
 	end
 	local function zoomBy(k: number)
-		fscale = math.clamp(fscale * k, winSize / 16000, winSize / 500)
+		-- (2026-11-19, owner: "zoom out all the way to see the entire map") out to the whole P1-P12, in to street level
+		fscale = math.clamp(fscale * k, Minimap.fitScale(winSize), winSize / 400)
 	end
 	local function myPart(): BasePart?
 		local model = Driving.getModel()
@@ -913,16 +964,13 @@ function Minimap.start()
 		local part = myPart()
 		center = if part then part.Position else Vector3.zero
 		fscale = winSize / 2600
-		for _, t in fullTiles do
-			if t.whole then
-				t.label.Image = t.image
-			end
-		end
-		loadNear(fullTiles, center, winSize / fscale)
+		showWhole(fullTiles)
+		sharpen(fullTiles, center, winSize / fscale)
 		fullGui.Enabled = true
 	end
 	local function closeFull()
 		fullGui.Enabled = false
+		loadNear(fullTiles, center, -1, -1) -- (the sharp tiles off while it is shut)
 	end
 	fClose.Activated:Connect(closeFull)
 	backdrop.Activated:Connect(closeFull)
@@ -931,6 +979,18 @@ function Minimap.start()
 	end)
 	fMinus.Activated:Connect(function()
 		zoomBy(1 / 1.4)
+	end)
+	-- two fingers pinch to zoom (phones: most players); one finger drags (below)
+	local pinchBase = fscale
+	UserInputService.TouchPinch:Connect(function(_, pinch: number, _, state: Enum.UserInputState)
+		if not fullGui.Enabled then
+			return
+		end
+		if state == Enum.UserInputState.Begin then
+			pinchBase = fscale
+		end
+		fscale = pinchBase
+		zoomBy(pinch)
 	end)
 	-- drag to move, scroll to zoom
 	local dragging: InputObject? = nil
@@ -975,10 +1035,8 @@ function Minimap.start()
 		end
 		fzoom.Scale = fscale
 		fmap.Position = UDim2.fromOffset(-center.X, -center.Z)
-		-- the detail tiles in view (dragged or zoomed to) get their pictures; far out the overview is enough
-		if fscale > 0.08 then
-			loadNear(fullTiles, center, winSize / fscale)
-		end
+		-- the sharp tiles in view (dragged or zoomed to) get their pictures; far out the overview is enough
+		sharpen(fullTiles, center, winSize / fscale)
 		local function put(f: GuiObject, p: Vector3)
 			local x, y = (p.X - center.X) * fscale, (p.Z - center.Z) * fscale
 			f.Visible = math.abs(x) < winSize / 2 and math.abs(y) < winSize / 2
@@ -1059,7 +1117,7 @@ function Minimap.start()
 		if tileCheck <= 0 then
 			tileCheck = 0.5
 			-- (2026-11-18: by the tile's box, not its middle; the 1:1 tiles are 5,120 studs wide and never came near)
-			loadNear(tiles, here, 2600)
+			loadNear(tiles, here, 2600, 7000)
 		end
 		-- zoom out with speed
 		local mph = Config.spsToMph(Driving.getSpeed())

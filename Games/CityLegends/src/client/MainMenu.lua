@@ -930,6 +930,7 @@ local function openWorldMap()
 
 	local function redraw()
 		placeMap(pane, cx, cz, scale)
+		Minimap.sharpen(getMap(), cx, cz, paneW / scale) -- (2026-11-19) sharp tiles when zoomed in
 		local size = Vector2.new(paneW, paneH)
 		local function put(g: GuiObject, p: Vector3): boolean
 			local x, y = (p.X - cx) * scale + size.X / 2, (p.Z - cz) * scale + size.Y / 2
@@ -980,7 +981,7 @@ local function openWorldMap()
 			local m = UserInputService:GetMouseLocation() -- (the menu ignores the top bar inset: screen pixels)
 			local a, s = pane.AbsolutePosition, pane.AbsoluteSize
 			if m.X >= a.X and m.Y >= a.Y and m.X <= a.X + s.X and m.Y <= a.Y + s.Y then
-				scale = math.clamp(scale * (if input.Position.Z > 0 then 1.2 else 1 / 1.2), 0.04, 0.6)
+				scale = math.clamp(scale * (if input.Position.Z > 0 then 1.2 else 1 / 1.2), Minimap.fitScale(paneW), 0.6)
 				redraw()
 			end
 		end
@@ -994,7 +995,7 @@ local function openWorldMap()
 		local b = button(z[1] :: string, NAVY, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -10, 0, 10 + (k - 1) * 44), Size = UDim2.fromOffset(38, 38), TextSize = 24, ZIndex = 30, Parent = pane })
 		b.Activated:Connect(function()
 			selectSound()
-			scale = math.clamp(scale * (z[2] :: number), 0.04, 0.6)
+			scale = math.clamp(scale * (z[2] :: number), Minimap.fitScale(paneW), 0.6)
 			redraw()
 		end)
 	end
@@ -1729,6 +1730,7 @@ local function buildCampaign(page: Frame)
 		end
 		local scale = 0.085
 		placeMap(mapPane, cx, cz, scale)
+		Minimap.sharpen(getMap(), cx, cz, 1e9) -- (the small tile: the overview only)
 		youDot.Position = UDim2.fromOffset((p.X - cx) * scale + mapPane.AbsoluteSize.X / scaler.Scale / 2, (p.Z - cz) * scale + mapPane.AbsoluteSize.Y / scaler.Scale / 2)
 		timeChip.Text = timeOfDay()
 		weatherChip.Text = if Weather.isRaining() then "Rain" else "Clear"
