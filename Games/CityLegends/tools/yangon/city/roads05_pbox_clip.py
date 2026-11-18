@@ -112,7 +112,13 @@ def clip(rows, parts):
 
 if __name__ == '__main__':
     tag, cdir, outp = sys.argv[1:4]
-    parts = pickle.load(open('D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/city_1to1/roads05_%s/parts.pkl' % tag, 'rb'))
+    D = 'D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/city_1to1/roads05_%s/' % tag
+    parts = pickle.load(open(D + 'parts.pkl', 'rb'))
+    # the bake's own scrap filter first (kerb / pavement scraps on a carriageway are not in the meshes)
+    import json
+    import roads05_bake as RB
+    tris = [t for p in parts if p[0] == 'R' for t in RB.faces_of(p)]
+    parts, _ = RB.drop_scraps(parts, json.load(open(D + 'roads.json', encoding='utf-8')), RB.Surface(tris))
     cover = Cover(parts)
     lines, nold, nnew = [], 0, 0
     for f in sorted(glob.glob(os.path.join(cdir, '*.txt'))):
