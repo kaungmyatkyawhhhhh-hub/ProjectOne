@@ -28,6 +28,27 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## MAP BUG FIXES (19 Nov, MAP BUGS agent): owner's drive of P1-P3 after the J37 rebuild; state `mapbugs_progress.json`
+- **(c) Invisible kerbs = pavement collision over bare asphalt.** `roads05_bake.collision` laid each P box (top = road + 0.5) along
+  the road's whole length from the DATA; where the builder cut the pavement (junction mouths, driveways, side lanes beside decks,
+  gores) the box stood over the visible asphalt. `tools/yangon/city/roads05_pbox_check.py` counted 4,203 of 11,905 P1-P3 P boxes
+  with such points. Root fix: `roads05_pbox_clip.py` (called at the end of `collision()`, so every new bake is clipped): each P box
+  is kept only over 1-stud x 1/3-width slices that a built pavement / kerb / median part covers (bridge parts only within +-1 of
+  the box top; the bake's `drop_scraps` first). In the place: the same clip applied to the swapped rows (`mapbugs/pbox_*.txt`,
+  "-" old row / "+" pieces; Studio swap code in `tools/yangon/MapBugScan.luau` `S.pboxSwap`). Self-check `roads05_pbox_clip_test.py`.
+  Other invisible collidables over R boxes: only landmark collision under landmark grounds (MC plaza, Sedona lawn, Bogyoke market,
+  Strand, YCC, Sule, Holy Trinity, a pagoda base) = visible surfaces, kept. Roads.Collide had no boxes outside the new mesh cells.
+- **(b) Kit props on the road (client data):** footprint test (poles r 0.45 at the base, trees r 0.8, walls / stalls / drains: the
+  whole base, > 25% on an R box; name plates `splate` + T labels: ray 12 down): 396 records in 194 tiles removed (Data_P1S 120 incl.
+  13 plates + 26 labels at University Ave x Kabar Aye etc., WCOL wall collision 79, compound walls ...). Repo copies patched by
+  `tools/yangon/city/kit_tile_patch.py` (JSON `kit_place_P123/data_place_18nov.json`, old `*.before_19nov`).
+- **(a) Terrain:** 39 R boxes had terrain over them (Shwedagon side 32.2-32.9k x 40.3-40.8k, 30.4k x 33.5k, MC 34.9k x 28.3k):
+  FillBlock Air over each box. Near the decks (every 4-stud column within 60 of a D box with a road / pavement box within 24):
+  3,791 voxels over (lowest road top + 4) or floating, in 1,748 columns (Kabar Aye flyover park 34.4k x 28.6k, P3 river bridge
+  approach 31.5k x 45.6k): cleared above G + 3. No kit record or far tree stood on them.
+- **(d) Kerb overlaps:** `roads05_kerb_cross.py <tag>` (kerb pieces crossing > 25 deg, >= 30% overlap, after drop_scraps) lists
+  clusters; not fixed in the builder this pass (see vault note).
+
 ## REBUILD progress 3 (18 Nov night, ROAD REBUILD agent 3): P3 SWAPPED, cleaned, Play-tested; verge P1-P3; kit data synced
 State: `build/city_1to1/rebuild_progress.json` ("P3", "props_cleanup", "ycc_ramp", "verge", "kit_sync").
 - **Export:** 13x13 / 13x14 / 13x15 slices pulled from `_G.RB3` (34 / 29 / 22 pages): all 15 P3 cells on disk. `roads05_grab.py` now
