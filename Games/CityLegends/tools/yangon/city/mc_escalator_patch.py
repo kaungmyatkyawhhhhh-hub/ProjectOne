@@ -7,6 +7,7 @@ plus landing boxes. This patch moves that into the placed meshes without a full 
 of memory): it builds the mall twice (without / with the tongues), takes the triangle difference of the six groups
 it touches (MAR, CEL, GFA, LIT, RAL, STL; each is one interior mesh in mc1.glb) and writes the patched meshes, plus
 the old / new escalator and ring collision boxes for Studio.
+    git show 6a3ddcca:./mc3d.py > _mc3d_old.py   (the placed version, before this fix; delete it after)
     YANGON_SCALE=1to1 python mc_escalator_patch.py -> imports/sync/landmarks/mc1/mc1_escalators.glb (+ .json)
 Studio: tools/yangon/MCEscalators.luau swaps the meshes (MeshPart:ApplyMesh) and the collision boxes."""
 import importlib, json, math, os, sys
@@ -24,11 +25,9 @@ GROUPS = {"CEL": "CEL_mc1s7_", "GFA": "GFA_mc1s15_", "LIT": "LIT_mc1s28_", "MAR"
 
 
 def build(tongues):
-    import mc3d as MC
-    MC = importlib.reload(MC)
+    """tongues False: the mall as placed (mc3d.py of git HEAD~ before this fix, given as OLD_MC, a copy in this folder)."""
+    MC = importlib.import_module("mc3d" if tongues else os.environ.get("OLD_MC", "_mc3d_old"))
     assert MC.ONE, "run with YANGON_SCALE=1to1"
-    if not tongues:
-        MC.landing_tongues = lambda *a: {}
     MC.build()
     y0 = MC.LAY["ground"]["y0"]
 
