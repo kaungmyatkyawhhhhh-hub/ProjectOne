@@ -700,7 +700,7 @@ function Minimap.start()
 
 	-- size and place: top right, under Roblox's top bar (owner, 2026-10-23). The gui's "Bottom"
 	-- attribute tells the cards that sit under it where the map ends.
-	local TOP = if isTouch then 40 else 64 -- (19 Nov: phones: under the cash pill, top right)
+	local TOP = if isTouch then 48 else 64 -- (19 Nov: phones: under the cash pill, top right)
 	local function layout()
 		local cam = workspace.CurrentCamera
 		local vp = if cam then cam.ViewportSize else Vector2.new(1280, 720)

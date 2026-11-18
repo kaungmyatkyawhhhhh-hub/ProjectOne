@@ -401,7 +401,7 @@ function UI.buildTouchControls()
 		Name = "TouchDrive",
 		ResetOnSpawn = false,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-		DisplayOrder = 11,
+		DisplayOrder = 9, -- (under the HUD's layer: GOALS, JOB CENTER and the garage cover it)
 		ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets,
 		Parent = gui.Parent,
 	})
