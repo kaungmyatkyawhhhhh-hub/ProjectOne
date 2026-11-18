@@ -235,7 +235,7 @@ function PlateClient.open()
 				rebuild()
 			end)
 			local holder = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, -6, 0, 100), LayoutOrder = nextOrder() }, list)
-			local big = plateBox(holder, car.plate or "", 220)
+			local big = plateBox(holder, car.plate or "- - -", 220) -- (no plate yet: it gets one on its first drive)
 			big.AnchorPoint = Vector2.new(0.5, 0)
 			big.Position = UDim2.fromScale(0.5, 0)
 			if car.plate then

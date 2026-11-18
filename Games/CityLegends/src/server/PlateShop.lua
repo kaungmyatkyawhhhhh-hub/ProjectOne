@@ -278,11 +278,12 @@ handlers.state = function(player)
 	if not profile then
 		return { ok = false }
 	end
-	-- every owned car gets its plate here (a few store calls the first time)
-	for carId in profile.Owned do
-		if Cars.ById[carId] and not data(profile).Car[carId] then
-			PlateShop.plateFor(player, carId)
-		end
+	-- only the car you're in gets its plate here; the others get theirs on their first drive (one store
+	-- call each: a player with 170 cars queued 170 UpdateAsyncs and the screen timed out, Studio 19 Nov)
+	local car = ctx and ctx.getCar(player)
+	local id = car and car:GetAttribute("CarId")
+	if type(id) == "string" and profile.Owned[id] then
+		PlateShop.plateFor(player, id)
 	end
 	return stateOf(player, profile)
 end

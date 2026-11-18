@@ -11,6 +11,9 @@
 	  T.install(list)   -> old TrafficModels to ServerStorage.TrafficModels_old (kept until tested), new folder in
 	                       ReplicatedStorage. list = { {id, kind}, ... }; returns a report.
 	  T.undo()          -> the old folder back.
+	Badges (2026-11-19): MarkPatch parts in CarModels (tools/brand_marks/RobloxBuiltPatches.luau) are always kept, and a
+	converted car's BrandMarks covers / wheel caps / hidden badge parts (what CarSkin does at run time, which a traffic copy
+	never goes through) are baked in as MarkPatch parts; cars in CarFinish.CARS have their logos out of the model already.
 	Mesh triangles can't be read (the place has no permission to load these meshes), so it drops by name, by
 	being inside the cabin box, and by size.
 ]]
