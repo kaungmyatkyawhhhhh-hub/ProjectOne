@@ -683,11 +683,11 @@ end
 
 -- the nearest thing ahead in a strip `off` studs to the side of the racer's lane middle, and whether the strip
 -- beside the racer (its length plus a margin, further back for faster cars coming up) is clear to move into
-local function stripGap(npc: Npc, off: number, obstacles: { Obstacle }, reach: number): (number, boolean)
+local function stripGap(npc: Npc, off: number, obstacles: { Obstacle }, reach: number): (number, boolean, number)
 	local fwd = npc.fwd
 	local right = fwd:Cross(Vector3.yAxis)
 	local base = npc.pos - right * npc.off
-	local best, clear = math.huge, true
+	local best, clear, bestV = math.huge, true, 0
 	for _, o in obstacles do
 		if o.self ~= npc then
 			local rel = o.pos - base
@@ -699,14 +699,97 @@ local function stripGap(npc: Npc, off: number, obstacles: { Obstacle }, reach: n
 					local closing = math.max(0, o.speed * o.fwd:Dot(fwd) - npc.speed)
 					if f > -side - closing * 1.5 and f < side then
 						clear = false
-					elseif f > 0 then
-						best = math.min(best, f - npc.halfLen - o.halfLen)
+					elseif f > 0 and f - npc.halfLen - o.halfLen < best then
+						best = f - npc.halfLen - o.halfLen
+						bestV = math.max(0, o.speed * o.fwd:Dot(fwd))
 					end
 				end
 			end
 		end
 	end
-	return best, clear
+	return best, clear, bestV
+end
+
+-- (2026-11-19, racer crashes -> 0) the gap a racer needs ahead to move into a strip: its braking distance down
+-- to the car ahead's speed plus a second of the closing speed, never under the old speed-only rule
+local function racerRoom(v: number, vo: number): number
+	local c = math.max(0, v - vo)
+	return math.max(v * v / (2 * RACER.Brake) * 0.6 + 12, c + c * c / (2 * RACER.Brake * 0.7) + 6 + v * 0.15)
+end
+
+-- the nearest car in the strip a racer covers over the next second (its lane middle offset `off` to `offTo`,
+-- so a lane change in progress sees both lanes): bumper gap and that car's speed along our way
+local function racerSweep(npc: Npc, obstacles: { Obstacle }): (number, number)
+	local fwd = npc.fwd
+	local right = fwd:Cross(Vector3.yAxis)
+	local base = npc.pos - right * npc.off
+	local lo, hi = math.min(npc.off, npc.offTo), math.max(npc.off, npc.offTo)
+	local reach = npc.speed * 1 + npc.halfLen * 2 + 40
+	local best, bestV = math.huge, 0
+	for _, o in obstacles do
+		if o.self ~= npc then
+			local rel = o.pos - npc.pos
+			local f = rel:Dot(fwd)
+			if f > 0 and f < reach and math.abs(rel.Y) < 12 then
+				local lat = (o.pos - base):Dot(right)
+				local half = (npc.width + o.width) / 2 + 0.6
+				if lat > lo - half and lat < hi + half then
+					local gap = f - npc.halfLen - o.halfLen
+					if gap < best then
+						best, bestV = gap, math.max(0, o.speed * o.fwd:Dot(fwd))
+					end
+				end
+			end
+		end
+	end
+	return best, bestV
+end
+
+-- another racer beside this one on the side it would slide to (the two yield: neither slides into the other)
+local function racerBeside(npc: Npc, dir: number): boolean
+	local fwd = npc.fwd
+	local right = fwd:Cross(Vector3.yAxis)
+	for _, o in Traffic.cars do
+		if o ~= npc and o.racer then
+			local rel = o.pos - npc.pos
+			local lat = rel:Dot(right)
+			if math.abs(rel.Y) < 12 and math.abs(rel:Dot(fwd)) < npc.halfLen + o.halfLen + 8 and lat * dir > 0 and math.abs(lat) < 16 then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+-- the car a racer's box (plus a hair) would overlap at pos / fwd, using each car's latest place this frame
+local function racerHit(npc: Npc, pos: Vector3, fwd: Vector3, obstacles: { Obstacle }): (Obstacle?, number)
+	local r = fwd:Cross(Vector3.yAxis)
+	local hl, hw = npc.halfLen + 0.4, npc.width / 2 + 0.25
+	for _, o in obstacles do
+		local me = o.self
+		if me ~= npc then
+			local op = if me then me.pos else o.pos
+			local of = if me then me.fwd else o.fwd
+			local d = op - pos
+			if math.abs(d.Y) < 8 and d.Magnitude < hl + o.halfLen + 12 then
+				local orr = of:Cross(Vector3.yAxis)
+				local ol, ow = o.halfLen + 0.4, o.width / 2 + 0.25
+				local sep = false
+				for _, ax in { fwd, r, of, orr } do
+					local ra = hl * math.abs(fwd:Dot(ax)) + hw * math.abs(r:Dot(ax))
+					local rb = ol * math.abs(of:Dot(ax)) + ow * math.abs(orr:Dot(ax))
+					if math.abs(d:Dot(ax)) > ra + rb then
+						sep = true
+						break
+					end
+				end
+				if not sep then
+					return o, d.Magnitude
+				end
+			end
+		end
+	end
+	return nil, 0
 end
 
 -- where a racer can be sideways: its lane, the same-way lanes beside it (by their real offsets) and the line
@@ -809,10 +892,11 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 		local step = math.clamp(npc.speed * RACER.SideRate, 7, 22) * dt
 		local to = npc.off + math.clamp(delta, -step, step)
 		local reach = math.max(T.LookAhead, npc.speed * RACER.LookAheadS)
-		local ahead, clear = stripGap(npc, npc.offTo, obstacles, reach)
-		local _, clearNow = stripGap(npc, to, obstacles, T.LookAhead)
-		local room = npc.speed * npc.speed / (2 * RACER.Brake) * 0.6 + 12
-		if clear and clearNow and ahead > room then
+		local ahead, clear, aheadV = stripGap(npc, npc.offTo, obstacles, reach)
+		local nowAhead, clearNow, nowV = stripGap(npc, to, obstacles, T.LookAhead)
+		-- (gap scaled by the closing speed, in the lane we go to and on the way there; a racer beside yields)
+		if clear and clearNow and ahead > racerRoom(npc.speed, aheadV) and nowAhead > racerRoom(npc.speed, nowV) * 0.5
+			and not racerBeside(npc, math.sign(delta)) then
 			npc.off = to
 		elseif settle then
 			npc.holdMerge = true
@@ -1223,6 +1307,15 @@ function Traffic.update(dt: number)
 			npc.ghost -= dt
 		end
 
+		-- racers: the strip swept over the next second (both lanes while changing) keeps a gap it can brake in
+		if npc.racer then
+			local gap, ov = racerSweep(npc, obstacleList)
+			if gap < math.huge then
+				local safe = gap - 3 - npc.speed * 0.15
+				target = if safe <= 0 then math.min(target, ov * 0.9) else math.min(target, math.sqrt(2 * RACER.Brake * 0.7 * safe + ov * ov))
+			end
+		end
+
 		-- integrate speed
 		if npc.speed < target then
 			npc.speed = math.min(target, npc.speed + (if npc.racer then RACER.Accel else T.Accel) * dt)
@@ -1246,6 +1339,9 @@ function Traffic.update(dt: number)
 
 		-- advance along the path
 		-- (a few hops at most: a run of very short connectors can't spin this forever)
+		local snap = if npc.racer
+			then { npc.seg, npc.s, npc.nextSeg, npc.plan and table.clone(npc.plan :: any), npc.off, npc.offTo, npc.pos, npc.fwd }
+			else nil
 		npc.s += npc.speed * dt
 		local hops = 0
 		while npc.s >= npc.seg.length do
@@ -1282,6 +1378,20 @@ function Traffic.update(dt: number)
 			local slide = npc.offTo - npc.off
 			if math.abs(slide) > 0.3 and npc.speed > 1 then
 				fwd = (fwd * npc.speed + right * math.sign(slide) * math.clamp(npc.speed * RACER.SideRate, 7, 22)).Unit
+			end
+		end
+		-- racers never move into another car: a step that would overlap one (and isn't backing out of one we
+		-- already touch) is undone and the racer takes that car's speed
+		if snap then
+			local hit, d = racerHit(npc, pos, fwd, obstacleList)
+			if hit then
+				local was, d0 = racerHit(npc, snap[7], snap[8], obstacleList)
+				if was ~= hit or d < d0 then
+					npc.seg, npc.s, npc.nextSeg, npc.plan, npc.off, npc.offTo = snap[1], snap[2], snap[3], snap[4], snap[5], snap[5]
+					pos, fwd = snap[7], snap[8]
+					npc.speed = math.min(npc.speed, math.max(0, hit.speed * hit.fwd:Dot(fwd)) * 0.9)
+					npc.model:SetAttribute("RacerHolds", (npc.model:GetAttribute("RacerHolds") or 0) + 1)
+				end
 			end
 		end
 		npc.pos = pos

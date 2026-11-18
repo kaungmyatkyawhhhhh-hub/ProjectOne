@@ -25,10 +25,10 @@ local CELL = 256
 MenuShots.SHOTS = {
 	{ name = "Myanmar Plaza from above Kabar Aye", subject = "MyanmarCentre", from = Vector3.new(34150, 330, 28150), at = Vector3.new(34845, 120, 27534), drift = Vector3.new(6, 0, -4), fov = 58 },
 	{ name = "Sedona over Inya Lake", subject = "Sedona", from = Vector3.new(35600, 380, 25900), at = Vector3.new(34983, 220, 26798), drift = Vector3.new(-6, 0, 3), fov = 60 },
-	{ name = "YCC, GGFest", subject = "YangonConventionCentre", from = Vector3.new(34200, 200, 22450), at = Vector3.new(33706, 71, 21990), drift = Vector3.new(-5, 0, 3), fov = 58 },
+	{ name = "YCC, GGFest", subject = "YangonConventionCentre", from = Vector3.new(33700, 240, 22750), at = Vector3.new(33706, 71, 21990), drift = Vector3.new(6, 0, 0), fov = 58 },
 	{ name = "Shwedagon from People's Park", subject = "Shwedagon", from = Vector3.new(32300, 260, 38250), at = Vector3.new(33107, 330, 37198), drift = Vector3.new(5, 0, 2), fov = 55 },
-	{ name = "Sule Pagoda roundabout from above", subject = "Sule", from = Vector3.new(36250, 260, 44850), at = Vector3.new(35999, 85, 45119), drift = Vector3.new(-4, 0, 3), fov = 56 },
-	{ name = "Strand Road along the river", subject = "strand_hotel", from = Vector3.new(37300, 200, 47250), at = Vector3.new(37295, 50, 46671), drift = Vector3.new(-6, 0, 0), fov = 58 },
+	{ name = "Sule Pagoda roundabout from above", subject = "Sule", from = Vector3.new(36050, 220, 45600), at = Vector3.new(35999, 85, 45119), drift = Vector3.new(-4, 0, 0), fov = 56 },
+	{ name = "Strand Road from the river", subject = "strand_hotel", from = Vector3.new(36900, 130, 47900), at = Vector3.new(37295, 50, 46671), drift = Vector3.new(6, 0, 0), fov = 58 },
 }
 MenuShots.FALLBACK = { name = "high over Myanmar Plaza", subject = "MyanmarCentre", from = Vector3.new(34300, 620, 28400), at = Vector3.new(34845, 120, 27534), drift = Vector3.new(4, 0, -3), fov = 60 }
 
