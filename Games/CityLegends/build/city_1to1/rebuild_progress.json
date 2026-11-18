@@ -153,6 +153,6 @@
   "baked": false,
   "uploaded": false,
   "swapped": false,
-  "district_moved": false
+  "district_moved": "DONE v1450: DistrictPlace P7 packs 79021963633938/128053610201688/87141674653732 (J37 clear), night 125319529830179 (24 cells), terrain 862 tiles, green paint 719 tiles + far 2952 parts (Green.Far renamed, merged back: 184 cells, 0 dups) + Data_P7G 705 tiles, Data_P7 527 tiles (all 429 kit ids in Templates), shells 4760 + roofs 1589, 10 pagodas re-placed (old ones + Shwedagon_Hill_TEMP + MahaWizayaPlate_TEMP in ServerStorage.RB_OldP7.Temps until the Play test; then delete). Packs + Terrain modules removed. Studio's ClaudeTools.PagodaPlace is the landmarks3d one: the rows one is ClaudeTools.PagodaPlaceRows (DistrictPlace.pagodas needs it named PagodaPlace for the call)."
  }
 }
