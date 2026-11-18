@@ -2,7 +2,7 @@
 	MainMenu (client)
 	The City Legends main menu (owner, 2026-11-02, "Main menu (tile style)"): big tiles over the live
 	game scene (blurred), a top bar (the car you drive by name, or CLAIM CAR for a new player; the
-	player, level and cash on the right) and the tabs CAMPAIGN, CARS, HOUSES, STORE. The look
+	player, level and cash on the right) and the tabs CAMPAIGN, CARS, HOUSES, JOBS, STORE. The look
 	(2026-11-04, owner-away step 7: same bar as the dealer menu): dark glass panels, Builder Sans,
 	gold for the main action, drawn icons from DealerArt (no emoji, no cartoon tiles).
 
@@ -257,7 +257,7 @@ local blur: BlurEffect? = nil
 local isOpen = false
 local startMode = false -- the start screen: no car yet (nothing to go back to)
 local tabName = "CAMPAIGN"
-local TABS = { "CAMPAIGN", "CARS", "HOUSES", "STORE" }
+local TABS = { "CAMPAIGN", "CARS", "HOUSES", "JOBS", "STORE" } -- (19 Nov: JOBS)
 local tabButtons: { [string]: TextButton } = {}
 local tabBadges: { [string]: Frame } = {}
 local pages: { [string]: Frame } = {}
@@ -494,11 +494,13 @@ local closeSubPage: () -> ()
 local function buildTabs()
 	local strip = new("Frame", { Name = "Tabs", BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 118), Size = UDim2.new(1, 0, 0, 46), Parent = canvas }, { corner(6) })
 	new("Frame", { BackgroundColor3 = WHITE, BackgroundTransparency = 0.86, BorderSizePixel = 0, AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Size = UDim2.new(1, 0, 0, 1), Parent = strip })
-	local row = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 6), Size = UDim2.fromOffset(#TABS * 196, 36), Parent = strip }, {
+	-- (19 Nov: five tabs fit between the Q / E arrows on the phone canvas too)
+	local tabW = math.min(190, math.floor((W - 150) / #TABS) - 6)
+	local row = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 6), Size = UDim2.fromOffset(#TABS * (tabW + 6), 36), Parent = strip }, {
 		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), HorizontalAlignment = Enum.HorizontalAlignment.Center }),
 	})
 	for i, name in TABS do
-		local b = new("TextButton", { AutoButtonColor = false, Text = name, FontFace = HEAVY, TextSize = 20, TextColor3 = WHITE, BackgroundColor3 = WHITE, BackgroundTransparency = 1, LayoutOrder = i, Size = UDim2.fromOffset(190, 36), Parent = row }, { corner(6) })
+		local b = new("TextButton", { AutoButtonColor = false, Text = name, FontFace = HEAVY, TextSize = 20, TextColor3 = WHITE, BackgroundColor3 = WHITE, BackgroundTransparency = 1, LayoutOrder = i, Size = UDim2.fromOffset(tabW, 36), Parent = row }, { corner(6) })
 		b.MouseEnter:Connect(hoverSound)
 		b.Activated:Connect(function()
 			if sub then
@@ -2406,6 +2408,106 @@ local function buildHouses(page: Frame)
 end
 
 ---------------------------------------------------------------------
+-- JOBS (19 Nov, owner: "u should make jobs like in roblox southwest florida"): every job from
+-- anywhere (a team change: the job shows over your head), its workplace, your rank, the pay per
+-- paycheck and what you do; TAKE JOB / QUIT on the tile, and for a field job its vehicle. The
+-- server decides everything (server/Jobs.lua); JobsClient gives the state and the calls.
+---------------------------------------------------------------------
+local JOB_ICON = { delivery = "drop", taxi = "key", bus = "map", police = "star", tea = "cash", fuel = "fuel", dealer = "tag", mall = "crown" }
+
+local function jobsClient(): any
+	local ok, mod = pcall(function()
+		return require(script.Parent:WaitForChild("JobsClient", 2)) :: any
+	end)
+	return if ok then mod else nil
+end
+
+local function buildJobs(page: Frame)
+	local JC = jobsClient()
+	local J = Config.Jobs
+	local JD = require(Shared:WaitForChild("JobsData")) :: any
+	local JobRules = require(Shared:WaitForChild("JobRules")) :: any
+	local cols, gap = 4, 12
+	local cw = (W - (cols - 1) * gap) / cols
+	local ch = (page.Size.Y.Offset - gap) / 2
+	local small = PHONE
+	local paints: { () -> () } = {}
+	for k, job in J.List do
+		local col, rowN = (k - 1) % cols, (k - 1) // cols
+		local b = tile(page, col * (cw + gap), rowN * (ch + gap), cw, ch, { title = job.name, icon = JOB_ICON[job.id] or "tag", iconSize = if small then 34 else 44, iconPos = UDim2.new(1, -12, 0, 12), titleSize = if small then 20 else 24 })
+		local title = b:FindFirstChild("Title") :: TextLabel
+		title.Size = UDim2.new(1, -70, 0, 30)
+		title.TextWrapped = false
+		title.TextTruncate = Enum.TextTruncate.AtEnd
+		local y = if small then 42 else 50
+		local rankLine = text({ Text = "", FontFace = HEAVY, TextSize = if small then 15 else 17, TextColor3 = GOLD, Position = UDim2.fromOffset(20, y), Size = UDim2.new(1, -40, 0, 18), TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 3, Parent = b })
+		text({ Text = job.where, FontFace = BOLD, TextSize = if small then 13 else 15, TextColor3 = WHITE, Position = UDim2.fromOffset(20, y + 21), Size = UDim2.new(1, -40, 0, 17), TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 3, Parent = b })
+		text({ Text = JD.What[job.id] or "", FontFace = MEDIUM, TextSize = if small then 13 else 15, TextColor3 = SUB, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Top, Position = UDim2.fromOffset(20, y + 40), Size = UDim2.new(1, -40, 0, if small then 34 else 40), ZIndex = 3, Parent = b })
+		local pill = new("Frame", { BackgroundColor3 = GREEN, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -12, 1, -12), Size = UDim2.fromOffset(if small then 104 else 116, 32), ZIndex = 4, Parent = b }, { corner(8) })
+		local pillText = text({ Text = "TAKE JOB", FontFace = HEAVY, TextSize = 14, TextColor3 = NAVY0, TextXAlignment = Enum.TextXAlignment.Center, Size = UDim2.fromScale(1, 1), ZIndex = 5, Parent = pill })
+		-- the job vehicle (field jobs, on this job only)
+		local v = JD.Vehicles[job.id]
+		local vb: TextButton? = nil
+		if v then
+			local vbtn = button("GET " .. v.label, GOLD, { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 12, 1, -12), Size = UDim2.fromOffset(if small then 112 else 130, 32), TextSize = 13, Visible = false, ZIndex = 5, Parent = b })
+			vbtn.Activated:Connect(function()
+				local res = JC and JC.call("vehicle")
+				if type(res) == "table" and res.ok then
+					UI.toast(v.label .. ": only you can drive it. It goes when you quit", GOLD)
+					closeMenu()
+				else
+					UI.toast((type(res) == "table" and res.message) or "Try again", RED)
+				end
+			end)
+			vb = vbtn
+		end
+		local function paint()
+			local st = if JC then JC.getState() else {}
+			local mine = st.job == job.id
+			local r = (st.ranks and st.ranks[job.id]) or 1
+			local pay = JobRules.paycheck(J, job, r, st.double)
+			rankLine.Text = string.format("R%d/%d %s  ·  %s a paycheck%s", r, #job.ranks, job.ranks[r], money(pay), if st.double then " (x2)" else "")
+			pill.BackgroundColor3 = if mine then RED else GREEN
+			pillText.Text = if mine then "QUIT" else "TAKE JOB"
+			pillText.TextColor3 = if mine then WHITE else NAVY0
+			if vb then
+				vb.Visible = mine
+			end
+		end
+		table.insert(paints, paint)
+		focusable(b, function()
+			if not JC then
+				return
+			end
+			local mine = JC.getState().job == job.id
+			local res = JC.call(if mine then "quit" else "take", job.id)
+			if type(res) == "table" and res.ok then
+				if mine then
+					UI.toast("You quit: " .. job.name, SUB)
+				elseif job.kind == "post" then
+					UI.toast(job.name .. ": follow the gold waypoint to " .. job.where .. ". You're paid while you stand at your post", GOLD)
+					closeMenu()
+				else
+					UI.toast(job.name .. ": you're on the job" .. (if v then ". Tap GET " .. v.label .. " for your vehicle" else ". Follow the gold ring"), GOLD)
+				end
+				for _, p in paints do
+					p()
+				end
+			else
+				UI.toast((type(res) == "table" and res.message) or "Try again", RED)
+			end
+		end, if job.kind == "post" then MINT else GOLD)
+	end
+	table.insert(refreshers, function()
+		if page.Visible then
+			for _, p in paints do
+				p()
+			end
+		end
+	end)
+end
+
+---------------------------------------------------------------------
 -- Tabs, open, close
 ---------------------------------------------------------------------
 local carsRefresh: (() -> ())? = nil
@@ -2413,6 +2515,7 @@ local playFocus: Focus? = nil
 local campaignFocus: { Focus } = {}
 local storeFocus: { Focus } = {}
 local housesFocus: { Focus } = {}
+local jobsFocus: { Focus } = {}
 
 switchTab = function(name: string)
 	tabName = name
@@ -2444,6 +2547,11 @@ switchTab = function(name: string)
 		setFocus(focusList[1])
 	elseif name == "HOUSES" then
 		for _, f in housesFocus do
+			table.insert(focusList, f)
+		end
+		setFocus(focusList[1])
+	elseif name == "JOBS" then
+		for _, f in jobsFocus do
 			table.insert(focusList, f)
 		end
 		setFocus(focusList[1])
@@ -2502,6 +2610,9 @@ local function build()
 	table.clear(focusList)
 	buildHouses(pages.HOUSES)
 	housesFocus = table.clone(focusList)
+	table.clear(focusList)
+	buildJobs(pages.JOBS)
+	jobsFocus = table.clone(focusList)
 	table.clear(focusList)
 
 	-- keys inside the menu
@@ -2671,7 +2782,7 @@ end
 
 -- (screenshots / tests) open a tab or a page by name
 function MainMenu.show(what: string)
-	if what == "CAMPAIGN" or what == "CARS" or what == "HOUSES" or what == "STORE" then
+	if table.find(TABS, what) then
 		if sub then
 			closeSub()
 		end

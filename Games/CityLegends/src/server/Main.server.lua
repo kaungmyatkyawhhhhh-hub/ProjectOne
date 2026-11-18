@@ -628,10 +628,8 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 	if not Cars.forSale(carId) then
 		return { ok = false, message = "Not for sale" }
 	end
-	-- new cars come from the dealership, in person
-	if not Dealership.near(player, ctx.getCar) then
-		return { ok = false, message = "Buy new cars at " .. Config.Dealership.Name }
-	end
+	-- (19 Nov, owner: the HUD's DEALER button opens the dealer from anywhere) bought anywhere now;
+	-- the server still checks the car, the level, the price and the cash
 	-- (2026-11-03) cars cost money only; class X also needs a player level (CarStats.requiredLevel)
 	local need = CarStats.requiredLevel(carId)
 	if (profile.Level or 1) < need then
@@ -666,6 +664,37 @@ end
 -- visit, out of the drive-out bay
 local tested: { [Player]: { [string]: boolean } } = {}
 local lastTest: { [Player]: number } = {}
+-- where a test from afar started: your own car comes back there
+testHome = {}
+-- a test car beside you (19 Nov): on the ground under your car, in front of you on foot, else on
+-- the nearest lane of the map
+testSpot = function(player: Player): CFrame?
+	local car = getSession(player).car
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if car and car.Parent and not player.Character then
+		local at = car:GetPivot()
+		local ray = RaycastParams.new()
+		ray.FilterType = Enum.RaycastFilterType.Exclude
+		ray.FilterDescendantsInstances = { playerCars }
+		local hit = workspace:Raycast(at.Position + Vector3.new(0, 4, 0), Vector3.new(0, -30, 0), ray)
+		local look = Vector3.new(at.LookVector.X, 0, at.LookVector.Z)
+		if hit and look.Magnitude > 0.1 then
+			return CFrame.lookAt(hit.Position, hit.Position + look.Unit)
+		end
+	end
+	local front = frontSpawnCFrame(player, Vector3.new(8, 5, 18))
+	if front then
+		return front
+	end
+	local pos = if hrp then hrp.Position elseif car and car.Parent then car:GetPivot().Position else nil
+	if pos and Config.activeMap() then
+		local ok, cf = pcall(RivieraTraffic.nearestCFrame, pos)
+		if ok and cf then
+			return cf
+		end
+	end
+	return nil
+end
 TestDrive.OnServerInvoke = function(player: Player, carId: any)
 	if type(carId) ~= "string" or not Cars.ById[carId] then
 		return { ok = false, message = "Unknown car" }
@@ -680,8 +709,12 @@ TestDrive.OnServerInvoke = function(player: Player, carId: any)
 	if not Cars.forSale(carId) then
 		return { ok = false, message = "Not for sale" }
 	end
-	if not Dealership.near(player, ctx.getCar) then
-		return { ok = false, message = "Test drives start at " .. Config.Dealership.Name }
+	-- (19 Nov) from anywhere (the HUD's DEALER button): at the dealership out of the drive-out bay,
+	-- elsewhere beside you (where your car is, in front of you on foot, else the nearest road);
+	-- at the end your own car comes back there (testHome)
+	local atDealer = Dealership.near(player, ctx.getCar)
+	if not atDealer and ctx.isBusy and ctx.isBusy(player) then
+		return { ok = false, message = "Finish your race or job first" }
 	end
 	local done = tested[player] or {}
 	tested[player] = done
@@ -693,12 +726,18 @@ TestDrive.OnServerInvoke = function(player: Player, carId: any)
 	end
 	done[carId] = true
 	lastTest[player] = os.clock()
-	spawnFor(player, carId, { test = true, at = Dealership.doorSpot() })
+	local at = if atDealer then Dealership.doorSpot() else testSpot(player)
+	local car = getSession(player).car
+	if not atDealer and not (car and car:GetAttribute("TestEnds")) then
+		testHome[player] = at
+	end
+	spawnFor(player, carId, { test = true, at = at })
 	return { ok = true, seconds = Config.Dealership.TestSeconds }
 end
 Players.PlayerRemoving:Connect(function(player)
 	tested[player] = nil
 	lastTest[player] = nil
+	testHome[player] = nil
 end)
 
 -- the luxury towers' garages: parked cars to steal, paid VIP bays (after spawnFor, which a theft uses)

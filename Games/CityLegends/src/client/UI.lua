@@ -51,6 +51,8 @@ UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
 UI.onJobsButton = nil :: (() -> ())? -- (19 Nov) the main menu's JOBS tab (Main.client)
+UI.onDealerButton = nil :: (() -> ())? -- (19 Nov) the dealer menu from anywhere (Main.client)
+UI.onShopButton = nil :: (() -> ())? -- (19 Nov) the main menu's STORE tab (Main.client)
 UI.onPhotoButton = nil :: (() -> ())? -- photo mode (PhotoMode)
 UI.onMenuButton = nil :: (() -> ())? -- the main menu (MainMenu; the MENU button replaced SETTINGS, 2026-11-02)
 UI.onCashPlus = nil :: (() -> ())? -- the "+" on the cash pill: the main menu's STORE (2026-11-04)
@@ -811,6 +813,15 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 				end
 			end
 		end
+	elseif kind == "dealer" then
+		-- a showroom: a flat roof on two posts over a car (the dealership)
+		box(2, 3, 28, 4, 1.5)
+		box(4, 7, 3, 22, 1)
+		box(25, 7, 3, 22, 1)
+		box(12, 14, 9, 5, 2) -- cabin
+		box(9, 18, 15, 6, 2) -- body
+		box(10, 22, 5, 5, -1) -- wheels
+		box(18, 22, 5, 5, -1)
 	elseif kind == "jobs" then
 		-- a briefcase (jobs): handle, case, clasp band
 		local handle = box(11, 3, 10, 7, 2)
@@ -1064,6 +1075,23 @@ local function buildCashTab()
 			UI.onCashPlus()
 		end
 	end)
+	-- (19 Nov) a small gold "2x" on the pill's left end for owners of the 2x Cash pass
+	local x2: Frame = new("Frame", {
+		Name = "Cash2xBadge",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(0, 2, 0, if UI.isTouch then 4 else 6),
+		Size = UDim2.fromOffset(if UI.isTouch then 26 else 32, if UI.isTouch then 16 else 19),
+		BackgroundColor3 = Theme.Accent2,
+		Visible = false,
+		ZIndex = 3,
+		Parent = tab,
+	}, { corner(6), stroke(Theme.Background, 1.5, 0) })
+	label({ Text = "2x", TextSize = if UI.isTouch then 12 else 14, Font = Enum.Font.GothamBlack, TextColor3 = Color3.fromRGB(20, 22, 34), Size = UDim2.fromScale(1, 1), ZIndex = 4, Parent = x2 })
+	local function paint2x()
+		x2.Visible = player:GetAttribute("Cash2x") == true
+	end
+	player:GetAttributeChangedSignal("Cash2x"):Connect(paint2x)
+	paint2x()
 
 	-- controls hint tab next to the cash (keyboard players only)
 	if UI.isTouch then
@@ -1213,15 +1241,25 @@ local function buildSideButtons()
 	-- down under the steering buttons. (19 Nov, owner's Driving Empire reference) a slim column at the
 	-- far left again, under Roblox's top bar and above the steering: 40 px icons, five of them (the
 	-- car's DESPAWN is PUT AWAY in the phone's ••• car menu)
+	-- (19 Nov, DEALER / SHOP / JOBS added: 8-9 icons) a column fills top down and wraps into a
+	-- second one: 5 high on a phone (above the steering), 6 on PC
+	local gap = if UI.isTouch then 4 else 10
 	local column = new("Frame", {
 		Name = "SideButtons",
 		AnchorPoint = if UI.isTouch then Vector2.zero else Vector2.new(0, 0.5),
 		Position = if UI.isTouch then UDim2.fromOffset(10, 52) else UDim2.new(0, 20, 0.5, 0),
-		Size = if UI.isTouch then UDim2.fromOffset(size, size * 5 + 16) else UDim2.fromOffset(size, size * 6 + 50),
+		Size = UDim2.fromOffset(size, size),
+		AutomaticSize = Enum.AutomaticSize.XY,
 		BackgroundTransparency = 1,
 		Parent = hud,
 	}, {
-		new("UIListLayout", { Padding = UDim.new(0, if UI.isTouch then 4 else 10), SortOrder = Enum.SortOrder.LayoutOrder }),
+		new("UIGridLayout", {
+			CellSize = UDim2.fromOffset(size, size),
+			CellPadding = UDim2.fromOffset(gap, gap),
+			FillDirection = Enum.FillDirection.Vertical,
+			FillDirectionMaxCells = if UI.isTouch then 5 else 6,
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
 	})
 	local function sideButton(kind: string, caption: string, order: number): TextButton
 		local b: TextButton = new("TextButton", {
@@ -1284,6 +1322,40 @@ local function buildSideButtons()
 			UI.onHouseButton()
 		end
 	end)
+	-- (19 Nov, owner: make the dealership and the store easy to find) DEALER opens the dealer menu
+	-- from anywhere, SHOP the main menu's STORE tab; column order Dealer, Shop, Jobs, then the rest
+	local dealerBtn = sideButton("dealer", "DEALER", -3)
+	dealerBtn.Name = "DealerButton"
+	dealerBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onDealerButton then
+			UI.onDealerButton()
+		end
+	end)
+	local storeBtn = sideButton("cart", "SHOP", -2)
+	storeBtn.Name = "ShopButton"
+	storeBtn.Activated:Connect(function()
+		closePanels()
+		if UI.onShopButton then
+			UI.onShopButton()
+		end
+	end)
+	-- "!" while the store has an item this player hasn't looked at (server/Offers.lua: StoreUnseen)
+	local storeDot: Frame = new("Frame", {
+		Name = "New",
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.new(1, -5, 0, 5),
+		Size = UDim2.fromOffset(15, 15),
+		BackgroundColor3 = Theme.Danger,
+		ZIndex = 3,
+		Parent = storeBtn,
+	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Background, 2, 0) })
+	label({ Text = "!", TextSize = 12, Font = Enum.Font.GothamBlack, Size = UDim2.fromScale(1, 1), ZIndex = 4, Parent = storeDot })
+	local function paintStoreDot()
+		storeDot.Visible = (tonumber(player:GetAttribute("StoreUnseen")) or 0) > 0
+	end
+	player:GetAttributeChangedSignal("StoreUnseen"):Connect(paintStoreDot)
+	paintStoreDot()
 	-- (19 Nov, owner: jobs like Southwest Florida) JOBS: the main menu's JOBS tab
 	local jobsBtn = sideButton("jobs", "JOBS", -1)
 	jobsBtn.Activated:Connect(function()

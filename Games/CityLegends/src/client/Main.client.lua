@@ -973,6 +973,13 @@ UI.onCashPlus = function()
 	end
 	MainMenu.show("STORE")
 end
+-- (19 Nov, owner: jobs like Southwest Florida) the HUD's JOBS icon, the job bar and the Job Center kiosk
+UI.onJobsButton = function()
+	if not MainMenu.isOpen() then
+		MainMenu.open(false)
+	end
+	MainMenu.show("JOBS")
+end
 
 showMenu = function()
 	UI.showHud(false)
@@ -1032,7 +1039,28 @@ UserInputService.InputBegan:Connect(function(input, processed)
 	end
 end)
 
-showMenu()
+-- (19 Nov) back from the idle rejoin at a job post (server/Jobs.lua stood you at your post, on duty):
+-- no start menu, the on-foot HUD
+local function rejoinedAtPost()
+	arrivedYet = true
+	MainMenu.close()
+	stopOrbit()
+	OnFoot.footMode()
+	UI.hideLoading()
+	UI.showHud(true)
+	UI.fade(false, 0.3)
+	UI.toast("Back at your post: still on duty", Config.Theme.Accent2)
+end
+player:GetAttributeChangedSignal("JobRejoined"):Connect(function()
+	if player:GetAttribute("JobRejoined") then
+		task.spawn(rejoinedAtPost)
+	end
+end)
+if player:GetAttribute("JobRejoined") then
+	task.spawn(rejoinedAtPost)
+else
+	showMenu()
+end
 
 -- Watchdog (19 Nov, owner: "the loading screen sometimes doesnt load in and i get stuck with no GUI
 -- after pressing skip / waiting a while"): once nothing is loading or on its way, there must be

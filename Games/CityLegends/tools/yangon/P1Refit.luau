@@ -162,12 +162,13 @@ function M.collide(data: string, site: string): number
 			for w in string.gmatch(parts[k], "%S+") do
 				table.insert(v, tonumber(w))
 			end
-			if #v == 7 then
+			if #v == 7 or #v == 8 then
 				local p = Instance.new("Part")
 				p.Name = "Col"
 				p.Anchored = true
 				p.Size = Vector3.new(math.max(v[4], 0.05), math.max(v[5], 0.05), math.max(v[6], 0.05))
-				p.CFrame = CFrame.new(v[1], v[2], v[3]) * CFrame.Angles(0, v[7], 0)
+				-- an 8th number pitches the box about its z (an escalator ramp: its +x end raised)
+				p.CFrame = CFrame.new(v[1], v[2], v[3]) * CFrame.Angles(0, v[7], 0) * CFrame.Angles(0, 0, v[8] or 0)
 				p.Transparency = 1
 				p.CanCollide = true
 				p.CanQuery = true

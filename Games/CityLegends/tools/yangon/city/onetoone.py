@@ -63,12 +63,13 @@ class XGeo(Geo):
         return (S * ax + (x - ax), S * ay + (y - ay), (self.f(az) + (z - az)) if zkeep else self.f(z))
 
     def box_x(self, b):
-        cx, cy, z0, sx, sy, sz, yaw = b
+        """(cx, cy, z0, sx, sy, sz, yaw[, pitch]): a pitched box (an escalator ramp) is only made in a KEEP frame."""
+        cx, cy, z0, sx, sy, sz, yaw = b[:7]
         if not self.stack:
-            return (cx * S, cy * S, self.f(z0), sx * S, sy * S, self.f(z0 + sz) - self.f(z0), yaw)
+            return (cx * S, cy * S, self.f(z0), sx * S, sy * S, self.f(z0 + sz) - self.f(z0), yaw) + tuple(b[7:])
         X, Y, Z = self.X((cx, cy, z0))
         zkeep = self.stack[-1][3]
-        return (X, Y, Z, sx, sy, sz if zkeep else self.f(z0 + sz) - self.f(z0), yaw)
+        return (X, Y, Z, sx, sy, sz if zkeep else self.f(z0 + sz) - self.f(z0), yaw) + tuple(b[7:])
 
     @contextmanager
     def keep(self, ax, ay, az=0.0, zkeep=True):
@@ -261,10 +262,13 @@ def collide_text(boxes, gboxes, y0, plane, tag):
     plane at their middle."""
     parts = []
     for lst, ground in ((boxes, False), (gboxes, True)):
-        for cx, cy, z0, sx, sy, sz, yaw in lst:
+        for b in lst:
+            cx, cy, z0, sx, sy, sz, yaw = b[:7]
             X, Z = OX1 + cx, OZ1 - cy
             base = plane_y(plane, X, Z) if ground else y0
-            parts.append("%.2f %.2f %.2f %.2f %.2f %.2f %.4f" % (X, base + z0 + sz / 2, Z, sx, sz, sy, yaw))
+            # an 8th number = pitch (radians, the box's x end raised): P1Refit.collide turns it about the box's z
+            parts.append("%.2f %.2f %.2f %.2f %.2f %.2f %.4f" % (X, base + z0 + sz / 2, Z, sx, sz, sy, yaw)
+                         + (" %.4f" % b[7] if len(b) > 7 else ""))
     return tag + "|" + "|".join(parts)
 
 

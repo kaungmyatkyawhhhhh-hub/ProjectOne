@@ -241,12 +241,14 @@ def export(geo, y0, out_glb, plane=None, ground_groups=(), tag="mc"):
 def collide_text(boxes, y0, plane=None, tag="mc"):
     """Boxes (cx, cy, z0, sx, sy, sz, yaw) in model coords -> YangonBuildingMeshes.collide data (one line)."""
     parts = []
-    for cx, cy, z0, sx, sy, sz, yaw in boxes:
+    for b in boxes:
+        cx, cy, z0, sx, sy, sz, yaw = b[:7]
         X, Z = OX + cx, OZ - cy
         base = y0
         if plane:
             base = max(y0, plane[0] + plane[1] * (X - OX) + plane[2] * (Z - OZ)) if z0 <= 0.01 else y0
-        parts.append("%.2f %.2f %.2f %.2f %.2f %.2f %.4f" % (X, base + z0 + sz / 2, Z, sx, sz, sy, yaw))
+        parts.append("%.2f %.2f %.2f %.2f %.2f %.2f %.4f" % (X, base + z0 + sz / 2, Z, sx, sz, sy, yaw)
+                     + (" %.4f" % b[7] if len(b) > 7 else ""))
     return tag + "|" + "|".join(parts)
 
 

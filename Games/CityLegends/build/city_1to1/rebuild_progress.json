@@ -168,6 +168,15 @@
   "swapped": "v1473: old 10 cells (z21 x19..23 from P1, z26 x19..23 from P3) + 3901 boxes (box centre in 1536 x19..23 z21..26) -> ServerStorage.RB_OldP7.{Meshes,Collide}; new 30 cells 287 meshes + 18761 boxes in",
   "district_moved": "DONE v1450: DistrictPlace P7 packs 79021963633938/128053610201688/87141674653732 (J37 clear), night 125319529830179 (24 cells), terrain 862 tiles, green paint 719 tiles + far 2952 parts (Green.Far renamed, merged back: 184 cells, 0 dups) + Data_P7G 705 tiles, Data_P7 527 tiles (all 429 kit ids in Templates), shells 4760 + roofs 1589, 10 pagodas re-placed (old ones + Shwedagon_Hill_TEMP + MahaWizayaPlate_TEMP in ServerStorage.RB_OldP7.Temps until the Play test; then delete). Packs + Terrain modules removed. Studio's ClaudeTools.PagodaPlace is the landmarks3d one: the rows one is ClaudeTools.PagodaPlaceRows (DistrictPlace.pagodas needs it named PagodaPlace for the call).",
   "export_note": "all 12 step boxes exported (labels: x10 = z 32256..33792, x13 = z 39936..41472 bands) -> roads05_RB7/pages (305 pages); 11x11 log has one MOUTH FAILED; Studio slices freed; terrain beds written; saved (v1450+)",
-  "next": "trees/props on new R boxes (Green.Far + Data_P7G/P7 KF), Studio sync lanes L1237 + YangonMapArt (asset 104399539049085), RoadVerge05 over P7 tiles, Play test, delete RB_OldP7, save"
+  "next": "Play test (store test -> v1), shots, delete RB_OldP7, save, notes",
+  "trees_on_road": "Green.Far / BANKTREE in 1536 x19..23 z21..26: 3380 tested, 0 on R; KF Data_P7G: 2 tree records removed (0 left)",
+  "lanes": "L1237 (P1 P2 P3 P7, roads05_lanesubset + roads05_lanes --install): 797 lanes, 1823 links, 0 dead ends; src/shared YangonLanes1to1_1..12 + Studio Shared synced (checksums equal, build/city_1to1/roads05_L1237_checksums.txt)",
+  "minimap": "FULL += P7; tiles d_0..1_6..9 + o_0..1_2..3 re-uploaded (ids imports/sync/minimap_1to1/ids.json, ops_P7.txt); src/client/YangonMapArt.lua regenerated + Studio synced",
+  "verge": "RoadVerge05 + trim, 9 tiles over x 29184..36864 z 32256..41472 (done)",
+  "pbox_clip": "roads05_pbox_clip.py RB7 re-run on the bake's collide: 1011 P rows -> 970 pieces swapped in Studio (old in RB_OldP7.PBoxes)",
+  "terrain_scan": "MapBugScan copy (AREAS = 1536 x19..23 z21..26): 80 R boxes with terrain over carved; nearDecks applied (2347 stray voxel entries near Kabar Aye / Arzani decks)",
+  "kit_walls": "Studio's YangonKitData was the OLD 14306-char decoder (no compact FORMAT=2: Data_P7 detail would not build!) -> synced to git 33827/69121963 (asset 115556805610024; old copy RB_OldP7.YangonKitData_old14306). Wall records on R in Data_P7 (expanded compact): 18 removed in 16 tiles (stored expanded), 0 left",
+  "saved": "v1476 after verge/pbox/terrain; then kit walls + KD saved (save timed out -> NotNeeded)",
+  "STORE": "!! PlayerData store switched to CityLegends_test for the P7 Play test (19 Nov ~02:40). If this run is cut: put it back to CityLegends_v1 first."
  }
 }

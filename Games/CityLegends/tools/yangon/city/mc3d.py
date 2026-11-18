@@ -2035,6 +2035,38 @@ def interior():
     lobby = Polygon([(lob_c[0] + t[0] * sx * 9 + n[0] * sy * 8, lob_c[1] + t[1] * sx * 9 + n[1] * sy * 8)
                      for sx, sy in ((-1, -1), (1, -1), (1, 1), (-1, 1))]).intersection(IB)
 
+    # escalator runs: a side-by-side up / down pair GF-1F, then single runs crossing the void, direction alternating
+    def chord(phi, run, off=0.0, r_out=1.8):
+        """Endpoints of a chord of the void (pushed r_out outside the ellipse at each end) centred at angle phi."""
+        best = None
+        for k in range(1, 400):
+            dlt = k * 0.0025
+            pa = (cx + (ATR_RX + r_out) * math.cos(phi - dlt), cy + (ATR_RY + r_out) * math.sin(phi - dlt))
+            pb = (cx + (ATR_RX + r_out) * math.cos(phi + dlt), cy + (ATR_RY + r_out) * math.sin(phi + dlt))
+            if math.dist(pa, pb) >= run:
+                best = (pa, pb)
+                break
+        pa, pb = best
+        nrm = unit(((pa[0] + pb[0]) / 2 - cx, (pa[1] + pb[1]) / 2 - cy))
+        return ((pa[0] - nrm[0] * off, pa[1] - nrm[1] * off), (pb[0] - nrm[0] * off, pb[1] - nrm[1] * off))
+    rise1, rise = POD_Z[1] - POD_Z[0], POD_Z[2] - POD_Z[1]
+    run1, run2 = rise1 * 1.73 + 4.8, rise * 1.73 + 4.8  # 30 degrees plus the two flat steps at each end
+    offs = (3.4, 9.8)
+    if ONE:
+        # true rises (16.5 / 15 studs), runs at 30 degrees, as old-frame chord lengths; the pair side by side
+        run1 = ((g.f(POD_Z[1]) - g.f(POD_Z[0])) * 1.73 + 4.8) / X1.S
+        run2 = ((g.f(POD_Z[2]) - g.f(POD_Z[1])) * 1.73 + 4.8) / X1.S
+        offs = (3.4, 3.4 + 6.6 / X1.S)
+    RUNS = []                                          # (p_lo, p_hi, z0, z1): bottom -> top
+    for off in offs:                                   # GF-1F pair at the void's south end
+        pa, pb = chord(-math.pi / 2, run1, off=off)
+        RUNS.append((pa, pb, POD_Z[0], POD_Z[1]))
+    pa, pb = chord(math.pi / 2, run2, off=3.4)         # 1F-2F at the north end (the other way)
+    RUNS.append((pb, pa, POD_Z[1], POD_Z[2]))
+    pa, pb = chord(-math.pi / 2, run2, off=3.4)        # 2F-3F back at the south end
+    RUNS.append((pb, pa, POD_Z[2], POD_Z[3]))
+    TONGUES = landing_tongues(RUNS, IB.difference(ATR), ATR) if ONE else {}
+
     # floors: GF marble; slabs at 1F-3F with the void (1F also open over the lobby); the slab at the 4th level closed
     g.capshape("MAR", IB, 0.05)
     COLL.extend(raster_boxes(IB, -1.0, 0.05, 6.0))
