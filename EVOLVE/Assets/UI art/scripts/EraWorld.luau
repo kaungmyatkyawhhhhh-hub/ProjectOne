@@ -212,6 +212,30 @@ end
 -- Swimming: in the sea world you sink slowly, and every jump press (Space or the phone jump button) is a stroke upward.
 local baseGravity = workspace.Gravity
 local SEA_GRAVITY, STROKE, SINK, SURFACE = 35, 22, 7, 90 -- a stroke lifts about 7 studs, you sink at 7 studs/s, nobody swims above y = 90
+-- Movement sounds: our own, synthesized (vault EVOLVE/Audio/make_moves.py). 2D, so only you hear your own steps.
+local MOVE_SOUNDS = { -- name = { asset ids (variants), volume }
+	step_small = { { 127521599602224, 72066563392714, 118475161030831 }, 0.35 },
+	step_mid = { { 136503552963955, 130897330270749, 116262435041797 }, 0.45 },
+	step_big = { { 112387779457047, 72300185311559, 131118480778541 }, 0.6 },
+	swim = { { 92086636252929, 74933962244943, 108983690361664 }, 0.5 },
+	jump = { { 138704544348101 }, 0.45 }, land = { { 86370231275212 }, 0.4 },
+}
+local pool, lastPick = {}, {}
+local function playMove(name)
+	local ids, volume = MOVE_SOUNDS[name][1], MOVE_SOUNDS[name][2]
+	if #ids == 0 then return end
+	local k = math.random(#ids)
+	if #ids > 1 and k == lastPick[name] then k = k % #ids + 1 end -- never the same variant twice in a row
+	lastPick[name] = k
+	local s = pool[ids[k]]
+	if not s then
+		s = Instance.new("Sound")
+		s.SoundId, s.Volume, s.Parent = "rbxassetid://" .. ids[k], volume, game:GetService("SoundService")
+		pool[ids[k]] = s
+	end
+	s.PlaybackSpeed = 1 + (math.random() - 0.5) * 0.12 -- ±6%
+	s:Play()
+end
 local lastStroke = 0
 game:GetService("UserInputService").JumpRequest:Connect(function()
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -219,6 +243,7 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
 	lastStroke = os.clock()
 	local v = root.AssemblyLinearVelocity
 	root.AssemblyLinearVelocity = Vector3.new(v.X, STROKE, v.Z)
+	playMove("swim")
 end)
 -- Swim pose: the server welds each body part ("Form") to the root. On this client those become Welds we can turn,
 -- so the body tips nose-up when rising, nose-down when sinking, and wiggles while moving. Only you see it.
@@ -237,6 +262,10 @@ local function hookCharacter(char)
 	end
 	for _, d in char:GetDescendants() do take(d) end
 	char.DescendantAdded:Connect(take)
+	char:WaitForChild("Humanoid").StateChanged:Connect(function(_, new)
+		if current == ERAS[1] then return end -- the sea has strokes, not jumps
+		if new == Enum.HumanoidStateType.Jumping then playMove("jump") elseif new == Enum.HumanoidStateType.Landed then playMove("land") end
+	end)
 end
 task.spawn(function() -- owner, 18 Nov 2026: "i can hear roblox walking sound". Our creatures aren't people: no default footsteps/jump/splash
 	local sounds = player:WaitForChild("PlayerScripts"):WaitForChild("RbxCharacterSounds", 30)
@@ -246,12 +275,22 @@ task.spawn(function() -- owner, 18 Nov 2026: "i can hear roblox walking sound". 
 end)
 if player.Character then task.spawn(hookCharacter, player.Character) end
 player.CharacterAdded:Connect(hookCharacter)
-local pitch, posed = 0, false
+local pitch, posed, walked = 0, false, 0
 game:GetService("RunService").Heartbeat:Connect(function(dt)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if not root then return end
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if not (root and hum) then return end
 	local sea, v = current == ERAS[1], root.AssemblyLinearVelocity
 	if sea and v.Y < -SINK then root.AssemblyLinearVelocity = Vector3.new(v.X, -SINK, v.Z) end -- water drag: sink, don't drop
+	if not sea and hum.FloorMaterial ~= Enum.Material.Air then -- footsteps: bigger creatures take longer, heavier steps
+		walked += Vector3.new(v.X, 0, v.Z).Magnitude * dt
+		local size = player.Character:GetExtentsSize()
+		local span = math.max(size.X, size.Z)
+		if walked >= math.clamp(span * 0.45, 1.5, 9) then
+			walked = 0
+			playMove(span < 5 and "step_small" or span > 14 and "step_big" or "step_mid")
+		end
+	end
 	if not sea and not posed then return end
 	pitch += ((sea and math.clamp(v.Y / STROKE, -1, 1) * 0.4 or 0) - pitch) * math.min(dt * 6, 1)
 	local wiggle = (sea and Vector3.new(v.X, 0, v.Z).Magnitude > 2) and math.sin(os.clock() * 8) * 0.12 or 0
