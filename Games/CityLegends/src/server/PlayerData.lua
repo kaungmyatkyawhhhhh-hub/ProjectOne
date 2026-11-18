@@ -121,9 +121,10 @@ local PlayerData = {}
 
 local profiles: { [Player]: Profile } = {}
 local store: DataStore? = nil
+PlayerData.storeName = "CityLegends_v1" -- (PlateShop's claims store is this name .. "_Plates")
 do
 	local ok, result = pcall(function()
-		return DataStoreService:GetDataStore("CityLegends_v1")
+		return DataStoreService:GetDataStore(PlayerData.storeName)
 	end)
 	if ok then
 		store = result
@@ -244,6 +245,7 @@ local function defaultProfile(): Profile
 		Luxe = {},
 		Challenges = {},
 		Customs = {},
+		Plates = {}, -- (2026-11-19) number plates: { Car = { [carId] = plate }, Bag = { [plate] = paid } } (PlateShop)
 		Goals = {},
 		Brands = {},
 		CarLevels = {},
@@ -442,6 +444,9 @@ function PlayerData.load(player: Player): Profile?
 			end
 			if type(saved.Customs) == "table" then
 				profile.Customs = saved.Customs -- (Customs.lua cleans each look when it's read)
+			end
+			if type(saved.Plates) == "table" then
+				(profile :: any).Plates = saved.Plates -- (PlateShop cleans it when it's read)
 			end
 			if type(saved.Goals) == "table" then
 				profile.Goals = saved.Goals -- (Goals.lua cleans it when it's read)
@@ -742,6 +747,7 @@ local function payloadOf(profile: Profile, session: { [string]: any }?): { [stri
 		Luxe = profile.Luxe,
 		Challenges = profile.Challenges,
 		Customs = profile.Customs,
+		Plates = (profile :: any).Plates,
 		Goals = profile.Goals,
 		Brands = profile.Brands,
 		CarLevels = profile.CarLevels,
