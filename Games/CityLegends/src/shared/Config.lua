@@ -2739,6 +2739,7 @@ Config.Goals = {
 		{ id = "jobs", text = "Finish %d delivery jobs", stat = "jobs", need = 2, cash = 6000, xp = 150 },
 		{ id = "pvp", text = "Race against players %d times", stat = "pvp", need = 2, cash = 8000, xp = 200 },
 		{ id = "escapes", text = "Get away from the police %d time", stat = "escapes", need = 1, cash = 8000, xp = 200 },
+		{ id = "paychecks", text = "Earn %d job paychecks", stat = "paychecks", need = 5, cash = 6000, xp = 150 }, -- (2026-11-18, the Job Center)
 	},
 	TaskLevelBoost = 0.05, -- task cash x(1 + this per level above 1), at most x3
 }
@@ -3254,7 +3255,7 @@ Config.Jobs = (function()
 		ArriveRadius = 30, -- studs from a stop / fare / patrol point
 		StopSps = 14, -- you must be (nearly) stopped there
 		MaxSps = 300, -- no car is faster: a leg done quicker than distance / MaxSps is refused
-		RadarSeconds = 3, -- police: hold still this long at a patrol point (the client waits, the server checks the time)
+		RadarSeconds = 3, -- police: hold still this long at a patrol point (the radar check; client side, feel only)
 		Ticket = { Range = 90, Pay = 250, Xp = 10, Cooldown = 45 }, -- police: a real player speeding past (Police.SpeedLimitKmh)
 		Taxi = { PickupMin = 250, PickupMax = 1400, FareMin = 900 }, -- studs
 		Patrol = { Min = 600, Max = 1800 },

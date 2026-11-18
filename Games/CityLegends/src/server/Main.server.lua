@@ -391,6 +391,7 @@ local ctx = {
 	end,
 	goals = Goals,
 	care = nil :: any, -- (Care, set below)
+	jobs = nil :: any, -- (Jobs, set below)
 }
 Goals.init(ctx)
 CarLevels.init(ctx)
@@ -688,6 +689,10 @@ local Trailers = require(script.Parent:WaitForChild("Trailers"))
 ctx.isTowing = Trailers.isTowing
 ctx.isBusy = Activities.isBusy
 Trailers.init(ctx)
+-- (2026-11-18) jobs with ranks and paychecks (the Job Center); Activities' delivery reports to it
+local Jobs = require(script.Parent:WaitForChild("Jobs"))
+ctx.jobs = Jobs
+Jobs.init(ctx)
 -- (2026-11-07) mileage, wear, fuel, the service book
 local Care = require(script.Parent:WaitForChild("Care"))
 ctx.care = Care

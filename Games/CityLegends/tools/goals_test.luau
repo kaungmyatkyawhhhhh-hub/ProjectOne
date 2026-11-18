@@ -35,7 +35,7 @@ local function check(ok: boolean, what: string)
 end
 
 local G = Config.Goals
-local STATS = { miles = true, cuts = true, combo = true, races = true, gold = true, traps = true, trapgold = true, drifts = true, jumps = true, jobs = true, chips = true, customs = true, escapes = true, bank = true, house = true, pvp = true, pvpwins = true, level = true, cars = true, brands = true }
+local STATS = { miles = true, cuts = true, combo = true, races = true, gold = true, traps = true, trapgold = true, drifts = true, jumps = true, jobs = true, paychecks = true, chips = true, customs = true, escapes = true, bank = true, house = true, pvp = true, pvpwins = true, level = true, cars = true, brands = true }
 
 local ids, bad, cashUp = {}, {}, true
 for i, g in G.Path do

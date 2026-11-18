@@ -518,7 +518,9 @@ handlers.jobFinish = function(player)
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, 80, "job")
 	ctx.note(player, "jobs", 1)
-	return { ok = true, cash = cash, left = left }
+	-- (2026-11-18) on the Delivery job: its rank / Double Pay share and job XP (server/Jobs.lua)
+	local extra = if ctx.jobs then ctx.jobs.task(player, "delivery", cash) else 0
+	return { ok = true, cash = cash + extra, left = left }
 end
 
 handlers.chip = function(player, index)
