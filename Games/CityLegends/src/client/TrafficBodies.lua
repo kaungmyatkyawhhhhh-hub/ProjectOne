@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local TrafficMix = require(Shared:WaitForChild("TrafficMix"))
 
 local TrafficBodies = {}
 
@@ -93,7 +94,10 @@ local function prepare(template: Model): Model
 	local m = template:Clone()
 	m:PivotTo(CFrame.new())
 	local kind = string.match(m.Name, "_(%a)") or "A"
-	local target = Config.Traffic.ModelLengths[kind] or 13
+	-- (2026-11-19) the Yangon set: each car at its own real length (TrafficMix), the old pack by type letter
+	local entry = TrafficMix.byName[template.Name]
+	local target = if entry then entry.len else Config.Traffic.ModelLengths[kind] or 13
+	local keepColors = template:GetAttribute("KeepColors") == true
 	local _, size = m:GetBoundingBox()
 	m:ScaleTo(m:GetScale() * target / math.max(size.Z, 0.1))
 	local cf, box = m:GetBoundingBox()
@@ -143,7 +147,7 @@ local function prepare(template: Model): Model
 			p.Massless = true
 			p.CastShadow = false
 			-- Import 3D drops the plain colours: the untextured pieces (tyres, trim, glass) are near-black
-			if p:IsA("MeshPart") and p.TextureID == "" then
+			if p:IsA("MeshPart") and p.TextureID == "" and not keepColors then
 				p.Color = UNTEXTURED
 			end
 			if not wheelParts[p] then
@@ -156,14 +160,22 @@ local function prepare(template: Model): Model
 	m:SetAttribute("Width", box.X)
 	m:SetAttribute("Height", box.Y)
 	m:SetAttribute("TrafficBody", m.Name)
+	if entry then
+		m:SetAttribute("TrafficId", entry.id)
+		if entry.rare then
+			-- the hook for a later chase bonus (17 Nov design): rare NPC supercars carry RareTraffic = their cap group
+			m:SetAttribute("RareTraffic", entry.rare)
+			m:SetAttribute("RacerMph", entry.mph)
+		end
+	end
 	return m
 end
 
-local function buildFrom(list: { Model }, rng: Random): Model?
-	if #list == 0 then
+local function buildFrom(list: { Model }, rng: Random, pick: Model?): Model?
+	if #list == 0 and not pick then
 		return nil
 	end
-	local template = list[rng:NextInteger(1, #list)]
+	local template = pick or list[rng:NextInteger(1, #list)]
 	local done = ready[template]
 	if not done then
 		local ok, result = pcall(prepare, template)
@@ -174,18 +186,48 @@ local function buildFrom(list: { Model }, rng: Random): Model?
 		done = result
 		ready[template] = done
 	end
-	return done:Clone()
+	local car = done:Clone()
+	-- livery: the parts marked TrafficPaint take one of the car's colours (TrafficMix)
+	local entry = TrafficMix.byName[template.Name]
+	if entry and #entry.paint > 0 then
+		local color = entry.paint[rng:NextInteger(1, #entry.paint)]
+		for _, d in car:GetDescendants() do
+			if d:IsA("BasePart") and d:GetAttribute("TrafficPaint") then
+				d.Color = color
+			end
+		end
+	end
+	return car
 end
 
--- a new traffic car (nil when there are no TrafficModels)
-function TrafficBodies.build(rng: Random): Model?
-	return buildFrom(templates(), rng)
+-- a new traffic car (nil when there are no TrafficModels). With the Yangon set in the place the car comes from
+-- TrafficMix.pick: `counts` = live cars per rare group, `main` = the spot is on a main road
+function TrafficBodies.build(rng: Random, counts: { [string]: number }?, main: boolean?): Model?
+	local all = templates()
+	local have, byName = {}, {}
+	for _, m in all do
+		if TrafficMix.byName[m.Name] then
+			have[m.Name] = true
+			byName[m.Name] = m
+		end
+	end
+	if next(have) then
+		local name = TrafficMix.pick(rng, have, counts or {}, main == true)
+		return if name then buildFrom({}, rng, byName[name]) else nil
+	end
+	return buildFrom(all, rng)
 end
 
 -- (2026-11-14, YangonStreetLife's parked cars) a car of one type letter (Config.Traffic.ModelLengths: A hatch,
 -- B people carrier, C small van, D minibus, E saloon, F pickup); any type when the place has none of that one
 function TrafficBodies.buildType(kind: string, rng: Random): Model?
-	local all = templates()
+	local all = {}
+	for _, m in templates() do
+		local e = TrafficMix.byName[m.Name]
+		if not (e and (e.rare or e.main)) then -- (no parked supercars or buses)
+			table.insert(all, m)
+		end
+	end
 	local list = {}
 	for _, m in all do
 		if (string.match(m.Name, "_(%a)") or "A") == kind then

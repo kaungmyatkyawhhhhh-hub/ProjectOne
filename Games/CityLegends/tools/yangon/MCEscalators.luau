@@ -18,7 +18,7 @@ local MC = workspace.Yangon1to1.Landmarks.MyanmarCentre
 
 local function prefixOf(name: string): string
 	local p = string.split(name, "_")
-	return p[1] .. "_" .. p[2] .. "_"
+	return p[1] .. "_" .. (p[2] or "") .. "_"
 end
 
 function M.swap(holding: Instance): string
@@ -51,30 +51,28 @@ function M.swap(holding: Instance): string
 	return #done .. " swapped: " .. table.concat(done, ", ")
 end
 
-local function key(cf: CFrame, size: Vector3): string
-	return string.format("%.1f %.1f %.1f %.1f %.1f %.1f", cf.X, cf.Y, cf.Z, size.X, size.Y, size.Z)
-end
-
 function M.collide(json: string): string
 	local data = game:GetService("HttpService"):JSONDecode(json)
 	local old = game:GetService("ServerStorage"):FindFirstChild("MCEscalatorsOld") or Instance.new("Folder")
 	old.Name = "MCEscalatorsOld"
 	old.Parent = game:GetService("ServerStorage")
-	local want = {}
+	local parts = MC.Collide:GetChildren()
+	local dropped, missing = 0, 0
 	for _, v in data.drop do
-		want[key(CFrame.new(v[1], v[2], v[3]), Vector3.new(v[4], v[5], v[6]))] = true
-	end
-	local dropped = 0
-	for _, p in MC.Collide:GetChildren() do
-		if p:IsA("BasePart") and want[key(p.CFrame, p.Size)] then
-			want[key(p.CFrame, p.Size)] = nil
-			p.Parent = old
-			dropped += 1
+		local at, size = Vector3.new(v[1], v[2], v[3]), Vector3.new(v[4], v[5], v[6])
+		local hit = nil
+		for _, p in parts do
+			if p.Parent == MC.Collide and (p.Position - at).Magnitude < 0.06 and (p.Size - size).Magnitude < 0.06 then
+				hit = p
+				break
+			end
 		end
-	end
-	local missing = 0
-	for _ in want do
-		missing += 1
+		if hit then
+			hit.Parent = old
+			dropped += 1
+		else
+			missing += 1
+		end
 	end
 	local added = 0
 	for _, v in data.add do
