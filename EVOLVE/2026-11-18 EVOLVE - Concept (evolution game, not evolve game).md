@@ -108,7 +108,7 @@ New LocalScript `StarterPlayerScripts.EraWorld` (copy in `Assets/UI art/scripts/
 - Everyone still shares the same ground, players, mysteries and events, and the server decides gameplay.
 - World Age pill moved to the right-middle edge (owner request).
 - **Known gaps:**
-  - Whales and sharks get the land era for their depth; it should be sea by lane.
+  - ~~Whales and sharks get the land era for their depth~~ fixed in v49 (sea era by lane).
   - No era-specific props yet (huts, fields, city).
   - Phone not checked.
 
@@ -188,3 +188,14 @@ Owner: "Yes, trait bodies".
 - About 100 species have no own look and use their lane's body.
 
 **Backup:** `Evolution_backup_before_traitbodies`.
+
+## Sea era by lane (v49, 18 Nov 2026)
+Owner: "Sea era by lane".
+- In EraWorld, if the newest branch in your `Path` is a sea branch, you see the Ancient Sea world at any depth.
+- **Sea branches:** Sharks, TrueSharks, Rays, RayFins, Coelacanths, Whales, SeaReptiles, Jellies, Sponges, Echinoderms, Cephalopods, Clams, Crustaceans.
+- **Not counted as sea:**
+  - Snails, Lungfish and Penguins (land or fresh water).
+  - Plain Fish before a split, because the main line walks onto land.
+- The world refreshes when either `StageNum` or `Path` changes.
+- **Play test:** Herpetocetus (whale, depth 28) sees the ocean. Lion at the same depth sees the land world.
+- **Not done:** whales still walk on the sea floor (no swimming).

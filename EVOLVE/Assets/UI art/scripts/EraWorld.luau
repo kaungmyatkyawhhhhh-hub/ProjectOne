@@ -85,6 +85,13 @@ local function eraOf(depth)
 	for _, e in ERAS do if depth <= e.upto then return e end end
 	return ERAS[#ERAS]
 end
-local function refresh() apply(eraOf(player:GetAttribute("StageNum") or 1)) end
+-- Sea branches stay in the sea at any depth (a whale in the Ice Age still sees the ocean). Path = "F1=Fish,...,F5=Whales": newest last.
+local SEA = { Sharks = true, TrueSharks = true, Rays = true, RayFins = true, Coelacanths = true, Whales = true, SeaReptiles = true,
+	Jellies = true, Sponges = true, Echinoderms = true, Cephalopods = true, Clams = true, Crustaceans = true }
+local function refresh()
+	local lane = (player:GetAttribute("Path") or ""):match("=(%w+)$")
+	apply(SEA[lane] and ERAS[1] or eraOf(player:GetAttribute("StageNum") or 1))
+end
 player:GetAttributeChangedSignal("StageNum"):Connect(refresh)
+player:GetAttributeChangedSignal("Path"):Connect(refresh)
 refresh()
