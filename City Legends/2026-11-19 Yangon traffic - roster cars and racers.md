@@ -105,7 +105,7 @@ The `kio_ev6` light copy came out with holes (its body is many small pieces), so
 | Before | 68 (36 racer x racer) | 202 s | 56 mph | many (queues) |
 | After | 14 (6 racer x racer) | 212 s | 90 mph | 1% |
 
-Not 0 yet. The ones left are almost all at junctions at 0-30 mph: crossing / turning cars at an angle, and everyday cars (which have no guard) running into a racer. A final run with a debug counter (does the racer's own step ever make an overlap?) could not be done: Studio's MCP Play button stuck ("Start play hasn't finished yet") for the rest of the session.
+Not 0 yet. The ones left are almost all at junctions at 0-30 mph: crossing / turning cars at an angle, and everyday cars (which have no guard) running into a racer. A final run with a debug counter (does the racer's own step ever make an overlap?) could not be done: the MCP Play button stuck ("Start play hasn't finished yet"); Play started with `StudioTestService:ExecutePlayModeAsync` from execute_luau, but then the client's Main stopped at start because `YangonLanes1to1_14` (the P4 district rebuild, in progress at 07:20) failed to load ("malformed escape sequence"), so no traffic spawned. Studio saved; store back on `CityLegends_v1`; the debug block is out of Studio's Traffic (it equals the repo file).
 
 ## Badges on traffic copies (19 Nov, later)
 - **Converted cars:** `TrafficLOD.make` now bakes the game's BrandMarks covers in (badge parts hidden by name / size, printed logos and plates covered, wheel caps), a fifth bigger than measured. Cars in `CarFinish.CARS` (GT-R, 599, California, Huracan, LP570) have their logos out of the model already and get none. New covers: Seal +8, LC300 +13, LX +7, R34 +5. The Chiron and the Chaser have no BrandMarks entry and showed no badge close up.
@@ -120,7 +120,7 @@ Not 0 yet. The ones left are almost all at junctions at 0-30 mph: crossing / tur
 - **Seen, not fixed:** the Camry and Belta traffic copies are open at the rear doors (white seats show through) and the Chiron's copy has no rear panel; they were like that before (parts the copy drops). The LC200's "NY GARAGE" plates on the player car are a made-up garage name, left.
 
 ## Left to do
-1. Racer overlaps 14 -> 0: run the debug counter (Studio's Traffic had a `DbgV` attribute block for it; remove before saving), then a junction rule for racers (treat crossing cars at an angle as ahead).
+1. Racer overlaps 14 -> 0 once the lanes load again: add a per-step debug counter (does the racer's own step make the overlap?), then a junction rule for racers (treat crossing cars at an angle as ahead).
 2. **Shots:** P3 traffic and a close-up of each type in Play (Play could not start).
 3. Switch-back check on the Server in a fresh Play (`CityLegends_v1`; the Edit source is back on it).
 4. **After the owner's phone test:** delete `ServerStorage.TrafficModels_old` and `TrafficModels_preBadges`.
