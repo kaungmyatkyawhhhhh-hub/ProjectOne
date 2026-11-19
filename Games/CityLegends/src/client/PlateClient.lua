@@ -66,13 +66,13 @@ function PlateClient.close()
 end
 
 function PlateClient.open()
-	if gui or busy then
+	if (gui and gui.Parent) or busy then
 		return
 	end
 	busy = true
 	local state = ask("state")
 	busy = false
-	if not (state and state.ok) or gui then
+	if not (state and state.ok) or (gui and gui.Parent) then
 		UI.toast(S.get("common.noServerShort"), Theme.Warning)
 		return
 	end
