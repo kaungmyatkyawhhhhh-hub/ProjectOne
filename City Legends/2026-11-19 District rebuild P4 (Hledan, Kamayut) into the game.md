@@ -24,7 +24,7 @@ P4 (Hledan, Kamayut, Insein Road, Pyay Road west side) is now in the main place,
 **Not done**
 - The same flyover fault exists in P3 (Khayaypin flyovers, Lanmadaw flyover). Those 3 road cells need rebuilding.
 - One junction mouth failed in the Hledan build (Lane #1255 on Lane #7606).
-- The grass verge beside the new roads is done for part of P4 only.
+- (Done later the same day: the grass verge over all of P4, old roads deleted, saved v1566.)
 - The edge cells next to P5 and P6 hold only P4 roads. They get rebuilt with P5 and P6.
 
 Studio restart recommended (memory 13-17 GB).
@@ -35,4 +35,4 @@ Pictures:
 - [[2026-11-19 rebuild P4 - Insein Road - after.jpg]]
 
 Steps, ids and traps: `Games/CityLegends/build/city_1to1/roads05_HANDOVER.md` "REBUILD P4" and `rebuild_progress.json`.
-Next: the rest of the P4 verge, the P3 flyover cells, then P6 and P8.
+Next: the P3 flyover cells, then P6 and P8.

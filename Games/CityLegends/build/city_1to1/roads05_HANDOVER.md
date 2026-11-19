@@ -50,7 +50,7 @@
 - **(d) Kerb overlaps:** `roads05_kerb_cross.py <tag>` (kerb pieces crossing > 25 deg, >= 30% overlap, after drop_scraps) lists
   clusters; not fixed in the builder this pass (see vault note).
 
-## REBUILD P4 (19 Nov, DISTRICT REBUILD agent 2): Hledan / Kamayut IN (district, J37 roads, lanes L12347, minimap), Play-tested
+## REBUILD P4 (19 Nov, DISTRICT REBUILD agent 2): Hledan / Kamayut IN (district, J37 roads, lanes L12347, minimap, verge), Play-tested, saved v1566
 State: `rebuild_progress.json` "P4". Same order as P7 (below); what differed:
 1. **Re-clear:** `district_files.sh P4 --no-roads buildings` (21 min): 11,209 buildings (805 dropped / 3,843 clipped), shells 14,113, roofs 6,410;
    old files `_pre_rebuild_P4`. **4 place packs** (P4 is big) and the night glb `cells_1.glb` was 23 MB (> 20 MB upload cap): split by mesh
