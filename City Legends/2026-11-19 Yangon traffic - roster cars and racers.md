@@ -90,11 +90,37 @@ The `kio_ev6` light copy came out with holes (its body is many small pieces), so
 - The 1:1 lanes come in short pieces. A "near the end of the piece" test is always true, so a racer never changed lanes until the test looked for the next real junction (a turn piece or a light).
 - Python written through a bash heredoc ate `"\n"` into a real newline again, and the module failed to load. Use `string.char(10)`.
 
+## Racer crashes, second pass (19 Nov, later)
+`client/Traffic.lua`, racers only (everyday cars unchanged, so the extra CPU is only on the rare cars):
+- **Swept strip:** every frame the racer looks at the strip it covers over the next second, its lane AND the lane it is sliding to (`racerSweep`), and caps its speed to stop behind the nearest car in it.
+- **Lane-change gate by closing speed:** a slide needs room ahead = a second of closing speed + braking from its speed down to the car ahead's (`racerRoom`), in the target lane and on the way there.
+- **Racer beside a racer:** the one level or behind (along the two's mean heading) waits (`racerBeside`), so two never slide into each other and never both wait.
+- **Hard guard:** after each step, the racer's box (+0.4 / 0.25) is tested against every car near it (`racerHit` / `racerBlocked`). A step that touches a new car, or digs deeper into one, is undone and the racer takes that car's speed. A sideways slide is checked all round; if only the slide touches, the racer drives on straight and the slide waits. Straight steps answer only for cars ahead; between two racers "ahead" is along their mean heading. Counter attribute `RacerHolds`.
+- **Merge wait creeps:** `holdMerge` used to cap the speed at 0.9x the speed, which at 0 stayed 0 forever (a whole queue of racers froze); it now creeps at 4 studs/s at least.
+
+**Test (Play on `CityLegends_test`, `TestRareChance` 1, 18 racers of 28 cars, an oriented-box overlap count every frame on the client):**
+
+| | Racer overlaps | Time | Avg racer speed | Racers under 5 mph |
+|---|---|---|---|---|
+| Before | 68 (36 racer x racer) | 202 s | 56 mph | many (queues) |
+| After | 14 (6 racer x racer) | 212 s | 90 mph | 1% |
+
+Not 0 yet. The ones left are almost all at junctions at 0-30 mph: crossing / turning cars at an angle, and everyday cars (which have no guard) running into a racer. A final run with a debug counter (does the racer's own step ever make an overlap?) could not be done: Studio's MCP Play button stuck ("Start play hasn't finished yet") for the rest of the session.
+
+## Badges on traffic copies (19 Nov, later)
+- **Converted cars:** `TrafficLOD.make` now bakes the game's BrandMarks covers in (badge parts hidden by name / size, printed logos and plates covered, wheel caps), a fifth bigger than measured. Cars in `CarFinish.CARS` (GT-R, 599, California, Huracan, LP570) have their logos out of the model already and get none. New covers: Seal +8, LC300 +13, LX +7, R34 +5. The Chiron and the Chaser have no BrandMarks entry and showed no badge close up.
+- **Roblox-built cars, fixed in `CarModels` (player cars too), `tools/brand_marks/RobloxBuiltPatches.luau`:**
+  - Belta / Vios taxi: grille emblem (chrome cover), boot emblem, TOYOTA and YARIS letters (paint covers).
+  - Camry: the boot emblem + CAMRY + XSE are one small mesh, and the grille emblem is its own part: both deleted (backup `ServerStorage.BadgeRemovalBackup.toyoka_camri`).
+  - Swift: both S badges deleted (backup), both "SWIFT" name plates made plain white plates.
+  - Land Cruiser 200 (found on the close-up pass): grille emblem covered, boot emblem, VX.R and V8 5.7 covered.
+  - Covers on paint are named `MarkPatch_Paint` (the Regent Sport's too), so Customs repaints them with the body and traffic treats them as paint. TrafficLOD keeps every `MarkPatch*`.
+- Traffic copies rebuilt with `TrafficLOD.install` (backup of the old set: `ServerStorage.TrafficModels_preBadges`).
+- Shots: `City Legends/2026-11-19 Traffic badges - *.jpg` (Belta, Camry, Swift, Land Cruiser 200 before / after; Seal, Belta, Camry, LX, LC300, R34, Chiron, GT-R / LP570 / Huracan, 599 / California traffic copies).
+- **Seen, not fixed:** the Camry and Belta traffic copies are open at the rear doors (white seats show through) and the Chiron's copy has no rear panel; they were like that before (parts the copy drops). The LC200's "NY GARAGE" plates on the player car are a made-up garage name, left.
+
 ## Left to do
-1. **Racer collisions:** add a sweep on the racer's own path for the next frame (its box against every car in the strip) and a hard stop when it would overlap. Also don't let a racer slide while another racer is beside it. Test again with `TestRareChance` 1.
-2. **Badges on traffic copies:**
-   - Converted cars (GT-R, 599, California, Huracan, LP570, Chiron, R34, Seal, Chaser, LC300, LX) get BrandMarks' covers only through CarSkin. Bring `CarSkin.addPatches` / BrandMarks into `TrafficLOD.make`, or bake the covers into the copies.
-   - Baked emblems seen close up: the Belta's front grille emblem and the TOYOTA / VIOS letters on its boot, and the Camry's boot emblem. These need `MarkPatch` entries in `tools/brand_marks/RobloxBuiltPatches.luau` (badge agent), then `TrafficLOD.install` again.
-   - Swift: its 2 badges and 2 plates are dropped in traffic, but the player car still has them.
-3. **Shots:** P3 traffic and a close-up of each type in Play.
-4. **After the owner's phone test:** delete `ServerStorage.TrafficModels_old`.
+1. Racer overlaps 14 -> 0: run the debug counter (Studio's Traffic had a `DbgV` attribute block for it; remove before saving), then a junction rule for racers (treat crossing cars at an angle as ahead).
+2. **Shots:** P3 traffic and a close-up of each type in Play (Play could not start).
+3. Switch-back check on the Server in a fresh Play (`CityLegends_v1`; the Edit source is back on it).
+4. **After the owner's phone test:** delete `ServerStorage.TrafficModels_old` and `TrafficModels_preBadges`.
