@@ -44,10 +44,27 @@ The owner approved [[2026-11-19 Economy - fair car prices proposal]] (all 6 poin
 ![[2026-11-19 Economy applied - dealer R35 trims and new prices.jpg]]
 ![[2026-11-19 Economy applied - import car from crates.jpg]]
 
+## Leftovers applied (19 Nov 2026, owner approved)
+1. **Day-7 streak car:** a dealer (Local) car you don't own, worth up to **$150,000** (`StreakCarMaxPrice` 50,000 -> 150,000; `Goals.streakCar` filters on `Source == "Local"` instead of the Mid tier, and never picks the free car). 18 cars are in the pool. Players who own all 18 still get the cash fallback (`StreakCarCash`, scaled to $9,000 by Config's cash scaler).
+2. **Sell-back stays at 60%** of the car's current price. No change.
+3. **Every free gift car is Local.** Imports stay crates only.
+   - Legends Rewards SPIN / SUPER SPIN car prize: `Rewards.pickCar` now takes Local cars only (same tiers and price caps).
+   - First-car pick and the Starter Pack's car (both use `Config.Menu.StarterChoices`): the C346 Rallye (Import) is replaced by the **Apex AE86** (Local, $110,000, "Light rear-drive drifter"). The three are now Horizon Z33 ($210k), Bavarica Werkz G20 Sport ($160k) and Apex AE86 ($110k), all Local.
+   - No other path gives a free car (grep of every `Owned[...] = true`: buying, the market, tester unlocks and save repair only).
+   - `Config.lua` got smaller (198,884 -> 198,860 bytes).
+
+**Tests (Studio, main place, test save `CityLegends_test`, unlock-all off for the run):**
+- First-car pick: the C346 Rallye is refused ("Pick one of the three"). The AE86 was claimed.
+- Starter Pack (test receipt): the pick opened. The AE86 was refused ("You own that one"). The G20 Sport was claimed.
+- Day 7 (`ClaimDaily` with the streak at day 6): it gave the **Bavarica Werkz G06 Sport Sport** (Local, $130,000).
+- The live pick code was run 2,000 times for day 7: 18 different cars, all Local, all $150k or less. Owning all of them gives the cash fallback.
+- Spin car prize: 3,000 picks, 4 Local cars, all under $120k. Super spin: 3,000 picks, 32 Local cars, all under $600k. No Imports.
+- Back on `CityLegends_v1` (checked on the Server in Play): the new rules are live, unlock-all is back on, no script errors. The place is saved, not published.
+
 ## Left for later / watch
 - **Sell-back** still pays 60% of the car's (new) price. Testers who bought cars cheap before today gain once when they sell.
-- **Day-7 streak car:** it was "a Mid car up to $50,000". Under the new prices no Mid car costs that little, so day 7 now pays its cash fallback (`StreakCarCash`). Raise `StreakCarMaxPrice`, or make it Local-only, if the owner wants a car there again.
-- **Gift cars:** Legends Rewards' free car (`pickCar`) and the first-car pick (the C346 Rallye, now Import) can still hand out a car. They are gifts, not cash buys.
+- ~~Day-7 streak car~~: done (see Leftovers applied).
+- ~~Gift cars~~: done, Local only (see Leftovers applied).
 - A deleted car's paint (`Customs`) stays in a tester's save. It's harmless.
 - **Crates themselves are not built yet.** `CrateRules` is the agreed data for when they are.
 - `tools/economy/model.py --lua` writes `CarMeta`. The live prices are frozen at the approved run. A re-run now prices lower, because delivery and posts pay less.
