@@ -34,12 +34,17 @@ local DROP_PARTS = { "cabin", "leather", "suede", "^steeringwheel", "_engine", "
 	"^hitbox", "^cam$", "^engine", "screenlit", "^tk$", "handle", "pedal", "^body_exhausthole",
 	"badge", "logo", "emblem", "lettering" }
 
+-- a badge cover (MarkPatch, MarkPatch_Paint: tools/brand_marks/RobloxBuiltPatches.luau)
+local function isPatch(n: string): boolean
+	return string.sub(n, 1, 9) == "MarkPatch"
+end
+
 local function lower(s: string): string
 	return string.lower(s)
 end
 
 local function dropped(p: Instance, root: Instance): boolean
-	if p.Name == "MarkPatch" then
+	if isPatch(p.Name) then
 		return false -- (badge covers from tools/brand_marks/RobloxBuiltPatches.luau: always kept)
 	end
 	local n = lower(p.Name)
@@ -230,7 +235,7 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 			table.remove(parts)
 		end
 		for _, d in w:GetDescendants() do
-			if d.Name == "MarkPatch" and d:IsA("BasePart") and not table.find(parts, d) then
+			if isPatch(d.Name) and d:IsA("BasePart") and not table.find(parts, d) then
 				table.insert(parts, d) -- (the wheel-cap badge covers)
 			end
 		end
@@ -332,7 +337,7 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 		local inside = math.abs(q.X) + ex < track * 0.42 and math.abs(q.Z) + ez < wb * 0.62
 			and q.Y - ey > groundY + height * 0.22 and q.Y + ey < hi.Y - height * 0.06
 		local n = lower(p.Name)
-		if p.Name == "MarkPatch" then
+		if isPatch(p.Name) then
 			table.insert(keep, p)
 		elseif badgeLike(p, length) then
 			droppedTiny += 1
@@ -346,7 +351,7 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 	end
 	if maxBody and #keep > maxBody then
 		table.sort(keep, function(a, b)
-			local pa, pb = a.Name == "MarkPatch", b.Name == "MarkPatch"
+			local pa, pb = isPatch(a.Name), isPatch(b.Name)
 			if pa ~= pb then
 				return pa -- (badge covers first: never trimmed)
 			end
