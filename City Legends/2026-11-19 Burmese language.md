@@ -7,8 +7,21 @@ created: 2026-11-19
 Owner approved, 19 Nov: a Burmese language option for the game's UI, "for burmese language u need to use unicode". Unicode only, never Zawgyi.
 
 ## Status
-- **Phase A done (19 Nov):** the font test, the string table `Games/CityLegends/src/shared/Strings.lua` (854 entries, English + Myanmar), its check `tools/strings_check.py`, this plan.
-- **Phase B not started:** the MainMenu / UI / HUD files were still being edited by other agents (jobs, mobile, minimap). Nothing in the game reads Strings yet; Strings.lua is not in Studio yet.
+- **Phase A done (19 Nov):** the font test, the string table, its check, the plan.
+- **Phase B done (19 Nov, in Studio, saved v1559, not published):** every screen shows Burmese, Settings > Language (AUTO / ENGLISH / မြန်မာ) switches live and is saved, tested at phone size in both languages (shots below). 1,029 entries now, 70 marked for the owner's check.
+
+## How it works (Phase B)
+- **`src/shared/Strings.lua`:** the table (`{ English, Myanmar, check? }`), `Strings.get(key, ...)`, `Strings.setLang("auto" | "en" | "my")` (Auto = Burmese when the player's Roblox language is `my-mm`), `Strings.Changed`, and `Strings.tr(text)`: English text as a screen builds it -> Burmese, by exact line, then by template (`"Waypoint: %s (on your map)"`, `"Reach level %d"`: numbers and names pass through, names that are in the table get translated too), then piece by piece across " · " and new lines.
+- **`src/client/LangUI.lua`** (started in Main.client right after UIStyle): watches every TextLabel / TextButton in PlayerGui and the job tags over heads; each time a screen sets a text it runs it through `Strings.tr` and keeps the English as attribute `En`; on a language change it redoes them all (live switch, no rebuild). So the screens kept their English code and every screen is covered, including ones added later. Code that compares a label's text must read `label:GetAttribute("En") or label.Text` (done in UI's gearbox / sound / TC toggles).
+- **Burmese sizes:** Myanmar letters look smaller than Latin at the same TextSize and need more height. One-line labels keep the English size (x1.15 for labels of 12 px or less) and step down only while the line is wider than its box (marks may reach a little past the box: no clipping); wrapped labels shrink to their box (x1.25 cap for small ones); labels that size themselves inside a fixed button step down until they fit. Never under 9 px.
+- **Setting:** first row of Settings, `Settings.Lang` saved by `PlayerData.setSettings`, applied in Main.client as soon as the profile arrives (`Strings.setLang(settings.Lang or "auto")`). Studio hook: player attribute `TestLang` = "en" / "my" / "auto".
+- **New UI text from now on:** add its English + Myanmar line to `Strings.lua` (one template per sentence, `%s` / `%d` in the same order in both), run `python tools/strings_check.py` (fails on Zawgyi order, kinzi, mismatched placeholders).
+- **Not translated on purpose:** car / brand / place / player names, plate numbers, key names (Enter, Q / E), units (MPH, km/h, hp), car dashboards (SurfaceGuis on the cars), world signs, rich-text lines (house specs), Roblox's own Chat and purchase prompts. Kept English as players use them: Level, XP, CP, VIP, PI, Drift, Turbo, TRACTION, CRUISE, DRIFT, 1ST PERSON, rarity names.
+- **Known limits:** Burmese digits not used (western digits everywhere); a few long Burmese lines are cut with "..." where the English was too (job card second lines); the dealer's OWNED price label touches the SELL button in both languages (old layout).
+
+## Shots (phone size 812 x 375, Studio Play, test save)
+Burmese: ![[2026-11-19 Burmese UI - main menu (Burmese).jpg]] ![[2026-11-19 Burmese UI - settings (Burmese).jpg]] ![[2026-11-19 Burmese UI - settings, graphics (Burmese).jpg]] ![[2026-11-19 Burmese UI - JOBS (Burmese).jpg]] ![[2026-11-19 Burmese UI - STORE (Burmese).jpg]] ![[2026-11-19 Burmese UI - driving HUD (Burmese).jpg]] ![[2026-11-19 Burmese UI - car menu (Burmese).jpg]] ![[2026-11-19 Burmese UI - dealer (Burmese).jpg]] ![[2026-11-19 Burmese UI - plates (Burmese).jpg]]
+English (same screens after switching back live): ![[2026-11-19 Burmese UI - main menu (English).jpg]] ![[2026-11-19 Burmese UI - settings (English).jpg]] ![[2026-11-19 Burmese UI - JOBS (English).jpg]] ![[2026-11-19 Burmese UI - STORE (English).jpg]] ![[2026-11-19 Burmese UI - driving HUD (English).jpg]] ![[2026-11-19 Burmese UI - dealer (English).jpg]] ![[2026-11-19 Burmese UI - plates (English).jpg]]
 
 ## Does Roblox draw Myanmar Unicode right? Mostly yes, except kinzi
 Tested in Studio 19 Nov (scratch ScreenGui + a world SurfaceGui, deleted after; build copy Studio, because the main Studio was locked by a Play test; the text engine is the same).
@@ -31,15 +44,7 @@ No special font, no images. Keep the game's Builder Sans: Roblox's Myanmar fallb
 - Burmese is a Roblox language: code `my`, locale `my-mm` (create.roblox.com, language codes). A LocalizationTable can hold it, and `Player.LocaleId` reads `my-mm` for a player whose Roblox language is Burmese.
 - **Automatic translation does not support Burmese** (its 18 languages: Arabic, Chinese x2, English, French, German, Hindi, Indonesian, Italian, Japanese, Korean, Polish, Portuguese, Russian, Spanish, Thai, Turkish, Vietnamese). The Translator would also mangle our UPPER-case, concatenated labels. So we use our own table, not Roblox's.
 
-## Plan for Phase B (wiring)
-1. **Setting:** Settings page, top of GRAPHICS: "Language / ဘာသာစကား" with AUTO / ENGLISH / မြန်မာ. Saved as `Settings.Lang` ("auto" / "en" / "my"), validated in `PlayerData.setSettings`. Auto = Burmese when `Player.LocaleId` starts with "my", else English. `Strings.setLang(value)` on load and on change.
-2. **Screens read Strings:** `local S = require(Shared.Strings)`; every literal becomes `S.get("key", ...)`. Concatenated labels become one template each (they are already templates in the table: `"Waypoint: %s (on your map)"`), because Burmese word order differs (the verb comes last). Job ranks: `S.rank(jobId, n)`; job names / "what" lines by job id.
-3. **Switching live:** menus are rebuilt each time they open, so they read the new language; for the HUD's fixed labels add a small `bind(label, key)` list in UI that re-sets them on `Strings.Changed`. Simplest acceptable first step: changing the language closes and reopens the main menu.
-4. **Text size rules for Burmese** (it is taller: marks above and below, and words are longer): labels that are one line get `TextScaled = true` + `UITextSizeConstraint.MaxTextSize` = their current TextSize (English stays as it is, Burmese shrinks to fit); body text keeps `TextWrapped`; buttons allow 2 lines; never under 12 px on a phone (812x375). No `string.upper` on Burmese (does nothing, harmless).
-5. **Not in the table yet:** texts the SERVER sends (toasts and notices from `server/*.lua`: they should send a key + args), goal names / descriptions (`Config.Goals`, `ChallengeData`), fast-travel place names (`TravelSpots`, `WestLayout.places`: real Yangon places could show their real Burmese names), store product names on Roblox's own purchase prompt (set by Roblox, not us), car and brand names (stay English by rule).
-6. **Test** at phone size in both languages, every screen: no clipping, no overflow. Shots `City Legends/2026-11-19 Burmese UI - <view>.jpg`.
-
-## Translations for the owner to check (33)
+## Translations for the owner to check (70)
 Rules used: short, game-style Myanmar; Level, XP, CP, VIP, PI, Drift, Turbo, Robux and brand / car / place names stay English; western digits (players see numbers that way in games). Please correct anything that sounds off: edit the Myanmar text in `src/shared/Strings.lua` or tell Claude.
 
 | Key | English | Myanmar |
@@ -51,8 +56,8 @@ Rules used: short, game-style Myanmar; Level, XP, CP, VIP, PI, Drift, Turbo, Rob
 | `set.handling` | HANDLING | ကိုင်တွယ်မှု |
 | `set.dof` | Depth of field | နောက်ခံ မှုန်ဝါးခြင်း |
 | `cars.trailerHome` | In your garage. | ကားဂိုဒေါင်ထဲမှာ။ |
-| `store.cash2x` | 2x Cash | ငွေ ၂ ဆ |
-| `store.doublePay` | Double Pay | လစာ ၂ ဆ |
+| `store.cash2x` | 2x Cash | ငွေ 2 ဆ |
+| `store.doublePay` | Double Pay | လစာ 2 ဆ |
 | `store.garage` | Garage Space | ကားဂိုဒေါင် နေရာ |
 | `house.mine` | My House | ကိုယ့်အိမ် |
 | `jobs.center` | JOB CENTER | အလုပ်စင်တာ |
@@ -77,8 +82,45 @@ Rules used: short, game-style Myanmar; Level, XP, CP, VIP, PI, Drift, Turbo, Rob
 | `mkt.salePays` | Market sale pays %s after the %d%% fee.%s | ဈေးမှာ ရောင်းရင် %s ရမည် (ခ %d%% နုတ်ပြီး)။%s |
 | `mkt.how` | • Cars trade like stocks. Prices move every %s s and jump on news. / • Tap BUY for the asking price. Hold BUY to lowball: a cheaper deal, or the seller walks. / • Sell to the market in Stalls (minus fees), or to a buyer's offer (no fee). / • Requests pay a premium for a car in a condition or better. / • Good flips raise your hype: better offers, lower fees. / • Showroom units can be delivered to your garage. | • ကားများကို စတော့လို ရောင်းဝယ်သည်။ ဈေးက %s စက္ကန့်တိုင်း ပြောင်းပြီး သတင်းထွက်ရင် ခုန်တက်သည်။ / • တောင်းဈေးဖြင့် ဝယ်ရန် ဝယ်မည် နှိပ်ပါ။ ဈေးဆစ်ရန် ဖိထားပါ: ပိုသက်သာ သို့မဟုတ် ရောင်းသူ ထွက်သွားမည်။ / • ဆိုင်ခန်းမှာ ဈေးကို ရောင်းပါ (ခ နုတ်)၊ သို့မဟုတ် ဝယ်သူ ကမ်းလှမ်းချက်ကို ရောင်းပါ (ခ မရှိ)။ / • Request များက သတ်မှတ် အခြေအနေ သို့မဟုတ် ပိုကောင်းတဲ့ ကားအတွက် ပိုပေးသည်။ / • အမြတ်ကောင်းရင် hype တက်သည်: ကမ်းလှမ်းချက် ပိုကောင်း၊ ခ ပိုနည်း။ / • Showroom ကားများကို ကိုယ့်ကားဂိုဒေါင်ထဲ ပို့ပေးနိုင်သည်။ |
 | `bank.complete` | HEIST COMPLETE | ဓားပြတိုက်မှု အောင်မြင် |
+| `plates.title` | NUMBER PLATES | ကားနံပါတ်ပြားများ |
+| `plates.customsButton` | NUMBER PLATES  › | ကားနံပါတ်ပြားများ  › |
+| `plates.atOffice` | Plate Office: choose any free number | နံပါတ်ရုံး: လွတ်နေသော နံပါတ်ကို ရွေးနိုင်သည် |
+| `plates.thisCar` | THIS CAR | ဤကား |
+| `plates.worth` | Worth %s: %s | တန်ဖိုး %s: %s |
+| `plates.roll` | ROLL NEW PLATE  %s | နံပါတ်အသစ် ကျပန်းယူမည်  %s |
+| `plates.lucky` | Lucky! %s: %s | ကံကောင်းသည်! %s: %s |
+| `plates.rolled` | New plate %s | နံပါတ်အသစ် %s |
+| `plates.office` | PLATE OFFICE | နံပါတ်ရုံး |
+| `plates.officeName` | Plate Office | နံပါတ်ရုံး |
+| `plates.officeOnly` | Chosen and lucky numbers are sold only at the Plate Office (# on the map). | ရွေးထားသော နံပါတ်နှင့် ကံကောင်းနံပါတ်များကို နံပါတ်ရုံး (မြေပုံပေါ်ရှိ #) တွင်သာ ရောင်းသည်။ |
+| `plates.waypoint` | SHOW ON MAP | မြေပုံပေါ်တွင် ပြမည် |
+| `plates.hint` | Type a plate like 9E-9999 (1-9 in front, the number from 1000) | 9E-9999 ကဲ့သို့ ရိုက်ပါ (ရှေ့တွင် 1-9၊ နံပါတ်က 1000 မှစ) |
+| `plates.check` | CHECK PRICE | ဈေးနှုန်း ကြည့်မည် |
+| `plates.quote` | %s: %s | %s: %s |
+| `plates.taken` | TAKEN | ယူပြီးသား |
+| `plates.claim` | CLAIM  %s | %s ဖြင့် ယူမည် |
+| `plates.claimed` | %s is yours: %s | %s သင့်ပိုင်ပြီ: %s |
+| `plates.ideas` | LUCKY NUMBERS | ကံကောင်းနံပါတ်များ |
+| `plates.mine` | MY PLATES | ကျွန်ုပ်၏ နံပါတ်များ |
+| `plates.on` | On %s | %s ပေါ်တွင် |
+| `plates.spare` | Spare | အပို |
+| `plates.putOn` | PUT ON | တပ်မည် |
+| `plates.moved` | %s moved | %s ကို ပြောင်းပြီး |
+| `plates.sell` | SELL %s | %s ဖြင့် ရောင်းမည် |
+| `plates.sold` | %s sold: +%s | %s ရောင်းပြီး: +%s |
+| `menu.campaign` | CAMPAIGN | ပင်မ |
+| `side.dealer` | DEALER | ကားဆိုင် |
+| `set.lowEnd` | LOW-END | ဖုန်းအနိမ့် |
+| `cam.immersive` | IMMERSIVE | အနီးကပ် |
+| `deal.importCrates` | IMPORT ONLY · CRATES | IMPORT သာ · CRATE များမှ |
+| `deal.importOnly` | IMPORT ONLY | IMPORT သာ |
+| `deal.fromCrates` | FROM CRATES | CRATE များမှ |
+| `deal.importText` | Import only: from crates | Import သာ: crate များမှသာ ရနိုင် |
+| `goal.bank` | Rob the bank and get away | ဘဏ်ဓားပြတိုက်ပြီး လွတ်အောင်ပြေးပါ |
+| `pop.closeCut` | CLOSE CUT | CLOSE CUT |
+| `pop.insaneCut` | INSANE CUT | INSANE CUT |
 
-## Full table (854 entries)
+## Full table (1,029 entries)
 Generated from `Strings.lua` (`**check**` = in the list above). Keys: `common` shared words, `menu` / `map` / `set` / `cars` / `store` / `house` / `jobs` main menu, `hud` / `keys` / `drive` driving, `daily` / `goals` / `rew` rewards, `deal` dealership, `shop` / `lvl` workshop, `cust` Customs, `mkt` car market, `care` service and fuel, `realty` / `lot` / `home` houses, `chf` / `hotel` / `gem` / `vip` venues, `bank` / `police`, `chal` / `act` races and jobs, `photo` / `mini`.
 
 | Key | English | Myanmar | Check |
@@ -285,17 +327,17 @@ Generated from `Strings.lua` (`**check**` = in the list above). Keys: `common` s
 | `store.soon` | %s: coming soon | %s: မကြာမီ လာမည် |  |
 | `store.ownIt` | %s: you own it | %s: ပိုင်ပြီးပါပြီ |  |
 | `store.garageNeedHouse` | Garage Space: place a house with room for one more space first (Legends Realty) | Garage Space: နေရာ တစ်ခု ထပ်ဆံ့တဲ့ အိမ်ကို အရင်ချပါ (Legends Realty) |  |
-| `store.cash2x` | 2x Cash | ငွေ ၂ ဆ | **check** |
-| `store.cash2xDesc` | Double the cash from driving, cut-ups and jobs, for good | မောင်းခြင်း၊ cut-up နှင့် အလုပ်များမှ ငွေ ၂ ဆ၊ အမြဲတမ်း |  |
+| `store.cash2x` | 2x Cash | ငွေ 2 ဆ | **check** |
+| `store.cash2xDesc` | Double the cash from driving, cut-ups and jobs, for good | မောင်းခြင်း၊ cut-up နှင့် အလုပ်များမှ ငွေ 2 ဆ၊ အမြဲတမ်း |  |
 | `store.vip` | VIP | VIP |  |
 | `store.vipDesc` | A VIP tag, free VIP bays in every tower garage and +10% cash from cut-ups | VIP tag၊ tower ကားဂိုဒေါင်တိုင်းမှာ အခမဲ့ VIP နေရာ နှင့် cut-up မှ ငွေ +10% |  |
-| `store.doublePay` | Double Pay | လစာ ၂ ဆ | **check** |
-| `store.doublePayDesc` | Double the pay from every job, for good | အလုပ်တိုင်းမှ လစာ ၂ ဆ၊ အမြဲတမ်း |  |
+| `store.doublePay` | Double Pay | လစာ 2 ဆ | **check** |
+| `store.doublePayDesc` | Double the pay from every job, for good | အလုပ်တိုင်းမှ လစာ 2 ဆ၊ အမြဲတမ်း |  |
 | `store.starter` | STARTER PACK | STARTER PACK |  |
 | `store.starterDesc` | $50,000 + a starter car you pick. Once per player | $50,000 + ကိုယ်ရွေးတဲ့ ကားတစ်စီး။ တစ်ယောက် တစ်ကြိမ်သာ |  |
 | `store.garage` | Garage Space | ကားဂိုဒေါင် နေရာ | **check** |
 | `store.garageDesc` | One more garage space at the house you live in | နေထိုင်တဲ့ အိမ်မှာ ကားဂိုဒေါင် နေရာ တစ်ခု ထပ်တိုး |  |
-| `store.payLink` | 2x with Double Pay  › | Double Pay ဖြင့် ၂ ဆ  › |  |
+| `store.payLink` | 2x with Double Pay  › | Double Pay ဖြင့် 2 ဆ  › |  |
 | `house.mine` | My House | ကိုယ့်အိမ် | **check** |
 | `house.cantGoHome` | Couldn't get you home | အိမ် ပြန်ပို့မရပါ |  |
 | `house.settings` | House Settings | အိမ် ဆက်တင် |  |
@@ -353,7 +395,7 @@ Generated from `Strings.lua` (`**check**` = in the list above). Keys: `common` s
 | `job.mall` | Mall Shop | Mall ဆိုင် |  |
 | `jobWhat.delivery` | Pick up parcels at the dispatch rings and drop them across town. | ပို့ဆောင်ရေးကွင်းမှာ ပါဆယ်ယူပြီး မြို့တစ်ဝှမ်း ပို့ပါ။ |  |
 | `jobWhat.taxi` | Drive to the pickup, then take the fare where they want to go. | ခရီးသည်ဆီ မောင်းသွားပြီး သူတို့ သွားချင်တဲ့နေရာ ပို့ပါ။ |  |
-| `jobWhat.bus` | Drive the YBS line: stop at each of the 7 real bus stops. | YBS လိုင်း မောင်းပါ: တကယ့် မှတ်တိုင် ၇ ခုစလုံးမှာ ရပ်ပါ။ |  |
+| `jobWhat.bus` | Drive the YBS line: stop at each of the 7 real bus stops. | YBS လိုင်း မောင်းပါ: တကယ့် မှတ်တိုင် 7 ခုစလုံးမှာ ရပ်ပါ။ |  |
 | `jobWhat.police` | Patrol points, and ticket real players who speed past you. | ကင်းလှည့်ပါ၊ အရှိန်လွန် မောင်းသွားတဲ့ ကစားသမားများကို ဒဏ်ရိုက်ပါ။ |  |
 | `jobWhat.tea` | Stand at the counter. Serve customers for tips. | ကောင်တာမှာ ရပ်ပါ။ ဧည့်သည်များကို ဧည့်ခံပြီး tip ရယူပါ။ |  |
 | `jobWhat.fuel` | Work the pumps. Fill customers' tanks for tips. | ဆီပန့်မှာ လုပ်ပါ။ ဆီဖြည့်ပေးပြီး tip ရယူပါ။ |  |
@@ -449,7 +491,7 @@ Generated from `Strings.lua` (`**check**` = in the list above). Keys: `common` s
 | `foot.cantGetOut` | Can't get out here | ဒီမှာ ဆင်းလို့ မရပါ |  |
 | `foot.noSeat` | No free seat here | ဒီမှာ ထိုင်ခုံ မလွတ်ပါ |  |
 | `daily.gift` | DAILY GIFT | နေ့စဉ် လက်ဆောင် |  |
-| `daily.giftSub` | Free cash every 24 hours. / Grows with your level. | ၂၄ နာရီတိုင်း အခမဲ့ ငွေ။ / Level မြင့်လေ များလေ။ |  |
+| `daily.giftSub` | Free cash every 24 hours. / Grows with your level. | 24 နာရီတိုင်း အခမဲ့ ငွေ။ / Level မြင့်လေ များလေ။ |  |
 | `daily.streak` | DAILY STREAK | နေ့စဉ် Streak |  |
 | `daily.streakDay` | DAILY STREAK  ·  DAY %d | နေ့စဉ် Streak  ·  နေ့ %d |  |
 | `daily.claimPlus` | CLAIM  +%s | ယူမည်  +%s |  |
@@ -459,7 +501,7 @@ Generated from `Strings.lua` (`**check**` = in the list above). Keys: `common` s
 | `daily.claimFailed` | Could not claim the gift, try again | လက်ဆောင် ယူမရပါ၊ ထပ်ကြိုးစားပါ |  |
 | `daily.day7` | DAY 7: FREE CAR | နေ့ 7: အခမဲ့ကား |  |
 | `daily.freeCar` | FREE CAR | အခမဲ့ကား |  |
-| `daily.rules` | Come back every day. Day 7 gives you a free car you don't own yet. / Miss more than 2 days and the streak starts again at day 1. | နေ့တိုင်း ပြန်လာပါ။ နေ့ 7 မှာ မပိုင်သေးတဲ့ ကား တစ်စီး အခမဲ့ ရမည်။ / ၂ ရက်ထက် ပိုလွတ်ရင် streak က နေ့ 1 က ပြန်စမည်။ |  |
+| `daily.rules` | Come back every day. Day 7 gives you a free car you don't own yet. / Miss more than 2 days and the streak starts again at day 1. | နေ့တိုင်း ပြန်လာပါ။ နေ့ 7 မှာ မပိုင်သေးတဲ့ ကား တစ်စီး အခမဲ့ ရမည်။ / 2 ရက်ထက် ပိုလွတ်ရင် streak က နေ့ 1 က ပြန်စမည်။ |  |
 | `daily.claimDay` | CLAIM DAY %d | နေ့ %d ယူမည် |  |
 | `goals.path` | LEGENDS PATH | LEGENDS PATH |  |
 | `goals.pathCount` | LEGENDS PATH  %d/%d | LEGENDS PATH  %d/%d |  |
@@ -818,13 +860,13 @@ Generated from `Strings.lua` (`**check**` = in the list above). Keys: `common` s
 | `chf.noAnswer` | The service didn't answer, try again | Service က မတုံ့ပြန်ပါ၊ ထပ်ကြိုးစားပါ |  |
 | `chf.onContract` | On contract · rides are free | စာချုပ်ရှိ · စီးခ အခမဲ့ |  |
 | `chf.contract` | Chauffeur contract | ကားဆရာ စာချုပ် |  |
-| `chf.call` | CALL  › | ခေါ်မည်  › |  |
+| `chf.call` | CALL › | ခေါ်မည် › |  |
 | `chf.pitch` | A driver in a black suit and this car, whenever you call. Pay once, ride free for good. | ခေါ်တိုင်း အနက်ရောင် ဝတ်စုံနဲ့ ကားဆရာ နှင့် ဒီကား။ တစ်ခါ ပေး၊ အမြဲ အခမဲ့ စီး။ |  |
 | `chf.sign` | SIGN CONTRACT | စာချုပ် ချုပ်မည် |  |
 | `chf.signed` | Contract signed | စာချုပ် ချုပ်ပြီး |  |
 | `chf.signFailed` | Couldn't sign | စာချုပ် မချုပ်နိုင်ပါ |  |
 | `chf.whereTo` | WHERE TO? | ဘယ်ကို သွားမလဲ? |  |
-| `chf.go` | GO  › | သွားမည်  › |  |
+| `chf.go` | GO › | သွားမည် › |  |
 | `chf.yours` | YOUR CHAUFFEUR | ကိုယ့် ကားဆရာ |  |
 | `chf.getOut` | Get out of your car to call a chauffeur (Y) | ကားဆရာ ခေါ်ရန် ကားပေါ်က ဆင်းပါ (Y) |  |
 | `chf.camera` | CAMERA [V] | ကင်မရာ [V] |  |
@@ -937,3 +979,178 @@ Generated from `Strings.lua` (`**check**` = in the list above). Keys: `common` s
 | `photo.barBack` | Tap or click anywhere to bring the bar back | Bar ပြန်ပေါ်ရန် ဘယ်နေရာမဆို နှိပ်ပါ |  |
 | `mini.inyaLake` | INYA LAKE | အင်းလျားကန် |  |
 | `mini.city` | THE CITY | မြို့ |  |
+| `plates.title` | NUMBER PLATES | ကားနံပါတ်ပြားများ | **check** |
+| `plates.customsButton` | NUMBER PLATES  › | ကားနံပါတ်ပြားများ  › | **check** |
+| `plates.atOffice` | Plate Office: choose any free number | နံပါတ်ရုံး: လွတ်နေသော နံပါတ်ကို ရွေးနိုင်သည် | **check** |
+| `plates.thisCar` | THIS CAR | ဤကား | **check** |
+| `plates.worth` | Worth %s: %s | တန်ဖိုး %s: %s | **check** |
+| `plates.roll` | ROLL NEW PLATE  %s | နံပါတ်အသစ် ကျပန်းယူမည်  %s | **check** |
+| `plates.lucky` | Lucky! %s: %s | ကံကောင်းသည်! %s: %s | **check** |
+| `plates.rolled` | New plate %s | နံပါတ်အသစ် %s | **check** |
+| `plates.office` | PLATE OFFICE | နံပါတ်ရုံး | **check** |
+| `plates.officeName` | Plate Office | နံပါတ်ရုံး | **check** |
+| `plates.officeOnly` | Chosen and lucky numbers are sold only at the Plate Office (# on the map). | ရွေးထားသော နံပါတ်နှင့် ကံကောင်းနံပါတ်များကို နံပါတ်ရုံး (မြေပုံပေါ်ရှိ #) တွင်သာ ရောင်းသည်။ | **check** |
+| `plates.waypoint` | SHOW ON MAP | မြေပုံပေါ်တွင် ပြမည် | **check** |
+| `plates.hint` | Type a plate like 9E-9999 (1-9 in front, the number from 1000) | 9E-9999 ကဲ့သို့ ရိုက်ပါ (ရှေ့တွင် 1-9၊ နံပါတ်က 1000 မှစ) | **check** |
+| `plates.check` | CHECK PRICE | ဈေးနှုန်း ကြည့်မည် | **check** |
+| `plates.quote` | %s: %s | %s: %s | **check** |
+| `plates.taken` | TAKEN | ယူပြီးသား | **check** |
+| `plates.claim` | CLAIM  %s | %s ဖြင့် ယူမည် | **check** |
+| `plates.claimed` | %s is yours: %s | %s သင့်ပိုင်ပြီ: %s | **check** |
+| `plates.ideas` | LUCKY NUMBERS | ကံကောင်းနံပါတ်များ | **check** |
+| `plates.mine` | MY PLATES | ကျွန်ုပ်၏ နံပါတ်များ | **check** |
+| `plates.on` | On %s | %s ပေါ်တွင် | **check** |
+| `plates.spare` | Spare | အပို | **check** |
+| `plates.putOn` | PUT ON | တပ်မည် | **check** |
+| `plates.moved` | %s moved | %s ကို ပြောင်းပြီး | **check** |
+| `plates.sell` | SELL %s | %s ဖြင့် ရောင်းမည် | **check** |
+| `plates.sold` | %s sold: +%s | %s ရောင်းပြီး: +%s | **check** |
+| `menu.campaign` | CAMPAIGN | ပင်မ | **check** |
+| `menu.storeTab` | STORE | ဆိုင် |  |
+| `menu.leaderboard` | Leaderboard | အဆင့်ဇယား |  |
+| `menu.comingSoon` | Coming soon | မကြာမီ လာမည် |  |
+| `side.market` | MARKET | ဈေး |  |
+| `side.despawn` | DESPAWN | ကား သိမ်းမည် |  |
+| `side.house` | HOUSE | အိမ် |  |
+| `side.dealer` | DEALER | ကားဆိုင် | **check** |
+| `side.chauffeur` | CHAUFFEUR | ကားဆရာ |  |
+| `side.controls` | CONTROLS | ခလုတ်များ |  |
+| `set.performance` | Performance | စွမ်းဆောင်ရည် |  |
+| `set.lowEnd` | LOW-END | ဖုန်းအနိမ့် | **check** |
+| `set.quality` | Quality | အရည်အသွေး |  |
+| `set.ultra` | ULTRA | အမြင့်ဆုံး |  |
+| `set.radio` | Radio | ရေဒီယို |  |
+| `set.sound` | SOUND | အသံ |  |
+| `set.show` | SHOW | ပြမည် |  |
+| `set.sunset` | SUNSET | နေဝင်ချိန် |  |
+| `set.english` | ENGLISH | ENGLISH |  |
+| `cam.immersive` | IMMERSIVE | အနီးကပ် | **check** |
+| `cam.chase` | CHASE | နောက်က |  |
+| `cam.interior` | INTERIOR | ကားထဲ |  |
+| `cam.chaseLow` | chase | နောက်က |  |
+| `cam.side` | side | ဘေးက |  |
+| `cam.rearSeat` | rear seat | နောက်ခုံ |  |
+| `cam.aerial` | aerial | အပေါ်စီး |  |
+| `jobs.payDouble` | %s a paycheck (Double Pay) | လစာ %s (Double Pay) |  |
+| `jobs.payPost` | %s a paycheck at the post | ကိုယ့်နေရာမှာ လစာ %s |  |
+| `jobs.payTask` | %s a paycheck + per task | လစာ %s + တာဝန်တစ်ခုစီ |  |
+| `jobs.rankShort` | R%d/%d  %s | R%d/%d  %s |  |
+| `deal.importCrates` | IMPORT ONLY · CRATES | IMPORT သာ · CRATE များမှ | **check** |
+| `deal.importOnly` | IMPORT ONLY | IMPORT သာ | **check** |
+| `deal.fromCrates` | FROM CRATES | CRATE များမှ | **check** |
+| `deal.importText` | Import only: from crates | Import သာ: crate များမှသာ ရနိုင် | **check** |
+| `deal.value` | Value %s | တန်ဖိုး %s |  |
+| `deal.findShowroom` | Find a Showroom one on the car market (K) | ကားဈေး (K) မှာ Showroom ကား ရှာပါ |  |
+| `deal.ownFirst` | own the %s first | %s ကို အရင် ပိုင်ပါ |  |
+| `act.accept` | ACCEPT | လက်ခံမည် |  |
+| `home.ignore` | IGNORE | လျစ်လျူရှုမည် |  |
+| `home.residents` | %s (residents only) | %s (နေထိုင်သူများသာ) |  |
+| `rew.redeem` | REDEEM | ထုတ်ယူမည် |  |
+| `rew.buyOneShort` | BUY 1 | 1 ခု ဝယ်မည် |  |
+| `gem.wear` | WEAR | ဝတ်မည် |  |
+| `hotel.locked` | Locked | သော့ခတ်ထား |  |
+| `realty.mid` | MID | အလယ် |  |
+| `shop.builds` | BUILDS | BUILD များ |  |
+| `shop.fittedCaps` | FITTED | တပ်ပြီး |  |
+| `shop.front` | %d%% front | ရှေ့ %d%% |  |
+| `map.cantTravelRight` | Can't travel right now | ယခု မသွားနိုင်ပါ |  |
+| `common.noServerComma` | The server didn't answer, try again | Server က မတုံ့ပြန်ပါ၊ ထပ်ကြိုးစားပါ |  |
+| `daily.carStreak` | Day %d streak: the %s is yours! It's in your CARS | Streak နေ့ %d: %s ကို ရပြီ! ကားများ ထဲမှာ ရှိသည် |  |
+| `daily.streakPopup` | DAY %d STREAK | Streak နေ့ %d |  |
+| `chf.yoursStar` | ★ YOUR CHAUFFEUR | ★ ကိုယ့် ကားဆရာ |  |
+| `pent.heli` | HELICOPTER TOUR | ရဟတ်ယာဉ် ခရီး |  |
+| `pent.land` | X to land | ဆင်းရန် X |  |
+| `pent.look` | Drag to look | ကြည့်ရန် ဆွဲပါ |  |
+| `pent.zoom` | scroll to zoom | ချဲ့ချုံ့ရန် scroll |  |
+| `pent.stop` | X to stop | ရပ်ရန် X |  |
+| `pent.onShow` | CAR ON SHOW | ပြသထားသော ကား |  |
+| `pent.isOnShow` | %s is on show | %s ကို ပြသထားသည် |  |
+| `pent.sharp` | Looking sharp | ကြည့်ကောင်းနေပြီ |  |
+| `common.select` | Select | ရွေးမည် |  |
+| `common.speed` | Speed | အမြန်နှုန်း |  |
+| `common.camera` | Camera | ကင်မရာ |  |
+| `common.shake` | Shake | လှုပ်ခြင်း |  |
+| `common.price` | Price | ဈေးနှုန်း |  |
+| `common.brand` | Brand | Brand |  |
+| `common.newest` | Newest | အသစ်ဆုံး |  |
+| `common.closeKey` | %s to close | ပိတ်ရန် %s |  |
+| `hud.cam` | CAM | ကင်မရာ |  |
+| `hud.car` | CAR | ကား |  |
+| `hud.engine` | ENGINE | အင်ဂျင် |  |
+| `hud.plates` | PLATES | နံပါတ်ပြား |  |
+| `hud.lift` | LIFT | ဓာတ်လှေကား |  |
+| `look.brightness` | Brightness | အလင်း |  |
+| `look.contrast` | Contrast | Contrast |  |
+| `look.glow` | Glow | အလင်းဝင်း |  |
+| `look.reflections` | Reflections | ရောင်ပြန် |  |
+| `look.saturation` | Saturation | အရောင်ရင့်မှု |  |
+| `look.shadows` | Shadows | အရိပ်များ |  |
+| `look.sky` | Sky | ကောင်းကင် |  |
+| `look.weather` | Weather | ရာသီဥတု |  |
+| `look.light` | LIGHT | ပါး |  |
+| `look.thick` | THICK | ထူ |  |
+| `look.clear` | Clear | ကြည်လင် |  |
+| `look.rain` | Rain | မိုးရွာ |  |
+| `look.dawn` | Dawn | အရုဏ် |  |
+| `look.day` | Day | နေ့ |  |
+| `store.cash2xEffect` | Double the cash from driving, cut-ups and jobs, for good | မောင်းခြင်း၊ cut-up နှင့် အလုပ်များမှ ငွေ 2 ဆ၊ အမြဲတမ်း |  |
+| `store.vipEffect` | A VIP tag, free VIP bays in every tower garage and +10% cash from cut-ups | VIP tag၊ tower ကားဂိုဒေါင်တိုင်းမှာ အခမဲ့ VIP နေရာ နှင့် cut-up မှ ငွေ +10% |  |
+| `store.doublePayEffect` | Double the pay from every job, for good | အလုပ်တိုင်းမှ လစာ 2 ဆ၊ အမြဲတမ်း |  |
+| `store.starterEffect` | $50,000 and a starter car of your choice, once per player | $50,000 နှင့် ကိုယ်ရွေးတဲ့ ကားတစ်စီး၊ တစ်ယောက် တစ်ကြိမ်သာ |  |
+| `store.garageEffect` | One more garage space at the house you live in | နေထိုင်တဲ့ အိမ်မှာ ကားဂိုဒေါင် နေရာ တစ်ခု ထပ်တိုး |  |
+| `jobWhere.delivery` | Dispatch rings (Myanmar Plaza, Kabar Aye) | ပို့ဆောင်ရေးကွင်းများ (Myanmar Plaza, Kabar Aye) |  |
+| `jobWhere.taxi` | Fares all over town | မြို့တစ်ဝှမ်း ခရီးသည်များ |  |
+| `jobWhere.bus` | 7 stops: Kabar Aye, Kamayut, Mayangone | မှတ်တိုင် 7 ခု: Kabar Aye, Kamayut, Mayangone |  |
+| `jobWhere.police` | Patrol points + speeders | ကင်းလှည့်နေရာများ + အရှိန်လွန်သူများ |  |
+| `jobWhere.tea` | Shwe Lahpet Tea Shop, Inya Lake | Shwe Lahpet လက်ဖက်ရည်ဆိုင်၊ Inya Lake |  |
+| `jobWhere.fuel` | Kabar Aye Fuel (the flyover station) | Kabar Aye ဆီဆိုင် (flyover ဘေးက) |  |
+| `jobWhere.dealer` | Legends Motors, Kabar Aye | Legends Motors, Kabar Aye |  |
+| `jobWhere.mall` | Golden Thread Boutique, Myanmar Plaza | Golden Thread Boutique, Myanmar Plaza |  |
+| `goal.bankDrifts` | Bank %d drifts | Drift %d ကြိမ် သိမ်းပါ |  |
+| `goal.bankDrift` | Bank a drift | Drift တစ်ခု သိမ်းပါ |  |
+| `goal.buyHouse` | Buy a house | အိမ် ဝယ်ပါ |  |
+| `goal.secondCar` | Buy your second car | ဒုတိယ ကား ဝယ်ပါ |  |
+| `goal.chips` | Collect %d chips | Chip %d ခု စုပါ |  |
+| `goal.cutUp` | Cut up %d cars | ကား %d စီး cut up လုပ်ပါ |  |
+| `goal.miles` | Drive %d miles | %d မိုင် မောင်းပါ |  |
+| `goal.milesComma` | Drive 1,000 miles | 1,000 မိုင် မောင်းပါ |  |
+| `goal.ggfest` | Drive to GG Gaming Fest at YCC | YCC က GG Gaming Fest ကို မောင်းသွားပါ |  |
+| `goal.firstMile` | Drive your first mile | ပထမဆုံး တစ်မိုင် မောင်းပါ |  |
+| `goal.paychecks` | Earn %d job paychecks | အလုပ်လစာ %d ကြိမ် ရယူပါ |  |
+| `goal.deliveries` | Finish %d delivery jobs | ပစ္စည်းပို့ အလုပ် %d ခု ပြီးအောင်လုပ်ပါ |  |
+| `goal.races` | Finish %d races | ပြိုင်ပွဲ %d ပွဲ ပြီးအောင်ပြိုင်ပါ |  |
+| `goal.delivery` | Finish a delivery job | ပစ္စည်းပို့ အလုပ် တစ်ခု ပြီးအောင်လုပ်ပါ |  |
+| `goal.race` | Finish a race | ပြိုင်ပွဲ တစ်ပွဲ ပြီးအောင်ပြိုင်ပါ |  |
+| `goal.medals` | Get %d speed trap medals | Speed trap ဆုတံဆိပ် %d ခု ရယူပါ |  |
+| `goal.medal` | Get a medal at a speed trap | Speed trap မှာ ဆုတံဆိပ် ရယူပါ |  |
+| `goal.escapes` | Get away from the police %d time | ရဲလက်က %d ကြိမ် လွတ်ပါ |  |
+| `goal.escape` | Get away from the police | ရဲလက်က လွတ်ပါ |  |
+| `goal.gold` | Get gold at a speed trap | Speed trap မှာ ရွှေ ရယူပါ |  |
+| `goal.combo` | Hit a x%d combo | x%d combo ရအောင်လုပ်ပါ |  |
+| `goal.king` | King of the City: own every car | မြို့ဘုရင်: ကားအားလုံး ပိုင်ပါ |  |
+| `goal.jumps` | Land %d jumps | %d ကြိမ် ခုန်ပြီး ကျပါ |  |
+| `goal.jump` | Land a jump | တစ်ကြိမ် ခုန်ပြီး ကျပါ |  |
+| `goal.own` | Own %d cars | ကား %d စီး ပိုင်ပါ |  |
+| `goal.brands` | Own cars from %d brands | Brand %d ခုမှ ကားများ ပိုင်ပါ |  |
+| `goal.pvp` | Race against another player | အခြား ကစားသမားနဲ့ ပြိုင်ပါ |  |
+| `goal.pvpN` | Race against players %d times | ကစားသမားများနဲ့ %d ကြိမ် ပြိုင်ပါ |  |
+| `goal.level` | Reach level %d | Level %d ရောက်ပါ |  |
+| `goal.restyle` | Restyle a car at Legends Customs | Legends Customs မှာ ကား ပြင်ဆင်ပါ |  |
+| `goal.bank` | Rob the bank and get away | ဘဏ်ဓားပြတိုက်ပြီး လွတ်အောင်ပြေးပါ | **check** |
+| `goal.photo` | Stop on the photo spot at the stage | စင်ပေါ်က ဓာတ်ပုံနေရာမှာ ရပ်ပါ |  |
+| `goal.winsN` | Win %d races against players | ကစားသမားများကို ပြိုင်ပွဲ %d ပွဲ နိုင်ပါ |  |
+| `goal.win` | Win a race against a player | ကစားသမားတစ်ယောက်ကို ပြိုင်ပွဲ နိုင်ပါ |  |
+| `goal.raceGold` | Win gold in a race | ပြိုင်ပွဲမှာ ရွှေ ရယူပါ |  |
+| `deal.drive` | DRIVE | မောင်းမည် |  |
+| `deal.allOf` | All %s models | %s မော်ဒယ် အားလုံး |  |
+| `deal.power` | power | ပါဝါ |  |
+| `deal.torque` | torque | torque |  |
+| `deal.driveTrain` | drive | ဒရိုက် |  |
+| `deal.seats` | seats | ထိုင်ခုံ |  |
+| `pop.suite` | SUITE INCOME | Suite ဝင်ငွေ |  |
+| `pop.delivered` | DELIVERED | ပို့ပြီး |  |
+| `pop.fare` | FARE PAID | ကားခ ရပြီ |  |
+| `pop.daily` | DAILY REWARD | နေ့စဉ် ဆု |  |
+| `pop.closeCut` | CLOSE CUT | CLOSE CUT | **check** |
+| `pop.insaneCut` | INSANE CUT | INSANE CUT | **check** |
+| `pop.available` | AVAILABLE | ရနိုင်သည် |  |
