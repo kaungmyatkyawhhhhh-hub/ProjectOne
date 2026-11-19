@@ -1223,8 +1223,6 @@ tr = function(text: string, depth: number): string
 	-- a symbol in front or behind ("IMMERSIVE  ▶", "★ YOUR CHAUFFEUR")
 	local pre, mid = string.match(core, "^([^%w%s]+%s+)(.+)$")
 	if pre and not string.find(pre, "\225[\128\129]") then -- (never a Burmese word)
-8
-9]") then -- (never a Burmese word)
 		local t = tr(mid, depth + 1)
 		if t ~= mid then
 			return lead .. pre .. t .. trail
@@ -1232,8 +1230,6 @@ tr = function(text: string, depth: number): string
 	end
 	local mid2, post = string.match(core, "^(.-)(%s+[^%w%s]+)$")
 	if mid2 and mid2 ~= "" and not string.find(post, "\225[\128\129]") then
-8
-9]") then
 		local t = tr(mid2, depth + 1)
 		if t ~= mid2 then
 			return lead .. t .. post .. trail
