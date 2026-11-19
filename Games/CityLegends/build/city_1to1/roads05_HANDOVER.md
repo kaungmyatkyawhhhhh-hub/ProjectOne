@@ -50,6 +50,27 @@
 - **(d) Kerb overlaps:** `roads05_kerb_cross.py <tag>` (kerb pieces crossing > 25 deg, >= 30% overlap, after drop_scraps) lists
   clusters; not fixed in the builder this pass (see vault note).
 
+## REBUILD P3 deck feet + failed mouths (19 Nov, DISTRICT REBUILD agent 3): state `rebuild_progress.json` "P3_feet", "mouths"
+- **Single-cell rebuild recipe (works, ~15 min a cell):** subset (`R05_GROW=1700 roads05_subset.py <net> <tag> <district>` or copy an
+  existing subset's roads/paint/subset.json into `roads05_<tag>`) -> pack + POST a NEW Model -> `LoadAsset`, modules into YangonData,
+  `require(YangonRoads:Clone()).load()`, delete the modules -> Studio `_G.RBXJob(label, box)` (stepCell into a folder in RoadsBuildRB,
+  `RoadBake05.collect`, zstd+base64 slices of 98,000 padded to 99k, parts cleared) -> `_G.RBXZ(label, k)` one per call ->
+  `roads05_grab.py <tag> <first file>` -> `roads05_bake.py <tag> collect <pages>` + `R05_ONLY=<cells> ... bake` -> POST each glb
+  (`model/gltf-binary`) + `roads05_pack_collide.py <P> <tag>` rbxmx -> `_G.PREP(tag, glbIds, collideId)` (place + collide into
+  ServerStorage folders) -> `_G.SWAPGO(tag, cells, ...)` (old Cell_ + boxes by box centre to `ServerStorage.RB_Old<tag>`). The helpers are
+  `tools/yangon/RebuildCell.luau` (paste into execute_luau once per Studio session; they live in `_G`).
+- **Built-surface deck-feet check:** `python tools/yangon/city/roads05_deckfeet_points.py > pts` -> `ClaudeTools.DeckFeetCheck(pts)`
+  (repo `tools/yangon/DeckFeetCheck.luau`): rays onto Roads.Collide at each deck end + 8/16/32 studs in. The +1 over the data 8-32 in
+  is the fixed builder's eased ramp (Hledan was driven: no bump). `roads05_deckfeet_check.py` is only a mirror of the old bug: in the
+  place the two Khayaypin feet (19x27) were already flush.
+- **Mouth fix (YangonRoads.buildMouth chain, 179,871 chars, checksum 1084283452):** a CROSSING mouth whose bigger road turns a corner
+  on it (Lane #7606 turns 64 deg on Lane #1255) walked its edge back past the crossing and errored ("never meets"), so the arm's slab
+  was skipped AND no mouth laid = a hole. Now it closes at the crossing sample like a shallow merge (nearest B point within MOUTH_SNAP).
+  `roads05_mouthsim.py` does not simulate crossings (it reported 0 for both cells).
+- **Found, not fixed:** Road #25 "Road Flyover" (31522,45702)->(33282,45912), P3 cells 20x29/21x29: never built (no parts at its height
+  in `roads05_RB3/parts.pkl`, no D boxes; the D boxes there are the Dala flyover 15 above) = a hole if a car gets onto it; "Road Flyover
+  #2" foot (30112,44964) has a P box +1.7 over the deck for ~32 studs.
+
 ## REBUILD P4 (19 Nov, DISTRICT REBUILD agent 2): Hledan / Kamayut IN (district, J37 roads, lanes L12347, minimap, verge), Play-tested, saved v1566
 State: `rebuild_progress.json` "P4". Same order as P7 (below); what differed:
 1. **Re-clear:** `district_files.sh P4 --no-roads buildings` (21 min): 11,209 buildings (805 dropped / 3,843 clipped), shells 14,113, roofs 6,410;
