@@ -99,7 +99,10 @@ def main(tag):
                 hit = ('ring', g['name'])
             else:
                 for j in big:
-                    if inside(q[0], q[2], roads[j]) is not None:
+                    # (19 Nov) a road meets another only at the same height: a deck passing over a road (or a road
+                    # under a deck) is no junction (2D only, 123 links ran from flyovers down to the roads under them)
+                    ii = inside(q[0], q[2], roads[j])
+                    if ii is not None and abs(S[roads[j]['name']][ii][1] - q[1]) < 6:
                         hit = ('road', roads[j]['name'])
                         break
             mask.append(hit is None)
