@@ -31,3 +31,8 @@ Driven: University Ave x Kabar Aye under the flyover (115 studs, height change 0
 - Buildings (shells) and some landmark grounds (Bogyoke market, Holy Trinity, Strand) stand over J37 road boxes: roads through compounds in the OSM data.
 
 Tools: `tools/yangon/city/roads05_pbox_check.py`, `roads05_pbox_clip.py` (+ `_test.py`), `roads05_kerb_cross.py`, `kit_tile_patch.py`, `tools/yangon/MapBugScan.luau`. Detail and counts: `build/city_1to1/roads05_HANDOVER.md` "MAP BUG FIXES".
+
+## Queued (owner, 19 Nov 2026): start after P4, P6 and P8 are in
+- About 280 crossing kerb pairs in P1–P3: builder fix, then rebuild the affected cells.
+- The median nose and the crumpled small junction: waiting for the owner's screenshots or locations.
+- Building grounds over the new roads (Bogyoke Market, Holy Trinity, Strand Hotel): trim them back.
