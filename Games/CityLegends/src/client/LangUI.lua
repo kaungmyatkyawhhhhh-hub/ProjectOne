@@ -96,7 +96,9 @@ local function fit(l: any)
 	l:SetAttribute("LangScaled", l.TextScaled)
 	local c = Instance.new("UITextSizeConstraint")
 	c.Name = FIT
-	c.MaxTextSize = math.max(9, math.floor(l.TextSize))
+	-- (a small label in a button-sized box may grow a little; paragraphs keep the English size)
+	local grow = l.TextSize <= 12 and l.AbsoluteSize.Y > 0 and l.AbsoluteSize.Y < l.TextSize * 4
+	c.MaxTextSize = math.max(9, math.ceil(l.TextSize * (if grow then 1.25 else 1)))
 	c.MinTextSize = 9
 	c.Parent = l
 	l.TextScaled = true
