@@ -2,7 +2,7 @@
 
 **Flyover starting in the air, P3** ([[Owner ref - flyover deck starts in the air (gap at the foot).webp]])
 - The Lanmadaw Road flyover was built about 18 studs too low 30 studs up its ramp. Its 3 road cells (19x27, 21x27, 21x28) were rebuilt with the fixed road builder and swapped in (saved v1573).
-- A new check now looks at the real road surfaces in the game (not a simulation): every flyover end in P1, P2, P3, P4 and P7 is flush with the road below.
+- A new check now looks at the real road surfaces in the game (not a simulation): every flyover end in P1, P2, P3, P4 and P7 is flush with the road below, except the Road #25 ramp (below).
 - The two Khayaypin flyovers were already fine in the game.
 
 **Junction holes**
