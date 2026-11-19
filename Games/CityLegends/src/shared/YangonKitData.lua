@@ -460,7 +460,8 @@ local function wallLayout(a, b, BAYW: number)
 end
 
 -- a compact tile string -> the old fixed-width string (and the number of records it could not write)
-function KD.expand(s: string, i: number, j: number, meta): (string, number)
+-- pause (optional): called before each record; Job:step passes one that yields its coroutine past the frame's deadline
+function KD.expand(s: string, i: number, j: number, meta, pause: (() -> ())?): (string, number)
 	local x0, z0 = i * meta.tile, j * meta.tile
 	local S, FH, STRETCH = meta.S, meta.FH, meta.STRETCH
 	local BAYW, WH, WT, CELLM = 3.5 * S, 2.1 * S, 0.22 * S, 1.0 * S
@@ -663,6 +664,9 @@ function KD.expand(s: string, i: number, j: number, meta): (string, number)
 	local p = if string.byte(s, 1) == 33 then 2 else 1
 	local n = #s
 	while p <= n do
+		if pause then
+			pause()
+		end
 		local t = string.byte(s, p)
 		if t == 72 then -- "H"
 			local arch = ARCHS[VAL[string.byte(s, p + 1)] + 1]
@@ -786,12 +790,38 @@ function KD.job(s: string, i: number, j: number, meta, T, parent: Instance)
 		parts = 0, missing = 0, batch = {} }, Job)
 end
 
--- builds up to `budget` parts; true when the tile is done
-function Job:step(budget: number): boolean
+-- builds up to `budget` parts; true when the tile is done. `untilClock` (os.clock(), optional): a compact tile's layout
+-- stops there and goes on at the next step (2026-11-19: one dense P7 / P4 tile's expand was up to 164 ms in one frame)
+function Job:step(budget: number, untilClock: number?): boolean
 	if string.byte(self.s, 1) == 33 then -- "!": compact (FORMAT=2): lay it out first
-		local bad
-		self.s, bad = KD.expand(self.s, self.x0 / self.meta.tile, self.z0 / self.meta.tile, self.meta)
-		self.missing += bad
+		if not untilClock then
+			local bad
+			self.s, bad = KD.expand(self.s, self.x0 / self.meta.tile, self.z0 / self.meta.tile, self.meta)
+			self.missing += bad
+		else
+			self.until_ = untilClock
+			if not self.co then
+				local src = self.s
+				self.co = coroutine.create(function()
+					return KD.expand(src, self.x0 / self.meta.tile, self.z0 / self.meta.tile, self.meta, function()
+						if os.clock() > self.until_ then
+							coroutine.yield()
+						end
+					end)
+				end)
+			end
+			local ok, s, bad = coroutine.resume(self.co)
+			if not ok then
+				self.co = nil
+				error(s)
+			end
+			if coroutine.status(self.co) ~= "dead" then
+				return false
+			end
+			self.co = nil
+			self.s = s
+			self.missing += bad
+		end
 	end
 	local s, x0, z0, meta, T = self.s, self.x0, self.z0, self.meta, self.T
 	local n = #s

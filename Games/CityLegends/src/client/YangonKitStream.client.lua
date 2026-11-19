@@ -278,7 +278,7 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		local list = jobs[key]
 		local job = list[1]
-		if job == nil or job:step(STEP_PARTS) then
+		if job == nil or job:step(STEP_PARTS, t0 + FRAME_MS / 1000) then
 			if job then
 				table.remove(list, 1)
 			end
