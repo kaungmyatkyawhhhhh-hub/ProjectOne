@@ -11,7 +11,7 @@ _Claude: follow these exactly. They're a starting point: edit them to say exactl
 - Don't ask for my passwords or logins.
 
 - Don't add your own extra ideas to prompts or plans unless I ask for them (2026-11-02). Do only what I asked.
-- **Autopilot (2026-11-16):** "i agree with you in everything, do autopilot ... dont ask me for permission". Go with your own recommendation and keep working; don't stop to ask which option or for a go-ahead. Still ask only for things only I can do (Save to File in Studio, logins, money), and say what you chose in the report.
+- **Autopilot (2026-11-16):** "i agree with you in everything, do autopilot ... dont ask me for permission". Go with your own recommendation and keep working; don't stop to ask which option or for a go-ahead. Still ask only for things only I can do (Save to File in Studio, logins, money), and say what you chose in the report. **Repeated 2026-11-19:** "dont ask me any questions or permissions anymore, i allow u with everything". This means no approval or choice questions at all, including design choices: decide, do it, and report.
 
 ## TikTok group chat "sec3b" (2026-11-16)
 _When I ask Claude to chat in it through Claude in Chrome._
