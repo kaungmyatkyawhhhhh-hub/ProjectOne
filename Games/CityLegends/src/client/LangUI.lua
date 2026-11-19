@@ -1,0 +1,127 @@
+--[[
+	LangUI (client, 19 Nov 2026, the Burmese language option; vault "City Legends/2026-11-19 Burmese language.md").
+	Every TextLabel / TextButton in PlayerGui (and the BillboardGuis over players' heads: job tags) shows
+	its text in the player's language: the screens keep building English, this runs each text through
+	Strings.tr as it is set, and again for all of them when the language changes (live switch).
+	The English text stays on the label as attribute "En" (code that reads a label's text back must use
+	it: UI's gearbox / sound toggles). Burmese runs taller and longer: a translated one-line label gets
+	TextScaled with its English TextSize as the cap, so it shrinks to fit and never clips.
+	Not translated: TextBoxes (player input), RichText labels, SurfaceGuis in the world (car clusters).
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Strings = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Strings"))
+
+local LangUI = {}
+
+local tracked: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any
+local setting: { [Instance]: boolean } = setmetatable({}, { __mode = "k" }) :: any -- our own Text writes
+local FIT = "LangFit" -- our UITextSizeConstraint
+
+local function unfit(l: any)
+	local c = l:FindFirstChild(FIT)
+	if c then
+		l.TextScaled = l:GetAttribute("LangScaled") == true
+		c:Destroy()
+	end
+end
+
+-- shrink-to-fit for Burmese: never bigger than the English size, never under 9 px
+local function fit(l: any)
+	if l:FindFirstChild(FIT) or l.TextScaled or l.AutomaticSize ~= Enum.AutomaticSize.None then
+		return
+	end
+	l:SetAttribute("LangScaled", l.TextScaled)
+	local c = Instance.new("UITextSizeConstraint")
+	c.Name = FIT
+	c.MaxTextSize = math.max(9, math.floor(l.TextSize))
+	c.MinTextSize = 9
+	c.Parent = l
+	l.TextScaled = true
+end
+
+local function apply(l: any)
+	if l.RichText then
+		return
+	end
+	local en = l:GetAttribute("En") or l.Text
+	local t = Strings.tr(en)
+	if t ~= l.Text then
+		setting[l] = true
+		l.Text = t
+		setting[l] = nil
+	end
+	if t ~= en then
+		l:SetAttribute("En", en)
+		if Strings.lang() == "my" then
+			fit(l)
+		end
+	else
+		l:SetAttribute("En", nil)
+		unfit(l)
+	end
+end
+
+local function track(d: Instance)
+	if tracked[d] or not (d:IsA("TextLabel") or d:IsA("TextButton")) then
+		return
+	end
+	tracked[d] = true
+	d:GetPropertyChangedSignal("Text"):Connect(function()
+		if setting[d] then
+			return
+		end
+		-- the screen set new text (English, or Burmese from Strings.get): that is the source now
+		d:SetAttribute("En", nil)
+		apply(d)
+	end)
+	apply(d)
+end
+
+-- the text a label shows in English (for code that compares a label's text)
+function LangUI.en(l: Instance): string
+	return (l:GetAttribute("En") or (l :: any).Text) :: string
+end
+
+function LangUI.init()
+	local player = Players.LocalPlayer
+	local pg = player:WaitForChild("PlayerGui")
+	for _, d in pg:GetDescendants() do
+		track(d)
+	end
+	pg.DescendantAdded:Connect(track)
+	-- job tags over heads (BillboardGuis on characters)
+	local function watchChar(c: Model)
+		c.DescendantAdded:Connect(function(d)
+			if d:IsA("TextLabel") and d:FindFirstAncestorWhichIsA("BillboardGui") then
+				track(d)
+			end
+		end)
+		for _, d in c:GetDescendants() do
+			if d:IsA("TextLabel") and d:FindFirstAncestorWhichIsA("BillboardGui") then
+				track(d)
+			end
+		end
+	end
+	local function watchPlayer(p: Player)
+		if p.Character then
+			watchChar(p.Character)
+		end
+		p.CharacterAdded:Connect(watchChar)
+	end
+	for _, p in Players:GetPlayers() do
+		watchPlayer(p)
+	end
+	Players.PlayerAdded:Connect(watchPlayer)
+	Strings.Changed.Event:Connect(function()
+		for l in tracked do
+			if l.Parent then
+				apply(l)
+			end
+		end
+	end)
+end
+
+return LangUI

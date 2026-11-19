@@ -344,8 +344,9 @@ def main(tag):
 
     def lane_txt(l):
         flat = ','.join('%.2f,%.2f,%.2f' % p for p in l['pts'])
+        # ensure_ascii=False: JSON "\uXXXX" escapes are not Luau ("malformed escape sequence"; Burmese road names, P4 19 Nov)
         return '\t\t{ road = %s, way = %d, lane = %d, kind = "route", closed = %s, yangon = true%s, pts = { %s } },' % (
-            json.dumps(l['road']), l['way'], l['lane'], 'true' if l['closed'] else 'false', ', outer = true' if l['outer'] else '', flat)
+            json.dumps(l["road"], ensure_ascii=False), l['way'], l['lane'], 'true' if l['closed'] else 'false', ', outer = true' if l['outer'] else '', flat)
     mods = []
     cur, n, first = [], 0, 1
     for li, l in enumerate(lanes):

@@ -799,13 +799,13 @@ local T: { [string]: { any } } = {
 	["chf.noAnswer"] = { "The service didn't answer, try again", "Service က မတုံ့ပြန်ပါ၊ ထပ်ကြိုးစားပါ" },
 	["chf.onContract"] = { "On contract · rides are free", "စာချုပ်ရှိ · စီးခ အခမဲ့" },
 	["chf.contract"] = { "Chauffeur contract", "ကားဆရာ စာချုပ်" },
-	["chf.call"] = { "CALL  ›", "ခေါ်မည်  ›" },
+	["chf.call"] = { "CALL ›", "ခေါ်မည် ›" },
 	["chf.pitch"] = { "A driver in a black suit and this car, whenever you call. Pay once, ride free for good.", "ခေါ်တိုင်း အနက်ရောင် ဝတ်စုံနဲ့ ကားဆရာ နှင့် ဒီကား။ တစ်ခါ ပေး၊ အမြဲ အခမဲ့ စီး။" },
 	["chf.sign"] = { "SIGN CONTRACT", "စာချုပ် ချုပ်မည်" },
 	["chf.signed"] = { "Contract signed", "စာချုပ် ချုပ်ပြီး" },
 	["chf.signFailed"] = { "Couldn't sign", "စာချုပ် မချုပ်နိုင်ပါ" },
 	["chf.whereTo"] = { "WHERE TO?", "ဘယ်ကို သွားမလဲ?" },
-	["chf.go"] = { "GO  ›", "သွားမည်  ›" },
+	["chf.go"] = { "GO ›", "သွားမည် ›" },
 	["chf.yours"] = { "YOUR CHAUFFEUR", "ကိုယ့် ကားဆရာ" },
 	["chf.getOut"] = { "Get out of your car to call a chauffeur (Y)", "ကားဆရာ ခေါ်ရန် ကားပေါ်က ဆင်းပါ (Y)" },
 	["chf.camera"] = { "CAMERA [V]", "ကင်မရာ [V]" },
@@ -951,6 +951,68 @@ local T: { [string]: { any } } = {
 	["plates.moved"] = { "%s moved", "%s ကို ပြောင်းပြီး", true },
 	["plates.sell"] = { "SELL %s", "%s ဖြင့် ရောင်းမည်", true },
 	["plates.sold"] = { "%s sold: +%s", "%s ရောင်းပြီး: +%s", true },
+	-- Phase B (19 Nov): labels added by the jobs / discoverability / performance / mobile passes
+	["menu.campaign"] = { "CAMPAIGN", "ပင်မ", true },
+	["menu.storeTab"] = { "STORE", "ဆိုင်" },
+	["menu.leaderboard"] = { "Leaderboard", "အဆင့်ဇယား" },
+	["menu.comingSoon"] = { "Coming soon", "မကြာမီ လာမည်" },
+	["side.market"] = { "MARKET", "ဈေး" },
+	["side.despawn"] = { "DESPAWN", "ကား သိမ်းမည်" },
+	["side.house"] = { "HOUSE", "အိမ်" },
+	["side.dealer"] = { "DEALER", "ကားဆိုင်", true },
+	["side.chauffeur"] = { "CHAUFFEUR", "ကားဆရာ" },
+	["side.controls"] = { "CONTROLS", "ခလုတ်များ" },
+	["set.performance"] = { "Performance", "စွမ်းဆောင်ရည်" },
+	["set.lowEnd"] = { "LOW-END", "ဖုန်းအနိမ့်", true },
+	["set.quality"] = { "Quality", "အရည်အသွေး" },
+	["set.ultra"] = { "ULTRA", "အမြင့်ဆုံး" },
+	["set.radio"] = { "Radio", "ရေဒီယို" },
+	["set.sound"] = { "SOUND", "အသံ" },
+	["set.show"] = { "SHOW", "ပြမည်" },
+	["set.sunset"] = { "SUNSET", "နေဝင်ချိန်" },
+	["set.english"] = { "ENGLISH", "ENGLISH" },
+	["cam.immersive"] = { "IMMERSIVE", "အနီးကပ်", true },
+	["cam.chase"] = { "CHASE", "နောက်က" },
+	["cam.interior"] = { "INTERIOR", "ကားထဲ" },
+	["cam.chaseLow"] = { "chase", "နောက်က" },
+	["cam.side"] = { "side", "ဘေးက" },
+	["cam.rearSeat"] = { "rear seat", "နောက်ခုံ" },
+	["cam.aerial"] = { "aerial", "အပေါ်စီး" },
+	["jobs.payDouble"] = { "%s a paycheck (Double Pay)", "လစာ %s (Double Pay)" },
+	["jobs.payPost"] = { "%s a paycheck at the post", "ကိုယ့်နေရာမှာ လစာ %s" },
+	["jobs.payTask"] = { "%s a paycheck + per task", "လစာ %s + တာဝန်တစ်ခုစီ" },
+	["jobs.rankShort"] = { "R%d/%d  %s", "R%d/%d  %s" },
+	["deal.importCrates"] = { "IMPORT ONLY · CRATES", "IMPORT သာ · CRATE များမှ", true },
+	["deal.importOnly"] = { "IMPORT ONLY", "IMPORT သာ", true },
+	["deal.fromCrates"] = { "FROM CRATES", "CRATE များမှ", true },
+	["deal.importText"] = { "Import only: from crates", "Import သာ: crate များမှသာ ရနိုင်", true },
+	["deal.value"] = { "Value %s", "တန်ဖိုး %s" },
+	["deal.findShowroom"] = { "Find a Showroom one on the car market (K)", "ကားဈေး (K) မှာ Showroom ကား ရှာပါ" },
+	["deal.ownFirst"] = { "own the %s first", "%s ကို အရင် ပိုင်ပါ" },
+	["act.accept"] = { "ACCEPT", "လက်ခံမည်" },
+	["home.ignore"] = { "IGNORE", "လျစ်လျူရှုမည်" },
+	["home.residents"] = { "%s (residents only)", "%s (နေထိုင်သူများသာ)" },
+	["rew.redeem"] = { "REDEEM", "ထုတ်ယူမည်" },
+	["rew.buyOneShort"] = { "BUY 1", "1 ခု ဝယ်မည်" },
+	["gem.wear"] = { "WEAR", "ဝတ်မည်" },
+	["hotel.locked"] = { "Locked", "သော့ခတ်ထား" },
+	["realty.mid"] = { "MID", "အလယ်" },
+	["shop.builds"] = { "BUILDS", "BUILD များ" },
+	["shop.fittedCaps"] = { "FITTED", "တပ်ပြီး" },
+	["shop.front"] = { "%d%% front", "ရှေ့ %d%%" },
+	["map.cantTravelRight"] = { "Can't travel right now", "ယခု မသွားနိုင်ပါ" },
+	["common.noServerComma"] = { "The server didn't answer, try again", "Server က မတုံ့ပြန်ပါ၊ ထပ်ကြိုးစားပါ" },
+	["daily.carStreak"] = { "Day %d streak: the %s is yours! It's in your CARS", "Streak နေ့ %d: %s ကို ရပြီ! ကားများ ထဲမှာ ရှိသည်" },
+	["daily.streakPopup"] = { "DAY %d STREAK", "Streak နေ့ %d" },
+	["chf.yoursStar"] = { "★ YOUR CHAUFFEUR", "★ ကိုယ့် ကားဆရာ" },
+	["pent.heli"] = { "HELICOPTER TOUR", "ရဟတ်ယာဉ် ခရီး" },
+	["pent.land"] = { "X to land", "ဆင်းရန် X" },
+	["pent.look"] = { "Drag to look", "ကြည့်ရန် ဆွဲပါ" },
+	["pent.zoom"] = { "scroll to zoom", "ချဲ့ချုံ့ရန် scroll" },
+	["pent.stop"] = { "X to stop", "ရပ်ရန် X" },
+	["pent.onShow"] = { "CAR ON SHOW", "ပြသထားသော ကား" },
+	["pent.isOnShow"] = { "%s is on show", "%s ကို ပြသထားသည်" },
+	["pent.sharp"] = { "Looking sharp", "ကြည့်ကောင်းနေပြီ" },
 }
 
 local Strings = {}
@@ -972,6 +1034,9 @@ function Strings.setLang(code: string)
 	local new = if setting == "auto" then fromLocale() else setting
 	if new ~= current then
 		current = new
+		if Strings.clearCache then
+			Strings.clearCache()
+		end
 		Strings.Changed:Fire(current)
 	end
 end
@@ -994,6 +1059,131 @@ function Strings.get(key: string, ...): string
 		return string.format(s, ...)
 	end
 	return s
+end
+
+-- English text as the screens build it -> the current language (19 Nov, Phase B): screens keep their
+-- English literals and client/LangUI runs every label's text through this. Exact lines first, then
+-- the templates ("Waypoint: %s (on your map)": %s args are translated too), then " · " / new-line
+-- pieces one by one. Burmese -> English the same way for text built with Strings.get.
+local SPEC = "%%[-+ #0]*%d*%.?%d*[dsfxXgq%%]"
+local exact: { [string]: string }, back: { [string]: string } = {}, {}
+local templates: { { pat: string, my: string, en: string, lit: number } } = {}
+local cache: { [string]: string } = {}
+local cached = 0
+
+local function escape(s: string): string
+	return (string.gsub(s, "[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%0"))
+end
+
+-- an English template -> a Lua pattern ("" when it has nothing to match on)
+local function toPattern(en: string): (string, number)
+	local out, pos, letters = {}, 1, 0
+	while true do
+		local a, b = string.find(en, SPEC, pos)
+		local lit = string.sub(en, pos, if a then a - 1 else -1)
+		letters += #string.gsub(lit, "[^%a]", "")
+		table.insert(out, escape(lit))
+		if not a then
+			break
+		end
+		local c = string.sub(en, b, b)
+		table.insert(out, if c == "%" then "%%" elseif c == "s" then "(.-)" else "([%-%d%.,]+)")
+		pos = b + 1
+	end
+	return "^" .. table.concat(out) .. "$", letters
+end
+
+for _, e in T do
+	local en, my = e[1], e[2]
+	if string.find(en, SPEC) then
+		local pat, letters = toPattern(en)
+		if letters > 0 then
+			table.insert(templates, { pat = pat, my = my, en = en, lit = #en })
+		end
+	else
+		local ens, mys = string.split(en, "|"), string.split(my, "|")
+		for i, piece in ens do
+			local m = mys[i] or piece
+			exact[piece] = m
+			exact[string.upper(piece)] = exact[string.upper(piece)] or m
+			back[m] = back[m] or piece
+		end
+	end
+end
+table.sort(templates, function(a, b)
+	return a.lit > b.lit
+end)
+
+local tr: (string, number) -> string
+-- put the captures into the other language's template, in order (the check keeps the order the same)
+local function fill(target: string, caps: { string }, depth: number): string
+	local i = 0
+	return (string.gsub(target, SPEC, function(spec)
+		if spec == "%%" then
+			return "%"
+		end
+		i += 1
+		local v = caps[i] or ""
+		return if string.sub(spec, -1) == "s" then tr(v, depth + 1) else v
+	end))
+end
+
+tr = function(text: string, depth: number): string
+	if depth > 2 or text == "" or not string.find(text, "[%a\128-\255]") then
+		return text
+	end
+	local lead, core, trail = string.match(text, "^(%s*)(.-)(%s*)$")
+	local hit = if current == "my" then exact[core] else back[core]
+	if hit then
+		return lead .. hit .. trail
+	end
+	if current == "my" then
+		for _, t in templates do
+			local caps = { string.match(core, t.pat) }
+			if caps[1] ~= nil then
+				return lead .. fill(t.my, caps, depth) .. trail
+			end
+		end
+	end
+	-- pieces: "A  ·  B", "A\nB" (plain splits: "·" is two bytes, a pattern class would cut Burmese letters)
+	for _, sep in { "·", "\n" } do
+		if string.find(core, sep, 1, true) then
+			local parts = string.split(core, sep)
+			local changed = false
+			for i, piece in parts do
+				local t = tr(piece, depth + 1)
+				changed = changed or t ~= piece
+				parts[i] = t
+			end
+			if changed then
+				return lead .. table.concat(parts, sep) .. trail
+			end
+			break
+		end
+	end
+	return text
+end
+
+-- the current language's version of a screen text (unchanged when it isn't in the table)
+function Strings.tr(text: string): string
+	if current == "en" and not string.find(text, "[\128-\255]") then
+		return text
+	end
+	local c = cache[text]
+	if c then
+		return c
+	end
+	local r = tr(text, 0)
+	if cached > 4000 then
+		cache, cached = {}, 0
+	end
+	cache[text] = r
+	cached += 1
+	return r
+end
+
+function Strings.clearCache()
+	cache, cached = {}, 0
 end
 
 -- a job's rank title (ranks are "a|b|c|d|e" in one entry)
