@@ -52,3 +52,5 @@ P4 MapBugScan copy 102115061814853 | lanes L12347 pack 132255950653663 | collide
 P4 YangonMapArt pack 134240973553689 (minimap tiles imports/sync/minimap_1to1/ids_P4_images.txt)
 Roads.luau deck-foot fix pack 139250321768926
 P4F cell 16x18 (deck feet fix) glbs 73155516774166 87031227296084 collide 78766276545760
+P6J (J37 re-clear, 19 Nov rebuild, agent 3) place 104009239183763 109020198747727 133451653433318 128448686655852 night 110792092350126
+P3F / P4M / P7M road cell rebuilds (19 Nov): RB3x data 71568135134132; uploads in roads05_RB3x/upload_ids_P3F.txt, roads05_RB4M/upload_ids_P4M.txt, roads05_RB7M/upload_ids_P7M.txt
