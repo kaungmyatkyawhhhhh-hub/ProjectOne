@@ -1,6 +1,8 @@
 -- (19 Nov) BUILT deck-feet check: POINTS = roads05_deckfeet_points.py lines "name|end|x y z x y z ...".
 -- Each point: ray from data y + 12 down onto Workspace.Yangon1to1.Roads.Collide; off = hit top - data y.
--- Only points over an existing Roads.Meshes Cell_<cx>x<cz> (1536) are checked. A foot is BAD when |off| > 0.6 at any sample.
+-- Only points over an existing Roads.Meshes Cell_<cx>x<cz> (1536) are checked. A foot is BAD when |off| > 0.6 at the foot,
+-- a step of over 3 between samples (the Lanmadaw deck: 0 / -0.6 / -9.9 / -18.3) or no box at a sample (-99). The fixed
+-- builder shows +1 over the data 8-32 studs in (deck ramp eased; driven, no bump): that is not a fault.
 return function(POINTS: string)
 	local R = workspace.Yangon1to1.Roads
 	local p = RaycastParams.new()
@@ -17,17 +19,18 @@ return function(POINTS: string)
 		if not (x0 and R.Meshes:FindFirstChild(string.format("Cell_%dx%d", x0 // 1536, z0 // 1536))) then
 			skipped += 1
 		else
-			local offs, worst = {}, 0
+			local offs, bad1, prev = {}, false, nil
 			for i = 1, #v, 3 do
 				local x, y, z = v[i], v[i + 1], v[i + 2]
 				local h = workspace:Raycast(Vector3.new(x, y + 12, z), Vector3.new(0, -60, 0), p)
 				local off = if h then h.Position.Y - y else -99
 				table.insert(offs, string.format("%.1f", off))
-				if math.abs(off) > math.abs(worst) then
-					worst = off
+				if off == -99 or (i == 1 and math.abs(off) > 0.6) or (prev and math.abs(off - prev) > 3) then
+					bad1 = true
 				end
+				prev = off
 			end
-			if math.abs(worst) > 0.6 then
+			if bad1 then
 				bad += 1
 				table.insert(out, string.format("%s %s (%.0f, %.0f) cell %dx%d: %s", name, e, x0, z0, x0 // 1536, z0 // 1536, table.concat(offs, " ")))
 			else
