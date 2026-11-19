@@ -69,7 +69,8 @@ local function fit(l: any)
 	l:SetAttribute("LangScaled", l.TextScaled)
 	local c = Instance.new("UITextSizeConstraint")
 	c.Name = FIT
-	c.MaxTextSize = math.max(9, math.ceil(l.TextSize * 1.25))
+	-- (only one-line boxes grow: a tall box's text would grow into what sits above it)
+	c.MaxTextSize = math.max(9, math.ceil(l.TextSize * (if l.AbsoluteSize.Y > l.TextSize * 2.2 then 1 else 1.25)))
 	c.MinTextSize = 9
 	c.Parent = l
 	l.TextScaled = true
