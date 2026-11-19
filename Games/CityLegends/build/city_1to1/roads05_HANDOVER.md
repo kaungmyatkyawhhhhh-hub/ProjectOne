@@ -50,6 +50,26 @@
 - **(d) Kerb overlaps:** `roads05_kerb_cross.py <tag>` (kerb pieces crossing > 25 deg, >= 30% overlap, after drop_scraps) lists
   clusters; not fixed in the builder this pass (see vault note).
 
+## REBUILD P4 (19 Nov, DISTRICT REBUILD agent 2): Hledan / Kamayut IN (district, J37 roads, lanes L12347, minimap), Play-tested
+State: `rebuild_progress.json` "P4". Same order as P7 (below); what differed:
+1. **Re-clear:** `district_files.sh P4 --no-roads buildings` (21 min): 11,209 buildings (805 dropped / 3,843 clipped), shells 14,113, roofs 6,410;
+   old files `_pre_rebuild_P4`. **4 place packs** (P4 is big) and the night glb `cells_1.glb` was 23 MB (> 20 MB upload cap): split by mesh
+   with `tools/yangon/city/glb_split.py <glb> 2` into `cells_1_a/b.glb`; `M.kit(nil, a, b)` takes both.
+2. **Swap range** 1536 x14..18 z11..21 (x18 = P1/P2 seam, clip P4+P1+P2). Step boxes: x 21504/24576/27648(1536 wide) x z 16896(1536 tall)
+   + 3072 rows to 33792, labels 7..9 x 5..10 (18 boxes, ~50 min, 2.7 M parts). Edge cells with P5 (x14) and P6 (z21) hold P4 roads only:
+   P5 / P6 rebuilds re-bake them whole. 9x9 log: MOUTH FAILED Lane #1255 on Lane #7606 (not fixed).
+3. Bake already pavement-box clips (5,659 rows). 476 meshes / 50 glbs / 23,906 boxes; old 11 cells (x18) + 4,305 boxes to RB_OldP4.
+4. **Lanes trap:** `roads05_lanes.py` wrote road names with `json.dumps` = JSON u-escapes; a Burmese name in P4 made
+   `YangonLanes1to1_14` fail to load ("malformed escape sequence") and stopped the client's Main (no menu, no traffic). Fixed
+   (`ensure_ascii=False`); **require-test every generated module in Studio before saving.**
+5. **Deck feet in the air (owner ref):** `tools/riviera/Roads.luau` kept `finalEdges` (module-level) from the cell's ground build while
+   the deck build's `alignJunctions` ran, so a deck that butts a bigger deck took a ground road's heights: Hledan Road Flyover feet
+   built +1.4 / +3.9 over the ground road. Fixed (reset before alignJunctions, Roads 55,792 / 1214386504); check any subset with
+   `tools/yangon/city/roads05_deckfeet_check.py <subset roads.json>`. P3 has the same fault (Khayaypin x2 cell 19x27, Lanmadaw deck ~24
+   low cells 21x27 / 21x28): rebuild those cells with the fixed builder.
+6. Minimap: FULL += P4 re-lays the whole detail grid (41 tiles): all re-uploaded as Image (`ids_P4_images.txt`).
+7. Lock etiquette (coordinator): release `studio.lock` after every saved batch, wait ~10 min, retake (`until mkdir ...`).
+
 ## REBUILD P7 (19 Nov, DISTRICT REBUILD agent): Shwedagon / Maha Wizaya / People's Park / Bahan IN, Play-tested, saved v1479
 State: `rebuild_progress.json` "P7". Order used (it works; copy it for P4, P6, P8):
 1. **District re-clear vs J37:** `district_files.sh P7 --no-roads buildings` (buildings 3,573, 159 dropped / 905 clipped by roads; old files

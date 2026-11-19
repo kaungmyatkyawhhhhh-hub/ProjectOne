@@ -97,6 +97,12 @@ This note is the fix. It works in three parts:
 - **Edge cells are rebuilt whole.** A road cell shared with an earlier district is rebuilt from both districts' data and swapped in one piece. Never paste half a cell next to an old half.
 - **Minimap pictures go up as Image, not Decal.** An ImageLabel cannot use a Decal id ("Asset type does not match").
 
+## Lesson (19 Nov 2026, City Legends: district P4 moved in; flyover feet in the air; traffic module broke)
+- **Generated code must be load-tested before saving.** A lane module held a Burmese street name written as a JSON escape, which is not valid in Luau. The module failed to load, the client stopped at start, and Play had no menu and no traffic. After generating any module, require every one of them in Studio (and keep text as plain UTF-8, not escapes).
+- **Module-level state leaks between two builds in the same run.** The road builder kept the last build's road edges in a file-wide table. The flyover build ran right after the ground build and read ground roads' heights as flyover heights, so two flyovers started 1.5 and 4 studs in the air with a gap under them. Reset shared state at the start of every build, before anything reads it.
+- **Upload caps can be hit by a big district.** One night-window file came out at 23 MB, over the 20 MB upload cap. Split such files by mesh before uploading.
+- **Shared tools: take short turns.** Several agents use one Studio: hold the lock only for one saved batch, then release it so others get short slots.
+
 ## Lesson (19 Nov 2026, City Legends: players fell off the Myanmar Plaza escalators)
 - **Rescaling a building but keeping player-size pieces breaks their joints.** At 1:1 the mall was stretched 1.875x but the escalators kept true size (right), so their ends no longer reached the galleries: they hung in the void, behind the glass rail, with no floor under the plates. After any rescale, check every place where a kept-size piece must meet the scaled building: escalator and stair ends, doors, bridges, lift doors.
 - **Walk test every walkable piece in data, before Studio:** sample each run and 10+ studs past both ends, and check two things: ground within a step under the expected surface, and nothing solid at body height. It found all 12 holes before anything was placed. Then walk it in Play.
