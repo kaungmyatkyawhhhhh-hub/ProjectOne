@@ -97,9 +97,17 @@ local function rearPlate(m: Model, cf: CFrame, box: Vector3): Part?
 	local away = Vector3.new(0, 20000, 0)
 	m:PivotTo(CFrame.new(away))
 	m.Parent = workspace
+	-- (the templates' parts have CanQuery off, and helper boxes are plain Parts: rays see only the meshes)
+	local meshes = {}
+	for _, d in m:GetDescendants() do
+		if d:IsA("MeshPart") then
+			d.CanQuery = true
+			table.insert(meshes, d)
+		end
+	end
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Include
-	params.FilterDescendantsInstances = { m }
+	params.FilterDescendantsInstances = meshes
 	local hit: RaycastResult? = nil
 	for _, k in { 0.3, 0.36, 0.24, 0.42 } do
 		local from = cf.Position + away + Vector3.new(0, -box.Y / 2 + box.Y * k, -box.Z / 2 - 4)
