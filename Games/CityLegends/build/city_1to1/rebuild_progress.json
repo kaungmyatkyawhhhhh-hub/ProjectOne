@@ -239,5 +239,12 @@
   "data": "R05_GROW=1700 roads05_subset.py net RB6 P6 (1302 roads, 18 decks, 42 modules, roads05_RB6/pack_checksums.txt); subset.json clip = P6+P4+P7+P1+P3 -> NEW asset 90949174861361; deckfeet mirror 0",
   "lanes_ready": "roads05_lanesubset L123467 (P1 P2 P3 P4 P6 P7): 1055 lanes, 2496 links, 0 dead ends, 18 modules (build dir only)",
   "plan": "move first (DistrictPlace P6: load 4 packs, kit(nil, night), terrain, green with Green.Far renamed Far_keep and merged back, shells, pagodas, cleanup), then roads: swap 1536 x14..19 z21..29 whole; step boxes: 3072 cols x7..9 (x 21504..30720) x rows z 32256..33792 (1536 row 21) + 3072 rows z11..z14 (z 33792..46080) -> labels <x>x10..<x>x14; then bake R05_ONLY = the swap cells, swap, pbox clip, MapBugScan, verge, KF/KW, lanes L123467 install + require-test, minimap FULL += P6, Play test, shots."
+ },
+ "P8": {
+  "status": "offline ready (agent 3, 19 Nov): re-clear done, packs + roads data uploaded. Studio steps not started.",
+  "buildings": "district_files.sh P8 --no-roads buildings: 269 dropped / 2,179 clipped by roads, shells 12,313 parts in 30 cells, roofs 3,620; old logs + sync copy in build/city_1to1/_pre_rebuild_P8",
+  "packs": "place 94911907173468 92837442323257 103728030356623 101220303279241; night cells_1.glb 74202999268049 (19.7 MB, no split)",
+  "data": "R05_GROW=1700 roads05_subset.py net RB8 P8 (1496 roads, 15 decks, 48 modules, roads05_RB8/pack_checksums.txt); subset.json clip = P8+P7+P3+P1 -> NEW asset 77804123579999; deckfeet mirror 0",
+  "plan": "P8 box x 36074..45984 z 32653..40943 -> 1536 cells x23..29 z21..26 (x23 = P7 seam column, z26 = P3 seam row, z21 = P1 seam row): swap them whole; lanes: roads05_lanesubset <net> L12345678-style with P8 added (after P6: L1234678)."
  }
 }
