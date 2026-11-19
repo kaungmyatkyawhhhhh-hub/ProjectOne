@@ -713,6 +713,11 @@ function Roads.build(data, opts)
 					continue -- a narrowed edge stops at the wall between this road and the next
 				end
 				local y = bigSurface(roads, grid, edge[i], ri, r.rank, if r.aligned then HALF + 1 else HALF + 8, finalEdges ~= nil) -- (a little past its edge: the joint stays level)
+				-- (19 Nov, Road #25 again: alignJunctions skipped the Dala flyover 30 above the valley foot, but this edge pin
+				-- still took its surface and lifted both ramp feet to 40) a bigger road far above / below is a crossing
+				if y and math.abs(y - edge[i].Y) > 8 then
+					y = nil
+				end
 				if y then
 					edge[i] = Vector3.new(edge[i].X, y, edge[i].Z)
 					;(if side == 1 then pinL else pinR)[i] = true
