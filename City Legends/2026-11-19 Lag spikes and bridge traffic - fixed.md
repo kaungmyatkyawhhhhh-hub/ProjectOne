@@ -63,7 +63,25 @@ Every 1:1 lane point (85,282) was checked against the BUILT road collision (`Yan
 
 Checked and NOT the cause: physics (2.3 ms a step, 2 contacts at the worst spot), rendering (13-20 ms), GC (no big heap drops at the spikes), streaming bursts while driving (dInst 0 on the spike frames).
 
-FINAL_PLAY
+## Final Play check (all fixes in, saved, store back on CityLegends_v1 and checked on the Server)
+- Traffic watched 14 s at each flyover, every traffic car within 500 studs, car bottom vs the collision under it:
+  - **Kabar Aye flyover: 28 cars, worst 0.44 studs**
+  - **Hledan flyover: 27 cars, worst 0.28** (was 5.18 before the same-height join fix)
+  - **Arzani flyover: 26 cars, worst 0.51**
+  - No car sinks into or falls through a deck (0.3-0.5 = tyres / camber). Most "no surface under" samples (Arzani) are probably road collision not streamed to the client 500 studs out (not checked).
+- Hops (teleport / fast travel): tiles now go out one per frame (dTiles -1, was -30 in one frame). One frame of 130-230 ms is still left right after each hop: only ~60 new instances, not the kit. It is the engine settling the new area, and the fast-travel loading screen (`waitForMap`) covers it.
+- No script errors from Traffic / YangonKitStream / YangonKitData in the Output; `startup: Traffic 0.26s` (the lane grid is built inside it).
+
+Shots (Play, the car parked on each deck, traffic on the deck behind / ahead):
+- ![[2026-11-19 Lag and bridge traffic - Kabar Aye flyover, traffic on the deck.jpg]]
+- ![[2026-11-19 Lag and bridge traffic - Hledan flyover, traffic on the deck.jpg]] (the white van queued into the parked test car)
+- ![[2026-11-19 Lag and bridge traffic - Arzani flyover, traffic on the deck.jpg]]
+
+## What is left
+- 32 deck lane points where the data deck is longer than the built deck (list above): fix the deck extents in the builder / data, then re-run LaneHeights + `roads05_lanes.py --install`.
+- **After every road swap (the district rebuild P3 feet / P6 / P8 now), re-run LaneHeights and the lanes**, or new deck heights will put the lanes off the deck again.
+- Phone: not measured on a real phone. The traffic scan was the same code on phones (3-4x slower), so the gain there should be bigger, but read a phone's MicroProfiler after publishing.
+- The kit streamer still builds 3 ms a frame (not lowered to 2): all its single steps now stay within ~10 ms.
 
 ## Traps (also in the Playbook)
 - Compact building data (P4-P12) is laid out on the client; one big compound building's roof grid took 190 ms in ONE frame (P7 tile 135_159). A per-frame time budget only works if the heavy step itself can stop: `KD.expand` / `roofSlabs` now pause at the frame's deadline (coroutine), and the roof grid keeps each corner test (same output as `kit_layout.py`: all 1,632 P4 / P7 tiles byte-identical).
