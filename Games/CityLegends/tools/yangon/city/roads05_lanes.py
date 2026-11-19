@@ -265,10 +265,11 @@ def main(tag):
         if l['closed'] or li in straight_from:
             continue
         end = np.array([l['pts'][-1][0], l['pts'][-1][2]])
+        ey = l['pts'][-1][1]  # (19 Nov) links only between lanes at the same height (never from a deck to a road under it)
         din = ldir(li, len(l['pts']) - 2)
         best = None
         for ti, t in starts:
-            if t['road'] == l['road'] or t['lane'] != min(l['lane'], t['nl']):
+            if t['road'] == l['road'] or t['lane'] != min(l['lane'], t['nl']) or abs(t['pts'][0][1] - ey) > 6:
                 continue
             st = np.array([t['pts'][0][0], t['pts'][0][2]])
             v = st - end
@@ -290,7 +291,7 @@ def main(tag):
             if kk + 2 >= len(t['pts']):
                 continue
             q = np.array([t['pts'][kk + 1][0], t['pts'][kk + 1][2]])
-            if np.linalg.norm(q - end) < 60 and float(ldir(ti, kk) @ din) > 0.7:
+            if np.linalg.norm(q - end) < 60 and float(ldir(ti, kk) @ din) > 0.7 and abs(t['pts'][kk + 1][1] - ey) <= 6:
                 links.append([li, len(l['pts']), ti, kk + 2])
                 break
     # ring: loops, lane changes outward a few times a turn
@@ -326,6 +327,7 @@ def main(tag):
         if l['closed'] or li in linked_from_end:
             continue
         end = np.array([l['pts'][-1][0], l['pts'][-1][2]])
+        ey = l['pts'][-1][1]
         din = ldir(li, len(l['pts']) - 2)
         best_same, best_any = None, None
         for ti, t in enumerate(lanes):
@@ -333,6 +335,7 @@ def main(tag):
                 continue
             P = np.array([[p[0], p[2]] for p in t['pts'][:-2]])
             d = np.hypot(P[:, 0] - end[0], P[:, 1] - end[1])
+            d[np.abs(np.array([p[1] for p in t['pts'][:-2]]) - ey) > 6] = np.inf  # (19 Nov) same height only
             kk = int(np.argmin(d))
             dd = float(d[kk])
             if best_any is None or dd < best_any[0]:
