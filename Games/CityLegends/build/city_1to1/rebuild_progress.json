@@ -233,7 +233,7 @@
   "P7_11x11": "FIXED: cell 22x22 rebuilt (RB7 data, fixed builder): 16 meshes / 2137 boxes, glbs 130872480368464 101740343571209, collide 101629578288611; swapped (old 2143 boxes), backup deleted. Verge+trim and terrain-over-R pass run on all 5 rebuilt cells (19 R/D boxes had terrain over: cleared; 11 far-tree parts on R removed)."
  },
  "P6": {
-  "status": "district moved (v1595); roads not started",
+  "status": "district + roads IN (agent 4): swapped, terrain over R cleared, lanes L123467 installed; verge running; Play test + shots not yet",
   "buildings": "district_files.sh P6 --no-roads buildings (12 min): 9,059 buildings (511 dropped / 2,855 clipped by roads), shells 10,811 parts in 28 cells, roofs 4,356; old logs + sync copy in build/city_1to1/_pre_rebuild_P6",
   "packs": "place 104009239183763 109020198747727 133451653433318 128448686655852; night cells_1.glb 110792092350126 (15.6 MB, no split)",
   "data": "R05_GROW=1700 roads05_subset.py net RB6 P6 (1302 roads, 18 decks, 42 modules, roads05_RB6/pack_checksums.txt); subset.json clip = P6+P4+P7+P1+P3 -> NEW asset 90949174861361; deckfeet mirror 0",
@@ -241,7 +241,13 @@
   "plan": "move first (DistrictPlace P6: load 4 packs, kit(nil, night), terrain, green with Green.Far renamed Far_keep and merged back, shells, pagodas, cleanup), then roads: swap 1536 x14..19 z21..29 whole; step boxes: 3072 cols x7..9 (x 21504..30720) x rows z 32256..33792 (1536 row 21) + 3072 rows z11..z14 (z 33792..46080) -> labels <x>x10..<x>x14; then bake R05_ONLY = the swap cells, swap, pbox clip, MapBugScan, verge, KF/KW, lanes L123467 install + require-test, minimap FULL += P6, Play test, shots.",
   "district_moved": "DONE v1595 (agent 4): DistrictPlace P6 load 4 packs, night 26 cells, terrain 1654 tiles, green paint 1340 tiles + far 5144 parts (Far_keep merge: 235 kept, 16 name dups renamed _old, 0 parts within 3 studs) + Data_P6G 1319, Data_P6 in YgnKit, shells 10811 + roof parts 5175, 2 pagodas re-placed (old 2 in ServerStorage.RB_OldP6.Temps until Play test). Packs + Terrain modules removed (cleanup 50).",
   "exported": "agent 4: 15 step boxes 7x10..9x14 (3072 cols x 21504..30720; rows x10 = z 32256..33792, x11..x14 = 3072 rows to 46080) -> roads05_RB6/pages, 0 MOUTH FAILED; terrain beds written; saved",
-  "bake": "R05_ONLY = 1536 x14..19 z21..29 minus 19x29 (19x29 stays the Road #25 build: Road Flyover #2's mid lies in 20x29, so a P6 build of 19x29 lacks its deck) -> roads05_RB6/r05_only.txt; bake running"
+  "bake": "R05_ONLY = 1536 x14..19 z21..29 minus 19x29 (19x29 stays the Road #25 build: Road Flyover #2's mid lies in 20x29, so a P6 build of 19x29 lacks its deck) -> roads05_RB6/r05_only.txt; bake running",
+  "baked": "422 meshes / 45 glbs / 21032 boxes (R05_ONLY 1536 x14..19 z21..29 minus 19x29; clip P6+P4+P7+P1+P3; pbox clip 7398 rows in the bake)",
+  "uploaded": "45 glbs roads05_RB6/upload_ids_P6.txt (group 33151111); collide imports/sync/rebuild_P6_collide.rbxmx = asset 136355963986563 (11 modules RColRB_P6_k)",
+  "swapped": "old 12 cells (x19 z21..28 + x15..18 z21) + 5282 boxes -> ServerStorage.RB_OldP6.{Meshes,Collide} (+ Temps = 2 old pagodas, TreesOnRoad 2); new 42 cells 422 meshes + 21032 boxes in; D boxes per x19 cell unchanged (64/30/38); saved",
+  "terrain_scan": "MapBugScanP6 (AREAS 1536 x14..19 z21..29; ServerStorage.MapBugScanP6, tools asset 97748776018483): 81 R boxes with terrain over -> cleared; nearDecks 63956 columns, 0 stray",
+  "lanes": "L123467 (P1 P2 P3 P4 P6 P7): LaneHeights after the swap (666 rows; merged: rows in rebuilt cells replaced, others kept; old file lane_heights_before_agent4.txt) -> 1033 lanes, 2415 links, 0 dead ends, 1291 built heights, 21 deck gaps (2 on the Road #25 ramp lane edge 31604,45612 / 31652,45605); src/shared YangonLanes1to1_1..18 + Studio synced (asset 121448422306950), checksums equal (roads05_L123467_checksums.txt), require 18/18 ok",
+  "kit_props": "NOT done: the KF / KW (kit records on R boxes) helpers are not in the repo (MapBugScan has no kitScan); P6 buildings were re-cleared vs J37 offline, green/street data (Data_P6G) not checked"
  },
  "P8": {
   "status": "offline ready (agent 3, 19 Nov): re-clear done, packs + roads data uploaded. Studio steps not started.",
