@@ -565,6 +565,7 @@ Roads.triangle = triangle
 
 function Roads.prepared(data, cut)
 	local roads, grid = prepare(data, cut)
+	finalEdges = nil
 	alignJunctions(roads, grid)
 	return roads
 end
@@ -574,6 +575,9 @@ function Roads.build(data, opts)
 	local box = opts.box
 	local parent = opts.parent
 	local roads, grid = prepare(data, opts.cut)
+	-- (P4 19 Nov: finalEdges is module-level, keyed by the LAST build's road numbers: reset it before alignJunctions,
+	-- or the deck build after the ground build read ground roads' edges as its decks' surfaces and lifted deck feet)
+	finalEdges = if opts.edgeSurface then {} else nil
 	alignJunctions(roads, grid)
 	local count = 0
 	local zebraSpots: { Vector3 } = {}
@@ -585,8 +589,7 @@ function Roads.build(data, opts)
 	if opts.keepEdges then
 		Roads.debugEdges = {}
 	end
-	-- (opts.edgeSurface: bigger roads first, each road's final edges kept for bigSurface)
-	finalEdges = if opts.edgeSurface then {} else nil
+	-- (opts.edgeSurface: bigger roads first, each road's final edges kept for bigSurface; finalEdges set above)
 	local order = {}
 	for ri in roads do
 		table.insert(order, ri)
