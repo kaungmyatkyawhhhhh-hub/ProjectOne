@@ -181,9 +181,12 @@ local function setShells(key: string, on: boolean)
 	end
 end
 
+-- (2026-11-19, owner: "lag spikes") a teleport took ~30 tiles (~6,000 parts) down in one frame (100-230 ms): a tile
+-- that goes is taken down a batch of parts at a time, inside the same frame budget as the building
+local dying = {}
 local function unload(key: string)
 	if folders[key] then
-		folders[key]:Destroy()
+		table.insert(dying, folders[key])
 		folders[key] = nil
 	end
 	jobs[key] = nil
@@ -248,6 +251,10 @@ RunService.Heartbeat:Connect(function(dt)
 		for key in folders do
 			unload(key)
 		end
+		for _, f in dying do
+			f:Destroy()
+		end
+		table.clear(dying)
 		return
 	end
 	acc += dt
@@ -257,6 +264,18 @@ RunService.Heartbeat:Connect(function(dt)
 		refresh()
 	end
 	local t0 = os.clock()
+	while dying[1] and (os.clock() - t0) * 1000 < FRAME_MS do
+		local f = dying[#dying]
+		local kids = f:GetChildren()
+		if #kids == 0 then
+			f:Destroy()
+			table.remove(dying)
+		else
+			for i = 1, math.min(#kids, 100) do
+				kids[i]:Destroy()
+			end
+		end
+	end
 	-- start the nearest waiting tile, then keep building until the frame's budget is spent
 	while (os.clock() - t0) * 1000 < FRAME_MS do
 		local key = next(jobs)
