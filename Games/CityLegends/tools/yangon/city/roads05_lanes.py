@@ -34,7 +34,11 @@ def main(tag):
     roads = [r for r in data['roads'] if r['kind'] in ('route', 'side')]
     allr = {r['name']: r for r in data['roads']}
     rings = data.get('roundabouts', [])
-    deck_of = {d['of']: d for d in data.get('decks', [])}
+    # every deck of a road (19 Nov: a dict kept only the LAST deck, so Hledan Road #3, Kabar Aye Pagoda Road, Road #25,
+    # Pyay Road #6 and Lanmadaw Road had lanes at ground height through their other decks: traffic drove inside them)
+    decks_of = {}
+    for d in data.get('decks', []):
+        decks_of.setdefault(d['of'], []).append(d)
     region_poly = None
     try:
         from shapely.ops import unary_union
@@ -45,8 +49,7 @@ def main(tag):
     S = {}
     for r in roads:
         s = [list(q) for q in r['s']]
-        d = deck_of.get(r['name'])
-        if d:
+        for d in decks_of.get(r['name'], []):
             for k, i in enumerate(range(d['from'], d['to'] + 1)):
                 s[i][1] = d['s'][k][1]
         S[r['name']] = s
@@ -342,8 +345,29 @@ def main(tag):
         if re.match(r'YangonLanes1to1_\d+\.lua$', f):
             os.remove(os.path.join(SRC, f))
 
+    # (19 Nov) heights of the BUILT road surface where it differs from the data (the builder re-grades some stretches:
+    # Arzani Street past its deck is built 20-36 studs under its data height): roads05_<tag>/lane_heights.txt, lines
+    # "x z y" keyed by the written x, z, made in Studio by tools/yangon/LaneHeights.luau (re-run it after a road swap)
+    built_y = {}
+    hp = os.path.join(od(tag), 'lane_heights.txt')
+    if os.path.exists(hp):
+        for row in open(hp, encoding='utf-8'):
+            f = row.split()
+            if len(f) == 3:
+                built_y['%s,%s' % (f[0], f[1])] = float(f[2])
+        print('built heights:', len(built_y))
+    snapped = 0
+
     def lane_txt(l):
-        flat = ','.join('%.2f,%.2f,%.2f' % p for p in l['pts'])
+        nonlocal snapped
+        out = []
+        for p in l['pts']:
+            xz = '%.2f,%.2f' % (p[0], p[2])
+            y = built_y.get(xz)
+            if y is not None:
+                snapped += 1
+            out.append('%.2f,%.2f,%.2f' % (p[0], p[1] if y is None else y, p[2]))
+        flat = ','.join(out)
         # ensure_ascii=False: JSON "\uXXXX" escapes are not Luau ("malformed escape sequence"; Burmese road names, P4 19 Nov)
         return '\t\t{ road = %s, way = %d, lane = %d, kind = "route", closed = %s, yangon = true%s, pts = { %s } },' % (
             json.dumps(l["road"], ensure_ascii=False), l['way'], l['lane'], 'true' if l['closed'] else 'false', ', outer = true' if l['outer'] else '', flat)
@@ -375,7 +399,7 @@ def main(tag):
         assert len(text) < 199000, len(text)
         open(os.path.join(SRC, 'YangonLanes1to1_%d.lua' % (mi + 1)), 'w', encoding='utf-8', newline='\n').write(text)
         print('YangonLanes1to1_%d.lua %d chars, %d lanes, %d links' % (mi + 1, len(text), len(ls), len(link_mod[mi])))
-    st = dict(lanes=len(lanes), links=len(links), turned_round=turned, dead_ends=len(dead), ring_lanes=len(ring_lanes), turned_inside=len(inner_turn), turned_inside_sample=inner_turn[:25],
+    st = dict(lanes=len(lanes), links=len(links), snapped_to_built=snapped, turned_round=turned, dead_ends=len(dead), ring_lanes=len(ring_lanes), turned_inside=len(inner_turn), turned_inside_sample=inner_turn[:25],
               dead_sample=[lanes[i]['road'] for i in dead[:10]], rescued=rescued)
     json.dump(st, open(os.path.join(od(tag), 'lanes_stats.json'), 'w'), indent=1)
     print(json.dumps(st))
