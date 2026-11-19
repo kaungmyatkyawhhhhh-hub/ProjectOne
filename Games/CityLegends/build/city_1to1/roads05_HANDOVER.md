@@ -28,6 +28,24 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## REBUILD Road #25 + P6 (19 Nov, DISTRICT REBUILD agent 4): state `rebuild_progress.json` "road25", "P6"
+- **Road #25 second cause:** after the alignJunctions guard the rebuilt ramps still rose to the Dala flyover (D tops 39.6-40.2 for ~80 studs
+  at both feet). `Roads.luau`'s EDGE PIN (each edge point on a bigger road takes its surface, ~line 715) had no height guard: now
+  `|dy| > 8` = a crossing (56,415 chars / 1235852328, asset 122752884486605, Studio ClaudeTools.Roads replaced). Found by running
+  `Roads.build` of just the 3 decks (asset 130928365314305 = their data) in the COPY Studio: a fast repro that leaves the main place alone.
+  Deck pairs that cross within reach at > 8 studs apart (python scan of RB6 / RB8): only Road #25 x Dala, so builds made before the fix elsewhere are fine.
+- 19x29..21x29 rebuilt (RB3w), swapped, saved. DeckFeetCheck 57 ok / 2 BAD = the valley foot itself: the two decks meet ON THE NORTH EDGE of
+  the ground road (kerb box 1.5 high across the Road Flyover mouth; ~7-stud gap before #2's first deck box). Needs a data fix (feet onto the carriageway).
+- **Invisible kerbs on decks (map-wide):** 34 P boxes standing 0.3-3 over a deck top inside the deck's footprint (Road Flyover #2 start 30139/30196 x 44965,
+  Pyay #6 deck, Kabar Aye, 36.9k x 43.5-44.1k) + 6 steep slabs at the valley -> `ServerStorage.RB_PBoxOnDeck`. Other steep boxes listed in
+  `steep_boxes_19nov.txt` (not changed). The bake's `roads05_pbox_clip` should drop P slices over decks (not done).
+- **Studio traps:** `require` caches a ModuleScript even after its Source changes (DeckFeetCheck gave old results): require a `:Clone()`.
+  `ChangeHistoryService:ResetWaypoints()` after a build: 18 -> 15 GB. A long MCP-blocking build: print a marker from Studio and wait on it from bash
+  with `grep` on `%LOCALAPPDATA%/Roblox/logs/*Studio*_last.log` (no polling calls).
+- **P6:** district moved (v1595, Data_P6 + P6G, Far_keep merge 16 name dups renamed `_old`, 0 parts within 3 studs); roads: 15 step boxes
+  7x10..9x14 exported (0 MOUTH FAILED), bake R05_ONLY = 1536 x14..19 z21..29 minus 19x29 (it stays the Road #25 build: Road Flyover #2's mid is
+  in 20x29, so P6's build of 19x29 has no deck).
+
 ## LANES vs BUILT ROADS (19 Nov, LAG+BRIDGE agent): run after every road swap
 - `roads05_lanes.py <tag> --install` now applies EVERY deck of a road, joins lanes only within 6 studs of height, and reads
   `roads05_<tag>/lane_heights.txt` (built surface). Make that file in Edit with `tools/yangon/LaneHeights.luau` (ClaudeTools.LaneHeights:
