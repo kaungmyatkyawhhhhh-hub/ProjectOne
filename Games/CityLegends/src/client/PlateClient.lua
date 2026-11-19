@@ -337,6 +337,10 @@ function PlateClient.open()
 			names[c.id] = c.name
 		end
 		for _, b in state.bag do
+			-- (bought plates, plus this car's free one: the free plates of your other cars show with the < > picker)
+			if (b.paid or 0) <= 0 and not (car and b.car == car.id) then
+				continue
+			end
 			local row = new("Frame", { BackgroundColor3 = Theme.PanelLight, Size = UDim2.new(1, -6, 0, 64), LayoutOrder = nextOrder() }, list)
 			corner(row, 8)
 			local p = plateBox(row, b.plate, 100, 0)

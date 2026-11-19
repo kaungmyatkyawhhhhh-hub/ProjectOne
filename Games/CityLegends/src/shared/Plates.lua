@@ -25,7 +25,7 @@ Plates.EVENT = { GGFEST26 = true } -- event plates (Customs looks) that still sh
 Plates.ROLL_COST = 3000 -- a new random plate from the menu
 Plates.BASE = 25000 -- choosing your own number at the office (no pattern)
 Plates.SELL_SHARE = 0.5 -- selling a plate back pays half of what you paid
-Plates.BAG_MAX = 20 -- plates one player can own
+Plates.BAG_MAX = 20 -- bought plates one player can own (free ones on cars don't count)
 
 local PRIVATE = "^([1-9])([" .. Plates.LETTERS .. "])%-([1-9]%d%d%d)$"
 

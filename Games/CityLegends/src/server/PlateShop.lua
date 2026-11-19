@@ -139,10 +139,13 @@ local function carOf(d: any, plate: string): string?
 	return nil
 end
 
+-- bought plates held (free plates on cars don't count: a player with 100 cars has 100 of those)
 local function countBag(d: any): number
 	local n = 0
-	for _ in d.Bag do
-		n += 1
+	for _, paid in d.Bag do
+		if paid > 0 then
+			n += 1
+		end
 	end
 	return n
 end
