@@ -611,7 +611,7 @@ function UI.buildTouchControls()
 		Name = "CarMenu",
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 0, -52),
-		Size = UDim2.fromOffset(COLS * TW + (COLS - 1) * GAP + 16, TOP + 4 * TH + 3 * GAP + 8), -- (4 rows since PLATES, 19 Nov)
+		Size = UDim2.fromOffset(COLS * TW + (COLS - 1) * GAP + 16, TOP + 3 * TH + 2 * GAP + 8), -- (a 4th row only for DOORS, below)
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.08,
 		Active = true,
@@ -688,6 +688,9 @@ function UI.buildTouchControls()
 	UI.showDoorsButton = function(on: boolean)
 		if doorsBtn.Visible ~= on then
 			doorsBtn.Visible = on
+			-- (19 Nov: PLATES filled row 3, so DOORS sits on a 4th row the panel grows to)
+			local rows = if on then 4 else 3
+			panel.Size = UDim2.fromOffset(COLS * TW + (COLS - 1) * GAP + 16, TOP + rows * TH + (rows - 1) * GAP + 8)
 		end
 	end
 	local function setOpen(open: boolean)
