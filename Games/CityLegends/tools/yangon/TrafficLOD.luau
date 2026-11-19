@@ -279,7 +279,8 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 			local face = (frame.Rotation * cv.face).Unit
 			local pos = frame * (cv.at * spm) + face * 0.003 * spm
 			local up = if math.abs(face.Y) > 0.95 then frame.LookVector else Vector3.yAxis
-			table.insert(addedCovers, coverPart(CFrame.lookAt(pos, pos + face, up), cv.w * spm, cv.h * spm, cv.color, cv.disc, "BrandMarks cover"))
+			-- (a fifth bigger than CarSkin's: the LC300's boot emblem peeked round the measured size)
+			table.insert(addedCovers, coverPart(CFrame.lookAt(pos, pos + face, up), cv.w * spm * 1.2, cv.h * spm * 1.2, cv.color, cv.disc, "BrandMarks cover"))
 		end
 		for _, c in CORNERS do
 			local cap = marks.caps and marks.caps[c]

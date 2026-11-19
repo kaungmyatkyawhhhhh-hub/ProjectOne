@@ -43,6 +43,12 @@ P.PATCHES = {
 	{ car = "toyoka_belta", covers = "rear emblem", paint = true, parent = { "Body", "Body", "Model", "Model", "Main Body" }, cf = { 0.0000, 0.6951, -9.5496, 1.0000, 0.0000, 0.0000, 0.0000, 0.9806, -0.1960, 0.0000, 0.1960, 0.9806 }, size = { 0.6200, 0.4200, 0.1000 }, disc = false, color = { 239, 184, 56 }, refl = 0 },
 	{ car = "toyoka_belta", covers = "TOYOTA", paint = true, parent = { "Body", "Body", "Model", "Model", "Main Body" }, cf = { 1.6538, 0.5950, -9.3792, 0.9806, -0.0377, -0.1924, 0.0000, 0.9813, -0.1924, 0.1961, 0.1886, 0.9623 }, size = { 0.8500, 0.2600, 0.1000 }, disc = false, color = { 239, 184, 56 }, refl = 0 },
 	{ car = "toyoka_belta", covers = "YARIS", paint = true, parent = { "Body", "Body", "Model", "Model", "Main Body" }, cf = { -1.6739, 0.5950, -9.3792, 0.9806, 0.0377, 0.1924, 0.0000, 0.9813, -0.1924, -0.1961, 0.1886, 0.9623 }, size = { 0.8000, 0.2600, 0.1000 }, disc = false, color = { 239, 184, 56 }, refl = 0 },
+	-- (2026-11-19) the Land Cruiser 200: grille emblem in the chrome mesh's picture, boot emblem / VX.R / V8 5.7 in the
+	-- body paint's picture
+	{ car = "toyoka_lc200", covers = "grille emblem", parent = { "Body", "Black" }, cf = { 0.0000, -0.0725, -10.8600, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000, 0.0000, 0.0000, 0.0000, 1.0000 }, size = { 1.3500, 0.9200, 0.0800 }, disc = false, color = { 30, 30, 32 }, refl = 0 },
+	{ car = "toyoka_lc200", covers = "rear emblem", paint = true, parent = { "Body", "Color" }, cf = { 0.0000, 1.0781, 10.5650, -1.0000, 0.0000, -0.0000, 0.0000, 0.9987, -0.0500, 0.0000, -0.0500, -0.9987 }, size = { 0.9500, 0.6500, 0.0800 }, disc = false, color = { 178, 176, 180 }, refl = 0 },
+	{ car = "toyoka_lc200", covers = "VX.R", paint = true, parent = { "Body", "Color" }, cf = { -2.6722, -0.0483, 10.5242, -0.9879, 0.0441, 0.1487, 0.0000, 0.9588, -0.2842, -0.1551, -0.2807, -0.9472 }, size = { 0.9000, 0.3000, 0.0800 }, disc = false, color = { 178, 176, 180 }, refl = 0 },
+	{ car = "toyoka_lc200", covers = "V8 5.7", paint = true, parent = { "Body", "Color" }, cf = { 2.5202, -0.0200, 10.5348, -0.9999, -0.0023, -0.0128, 0.0000, 0.9842, -0.1772, 0.0130, -0.1772, -0.9841 }, size = { 0.8500, 0.3000, 0.0800 }, disc = false, color = { 178, 176, 180 }, refl = 0 },
 }
 
 P.PARTS = {
