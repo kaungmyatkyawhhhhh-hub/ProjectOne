@@ -28,6 +28,13 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## LANES vs BUILT ROADS (19 Nov, LAG+BRIDGE agent): run after every road swap
+- `roads05_lanes.py <tag> --install` now applies EVERY deck of a road, joins lanes only within 6 studs of height, and reads
+  `roads05_<tag>/lane_heights.txt` (built surface). Make that file in Edit with `tools/yangon/LaneHeights.luau` (ClaudeTools.LaneHeights:
+  `start`, `status`, `page`) on the installed lanes, re-run the lanes, sync, require-test all modules. Keep the FIRST run's rows when merging.
+- Open: 32 deck lane points where the data deck is longer than the built deck (Pyay Road #6 deck end, Kabar Aye flyover south end, Road #25
+  ramp, Lanmadaw (being rebuilt)); list in the vault note `City Legends/2026-11-19 Lag spikes and bridge traffic - fixed.md`.
+
 ## MAP BUG FIXES (19 Nov, MAP BUGS agent): owner's drive of P1-P3 after the J37 rebuild; state `mapbugs_progress.json`
 - **(c) Invisible kerbs = pavement collision over bare asphalt.** `roads05_bake.collision` laid each P box (top = road + 0.5) along
   the road's whole length from the DATA; where the builder cut the pavement (junction mouths, driveways, side lanes beside decks,
