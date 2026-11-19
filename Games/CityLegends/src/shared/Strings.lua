@@ -237,17 +237,17 @@ local T: { [string]: { any } } = {
 	["store.soon"] = { "%s: coming soon", "%s: မကြာမီ လာမည်" },
 	["store.ownIt"] = { "%s: you own it", "%s: ပိုင်ပြီးပါပြီ" },
 	["store.garageNeedHouse"] = { "Garage Space: place a house with room for one more space first (Legends Realty)", "Garage Space: နေရာ တစ်ခု ထပ်ဆံ့တဲ့ အိမ်ကို အရင်ချပါ (Legends Realty)" },
-	["store.cash2x"] = { "2x Cash", "ငွေ ၂ ဆ", true },
-	["store.cash2xDesc"] = { "Double the cash from driving, cut-ups and jobs, for good", "မောင်းခြင်း၊ cut-up နှင့် အလုပ်များမှ ငွေ ၂ ဆ၊ အမြဲတမ်း" },
+	["store.cash2x"] = { "2x Cash", "ငွေ 2 ဆ", true },
+	["store.cash2xDesc"] = { "Double the cash from driving, cut-ups and jobs, for good", "မောင်းခြင်း၊ cut-up နှင့် အလုပ်များမှ ငွေ 2 ဆ၊ အမြဲတမ်း" },
 	["store.vip"] = { "VIP", "VIP" },
 	["store.vipDesc"] = { "A VIP tag, free VIP bays in every tower garage and +10% cash from cut-ups", "VIP tag၊ tower ကားဂိုဒေါင်တိုင်းမှာ အခမဲ့ VIP နေရာ နှင့် cut-up မှ ငွေ +10%" },
-	["store.doublePay"] = { "Double Pay", "လစာ ၂ ဆ", true },
-	["store.doublePayDesc"] = { "Double the pay from every job, for good", "အလုပ်တိုင်းမှ လစာ ၂ ဆ၊ အမြဲတမ်း" },
+	["store.doublePay"] = { "Double Pay", "လစာ 2 ဆ", true },
+	["store.doublePayDesc"] = { "Double the pay from every job, for good", "အလုပ်တိုင်းမှ လစာ 2 ဆ၊ အမြဲတမ်း" },
 	["store.starter"] = { "STARTER PACK", "STARTER PACK" },
 	["store.starterDesc"] = { "$50,000 + a starter car you pick. Once per player", "$50,000 + ကိုယ်ရွေးတဲ့ ကားတစ်စီး။ တစ်ယောက် တစ်ကြိမ်သာ" },
 	["store.garage"] = { "Garage Space", "ကားဂိုဒေါင် နေရာ", true },
 	["store.garageDesc"] = { "One more garage space at the house you live in", "နေထိုင်တဲ့ အိမ်မှာ ကားဂိုဒေါင် နေရာ တစ်ခု ထပ်တိုး" },
-	["store.payLink"] = { "2x with Double Pay  ›", "Double Pay ဖြင့် ၂ ဆ  ›" },
+	["store.payLink"] = { "2x with Double Pay  ›", "Double Pay ဖြင့် 2 ဆ  ›" },
 
 	-- houses (main menu tab)
 	["house.mine"] = { "My House", "ကိုယ့်အိမ်", true },
@@ -310,7 +310,7 @@ local T: { [string]: { any } } = {
 	["job.mall"] = { "Mall Shop", "Mall ဆိုင်" },
 	["jobWhat.delivery"] = { "Pick up parcels at the dispatch rings and drop them across town.", "ပို့ဆောင်ရေးကွင်းမှာ ပါဆယ်ယူပြီး မြို့တစ်ဝှမ်း ပို့ပါ။" },
 	["jobWhat.taxi"] = { "Drive to the pickup, then take the fare where they want to go.", "ခရီးသည်ဆီ မောင်းသွားပြီး သူတို့ သွားချင်တဲ့နေရာ ပို့ပါ။" },
-	["jobWhat.bus"] = { "Drive the YBS line: stop at each of the 7 real bus stops.", "YBS လိုင်း မောင်းပါ: တကယ့် မှတ်တိုင် ၇ ခုစလုံးမှာ ရပ်ပါ။" },
+	["jobWhat.bus"] = { "Drive the YBS line: stop at each of the 7 real bus stops.", "YBS လိုင်း မောင်းပါ: တကယ့် မှတ်တိုင် 7 ခုစလုံးမှာ ရပ်ပါ။" },
 	["jobWhat.police"] = { "Patrol points, and ticket real players who speed past you.", "ကင်းလှည့်ပါ၊ အရှိန်လွန် မောင်းသွားတဲ့ ကစားသမားများကို ဒဏ်ရိုက်ပါ။" },
 	["jobWhat.tea"] = { "Stand at the counter. Serve customers for tips.", "ကောင်တာမှာ ရပ်ပါ။ ဧည့်သည်များကို ဧည့်ခံပြီး tip ရယူပါ။" },
 	["jobWhat.fuel"] = { "Work the pumps. Fill customers' tanks for tips.", "ဆီပန့်မှာ လုပ်ပါ။ ဆီဖြည့်ပေးပြီး tip ရယူပါ။" },
@@ -412,7 +412,7 @@ local T: { [string]: { any } } = {
 
 	-- daily gift and streak
 	["daily.gift"] = { "DAILY GIFT", "နေ့စဉ် လက်ဆောင်" },
-	["daily.giftSub"] = { "Free cash every 24 hours.\nGrows with your level.", "၂၄ နာရီတိုင်း အခမဲ့ ငွေ။\nLevel မြင့်လေ များလေ။" },
+	["daily.giftSub"] = { "Free cash every 24 hours.\nGrows with your level.", "24 နာရီတိုင်း အခမဲ့ ငွေ။\nLevel မြင့်လေ များလေ။" },
 	["daily.streak"] = { "DAILY STREAK", "နေ့စဉ် Streak" },
 	["daily.streakDay"] = { "DAILY STREAK  ·  DAY %d", "နေ့စဉ် Streak  ·  နေ့ %d" },
 	["daily.claimPlus"] = { "CLAIM  +%s", "ယူမည်  +%s" },
@@ -422,7 +422,7 @@ local T: { [string]: { any } } = {
 	["daily.claimFailed"] = { "Could not claim the gift, try again", "လက်ဆောင် ယူမရပါ၊ ထပ်ကြိုးစားပါ" },
 	["daily.day7"] = { "DAY 7: FREE CAR", "နေ့ 7: အခမဲ့ကား" },
 	["daily.freeCar"] = { "FREE CAR", "အခမဲ့ကား" },
-	["daily.rules"] = { "Come back every day. Day 7 gives you a free car you don't own yet.\nMiss more than 2 days and the streak starts again at day 1.", "နေ့တိုင်း ပြန်လာပါ။ နေ့ 7 မှာ မပိုင်သေးတဲ့ ကား တစ်စီး အခမဲ့ ရမည်။\n၂ ရက်ထက် ပိုလွတ်ရင် streak က နေ့ 1 က ပြန်စမည်။" },
+	["daily.rules"] = { "Come back every day. Day 7 gives you a free car you don't own yet.\nMiss more than 2 days and the streak starts again at day 1.", "နေ့တိုင်း ပြန်လာပါ။ နေ့ 7 မှာ မပိုင်သေးတဲ့ ကား တစ်စီး အခမဲ့ ရမည်။\n2 ရက်ထက် ပိုလွတ်ရင် streak က နေ့ 1 က ပြန်စမည်။" },
 	["daily.claimDay"] = { "CLAIM DAY %d", "နေ့ %d ယူမည်" },
 
 	-- goals
@@ -1090,6 +1090,12 @@ local T: { [string]: { any } } = {
 	["goal.winsN"] = { "Win %d races against players", "ကစားသမားများကို ပြိုင်ပွဲ %d ပွဲ နိုင်ပါ" },
 	["goal.win"] = { "Win a race against a player", "ကစားသမားတစ်ယောက်ကို ပြိုင်ပွဲ နိုင်ပါ" },
 	["goal.raceGold"] = { "Win gold in a race", "ပြိုင်ပွဲမှာ ရွှေ ရယူပါ" },
+	["deal.drive"] = { "DRIVE", "မောင်းမည်" },
+	["deal.allOf"] = { "All %s models", "%s မော်ဒယ် အားလုံး" },
+	["deal.power"] = { "power", "ပါဝါ" },
+	["deal.torque"] = { "torque", "torque" },
+	["deal.driveTrain"] = { "drive", "ဒရိုက်" },
+	["deal.seats"] = { "seats", "ထိုင်ခုံ" },
 }
 
 local Strings = {}
@@ -1210,9 +1216,24 @@ tr = function(text: string, depth: number): string
 		return text
 	end
 	local lead, core, trail = string.match(text, "^(%s*)(.-)(%s*)$")
-	local hit = if current == "my" then exact[core] else back[core]
+	local hit = if current == "my" then (exact[core] or exact[string.upper(core)]) else back[core]
 	if hit then
 		return lead .. hit .. trail
+	end
+	-- a symbol in front or behind ("IMMERSIVE  ▶", "★ YOUR CHAUFFEUR")
+	local pre, mid = string.match(core, "^([^%w%s]+%s+)(.+)$")
+	if pre then
+		local t = tr(mid, depth + 1)
+		if t ~= mid then
+			return lead .. pre .. t .. trail
+		end
+	end
+	local mid2, post = string.match(core, "^(.-)(%s+[^%w%s]+)$")
+	if mid2 and mid2 ~= "" then
+		local t = tr(mid2, depth + 1)
+		if t ~= mid2 then
+			return lead .. t .. post .. trail
+		end
 	end
 	if current == "my" then
 		for _, t in templates do

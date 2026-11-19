@@ -26,17 +26,50 @@ local function unfit(l: any)
 		l.TextScaled = l:GetAttribute("LangScaled") == true
 		c:Destroy()
 	end
+	local ts = l:GetAttribute("LangSize")
+	if ts then
+		l.TextSize = ts
+		l:SetAttribute("LangSize", nil)
+	end
 end
 
--- shrink-to-fit for Burmese: never bigger than the English size, never under 9 px
+-- a label that sizes itself to its text (AutomaticSize) inside a fixed box: step its TextSize down
+-- until it ends inside the box (the box was sized for the English word)
+local function shrinkAuto(l: any)
+	task.defer(function()
+		local box = l.Parent
+		while box and box:IsA("GuiObject") and box.AutomaticSize ~= Enum.AutomaticSize.None do
+			box = box.Parent
+		end
+		if not (box and box:IsA("GuiObject")) then
+			return
+		end
+		l:SetAttribute("LangSize", l:GetAttribute("LangSize") or l.TextSize)
+		for _ = 1, 14 do
+			local over = (l.AbsolutePosition.X + l.AbsoluteSize.X) - (box.AbsolutePosition.X + box.AbsoluteSize.X - 4)
+			if over <= 0 or l.TextSize <= 9 or Strings.lang() ~= "my" then
+				break
+			end
+			l.TextSize -= 1
+			task.wait()
+		end
+	end)
+end
+
+-- shrink-to-fit for Burmese: up to 1.25 x the English size (Myanmar letters look smaller at the same
+-- size), never under 9 px
 local function fit(l: any)
-	if l:FindFirstChild(FIT) or l.TextScaled or l.AutomaticSize ~= Enum.AutomaticSize.None then
+	if l:FindFirstChild(FIT) or l.TextScaled then
+		return
+	end
+	if l.AutomaticSize ~= Enum.AutomaticSize.None then
+		shrinkAuto(l)
 		return
 	end
 	l:SetAttribute("LangScaled", l.TextScaled)
 	local c = Instance.new("UITextSizeConstraint")
 	c.Name = FIT
-	c.MaxTextSize = math.max(9, math.floor(l.TextSize))
+	c.MaxTextSize = math.max(9, math.ceil(l.TextSize * 1.25))
 	c.MinTextSize = 9
 	c.Parent = l
 	l.TextScaled = true
