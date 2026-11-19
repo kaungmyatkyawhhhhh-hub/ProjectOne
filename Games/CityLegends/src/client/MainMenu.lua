@@ -34,6 +34,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Strings = require(Shared:WaitForChild("Strings"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarCare = require(Shared:WaitForChild("CarCare"))
@@ -1128,7 +1129,7 @@ local function openSettings()
 		end
 		table.insert(refreshers, refresh)
 		for k, name in options do
-			local b = new("TextButton", { AutoButtonColor = false, Text = name, FontFace = HEAVY, TextSize = 15, Size = UDim2.fromOffset(math.max(84, #name * 10 + 24), 34), LayoutOrder = k, Parent = holder }, { corner(8) })
+			local b = new("TextButton", { AutoButtonColor = false, Text = name, FontFace = HEAVY, TextSize = 15, Size = UDim2.fromOffset(math.max(84, (utf8.len(name) or #name) * 10 + 24), 34), LayoutOrder = k, Parent = holder }, { corner(8) })
 			b.MouseEnter:Connect(hoverSound)
 			b.Activated:Connect(function()
 				selectSound()
@@ -1187,6 +1188,18 @@ local function openSettings()
 		page.Destroying:Connect(function()
 			c1:Disconnect()
 			c2:Disconnect()
+		end)
+	end
+
+	-- (2026-11-19) language: AUTO follows the player's Roblox language (Burmese for my-mm); switches live
+	do
+		local LANG = { AUTO = "auto", ENGLISH = "en", ["မြန်မာ"] = "my" }
+		choices(row("Language"), { "AUTO", "ENGLISH", "မြန်မာ" }, function()
+			local s = Strings.setting()
+			return if s == "en" then "ENGLISH" elseif s == "my" then "မြန်မာ" else "AUTO"
+		end, function(v)
+			st.Lang = LANG[v]
+			Strings.setLang(LANG[v])
 		end)
 	end
 

@@ -32,6 +32,7 @@ local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 require(script.Parent:WaitForChild("UIStyle")).init() -- one studio finish for every screen
+require(script.Parent:WaitForChild("LangUI")).init() -- (19 Nov) every screen in the player's language (Strings)
 UI.init()
 
 -- the loading screen films the Monaco city (the Riviera) in slow cinematic shots, like the main menu
@@ -236,6 +237,7 @@ end
 local settings = if type(data.Settings) == "table" then data.Settings else {}
 -- (2026-11-19) low-end mode, decided before traffic / pedestrians start so their counts follow it
 require(script.Parent:WaitForChild("LowEnd")).init(settings)
+require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Strings")).setLang(settings.Lang or "auto") -- (19 Nov) Settings > Language
 local SaveSettings = remote("SaveSettings", "RemoteEvent") :: RemoteEvent
 Driving.setUnits(if settings.Units == "kmh" then "kmh" else "mph")
 Driving.setGearbox(if settings.Gearbox == "Manual" then "Manual" else "Auto")

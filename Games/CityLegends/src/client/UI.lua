@@ -1423,7 +1423,7 @@ local function buildSideButtons()
 		blurBtn.Text = if camFx.blur then "ON" else "OFF"
 		fovValue.Text = tostring(camFx.fov)
 		for _, b in { shakeBtn, headBtn, blurBtn } do
-			b.TextColor3 = if b.Text == "OFF" then Theme.SubText else Theme.Accent
+			b.TextColor3 = if (b:GetAttribute("En") or b.Text) == "OFF" then Theme.SubText else Theme.Accent -- (En: LangUI's English)
 		end
 	end
 	local function changed()
@@ -1488,7 +1488,7 @@ local function buildSideButtons()
 	gearboxToggle = settingRow("Gearbox", "M", 184)
 	gearboxToggle.Text = "AUTO"
 	gearboxToggle.Activated:Connect(function()
-		local mode = if gearboxToggle.Text == "AUTO" then "Manual" else "Auto"
+		local mode = if (gearboxToggle:GetAttribute("En") or gearboxToggle.Text) == "AUTO" then "Manual" else "Auto" -- (En: LangUI's English)
 		UI.setGearboxLabel(mode)
 		if UI.onGearboxChanged then
 			UI.onGearboxChanged(mode)
@@ -2896,7 +2896,7 @@ function UI.setTcWorking(on: boolean)
 	if on then
 		tcLamp.Text = "TC"
 		tcLamp.Visible = (os.clock() % 0.24) < 0.12
-	elseif tcLamp.Text == "TC" then
+	elseif (tcLamp:GetAttribute("En") or tcLamp.Text) == "TC" then
 		tcLamp.Text = "TC OFF"
 		tcLamp.Visible = false
 	end
