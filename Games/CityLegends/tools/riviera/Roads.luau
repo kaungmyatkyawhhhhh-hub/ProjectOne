@@ -471,6 +471,12 @@ local function alignJunctions(roads, grid)
 			any = true
 			for i = e.first, e.last do
 				local y = bigSurface(roads, grid, pts[i].pos, ri, r.rank, HALF + 6)
+				-- (19 Nov, Road #25 under the Yangon-Dala flyover: its valley foot lay in the flyover's footprint 30 below
+				-- it, and the whole ramp was lifted ~20 studs over its data) a bigger road far above / below is a
+				-- crossing over or under, not a junction
+				if y and math.abs(y - pts[i].pos.Y) > 8 then
+					y = nil
+				end
 				if y then
 					target[i] = y
 				end
