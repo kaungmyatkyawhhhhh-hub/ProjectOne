@@ -17,11 +17,12 @@ created: 2026-11-19
 
 ## Rules in the game
 - Format `[1-9][letter]-[1000-9999]`; letters A-Z without I and O (the research couldn't confirm which letters Myanmar skips; I and O read as 1 and 0). Server rejects anything else.
-- Every owned car gets a **free random plate** (`3Q-3152`) the first time it spawns or the plate screen opens. Traffic cars get random plates too (rear plate; ~half the Probox and ~12% of other small cars are red taxis). Taxi and YBS job vehicles and the chauffeur's car get red hire plates; the patrol car a black one.
+- Every owned car gets a **free random plate** (`3Q-3152`) the first time it spawns (or the plate screen opens while you drive it). Traffic cars get random plates too (rear plate; ~half the Probox and ~12% of other small cars are red taxis). Taxi and YBS job vehicles and the chauffeur's car get red hire plates; the patrol car a black one.
 - **Event plates** stay: the GGFest look's `GGFEST26` still shows over the registered plate. Customs no longer sells free-text plates (its NUMBER PLATE section is now a button to the plate screen).
 - **Unique in every server:** each plate is a key in the DataStore `CityLegends_v1_Plates` (follows the PlayerData store name, so test runs use `CityLegends_test_Plates`), claimed with `UpdateAsync` (value = owner's UserId, 0 = free again). Released when a plate is sold or a free plate is replaced. Without DataStores (Studio offline) only unique per server.
 - **Moving:** any plate you own can go on any of your cars (the car it left gets a free random one).
-- **Selling back:** 50% of what you **paid** (not of the pattern value: a lucky roll can't be sold for its value). Free plates can't be sold. Up to 20 plates each.
+- **Selling back:** 50% of what you **paid** (not of the pattern value: a lucky roll can't be sold for its value). Free plates can't be sold. Up to 20 bought plates each (free plates on cars don't count).
+- **Where plates show:** imported car models have no plate mark (their plates were painted out), so CarSkin casts a ray at bumper height front and back and puts a real-size plate (358 x 162 mm) where it meets the body; built cars keep their marked plate spot. Traffic cars get a rear plate the same way.
 
 ## Prices (cash only, no Robux)
 - Roll a random plate (menu, anywhere): **$3,000**. A lucky roll keeps its pattern but sells back for $1,500.
@@ -46,5 +47,22 @@ created: 2026-11-19
 - `src/client/PlateClient.lua`: the NUMBER PLATES screen (Customs panel style; half the screen on phones).
 - Hooks: `PlayerData` (Plates field, `storeName`), `Main.server` (spawn), `Customs` (event plates only), `Chauffeur`, `CarSkin` + `CustomsClient` (draw), `TrafficBodies` (rear plate by a ray), `UI` (PLATES tile, 4-row car menu), `Main.client`, `Minimap` (#), `Strings` (`plates.*`, Burmese marked for review).
 
-## Test (Studio, 19 Nov)
-(filled in below after the play test)
+## Test (Studio main "City Legends", 19 Nov; test store `CityLegends_test`, then back on `CityLegends_v1`)
+- `Plates.selfTest()`: 10,000 random rolls and taxi plates all valid; `0E-9999`, `9E-0999`, `9I-1234`, `99-9999`, `AA-1234` refused. Prices: 9E-9999 **$3.6M**, 8E-8888 $1.8M, 1A-1111 $1.1M, 9E-9000 $680k, 5K-1234 $280k, 2B-8989 $240k, 3Q-1221 $110k, 7M-2020 $85k, 4C-7704 $40k, 3Q-3152 $25k.
+- New car spawn: got a valid random plate (8R-5117), saved, same plate after a restart; drawn front and back on the imported model.
+- Roll $3,000: new plate 9Z-7666 (a lucky "three 6s" roll), on the car at once, cash -3,000.
+- Claim away from the office: refused ("sold at the Plate Office"). At the office: 9E-9999 claimed for $3.6M, 3Q-1221 for $110k; moved 9E-9999 to another car; sold 3Q-1221 back for $55,000 and it was free again.
+- Uniqueness: a plate written to the store under another UserId showed "taken" and the claim was refused.
+- Traffic: 28 of 28 cars with a rear plate, some red taxi plates (Crown taxi below).
+- Phone size (812 x 375): car menu PLATES tile, the screen at the office, ideas, my plates.
+- Live store check: Play on `CityLegends_v1`, office + remotes up, no errors. Place saved (Team Create), not published.
+- Fixed during the test: the screen first claimed a plate for every owned car (170 cars -> 170 DataStore calls, timed out): now only the car you drive; the bag cap counted free plates; traffic templates have CanQuery off (rays missed); imported cars had no plate at all; the office check now takes the car OR the character.
+- **Not tested:** the taxi / YBS job vehicle's red plate (the job vehicle didn't spawn in the test: `vehicle` refused with no message, maybe the anchored test car), the chauffeur's plate, the Customs NUMBER PLATES button (needs the tuning bay), two real players at once. The traffic plate sits on the lower bumper on some models (the ray at 30% height), not in the plate recess above.
+
+![[2026-11-19 Plates - rear plate on a player car.jpg]]
+![[2026-11-19 Plates - red taxi plate on traffic.jpg]]
+![[2026-11-19 Plates - Plate Office on Kabar Aye Pagoda Road.jpg]]
+![[2026-11-19 Plates - phone car menu PLATES tile.jpg]]
+![[2026-11-19 Plates - phone plate screen at the office.jpg]]
+![[2026-11-19 Plates - phone lucky number ideas.jpg]]
+![[2026-11-19 Plates - phone my plates (move, sell).jpg]]
