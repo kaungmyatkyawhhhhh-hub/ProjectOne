@@ -39,3 +39,14 @@ If the PC is still in the middle of a district swap, wait until it says done. Th
 
 ## If something is broken
 Tell Claude what you saw, with a screenshot. The home PC agents can fix it if the PC is still on.
+
+## If the home PC lost power mid-move (P4 / P6 / P8 not done)
+- **Don't finish the move on the laptop.** The rebuild needs up to ~18 GB of Studio memory; the laptop has 16 GB.
+- **What's safe:** P1–P3, P7 and every district that finished.
+- **What may not be:** the district being moved when the power went may be partly placed (for example, buildings in but its roads not yet). Road cells are never half-swapped.
+- **Steps:**
+  1. Pull the vault, then open `Games/CityLegends/build/city_1to1/rebuild_progress.json` to see the last district and step.
+  2. In Studio, press Play and drive into that district.
+  3. If it looks broken, hide it for GGFest: drag its new folders from `Workspace.Yangon1to1` to `ServerStorage`. Nothing is lost. If Claude is on the laptop, just say "hide the unfinished district".
+  4. Then test, publish, and test the live game (sections 2–3).
+- The move continues on the PC at home, from the progress file.
