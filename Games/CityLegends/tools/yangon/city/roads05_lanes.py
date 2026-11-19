@@ -353,27 +353,30 @@ def main(tag):
     # (19 Nov) heights of the BUILT road surface where it differs from the data (the builder re-grades some stretches:
     # Arzani Street past its deck is built 20-36 studs under its data height): roads05_<tag>/lane_heights.txt, lines
     # "x z y" keyed by the written x, z, made in Studio by tools/yangon/LaneHeights.luau (re-run it after a road swap)
-    # each line "x z y below above" (nearest R / D top under / over the point, "-" = none). Rules: a top <= 6 over the
-    # point lifts it (a car there is inside the slab); a ground point floating over a top drops onto it; a deck point
-    # over nothing is a hole in the deck collision: kept, counted in deck_gaps.
+    # each line "x z y below above deck" (nearest R / D top under / within 8 over the point, nearest D top within 20
+    # either way; "-" = none). Rules: a deck point goes onto the built deck (its nearest D top; the builder regrades
+    # decks, J37); a deck point with no D top near is a hole in the deck collision: kept, counted in deck_gaps. A ground
+    # point goes up onto a top <= 6 over it (a car there is inside the slab) or down onto the top it floats over.
     built_y = {}
     deck_gaps = []
     hp = os.path.join(od(tag), 'lane_heights.txt')
     if os.path.exists(hp):
         for row in open(hp, encoding='utf-8'):
             f = row.split()
-            if len(f) != 5:
+            if len(f) != 6:
                 continue
             key = '%s,%s' % (f[0], f[1])
             y = float(f[2])
-            b = None if f[3] == '-' else float(f[3])
-            a = None if f[4] == '-' else float(f[4])
-            if a is not None and a - y <= 6:
+            b, a, dk = (None if v == '-' else float(v) for v in f[3:6])
+            if key in deck_xz:
+                if dk is not None:
+                    built_y[key] = dk
+                elif b is None or y - b > 2:
+                    deck_gaps.append((float(f[0]), float(f[1]), y))
+            elif a is not None and a - y <= 6:
                 built_y[key] = a
-            elif b is not None and key not in deck_xz:
+            elif b is not None:
                 built_y[key] = b
-            elif key in deck_xz and (b is None or y - b > 2):
-                deck_gaps.append((float(f[0]), float(f[1]), y))
         print('built heights:', len(built_y), 'deck gaps kept:', len(deck_gaps))
     snapped = 0
 
