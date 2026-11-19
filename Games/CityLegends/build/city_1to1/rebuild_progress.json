@@ -205,7 +205,7 @@
   "trees_on_road": "Green.Far/BANKTREE in swap range: 5632 tested, 2 on R -> RB_OldP4.TreesOnRoad; KF: Data_P4G 3, Data_P1S 14 (L 5, P 9) removed",
   "kit_walls": "KWC (expanded compact): Data_P4 31 wall pieces in 27 tiles, Data_P2 1, Data_P1 0; P4 left 0. saved v1538",
   "terrain_scan": "MapBugScanP4 (AREAS 1536 x14..18 z11..21, asset 102115061814853 in ServerStorage): 132 R boxes with terrain over -> cleared; nearDecks 64328 columns, 0 stray",
-  "verge": "RoadVerge05 + trim: tiles 1-5 of 18 done (order x 21504/24576/27648 x z 16896,18432,21504,24576,27648,30720; tile = {x,z,min(x+3072,29184), z==16896 and 18432 or z+3072}); tiles 6-18 left",
+  "verge": "RoadVerge05 + trim: tiles 1-12 of 18 done (v1564) (order x 21504/24576/27648 x z 16896,18432,21504,24576,27648,30720; tile = {x,z,min(x+3072,29184), z==16896 and 18432 or z+3072}); tiles 6-18 left",
   "lanes": "L12347 installed (src/shared YangonLanes1to1_1..15) + Studio Shared synced, checksums equal (roads05_L12347_checksums.txt): 923 lanes, 2100 links, 0 dead ends",
   "minimap": "FULL += P4 (minimap_1to1.py); detail grid re-laid out: all 41 detail tiles + o_0_0..2 uploaded as Image (imports/sync/minimap_1to1/ids_P4_images.txt), ids.json merged (old ids_before_P4.json), YangonMapArt regenerated 4141/52223306, Studio synced",
   "lanes_fix": "19 Nov: YangonLanes1to1_14 failed to load ('malformed escape sequence': json.dumps wrote Burmese road names as JSON u-escapes). roads05_lanes.py now writes ensure_ascii=False; lanes re-installed (pack 79660195397792), every module require-tested in Studio (15/15 ok, byte hashes = repo), Play: menu opens, 28 traffic cars. Saved v1549.",
