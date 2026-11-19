@@ -47,11 +47,14 @@ def main(tag):
         pass
     # samples with deck heights
     S = {}
+    deck_idx = set()  # (road, sample) on a deck
+    deck_xz = set()  # written x, z of lane points on a deck (for the built-height rules)
     for r in roads:
         s = [list(q) for q in r['s']]
         for d in decks_of.get(r['name'], []):
             for k, i in enumerate(range(d['from'], d['to'] + 1)):
                 s[i][1] = d['s'][k][1]
+                deck_idx.add((r['name'], i))
         S[r['name']] = s
     # carriageway test against bigger main roads
     lines = [LineString([(q[0], q[2]) for q in r['s']]) for r in roads]
@@ -136,6 +139,8 @@ def main(tag):
                             W = min(q[10], max(6.0, (half - lm) / nl))
                             off = way * min(lm + W * (k - 0.5), half - W / 2)
                         pts.append((q[0] + rx * off, q[1], q[2] + rz * off))
+                        if (r['name'], i) in deck_idx:
+                            deck_xz.add('%.2f,%.2f' % (pts[-1][0], pts[-1][2]))
                     if way < 0:
                         pts = pts[::-1]
                     li = len(lanes)
@@ -348,14 +353,28 @@ def main(tag):
     # (19 Nov) heights of the BUILT road surface where it differs from the data (the builder re-grades some stretches:
     # Arzani Street past its deck is built 20-36 studs under its data height): roads05_<tag>/lane_heights.txt, lines
     # "x z y" keyed by the written x, z, made in Studio by tools/yangon/LaneHeights.luau (re-run it after a road swap)
+    # each line "x z y below above" (nearest R / D top under / over the point, "-" = none). Rules: a top <= 6 over the
+    # point lifts it (a car there is inside the slab); a ground point floating over a top drops onto it; a deck point
+    # over nothing is a hole in the deck collision: kept, counted in deck_gaps.
     built_y = {}
+    deck_gaps = []
     hp = os.path.join(od(tag), 'lane_heights.txt')
     if os.path.exists(hp):
         for row in open(hp, encoding='utf-8'):
             f = row.split()
-            if len(f) == 3:
-                built_y['%s,%s' % (f[0], f[1])] = float(f[2])
-        print('built heights:', len(built_y))
+            if len(f) != 5:
+                continue
+            key = '%s,%s' % (f[0], f[1])
+            y = float(f[2])
+            b = None if f[3] == '-' else float(f[3])
+            a = None if f[4] == '-' else float(f[4])
+            if a is not None and a - y <= 6:
+                built_y[key] = a
+            elif b is not None and key not in deck_xz:
+                built_y[key] = b
+            elif key in deck_xz and (b is None or y - b > 2):
+                deck_gaps.append((float(f[0]), float(f[1]), y))
+        print('built heights:', len(built_y), 'deck gaps kept:', len(deck_gaps))
     snapped = 0
 
     def lane_txt(l):
@@ -399,7 +418,7 @@ def main(tag):
         assert len(text) < 199000, len(text)
         open(os.path.join(SRC, 'YangonLanes1to1_%d.lua' % (mi + 1)), 'w', encoding='utf-8', newline='\n').write(text)
         print('YangonLanes1to1_%d.lua %d chars, %d lanes, %d links' % (mi + 1, len(text), len(ls), len(link_mod[mi])))
-    st = dict(lanes=len(lanes), links=len(links), snapped_to_built=snapped, turned_round=turned, dead_ends=len(dead), ring_lanes=len(ring_lanes), turned_inside=len(inner_turn), turned_inside_sample=inner_turn[:25],
+    st = dict(lanes=len(lanes), links=len(links), snapped_to_built=snapped, deck_gaps=len(deck_gaps), deck_gap_sample=deck_gaps[:20], turned_round=turned, dead_ends=len(dead), ring_lanes=len(ring_lanes), turned_inside=len(inner_turn), turned_inside_sample=inner_turn[:25],
               dead_sample=[lanes[i]['road'] for i in dead[:10]], rescued=rescued)
     json.dump(st, open(os.path.join(od(tag), 'lanes_stats.json'), 'w'), indent=1)
     print(json.dumps(st))
