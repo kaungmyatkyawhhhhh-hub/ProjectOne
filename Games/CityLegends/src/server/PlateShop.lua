@@ -228,18 +228,16 @@ end
 ---------------------------------------------------------------------
 -- Remote calls (PlateCall)
 ---------------------------------------------------------------------
+-- in your car or on foot by the counter
 local function atOffice(player: Player): boolean
-	local at: Vector3? = nil
+	local o = PlateShop.OFFICE.Position
 	local car = ctx and ctx.getCar(player)
-	if car and car.Parent then
-		at = car:GetPivot().Position
+	if car and car.Parent and (car:GetPivot().Position - o).Magnitude <= OFFICE_REACH then
+		return true
 	end
 	local char = player.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart") :: BasePart?
-	if root then
-		at = root.Position
-	end
-	return at ~= nil and (at - PlateShop.OFFICE.Position).Magnitude <= OFFICE_REACH
+	return root ~= nil and (root.Position - o).Magnitude <= OFFICE_REACH
 end
 
 local function stateOf(player: Player, profile: any): { [string]: any }
@@ -523,8 +521,8 @@ local function buildOffice()
 		local box = Instance.new("Part")
 		box.Name = "plateoffice"
 		box.Anchored = true
-		box.Size = Vector3.new(18, 20, 24)
-		box.CFrame = base * CFrame.new(0, 8, -4)
+		box.Size = Vector3.new(44, 20, 30) -- (wide: the park's trees 19 studs off still hung their crowns over the canopy)
+		box.CFrame = base * CFrame.new(0, 8, -5)
 		box.Parent = keep
 	end
 end
