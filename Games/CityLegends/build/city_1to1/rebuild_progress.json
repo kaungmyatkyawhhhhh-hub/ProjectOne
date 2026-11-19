@@ -215,14 +215,18 @@
   "backup_deleted": true
  },
  "P3_feet": {
-  "status": "built + exported, bake running (agent 3, 19 Nov)",
+  "status": "SWAPPED v1573 (play test pending)",
   "data": "R05_GROW=1700 roads05_subset.py net RB3x P3 (1165 roads, 42 modules, roads05_RB3x/pack_checksums.txt), clip boxes P3+P7 -> imports/sync/rebuild_RB3x_data.rbxmx -> NEW asset 71568135134132 (loaded, modules deleted)",
   "built": "stepCell 19x27 (box 29184,41472..30720,43008: 37325 parts, 9 pages) and 21x27 (box 32256,41472..33792,44544 = 21x27+21x28: 79870 parts, 18 pages) -> roads05_RB3x/pages (grab first file mcp-Roblox_Studio-execute_luau-1795055696094.txt)",
   "check_before": "built-surface check (tools/yangon/DeckFeetCheck.luau + roads05_deckfeet_points.py, rays onto Roads.Collide): Lanmadaw start (32504,43018) deck -0.6/-9.9/-18.3 at 8/16/32 studs in = the fault; Khayaypin x2 in 19x27 already 0.0 (not faulty in the place). Road Flyover #2 start (30112,44964) has a P box +1.7 over the D box for 32 studs (pavement collision over the deck, open). Road Flyover / #2 valley joint (31522,45702) under the Dala flyover: no deck collision near data y (builder starts the decks where they lift; check by driving).",
-  "next": "bake R05_ONLY=19x27,21x27,21x28 -> upload glbs + collide (new Model) -> swap whole cells (old to ServerStorage.RB_OldP3F) -> check -> Play drive both ramps -> save"
+  "next": "bake R05_ONLY=19x27,21x27,21x28 -> upload glbs + collide (new Model) -> swap whole cells (old to ServerStorage.RB_OldP3F) -> check -> Play drive both ramps -> save",
+  "baked": "28 meshes / 3 glbs / 1708 boxes (R05_ONLY=19x27,21x27,21x28; clip P3+P7)",
+  "uploaded": "roads05_RB3x/upload_ids_P3F.txt: glbs 95304922042944 122298675166963 87021820491424, collide 104016552498398 (RColRB_P3F_1)",
+  "swapped": "old 3 cells + 1642 boxes -> ServerStorage.RB_OldP3F; new 3 cells + 1708 boxes in; saved v1573",
+  "check_after": "DeckFeetCheck: Lanmadaw start now 0.0 at the foot (was -18.3 at 32 studs). Left in the place (P3, not these cells): Road #25's 'Road Flyover' (31522,45702)->(33282,45912) has NO collision boxes along most of its length (D boxes only at its far end; the D boxes near are the Yangon-Dala Bridge Flyover 15 studs above) = a hole; 'Road Flyover #2' start (30112,44964) has a P box +1.7 over the deck for ~32 studs (invisible kerb). Both cells 19x29 / 20x29. Next: rebuild 20x29 + 19x29 with RB3x and read the deck log."
  },
  "mouths": {
-  "P4_9x9": "Lane #1255 x Lane #7606 crossing (28821,29218): 7606 turns a corner on 1255 (64 deg), the arm's edge ran back past the crossing without meeting B. Fix: YangonRoads.buildMouth chain() closes at the crossing sample like a shallow merge (179,871 chars, checksum 1084283452, Studio synced). Rebuilt 1536 cell 18x19 with RB4 data (asset 72548567115317): 0 MOUTH FAILED, 36809 parts -> roads05_RB4M/pages (first file mcp-Roblox_Studio-execute_luau-1795056250781.txt). Next: bake R05_ONLY=18x19 + swap.",
-  "P7_11x11": "test-building the four 1536 cells 22..23 x 22..23 with RB7 data (asset 117092137372695) to find the failure"
+  "P4_9x9": "FIXED: YangonRoads crossing-mouth close (179,871 / 1084283452, Studio synced); cell 18x19 rebuilt (RB4 data), baked 10 meshes / 329 boxes, glb 81942506475508, collide 86758141649519; swapped (old in ServerStorage.RB_OldP4M); saved v1573",
+  "P7_11x11": "RB7 data (asset 117092137372695): 3072 box 33792..36864 rebuilt with the fixed builder = 0 MOUTH FAILED (the 4 crossing snaps all in 1536 cell 22x22). Cell 22x22 rebuilt: 76169 parts, 17 pages -> roads05_RB7M/pages (first file mcp-Roblox_Studio-execute_luau-1795057306682.txt); bake R05_ONLY=22x22 running -> upload -> swap"
  }
 }
