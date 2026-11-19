@@ -10,8 +10,12 @@
 - Cause: where a bigger road turns a corner right on a smaller road, the builder gave up. It now closes the junction instead.
 - Both road cells were rebuilt and swapped in.
 
-**Found, not fixed yet**
-- Near the Dala bridge (P3, Road #25): one flyover was never built, so its ramp has no road surface. A car that drives onto it falls.
+**Found, cause fixed, cells still to rebuild**
+- Near the Dala bridge (P3, Road #25): a flyover ramp was built about 20 studs too high, because its low end sits right under the Dala bridge flyover and the builder thought they joined. Its ramp starts in the air. The builder is fixed; the 3 road cells there still need rebuilding with it (next step).
 - On the other half of that flyover, an invisible kerb sits on the ramp for about 30 studs.
+
+**Traffic lanes** were re-measured against the new roads and re-installed (901 lanes, no dead ends). Play test: all 28 traffic cars moving, no script errors. Saved v1591.
+
+**P6 and P8** are prepared offline (buildings re-cleared against the new roads, packs and road data uploaded). Moving them into the game is next.
 
 Steps, ids and traps: `Games/CityLegends/build/city_1to1/roads05_HANDOVER.md` "REBUILD P3 deck feet + failed mouths" and `rebuild_progress.json` ("P3_feet", "mouths").

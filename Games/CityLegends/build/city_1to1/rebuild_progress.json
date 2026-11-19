@@ -187,7 +187,7 @@
    "x19 z22..25 and x23 z22..25 cells hold only P7 roads: P6 / P8 must re-bake them whole (clip P7+P6 / P7+P8)"
   ]
  },
- "next_district": "Road #25 hole (P3 19x29..21x29: rebuild box x 29184..33792 z 44544..46080 with RB3x, check the deck log), then P6 (offline ready: see P6) -> move -> roads -> lanes L123467 -> minimap -> Play; then P8 (re-clear started 19 Nov 10:05).",
+ "next_district": "Road #25 rebuild with the fixed Roads (see road25), then P6 (offline ready, see P6), then P8 (offline ready, see P8).",
  "P4": {
   "status": "DONE 19 Nov (DISTRICT REBUILD agent 2): district moved (J37 re-clear), roads swapped (52 cells), cleaned, verge, lanes L12347, minimap, Play-tested, Hledan deck feet fixed (cell 16x18), backup deleted, saved v1566.",
   "plan": "swap 1536 cells x14..18 z11..21 whole (x18 = P1/P2 seam: subset.json clip = P4+P1+P2); step boxes: x 21504..24576 / 24576..27648 / 27648..29184 (labels 7/8/9) x rows z 16896..18432 (label 5), 3072 z6..z10 (labels 6..10) = 18 boxes",
@@ -246,5 +246,13 @@
   "packs": "place 94911907173468 92837442323257 103728030356623 101220303279241; night cells_1.glb 74202999268049 (19.7 MB, no split)",
   "data": "R05_GROW=1700 roads05_subset.py net RB8 P8 (1496 roads, 15 decks, 48 modules, roads05_RB8/pack_checksums.txt); subset.json clip = P8+P7+P3+P1 -> NEW asset 77804123579999; deckfeet mirror 0",
   "plan": "P8 box x 36074..45984 z 32653..40943 -> 1536 cells x23..29 z21..26 (x23 = P7 seam column, z26 = P3 seam row, z21 = P1 seam row): swap them whole; lanes: roads05_lanesubset <net> L12345678-style with P8 added (after P6: L1234678)."
- }
+ },
+ "road25": {
+  "status": "CAUSE FOUND + builder fixed in repo and Studio, cells NOT yet rebuilt with the fix (agent 3 out of context)",
+  "fault": "Road #25 'Road Flyover' (valley foot (31522,45702) -> (33282,45912)): its valley foot lies 4 studs from the Yangon-Dala Bridge Flyover centre line (30 studs above it), so Roads.alignJunctions treated the flyover as a junction and lifted the whole ramp ~20 studs over its data (built D tops 42-44 where data is 22-31; nothing at the valley = a ~30-stud step: 'starts in the air'). 'Road Flyover #2' foot (30112,44964) has a P box +1.7 over the deck for ~32 studs.",
+  "fix": "tools/riviera/Roads.luau alignJunctions: a bigger road more than 8 studs above / below the sample is a crossing, not a junction (56,123 chars, checksum 1931436212; Studio ClaudeTools.Roads synced, asset 135636605808960).",
+  "done": "19x29..21x29 rebuilt once BEFORE the fix (RB3y, swap v1587-1591, same fault, backup deleted): glbs 132773666005168 108386619218645 84581053170505 115882396673409 70638126160962, collide 88026176684106.",
+  "next": "RebuildCell helpers (paste tools/yangon/RebuildCell.luau or require ClaudeTools.RebuildCell) -> load RB3x (asset 71568135134132) -> _G.RBXJob('19x29',{29184,44544,33792,46080}) -> 14 slices -> roads05_RB3y -> bake R05_ONLY=19x29,20x29,21x29 -> upload -> _G.PREP/_G.SWAPGO -> DeckFeetCheck (points asset 87963405711643) must show the Road Flyover feet flush -> drive up from the valley -> LaneHeights + lanes rerun."
+ },
+ "lanes_rerun": "19 Nov agent 3 after the P3F/P4M/P7M/P3G swaps: LaneHeights (85,452 points, 371 listed) merged into roads05_L12347/lane_heights.txt (old rows in rebuilt cells replaced; before: lane_heights_before_agent3.txt) -> roads05_lanes.py L12347 --install: 901 lanes, 2019 links, 0 dead ends, 1054 built heights, 29 deck gaps (Road #25 ramp among them) -> QuickSync asset 137549998684312, require 15/15 ok, checksums = repo; Play (test store): 28 traffic, 28 moving; store back to v1 checked on the Server; saved v1591."
 }

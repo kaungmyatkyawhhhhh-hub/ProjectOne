@@ -74,9 +74,16 @@
   on it (Lane #7606 turns 64 deg on Lane #1255) walked its edge back past the crossing and errored ("never meets"), so the arm's slab
   was skipped AND no mouth laid = a hole. Now it closes at the crossing sample like a shallow merge (nearest B point within MOUTH_SNAP).
   `roads05_mouthsim.py` does not simulate crossings (it reported 0 for both cells).
-- **Found, not fixed:** Road #25 "Road Flyover" (31522,45702)->(33282,45912), P3 cells 20x29/21x29: never built (no parts at its height
-  in `roads05_RB3/parts.pkl`, no D boxes; the D boxes there are the Dala flyover 15 above) = a hole if a car gets onto it; "Road Flyover
-  #2" foot (30112,44964) has a P box +1.7 over the deck for ~32 studs.
+- **Road #25 "Road Flyover" (P3 19x29..21x29), cause found:** its valley foot (31522,45702) lies 4 studs from the Yangon-Dala
+  Bridge Flyover centre line 30 studs above, so `Roads.alignJunctions` took the flyover as a junction and lifted the whole ramp
+  ~20 studs (built D tops 42-44 vs data 22-31; nothing at the valley). Fixed in `tools/riviera/Roads.luau` (a bigger road > 8 studs
+  above / below is a crossing; 56,123 / 1931436212, Studio synced). The cells are NOT rebuilt with the fix yet: steps in
+  `rebuild_progress.json` "road25". "Road Flyover #2" foot (30112,44964): a P box +1.7 over the deck (check after that rebuild).
+- **Lanes after a swap (coordinator rule):** LaneHeights -> merge into `roads05_L12347/lane_heights.txt` -> `roads05_lanes.py L12347
+  --install` -> pack_sync + QuickSync -> require-test. Done after these swaps ("lanes_rerun"). Trap: a big `LH.page` result came back
+  inline (not in a file): pad it or read it from the session transcript.
+- **P6 and P8 offline steps are DONE** (re-clear, packs, roads data, P6 lanes L123467 built): ids in `rebuild_progress.json` "P6" / "P8"
+  and `districts_assets.txt`. Studio steps not started (memory 14.4 GB at stop).
 
 ## REBUILD P4 (19 Nov, DISTRICT REBUILD agent 2): Hledan / Kamayut IN (district, J37 roads, lanes L12347, minimap, verge), Play-tested, saved v1566
 State: `rebuild_progress.json` "P4". Same order as P7 (below); what differed:
