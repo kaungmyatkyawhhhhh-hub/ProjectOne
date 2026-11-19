@@ -65,3 +65,10 @@ Only if the home PC is off. Two machines can't see each other's Studio lock.
    > Continue the City Legends district move-in (P4, P6, P8) exactly from `Games/CityLegends/build/city_1to1/rebuild_progress.json` and the REBUILD sections of `roads05_HANDOVER.md`. The home PC is off; this laptop has the build folder. Studio: City Legends. The laptop has 16 GB RAM, so restart Studio between districts. Save after every batch.
 4. **While it runs:** keep the laptop plugged in, with sleep off. Restart Studio when Claude asks.
 5. **When the home PC is back:** pull the vault on the PC before doing any work there.
+
+## Easier: the vault now has the files P6/P8 need (commit 8783fc89, ~86 MB)
+There's no need to copy the 9.5 GB folder. After pulling the vault on the laptop, unzip 3 files once. Run this from `Games/CityLegends`:
+```bash
+gunzip -k -f build/city_1to1/roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12/*.json.gz build/footprints/ygn_footprints.json.gz
+```
+Then give Claude the prompt from the section above. Its first step is a dry run: `district_files.sh P6 --no-roads buildings`. The rest of P4 only needs Studio.
