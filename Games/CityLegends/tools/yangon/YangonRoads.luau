@@ -1107,7 +1107,9 @@ function M.buildMouth(m, folder: Instance)
 		local i = m.k
 		while true do
 			local j = i - m.step
-			if j < 1 or j > o.n then
+			-- (19 Nov, Lane #1255 x Lane #7606: a crossing whose bigger road turns a corner on it: the arm's edge ran
+			-- back past the crossing without meeting B: close at the crossing sample like a shallow merge)
+			if j < 1 or j > o.n or (m.xid and (j - m.i0) * m.step < 0) then
 				-- (17 Nov, roads05: a slip road or a flare meeting the bigger road at a shallow angle keeps one edge
 				-- just outside the bigger road's edge to its end: close the mouth from that end to the nearest point
 				-- of the edge instead of failing, when it is near)

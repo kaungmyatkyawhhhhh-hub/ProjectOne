@@ -374,7 +374,8 @@ local function frame(ring)
 	return { cx, cz, -uz, ux, (v1 - v0) / 2, (u1 - u0) / 2 }
 end
 
-local function roofSlabs(ring, fr, CELLM: number)
+local CORNERS = { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } }
+local function roofSlabs(ring, fr, CELLM: number, pause: (() -> ())?)
 	local inset = 0.75
 	local cx, cz, e1x, e1z = fr[1], fr[2], fr[3], fr[4]
 	local hl, hw = fr[5] - inset, fr[6] - inset
@@ -383,10 +384,23 @@ local function roofSlabs(ring, fr, CELLM: number)
 	if hl < 0.25 or hw < 0.25 then
 		return {}
 	end
+	-- (19 Nov) neighbouring cells share corners: each corner test is kept by its exact (u, v), so the result is the same
+	-- as kit_layout.py's and a big compound roof costs ~4x less (P7 tile 135_159: one building took 190 ms)
+	local memo = {}
 	local function ok(uu, v, hu, hv)
-		for _, c in { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } } do
-			local a, b = c[1], c[2]
-			if not inner(ring, cx + e1x * (uu + a * hu) + e2x * (v + b * hv), cz + e1z * (uu + a * hu) + e2z * (v + b * hv), 0.6) then
+		for _, c in CORNERS do
+			local U, V = uu + c[1] * hu, v + c[2] * hv
+			local row = memo[U]
+			if not row then
+				row = {}
+				memo[U] = row
+			end
+			local r = row[V]
+			if r == nil then
+				r = inner(ring, cx + e1x * U + e2x * V, cz + e1z * U + e2z * V, 0.6)
+				row[V] = r
+			end
+			if not r then
 				return false
 			end
 		end
@@ -399,6 +413,9 @@ local function roofSlabs(ring, fr, CELLM: number)
 	local du, dv = 2 * hl / nu, 2 * hw / nv
 	local res, open = {}, {}
 	for j = 0, nv do
+		if pause then
+			pause()
+		end
 		local runs = {}
 		if j < nv then
 			local v = -hw + (j + 0.5) * dv
@@ -621,7 +638,7 @@ function KD.expand(s: string, i: number, j: number, meta, pause: (() -> ())?): (
 		if not fr then
 			return
 		end
-		local slabs = roofSlabs(ring, fr, CELLM)
+		local slabs = roofSlabs(ring, fr, CELLM, pause)
 		for _, q in slabs do
 			B(q[1], topY + 0.15 - 0.4, q[2], q[3], 0.8, q[4], q[5], "KCO")
 		end
