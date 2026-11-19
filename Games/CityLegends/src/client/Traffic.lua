@@ -266,14 +266,56 @@ if workspace:FindFirstChild("Riviera") or Config.mapRoot() then
 end
 local rivieraCars = 0
 local nearby: { CityLayout.Segment } = {}
-local function lanesNear(lanes: { CityLayout.Segment }, center: Vector3, maxDist: number): { CityLayout.Segment }
-	table.clear(nearby)
+-- (2026-11-19, owner: "lag spikes", mostly on the small roads) the 1:1 lanes are 92k segments: one full scan was ~20 ms,
+-- and on a street with no lane near, the recycler's findSpot failed for every car (~28 scans, ~500 ms in one frame,
+-- twice a second). Segments are kept in a 512-stud grid; the same box test, only on the cells round the point.
+local GRID = 512
+local laneGrids: { [any]: { n: number, cells: { [number]: { CityLayout.Segment } } } } = {}
+local seen: { [any]: number } = {}
+local stamp = 0
+local function gridOf(lanes: { CityLayout.Segment })
+	local g = laneGrids[lanes]
+	if g and g.n == #lanes then
+		return g
+	end
+	g = { n = #lanes, cells = {} }
 	for _, seg in lanes do
 		local b = laneBox[seg]
-		local dx = math.max(b[1].X - center.X, 0, center.X - b[2].X)
-		local dz = math.max(b[1].Z - center.Z, 0, center.Z - b[2].Z)
-		if dx * dx + dz * dz <= maxDist * maxDist then
-			table.insert(nearby, seg)
+		for cx = math.floor(b[1].X / GRID), math.floor(b[2].X / GRID) do
+			for cz = math.floor(b[1].Z / GRID), math.floor(b[2].Z / GRID) do
+				local k = cx * 100003 + cz
+				local cell = g.cells[k]
+				if not cell then
+					cell = {}
+					g.cells[k] = cell
+				end
+				table.insert(cell, seg)
+			end
+		end
+	end
+	laneGrids[lanes] = g
+	return g
+end
+local function lanesNear(lanes: { CityLayout.Segment }, center: Vector3, maxDist: number): { CityLayout.Segment }
+	table.clear(nearby)
+	local g = gridOf(lanes)
+	stamp += 1
+	for cx = math.floor((center.X - maxDist) / GRID), math.floor((center.X + maxDist) / GRID) do
+		for cz = math.floor((center.Z - maxDist) / GRID), math.floor((center.Z + maxDist) / GRID) do
+			local cell = g.cells[cx * 100003 + cz]
+			if cell then
+				for _, seg in cell do
+					if seen[seg] ~= stamp then
+						seen[seg] = stamp
+						local b = laneBox[seg]
+						local dx = math.max(b[1].X - center.X, 0, center.X - b[2].X)
+						local dz = math.max(b[1].Z - center.Z, 0, center.Z - b[2].Z)
+						if dx * dx + dz * dz <= maxDist * maxDist then
+							table.insert(nearby, seg)
+						end
+					end
+				end
+			end
 		end
 	end
 	return nearby
