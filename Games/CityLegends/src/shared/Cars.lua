@@ -211,7 +211,7 @@ local list: { CarSpec } = {
 	-- CZ4A: 2015 Lancer Evolution X Final Edition, 4B11T (303 hp, 1,560 kg)
 	{ Id = "ronin_cz4a", Name = "Ronin CZ4A Final", Class = "Sedan", Tier = "Mid", TopSpeed = 155, ZeroToSixty = 4.9, Handling = 0.84, Price = 50000, PriceSource = "collector", Color = Color3.fromRGB(235, 236, 238), Accent = Color3.fromRGB(16, 16, 18), Order = 25.5, Pending = true },
 	-- GC8 Wide: 1998 Impreza 22B STi (2-door wide body, EJ22T, 276 hp, 1,270 kg; 424 built)
-	{ Id = "pleiad_gc8", Name = "Pleiad GC8 Wide", Class = "Coupe", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.86, Price = 350000, PriceSource = "collector", Color = Color3.fromRGB(28, 50, 140), Order = 26.5 },
+	{ Id = "pleiad_gc8", Name = "Pleiad GC8 Wide", Class = "Coupe", Tier = "High", TopSpeed = 155, ZeroToSixty = 4.7, Handling = 0.86, Price = 350000, PriceSource = "collector", Color = Color3.fromRGB(28, 50, 140), Order = 26.5, Pending = true },
 	-- GDB: 2006 Impreza WRX STI, EJ257 (300 hp, 1,495 kg)
 	{ Id = "pleiad_gdb", Name = "Pleiad GDB", Class = "Sedan", Tier = "Starter", TopSpeed = 155, ZeroToSixty = 4.6, Handling = 0.84, Price = 27500, PriceSource = "used", Color = Color3.fromRGB(30, 56, 140), Order = 16.5, Pending = true },
 	-- ZC6: 2013 BRZ, FA20 (200 hp, 1,250 kg), rear drive
@@ -237,14 +237,37 @@ for _, spec in list do
 	end
 end
 
+-- the cars still on an OLD 3D model (owner, 2026-11-19: "only new model cars are supposed to be in the game"),
+-- by MODEL id. Their models are in ServerStorage.OldModelCars; the cars are Pending (not sold or given
+-- anywhere; their trims and the cars on their body follow). An owner's stay in the save's Owned list;
+-- PlayerData keeps them out of the garage as Shelved while the id is here.
+-- To bring one back: import its new model as CarModels.<id>, then take its id off this list.
+-- (toyoka_alfard's and toyoka_lc300's models stay in CarModels: the YBS job van and its steering wheel.
+-- lambrini_urus is not here: Cars.Swapped)
+Cars.OLD_MODELS = {
+	suzaki_swift = true, toyoka_belta = true, kio_ev6 = true, byt_seal = true, toyoka_camri = true, toyoka_crown = true,
+	toyoka_alfard = true, toyoka_lc200 = true, mazdo_rx7 = true, mazdo_rx8 = true, bnw_530i = true, bnw_540i = true,
+	bentz_e300 = true, bentz_e400 = true, bnw_m3_f80 = true, bnw_m6_v10 = true, bnw_m8gc = true, bentz_cla45 = true,
+	bentz_cls63s = true, nisun_r34 = true, dodger_challenger = true, xiaomo_su7 = true, bnw_x6 = true, bnw_x7 = true,
+	toyoka_lc300 = true, lexis_lx700 = true, bentz_gle53 = true, bentz_g63 = true, byt_u8 = true, porsha_panamera = true,
+	chevo_camaro = true, chevo_c6 = true, porsha_boxster = true, chevo_c7 = true, bentz_s63 = true, bentz_gt63s = true,
+	astin_db9 = true, astin_vantage = true, ferrara_f430 = true, brabos_g63 = true, rolls_wraith = true, rolls_cullinan = true,
+	bnw_750li = true, bentz_190e = true, bentz_s65_w221 = true, maseroti_levante = true, lexis_lc500 = true,
+} :: { [string]: boolean }
+for _, spec in list do
+	if Cars.OLD_MODELS[spec.Model or spec.Id] then
+		spec.Pending = true
+	end
+end
+
 Cars.ById = {} :: { [string]: CarSpec }
 for _, spec in list do
 	Cars.ById[spec.Id] = spec
 end
 
 -- the free car and the fallback for an unknown id (owner, 2026-11-03: the Orient EV6, $0; it was the
--- Sompact Swiff)
-Cars.StarterId = "kio_ev6"
+-- Sompact Swiff; 2026-11-19: the Apex AE86, the cheapest new-model dealer car; the Voltra's old model is put away)
+Cars.StarterId = "toyoka_ae86"
 
 -- the car whose imported model a car uses (its own id unless it borrows one)
 function Cars.modelOf(id: string): string

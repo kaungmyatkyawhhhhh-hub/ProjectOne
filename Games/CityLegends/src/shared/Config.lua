@@ -1897,7 +1897,7 @@ Config.Police = {
 	RamCooldown = 6,
 	EscalateSeconds = 75, -- a chase this long adds a star...
 	EscalateMax = 3, -- ...up to here
-	CarId = "toyoka_crown", -- the police car's body
+	CarId = "toyoka_chaser", -- the police car's body
 }
 
 ---------------------------------------------------------------------
@@ -2284,7 +2284,7 @@ Config.Chauffeur = {
 		rolls_cullinan = 432000,
 	},
 	-- the order the phone lists them in
-	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urusp", "brabos_g63", "bentz_s680", "rolls_wraith", "rolls_cullinan" },
+	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urusp", "bentz_s680" },
 	CityMph = 62, -- how fast the driver goes in town (owner, 2026-10-23: "drive faster"; was 44)
 	HighwayMph = 125, -- on the highway and the loop (was 92)
 	TurnMph = 22, -- round corners (highway ramps use their own speed; was 15)
@@ -2538,12 +2538,12 @@ Config.Dealership = {
 	Face = "W", -- the side its showroom looks out of (towards the city centre)
 	BuyRange = 260, -- a player must be this close to the showroom to buy
 	-- cars on the showroom turntables (one per brand zone)
-	Display = { "bnw_m5_e60", "bentz_e63s", "toyoka_supra_mk4", "nisun_r34", "porsha_panamera", "chevo_c7", "astin_vantage", "lexis_lc500" },
+	Display = { "bnw_m5_e60", "bentz_s680", "toyoka_supra_mk4", "nisun_gtr", "bentlee_bentayga", "nisun_350z", "toyoka_chaser", "lambrini_urusp" },
 	-- the ready-made building (ServerStorage.DealerBody, 2026-10-31): the car on the turntable and
 	-- the four indoor spots. The front car park stays empty for players to park in (owner,
 	-- 2026-10-31: "dont put cars infront the dealership"); Lot = { ids } would fill its bays.
 	Stage = "lambrini_lp750",
-	Indoor = { "ferrara_599", "rolls_wraith", "porsha_gt3", "bentz_g63" },
+	Indoor = { "ferrara_599", "bentlee_contgt", "porsha_gt3", "bentz_gls" },
 	-- test drives (owner, 2026-10-30, from the research: Vehicle Legends): any dealer car you don't
 	-- own, for a few minutes, once per car each visit; it pays less while you test it
 	TestSeconds = 300,

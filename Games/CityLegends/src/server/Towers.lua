@@ -1282,7 +1282,8 @@ refreshResidents = function()
 			if profile and profile.Penthouses[id] then
 				table.insert(names, p.DisplayName)
 				if not carId then
-					carId = profile.Showcase[id] or profile.Selected
+					local show = profile.Showcase[id]
+					carId = if show and profile.Owned[show] then show else profile.Selected -- (a sold or shelved car is not shown)
 					carOwner = profile
 				end
 			end

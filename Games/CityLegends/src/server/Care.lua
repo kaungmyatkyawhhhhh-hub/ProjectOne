@@ -641,6 +641,9 @@ handlers.sell = function(player, id)
 	if type(id) ~= "string" or not profile or not profile.Owned[id] then
 		return { ok = false, message = "Not your car" }
 	end
+	if id == Cars.StarterId and not profile.Claimed then -- (2026-11-19) the free car comes back on every join until the first-car pick
+		return { ok = false, message = "You can't sell your last car" }
+	end
 	if not Dealership.near(player, ctx.getCar) then
 		return { ok = false, message = "Sell it at " .. Config.Dealership.Name }
 	end

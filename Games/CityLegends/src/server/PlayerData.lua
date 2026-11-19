@@ -21,6 +21,7 @@ local CarCare = require(Shared:WaitForChild("CarCare"))
 export type Profile = {
 	Cash: number,
 	Owned: { [string]: boolean },
+	Shelved: { [string]: boolean }?, -- owned cars on an old model, put away (Cars.OLD_MODELS); saved inside Owned
 	Selected: string,
 	Level: number,
 	XP: number, -- progress inside the current level
@@ -220,6 +221,7 @@ local function defaultProfile(): Profile
 	return {
 		Cash = Config.Economy.StartingCash,
 		Owned = { [Cars.StarterId] = true },
+		Shelved = {},
 		Selected = Cars.StarterId,
 		Level = 1,
 		XP = 0,
@@ -394,9 +396,15 @@ function PlayerData.load(player: Player): Profile?
 				-- (2026-11-04) a save that made the first-car pick owns just its list: the free car was
 				-- added back here on every join. Older saves (no Claimed) still get it
 				local owned: { [string]: boolean } = if saved.Claimed == true then {} else profile.Owned
+				-- (2026-11-19) a car on an old model stays in the save but is Shelved, not owned, until its new model is in
+				local shelved = (profile :: any).Shelved
 				for _, id in saved.Owned do
 					if type(id) == "string" and Cars.ById[id] then
-						owned[id] = true
+						if Cars.OLD_MODELS[Cars.modelOf(id)] then
+							shelved[id] = true
+						else
+							owned[id] = true
+						end
 					end
 				end
 				if next(owned) then
@@ -709,6 +717,11 @@ local function payloadOf(profile: Profile, session: { [string]: any }?): { [stri
 	local owned = {}
 	for id in profile.Owned do
 		table.insert(owned, id)
+	end
+	for id in (profile :: any).Shelved or {} do -- (saved with the owned cars: older code and an undo keep them)
+		if not profile.Owned[id] then
+			table.insert(owned, id)
+		end
 	end
 	local penthouses = {}
 	for id in profile.Penthouses do
