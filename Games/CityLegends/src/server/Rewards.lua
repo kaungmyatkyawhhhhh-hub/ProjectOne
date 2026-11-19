@@ -861,7 +861,8 @@ end
 local function pickCar(profile: any, maxPrice: number, tiers: { string }?): string?
 	local pick = {}
 	for _, spec in Cars.List do
-		if table.find(tiers or { "Mid" }, spec.Tier) and spec.Price <= maxPrice and not profile.Owned[spec.Id] then
+		-- (19 Nov, owner) gift cars are dealer (Local) cars only: imports come from crates
+		if spec.Source == "Local" and table.find(tiers or { "Mid" }, spec.Tier) and spec.Price <= maxPrice and not profile.Owned[spec.Id] then
 			table.insert(pick, spec.Id)
 		end
 	end

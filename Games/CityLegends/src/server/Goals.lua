@@ -312,11 +312,11 @@ function Goals.streak(player: Player): (number, number)
 	return (s.Day % 7) + 1, math.max(0, s.Last + G.StreakCooldown - now)
 end
 
--- the day-7 car: a Mid car from the dealer you don't own, at or under the price cap
+-- the day-7 car: a dealer (Local) car you don't own, at or under the price cap (never the free car)
 local function streakCar(profile: any): string?
 	local pick = {}
 	for _, spec in Cars.List do
-		if spec.Tier == "Mid" and spec.Price <= G.StreakCarMaxPrice and not profile.Owned[spec.Id] then
+		if spec.Source == "Local" and spec.Price > 0 and spec.Price <= G.StreakCarMaxPrice and not profile.Owned[spec.Id] then
 			table.insert(pick, spec.Id)
 		end
 	end

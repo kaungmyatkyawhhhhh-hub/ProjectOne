@@ -64,7 +64,7 @@ Config.Menu = {
 	StarterChoices = {
 		{ id = "nisun_350z", feel = "Grippy sports car" },
 		{ id = "bnw_330i_g20", feel = "Quick, comfy sedan" },
-		{ id = "dearb_focus_rs", feel = "All-wheel drive, drift mode", fallback = "bnw_540i", fallbackFeel = "Fast and comfy" },
+		{ id = "toyoka_ae86", feel = "Light rear-drive drifter" }, -- (19 Nov) gifts are Local only
 	},
 	FastTravelCooldown = 30, -- seconds between trips
 	-- the store (Playbook money rules): names and exact effects here, prices read from Roblox.
@@ -2720,9 +2720,9 @@ Config.Goals = {
 		{ id = "mile1000", text = "Drive 1,000 miles", stat = "miles", need = 1000, cash = 250000, xp = 2000 },
 		{ id = "allcars", text = "King of the City: own every car", stat = "cars", need = -1, cash = 1000000, xp = 5000 }, -- (need -1: every car)
 	},
-	-- the daily streak: day 1..6 cash, day 7 a free Mid car you don't own (or StreakCarCash)
+	-- the daily streak: day 1..6 cash, day 7 a free Local car you don't own (or StreakCarCash)
 	Streak = { 5000, 8000, 12000, 18000, 25000, 35000 },
-	StreakCarMaxPrice = 50000, -- the day-7 car: a Mid car at or under this price
+	StreakCarMaxPrice = 150000, -- the day-7 car: a Local car at or under this price
 	StreakCarCash = 60000, -- ...or this, when you own them all
 	StreakCooldown = 20 * 60 * 60, -- a claim opens this long after the last one
 	StreakGrace = 48 * 60 * 60, -- more than this since the last claim: back to day 1

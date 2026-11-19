@@ -115,6 +115,10 @@ function LangUI.init()
 		watchPlayer(p)
 	end
 	Players.PlayerAdded:Connect(watchPlayer)
+	-- Studio test hook: player attribute TestLang = "en" / "my" / "auto" switches live
+	player:GetAttributeChangedSignal("TestLang"):Connect(function()
+		Strings.setLang(tostring(player:GetAttribute("TestLang") or "auto"))
+	end)
 	Strings.Changed.Event:Connect(function()
 		for l in tracked do
 			if l.Parent then
