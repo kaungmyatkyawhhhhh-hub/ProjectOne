@@ -56,8 +56,31 @@ local function shrinkAuto(l: any)
 	end)
 end
 
--- shrink-to-fit for Burmese: up to 1.25 x the English size (Myanmar letters look smaller at the same
--- size), never under 9 px
+-- one-line label: Myanmar letters look smaller than Latin at the same size and need more height than
+-- the box has, so TextScaled made them tiny. Instead: the English size (x1.15 for small labels), stepped
+-- down only while the line is wider than its box (marks may reach a little above / below the box)
+local function fitLine(l: any, tries: number)
+	if l.AbsoluteSize.X < 2 then
+		if tries < 3 then
+			task.delay(0.05, fitLine, l, tries + 1)
+		end
+		return
+	end
+	if Strings.lang() ~= "my" or not l:GetAttribute("En") then
+		return
+	end
+	local base = l:GetAttribute("LangSize") or l.TextSize
+	l:SetAttribute("LangSize", base)
+	local size = math.ceil(base * (if base <= 12 then 1.15 else 1))
+	l.TextSize = size
+	while size > 9 and l.TextBounds.X > l.AbsoluteSize.X - 2 do
+		size -= 1
+		l.TextSize = size
+	end
+end
+
+-- Burmese fitting: one-line labels by width (fitLine), wrapped ones shrink to their box (TextScaled
+-- capped at the English size), self-sizing ones inside a fixed box (shrinkAuto); never under 9 px
 local function fit(l: any)
 	if l:FindFirstChild(FIT) or l.TextScaled then
 		return
@@ -66,11 +89,14 @@ local function fit(l: any)
 		shrinkAuto(l)
 		return
 	end
+	if not l.TextWrapped then
+		fitLine(l, 0)
+		return
+	end
 	l:SetAttribute("LangScaled", l.TextScaled)
 	local c = Instance.new("UITextSizeConstraint")
 	c.Name = FIT
-	-- (only one-line boxes grow: a tall box's text would grow into what sits above it)
-	c.MaxTextSize = math.max(9, math.ceil(l.TextSize * (if l.AbsoluteSize.Y > l.TextSize * 2.2 then 1 else 1.25)))
+	c.MaxTextSize = math.max(9, math.floor(l.TextSize))
 	c.MinTextSize = 9
 	c.Parent = l
 	l.TextScaled = true
