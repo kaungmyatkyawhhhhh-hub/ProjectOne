@@ -50,3 +50,18 @@ Tell Claude what you saw, with a screenshot. The home PC agents can fix it if th
   3. If it looks broken, hide it for GGFest: drag its new folders from `Workspace.Yangon1to1` to `ServerStorage`. Nothing is lost. If Claude is on the laptop, just say "hide the unfinished district".
   4. Then test, publish, and test the live game (sections 2–3).
 - The move continues on the PC at home, from the progress file.
+
+## Continue the move on the other laptop (it has the build folder)
+Only if the home PC is off. Two machines can't see each other's Studio lock.
+1. **Files:**
+   - Vault at `D:\ObsidianOne\Claude+Obsidian` (same path as the PC), pulled with Obsidian Git.
+   - The copied folder at `...\Games\CityLegends\build`.
+   - If `build\city_1to1\rebuild_progress.json` differs from the vault's copy, keep the vault's (newer) one.
+2. **Install:**
+   - Python 3, then `pip install shapely numpy scipy pillow`.
+   - Roblox Studio with the Studio MCP plugin.
+   - The Claude desktop app (Code tab, vault folder).
+3. **Start:** open City Legends in Studio, close Chrome, and give Claude this prompt:
+   > Continue the City Legends district move-in (P4, P6, P8) exactly from `Games/CityLegends/build/city_1to1/rebuild_progress.json` and the REBUILD sections of `roads05_HANDOVER.md`. The home PC is off; this laptop has the build folder. Studio: City Legends. The laptop has 16 GB RAM, so restart Studio between districts. Save after every batch.
+4. **While it runs:** keep the laptop plugged in, with sleep off. Restart Studio when Claude asks.
+5. **When the home PC is back:** pull the vault on the PC before doing any work there.
