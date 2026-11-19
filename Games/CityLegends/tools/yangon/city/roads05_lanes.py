@@ -379,6 +379,8 @@ def main(tag):
                     built_y[key] = dk
                 elif b is None or y - b > 2:
                     deck_gaps.append((float(f[0]), float(f[1]), y))
+            elif b is not None and y - b <= 0.6:
+                pass  # on its own road; a low deck over it (a ramp foot) is real geometry, not its surface
             elif a is not None and a - y <= 6:
                 built_y[key] = a
             elif b is not None:
