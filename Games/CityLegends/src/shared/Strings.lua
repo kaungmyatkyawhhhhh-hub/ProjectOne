@@ -1096,6 +1096,13 @@ local T: { [string]: { any } } = {
 	["deal.torque"] = { "torque", "torque" },
 	["deal.driveTrain"] = { "drive", "ဒရိုက်" },
 	["deal.seats"] = { "seats", "ထိုင်ခုံ" },
+	["pop.suite"] = { "SUITE INCOME", "Suite ဝင်ငွေ" },
+	["pop.delivered"] = { "DELIVERED", "ပို့ပြီး" },
+	["pop.fare"] = { "FARE PAID", "ကားခ ရပြီ" },
+	["pop.daily"] = { "DAILY REWARD", "နေ့စဉ် ဆု" },
+	["pop.closeCut"] = { "CLOSE CUT", "CLOSE CUT", true },
+	["pop.insaneCut"] = { "INSANE CUT", "INSANE CUT", true },
+	["pop.available"] = { "AVAILABLE", "ရနိုင်သည်" },
 }
 
 local Strings = {}
