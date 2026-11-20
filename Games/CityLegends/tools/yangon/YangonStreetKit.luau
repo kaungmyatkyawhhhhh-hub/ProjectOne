@@ -105,8 +105,11 @@ function K.templates(holding: Instance): number
 			CollectionService:AddTag(q, "LampGlow")
 			local l = Instance.new("SpotLight")
 			l.Face = Enum.NormalId.Bottom
-			l.Angle = 120
-			l.Range = 42
+			-- (21 Nov) main-road lamps (lamp1 / lamp2, about 30 studs up) light a wider pool: the videos' roads are lit
+			-- end to end; 42 lit only a 29-stud circle under each post
+			local main = id == "lamp1" or id == "lamp2"
+			l.Angle = if main then 135 else 120
+			l.Range = if main then 60 else 42
 			l.Brightness = 5
 			l.Color = if amber then Color3.fromRGB(255, 170, 96) else Color3.fromRGB(232, 240, 255)
 			l.Shadows = false

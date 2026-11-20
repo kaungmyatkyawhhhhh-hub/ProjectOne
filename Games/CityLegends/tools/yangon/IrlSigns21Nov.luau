@@ -6,6 +6,14 @@
 	+ Neon flood bars tagged LampGlow (WorldFx: Neon at night, plain by day), so phones pay no light cost.
 	Everything goes in Workspace.Yangon1to1.Landmarks.IrlSigns21Nov; M.undo() deletes that folder.
 	Spots are checked by raycast: a board stands only on grass, never on a road / pavement box or in a building.
+	Placed 21 Nov (run inline from execute_luau with these functions; 25 parts in all):
+	  * billboards: Kabar Aye Pagoda Rd lake verge (road west edge - 14, z 26700..28500 step 260, facing +X) and
+	    Sule Pagoda Rd north of Sule (z 43700..44900 step 200, alternate verges): 6 of 14 spots were all-grass
+	  * MyanmarPlaza_LED 46 x 26 (+ LEDFrame 48 x 28) and MyanmarPlaza_Name 70 x 9 on Myanmar Centre's west wall
+	    (wallAt from x 34600 at z 27310 / 27410, 4 / 3 studs out), Brightness 2.2, LightInfluence 0
+	  * JunctionCity_NameWall 64 x 8 (cream, ground + 13) and JunctionCity_RoofSign 180 x 22 (y 268) on the north
+	    face (z ~43482, facing Bogyoke Aung San Rd)
+	  * TheCentral_Letters 58 x 10 + plinth at (34978, 25265) on the grass east of Kabar Aye, facing the road
 ]]
 local CS = game:GetService("CollectionService")
 local M = {}
