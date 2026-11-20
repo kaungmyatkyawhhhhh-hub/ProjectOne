@@ -1208,8 +1208,13 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	-- tail lamps: parts named as tail / brake lights, the converted cars' measured lamp parts
 	-- (TailLights), and A-Chassis brake-light glow meshes (a "Brake" group, invisible when off)
 	-- (LampFx_Tail: a lens cut from the model's own lamp, tools/lamps, in place of measured spots)
-	local tails = if src:FindFirstChild("LampFx_TailL") then nil else TailLights[src.Name]
+	local cutTail = src:FindFirstChild("LampFx_TailL") ~= nil
+	local tails = if cutTail then nil else TailLights[src.Name]
 	local function isTail(d: BasePart): boolean
+		-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): the cut lens is the lamp, no second glow over the whole red lens
+		if cutTail then
+			return false
+		end
 		if tails then
 			for _, sh in tails.shells do
 				if d.Name == sh.name and (sh.size == nil or (d.Size - sh.size).Magnitude < 0.01) then

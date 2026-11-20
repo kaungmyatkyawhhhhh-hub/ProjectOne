@@ -58,6 +58,52 @@ CarLamps.CARS = {
 	pleiad_gc8 = true, -- (the 1998 wide-body model's own lamps, 2026-11-15)
 } :: { [string]: boolean }
 
+-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): no daytime running lamps on
+-- the cars whose real model never had them (dark by day, low beam at night as before)
+CarLamps.NO_DRL = {
+	toyoka_ae86 = true, toyoka_chaser = true, toyoka_supra_mk4 = true, ronin_cp9a = true, ronin_cp9a_champ = true,
+	lambrini_countach = true, lambrini_lp640 = true, lambrini_lp670 = true,
+} :: { [string]: boolean }
+
+-- the real car's lamps by model and year: warm halogen, cool xenon, white LED (shells and beams)
+local HALOGEN, XENON, LED = Color3.fromRGB(255, 214, 160), Color3.fromRGB(240, 246, 255), Color3.fromRGB(228, 238, 255)
+CarLamps.TINT = {
+	toyoka_ae86 = HALOGEN, toyoka_chaser = HALOGEN, toyoka_supra_mk4 = HALOGEN, ronin_cp9a = HALOGEN, ronin_cp9a_champ = HALOGEN,
+	lambrini_countach = HALOGEN,
+	audy_r8 = XENON, audy_r8_lw = XENON, nisun_gtr = XENON, bnw_m5_e60 = XENON, bnw_m3_e92 = XENON,
+	lambrini_lp560 = XENON, lambrini_lp570 = XENON, lambrini_lp640 = XENON, lambrini_lp670 = XENON, lambrini_lp700 = XENON,
+	lambrini_lp750 = XENON, ferrara_458spider = XENON, ferrara_458speciale = XENON, ferrara_california = XENON,
+	bugotti_veyron = XENON, bugotti_veyron_sport = XENON, bugotti_veyron_top = XENON,
+	lexis_lfa = XENON, lexis_lfa_circuit = XENON, dearb_focus_rs = XENON,
+	audy_r8_4s = LED, bnw_m4_f82 = LED, bnw_m5_f90 = LED,
+	bugotti_chiron = LED, bugotti_chiron_pursport = LED, bugotti_chiron_supersport = LED,
+	lambrini_huracan = LED, lambrini_performante = LED, lambrini_sto = LED, lambrini_sterrato = LED, lambrini_svj = LED,
+	lambrini_svj63 = LED, lambrini_revuelto = LED, lambrini_urusp = LED,
+	bentlee_bentayga = LED, bentz_gls = LED, bentz_s680 = LED, porsha_gt3 = LED,
+} :: { [string]: Color3 }
+
+-- the lamp colours a car has before Customs: the box car's SpotLight as built, and Customs' own white
+local STOCK = { Color3.fromRGB(232, 240, 255), Color3.fromRGB(table.unpack(Config.Customs.Headlights.white)) }
+
+-- the beam a model shows for the beam its driver has (id: the model's, Cars.modelOf)
+function CarLamps.shown(id: string, beam: string): string
+	return if beam == "drl" and CarLamps.NO_DRL[id] then "off" else beam
+end
+
+-- a model's lamp colour: its real one, unless the player bought a Customs colour (src: the box car's light)
+function CarLamps.colourOf(id: string, src: Color3?): Color3
+	local tint = CarLamps.TINT[id]
+	if tint and src then
+		for _, stock in STOCK do
+			if math.abs(src.R - stock.R) + math.abs(src.G - stock.G) + math.abs(src.B - stock.B) < 0.01 then
+				return tint
+			end
+		end
+		return src
+	end
+	return tint or src or WHITE
+end
+
 function CarLamps.has(id: string?): boolean
 	return id ~= nil and CarLamps.CARS[Cars.modelOf(id)] == true
 end
@@ -71,7 +117,7 @@ type Car = {
 	model: Model,
 	root: BasePart,
 	parts: Lamp,
-	tails: { BasePart },
+	id: string, -- the model's id (Cars.modelOf): NO_DRL and TINT go by it
 	beam: string?,
 	left: boolean?,
 	right: boolean?,
@@ -97,16 +143,12 @@ local function build(model: Model): Car?
 		return nil
 	end
 	local parts: Lamp = {}
-	local tails: { BasePart } = {}
 	local source: Light? = nil
 	for _, d in model:GetDescendants() do
 		if d:IsA("BasePart") then
 			local src = d:GetAttribute("SrcName")
 			if type(src) == "string" and src:sub(1, 7) == "LampFx_" then
 				parts[src:sub(8)] = d
-			end
-			if d:GetAttribute("TailLight") and d:GetAttribute("TailOff") then
-				table.insert(tails, d)
 			end
 		elseif d:IsA("SpotLight") and d.Name ~= "LampBeam" then
 			d.Enabled = false
@@ -116,13 +158,14 @@ local function build(model: Model): Car?
 	if not (parts.HeadCoreL or parts.HeadGlassL) then
 		return nil
 	end
+	local id = Cars.modelOf(model:GetAttribute("CarId") :: string)
 	return {
 		model = model,
 		root = root,
 		parts = parts,
-		tails = tails,
-		glass = L.Glass[Cars.modelOf(model:GetAttribute("CarId") :: string)] or L.LowGlass,
-		colour = if source then source.Color else WHITE,
+		id = id,
+		glass = L.Glass[id] or L.LowGlass,
+		colour = CarLamps.colourOf(id, if source then source.Color else nil),
 		source = source,
 		near = false,
 		own = false,
@@ -236,12 +279,13 @@ end
 local function colourNow(c: Car): Color3
 	local src = c.source
 	if src and src.Parent then
-		c.colour = src.Color
+		c.colour = CarLamps.colourOf(c.id, src.Color)
 	end
 	return c.colour
 end
 
 local function applyBeam(c: Car, beam: string)
+	beam = CarLamps.shown(c.id, beam)
 	if c.beam == beam then
 		return
 	end
@@ -261,13 +305,7 @@ local function applyBeam(c: Car, beam: string)
 		set(c, "HeadCore", 0, colour)
 		set(c, "HeadGlass", c.glass * L.HighGlass, colour)
 	end
-	-- other players' tail lamps follow their lights (your own: Driving)
-	if not c.own then
-		local on = beam == "low" or beam == "high"
-		for _, t in c.tails do
-			t.Transparency = if on then t:GetAttribute("TailOff") :: number else 1
-		end
-	end
+	-- (tail and brake lamps, yours and other players': Driving, 2026-11-21)
 end
 
 local function applyTurn(c: Car, left: boolean, right: boolean)
@@ -386,7 +424,11 @@ local function step(dt: number)
 			end
 			if c then
 				local mine = model == own.model
-				c.own = mine
+				if c.own ~= mine then
+					-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): the driver got in or out, so every lamp is set afresh
+					c.own = mine
+					c.beam, c.left, c.right, c.rev = nil, nil, nil, nil
+				end
 				if mine then
 					applyBeam(c, own.beam)
 					local b = own.blinker
@@ -396,7 +438,7 @@ local function step(dt: number)
 					local b = (model:GetAttribute("Blinker") :: string?) or ""
 					applyBeam(c, (model:GetAttribute("Beam") :: string?) or "off")
 					applyTurn(c, phase and (b == "L" or b == "H"), phase and (b == "R" or b == "H"))
-					applyRev(c, false)
+					applyRev(c, model:GetAttribute("Rev") == true) -- (other players see reverse lamps, 2026-11-21)
 				end
 			end
 		end

@@ -147,6 +147,7 @@ type State = {
 	towPull: number,
 	towTurn: number,
 	applyTune: () -> (),
+	lampsOut: () -> (), -- (detach: lights and brake lamps off, told to everyone)
 	-- (2026-11-08) the two-axle model (CarPhysics): the car's numbers, its brakes, last step's acceleration and result,
 	-- each axle's grip under it; the keyboard throttle's ease; the kit-v2 wheels (blur, spokes, brake discs) and the
 	-- brakes' heat; the steering sent to the other players; the rev limiter
@@ -893,6 +894,8 @@ function Driving.detach()
 	for _, f in s.flameParts do
 		f:Destroy()
 	end
+	-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): getting out puts every lamp out, for everyone
+	s.lampsOut()
 	if s.lamps then
 		CarLamps.drive(nil, "off", "", false, false)
 		CarLamps.reset()
@@ -1426,23 +1429,25 @@ end
 
 -- tail lamps: off with the lights, dim red with them on, bright red while braking
 local TAIL_DIM, TAIL_BRAKE = Color3.fromRGB(150, 0, 6), Color3.fromRGB(255, 22, 22)
-local function setTails(s: State)
-	local braking = s.tailBrake == true
-	for _, t in s.tails do
+local function tailsLook(tails: { BasePart }, rearGlow: { any }, lightsOn: boolean, braking: boolean)
+	for _, t in tails do
 		local off = t:GetAttribute("TailOff") :: number?
 		if off then
 			-- a glowing copy over the model's own lamp: gone when the lights are off
 			t.Color = if braking then TAIL_BRAKE else TAIL_DIM
-			t.Transparency = if not s.lightsOn and not braking then 1 elseif braking then off * 0.3 else off
+			t.Transparency = if not lightsOn and not braking then 1 elseif braking then off * 0.3 else off
 		else
 			-- the lamp itself (our own bodies): darker when off
-			t.Color = if braking then TAIL_BRAKE elseif s.lightsOn then TAIL_DIM else Color3.fromRGB(60, 0, 4)
+			t.Color = if braking then TAIL_BRAKE elseif lightsOn then TAIL_DIM else Color3.fromRGB(60, 0, 4)
 		end
 	end
-	for _, g in s.rearGlow do
-		g.Enabled = s.lightsOn or braking
+	for _, g in rearGlow do
+		g.Enabled = lightsOn or braking
 		g.Brightness = if braking then 2.2 else 0.6
 	end
+end
+local function setTails(s: State)
+	tailsLook(s.tails, s.rearGlow, s.lightsOn, s.tailBrake == true)
 end
 
 local function setLights(s: State, on: boolean)
@@ -1617,7 +1622,7 @@ end
 
 -- other players' cars: their blinkers and lights, from the attributes the server sets on them
 type OtherWheel = { motor: Motor6D, knuckle: Motor6D?, front: boolean, radius: number, spin: number, blur: { BasePart }, spokes: { BasePart }, shown: number }
-type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number, engine: Audio.Engine?, eRpm: number, eThr: number, eGear: number, eOn: boolean?, eDistT: number }
+type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number, tails: { BasePart }?, tailN: number?, tailOn: boolean?, tailBrake: boolean?, engine: Audio.Engine?, eRpm: number, eThr: number, eGear: number, eOn: boolean?, eDistT: number }
 local others: { [Model]: OtherCar } = {}
 -- (2026-11-09) the other players' engines heard at once, and how far (studs)
 local OTHER_ENGINE_MAX, OTHER_ENGINE_RANGE = 3, 220
@@ -1726,6 +1731,24 @@ local function updateOthers(dt: number?)
 		end
 		-- its kit-v2 wheel pieces (the skin can come after the car)
 		local skin = model:FindFirstChild("Skin")
+		-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): its tail and brake lamps, as its
+		-- driver's game sends them (the same look as your own; no RearGlow lights: too many for a phone)
+		local tailN = if skin then #skin:GetChildren() else 0
+		local tails = o.tails
+		if not tails or o.tailN ~= tailN then
+			tails = {}
+			o.tails, o.tailN, o.tailOn = tails, tailN, nil
+			for _, d in model:GetDescendants() do
+				if d:IsA("BasePart") and d:GetAttribute("TailLight") then
+					table.insert(tails, d)
+				end
+			end
+		end
+		local tailOn, tailBrake = lights == true, model:GetAttribute("Brake") == true
+		if tailOn ~= o.tailOn or tailBrake ~= o.tailBrake then
+			o.tailOn, o.tailBrake = tailOn, tailBrake
+			tailsLook(tails, {}, tailOn, tailBrake)
+		end
 		if skin and #skin:GetChildren() ~= o.skinN then
 			o.skinN = #skin:GetChildren()
 			for _, w in o.wheels do
@@ -2418,6 +2441,7 @@ function Driving.attach(model: Model)
 		towPull = 0,
 		towTurn = 0,
 		applyTune = function() end, -- (set by attach)
+		lampsOut = function() end, -- (set by attach)
 		cruiseUp = 0,
 		cruiseDown = 0,
 		cruiseI = 0,
@@ -2697,6 +2721,11 @@ function Driving.attach(model: Model)
 		end
 	end
 	s.applyTune = applyTune
+	s.lampsOut = function()
+		s.tailBrake = false
+		setLights(s, false)
+		remote("CarSignals"):FireServer({ blinker = "", lights = false, beam = "off", brake = false, rev = false })
+	end
 	applyTune()
 	table.insert(s.connections, model:GetAttributeChangedSignal("Parts"):Connect(applyTune))
 	table.insert(s.connections, model:GetAttributeChangedSignal("Setup"):Connect(applyTune))
@@ -4189,6 +4218,7 @@ function Driving.render(dt: number)
 		UI.setBlink(false, false)
 	end
 
+	local reversing = s.engineOn and (fwdSpeed < -1 or (s.manual and s.mgear < 0))
 	-- the new models' lamps (CarLamps): the beam it should be now, told to everyone when it changes
 	if s.lamps then
 		local beam = CarLamps.beamFor(s.engineOn, s.inTunnel == true)
@@ -4198,22 +4228,19 @@ function Driving.render(dt: number)
 			UI.setIndicators(indicatorState(s))
 			remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn, beam = beam })
 		end
-		local reversing = s.engineOn and (fwdSpeed < -1 or (s.manual and s.mgear < 0))
 		CarLamps.drive(s.model, beam, s.blinker, s.blinker ~= "" and (s.blinkT % 0.8) < 0.4, reversing)
 		CarLamps.wet = Driving.wet
 	end
 
-	-- (2026-11-07) towing: the trailer's brake and reverse lamps, told to everyone when they change;
-	-- the camera turns round while reversing
-	local towReverse = false
-	if s.towTop then
-		towReverse = s.engineOn and (fwdSpeed < -1.5 or (s.manual and s.mgear < 0))
-		local braking = s.brakeIn > 0.2
-		if braking ~= s.towBrake or towReverse ~= s.towRev then
-			s.towBrake, s.towRev = braking, towReverse
-			remote("CarSignals"):FireServer({ brake = braking, rev = towReverse })
-		end
+	-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): brake and reverse lamps told to
+	-- everyone when they change, towing or not (2026-11-07: the trailer's lamps show them too)
+	local braking = s.tailBrake == true
+	if braking ~= s.towBrake or reversing ~= s.towRev then
+		s.towBrake, s.towRev = braking, reversing
+		remote("CarSignals"):FireServer({ brake = braking, rev = reversing })
 	end
+	-- towing: the camera turns round while reversing
+	local towReverse = s.towTop ~= nil and s.engineOn and (fwdSpeed < -1.5 or (s.manual and s.mgear < 0))
 	s.towTurn += ((if towReverse then math.pi else 0) - s.towTurn) * math.min(1, dt * Config.Towing.Camera.Turn)
 	s.towPull += ((if s.towTop then 1 else 0) - s.towPull) * math.min(1, dt * 2)
 
