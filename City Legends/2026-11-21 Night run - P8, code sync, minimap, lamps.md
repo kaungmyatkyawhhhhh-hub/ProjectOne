@@ -100,3 +100,11 @@ Owner: "dont make the rare car ai stop for players cars, make them cut up by mer
 
 ## Fast buses and taxis (repo + Studio)
 Owner: "also sometimes the ybs and taxis need to be fast". 30% of YBS buses and Probox taxis get a top speed of 62-80 mph (everyday traffic: 24-54). Only the top speed changes; gaps, lights and turns are as before. `TrafficMix.Hurry`. Not watched in Play.
+
+## CORRECTION: the ground-deepening fix did NOT work
+- The agent carved the ground 10 studs deep under the roads in 251 of 252 cells (4.2 million voxels, margin 4 studs, ramps and water skipped) before its controlled test showed no gain. Cell 23x29 was restored from `ServerStorage.TerrainBackup_21Nov`; the other 251 have no backup except place version 1662.
+- What the controlled test showed: after the camera jumps, far terrain is drawn coarse for a while and covers the roads; held still for about 28 s it refines and the roads show 900 studs away, with the ORIGINAL ground too. A narrow deep cut under the road changes nothing, because the coarse far terrain does not keep a narrow trench.
+- So my earlier "PROVEN" note was only half right: coarse far terrain does cover the roads (a mesh lifted 3-6 studs shows at once), but deepening the bed is not the cure.
+- The carve is kept: one kerb spot looked identical before and after, and cars drive on the `RCol` boxes, not on terrain. Risk: where the collision boxes have a hole (known: Sule Pagoda Road), a car now drops 10 studs instead of 1-4.
+- **Still open: roads hidden by coarse far terrain while it refines** (worse when driving fast or on a slow device). Ideas not yet tried: lower the ground in a WIDE band around roads so even the coarse version stays under them (needs the grass-edge meshes to hide the dip), or keep the nearest road cells' terrain refined. Test on ONE cell with equal waiting times before touching the rest.
+- Lesson: an agent must finish the one-cell test, with equal wait times before each screenshot, before running a change on every cell.

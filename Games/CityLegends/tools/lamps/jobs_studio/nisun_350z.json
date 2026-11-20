@@ -1,0 +1,9 @@
+{"id": "nisun_350z",
+ "roles": {
+  "HeadCore": [{"part": "Body_Lamp", "in": [0.64, 0.66, 0.66, 0.675, -1.7, -1.68], "off": 0.003}],
+  "HeadGlass": [{"part": "SeeThrough_Window", "in": [0.6, 0.63, 0.68, 0.71, -1.72, -1.69], "box": [0, 9, -9, 9, -9, -1.62], "off": 0.008}],
+  "TurnF": [{"part": "SeeThrough_Window", "in": [0.6, 0.63, 0.68, 0.71, -1.72, -1.69], "box": [0, 9, -9, 9, -1.62, 9], "off": 0.008}],
+  "Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.55, 0.62, 0.8, 0.88, 1.7, 1.8], "off": 0.006}],
+  "TurnR": [{"part": "SeeThrough_Lens_Red", "in": [0.55, 0.62, 0.8, 0.88, 1.7, 1.8], "box": [0, 9, -9, 9, -9, 1.7], "off": 0.012}],
+  "Rev": [{"part": "SeeThrough_Lens_Red", "in": [0.55, 0.62, 0.8, 0.88, 1.7, 1.8], "box": [0, 9, -9, 9, 1.97, 9], "off": 0.012}]
+ }}
