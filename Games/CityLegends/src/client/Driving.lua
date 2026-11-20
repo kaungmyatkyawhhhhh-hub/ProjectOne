@@ -39,6 +39,7 @@ local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CarPhysics = require(Shared:WaitForChild("CarPhysics"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
+local WaterRescue = require(Shared:WaitForChild("WaterRescue"))
 
 local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local UI = require(script.Parent:WaitForChild("UI"))
@@ -350,7 +351,7 @@ type State = {
 	wind: number?, -- the wind blur's strength now, 0..1
 	inTunnel: boolean?,
 	autoHintT: number?, -- when Q / E in automatic last showed its hint
-	seaT: number?, -- seconds on the water (back to the road after 2)
+	seaT: number?, -- seconds since the last water check (WaterRescue.Every)
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
 	groundDist: number?, -- last ground ray distance (kerbs and bumps kick the body)
@@ -1235,14 +1236,76 @@ applyCamera = function()
 	end
 end
 
-function Driving.reset()
+-- (2026-11-21, owner: "make it so that when a car goes in water, they get teleported back to the nearest road
+-- near the water, facing the roads direction") is this point in Terrain water: its one 4-stud cell
+local function wetAt(p: Vector3): boolean
+	local c = Vector3.new(math.floor(p.X / 4), math.floor(p.Y / 4), math.floor(p.Z / 4)) * 4
+	local mats = workspace.Terrain:ReadVoxels(Region3.new(c, c + Vector3.new(4, 4, 4)), 4)
+	return mats[1][1][1] == Enum.Material.Water
+end
+local roadRay = RaycastParams.new()
+roadRay.FilterType = Enum.RaycastFilterType.Include
+local roadOverlap = OverlapParams.new()
+roadOverlap.FilterType = Enum.RaycastFilterType.Include
+-- (same day) the middle of the nearest lane on a DRY road, looking the way that lane drives: of the lane points
+-- nearest to `pos`, the first with a built carriageway or deck under it (the 1:1 map's collision boxes, RoadBox
+-- "R" / "D") and no water on it. Without lane data: the nearest road box's top, along its long axis. nil = no map
+local function roadNear(pos: Vector3): CFrame?
+	local map = workspace:FindFirstChild("Yangon1to1")
+	local roads = map and map:FindFirstChild("Roads")
+	local collide = roads and roads:FindFirstChild("Collide")
+	local g = if Config.activeMap() then RivieraTraffic.build() else nil
+	if g then
+		local list = WaterRescue.candidates(g.lanes, CityLayout.sample, pos, 8, 24)
+		for _, c in list do
+			local onRoad = true
+			if collide then
+				roadRay.FilterDescendantsInstances = { collide }
+				local h = workspace:Raycast(c.p + Vector3.new(0, 6, 0), Vector3.new(0, -16, 0), roadRay)
+				local kind = h and h.Instance:GetAttribute("RoadBox")
+				onRoad = kind == "R" or kind == "D"
+				if h and onRoad then
+					c.p = Vector3.new(c.p.X, h.Position.Y, c.p.Z)
+				end
+			end
+			c.dry = onRoad and not wetAt(c.p + Vector3.new(0, 2, 0))
+		end
+		local c = WaterRescue.pick(list)
+		if c then
+			local flat = Vector3.new(c.dir.X, 0, c.dir.Z)
+			return if flat.Magnitude > 0.01 then CFrame.lookAt(c.p, c.p + flat.Unit) else CFrame.new(c.p)
+		end
+	end
+	if collide then
+		roadOverlap.FilterDescendantsInstances = { collide }
+		for _, r in { 300, 1200, 4000 } do
+			local best: BasePart?, bd = nil, math.huge
+			for _, p in workspace:GetPartBoundsInRadius(pos, r, roadOverlap) do
+				local d = (p.Position - pos).Magnitude
+				if d < bd and p:GetAttribute("RoadBox") == "R" then
+					best, bd = p, d
+				end
+			end
+			if best then
+				-- (a road box lies along its road: length on Z, the top on the surface)
+				local top = best.Position + best.CFrame.UpVector * (best.Size.Y / 2)
+				local look = best.CFrame.LookVector
+				return CFrame.lookAt(top, top + Vector3.new(look.X, 0, look.Z).Unit)
+			end
+		end
+	end
+	return nil
+end
+
+-- (`from`: the road nearest to that point instead of to the car, 2026-11-21: where it went into the water)
+function Driving.reset(from: Vector3?)
 	local s = state
 	if not s then
 		return
 	end
 	-- (on the Monaco map its own lanes; CityLayout only knows the old city's)
-	local here = s.root.Position - Vector3.new(0, 2, 0)
-	local cf = (if Config.activeMap() then RivieraTraffic.nearestCFrame(here) else nil) or CityLayout.nearestLaneCFrame(s.root.Position)
+	local here = (from or s.root.Position) - Vector3.new(0, 2, 0)
+	local cf = roadNear(here) or CityLayout.nearestLaneCFrame(s.root.Position)
 	s.root.AssemblyLinearVelocity = Vector3.zero
 	s.root.AssemblyAngularVelocity = Vector3.zero
 	s.root.CFrame = cf + Vector3.new(0, s.halfHeight + 0.4, 0)
@@ -2769,6 +2832,7 @@ end
 -- Physics step
 ---------------------------------------------------------------------
 local rayParams = RaycastParams.new()
+local waterState = WaterRescue.new() -- (2026-11-21) the water timer and its cooldown: client/Driving's "in the sea" check
 rayParams.FilterType = Enum.RaycastFilterType.Exclude
 
 local function reportCrash(s: State, severity: number)
@@ -3760,16 +3824,27 @@ function Driving.step(dt: number)
 	-- (2026-11-04) in the sea: off a quay the car skates on the water or sits on the shallow seabed, and
 	-- never gets down to the check above. Two seconds of that and it's back on the road (the ray starts
 	-- above the car: from under the surface it would miss the water)
-	local sea = if root.Position.Y < 20 then workspace:Raycast(root.Position + Vector3.new(0, 8, 0), Vector3.new(0, -(s.halfHeight + 9.2), 0), rayParams) else nil
-	if sea and sea.Material == Enum.Material.Water then
-		s.seaT = (s.seaT or 0) + dt
-		if (s.seaT :: number) >= 2 then
-			s.seaT = 0
-			Driving.reset()
-			return
-		end
-	else
+	-- (2026-11-21, owner: "make it so that when a car goes in water, they get teleported back to the nearest road
+	-- near the water, facing the roads direction") the "Y < 20" gate missed Inya Lake (water at 40) and a sunk
+	-- car; now 5 checks a second at any height: water is the first thing under the car (a bridge deck or a road
+	-- beside the river is hit first, rain and pools are not Terrain water) or the body's middle is under water.
+	-- After WaterRescue.Hold: a quick fade, back onto the nearest dry road to where it went in, no penalty
+	s.seaT = (s.seaT or 0) + dt
+	if (s.seaT :: number) >= WaterRescue.Every then
+		local sea = workspace:Raycast(root.Position + Vector3.new(0, 8, 0), Vector3.new(0, -(s.halfHeight + 9.2), 0), rayParams)
+		local wet = (sea ~= nil and sea.Material == Enum.Material.Water) or wetAt(root.Position)
+		local from = WaterRescue.step(waterState, wet, root.Position, s.seaT :: number, os.clock())
 		s.seaT = 0
+		if from then
+			task.spawn(function()
+				UI.fade(true, 0.25)
+				if state == s then
+					Driving.reset(from)
+					UI.toast("Back on the road")
+				end
+				UI.fade(false, 0.35)
+			end)
+		end
 	end
 
 	if s.vyTarget and s.grounded then

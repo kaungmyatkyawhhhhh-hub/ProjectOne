@@ -406,6 +406,7 @@ local T: { [string]: { any } } = {
 	["drive.lightsMode"] = { "Lights: %s", "မီး: %s" },
 	["drive.launch"] = { "Launch control: let go of the brake", "Launch control: ဘရိတ် လွှတ်ပါ" },
 	["drive.radio"] = { "Radio: %s", "ရေဒီယို: %s" },
+	["drive.backOnRoad"] = { "Back on the road", "လမ်းပေါ် ပြန်ရောက်ပြီ", true },
 	["drive.stopForDoors"] = { "Stop the car to open the doors", "တံခါးဖွင့်ရန် ကားကို ရပ်ပါ" },
 	["foot.slowDown"] = { "Slow down to get out", "ဆင်းရန် အရှိန် လျှော့ပါ" },
 	["foot.cantGetOut"] = { "Can't get out here", "ဒီမှာ ဆင်းလို့ မရပါ" },
