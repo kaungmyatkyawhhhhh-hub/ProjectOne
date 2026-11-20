@@ -1,0 +1,10 @@
+{"id": "astin_dbx", "dump": ["Body_Lamp_p1", "Body_Lamp_p2", "SeeThrough_Window"],
+ "roles": {
+  "HeadCore": [{"part": "Body_Lamp_p1", "in": [0.5, 0.8, 0.78, 0.93, -2.13, -1.95], "off": 0.003}],
+  "HeadGlass": [{"part": "SeeThrough_Window", "in": [0.6, 0.75, 0.8, 0.9, -2.1, -1.95], "off": 0.008}],
+  "TurnF": [{"part": "SeeThrough_Window", "in": [0.75, 0.85, 0.5, 0.57, -2.2, -2.1], "off": 0.008}],
+  "Tail": [{"part": "SeeThrough_Window", "in": [0, 0.8, 1.0, 1.2, 2.15, 2.6], "off": 0.006}],
+  "TurnR": [{"part": "SeeThrough_Window", "in": [0.4, 0.5, 1.0, 1.2, 2.4, 2.5], "box": [0.5, 9, -9, 9, -9, 9], "off": 0.013},
+            {"part": "SeeThrough_Window", "in": [0.7, 0.8, 1.0, 1.1, 2.15, 2.3], "box": [0, 9, -9, 9, 2.3, 9], "off": 0.013}],
+  "Rev": [{"part": "SeeThrough_Window", "in": [0.62, 0.75, 0.6, 0.7, 2.3, 2.4], "off": 0.008}]
+ }}

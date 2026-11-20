@@ -228,13 +228,13 @@ function M.build()
 		table.sort(breaks)
 		while s < s1 - 0.5 do
 			local len = base
-			if L == main and math.abs(s - sJ) < 90 * S and s < sJ then len = 8 * S end
-			if L ~= main and s > L.len - 90 * S then len = 8 * S end
+			if L == main and math.abs(s - sJ) < 90 * S and s < sJ then len = 10 * S end
+			if L ~= main and s > L.len - 90 * S then len = 10 * S end
 			local _, sl0, h0 = frame(L, s)
-			while len > 8 * S do
+			while len > 12 * S do
 				local _, sl1, h1 = frame(L, math.min(s + len, s1))
 				local dh = math.abs((h1 - h0 + math.pi) % (2 * math.pi) - math.pi)
-				if dh < 0.03 and math.abs(sl1 - sl0) < 0.008 then break end
+				if dh < 0.06 and math.abs(sl1 - sl0) < 0.012 then break end
 				len /= 2
 			end
 			local e = math.min(s + len, s1)
@@ -251,9 +251,9 @@ function M.build()
 		return segs
 	end
 	local all = {
-		main = segments(main, sStart, sEnd, 40 * S, { sJ, sMainN, sMainS, sApprS, sPlaza - PLAZA_HALF, sPlaza + PLAZA_HALF }),
-		west = segments(west, 0, west.len, 24 * S, {}),
-		east = segments(east, 0, east.len, 24 * S, {}),
+		main = segments(main, sStart, sEnd, 60 * S, { sJ, sMainN, sMainS, sApprS, sPlaza - PLAZA_HALF, sPlaza + PLAZA_HALF }),
+		west = segments(west, 0, west.len, 30 * S, {}),
+		east = segments(east, 0, east.len, 30 * S, {}),
 	}
 	-- a piece standing in another line's carriageway (where the ramps merge) is left out
 	local function blocked(L, cf, x, len)
@@ -309,7 +309,6 @@ function M.build()
 						rcol(col, "P", Vector3.new(ww, 2, len), cf * CFrame.new(wx, -0.4, 0))
 						local r = part(deck, "Railing", Vector3.new(0.3, 3.6, len), cf * CFrame.new(sx * (tot - 0.3), 2.4, 0), C.rail, Enum.Material.Metal)
 						r.Transparency = 0.35
-						rcol(col, "W", Vector3.new(0.6, 4.5, len), cf * CFrame.new(sx * (tot - 0.3), 2.25, 0))
 					end
 				end
 				if isMain then -- the median barrier (IMG_0808 172 s: a bus on the other carriageway behind it)
@@ -425,19 +424,19 @@ function M.build()
 	end
 	flush(piers)
 
-	-- ---- lamps: white (the game's Yangon lamp colours), on the outer barriers; a SpotLight on every third ----
+	-- ---- lamps: white (the game's Yangon lamp colours), on the outer barriers; a SpotLight on every fourth ----
 	local lamps = group("Lamps")
 	local nLamp = 0
 	local function lamp(L, s, sx)
 		local f = frame(L, s)
 		local x = sx * (L.sec(s).cw * S + BAR_W / 2)
-		if blocked(L, f, x, 2) or blocked(L, f, x - sx * 6, 2) then return end
+		if blocked(L, f, x + sx * 1.6, 90) then return end -- the barrier's own test: no lamp where the barrier is left out
 		local flat = CFrame.lookAt(f.Position, f.Position + Vector3.new(f.LookVector.X, 0, f.LookVector.Z)) * CFrame.new(x, 0, 0)
 		rod(lamps, "Pole", (flat * CFrame.new(0, BAR_H, 0)).Position, (flat * CFrame.new(0, BAR_H + 30, 0)).Position, 0.75, C.rail)
 		local head = part(lamps, "Head", Vector3.new(4.5, 0.5, 1.5), flat * CFrame.new(-sx * 2.2, BAR_H + 30, 0), C.lamp)
 		head:AddTag("LampGlow")
 		nLamp += 1
-		if nLamp % 3 == 0 then
+		if nLamp % 4 == 0 then
 			local l = Instance.new("SpotLight")
 			l.Face, l.Angle, l.Range, l.Brightness, l.Color = Enum.NormalId.Bottom, 120, 60, 7, Color3.fromRGB(232, 240, 255)
 			l.Shadows, l.Enabled = false, false
@@ -495,7 +494,7 @@ function M.build()
 
 	-- ---- self-check ----
 	local n = #root:GetDescendants()
-	assert(n < 3200, "too many instances: " .. n)
+	assert(n < 2700, "too many instances: " .. n)
 	assert(math.abs((main.y(sMid) - WATER_Y) / S - CREST) < 0.01, "crest height")
 	assert(math.abs(sMainS - sMainN - MAIN_LEN * S) < 0.01, "main bridge length")
 	for name, segs in all do
