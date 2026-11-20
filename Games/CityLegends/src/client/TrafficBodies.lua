@@ -262,7 +262,8 @@ end
 
 -- a new traffic car (nil when there are no TrafficModels). With the Yangon set in the place the car comes from
 -- TrafficMix.pick: `counts` = live cars per rare group, `main` = the spot is on a main road
-function TrafficBodies.build(rng: Random, counts: { [string]: number }?, main: boolean?): Model?
+-- (2026-11-21, races) `rivalOf` = a rare cap group: only a rival for that group's car (TrafficMix.rival), or nil
+function TrafficBodies.build(rng: Random, counts: { [string]: number }?, main: boolean?, rivalOf: string?): Model?
 	local all = templates()
 	local have, byName = {}, {}
 	for _, m in all do
@@ -272,10 +273,10 @@ function TrafficBodies.build(rng: Random, counts: { [string]: number }?, main: b
 		end
 	end
 	if next(have) then
-		local name = TrafficMix.pick(rng, have, counts or {}, main == true)
+		local name = if rivalOf then TrafficMix.rival(rng, have, counts or {}, rivalOf) else TrafficMix.pick(rng, have, counts or {}, main == true)
 		return if name then buildFrom({}, rng, byName[name]) else nil
 	end
-	return buildFrom(all, rng)
+	return if rivalOf then nil else buildFrom(all, rng)
 end
 
 -- (2026-11-14, YangonStreetLife's parked cars) a car of one type letter (Config.Traffic.ModelLengths: A hatch,

@@ -193,4 +193,40 @@ function TrafficMix.pick(rng: Random, have: { [string]: boolean }, counts: { [st
 	return last
 end
 
+-- (owner, 2026-11-21: "also make it so that rare cars can race with each other") a rare car now and then spawns
+-- with a rival from another cap group; the two share a way (Traffic.lua raceNext) and trade places
+TrafficMix.Race = {
+	Chance = 0.5, -- of rare spawns, the share that brings a rival (when another group is under its cap)
+	Behind = 3, -- car lengths the rival starts behind (when there is no free lane beside)
+	Split = 900, -- studs apart at which the race is over and each drives on alone
+	Tow = 1.08, -- top speed x this for the one behind, within TowGap of its rival (slipstream)
+	TowGap = 90,
+	Ease = 0.92, -- top speed x this for the one in front, more than LeadGap ahead (so the other catches up)
+	LeadGap = 70,
+}
+
+-- the rival's template name: a rare car of another cap group than `firstGroup` that is under its cap (the rules
+-- of pick), nil when there is none
+function TrafficMix.rival(rng: Random, have: { [string]: boolean }, counts: { [string]: number }, firstGroup: string): string?
+	local open = {}
+	for name, e in TrafficMix.byName do
+		if e.rare and e.rare ~= firstGroup and have[name] and TrafficMix.spawns(name) and (counts[e.rare] or 0) < (TrafficMix.Rare[e.rare] or 0) then
+			table.insert(open, name)
+		end
+	end
+	table.sort(open)
+	return if #open > 0 then open[rng:NextInteger(1, #open)] else nil
+end
+
+-- a race car's top speed factor from how far it is ahead of its rival along the road (studs, negative = behind)
+function TrafficMix.raceFactor(ahead: number): number
+	local R = TrafficMix.Race
+	if ahead < 0 and ahead >= -R.TowGap then
+		return R.Tow
+	elseif ahead > R.LeadGap then
+		return R.Ease
+	end
+	return 1
+end
+
 return TrafficMix
