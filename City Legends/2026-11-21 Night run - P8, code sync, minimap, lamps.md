@@ -119,3 +119,7 @@ Owner: "also sometimes the ybs and taxis need to be fast". 30% of YBS buses and 
 - "fix everything".
 - Rare cars: "slow down on turn every 1 degree = 3% slower ... 10 degrees = 30% slower so 100 mph to 70 mph".
 - "put more traffic, it dont feel like yangon rn cuz it needs more traffic": +60-70% on normal devices, low-end numbers unchanged.
+
+## Owner, about 03:15
+- "do everything in known but not started": far roads, lag spikes, Sule Pagoda Road hole, P8 deck dip, remaining car lamps, Dala Bridge route, more real-Yangon look, the 4 road meshes. Studio work starts when the Play test ends.
+- **"dont make the land beyond dala"**: no ground, town or road is built on the Dala side. The bridge is made drivable only as far as its own structure; it ends at its Dala end.
