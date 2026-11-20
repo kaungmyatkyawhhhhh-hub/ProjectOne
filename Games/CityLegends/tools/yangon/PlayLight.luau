@@ -13,7 +13,7 @@ local M = {}
 local function rgb(r, g, b)
 	return Color3.fromRGB(r, g, b)
 end
-local R_NIGHT = { brightness = 1.3, ambient = rgb(74, 86, 124), outdoor = rgb(88, 104, 154), shiftTop = rgb(110, 124, 170), exposure = 0.66, density = 0.2, haze = 0.4, glare = 0, atmo = rgb(34, 50, 96), decay = rgb(18, 28, 66), bloom = 0.32, rays = 0, tint = rgb(255, 242, 226), sat = 0.06, con = 0.1, soft = 0.12, offset = 0.12 }
+local R_NIGHT = { brightness = 1.3, ambient = rgb(80, 78, 74), outdoor = rgb(96, 94, 90), shiftTop = rgb(120, 116, 108), exposure = 0.66, density = 0.2, haze = 0.4, glare = 0, atmo = rgb(28, 30, 36), decay = rgb(14, 15, 18), bloom = 0.32, rays = 0, tint = rgb(255, 240, 220), sat = 0.04, con = 0.12, soft = 0.12, offset = 0.12 }
 local function with(k, h)
 	local c = table.clone(k)
 	c.hour = h

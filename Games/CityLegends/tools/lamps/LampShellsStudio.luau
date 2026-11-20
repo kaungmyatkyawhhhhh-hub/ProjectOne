@@ -11,6 +11,19 @@ local LS = {}
 _G.LS = LS
 local CM = game.ReplicatedStorage.CarModels
 
+-- the car's middle across: some models sit off their pivot (458 Speciale 7 m, Sterrato 10.6 m). Taken from the
+-- shells' own L / R pair, else 0. Every read and apply works about it, so left / right mirror about the car.
+LS.X0 = {}
+function LS.x0(id)
+	if LS.X0[id] == nil then
+		local m = CM[id]
+		local l = m:FindFirstChild("LampFx_HeadGlassL") or m:FindFirstChild("LampFx_HeadCoreL")
+		local r = m:FindFirstChild("LampFx_HeadGlassR") or m:FindFirstChild("LampFx_HeadCoreR")
+		LS.X0[id] = if l and r then (m:GetPivot():PointToObjectSpace(l.Position).X + m:GetPivot():PointToObjectSpace(r.Position).X) / 2 else 0
+	end
+	return LS.X0[id]
+end
+
 function LS.read(model, p)
 	local em = AS:CreateEditableMeshAsync(Content.fromUri(p.MeshId))
 	local pv = model:GetPivot()
@@ -25,7 +38,7 @@ function LS.read(model, p)
 	local c = (mn + mx) / 2
 	local ext = mx - mn
 	local sc = Vector3.new(ext.X > 1e-6 and p.Size.X / ext.X or 1, ext.Y > 1e-6 and p.Size.Y / ext.Y or 1, ext.Z > 1e-6 and p.Size.Z / ext.Z or 1)
-	local toModel = pv:Inverse() * p.CFrame
+	local toModel = CFrame.new(-LS.x0(model.Name), 0, 0) * pv:Inverse() * p.CFrame
 	local pos, key, keyOf, nk = {}, {}, {}, 0
 	for v, q in raw do
 		local w = toModel * ((q - c) * sc)
@@ -302,6 +315,7 @@ end
 function LS.apply(id, assetId, mode)
 	local pack = game:GetService("InsertService"):LoadAsset(assetId)
 	local model = CM[id]
+	local x0 = LS.x0(id)
 	local made = LS.backup(id)
 	local out = {}
 	for _, d in pack:GetDescendants() do
@@ -316,7 +330,7 @@ function LS.apply(id, assetId, mode)
 				local q = d:Clone()
 				q.Name = name
 				q.Size = Vector3.new(math.max(num(sx), 0.002), math.max(num(sy), 0.002), math.max(num(sz), 0.002))
-				q.CFrame = model:GetPivot() * CFrame.new(num(cx), num(cy), num(cz))
+				q.CFrame = model:GetPivot() * CFrame.new(x0 + num(cx), num(cy), num(cz))
 				q.Anchored = true
 				q.CanCollide = false
 				q.CanQuery = false

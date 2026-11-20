@@ -80,7 +80,9 @@ end
 -- the morning drive and the blue-hour / night drive) a crisp deep-blue day with strong sun, a warm
 -- golden hour, a long navy blue hour with the lamps just on, and a navy (never black) night under
 -- warm sodium lamps. Grade kept subtle: a touch more saturation and contrast, warm by day.
-local R_NIGHT: Key = { hour = 0, brightness = 1.3, ambient = rgb(74, 86, 124), outdoor = rgb(88, 104, 154), shiftTop = rgb(110, 124, 170), exposure = 0.66, density = 0.2, haze = 0.4, glare = 0, atmo = rgb(34, 50, 96), decay = rgb(18, 28, 66), bloom = 0.32, rays = 0, tint = rgb(255, 242, 226), water = rgb(8, 22, 44), sat = 0.06, con = 0.1, fog = 0.1 }
+-- (owner, 2026-11-21: "its the real life yangon city", the night videos) Yangon's night is a near-black sky over
+-- neutral warm grey streets, not navy: was ambient 74,86,124 / outdoor 88,104,154 / atmo 34,50,96 / tint 255,242,226
+local R_NIGHT: Key = { hour = 0, brightness = 1.3, ambient = rgb(80, 78, 74), outdoor = rgb(96, 94, 90), shiftTop = rgb(120, 116, 108), exposure = 0.66, density = 0.2, haze = 0.4, glare = 0, atmo = rgb(28, 30, 36), decay = rgb(14, 15, 18), bloom = 0.32, rays = 0, tint = rgb(255, 240, 220), water = rgb(10, 18, 24), sat = 0.04, con = 0.12, fog = 0.1 }
 local RIVIERA_KEYS: { Key } = {
 	R_NIGHT,
 	table.freeze(with(R_NIGHT, 4.6)),
