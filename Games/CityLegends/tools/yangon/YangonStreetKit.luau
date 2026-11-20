@@ -98,14 +98,17 @@ function K.templates(holding: Instance): number
 		q.Color = Color3.new(1, 1, 1)
 		q.Transparency = if kind == "SGL" then 0.55 else 0
 		if kind == "SNE" then
-			q.Color = Color3.fromRGB(236, 244, 255)
+			-- (owner, 2026-11-21: the videos overrule "Yangon lights are white") main-road lamps stay white LED; the
+			-- plain side-street pole lamps (ppolel) are amber sodium as in the 0815 video, coil poles keep white
+			local amber = id == "ppolel"
+			q.Color = if amber then Color3.fromRGB(255, 176, 92) else Color3.fromRGB(236, 244, 255)
 			CollectionService:AddTag(q, "LampGlow")
 			local l = Instance.new("SpotLight")
 			l.Face = Enum.NormalId.Bottom
 			l.Angle = 120
 			l.Range = 42
 			l.Brightness = 5
-			l.Color = Color3.fromRGB(232, 240, 255)
+			l.Color = if amber then Color3.fromRGB(255, 170, 96) else Color3.fromRGB(232, 240, 255)
 			l.Shadows = false
 			l.Parent = q
 			CollectionService:AddTag(l, "LODLight")
