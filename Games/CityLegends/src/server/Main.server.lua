@@ -22,6 +22,35 @@ local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 
 local CityBuilder = require(script.Parent:WaitForChild("CityBuilder"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+-- (21 Nov, owner: "make the loading screen ingame load fast") a profile starts loading the moment its player joins,
+-- not after every system below has started (~5 s in Studio Play): the client's menu waits on it (GetData).
+-- onPlayerAdded (the end of this script) waits for this load instead of starting its own.
+local profileLoads: { [Player]: { done: boolean, ok: boolean } } = {}
+local removingHooked = false -- (until the main PlayerRemoving below is connected, a leaver's lock is handed back here)
+local function startProfileLoad(player: Player)
+	if profileLoads[player] then
+		return
+	end
+	local job = { done = false, ok = false }
+	profileLoads[player] = job
+	task.spawn(function()
+		local ok, err = pcall(PlayerData.load, player)
+		if not ok then
+			warn("[CityLegends] profile load failed for " .. player.Name .. ": " .. tostring(err))
+		end
+		job.ok, job.done = ok, true
+	end)
+end
+Players.PlayerAdded:Connect(startProfileLoad)
+for _, p in Players:GetPlayers() do
+	startProfileLoad(p)
+end
+Players.PlayerRemoving:Connect(function(player)
+	profileLoads[player] = nil
+	if not removingHooked then
+		PlayerData.release(player)
+	end
+end)
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
@@ -1331,7 +1360,14 @@ local function onPlayerAdded(player: Player)
 	watchConsoleUnlock(player)
 	watchConsoleEverything(player)
 	watchConsoleCarXp(player)
-	PlayerData.load(player)
+	startProfileLoad(player) -- (started at join, near the top of this script)
+	local job = profileLoads[player]
+	while job and not job.done do
+		task.wait(0.05)
+	end
+	if not job or not job.ok or not player.Parent then
+		return
+	end
 	Brands.publish(player)
 	CarLevels.publish(player)
 	-- Studio play tests start with everything unlocked and the test cash (owner, 2026-10-23:
@@ -1363,6 +1399,7 @@ for _, p in Players:GetPlayers() do
 	task.spawn(onPlayerAdded, p)
 end
 
+removingHooked = true
 Players.PlayerRemoving:Connect(function(player)
 	local f = focusFolder:FindFirstChild(player.Name)
 	if f then

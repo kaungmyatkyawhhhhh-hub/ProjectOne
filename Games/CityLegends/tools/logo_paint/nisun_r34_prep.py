@@ -174,6 +174,28 @@ def cabin_role(lo, hi):
     return "r34_cabin"  # dash
 
 
+# the model's front wheels are drawn almost twice as wide as the rears (0.58 m tyres poking 8 cm out of the
+# arches; a real BNR34 runs 245s all round): narrow every front wheel piece to the rears' width, about its middle
+FRONT_PIECES = {"Tire", "Nismo_alloy", "material", "material01", "Disc_Spiral", "Disc_normal", "material.001", "Material.023", "Material.010"}
+for o in [o for o in bpy.data.objects if o.type == "MESH"]:
+    me = o.data
+    if not me.materials or me.materials[0].name not in FRONT_PIECES:
+        continue
+    M = np.array(o.matrix_world)
+    Mi = np.linalg.inv(M)
+    co = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", co)
+    w = co.reshape(-1, 3) @ M[:3, :3].T + M[:3, 3]
+    yz = np.hypot(w[:, 1] + 2.86, w[:, 2] - 0.68)
+    sel = (yz < 0.72) & (np.abs(w[:, 0]) > 0.75)
+    if not sel.any() or (me.materials[0].name == "Material.010" and not sel.all()):
+        continue
+    sg = np.sign(w[sel, 0])
+    w[sel, 0] = sg * (1.43 + (np.abs(w[sel, 0]) - 1.43) * 0.574)
+    loc = w @ Mi[:3, :3].T + Mi[:3, 3]
+    me.vertices.foreach_set("co", loc.ravel())
+    me.update()
+
 log = {}
 cards = []
 for o in list(bpy.data.objects):
@@ -292,6 +314,29 @@ for o, faces, M in cards:
     ob = bpy.data.objects.new(o.name + "_DoorCard", nm)
     bpy.context.scene.collection.objects.link(ob)
     log["r34_door_card"] = log.get("r34_door_card", 0) + len(polys)
+
+# hidden or tiny-detail meshes are far too heavy (wheel bolts 52k faces each, calipers 34k, the grille mesh
+# 66k): thin them here, so auto_car's even thinning keeps the body and cabin nearly whole
+TARGET = {"r34_rim": 7000, "r34_caliper": 2500, "r34_disc": 1800, "r34_grill": 6000, "r34_black": 3000, "r34_rubber": 3000, "r34_carbon": 6000}
+for o in [o for o in bpy.data.objects if o.type == "MESH"]:
+    me = o.data
+    if len(me.materials) != 1 or me.materials[0].name not in TARGET:
+        continue
+    goal = TARGET[me.materials[0].name]
+    n = len(me.polygons)
+    if n <= goal * 1.2:
+        continue
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
+    bm.to_mesh(me)
+    bm.free()
+    mod = o.modifiers.new("thin", "DECIMATE")
+    mod.ratio = goal / n
+    mod.use_collapse_triangulate = True
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.modifier_apply(modifier=mod.name)
+    log["thin " + o.name] = (n, len(me.polygons))
 
 for k in sorted(log):
     print("role", k, log[k])
