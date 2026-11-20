@@ -45,6 +45,7 @@ local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 local Audio = require(script.Parent:WaitForChild("Audio"))
+local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
 local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local CarLamps = require(script.Parent:WaitForChild("CarLamps"))
@@ -1688,7 +1689,8 @@ type OtherWheel = { motor: Motor6D, knuckle: Motor6D?, front: boolean, radius: n
 type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number, tails: { BasePart }?, tailN: number?, tailOn: boolean?, tailBrake: boolean?, engine: Audio.Engine?, eRpm: number, eThr: number, eGear: number, eOn: boolean?, eDistT: number }
 local others: { [Model]: OtherCar } = {}
 -- (2026-11-09) the other players' engines heard at once, and how far (studs)
-local OTHER_ENGINE_MAX, OTHER_ENGINE_RANGE = 3, 220
+-- (owner, 2026-11-21: "u can hear ur car sounds only") 4, 2 on a low-end phone (LowEnd.on)
+local OTHER_ENGINE_MAX, OTHER_ENGINE_RANGE = 4, 220
 local function otherCar(model: Model): OtherCar?
 	local found = others[model]
 	if found then
@@ -1899,7 +1901,7 @@ local function updateOthers(dt: number?)
 		return a.d < b.d
 	end)
 	local keep: { [OtherCar]: number } = {}
-	for i = 1, math.min(#near, OTHER_ENGINE_MAX) do
+	for i = 1, math.min(#near, if LowEnd.on then 2 else OTHER_ENGINE_MAX) do
 		keep[near[i].o] = near[i].d
 	end
 	for model, o in others do

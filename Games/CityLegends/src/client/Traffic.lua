@@ -1475,7 +1475,7 @@ local function racerSounds(dt: number)
 		local v = voices[npc]
 		if not v then
 			local id = npc.model:GetAttribute("TrafficId")
-			local spec = if type(id) == "string" then Cars.get(id) else nil
+			local spec = if type(id) == "string" then Cars.ById[id] else nil
 			if not spec or spec.Electric then
 				continue
 			end

@@ -198,6 +198,16 @@ local Progress = remotes:WaitForChild("Progress") :: RemoteEvent
 local ClaimDaily = remotes:WaitForChild("ClaimDaily") :: RemoteFunction
 
 phase("remotes")
+-- (21 Nov) the profile is asked for now and picked up after the world setup below (it waits on the DataStore load)
+local dataAsked: any, dataIn = nil, false
+task.spawn(function()
+	local ok, got = pcall(GetData.InvokeServer, GetData)
+	dataAsked = if ok then got else nil
+	if not ok then
+		warn("[CityLegends] GetData failed:", got)
+	end
+	dataIn = true
+end)
 Driving.init()
 OnFoot.init()
 
@@ -226,14 +236,25 @@ for _, root in { workspace:FindFirstChild("Riviera"), Config.mapRoot(), city } d
 	end
 end
 local MAP_QUIET_PARTS = 6 -- at most this many parts arriving per quarter second...
-local MAP_QUIET_TIME = 1.5 -- ...for this long counts as loaded
+local MAP_QUIET_TIME = 1 -- ...for this long counts as loaded after a jump (was 1.5 behind a fixed 1 s wait)
+local MAP_QUIET_STAY = 0.5 -- (21 Nov) no jump (the start, under the menu's own streamed spot): this long
 local MAP_MAX_WAIT = 30
+-- (21 Nov) a spot within this of where the camera just was is no jump: its terrain is already drawn up close
+local JUMP_FAR = 600
 -- (21 Nov, owner: "the map loading is bugged and sometimes it dont fully load") after a jump the terrain's data
 -- is in within ~1 s, but its fine meshes are drawn seconds later: until then a coarse terrain sheet lies 15+ studs
 -- over the roads (only kerbs and tall things show). Studio Play on a PC: covered at 1.5 s, clear by ~3.5 s, while the
 -- parts go quiet at ~2.6 s. So a jump keeps the screen up a little longer; phones mesh terrain slower.
-local TERRAIN_SETTLE = 1.5
-local TERRAIN_SETTLE_PHONE = 4 -- shortcut: a guess (not measured on a phone), tune from a phone test
+-- (21 Nov, "make the loading screen ingame load fast") the terrain time now runs from the jump itself, alongside the
+-- parts wait (it used to start only after the parts went quiet: 1.5 / 4 s on top), and a spot near where the camera
+-- just was (the first car out under the menu's orbit) is no jump at all. The values below are from the jump: PC
+-- 3.5 s = the measured "clear by ~3.5 s"; phones = the old 2.6 s parts wait + its 4 s guess, rounded down.
+local TERRAIN_SETTLE = 3.5
+local TERRAIN_SETTLE_PHONE = 6 -- shortcut: a guess (not measured on a phone), tune from a phone test
+-- is `to` far from where the camera is now (call before moving the car or the camera there)
+local function isJump(to: Vector3): boolean
+	return (to - camera.CFrame.Position).Magnitude > JUMP_FAR
+end
 local function waitForMap(status: string, jumped: boolean?)
 	if not workspace.StreamingEnabled or not Config.activeMap() then
 		return
@@ -241,30 +262,33 @@ local function waitForMap(status: string, jumped: boolean?)
 	UI.showLoading(status)
 	local t0 = os.clock()
 	local parts0 = streamedIn
-	task.wait(1)
+	local settleBy = 0
+	if jumped then
+		local phone = UI.isTouch or require(script.Parent:WaitForChild("LowEnd")).on
+		settleBy = t0 + (if phone then TERRAIN_SETTLE_PHONE else TERRAIN_SETTLE)
+		task.wait(0.5) -- (streaming round the new spot gets going)
+	end
+	local need = if jumped then MAP_QUIET_TIME else MAP_QUIET_STAY
 	local last, quiet = streamedIn, 0
+	local tQuiet = nil
 	while os.clock() - t0 < MAP_MAX_WAIT and UI.loadingWaiting() do
 		task.wait(0.25)
 		local added = streamedIn - last
 		last = streamedIn
 		if added <= MAP_QUIET_PARTS and not player.GameplayPaused then
 			quiet += 0.25
-			if quiet >= MAP_QUIET_TIME then
-				break
+			if quiet >= need then
+				tQuiet = tQuiet or os.clock() - t0
+				if os.clock() >= settleBy then
+					break
+				end
 			end
 		else
 			quiet = 0
+			tQuiet = nil
 		end
 	end
-	local tQuiet = os.clock() - t0
-	if jumped then
-		local phone = UI.isTouch or require(script.Parent:WaitForChild("LowEnd")).on
-		local settleBy = os.clock() + (if phone then TERRAIN_SETTLE_PHONE else TERRAIN_SETTLE)
-		while os.clock() < settleBy and os.clock() - t0 < MAP_MAX_WAIT and UI.loadingWaiting() do
-			task.wait(0.25)
-		end
-	end
-	print(string.format("[CityLegends] map wait '%s': parts quiet %.2fs (%d parts), total %.2fs", status, tQuiet, streamedIn - parts0, os.clock() - t0))
+	print(string.format("[CityLegends] map wait '%s'%s: parts quiet %.2fs (%d parts), total %.2fs", status, if jumped then " (jump)" else "", tQuiet or -1, streamedIn - parts0, os.clock() - t0))
 end
 
 UI.showLoading("Shaping the cars...")
@@ -300,7 +324,10 @@ phase("world")
 ---------------------------------------------------------------------
 -- Data
 ---------------------------------------------------------------------
-local data = GetData:InvokeServer()
+while not dataIn do
+	task.wait()
+end
+local data = dataAsked
 phase("data")
 if not data then
 	data = { Cash = Config.Economy.StartingCash, Owned = { "aurelia_s4" }, Selected = "aurelia_s4" }
@@ -648,6 +675,7 @@ local function tryAttach(model: Instance)
 		pendingAttach = false
 		attaching = true
 		local tArrived = os.clock()
+		local jumped = isJump(model:GetPivot().Position)
 		waitWhole(model)
 		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
 		if not okSkin then
@@ -668,7 +696,7 @@ local function tryAttach(model: Instance)
 		end
 		-- (the streets round the car finish loading behind the loading screen, the car held)
 		Driving.loadHold = true
-		waitForMap("Loading the streets...", true)
+		waitForMap("Loading the streets...", jumped)
 		Driving.loadHold = false
 		-- (the first car of a visit: you start on foot in the casino's garden)
 		if not arrivedYet then
@@ -1017,10 +1045,11 @@ local menuApi = {
 				UI.toast("Can't put the car there right now, try again", Config.Theme.Danger)
 				return result
 			end
+			local jumped = isJump(cf.Position)
 			Driving.teleport(cf)
 			Traffic.clearAround(cf.Position, 35)
 			Driving.loadHold = true
-			waitForMap("Loading the streets...", true)
+			waitForMap("Loading the streets...", jumped)
 			Driving.loadHold = false
 			UI.hideLoading()
 			UI.fade(false, 0.4)
@@ -1028,8 +1057,9 @@ local menuApi = {
 			UI.fade(true, 0.25)
 			task.wait(0.3)
 			if settle() and player.Character then
+				local jumped = isJump(cf.Position)
 				player.Character:PivotTo(cf + Vector3.new(0, 3, 0))
-				waitForMap("Loading the streets...", true)
+				waitForMap("Loading the streets...", jumped)
 				UI.hideLoading()
 			else
 				UI.toast("Can't put you there right now, try again", Config.Theme.Danger)
