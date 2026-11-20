@@ -24,8 +24,11 @@ local WALLS = {
 }
 
 local function world(u, v, y)
-	local p = O + AX * u + NE * v
-	return Vector3.new(p.X, y, p.Y)
+	-- u, v are projections (d:Dot(AX), d:Dot(NE)) and AX, NE are not quite perpendicular: invert the 2x2
+	local det = AX.X * NE.Y - AX.Y * NE.X
+	local x = (u * NE.Y - v * AX.Y) / det
+	local z = (v * AX.X - u * NE.X) / det
+	return Vector3.new(O.X + x, y, O.Y + z)
 end
 
 local function hall()
@@ -65,12 +68,12 @@ end
 local function panel(folder, name, u0, u1, w)
 	local uc = (u0 + u1) / 2
 	local vin = w.v0 + w.k * uc - w.side * 0.5
-	local along = (AX + NE * w.k).Unit
-	local inward = Vector2.new(-along.Y, along.X) -- perpendicular; flip to point into the hall
+	local at = world(uc, vin, Y0 + H / 2)
+	local d = world(uc + 1, vin + w.k, 0) - world(uc, vin, 0)
+	local inward = Vector2.new(-d.Z, d.X).Unit -- perpendicular to the wall; flip to point into the hall
 	if inward:Dot(NE) * w.side > 0 then
 		inward = -inward
 	end
-	local at = world(uc, vin, Y0 + H / 2)
 	local p = Instance.new("Part")
 	p.Name = name
 	p.Size = Vector3.new(u1 - u0, H, 0.2)
