@@ -38,6 +38,7 @@ export type Entry = {
 	main: boolean?,
 	rare: string?,
 	mph: number?,
+	trim: string?, -- a rare car's fixed trim (TrimSpeed)
 }
 
 TrafficMix.Entries = {
@@ -57,18 +58,22 @@ TrafficMix.Entries = {
 	{ id = "toyoka_lc300", kind = "F", len = 15.0, w = 2, paint = { WHITE, BLACK, PEARL } }, -- the few luxury SUVs
 	{ id = "lexis_lx700", kind = "F", len = 15.3, w = 1, paint = { BLACK, WHITE, PEARL } },
 	-- rare supercars (owner, 19 Nov): racers, capped per group (Rare)
-	{ id = "nisun_gtr", kind = "R", len = 14.1, w = 0, paint = { WHITE, SILVER, BLACK, rgb(200, 90, 20) }, rare = "gtr", mph = 150 },
-	{ id = "nisun_r34", kind = "R", len = 13.8, w = 0, paint = { rgb(40, 60, 150), SILVER, WHITE }, rare = "r34", mph = 130 },
-	{ id = "ferrara_599", kind = "R", len = 14.0, w = 0, paint = SUPER, rare = "ferrari", mph = 185 },
-	{ id = "ferrara_california", kind = "R", len = 13.9, w = 0, paint = SUPER, rare = "ferrari", mph = 170 },
-	{ id = "lambrini_huracan", kind = "R", len = 13.4, w = 0, paint = SUPER, rare = "lambo", mph = 185 },
-	{ id = "lambrini_lp570", kind = "R", len = 13.1, w = 0, paint = SUPER, rare = "lambo", mph = 190 },
-	{ id = "bugotti_chiron", kind = "R", len = 13.6, w = 0, paint = { rgb(20, 40, 90), BLACK, rgb(200, 200, 205) }, rare = "bugatti", mph = 220 },
+	-- (owner, 2026-11-21: "make all the rare car not have the same color or trim and set color,trim ... for every
+	-- server and game") one fixed colour and one fixed trim each, no two the same pair; the trim scales its top speed
+	-- (TrimSpeed)
+	{ id = "nisun_gtr", kind = "R", len = 14.1, w = 0, paint = { rgb(200, 90, 20) }, trim = "TOP", rare = "gtr", mph = 150 },
+	{ id = "nisun_r34", kind = "R", len = 13.8, w = 0, paint = { rgb(40, 60, 150) }, trim = "SPORT", rare = "r34", mph = 130 },
+	{ id = "ferrara_599", kind = "R", len = 14.0, w = 0, paint = { rgb(200, 14, 22) }, trim = "BASE", rare = "ferrari", mph = 185 },
+	{ id = "ferrara_california", kind = "R", len = 13.9, w = 0, paint = { rgb(240, 240, 240) }, trim = "SPORT", rare = "ferrari", mph = 170 },
+	{ id = "lambrini_huracan", kind = "R", len = 13.4, w = 0, paint = { rgb(120, 190, 40) }, trim = "TOP", rare = "lambo", mph = 185 },
+	{ id = "lambrini_lp570", kind = "R", len = 13.1, w = 0, paint = { rgb(240, 170, 10) }, trim = "SPORT", rare = "lambo", mph = 190 },
+	{ id = "bugotti_chiron", kind = "R", len = 13.6, w = 0, paint = { rgb(20, 20, 22) }, trim = "BASE", rare = "bugatti", mph = 220 },
 } :: { Entry }
 
 -- the most of each rare group on the road at once (counted over all live traffic: traffic is per client, so this is
 -- per player's view of the map)
 TrafficMix.Rare = { ferrari = 1, lambo = 1, gtr = 1, r34 = 1, bugatti = 1 } -- (owner, 2026-11-21: "i keep on spotting them"; was 2 / 2 / 10 / 3 / 1)
+TrafficMix.TrimSpeed = { BASE = 1, SPORT = 1.05, TOP = 1.1 } -- (a rare car's top speed by its trim: the dealer's trim steps)
 TrafficMix.RareChance = 0.01 -- (21 Nov: was 0.07) of each spawn, the share that tries a rare car (a group under its cap)
 -- (owner, 2026-11-21: "sometimes the ybs and taxis need to be fast") the share of YBS buses and Probox taxis that
 -- hurry, and their top speed in mph (everyday cars: Config.Traffic 24..54)

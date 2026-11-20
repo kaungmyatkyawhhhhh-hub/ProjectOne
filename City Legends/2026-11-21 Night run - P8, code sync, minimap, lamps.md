@@ -129,3 +129,16 @@ Owner: "also sometimes the ybs and taxis need to be fast". 30% of YBS buses and 
 - **Rare cars:** 3% slower per degree of turn (`TrafficMix.racerTurnSpeed`, `TurnSlowPerDeg` 0.03); a started lane slide finishes (eases back if blocked, 1 s hold); a racer that gets far away is removed and replaced by a normal roll.
 - **More traffic:** CarCount 28 -> 46, HighwayCars 18 -> 30; low-end stays 14.
 - Sync pack uploaded: Model asset 81044857236765 (`imports/sync/sync_21nov_b.rbxmx`: Config, Strings, TrafficMix, StartupGuard, UI, Traffic, Main). Script-pack uploads work again (last night's one, 130702191529633, also finished).
+
+## Rare cars: one fixed colour and trim each (repo; in the next sync pack)
+Owner: "make all the rare car not have the same color or trim and set color,trim like for example rarecar1 is red,sport trim and its like that for every server and game".
+| Rare car | Colour | Trim |
+|---|---|---|
+| nisun_gtr | orange (200, 90, 20) | TOP |
+| nisun_r34 (put away: old model) | blue (40, 60, 150) | SPORT |
+| ferrara_599 | red (200, 14, 22) | BASE |
+| ferrara_california | white (240, 240, 240) | SPORT |
+| lambrini_huracan | green (120, 190, 40) | TOP |
+| lambrini_lp570 | yellow (240, 170, 10) | SPORT |
+| bugotti_chiron | black (20, 20, 22) | BASE |
+Fixed in `TrafficMix.Entries`, so it is the same in every server and session. Trims are the same body in this game, so the trim shows as top speed: SPORT x1.05, TOP x1.1 (`TrafficMix.TrimSpeed`); attribute `RareTrim` on the car.
