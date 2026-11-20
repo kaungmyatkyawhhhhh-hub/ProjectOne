@@ -242,6 +242,17 @@ if __name__ == '__main__':
     if sys.argv[1] == 'test':
         test()
         sys.exit()
+    if sys.argv[1] == 'want':  # the Lua call that fetches just a job's pieces
+        for path in sys.argv[2:]:
+            job = json.load(open(path))
+            rows = []
+            for srcs in job['roles'].values():
+                for src in srcs:
+                    rows.append('{"%s"%s}' % (src['part'], ''.join(',%g' % v for v in src.get('in', []))))
+                    if 'drape' in src:
+                        rows.append('{"%s"}' % src['drape'])
+            print('return _G.LS.get("%s",{%s})' % (job['id'], ','.join(sorted(set(rows)))))
+        sys.exit()
     if sys.argv[1] == 'scan':
         scan(load(sys.argv[2:]))
         sys.exit()
