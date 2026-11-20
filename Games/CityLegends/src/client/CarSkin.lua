@@ -138,7 +138,7 @@ CarSkin.CLUSTER_RECT = {
 	bnw_m3_e92_cabin = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- the old E92 cabin's cluster hood (the F80's donor)
 	toyoka_chaser = { at = Vector3.new(-0.0082, 0.0490, -0.2638), face = Vector3.new(0.0081, 0.3344, 0.9424), w = 0.386, h = 0.092 }, -- the model's dash hood (tools/lambo/window_chaser.png), 2026-11-14
 	toyoka_supra_mk4 = { at = Vector3.new(-0.0002, 0.0143, -0.2554), face = Vector3.new(-0.0019, 0.2049, 0.9788), w = 0.380, h = 0.152 }, -- the model's hood over its three dials (tools/lambo/window_supra.png), 2026-11-14
-	nisun_r34 = { at = Vector3.new(-0.001, 0.0613, -0.1699), face = Vector3.new(0, 0.330, 0.944), w = 0.360, h = 0.160 }, -- the model's plain hood face (ray-cast from the driver's eye on build/r34/nisun_r34_lamps.blend), 2026-11-21
+	nisun_r34 = { at = Vector3.new(-0.001, 0.0613, -0.1736), face = Vector3.new(0, 0.330, 0.944), w = 0.360, h = 0.160 }, -- the model's plain hood face (ray-cast from the driver's eye on build/r34/nisun_r34_lamps.blend), 2026-11-21
 	toyoka_ae86 = { at = Vector3.new(-0.0012, 0.0328, -0.2576), face = Vector3.new(0.0066, 0.6233, 0.7819), w = 0.346, h = 0.116 }, -- the model's hood over its two dials (tools/lambo/window_ae86.png), 2026-11-14
 	ronin_cp9a_champ = { at = Vector3.new(0.0001, -0.0038, -0.3014), face = Vector3.new(-0.0004, 0.3746, 0.9272), w = 0.312, h = 0.128 }, -- the model's hood over its dials (tools/lambo/window_evo6c.png), 2026-11-14
 	ronin_cp9a = { at = Vector3.new(-0.0026, -0.0039, -0.3183), face = Vector3.new(-0.0000, 0.4475, 0.8943), w = 0.298, h = 0.118 }, -- the model's hood (tools/lambo/window_evo6.png), 2026-11-14
@@ -199,6 +199,12 @@ CarSkin.CLUSTER_RECT = {
 	-- the frame are cut away, tools/svj_cluster_mask.png). Was: over the screen picture only.
 	lambrini_svj = { at = Vector3.new(-0.0016, 0.0524, -0.1748), face = Vector3.new(0.0007, 0.1363, 0.9907), w = 0.336, h = 0.136 },
 	lambrini_svj63 = { at = Vector3.new(-0.0005, 0.0411, -0.229), face = Vector3.new(0, 0.11, 0.9939), w = 0.324, h = 0.132 },
+} :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
+
+-- a second screen on the dash, the same way as CLUSTER_RECT (from the steering wheel's middle, metres right / up /
+-- back): the BNR34's multi-function display on top of the dash (client/R34Mfd draws it), 2026-11-21
+CarSkin.MFD_RECT = {
+	nisun_r34 = { at = Vector3.new(-0.335, 0.1273, -0.2081), face = Vector3.new(0, 0.087, 0.996), w = 0.150, h = 0.052 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
@@ -2864,6 +2870,22 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 			if ownDesign then
 				model:SetAttribute("OwnCluster", true) -- the model's own gauge screens stay off
 			end
+		end
+		local mfd = CarSkin.MFD_RECT[id]
+		if mfd and imported.steer and not liteMode then
+			local m = CarBuilder.STUDS_PER_METRE
+			local face = mfd.face.Unit
+			local pos = imported.steer.mount.Position + mfd.at * m + face * 0.002 * m
+			local p = Instance.new("Part")
+			p.Name = "DashMfd"
+			p.Size = Vector3.new(mfd.w * m, mfd.h * m, 0.02)
+			p.Transparency = 1
+			p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow, p.Massless = false, false, false, false, true
+			p.CFrame = groundCF * CFrame.lookAt(pos, pos - face, (Vector3.yAxis - face * face.Y).Unit)
+			p.Parent = skin
+			local w = Instance.new("WeldConstraint")
+			w.Part0, w.Part1 = root, p
+			w.Parent = p
 		end
 		-- our own dial over each of the car's dials (owner: "create your own cluster and replace that
 		-- old cluster"): a solid face with the car's scale, numbers and a red needle, so the old needle

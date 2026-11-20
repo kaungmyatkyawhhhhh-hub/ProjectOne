@@ -47,6 +47,7 @@ local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-f
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
 local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
+local R34Mfd = require(script.Parent:WaitForChild("R34Mfd"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local CarLamps = require(script.Parent:WaitForChild("CarLamps"))
 local CameraLook = require(script.Parent:WaitForChild("CameraLook"))
@@ -232,6 +233,7 @@ type State = {
 	gaugeGear: TextLabel?,
 	gaugeBar: Frame?,
 	dashUpdate: ((number, string, number) -> ())?,
+	mfdUpdate: ((number, number, number, number, boolean) -> ())?, -- a second dash screen (client/R34Mfd)
 	-- imported cars: their steering wheel and our arms, posed every frame on this client
 	localSteer: { { part: BasePart, offset: CFrame } },
 	localArms: { LocalArm },
@@ -2369,6 +2371,7 @@ function Driving.attach(model: Model)
 		local okDash, upd = pcall(DashGauges.build, dashPanel)
 		dashUpdate = if okDash then upd else nil
 	end
+	local okMfd, mfdUpdate = pcall(R34Mfd.build, model)
 	local flames, flameParts, flameLight = buildFlames(model, root, spec)
 	-- shortcut: exhaust flames (pops, shifts, nitro) and their glow off for now (owner, 2026-11-21: "I will add them
 	-- back later"); delete these lines to bring them back
@@ -2496,6 +2499,7 @@ function Driving.attach(model: Model)
 		gaugeGear = gGear,
 		gaugeBar = gBar,
 		dashUpdate = dashUpdate,
+		mfdUpdate = if okMfd then mfdUpdate else nil,
 		localSteer = localSteer,
 		localArms = localArms,
 		partNeedles = partNeedles,
@@ -4196,6 +4200,9 @@ function Driving.render(dt: number)
 	end
 	if s.dashUpdate then
 		pcall(s.dashUpdate, mph, s.gear, s.rpm)
+	end
+	if s.mfdUpdate then
+		pcall(s.mfdUpdate, dt, mph, s.rpm, s.throttle, s.engineOn == true)
 	end
 	pcall(function()
 		if #s.partNeedles > 0 or #s.guiNeedles > 0 or #s.guiTexts > 0 or #s.dialNeedles > 0 then

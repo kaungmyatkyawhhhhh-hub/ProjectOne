@@ -3304,6 +3304,7 @@ DashGauges.tcOff = false
 -- (2026-11-07) CareClient sets these: the real odometer and fuel, the check engine light; Driving the cruise speed
 DashGauges.odoMiles = nil :: number?
 DashGauges.fuelShare = 0.8
+DashGauges.waterShare = nil :: number? -- the water temperature, C 0 .. H 1 (client/R34Mfd sets it; 0.5 when nil)
 DashGauges.checkEngine = 0
 DashGauges.cruiseMph = nil :: number?
 
