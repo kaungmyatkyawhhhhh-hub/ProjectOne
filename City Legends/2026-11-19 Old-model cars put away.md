@@ -37,3 +37,12 @@ Old cabin donors and a spare (4): bnw_m3_e92_cabin bentz_c63c ferrara_458s ferra
 
 ## Found on the way
 - **Studio was saved with the TEST save store** (`PlayerData.storeName = "CityLegends_test"`), left by the power cut. Must be `CityLegends_v1` before any publish.
+
+## 20 Nov: Sport and Top trims off sale
+
+Owner: "remove all the sport and top tier trims if i didnt add a model for them".
+
+- Every auto-made SPORT / TOP trim is now off sale (retired, the same way as the Countach and GT3 trims on 13 Nov). 22 trims left the shop: 75 -> 53 cars on sale.
+- Kept: the Origine Super Sport and Roadster Vitesse (they have their own models).
+- A player who already bought a trim keeps it and can still drive it.
+- Code: one rule in `Games/CityLegends/src/shared/Cars.lua` (the trim loop). Undo: put the line back to `if series.OldTrims then {} else nil`.
