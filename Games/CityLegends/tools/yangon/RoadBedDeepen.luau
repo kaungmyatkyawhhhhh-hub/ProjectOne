@@ -1,7 +1,7 @@
 --[[
 	RoadBedDeepen (21 Nov 2026). Studio, Edit. Only writes Workspace.Terrain (Air). Re-runnable.
 
-	WHY: the road meshes (Yangon1to1.Roads.Meshes.Cell_<x>x<z>) sat only 1 to 4 studs over the terrain bed carved
+	WHY (the theory this was built on; see RESULT below, it did not hold): the road meshes (Yangon1to1.Roads.Meshes.Cell_<x>x<z>) sat only 1 to 4 studs over the terrain bed carved
 	for them. Far from the camera Roblox draws terrain at a coarser LOD whose surface rises over the road, so far
 	roads showed as grass with only the kerbs left (owner: "the map loading is bugged"). Not a mesh loading fault:
 	the same mesh lifted 3 to 6 studs is visible. Fix: deepen the bed under the road surface.
@@ -17,9 +17,14 @@
 	task.spawn(R.run, { { 23, 29 } })     -- or R.run() for every cell in Roads.Meshes; poll R.S (also _G.RoadBedDeepen)
 	R.cell(23, 29, true)                  -- dry run: counts only
 
-	Chosen on the Sule test cell 23x29 (aerial from (35700,420,44700)): D = 6 showed the near roads but roads
-	900 studs off stayed narrow or hidden; D = 10 shows them at full width. MARGIN 1 column: close-ups at kerbs
-	and grass edges are identical before / after. A second run with the same D changes nothing.
+	RESULT (21 Nov, read before running again): NO PROVEN BENEFIT. In Edit the "grass over far roads" is the
+	terrain LOD still refining after a camera jump: hold the camera 25 s and the ORIGINAL terrain shows the roads
+	900 studs off. With the same jump + 4 s wait, original and D = 10 look the same (far roads hidden in both);
+	D = 40 (no terrain under the road at all) showed a little more but opened a see-through patch. Early shots
+	that seemed to show D = 10 beating D = 6 only differed in how long the camera had been there.
+	State of the place: every Roads.Meshes cell EXCEPT 23x29 was carved at D = 10, MARGIN 1 (4.23 M voxels);
+	23x29 was restored from its backup. Close-ups at a kerb and a grass edge were identical before / after.
+	A second run with the same D changes nothing.
 	shortcut: a re-run with a BIGGER D skips already-carved columns (they now fail MAX_GAP); raise MAX_GAP by the
 	old D for that run.
 ]]
