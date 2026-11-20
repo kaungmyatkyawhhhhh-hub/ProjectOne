@@ -123,3 +123,9 @@ Owner: "also sometimes the ybs and taxis need to be fast". 30% of YBS buses and 
 ## Owner, about 03:15
 - "do everything in known but not started": far roads, lag spikes, Sule Pagoda Road hole, P8 deck dip, remaining car lamps, Dala Bridge route, more real-Yangon look, the 4 road meshes. Studio work starts when the Play test ends.
 - **"dont make the land beyond dala"**: no ground, town or road is built on the Dala side. The bridge is made drivable only as far as its own structure; it ends at its Dala end.
+
+## Traffic + loading code ready (repo, commit 5a34bbd1; NOT in Studio yet: waits for the Play test to end)
+- **Skip can't leave a black screen:** during startup SKIP / the time limit keep the loading screen with "Still loading the city..."; the menu opens first, then loading hides; watchdog now runs from the start (new `src/shared/StartupGuard.lua`). Likeliest long wait found: `GetData:InvokeServer` with no timeout.
+- **Rare cars:** 3% slower per degree of turn (`TrafficMix.racerTurnSpeed`, `TurnSlowPerDeg` 0.03); a started lane slide finishes (eases back if blocked, 1 s hold); a racer that gets far away is removed and replaced by a normal roll.
+- **More traffic:** CarCount 28 -> 46, HighwayCars 18 -> 30; low-end stays 14.
+- Sync pack uploaded: Model asset 81044857236765 (`imports/sync/sync_21nov_b.rbxmx`: Config, Strings, TrafficMix, StartupGuard, UI, Traffic, Main). Script-pack uploads work again (last night's one, 130702191529633, also finished).
