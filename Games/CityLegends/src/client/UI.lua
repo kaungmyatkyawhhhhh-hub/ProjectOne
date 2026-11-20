@@ -1375,6 +1375,9 @@ local function buildSideButtons()
 			UI.onJobsButton()
 		end
 	end)
+	-- (owner, 2026-11-20: "only add the important buttons. 9 buttons is alot"): CARS, HOUSE and JOBS are tabs of
+	-- MENU, so their buttons are hidden: one column of Dealer, Shop, Menu, Goals, Chauffeur, Despawn
+	shopBtn.Visible, houseBtn.Visible, jobsBtn.Visible = false, false, false
 	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
 	chauffeurBtn.Activated:Connect(function()
 		closePanels()
