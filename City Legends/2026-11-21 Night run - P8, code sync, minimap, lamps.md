@@ -108,3 +108,14 @@ Owner: "also sometimes the ybs and taxis need to be fast". 30% of YBS buses and 
 - The carve is kept: one kerb spot looked identical before and after, and cars drive on the `RCol` boxes, not on terrain. Risk: where the collision boxes have a hole (known: Sule Pagoda Road), a car now drops 10 studs instead of 1-4.
 - **Still open: roads hidden by coarse far terrain while it refines** (worse when driving fast or on a slow device). Ideas not yet tried: lower the ground in a WIDE band around roads so even the coarse version stays under them (needs the grass-edge meshes to hide the dip), or keep the nearest road cells' terrain refined. Test on ONE cell with equal waiting times before touching the rest.
 - Lesson: an agent must finish the one-cell test, with equal wait times before each screenshot, before running a change on every cell.
+
+## Car lamp shells: 4 of 8 done (paused for the Play test)
+- Done with real cut shells (12 each: head core, head glass, front / rear indicator, reverse, tail): `bentlee_contgt`, `astin_dbx`, `bentz_sl65bs`, `bnw_330i_g20`. Added to CarLamps CARS / NO_DRL / TINT (repo = Studio, 19,448 chars). Backups in `ServerStorage.LampBackup_21Nov`.
+- Not done: `bentz_sls` (shells uploaded, asset 118050194412654, not applied), `ferrara_599`, `mclaran_12c`, `nisun_350z`, the 12 tail-shell cars, 5 re-cuts.
+- Method: `tools/lamps/lampfx_studio.py` + `tools/lamps/jobs_studio/<id>.json` -> .glb in `imports/sync/lamp_shells/` (x and z negated) -> upload as Model to the group -> LoadAsset. The Studio helper lives only in `_G.LS` and is lost on a Studio restart (not in the repo yet).
+- Not real-life yet: no third brake lamp role, DBX intake ring is indicator only, 330i fog lamps unlit. Nothing seen at night in Play.
+
+## Owner orders at about 03:00 (with the traffic code agent)
+- "fix everything".
+- Rare cars: "slow down on turn every 1 degree = 3% slower ... 10 degrees = 30% slower so 100 mph to 70 mph".
+- "put more traffic, it dont feel like yangon rn cuz it needs more traffic": +60-70% on normal devices, low-end numbers unchanged.
