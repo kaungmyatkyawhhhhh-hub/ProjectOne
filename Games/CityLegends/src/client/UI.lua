@@ -17,6 +17,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
@@ -1744,7 +1745,7 @@ function UI.init()
 
 	refreshDaily(true)
 	local dailyTick = 0
-	RunService.RenderStepped:Connect(function(dt)
+	Frame.Connect(function(dt)
 		if displayedCash ~= targetCash then
 			local diff = targetCash - displayedCash
 			local step = math.max(1, math.abs(diff) * math.min(1, dt * 8))
@@ -1916,7 +1917,19 @@ function UI.fade(toBlack: boolean, duration: number)
 	end
 	local f = fadeFrame :: Frame
 	local t = tween(f, duration, { BackgroundTransparency = if toBlack then 0 else 1 }, Enum.EasingStyle.Sine)
-	t.Completed:Wait()
+	-- (owner, 2026-11-20: a locked / minimised PC gives 0 render frames) never wait on the tween alone: if it
+	-- hasn't ended 0.25 s after its time, go on (Main.client's startup and every car spawn wait here)
+	local done = false
+	t.Completed:Once(function()
+		done = true
+	end)
+	local by = os.clock() + duration + 0.25
+	while not done and os.clock() < by do
+		task.wait()
+	end
+	if not done then
+		f.BackgroundTransparency = if toBlack then 0 else 1
+	end
 end
 
 local barTop: Frame? = nil
@@ -3261,7 +3274,7 @@ function UI.setCombo(combo: number)
 	tween(comboLabel, 0.25, { TextSize = 28 }, Enum.EasingStyle.Back)
 end
 
-RunService.RenderStepped:Connect(function()
+Frame.Connect(function()
 	if comboFrame and comboFrame.Visible then
 		local left = comboExpire - os.clock()
 		if left <= 0 then

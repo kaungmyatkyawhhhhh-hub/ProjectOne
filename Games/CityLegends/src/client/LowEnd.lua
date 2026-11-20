@@ -117,6 +117,9 @@ local function autoWatch()
 	end)
 	task.wait(25)
 	conn:Disconnect()
+	if frames == 0 then
+		return -- (2026-11-20) a locked / minimised PC draws nothing: that is not a slow device
+	end
 	if LowEnd.mode ~= "Auto" or (player and player:GetAttribute("TestLowEnd") ~= nil) or workspace:GetAttribute("TestLowEnd") ~= nil then
 		return
 	end

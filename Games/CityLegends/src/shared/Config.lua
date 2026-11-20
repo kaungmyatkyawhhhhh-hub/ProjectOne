@@ -2523,7 +2523,7 @@ Config.Look = {
 Config.Minimap = {
 	Enabled = true,
 	-- (2026-11-03, the drawn map: a little wider, so the roads read as streets, not one big band)
-	ZoomNear = 0.32, -- pixels per stud when slow (about 320 studs across the radius)
+	ZoomNear = 0.24, -- px per stud when slow (20 Nov, owner: zoom out a bit; was 0.32)
 	ZoomFar = 0.09, -- ...and at FarMph and above (2026-11-19: 0.12 -> 0.09, owner: zoom out further)
 	FarMph = 150,
 }

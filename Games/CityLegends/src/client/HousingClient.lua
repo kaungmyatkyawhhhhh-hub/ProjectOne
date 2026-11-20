@@ -22,6 +22,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
 local HouseBuilder = require(Shared:WaitForChild("HouseBuilder"))
 local UI = require(script.Parent:WaitForChild("UI"))
+local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 local Driving = require(script.Parent:WaitForChild("Driving"))
 
 local HousingClient = {}
@@ -811,7 +812,7 @@ local function moveGate(part: BasePart)
 	local time = math.max(0.05, GATE_TIME * math.abs(to - from))
 	local t0 = os.clock()
 	local conn: RBXScriptConnection
-	conn = RunService.RenderStepped:Connect(function()
+	conn = Frame.Connect(function()
 		if gateRun[part] ~= run or not part.Parent then
 			conn:Disconnect()
 			return
