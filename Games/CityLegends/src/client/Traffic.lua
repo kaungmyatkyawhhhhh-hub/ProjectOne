@@ -627,6 +627,25 @@ function Traffic.start(count: number?, focus: (() -> Vector3?)?)
 	end
 end
 
+-- fewer cars once a phone is found to be low-end after the start: the farthest go first (same removal as a far racer)
+-- shortcut: never adds cars back if the phone leaves low-end; add a grow step if players ask
+function Traffic.trim(count: number)
+	local keep = count + (if Config.monacoOnly() then 0 else math.floor(T.HighwayCars * count / T.CarCount + 0.5))
+	while #Traffic.cars > keep do
+		local far, fd = 1, -1
+		for i, npc in Traffic.cars do
+			local d = (npc :: any).camDist or 0
+			if d > fd then
+				far, fd = i, d
+			end
+		end
+		local npc = Traffic.cars[far]
+		Traffic.cars[far] = Traffic.cars[#Traffic.cars]
+		table.remove(Traffic.cars)
+		npc.model:Destroy()
+	end
+end
+
 function Traffic.stop()
 	running = false
 	for _, npc in Traffic.cars do

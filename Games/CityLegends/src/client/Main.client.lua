@@ -481,7 +481,14 @@ end
 startStep("Traffic", function()
 	-- (owner, 2026-11-21: "put more traffic": CarCount 28 -> 46; the low-end 0.5 keeps its 14 cars, TrafficMix.LowEndCars)
 	local q = WorldFx.qualityScale()
-	Traffic.start(if q <= 0.5 then require(Shared:WaitForChild("TrafficMix")).LowEndCars else math.floor(Config.Traffic.CarCount * math.min(q, 1)), focusPoint)
+	local lowCars = require(Shared:WaitForChild("TrafficMix")).LowEndCars
+	Traffic.start(if q <= 0.5 then lowCars else math.floor(Config.Traffic.CarCount * math.min(q, 1)), focusPoint)
+	-- a phone found low-end after the start drops to the low-end count too (Play test 21 Nov: it kept 46)
+	require(script.Parent:WaitForChild("LowEnd")).changed(function(on)
+		if on then
+			Traffic.trim(lowCars)
+		end
+	end)
 end)
 startStep("Police", Police.init)
 startStep("Bank", BankClient.init)
