@@ -192,3 +192,12 @@ Operation d817aa1d-6554-4de8-9641-558ab847b651 (`imports/sync/sync_21nov_g.rbxmx
 ## Play test of the new code (21 Nov, late) - all PASS
 - Startup no errors; rare car nose: max 7 deg behind a slower car (was ~45 deg x3 a second), lane changes 15 deg; rare colours / trims / one of each: right; 46 city cars; no exhaust flames; water rescue (Inya Lake) back on the road in 1.1 s facing along it, toast shown; side buttons MENU, SHOP, CARS, DEALER; menu cards there. Store back on CityLegends_v1, 0 test-store scripts.
 - Found: a phone switched to low-end AFTER the start kept 46 cars. Fixed: `Traffic.trim(n)` drops the farthest cars to the low-end count when LowEnd turns on (Main.client). Sync pack I (asset 95786305296234), checked in Studio, saved. Not Play-tested (small change, same removal as a far racer). Does not add cars back if the phone leaves low-end.
+
+## Order changed (owner, late 21 Nov): road holes, far roads, car lamps, real-Yangon look, Dala Bridge LAST
+Owner also: "never ask me any questions again" (autopilot; say what I will and won't do instead).
+
+### Dala Bridge survey (paused, nothing changed yet)
+- New bridge collision (`Landmarks.DalaBridge.Collide_main/west/east`): steps <= 0.2 studs; GAPS between box ends on bends: 1.4-3.2 studs at z 48428-48677, 1.0-2.5 at z 49872-50028 (need filler boxes). Ramps not checked.
+- Old deck under it: 21-wide D boxes at y 40.2 (W 7x3x8 at 38.2 on the centre, 1x6x8 at 42.8 at +-10), flat z 44160-47840, down to ~15 at z 48250. 2,842 RCol within 25 studs, many belong to Strand Road area ground roads (z 44900-45700): select by lane 828's line + height, not distance. Keep north of z ~44236 (Phone Gyi junction). Old parapets at x 31565 / 31584, z 44230-44300 poke through the new deck.
+- Road meshes: Cell_20x30 = old deck only (whole cell can go); cells 20x28, 20x29, 20x31 mix it with other roads: need a re-bake without "Yangon-Dala Bridge".
+- Lane 828 "Yangon-Dala Bridge" (YangonLanes1to1_18.lua), one northbound lane flat at 40.2 over the old deck = NPCs on air. Links {832,59->828}, {828,90->526}, {846,33->828,55}, {828,53->848}. Phone Gyi Street lanes 835/836 stay.
