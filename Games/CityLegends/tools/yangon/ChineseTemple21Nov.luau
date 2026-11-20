@@ -6,7 +6,7 @@
 	pavilion on that roof (the shell is not touched): a green glazed tile skirt with a red fascia round the roof edge,
 	the yellow lattice balustrade, the white pavilion with octagonal green windows and a gold name plaque, two tiers of
 	green tile roof with red eaves and upturned red corners.
-	~40 parts, all CanCollide / CanQuery off (roof dressing nobody drives on). Faces butt or cross at angles: no coplanar
+	32 parts, all CanCollide / CanQuery off (roof dressing nobody drives on). Faces butt or cross at angles: no coplanar
 	visible faces. M.build() -> Workspace.Yangon1to1.Landmarks.IrlBuild21Nov.ChineseTempleHanthawaddy; M.undo().
 ]]
 local M = {}
@@ -60,7 +60,7 @@ local function tier(y, hx, hz, rise, eave)
 	part("EaveRed", "Part", CFrame.new(0, y - 0.3, 0), Vector3.new(2 * (hx + eave) - 1.6, 0.6, 2 * (hz + eave) - 1.6), RED)
 	for _, sign in { 1, -1 } do
 		local cf = CFrame.new(0, y + 1.2 + rise / 2, sign * (hz + eave - 1) / 2)
-			* CFrame.Angles(0, if sign > 0 then math.pi else 0, 0)
+			* CFrame.Angles(0, if sign > 0 then 0 else math.pi, 0)
 		part("Roof", "WedgePart", cf, Vector3.new(2 * (hx + eave) - 2, rise, hz + eave - 1), GREEN)
 	end
 	part("Ridge", "Part", CFrame.new(0, y + 1.2 + rise + 0.6, 0), Vector3.new(2 * (hx + eave) - 2, 1.2, 1.6), RED)

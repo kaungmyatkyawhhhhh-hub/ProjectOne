@@ -14,6 +14,15 @@
 	  * JunctionCity_NameWall 64 x 8 (cream, ground + 13) and JunctionCity_RoofSign 180 x 22 (y 268) on the north
 	    face (z ~43482, facing Bogyoke Aung San Rd)
 	  * TheCentral_Letters 58 x 10 + plinth at (34978, 25265) on the grass east of Kabar Aye, facing the road
+	Real brand signs (owner, 21 Nov: the managers of CB Bank, Melia, Sedona agreed):
+	  * CBBank_RoofSign: transparent Part 60 x 26 x 0.4 on Myanmar Centre tower B's roof (34716, 392, 27488), facing -X;
+	    SurfaceGuis Front + Back (PPS 10, LightInfluence 0, Brightness 1.8): rainbow arc (clipped ring Frame, UIStroke 22
+	    with a rainbow UIGradient) over yellow "CB BANK" (GothamSSm Heavy, 255, 214, 20), as the real one (0799_85s)
+	  * CBBank_RoofSign_Sule: a clone on the tower by Sule Pagoda Rd (shell Cell_20_24.KW6, roof 269.9), centre
+	    (36196, 283.5, 43544), facing north to the truss bridge (0804_56s)
+	  * Melia: no new part; Landmarks.MyanmarCentre.Meshes.RDL (the existing MELIA YANGON letters) re-coloured gold
+	    (226, 182, 96), NightColor (255, 214, 130); old colour in attribute Color_before_21Nov
+	  * Sedona: the existing white glowing SEDONA (Landmarks.Sedona WLT) already matches 0799_43s: unchanged
 ]]
 local CS = game:GetService("CollectionService")
 local M = {}
