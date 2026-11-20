@@ -1015,7 +1015,7 @@ function Minimap.start()
 		loadNear(fullTiles, center, -1, -1) -- (the sharp tiles off while it is shut)
 	end
 	fClose.Activated:Connect(closeFull)
-	backdrop.Activated:Connect(closeFull)
+	-- (owner, 2026-11-21: "make the expanded map only close when i the X button": a drag that ended on the backdrop shut it)
 	fPlus.Activated:Connect(function()
 		zoomBy(1.4)
 	end)

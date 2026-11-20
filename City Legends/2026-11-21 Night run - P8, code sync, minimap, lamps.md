@@ -72,3 +72,14 @@ CarLamps, Driving, TailLights are checksum-identical to the repo; CarSkin got on
 ## 02:10 usage limit hit; Studio changed
 - Three agents stopped mid-work at the usage limit: landmarks (City Hall, Sule, roundabout, fence), Dala Bridge, car lamp shells. Their Studio work up to then is in the open place only if it was still open; last save is v1656.
 - After the reset, the only Studio open was "rongstrix's Place: 11202026_2" (placeId 115768373987676), not City Legends. Nothing was done in it (rule: never touch another game's Studio).
+
+## After the owner published (about 03:00)
+- Owner published the place himself; live = the state with the builders' half-finished work (City Hall, Sule, fence, roundabout).
+- **"Stuck in black screen after skipping loading"**: not a crash. All scripts compile; a Studio Play test loads the menu with no script errors; the owner got into the game a few minutes later. Skipping while the big map is still loading leaves nothing ready behind the loading screen.
+- **"Map loading is bugged, sometimes it doesn't fully load, lag spikes"** (screenshot: kerbs there, asphalt missing; client memory 1.8 GB):
+  - Roblox's mesh servers were failing tonight (HTTP 502, "Failed to load mesh asset"): 112 road meshes would not load at 01:30, 108 of the same ones loaded fine at 03:10. A mesh that fails to download is simply not drawn.
+  - Road cells are 1536-stud Atomic models with about 9 big meshes each, so a whole cell arrives at once = a spike. Client memory is high (1.8 GB) with 7 districts in.
+  - Not fixed yet. Needs a measured pass (memory by type, streaming radius, cell size).
+- **Expanded map closes while dragging**: fixed (owner: "make the expanded map only close when i the X button"). The click-outside-to-close on the backdrop is gone; only the X closes it. Repo + Studio.
+- Road mesh collision strip: 2,103 of 2,107 done now. Leftover test stages `_LampStage`, `_WheelStage` deleted. Saved **v1662** (the map-close fix was made after this save).
+- Test note: the Studio account tonight is "rongstrix", not the owner's; owner's save is `p_848360565` (L64, lexis_lfa).
