@@ -422,7 +422,9 @@ for _, series in allSeries do
 	end
 	local base = Cars.ById[series.TrimBase or series.Ids[1]]
 	local at = table.find(series.Ids, base.Id) :: number -- (the trims go right after their base car)
-	local oldIds: { string }? = if series.OldTrims then {} else nil
+	-- (owner, 2026-11-20: "remove all the sport and top tier trims if i didnt add a model for them": only the
+	-- Origine's two trims have a model of their own, below; every other line's trims go the OldTrims way)
+	local oldIds: { string }? = if series.OldTrims or base.Id ~= "bugotti_veyron" then {} else nil
 	if not oldIds then
 		base.Trim = "BASE"
 	end
@@ -445,7 +447,7 @@ for _, series in allSeries do
 			Model = base.Model or base.Id,
 			Trim = step.Trim,
 			BaseId = base.Id,
-			Retired = base.Retired or series.OldTrims,
+			Retired = base.Retired or oldIds ~= nil,
 			Pending = base.Pending,
 		}
 		table.insert(list, spec)
