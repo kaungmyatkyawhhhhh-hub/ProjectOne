@@ -147,3 +147,12 @@ Fixed in `TrafficMix.Entries`, so it is the same in every server and session. Tr
 Owner: "make it so that rare cars can race with each other", then "no dont spawn as pairs i mean like when they meet each other coincidencely".
 - No paired spawns. Two racers going the same way within 120 studs (`TrafficMix.Race.MeetGap`) become a race: the one behind takes the same turns, gets a x1.08 slipstream within 90 studs, the leader eases to x0.92 when 70+ studs ahead (and is capped at the slower rival's top speed), passes only through open strips, ends when split by 900 studs. A third can join.
 - Tests `racer_race_test` 14/14. Not watched in Play. With caps of 1 and a 1% chance, meetings are only now and then.
+
+## Rare cars: U-turn to start a race (repo; not in Studio, not watched in Play)
+Owner: "if two rare cars happen to meet, the faster car will go around and make an u turn and go near the other rare car and they will start racing".
+- Any two racers within 250 studs (12 studs of height) "meet". Same way on the same road: race at once. Otherwise the faster one makes a driven U-turn arc (10 mph, 2.5 s) onto the opposite lane and chases at x1.15; the slower one drops to x0.4 so it can be caught (0.85 was too little: the turn takes about 8 s); give up after 25 s, 30 s cooldown.
+- Opposite lane is found by place (nearest lane heading the other way within 48 studs): the lane graph has no such link. No U-turn on one-way roads, decks, wide medians, turn pieces, or when a kerb / rail is between the lanes; then only junction steering leads it back. Crossing roads never U-turn.
+- Known gap: a car stuck mid-arc has no timeout. Tests: racer_race_test 24, racer_pass_test pass.
+
+## Water rescue (agent working, repo only)
+Owner: "when a car goes in water, they get teleported back to the nearest road near the water, facing the roads direction".

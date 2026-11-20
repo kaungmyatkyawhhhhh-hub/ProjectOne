@@ -204,6 +204,19 @@ TrafficMix.Race = {
 	TowGap = 90,
 	Ease = 0.92, -- top speed x this for the one in front, more than LeadGap ahead (so the other catches up)
 	LeadGap = 70,
+	-- (owner, 2026-11-21: "if two rare cars happen to meet, the faster car will go around and make an u turn and go
+	-- near the other rare car and they will start racing") two racers that see each other, whatever their ways: the
+	-- faster one turns round and chases, the other waits for it
+	SeeGap = 250, -- studs apart (straight line) at which two racers meet
+	SeeHeight = 12, -- studs of height apart at most (a flyover over a street is no meeting)
+	Chase = 1.15, -- the chaser's top speed x this until it is within MeetGap on the other's road
+	Wait = 0.4, -- the chased car's top speed x this (the chaser brakes, turns and gets back up to speed: 8 s or more)
+	ChaseTime = 25, -- s before the chase is given up (or beyond Split); then both drive on alone
+	Cooldown = 30, -- s before either starts another chase
+	UTurnMph = 10, -- the U-turn's speed at most
+	UTurnTime = 2.5, -- s the half circle takes at least
+	UTurnWidth = 48, -- studs sideways at most to the oncoming lane it turns into
+	UTurnTry = 10, -- s it looks for a clear U-turn; after that only junction turns lead it back
 }
 
 -- do two racers meet? `along` / `side` = the other car's place ahead (+) / beside this one in studs, `dot` = the
@@ -211,6 +224,24 @@ TrafficMix.Race = {
 function TrafficMix.raceMeets(along: number, side: number, dot: number): boolean
 	local R = TrafficMix.Race
 	return dot > 0.7 and math.abs(along) <= R.MeetGap and math.abs(side) <= R.MeetSide
+end
+
+-- do two racers see each other (any directions)? `dist` = studs apart, `dy` = their height difference
+function TrafficMix.raceSees(dist: number, dy: number): boolean
+	return dist <= TrafficMix.Race.SeeGap and math.abs(dy) <= TrafficMix.Race.SeeHeight
+end
+
+-- which of the two turns round and chases: the faster one (top speed with its trim); the same speed: the one
+-- further behind the other along the other's heading
+function TrafficMix.raceTurns(myTop: number, otherTop: number, myBehind: number, otherBehind: number): boolean
+	return myTop > otherTop or (myTop == otherTop and myBehind > otherBehind)
+end
+
+-- a U-turn's place and heading at t = 0..1: a half circle of radius r from `p0` heading `fwd` (t = 0) round to the
+-- oncoming lane 2 r to the `side`, heading back (t = 1). fwd and side are flat unit vectors square to each other.
+function TrafficMix.uTurnPose(p0: Vector3, fwd: Vector3, side: Vector3, r: number, t: number): (Vector3, Vector3)
+	local a = math.pi * math.clamp(t, 0, 1)
+	return p0 + side * (r * (1 - math.cos(a))) + fwd * (r * math.sin(a)), fwd * math.cos(a) + side * math.sin(a)
 end
 
 -- a race car's top speed factor from how far it is ahead of its rival along the road (studs, negative = behind)
