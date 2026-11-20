@@ -34,3 +34,11 @@ Source: `C:\Users\kaung\Downloads\IrlReferences\` (29 videos + photos, 1.6 GB, l
 15. Chinese temple by the flyover, once located (0800_1s).
 
 "Game has none" was judged from the repo only, not checked in Studio.
+
+## Owner decision (21 Nov): the videos overrule the old rules
+"the videos overrule the old rules, use yellow lines on the ones that uses yellow in real life, not all"
+- Lines: double yellow centre line between opposing traffic, yellow hatching and chevrons; lane dividers stay white. (Game CLAUDE.md rule updated.)
+- By the same decision the two other clashes follow the videos: amber lamps on the side streets that have them in real life (main roads stay white LED), and the LED screen at the Myanmar Plaza corner.
+
+## Flyover feet (owner, 21 Nov, with a game screenshot and a real photo)
+"on almost every overhead road, its like this. its suppose to be like the 2nd pic": in the game the ramp rises in the middle with the ground lanes kerbed off, a stray box and a pointed island; in real life the road forks, the ground road runs on beside the ramp at full width, and yellow barriers mark the nose. Generator fix in progress; every flyover-foot cell then needs a rebuild and re-bake.
