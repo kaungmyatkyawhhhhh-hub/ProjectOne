@@ -317,7 +317,7 @@ for o, faces, M in cards:
 
 # hidden or tiny-detail meshes are far too heavy (wheel bolts 52k faces each, calipers 34k, the grille mesh
 # 66k): thin them here, so auto_car's even thinning keeps the body and cabin nearly whole
-TARGET = {"r34_rim": 7000, "r34_caliper": 2500, "r34_disc": 1800, "r34_grill": 6000, "r34_black": 3000, "r34_rubber": 3000, "r34_carbon": 6000}
+TARGET = {"r34_rim": 7000, "r34_caliper": 2500, "r34_disc": 1800, "r34_grill": 14000, "r34_black": 3000, "r34_rubber": 3000, "r34_carbon": 6000}
 for o in [o for o in bpy.data.objects if o.type == "MESH"]:
     me = o.data
     if len(me.materials) != 1 or me.materials[0].name not in TARGET:
@@ -337,6 +337,13 @@ for o in [o for o in bpy.data.objects if o.type == "MESH"]:
     bpy.context.view_layer.objects.active = o
     bpy.ops.object.modifier_apply(modifier=mod.name)
     log["thin " + o.name] = (n, len(me.polygons))
+
+# dark backing plates behind the upper and lower grilles: a thinned mesh grille shows the paint behind it
+for name, (x0, x1, y, z0, z1) in {"GrilleBack_Upper": (-0.68, 0.68, -4.505, 1.03, 1.28), "GrilleBack_Lower": (-0.67, 0.67, -4.455, 0.49, 0.91)}.items():
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([(x0, y, z0), (x1, y, z0), (x1, y, z1), (x0, y, z1)], [], [(0, 1, 2, 3)])  # faces -Y (forwards)
+    me.materials.append(mat("r34_black"))
+    bpy.context.scene.collection.objects.link(bpy.data.objects.new(name, me))
 
 for k in sorted(log):
     print("role", k, log[k])

@@ -368,7 +368,10 @@ function JobsClient.init()
 			end
 		end)
 	end
-	setState(invoke("state"))
+	-- (21 Nov, "make the loading screen load fast") asked in the background: this round trip held the start 0.4-0.8 s
+	task.spawn(function()
+		setState(invoke("state"))
+	end)
 	RunService.Heartbeat:Connect(update)
 	-- (19 Nov) Roblox kicks after 20 idle minutes: a player on duty at a post is rejoined first (the
 	-- server decides and teleports; not officially approved by Roblox: watch moderation)

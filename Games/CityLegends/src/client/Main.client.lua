@@ -320,6 +320,9 @@ phase("worldfx")
 Weather.init() -- rain cycle (rare showers, starts clear), wet roads, mist, rain sound
 -- (the day / night cycle runs since the loading screen: morning, day, sunset, night)
 phase("world")
+-- (21 Nov) the map round the menu settles while the profile is still on its way (it used to wait after the steps)
+waitForMap("Loading the map...")
+phase("map")
 
 ---------------------------------------------------------------------
 -- Data
@@ -624,8 +627,6 @@ startStep("Care", function()
 end)
 print("[CityLegends] startup: " .. table.concat(stepTimes, ", "))
 phase("steps")
-waitForMap("Loading the map...")
-phase("map")
 -- (owner, 2026-11-21: the loading screen now stays up until the main menu opens, at the end of this script)
 
 ---------------------------------------------------------------------
