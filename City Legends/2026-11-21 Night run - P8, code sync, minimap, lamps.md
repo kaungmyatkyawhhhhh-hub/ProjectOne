@@ -201,3 +201,8 @@ Owner also: "never ask me any questions again" (autopilot; say what I will and w
 - Old deck under it: 21-wide D boxes at y 40.2 (W 7x3x8 at 38.2 on the centre, 1x6x8 at 42.8 at +-10), flat z 44160-47840, down to ~15 at z 48250. 2,842 RCol within 25 studs, many belong to Strand Road area ground roads (z 44900-45700): select by lane 828's line + height, not distance. Keep north of z ~44236 (Phone Gyi junction). Old parapets at x 31565 / 31584, z 44230-44300 poke through the new deck.
 - Road meshes: Cell_20x30 = old deck only (whole cell can go); cells 20x28, 20x29, 20x31 mix it with other roads: need a re-bake without "Yangon-Dala Bridge".
 - Lane 828 "Yangon-Dala Bridge" (YangonLanes1to1_18.lua), one northbound lane flat at 40.2 over the old deck = NPCs on air. Links {832,59->828}, {828,90->526}, {846,33->828,55}, {828,53->848}. Phone Gyi Street lanes 835/836 stay.
+
+## Owner decisions, 21 Nov (late)
+- **Real brands allowed: CB Bank, Meliá, Sedona.** Owner: "i already talked to the managers and they accept it ... they said theyre happy to be in the game and allow me to let their brands be in the game since its like free sponsor too". Their real signs may be shown.
+- Do now: truss bridge, YCC interior (only from real photos online), Chinese temple, those three brand signs.
+- New R34 model: Sketchfab "Nissan GTR R34 Skyline | GT-R Skyline" by Pooya_dh (uid 5eed440cfd094c5a8fdc9929eb43ab02, CC Attribution: credit needed, commercial OK). The owner's first pick (2005 Nismo Z-Tune by Ddiaz Design) was refused: CC BY-NC-SA (no commercial use) and "based on a CSR2 3d model" (a game rip).
