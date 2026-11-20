@@ -42,3 +42,8 @@ Source: `C:\Users\kaung\Downloads\IrlReferences\` (29 videos + photos, 1.6 GB, l
 
 ## Flyover feet (owner, 21 Nov, with a game screenshot and a real photo)
 "on almost every overhead road, its like this. its suppose to be like the 2nd pic": in the game the ramp rises in the middle with the ground lanes kerbed off, a stray box and a pointed island; in real life the road forks, the ground road runs on beside the ramp at full width, and yellow barriers mark the nose. Generator fix in progress; every flyover-foot cell then needs a rebuild and re-bake.
+
+## More owner orders (21 Nov, night)
+- "there is sule roundabout too": Sule roundabout night look added to the build list.
+- "the city hall needs fix too" (screenshot): tower roofs are plain white boxes, one tower floats off the building, flat brown roof, cyan trim. The model itself is being fixed (backup `ServerStorage.CityHall_before_21Nov`), then lit.
+- "the dala bridge needs to be 1:1 exactly the same as the real life": Yangon-Dala Bridge being built from real engineering numbers + the owner's videos (0807, 0808, 0810, 0811) into `Workspace.Yangon1to1.Landmarks.DalaBridge`; script `tools/yangon/DalaBridge.luau`. It lies outside every district, so joining it to the road network is a separate step.
