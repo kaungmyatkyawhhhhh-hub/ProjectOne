@@ -1,1 +1,1 @@
-{"id": "lambrini_huracan", "note": "tail only: the Y strip, between Rev and TurnR", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.5, 0.7, 0.7, 0.85, 1.7, 2.0], "box": [0.53, 0.7, -9, 9, -9, 9], "off": 0.006}]}}
+{"id": "lambrini_huracan", "note": "tail only: the Y strip; 6 mm proud, under Rev / TurnR (15 mm)", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.5, 0.7, 0.7, 0.85, 1.7, 2.0], "off": 0.006}]}}
