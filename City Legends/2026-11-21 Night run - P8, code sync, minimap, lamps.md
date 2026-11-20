@@ -163,3 +163,7 @@ Owner: "when a car goes in water, they get teleported back to the nearest road n
 - U-turn gap closed: a racer blocked mid-arc for 4 s backs out the way it came.
 - **Sync pack E** = operation 5ad3525f-9ae3-43a1-aa9c-d77f1fd7cd7c (`imports/sync/sync_21nov_e.rbxmx`, 10 scripts incl. new StartupGuard + WaterRescue modules; all compile). To install: insert into `ServerStorage.SyncHolding`, run `ClaudeTools.SyncScripts`, compare lengths (Config 198823, Strings 117127, TrafficMix 15299, StartupGuard 1048, WaterRescue 3546, UI 134606, Traffic 71358, TrafficBodies 9886, Driving 186300, Main 42120).
 - Owner: real-Yangon look (item 13) goes LAST. Studio jobs run in parallel as soon as the Play test ends.
+
+## Side button order (repo; sync pack F replaces E)
+Owner: "put menu at first, shop at second, cars at 3rd, dealer at 4th, goals at 5th, chaffuer at 6th". LayoutOrder: MENU 1, SHOP 2, CARS 3, DEALER 4, GOALS 5, CHAUFFEUR 6 (Market 7 when enabled; Despawn, House, Jobs stay hidden).
+Trailer + water rescue: no code needed. `TrailerClient.follow` already puts a hitched trailer straight behind the car after any jump (built for fast travel).

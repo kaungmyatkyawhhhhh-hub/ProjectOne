@@ -1303,13 +1303,14 @@ local function buildSideButtons()
 	end
 
 	-- (owner, 2026-11-02: SETTINGS became MENU, the big-tile main menu; settings live in it)
+	-- (owner, 2026-11-21: "put menu at first, shop at second, cars at 3rd, dealer at 4th, goals at 5th, chaffuer at 6th")
 	local settingsBtn = sideButton("menu", "MENU", 1)
 	settingsBtn.Name = "MenuButton"
 	-- (owner, 2026-10-23: the SHOP became CARS, your own cars; new ones are sold at the dealership)
-	local shopBtn = sideButton("car", "CARS", 2)
+	local shopBtn = sideButton("car", "CARS", 3)
 	-- (owner, 2026-10-30: GIFTS became GOALS: Legends Path, daily tasks and the daily streak)
-	local giftBtn = sideButton("flag", "GOALS", 3)
-	local marketBtn = sideButton("chart", "MARKET", 4)
+	local giftBtn = sideButton("flag", "GOALS", 5)
+	local marketBtn = sideButton("chart", "MARKET", 7)
 	marketBtn.Visible = Config.Market.Enabled == true
 	marketBtn.Activated:Connect(function()
 		closePanels()
@@ -1318,7 +1319,7 @@ local function buildSideButtons()
 		end
 	end)
 	-- owner (2026-10-23): "add a function to despawn car"
-	local despawnBtn = sideButton("despawn", "DESPAWN", 6)
+	local despawnBtn = sideButton("despawn", "DESPAWN", 8)
 	despawnBtn.Visible = false -- (owner, 2026-11-21: "remove despawn and replace it with cars in the side buttons")
 	despawnBtn.Activated:Connect(function()
 		closePanels()
@@ -1327,7 +1328,7 @@ local function buildSideButtons()
 		end
 	end)
 	-- (owner, 2026-10-29: housing like Driving Empire's, a house button on the HUD)
-	local houseBtn = sideButton("house", "HOUSE", 7)
+	local houseBtn = sideButton("house", "HOUSE", 9)
 	houseBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onHouseButton then
@@ -1336,7 +1337,7 @@ local function buildSideButtons()
 	end)
 	-- (19 Nov, owner: make the dealership and the store easy to find) DEALER opens the dealer menu
 	-- from anywhere, SHOP the main menu's STORE tab; column order Dealer, Shop, Jobs, then the rest
-	local dealerBtn = sideButton("dealer", "DEALER", -3)
+	local dealerBtn = sideButton("dealer", "DEALER", 4)
 	dealerBtn.Name = "DealerButton"
 	dealerBtn.Activated:Connect(function()
 		closePanels()
@@ -1344,7 +1345,7 @@ local function buildSideButtons()
 			UI.onDealerButton()
 		end
 	end)
-	local storeBtn = sideButton("cart", "SHOP", -2)
+	local storeBtn = sideButton("cart", "SHOP", 2)
 	storeBtn.Name = "ShopButton"
 	storeBtn.Activated:Connect(function()
 		closePanels()
@@ -1369,7 +1370,7 @@ local function buildSideButtons()
 	player:GetAttributeChangedSignal("StoreUnseen"):Connect(paintStoreDot)
 	paintStoreDot()
 	-- (19 Nov, owner: jobs like Southwest Florida) JOBS: the main menu's JOBS tab
-	local jobsBtn = sideButton("jobs", "JOBS", -1)
+	local jobsBtn = sideButton("jobs", "JOBS", 10)
 	jobsBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onJobsButton then
@@ -1379,7 +1380,7 @@ local function buildSideButtons()
 	-- (owner, 2026-11-20: "only add the important buttons. 9 buttons is alot"): CARS, HOUSE and JOBS are tabs of
 	-- MENU, so their buttons are hidden: one column of Dealer, Shop, Menu, Goals, Chauffeur, Despawn
 	houseBtn.Visible, jobsBtn.Visible = false, false -- (21 Nov: CARS is back in the column, DESPAWN is out)
-	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
+	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 6)
 	chauffeurBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onChauffeurButton then
