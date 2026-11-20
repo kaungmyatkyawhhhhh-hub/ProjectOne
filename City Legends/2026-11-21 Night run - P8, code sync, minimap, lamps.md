@@ -29,3 +29,14 @@ Full list: `Games/CityLegends/build/lamp_audit_21nov.md` (build/ is not in git: 
 - **Data work left (shell cuts with tools/lamps, in Studio):** 8 cars have no lamp shells at all (astin_dbx, bentlee_contgt, bentz_sl65bs, bentz_sls, bnw_330i_g20, ferrara_599, mclaran_12c, nisun_350z; the DBX also has no tail lamp); 12 cars light the whole rear lens; re-cuts for CP9A Champion, Supra, Bentayga reverse, 458 Spider, Chaser; GLS bumper strip lights as a tail lamp.
 - **Not possible without new meshes:** LED signatures fused into one piece (Audi / BMW light guides, angel eyes, Lamborghini Y tails, Porsche four-point), separate brake element, AE86 pop-ups, sequential indicators.
 - Stray `Workspace._WheelStage.lexis_lfa` (20 visible Neon shells) is in the place: remove before publishing.
+
+## Lamp code fixes in the repo (not in Studio yet, not play-tested)
+- Brake / reverse lamps now sent for every car, and shown on other players' cars (Driving.lua, CarLamps.lua).
+- Getting out switches lamps and brake off (Driving detach); state resets when the driver changes.
+- No double tail glow when a car has cut tail shells (CarSkin.lua).
+- 8 stale tail entries removed (TailLights.lua, tools/tail_lights/tails.json).
+- `NO_DRL` and `TINT` tables in CarLamps.lua: no daytime lights on cars that never had them; real headlamp colour per car. A bought Customs lamp colour beats the tint.
+- New test `tools/lamps_test.luau` passes.
+
+## Owner's real-life references (21 Nov)
+Folder `C:\Users\kaung\Downloads\IrlReferences\` (1.6 GB, laptop only, NOT in the vault): 29 videos + photos, Yangon at night, mostly filmed from a moving car: GG Gaming Fest hall, towers, a lit roundabout monument, City Hall lit up, the cable-stayed bridge, street lamps, cars' head and tail lights on the road. Used as the target for how lamps and the night city should look.
