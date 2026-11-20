@@ -100,14 +100,6 @@ LOOKS = {
     num=W, numR=84, size=24, font="GothamBold", step=1000, div=1000, red=7000, redC=RED, needle=RED, needleW=5, hub=(26, 26, 28), hubR=14,
     texts=[("RPMx1000", 0, 40, 10, W, "GothamMedium")]),
  ],
- "nisun_r34": [
-  L(r=120, face=(236, 236, 232), inner=(20, 20, 22), innerR=48, bezel=(40, 40, 42), bezelW=4, tick=(150, 80, 30), tickR=116, major=(14, 3), minor=(7, 1.5), minors=1,
-    num=(200, 96, 32), numR=92, size=20, font="GothamBold", step=20, needle=(236, 70, 32), needleW=6, hub=(14, 14, 16), hubR=16,
-    texts=[("km/h", 0, -24, 11, W, "GothamMedium")]),
-  L(r=120, face=(236, 236, 232), inner=(20, 20, 22), innerR=48, bezel=(40, 40, 42), bezelW=4, tick=(150, 80, 30), tickR=116, major=(14, 3), minor=(7, 1.5), minors=4,
-    num=(200, 96, 32), numR=92, size=22, font="GothamBold", step=1000, div=1000, red=9000, redC=(220, 40, 30), numRed=(220, 40, 30), needle=(236, 70, 32), needleW=6, hub=(14, 14, 16), hubR=16,
-    texts=[("x1000r/min", 0, -24, 9, W, "GothamMedium")]),
- ],
  "porsha_boxster": [
   L(r=118, face=(14, 14, 16), bezel=(62, 62, 66), bezelW=3, tick=W, tickR=113, major=(13, 3), minor=(7, 1.5), minors=4,
     num=W, numR=88, size=22, font="GothamMedium", step=1000, div=1000, red=7500, redC=RED, needle=RED, needleW=5, hub=(26, 26, 28), hubR=13,

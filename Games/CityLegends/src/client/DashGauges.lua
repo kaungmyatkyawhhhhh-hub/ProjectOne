@@ -3453,6 +3453,7 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 	local fuelLeft = 0.8
 	local tripFrom: number? = nil -- (this drive: the trip line of a screen)
 	local audio: any = nil
+	local born = os.clock() -- ("start": the bulb check of the first seconds)
 	return function(mph: number, g: string, rpm: number)
 		shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
 		local v = Art.idle + shown * (Art.redline - Art.idle)
@@ -3478,6 +3479,7 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 			gearN = g == "N",
 			gearR = g == "R",
 			gearD = tonumber(g) ~= nil,
+			start = now - born < 2.6,
 		}
 		if flag then
 			state[flag] = true -- (a car's own touch on a shared screen: the SV's mark)
@@ -3502,7 +3504,7 @@ local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
 		end
 		for _, n in needles do
 			-- ("dial": a speedometer whose numbers follow the player's units, with a table for each)
-			local value = if n.bind == "rpm" then v elseif n.bind == "fuel" then (DashGauges.fuelShare or 0.8) elseif n.bind == "kmh" or (n.bind == "dial" and KMH) then mph * 1.609 else mph
+			local value = if n.bind == "rpm" then v elseif n.bind == "fuel" then (DashGauges.fuelShare or 0.8) elseif n.bind == "water" then (DashGauges.waterShare or 0.5) elseif n.bind == "kmh" or (n.bind == "dial" and KMH) then mph * 1.609 else mph
 			n.l.Rotation = pointOn(if n.bind == "dial" and not KMH then n.alt else n.pts, value)
 		end
 		if mark and marker then
@@ -3648,6 +3650,9 @@ local STYLES: { [string]: (SurfaceGui) -> Update } = {
 	end,
 	LiveSupra = function(gui)
 		return liveCluster(gui, "supra")
+	end,
+	LiveR34 = function(gui)
+		return liveCluster(gui, "r34")
 	end,
 	LiveAE86 = function(gui)
 		return liveCluster(gui, "ae86")

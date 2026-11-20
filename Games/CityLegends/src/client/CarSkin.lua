@@ -70,6 +70,7 @@ CarSkin.CLUSTER_STYLE = {
 	porsha_gt3 = "LiveGT3RS", -- the 2019 model (2026-11-13), redrawn from the owner's photo ("Porsche991GT3" puts the old drawn one back; that one was laid out for the 718 cabin's hood)
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "LiveSupra", -- the 1994 SZ-R model (2026-11-14), redrawn from the owner's photo ("SupraTRD" puts the old drawn one back; that one was laid out for the old model)
+	nisun_r34 = "LiveR34", -- the ARjun.JS model (2026-11-21): drawn from the real BNR34 layout (the model's hood has a plain face), with the start-up bulb check and the 7,500 shift lamp
 	toyoka_ae86 = "LiveAE86", -- a new car (2026-11-14): the model's own two dials redrawn sharp and live (no owner photo; tools/lambo/window_ae86.png)
 	ronin_cp9a_champ = "LiveEvo6c", -- a new car (2026-11-14): the model's own dials redrawn sharp and live (no owner photo; tools/lambo/window_evo6c.png)
 	ronin_cp9a = "LiveEvo6", -- a new car (2026-11-14): redrawn sharp and live from the owner's photo (tools/lambo/window_evo6.png; the Ronin CT9A will share the drawing)
@@ -137,6 +138,7 @@ CarSkin.CLUSTER_RECT = {
 	bnw_m3_e92_cabin = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- the old E92 cabin's cluster hood (the F80's donor)
 	toyoka_chaser = { at = Vector3.new(-0.0082, 0.0490, -0.2638), face = Vector3.new(0.0081, 0.3344, 0.9424), w = 0.386, h = 0.092 }, -- the model's dash hood (tools/lambo/window_chaser.png), 2026-11-14
 	toyoka_supra_mk4 = { at = Vector3.new(-0.0002, 0.0143, -0.2554), face = Vector3.new(-0.0019, 0.2049, 0.9788), w = 0.380, h = 0.152 }, -- the model's hood over its three dials (tools/lambo/window_supra.png), 2026-11-14
+	nisun_r34 = { at = Vector3.new(-0.001, 0.0613, -0.1699), face = Vector3.new(0, 0.330, 0.944), w = 0.360, h = 0.160 }, -- the model's plain hood face (ray-cast from the driver's eye on build/r34/nisun_r34_lamps.blend), 2026-11-21
 	toyoka_ae86 = { at = Vector3.new(-0.0012, 0.0328, -0.2576), face = Vector3.new(0.0066, 0.6233, 0.7819), w = 0.346, h = 0.116 }, -- the model's hood over its two dials (tools/lambo/window_ae86.png), 2026-11-14
 	ronin_cp9a_champ = { at = Vector3.new(0.0001, -0.0038, -0.3014), face = Vector3.new(-0.0004, 0.3746, 0.9272), w = 0.312, h = 0.128 }, -- the model's hood over its dials (tools/lambo/window_evo6c.png), 2026-11-14
 	ronin_cp9a = { at = Vector3.new(-0.0026, -0.0039, -0.3183), face = Vector3.new(-0.0000, 0.4475, 0.8943), w = 0.298, h = 0.118 }, -- the model's hood (tools/lambo/window_evo6.png), 2026-11-14
@@ -293,10 +295,6 @@ CarSkin.DIAL_NEEDLES = {
 	mazdo_rx8 = { -- RX-8 (rev counter and the speed read-out)
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0021, 0.0463, -0.2049), face = Vector3.new(0, 0.18, 0.9837), length = 0.043, scale = "0:178.5,1000:201.4,4000:269.9,7000:347.7,10000:424.0" },
 		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0286, 0.0321, -0.2023), face = Vector3.new(0, 0.18, 0.9837), length = 0.0242, scale = "" },
-	},
-	nisun_r34 = {
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0541, 0.0125, -0.1938), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.6,180:125.6" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0656, 0.0126, -0.1935), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.7,3000:-85.2,10000:125.3" },
 	},
 	porsha_boxster = { -- Boxster (labels too blurry to read: an even 243 degree sweep)
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0008, 0.0489, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), length = 0.0432, scale = "0:-122.0,8000:121.0" },

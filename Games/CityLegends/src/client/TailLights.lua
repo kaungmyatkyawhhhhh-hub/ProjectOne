@@ -227,10 +227,6 @@ return {
 		shells = { { name = "SeeThrough_red_glass" } },
 		spots = {},
 	},
-	nisun_r34 = {
-		shells = { { name = "Body_red_glass" } },
-		spots = {},
-	},
 	porsha_boxster = {
 		shells = { { name = "Body_pM_LightGlassNormal_Oute" } },
 		spots = {},
