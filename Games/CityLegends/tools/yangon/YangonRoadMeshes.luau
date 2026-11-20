@@ -56,7 +56,7 @@ M.LOOK = {
 	MG = { Enum.Material.Grass, Color3.fromRGB(84, 116, 58) },
 	B = { Enum.Material.Concrete, Color3.fromRGB(150, 146, 138) },
 	F = { Enum.Material.Concrete, Color3.fromRGB(104, 102, 98) }, -- flush edge strips of residential streets
-	LY = { Enum.Material.SmoothPlastic, Color3.fromRGB(232, 184, 52) }, -- (1:1) yellow median lines and zebras
+	LY = { Enum.Material.SmoothPlastic, Color3.fromRGB(230, 222, 114) }, -- (1:1; 21 Nov owner videos) yellow lines: centre (double), kerb, hatch; gore barriers
 	LZ = { Enum.Material.SmoothPlastic, Color3.fromRGB(230, 190, 110) }, -- (J14, owner) zebras: faded ochre yellow, as in Yangon
 }
 

@@ -30,7 +30,7 @@ T.state = "new"
 T.fills = 0
 T.COLOR = {
 	LW = Color3.fromRGB(232, 232, 226),
-	LY = Color3.fromRGB(232, 184, 52),
+	LY = Color3.fromRGB(230, 222, 114),
 	LZ = Color3.fromRGB(230, 190, 110),
 }
 

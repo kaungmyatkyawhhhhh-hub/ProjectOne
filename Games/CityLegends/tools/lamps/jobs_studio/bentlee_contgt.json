@@ -1,0 +1,9 @@
+{"id": "bentlee_contgt", "dump": ["SeeThrough_Lens_Clear", "SeeThrough_Lens_Red", "Body_Lamp", "Body_LampGlow"],
+ "roles": {
+  "HeadCore": [{"part": "Body_Lamp", "in": [0.4, 0.85, 0.55, 0.85, -2.3, -1.8], "off": 0.004}],
+  "HeadGlass": [{"part": "SeeThrough_Lens_Clear", "in": [0.4, 0.64, 0.55, 0.85, -2.3, -1.8], "off": 0.008}],
+  "TurnF": [{"part": "SeeThrough_Lens_Clear", "in": [0.64, 0.85, 0.55, 0.85, -2.3, -1.8], "off": 0.008}],
+  "Tail": [{"part": "SeeThrough_Lens_Red", "off": 0.006}],
+  "TurnR": [{"part": "Body_Lamp", "in": [0.5, 0.8, 0.76, 0.83, 2.1, 2.3], "box": [0.635, 9, -9, 9, -9, 9], "drape": "SeeThrough_Lens_Red", "off": 0.012}],
+  "Rev": [{"part": "Body_Lamp", "in": [0.5, 0.8, 0.76, 0.83, 2.1, 2.3], "box": [0, 0.635, -9, 9, -9, 9], "drape": "SeeThrough_Lens_Red", "off": 0.012}]
+ }}
