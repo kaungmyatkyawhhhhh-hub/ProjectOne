@@ -16,6 +16,7 @@ cabin (seats, dash, MFD, wheel, door cards, headliner) plus the chassis sit in t
 
 import sys
 
+import bmesh
 import bpy
 import numpy as np
 
@@ -44,11 +45,11 @@ LOOK = {
     "r34_mirror": ((150, 155, 160), 1.0, 0.06, 1),
     "r34_black": ((12, 12, 13), 0.0, 0.7, 1),
     # cabin (stock BNR34 photos)
-    "r34_cabin": ((30, 30, 32), 0.0, 0.7, 1),
+    "r34_cabin": ((34, 34, 36), 0.0, 0.7, 1),
     "r34_cabin_soft": ((44, 44, 47), 0.0, 0.8, 1),
     "r34_cloth": ((50, 51, 55), 0.0, 0.9, 1),
     "r34_cloth_insert": ((82, 85, 92), 0.0, 0.9, 1),
-    "r34_door": ((40, 40, 43), 0.0, 0.8, 1),
+    "r34_door": ((58, 58, 62), 0.0, 0.85, 1),
     "r34_headliner": ((150, 148, 142), 0.0, 0.9, 1),
     "r34_carpet": ((24, 24, 25), 0.0, 0.95, 1),
     "r34_leather": ((22, 22, 23), 0.0, 0.55, 1),
@@ -219,7 +220,7 @@ for o in list(bpy.data.objects):
         froles = vrole[lv[fv]]
     else:
         froles = np.array([role0 or "r34_trim"] * nf, dtype=object)
-        if role0 == "r34_paint":
+        if role0 in ("r34_paint", "r34_carbon", "r34_black", "r34_trim"):
             # body panels seen from inside the cabin (door shells, pillars, roof underside) get trim colours
             M = np.array(o.matrix_world)
             fc = np.empty(nf * 3)
@@ -230,13 +231,16 @@ for o in list(bpy.data.objects):
             fn = fn.reshape(-1, 3) @ np.linalg.inv(M[:3, :3])
             fn /= np.linalg.norm(fn, axis=1, keepdims=True) + 1e-9
             inside = (np.abs(fc[:, 0]) < 1.72) & (fc[:, 1] > -2.1) & (fc[:, 1] < 1.9) & (fc[:, 2] > 0.5) & (fc[:, 2] < 2.64)
-            side = inside & (fn[:, 0] * -np.sign(fc[:, 0]) > 0.35) & (fc[:, 2] < 2.3)
+            toc = np.array([0.0, -0.2, 1.4]) - fc
+            toc /= np.linalg.norm(toc, axis=1, keepdims=True) + 1e-9
+            side = inside & (np.abs(fc[:, 0]) > 1.0) & ((fn * toc).sum(1) > 0.2) & (fc[:, 2] < 2.3)
             roof = inside & (fn[:, 2] < -0.5) & (fc[:, 2] > 2.2)
-            froles[side] = "r34_door"
-            froles[roof] = "r34_headliner"
+            if role0 == "r34_paint":
+                froles[side] = "r34_door"
+                froles[roof] = "r34_headliner"
             # the door and quarter skins are one layer (seen from inside they vanish in Roblox, which draws one
             # side): copy their outward faces 4 cm inwards, turned round, as plain door cards
-            out = inside & (np.abs(fc[:, 0]) > 1.25) & (fn[:, 0] * np.sign(fc[:, 0]) > 0.3) & (fc[:, 2] > 0.72) & (fc[:, 2] < 1.8)
+            out = inside & (np.abs(fc[:, 0]) > 1.25) & ((fn * toc).sum(1) < 0.2) & (fc[:, 2] > 0.72) & (fc[:, 2] < 1.8)
             if out.any():
                 cards.append((o, np.flatnonzero(out), M))
     froles[black] = "r34_black"
@@ -273,6 +277,17 @@ for o, faces, M in cards:
         polys.append(poly)
     nm = bpy.data.meshes.new(o.name + "_card")
     nm.from_pydata(verts, [], polys)
+    bm = bmesh.new()
+    bm.from_mesh(nm)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
+    bmesh.ops.holes_fill(bm, edges=[e for e in bm.edges if e.is_boundary], sides=90)  # handle / keyhole recesses
+    from mathutils import Vector
+
+    c0 = Vector((0.0, -0.2, 1.4))
+    flip = [f for f in bm.faces if f.normal.dot(c0 - f.calc_center_median()) < 0]
+    bmesh.ops.reverse_faces(bm, faces=flip)  # every card face looks into the cabin
+    bm.to_mesh(nm)
+    bm.free()
     nm.materials.append(mat("r34_door"))
     ob = bpy.data.objects.new(o.name + "_DoorCard", nm)
     bpy.context.scene.collection.objects.link(ob)

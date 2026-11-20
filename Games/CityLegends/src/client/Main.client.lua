@@ -520,6 +520,7 @@ stopLoadingShots()
 startOrbit()
 UI.showLoading("Filling the streets with traffic...")
 UI.fade(false, 0.01)
+phase("fade")
 -- each step runs on its own and is timed: one that errors or hangs is reported in the Output and
 -- the rest still start (a crash in one of them used to leave the loading screen up for good)
 local stepTimes = {}
@@ -545,7 +546,17 @@ startStep("Traffic", function()
 	-- (owner, 2026-11-21: "put more traffic": CarCount 28 -> 46; the low-end 0.5 keeps its 14 cars, TrafficMix.LowEndCars)
 	local q = WorldFx.qualityScale()
 	local lowCars = require(Shared:WaitForChild("TrafficMix")).LowEndCars
-	Traffic.start(if q <= 0.5 then lowCars else math.floor(Config.Traffic.CarCount * math.min(q, 1)), focusPoint)
+	-- (21 Nov, "make the loading screen load fast") the cars are put out a few a frame behind the menu: placing them
+	-- held the start 0.4-2.5 s in Studio Play (a frame every 10 cars at loading-time frame rates)
+	task.spawn(function()
+		local t0 = os.clock()
+		local ok, err = pcall(Traffic.start, if q <= 0.5 then lowCars else math.floor(Config.Traffic.CarCount * math.min(q, 1)), focusPoint)
+		if ok then
+			print(string.format("[CityLegends] startup: Traffic cars out in %.2fs (in the background)", os.clock() - t0))
+		else
+			warn("[CityLegends] startup: Traffic failed: " .. tostring(err))
+		end
+	end)
 	-- a phone found low-end after the start drops to the low-end count too (Play test 21 Nov: it kept 46)
 	require(script.Parent:WaitForChild("LowEnd")).changed(function(on)
 		if on then
@@ -722,13 +733,14 @@ local function requestDrive(id: string, stealFrom: Model?)
 	local my = driveRequest
 	pendingAttach = true
 	driveAskedAt = os.clock()
-	UI.fade(true, 0.3)
+	-- (21 Nov) asked first, then the fade: the server's spawn runs while the screen goes black
 	if stealFrom then
 		(remotes:WaitForChild("StealCar") :: RemoteEvent):FireServer(stealFrom)
 	else
 		data.Selected = id
 		SpawnCar:FireServer(id)
 	end
+	UI.fade(true, 0.3)
 	-- safety: if the car is already there (rare race) attach to it
 	task.delay(0.5, function()
 		if pendingAttach then
@@ -1038,8 +1050,7 @@ local menuApi = {
 			return false
 		end
 		if Driving.isDriving() then
-			UI.fade(true, 0.25)
-			task.wait(0.3)
+			UI.fade(true, 0.25) -- (it returns once black: the extra 0.3 s wait after it is gone, 21 Nov)
 			if not settle() then
 				UI.fade(false, 0.3)
 				UI.toast("Can't put the car there right now, try again", Config.Theme.Danger)
@@ -1054,8 +1065,7 @@ local menuApi = {
 			UI.hideLoading()
 			UI.fade(false, 0.4)
 		elseif OnFoot.active and player.Character then
-			UI.fade(true, 0.25)
-			task.wait(0.3)
+			UI.fade(true, 0.25) -- (it returns once black: the extra 0.3 s wait after it is gone, 21 Nov)
 			if settle() and player.Character then
 				local jumped = isJump(cf.Position)
 				player.Character:PivotTo(cf + Vector3.new(0, 3, 0))
