@@ -156,3 +156,10 @@ Owner: "if two rare cars happen to meet, the faster car will go around and make 
 
 ## Water rescue (agent working, repo only)
 Owner: "when a car goes in water, they get teleported back to the nearest road near the water, facing the roads direction".
+
+## Water rescue written (repo, commit e65d643d); sync pack E
+- Existing: a water reset only below Y 20 (never fired at Inya Lake, water at about 40), to the nearest lane with no over-water check.
+- New `src/shared/WaterRescue.lua` + Driving: in water for 1 s (water is the first thing under the car, or the body's terrain cell is Water) -> the 8 nearest lane points to where it went in, first one with a road box under it and no water wins, heading = the lane's direction; fade 0.25 s, toast `drive.backOnRoad` (Burmese text marked for review), 4 s cooldown, no penalty. Backspace reset uses the same picker. Trailers are not moved.
+- U-turn gap closed: a racer blocked mid-arc for 4 s backs out the way it came.
+- **Sync pack E** = operation 5ad3525f-9ae3-43a1-aa9c-d77f1fd7cd7c (`imports/sync/sync_21nov_e.rbxmx`, 10 scripts incl. new StartupGuard + WaterRescue modules; all compile). To install: insert into `ServerStorage.SyncHolding`, run `ClaudeTools.SyncScripts`, compare lengths (Config 198823, Strings 117127, TrafficMix 15299, StartupGuard 1048, WaterRescue 3546, UI 134606, Traffic 71358, TrafficBodies 9886, Driving 186300, Main 42120).
+- Owner: real-Yangon look (item 13) goes LAST. Studio jobs run in parallel as soon as the Play test ends.
