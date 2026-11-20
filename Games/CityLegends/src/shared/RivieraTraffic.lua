@@ -491,11 +491,29 @@ function RivieraTraffic.build()
 	-- pieces leading nowhere when nothing else left from there (20 places): a car going straight on
 	-- drove into the dead end and the queue behind it piled up. Pieces and turns with no way on are
 	-- taken out of the graph (step by step back from each dead end), so every choice goes somewhere.
+	-- (21 Nov, "make the loading screen load fast") walked back from each dead end through a list of who leads into
+	-- what: the old repeat-until-nothing-changes sweep took 320 passes over the 1:1 lanes (3.5 s of a 3.7 s build on a
+	-- PC, at the start of every client and in Chauffeur.init); same result
 	local dead = {}
-	local changed = true
-	while changed do
-		changed = false
-		for _, seg in all do
+	local into = {} -- [seg] = the pieces and turns whose next holds it
+	local stack = {}
+	for _, seg in all do
+		for _, nx in seg.next do
+			local list = into[nx]
+			if list then
+				table.insert(list, seg)
+			else
+				into[nx] = { seg }
+			end
+		end
+		if #seg.next == 0 then
+			dead[seg] = true
+			table.insert(stack, seg)
+		end
+	end
+	while #stack > 0 do
+		local gone = table.remove(stack)
+		for _, seg in into[gone] or {} do
 			if not dead[seg] then
 				for i = #seg.next, 1, -1 do
 					if dead[seg.next[i]] then
@@ -504,7 +522,7 @@ function RivieraTraffic.build()
 				end
 				if #seg.next == 0 then
 					dead[seg] = true
-					changed = true
+					table.insert(stack, seg)
 				end
 			end
 		end

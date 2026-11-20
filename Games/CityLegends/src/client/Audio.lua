@@ -84,6 +84,45 @@ function Audio.init()
 	SoundService.RolloffScale = 0.6
 
 	-- test-load every configured id (in parallel, during the loading screen)
+	-- (21 Nov, owner: "make the loading screen ingame load fast") in the background: it held the start ~5 s (Studio
+	-- Play); the music starts when it is done, and a car waits for it (Audio.waitReady) before its sounds are picked
+	task.spawn(Audio.preload)
+	-- night city ambience: distant traffic / wind hum
+	local amb = newSound(BUILTIN.wind, SoundService, 0.06, true)
+	amb.Name = "Ambience"
+	amb.PlaybackSpeed = 0.42
+	effect("EqualizerSoundEffect", amb, { LowGain = 4, MidGain = -6, HighGain = -30 })
+	amb:Play()
+
+	-- tunnel reverb when the camera is inside the tunnel
+	local C = Config.City
+	local tx0 = CityLayout.HighwayStartX + C.TunnelStart
+	local tx1 = tx0 + C.TunnelLength
+	local inTunnel = false
+	RunService.Heartbeat:Connect(function()
+		local cam = workspace.CurrentCamera
+		if not cam then
+			return
+		end
+		local p = cam.CFrame.Position
+		local now = p.X > tx0 and p.X < tx1 and math.abs(p.Z) < C.HighwayWidth / 2 + 2 and p.Y < 22
+		if now ~= inTunnel then
+			inTunnel = now
+			SoundService.AmbientReverb = if now then Enum.ReverbType.StoneCorridor else Enum.ReverbType.City
+		end
+	end)
+end
+
+local soundsReady = false
+-- wait (at most maxWait seconds) until the sound check is done, so a car's engine id is picked from the checked list
+function Audio.waitReady(maxWait: number)
+	local by = os.clock() + maxWait
+	while not soundsReady and os.clock() < by do
+		task.wait(0.1)
+	end
+end
+
+function Audio.preload()
 	local probes: { [Sound]: string } = {}
 	local list = {}
 	for key, value in Config.Sounds do
@@ -117,32 +156,8 @@ function Audio.init()
 	for probe in probes do
 		probe:Destroy()
 	end
+	soundsReady = true
 	Audio.startMusic()
-
-	-- night city ambience: distant traffic / wind hum
-	local amb = newSound(BUILTIN.wind, SoundService, 0.06, true)
-	amb.Name = "Ambience"
-	amb.PlaybackSpeed = 0.42
-	effect("EqualizerSoundEffect", amb, { LowGain = 4, MidGain = -6, HighGain = -30 })
-	amb:Play()
-
-	-- tunnel reverb when the camera is inside the tunnel
-	local C = Config.City
-	local tx0 = CityLayout.HighwayStartX + C.TunnelStart
-	local tx1 = tx0 + C.TunnelLength
-	local inTunnel = false
-	RunService.Heartbeat:Connect(function()
-		local cam = workspace.CurrentCamera
-		if not cam then
-			return
-		end
-		local p = cam.CFrame.Position
-		local now = p.X > tx0 and p.X < tx1 and math.abs(p.Z) < C.HighwayWidth / 2 + 2 and p.Y < 22
-		if now ~= inTunnel then
-			inTunnel = now
-			SoundService.AmbientReverb = if now then Enum.ReverbType.StoneCorridor else Enum.ReverbType.City
-		end
-	end)
 end
 
 ---------------------------------------------------------------------

@@ -1320,6 +1320,7 @@ local function supercarExhaust()
 			},
 			start = { idleAt = 3.3, fade = 0.5, out = 3.6, ends = 4.3, settleFrom = 1180, settle = 1.0, gain = 0.81 },
 		},
+		I6_RB26 = if script then require(script.Parent.ExhaustRB26)(Config.Sounds) else nil,
 		-- BMW S55 3.0 twin-turbo straight-6 (F82 M4): firing at the 3rd order with the 1.5 / 4.5 of its two
 		-- turbos; whine, a blow-off on the lift, a few burbles
 		I6_TWINTURBO = {
@@ -1765,7 +1766,7 @@ local function supercarExhaust()
 		bnw_m5_f90 = { family = "V8_S63" },
 		bentlee_bentayga = { family = "V8_VW40", volume = 0.8, tone = { high = -4 } }, -- quieter and softer than the tuned RS7
 		nisun_gtr = { family = "V6_TWINTURBO" },
-		nisun_r34 = { family = "I6_TWINTURBO", tone = { high = 1 } }, -- (21 Nov) RB26 stand-in: was the shared loop
+		nisun_r34 = { family = "I6_RB26" },
 		-- (2026-11-13) the last nine imports with no set
 		astin_dbx = { family = "V8_M177", volume = 1.1, tone = { low = 2, drive = 0.06 }, bands = { shots = { Pops = 1.0 } } }, -- loud, a deep burble
 		bentz_gls = { family = "V8_M177", volume = 0.6, tone = { high = -5 }, bands = { turbo = 0.2, liftPops = false, coast = { mid = -5, high = -14 } } }, -- quiet, smooth, no pops
@@ -1802,6 +1803,9 @@ local function supercarExhaust()
 			continue
 		end
 		local fam = FAMILY[car.family]
+		if not fam then
+			continue
+		end
 		local with = car.with or {}
 		local sounds = merged(fam.sounds, with.sounds)
 		local bands = merged(merged(fam.bands, with.bands), car.bands)
