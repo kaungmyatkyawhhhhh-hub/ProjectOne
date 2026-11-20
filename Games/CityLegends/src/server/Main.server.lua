@@ -25,6 +25,7 @@ local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 -- (21 Nov, owner: "make the loading screen ingame load fast") a profile starts loading the moment its player joins,
 -- not after every system below has started (~5 s in Studio Play): the client's menu waits on it (GetData).
 -- onPlayerAdded (the end of this script) waits for this load instead of starting its own.
+local serverT0 = os.clock()
 local profileLoads: { [Player]: { done: boolean, ok: boolean } } = {}
 local removingHooked = false -- (until the main PlayerRemoving below is connected, a leaver's lock is handed back here)
 local function startProfileLoad(player: Player)
@@ -34,11 +35,13 @@ local function startProfileLoad(player: Player)
 	local job = { done = false, ok = false }
 	profileLoads[player] = job
 	task.spawn(function()
+		local t0 = os.clock()
 		local ok, err = pcall(PlayerData.load, player)
 		if not ok then
 			warn("[CityLegends] profile load failed for " .. player.Name .. ": " .. tostring(err))
 		end
 		job.ok, job.done = ok, true
+		print(string.format("[CityLegends] profile of %s loaded in %.2fs (%.2fs after the server script started)", player.Name, os.clock() - t0, os.clock() - serverT0))
 	end)
 end
 Players.PlayerAdded:Connect(startProfileLoad)
@@ -426,11 +429,14 @@ local ctx = {
 -- (19 Nov, owner: stuck with no GUI) each system starts in its own guard: one that errors is
 -- reported and the rest still start, so the remotes and handlers made after it (SpawnCar,
 -- ClaimStarter, FastTravel, MenuFocus) always exist and no client waits on them forever
+local guardTimes: { string } = {} -- (21 Nov) each system's start time, printed once the server is up
 local function guard(name: string, fn: () -> ())
+	local t0 = os.clock()
 	local ok, err = pcall(fn)
 	if not ok then
 		warn(string.format("[CityLegends] server start: %s failed: %s", name, tostring(err)))
 	end
+	table.insert(guardTimes, string.format("%s %.2f", name, os.clock() - t0))
 end
 guard("Goals", function() Goals.init(ctx) end)
 guard("CarLevels", function() CarLevels.init(ctx) end)
@@ -612,6 +618,7 @@ end
 ---------------------------------------------------------------------
 -- Remotes
 ---------------------------------------------------------------------
+print(string.format("[CityLegends] server: GetData answers from %.2fs", os.clock() - serverT0))
 GetData.OnServerInvoke = function(player: Player)
 	local timeout = os.clock() + 10
 	while not PlayerData.get(player) and os.clock() < timeout do
@@ -1399,6 +1406,7 @@ for _, p in Players:GetPlayers() do
 	task.spawn(onPlayerAdded, p)
 end
 
+print(string.format("[CityLegends] server start: %.2fs (%s)", os.clock() - serverT0, table.concat(guardTimes, ", ")))
 removingHooked = true
 Players.PlayerRemoving:Connect(function(player)
 	local f = focusFolder:FindFirstChild(player.Name)

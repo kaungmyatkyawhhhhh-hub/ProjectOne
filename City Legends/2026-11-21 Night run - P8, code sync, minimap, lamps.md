@@ -214,3 +214,8 @@ Owner also: "never ask me any questions again" (autopilot; say what I will and w
 - **Fix (repo + Studio, synced, checksum 1013210700):** `Main.client` `waitForMap(status, jumped)`: after the parts go quiet, a jump (car spawn, fast travel in a car or on foot) keeps the loading screen up 1.5 s more on PC, 4 s on phones / low-end. SKIP still cuts it. Old loading end on PC: 2.6 s (ring road right of Sule still covered); new: 4.1 s (clean).
 - Shots: `2026-11-21 Terrain cover - 0 reference (held still).jpg`, `- 1 jump +1.5 s (covered).jpg`, `- 2 old loading end +2.6 s.jpg`, `- 3 new loading end +4.1 s.jpg`.
 - **Not done / not known:** the phone time (4 s is a guess: measure on a phone and tune `TERRAIN_SETTLE_PHONE`); first load "Loading the map..." left as it was (its camera is on the menu shots); the 251 cells carved 10 deep stay as they are.
+
+## Lamp shells cut on the 8 cars that had none (21 Nov)
+- All 8 now have full shell sets (12 each: head core + glass, front / rear indicators, reverse, tail), cut from each model's own lamp meshes and placed where the real car has them: astin_dbx (now has a tail lamp: the full-width blade), bentlee_contgt, bentz_sl65bs, bentz_sls, bnw_330i_g20, ferrara_599, mclaran_12c, nisun_350z. Added to `CarLamps.CARS` with their headlamp colour; no daytime lights on the Continental GT, SL65, 599 and 350Z. Old models kept in `ServerStorage.LampBackup_21Nov`.
+- New route, no Blender needed: `tools/lamps/lampfx_studio.py` + `LampShellsStudio.luau` + `jobs_studio/` (see `tools/lamps/README.md`).
+- Still to do: tail shells on the 12 cars that light the whole rear lens (6 jobs written), the 5 re-cuts, the GLS bumper strip. Not checked at night in Play yet.
