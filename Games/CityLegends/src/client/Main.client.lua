@@ -269,8 +269,8 @@ end
 
 UI.showLoading("Shaping the cars...")
 UI.showLoading("Starting engines...")
-task.wait(1) -- let the world finish replicating
-phase("wait1")
+-- (21 Nov) the old 1 s "let the world finish replicating" wait is gone: the City's Ready flag is in by now, and the
+-- map round the menu is waited for in waitForMap
 
 ---------------------------------------------------------------------
 -- World effects: lights, searchlights, billboards, monorail
@@ -284,11 +284,15 @@ if city then
 		warn("[CityLegends] BuildingSkin failed:", err)
 	end
 	-- our own far stand-ins for streamed-out buildings (Roblox's showed as black shapes)
+	phase("skin")
 	require(script.Parent:WaitForChild("Standins")).init(city)
+	phase("standins")
 end
 -- knockable street lights, trees and traffic poles (scanned before the LOD system hides far ones)
 require(script.Parent:WaitForChild("Knockables")).init()
+phase("knock")
 WorldFx.start()
+phase("worldfx")
 Weather.init() -- rain cycle (rare showers, starts clear), wet roads, mist, rain sound
 -- (the day / night cycle runs since the loading screen: morning, day, sunset, night)
 phase("world")
@@ -652,6 +656,7 @@ local function tryAttach(model: Instance)
 		stopOrbit()
 		OnFoot.reset()
 		Traffic.clearAround(model:GetPivot().Position, 35)
+		Audio.waitReady(5) -- (the sound check runs in the background since 21 Nov: the engine's id comes from it)
 		local okAttach, errAttach = pcall(Driving.attach, model)
 		if not okAttach then
 			attaching = false
@@ -951,7 +956,7 @@ end
 MainMenu = require(script.Parent:WaitForChild("MainMenu"))
 local FastTravel = remote("FastTravel", "RemoteFunction") :: RemoteFunction
 local ClaimStarter = remote("ClaimStarter", "RemoteFunction") :: RemoteFunction
-MainMenu.init({
+local menuApi = {
 	getData = function()
 		return data
 	end,
@@ -1065,7 +1070,8 @@ MainMenu.init({
 			UI.onPhotoButton()
 		end
 	end,
-})
+}
+MainMenu.init(menuApi)
 MainMenu.applySettings(settings)
 
 -- Studio test hook (Claude's driving tests): player attribute TestCar = a car id drives it out
@@ -1077,6 +1083,16 @@ if RunService:IsStudio() then
 				MainMenu.close()
 			end
 			requestDrive(id)
+		end
+	end)
+	-- TestTravel = a fast travel spot id (TravelSpots): the menu's fast travel, timed in the Output ("map wait")
+	player:GetAttributeChangedSignal("TestTravel"):Connect(function()
+		local id = player:GetAttribute("TestTravel")
+		if type(id) == "string" and id ~= "" then
+			player:SetAttribute("TestTravel", nil)
+			local t0 = os.clock()
+			local result = menuApi.travel(id)
+			print(string.format("[CityLegends] fast travel %s: %.2fs (%s)", id, os.clock() - t0, tostring(result and result.ok)))
 		end
 	end)
 end
