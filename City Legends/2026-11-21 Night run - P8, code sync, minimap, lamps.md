@@ -61,3 +61,14 @@ CarLamps, Driving, TailLights are checksum-identical to the repo; CarSkin got on
 - Road mesh collision data stripped on 1,995 of 2,107 meshes (112 would not load tonight: "Failed to load mesh asset"; retry later). Size, position and DoubleSided unchanged on every one. The place saved straight after.
 - v1656 holds: P8 roads + lanes, the 14 synced code files, lamp code fixes, new minimap art, and the builders' work in progress (IrlNight21Nov, City Hall, Dala Bridge).
 - Still to do: P8 Play drive test, night lamp check, the 112 meshes, U Chit Maung deck dip, flyover feet + yellow lines rebuild.
+
+## Flyover feet + yellow lines: generator fixed in the repo (not rebuilt yet)
+- **Why the feet looked wrong** (owner's picture = Banyar Dala south foot): `roads05_fix.py` `deck_joints` narrowed the ground road at every deck foot to the deck width, undoing the gore widening, so the side lanes ended on grass and the main road's kerb and pavement crossed them. The stray grey box was a small pavement piece; the pointed island was the kerbed median starting inside the gore.
+- **Fixed in code:** decks with side lanes keep the gore width; no kerbed median within 150 studs of such a foot; 6 yellow barriers per edge at each nose (mesh + collision); centre line of undivided two-way roads and decks is double yellow (230, 222, 114). Test `roads05_deckfoot_test.py` passes.
+- **U Chit Maung deck dip cause:** the bake sampled the ground junction's height (29.9) because that deck's own surface was not in the P8 export. Bake now ignores surfaces more than 8 studs off the data height.
+- **To see it in the game:** fix -> paint must run on the HOME PC (the laptop has no `roads_unfixed.json`). Then rebuild + bake 11 cells for the 9 feet of the 5 decks with side lanes: 22x18, 22x19, 22x21, 22x23, 23x28, 24x28, 25x21, 25x22, 26x20, 26x21, 26x22. Yellow centre lines need a bake of all 252 cells.
+- Only 5 of 52 decks have side lanes in the data. 12+ other decks have separately named ground roads beside them; those are unchanged and not yet looked at.
+
+## 02:10 usage limit hit; Studio changed
+- Three agents stopped mid-work at the usage limit: landmarks (City Hall, Sule, roundabout, fence), Dala Bridge, car lamp shells. Their Studio work up to then is in the open place only if it was still open; last save is v1656.
+- After the reset, the only Studio open was "rongstrix's Place: 11202026_2" (placeId 115768373987676), not City Legends. Nothing was done in it (rule: never touch another game's Studio).
