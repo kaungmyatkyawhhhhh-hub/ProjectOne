@@ -174,6 +174,7 @@ def cabin_role(lo, hi):
 
 
 log = {}
+cards = []
 for o in list(bpy.data.objects):
     if o.type != "MESH":
         continue
@@ -216,12 +217,6 @@ for o in list(bpy.data.objects):
         lv = np.empty(len(me.loops), dtype=np.int64)
         me.loops.foreach_get("vertex_index", lv)
         froles = vrole[lv[fv]]
-        # seat inserts: the middle strip of each front seat's back and base
-        fc = np.empty(nf * 3)
-        me.polygons.foreach_get("center", fc)
-        fc = fc.reshape(-1, 3) @ M[:3, :3].T + M[:3, 3]
-        ins = (froles == "r34_cloth") & (np.abs(np.abs(fc[:, 0]) - 0.76) < 0.2) & (fc[:, 1] < 0.95)
-        froles[ins] = "r34_cloth_insert"
     else:
         froles = np.array([role0 or "r34_trim"] * nf, dtype=object)
         if role0 == "r34_paint":
@@ -234,11 +229,16 @@ for o in list(bpy.data.objects):
             me.polygons.foreach_get("normal", fn)
             fn = fn.reshape(-1, 3) @ np.linalg.inv(M[:3, :3])
             fn /= np.linalg.norm(fn, axis=1, keepdims=True) + 1e-9
-            inside = (np.abs(fc[:, 0]) < 1.62) & (fc[:, 1] > -2.1) & (fc[:, 1] < 1.9) & (fc[:, 2] > 0.5) & (fc[:, 2] < 2.64)
+            inside = (np.abs(fc[:, 0]) < 1.72) & (fc[:, 1] > -2.1) & (fc[:, 1] < 1.9) & (fc[:, 2] > 0.5) & (fc[:, 2] < 2.64)
             side = inside & (fn[:, 0] * -np.sign(fc[:, 0]) > 0.35) & (fc[:, 2] < 2.3)
             roof = inside & (fn[:, 2] < -0.5) & (fc[:, 2] > 2.2)
             froles[side] = "r34_door"
             froles[roof] = "r34_headliner"
+            # the door and quarter skins are one layer (seen from inside they vanish in Roblox, which draws one
+            # side): copy their outward faces 4 cm inwards, turned round, as plain door cards
+            out = inside & (np.abs(fc[:, 0]) > 1.25) & (fn[:, 0] * np.sign(fc[:, 0]) > 0.3) & (fc[:, 2] > 0.72) & (fc[:, 2] < 1.8)
+            if out.any():
+                cards.append((o, np.flatnonzero(out), M))
     froles[black] = "r34_black"
     roles = sorted(set(froles))
     me.materials.clear()
@@ -250,6 +250,33 @@ for o in list(bpy.data.objects):
     for nm in [c.name for c in me.color_attributes]:
         me.color_attributes.remove(me.color_attributes[nm])
     me.update()
+
+for o, faces, M in cards:
+    me = o.data
+    lv = np.empty(len(me.loops), dtype=np.int64)
+    me.loops.foreach_get("vertex_index", lv)
+    co = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", co)
+    w = co.reshape(-1, 3) @ M[:3, :3].T + M[:3, 3]
+    verts, polys, remap = [], [], {}
+    for fi in faces:
+        p = me.polygons[fi]
+        ids = [lv[li] for li in range(p.loop_start, p.loop_start + p.loop_total)][::-1]
+        poly = []
+        for vi in ids:
+            if vi not in remap:
+                q = w[vi].copy()
+                q[0] -= 0.08 * np.sign(q[0])
+                remap[vi] = len(verts)
+                verts.append(tuple(q))
+            poly.append(remap[vi])
+        polys.append(poly)
+    nm = bpy.data.meshes.new(o.name + "_card")
+    nm.from_pydata(verts, [], polys)
+    nm.materials.append(mat("r34_door"))
+    ob = bpy.data.objects.new(o.name + "_DoorCard", nm)
+    bpy.context.scene.collection.objects.link(ob)
+    log["r34_door_card"] = log.get("r34_door_card", 0) + len(polys)
 
 for k in sorted(log):
     print("role", k, log[k])
