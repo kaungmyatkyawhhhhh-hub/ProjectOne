@@ -1722,7 +1722,9 @@ local function buildCampaign(page: Frame)
 	end)
 
 	-- WORLD MAP (wide, top)
-	local mapTile = tile(page, x2, y0, c2 + 12 + c3, topH, { title = "World Map", titleSize = 32 })
+	-- (owner, 2026-11-21: "nvm put goals and chauffeur in the menu"): the right column is three equal cards (Settings,
+	-- Goals, Chauffeur), each about the size the Settings card had on a phone; the map is as wide as PLAY
+	local mapTile = tile(page, x2, y0, c2, topH, { title = "World Map", titleSize = 32 })
 	local mapPane = new("Frame", { Name = "MapPane", BackgroundColor3 = Color3.fromRGB(14, 34, 58), Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = mapTile })
 	local shadeL = new("Frame", { BackgroundColor3 = NAVY0, BorderSizePixel = 0, Size = UDim2.new(0.55, 0, 1, 0), ZIndex = 2, Parent = mapTile }, {
 		new("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) }) }),
@@ -1797,8 +1799,37 @@ local function buildCampaign(page: Frame)
 	end)
 
 	-- SETTINGS
-	local set = tile(page, x3, lowY, c3, lowH, { title = "Settings", sub = "Map, graphics, camera, sound", icon = "gear", iconSize = 64, titleSize = 30 })
+	local h3 = math.floor((hTall - 24) / 3)
+	local set = tile(page, x3, y0, c3, h3, { title = "Settings", sub = "Map, graphics, camera, sound", icon = "gear", iconSize = 64, titleSize = 30 })
 	focusable(set, openSettings)
+	-- GOALS and CHAUFFEUR: the same tile, with the HUD side buttons' own drawn icons
+	local function sideCard(row: number, title: string, caption: string, kind: string, open: () -> ()): TextButton
+		local b = tile(page, x3, y0 + row * (h3 + 12), c3, h3, { title = title, sub = caption, titleSize = 30 })
+		local art = new("Frame", { Name = "Art", BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -20, 0, 20), Size = UDim2.fromOffset(64, 64), ZIndex = 2, Parent = b })
+		UI.kit.icon(kind, art, 64, GOLD)
+		focusable(b, function()
+			outOfMenu(open)
+		end)
+		return b
+	end
+	local goals = sideCard(1, "Goals", "Daily tasks and rewards", "flag", function()
+		if api then
+			api.openGoals()
+		end
+	end)
+	-- the old GOALS side button's red dot: something to claim
+	local goalsDot = new("Frame", { Name = "Dot", BackgroundColor3 = Color3.fromRGB(255, 72, 72), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -20, 0, 20), Size = UDim2.fromOffset(14, 14), Visible = false, ZIndex = 4, Parent = goals }, {
+		new("UICorner", { CornerRadius = UDim.new(1, 0) }),
+		new("UIStroke", { Color = NAVY0, Thickness = 2 }),
+	})
+	table.insert(refreshers, function()
+		goalsDot.Visible = UI.goalsReady
+	end)
+	sideCard(2, "Chauffeur", "Call your driver", "phone", function()
+		if UI.onChauffeurButton then
+			UI.onChauffeurButton()
+		end
+	end)
 	return playFocus
 end
 

@@ -51,6 +51,7 @@ UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (Chauffeu
 UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
+UI.goalsReady = false -- the goals dot is showing (MainMenu's Goals card shows it too)
 UI.onJobsButton = nil :: (() -> ())? -- (19 Nov) the main menu's JOBS tab (Main.client)
 UI.onDealerButton = nil :: (() -> ())? -- (19 Nov) the dealer menu from anywhere (Main.client)
 UI.onShopButton = nil :: (() -> ())? -- (19 Nov) the main menu's STORE tab (Main.client)
@@ -1310,6 +1311,7 @@ local function buildSideButtons()
 	local shopBtn = sideButton("car", "CARS", 3)
 	-- (owner, 2026-10-30: GIFTS became GOALS: Legends Path, daily tasks and the daily streak)
 	local giftBtn = sideButton("flag", "GOALS", 5)
+	giftBtn.Visible = false -- (owner, 2026-11-21: "nvm put goals and chauffeur in the menu"): the main menu's Goals card; its dot sits on MENU
 	local marketBtn = sideButton("chart", "MARKET", 7)
 	marketBtn.Visible = Config.Market.Enabled == true
 	marketBtn.Activated:Connect(function()
@@ -1381,6 +1383,7 @@ local function buildSideButtons()
 	-- MENU, so their buttons are hidden: one column of Dealer, Shop, Menu, Goals, Chauffeur, Despawn
 	houseBtn.Visible, jobsBtn.Visible = false, false -- (21 Nov: CARS is back in the column, DESPAWN is out)
 	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 6)
+	chauffeurBtn.Visible = false -- (owner, 2026-11-21: "nvm put goals and chauffeur in the menu"): the main menu's Chauffeur card
 	chauffeurBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onChauffeurButton then
@@ -1394,7 +1397,7 @@ local function buildSideButtons()
 		BackgroundColor3 = Theme.Danger,
 		Visible = false,
 		ZIndex = 3,
-		Parent = giftBtn,
+		Parent = settingsBtn, -- (21 Nov: GOALS moved into the menu, so MENU carries its dot)
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Background, 2, 0) })
 
 	-- settings: camera + music toggles (same actions as C and M)
@@ -1644,6 +1647,7 @@ local function refreshDaily(force: boolean?)
 	dailyCardTitle.Text = "DAILY STREAK  ·  DAY " .. streak.day
 	dailyPanelAmount.Text = amount
 	giftDot.Visible = ready
+	UI.goalsReady = ready
 	if ready then
 		dailyCardTime.Text = "READY!"
 		dailyCardTime.TextColor3 = Theme.Money
