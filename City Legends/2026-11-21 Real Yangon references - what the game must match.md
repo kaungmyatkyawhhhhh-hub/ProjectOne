@@ -54,3 +54,7 @@ Source: `C:\Users\kaung\Downloads\IrlReferences\` (29 videos + photos, 1.6 GB, l
 - **Signs (fixes 4, 8, 9, 10):** `Workspace.Yangon1to1.Landmarks.IrlSigns21Nov` (25 parts, no Light objects; script `tools/yangon/IrlSigns21Nov.luau`, Studio `ServerStorage.ClaudeTools.IrlSigns21Nov`): Myanmar Plaza LED screen + MYANMAR PLAZA name on Myanmar Centre's Kabar Aye wall; Junction City cream name wall + roof sign; THE CENTRAL letters by Kabar Aye; 6 lit billboards (made-up ads: Legends Motors, Golden River Bank, Swan Mobile ...) on Kabar Aye's lake verge and Sule Pagoda Road. Plain text only, no logo art.
 - Pictures: `2026-11-21 Real Yangon look - * (ours vs real).jpg` (night grade, before-after, Myanmar Plaza, Junction City x2).
 - **Not done:** amber lamps not seen in a screenshot (checked by property only); THE CENTRAL letters and billboard fronts not screenshotted; Junction City canopy lights and The Central's glowing pavilion; CB Bank / Melia / Sedona signs (real brands: owner's call); truss bridge (12); YCC interior (13); Chinese temple (15). Junction City is still one plain shell block in the game.
+
+## Owner order (21 Nov, later): truss bridge, YCC interior, Chinese temple, brand signs
+"do these: the truss bridge, the YCC interior and the Chinese temple; the CB Bank, Meliá and Sedona signs".
+- **Permission:** CB Bank, Meliá, Sedona: real brand signs allowed (owner says the managers agreed, 21 Nov). Signs match the real ones (name, colours, placement). Logged in the game CLAUDE.md landmark-names rule.
