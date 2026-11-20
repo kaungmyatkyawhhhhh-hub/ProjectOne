@@ -16,10 +16,16 @@
 	R.backup(23, 29)                      -- TerrainRegion into ServerStorage.TerrainBackup_21Nov (R.restore undoes)
 	task.spawn(R.run, { { 23, 29 } })     -- or R.run() for every cell in Roads.Meshes; poll R.S (also _G.RoadBedDeepen)
 	R.cell(23, 29, true)                  -- dry run: counts only
+
+	Chosen on the Sule test cell 23x29 (aerial from (35700,420,44700)): D = 6 showed the near roads but roads
+	900 studs off stayed narrow or hidden; D = 10 shows them at full width. MARGIN 1 column: close-ups at kerbs
+	and grass edges are identical before / after. A second run with the same D changes nothing.
+	shortcut: a re-run with a BIGGER D skips already-carved columns (they now fail MAX_GAP); raise MAX_GAP by the
+	old D for that run.
 ]]
 local T = workspace.Terrain
 local M = {}
-M.D = 6 -- studs of Air under the road top
+M.D = 10 -- studs of Air under the road top
 M.MARGIN = 1 -- columns (4 studs each) kept uncarved inside the road's edge
 M.MAX_GAP = 6 -- road top more than this over the terrain = ramp / bridge: skip
 M.KINDS = { R = true, P = true }
