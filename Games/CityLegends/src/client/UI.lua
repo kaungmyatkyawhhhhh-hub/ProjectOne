@@ -1319,7 +1319,7 @@ local function buildSideButtons()
 	end)
 	-- owner (2026-10-23): "add a function to despawn car"
 	local despawnBtn = sideButton("despawn", "DESPAWN", 6)
-	despawnBtn.Visible = not UI.isTouch
+	despawnBtn.Visible = false -- (owner, 2026-11-21: "remove despawn and replace it with cars in the side buttons")
 	despawnBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onDespawnButton then
@@ -1378,7 +1378,7 @@ local function buildSideButtons()
 	end)
 	-- (owner, 2026-11-20: "only add the important buttons. 9 buttons is alot"): CARS, HOUSE and JOBS are tabs of
 	-- MENU, so their buttons are hidden: one column of Dealer, Shop, Menu, Goals, Chauffeur, Despawn
-	shopBtn.Visible, houseBtn.Visible, jobsBtn.Visible = false, false, false
+	houseBtn.Visible, jobsBtn.Visible = false, false -- (21 Nov: CARS is back in the column, DESPAWN is out)
 	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
 	chauffeurBtn.Activated:Connect(function()
 		closePanels()

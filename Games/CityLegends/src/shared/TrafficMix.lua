@@ -68,8 +68,8 @@ TrafficMix.Entries = {
 
 -- the most of each rare group on the road at once (counted over all live traffic: traffic is per client, so this is
 -- per player's view of the map)
-TrafficMix.Rare = { ferrari = 2, lambo = 2, gtr = 10, r34 = 3, bugatti = 1 }
-TrafficMix.RareChance = 0.07 -- of each spawn, the share that tries a rare car (a group under its cap)
+TrafficMix.Rare = { ferrari = 1, lambo = 1, gtr = 1, r34 = 1, bugatti = 1 } -- (owner, 2026-11-21: "i keep on spotting them"; was 2 / 2 / 10 / 3 / 1)
+TrafficMix.RareChance = 0.01 -- (21 Nov: was 0.07) of each spawn, the share that tries a rare car (a group under its cap)
 
 -- racer driving (Traffic.lua profile "racer")
 TrafficMix.Racer = {
