@@ -109,7 +109,7 @@ def read_pages(folders):
     pages = {}
     for f in folders:
         for p in glob.glob(os.path.join(f, '*')):
-            if not (p.endswith('.txt') or p.endswith('.json')) or os.path.getsize(p) < 1000:
+            if not (p.endswith('.txt') or p.endswith('.json')) or os.path.getsize(p) < 30:
                 continue
             raw = open(p, encoding='utf-8', errors='replace').read()
             if p.endswith('.json') or raw.startswith('['):
