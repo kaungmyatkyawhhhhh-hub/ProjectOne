@@ -188,3 +188,7 @@ Operation d817aa1d-6554-4de8-9641-558ab847b651 (`imports/sync/sync_21nov_g.rbxmx
 - Fix (Traffic.lua): the nose follows only the sideways move that really happened this frame, eased, capped at 19 degrees at every speed; after a blocked slide the racer waits SideHold (1 s) before trying again.
 - Exhaust flames off for now (owner: "I will add them back later"): Driving.lua removes the flame emitters and glow right after building them (shortcut comment says how to undo); the Workshop dyno flames off too.
 - Sync pack H (asset 74053055634228) = pack G's 13 scripts + Workshop; all 14 checked in Studio, store CityLegends_v1, saved. Not Play-tested yet.
+
+## Play test of the new code (21 Nov, late) - all PASS
+- Startup no errors; rare car nose: max 7 deg behind a slower car (was ~45 deg x3 a second), lane changes 15 deg; rare colours / trims / one of each: right; 46 city cars; no exhaust flames; water rescue (Inya Lake) back on the road in 1.1 s facing along it, toast shown; side buttons MENU, SHOP, CARS, DEALER; menu cards there. Store back on CityLegends_v1, 0 test-store scripts.
+- Found: a phone switched to low-end AFTER the start kept 46 cars. Fixed: `Traffic.trim(n)` drops the farthest cars to the low-end count when LowEnd turns on (Main.client). Sync pack I (asset 95786305296234), checked in Studio, saved. Not Play-tested (small change, same removal as a far racer). Does not add cars back if the phone leaves low-end.
