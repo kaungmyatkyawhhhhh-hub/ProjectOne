@@ -219,3 +219,33 @@ Owner also: "never ask me any questions again" (autopilot; say what I will and w
 - All 8 now have full shell sets (12 each: head core + glass, front / rear indicators, reverse, tail), cut from each model's own lamp meshes and placed where the real car has them: astin_dbx (now has a tail lamp: the full-width blade), bentlee_contgt, bentz_sl65bs, bentz_sls, bnw_330i_g20, ferrara_599, mclaran_12c, nisun_350z. Added to `CarLamps.CARS` with their headlamp colour; no daytime lights on the Continental GT, SL65, 599 and 350Z. Old models kept in `ServerStorage.LampBackup_21Nov`.
 - New route, no Blender needed: `tools/lamps/lampfx_studio.py` + `LampShellsStudio.luau` + `jobs_studio/` (see `tools/lamps/README.md`).
 - Still to do: tail shells on the 12 cars that light the whole rear lens (6 jobs written), the 5 re-cuts, the GLS bumper strip. Not checked at night in Play yet.
+
+## Loading screens made faster (21 Nov, owner: "make the loading screen ingame load fast")
+Measured first in Studio Play (this PC; the client now prints `startup phases`, `map wait`, `car spawn`, `fast travel`, the server `server start` and `profile ... loaded in`).
+
+**Before -> after (Studio Play, seconds):**
+
+| | Before | After |
+|---|---|---|
+| Play -> main menu (PC) | 19.3 | 8.8 |
+| Play -> main menu (TestLowEnd + PreviewPhone) | not measured | 8.5 |
+| Car out from the menu, asked -> driving (low-end branch) | 7.3-8.2 | 6.4 |
+| Car out, PC branch | old code would be ~4.5 (2.6 parts + 1.5 terrain) | 3.9 (with 3.5 s terrain; 4 s now: ~4.4) |
+| Fast travel to Sule in a car (low-end branch) | 7.8 | 6.9 |
+| Fast travel, PC branch | ~5.1 (old formula) | 4.4-4.7 (with 3.5 s; 4 s now: ~4.9) |
+
+**What was slow at the start and what changed:**
+- `RivieraTraffic.build()` 3.7 s (required by Traffic at load): its dead-end pruning swept all 134k pieces 320 times. Now a worklist, same result (checked in Play: same 133,965 pieces, 128,911 live, 2,045 dead, 0 differences), 0.34 s. Also makes the server's Chauffeur graph faster.
+- Sound check (`Audio.init` PreloadAsync) 5.0 s: now in the background (`Audio.preload`); the music starts when it is done, a car waits for it (`Audio.waitReady(5)`).
+- `BuildingSkin.apply` 3-8 s: it made every facade texture (all styles x moods) before finding that Studio refuses them, for 2 towers. Now: towers first (none = nothing to do), maps only for the looks in use.
+- The fixed `task.wait(1)` "let the world replicate" (2 s at loading frame rates): gone.
+- GetData: asked right after the remotes, picked up after the world setup.
+- Traffic cars (0.4-2.5 s) and JobsClient's state round trip (0.4-0.8 s): behind the menu.
+- Start map wait: no fixed 1 s + 1.5 s quiet; it now waits only for parts within 800 studs of the menu orbit's centre (and 300 parts within 400 there). Moved before the profile join so the two overlap.
+- After a jump (car out, fast travel): the terrain timer now runs FROM the jump, alongside the parts wait (it used to start only after the parts went quiet); first 1 s fixed wait cut to 0.5; quiet 1 s (was 1.5); a spot within 600 studs of the camera is no jump. The menu orbit is 420+ studs up, so the first car out still counts as a jump. The fade before a spawn starts after the spawn is asked (not before), and the extra 0.3 s after the fast-travel fade is gone.
+- **Terrain check tried and dropped:** `Stats` GraphicsTerrain memory keeps rising 8+ s after a jump (no plateau), so there is no usable "fine meshes done" signal. The fixed time stays as the floor: PC 4 s, phone / low-end 6.5 s, both counted from the jump (= the old ends 4.1 s / ~6.6 s, so the hidden-roads fix is kept). Shot after a Sule jump in phone mode: roads clear.
+- Server: systems start in 0.7 s; the profile load (DataStore claim) is 3-4 s in Studio and is now what the menu waits on with the first streaming (~6 s, 8,000 parts). An early profile load at join was tried and reverted (no gain: the server was already up when the player joined).
+
+**Kept:** watchdog, guarded inits, SKIP (every wait still checks `UI.loadingWaiting`), the 45 s cap. Studio hook: player attribute `TestTravel` = a fast travel id.
+**Synced to Studio** (Main.client, Audio, BuildingSkin, JobsClient, RivieraTraffic, Main.server; each checked against git before and by checksum after; last Main.client 1155535121). Store back on CityLegends_v1, 0 test refs. Not saved (owner saves).
+**Not done / not known:** real phone numbers (Studio's "phone" is only the TestLowEnd / PreviewPhone branch on a PC); the 6.5 s phone terrain time is still the old guess; the final 4 s PC terrain value was synced but not Play-timed (it is a constant, +0.5 s on the measured 3.5 s runs).

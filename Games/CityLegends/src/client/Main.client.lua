@@ -256,10 +256,11 @@ local JUMP_FAR = 600
 -- parts go quiet at ~2.6 s. So a jump keeps the screen up a little longer; phones mesh terrain slower.
 -- (21 Nov, "make the loading screen ingame load fast") the terrain time now runs from the jump itself, alongside the
 -- parts wait (it used to start only after the parts went quiet: 1.5 / 4 s on top), and a spot near where the camera
--- just was (the first car out under the menu's orbit) is no jump at all. The values below are from the jump: PC
--- 3.5 s = the measured "clear by ~3.5 s"; phones = the old 2.6 s parts wait + its 4 s guess, rounded down.
-local TERRAIN_SETTLE = 3.5
-local TERRAIN_SETTLE_PHONE = 6 -- shortcut: a guess (not measured on a phone), tune from a phone test
+-- just was is no jump at all (the menu orbits 420+ studs up, so the first car out still counts as one). The values
+-- are from the jump: PC 4 s = the measured "clear at 3.5-4 s" (the old end was 4.1 s); phones = the old 2.6 s parts
+-- wait + its 4 s guess. (Terrain graphics memory never settles soon after a jump: no usable "meshes done" signal.)
+local TERRAIN_SETTLE = 4
+local TERRAIN_SETTLE_PHONE = 6.5 -- shortcut: a guess (not measured on a phone), tune from a phone test
 -- is `to` far from where the camera is now (call before moving the car or the camera there)
 local function isJump(to: Vector3): boolean
 	return (to - camera.CFrame.Position).Magnitude > JUMP_FAR
