@@ -1,0 +1,1 @@
+{"id": "lexis_lfa", "note": "tail only: the triangle lamp inside TurnR, round the Rev corner (not the middle strip)", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.4, 0.9, 0.65, 0.9, 1.6, 2.2], "box": [0, 0.7, -9, 9, -9, 2.05], "off": 0.006}, {"part": "SeeThrough_Lens_Red", "in": [0.4, 0.9, 0.65, 0.9, 1.6, 2.2], "box": [0.62, 0.7, -9, 9, 2.05, 9], "off": 0.006}]}}

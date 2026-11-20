@@ -1,0 +1,1 @@
+{"id": "ferrara_california", "note": "tail only: the lamp unit between Rev and TurnR (not the middle stop strip, not the low reflector)", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.5, 0.75, 0.7, 1.0, 1.7, 2.2], "box": [0.58, 0.66, -9, 9, -9, 9], "off": 0.006}]}}

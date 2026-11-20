@@ -1,1 +1,1 @@
-{"id": "ferrara_458speciale", "note": "tail only: the round lamp per side (not the low fog / reflector pieces, not the middle bar)", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.6, 0.95, 0.7, 0.9, 1.6, 1.9], "off": 0.006}]}}
+{"id": "ferrara_458speciale", "note": "tail only: the round lamp per side, between the existing Rev (inner) and TurnR (outer) slices so no shells overlap", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.6, 0.95, 0.7, 0.9, 1.6, 1.9], "box": [0.73, 0.81, -9, 9, -9, 9], "off": 0.006}]}}

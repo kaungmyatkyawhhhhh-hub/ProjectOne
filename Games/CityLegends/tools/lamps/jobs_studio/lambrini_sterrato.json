@@ -1,1 +1,1 @@
-{"id": "lambrini_sterrato", "note": "tail only: the Y strip, not the middle bar", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.5, 0.8, 0.7, 0.9, 1.7, 2.05], "off": 0.006}]}}
+{"id": "lambrini_sterrato", "note": "tail only: the Y strip, not the middle bar, between Rev and TurnR", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.5, 0.8, 0.7, 0.9, 1.7, 2.05], "box": [0.51, 0.71, -9, 9, -9, 9], "off": 0.006}]}}

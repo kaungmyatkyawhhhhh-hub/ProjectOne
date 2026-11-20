@@ -1,1 +1,1 @@
-{"id": "lambrini_lp750", "note": "tail only: the Y segments", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.55, 0.85, 0.66, 0.8, 1.9, 2.16], "off": 0.006}]}}
+{"id": "lambrini_lp750", "note": "tail only: the Y segments under the TurnR top band (y 0.73)", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.55, 0.85, 0.66, 0.8, 1.9, 2.16], "box": [0, 9, -9, 0.73, -9, 9], "off": 0.006}]}}
