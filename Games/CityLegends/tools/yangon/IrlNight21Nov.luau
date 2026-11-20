@@ -4,9 +4,11 @@
 
 	Builds Workspace.Yangon1to1.Landmarks.IrlNight21Nov (delete that one folder to undo):
 	  CityHall    warm-white light lines on the floor bands, parapet and every tower eave + facade wash (0806_19s)
+	              + M.cityHallModel(): the model fix inside Landmarks.city_hall (Rebuild21Nov; M.undoCityHall())
 	  Roundabout  the gold monument and its lit base ring on the bare Hanthawaddy island (0803_2s)
 	  ParkFence   red / green neon meander and gold-wrapped poles round Maha Bandula Park (0801_5s)
 	  SuleShops   gold crest on the shop ring, crest floodlights, yellow sign boards (0806_1s)
+	  SuleRoundabout  floods on the stupa (IMG_0806, IMG_0804 80 s)
 
 	Night switching is WorldFx's own (no new code): Neon lines carry tag FacadeNight (hidden by day), gold
 	carries LandmarkGlow (DayColor / DayMaterial / NightColor), pole wraps LampGlow, lights LODLight + DayOff
@@ -125,23 +127,319 @@ local function centroid(poly): { number }
 end
 
 ------------------------------------------------------------------------------------------------ A. City Hall
--- outline = OSM o5677100 (dt_landmarks.city_hall: same polygon, same tower maths; S = 3 studs a metre)
+-- outline = OSM o5677100 (the polygon dt_landmarks.city_hall uses; S = 3 studs a metre)
 local CH_POLY = { { 36109.3, 44964.3 }, { 36162.8, 45014.5 }, { 36256.7, 45017.2 }, { 36256.5, 45023.9 }, { 36262.3, 45024.1 }, { 36261.9, 45036.5 }, { 36350.3, 45039.1 }, { 36350.7, 45025.7 }, { 36355.9, 45025.9 }, { 36356.0, 45021.2 }, { 36444.2, 45023.7 }, { 36465.9, 45003.8 }, { 36471.3, 44787.5 }, { 36115.1, 44777.2 } }
 local CH_RECT = { { 36472.2, 44787.5 }, { 36114.8, 44777.1 }, { 36107.4, 45032.1 }, { 36464.8, 45042.4 } } -- its minimum rotated rectangle
 local CH_C = { 36289.77, 44909.79 }
-local CH_BASE = 13.9 -- the trim mesh's foot (Visual.TRM)
+local CH_BASE = 13.9 -- the trim mesh foot (Visual.TRM)
+local CH_YH = CH_BASE + 15.6 * 3 -- the roof
+local CH_FRONT = 6 -- CH_POLY edge 6 -> 7 is the entrance bay front (south, facing the park)
 local WARM = rgb(238, 230, 213) -- photo; the lights use it
 local WARM_NEON = rgb(196, 182, 156) -- the Neon that reads as it (full white blooms)
+local CH_WALL = rgb(238, 230, 212) -- cream stone
+local CH_TRIM = rgb(218, 206, 182)
+local CH_ROOF = rgb(132, 104, 156) -- lilac tier roofs
+local CH_EAVE = rgb(70, 120, 84) -- green eave boards
+local CH_GOLD = rgb(232, 180, 70)
+local CH_HIP = math.pi -- the CornerWedgePart turn that puts its peak on the tier (checked by eye in Studio)
 
-function M.cityHall(): string
-	local f = item("CityHall")
-	local yH = CH_BASE + 15.6 * 3
-	local nLine, nLight = 0, 0
-	-- floor bands and parapet, right round
+local function inPoly(x: number, z: number, poly): boolean
+	local inside = false
+	local j = #poly
+	for i = 1, #poly do
+		local a, b = poly[i], poly[j]
+		if (a[2] > z) ~= (b[2] > z) and x < (b[1] - a[1]) * (z - a[2]) / (b[2] - a[2]) + a[1] then
+			inside = not inside
+		end
+		j = i
+	end
+	return inside
+end
+
+-- the towers, each ON the roof: a corner pavilion slides in from its corner of the rectangle until its whole
+-- block stands inside the outline (the old mesh put the south-west one 27 studs in from the rectangle corner,
+-- which is outside the cut corner by Sule: it hung in the air); the tall one stands on the entrance bay
+type Tower = { cx: number, cz: number, hu: number, hv: number, blockH: number, hb: number, tiers: number }
+local function chFrame(): Vector3
+	return Vector3.new(CH_RECT[2][1] - CH_RECT[1][1], 0, CH_RECT[2][2] - CH_RECT[1][2]).Unit
+end
+local function chTowers(): { Tower }
+	local e = chFrame()
+	local v = Vector3.new(-e.Z, 0, e.X)
+	local out = {}
+	for _, c in CH_RECT do
+		local d = Vector3.new(CH_C[1] - c[1], 0, CH_C[2] - c[2]).Unit
+		local half = 13.5
+		for step = 27, 140 do
+			local p = Vector3.new(c[1], 0, c[2]) + d * step
+			local ok = true
+			for _, s in { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } } do
+				local q = p + e * (s[1] * (half + 3)) + v * (s[2] * (half + 3))
+				ok = ok and inPoly(q.X, q.Z, CH_POLY)
+			end
+			if ok then
+				table.insert(out, { cx = p.X, cz = p.Z, hu = half, hv = half, blockH = 16, hb = 16, tiers = 3 })
+				break
+			end
+		end
+	end
+	local a, b = CH_POLY[CH_FRONT], CH_POLY[CH_FRONT + 1]
+	local nx, nz = outward(a, b, CH_C)
+	table.insert(out, { cx = (a[1] + b[1]) / 2 - nx * 25, cz = (a[2] + b[2]) / 2 - nz * 25, hu = 24, hv = 21, blockH = 25, hb = 25.5, tiers = 5 })
+	return out
+end
+-- the tiers of a tower: { y of the eave over the roof, eave half, top half, rise }, then the spire foot
+local function chTiers(t: Tower): ({ { number } }, number)
+	local list = {}
+	local y, hb = t.blockH, t.hb
+	for k = 1, t.tiers do
+		table.insert(list, { y, hb, hb * 0.5, hb * 0.42 })
+		y += 0.5 + hb * 0.42
+		if k < t.tiers then
+			y += hb * 0.24
+			hb *= 0.72
+		end
+	end
+	return list, y
+end
+
+-- the model fix (owner, 21 Nov: "the city hall needs fix too"). The wall, tier-roof, eave and spire meshes
+-- (WAL / ROW / WTR / GLD) hold the hanging tower and the flat slab tiers and cannot be cut in Studio (CSG: not
+-- manifold), so they are hidden and built again here from Parts in city_hall.Rebuild21Nov: walls on the same
+-- plane with the window openings read from the glass mesh, towers at chTowers(), sloped tiers, spires.
+-- Undo: M.undoCityHall() (or the whole original: ServerStorage.CityHall_before_21Nov).
+local CH_HIDE = { "WAL", "ROW", "WTR", "GLD", "TRM" } -- (TRM: its teal is baked into the mesh, Color cannot change it)
+local function merge(iv: { { number } }): { { number } }
+	table.sort(iv, function(p, q)
+		return p[1] < q[1]
+	end)
+	local out = {}
+	for _, r in iv do
+		local last = out[#out]
+		if last and r[1] <= last[2] + 0.05 then
+			last[2] = math.max(last[2], r[2])
+		else
+			table.insert(out, { r[1], r[2] })
+		end
+	end
+	return out
+end
+
+function M.cityHallModel(): string
+	local model = landmarks().city_hall
+	local V = model.Visual
+	local SS = game:GetService("ServerStorage")
+	if not SS:FindFirstChild("CityHall_before_21Nov") then
+		local b = model:Clone()
+		b.Name = "CityHall_before_21Nov"
+		b.Parent = SS
+	end
+	local old = model:FindFirstChild("Rebuild21Nov")
+	if old then
+		old:Destroy()
+	end
+	local R = Instance.new("Model")
+	R.Name = "Rebuild21Nov"
+	R:SetAttribute("From", FROM)
+	local nWall, nTower = 0, 0
+
+	-- window openings: the glass panes stand 1 stud behind the wall plane
+	local glass = V.GLW
+	local em = game:GetService("AssetService"):CreateEditableMeshAsync(Content.fromUri(glass.MeshId), { FixedSize = true })
+	local sc = glass.Size / glass.MeshSize
+	local pos = {}
+	for _, vid in em:GetVertices() do
+		pos[vid] = glass.CFrame:PointToWorldSpace(em:GetPosition(vid) * sc)
+	end
+	local faces = {}
+	for _, fid in em:GetFaces() do
+		local f = em:GetFaceVertices(fid)
+		table.insert(faces, { pos[f[1]], pos[f[2]], pos[f[3]] })
+	end
+	em:Destroy()
+
+	local TOP = CH_YH + 1.6
+	local FOOT = CH_BASE - 0.5
 	for i, a in CH_POLY do
 		local b = CH_POLY[i % #CH_POLY + 1]
 		local nx, nz, L = outward(a, b, CH_C)
-		for _, y in { CH_BASE + 14.6, CH_BASE + 35.6, yH - 0.6, yH + 3.8 } do
+		local A = Vector3.new(a[1], 0, a[2])
+		local e = Vector3.new(b[1] - a[1], 0, b[2] - a[2]).Unit
+		local n = Vector3.new(nx, 0, nz)
+		local cf = CFrame.fromMatrix(A, e, Vector3.yAxis) -- local x along the wall
+		local zOut = cf:VectorToObjectSpace(n).Z -- +1 or -1: which local z is outside
+		local function wall(s0: number, s1: number, y0: number, y1: number, d0: number, d1: number)
+			if s1 - s0 < 0.05 or y1 - y0 < 0.05 then
+				return
+			end
+			part(R, "Wall", Vector3.new(s1 - s0, y1 - y0, d0 - d1), cf * CFrame.new((s0 + s1) / 2, (y0 + y1) / 2, zOut * (d0 + d1) / 2), CH_WALL)
+			nWall += 1
+		end
+		-- the panes of this wall as (s, y) boxes
+		local boxes = {}
+		for _, f in faces do
+			local on = true
+			local s0, s1, y0, y1 = math.huge, -math.huge, math.huge, -math.huge
+			for _, p in f do
+				local rel = p - A
+				local s, d = rel:Dot(e), rel:Dot(n)
+				on = on and math.abs(d + 1) < 0.25 and s > -0.1 and s < L + 0.1
+				s0, s1, y0, y1 = math.min(s0, s), math.max(s1, s), math.min(y0, p.Y), math.max(y1, p.Y)
+			end
+			if on then
+				table.insert(boxes, { s0, s1, y0, y1 })
+			end
+		end
+		local rowIv = {}
+		for _, bx in boxes do
+			table.insert(rowIv, { bx[3], bx[4] })
+		end
+		local rows = merge(rowIv)
+		wall(0, L, FOOT, TOP, -1.06, -1.7) -- the back of every opening
+		local y = FOOT
+		for _, row in rows do
+			wall(0, L, y, row[1], -0.06, -0.98) -- the band under this row
+			local paneIv = {}
+			for _, bx in boxes do
+				if bx[3] >= row[1] - 0.1 and bx[4] <= row[2] + 0.1 then
+					table.insert(paneIv, { bx[1], bx[2] })
+				end
+			end
+			local s = 0
+			for _, pane in merge(paneIv) do
+				wall(s, pane[1], row[1], row[2], -0.06, -0.98) -- a pier
+				s = pane[2]
+			end
+			wall(s, L, row[1], row[2], -0.06, -0.98)
+			y = row[2]
+		end
+		wall(0, L, y, TOP, -0.06, -0.98)
+		-- the trim, in stone instead of teal: three bands and a pilaster between bays
+		local function trim(s0: number, s1: number, y0: number, y1: number, depth: number)
+			part(R, "Trim", Vector3.new(s1 - s0, y1 - y0, depth), cf * CFrame.new((s0 + s1) / 2, (y0 + y1) / 2, zOut * (depth / 2 - 0.06)), CH_TRIM)
+			nWall += 1
+		end
+		local bands = { { CH_BASE + 14.1, CH_BASE + 15, 0.96 }, { CH_BASE + 35.1, CH_BASE + 36, 1.1 }, { CH_YH - 1.35, CH_YH + 0.2, 1.5 } }
+		local foot = FOOT
+		for _, bd in bands do
+			trim(0, L, bd[1], bd[2], bd[3])
+			if rows[1] then
+				local paneIv = {}
+				for _, bx in boxes do
+					if bx[4] <= rows[1][2] + 0.1 then
+						table.insert(paneIv, { bx[1], bx[2] })
+					end
+				end
+				local panes = merge(paneIv)
+				for j = 1, #panes - 1 do
+					local mid = (panes[j][2] + panes[j + 1][1]) / 2
+					trim(mid - 0.6, mid + 0.6, foot, bd[1], 0.6)
+				end
+			end
+			foot = bd[2]
+		end
+	end
+
+	-- towers
+	local e = chFrame()
+	for _, t in chTowers() do
+		local cf = CFrame.fromMatrix(Vector3.new(t.cx, CH_YH, t.cz), e, Vector3.yAxis)
+		local function P(name: string, size: Vector3, at: CFrame, color: Color3, class: string?): BasePart
+			nTower += 1
+			if class then
+				local p = Instance.new(class) :: BasePart
+				p.Name, p.Anchored, p.CanCollide, p.CanTouch, p.CanQuery, p.CastShadow = name, true, false, false, false, false
+				p.Size, p.CFrame, p.Color, p.Material = size, cf * at, color, Enum.Material.SmoothPlastic
+				p:SetAttribute("From", FROM)
+				p.Parent = R
+				return p
+			end
+			return part(R, name, size, cf * at, color)
+		end
+		P("Block", Vector3.new(2 * t.hu, t.blockH + 1, 2 * t.hv), CFrame.new(0, (t.blockH - 1) / 2, 0), CH_WALL)
+		P("BlockBand", Vector3.new(2 * t.hu + 1.2, 0.9, 2 * t.hv + 1.2), CFrame.new(0, t.blockH - 2.2, 0), CH_TRIM)
+		local tiers, top = chTiers(t)
+		for k, tr in tiers do
+			local y, hb, ht, rise = tr[1], tr[2], tr[3], tr[4]
+			local d = hb - ht
+			P("Eave", Vector3.new(2 * hb + 0.7, 0.5, 2 * hb + 0.7), CFrame.new(0, y + 0.25, 0), CH_EAVE)
+			P("RoofCore", Vector3.new(2 * ht, rise, 2 * ht), CFrame.new(0, y + 0.5 + rise / 2, 0), CH_ROOF)
+			for q = 0, 3 do
+				local rot = CFrame.Angles(0, q * math.pi / 2, 0)
+				P("Roof", Vector3.new(2 * ht, rise, d), rot * CFrame.new(0, y + 0.5 + rise / 2, -(ht + d / 2)), CH_ROOF, "WedgePart")
+				P("RoofHip", Vector3.new(d, rise, d), rot * CFrame.new(ht + d / 2, y + 0.5 + rise / 2, -(ht + d / 2)) * CFrame.Angles(0, CH_HIP, 0), CH_ROOF, "CornerWedgePart")
+				-- the upturned corner
+				local s = hb * 0.16
+				P("Horn", Vector3.new(0.5, 0.5, s * 2), rot * CFrame.new(hb + 0.1, y + 0.5, -(hb + 0.1)) * CFrame.Angles(0, -math.pi / 4, 0) * CFrame.Angles(math.rad(38), 0, 0) * CFrame.new(0, 0, -s * 0.8), CH_GOLD)
+			end
+			if k < #tiers then
+				local nh = tiers[k + 1][2] * 0.55
+				local dh = tiers[k + 1][1] - (y + 0.5 + rise)
+				P("Drum", Vector3.new(2 * nh, dh, 2 * nh), CFrame.new(0, y + 0.5 + rise + dh / 2, 0), CH_WALL)
+			end
+		end
+		-- spire: shrinking gold drums, a rod, a bud
+		local r = tiers[#tiers][3] * 0.8
+		local y = top
+		for _ = 1, 5 do
+			local h = r * 1.5
+			nTower += 1
+			local c = cyl(R, "Spire", r, h, (cf * CFrame.new(0, y + h / 2, 0)).Position, CH_GOLD)
+			c.Reflectance = 0.12
+			y += h
+			r *= 0.66
+		end
+		nTower += 2
+		cyl(R, "SpireRod", 0.3, t.hb * 0.35, (cf * CFrame.new(0, y + t.hb * 0.175, 0)).Position, CH_GOLD)
+		part(R, "SpireBud", Vector3.one * 1.4, cf * CFrame.new(0, y + t.hb * 0.35, 0), CH_GOLD, nil, Enum.PartType.Ball)
+	end
+
+	-- real colours on the meshes that stay; the old ones kept as attributes
+	for name, look in { SLB = { rgb(168, 164, 156), Enum.Material.SmoothPlastic } } do
+		local p = V[name]
+		if p:GetAttribute("Old21Color") == nil then
+			p:SetAttribute("Old21Color", p.Color)
+			p:SetAttribute("Old21Material", p.Material.Name)
+		end
+		p.Color, p.Material = look[1], look[2]
+	end
+	for _, name in CH_HIDE do
+		local p = V[name]
+		if p:GetAttribute("Old21Transparency") == nil then
+			p:SetAttribute("Old21Transparency", p.Transparency)
+		end
+		p.Transparency = 1
+	end
+	R.ModelStreamingMode = model.ModelStreamingMode
+	R.Parent = model
+	return string.format("CityHall model: %d wall and trim parts, %d tower parts; hidden %s", nWall, nTower, table.concat(CH_HIDE, " "))
+end
+
+function M.undoCityHall()
+	local model = landmarks().city_hall
+	local r = model:FindFirstChild("Rebuild21Nov")
+	if r then
+		r:Destroy()
+	end
+	for _, p in model.Visual:GetChildren() do
+		if p:GetAttribute("Old21Transparency") ~= nil then
+			p.Transparency = p:GetAttribute("Old21Transparency")
+		end
+		if p:GetAttribute("Old21Color") ~= nil then
+			p.Color = p:GetAttribute("Old21Color")
+			p.Material = (Enum.Material :: any)[p:GetAttribute("Old21Material")]
+		end
+	end
+end
+
+-- the night lights: lines on the floor bands and parapet, on every tier eave, and the facade wash
+function M.cityHall(): string
+	local f = item("CityHall")
+	local nLine, nLight = 0, 0
+	for i, a in CH_POLY do
+		local b = CH_POLY[i % #CH_POLY + 1]
+		local nx, nz, L = outward(a, b, CH_C)
+		for _, y in { CH_BASE + 14.6, CH_BASE + 35.6, CH_YH + 1.9 } do
 			local o = Vector3.new(nx * 1.9, 0, nz * 1.9)
 			local size, cf = bar(Vector3.new(a[1], y, a[2]) + o, Vector3.new(b[1], y, b[2]) + o, 0.55, 2)
 			neon(f, "Line", size, cf, WARM_NEON)
@@ -160,38 +458,21 @@ function M.cityHall(): string
 			nLight += 1
 		end
 	end
-	-- towers: eave squares in the rectangle's frame
-	local e = Vector3.new(CH_RECT[2][1] - CH_RECT[1][1], 0, CH_RECT[2][2] - CH_RECT[1][2]).Unit
-	local function square(cx: number, cz: number, y: number, hu: number, hv: number)
-		local cf = CFrame.fromMatrix(Vector3.new(cx, y, cz), e, Vector3.yAxis)
-		for _, s in { -1, 1 } do
-			neon(f, "Eave", Vector3.new(2 * hu + 0.5, 0.5, 0.5), cf * CFrame.new(0, 0, s * hv), WARM_NEON)
-			neon(f, "Eave", Vector3.new(0.5, 0.5, 2 * hv + 0.5), cf * CFrame.new(s * hu, 0, 0), WARM_NEON)
-			nLine += 2
-		end
-	end
-	local function pyatthat(cx: number, cz: number, w: number, y: number, tiers: number)
-		for k = 1, tiers do
-			local hb = w / 2 + w * 0.12 + 0.3
-			square(cx, cz, y - 0.25, hb, hb)
-			y += w * 0.22
-			w *= 0.62
-			if k < tiers then
-				y += w * 0.35
+	local e = chFrame()
+	for _, t in chTowers() do
+		local function square(y: number, hu: number, hv: number)
+			local cf = CFrame.fromMatrix(Vector3.new(t.cx, CH_YH + y, t.cz), e, Vector3.yAxis)
+			for _, s in { -1, 1 } do
+				neon(f, "Eave", Vector3.new(2 * hu + 0.5, 0.5, 0.5), cf * CFrame.new(0, 0, s * hv), WARM_NEON)
+				neon(f, "Eave", Vector3.new(0.5, 0.5, 2 * hv + 0.5), cf * CFrame.new(s * hu, 0, 0), WARM_NEON)
+				nLine += 2
 			end
 		end
+		square(t.blockH - 2.2, t.hu + 0.95, t.hv + 0.95)
+		for _, tr in (chTiers(t)) do
+			square(tr[1] + 0.25, tr[2] + 0.7, tr[2] + 0.7)
+		end
 	end
-	for _, c in CH_RECT do
-		local d = Vector3.new(CH_C[1] - c[1], 0, CH_C[2] - c[2]).Unit * 27
-		local tx, tz = c[1] + d.X, c[2] + d.Z
-		square(tx, tz, yH + 15.35, 17.4, 17.4)
-		pyatthat(tx, tz, 27 * 0.62, yH + 21.4, 2)
-	end
-	local sx, sz = (CH_RECT[3][1] + CH_RECT[4][1]) / 2, (CH_RECT[3][2] + CH_RECT[4][2]) / 2 -- the south side's middle
-	local d = Vector3.new(CH_C[1] - sx, 0, CH_C[2] - sz).Unit * 36
-	local tx, tz = sx + d.X, sz + d.Z
-	square(tx, tz, yH + 24.0, 27.3, 21.9)
-	pyatthat(tx, tz, 54 * 0.75, yH + 24.6, 5)
 	f.Parent = landmarks().IrlNight21Nov
 	return string.format("CityHall: %d neon lines, %d lights", nLine, nLight)
 end
@@ -460,12 +741,13 @@ function M.check(): string
 end
 
 function M.build(): string
-	local out = { M.cityHall(), M.roundabout(), M.parkFence(), M.suleShops(), M.suleRoundabout() }
+	local out = { M.cityHallModel(), M.cityHall(), M.roundabout(), M.parkFence(), M.suleShops(), M.suleRoundabout() }
 	table.insert(out, M.check())
 	return table.concat(out, "\n")
 end
 
 function M.undo()
+	M.undoCityHall()
 	local root = landmarks():FindFirstChild("IrlNight21Nov")
 	if root then
 		root:Destroy()

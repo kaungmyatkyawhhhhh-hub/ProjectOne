@@ -23,12 +23,9 @@ def load(paths):
     text = ''
     for path in paths:
         t = open(path, encoding='utf-8', errors='ignore').read()
-        text += t[t.index('
-') + 1:].rstrip('#
- ')
+        text += t[t.index('\n') + 1:].rstrip('#\n ')
     parts, name = {}, None
-    for line in text.split('
-'):
+    for line in text.split('\n'):
         if line.startswith('P '):
             name = line.split(' ')[1]
         elif line.startswith('V ') and name:
