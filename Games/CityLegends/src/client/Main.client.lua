@@ -216,7 +216,13 @@ end
 local MAP_QUIET_PARTS = 6 -- at most this many parts arriving per quarter second...
 local MAP_QUIET_TIME = 1.5 -- ...for this long counts as loaded
 local MAP_MAX_WAIT = 30
-local function waitForMap(status: string)
+-- (21 Nov, owner: "the map loading is bugged and sometimes it dont fully load") after a jump the terrain's data
+-- is in within ~1 s, but its fine meshes are drawn seconds later: until then a coarse terrain sheet lies 15+ studs
+-- over the roads (only kerbs and tall things show). Studio Play on a PC: covered at 1.5 s, clear by ~3.5 s, while the
+-- parts go quiet at ~2.6 s. So a jump keeps the screen up a little longer; phones mesh terrain slower.
+local TERRAIN_SETTLE = 1.5
+local TERRAIN_SETTLE_PHONE = 4 -- shortcut: a guess (not measured on a phone), tune from a phone test
+local function waitForMap(status: string, jumped: boolean?)
 	if not workspace.StreamingEnabled or not Config.activeMap() then
 		return
 	end
@@ -235,6 +241,13 @@ local function waitForMap(status: string)
 			end
 		else
 			quiet = 0
+		end
+	end
+	if jumped then
+		local phone = UI.isTouch or require(script.Parent:WaitForChild("LowEnd")).on
+		local settleBy = os.clock() + (if phone then TERRAIN_SETTLE_PHONE else TERRAIN_SETTLE)
+		while os.clock() < settleBy and os.clock() - t0 < MAP_MAX_WAIT and UI.loadingWaiting() do
+			task.wait(0.25)
 		end
 	end
 end
@@ -627,7 +640,7 @@ local function tryAttach(model: Instance)
 		end
 		-- (the streets round the car finish loading behind the loading screen, the car held)
 		Driving.loadHold = true
-		waitForMap("Loading the streets...")
+		waitForMap("Loading the streets...", true)
 		Driving.loadHold = false
 		-- (the first car of a visit: you start on foot in the casino's garden)
 		if not arrivedYet then
@@ -977,7 +990,7 @@ MainMenu.init({
 			Driving.teleport(cf)
 			Traffic.clearAround(cf.Position, 35)
 			Driving.loadHold = true
-			waitForMap("Loading the streets...")
+			waitForMap("Loading the streets...", true)
 			Driving.loadHold = false
 			UI.hideLoading()
 			UI.fade(false, 0.4)
@@ -986,7 +999,7 @@ MainMenu.init({
 			task.wait(0.3)
 			if settle() and player.Character then
 				player.Character:PivotTo(cf + Vector3.new(0, 3, 0))
-				waitForMap("Loading the streets...")
+				waitForMap("Loading the streets...", true)
 				UI.hideLoading()
 			else
 				UI.toast("Can't put you there right now, try again", Config.Theme.Danger)
