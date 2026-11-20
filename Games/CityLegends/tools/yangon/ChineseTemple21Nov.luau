@@ -12,7 +12,7 @@
 local M = {}
 M.SHELL = { pos = Vector3.new(27294.6, 122.45, 30353.3), look = Vector3.new(-0.991, 0, 0.134), w = 103.3, d = 74.8 }
 
-local GREEN = Color3.fromRGB(52, 96, 70)
+local GREEN = Color3.fromRGB(38, 76, 54)
 local RED = Color3.fromRGB(168, 52, 40)
 local YELLOW = Color3.fromRGB(226, 190, 80)
 local WHITE = Color3.fromRGB(236, 234, 226)
