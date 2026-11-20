@@ -130,7 +130,8 @@ local CH_POLY = { { 36109.3, 44964.3 }, { 36162.8, 45014.5 }, { 36256.7, 45017.2
 local CH_RECT = { { 36472.2, 44787.5 }, { 36114.8, 44777.1 }, { 36107.4, 45032.1 }, { 36464.8, 45042.4 } } -- its minimum rotated rectangle
 local CH_C = { 36289.77, 44909.79 }
 local CH_BASE = 13.9 -- the trim mesh's foot (Visual.TRM)
-local WARM = rgb(238, 230, 213)
+local WARM = rgb(238, 230, 213) -- photo; the lights use it
+local WARM_NEON = rgb(196, 182, 156) -- the Neon that reads as it (full white blooms)
 
 function M.cityHall(): string
 	local f = item("CityHall")
@@ -143,7 +144,7 @@ function M.cityHall(): string
 		for _, y in { CH_BASE + 14.6, CH_BASE + 35.6, yH - 0.6, yH + 3.8 } do
 			local o = Vector3.new(nx * 1.9, 0, nz * 1.9)
 			local size, cf = bar(Vector3.new(a[1], y, a[2]) + o, Vector3.new(b[1], y, b[2]) + o, 0.55, 2)
-			neon(f, "Line", size, cf, WARM)
+			neon(f, "Line", size, cf, WARM_NEON)
 			nLine += 1
 		end
 		-- the wash: one SurfaceLight strip per long wall, on the ground, tilted up at the wall
@@ -164,8 +165,8 @@ function M.cityHall(): string
 	local function square(cx: number, cz: number, y: number, hu: number, hv: number)
 		local cf = CFrame.fromMatrix(Vector3.new(cx, y, cz), e, Vector3.yAxis)
 		for _, s in { -1, 1 } do
-			neon(f, "Eave", Vector3.new(2 * hu + 0.5, 0.5, 0.5), cf * CFrame.new(0, 0, s * hv), WARM)
-			neon(f, "Eave", Vector3.new(0.5, 0.5, 2 * hv + 0.5), cf * CFrame.new(s * hu, 0, 0), WARM)
+			neon(f, "Eave", Vector3.new(2 * hu + 0.5, 0.5, 0.5), cf * CFrame.new(0, 0, s * hv), WARM_NEON)
+			neon(f, "Eave", Vector3.new(0.5, 0.5, 2 * hv + 0.5), cf * CFrame.new(s * hu, 0, 0), WARM_NEON)
 			nLine += 2
 		end
 	end
@@ -200,14 +201,14 @@ end
 local RB = Vector3.new(28250.5, 75.63, 32193.5)
 local GOLD = rgb(232, 227, 96)
 local GOLD_DAY = rgb(246, 196, 62)
-local RING_GREEN = rgb(156, 201, 116)
+local RING_GREEN = rgb(78, 100, 58) -- photo (156, 201, 116) halved for Neon
 
 function M.roundabout(): string
 	local f = item("Roundabout")
 	local n = 0
 	local K = 1.25 -- the drawing below is in units of 0.8 m; the real one stands about 12 m
-	local NIGHT = rgb(150, 132, 38) -- (a bright gold Neon blooms into a yellow blob)
-	local LINE = rgb(255, 246, 190)
+	local NIGHT = rgb(116, 113, 48) -- photo (232, 227, 96) halved: Neon renders about twice its colour
+	local LINE = rgb(196, 186, 150)
 	local function at(y: number): Vector3
 		return RB + Vector3.new(0, y * K, 0)
 	end
@@ -225,7 +226,7 @@ function M.roundabout(): string
 	bed.CanQuery = true
 	n += 1
 	rim("RingGreen", 28.5, 0.5, RING_GREEN, 0.8)
-	rim("RingWhite", 28.3, 1.45, rgb(255, 250, 225), 0.6)
+	rim("RingWhite", 28.3, 1.45, LINE, 0.6)
 	-- three gold steps, a light line on each
 	local y = 1.6
 	for i, r in { 9.5, 7.8, 6.2 } do
@@ -273,9 +274,9 @@ end
 
 ------------------------------------------------------------------------------------------------ C. Maha Bandula Park fence
 local PARK = { { 36014.4, 45932.5 }, { 36409.9, 45944.4 }, { 36424.7, 45553.1 }, { 36431.7, 45297.7 }, { 36241.4, 45292.5 }, { 36125.9, 45290.8 }, { 36071.2, 45310.2 }, { 36025.2, 45350.8 }, { 36024.4, 45548.6 } } -- OSM way 129485365
-local RED = rgb(206, 52, 26) -- photo (216, 93, 49); Neon renders lighter, so the part is deeper
-local GREEN = rgb(70, 200, 62) -- photo (128, 211, 100)
-local LED_GOLD = rgb(255, 214, 96)
+local RED = rgb(108, 46, 24) -- photo (216, 93, 49): Neon renders about twice its colour, so parts carry half
+local GREEN = rgb(64, 106, 50) -- photo (128, 211, 100)
+local LED_GOLD = rgb(128, 106, 46)
 
 function M.parkFence(): string
 	local f = item("ParkFence")
@@ -334,7 +335,7 @@ local SULE_C = { 35993.22, 45130.83 }
 local SULE_Y0 = 18.47
 local BOARD = rgb(236, 200, 44)
 local CREST_DAY = rgb(255, 187, 84) -- Sule's own gold (Visual.GLD)
-local CREST_NIGHT = rgb(150, 112, 30) -- (brighter blooms yellow)
+local CREST_NIGHT = rgb(104, 86, 28) -- renders about (208, 172, 56)
 
 function M.suleShops(): string
 	local f = item("SuleShops")
