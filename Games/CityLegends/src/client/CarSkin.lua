@@ -309,7 +309,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bnw_m3_e92 = true, toyoka_chaser = true, toyoka_supra_mk4 = true, toyoka_ae86 = true, ronin_cp9a_champ = true, ronin_cp9a = true, pleiad_gc8 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bnw_m3_e92 = true, toyoka_chaser = true, toyoka_supra_mk4 = true, nisun_r34 = true, toyoka_ae86 = true, ronin_cp9a_champ = true, ronin_cp9a = true, pleiad_gc8 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -441,7 +441,7 @@ CarSkin.STEER_MODEL = {
 	-- American
 	chevo_c6 = "AmericanFlat", chevo_c7 = "AmericanFlat", chevo_camaro = "AmericanFlat", dodger_challenger = "Dodge", bentz_gt63s = "Dodge",
 	-- Japanese and the rest
-	nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s", -- (toyoka_chaser and toyoka_supra_mk4 keep their models' own wheels since their 2026-11-14 conversions)
+	mazdo_rx7 = "JDM90s", -- (toyoka_chaser, toyoka_supra_mk4 and nisun_r34 keep their models' own wheels since their conversions of 2026-11-14 / 11-21)
 	mazdo_rx8 = "RX8",
 	-- (bugotti_veyron had the generated "Veyron" wheel; the new Veyrun models of 2026-11-03 keep their
 	-- own, owner: "use the steering wheel which came from the model")

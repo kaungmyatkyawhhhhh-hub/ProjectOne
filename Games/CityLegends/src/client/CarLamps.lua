@@ -52,6 +52,7 @@ CarLamps.CARS = {
 	bnw_m3_e92 = true, -- (the 2011 model's own lamps, 2026-11-13)
 	toyoka_chaser = true, -- (the JZX100 model's own lamps, re-converted 2026-11-14)
 	toyoka_supra_mk4 = true, -- (the 1994 SZ-R model's own lamps, 2026-11-14)
+	nisun_r34 = true, -- (the ARjun.JS model's own lamps, 2026-11-21)
 	toyoka_ae86 = true, -- (the 1985 model's own lamps, the pop-ups raised for good, 2026-11-14)
 	ronin_cp9a_champ = true, -- (the 1999 champion's edition model's own lamps, 2026-11-14)
 	ronin_cp9a = true, -- (the 1999 model's own lamps, 2026-11-14)
@@ -65,7 +66,7 @@ CarLamps.CARS = {
 CarLamps.NO_DRL = {
 	toyoka_ae86 = true, toyoka_chaser = true, toyoka_supra_mk4 = true, ronin_cp9a = true, ronin_cp9a_champ = true,
 	lambrini_countach = true, lambrini_lp640 = true, lambrini_lp670 = true,
-	bentlee_contgt = true, bentz_sl65bs = true, nisun_350z = true, ferrara_599 = true,
+	bentlee_contgt = true, bentz_sl65bs = true, nisun_350z = true, ferrara_599 = true, nisun_r34 = true,
 } :: { [string]: boolean }
 
 -- the real car's lamps by model and year: warm halogen, cool xenon, white LED (shells and beams)
@@ -73,7 +74,8 @@ local HALOGEN, XENON, LED = Color3.fromRGB(255, 214, 160), Color3.fromRGB(240, 2
 CarLamps.TINT = {
 	toyoka_ae86 = HALOGEN, toyoka_chaser = HALOGEN, toyoka_supra_mk4 = HALOGEN, ronin_cp9a = HALOGEN, ronin_cp9a_champ = HALOGEN,
 	lambrini_countach = HALOGEN,
-	audy_r8 = XENON, audy_r8_lw = XENON, nisun_gtr = XENON, bnw_m5_e60 = XENON, bnw_m3_e92 = XENON,
+	audy_r8 = XENON, audy_r8_lw = XENON, nisun_gtr = XENON, nisun_r34 = XENON, -- (the BNR34: HID low beams)
+	bnw_m5_e60 = XENON, bnw_m3_e92 = XENON,
 	lambrini_lp560 = XENON, lambrini_lp570 = XENON, lambrini_lp640 = XENON, lambrini_lp670 = XENON, lambrini_lp700 = XENON,
 	lambrini_lp750 = XENON, ferrara_458spider = XENON, ferrara_458speciale = XENON, ferrara_california = XENON,
 	bugotti_veyron = XENON, bugotti_veyron_sport = XENON, bugotti_veyron_top = XENON,

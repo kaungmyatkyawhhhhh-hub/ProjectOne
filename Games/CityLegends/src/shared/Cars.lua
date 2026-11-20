@@ -248,7 +248,7 @@ Cars.OLD_MODELS = {
 	suzaki_swift = true, toyoka_belta = true, kio_ev6 = true, byt_seal = true, toyoka_camri = true, toyoka_crown = true,
 	toyoka_alfard = true, toyoka_lc200 = true, mazdo_rx7 = true, mazdo_rx8 = true, bnw_530i = true, bnw_540i = true,
 	bentz_e300 = true, bentz_e400 = true, bnw_m3_f80 = true, bnw_m6_v10 = true, bnw_m8gc = true, bentz_cla45 = true,
-	bentz_cls63s = true, nisun_r34 = true, dodger_challenger = true, xiaomo_su7 = true, bnw_x6 = true, bnw_x7 = true,
+	bentz_cls63s = true, dodger_challenger = true, xiaomo_su7 = true, bnw_x6 = true, bnw_x7 = true,
 	toyoka_lc300 = true, lexis_lx700 = true, bentz_gle53 = true, bentz_g63 = true, byt_u8 = true, porsha_panamera = true,
 	chevo_camaro = true, chevo_c6 = true, porsha_boxster = true, chevo_c7 = true, bentz_s63 = true, bentz_gt63s = true,
 	astin_db9 = true, astin_vantage = true, ferrara_f430 = true, brabos_g63 = true, rolls_wraith = true, rolls_cullinan = true,
