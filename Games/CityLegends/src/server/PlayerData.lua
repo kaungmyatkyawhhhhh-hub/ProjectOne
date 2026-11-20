@@ -400,7 +400,7 @@ function PlayerData.load(player: Player): Profile?
 				local shelved = (profile :: any).Shelved
 				for _, id in saved.Owned do
 					if type(id) == "string" and Cars.ById[id] then
-						if Cars.OLD_MODELS[Cars.modelOf(id)] then
+						if Cars.OLD_MODELS[Cars.modelOf(id)] or Cars.oldTrim(id) then -- (21 Nov: old trims too)
 							shelved[id] = true
 						else
 							owned[id] = true

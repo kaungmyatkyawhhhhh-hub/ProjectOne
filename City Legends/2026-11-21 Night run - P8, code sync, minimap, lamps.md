@@ -167,3 +167,12 @@ Owner: "when a car goes in water, they get teleported back to the nearest road n
 ## Side button order (repo; sync pack F replaces E)
 Owner: "put menu at first, shop at second, cars at 3rd, dealer at 4th, goals at 5th, chaffuer at 6th". LayoutOrder: MENU 1, SHOP 2, CARS 3, DEALER 4, GOALS 5, CHAUFFEUR 6 (Market 7 when enabled; Despawn, House, Jobs stay hidden).
 Trailer + water rescue: no code needed. `TrailerClient.follow` already puts a hitched trailer straight behind the car after any jump (built for fast travel).
+
+## Old trims leave every inventory (repo; next sync pack: Cars + PlayerData)
+Owner: "remove the old trims from every player inventory, keep in studio".
+- `Cars.oldTrim(id)` = a SPORT / TOP trim that is off sale (84 of them). When a save loads, PlayerData puts them in `Shelved` like the old-model cars: not in the garage, not drivable, not selectable. The trims stay defined in the code and Studio.
+- The ids stay inside the save's Owned list, so nothing is destroyed and it can be undone by removing the rule. No money is refunded (not asked).
+- Kept: the Origine's Sport and Top, and the GT-R Nismo (a real car on sale that borrows a body). Test `tools/old_trim_test.luau`.
+
+## Side buttons, second order (agent working)
+Owner: "nvm put goals and chauffeur in the menu": side column = Menu, Shop, Cars, Dealer; Goals and Chauffeur become cards on the menu's first page; the goals dot moves to the Menu button.

@@ -546,6 +546,13 @@ for _, series in allSeries do
 end
 
 -- a car you can buy (not retired, not waiting for its model)
+-- (owner, 2026-11-21: "remove the old trims from every player inventory, keep in studio") a SPORT / TOP trim that
+-- is off sale: PlayerData keeps it out of the garage as Shelved (it stays in the save; the trim itself stays defined)
+function Cars.oldTrim(id: string): boolean
+	local spec = Cars.ById[id]
+	return spec ~= nil and spec.BaseId ~= nil and spec.Retired == true
+end
+
 function Cars.forSale(id: string): boolean
 	local spec = Cars.ById[id]
 	return spec ~= nil and not spec.Retired and not spec.Pending
