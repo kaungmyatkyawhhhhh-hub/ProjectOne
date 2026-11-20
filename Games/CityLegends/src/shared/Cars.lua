@@ -253,6 +253,7 @@ Cars.OLD_MODELS = {
 	chevo_camaro = true, chevo_c6 = true, porsha_boxster = true, chevo_c7 = true, bentz_s63 = true, bentz_gt63s = true,
 	astin_db9 = true, astin_vantage = true, ferrara_f430 = true, brabos_g63 = true, rolls_wraith = true, rolls_cullinan = true,
 	bnw_750li = true, bentz_190e = true, bentz_s65_w221 = true, maseroti_levante = true, lexis_lc500 = true,
+	pleiad_gc8 = true, -- (owner, 2026-11-20: "remove pleiad GC8 if it has no model rn": it never had one in the place)
 } :: { [string]: boolean }
 for _, spec in list do
 	if Cars.OLD_MODELS[spec.Model or spec.Id] then

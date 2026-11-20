@@ -129,10 +129,18 @@ end
 print("lowballs landed", landed, "walked", walked)
 check(landed > 0 and walked > 0, "lowball is a gamble")
 -- stash cap
+-- (20 Nov 2026) the 19 Nov fair prices: 5e7 ran out after about 24 cars ("Not enough cash"), so the cap was never
+-- reached; cash is topped up before each buy and the buys past the cap must be refused
+local overCap = 0
 for _ = 1, Config.Market.StashSlots + 3 do
 	r = invoke("open")
-	invoke("buy", { lid = r.state.listings[1].lid })
+	profiles[player].Cash = 1e9
+	local full = #r.state.stash >= Config.Market.StashSlots
+	local res = invoke("buy", { lid = r.state.listings[1].lid })
+	check(res.ok == not full, if full then "buy refused, stash full" else "buy ok below the cap: " .. tostring(res.msg))
+	if full then overCap += 1 end
 end
+check(overCap == 3, "three buys tried past the cap")
 r = invoke("open")
 check(#r.state.stash == Config.Market.StashSlots, "stash capped at " .. Config.Market.StashSlots)
 -- redeem a showroom unit, refuse others

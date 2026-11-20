@@ -12,6 +12,8 @@
 	(Config.lua is at its 199k sync limit: traffic tables live here.)
 ]]
 
+local Cars = require(script.Parent:WaitForChild("Cars"))
+
 local TrafficMix = {}
 
 local function rgb(r: number, g: number, b: number): Color3
@@ -86,6 +88,40 @@ for _, e in TrafficMix.Entries do
 	TrafficMix.byName["Traffic_" .. e.kind .. "_" .. e.id] = e
 end
 
+-- (20 Nov 2026, owner 19 Nov: "only new model cars are supposed to be in the game") a traffic copy of a car whose
+-- model is put away (Cars.OLD_MODELS) does not spawn, moving or parked. It comes back by itself when the car's id
+-- leaves that list. Probox / Hiace / Carry / YBS are traffic-only bodies, never on the list. Templates that are not
+-- in this mix (the old low-poly pack) are not touched.
+function TrafficMix.spawns(name: string): boolean
+	local e = TrafficMix.byName[name]
+	return not (e and Cars.OLD_MODELS[e.id])
+end
+
+-- the everyday weight of every template that can spawn here, and their sum. `main`-only entries (the YBS bus) keep
+-- the share of the street they have in the full mix when other cars are missing (old model, or template not in the
+-- place): with half the mix away a plain re-share doubled the buses (6% -> 13% of main-road traffic).
+function TrafficMix.weights(have: { [string]: boolean }, main: boolean): ({ [string]: number }, number)
+	local all, present = 0, 0
+	for name, e in TrafficMix.byName do
+		if not e.main then
+			all += e.w
+			if have[name] and TrafficMix.spawns(name) then
+				present += e.w
+			end
+		end
+	end
+	local k = if all > 0 then present / all else 1
+	local out, total = {}, 0
+	for name, e in TrafficMix.byName do
+		local w = if e.main then e.w * k else e.w
+		if w > 0 and have[name] and TrafficMix.spawns(name) and (main or not e.main) then
+			out[name] = w
+			total += w
+		end
+	end
+	return out, total
+end
+
 -- the template name to spawn: a rare car now and then (group under its cap), else the everyday mix. `have` = the
 -- names that exist in TrafficModels, `counts` = live cars per rare group, `main` = the spot is on a main road
 function TrafficMix.pick(rng: Random, have: { [string]: boolean }, counts: { [string]: number }, main: boolean): string?
@@ -94,7 +130,7 @@ function TrafficMix.pick(rng: Random, have: { [string]: boolean }, counts: { [st
 	if rng:NextNumber() < (if type(chance) == "number" then chance else TrafficMix.RareChance) then
 		local open = {}
 		for name, e in TrafficMix.byName do
-			if e.rare and have[name] and (counts[e.rare] or 0) < (TrafficMix.Rare[e.rare] or 0) then
+			if e.rare and have[name] and TrafficMix.spawns(name) and (counts[e.rare] or 0) < (TrafficMix.Rare[e.rare] or 0) then
 				table.insert(open, name)
 			end
 		end
@@ -103,12 +139,7 @@ function TrafficMix.pick(rng: Random, have: { [string]: boolean }, counts: { [st
 			return open[rng:NextInteger(1, #open)]
 		end
 	end
-	local total = 0
-	for name, e in TrafficMix.byName do
-		if have[name] and e.w > 0 and (main or not e.main) then
-			total += e.w
-		end
-	end
+	local weights, total = TrafficMix.weights(have, main)
 	if total <= 0 then
 		return nil
 	end
@@ -116,8 +147,9 @@ function TrafficMix.pick(rng: Random, have: { [string]: boolean }, counts: { [st
 	local last = nil
 	for _, e in TrafficMix.Entries do
 		local name = "Traffic_" .. e.kind .. "_" .. e.id
-		if have[name] and e.w > 0 and (main or not e.main) then
-			r -= e.w
+		local w = weights[name]
+		if w then
+			r -= w
 			last = name
 			if r <= 0 then
 				return name

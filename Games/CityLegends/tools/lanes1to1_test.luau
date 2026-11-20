@@ -11,6 +11,12 @@ local roblox = require("@lune/roblox")
 local process = require("@lune/process")
 
 local root = process.args[1] or "."
+-- (20 Nov 2026) the shared files, listed once: fs.isFile yields in Lune 0.10 and script.Parent.X is an __index metamethod
+-- ("attempt to yield across metamethod/C-call boundary" at CityLayout's require(script.Parent.Config))
+local isShared: { [string]: boolean } = {}
+for _, f in fs.readDir(root .. "/src/shared") do
+	isShared[f] = true
+end
 local env0 = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, UDim2 = roblox.UDim2, Enum = roblox.Enum,
 	CFrame = roblox.CFrame, math = math, string = string, table = table, print = print, warn = function() end, error = error,
 	pcall = pcall, type = type, tostring = tostring, tonumber = tonumber, pairs = pairs, ipairs = ipairs, select = select,
@@ -22,7 +28,7 @@ local function loader(allow: (string) -> boolean)
 	local modules = {}
 	local load
 	local function desc(name)
-		if not allow(name) or not fs.isFile(root .. "/src/shared/" .. name .. ".lua") then
+		if not allow(name) or not isShared[name .. ".lua"] then
 			return nil
 		end
 		return { name = name }
@@ -85,7 +91,7 @@ do
 		if name == "RivieraLanesHighway" then
 			return nil
 		end
-		if not fs.isFile(root .. "/src/shared/" .. name .. ".lua") then
+		if not isShared[name .. ".lua"] then
 			return nil
 		end
 		return { name = name }

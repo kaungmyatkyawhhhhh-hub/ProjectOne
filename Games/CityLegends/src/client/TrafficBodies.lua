@@ -47,7 +47,8 @@ local function templates(): { Model }
 	local f = folder()
 	if f then
 		for _, m in f:GetChildren() do
-			if m:IsA("Model") and partOf(m, "Body") then
+			-- (20 Nov 2026) no copies of put-away old-model cars: TrafficMix.spawns (moving and parked cars)
+			if m:IsA("Model") and partOf(m, "Body") and TrafficMix.spawns(m.Name) then
 				table.insert(out, m)
 			end
 		end
