@@ -1316,7 +1316,8 @@ local function dynoRun()
 			engine:crank()
 		end
 		task.wait(if spec.Electric then 0.2 else 1)
-		local flames = dynoFlames()
+		local flames = {} :: { ParticleEmitter } -- shortcut: dyno flames off with the driving ones (owner, 2026-11-21); was dynoFlames()
+		local _ = dynoFlames
 		local driven = CarStats.of(carId).drive
 		local spin = 0
 		local rate = 0

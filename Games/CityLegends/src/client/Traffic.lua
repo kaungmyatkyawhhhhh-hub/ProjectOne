@@ -1186,6 +1186,8 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 				npc.off -= sp.lat
 				npc.offTo -= sp.lat
 				npc.offFrom = if npc.offFrom then npc.offFrom - sp.lat else nil
+				local u = npc :: any
+				u.prevOff = if u.prevOff then u.prevOff - sp.lat else nil
 				npc.s = math.clamp(npc.s * o.length / seg.length, 0, o.length)
 				npc.seg = o
 				npc.nextSeg = raceNext(npc, o)
@@ -1721,18 +1723,6 @@ function Traffic.update(dt: number)
 			-- a racer beside its lane's middle (sliding over, or on the line between two lanes)
 			local right = fwd:Cross(Vector3.yAxis)
 			pos += right * npc.off
-			-- (owner, 2026-11-21: "the rare cars ai is glitching") the nose eases into and out of a lane change, and
-			-- leans at most 19 degrees; it snapped to the slide's angle and back (over 40 degrees at low speed)
-			local slide = npc.offTo - npc.off
-			local want = if math.abs(slide) > 0.3 and npc.speed > 1
-				then math.sign(slide) * math.min(math.clamp(npc.speed * RACER.SideRate, 7, 22), npc.speed * 0.35)
-				else 0
-			local sv = (npc :: any).slideV or 0
-			sv += math.clamp(want - sv, -RACER.YawRate * dt, RACER.YawRate * dt);
-			(npc :: any).slideV = sv
-			if math.abs(sv) > 0.05 and npc.speed > 1 then
-				fwd = (fwd * npc.speed + right * sv).Unit
-			end
 		end
 		-- racers never move into another car: a step that comes within a hair of a new car, or deeper into a real
 		-- overlap, is undone and the racer takes that car's speed; a slide sideways is checked all round, and when
@@ -1745,18 +1735,37 @@ function Traffic.update(dt: number)
 				p2 += f2:Cross(Vector3.yAxis) * (snap[5] :: number)
 				if not racerBlocked(npc, p2, f2, snap[7], snap[8], obstacleList, false) then
 					npc.off, npc.offTo = snap[5], snap[5]
+					npc.sideT = math.max(npc.sideT, RACER.SideHold) -- (no new slide try 0.2 s later: a wobble)
 					pos, fwd, hit = p2, f2, nil
 				end
 			end
 			if hit then
 				npc.seg, npc.s, npc.nextSeg, npc.plan, npc.off, npc.offTo = snap[1], snap[2], snap[3], snap[4], snap[5], snap[5]
 				pos, fwd = snap[7], snap[8]
+				npc.sideT = math.max(npc.sideT, RACER.SideHold)
 				npc.speed = math.min(npc.speed, math.max(0, hit.speed * hit.fwd:Dot(fwd)) * 0.9)
 				npc.model:SetAttribute("RacerHolds", (npc.model:GetAttribute("RacerHolds") or 0) + 1)
 			end
 		end
 		npc.pos = pos
 		npc.fwd = fwd
+		-- (owner, 2026-11-21: racers behind a car swung their nose ~45 degrees side to side while going straight) the
+		-- nose follows only the sideways move that really happened this frame, eased, at most 19 degrees at any speed;
+		-- it used to lean toward the wanted lane even while the slide was blocked and undone
+		local look = fwd
+		if npc.racer then
+			local u = npc :: any
+			local lastOff = u.prevOff or npc.off
+			u.prevOff = npc.off
+			local cap = npc.speed * 0.35
+			local want = math.clamp((npc.off - lastOff) / math.max(dt, 1 / 240), -cap, cap)
+			local sv = (u.slideV or 0) + math.clamp(want - (u.slideV or 0), -RACER.YawRate * dt, RACER.YawRate * dt)
+			sv = math.clamp(sv, -cap, cap)
+			u.slideV = sv
+			if math.abs(sv) > 0.05 and npc.speed > 1 then
+				look = (fwd * npc.speed + fwd:Cross(Vector3.yAxis) * sv).Unit
+			end
+		end
 		-- far-away cars only need their transform pushed every 3rd frame
 		local dist = (pos - camPos).Magnitude
 		local far = dist > 380;
@@ -1777,7 +1786,7 @@ function Traffic.update(dt: number)
 		if not far or (frameCount + _idx) % 3 == 0 then
 			local up = Vector3.new(0, npc.height / 2, 0)
 			table.insert(movedParts, npc.root)
-			table.insert(movedCFrames, CFrame.lookAt(pos + up, pos + up + fwd))
+			table.insert(movedCFrames, CFrame.lookAt(pos + up, pos + up + look))
 		end
 	end
 

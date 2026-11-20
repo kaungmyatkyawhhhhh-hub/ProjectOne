@@ -2368,6 +2368,15 @@ function Driving.attach(model: Model)
 		dashUpdate = if okDash then upd else nil
 	end
 	local flames, flameParts, flameLight = buildFlames(model, root, spec)
+	-- shortcut: exhaust flames (pops, shifts, nitro) and their glow off for now (owner, 2026-11-21: "I will add them
+	-- back later"); delete these lines to bring them back
+	for _, e in flames do
+		e:Destroy()
+	end
+	if flameLight then
+		flameLight:Destroy()
+	end
+	flames, flameLight = {}, nil
 	-- tyre smoke at each wheel's contact patch; strength follows the squeal
 	local smoke: { { emitter: ParticleEmitter, rear: boolean } } = {}
 	for _, j in root:GetChildren() do
