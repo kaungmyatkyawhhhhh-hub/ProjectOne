@@ -488,7 +488,7 @@ function M.roundabout(): string
 	local f = item("Roundabout")
 	local n = 0
 	local K = 1.25 -- the drawing below is in units of 0.8 m; the real one stands about 12 m
-	local NIGHT = rgb(116, 113, 48) -- photo (232, 227, 96) halved: Neon renders about twice its colour
+	local NIGHT = rgb(92, 88, 34) -- photo (232, 227, 96): Neon renders well over twice its colour (116, 113, 48 still read pure yellow)
 	local LINE = rgb(196, 186, 150)
 	local function at(y: number): Vector3
 		return RB + Vector3.new(0, y * K, 0)
@@ -506,8 +506,8 @@ function M.roundabout(): string
 	bed.CanCollide = true
 	bed.CanQuery = true
 	n += 1
-	rim("RingGreen", 28.5, 0.5, RING_GREEN, 0.8)
-	rim("RingWhite", 28.3, 1.45, LINE, 0.6)
+	rim("RingGreen", 28.5, 0.5, RING_GREEN, 1.6)
+	rim("RingWhite", 28.3, 1.45, LINE, 1.0)
 	-- three gold steps, a light line on each
 	local y = 1.6
 	for i, r in { 9.5, 7.8, 6.2 } do

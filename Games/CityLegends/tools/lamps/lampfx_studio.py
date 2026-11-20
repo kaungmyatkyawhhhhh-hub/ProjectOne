@@ -23,6 +23,8 @@ def load(paths):
     text = ''
     for path in paths:
         t = open(path, encoding='utf-8', errors='ignore').read()
+        if t.startswith('['):  # a short page comes wrapped as JSON
+            t = json.loads(t)[0]['text']
         text += t[t.index('\n') + 1:].rstrip('#\n ')
     parts, name = {}, None
     for line in text.split('\n'):
