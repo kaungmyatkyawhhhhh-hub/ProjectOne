@@ -226,11 +226,20 @@ end
 -- player arrives over a few seconds. The loading screen stays up (the car held) until parts have
 -- stopped arriving for a moment, then the game starts. SKIP (after 5 s, Playbook) still works.
 local streamedIn = 0
+-- (21 Nov) the start waits only for the part of the map the menu camera looks at (parts arriving within NEAR_R of
+-- nearAt): the whole streaming radius took ~7 s in Studio Play (8,000 parts), the menu's view is in well before
+local NEAR_R = 800
+local nearAt: Vector3? = nil
+local streamedNear = 0
 for _, root in { workspace:FindFirstChild("Riviera"), Config.mapRoot(), city } do
 	if root then
 		root.DescendantAdded:Connect(function(d)
 			if d:IsA("BasePart") then
 				streamedIn += 1
+				local at = nearAt
+				if at and (d.Position - at).Magnitude < NEAR_R then
+					streamedNear += 1
+				end
 			end
 		end)
 	end
@@ -255,13 +264,18 @@ local TERRAIN_SETTLE_PHONE = 6 -- shortcut: a guess (not measured on a phone), t
 local function isJump(to: Vector3): boolean
 	return (to - camera.CFrame.Position).Magnitude > JUMP_FAR
 end
-local function waitForMap(status: string, jumped: boolean?)
+local function waitForMap(status: string, jumped: boolean?, near: Vector3?)
 	if not workspace.StreamingEnabled or not Config.activeMap() then
 		return
 	end
 	UI.showLoading(status)
 	local t0 = os.clock()
 	local parts0 = streamedIn
+	nearAt = near
+	streamedNear = 0
+	local function arrived(): number
+		return if near then streamedNear else streamedIn
+	end
 	local settleBy = 0
 	if jumped then
 		local phone = UI.isTouch or require(script.Parent:WaitForChild("LowEnd")).on
@@ -269,15 +283,16 @@ local function waitForMap(status: string, jumped: boolean?)
 		task.wait(0.5) -- (streaming round the new spot gets going)
 	end
 	local need = if jumped then MAP_QUIET_TIME else MAP_QUIET_STAY
-	local last, quiet = streamedIn, 0
+	local last, quiet = arrived(), 0
 	local tQuiet = nil
 	while os.clock() - t0 < MAP_MAX_WAIT and UI.loadingWaiting() do
 		task.wait(0.25)
-		local added = streamedIn - last
-		last = streamedIn
+		local added = arrived() - last
+		last = arrived()
 		if added <= MAP_QUIET_PARTS and not player.GameplayPaused then
 			quiet += 0.25
-			if quiet >= need then
+			-- (a quiet spot must also have its city in: 300 parts within 400 studs, MenuShots' own test)
+			if quiet >= need and (not near or #workspace:GetPartBoundsInRadius(near, 400) >= 300) then
 				tQuiet = tQuiet or os.clock() - t0
 				if os.clock() >= settleBy then
 					break
@@ -288,7 +303,8 @@ local function waitForMap(status: string, jumped: boolean?)
 			tQuiet = nil
 		end
 	end
-	print(string.format("[CityLegends] map wait '%s'%s: parts quiet %.2fs (%d parts), total %.2fs", status, if jumped then " (jump)" else "", tQuiet or -1, streamedIn - parts0, os.clock() - t0))
+	nearAt = nil
+	print(string.format("[CityLegends] map wait '%s'%s: parts quiet %.2fs (%d parts, %s), total %.2fs", status, if jumped then " (jump)" else "", tQuiet or -1, streamedIn - parts0, if near then streamedNear .. " near" else "all", os.clock() - t0))
 end
 
 UI.showLoading("Shaping the cars...")
@@ -321,7 +337,7 @@ Weather.init() -- rain cycle (rare showers, starts clear), wet roads, mist, rain
 -- (the day / night cycle runs since the loading screen: morning, day, sunset, night)
 phase("world")
 -- (21 Nov) the map round the menu settles while the profile is still on its way (it used to wait after the steps)
-waitForMap("Loading the map...")
+waitForMap("Loading the map...", false, if Config.activeMap() == "Yangon" then require(Shared:WaitForChild("MenuShots")).orbit().centre else nil)
 phase("map")
 
 ---------------------------------------------------------------------

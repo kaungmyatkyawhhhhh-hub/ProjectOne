@@ -255,7 +255,7 @@ for o in list(bpy.data.objects):
             inside = (np.abs(fc[:, 0]) < 1.72) & (fc[:, 1] > -2.1) & (fc[:, 1] < 1.9) & (fc[:, 2] > 0.5) & (fc[:, 2] < 2.64)
             toc = np.array([0.0, -0.2, 1.4]) - fc
             toc /= np.linalg.norm(toc, axis=1, keepdims=True) + 1e-9
-            side = inside & (np.abs(fc[:, 0]) > 1.0) & ((fn * toc).sum(1) > 0.2) & (fc[:, 2] < 2.3)
+            side = inside & (np.abs(fc[:, 0]) > 0.3) & ((fn * toc).sum(1) > 0.2) & (fc[:, 2] < 2.3)
             roof = inside & (fn[:, 2] < -0.5) & (fc[:, 2] > 2.2)
             if role0 == "r34_paint":
                 froles[side] = "r34_door"
