@@ -15,6 +15,10 @@ def only(objs):
 
 # the wheels first (names are what the game spins)
 O["Body_r34_tyre"].name = "FR_r34_tyre"
+t, hub = O["FR_r34_tyre"], O["FR_r34_rim"].parent  # (into the FR group, or it stays on the body: Studio's Wheels.FR had no tyre)
+mw = t.matrix_world.copy()
+t.parent = hub
+t.matrix_world = mw
 only([O["FR_static_r34_caliper"], O["FR_r34_caliper"]]); bpy.ops.object.join()
 for n in ("FL_r34_caliper", "Body_Fixed_r34_grill"):
     bpy.data.objects.remove(O[n])
