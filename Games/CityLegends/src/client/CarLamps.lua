@@ -56,6 +56,7 @@ CarLamps.CARS = {
 	ronin_cp9a_champ = true, -- (the 1999 champion's edition model's own lamps, 2026-11-14)
 	ronin_cp9a = true, -- (the 1999 model's own lamps, 2026-11-14)
 	pleiad_gc8 = true, -- (the 1998 wide-body model's own lamps, 2026-11-15)
+	bentlee_contgt = true, astin_dbx = true, bentz_sl65bs = true, bnw_330i_g20 = true, -- (shells cut in Studio from the models' own lamps, tools/lamps/lampfx_studio.py, 2026-11-21)
 } :: { [string]: boolean }
 
 -- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): no daytime running lamps on
@@ -63,6 +64,7 @@ CarLamps.CARS = {
 CarLamps.NO_DRL = {
 	toyoka_ae86 = true, toyoka_chaser = true, toyoka_supra_mk4 = true, ronin_cp9a = true, ronin_cp9a_champ = true,
 	lambrini_countach = true, lambrini_lp640 = true, lambrini_lp670 = true,
+	bentlee_contgt = true, bentz_sl65bs = true,
 } :: { [string]: boolean }
 
 -- the real car's lamps by model and year: warm halogen, cool xenon, white LED (shells and beams)
@@ -80,6 +82,7 @@ CarLamps.TINT = {
 	lambrini_huracan = LED, lambrini_performante = LED, lambrini_sto = LED, lambrini_sterrato = LED, lambrini_svj = LED,
 	lambrini_svj63 = LED, lambrini_revuelto = LED, lambrini_urusp = LED,
 	bentlee_bentayga = LED, bentz_gls = LED, bentz_s680 = LED, porsha_gt3 = LED,
+	bentlee_contgt = XENON, bentz_sl65bs = XENON, astin_dbx = LED, bnw_330i_g20 = LED,
 } :: { [string]: Color3 }
 
 -- the lamp colours a car has before Customs: the box car's SpotLight as built, and Customs' own white
