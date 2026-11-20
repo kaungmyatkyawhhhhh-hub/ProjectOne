@@ -1779,6 +1779,10 @@ end
 -- until the map round the player has streamed in (waitForMap), so the cap is only for a stuck load
 local loadingFrame: Frame? = nil
 local loadingSkipped = false
+-- (owner, 2026-11-21: "i am stuck in black screen after skipping loading") while Main.client's startup holds the
+-- screen (no menu to show yet), SKIP / LOADING_MAX keep it up with an honest status line instead of baring the view
+local loadingHold = false
+local loadingSkipAsked = false
 local LOADING_SKIP_AFTER = 5
 local LOADING_MAX = 45
 -- the loading screen shows the whole map behind the title (owner, 2026-10-30, in place of the intro
@@ -1840,7 +1844,9 @@ function UI.showLoading(text: string)
 		return
 	end
 	if loadingFrame then
-		(loadingFrame:FindFirstChild("Status") :: TextLabel).Text = text
+		if not loadingSkipAsked then
+			(loadingFrame:FindFirstChild("Status") :: TextLabel).Text = text
+		end
 		return
 	end
 	local f = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = if loadingCinematic then 1 else 0, Size = UDim2.fromScale(1, 1), ZIndex = 100, Parent = gui })
@@ -1874,14 +1880,21 @@ function UI.showLoading(text: string)
 	end)
 	loadingFrame = f
 	local function skip()
-		if loadingFrame == f then
+		if loadingFrame == f and loadingHold then
+			loadingSkipAsked = true;
+			(f:FindFirstChild("Status") :: TextLabel).Text = "Still loading the city..."
+			local b = f:FindFirstChild("Skip")
+			if b then
+				b:Destroy()
+			end
+		elseif loadingFrame == f then
 			f:Destroy()
 			loadingFrame = nil
 			loadingSkipped = true
 		end
 	end
 	task.delay(LOADING_SKIP_AFTER, function()
-		if loadingFrame ~= f then
+		if loadingFrame ~= f or loadingSkipAsked then
 			return
 		end
 		local b = button("SKIP", Theme.Accent, {
@@ -1902,8 +1915,22 @@ function UI.loadingVisible(): boolean
 	return loadingFrame ~= nil
 end
 
+-- on screen and nobody asked to skip: the waits a SKIP may cut short (the map settling) look at this
+function UI.loadingWaiting(): boolean
+	return loadingFrame ~= nil and not loadingSkipAsked
+end
+
+-- startup's hold (see loadingHold): on from the top of Main.client until the main menu can open
+function UI.setLoadingHold(on: boolean)
+	loadingHold = on
+end
+function UI.loadingHeld(): boolean
+	return loadingHold
+end
+
 function UI.hideLoading()
 	loadingSkipped = false
+	loadingSkipAsked = false
 	if loadingFrame then
 		loadingFrame:Destroy()
 		loadingFrame = nil

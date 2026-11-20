@@ -43,6 +43,7 @@ UI.init()
 -- the ground, the roads and the lamps, always on every client). A short dip to black between
 -- shots; the menu camera takes over when loading is done. Without the Riviera: the old city.
 UI.setLoadingCinematic(true)
+UI.setLoadingHold(true) -- (owner, 2026-11-21: "i am stuck in black screen after skipping loading": SKIP can't bare the view before the menu exists)
 require(script.Parent:WaitForChild("DayCycle")).start() -- (early: the loading shots get the game's light)
 require(script.Parent:WaitForChild("LookFx")).start()
 local loadingShotsConn: RBXScriptConnection? = nil
@@ -125,6 +126,48 @@ Audio.musicKeyBlocked = Driving.isDriving -- in a car M is the gearbox
 Audio.init() -- test-loads the Creator Store sounds (falls back to built-in ones)
 UI.showLoading("Building the city...")
 
+local pendingAttach = false
+local attaching = false -- (the watchdog waits while a car is being put on)
+local showMenu: () -> ()
+local MainMenu: any = nil
+-- Watchdog (19 Nov, owner: "the loading screen sometimes doesnt load in and i get stuck with no GUI
+-- after pressing skip / waiting a while"): once nothing is loading or on its way, there must be
+-- something to use on screen: the HUD, the main menu or a full screen (garage, dealer, customs,
+-- workshop; photo mode hides everything on purpose). Nothing for 6 s: the black fade goes and the HUD
+-- (in a car or on foot) or the main menu comes back.
+-- (owner, 2026-11-21: "i am stuck in black screen after skipping loading") started here, before the long
+-- waits, so it covers startup too: until the menu can open, a bare view gets the loading screen back
+task.spawn(function()
+	local Guard = require(Shared:WaitForChild("StartupGuard"))
+	local idle = 0
+	while true do
+		task.wait(1)
+		local hud = UI.screen():FindFirstChild("HUD") :: Frame?
+		local action = Guard.watch({
+			startup = UI.loadingHeld(),
+			loading = UI.loadingVisible(),
+			busy = pendingAttach or attaching,
+			gui = (hud ~= nil and hud.Visible) or (MainMenu ~= nil and MainMenu.isOpen()) or UI.isGarageOpen() or not UI.screen().Enabled,
+			inGame = Driving.isDriving() or (OnFoot.active and player.Character ~= nil),
+		})
+		idle = if action == "ok" then 0 else idle + 1
+		if action ~= "ok" and idle >= Guard.After[action] then
+			idle = 0
+			warn("[CityLegends] watchdog: no GUI for " .. Guard.After[action] .. " s, showing the " .. action)
+			if action == "loading" then
+				UI.showLoading("Still loading the city...")
+			else
+				task.spawn(UI.fade, false, 0.3)
+				if action == "hud" then
+					UI.showHud(true)
+				else
+					showMenu()
+				end
+			end
+		end
+	end
+end)
+
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 -- (19 Nov, owner: "stuck with no GUI after pressing skip") a remote the server never made (one of its
 -- systems failed at start) used to hold this script forever, before the main menu: wait 10 s at
@@ -181,7 +224,7 @@ local function waitForMap(status: string)
 	local t0 = os.clock()
 	task.wait(1)
 	local last, quiet = streamedIn, 0
-	while os.clock() - t0 < MAP_MAX_WAIT and UI.loadingVisible() do
+	while os.clock() - t0 < MAP_MAX_WAIT and UI.loadingWaiting() do
 		task.wait(0.25)
 		local added = streamedIn - last
 		last = streamedIn
@@ -436,7 +479,9 @@ local function startStep(name: string, fn: () -> ())
 	end
 end
 startStep("Traffic", function()
-	Traffic.start(math.floor(Config.Traffic.CarCount * math.clamp(WorldFx.qualityScale(), 0.5, 1)), focusPoint) -- (low-end: 0.5 -> 14 cars)
+	-- (owner, 2026-11-21: "put more traffic": CarCount 28 -> 46; the low-end 0.5 keeps its 14 cars, TrafficMix.LowEndCars)
+	local q = WorldFx.qualityScale()
+	Traffic.start(if q <= 0.5 then require(Shared:WaitForChild("TrafficMix")).LowEndCars else math.floor(Config.Traffic.CarCount * math.min(q, 1)), focusPoint)
 end)
 startStep("Police", Police.init)
 startStep("Bank", BankClient.init)
@@ -498,12 +543,11 @@ startStep("Care", function()
 end)
 print("[CityLegends] startup: " .. table.concat(stepTimes, ", "))
 waitForMap("Loading the map...")
-UI.hideLoading()
+-- (owner, 2026-11-21: the loading screen now stays up until the main menu opens, at the end of this script)
 
 ---------------------------------------------------------------------
 -- Spawning / garage
 ---------------------------------------------------------------------
-local pendingAttach = false
 -- (2026-11-04) is this my car, to get straight into? Asked for here, or brought out by the server on
 -- its own (a test drive starting or ending). SpawnedAt is when it came out, so a car of yours
 -- streaming back in later doesn't pull you into it
@@ -553,7 +597,6 @@ playerCars.ChildAdded:Connect(function(model)
 end)
 
 local arrivedYet = false
-local attaching = false -- (the watchdog waits while a car is being put on)
 local function tryAttach(model: Instance)
 	if model:IsA("Model") and driveNow(model) then
 		pendingAttach = false
@@ -594,8 +637,6 @@ local function tryAttach(model: Instance)
 	end
 end
 playerCars.ChildAdded:Connect(tryAttach)
-
-local showMenu: () -> ()
 
 -- stealFrom: a parked car in a tower garage (Parking): the server swaps it for a drivable one
 local driveRequest = 0
@@ -862,7 +903,7 @@ end
 
 -- the main menu (owner, 2026-11-02: big tiles, CAMPAIGN / CARS / STORE): the start screen, and
 -- from the HUD's MENU button (it replaced SETTINGS) while you play
-local MainMenu = require(script.Parent:WaitForChild("MainMenu"))
+MainMenu = require(script.Parent:WaitForChild("MainMenu"))
 local FastTravel = remote("FastTravel", "RemoteFunction") :: RemoteFunction
 local ClaimStarter = remote("ClaimStarter", "RemoteFunction") :: RemoteFunction
 MainMenu.init({
@@ -1092,36 +1133,12 @@ player:GetAttributeChangedSignal("JobRejoined"):Connect(function()
 		task.spawn(rejoinedAtPost)
 	end
 end)
+-- startup is over (owner, 2026-11-21): SKIP hides the loading screen again; the menu opens under it first, so
+-- there is never a bare view in between (the watchdog started near the top of this script)
+UI.setLoadingHold(false)
 if player:GetAttribute("JobRejoined") then
 	task.spawn(rejoinedAtPost)
 else
 	showMenu()
+	UI.hideLoading()
 end
-
--- Watchdog (19 Nov, owner: "the loading screen sometimes doesnt load in and i get stuck with no GUI
--- after pressing skip / waiting a while"): once nothing is loading or on its way, there must be
--- something to use on screen: the HUD, the main menu or a full screen (garage, dealer, customs,
--- workshop; photo mode hides everything on purpose). Nothing for WATCHDOG_AFTER seconds: the black
--- fade goes and the HUD (in a car or on foot) or the main menu comes back
-local WATCHDOG_AFTER = 6
-task.spawn(function()
-	local idle = 0
-	local hudFrame = UI.screen():FindFirstChild("HUD") :: Frame
-	while true do
-		task.wait(1)
-		local fine = UI.loadingVisible() or pendingAttach or attaching or hudFrame.Visible or MainMenu.isOpen()
-			or UI.isGarageOpen() or not UI.screen().Enabled
-		idle = if fine then 0 else idle + 1
-		if idle >= WATCHDOG_AFTER then
-			idle = 0
-			local inGame = Driving.isDriving() or (OnFoot.active and player.Character ~= nil)
-			warn("[CityLegends] watchdog: no GUI for " .. WATCHDOG_AFTER .. " s, showing the " .. (if inGame then "HUD" else "main menu"))
-			task.spawn(UI.fade, false, 0.3)
-			if inGame then
-				UI.showHud(true)
-			else
-				showMenu()
-			end
-		end
-	end
-end)

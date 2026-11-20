@@ -79,11 +79,12 @@ TrafficMix.Racer = {
 	MinMph = 100, -- cruise at least this on a lane whose bends allow it
 	Accel = 40, -- studs/s^2 (about 1.3 g)
 	Brake = 95, -- studs/s^2 used for planning (about 1.1 g x 0.95 margin)
-	LatAccel = 26, -- studs/s^2 in a bend (about 0.9 g): v = sqrt(LatAccel * radius)
+	TurnSlowPerDeg = 0.03, -- (owner, 2026-11-21: "rare cars slow down on turn every 1 degree = 3% slower ... 10 degrees = 30% slower so 100 mph to 70 mph"; was a 0.9 g bend rule)
 	LookAheadS = 2.6, -- seconds of travel looked ahead for cars (at least Config.Traffic.LookAhead)
 	PassGap = 4, -- studs: closer than this behind a player's car a racer never rolls forward
 	PassCreep = 6, -- studs/s it keeps rolling while it moves over to pass a slow or stopped player
-	Recycle = 1500, -- flat studs from the focus before a racer is moved (everyday cars: RecycleDistance)
+	Recycle = 1500, -- flat studs from the focus before a racer is taken off the road (owner, 2026-11-21: "i keep on spotting them": it used to be moved back near the player; a fresh car from the normal spawn roll takes its place now)
+	SideHold = 1, -- s after choosing a sideways target before choosing another (owner, 2026-11-21: no wobble from a slide re-picked 0.2 s later)
 	SideRate = 0.14, -- lateral studs/s per stud/s of speed (lane change speed), clamped 7..22
 	YawRate = 60, -- studs/s^2 the sideways lean of a lane change eases in and out at
 }
@@ -100,6 +101,16 @@ function TrafficMix.racerBehindPlayer(target: number, gap: number, keep: number,
 	end
 	return math.min(target, t)
 end
+
+-- a racer's speed limit through a bend or turn piece of `degrees` heading change: 3% of its top speed off per degree
+-- (Racer.TurnSlowPerDeg), never under `floor` (the junction turn speed)
+function TrafficMix.racerTurnSpeed(top: number, degrees: number, floor: number): number
+	return math.min(top, math.max(floor, top * (1 - TrafficMix.Racer.TurnSlowPerDeg * degrees)))
+end
+
+-- (owner, 2026-11-21: "put more traffic, it dont feel like yangon rn cuz it needs more traffic") Config.Traffic.CarCount
+-- 28 -> 46 (HighwayCars 18 -> 30, the same share); low-end devices keep their 14
+TrafficMix.LowEndCars = 14
 
 TrafficMix.byName = {} :: { [string]: Entry }
 for _, e in TrafficMix.Entries do

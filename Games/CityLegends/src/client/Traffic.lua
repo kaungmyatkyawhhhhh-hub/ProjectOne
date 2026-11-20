@@ -61,6 +61,7 @@ export type Npc = {
 	off: number, -- sideways offset from the lane's middle (+ = right): lane changes and splits in progress
 	offTo: number,
 	sideT: number, -- time to the next overtaking look
+	offFrom: number?, -- where the slide under way began (it eases back there if its target strip fills)
 	plan: { CityLayout.Segment }?, -- the way chosen past nextSeg (racers brake for bends far ahead)
 	holdMerge: boolean?, -- a racer waiting to merge back before a junction
 }
@@ -671,18 +672,18 @@ end
 ---------------------------------------------------------------------
 -- Racers (2026-11-19, owner: rare supercars "swimming" through traffic at 100-220 mph; TrafficMix.Racer)
 ---------------------------------------------------------------------
--- the safe speed through a piece from its bend (a quadratic bezier: its turn angle over its length = 1 / radius)
+-- a racer's speed through a piece from its bend (a quadratic bezier): the heading change of that piece in degrees,
+-- 3% of its top speed off per degree (owner, 2026-11-21: TrafficMix.racerTurnSpeed), never under the junction turn speed
 local bendCache: { [any]: number } = setmetatable({}, { __mode = "k" }) :: any
-local function bendSpeed(q: CityLayout.Segment): number
-	local v = bendCache[q]
-	if v == nil then
+local function bendSpeed(npc: Npc, q: CityLayout.Segment): number
+	local deg = bendCache[q]
+	if deg == nil then
 		local a = (q.p1 - q.p0) * Vector3.new(1, 0, 1)
 		local b = (q.p2 - q.p1) * Vector3.new(1, 0, 1)
-		local th = if a.Magnitude > 0.1 and b.Magnitude > 0.1 then math.acos(math.clamp(a.Unit:Dot(b.Unit), -1, 1)) else 0
-		v = if th < 0.02 then math.huge else math.sqrt(RACER.LatAccel * q.length / th)
-		bendCache[q] = v
+		deg = if a.Magnitude > 0.1 and b.Magnitude > 0.1 then math.deg(math.acos(math.clamp(a.Unit:Dot(b.Unit), -1, 1))) else 0
+		bendCache[q] = deg
 	end
-	return v :: number
+	return TrafficMix.racerTurnSpeed(npc.racer or npc.maxSpeed, deg :: number, if q.turnSpeed then Config.mphToSps(q.turnSpeed) else TURN_SPEED)
 end
 
 -- the i-th piece after nextSeg on a racer's way (chosen once and kept, so the braking plan is the way it drives)
@@ -705,14 +706,14 @@ end
 -- the highest speed now that still lets a racer slow for every bend, turn and red light within braking distance
 local function racerCap(npc: Npc, now: number): number
 	local seg = npc.seg
-	local cap = bendSpeed(seg)
+	local cap = bendSpeed(npc, seg)
 	local d = seg.length - npc.s
 	local reach = npc.speed * npc.speed / (2 * RACER.Brake) + 80
 	local q = npc.nextSeg
 	local prev = seg
 	local i = 0
 	while q and d < reach and i < 14 do
-		local v = bendSpeed(q)
+		local v = bendSpeed(npc, q)
 		if q.kind == "turn" and q.turning then
 			v = math.min(v, if q.turnSpeed then Config.mphToSps(q.turnSpeed) else TURN_SPEED)
 		end
@@ -933,8 +934,11 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 		if npc.sideT <= 0 then
 			npc.sideT = 0.2
 		end
+	elseif npc.sideT <= 0 and math.abs(npc.offTo - npc.off) > 0.01 then
+		npc.sideT = 0.2 -- (owner, 2026-11-21: a slide under way finishes; a new target only once it has arrived: no wobble)
 	elseif npc.sideT <= 0 then
 		npc.sideT = 0.2
+		local was = npc.offTo
 		local reach = math.max(T.LookAhead, npc.speed * RACER.LookAheadS)
 		local here = stripGap(npc, npc.off, obstacles, reach)
 		if here < npc.speed * 1.6 + 20 then
@@ -958,6 +962,10 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 			end
 			npc.offTo = near
 		end
+		if npc.offTo ~= was then
+			npc.offFrom = npc.off
+			npc.sideT = RACER.SideHold -- (a minimum time before the next choice)
+		end
 	end
 	-- slide, but only into a strip that is clear beside us and has room ahead to brake in (sliding in at speed
 	-- right behind a slow car rear-ended it in the first test); if a merge back before a junction can't be made,
@@ -977,7 +985,10 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 		elseif settle then
 			npc.holdMerge = true
 		else
-			npc.offTo = npc.off -- (that gap closed: stay)
+			-- (owner, 2026-11-21) that gap closed: ease back to where the slide began (the way back shut too: stay),
+			-- and no new choice for a moment (it used to stop mid-lane and re-pick 0.2 s later: a wobble)
+			npc.offTo = if npc.offFrom and npc.offTo ~= npc.offFrom then npc.offFrom else npc.off
+			npc.sideT = math.max(npc.sideT, RACER.SideHold)
 		end
 	end
 	-- over another lane's middle: that lane is ours now (its way on through the next junction)
@@ -987,6 +998,7 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 			if o and o ~= seg and math.abs(sp.lat - npc.off) < 0.5 then
 				npc.off -= sp.lat
 				npc.offTo -= sp.lat
+				npc.offFrom = if npc.offFrom then npc.offFrom - sp.lat else nil
 				npc.s = math.clamp(npc.s * o.length / seg.length, 0, o.length)
 				npc.seg = o
 				npc.nextSeg = chooseNext(o)
@@ -1521,7 +1533,7 @@ function Traffic.update(dt: number)
 		if focus then
 			local flatFocus = Vector3.new(focus.X, 0, focus.Z)
 			local moved = 0
-			for _, npc in Traffic.cars do
+			for i, npc in Traffic.cars do
 				if moved >= 3 then
 					break
 				end
@@ -1539,7 +1551,22 @@ function Traffic.update(dt: number)
 					crowded = not cam or (npc.pos - cam.CFrame.Position).Unit:Dot(cam.CFrame.LookVector) < 0.55
 				end
 				local limit = if npc.racer then RACER.Recycle else T.RecycleDistance
-				if away > limit or (offRoute and away > T.StreetRecycle) or npc.deadEnd or crowded then
+				if npc.racer and away > limit then
+					-- (owner, 2026-11-21: "i keep on spotting them") a racer that has gone is taken off the road, not
+					-- moved back near the player; a fresh car takes its place in the list, out of sight (the
+					-- normal spawn roll, TrafficMix.RareChance under the caps, decides if it is a rare one)
+					local new = spawnNpc(flatFocus, npc.highway)
+					if new then
+						Traffic.cars[i] = table.remove(Traffic.cars) :: Npc
+						npc.model:Destroy()
+						local seg, s = findSpot(flatFocus, T.RespawnMin, T.RespawnMax, new, true, new.highway)
+						if seg then
+							placeNpc(new, seg, s)
+							new.model:PivotTo(CFrame.lookAt(new.pos, new.pos + new.fwd) + Vector3.new(0, new.height / 2, 0))
+						end
+						moved += 1
+					end
+				elseif away > limit or (offRoute and away > T.StreetRecycle) or npc.deadEnd or crowded then
 					local seg, s = findSpot(flatFocus, T.RespawnMin, T.RespawnMax, npc, true, npc.highway)
 					if seg then
 						placeNpc(npc, seg, s)

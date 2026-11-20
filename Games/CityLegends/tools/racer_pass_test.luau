@@ -39,6 +39,16 @@ check(f(0, 10, 16, 0, true) == 0, "a red light / bend limit still wins")
 check(f(40, 100, 100, 60, false) == 40, "never faster than its own limit")
 check(R.PlayerGap == nil, "the old wide player gap is gone")
 
+-- (owner, 2026-11-21: "every 1 degree = 3% slower ... 10 degrees = 30% slower so 100 mph to 70 mph")
+local t = Mix.racerTurnSpeed
+check(math.abs(t(100, 10, 15) - 70) < 1e-6, "turn: 100 mph, 10 degrees -> 70")
+check(t(100, 0, 15) == 100, "turn: 0 degrees -> top speed")
+check(t(100, 40, 15) == 15, "turn: 40 degrees -> the floor, never 0")
+check(t(100, 30, 15) == 15, "turn: 30 degrees -> the floor")
+check(R.TurnSlowPerDeg == 0.03 and R.LatAccel == nil, "3% a degree; the old bend rule is gone")
+check(R.SideHold >= 0.5, "a minimum time between sideways choices")
+check(Mix.LowEndCars == 14, "low-end devices keep 14 cars")
+
 if fails > 0 then
 	print(fails .. " FAILED")
 	process.exit(1)

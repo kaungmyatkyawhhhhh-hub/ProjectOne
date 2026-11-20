@@ -78,6 +78,7 @@ local T: { [string]: { any } } = {
 	["load.skyline"] = { "Painting the skyline...", "မြို့ပုံကို ဆေးခြယ်နေသည်..." },
 	["load.traffic"] = { "Filling the streets with traffic...", "လမ်းများပေါ် ကားများ ထည့်နေသည်..." },
 	["load.map"] = { "Loading the map...", "မြေပုံ ဖွင့်နေသည်..." },
+	["load.still"] = { "Still loading the city...", "မြို့ကို ဖွင့်နေဆဲ..." },
 	["load.streets"] = { "Loading the streets...", "လမ်းများ ဖွင့်နေသည်..." },
 	["intro.skip"] = { "SKIP  ▶", "ကျော်မည်  ▶" },
 	["intro.tagline"] = { "NIGHT  ·  CITY  ·  TRAFFIC", "ည  ·  မြို့  ·  ယာဉ်ကြော" },
