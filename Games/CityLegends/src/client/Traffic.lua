@@ -513,6 +513,12 @@ local function spawnNpc(center: Vector3?, highway: boolean): Npc?
 		npc.racer = Config.mphToSps(racerMph)
 		npc.maxSpeed = npc.racer :: number
 	end
+	-- (owner, 2026-11-21: "sometimes the ybs and taxis need to be fast") some buses and Probox taxis hurry: a higher
+	-- top speed only, everything else (gaps, lights, turns) as everyday traffic
+	local hurry = TrafficMix.Hurry
+	if not npc.racer and hurry.ids[model:GetAttribute("TrafficId") :: string] and rng:NextNumber() < hurry.chance then
+		npc.maxSpeed = Config.mphToSps(rng:NextNumber(hurry.mph[1], hurry.mph[2]))
+	end
 	placeNpc(npc, seg, s)
 	npc.speed = npc.maxSpeed * 0.7
 	model:PivotTo(CFrame.lookAt(npc.pos, npc.pos + npc.fwd) + Vector3.new(0, npc.height / 2, 0))

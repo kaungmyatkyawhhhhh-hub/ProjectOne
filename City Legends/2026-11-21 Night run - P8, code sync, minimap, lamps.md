@@ -97,3 +97,6 @@ Owner: "dont make the rare car ai stop for players cars, make them cut up by mer
 - Behind a player's car a racer now only slows to the player's speed at the normal gap, and keeps rolling at 6 studs/s while it moves over to a free strip (`TrafficMix.racerBehindPlayer`; the old 1 s wider gap + full stop is gone). It still never moves into an occupied strip and never pushes a car.
 - Glitch causes found: stop-go behind players (fixed); the nose snapping over 40 degrees at lane changes (now eases, max 19 degrees); crabbing sideways at standstill (limited). Not changed: a slide cancelled mid-lane and re-picked 0.2 s later (wobble); a racer 1500 studs away respawning 220-520 studs from the player (may be why they are "spotted" often).
 - Test `tools/racer_pass_test.luau` 11/11.
+
+## Fast buses and taxis (repo + Studio)
+Owner: "also sometimes the ybs and taxis need to be fast". 30% of YBS buses and Probox taxis get a top speed of 62-80 mph (everyday traffic: 24-54). Only the top speed changes; gaps, lights and turns are as before. `TrafficMix.Hurry`. Not watched in Play.

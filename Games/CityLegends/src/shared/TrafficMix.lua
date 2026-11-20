@@ -70,6 +70,9 @@ TrafficMix.Entries = {
 -- per player's view of the map)
 TrafficMix.Rare = { ferrari = 1, lambo = 1, gtr = 1, r34 = 1, bugatti = 1 } -- (owner, 2026-11-21: "i keep on spotting them"; was 2 / 2 / 10 / 3 / 1)
 TrafficMix.RareChance = 0.01 -- (21 Nov: was 0.07) of each spawn, the share that tries a rare car (a group under its cap)
+-- (owner, 2026-11-21: "sometimes the ybs and taxis need to be fast") the share of YBS buses and Probox taxis that
+-- hurry, and their top speed in mph (everyday cars: Config.Traffic 24..54)
+TrafficMix.Hurry = { ids = { ybs = true, probox = true }, chance = 0.3, mph = { 62, 80 } }
 
 -- racer driving (Traffic.lua profile "racer")
 TrafficMix.Racer = {
