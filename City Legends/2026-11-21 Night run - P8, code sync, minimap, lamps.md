@@ -142,3 +142,8 @@ Owner: "make all the rare car not have the same color or trim and set color,trim
 | lambrini_lp570 | yellow (240, 170, 10) | SPORT |
 | bugotti_chiron | black (20, 20, 22) | BASE |
 Fixed in `TrafficMix.Entries`, so it is the same in every server and session. Trims are the same body in this game, so the trim shows as top speed: SPORT x1.05, TOP x1.1 (`TrafficMix.TrimSpeed`); attribute `RareTrim` on the car.
+
+## Rare cars race when they meet by chance (repo; next sync pack)
+Owner: "make it so that rare cars can race with each other", then "no dont spawn as pairs i mean like when they meet each other coincidencely".
+- No paired spawns. Two racers going the same way within 120 studs (`TrafficMix.Race.MeetGap`) become a race: the one behind takes the same turns, gets a x1.08 slipstream within 90 studs, the leader eases to x0.92 when 70+ studs ahead (and is capped at the slower rival's top speed), passes only through open strips, ends when split by 900 studs. A third can join.
+- Tests `racer_race_test` 14/14. Not watched in Play. With caps of 1 and a 1% chance, meetings are only now and then.

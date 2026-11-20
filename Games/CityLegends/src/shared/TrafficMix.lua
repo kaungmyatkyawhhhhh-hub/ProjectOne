@@ -193,11 +193,12 @@ function TrafficMix.pick(rng: Random, have: { [string]: boolean }, counts: { [st
 	return last
 end
 
--- (owner, 2026-11-21: "also make it so that rare cars can race with each other") a rare car now and then spawns
--- with a rival from another cap group; the two share a way (Traffic.lua raceNext) and trade places
+-- (owner, 2026-11-21: "also make it so that rare cars can race with each other"; "no dont spawn as pairs i mean
+-- like when they meet each other coincidencely") two rare cars that happen to meet going the same way race: they
+-- share a way (Traffic.lua raceNext) and trade places. Nothing is spawned for it.
 TrafficMix.Race = {
-	Chance = 0.5, -- of rare spawns, the share that brings a rival (when another group is under its cap)
-	Behind = 3, -- car lengths the rival starts behind (when there is no free lane beside)
+	MeetGap = 120, -- studs along the road within which two racers going the same way become a race
+	MeetSide = 30, -- studs sideways at most (the same road, not a crossing or parallel one)
 	Split = 900, -- studs apart at which the race is over and each drives on alone
 	Tow = 1.08, -- top speed x this for the one behind, within TowGap of its rival (slipstream)
 	TowGap = 90,
@@ -205,17 +206,11 @@ TrafficMix.Race = {
 	LeadGap = 70,
 }
 
--- the rival's template name: a rare car of another cap group than `firstGroup` that is under its cap (the rules
--- of pick), nil when there is none
-function TrafficMix.rival(rng: Random, have: { [string]: boolean }, counts: { [string]: number }, firstGroup: string): string?
-	local open = {}
-	for name, e in TrafficMix.byName do
-		if e.rare and e.rare ~= firstGroup and have[name] and TrafficMix.spawns(name) and (counts[e.rare] or 0) < (TrafficMix.Rare[e.rare] or 0) then
-			table.insert(open, name)
-		end
-	end
-	table.sort(open)
-	return if #open > 0 then open[rng:NextInteger(1, #open)] else nil
+-- do two racers meet? `along` / `side` = the other car's place ahead (+) / beside this one in studs, `dot` = the
+-- dot of their headings (1 the same way, -1 oncoming, 0 crossing)
+function TrafficMix.raceMeets(along: number, side: number, dot: number): boolean
+	local R = TrafficMix.Race
+	return dot > 0.7 and math.abs(along) <= R.MeetGap and math.abs(side) <= R.MeetSide
 end
 
 -- a race car's top speed factor from how far it is ahead of its rival along the road (studs, negative = behind)

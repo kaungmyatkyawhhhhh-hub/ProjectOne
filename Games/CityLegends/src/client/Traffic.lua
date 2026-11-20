@@ -26,6 +26,7 @@ local TrafficBodies = require(script.Parent:WaitForChild("TrafficBodies"))
 local TrafficMix = require(Shared:WaitForChild("TrafficMix"))
 local ChauffeurRoute = require(Shared:WaitForChild("ChauffeurRoute"))
 local RACER = TrafficMix.Racer
+local RACE = TrafficMix.Race
 local besideOf: (any) -> { any }?
 
 local T = Config.Traffic
@@ -64,6 +65,10 @@ export type Npc = {
 	offFrom: number?, -- where the slide under way began (it eases back there if its target strip fills)
 	plan: { CityLayout.Segment }?, -- the way chosen past nextSeg (racers brake for bends far ahead)
 	holdMerge: boolean?, -- a racer waiting to merge back before a junction
+	-- (2026-11-21) a race of rare cars that met (TrafficMix.Race): its number, and the way its cars share (piece ->
+	-- the piece taken after it)
+	race: number?,
+	way: { [any]: any }?,
 }
 
 type Obstacle = { pos: Vector3, fwd: Vector3, speed: number, halfLen: number, width: number, self: Npc? }
@@ -686,6 +691,84 @@ local function bendSpeed(npc: Npc, q: CityLayout.Segment): number
 	return TrafficMix.racerTurnSpeed(npc.racer or npc.maxSpeed, deg :: number, if q.turnSpeed then Config.mphToSps(q.turnSpeed) else TURN_SPEED)
 end
 
+-- (owner, 2026-11-21: "also make it so that rare cars can race with each other") the piece a car takes after
+-- `prev`: in a race the first car to look decides and the others take the same when they get there, so a race stays
+-- together through junctions. In the lane beside that car's: the way on that ends nearest its way on.
+local function raceNext(npc: Npc, prev: CityLayout.Segment): CityLayout.Segment?
+	local way = npc.way
+	if not way then
+		return chooseNext(prev)
+	end
+	local q = way[prev]
+	if q == nil then
+		q = chooseNext(prev)
+		local ref = nil
+		for _, b in besideOf(prev) or {} do
+			ref = ref or way[b]
+		end
+		if ref and q then
+			for _, o in publicNext[prev] or {} do
+				if (o.p2 - ref.p2).Magnitude < (q.p2 - ref.p2).Magnitude then
+					q = o
+				end
+			end
+		end
+		way[prev] = q or false
+	end
+	return q or nil
+end
+
+-- (owner, 2026-11-21: "no dont spawn as pairs i mean like when they meet each other coincidencely") a racer's
+-- rival: the nearest car of its race. Two racers that meet going the same way on one road (TrafficMix.raceMeets)
+-- become a race, a third that meets them joins; with no car of its race within Race.Split (far apart, or taken
+-- off the road) a racer drives on alone.
+local raceId = 0
+local function raceRival(npc: Npc): Npc?
+	local fwd = npc.fwd
+	local right = fwd:Cross(Vector3.yAxis)
+	local best: Npc?, bestD = nil, RACE.Split
+	for _, o in Traffic.cars do
+		if o ~= npc and o.racer then
+			local rel = o.pos - npc.pos
+			if not (npc.race and o.race) and math.abs(rel.Y) < 12 and TrafficMix.raceMeets(rel:Dot(fwd), rel:Dot(right), fwd:Dot(o.fwd)) then
+				local a, b = npc, o -- a = the one ahead: its way is the race's
+				if rel:Dot(fwd) > 0 then
+					a, b = o, npc
+				end
+				local way = a.way or b.way or {}
+				if not a.way then
+					local prev: CityLayout.Segment? = a.seg
+					for _, q in { a.nextSeg, table.unpack(a.plan or {}) } do
+						if way[prev] == nil then
+							way[prev] = q
+						end
+						prev = q
+					end
+				end
+				raceId += if a.race or b.race then 0 else 1
+				local id = a.race or b.race or raceId
+				for _, c in { a, b } do
+					local joins = c.way ~= way
+					c.race, c.way = id, way
+					c.model:SetAttribute("Race", id)
+					if joins and c == b then
+						b.plan = nil
+						b.nextSeg = raceNext(b, b.seg)
+					end
+				end
+			end
+			if npc.race and o.race == npc.race and rel.Magnitude < bestD then
+				best, bestD = o, rel.Magnitude
+			end
+		end
+	end
+	if npc.race and not best then
+		npc.race, npc.way = nil, nil
+		npc.model:SetAttribute("Race", nil)
+	end
+	return best
+end
+
 -- the i-th piece after nextSeg on a racer's way (chosen once and kept, so the braking plan is the way it drives)
 local function planNext(npc: Npc, i: number, prev: CityLayout.Segment): CityLayout.Segment?
 	local plan = npc.plan
@@ -695,7 +778,7 @@ local function planNext(npc: Npc, i: number, prev: CityLayout.Segment): CityLayo
 	end
 	local q = (plan :: any)[i]
 	if not q then
-		q = chooseNext(prev)
+		q = raceNext(npc, prev)
 		if q then
 			(plan :: any)[i] = q
 		end
@@ -1001,7 +1084,7 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 				npc.offFrom = if npc.offFrom then npc.offFrom - sp.lat else nil
 				npc.s = math.clamp(npc.s * o.length / seg.length, 0, o.length)
 				npc.seg = o
-				npc.nextSeg = chooseNext(o)
+				npc.nextSeg = raceNext(npc, o)
 				npc.plan = nil
 				npc.model:SetAttribute("LaneSwaps", (npc.model:GetAttribute("LaneSwaps") or 0) + 1)
 				break
@@ -1308,7 +1391,16 @@ function Traffic.update(dt: number)
 		end
 		if npc.racer then
 			-- top speed on straights, slowed in time for every bend, turn and red light ahead
-			target = math.min(npc.racer * (1 + 0.03 * math.sin(now * npc.wanderRate + npc.wanderPhase)), racerCap(npc, now))
+			-- (owner, 2026-11-21: "rare cars can race with each other") in a race the one behind is towed along (x Race.Tow
+			-- within TowGap) and the one well in front eases to the slower car's pace (x Race.Ease), so they trade
+			-- places; passing is the normal strip logic and every no-touch rule holds between them
+			local top = npc.racer
+			local rival = raceRival(npc)
+			if rival then
+				local k = TrafficMix.raceFactor((npc.pos - rival.pos):Dot(npc.fwd + rival.fwd) / 2)
+				top = (if k < 1 then math.min(top, rival.racer or top) else top) * k
+			end
+			target = math.min(top * (1 + 0.03 * math.sin(now * npc.wanderRate + npc.wanderPhase)), racerCap(npc, now))
 			if (npc :: any).holdMerge then
 				target = math.min(target, math.max(npc.speed * 0.9, 4)) -- (let the lane we must merge into go by; creep, never stand for good)
 			end
@@ -1452,7 +1544,7 @@ function Traffic.update(dt: number)
 			end
 			npc.seg = nxt
 			local plan = npc.plan
-			npc.nextSeg = if plan and plan[1] then table.remove(plan, 1) else chooseNext(nxt)
+			npc.nextSeg = if plan and plan[1] then table.remove(plan, 1) else raceNext(npc, nxt)
 		end
 		if npc.racer then
 			racerSide(npc, dt, obstacleList)
