@@ -9,6 +9,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
+-- (21 Nov, owner: "make the loading screen ingame load fast") each startup phase's time since this script
+-- started, printed with the menu: "startup phases: requires 0.4, sounds 0.4, ..."
+local startT0 = os.clock()
+local phaseLog: { string } = {}
+local function phase(name: string)
+	table.insert(phaseLog, string.format("%s %.2f", name, os.clock() - startT0))
+end
+
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 
@@ -121,9 +129,11 @@ do
 		camera.FieldOfView = shot[4]
 	end)
 end
+phase("requires")
 UI.showLoading("Loading sounds...")
 Audio.musicKeyBlocked = Driving.isDriving -- in a car M is the gearbox
 Audio.init() -- test-loads the Creator Store sounds (falls back to built-in ones)
+phase("sounds")
 UI.showLoading("Building the city...")
 
 local pendingAttach = false
@@ -187,6 +197,7 @@ local SpawnCar = remotes:WaitForChild("SpawnCar") :: RemoteEvent
 local Progress = remotes:WaitForChild("Progress") :: RemoteEvent
 local ClaimDaily = remotes:WaitForChild("ClaimDaily") :: RemoteFunction
 
+phase("remotes")
 Driving.init()
 OnFoot.init()
 
@@ -196,6 +207,7 @@ local readyBy = os.clock() + 60
 while city and not city:GetAttribute("Ready") and os.clock() < readyBy do
 	task.wait(0.2)
 end
+phase("city")
 if not city then
 	warn("[CityLegends] no City in Workspace after 60 s, going on without it")
 end
@@ -228,6 +240,7 @@ local function waitForMap(status: string, jumped: boolean?)
 	end
 	UI.showLoading(status)
 	local t0 = os.clock()
+	local parts0 = streamedIn
 	task.wait(1)
 	local last, quiet = streamedIn, 0
 	while os.clock() - t0 < MAP_MAX_WAIT and UI.loadingWaiting() do
@@ -243,6 +256,7 @@ local function waitForMap(status: string, jumped: boolean?)
 			quiet = 0
 		end
 	end
+	local tQuiet = os.clock() - t0
 	if jumped then
 		local phone = UI.isTouch or require(script.Parent:WaitForChild("LowEnd")).on
 		local settleBy = os.clock() + (if phone then TERRAIN_SETTLE_PHONE else TERRAIN_SETTLE)
@@ -250,11 +264,13 @@ local function waitForMap(status: string, jumped: boolean?)
 			task.wait(0.25)
 		end
 	end
+	print(string.format("[CityLegends] map wait '%s': parts quiet %.2fs (%d parts), total %.2fs", status, tQuiet, streamedIn - parts0, os.clock() - t0))
 end
 
 UI.showLoading("Shaping the cars...")
 UI.showLoading("Starting engines...")
 task.wait(1) -- let the world finish replicating
+phase("wait1")
 
 ---------------------------------------------------------------------
 -- World effects: lights, searchlights, billboards, monorail
@@ -275,11 +291,13 @@ require(script.Parent:WaitForChild("Knockables")).init()
 WorldFx.start()
 Weather.init() -- rain cycle (rare showers, starts clear), wet roads, mist, rain sound
 -- (the day / night cycle runs since the loading screen: morning, day, sunset, night)
+phase("world")
 
 ---------------------------------------------------------------------
 -- Data
 ---------------------------------------------------------------------
 local data = GetData:InvokeServer()
+phase("data")
 if not data then
 	data = { Cash = Config.Economy.StartingCash, Owned = { "aurelia_s4" }, Selected = "aurelia_s4" }
 end
@@ -466,6 +484,7 @@ local function stopOrbit()
 	end
 end
 
+phase("settings")
 stopLoadingShots()
 startOrbit()
 UI.showLoading("Filling the streets with traffic...")
@@ -562,7 +581,9 @@ startStep("Care", function()
 	require(script.Parent:WaitForChild("DamageFx")).init()
 end)
 print("[CityLegends] startup: " .. table.concat(stepTimes, ", "))
+phase("steps")
 waitForMap("Loading the map...")
+phase("map")
 -- (owner, 2026-11-21: the loading screen now stays up until the main menu opens, at the end of this script)
 
 ---------------------------------------------------------------------
@@ -617,10 +638,12 @@ playerCars.ChildAdded:Connect(function(model)
 end)
 
 local arrivedYet = false
+local driveAskedAt = 0 -- (os.clock of the last drive request: the spawn's load time is printed)
 local function tryAttach(model: Instance)
 	if model:IsA("Model") and driveNow(model) then
 		pendingAttach = false
 		attaching = true
+		local tArrived = os.clock()
 		waitWhole(model)
 		local okSkin, errSkin = pcall(CarSkin.apply, model, false)
 		if not okSkin then
@@ -650,6 +673,7 @@ local function tryAttach(model: Instance)
 			end
 		end
 		UI.hideLoading()
+		print(string.format("[CityLegends] car spawn: asked -> car %.2fs, car -> driving %.2fs", tArrived - driveAskedAt, os.clock() - tArrived))
 		UI.showHud(true)
 		attaching = false
 		UI.setCameraLabel(Driving.cameraMode)
@@ -664,6 +688,7 @@ local function requestDrive(id: string, stealFrom: Model?)
 	driveRequest += 1
 	local my = driveRequest
 	pendingAttach = true
+	driveAskedAt = os.clock()
 	UI.fade(true, 0.3)
 	if stealFrom then
 		(remotes:WaitForChild("StealCar") :: RemoteEvent):FireServer(stealFrom)
@@ -1162,3 +1187,5 @@ else
 	showMenu()
 	UI.hideLoading()
 end
+phase("menu")
+print("[CityLegends] startup phases: " .. table.concat(phaseLog, ", "))
