@@ -205,33 +205,39 @@ local RING_GREEN = rgb(156, 201, 116)
 function M.roundabout(): string
 	local f = item("Roundabout")
 	local n = 0
+	local K = 1.25 -- the drawing below is in units of 0.8 m; the real one stands about 12 m
+	local NIGHT = rgb(150, 132, 38) -- (a bright gold Neon blooms into a yellow blob)
+	local LINE = rgb(255, 246, 190)
+	local function at(y: number): Vector3
+		return RB + Vector3.new(0, y * K, 0)
+	end
 	local function gold(name: string, r: number, h: number, y: number): Part
 		n += 1
-		return glow(cyl(f, name, r, h, RB + Vector3.new(0, y + h / 2, 0), GOLD_DAY, Enum.Material.Metal), rgb(196, 176, 58))
+		return glow(cyl(f, name, r * K, h * K, at(y + h / 2), GOLD_DAY, Enum.Material.Metal), NIGHT)
 	end
-	local function rim(name: string, r: number, y: number, color: Color3)
+	local function rim(name: string, r: number, y: number, color: Color3, t: number?)
 		n += 1
-		neon(f, name, Vector3.new(0.35, 2 * r, 2 * r), CFrame.new(RB + Vector3.new(0, y, 0)) * CFrame.Angles(0, 0, math.pi / 2), color, Enum.PartType.Cylinder)
+		neon(f, name, Vector3.new(t or 0.45, 2 * r * K, 2 * r * K), CFrame.new(at(y)) * CFrame.Angles(0, 0, math.pi / 2), color, Enum.PartType.Cylinder)
 	end
 	-- the planted base ring (the only solid piece)
-	local bed = cyl(f, "BaseRing", 28, 1.6, RB + Vector3.new(0, 0.8, 0), rgb(74, 122, 60), Enum.Material.Grass)
+	local bed = cyl(f, "BaseRing", 28 * K, 1.6 * K, at(0.8), rgb(74, 122, 60), Enum.Material.Grass)
 	bed.CanCollide = true
 	bed.CanQuery = true
 	n += 1
-	rim("RingGreen", 28.35, 0.55, RING_GREEN)
-	rim("RingWhite", 28.2, 1.5, rgb(255, 250, 225))
+	rim("RingGreen", 28.5, 0.5, RING_GREEN, 0.8)
+	rim("RingWhite", 28.3, 1.45, rgb(255, 250, 225), 0.6)
 	-- three gold steps, a light line on each
 	local y = 1.6
 	for i, r in { 9.5, 7.8, 6.2 } do
 		gold("Step" .. i, r, 1.3, y)
 		y += 1.3
-		rim("StepLight", r + 0.12, y - 0.2, rgb(255, 246, 190))
+		rim("StepLight", r + 0.15, y - 0.2, LINE)
 	end
 	-- the open-work stem: an hourglass of drums with light bands
 	for i, r in { 4.4, 3.5, 2.7, 2.7, 3.5, 4.4 } do
 		gold("Stem" .. i, r, 2.6, y)
 		y += 2.6
-		rim("StemLight", r + 0.12, y, rgb(255, 246, 190))
+		rim("StemLight", r + 0.15, y, LINE)
 	end
 	-- the bowl under the canopy, the wide scalloped canopy, two shrinking tiers, the dark crown
 	gold("Bowl", 6.5, 1.6, y)
@@ -240,35 +246,35 @@ function M.roundabout(): string
 	for k = 1, 14 do
 		local a = k / 14 * math.pi * 2
 		n += 1
-		glow(part(f, "Scallop", Vector3.new(4.6, 4.6, 4.6), CFrame.new(RB + Vector3.new(math.cos(a) * 10.4, y - 0.4, math.sin(a) * 10.4)), GOLD_DAY, Enum.Material.Metal, Enum.PartType.Ball), rgb(196, 176, 58))
+		glow(part(f, "Scallop", Vector3.one * 4.6 * K, CFrame.new(at(y - 0.4) + Vector3.new(math.cos(a), 0, math.sin(a)) * 10.4 * K), GOLD_DAY, Enum.Material.Metal, Enum.PartType.Ball), NIGHT)
 	end
 	y += 1.5
-	rim("CanopyLight", 11.6, y, rgb(255, 246, 190))
+	rim("CanopyLight", 11.65, y, LINE)
 	gold("Tier1", 8.4, 1.5, y)
 	y += 1.5
-	rim("TierLight", 8.5, y, rgb(255, 246, 190))
+	rim("TierLight", 8.55, y, LINE)
 	gold("Tier2", 5.6, 1.4, y)
 	y += 1.4
-	cyl(f, "Crown", 3.6, 2.2, RB + Vector3.new(0, y + 1.1, 0), rgb(120, 44, 40))
+	cyl(f, "Crown", 3.6 * K, 2.2 * K, at(y + 1.1), rgb(120, 44, 40))
 	n += 1
 	y += 2.2
-	rim("CrownLight", 3.75, y - 0.3, rgb(255, 246, 190))
+	rim("CrownLight", 3.8, y - 0.3, LINE)
 	gold("Cap", 2.2, 0.8, y)
 	-- two lights: the stem's glow and the canopy's underside
 	for _, h in { 9, 20 } do
-		local holder = part(f, "Glow", Vector3.new(0.4, 0.4, 0.4), CFrame.new(RB + Vector3.new(0, h, 9)), GOLD)
+		local holder = part(f, "Glow", Vector3.new(0.4, 0.4, 0.4), CFrame.new(at(h) + Vector3.new(0, 0, 12)), GOLD)
 		holder.Transparency = 1
 		n += 1
-		light(Instance.new("PointLight"), holder, GOLD, 1.6, 34)
+		light(Instance.new("PointLight"), holder, GOLD, 1.6, 40)
 	end
 	f.Parent = landmarks().IrlNight21Nov
-	return string.format("Roundabout: %d parts, 2 lights, top %.1f studs over the island", n, y + 0.8)
+	return string.format("Roundabout: %d parts, 2 lights, top %.1f studs over the island", n, (y + 0.8) * K)
 end
 
 ------------------------------------------------------------------------------------------------ C. Maha Bandula Park fence
 local PARK = { { 36014.4, 45932.5 }, { 36409.9, 45944.4 }, { 36424.7, 45553.1 }, { 36431.7, 45297.7 }, { 36241.4, 45292.5 }, { 36125.9, 45290.8 }, { 36071.2, 45310.2 }, { 36025.2, 45350.8 }, { 36024.4, 45548.6 } } -- OSM way 129485365
-local RED = rgb(216, 93, 49)
-local GREEN = rgb(128, 211, 100)
+local RED = rgb(206, 52, 26) -- photo (216, 93, 49); Neon renders lighter, so the part is deeper
+local GREEN = rgb(70, 200, 62) -- photo (128, 211, 100)
 local LED_GOLD = rgb(255, 214, 96)
 
 function M.parkFence(): string
@@ -328,7 +334,7 @@ local SULE_C = { 35993.22, 45130.83 }
 local SULE_Y0 = 18.47
 local BOARD = rgb(236, 200, 44)
 local CREST_DAY = rgb(255, 187, 84) -- Sule's own gold (Visual.GLD)
-local CREST_NIGHT = rgb(206, 160, 52)
+local CREST_NIGHT = rgb(150, 112, 30) -- (brighter blooms yellow)
 
 function M.suleShops(): string
 	local f = item("SuleShops")
