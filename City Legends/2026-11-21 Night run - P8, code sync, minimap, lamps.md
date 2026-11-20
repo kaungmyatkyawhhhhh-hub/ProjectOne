@@ -181,3 +181,10 @@ Owner: "nvm put goals and chauffeur in the menu": side column = Menu, Shop, Cars
 Operation d817aa1d-6554-4de8-9641-558ab847b651 (`imports/sync/sync_21nov_g.rbxmx`, 13 scripts, all compile). Expected lengths: Config 198823, Strings 117355, Cars 53704, TrafficMix 15299, StartupGuard 1048 (new), WaterRescue 3546 (new), PlayerData 37062 (store name v1), UI 135171, MainMenu 121138, Traffic 71358, TrafficBodies 9886, Driving 186300, Main 42120.
 - Menu: Settings, Goals, Chauffeur are three stacked cards on the CAMPAIGN tab (281x98 on phone, 336x131 on PC; World Map narrowed); goals dot on the MENU button and the Goals card. Burmese captions not reviewed by a speaker.
 - Install after the Play test ends, then a second Play test for: skip loading, racers (3%/degree, races, U-turn, colours), 46 cars, water rescue (+ trailer), menu cards at phone and PC size, old trims gone from the garage.
+
+## Rare car nose swing + exhaust flames off (21 Nov, late)
+- Owner: rare cars behind a car swung their nose ~45 degrees left and right every 1/3 s while going straight.
+- Cause: the nose leaned toward the lane the racer WANTED, even while the slide was blocked and undone; at low speed the lean was not capped (it built up at speed, then the car slowed behind traffic: up to ~54 degrees). A blocked slide was tried again 0.2 s later, so it repeated.
+- Fix (Traffic.lua): the nose follows only the sideways move that really happened this frame, eased, capped at 19 degrees at every speed; after a blocked slide the racer waits SideHold (1 s) before trying again.
+- Exhaust flames off for now (owner: "I will add them back later"): Driving.lua removes the flame emitters and glow right after building them (shortcut comment says how to undo); the Workshop dyno flames off too.
+- Sync pack H (asset 74053055634228) = pack G's 13 scripts + Workshop; all 14 checked in Studio, store CityLegends_v1, saved. Not Play-tested yet.
