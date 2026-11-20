@@ -4691,3 +4691,151 @@ def gc8(Spec, needle_sprite, add_needle, glyph, solid_gear):
     sprites = {ch: {"im": Image.new("RGBA", (4, 4), (0, 0, 0, 0))} for ch in "RNP1234567"}
     sp.gear = {"x": 0, "y": 0, "sprites": sprites}
     return sp
+
+
+def r34(Spec, needle_sprite, add_needle, glyph, solid_gear):
+    """the Horizon BNR34 (`nisun_r34`, the ARjun.JS model, 2026-11-21): no photo and no cluster picture in the model (its
+    hood holds a plain dark face), so drawn from the real car's layout: three black dials with white numbers and orange
+    needles. Left: the speedometer 0-180 km/h (the home-market dial, a mark every 10) with the odometer and trip; middle:
+    the big rev counter 0-10 (x1000 r/min, red from 8) with the shift lamp at its top (lit from 7,500, the setting the
+    real upshift light is usually given) and the start-up lamps under the hub (charge, oil, check, brake, belt: lit for
+    the first seconds, like the bulb check of a real car); right: the water temperature (C - H, upper half) and the fuel
+    (E - F, lower half) on one face. No gear read-out: the real car has none (the HUD keeps it). Idle 0 and redline 8
+    put the rev needle where the HUD's revs are (share x redline) instead of the shared idle-high reading. Coordinates:
+    design pixels, 3 per mm of the 360 x 160 mm hood face."""
+    REF = "nisun_r34_cluster_blank.png"
+    box = (0, 0, 1080, 480)
+    A = Art(REF, box, S=3, bg=(7, 7, 8))
+    L = Art(REF, box, S=3, bg=(0, 0, 0))  # the lit lamps alone (shows and the shift block)
+    sp = Spec("r34", 1080, 480, 1.2, 1.2, 0, 0)
+    sp.redline, sp.idle = 8.0, 0.0
+    C1, R1 = (176.0, 262.0), 156.0  # speedometer
+    C2, R2 = (540.0, 240.0), 200.0  # rev counter
+    C3, R3 = (904.0, 262.0), 156.0  # water + fuel
+    WHT = (238, 238, 232)
+    RED = (226, 44, 34)
+    ORG = (255, 112, 34)
+    GLOW = (30, 30, 28)
+    NUMF = ARIAL_B
+
+    def spd(v):
+        return -135.0 + v * 1.5
+
+    def rev(v):
+        return -135.0 + v * 27.0
+
+    def tick(C, r0, r1, deg, w, col):
+        A.line([polar(C, r0, deg), polar(C, r1, deg)], col, w, glow=GLOW, gw=w * 1.8)
+
+    def face(C, R):
+        A.circle(C[0], C[1], R + 9, (34, 34, 36))  # the bezel
+        A.circle(C[0], C[1], R + 3, (16, 16, 18))
+        A.circle(C[0], C[1], R, (5, 5, 6))
+
+    for C, R in ((C1, R1), (C3, R3), (C2, R2)):
+        face(C, R)
+
+    # ---- speedometer
+    for v in range(0, 181, 5):
+        if v % 20 == 0:
+            tick(C1, R1 - 24, R1 - 3, spd(v), 5.0, WHT)
+        elif v % 10 == 0:
+            tick(C1, R1 - 16, R1 - 3, spd(v), 3.0, WHT)
+        else:
+            tick(C1, R1 - 10, R1 - 3, spd(v), 1.8, WHT)
+    for v in range(0, 181, 20):
+        x, y = polar(C1, R1 - 46, spd(v))
+        A.text(x, y, str(v), NUMF, 23, WHT, glow=GLOW)
+    A.text(C1[0], C1[1] - 62, "km/h", ARIAL, 18, WHT, glow=GLOW)
+    ODO = (C1[0] - 48, C1[1] + 48, C1[0] + 48, C1[1] + 70)
+    TRIP = (C1[0] - 34, C1[1] + 78, C1[0] + 34, C1[1] + 98)
+    for (x0, y0, x1, y1) in (ODO, TRIP):
+        A.round_rect(x0 - 2, y0 - 2, x1 + 2, y1 + 2, 2, (20, 20, 22))
+
+    # ---- rev counter: a mark every 100, red from 8
+    for i in range(0, 101):
+        v = i / 10
+        col = RED if v >= 8 else WHT
+        if i % 10 == 0:
+            tick(C2, R2 - 30, R2 - 3, rev(v), 6.0, col)
+        elif i % 5 == 0:
+            tick(C2, R2 - 19, R2 - 3, rev(v), 3.2, col)
+        else:
+            tick(C2, R2 - 12, R2 - 3, rev(v), 2.0, col)
+    a0, a1 = rev(8), rev(10)
+    for k in range(60):  # the red band inside the marks
+        t0 = a0 + (a1 - a0) * k / 60
+        t1 = a0 + (a1 - a0) * (k + 1) / 60
+        A.line([polar(C2, R2 - 36, t0), polar(C2, R2 - 36, t1)], RED, 7.0)
+    for v in range(0, 11):
+        x, y = polar(C2, R2 - 64, rev(v))
+        A.text(x, y, str(v), NUMF, 34, RED if v >= 8 else WHT, glow=GLOW)
+    A.text(C2[0], C2[1] - 56, "x1000r/min", ARIAL, 17, WHT, glow=GLOW)
+
+    # ---- the shift lamp (top of the rev counter) and the start-up lamps (under its hub): dim on the face, lit in L
+    SH = (C2[0] - 26, C2[1] - 104, C2[0] + 26, C2[1] - 86)
+    A.round_rect(*SH, 4, (40, 14, 12))
+    L.round_rect(*SH, 4, (255, 70, 40))
+    LAMPS = [("CHG", RED), ("OIL", RED), ("CHECK", (255, 170, 30)), ("BRAKE", RED), ("BELT", RED)]
+    xs = [C2[0] - 92 + i * 46 for i in range(5)]
+    LY = C2[1] + 46
+    for (txt, col), x in zip(LAMPS, xs):
+        A.text(x, LY, txt, ARIAL_B, 12, (36, 34, 32))
+        L.text(x, LY, txt, ARIAL_B, 12, col, glow=tuple(c // 3 for c in col))
+
+    # ---- water (upper half) and fuel (lower half)
+    def wa(t):  # 0 cold .. 1 hot
+        return -60.0 + 120.0 * t
+
+    def fu(t):  # 0 empty .. 1 full: E at the lower left, F at the lower right
+        return 240.0 - 120.0 * t
+
+    for k in range(0, 9):
+        t = k / 8
+        big = k % 4 == 0
+        tick(C3, R3 - (24 if big else 14), R3 - 3, wa(t), 4.0 if big else 2.2, RED if t > 0.85 else WHT)
+        tick(C3, R3 - (24 if big else 14), R3 - 3, fu(t), 4.0 if big else 2.2, RED if t < 0.1 else WHT)
+    for s, ang, col in (("C", wa(0), WHT), ("H", wa(1), RED), ("E", fu(0), RED), ("F", fu(1), WHT)):
+        x, y = polar(C3, R3 - 46, ang)
+        A.text(x, y, s, NUMF, 26, col, glow=GLOW)
+    A.text(C3[0] - 62, C3[1] - 28, "TEMP", ARIAL, 16, WHT, glow=GLOW)
+    A.text(C3[0] - 62, C3[1] + 28, "FUEL", ARIAL, 16, WHT, glow=GLOW)
+
+    A.final = A.finish(A.S, blur=1.4, strength=0.45)
+    L.final = L.finish(L.S, blur=2.0, strength=0.9)
+    sp.bg = A.final.resize((round(sp.W * sp.bg_scale), round(sp.H * sp.bg_scale)), Image.LANCZOS)
+
+    sh = sp.box(L, (SH[0] - 12, SH[1] - 12, SH[2] + 12, SH[3] + 12), black=True)
+    sp.blocks.append({"im": sh[0], "left": sh[1], "top": sh[2], "v": 7.5})
+    for x in xs:
+        sp.add_show(sp.box(L, (x - 23, LY - 10, x + 23, LY + 10), black=True), "start")
+
+    def blade(length, tail, w0, w1, cap):
+        return needle_sprite(sp, length, tail, [(-tail, length, w0, w1, ORG)], hub=cap, hub_col=(20, 20, 22), hub_line=(70, 70, 74))
+
+    add_needle(sp, blade(R1 - 12, 28, 3.6, 1.8, 15), C1[0], C1[1], "kmh", [(0, spd(0)), (190, spd(190))])
+    add_needle(sp, blade(R2 - 14, 34, 4.2, 2.0, 19), C2[0], C2[1], "rpm", [(0, rev(0)), (10.4, rev(10.4))])
+    add_needle(sp, blade(R3 - 40, 0, 3.4, 1.8, 15), C3[0], C3[1], "water", [(0, wa(0)), (1, wa(1))])
+    add_needle(sp, blade(R3 - 40, 0, 3.4, 1.8, 0), C3[0], C3[1], "fuel", [(0, fu(0)), (1, fu(1))])
+
+    def drum_font(name, h, pitch, chars):
+        sp.font(name, ARIAL, h, "", shear=0)
+        g = sp.fonts[name]["g"]
+        K = 4
+        k = sp.A * K
+        for ch in chars:
+            fo = font(ARIAL, h / 0.716 * k)
+            t = Image.new("L", (int(h * 3 * k), int(h * 3 * k)), 0)
+            ImageDraw.Draw(t).text((h * k * 0.5, h * k * 0.5), ch, font=fo, fill=255)
+            t = t.crop(t.getbbox())
+            m = t.resize((max(1, round(t.width / K)), max(1, round(t.height / K))), Image.LANCZOS)
+            im = Image.new("RGBA", m.size, (255, 255, 255, 0))
+            im.putalpha(m)
+            g[ch] = (im, (pitch - m.width / sp.A) / 2, -m.height / sp.A / 2, pitch)
+
+    drum_font("odo", 14.0, (ODO[2] - ODO[0]) / 6, "0123456789")
+    sp.readout("odo", ODO[2], (ODO[1] + ODO[3]) / 2, "r", 6, "odo", WHT)
+    drum_font("trip", 13.0, (TRIP[2] - TRIP[0]) / 5, "0123456789.")
+    sp.readout("trip", TRIP[2], (TRIP[1] + TRIP[3]) / 2, "r", 5, "trip", WHT)
+    sp.gear = {"x": 0, "y": 0, "sprites": {ch: {"im": Image.new("RGBA", (4, 4), (0, 0, 0, 0))} for ch in "RNP1234567"}}
+    return sp

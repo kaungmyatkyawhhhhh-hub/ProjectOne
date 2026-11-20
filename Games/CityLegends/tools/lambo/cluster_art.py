@@ -20,7 +20,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 REFS = os.path.join(ROOT, "imports", "refs")
-FONTDIR = sorted(glob.glob("C:/Users/USER/AppData/Local/Roblox/Versions/*/content/fonts/"))[-1]
+FONTDIR = sorted(glob.glob(os.path.expanduser("~").replace("\\", "/") + "/AppData/Local/Roblox/Versions/*/content/fonts/"))[-1]  # (any PC: was C:/Users/USER only)
 REG = FONTDIR + "Roboto-Regular.ttf"
 ROBO_B = FONTDIR + "Roboto-Bold.ttf"
 TECH = FONTDIR + "Sarpanch-Bold.ttf"
