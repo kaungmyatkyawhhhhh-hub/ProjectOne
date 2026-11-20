@@ -252,7 +252,7 @@ function LS.stage(id)
 			d.Anchored = true
 		end
 	end
-	m:PivotTo(CFrame.new(0, 5000, 0))
+	m:PivotTo(CFrame.new(-LS.x0(id), 5000, 0)) -- the car's middle at x 0
 	m.Parent = st
 	return m
 end
