@@ -375,7 +375,8 @@ Config.Traffic = {
 }
 
 -- shown at the bottom of Settings (assets that ask for credit)
-Config.Credits = if script then require(script.Parent.Credits) else {} -- (the list is in Credits.lua: this file is at Studio's size limit)
+local okCredits, credits = pcall(function() return require(script.Parent:WaitForChild("Credits")) end)
+Config.Credits = if okCredits and type(credits) == "table" then credits else {} -- (in Credits.lua: this file is at Studio's size limit; tests with no Credits get none)
 
 ---------------------------------------------------------------------
 -- Economy
