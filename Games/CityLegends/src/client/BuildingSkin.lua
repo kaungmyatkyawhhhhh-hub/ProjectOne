@@ -42,21 +42,30 @@ local function image(buf: buffer): any
 	return Content.fromObject(img)
 end
 
-local function buildLibrary(): ({ [string]: Maps }, { [string]: Surface })
-	local moods: { [string]: Maps } = {}
-	local surfaces: { [string]: Surface } = {}
-	for style in FacadeTex.STYLES do
+-- (21 Nov, owner: "make the loading screen ingame load fast") the maps are made only for the looks the towers in
+-- the City use, when first needed: the whole library (every style x warm x busy) held the start 3-8 s in Studio
+-- Play, for 2 towers (Yangon), and was thrown away when the probe below found textures refused
+local moods: { [string]: Maps } = {}
+local surfaces: { [string]: Surface } = {}
+local function surfaceOf(style: string): Surface
+	local s = surfaces[style]
+	if not s then
 		local n, r, m = FacadeTex.surface(style)
-		surfaces[style] = { normal = image(n), rough = image(r), metal = image(m) }
-		for _, warm in { true, false } do
-			for _, busy in { true, false } do
-				local c, e = FacadeTex.generate(style, warm, busy)
-				moods[style .. tostring(warm) .. tostring(busy)] = { color = image(c), emissive = image(e) }
-				task.wait() -- spread the work over frames
-			end
-		end
+		s = { normal = image(n), rough = image(r), metal = image(m) }
+		surfaces[style] = s
 	end
-	return moods, surfaces
+	return s
+end
+local function mapsOf(style: string, warm: boolean, busy: boolean): Maps
+	local key = style .. tostring(warm) .. tostring(busy)
+	local m = moods[key]
+	if not m then
+		local c, e = FacadeTex.generate(style, warm, busy)
+		m = { color = image(c), emissive = image(e) }
+		moods[key] = m
+		task.wait() -- spread the work over frames
+	end
+	return m
 end
 
 -- night 1 .. day 0 (DayCycle): how brightly the lit rooms glow
@@ -71,18 +80,31 @@ function BuildingSkin.setNight(n: number)
 end
 
 function BuildingSkin.apply(city: Instance): boolean
-	local ok, moods, surfaces = pcall(buildLibrary)
-	if not ok then
-		warn("[CityLegends] Facade textures unavailable, keeping part facades:", moods)
+	local towers: { BasePart } = {}
+	local remove: { Instance } = {}
+	for _, d in city:GetDescendants() do
+		if d:IsA("BasePart") then
+			if d.Name == "Tower" and d:GetAttribute("Style") then
+				table.insert(towers, d)
+			elseif REMOVE[d.Name] then
+				table.insert(remove, d)
+			end
+		end
+	end
+	if #towers == 0 then
 		return false
 	end
 
 	-- Studio (2026-10-31) can refuse scripts putting runtime images on a Texture ("lacking capability
 	-- Plugin"): try one first; without the maps keep the part facades, without the glow skip it
-	local anyMaps: Maps?, anySurf: Surface? = nil, nil
-	for style, surf in surfaces do
-		anyMaps, anySurf = moods[style .. "truetrue"], surf
-		break
+	local first = towers[1]
+	local ok, anyMaps, anySurf = pcall(function()
+		local style = first:GetAttribute("Style") :: string
+		return mapsOf(style, first:GetAttribute("Warm") == true, first:GetAttribute("Busy") == true), surfaceOf(style)
+	end)
+	if not ok then
+		warn("[CityLegends] Facade textures unavailable, keeping part facades:", anyMaps)
+		return false
 	end
 	if anyMaps and anySurf then
 		local probe = Instance.new("Texture")
@@ -106,18 +128,6 @@ function BuildingSkin.apply(city: Instance): boolean
 		end
 	end
 
-	local towers: { BasePart } = {}
-	local remove: { Instance } = {}
-	for _, d in city:GetDescendants() do
-		if d:IsA("BasePart") then
-			if d.Name == "Tower" and d:GetAttribute("Style") then
-				table.insert(towers, d)
-			elseif REMOVE[d.Name] then
-				table.insert(remove, d)
-			end
-		end
-	end
-
 	local rng = Random.new(4242)
 	for i, tower in towers do
 		local style = tower:GetAttribute("Style") :: string
@@ -125,9 +135,10 @@ function BuildingSkin.apply(city: Instance): boolean
 		local warm = tower:GetAttribute("Warm") == true
 		local busy = tower:GetAttribute("Busy") == true
 		local skip = tower:GetAttribute("SkipFace") :: Vector3?
-		local maps = moods[style .. tostring(warm) .. tostring(busy)]
-		local surf = surfaces[style]
-		if maps and surf then
+		local got, maps, surf = pcall(function()
+			return mapsOf(style, warm, busy), surfaceOf(style)
+		end)
+		if got and maps and surf then
 			local offsetU = rng:NextNumber(0, FacadeTex.tileStudsU(module))
 			for _, face in FACES do
 				local normal = tower.CFrame:VectorToWorldSpace(Vector3.FromNormalId(face))

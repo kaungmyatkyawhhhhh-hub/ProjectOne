@@ -25,6 +25,8 @@ local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local TrafficBodies = require(script.Parent:WaitForChild("TrafficBodies"))
 local TrafficMix = require(Shared:WaitForChild("TrafficMix"))
 local ChauffeurRoute = require(Shared:WaitForChild("ChauffeurRoute"))
+local Audio = require(script.Parent:WaitForChild("Audio"))
+local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
 local RACER = TrafficMix.Racer
 local RACE = TrafficMix.Race
 local besideOf: (any) -> { any }?
@@ -1438,11 +1440,71 @@ local frameCount = 0
 local movedParts: { BasePart } = {}
 local movedCFrames: { CFrame } = {}
 
+-- (owner, 2026-11-21: "the rare car sounds too") the nearest racers play their own car's engine set from the
+-- car (Audio.engine, 3D), revs from their speed through made-up gears; at most RACER_VOICES (1 on a low-end
+-- phone), none past RACER_EAR studs; a racer taken off the road loses its sound the same frame
+local RACER_VOICES, RACER_EAR, RACER_GEARS = 2, 220, 6
+local voices: { [Npc]: { eng: any, distT: number } } = {}
+local function racerSounds(dt: number)
+	local cam = workspace.CurrentCamera
+	local near: { { npc: Npc, d: number } } = {}
+	if cam and running then
+		for _, npc in Traffic.cars do
+			if npc.racer and npc.model.Parent then
+				local d = (npc.pos - cam.CFrame.Position).Magnitude
+				if d < RACER_EAR then
+					table.insert(near, { npc = npc, d = d })
+				end
+			end
+		end
+		table.sort(near, function(a, b)
+			return a.d < b.d
+		end)
+	end
+	local keep: { [Npc]: number } = {}
+	for i = 1, math.min(#near, if LowEnd.on then 1 else RACER_VOICES) do
+		keep[near[i].npc] = near[i].d
+	end
+	for npc, v in voices do
+		if not keep[npc] then
+			v.eng:destroy()
+			voices[npc] = nil
+		end
+	end
+	for npc, d in keep do
+		local v = voices[npc]
+		if not v then
+			local id = npc.model:GetAttribute("TrafficId")
+			local spec = if type(id) == "string" then Cars.get(id) else nil
+			if not spec or spec.Electric then
+				continue
+			end
+			local ok, eng = pcall(Audio.engine, spec.Class, npc.root, spec.Id)
+			if not ok then
+				continue
+			end
+			v = { eng = eng, distT = 0 }
+			voices[npc] = v
+		end
+		local frac = math.clamp(npc.speed / (npc.racer :: number), 0, 1)
+		local inGear = math.min(frac * RACER_GEARS, RACER_GEARS - 0.001) % 1
+		local rpm = if frac < 1 / RACER_GEARS then 0.15 + 0.8 * inGear else 0.45 + 0.5 * inGear
+		v.eng:update(rpm, if npc.braking then 0 else 1, frac, 0, nil, nil)
+		v.distT -= dt
+		if v.distT <= 0 then
+			v.distT = 0.25
+			v.eng:setDistance(d)
+		end
+	end
+end
+
 function Traffic.update(dt: number)
 	if not running or #Traffic.cars == 0 then
+		racerSounds(0)
 		return
 	end
 	dt = math.min(dt, 0.1)
+	racerSounds(dt)
 	local dt0 = dt
 	refreshPlayerCars()
 	bumpRefresh -= dt
