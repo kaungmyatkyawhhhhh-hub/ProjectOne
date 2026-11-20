@@ -1362,12 +1362,12 @@ function Traffic.update(dt: number)
 				-- (owner, 2026-10-29: "NPC cars on each other's tail, make space for at least one
 				-- car"): once moving, keep a car length plus a time gap; a stopped queue closes up
 				local keep = T.StopGap + (T.FollowGap - T.StopGap) * math.min(npc.speed / 8, 1) + npc.speed * T.Headway
-				if npc.racer and isPlayer then
-					keep += npc.speed * RACER.PlayerGap -- (a wide berth: players always have the way)
-				end
 				local safe = gap - keep
 				local brake = if npc.racer then RACER.Brake else T.Brake
-				if safe <= 0 then
+				if npc.racer and isPlayer then
+					-- (owner, 2026-11-21: racers don't stop for a player's car, they move over and pass; was a 1 s wider gap and a full stop)
+					target = TrafficMix.racerBehindPlayer(target, gap, keep, otherSpeed, math.abs(npc.offTo - npc.off) > 0.01)
+				elseif safe <= 0 then
 					target = 0
 				else
 					target = math.min(target, math.sqrt(2 * brake * 0.7 * safe + otherSpeed * otherSpeed))
@@ -1441,13 +1441,21 @@ function Traffic.update(dt: number)
 		end
 
 		local pos, fwd = CityLayout.sample(npc.seg, npc.s)
-		if npc.off ~= 0 then
+		if npc.racer then
 			-- a racer beside its lane's middle (sliding over, or on the line between two lanes)
 			local right = fwd:Cross(Vector3.yAxis)
 			pos += right * npc.off
+			-- (owner, 2026-11-21: "the rare cars ai is glitching") the nose eases into and out of a lane change, and
+			-- leans at most 19 degrees; it snapped to the slide's angle and back (over 40 degrees at low speed)
 			local slide = npc.offTo - npc.off
-			if math.abs(slide) > 0.3 and npc.speed > 1 then
-				fwd = (fwd * npc.speed + right * math.sign(slide) * math.clamp(npc.speed * RACER.SideRate, 7, 22)).Unit
+			local want = if math.abs(slide) > 0.3 and npc.speed > 1
+				then math.sign(slide) * math.min(math.clamp(npc.speed * RACER.SideRate, 7, 22), npc.speed * 0.35)
+				else 0
+			local sv = (npc :: any).slideV or 0
+			sv += math.clamp(want - sv, -RACER.YawRate * dt, RACER.YawRate * dt);
+			(npc :: any).slideV = sv
+			if math.abs(sv) > 0.05 and npc.speed > 1 then
+				fwd = (fwd * npc.speed + right * sv).Unit
 			end
 		end
 		-- racers never move into another car: a step that comes within a hair of a new car, or deeper into a real

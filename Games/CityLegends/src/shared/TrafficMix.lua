@@ -78,10 +78,25 @@ TrafficMix.Racer = {
 	Brake = 95, -- studs/s^2 used for planning (about 1.1 g x 0.95 margin)
 	LatAccel = 26, -- studs/s^2 in a bend (about 0.9 g): v = sqrt(LatAccel * radius)
 	LookAheadS = 2.6, -- seconds of travel looked ahead for cars (at least Config.Traffic.LookAhead)
-	PlayerGap = 1.0, -- extra seconds kept behind a player's car
+	PassGap = 4, -- studs: closer than this behind a player's car a racer never rolls forward
+	PassCreep = 6, -- studs/s it keeps rolling while it moves over to pass a slow or stopped player
 	Recycle = 1500, -- flat studs from the focus before a racer is moved (everyday cars: RecycleDistance)
 	SideRate = 0.14, -- lateral studs/s per stud/s of speed (lane change speed), clamped 7..22
+	YawRate = 60, -- studs/s^2 the sideways lean of a lane change eases in and out at
 }
+
+-- (owner, 2026-11-21: "dont make the rare car ai stop for players cars, make them cut up by merging into another
+-- lane if the lane is open") a racer's speed limit behind a player's car: brake only down to the player's speed at
+-- the normal gap (never to a stop the player isn't making), and keep rolling while it is moving over to a free strip
+function TrafficMix.racerBehindPlayer(target: number, gap: number, keep: number, playerSpeed: number, movingOver: boolean): number
+	local R = TrafficMix.Racer
+	local safe = gap - keep
+	local t = if safe > 0 then math.sqrt(2 * R.Brake * 0.7 * safe + playerSpeed * playerSpeed) else playerSpeed
+	if movingOver and gap > R.PassGap then
+		t = math.max(t, R.PassCreep)
+	end
+	return math.min(target, t)
+end
 
 TrafficMix.byName = {} :: { [string]: Entry }
 for _, e in TrafficMix.Entries do

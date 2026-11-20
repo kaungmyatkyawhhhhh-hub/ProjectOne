@@ -91,3 +91,9 @@ CarLamps, Driving, TailLights are checksum-identical to the repo; CarSkin got on
 - **Why roads vanish ("map doesn't fully load")**: PROVEN. Roads sit only 1-4 studs above the carved ground. Far away Roblox draws terrain more coarsely and it rises over the road. A copy of a Sule road mesh lifted 3-6 studs is fully visible from the same far camera. Not a download or mesh problem. Fix running: deepen the ground under every road (`tools/yangon/RoadBedDeepen.luau`), test cell first (x23 z29, backup `ServerStorage.TerrainBackup_21Nov`).
 - **Rare traffic cars** (owner: "the rare cars ai is glitching and also i keep on spotting them"): RareChance 0.07 -> 0.01; caps ferrari 2, lambo 2, gtr 10, r34 3, bugatti 1 -> 1 each. The racer driving itself (19 Nov "swimming through traffic at 100-220 mph") is NOT changed yet.
 - **Side buttons** (owner: "remove despawn and replace it with cars in the side buttons"): DESPAWN hidden, CARS shown.
+
+## Rare cars pass instead of stopping (repo + Studio, identical; not watched in Play)
+Owner: "dont make the rare car ai stop for players cars, make them cut up by merging into another lane if the lane is open".
+- Behind a player's car a racer now only slows to the player's speed at the normal gap, and keeps rolling at 6 studs/s while it moves over to a free strip (`TrafficMix.racerBehindPlayer`; the old 1 s wider gap + full stop is gone). It still never moves into an occupied strip and never pushes a car.
+- Glitch causes found: stop-go behind players (fixed); the nose snapping over 40 degrees at lane changes (now eases, max 19 degrees); crabbing sideways at standstill (limited). Not changed: a slide cancelled mid-lane and re-picked 0.2 s later (wobble); a racer 1500 studs away respawning 220-520 studs from the player (may be why they are "spotted" often).
+- Test `tools/racer_pass_test.luau` 11/11.

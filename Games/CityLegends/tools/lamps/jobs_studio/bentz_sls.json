@@ -1,6 +1,6 @@
 {"id": "bentz_sls",
  "roles": {
-  "HeadCore": [{"part": "Body_Lamp", "in": [0.72, 0.79, 0.56, 0.63, -1.9, -1.8], "off": 0.003}],
+  "HeadCore": [{"part": "Body_Lamp", "in": [0.72, 0.79, 0.58, 0.61, -1.9, -1.8], "off": 0.003}],
   "HeadGlass": [{"part": "SeeThrough_Lens_Clear", "in": [0.7, 0.8, 0.55, 0.65, -1.9, -1.75], "off": 0.008}],
   "TurnF": [{"part": "Body_Lamp", "in": [0.7, 0.83, 0.5, 0.56, -2.0, -1.9], "drape": "SeeThrough_Lens_Clear", "off": 0.014}],
   "Tail": [{"part": "SeeThrough_Lens_Clear", "in": [0.6, 0.8, 0.67, 0.8, 1.9, 2.05], "off": 0.006}],
