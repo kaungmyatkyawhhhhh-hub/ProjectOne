@@ -1491,16 +1491,25 @@ function Traffic.update(dt: number)
 		local u = npc.uturn
 		if u then
 			local v = math.min(Config.mphToSps(RACE.UTurnMph), math.pi * u.r / RACE.UTurnTime)
-			local t = math.min(1, u.t + v * dt / (math.pi * u.r))
+			-- (blocked mid-arc for 4 s: it backs out the way it came and gives the turn up; it never sits across the road)
+			local back = ((u :: any).stall or 0) > 4
+			local t = math.clamp(u.t + (if back then -1 else 1) * v * dt / (math.pi * u.r), 0, 1)
 			local pos, fwd = TrafficMix.uTurnPose(u.p0, u.fwd, u.side, u.r, t)
 			pos += Vector3.yAxis * (u.dy * t)
-			if racerHit(npc, pos, fwd, obstacleList, 1, nil) then
-				npc.speed = 0
+			if back then
+				u.t, npc.pos, npc.fwd, npc.speed = t, pos, fwd, 0
+				if t <= 0 then
+					npc.uturn, npc.wantU = nil, nil
+				end
+			elseif racerHit(npc, pos, fwd, obstacleList, 1, nil) then
+				npc.speed = 0;
+				(u :: any).stall = ((u :: any).stall or 0) + dt
 				if u.t == 0 then
 					npc.uturn = nil -- (not begun: look again)
 				end
 			else
-				u.t, npc.pos, npc.fwd, npc.speed = t, pos, fwd, v
+				u.t, npc.pos, npc.fwd, npc.speed = t, pos, fwd, v;
+				(u :: any).stall = 0
 			end
 			if u.t >= 1 then
 				npc.seg, npc.s, npc.off, npc.offTo, npc.plan, npc.uturn, npc.wantU = u.seg, u.s, 0, 0, nil, nil, nil
