@@ -11,6 +11,7 @@ A job gives each role a list of sources; only the left half is cut, the right is
   drape  a part (the lens): lay the piece on that part's outer surface along `dir` (default: the piece's own facing)
   off    how far out of the surface (metres)
 Each mesh's name carries its true box in mm (LF_<role><L/R>_<centre>_<size>): LampStudio's apply puts it there.
+  python lampfx_studio.py scan <dump pages>   lists the loose pieces
 Self-check: python lampfx_studio.py test
 """
 import json, struct, sys, os
@@ -18,22 +19,44 @@ import numpy as np
 
 
 def load(paths):
-    parts = {}
+    """The pages of one dump (LS.page(1..n), in order): a header line, a slice, '#' padding."""
+    text = ''
     for path in paths:
-        name = None
-        for line in open(path, encoding='utf-8', errors='ignore').read().split('\n'):
-            if line.startswith('P '):
-                name = line.split(' ')[1]
-            elif line.startswith('V ') and name:
-                h = line[2:].strip()
-                V = np.array([int(h[i:i + 4], 16) for i in range(0, len(h) - len(h) % 4, 4)], float).reshape(-1, 3)
-                V = (V - 32768) / 1000
-            elif line.startswith('T ') and name:
-                h = line[2:].strip().rstrip('#')
-                T = np.array([int(h[i:i + 5], 16) for i in range(0, len(h) - len(h) % 5, 5)], int).reshape(-1, 4)
-                parts[name] = (V, T[:, :3], T[:, 3])
-                name = None
+        t = open(path, encoding='utf-8', errors='ignore').read()
+        text += t[t.index('
+') + 1:].rstrip('#
+ ')
+    parts, name = {}, None
+    for line in text.split('
+'):
+        if line.startswith('P '):
+            name = line.split(' ')[1]
+        elif line.startswith('V ') and name:
+            h = line[2:].strip()
+            V = (np.array([int(h[i:i + 4], 16) for i in range(0, len(h), 4)], float).reshape(-1, 3) - 32768) / 1000
+        elif line.startswith('T ') and name:
+            h = line[2:].strip()
+            T = np.array([int(h[i:i + 5], 16) for i in range(0, len(h), 5)], int).reshape(-1, 4)
+            parts[name] = (V, T[:, :3], T[:, 3])
+            name = None
     return parts
+
+
+def scan(parts, min_area=0.0008):
+    """The loose pieces of the left half, biggest first: where to point a job's boxes."""
+    for name, (V, T, I) in parts.items():
+        print('%s  %d faces' % (name, len(T)))
+        rows = []
+        for root in np.unique(I):
+            P = V[T[I == root]]
+            n = np.cross(P[:, 1] - P[:, 0], P[:, 2] - P[:, 0])
+            area = np.linalg.norm(n, axis=1).sum() / 2
+            lo, hi = P.reshape(-1, 3).min(axis=0), P.reshape(-1, 3).max(axis=0)
+            if area >= min_area and lo[0] < 0.02:
+                nn = n.sum(axis=0) / max(np.linalg.norm(n.sum(axis=0)), 1e-9)
+                rows.append((area, '  %5d tris %.4f m2  ax %.2f..%.2f  y %.2f..%.2f  z %.2f..%.2f  n %.1f,%.1f,%.1f' % (len(P), area, max(-hi[0], 0), -lo[0], lo[1], hi[1], lo[2], hi[2], nn[0], nn[1], nn[2])))
+        for _, r in sorted(rows, reverse=True)[:60]:
+            print(r)
 
 
 def soup(V, T):
@@ -219,6 +242,9 @@ def test():
 if __name__ == '__main__':
     if sys.argv[1] == 'test':
         test()
+        sys.exit()
+    if sys.argv[1] == 'scan':
+        scan(load(sys.argv[2:]))
         sys.exit()
     job = json.load(open(sys.argv[1]))
     shells = build(load(sys.argv[2:]), job)
