@@ -176,3 +176,8 @@ Owner: "remove the old trims from every player inventory, keep in studio".
 
 ## Side buttons, second order (agent working)
 Owner: "nvm put goals and chauffeur in the menu": side column = Menu, Shop, Cars, Dealer; Goals and Chauffeur become cards on the menu's first page; the goals dot moves to the Menu button.
+
+## Sync pack G = everything written tonight that is not in Studio yet
+Operation d817aa1d-6554-4de8-9641-558ab847b651 (`imports/sync/sync_21nov_g.rbxmx`, 13 scripts, all compile). Expected lengths: Config 198823, Strings 117355, Cars 53704, TrafficMix 15299, StartupGuard 1048 (new), WaterRescue 3546 (new), PlayerData 37062 (store name v1), UI 135171, MainMenu 121138, Traffic 71358, TrafficBodies 9886, Driving 186300, Main 42120.
+- Menu: Settings, Goals, Chauffeur are three stacked cards on the CAMPAIGN tab (281x98 on phone, 336x131 on PC; World Map narrowed); goals dot on the MENU button and the Goals card. Burmese captions not reviewed by a speaker.
+- Install after the Play test ends, then a second Play test for: skip loading, racers (3%/degree, races, U-turn, colours), 46 cars, water rescue (+ trailer), menu cards at phone and PC size, old trims gone from the garage.
