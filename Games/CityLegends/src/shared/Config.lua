@@ -239,15 +239,15 @@ Config.YangonVenues = {
 		-- square) is the nearest free one beside the real pin, its front on a road. Old spots in the vault note.
 		dealership = { x = 28398.0, z = 33909.0, fx = 0, fz = -1, y = 70.89 }, -- Rider Auto (16.80879, 96.13499)
 		customs = { x = 31773.0, z = 31265.0, fx = 0, fz = 1, y = 76.52 }, -- Optima Werkz (16.81564, 96.14513)
-		bank = { x = 35609.5, z = 21267.0, fx = -0.992, fz = -0.128, y = 42.08 },
+		bank = { x = 38525.0, z = 45372.0, fx = 1, fz = 0, y = 21.29 }, -- CB Bank head office (16.77423, 96.16742)
 		dropoff = { x = 35416.6, z = 27780.7, fx = 0.622, fz = -0.783, y = 36.12 }, -- by Myanmar Plaza
-		gems = { x = 35653.1, z = 20934.2, fx = -0.992, fz = -0.130, y = 39.77 },
+		gems = { x = 35023.0, z = 18623.0, fx = 0.866, fz = -0.5, y = 63.70 }, -- Gems Museum (16.85471, 96.15632)
 		rewards = { x = 35389.0, z = 22838.7, fx = -0.989, fz = -0.150, y = 37.06, w = 304 }, -- its car courts make it 304 wide
 		-- square to the world axes (their towers and facade tiers are)
 		hotel = { x = 27227.0, z = 30361.0, fx = 1, fz = 0, y = 60.63 }, -- Novotel Yangon Max (16.82000, 96.13166)
 		tower_aurum = { x = 29226.0, z = 21923.0, fx = -1, fz = 0, y = 67.78 }, -- Lotte Hotel (16.84432, 96.13728)
 		tower_skyline = { x = 36686.0, z = 24776.8, fx = 0, fz = 1, y = 34.0 },
-		tower_crown = { x = 34397.5, z = 20059.9, fx = 0, fz = -1, y = 40.2 },
+		tower_crown = { x = 39387.0, z = 39273.0, fx = 0, fz = -1, y = 35.86 }, -- Kan Thar Yar Centre (16.79233, 96.16963)
 		realty = { x = 35426.2, z = 22115.1, fx = -0.991, fz = -0.136, y = 40.35, size = 80 },
 	},
 }

@@ -274,3 +274,5 @@ Traffic uses the "lite" runtime meshes first. The owner thinks the procedural ca
   - exhaust flames;
   - the model import and the generic adapter.
 - **XP and reward numbers** in `Config.Progression` and `Config.Daily` are first guesses.
+
+- **Parks and hangout spots (2026-11-22, vault `City Legends/2026-11-22 Night run - Peoples Park, view point, car parks, The Central, 3 venues moved.md`):** `tools/yangon/PeoplesPark.luau` (`ClaudeTools.PeoplesPark`: `all`, `central`, `undo`) builds `Workspace.Yangon1to1.Parks` from real OSM boxes (`P.RECTS`): People's Park fountain garden, the Shwedagon view point, People's Square, car parks (bay tiles beside the map's own roads), The Central's forecourt. Each box has a `park_<key>` KeepOut. The Shwedagon's big pieces are in `Landmarks.Shwedagon.FarVisible` (Persistent) so it shows from far. Studio crashed on Stop Play (out of memory): Team Create kept the edits; save before a Play test; reopen with the `roblox-studio:` link in the note.
