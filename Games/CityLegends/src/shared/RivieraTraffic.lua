@@ -417,6 +417,19 @@ function RivieraTraffic.build()
 			fromK = fromN
 		end
 		local fromRow, toRow = pieces[fromLane], pieces[toLane]
+		-- (21 Nov) a link INTO a lane's last point (a roundabout lane closed by its own last -> first link,
+		-- e.g. Maha Bandula Road #3 into Roundabout 4) found no piece starting there and was dropped, so
+		-- whole roads behind it led nowhere and were pruned (1,972 1:1 pieces): join its last piece instead
+		local tlN = if dataLanes[toLane] then #dataLanes[toLane].pts // 3 else 0
+		if toK >= tlN and tlN >= 2 and not (fromLane == toLane and toK == 1) then
+			toK = tlN - 1
+		end
+		-- (21 Nov) a link FROM a lane's first point (a roundabout's lane-to-lane hops, a side road leaving at a
+		-- road's very start) had no piece ending there and was dropped: on a closed lane point 1 is also its
+		-- last point (the last piece ends there), on an open one leave from its first piece
+		if fromRow and fromK <= 1 then
+			fromK = if fl and fl.closed then #fromRow + 1 else 2
+		end
 		local before = fromRow and fromRow[fromK - 1] -- the piece ending at point fromK
 		local after = toRow and toRow[toK] -- the piece starting at point toK
 		if before and after then
@@ -494,6 +507,38 @@ function RivieraTraffic.build()
 	-- (21 Nov, "make the loading screen load fast") walked back from each dead end through a list of who leads into
 	-- what: the old repeat-until-nothing-changes sweep took 320 passes over the 1:1 lanes (3.5 s of a 3.7 s build on a
 	-- PC, at the start of every client and in Chauffeur.init); same result
+	-- (21 Nov) on a short lane (2-4 pieces) the turn in can join a piece or two AFTER the piece the turn out
+	-- leaves from (each turn picks its own clean arc), so a car coming in met a dead end and whole roads
+	-- behind it were pruned (Zoological Garden Road into Roundabout 1). A lane's last piece with no way on
+	-- gets its own turns to wherever the nearest piece up to 3 back turns off to.
+	for li, row in pieces do
+		local l = dataLanes[li]
+		local last = row[#row]
+		if l and not l.closed and last and #last.next == 0 then
+			for back = 1, math.min(3, #row - 1) do
+				local prev = row[#row - back]
+				local outs = {}
+				for _, t in prev.next do
+					if t ~= row[#row - back + 1] and t.next and t.next[1] then
+						table.insert(outs, t.next[1])
+					end
+				end
+				if #outs > 0 then
+					for _, a in outs do
+						local mid = (last.p2 + a.p0) / 2
+						local turn = newSegment(all, last.p2, mid, a.p0, "turn")
+						turn.speedK = 0.8
+						turn.turnSpeed = 18
+						turn.next = { a }
+						turn.route = a.route
+						turn.rivHighway = a.rivHighway
+						table.insert(last.next, turn)
+					end
+					break
+				end
+			end
+		end
+	end
 	local dead = {}
 	local into = {} -- [seg] = the pieces and turns whose next holds it
 	local stack = {}

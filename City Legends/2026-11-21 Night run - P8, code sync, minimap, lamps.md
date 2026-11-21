@@ -266,3 +266,12 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
 
 ## Drop-off marker (21 Nov)
 - Owner: the DROP-OFF text near Myanmar Plaza (the bank/jewellery heist cash-in spot) should only show while carrying loot. `BankClient.lua` now hides the ring, beam and DROP-OFF label for players without the `Loot` attribute (client side, other players still see it when they carry loot). Synced to Studio (checksum 1569993120), commit a5408893. Play check left for the final test.
+
+## Traffic dead ends fixed in code (cloud, 21 Nov day; repo only, NOT in Studio yet)
+- `lanes1to1_test` failed: 1,972 of the 1:1 lane pieces were pruned as "leading nowhere" (whole roads with no traffic: Maha Bandula Road #3, Zoological Garden Road, Gyophyu Road, Kun Chan Road, Bo Min Gaung Street). The lane data itself has 0 dead ends; `RivieraTraffic.build` lost them. Three fixes in `src/shared/RivieraTraffic.lua`:
+  1. a link INTO a lane's last point (Maha Bandula Road #3 -> Roundabout 4) now joins its last piece (was dropped);
+  2. a link FROM a lane's first point (roundabout lane hops, 20 links) now leaves from the closed lane's last piece / the open lane's first piece (was dropped);
+  3. a short lane's last piece with no way on gets its own turns to where the piece up to 3 back turns off (the turn in joined after the turn out: Zoological Garden Road #3 into Roundabout 1).
+- Result: dead 1,972 -> 526. All 526 left are lane-2 merge tails (9 pieces after a route's lane 2 merges into lane 1, `mergeRouteEnds`, by design; the old maps have the same). graph, chauffeur, racer, water rescue tests pass. Old maps' dead pieces 73 -> 54 (fixes 1-3 help them too).
+- **Still open:** the biggest connected part is 82.7% of the 1:1 network (test wants 90%): some areas can be entered but not left. Needs the lane generator (`roads05_lanes.py`) or more links; not done.
+- **Owner / PC:** sync `RivieraTraffic.lua` into Studio and Play-test traffic.
