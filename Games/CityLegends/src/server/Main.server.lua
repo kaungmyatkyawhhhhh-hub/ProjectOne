@@ -779,6 +779,7 @@ local Care = require(script.Parent:WaitForChild("Care"))
 ctx.care = Care
 guard("Care", function() Care.init(ctx) end)
 guard("Parking", function() require(script.Parent:WaitForChild("Parking")).init(ctx, Police, Towers) end)
+task.defer(function() guard("VenueLooks", function() require(script.Parent:WaitForChild("VenueLooks")).apply() end) end) -- (2026-11-21) real places' colours on the venues beside them
 
 SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
 	if type(carId) ~= "string" then

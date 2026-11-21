@@ -32,6 +32,7 @@ export type Opts = {
 	material: Enum.Material?,
 	edge: Color3?, -- the edging
 	reach: number?, -- how far out to look for the road (default 40)
+	shifted: boolean?, -- (set by build itself: a try moved along the lot's edge)
 	keep: { Instance }?, -- never hidden (the venue itself)
 	lift: number?, -- the drive's paving stands this much over the lot's floor where they meet
 	notch: boolean?, -- the slab may start inside the lot, under its floor (the caller cuts the floor)
@@ -133,6 +134,9 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 
 	local lot = cast(p0 - out)
 	if not lot then
+		if o.shifted then
+			return nil
+		end
 		warn("[CityLegends] EntranceRamp: no lot found from", parent:GetFullName())
 		return nil
 	end
@@ -163,7 +167,20 @@ function EntranceRamp.build(parent: Instance, inner: CFrame, opts: Opts?): Model
 		end
 	end
 	if not roadT then
-		warn("[CityLegends] EntranceRamp: no road found from", parent:GetFullName())
+		-- (2026-11-21, the venues moved to their real places) no road straight out from the drive: try the same
+		-- drive moved along the lot's edge, nearest first, and build it where the road is
+		if not o.shifted then
+			for _, s in { 10, -10, 20, -20, 30, -30, 40, -40, 50, -50, 60, -60, 70, -70 } do
+				local o2 = table.clone(o)
+				o2.shifted = true
+				o2.reach = math.max(reach, 60)
+				local made = EntranceRamp.build(parent, inner + right * s, o2)
+				if made then
+					return made
+				end
+			end
+			warn("[CityLegends] EntranceRamp: no road found from", parent:GetFullName())
+		end
 		return nil
 	end
 	local rT: number = roadT
