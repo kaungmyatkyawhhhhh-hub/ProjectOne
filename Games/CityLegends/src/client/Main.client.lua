@@ -593,6 +593,9 @@ end)
 startStep("YangonStreetLife", function()
 	require(script.Parent:WaitForChild("YangonStreetLife")).start(WorldFx.qualityScale) -- parked cars and people (Yangon only)
 end)
+startStep("YangonSignals", function()
+	require(script.Parent:WaitForChild("YangonSignals")).start() -- (21 Nov) traffic light poles at the junctions
+end)
 startStep("Chauffeur", ChauffeurClient.init)
 startStep("Luxe", function()
 	require(script.Parent:WaitForChild("LuxeClient")).init() -- the gem shop and VIP cards, smash-and-grab messages

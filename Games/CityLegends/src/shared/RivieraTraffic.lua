@@ -696,6 +696,151 @@ function RivieraTraffic.build()
 		end
 		prune()
 	end
+	-- (owner, 2026-11-21: "put traffic lights too") traffic lights at the 1:1 Yangon's junctions. A junction is a
+	-- cluster of link mouths (where a link leaves or joins a lane) with 2+ roads, 3+ lanes and no roundabout; the lane
+	-- piece that enters it (ends inside, starts outside) gets the old city's signal (seg.signal, i = junction, axis by
+	-- heading), so Traffic / Chauffeur / Police stop there on red exactly like the old city. A cluster where every
+	-- approach runs the same way (a road changing name, a merge) gets no lights. `signals` is for YangonSignals (poles).
+	local signals = {}
+	do
+		local CELL = 60
+		local function baseRoad(name: string?): string
+			return (string.gsub(name or "", "%s*#%d+$", ""))
+		end
+		local function lanePoint(l, k: number): Vector3
+			local p = l.pts
+			return Vector3.new(p[3 * k - 2], p[3 * k - 1], p[3 * k])
+		end
+		local function flat(v: Vector3): Vector3
+			return Vector3.new(v.X, 0, v.Z)
+		end
+		local mouths = {}
+		for _, link in dataLinks do
+			local fl, tl = dataLanes[link[1]], dataLanes[link[3]]
+			if fl and tl and fl.yangon and tl.yangon and link[1] ~= link[3] and not fl.skip and not tl.skip then
+				local round = fl.closed or tl.closed or string.find(fl.road or "", "Roundabout", 1, true) ~= nil or string.find(tl.road or "", "Roundabout", 1, true) ~= nil
+				local fk = math.clamp(link[2], 1, #fl.pts // 3)
+				local tk = math.clamp(link[4], 1, #tl.pts // 3)
+				table.insert(mouths, { pos = lanePoint(fl, fk), road = baseRoad(fl.road), lane = link[1], round = round })
+				table.insert(mouths, { pos = lanePoint(tl, tk), road = baseRoad(tl.road), lane = link[3], round = round })
+			end
+		end
+		-- cluster the mouths (union-find over a grid, 40 studs)
+		local up = {}
+		local function find(a: number): number
+			while up[a] ~= a do
+				up[a] = up[up[a]]
+				a = up[a]
+			end
+			return a
+		end
+		local grid = {}
+		for k, m in mouths do
+			up[k] = k
+			local cx, cz = math.floor(m.pos.X / CELL), math.floor(m.pos.Z / CELL)
+			for dx = -1, 1 do
+				for dz = -1, 1 do
+					for _, o in grid[(cx + dx) .. "," .. (cz + dz)] or {} do
+						local q = mouths[o].pos
+						if (q - m.pos).Magnitude < 40 then
+							local ra, rb = find(k), find(o)
+							if ra ~= rb then
+								up[math.max(ra, rb)] = math.min(ra, rb)
+							end
+						end
+					end
+				end
+			end
+			local key = cx .. "," .. cz
+			grid[key] = grid[key] or {}
+			table.insert(grid[key], k)
+		end
+		local order, groups = {}, {}
+		for k in mouths do
+			local r = find(k)
+			if not groups[r] then
+				groups[r] = {}
+				table.insert(order, r)
+			end
+			table.insert(groups[r], mouths[k])
+		end
+		-- the Yangon lane pieces by where they end (for the entering-piece search)
+		local pieceGrid = {}
+		for li, l in dataLanes do
+			if l.yangon and not l.skip then
+				for _, seg in pieces[li] do
+					local key = math.floor(seg.p2.X / CELL) .. "," .. math.floor(seg.p2.Z / CELL)
+					pieceGrid[key] = pieceGrid[key] or {}
+					table.insert(pieceGrid[key], seg)
+				end
+			end
+		end
+		local junction = 0
+		for _, r in order do
+			local g = groups[r]
+			local roads, lanesIn, nRoads, nLanes, round = {}, {}, 0, 0, false
+			local sum = Vector3.zero
+			for _, m in g do
+				round = round or m.round
+				if not roads[m.road] then
+					roads[m.road] = true
+					nRoads += 1
+				end
+				if not lanesIn[m.lane] then
+					lanesIn[m.lane] = true
+					nLanes += 1
+				end
+				sum += m.pos
+			end
+			if round or nRoads < 2 or nLanes < 3 then
+				continue
+			end
+			local c = sum / #g
+			local radius = 0
+			local tall = false
+			for _, m in g do
+				radius = math.max(radius, (flat(m.pos) - flat(c)).Magnitude)
+				tall = tall or math.abs(m.pos.Y - c.Y) > 6
+			end
+			if tall then
+				continue -- (a flyover over a road: two levels, no junction)
+			end
+			radius = math.clamp(radius + 6, 18, 70)
+			local entering = {}
+			local cx, cz = math.floor(c.X / CELL), math.floor(c.Z / CELL)
+			local reach = math.ceil((radius + 30) / CELL)
+			for dx = -reach, reach do
+				for dz = -reach, reach do
+					for _, seg in pieceGrid[(cx + dx) .. "," .. (cz + dz)] or {} do
+						if not seg.signal and (flat(seg.p2) - flat(c)).Magnitude < radius and (flat(seg.p0) - flat(c)).Magnitude >= radius and math.abs(seg.p2.Y - c.Y) < 6 then
+							table.insert(entering, seg)
+						end
+					end
+				end
+			end
+			if #entering < 2 then
+				continue
+			end
+			table.sort(entering, function(a, b)
+				return a.id < b.id
+			end)
+			local ref = flat(entering[1].p2 - entering[1].p0).Unit
+			local axes, hasZ = {}, false
+			for k, seg in entering do
+				local h = flat(seg.p2 - seg.p0).Unit
+				axes[k] = if math.abs(h:Dot(ref)) >= 0.7071 then "X" else "Z"
+				hasZ = hasZ or axes[k] == "Z"
+			end
+			if not hasZ then
+				continue -- (every approach runs the same way: no cross traffic)
+			end
+			junction += 1
+			for k, seg in entering do
+				seg.signal, seg.i, seg.j, seg.axis = true, junction, 0, axes[k]
+				table.insert(signals, { pos = seg.p2, dir = flat(seg.p2 - seg.p0).Unit, axis = axes[k], i = junction, center = c, radius = radius })
+			end
+		end
+	end
 	local live = {}
 	for _, seg in lanes do
 		if not dead[seg] then
@@ -709,7 +854,7 @@ function RivieraTraffic.build()
 		seg.id = base + i
 	end
 	-- (rows, links and corner are for the Studio tools: TurnPicks)
-	cached = { lanes = live, all = all, dead = dead, rows = pieces, links = dataLinks, corner = corner, lanesData = dataLanes, endLinked = endLinked }
+	cached = { lanes = live, all = all, dead = dead, rows = pieces, links = dataLinks, corner = corner, lanesData = dataLanes, endLinked = endLinked, signals = signals }
 	return cached
 end
 
