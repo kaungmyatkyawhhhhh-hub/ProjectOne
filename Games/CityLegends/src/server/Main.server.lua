@@ -570,7 +570,10 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 		return
 	end
 	spawning[player] = nil
-	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic -- the whole car arrives at once
+	-- (owner, 2026-11-21: "u cant see other people car when they spawn outside of ur render distance") Persistent:
+	-- every player's car reaches every client whole and stays, wherever it is (was Atomic: streamed out past the
+	-- streaming radius, so far cars and their headlights vanished); one car per player keeps it cheap
+	model.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
 	-- a big car reaches clients in pieces: they wait for this many before putting the body on

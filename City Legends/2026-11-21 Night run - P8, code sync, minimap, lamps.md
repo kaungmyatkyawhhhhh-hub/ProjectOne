@@ -289,3 +289,9 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
 - `lanes1to1_test`: dead-piece bar is now under 1% (merge tails + traps are pruned on purpose; a broken link drops whole roads: 1,972 before). 864 of 130,011 now.
 - `world_test`: `Garages.lua` destroyed lamp posts while walking `GetDescendants` and then read their destroyed parts; now it collects first and destroys after (old map only, the baked Monaco city). Passes.
 - **All 23 Lune tests pass.** Not in Studio: sync `RivieraTraffic.lua` (and `Garages.lua`) and watch traffic in Play.
+
+## Other players' cars seen from anywhere (cloud, 21 Nov day; repo only, NOT in Studio yet)
+- Owner: "u cant see other people car when they spawn outside of ur render distance, fix it so that u can see".
+- Cause: StreamingEnabled; player cars were `ModelStreamingMode = Atomic`, so a car past the streaming radius was never sent to you.
+- Fix: player cars (`Main.server` spawnFor) and chauffeur cars (`Chauffeur.lua`) are now `Persistent`: sent whole to every client and kept wherever they are. One car per player keeps it cheap; parked house cars stay Atomic.
+- Not tested in Play (needs 2 players far apart, e.g. Studio's 2-player test, one fast-travels away).
