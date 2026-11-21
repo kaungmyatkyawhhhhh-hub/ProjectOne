@@ -3109,14 +3109,32 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				-- (up from the ground line, not the skin's lowest point: the wheels are not on yet at this moment)
 				local at = Vector3.new((lo.X + hi.X) / 2, -height / 2 + spot[1] * len, z) + n * 0.03
 				local w, h = spot[4] * len, spot[5] * len
+				local wp, wn = root.CFrame * at, root.CFrame:VectorToWorldSpace(n)
 				if w / h < 1.7 or w / h > 2.8 then
-					h = math.min(h, w / 2.2) -- (a long holder: our plate's own shape, in its middle)
+					-- (a long holder: a plain black plate over all of it (some models print their own number there),
+					-- then our plate's own shape in its middle)
+					local back = Instance.new("Part")
+					back.Name = "PlateBack"
+					back.Size = Vector3.new(w * 1.03, h * 1.03, 0.02)
+					back.Color = Color3.fromRGB(12, 12, 13)
+					back.Material = Enum.Material.SmoothPlastic
+					back.CanCollide = false
+					back.CanQuery = false
+					back.CanTouch = false
+					back.Massless = true
+					back.CastShadow = false
+					back.CFrame = CFrame.lookAt(wp - wn * 0.015, wp + wn, up)
+					back.Parent = skin
+					local bw = Instance.new("WeldConstraint")
+					bw.Part0 = root
+					bw.Part1 = back
+					bw.Parent = back
+					h = math.min(h, w / 2.2)
 					w = h * 2.2
 				else
 					w *= 1.03 -- (covers the model's blank plate)
 					h *= 1.03
 				end
-				local wp, wn = root.CFrame * at, root.CFrame:VectorToWorldSpace(n)
 				plateAt(CFrame.lookAt(wp, wp + wn, up), Vector3.new(w, h, 0.02), Vector2.new(220, 100))
 				continue
 			end
