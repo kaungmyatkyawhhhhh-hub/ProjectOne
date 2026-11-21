@@ -1690,9 +1690,30 @@ function Traffic.update(dt: number)
 			end
 			-- traffic light at the end of this lane: the front bumper stops behind the stop line
 			-- (owner, 2026-10-30: some cars stopped past it; the lane ends at the line's near edge)
-			local state = if seg.signal then CityLayout.lightState(seg.i, seg.j, seg.axis, now) else "G"
+			-- (owner, 2026-11-21: "npc cars doesnt wait for traffic lights, sometime") the 1:1 lane pieces are ~24 studs: a
+			-- car that only saw the light once on its last piece could not stop from speed (a bus never could) and ran it.
+			-- Look up to 4 pieces ahead for the next light, so braking starts in time
+			local sigSeg, sigDist = nil, remaining
+			if seg.signal then
+				sigSeg = seg
+			else
+				local q, k = npc.nextSeg, 0
+				while q and k < 4 and sigDist < 160 do
+					k += 1
+					sigDist += q.length
+					if q.signal then
+						sigSeg = q
+						break
+					end
+					if q.kind == "turn" then
+						break -- (past a junction: that light is someone else's)
+					end
+					q = planNext(npc, k, q)
+				end
+			end
+			local state = if sigSeg then CityLayout.lightState(sigSeg.i, sigSeg.j, sigSeg.axis, now) else "G"
 			if state ~= "G" then
-				local stopDist = remaining - npc.halfLen - T.StopLineMargin
+				local stopDist = sigDist - npc.halfLen - T.StopLineMargin
 				local mustStop = state == "R"
 				if state == "Y" then
 					-- stop only if we can do it comfortably, otherwise clear the junction
