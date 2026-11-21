@@ -420,6 +420,15 @@ function CarStats.fits(id: string, partId: string, parts: Parts?): (boolean, str
 	if not CarStats.partAllowed(id, partId) then
 		return false, "S2, R and X cars take only tyres, gearbox, suspension and exhaust"
 	end
+	-- (2026-11-21) the Flame Tune only where the game shows exhaust flames (owner: supercars + the Aventadors / Revuelto)
+	if def.fx.flame then
+		local ok, tips = pcall(function()
+			return require(script.Parent:WaitForChild("ExhaustTips", 2))
+		end)
+		if ok and type(tips) == "table" and not tips.allowed(id) then
+			return false, "Only on supercars and the flame hypercars"
+		end
+	end
 	if parts and not needsMet(def, CarStats.forcedOf(parts)) then
 		return false, if def.needs == "super" then "Needs a supercharger" elseif def.needs == "turbo" then "Needs a turbo" else "Needs a turbo or supercharger"
 	end
