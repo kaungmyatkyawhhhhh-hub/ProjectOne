@@ -34,6 +34,14 @@ PlateSpots.CARS = {
 	nisun_gtr = { rear = { 0.1362, 0.0108, 11.0, 0.0650, 0.0321 }, front = { 0.0948, 0.0065, -0.6, 0.0650, 0.0325 } },
 	porsha_gt3 = { rear = { 0.1131, 0.0087, 12.1, 0.0671, 0.0327 } },
 	toyoka_supra_mk4 = { rear = { 0.1341, 0.0133, 1.1, 0.0675, 0.0337 } },
+	-- (plate-sized loose pieces found by the scan, 21 Nov)
+	ferrara_458spider = { rear = { 0.1180, 0.0084, 19.0, 0.0663, 0.0309 } },
+	ferrara_599 = { rear = { 0.1486, 0.0196, 19.0, 0.0638, 0.0298 } },
+	ferrara_california = { rear = { 0.1301, 0.0188, 14.0, 0.0679, 0.0329 } },
+	lambrini_sterrato = { rear = { 0.1390, 0.0210, 7.0, 0.0664, 0.0332 } },
+	mclaran_12c = { rear = { 0.1116, 0.0053, 15.0, 0.0667, 0.0333 } },
+	toyoka_ae86 = { rear = { 0.1627, 0.0285, 11.0, 0.0791, 0.0359 } },
+	toyoka_lc300 = { rear = { 0.1898, 0.0287, 3.0, 0.0991, 0.0258 }, front = { 0.1054, 0.0020, 0.0, 0.0991, 0.0258 } },
 } :: { [string]: { rear: { number }?, front: { number }? } }
 
 function PlateSpots.of(id: string): { rear: { number }?, front: { number }? }?

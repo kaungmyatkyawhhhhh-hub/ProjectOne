@@ -140,13 +140,13 @@ local function build(a, folder: Instance): Model
 	base = Vector3.new(base.X, y, base.Z)
 	-- the pole: slim, pale grey, a small foot
 	part(m, Vector3.new(0.5, 1.5, 1.5), CFrame.new(base + Vector3.new(0, 0.25, 0)) * CFrame.Angles(0, 0, math.pi / 2), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
-	part(m, Vector3.new(POLE_H, 0.75, 0.75), CFrame.new(base + Vector3.new(0, POLE_H / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
+	part(m, Vector3.new(POLE_H, 1.0, 1.0), CFrame.new(base + Vector3.new(0, POLE_H / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
 	-- the arm: one long thin tube from the pole's top out over the lanes, to the middle of the approach
 	local armStart = base + Vector3.new(0, POLE_H - 0.5, 0)
 	local reach = math.clamp((base - a.mid):Dot(a.right), 8, 44)
 	local armEnd = armStart - a.right * reach
-	part(m, Vector3.new(reach, 0.4, 0.4), CFrame.lookAt((armStart + armEnd) / 2, armEnd) * CFrame.Angles(0, math.pi / 2, 0), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
-	part(m, Vector3.new(0.9, 0.9, 0.9), CFrame.new(armStart), POLE, Enum.Material.Metal, Enum.PartType.Ball)
+	part(m, Vector3.new(reach, 0.62, 0.62), CFrame.lookAt((armStart + armEnd) / 2, armEnd) * CFrame.Angles(0, math.pi / 2, 0), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
+	part(m, Vector3.new(1.15, 1.15, 1.15), CFrame.new(armStart), POLE, Enum.Material.Metal, Enum.PartType.Ball)
 	-- the head at the arm's end, its middle on the arm
 	local hp = armEnd - a.right * 3.2
 	head(m, CFrame.lookAt(hp, hp - a.dir), a.i, a.axis)
