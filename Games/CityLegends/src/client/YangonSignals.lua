@@ -2,8 +2,8 @@
 	YangonSignals (client): traffic light poles at the 1:1 Yangon's signalled junctions (owner, 2026-11-21: "put
 	traffic lights too"). The junctions and their phases come from RivieraTraffic.build().signals (the same lane
 	pieces Traffic / Chauffeur / Police stop at), so the poles and the cars agree. Each approach (one junction, one
-	heading) gets a mast pole on its right-hand pavement with an arm over its lanes and one head facing the cars, in
-	the old city's look. The lenses carry the old city's tag and attributes (TrafficLamp, I / J / Axis / State), so
+	heading) gets a slim pole on its right-hand pavement with a long thin arm over its lanes and one head on its side
+	facing the cars, as in Yangon (the owner's photo, 21 Nov), with a countdown. The lenses carry the old city's tag and attributes (TrafficLamp, I / J / Axis / State), so
 	WorldFx lights them on the shared clock. Built only within LOAD studs of the camera, taken down past DROP.
 
 	YangonSignals.start()
@@ -15,14 +15,19 @@ local CollectionService = game:GetService("CollectionService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 local Config = require(Shared:WaitForChild("Config"))
+local CityLayout = require(Shared:WaitForChild("CityLayout"))
 
 local YangonSignals = {}
 
 local LOAD, DROP = 650, 850
-local METAL = Color3.fromRGB(46, 50, 56)
-local BORDER = Color3.fromRGB(214, 168, 30)
+-- (owner, 2026-11-21, with a photo of a real Yangon signal: "Make the traffic lights like this") a slim pale-grey
+-- pole on the pavement, a long thin arm out over the lanes, and at its end one black head lying on its side: a
+-- countdown box, then red / yellow / green in a row
+local POLE = Color3.fromRGB(196, 198, 200)
+local HOUSING = Color3.fromRGB(18, 19, 21)
 local LENS_OFF = { R = Color3.fromRGB(52, 8, 8), Y = Color3.fromRGB(56, 38, 4), G = Color3.fromRGB(6, 40, 22) }
-local POLE_H = 19
+local COUNT_COLOR = { R = Color3.fromRGB(255, 60, 50), Y = Color3.fromRGB(255, 200, 40), G = Color3.fromRGB(60, 255, 120) }
+local POLE_H = 21
 local SIDE = 9 -- studs from the outer lane's middle to the pole (the pavement)
 
 local function part(parent: Instance, size: Vector3, cf: CFrame, color: Color3, material: Enum.Material, shape: Enum.PartType?): BasePart
@@ -43,23 +48,43 @@ local function part(parent: Instance, size: Vector3, cf: CFrame, color: Color3, 
 	return p
 end
 
--- one head: housing, yellow-bordered backplate, three lenses (R, Y, G) under visors, facing -look
+-- the countdown read-outs of the heads that are built: { label, junction, axis }
+local counters: { { label: TextLabel, i: number, axis: string } } = {}
+
+-- one head on its side, facing -look: seen from the road, the countdown on the left, then R, Y, G
 local function head(parent: Instance, cf: CFrame, i: number, axis: string)
-	part(parent, Vector3.new(2.9, 6.1, 0.06), cf * CFrame.new(0, 0, 0.68), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
-	part(parent, Vector3.new(2.9, 6.1, 0.06), cf * CFrame.new(0, 0, 0.62), BORDER, Enum.Material.SmoothPlastic)
-	part(parent, Vector3.new(2.55, 5.75, 0.06), cf * CFrame.new(0, 0, 0.57), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
-	part(parent, Vector3.new(1.7, 5.1, 1.1), cf, Color3.fromRGB(22, 23, 26), Enum.Material.Metal)
+	part(parent, Vector3.new(7.6, 2.0, 1.0), cf, HOUSING, Enum.Material.SmoothPlastic)
+	-- (the head's +X is the viewer's left)
 	for idx, state in { "R", "Y", "G" } do
-		local y = (2 - idx) * 1.6
-		local lamp = part(parent, Vector3.new(0.25, 1.2, 1.2), cf * CFrame.new(0, y, -0.58) * CFrame.Angles(0, math.pi / 2, 0), LENS_OFF[state], Enum.Material.SmoothPlastic, Enum.PartType.Cylinder)
+		local x = 0.9 - (idx - 1) * 1.75
+		-- cylinder axis is X: turn it so the round face looks down the road
+		local lamp = part(parent, Vector3.new(0.25, 1.4, 1.4), cf * CFrame.new(x, 0, -0.52) * CFrame.Angles(0, math.pi / 2, 0), LENS_OFF[state], Enum.Material.SmoothPlastic, Enum.PartType.Cylinder)
 		lamp.Name = "Lamp"
 		lamp:SetAttribute("I", i)
 		lamp:SetAttribute("J", 0)
 		lamp:SetAttribute("Axis", axis)
 		lamp:SetAttribute("State", state)
 		CollectionService:AddTag(lamp, "TrafficLamp")
-		part(parent, Vector3.new(1.45, 0.08, 0.9), cf * CFrame.new(0, y + 0.7, -1.0), Color3.fromRGB(14, 14, 16), Enum.Material.SmoothPlastic)
+		part(parent, Vector3.new(1.6, 0.08, 0.8), cf * CFrame.new(x, 0.78, -0.9), HOUSING, Enum.Material.SmoothPlastic) -- visor
 	end
+	local face = part(parent, Vector3.new(1.7, 1.6, 0.06), cf * CFrame.new(2.75, 0, -0.52), Color3.fromRGB(6, 6, 7), Enum.Material.SmoothPlastic)
+	face.Name = "Countdown"
+	local sg = Instance.new("SurfaceGui")
+	sg.Face = Enum.NormalId.Front
+	sg.LightInfluence = 0
+	sg.Brightness = 2
+	sg.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+	sg.CanvasSize = Vector2.new(102, 96)
+	sg.Parent = face
+	local t = Instance.new("TextLabel")
+	t.BackgroundTransparency = 1
+	t.Size = UDim2.fromScale(1, 1)
+	t.Font = Enum.Font.Code
+	t.TextScaled = true
+	t.Text = ""
+	t.TextColor3 = COUNT_COLOR.R
+	t.Parent = sg
+	table.insert(counters, { label = t, i = i, axis = axis })
 end
 
 -- the approaches: one per junction and heading (30-degree buckets), with its lanes' stop points
@@ -113,22 +138,18 @@ local function build(a, folder: Instance): Model
 		end
 	end
 	base = Vector3.new(base.X, y, base.Z)
-	part(m, Vector3.new(2.4, 1.2, 2.4), CFrame.new(base + Vector3.new(0, 0.6, 0)), Color3.fromRGB(70, 72, 76), Enum.Material.Concrete)
-	part(m, Vector3.new(POLE_H, 1.05, 1.05), CFrame.new(base + Vector3.new(0, POLE_H / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), METAL, Enum.Material.Metal, Enum.PartType.Cylinder)
-	part(m, Vector3.new(1.3, 0.5, 1.3), CFrame.new(base + Vector3.new(0, POLE_H + 0.25, 0)), METAL, Enum.Material.Metal)
-	-- the arm out over the lanes, to the middle of the approach
-	local armStart = base + Vector3.new(0, POLE_H - 2, 0)
-	local reach = math.clamp((base - a.mid):Dot(a.right), 6, 40)
+	-- the pole: slim, pale grey, a small foot
+	part(m, Vector3.new(0.5, 1.5, 1.5), CFrame.new(base + Vector3.new(0, 0.25, 0)) * CFrame.Angles(0, 0, math.pi / 2), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
+	part(m, Vector3.new(POLE_H, 0.75, 0.75), CFrame.new(base + Vector3.new(0, POLE_H / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
+	-- the arm: one long thin tube from the pole's top out over the lanes, to the middle of the approach
+	local armStart = base + Vector3.new(0, POLE_H - 0.5, 0)
+	local reach = math.clamp((base - a.mid):Dot(a.right), 8, 44)
 	local armEnd = armStart - a.right * reach
-	part(m, Vector3.new(0.7, 0.7, reach), CFrame.lookAt((armStart + armEnd) / 2, armEnd), METAL, Enum.Material.Metal)
-	local bA, bB = base + Vector3.new(0, POLE_H - 6, 0), armStart - a.right * math.min(8, reach)
-	part(m, Vector3.new(0.35, 0.35, (bB - bA).Magnitude), CFrame.lookAt((bA + bB) / 2, bB), METAL, Enum.Material.Metal)
-	local hp = armEnd - Vector3.new(0, 3.4, 0)
-	part(m, Vector3.new(0.25, 0.9, 0.25), CFrame.new(hp + Vector3.new(0, 3, 0)), METAL, Enum.Material.Metal)
+	part(m, Vector3.new(reach, 0.4, 0.4), CFrame.lookAt((armStart + armEnd) / 2, armEnd) * CFrame.Angles(0, math.pi / 2, 0), POLE, Enum.Material.Metal, Enum.PartType.Cylinder)
+	part(m, Vector3.new(0.9, 0.9, 0.9), CFrame.new(armStart), POLE, Enum.Material.Metal, Enum.PartType.Ball)
+	-- the head at the arm's end, its middle on the arm
+	local hp = armEnd - a.right * 3.2
 	head(m, CFrame.lookAt(hp, hp - a.dir), a.i, a.axis)
-	-- a lower head on the pole for the cars at the front of the queue
-	local lp = base + Vector3.new(0, 9, 0) - a.right * 1.2
-	head(m, CFrame.lookAt(lp, lp - a.dir), a.i, a.axis)
 	m.Parent = folder
 	return m
 end
@@ -156,6 +177,23 @@ function YangonSignals.start()
 		folder.Name = "YangonSignals"
 		folder.Parent = workspace
 		local built: { [any]: Model } = {}
+		-- the countdowns: seconds left in the light's state, in its colour (4 times a second)
+		task.spawn(function()
+			while true do
+				local now = workspace:GetServerTimeNow()
+				for k = #counters, 1, -1 do
+					local c = counters[k]
+					if not c.label.Parent then
+						table.remove(counters, k)
+					else
+						local state = CityLayout.lightState(c.i, 0, c.axis, now)
+						c.label.Text = tostring(math.clamp(math.ceil(CityLayout.lightTimeLeft(c.i, 0, c.axis, now)), 0, 99))
+						c.label.TextColor3 = COUNT_COLOR[state] or COUNT_COLOR.R
+					end
+				end
+				task.wait(0.25)
+			end
+		end)
 		while true do
 			local cam = workspace.CurrentCamera
 			local at = if cam then cam.CFrame.Position else Vector3.zero
