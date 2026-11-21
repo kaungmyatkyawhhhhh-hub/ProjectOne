@@ -8,15 +8,15 @@
 	  The lights are one SurfaceGui on the slab's Bottom (LightInfluence 0, two rows of slanted bars): no Light objects.
 	* The Central (refs_21nov/0799_36s.jpg): the round podium pavilion with a glowing white crown band and vertical gold
 	  light strips. A free grass spot was probed (GetPartBoundsInBox 36 x 80 x 36, ground 44.5 by raycast) at
-	  (35075, 25300), between the walk-ups and The Central's tower (shell KWG 308 tall at 35121, 25218), east of the
-	  THE CENTRAL letters. Drum 40 across: lower shopfront ring and crown are Neon tagged LampGlow (WorldFx: Neon at
+	  (35068, 25307) (GetPartBoundsInRadius 23 empty), between the walk-ups and The Central's tower (shell KWG 308
+	  tall at 35121, 25218), east of the THE CENTRAL letters. Drum 44 across, 30 tall: lower shopfront ring and crown are Neon tagged LampGlow (WorldFx: Neon at
 	  night, SmoothPlastic by day), 12 gold strips the same; 15 parts, CanCollide on for the body only.
 	Both go in Workspace.Yangon1to1.Landmarks.IrlBuild21Nov (JunctionCityCanopy, TheCentralPavilion). M.build(), M.undo().
 ]]
 local CS = game:GetService("CollectionService")
 local M = {}
 local CANOPY_Y, DEPTH, THICK = 54, 14, 1.6
-local CENTRAL = Vector3.new(35075, 44.5, 25300)
+local CENTRAL = Vector3.new(35068, 44.5, 25307)
 
 local function root()
 	local lm = workspace.Yangon1to1.Landmarks
@@ -105,9 +105,9 @@ function M.build()
 	local function drum(name, y0, h, d, color, glow)
 		return part(tc, name, "Part", CFrame.new(CENTRAL + Vector3.new(0, y0 + h / 2, 0)) * up, Vector3.new(h, d, d), color, glow)
 	end
-	for _, p in { drum("Shopfront", -1, 7.5, 39.6, Color3.fromRGB(255, 226, 160), true),
-		drum("Body", 6.5, 11, 40, Color3.fromRGB(196, 190, 178), false),
-		drum("Crown", 17.5, 6.5, 41, Color3.fromRGB(255, 248, 232), true) } do
+	for _, p in { drum("Shopfront", -1, 9, 43.6, Color3.fromRGB(255, 226, 160), true),
+		drum("Body", 8, 14, 44, Color3.fromRGB(196, 190, 178), false),
+		drum("Crown", 22, 7, 45, Color3.fromRGB(255, 248, 232), true) } do
 		p.Shape = Enum.PartType.Cylinder
 	end
 	tc.Body.CanCollide = true
@@ -115,8 +115,8 @@ function M.build()
 	for i = 0, 11 do
 		local a = i * math.pi / 6
 		local dir = Vector3.new(math.cos(a), 0, math.sin(a))
-		local at = CENTRAL + Vector3.new(0, 6.5 + 5.5, 0) + dir * 20.1
-		part(tc, "GoldStrip", "Part", CFrame.lookAt(at, at + dir), Vector3.new(0.6, 10.5, 0.5), Color3.fromRGB(255, 204, 120), true)
+		local at = CENTRAL + Vector3.new(0, 8 + 7, 0) + dir * 22.1
+		part(tc, "GoldStrip", "Part", CFrame.lookAt(at, at + dir), Vector3.new(0.6, 13.5, 0.5), Color3.fromRGB(255, 204, 120), true)
 	end
 	tc.Parent = r
 	local n = #tc:GetChildren() + #jc:GetChildren()
