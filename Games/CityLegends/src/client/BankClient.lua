@@ -109,6 +109,7 @@ function BankClient.init()
 	-- (owner, 2026-11-21) the drop-off's ring, beam and DROP-OFF text show only while you carry loot
 	local marker: Model? = nil
 	local markerShown: boolean? = nil
+	local markerN = 0
 	local function showMarker(on: boolean)
 		if not (marker and marker.Parent) then
 			local city = workspace:FindFirstChild("City")
@@ -118,10 +119,12 @@ function BankClient.init()
 				return
 			end
 		end
-		if on == markerShown then
+		-- (parts streamed back in come back visible: the child count tells)
+		local n = #(marker :: Model):GetChildren()
+		if on == markerShown and n == markerN then
 			return
 		end
-		markerShown = on
+		markerShown, markerN = on, n
 		for _, d in (marker :: Model):GetDescendants() do
 			if d:IsA("BillboardGui") then
 				d.Enabled = on
