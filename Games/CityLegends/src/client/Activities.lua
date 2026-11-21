@@ -144,6 +144,7 @@ local function buildWorld()
 	end
 	for _, d in ActivityData.dispatch do
 		local p = ring(d.pos - Vector3.new(0, Config.City.CurbHeight, 0), Color3.fromRGB(40, 150, 255), 24)
+		p.Transparency = 1 -- (owner, 2026-11-21: "remove the delivery job blue neon circle area"): sign only
 		billboard(p, "DELIVERY JOBS", d.name .. " · stop here", Color3.fromRGB(90, 180, 255))
 	end
 	for k, pos in ActivityData.chips do
