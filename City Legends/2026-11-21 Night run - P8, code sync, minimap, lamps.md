@@ -289,3 +289,8 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
 - `lanes1to1_test`: dead-piece bar is now under 1% (merge tails + traps are pruned on purpose; a broken link drops whole roads: 1,972 before). 864 of 130,011 now.
 - `world_test`: `Garages.lua` destroyed lamp posts while walking `GetDescendants` and then read their destroyed parts; now it collects first and destroys after (old map only, the baked Monaco city). Passes.
 - **All 23 Lune tests pass.** Not in Studio: sync `RivieraTraffic.lua` (and `Garages.lua`) and watch traffic in Play.
+
+## PC run of the "sync today's cloud fixes" prompt (21 Nov)
+- **Blocked:** Studio on the PC was running with NO place open, so nothing was synced (RivieraTraffic, ExhaustTips, Driving, Garages still repo only). Lamps and the P8 re-bake also need Studio. Owner: open City Legends in Studio, then rerun the prompt.
+- **GT-R Nismo import refused:** `imports/importing cars/2017_nissan_gt-r_nismo.glb` is Ddiaz Design, licence **CC BY-NC-SA 4.0** (no commercial use; read from the file's own metadata). Same reason as the refused R34 Z-Tune. Not imported; `nisun_gtr_nismo` keeps borrowing the R35 2013 body. Needs a model with a commercial-OK licence (CC BY, CC0, or bought).
+- Lune 0.11.1 on this PC segfaults on the tests (cloud used 0.8.9): install 0.8.9 here to run them.
