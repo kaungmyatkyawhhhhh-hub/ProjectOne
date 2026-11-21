@@ -615,7 +615,7 @@ Config.DrivingFeel = {
 	-- the speed effect (owner, 2026-11-03: "realistic wind blur, not cartoon lines"): from this speed
 	-- up to the car's top speed the near roadside blurs (depth of field) and the edges darken
 	WindFromMph = 75, -- (120 km/h)
-	WindFarBlur = 0.35, -- how much the street ahead and the roadside further off blur at top speed (0..1)
+	WindFarBlur = 0, -- (21 Nov, owner: "too grainy": Roblox's depth of field is noisy; was 0.35) -- how much the street ahead and the roadside further off blur at top speed (0..1)
 	WindStreaks = 0.8, -- the soft streaks at the screen's edge at top speed (0 = none)
 	ShiftPunchFov = 3, -- a flat-out upshift at high revs: the view kicks wider for a moment
 	ShiftBlur = 1,

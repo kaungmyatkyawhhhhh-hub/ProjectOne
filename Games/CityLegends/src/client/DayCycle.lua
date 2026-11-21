@@ -394,7 +394,9 @@ function DayCycle.start()
 		end
 		Lighting.Brightness = k.brightness
 		Lighting.Ambient = k.ambient
-		Lighting.ShadowSoftness = k.soft or BASE_SOFT
+		-- (owner, 2026-11-21: "too grainy, I want it very smooth") Roblox draws soft shadow edges with a dither, which
+		-- reads as grain: keep the edges crisp
+		Lighting.ShadowSoftness = math.min(k.soft or BASE_SOFT, 0.08)
 		Lighting.ColorShift_Top = k.shiftTop
 		if bloom and bloom.Parent then
 			bloom.Intensity = k.bloom
