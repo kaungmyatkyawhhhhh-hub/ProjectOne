@@ -295,3 +295,7 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
 - Cause: StreamingEnabled; player cars were `ModelStreamingMode = Atomic`, so a car past the streaming radius was never sent to you.
 - Fix: player cars (`Main.server` spawnFor) and chauffeur cars (`Chauffeur.lua`) are now `Persistent`: sent whole to every client and kept wherever they are. One car per player keeps it cheap; parked house cars stay Atomic.
 - Not tested in Play (needs 2 players far apart, e.g. Studio's 2-player test, one fast-travels away).
+## PC run of the "sync today's cloud fixes" prompt (21 Nov)
+- **Blocked:** Studio on the PC was running with NO place open, so nothing was synced (RivieraTraffic, ExhaustTips, Driving, Garages still repo only). Lamps and the P8 re-bake also need Studio. Owner: open City Legends in Studio, then rerun the prompt.
+- **GT-R Nismo import refused:** `imports/importing cars/2017_nissan_gt-r_nismo.glb` is Ddiaz Design, licence **CC BY-NC-SA 4.0** (no commercial use; read from the file's own metadata). Same reason as the refused R34 Z-Tune. Not imported; `nisun_gtr_nismo` keeps borrowing the R35 2013 body. Needs a model with a commercial-OK licence (CC BY, CC0, or bought).
+- Lune 0.11.1 on this PC segfaults on the tests (cloud used 0.8.9): install 0.8.9 here to run them.
