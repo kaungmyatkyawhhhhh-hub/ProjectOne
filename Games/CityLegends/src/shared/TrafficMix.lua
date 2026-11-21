@@ -72,9 +72,9 @@ TrafficMix.Entries = {
 
 -- the most of each rare group on the road at once (counted over all live traffic: traffic is per client, so this is
 -- per player's view of the map)
-TrafficMix.Rare = { ferrari = 1, lambo = 1, gtr = 1, r34 = 1, bugatti = 1 } -- (owner, 2026-11-21: "i keep on spotting them"; was 2 / 2 / 10 / 3 / 1)
+TrafficMix.Rare = { ferrari = 2, lambo = 2, gtr = 2, r34 = 1, bugatti = 1 } -- (owner, 21 Nov evening: "make rare cars more common"; was 1 each after "i keep on spotting them"; before that 2 / 2 / 10 / 3 / 1)
 TrafficMix.TrimSpeed = { BASE = 1, SPORT = 1.05, TOP = 1.1 } -- (a rare car's top speed by its trim: the dealer's trim steps)
-TrafficMix.RareChance = 0.01 -- (21 Nov: was 0.07) of each spawn, the share that tries a rare car (a group under its cap)
+TrafficMix.RareChance = 0.03 -- (21 Nov evening, owner: "make rare cars more common"; was 0.01, and 0.07 before that) of each spawn, the share that tries a rare car (a group under its cap)
 -- (owner, 2026-11-21: "sometimes the ybs and taxis need to be fast") the share of YBS buses and Probox taxis that
 -- hurry, and their top speed in mph (everyday cars: Config.Traffic 24..54)
 TrafficMix.Hurry = { ids = { ybs = true, probox = true }, chance = 0.3, mph = { 62, 80 } }

@@ -42,7 +42,7 @@ check(f(-R.TowGap - 1) == 1, "behind beyond TowGap: no tow")
 check(f(R.LeadGap + 1) == R.Ease and R.Ease == 0.92, "leading beyond LeadGap: x 0.92")
 check(f(R.LeadGap) == 1 and f(0) == 1 and f(30) == 1, "level or just ahead: 1")
 check(R.Split == 900 and R.TowGap == 90 and R.LeadGap == 70 and R.MeetGap == 120, "the race numbers")
-check(Mix.Rare.ferrari == 1 and Mix.RareChance == 0.01, "caps and the rare chance are unchanged")
+check(Mix.Rare.ferrari == 2 and Mix.RareChance == 0.03, "caps and the rare chance are unchanged")
 
 -- (owner, 2026-11-21: "the faster car will go around and make an u turn and go near the other rare car")
 local s = Mix.raceSees
