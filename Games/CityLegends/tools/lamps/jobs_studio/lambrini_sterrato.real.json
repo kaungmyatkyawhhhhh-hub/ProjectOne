@@ -1,1 +1,1 @@
-{"id": "lambrini_sterrato", "note": "real shapes (21 Nov): indicator = the thin strip along the top of the unit; Tail (whole lens) and Rev stay", "roles": {"TurnR": [{"part": "Body_Lamp", "in": [0.5, 0.65, 0.8, 0.9, 1.8, 1.97], "drape": "SeeThrough_Lens_Red", "off": 0.015}]}}
+{"id": "lambrini_sterrato", "note": "real shapes (21 Nov): indicator = the thin strip along the top of the unit; Tail (whole lens) and Rev stay", "roles": {"TurnR": [{"part": "Body_Lamp", "in": [0.55, 0.6, 0.84, 0.87, 1.86, 1.9], "drape": "SeeThrough_Lens_Red", "off": 0.015, "dir": [0, 0, 1]}]}}

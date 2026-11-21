@@ -309,3 +309,15 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
 - **Flyover by Myanmar Plaza, falling through the pavement:** the ground under the Kabar Aye flyover deck (x 34100-34700, z 28200-29560) had pavement / road meshes but no collision (terrain 2-7 studs lower). Added `Workspace.Yangon1to1.Roads.CollideFix_MyanmarPlazaFlyover`: 270 invisible `RCol` strips (RoadBox P / R) laid from the pavement / kerb / road meshes' own triangles, every spot within 0.2 studs of the surface. Place-only change: **owner must save**.
 - **Traffic lights (owner: "put traffic lights too"):** `RivieraTraffic` finds the 1:1 junctions (link mouths clustered, 2+ roads, 3+ lanes, no roundabout, one level, cross traffic) and sets the old city's `seg.signal` on each lane piece entering them: 188 junctions, 1,671 approaches. Traffic, chauffeur and police stop on red with the old code. New `client/YangonSignals.lua` puts up poles (old city look) within 650 studs; lenses use the `TrafficLamp` tag so WorldFx lights them. Play-tested at the spawn junction: pole on the corner, lights change, cars wait at the line, no script errors. Not tested: every junction's pole spot, phone FPS.
 - **Still open:** P8 deck dip (needs the home PC's `roads_unfixed.json`), car lamp shells (Blender), GT-R Nismo (licence: needs a commercial-OK model), real-Yangon look, Dala Bridge.
+
+## Real lamp shapes on 5 cars: cut, NOT in Studio yet (21 Nov, late)
+- Checked: the 4 "tail shell" cars (bentz_sls, ferrara_599, mclaran_12c, nisun_350z) already have full shell sets in `CarModels` (12 each). Nothing left there.
+- New shells cut from each model's own lamp pieces (jobs `tools/lamps/jobs_studio/<id>.real.json`, files in `imports/sync/lamp_shells/<id>.glb`):
+  - **458 Speciale:** indicator = the round lamp's centre (the red lens is a ring round it), reverse = the low round bumper lamp. Tail ring stays.
+  - **Huracán / Sterrato:** indicator = the thin strip along the top of the unit (the model's own piece); Huracán tail = the whole Y lens with its outer end. Reverse stays.
+  - **California:** round lamp = tail / stop only; indicator = outer half of the low unit beside the plate, reverse = its inner half (lens is `SeeThrough_Window2`).
+  - **LFA:** indicator = round lamp at the cluster's outer end, reverse = the low bumper lamp. Tail stays.
+- `lampfx_studio.py` got a `disc` source (a round or ring piece made in the tool, for a lamp the model has no loose piece for).
+- **Blocked:** Studio refused the uploads: "`imports/sync/lamp_shells` is not inside a directory approved for uploads" (this PC's Studio: Assistant Settings -> MCP Permissions). Once `Games/CityLegends/imports` is approved: upload each .glb as a Model (group 33151111), paste `LampShellsStudio.luau`, `LS.apply(id, assetId)`, look, `LS.unstage()`.
+- From knowledge of the real cars, not checked against photos: which low lamp is reverse on the 458 / LFA, the California's low unit split.
+- **P8 deck dip:** still blocked here: this PC has only `roads.json.gz` / `paint.json.gz`, no `roads_unfixed.json`, and the re-bake needs uploads too.
