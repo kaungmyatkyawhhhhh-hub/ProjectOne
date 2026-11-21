@@ -29,6 +29,7 @@ local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local Config = require(Shared:WaitForChild("Config"))
 local Plates = require(Shared:WaitForChild("Plates"))
+local PlateSpots = require(Shared:WaitForChild("PlateSpots"))
 local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
 local TailLights = require(script.Parent:WaitForChild("TailLights"))
@@ -3076,7 +3077,48 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		params.FilterType = Enum.RaycastFilterType.Include
 		params.FilterDescendantsInstances = { skin }
 		local up = root.CFrame.UpVector
-		for _, side in { { -1, { 1.5, 1.8, 1.25, 2.1 } }, { 1, { 2.3, 2.0, 2.7, 1.7 } } } do
+		-- (owner, 2026-11-21: "make the license plates in the proper place? Some cars already have an license plate
+		-- thing") a model with its own plate holder gets our plate on it (PlateSpots: measured from the model), sized to
+		-- cover it; placed from the skin's own box in root space, like the exhaust tips
+		local spots = PlateSpots.of(id)
+		local lo, hi = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+		if spots then
+			for _, d in skin:GetDescendants() do
+				if d:IsA("BasePart") and d.Transparency < 1 and d.Name ~= "PlateText" then
+					local cf = root.CFrame:ToObjectSpace(d.CFrame)
+					local h = d.Size / 2
+					for sx = -1, 1, 2 do
+						for sy = -1, 1, 2 do
+							for sz = -1, 1, 2 do
+								local c = cf * Vector3.new(h.X * sx, h.Y * sy, h.Z * sz)
+								lo = lo:Min(c)
+								hi = hi:Max(c)
+							end
+						end
+					end
+				end
+			end
+		end
+		for _, side in { { -1, { 1.5, 1.8, 1.25, 2.1 }, "front" }, { 1, { 2.3, 2.0, 2.7, 1.7 }, "rear" } } do
+			local spot = spots and (spots :: any)[side[3]]
+			local len = hi.Z - lo.Z
+			if spot and len > 4 and len < 80 then
+				local t = math.rad(spot[3])
+				local n = Vector3.new(0, math.sin(t), side[1] * math.cos(t))
+				local z = if side[1] > 0 then hi.Z - spot[2] * len else lo.Z + spot[2] * len
+				local at = Vector3.new((lo.X + hi.X) / 2, lo.Y + spot[1] * len, z) + n * 0.03
+				local w, h = spot[4] * len, spot[5] * len
+				if w / h < 1.7 or w / h > 2.8 then
+					h = math.min(h, w / 2.2) -- (a long holder: our plate's own shape, in its middle)
+					w = h * 2.2
+				else
+					w *= 1.03 -- (covers the model's blank plate)
+					h *= 1.03
+				end
+				local wp, wn = root.CFrame * at, root.CFrame:VectorToWorldSpace(n)
+				plateAt(CFrame.lookAt(wp, wp + wn, up), Vector3.new(w, h, 0.02), Vector2.new(220, 100))
+				continue
+			end
 			local out = root.CFrame:VectorToWorldSpace(Vector3.new(0, 0, side[1])) -- -Z is the front
 			for _, y in side[2] do
 				local from = (groundCF * CFrame.new(0, y, side[1] * 20)).Position
