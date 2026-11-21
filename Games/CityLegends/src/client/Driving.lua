@@ -34,6 +34,7 @@ local avatarDesc: HumanoidDescription? = nil -- for the driver's arms
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local ExhaustTips = require(Shared:WaitForChild("ExhaustTips"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CarPhysics = require(Shared:WaitForChild("CarPhysics"))
@@ -731,8 +732,34 @@ end
 ---------------------------------------------------------------------
 -- Exhaust tip positions in root space. A skinned car shows CarMesh's pipes,
 -- so mirror its placement; otherwise use the (visible) part-built pipes.
-local function exhaustTips(model: Model, root: BasePart): { Vector3 }
+local function exhaustTips(model: Model, root: BasePart, id: string?): { Vector3 }
 	local tips: { Vector3 } = {}
+	-- (2026-11-21) an imported model's tips measured from its own model file (ExhaustTips), placed from the skin's box
+	-- in root space: { across, up, in } x the skin's length from its middle, lowest and rear-most points (-Z = front)
+	local rows = if id then ExhaustTips.tipsOf(id) else nil
+	local skin = model:FindFirstChild("Skin")
+	if rows and skin then
+		local lo, hi = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+		for _, d in skin:GetDescendants() do
+			if d:IsA("BasePart") and d.Transparency < 1 then
+				local cf = root.CFrame:ToObjectSpace(d.CFrame)
+				local h = d.Size / 2
+				for _, c in { Vector3.new(h.X, h.Y, h.Z), Vector3.new(-h.X, h.Y, h.Z), Vector3.new(h.X, -h.Y, h.Z), Vector3.new(h.X, h.Y, -h.Z), Vector3.new(-h.X, -h.Y, h.Z), Vector3.new(-h.X, h.Y, -h.Z), Vector3.new(h.X, -h.Y, -h.Z), Vector3.new(-h.X, -h.Y, -h.Z) } do
+					local p = cf * c
+					lo = lo:Min(p)
+					hi = hi:Max(p)
+				end
+			end
+		end
+		local len = hi.Z - lo.Z
+		if len > 4 and len < 80 then
+			local midX = (lo.X + hi.X) / 2
+			for _, r in rows do
+				table.insert(tips, Vector3.new(midX + r[1] * len, lo.Y + r[2] * len, hi.Z - r[3] * len))
+			end
+			return tips
+		end
+	end
 	if model:GetAttribute("Skinned") then
 		-- CarSkin stores the mesh's pipe tips (root space) as Exhaust1..n
 		local i = 1
@@ -757,10 +784,13 @@ local function exhaustTips(model: Model, root: BasePart): { Vector3 }
 	return tips
 end
 
+local exhaustSmoke: { [Instance]: { ParticleEmitter } } = {} -- [root] = its tips' smoke (2026-11-21)
 local function buildFlames(model: Model, root: BasePart, spec: Cars.CarSpec): ({ ParticleEmitter }, { Instance }, PointLight?)
 	local emitters: { ParticleEmitter } = {}
 	local parts: { Instance } = {}
-	local tips = exhaustTips(model, root)
+	local smokes: { ParticleEmitter } = {}
+	exhaustSmoke[root] = smokes
+	local tips = exhaustTips(model, root, spec.Id)
 	if #tips == 0 then
 		return emitters, parts, nil
 	end
@@ -796,6 +826,22 @@ local function buildFlames(model: Model, root: BasePart, spec: Cars.CarSpec): ({
 		e.ZOffset = 0.3
 		e.Parent = att
 		table.insert(emitters, e)
+		-- exhaust smoke: a grey puff that drifts and grows (pops, hard shifts, launches)
+		local sm = Instance.new("ParticleEmitter")
+		sm.Rate = 0
+		sm.Texture = "rbxasset://textures/particles/smoke_main.dds"
+		sm.EmissionDirection = Enum.NormalId.Back
+		sm.Lifetime = NumberRange.new(0.6, 1.2)
+		sm.Speed = NumberRange.new(2, 5)
+		sm.SpreadAngle = Vector2.new(25, 25)
+		sm.Acceleration = Vector3.new(0, 1.5, 0)
+		sm.Drag = 2
+		sm.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.4), NumberSequenceKeypoint.new(1, 2.6) })
+		sm.Color = ColorSequence.new(Color3.fromRGB(120, 120, 124), Color3.fromRGB(170, 170, 174))
+		sm.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(1, 1) })
+		sm.LightInfluence = 1
+		sm.Parent = att
+		table.insert(smokes, sm)
 	end
 	local glowAtt = Instance.new("Attachment")
 	glowAtt.Name = "ExhaustGlow"
@@ -815,6 +861,9 @@ end
 local function exhaustPop(s: State, strength: number)
 	for _, e in s.flames do
 		e:Emit(math.max(1, math.floor((4 + math.random() * 4) * strength)))
+	end
+	for _, e in exhaustSmoke[s.root] or {} do
+		e:Emit(math.max(1, math.floor(2 * strength)))
 	end
 	s.flameGlow = math.max(s.flameGlow, 4 * strength)
 end
@@ -2373,15 +2422,21 @@ function Driving.attach(model: Model)
 	end
 	local okMfd, mfdUpdate = pcall(R34Mfd.build, model)
 	local flames, flameParts, flameLight = buildFlames(model, root, spec)
-	-- shortcut: exhaust flames (pops, shifts, nitro) and their glow off for now (owner, 2026-11-21: "I will add them
-	-- back later"); delete these lines to bring them back
-	for _, e in flames do
-		e:Destroy()
+	-- (owner, 2026-11-21) exhaust flames + smoke only on supercars and 5 hypercars (the 4 Aventadors, the Revuelto):
+	-- ExhaustTips.allowed; every other car keeps them off (they were off for all cars earlier that night)
+	if not ExhaustTips.allowed(spec.Id) then
+		for _, e in flames do
+			e:Destroy()
+		end
+		for _, e in exhaustSmoke[root] or {} do
+			e:Destroy()
+		end
+		exhaustSmoke[root] = nil
+		if flameLight then
+			flameLight:Destroy()
+		end
+		flames, flameLight = {}, nil
 	end
-	if flameLight then
-		flameLight:Destroy()
-	end
-	flames, flameLight = {}, nil
 	-- tyre smoke at each wheel's contact patch; strength follows the squeal
 	local smoke: { { emitter: ParticleEmitter, rear: boolean } } = {}
 	for _, j in root:GetChildren() do
@@ -2639,6 +2694,33 @@ function Driving.attach(model: Model)
 		table.insert(s.flameColors, e.Color)
 	end
 	state = s
+	-- (2026-11-21) the skin can arrive after the car: try the exhaust tips again for a few seconds
+	if ExhaustTips.allowed(spec.Id) and #flames == 0 then
+		task.spawn(function()
+			for _ = 1, 6 do
+				task.wait(1.5)
+				if state ~= s or not root.Parent then
+					return
+				end
+				local f, fp, fl = buildFlames(model, root, spec)
+				if #f > 0 then
+					s.flames = f
+					for _, x in fp do
+						table.insert(s.flameParts, x)
+					end
+					s.flameLight = fl
+					s.flameColors = {}
+					for _, e in f do
+						table.insert(s.flameColors, e.Color)
+					end
+					return
+				end
+				for _, x in fp do
+					x:Destroy()
+				end
+			end
+		end)
+	end
 	UI.showShiftPaddles(UI.isTouch and s.manual)
 	-- (2026-11-08) the kit-v2 wheels' pieces by corner (CarSkin welds each wheel piece to its tyre part): the blurred
 	-- face, the spokes it stands in for, the brake discs (they glow after a hard stop)
@@ -3103,6 +3185,9 @@ function Driving.step(dt: number)
 		elseif s.rpm > 0.6 and liftMph > 30 and not noPops(s) and not noLiftPops(s) then
 			s.pops = math.random(2, 4)
 			s.popTimer = 0.04
+		elseif s.rpm > 0.75 and liftMph > 40 and #s.flames > 0 then
+			-- (2026-11-21) a silent flame + smoke lifting off high revs on the flame cars that have no pop sound
+			exhaustPop(s, 0.6)
 		end
 	end
 	s.throttleIn = throttle
@@ -3988,6 +4073,9 @@ function Driving.step(dt: number)
 		s.engine:shift(isUp, math.clamp(0.12 + 0.88 * frac / gearHi(effGear), 0.12, 1.02))
 		if isUp and throttle > 0.5 and (s.popTune or (not noPops(s) and not noShiftPops(s))) then
 			exhaustPop(s, if s.popLoud then 1.4 else 1)
+		elseif isUp and throttle > 0.8 and s.rpm > 0.7 and #s.flames > 0 then
+			-- (2026-11-21) a flame + smoke on a hard, high-rev upshift for the flame cars with no pop sound
+			exhaustPop(s, 0.8)
 		end
 		-- the crackle map also crackles on the way down the gears
 		if not isUp and (s.popTune == "crackle" or s.popTune == "antilag") then
