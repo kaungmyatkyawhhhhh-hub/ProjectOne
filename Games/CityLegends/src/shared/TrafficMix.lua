@@ -52,7 +52,7 @@ TrafficMix.Entries = {
 	{ id = "toyoka_alfard", kind = "B", len = 14.6, w = 6, paint = { WHITE, PEARL, BLACK, SILVER } }, -- Alphard / Wish / Noah
 	{ id = "hiace", kind = "C", len = 14.5, w = 6, paint = LIGHT }, -- Hiace vans and line ferries
 	{ id = "carry", kind = "H", len = 10.2, w = 6, paint = LIGHT }, -- Carry / Hijet kei trucks
-	{ id = "ybs", kind = "D", len = 33.0, w = 6, paint = YBS, main = true }, -- YBS buses, main roads only
+	{ id = "ybs", kind = "D", len = 33.0, w = 2, paint = YBS, main = true }, -- YBS buses, main roads only (owner, 2026-11-21: "spawn less ybs bus"; was 6)
 	{ id = "toyoka_lc200", kind = "F", len = 14.9, w = 4, paint = { WHITE, BLACK, SILVER, PEARL } }, -- Land Cruiser / Hilux Surf / Prado
 	{ id = "byt_seal", kind = "E", len = 14.4, w = 5, paint = { WHITE, SILVER, BLUE, GREY } }, -- BYD and the other EVs: top new-car brand 2024-25 (the EV6 copy came out with holes: left out)
 	{ id = "toyoka_lc300", kind = "F", len = 15.0, w = 2, paint = { WHITE, BLACK, PEARL } }, -- the few luxury SUVs
