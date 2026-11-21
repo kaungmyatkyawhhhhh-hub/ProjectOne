@@ -6,7 +6,7 @@
 	pavilion on that roof (the shell is not touched): a green glazed tile skirt with a red fascia round the roof edge,
 	the yellow lattice balustrade, the white pavilion with octagonal green windows and a gold name plaque, two tiers of
 	green tile roof with red eaves and upturned red corners.
-	32 parts, all CanCollide / CanQuery off (roof dressing nobody drives on). Faces butt or cross at angles: no coplanar
+	32 parts (+22 facade parts, below), all CanCollide / CanQuery off (roof dressing nobody drives on). Faces butt or cross at angles: no coplanar
 	visible faces. M.build() -> Workspace.Yangon1to1.Landmarks.IrlBuild21Nov.ChineseTempleHanthawaddy; M.undo().
 ]]
 local M = {}
@@ -123,6 +123,102 @@ local function windows(face: Enum.NormalId, wide: number)
 	end
 end
 
+-- (leftovers 21 Nov: "give the Chinese temple building its own facade") the block under the pavilion was the kit's
+-- generic walk-up (window grid). A KeepOut box (ReplicatedStorage.YgnKit.KeepOut.ChineseTemple_21Nov) stops the kit
+-- detail there; the shell still hides near the camera, so the building is now this facade: a cream body 0.2 stud
+-- outside the shell (shell top 0.1 above it, under the skirt), red columns between bays, two green tile cornices with
+-- red bands at the 2nd and 4th floor lines, a red plinth; windows as SurfaceGui (octagonal green on the top floors,
+-- red-framed below, red doors in the middle bay of the long faces). 22 parts + 4 SurfaceGuis.
+local CREAM = Color3.fromRGB(238, 228, 204)
+local H = 66.3 -- shell height; local y 0 = shell top
+
+local function faceGui(body, face: Enum.NormalId, bays: number, doors: boolean)
+	local g = Instance.new("SurfaceGui")
+	g.Face = face
+	g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	g.PixelsPerStud = 4
+	g.LightInfluence = 1
+	g.MaxDistance = 1500
+	local function box(xs, ys, w, h, color, stroke, round)
+		local f = Instance.new("Frame")
+		f.AnchorPoint = Vector2.new(0.5, 0.5)
+		f.Position = UDim2.fromScale(xs, ys)
+		f.Size = UDim2.fromOffset(w * 4, h * 4)
+		f.BackgroundColor3 = color
+		f.BorderSizePixel = 0
+		if round then
+			f.Rotation = 22.5
+			local c = Instance.new("UICorner")
+			c.CornerRadius = UDim.new(0.29, 0) -- near-octagon
+			c.Parent = f
+		end
+		local s = Instance.new("UIStroke")
+		s.Color = stroke
+		s.Thickness = 4
+		s.Parent = f
+		f.Parent = g
+	end
+	local GLASS = Color3.fromRGB(40, 46, 52)
+	for i = 1, bays do
+		local xs = (i - 0.5) / bays
+		box(xs, 0.15, 8, 8, Color3.fromRGB(36, 74, 52), GOLD, true) -- top zone (local y 0..-22)
+		for _, ys in { 0.42, 0.58, 0.75 } do
+			box(xs, ys, 7, 5, GLASS, RED, false)
+		end
+		if doors and i == math.ceil(bays / 2) then
+			box(xs, 0.91, 9, 9, Color3.fromRGB(120, 36, 28), GOLD, false)
+		else
+			box(xs, 0.91, 7, 5, GLASS, RED, false)
+		end
+	end
+	g.Parent = body
+end
+
+local function facade(hx, hz)
+	local body = part("FacadeBody", "Part", CFrame.new(0, -0.1 - H / 2, 0), Vector3.new(2 * hx + 0.4, H, 2 * hz + 0.4), CREAM)
+	faceGui(body, Enum.NormalId.Front, 5, true)
+	faceGui(body, Enum.NormalId.Back, 5, true)
+	faceGui(body, Enum.NormalId.Left, 3, false)
+	faceGui(body, Enum.NormalId.Right, 3, false)
+	part("Plinth", "Part", CFrame.new(0, -H + 1.5, 0), Vector3.new(2 * hx + 1.4, 3.4, 2 * hz + 1.4), Color3.fromRGB(120, 44, 34))
+	for _, y in { -22, -44 } do -- floor lines (6 levels, 11 studs each)
+		part("Cornice", "Part", CFrame.new(0, y + 0.5, 0), Vector3.new(2 * hx + 3, 1, 2 * hz + 3), GREEN)
+		part("CorniceRed", "Part", CFrame.new(0, y - 0.6, 0), Vector3.new(2 * hx + 1.2, 1.2, 2 * hz + 1.2), RED)
+	end
+	-- columns: 6 across the long faces (5 bays), 4 across the short ones (3 bays); corners shared
+	local cy, ch = -0.1 - H / 2, H - 0.2
+	for i = 0, 5 do
+		local x = -hx + i * (2 * hx / 5)
+		for _, sz in { 1, -1 } do
+			part("Column", "Part", CFrame.new(x, cy, sz * (hz + 0.5)), Vector3.new(1.8, ch, 1.2), RED)
+		end
+	end
+	for i = 1, 2 do
+		local z = -hz + i * (2 * hz / 3)
+		for _, sx in { 1, -1 } do
+			part("Column", "Part", CFrame.new(sx * (hx + 0.5), cy, z), Vector3.new(1.2, ch, 1.8), RED)
+		end
+	end
+end
+
+local function keepOut(on: boolean)
+	local ko = game:GetService("ReplicatedStorage").YgnKit.KeepOut
+	local old = ko:FindFirstChild("ChineseTemple_21Nov")
+	if old then
+		old:Destroy()
+	end
+	if on then
+		local s = M.SHELL
+		local b = Instance.new("Part")
+		b.Name = "ChineseTemple_21Nov"
+		b.Size = Vector3.new(s.w + 4, 80, s.d + 4)
+		b.CFrame = CFrame.lookAt(s.pos, s.pos + s.look) * CFrame.new(0, -H / 2, 0)
+		b.Anchored, b.CanCollide, b.CanQuery, b.CanTouch = true, false, false, false
+		b.Transparency = 1
+		b.Parent = ko
+	end
+end
+
 function M.build()
 	local lm = workspace.Yangon1to1.Landmarks
 	local root = lm:FindFirstChild("IrlBuild21Nov") or Instance.new("Folder")
@@ -156,6 +252,8 @@ function M.build()
 	-- upper drum and the top tier
 	part("Drum", "Part", CFrame.new(0, ph + 7.2 + 4, 0), Vector3.new(30, 8, 20), WHITE)
 	tier(ph + 15.2, 15, 10, 6, 6)
+	facade(hx, hz)
+	keepOut(true)
 	model.Parent = root
 	local n = 0
 	for _, d in model:GetDescendants() do
@@ -172,6 +270,7 @@ function M.undo()
 	if m then
 		m:Destroy()
 	end
+	keepOut(false)
 end
 
 return M
