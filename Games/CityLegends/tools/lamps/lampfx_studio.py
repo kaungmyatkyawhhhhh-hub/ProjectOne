@@ -8,6 +8,7 @@ A job gives each role a list of sources; only the left half is cut, the right is
   part   the model's part
   in     [ax0, ax1, y0, y1, z0, z1]: whole loose pieces whose middle is in the box (ax = distance from the middle)
   box    [ax0, ax1, y0, y1, z0, z1]: cut the faces at the box (clean edges)
+  disc   [ax, y, z, r] (+ ring, squash, n): a round piece made here, for a lamp the model has no piece for
   drape  a part (the lens): lay the piece on that part's outer surface along `dir` (default: the piece's own facing)
   off    how far out of the surface (metres)
 Each mesh's name carries its true box in mm (LF_<role><L/R>_<centre>_<size>): LampStudio's apply puts it there.
@@ -91,7 +92,33 @@ def cut_box(tri, box):
     return tri
 
 
+def disc(src):
+    """A flat round (or ring) piece facing back, on the left: disc = [ax, y, z, r], ring = inner radius, n = sides,
+    squash = [sx, sy] (an oval). For lamps the model has no separate piece for (a round indicator inside a tail lamp)."""
+    ax, y, z, r = src['disc']
+    r0 = src.get('ring', 0)
+    n = src.get('n', 28)
+    sx, sy = src.get('squash', [1, 1])
+    tri = []
+    for i in range(n):
+        a0, a1 = 2 * np.pi * i / n, 2 * np.pi * (i + 1) / n
+        o0 = [-ax + r * sx * np.cos(a0), y + r * sy * np.sin(a0), z]
+        o1 = [-ax + r * sx * np.cos(a1), y + r * sy * np.sin(a1), z]
+        if r0 > 0:
+            i0 = [-ax + r0 * sx * np.cos(a0), y + r0 * sy * np.sin(a0), z]
+            i1 = [-ax + r0 * sx * np.cos(a1), y + r0 * sy * np.sin(a1), z]
+            tri += [[i0, o0, o1], [i0, o1, i1]]
+        else:
+            tri.append([[-ax, y, z], o0, o1])
+    return np.array(tri, float)
+
+
 def pick(parts, src):
+    if 'disc' in src:
+        tri = disc(src)
+        if 'box' in src:
+            tri = cut_box(tri, src['box'])
+        return tri
     V, T, I = parts[src['part']]
     keep = np.ones(len(T), bool)
     if 'in' in src:
@@ -248,7 +275,8 @@ if __name__ == '__main__':
             rows = []
             for srcs in job['roles'].values():
                 for src in srcs:
-                    rows.append('{"%s"%s}' % (src['part'], ''.join(',%g' % v for v in src.get('in', []))))
+                    if 'part' in src:
+                        rows.append('{"%s"%s}' % (src['part'], ''.join(',%g' % v for v in src.get('in', []))))
                     if 'drape' in src:
                         rows.append('{"%s"}' % src['drape'])
             print('return _G.LS.get("%s",{%s})' % (job['id'], ','.join(sorted(set(rows)))))
