@@ -135,7 +135,10 @@ for _ in riv.dead do
 	deadN += 1
 end
 print(string.format("     1:1 lanes %d, pieces %d (live %d), links %d", nLanes, allN, #riv.lanes, #riv.links))
-check(deadN == 0, "1:1 pieces leading nowhere (pruned): " .. deadN)
+-- (21 Nov) some pieces are pruned on purpose: the last 9 of a route's lane 2 after it merges into lane 1
+-- (mergeRouteEnds) and small trap parts with no way out (RivieraTraffic.build); a broken link drops whole roads
+-- (1,972 pieces before the fixes that day), so the bar is 1% of the pieces
+check(deadN < allN * 0.01, "1:1 pieces leading nowhere (pruned): " .. deadN .. " of " .. allN .. " (under 1%)")
 local badLink = 0
 for _, l in riv.links do
 	if l[1] < 1 or l[1] > nLanes or l[3] < 1 or l[3] > nLanes then
@@ -235,7 +238,7 @@ if a and b then
 		#a.lanesData, #a.lanes, deadA, #b.lanesData, #b.lanes, deadB))
 	check(#b.lanesData == #a.lanesData + nLanes, "the 1:1 lanes come after the old ones (" .. #b.lanesData .. " = " .. #a.lanesData .. " + " .. nLanes .. ")")
 	check(#b.lanes == #a.lanes + #riv.lanes, "old maps' live pieces unchanged, 1:1's added")
-	check(deadB == deadA, "no new dead pieces")
+	check(deadB - deadA < #b.lanes * 0.01, "new dead pieces under 1% (merge tails, traps): " .. (deadB - deadA))
 	local oldIn = 0
 	for _, s in a.lanes do
 		if C.isYangon1to1At(s.p0) then

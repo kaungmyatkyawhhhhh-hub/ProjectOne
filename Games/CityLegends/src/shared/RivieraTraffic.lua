@@ -408,6 +408,40 @@ function RivieraTraffic.build()
 			endLinked[link[1]] = true
 		end
 	end
+	-- (21 Nov) a 1:1 Yangon lane nothing turns into (an inner lane of a wide road: the generator links junctions to
+	-- one or two lanes only) took its cars nowhere and was never used: it gets the links into its neighbour lane
+	-- (same road and way, starting within 20 studs), so junction traffic spreads over every lane
+	do
+		local intoLane = {}
+		for _, link in dataLinks do
+			if link[1] ~= link[3] then
+				intoLane[link[3]] = intoLane[link[3]] or {}
+				table.insert(intoLane[link[3]], link)
+			end
+		end
+		local function startOf(l): Vector3
+			return Vector3.new(l.pts[1], l.pts[2], l.pts[3])
+		end
+		local extra = {}
+		for li, l in dataLanes do
+			if l.yangon and not l.closed and not l.skip and not intoLane[li] and #l.pts >= 6 then
+				for _, d in { -1, 1, -2, 2 } do
+					local sib = dataLanes[li + d]
+					if sib and sib.road == l.road and sib.way == l.way and intoLane[li + d] and (startOf(sib) - startOf(l)).Magnitude < 20 then
+						for _, link in intoLane[li + d] do
+							if link[1] ~= li then
+								table.insert(extra, { link[1], link[2], li, link[4] })
+							end
+						end
+						break
+					end
+				end
+			end
+		end
+		for _, x in extra do
+			table.insert(dataLinks, x)
+		end
+	end
 	local made = {} -- [piece][piece] = true: one turn per pair (two links can pick the same pair)
 	for _, link in dataLinks do
 		local fromLane, fromK, toLane, toK = link[1], link[2], link[3], link[4]
@@ -556,21 +590,111 @@ function RivieraTraffic.build()
 			table.insert(stack, seg)
 		end
 	end
-	while #stack > 0 do
-		local gone = table.remove(stack)
-		for _, seg in into[gone] or {} do
-			if not dead[seg] then
-				for i = #seg.next, 1, -1 do
-					if dead[seg.next[i]] then
-						table.remove(seg.next, i)
+	local function prune()
+		while #stack > 0 do
+			local gone = table.remove(stack)
+			for _, seg in into[gone] or {} do
+				if not dead[seg] then
+					for i = #seg.next, 1, -1 do
+						if dead[seg.next[i]] then
+							table.remove(seg.next, i)
+						end
 					end
-				end
-				if #seg.next == 0 then
-					dead[seg] = true
-					table.insert(stack, seg)
+					if #seg.next == 0 then
+						dead[seg] = true
+						table.insert(stack, seg)
+					end
 				end
 			end
 		end
+	end
+	prune()
+	-- (21 Nov) traps: a part of the network cars can drive into but never leave (5 small roundabouts with no roads
+	-- joined, U-turn loops at the edge of the built districts: San Da Koo Street, Bo Min Yaung / Yarza Thingyan
+	-- Road). Every small part (under 1,000 pieces) with no way out is taken out like a dead end, so cars don't pile up there.
+	do
+		local index, low, onStack, sstack, idx = {}, {}, {}, {}, 0
+		local comps = {}
+		for _, v0 in all do
+			if dead[v0] or index[v0] then
+				continue
+			end
+			local work = { { v0, 1 } }
+			index[v0], low[v0] = idx, idx
+			idx += 1
+			table.insert(sstack, v0)
+			onStack[v0] = true
+			while #work > 0 do
+				local top = work[#work]
+				local v, i = top[1], top[2]
+				local nx = v.next[i]
+				if nx then
+					top[2] = i + 1
+					if not dead[nx] then
+						if index[nx] == nil then
+							index[nx], low[nx] = idx, idx
+							idx += 1
+							table.insert(sstack, nx)
+							onStack[nx] = true
+							table.insert(work, { nx, 1 })
+						elseif onStack[nx] then
+							low[v] = math.min(low[v], index[nx])
+						end
+					end
+				else
+					table.remove(work)
+					if #work > 0 then
+						local u = work[#work][1]
+						low[u] = math.min(low[u], low[v])
+					end
+					if low[v] == index[v] then
+						local members = {}
+						while true do
+							local w = table.remove(sstack)
+							onStack[w] = nil
+							table.insert(members, w)
+							if w == v then
+								break
+							end
+						end
+						table.insert(comps, members)
+					end
+				end
+			end
+		end
+		local biggest, compOf = nil, {}
+		for k, m in comps do
+			for _, s in m do
+				compOf[s] = k
+			end
+			if biggest == nil or #m > #comps[biggest] then
+				biggest = k
+			end
+		end
+		-- (only small ones: each map's network is its own big part, the old maps' and the 1:1 Yangon's)
+		for k, m in comps do
+			if k ~= biggest and #m < 1000 then
+				local leaves = false
+				for _, s in m do
+					for _, nx in s.next do
+						if not dead[nx] and compOf[nx] ~= k then
+							leaves = true
+							break
+						end
+					end
+					if leaves then
+						break
+					end
+				end
+				if not leaves then
+					for _, s in m do
+						dead[s] = true
+						table.insert(stack, s)
+					end
+				end
+			end
+		end
+		prune()
 	end
 	local live = {}
 	for _, seg in lanes do

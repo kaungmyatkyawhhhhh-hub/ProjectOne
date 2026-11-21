@@ -156,12 +156,30 @@ function Garages.build(kit: any, city: Instance)
 		cutAll(grounds, wx0, wx1, cz + RAMP_Z0, cz + RAMP_Z1)
 		-- clear the driveway of street furniture (lamp posts with their arms, a bus stop, a hydrant)
 		local dx0, dx1 = span(inner / 2 - 12, inner / 2 + 10)
+		-- (21 Nov) found first, destroyed after, and a part inside one already going is skipped: destroying while
+		-- walking GetDescendants read parts of a destroyed lamp post (world_test: "Instance has been destroyed")
+		local doomed, order = {}, {}
 		for _, d in block:GetDescendants() do
 			if d:IsA("BasePart") and d.Name ~= "Sidewalk" and d.Parent ~= garage then
 				local p = d.CFrame.Position
 				if p.X > dx0 and p.X < dx1 and p.Z > cz + APRON_Z0 - 1 and p.Z < cz + APRON_Z1 + 1 and p.Y < 30 and math.max(d.Size.X, d.Size.Z) < 40 then
-					d:Destroy()
+					doomed[d] = true
+					table.insert(order, d)
 				end
+			end
+		end
+		for _, d in order do
+			local inside = false
+			local a = d.Parent
+			while a and a ~= block do
+				if doomed[a] then
+					inside = true
+					break
+				end
+				a = a.Parent
+			end
+			if not inside then
+				d:Destroy()
 			end
 		end
 		-- the lowered kerb: a gentle slope from the road up to the lot

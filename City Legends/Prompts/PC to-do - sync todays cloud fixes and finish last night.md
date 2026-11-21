@@ -10,8 +10,8 @@ _For Claude Code on the PC (Studio MCP, Blender). Owner: caveman mode, no questi
 ## 2. Last night's open items (in this order)
 1. P8: the U Chit Maung x Banyar Dala deck dip (60.6 -> 29.9 at about 39940, 32800): builder fix + re-bake of cell 26x21.
 2. Lamps: real lamp shapes on the 458 Speciale, Huracán, Sterrato, California, LFA; apply the tail shells on bentz_sls (asset 118050194412654), ferrara_599, mclaran_12c, nisun_350z.
-3. Traffic reach: only 82.7% of the 1:1 network is one connected part (`lanes1to1_test` wants 90%): find the areas cars can enter but not leave (lane generator `roads05_lanes.py` / links) and fix.
-4. `world_test` fails ("Instance has been destroyed" in CityBuilder.build, line 298): fix the test or the builder.
+3. (done in the cloud, 21 Nov: reach 92.1%, traps removed: just watch traffic in Play.)
+4. (done in the cloud, 21 Nov: world_test passes.) Also sync `src/server/Garages.lua`.
 5. Real-Yangon look, then the Dala Bridge LAST (survey notes in the night-run file).
 
 ## 3. GT-R Nismo
