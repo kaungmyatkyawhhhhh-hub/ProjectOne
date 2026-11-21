@@ -3106,7 +3106,8 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				local t = math.rad(spot[3])
 				local n = Vector3.new(0, math.sin(t), side[1] * math.cos(t))
 				local z = if side[1] > 0 then hi.Z - spot[2] * len else lo.Z + spot[2] * len
-				local at = Vector3.new((lo.X + hi.X) / 2, lo.Y + spot[1] * len, z) + n * 0.03
+				-- (up from the ground line, not the skin's lowest point: the wheels are not on yet at this moment)
+				local at = Vector3.new((lo.X + hi.X) / 2, -height / 2 + spot[1] * len, z) + n * 0.03
 				local w, h = spot[4] * len, spot[5] * len
 				if w / h < 1.7 or w / h > 2.8 then
 					h = math.min(h, w / 2.2) -- (a long holder: our plate's own shape, in its middle)
