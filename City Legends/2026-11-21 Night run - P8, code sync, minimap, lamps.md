@@ -263,3 +263,6 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
 - Backups `ServerStorage.LampBackup_21Nov.<id>` (24 now). Studio saved v1705 (save only). CarLamps repo = Studio (checksum 2074714912, not changed).
 - **Night Play check** (store on CityLegends_test, back on CityLegends_v1 after, 0 test refs): LFA tail, brake, reverse and hazards; Supra tail + hazards; indicators blink cleanly on / off. Edit-stage night shots of all 16 cars and the 458 heads.
 - **Not like the real lamps:** the new tails sit under the old indicator / reverse slices, which are still straight ax / height bands of the lens (458 Speciale, Huracan, Sterrato, California, LFA), not the real lamps' shapes; brake-only centre stop lamps (California, LFA, Evo, Bentayga) are not lit at all; the Supra role order follows the model's red blocks; Bentayga's reverse band and the Chaser are judgement calls from the model, not checked against photos.
+
+## Drop-off marker (21 Nov)
+- Owner: the DROP-OFF text near Myanmar Plaza (the bank/jewellery heist cash-in spot) should only show while carrying loot. `BankClient.lua` now hides the ring, beam and DROP-OFF label for players without the `Loot` attribute (client side, other players still see it when they carry loot). Synced to Studio (checksum 1569993120), commit a5408893. Play check left for the final test.
