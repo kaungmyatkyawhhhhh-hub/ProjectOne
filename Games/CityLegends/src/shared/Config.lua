@@ -1362,14 +1362,19 @@ local function supercarExhaust()
 			sounds = {
 				Start = id(8393134777), -- "Nissan GTR R35 (VR38DETT) Startup" (EfiniRX): catches at 0.75 s, ~1,290 at its end
 				Idle = id(119747324235535), -- "nissan gtr idle" (jeemuzujamin), 1,255 rpm
-				Low = id(86018842069517), -- "r35 low rev" (imkn32), 3,320 rpm
-				Mid = id(130132947354022), -- "nissan gtr high" (jeemuzujamin), 5,862 rpm
-				High = id(106611475215254), -- "GTR R35" (vamytran78965), 6,907 rpm
+				-- (owner, 2026-11-21: "add new exhaust sounds for the GTR r35") one recordist's exterior set (FROZENSOLlD,
+				-- "GTR_<rpm>_<ON / OFF / RED>_OUT"): on-throttle loops, the redline, and coast recordings. The rpm is the
+				-- file's own name, not measured here. Old loops: 86018842069517 / 130132947354022 / 106611475215254
+				Low = id(110671849807653), -- "GTR_2500_ON_OUT"
+				Mid = id(114724502959075), -- "GTR_5500_ONLOOP_OUT"
+				High = id(78215344919914), -- "GTR_7200_RED_OUT"
+				LowOff = id(100077226098132), -- "GTR_2500_OFF_OUT": coasting
+				MidOff = id(84339007449917), -- "GTR_5500_OFF_OUT"
 				Turbo = Config.Sounds.SharedTurbo,
 				BlowOff = id(130283408353912), -- "VR38 Pop Off Flutter" (cezuuya)
 			},
 			bands = {
-				bands = { Idle = 1255, Low = 3320, Mid = 5862, High = 6907 },
+				bands = { Idle = 1255, Low = 2500, Mid = 5500, High = 7200 },
 				gains = { Idle = 0.48, Low = 0.69, Mid = 0.74, High = 0.57 },
 				reachDown = { Low = 0.5 }, whine = 0.6, bov = 0.5, turbo = 0.7,
 				coast = COAST, shiftCut = 0.06, liftPops = false, shiftPops = false,
