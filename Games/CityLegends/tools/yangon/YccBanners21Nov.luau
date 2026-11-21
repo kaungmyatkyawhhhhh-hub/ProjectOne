@@ -6,8 +6,9 @@
 	Ours: thin transparent parts 0.5 stud inside the INW long walls (y 55.4-67.4), each carrying one SurfaceGui (bg, two
 	dash rows from hard-step UIGradients, three labels). Wall lines measured from INW vertices in hall axes (u along the
 	hall, v across): +v wall v = 91.97 + 0.0073u (doors at u -177..-150, -12..14, 152..179 kept clear), -v wall
-	v = -92.15 + 0.0075u. Night: the 14 existing PointLights get brightness 1.1 -> 2.6 and a cooler flood white; no new
-	lights (phones). Old values in attributes *_before_21Nov. M.build(), M.undo().
+	v = -92.15 + 0.0075u. Night: the 14 existing PointLights sat at y 82 inside the roof meshes (the hall floor got
+	nothing; found in a Play night test): their parts move down to y 70 (15 above the floor), brightness 1.1 -> 2.6 and a
+	cooler flood white; no new lights (phones). Old values in attributes *_before_21Nov. M.build(), M.undo().
 ]]
 local M = {}
 local A, B, C = Vector2.new(33412.5, 21916.6), Vector2.new(33537.9, 21779.2), Vector2.new(33922.3, 22124.8)
@@ -123,6 +124,9 @@ function M.build()
 			l:SetAttribute("Color_before_21Nov", l.Color)
 			l.Brightness = 2.6
 			l.Color = Color3.fromRGB(238, 244, 255)
+			local q = l.Parent -- the 0.4-stud "Light" part: at y 82 it sat inside the roof meshes and lit only them
+			q:SetAttribute("Y_before_21Nov", q.Position.Y)
+			q.Position = Vector3.new(q.Position.X, 70, q.Position.Z)
 		end
 	end
 	return n
@@ -139,6 +143,11 @@ function M.undo()
 			l.Color = l:GetAttribute("Color_before_21Nov")
 			l:SetAttribute("Bright_before_21Nov", nil)
 			l:SetAttribute("Color_before_21Nov", nil)
+			local q = l.Parent
+			if q:GetAttribute("Y_before_21Nov") then
+				q.Position = Vector3.new(q.Position.X, q:GetAttribute("Y_before_21Nov"), q.Position.Z)
+				q:SetAttribute("Y_before_21Nov", nil)
+			end
 		end
 	end
 end

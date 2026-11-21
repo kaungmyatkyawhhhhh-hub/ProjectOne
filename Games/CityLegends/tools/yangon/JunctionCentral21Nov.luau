@@ -4,8 +4,8 @@
 	* Junction City (refs_21nov/0820_19s.jpg): a deep canopy over the pavement along the mall's north face (Bogyoke Aung
 	  San Rd), its underside full of short slanted white LED bars. The mall is the two tall shells
 	  Buildings.Shell.Cell_19_24.KW6 (259 tall); for each, the face whose normal points most to -Z (north) gets one
-	  slab 1.6 thick x 14 deep, bottom at y 54 (above the JunctionCity_NameWall, 44..52; pavement 35), CanCollide off.
-	  The lights are one SurfaceGui on the slab's Bottom (LightInfluence 0, two rows of slanted bars): no Light objects.
+	  canopy 1.6 thick x 14 deep (8 segments), bottom at y 54 (above the JunctionCity_NameWall, 44..52; pavement 35), CanCollide off.
+	  The lights are a SurfaceGui on each segment's Bottom (LightInfluence 0, three rows of slanted bars): no Light objects.
 	* The Central (refs_21nov/0799_36s.jpg): the round podium pavilion with a glowing white crown band and vertical gold
 	  light strips. A free grass spot was probed (GetPartBoundsInBox 36 x 80 x 36, ground 44.5 by raycast) at
 	  (35068, 25307) (GetPartBoundsInRadius 23 empty), between the walk-ups and The Central's tower (shell KWG 308
@@ -51,17 +51,17 @@ local function canopyLights(slab)
 	local g = Instance.new("SurfaceGui")
 	g.Face = Enum.NormalId.Bottom
 	g.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
-	g.PixelsPerStud = 6
+	g.PixelsPerStud = 10
 	g.LightInfluence = 0
 	g.Brightness = 3
 	g.MaxDistance = 700
-	local n = math.floor(slab.Size.X / 9)
-	for _, ys in { 0.3, 0.7 } do
+	local n = math.floor(slab.Size.X / 7)
+	for _, ys in { 0.22, 0.5, 0.78 } do
 		for i = 1, n do
 			local f = Instance.new("Frame")
 			f.AnchorPoint = Vector2.new(0.5, 0.5)
 			f.Position = UDim2.fromScale((i - 0.5) / n, ys)
-			f.Size = UDim2.fromOffset(26, 3)
+			f.Size = UDim2.fromOffset(60, 8)
 			f.Rotation = -35
 			f.BorderSizePixel = 0
 			f.BackgroundColor3 = Color3.fromRGB(250, 252, 255)
@@ -89,9 +89,14 @@ function M.build()
 			local face = s.Position + best * half
 			local at = Vector3.new(face.X, CANOPY_Y + THICK / 2, face.Z) + best * (DEPTH / 2)
 			local along = Vector3.yAxis:Cross(best).Unit
-			local slab = part(jc, "Canopy", "Part", CFrame.fromMatrix(at, along, Vector3.yAxis), Vector3.new(len, THICK, DEPTH),
-				Color3.fromRGB(214, 214, 208), false)
-			canopyLights(slab)
+			-- 8 segments: one SurfaceGui 2,500 px wide did not render (a long canvas fails), ~32-stud ones do
+			local segs = 8
+			for k = 0, segs - 1 do
+				local off = (k + 0.5 - segs / 2) * len / segs
+				local slab = part(jc, "Canopy", "Part", CFrame.fromMatrix(at + along * off, along, Vector3.yAxis),
+					Vector3.new(len / segs, THICK, DEPTH), Color3.fromRGB(214, 214, 208), false)
+				canopyLights(slab)
+			end
 			-- thin glowing edge along the canopy front
 			part(jc, "CanopyEdge", "Part", CFrame.fromMatrix(at + best * (DEPTH / 2 + 0.15), along, Vector3.yAxis),
 				Vector3.new(len, 0.5, 0.3), Color3.fromRGB(240, 244, 250), true)
