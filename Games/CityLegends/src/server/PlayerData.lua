@@ -82,7 +82,7 @@ export type Settings = {
 	Graphics: string?, -- "Low" | "Medium" | "High" | "Ultra"
 	Performance: string?, -- (2026-11-19) "Auto" | "Low" | "Normal": low-end mode for cheap phones
 	Lang: string?, -- (2026-11-19) "auto" | "en" | "my": Settings > Language (client/LangUI, shared/Strings)
-	RenderDistance: string?, -- (2026-11-18) "Low" | "Medium" | "High" | "Ultra" | "Max": client detail radius x0.5 / 0.75 / 1 / 1.5 / 8.1
+	RenderDistance: string?, -- (2026-11-18) "Low" | "Medium" | "High" | "Ultra" | "Max": client detail radius x0.5 / 0.75 / 1 / 1.5 / 3
 	Music: number?, -- 0..1
 	Sfx: number?, -- 0..1
 	Favs: { string }?, -- favourite cars (CARS tab)

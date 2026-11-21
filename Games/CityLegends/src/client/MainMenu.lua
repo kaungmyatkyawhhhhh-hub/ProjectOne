@@ -2896,10 +2896,10 @@ end
 
 -- (2026-11-18) Render distance: a multiplier on the client detail radii (YangonKitStream's LOADs, WorldFx's
 -- LodRange lights), shared as player attribute RenderDist. High = the old distances; phones / Low graphics start on Medium.
--- (21 Nov, owner: "put option for max graphic which loads 35% of the map around u") Max: the detail circle covers
--- 35% of the built map: 252 road cells of 1,536 x 1,536 studs = 594.6M square studs, 35% = a circle of radius 8,140,
--- over the detail LOAD of 1,000 = x8.1. Very heavy (about 66 times High's tiles): for strong PCs only.
-local RENDER_MULT = { Low = 0.5, Medium = 0.75, High = 1, Ultra = 1.5, Max = 8.1 }
+-- (21 Nov, owner: "put option for max graphic which loads 35% of the map around u") Max = x3. A true 35% of the
+-- built map is x8.1 (radius 8,140): tried in Play, 24 -> 8 FPS at 114,000 parts with a quarter of it loaded and
+-- still falling, so it is not shipped. x3 = 429 tiles / 64,000 parts (Ultra: 123 / 21,000), about half Ultra's FPS.
+local RENDER_MULT = { Low = 0.5, Medium = 0.75, High = 1, Ultra = 1.5, Max = 3 }
 function MainMenu.renderDistanceOf(st: { [string]: any }): string
 	if LowEnd.on then
 		return "Low" -- (2026-11-19) low-end mode
