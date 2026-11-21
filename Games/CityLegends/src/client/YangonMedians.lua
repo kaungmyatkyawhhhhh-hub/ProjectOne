@@ -27,6 +27,7 @@ local LOAD, DROP = 520, 680
 local CHUNK = 160
 local STEP = 8 -- studs per kerb block
 local RED, WHITE = Color3.fromRGB(176, 34, 30), Color3.fromRGB(226, 226, 220)
+local SOIL = Color3.fromRGB(52, 84, 40)
 local TYRE, BOX = Color3.fromRGB(58, 58, 62), Color3.fromRGB(232, 232, 228)
 local LEAF = { Color3.fromRGB(58, 104, 44), Color3.fromRGB(70, 118, 50), Color3.fromRGB(48, 92, 40) }
 
@@ -116,7 +117,7 @@ local function plan(g): { [string]: { any } }
 				local w = 0
 				if q and d >= 13 and d <= 40 then
 					mid = (p + q) / 2
-					w = math.clamp(d - 12 - 1.2, 1.4, 3.2) -- the strip's width: the gap between the lanes, a little in from each
+					w = math.clamp(d - 12 - 0.6, 1.8, 9) -- the strip's width: the gap between the lanes, a little in from each
 					if inJunction(mid :: Vector3) then
 						mid = nil
 					end
@@ -166,24 +167,56 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 		end
 		local len = (b - a).Magnitude
 		local cf = CFrame.lookAt(mid, mid + Vector3.new(b.X - a.X, 0, b.Z - a.Z))
-		-- the kerb block: red and white in turn along the road
+		-- the strip: a planted soil bed with a red-and-white banded kerb down each side (bands STEP / 2 long)
 		local hash = math.floor(mid.X / STEP + 0.5) + math.floor(mid.Z / STEP + 0.5)
-		part(m, Vector3.new(w, 0.45, len + 0.05), cf * CFrame.new(0, 0.225, 0), if hash % 2 == 0 then RED else WHITE, Enum.Material.Concrete, nil, true)
-		-- a pot plant on every block but a few (real strips have gaps)
-		if rng:NextNumber() < 0.82 then
-			local at = cf * CFrame.new(0, 0.45, rng:NextNumber(-1.5, 1.5))
-			local d = math.min(w + 0.5, 2.1)
-			if (idx + hash) % 3 == 0 then
-				part(m, Vector3.new(d, 0.95, d), at * CFrame.new(0, 0.475, 0), BOX, Enum.Material.SmoothPlastic) -- a white box planter
-			else
-				part(m, Vector3.new(0.85, d, d), at * CFrame.new(0, 0.425, 0) * CFrame.Angles(0, 0, math.pi / 2), TYRE, Enum.Material.SmoothPlastic, Enum.PartType.Cylinder) -- a painted tyre
-				part(m, Vector3.new(0.12, d + 0.04, d + 0.04), at * CFrame.new(0, 0.5, 0) * CFrame.Angles(0, 0, math.pi / 2), WHITE, Enum.Material.SmoothPlastic, Enum.PartType.Cylinder)
+		local kw = 0.42
+		local bedW = math.max(w - 2 * kw, 0.6)
+		part(m, Vector3.new(bedW, 0.5, len + 0.05), cf * CFrame.new(0, 0.25, 0), SOIL, Enum.Material.Grass, nil, true)
+		for side = -1, 1, 2 do
+			for h = 0, 1 do
+				local col = if (hash + h) % 2 == 0 then RED else WHITE
+				part(m, Vector3.new(kw, 0.58, len / 2), cf * CFrame.new(side * (bedW + kw) / 2, 0.29, (h - 0.5) * len / 2), col, Enum.Material.Concrete, nil, true)
 			end
-			-- the shrub: a short stem and a clipped ball
-			local hgt = rng:NextNumber(1.3, 2.4)
-			local ball = rng:NextNumber(1.7, 2.6)
-			part(m, Vector3.new(hgt, 0.22, 0.22), at * CFrame.new(0, 0.9 + hgt / 2, 0) * CFrame.Angles(0, 0, math.pi / 2), Color3.fromRGB(84, 66, 48), Enum.Material.Wood, Enum.PartType.Cylinder)
-			part(m, Vector3.new(ball, ball * 0.9, ball), at * CFrame.new(0, 0.9 + hgt + ball * 0.3, 0), LEAF[rng:NextInteger(1, #LEAF)], Enum.Material.Grass, Enum.PartType.Ball)
+		end
+		local kit = ReplicatedStorage:FindFirstChild("MedianKit")
+		local function put(name: string, k: number, at: CFrame)
+			local src = kit and kit:FindFirstChild(name)
+			if src and src:IsA("Model") then
+				local c = src:Clone()
+				c:ScaleTo(src:GetScale() * k) -- (ScaleTo is absolute: times the kit's own scale)
+				c:PivotTo(at * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0))
+				c.Parent = m
+			end
+		end
+		local sway = math.max(bedW / 2 - 0.9, 0)
+		-- ground cover all along the bed
+		for j = 0, 1 do
+			put("Low", rng:NextNumber(0.55, 0.8), cf * CFrame.new(rng:NextNumber(-sway, sway), 0.46, (j - 0.5) * len / 2 + rng:NextNumber(-0.8, 0.8)))
+		end
+		-- the main plant of the block: mostly a clipped shrub in the soil, now and then a pot (painted tyre or white
+		-- box, as on the real strips) or a spiky plant; a few blocks stay bare
+		local roll = rng:NextNumber()
+		if roll < 0.88 then
+			local at = cf * CFrame.new(rng:NextNumber(-sway, sway) * 0.5, 0.5, rng:NextNumber(-1.2, 1.2))
+			local pick = if (idx * 7 + hash) % 6 == 0 then "Spiky" else "Shrub"
+			local up = 0
+			if (idx + hash) % 4 == 0 then
+				local d = math.min(bedW + 0.2, 2.1)
+				up = 0.3
+				if (idx + hash) % 8 == 0 then
+					part(m, Vector3.new(d, 0.95, d), at * CFrame.new(0, 0.475, 0), BOX, Enum.Material.Concrete) -- a white box planter
+					part(m, Vector3.new(d - 0.3, 0.06, d - 0.3), at * CFrame.new(0, 0.96, 0), Color3.fromRGB(70, 52, 38), Enum.Material.Ground)
+				else
+					part(m, Vector3.new(0.85, d, d), at * CFrame.new(0, 0.425, 0) * CFrame.Angles(0, 0, math.pi / 2), TYRE, Enum.Material.SmoothPlastic, Enum.PartType.Cylinder) -- a painted tyre
+					part(m, Vector3.new(0.12, d + 0.04, d + 0.04), at * CFrame.new(0, 0.5, 0) * CFrame.Angles(0, 0, math.pi / 2), WHITE, Enum.Material.SmoothPlastic, Enum.PartType.Cylinder)
+				end
+			end
+			if kit and kit:FindFirstChild(pick) then
+				put(pick, if pick == "Spiky" then rng:NextNumber(0.85, 1.15) else rng:NextNumber(0.7, 1.0), at * CFrame.new(0, up, 0))
+			else
+				local ball = rng:NextNumber(1.7, 2.6)
+				part(m, Vector3.new(ball, ball * 0.9, ball), at * CFrame.new(0, up + ball * 0.4, 0), LEAF[rng:NextInteger(1, #LEAF)], Enum.Material.Grass, Enum.PartType.Ball)
+			end
 		end
 	end
 	m.Parent = folder
