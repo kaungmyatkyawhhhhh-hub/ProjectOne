@@ -660,6 +660,9 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 	end
 	-- a one-shot from the car's set (pitch varied a little each time)
 	local function oneShot(id: string, volume: number, pitch: number?)
+		if pitch == nil then
+			pitch = 0.96 + math.random() * 0.08
+		end
 		local snd = newSound(id, holder, volume * (1 + tunnelK) * carVol)
 		snd.PlaybackSpeed = pitch or (0.96 + math.random() * 0.08)
 		if positional then
@@ -669,6 +672,12 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 		end
 		snd:Play()
 		Debris:AddItem(snd, 6)
+	end
+	-- (2026-11-21) the flutter's pitch: compressor surge chatters faster on two small turbos (higher, quicker) than
+	-- on one big one (deeper, slower); a twin-turbo engine or the Twin-Turbo Kit = twin, the rest single
+	local function flutterPitch(): number
+		local twin = mods.twin or (layers.Turbo2 ~= nil) or (bandCfg ~= nil and bandCfg.twin == true)
+		return (if twin then 1.12 else 0.86) * (0.97 + math.random() * 0.06)
 	end
 	-- pops and crackles: lifting off (Pops) or a hard upshift (ShiftPop); Crackle when either is missing
 	local function crackle(volume: number, kind: string?)
@@ -942,8 +951,10 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				if throttle > 0.6 then
 					boostAtHigh = boost
 				end
-				if ex and ex.BlowOff and running and throttle < 0.3 and os.clock() - highAt < 0.4 and not liftDone and boostAtHigh > 0.3 and bovCool <= 0 then
-					oneShot(ex.BlowOff, ((bandCfg and bandCfg.bov) or 1) * shotK("BlowOff") * (0.45 + 0.65 * boostAtHigh))
+				-- (owner, 2026-11-21: "dont add a turbo flutter until the player adds performance mods") a stock turbo car's
+				-- recirculating valve is quiet; the flutter comes with a boost part (more boost, a downpipe, a BOV)
+				if ex and ex.BlowOff and mods.boostMod and running and throttle < 0.3 and os.clock() - highAt < 0.4 and not liftDone and boostAtHigh > 0.3 and bovCool <= 0 then
+					oneShot(ex.BlowOff, ((bandCfg and bandCfg.bov) or 1) * shotK("BlowOff") * (0.45 + 0.65 * boostAtHigh), flutterPitch())
 					bovCool = 0.9
 					boost *= 0.2
 				end
@@ -1006,10 +1017,10 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				liftBov = true
 			elseif liftBov and throttle < 0.3 then
 				liftBov = false
-				if mods.bov and spoolK > 0.3 and bovCool <= 0 and running then
+				if (mods.bov or mods.boostMod) and spoolK > 0.3 and bovCool <= 0 and running then
 					local id = (ex and ex.BlowOff) or pickCustom("SharedBlowOff")
 					if id then
-						oneShot(id, 0.4 + 0.5 * spoolK)
+						oneShot(id, 0.4 + 0.5 * spoolK, flutterPitch())
 						bovCool = 0.7
 					end
 					spoolK *= 0.25
@@ -1103,8 +1114,8 @@ function Audio.engine(class: string, parent: Instance?, carId: string?, layout: 
 				oneShot(ex.Shift, 0.8 * shotK("Shift"))
 			end
 			-- under boost the blow-off sighs on each upshift too (quieter than a lift-off)
-			if ex and ex.BlowOff and boost > 0.5 and bovCool <= 0 then
-				oneShot(ex.BlowOff, (0.4 + 0.3 * boost) * shotK("BlowOff"))
+			if ex and ex.BlowOff and mods.boostMod and boost > 0.5 and bovCool <= 0 then
+				oneShot(ex.BlowOff, (0.4 + 0.3 * boost) * shotK("BlowOff"), flutterPitch())
 				bovCool = 0.5
 				boost *= 0.6
 			end

@@ -1778,6 +1778,7 @@ local function supercarExhaust()
 		for _, part in PARTS do
 			Config.Sounds["Exhaust_" .. carId .. "_" .. part] = sounds[part] -- (clears the old set's parts)
 		end
+		bands.twin = string.find(car.family, "TWIN") ~= nil -- (2026-11-21: the flutter's pitch, Audio)
 		Config.ExhaustBands[carId] = bands
 		Config.ExhaustStart[carId] = merged(fam.start, with.start)
 		Config.ExhaustVolume[carId] = car.volume or 1

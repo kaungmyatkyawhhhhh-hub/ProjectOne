@@ -152,6 +152,7 @@ local T: { [string]: { any } } = {
 	["set.bottomRight"] = { "BOTTOM RIGHT", "ညာဘက် အောက်" },
 	["set.bottomLeft"] = { "BOTTOM LEFT", "ဘယ်ဘက် အောက်" },
 	["set.renderDistance"] = { "Render distance", "မြင်ကွင်း အကွာအဝေး" },
+	["set.traffic"] = { "Traffic", "ယာဉ်အသွားအလာ" },
 	["set.ambient"] = { "Ambient light", "ပတ်ဝန်းကျင် အလင်း" },
 	["set.sunRays"] = { "Sun rays", "နေရောင်ခြည်" },
 	["set.dof"] = { "Depth of field", "နောက်ခံ မှုန်ဝါးခြင်း", true },

@@ -604,8 +604,29 @@ local function refreshPlayerCars()
 	end
 end
 
+-- (owner, 2026-11-21: "add a function to disable traffic") Settings > Traffic OFF sets player attribute TrafficOff:
+-- the cars go at once and come back (same count and focus as the start) when it is switched on again
+local startArgs: { any }? = nil
+local watching = false
+local function watchToggle()
+	if watching then
+		return
+	end
+	watching = true
+	local plr = game:GetService("Players").LocalPlayer
+	plr:GetAttributeChangedSignal("TrafficOff"):Connect(function()
+		if plr:GetAttribute("TrafficOff") then
+			Traffic.stop()
+		elseif startArgs and not running then
+			task.spawn(Traffic.start, startArgs[1], startArgs[2])
+		end
+	end)
+end
+
 function Traffic.start(count: number?, focus: (() -> Vector3?)?)
-	if running then
+	startArgs = { count, focus }
+	watchToggle()
+	if running or game:GetService("Players").LocalPlayer:GetAttribute("TrafficOff") then
 		return
 	end
 	running = true

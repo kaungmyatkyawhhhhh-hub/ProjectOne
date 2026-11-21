@@ -88,6 +88,7 @@ export type Settings = {
 	Favs: { string }?, -- favourite cars (CARS tab)
 	HideKeys: boolean?, -- the on-screen controls hidden
 	Speedo: string?, -- the HUD speedometer: "Analogue" (default) | "Digital"
+	Traffic: boolean?, -- (2026-11-21) false = no NPC traffic
 	Assist: string?, -- driving assists: "Off" | "Low" | "Normal" (default)
 	TC: string?, -- (2026-11-08) traction control "Off" | "Sport" | "On"
 	ESC: string?, -- stability control "Off" | "Sport" | "On"
@@ -974,6 +975,9 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if type(raw.Marks) == "boolean" then
 		profile.Settings.Marks = raw.Marks -- tyre marks
+	end
+	if type(raw.Traffic) == "boolean" then
+		profile.Settings.Traffic = raw.Traffic -- (2026-11-21) NPC traffic on / off
 	end
 	if raw.Speedo == "Analogue" or raw.Speedo == "Digital" then
 		profile.Settings.Speedo = raw.Speedo -- the HUD speedometer style (2026-11-03)

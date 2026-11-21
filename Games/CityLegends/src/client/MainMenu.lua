@@ -1276,6 +1276,13 @@ local function openSettings()
 			f()
 		end
 	end)
+	-- (owner, 2026-11-21: "add a function to disable traffic") the NPC cars on or off (Traffic watches the attribute)
+	choices(row("Traffic"), { "ON", "OFF" }, function()
+		return if st.Traffic == false then "OFF" else "ON"
+	end, function(v)
+		st.Traffic = v == "ON"
+		player:SetAttribute("TrafficOff", st.Traffic == false or nil)
+	end)
 	-- (2026-11-18, owner: "add render distance to the settings") how far the client builds detail
 	choices(row("Render distance"), { "LOW", "MEDIUM", "HIGH", "ULTRA", "MAX" }, function()
 		return string.upper(MainMenu.renderDistanceOf(st))
@@ -2917,6 +2924,7 @@ end
 local lastSettings: { [string]: any }? = nil
 function MainMenu.applySettings(st: { [string]: any })
 	lastSettings = st
+	player:SetAttribute("TrafficOff", st.Traffic == false or nil) -- (21 Nov) Settings > Traffic
 	MainMenu.applyRenderDistance(st)
 	if type(st.Minimap) == "table" then
 		Minimap.setVisible(st.Minimap.on ~= false)

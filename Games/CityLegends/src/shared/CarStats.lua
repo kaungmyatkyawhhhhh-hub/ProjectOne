@@ -259,6 +259,8 @@ export type Tune = {
 	speedDrive: number, -- the top speed from slots that aren't power slots
 	pop: string?,
 	decat: boolean,
+	boostMod: boolean, -- (2026-11-21) a boost part is fitted: the turbo flutters on a lift-off
+	twin: boolean, -- the twin-turbo kit: a quicker, higher flutter
 	flame: boolean, -- the Flame Tune (2026-11-21)
 	bov: boolean,
 	downpipe: boolean,
@@ -301,7 +303,7 @@ local ADD = { "speed", "grip", "brake", "weight", "pi", "shift", "steer", "drift
 function CarStats.tuneOf(parts: Parts?): Tune
 	local t: Tune = {
 		accel = 0, speed = 0, grip = 0, brake = 0, weight = 0, pi = 0, shift = 0, steer = 0, drift = 0, launch = 0, redline = 0,
-		rally = 0, nitro = 0, loud = 0, spool = 0, power = 0, driveK = 1, speedDrive = 0, decat = false, flame = false, bov = false, downpipe = false, air = false,
+		rally = 0, nitro = 0, loud = 0, spool = 0, power = 0, driveK = 1, speedDrive = 0, decat = false, boostMod = false, twin = false, flame = false, bov = false, downpipe = false, air = false,
 	}
 	if not parts then
 		return t
@@ -341,6 +343,10 @@ function CarStats.tuneOf(parts: Parts?): Tune
 		t.pop = fx.pop or t.pop
 		t.decat = t.decat or fx.decat == true
 		t.flame = t.flame or fx.flame == true
+		t.twin = t.twin or def.icon == "twinTurbo"
+		if PartData.Slots[slot].cat == "boost" or fx.downpipe then
+			t.boostMod = true
+		end
 		t.bov = t.bov or fx.bov == true
 		t.downpipe = t.downpipe or fx.downpipe == true
 		t.air = t.air or fx.air == true
