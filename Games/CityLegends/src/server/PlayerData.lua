@@ -82,7 +82,7 @@ export type Settings = {
 	Graphics: string?, -- "Low" | "Medium" | "High" | "Ultra"
 	Performance: string?, -- (2026-11-19) "Auto" | "Low" | "Normal": low-end mode for cheap phones
 	Lang: string?, -- (2026-11-19) "auto" | "en" | "my": Settings > Language (client/LangUI, shared/Strings)
-	RenderDistance: string?, -- (2026-11-18) "Low" | "Medium" | "High" | "Ultra": client detail radius x0.5 / 0.75 / 1 / 1.5
+	RenderDistance: string?, -- (2026-11-18) "Low" | "Medium" | "High" | "Ultra" | "Max": client detail radius x0.5 / 0.75 / 1 / 1.5 / 8.1
 	Music: number?, -- 0..1
 	Sfx: number?, -- 0..1
 	Favs: { string }?, -- favourite cars (CARS tab)
@@ -950,7 +950,7 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	if raw.Lang == "auto" or raw.Lang == "en" or raw.Lang == "my" then
 		profile.Settings.Lang = raw.Lang -- (2026-11-19) Settings > Language
 	end
-	if raw.RenderDistance == "Low" or raw.RenderDistance == "Medium" or raw.RenderDistance == "High" or raw.RenderDistance == "Ultra" then
+	if raw.RenderDistance == "Low" or raw.RenderDistance == "Medium" or raw.RenderDistance == "High" or raw.RenderDistance == "Ultra" or raw.RenderDistance == "Max" then
 		profile.Settings.RenderDistance = raw.RenderDistance -- (2026-11-18) client detail distance
 	end
 	if raw.Assist == "Off" or raw.Assist == "Low" or raw.Assist == "Normal" then

@@ -389,7 +389,7 @@ local function startLod(scale: number)
 		local s = lightScale or scale
 		-- (2026-11-18) Settings > Render distance scales the venue lights' LodRange too (MainMenu's player attribute)
 		local rd = game:GetService("Players").LocalPlayer:GetAttribute("RenderDist")
-		local lodS = s * (if type(rd) == "number" then rd else 1)
+		local lodS = s * (if type(rd) == "number" then math.min(rd, 1.5) else 1) -- (21 Nov: Max render distance keeps Ultra's light range)
 		local lightRangeNow = 560 * s
 		local rivieraLightRangeNow = 300 * s
 		local shadowRangeNow = if s >= 0.85 then 170 else 0

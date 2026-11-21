@@ -321,7 +321,7 @@ Config.Traffic = {
 	Accel = 28, -- studs/s^2
 	Brake = 70,
 	EmergencyBrake = 140,
-	StopGap = 4, -- studs left between bumpers in a stopped queue
+	StopGap = 15, -- studs between bumpers in a stopped queue (21 Nov, owner: a 1-car gap to cut through; was 4)
 	StopLineMargin = 1.2, -- studs between the front bumper and the stop line at a red light
 	-- Legends Isle's mountain roads (owner, 2026-10-30: "reduce traffic on the mountain")
 	MountainMax = 3, -- cars on the climbs and the mid ring at once
@@ -359,7 +359,7 @@ Config.Traffic = {
 	StreetRecycle = 260, -- a car off the routes this far from you goes back onto one
 	RivieraMax = 90, -- (64 before, then 32 before that, 2026-11-03: "add more traffic cars throughout the map"; 22 before that; owner 2026-11-02 again: "add more cars traffic")
 	-- (12 before that: "add a little more traffic, the city monaco is kinda dead")
-	FollowGap = 16, -- ...and at least a car length once moving (owner, 2026-10-29)...
+	FollowGap = 18, -- ...and at least a car length once moving (owner, 2026-10-29; 21 Nov: 16 -> 18)...
 	Headway = 0.5, -- ...plus this many seconds of travel
 	LookAhead = 70,
 	RecycleDistance = 700,

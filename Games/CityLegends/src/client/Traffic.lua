@@ -370,7 +370,7 @@ local function findSpot(center: Vector3?, minDist: number, maxDist: number, igno
 	local camera = workspace.CurrentCamera
 	local lanes = if highway then highwayLanes else cityLanes
 	local pool = if center and maxDist < 5000 then lanesNear(lanes, center, maxDist) else areaPool(lanes)
-	local gap = if highway then T.HighwayGap else 22
+	local gap = if highway then T.HighwayGap else 30 -- (21 Nov, owner: a 1-car gap between cars; was 22)
 	if #pool == 0 then
 		return nil, 0
 	end
