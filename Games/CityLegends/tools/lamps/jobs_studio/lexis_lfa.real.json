@@ -1,0 +1,1 @@
+{"id": "lexis_lfa", "note": "real shapes (21 Nov): indicator = the round lamp at the outer end of the cluster, reverse = the low bumper lamp; Tail stays", "roles": {"TurnR": [{"disc": [0.765, 0.76, 1.8, 0.03], "drape": "SeeThrough_Lens_Red", "dir": [0, 0, 1], "off": 0.015}], "Rev": [{"part": "Body_Lamp", "in": [0.4, 0.56, 0.27, 0.37, 2.1, 2.25], "off": 0.008}]}}
