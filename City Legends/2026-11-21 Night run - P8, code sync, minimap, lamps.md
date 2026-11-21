@@ -368,3 +368,22 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
   3. "The central point": view and build it (meaning to confirm from the vault: The Central on Kabar Aye, or Central Point tower).
   4. Play-test everything synced today; night lamps on the other 4 cars; rare cars; 2-player car visibility.
   5. Still blocked: P8 deck dip (home PC data).
+
+## Venues moved (21 Nov, late; in Studio = repo, NOT saved yet)
+Owner: "yes move every venues to their actual place", "dont ask me any questions, just build it", "add more venues if it exists".
+
+| Venue | Real place | New lot (x, z, facing, y) | From the real pin | Old lot |
+|---|---|---|---|---|
+| dealership | Rider Auto | 28398.0, 33909.0, (0, -1), 70.89 | 192 studs | 35454.1, 22409.3, (-0.991, -0.135), 38.56 |
+| customs | Optima Werkz | 31773.0, 31265.0, (0, 1), 76.52 | 223 studs | 35533.5, 21839.2, (-0.991, -0.136), 41.08 |
+| hotel | Novotel Yangon Max | 27227.0, 30361.0, (1, 0), 60.63 | 376 studs | 36030.1, 19832.9, (0, 1), 29.64 |
+| tower_aurum | Lotte Hotel | 29226.0, 21923.0, (-1, 0), 67.78 | 97 studs | 34841.0, 19736.6, (0, 1), 39.07 |
+
+- How: a search in Studio (Edit) for the lot nearest the real pin that holds no road / pavement collision box and has road within 16 studs of its front (hotel and tower: square to the world axes), then `YangonSites.prepare` (S.root = Yangon1to1): shells deleted in the lots (customs 34, dealership 20, hotel 10, tower 0), pads laid, KeepOut boxes. `Config.YangonVenues.Sites` updated. The lot is 216 studs (72 m) square, so its middle cannot sit on the pin: the building stands beside the real place, not on it.
+- Play (server): venue parts found in all four lots (dealership 1,190, hotel 452, customs 109, tower 44). **Warnings: `EntranceRamp: no road found` for the hotel forecourt and Tower_aurum**: they have no driveway ramp at the new lots (the dealership and customs got theirs). Not driven into, not bought from, no fast-travel check, minimap icons not looked at.
+- The old lots are left as empty flat pads' ground (their old shells were deleted on 17 Nov and are not put back). The old pads were replaced by the new ones (same names).
+- Not moved yet: bank, gems, rewards, realty, dropoff, tower_skyline, tower_crown, the Racing Hub, Legends Service, the plate office. Not added yet: new venues. Not looked at yet: People's Park, the Shwedagon view point, the Shwedagon parking, "the central point".
+
+## Planted median strips (21 Nov, late)
+- Owner (photo of Pyay Road): "on the pyay roads the middle of the roads need to be like this (not on bridges)". New `client/YangonMedians.lua`: between the two directions' inner lanes of **Pyay Road** and **Kabar Aye Pagoda Road** (where the lanes' middles are 13-40 studs apart), a 0.45-high red / white kerb block every 8 studs (collides) and a pot plant on most blocks (painted tyre or white box, stem, clipped ball; no collision); none in signalled junctions, none over a deck (`RoadBox = "D"`). Client-built within 520 studs. Play: 8 chunks / 459 parts by Myanmar Plaza, seen in a screenshot, 0 errors. Kabar Aye's real median was judged from one Google photo sphere (16.8262, 96.1542). Pyay Road itself not looked at in the game. It sits on top of the map's own median kerb where there is one (two kerbs in one place: may flicker).
+- Sync route used: `pack_sync.py` -> PATCH asset 133014134133489 -> `InsertService:LoadAsset` -> copy Source (works on this PC now the imports folder is approved).

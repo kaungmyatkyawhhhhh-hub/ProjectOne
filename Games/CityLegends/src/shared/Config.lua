@@ -235,15 +235,17 @@ Config.RivieraVenues = {
 Config.YangonVenues = {
 	On = true,
 	Sites = {
-		dealership = { x = 35454.1, z = 22409.3, fx = -0.991, fz = -0.135, y = 38.56 },
-		customs = { x = 35533.5, z = 21839.2, fx = -0.991, fz = -0.136, y = 41.08 },
+		-- (owner, 2026-11-21: "move every venues to their actual place") the real places, from Google Maps: the lot (216
+		-- square) is the nearest free one beside the real pin, its front on a road. Old spots in the vault note.
+		dealership = { x = 28398.0, z = 33909.0, fx = 0, fz = -1, y = 70.89 }, -- Rider Auto (16.80879, 96.13499)
+		customs = { x = 31773.0, z = 31265.0, fx = 0, fz = 1, y = 76.52 }, -- Optima Werkz (16.81564, 96.14513)
 		bank = { x = 35609.5, z = 21267.0, fx = -0.992, fz = -0.128, y = 42.08 },
 		dropoff = { x = 35416.6, z = 27780.7, fx = 0.622, fz = -0.783, y = 36.12 }, -- by Myanmar Plaza
 		gems = { x = 35653.1, z = 20934.2, fx = -0.992, fz = -0.130, y = 39.77 },
 		rewards = { x = 35389.0, z = 22838.7, fx = -0.989, fz = -0.150, y = 37.06, w = 304 }, -- its car courts make it 304 wide
 		-- square to the world axes (their towers and facade tiers are)
-		hotel = { x = 36030.1, z = 19832.9, fx = 0, fz = 1, y = 29.64 },
-		tower_aurum = { x = 34841.0, z = 19736.6, fx = 0, fz = 1, y = 39.07 },
+		hotel = { x = 27227.0, z = 30361.0, fx = 1, fz = 0, y = 60.63 }, -- Novotel Yangon Max (16.82000, 96.13166)
+		tower_aurum = { x = 29226.0, z = 21923.0, fx = -1, fz = 0, y = 67.78 }, -- Lotte Hotel (16.84432, 96.13728)
 		tower_skyline = { x = 36686.0, z = 24776.8, fx = 0, fz = 1, y = 34.0 },
 		tower_crown = { x = 34397.5, z = 20059.9, fx = 0, fz = -1, y = 40.2 },
 		realty = { x = 35426.2, z = 22115.1, fx = -0.991, fz = -0.136, y = 40.35, size = 80 },
