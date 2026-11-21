@@ -1016,6 +1016,27 @@ function Minimap.start()
 	end
 	fClose.Activated:Connect(closeFull)
 	-- (owner, 2026-11-21: "make the expanded map only close when i the X button": a drag that ended on the backdrop shut it)
+	-- (owner, later 2026-11-21: "when u click on the outside (not the map) u can exit the map") a TAP outside closes it:
+	-- the press must start on the backdrop and end within 12 px and 0.5 s, so a drag of the map ending outside doesn't
+	local downAt: Vector3? = nil
+	local downT = 0
+	backdrop.InputBegan:Connect(function(input)
+		local t = input.UserInputType
+		if t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch then
+			downAt = input.Position
+			downT = os.clock()
+		end
+	end)
+	backdrop.InputEnded:Connect(function(input)
+		local t = input.UserInputType
+		if (t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch) and downAt then
+			local moved = (input.Position - downAt).Magnitude
+			downAt = nil
+			if moved < 12 and os.clock() - downT < 0.5 and fullGui.Enabled then
+				closeFull()
+			end
+		end
+	end)
 	fPlus.Activated:Connect(function()
 		zoomBy(1.4)
 	end)

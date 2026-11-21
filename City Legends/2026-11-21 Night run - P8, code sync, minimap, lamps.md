@@ -352,3 +352,7 @@ Measured first in Studio Play (this PC; the client now prints `startup phases`, 
 - **No holder found (keep the ray):** both R8 (2010 / GT), Continental GT, GLS, SLS, 330i, M5 E60, the Chirons and Veyrons, Focus RS, LP560, LP570, SVJ, 350Z, R34, both Evo VI, Chaser. Their plates sit where they did.
 - Seen in passing: the LC300 model still wears a real maker's badge on its grille (the no-real-badges rule).
 - **Traffic lights (owner, with a photo of a real Yangon signal: "Make the traffic lights like this"):** `client/YangonSignals.lua` restyled: slim pale-grey pole on the pavement, one long thin arm over the lanes, at its end ONE black head on its side: a countdown box (seconds left, in the light's colour, 4 updates a second) then red / yellow / green in a row. The low second head, the yellow backplate, the plinth and the brace are gone. Checked in Play at the spawn junction (head, countdown and lit lens seen; pole and arm thickened a little after that shot: 1.0 / 0.62 studs, not looked at again).
+
+## Big map closes on a tap outside (cloud, 21 Nov; repo only, NOT in Studio yet)
+- Owner: "make it so that when u click on the outside (not the map) u can exit the map" (changes the earlier "only the X button" rule, which was there because a drag ending on the backdrop shut it).
+- `Minimap.lua`: the backdrop closes the map only on a TAP: the press starts on the backdrop and ends within 12 px and 0.5 s. A map drag that ends outside still keeps it open. Sync `Minimap.lua` into Studio.
