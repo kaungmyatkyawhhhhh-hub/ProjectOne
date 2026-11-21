@@ -3511,7 +3511,7 @@ function Driving.step(dt: number)
 		-- steering: speed-sensitive wheel angle, capped by lateral grip; the wheel turns slower and
 		-- finer at speed
 		local speedAbs = math.abs(fwdSpeed)
-		local steerRate = (if math.abs(steerIn) > math.abs(s.steer) then 4.2 else 7) / (1 + speedAbs / DF.SteerSlowdown)
+		local steerRate = (if math.abs(steerIn) > math.abs(s.steer) then 6 else 8.5) / (1 + speedAbs / DF.SteerSlowdown)
 		s.steer += (steerIn - s.steer) * math.min(1, dt * steerRate)
 		local maxAngle = math.rad(36) * s.steerK / (1 + (speedAbs / 70) ^ 1.3)
 		local angle = s.steer * maxAngle
