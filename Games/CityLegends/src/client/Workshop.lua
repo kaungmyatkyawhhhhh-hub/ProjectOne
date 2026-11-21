@@ -1385,8 +1385,12 @@ local function dynoRun()
 				pops -= 1
 				nextPop = now + 0.07 + math.random() * 0.12
 				engine:pop(0.6 + math.random() * 0.4)
+				-- (2026-11-21) flames only with the parts that make them (CarStats.flameLevel)
+				local fl = CarStats.flameLevel(tune)
 				for _, e in flames do
-					e:Emit(if tune.loud >= 2 or tune.decat then 7 else 3)
+					if fl > 0 then
+						e:Emit(if fl >= 2 then 11 elseif tune.loud >= 2 or tune.decat then 7 else 3)
+					end
 				end
 			end
 			task.wait()

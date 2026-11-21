@@ -259,6 +259,7 @@ export type Tune = {
 	speedDrive: number, -- the top speed from slots that aren't power slots
 	pop: string?,
 	decat: boolean,
+	flame: boolean, -- the Flame Tune (2026-11-21)
 	bov: boolean,
 	downpipe: boolean,
 	air: boolean,
@@ -286,11 +287,21 @@ local function needsMet(def: PartData.Part, forced: string?): boolean
 	return def.needs == nil or def.needs == forced
 end
 
+-- (owner, 2026-11-21: "make it so that only after you tune the car") which fitted parts make the exhaust spit flames,
+-- as on real cars (unburnt fuel lighting in a hot, open exhaust): 0 = none (a stock car: its catalyst burns it off),
+-- 1 = a decat / catless downpipe, or a crackle or anti-lag map, 2 = the Flame Tune (bigger, and on every upshift)
+function CarStats.flameLevel(tune: Tune): number
+	if tune.flame then
+		return 2
+	end
+	return if tune.decat or tune.pop == "crackle" or tune.pop == "antilag" then 1 else 0
+end
+
 local ADD = { "speed", "grip", "brake", "weight", "pi", "shift", "steer", "drift", "launch", "redline", "rally", "nitro" }
 function CarStats.tuneOf(parts: Parts?): Tune
 	local t: Tune = {
 		accel = 0, speed = 0, grip = 0, brake = 0, weight = 0, pi = 0, shift = 0, steer = 0, drift = 0, launch = 0, redline = 0,
-		rally = 0, nitro = 0, loud = 0, spool = 0, power = 0, driveK = 1, speedDrive = 0, decat = false, bov = false, downpipe = false, air = false,
+		rally = 0, nitro = 0, loud = 0, spool = 0, power = 0, driveK = 1, speedDrive = 0, decat = false, flame = false, bov = false, downpipe = false, air = false,
 	}
 	if not parts then
 		return t
@@ -329,6 +340,7 @@ function CarStats.tuneOf(parts: Parts?): Tune
 		t.spool = math.max(t.spool, fx.spool or 0)
 		t.pop = fx.pop or t.pop
 		t.decat = t.decat or fx.decat == true
+		t.flame = t.flame or fx.flame == true
 		t.bov = t.bov or fx.bov == true
 		t.downpipe = t.downpipe or fx.downpipe == true
 		t.air = t.air or fx.air == true

@@ -342,6 +342,7 @@ type State = {
 	airRide: boolean,
 	popTune: string?, -- the ECU's map: pop, crackle, burble, antilag
 	popLoud: boolean, -- a straight pipe, muffler delete or decat
+	flameLevel: number, -- (2026-11-21) CarStats.flameLevel: 0 no exhaust flames (stock), 1 flames, 2 the Flame Tune
 	popGap: number, -- seconds between pops
 	nitroOn: boolean, -- a bottle is fitted
 	nitroDrain: number,
@@ -859,6 +860,13 @@ local function buildFlames(model: Model, root: BasePart, spec: Cars.CarSpec): ({
 end
 
 local function exhaustPop(s: State, strength: number)
+	-- (owner, 2026-11-21) flames only on a car tuned for them (CarStats.flameLevel); the Flame Tune's are bigger
+	if s.flameLevel <= 0 then
+		return
+	end
+	if s.flameLevel >= 2 then
+		strength *= 1.6
+	end
 	for _, e in s.flames do
 		e:Emit(math.max(1, math.floor((4 + math.random() * 4) * strength)))
 	end
@@ -2664,6 +2672,7 @@ function Driving.attach(model: Model)
 		rideWant = 0,
 		airRide = false,
 		popLoud = false,
+		flameLevel = 0,
 		popGap = 0.1,
 		nitroOn = false,
 		nitroDrain = Config.DrivingFeel.NitroDrain,
@@ -2832,6 +2841,7 @@ function Driving.attach(model: Model)
 		s.airRide = tune.air
 		s.popTune = tune.pop
 		s.popLoud = tune.loud >= 2 or tune.decat
+		s.flameLevel = CarStats.flameLevel(tune)
 		s.popGap = if tune.pop == "crackle" then 0.05 elseif tune.pop == "burble" then 0.14 else 0.08
 		-- a nitrous bottle: its HUD, and how long it lasts
 		s.nitroOn = tune.nitro > 0
@@ -3182,6 +3192,10 @@ function Driving.step(dt: number)
 				s.pops = math.random(3, 5)
 				s.popTimer = 0.08
 			end
+		elseif s.flameLevel >= 2 and s.rpm > 0.4 then
+			-- (2026-11-21) the Flame Tune with no ECU map (S2 / R / X cars can't fit one): a burst of bangs + flames
+			s.pops = math.random(6, 9)
+			s.popTimer = 0.04
 		elseif s.rpm > 0.6 and liftMph > 30 and not noPops(s) and not noLiftPops(s) then
 			s.pops = math.random(2, 4)
 			s.popTimer = 0.04
@@ -4071,7 +4085,7 @@ function Driving.step(dt: number)
 	if effGear and s.soundGear and effGear ~= s.soundGear and math.abs(fs) > 2 and s.engineOn then
 		local isUp = effGear > s.soundGear
 		s.engine:shift(isUp, math.clamp(0.12 + 0.88 * frac / gearHi(effGear), 0.12, 1.02))
-		if isUp and throttle > 0.5 and (s.popTune or (not noPops(s) and not noShiftPops(s))) then
+		if isUp and throttle > 0.5 and (s.popTune or s.flameLevel >= 2 or (not noPops(s) and not noShiftPops(s))) then
 			exhaustPop(s, if s.popLoud then 1.4 else 1)
 		elseif isUp and throttle > 0.8 and s.rpm > 0.7 and #s.flames > 0 then
 			-- (2026-11-21) a flame + smoke on a hard, high-rev upshift for the flame cars with no pop sound
