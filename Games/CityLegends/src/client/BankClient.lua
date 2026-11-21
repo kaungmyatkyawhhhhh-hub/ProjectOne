@@ -106,9 +106,35 @@ function BankClient.init()
 	arrow.Visible = false
 	arrow.Parent = gui
 
+	-- (owner, 2026-11-21) the drop-off's ring, beam and DROP-OFF text show only while you carry loot
+	local marker: Model? = nil
+	local markerShown: boolean? = nil
+	local function showMarker(on: boolean)
+		if not (marker and marker.Parent) then
+			local city = workspace:FindFirstChild("City")
+			marker = (city and city:FindFirstChild("Dropoff") or workspace:FindFirstChild("Dropoff")) :: Model?
+			markerShown = nil
+			if not marker then
+				return
+			end
+		end
+		if on == markerShown then
+			return
+		end
+		markerShown = on
+		for _, d in (marker :: Model):GetDescendants() do
+			if d:IsA("BillboardGui") then
+				d.Enabled = on
+			elseif d:IsA("BasePart") and (d.Name == "Marker" or d.Name == "Beam") then
+				d.LocalTransparencyModifier = if on then 0 else 1
+			end
+		end
+	end
+
 	RunService.RenderStepped:Connect(function()
 		local amount = (player:GetAttribute("Loot") :: number?) or 0
 		local drop = workspace:GetAttribute("Dropoff") :: Vector3?
+		showMarker(amount > 0)
 		if amount <= 0 or not drop then
 			card.Visible = false
 			arrow.Visible = false
