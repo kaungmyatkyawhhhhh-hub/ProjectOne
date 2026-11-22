@@ -95,7 +95,8 @@ end
 function WestLayout.customs(): (CFrame, number)
 	local riv = WestLayout.rivieraSite("customs")
 	if riv then
-		return riv, LOT
+		local s = WestLayout.siteData("customs") -- (a compact site: size = its depth, w = its width)
+		return riv, (s and s.size) or LOT
 	end
 	local d = Config.Customs
 	local c = WestLayout.blockCenter(d.Block[1], d.Block[2])
@@ -105,7 +106,8 @@ end
 function WestLayout.dealership(): (CFrame, number)
 	local riv = WestLayout.rivieraSite("dealership")
 	if riv then
-		return riv, LOT
+		local s = WestLayout.siteData("dealership")
+		return riv, (s and s.size) or LOT
 	end
 	local d = Config.Dealership
 	local c = WestLayout.blockCenter(d.Block[1], d.Block[2])

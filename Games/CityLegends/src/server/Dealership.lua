@@ -140,9 +140,10 @@ local WARM_LIGHT = Color3.fromRGB(255, 226, 180)
 local METAL = Color3.fromRGB(168, 170, 174)
 local STAND = Color3.fromRGB(20, 20, 24)
 
-local function bodyTemplate(): Model?
+local function bodyTemplate(compact: boolean?): Model?
 	local ok, found = pcall(function()
-		return game:GetService("ServerStorage"):FindFirstChild("DealerBody")
+		local ss = game:GetService("ServerStorage")
+		return (compact and ss:FindFirstChild("DealerBodyCompact")) or ss:FindFirstChild("DealerBody")
 	end)
 	return if ok and found and found:IsA("Model") then found else nil
 end
@@ -159,7 +160,8 @@ local function infoStand(kit: any, parent: Instance, cf: CFrame, carId: string)
 	prompt(stand, "View cars", spec.Name, carId)
 end
 
-local function fromBody(kit: any, model: Model, template: Model, base: CFrame, lot: number)
+local function fromBody(kit: any, model: Model, template: Model, base: CFrame, lot: number, wide: number?)
+	local wideLot: number = wide or lot
 	local mk, deco = kit.mk, kit.deco
 	local half = lot / 2
 	local function at(x: number, y: number, z: number): CFrame
@@ -167,7 +169,7 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 	end
 	local detail = kit.lodGroup(model, "Detail", base.Position, 520)
 	-- the ground: dark asphalt over the whole lot (the building's paving sits on it)
-	mk(model, Vector3.new(lot, 0.05, lot), at(0, 0.025, 0), Color3.fromRGB(46, 46, 50), Enum.Material.Asphalt, { name = "Forecourt" })
+	mk(model, Vector3.new(wideLot, 0.05, lot), at(0, 0.025, 0), Color3.fromRGB(46, 46, 50), Enum.Material.Asphalt, { name = "Forecourt" })
 
 	local body = template:Clone()
 	body.Name = "Building"
@@ -177,7 +179,8 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 		end
 	end
 	-- turned round: its front (+Z) looks at the street (-Z here)
-	body:PivotTo(base * CFrame.new(0, -BODY_DROP, BODY_Z) * CFrame.Angles(0, math.pi, 0))
+	-- (the compact body, ServerStorage.DealerBodyCompact, carries its own drop and offset)
+	body:PivotTo(base * CFrame.new(0, -(template:GetAttribute("BodyDrop") or BODY_DROP), template:GetAttribute("BodyZ") or BODY_Z) * CFrame.Angles(0, math.pi, 0))
 	local markers = body:FindFirstChild("Markers")
 	if markers then
 		markers.Parent = nil
@@ -280,12 +283,12 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 			table.insert(brands, b)
 		end
 	end
-	local pylonP = at(half - 10, 0, -half + 10)
+	local pylonP = at(wideLot / 2 - (if wide then 5 else 10), 0, -half + (if wide then 4 else 10))
 	mk(model, Vector3.new(8, 40, 3), pylonP * CFrame.new(0, 20, 0), Color3.fromRGB(44, 46, 52), Enum.Material.SmoothPlastic, { name = "Pylon" })
 	mk(model, Vector3.new(8.6, 1, 3.6), pylonP * CFrame.new(0, 40.5, 0), METAL, Enum.Material.Metal)
 	mk(model, Vector3.new(9, 1.2, 4), pylonP * CFrame.new(0, 0.6, 0), METAL, Enum.Material.Metal)
 	local nameFace = deco(model, Vector3.new(7, 6, 0.2), pylonP * CFrame.new(0, 35, -1.6), STAND, Enum.Material.SmoothPlastic)
-	kit.surfaceText(nameFace, Enum.NormalId.Front, "LEGENDS\nMOTORS", Color3.fromRGB(246, 242, 234), nil, nil, Enum.Font.GothamBlack, Vector2.new(300, 260))
+	kit.surfaceText(nameFace, Enum.NormalId.Front, "RIDER\nAUTO", Color3.fromRGB(246, 242, 234), nil, nil, Enum.Font.GothamBlack, Vector2.new(300, 260))
 	local pylonFace = deco(model, Vector3.new(6, 26, 0.2), pylonP * CFrame.new(0, 17, -1.6), STAND, Enum.Material.SmoothPlastic)
 	kit.surfaceText(pylonFace, Enum.NormalId.Front, table.concat(brands, "\n"), WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(260, 1130))
 	local wash = deco(model, Vector3.new(0.5, 0.5, 0.5), pylonP * CFrame.new(0, 2, -6), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
@@ -294,7 +297,9 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 	-- the LEGENDS MEET car park behind the building
 	local wall = spot("MeetWall")
 	local wallLocal = if wall then base:PointToObjectSpace(wall.Position) else Vector3.new(0, 0, half - 56)
-	meetPark(kit, model, detail, at, wallLocal.X - 50, wallLocal.X + 50, wallLocal.Z + 2, half - 4, wallLocal.Z, 16)
+	if half - 4 - (wallLocal.Z + 2) > 24 then -- (no room behind a compact showroom)
+		meetPark(kit, model, detail, at, wallLocal.X - 50, wallLocal.X + 50, wallLocal.Z + 2, half - 4, wallLocal.Z, 16)
+	end
 	if markers then
 		markers:Destroy()
 	end
@@ -319,9 +324,13 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 	local model = Instance.new("Model")
 	model.Name = "LegendsMotors"
 	model.Parent = parent
-	local template = bodyTemplate()
+	local site = WestLayout.siteData("dealership")
+	if site and site.size then
+		lot = site.size
+	end
+	local template = bodyTemplate(lot < 150)
 	if template then
-		fromBody(kit, model, template, base, lot)
+		fromBody(kit, model, template, base, lot, site and site.w)
 		return true
 	end
 	local half = lot / 2

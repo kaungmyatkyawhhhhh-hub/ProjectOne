@@ -454,6 +454,13 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 	end
 	local mk, deco = kit.mk, kit.deco
 	local base = WestLayout.customs()
+	-- (2026-11-22) a compact site (Config site size = depth, w = width): the real Optima Werkz block is 28 m deep
+	local site = WestLayout.siteData("customs")
+	if site and site.size then
+		lot = site.size
+	end
+	local wide: number = (site and site.w) or lot
+	local compact = lot < 150
 	local function at(x: number, y: number, z: number): CFrame
 		return base * CFrame.new(x, y, z) -- -z is the street the bay doors face
 	end
@@ -461,8 +468,8 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 	model.Name = "LegendsCustoms"
 	model.Parent = parent
 	local half = lot / 2
-	local W = math.min(half - 20, 86) -- the workshop's half width
-	local Z0, Z1 = -half + 72, half - 30 -- front wall, back wall
+	local W = math.min(if compact then wide / 2 - 8 else half - 20, 86) -- the workshop's half width
+	local Z0, Z1 = -half + (if compact then 26 else 72), half - (if compact then 4 else 30) -- front wall, back wall
 	local H = 26
 	local DOOR_W, DOOR_H = 30, 18
 	local bays = { -W * 0.62, 0, W * 0.62 } -- door middles (the tuning bay is the middle one)
@@ -470,7 +477,7 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 	local detail = kit.lodGroup(model, "Detail", (base * CFrame.new(0, 10, 0)).Position, 480)
 
 	-- forecourt: dark pavers with white lines leading into each bay
-	mk(model, Vector3.new(lot, 0.12, Z0 + half), at(0, 0.06, (-half + Z0) / 2), Color3.fromRGB(58, 60, 64), Enum.Material.Pavement, { name = "Forecourt" })
+	mk(model, Vector3.new(wide, 0.12, Z0 + half), at(0, 0.06, (-half + Z0) / 2), Color3.fromRGB(58, 60, 64), Enum.Material.Pavement, { name = "Forecourt" })
 	for _, bx in bays do
 		for _, sx in { -1, 1 } do
 			deco(model, Vector3.new(0.5, 0.05, Z0 + half - 8), at(bx + sx * (DOOR_W / 2 - 1), 0.13, (-half + Z0) / 2 + 4), LINE, Enum.Material.SmoothPlastic)
