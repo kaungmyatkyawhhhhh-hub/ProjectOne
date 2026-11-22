@@ -357,6 +357,7 @@ type State = {
 	inTunnel: boolean?,
 	autoHintT: number?, -- when Q / E in automatic last showed its hint
 	seaT: number?, -- seconds since the last water check (WaterRescue.Every)
+	holeT: number?, -- (2026-11-22) seconds stuck under a road (fell through a hole in its collision)
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
 	groundDist: number?, -- last ground ray distance (kerbs and bumps kick the body)
@@ -3948,6 +3949,35 @@ function Driving.step(dt: number)
 		local sea = workspace:Raycast(root.Position + Vector3.new(0, 8, 0), Vector3.new(0, -(s.halfHeight + 9.2), 0), rayParams)
 		local wet = (sea ~= nil and sea.Material == Enum.Material.Water) or wetAt(root.Position)
 		local from = WaterRescue.step(waterState, wet, root.Position, s.seaT :: number, os.clock())
+		-- (2026-11-22, owner: "in Sule, in some parts u can go through the road and get stuck in the ground") a car
+		-- that fell through a hole in the road's collision sits in the ground under the road: no road box under it,
+		-- a road box's top 4+ studs over it within 12 studs, and hardly moving. 2 s of that: back on the road
+		if not from and not wet then
+			local stuck = false
+			local map = workspace:FindFirstChild("Yangon1to1")
+			local roadsF = map and map:FindFirstChild("Roads")
+			local collideF = roadsF and roadsF:FindFirstChild("Collide")
+			local flat = Vector3.new(root.AssemblyLinearVelocity.X, 0, root.AssemblyLinearVelocity.Z).Magnitude
+			if collideF and flat < 8 then
+				roadRay.FilterDescendantsInstances = { collideF }
+				local under = workspace:Raycast(root.Position + Vector3.new(0, 1, 0), Vector3.new(0, -(s.halfHeight + 4), 0), roadRay)
+				if not under then
+					roadOverlap.FilterDescendantsInstances = { collideF }
+					local bottom = root.Position.Y - s.halfHeight
+					for _, p in workspace:GetPartBoundsInBox(CFrame.new(root.Position + Vector3.new(0, 10, 0)), Vector3.new(24, 30, 24), roadOverlap) do
+						if p:GetAttribute("RoadBox") and p.Position.Y + p.Size.Y / 2 > bottom + 4 then
+							stuck = true
+							break
+						end
+					end
+				end
+			end
+			s.holeT = if stuck then (s.holeT or 0) + (s.seaT :: number) else 0
+			if (s.holeT :: number) >= 2 then
+				s.holeT = 0
+				from = root.Position
+			end
+		end
 		s.seaT = 0
 		if from then
 			task.spawn(function()
