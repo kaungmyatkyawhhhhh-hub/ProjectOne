@@ -64,3 +64,7 @@ Owner (22 Nov): "make the rider auto dealership at its exact place. Right beside
 - Each piece is its own `Piece` model; a run of fewer than 5 pieces (40 studs) that joins nothing is removed, unless it reaches its chunk's edge.
 - Play, 22 Nov: Pyay Road at 27537, 29681 = no strip, no stray piece (that stretch is one carriageway in the map); Kabar Aye by Myanmar Plaza = planted strip exactly inside the gap, lanes clear (pictures in this folder). Real Pyay Road has a median there: the map's road has no gap for one, so it needs the road re-baked as two carriageways.
 - Compact showroom door: the thing a low box hit is only the doormat (0.6 over the forecourt): walkable. Times City was tried for the Skyline tower: no free 216 lot within 360 studs, so it stays.
+
+## More of the Optima / Rider area made like the satellite (22 Nov, later)
+- Within 380 studs of 31700, 31510: every shell box whose top stood more than 36 studs (4+ storeys) over the ground was moved to `ServerStorage.Backups.OptimaTallShells` (45 boxes), each with a KeepOut box `optima_area` (so the client kit builds no panels for it), and replaced by 31 houses on the same footprints and directions (1-3 floors, gable roofs, in `Parks.OptimaNeighbours`). 116 lower shells kept. Seen in Edit only.
+- **Hledan deck surface test (Edit):** rays every 2 studs along both directions, 120 studs before the new deck to 120 after: biggest height step 0.14 studs, no hole. Not driven with a car.
