@@ -14,6 +14,6 @@ Owner: "read this, https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_
 
 ## Gaps to close
 1. Region: let a plate be YGN, MDY or NPW (township number within that region's range), chosen at the Plate Office; default YGN.
-2. Bottom line: the car's make and model. The game's car names are fictional, so the line shows the game's own name (e.g. the make + model the garage shows), never a real brand.
+2. **No bottom line (owner, 22 Nov: "dont add bottom line car names").** The plate keeps two lines: region + township, and the serial.
 3. Colours for the game's vehicle kinds: bus / truck / delivery job vehicles red (hire), tour or chauffeur service blue if the owner wants touring, taxis red with a two-letter serial (already), everything else black.
 4. Keep the pricing rules of 19 Nov (lucky numbers) as they are; a region code is cosmetic unless the owner prices it.
