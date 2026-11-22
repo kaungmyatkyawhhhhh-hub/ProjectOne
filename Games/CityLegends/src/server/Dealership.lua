@@ -186,6 +186,23 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 		markers.Parent = nil
 	end
 	body.Parent = model
+	if wide then
+		-- (compact showroom, 2026-11-22) the scaled front doorway is tight (about 4 wide, 5.6 clear): the small pieces
+		-- standing in it (door leaves, sill, handles) don't collide, so a player always gets in
+		local gap = Instance.new("Part")
+		gap.Anchored, gap.CanCollide, gap.Transparency = true, false, 1
+		gap.Size, gap.CFrame = Vector3.new(6, 8.4, 6), at(-5, 5.2, -27)
+		gap.Parent = model
+		local op = OverlapParams.new()
+		op.FilterType = Enum.RaycastFilterType.Include
+		op.FilterDescendantsInstances = { body }
+		for _, p in workspace:GetPartsInPart(gap, op) do
+			if math.max(p.Size.X, p.Size.Z) < 12 and p.Size.Y < 12 then
+				p.CanCollide = false
+			end
+		end
+		gap:Destroy()
+	end
 
 	for _, d in body:GetDescendants() do
 		local text = d:GetAttribute("Text")
