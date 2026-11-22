@@ -68,3 +68,19 @@ Owner (22 Nov): "make the rider auto dealership at its exact place. Right beside
 ## More of the Optima / Rider area made like the satellite (22 Nov, later)
 - Within 380 studs of 31700, 31510: every shell box whose top stood more than 36 studs (4+ storeys) over the ground was moved to `ServerStorage.Backups.OptimaTallShells` (45 boxes), each with a KeepOut box `optima_area` (so the client kit builds no panels for it), and replaced by 31 houses on the same footprints and directions (1-3 floors, gable roofs, in `Parks.OptimaNeighbours`). 116 lower shells kept. Seen in Edit only.
 - **Hledan deck surface test (Edit):** rays every 2 studs along both directions, 120 studs before the new deck to 120 after: biggest height step 0.14 studs, no hole. Not driven with a car.
+
+## Side by side, facing the road (owner, 22 Nov: "optima werkz and rider auto is side to side not facing each other")
+- Both lots now face west onto the main north-south road (road edge x ~31626), Optima north of the small cross street, Rider south of it: customs 31689, 31454, facing (-1, 0), y 75.5, size (depth) 110, w 80; dealership 31689, 31574, facing (-1, 0), y 73.5, size 110, w 80.
+- `ServerStorage.DealerBodyCompact` rebuilt at x 0.36 across, 0.62 deep, 0.8 high (79 x 21 x 101), attributes `DoorX` / `DoorZ` for the doorway box in `Dealership.fromBody`. The compact workshop on a front under 100 wide uses three 18-wide doors (`Customs.lua`).
+- Play: both built, no road box under the showroom, 0 script errors (picture in this folder). Not tested: walking in (the door is now about 3.6 wide), tuning, the side bay.
+
+## Street lights like real Yangon (owner, 22 Nov) - part 1
+- Research: vault `2026-11-16 Research - Yangon street furniture and traffic life.md` 2.3 (divided main roads are lit from the median by galvanised ~10 m poles with two short arms and white LED heads every 30-35 m; undivided main roads single-arm poles on the kerb; side streets a lamp on the power pole; decorative lamps downtown / Strand). Web check 22 Nov: Schreder lists Pyay Road, Kaba Aye Pagoda Road, Sule Road and Ahlone Road as its LED boulevards; Yangon Region counts 7,230 lights on medians.
+- Built: `YangonMedians` puts a double-arm post (30 studs tall, 12.4 across, two Neon heads with a SpotLight each, range 60, no shadows, tag `MedianLamp`, on only at night by `Lighting.ClockTime`) on every 12th median piece (96 studs) where the strip is at least 2.2 wide. Play at night by Myanmar Plaza: lit, both carriageways (picture).
+- Still to do: take the kerb lamps off roads lit from the median, restyle the kerb lamps (`SMT_lamp1` / `SNE_lamp1` templates) to the galvanised single-arm pole, decorative warm lamps downtown.
+
+## NPC cars between lanes (owner, 22 Nov: "some cars drive between both lanes taking up space")
+- Cause (Traffic.lua): racers could pick the line between two lanes (`racerSpots` added the midpoints as "splits"), and a blocked lane change could "stay" between lanes. Now only whole lanes are spots, and a blocked change keeps heading back to the lane it came from. Synced; **not watched in Play yet**.
+
+## Helper agent
+- A background agent briefed for the rest of People's Park, the Shwedagon gate car parks and more trees died on a network error (HTTP 403) before building anything. Those three are still to do.

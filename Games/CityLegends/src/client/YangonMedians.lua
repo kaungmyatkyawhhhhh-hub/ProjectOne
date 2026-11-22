@@ -13,6 +13,31 @@
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+local CollectionService = game:GetService("CollectionService")
+
+-- (owner, 2026-11-22: "add road street lights like the actual yangon depending on the location") a divided main road
+-- in Yangon is lit from its median: galvanised 10 m poles with two short arms and white LED heads, every 30-35 m
+-- (vault: 2026-11-16 Research - Yangon street furniture, 2.3). Their lights follow the time of day.
+local GALV = Color3.fromRGB(170, 174, 178)
+local LED = Color3.fromRGB(236, 244, 255)
+local LAMP_EVERY = 12 -- pieces of 8 studs: one post every 96 studs (32 m)
+local function isNight(): boolean
+	local t = Lighting.ClockTime
+	return t < 6.2 or t > 17.8
+end
+local lampsOn = isNight()
+Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+	local n = isNight()
+	if n ~= lampsOn then
+		lampsOn = n
+		for _, l in CollectionService:GetTagged("MedianLamp") do
+			if l:IsA("Light") then
+				l.Enabled = n
+			end
+		end
+	end
+end)
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
@@ -200,6 +225,20 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 		table.insert(runs, { m, a, b })
 		local len = (b - a).Magnitude
 		local cf = CFrame.lookAt(mid, mid + Vector3.new(b.X - a.X, 0, b.Z - a.Z))
+		if idx % LAMP_EVERY == 0 and w >= 2.2 then
+			part(m, Vector3.new(0.9, 30, 0.9), cf * CFrame.new(0, 15, 0), GALV, Enum.Material.Metal, nil, true) -- the post
+			part(m, Vector3.new(1.5, 1.2, 1.5), cf * CFrame.new(0, 0.6, 0), GALV, Enum.Material.Metal)
+			part(m, Vector3.new(12.4, 0.45, 0.45), cf * CFrame.new(0, 29.7, 0), GALV, Enum.Material.Metal) -- both arms
+			for side = -1, 1, 2 do
+				local head = part(m, Vector3.new(2.3, 0.36, 0.95), cf * CFrame.new(side * 6.9, 29.55, 0), LED, Enum.Material.Neon)
+				local l = Instance.new("SpotLight")
+				l.Face = Enum.NormalId.Bottom
+				l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = Color3.fromRGB(232, 240, 255), 4, 60, 135, false
+				l.Enabled = lampsOn
+				CollectionService:AddTag(l, "MedianLamp")
+				l.Parent = head
+			end
+		end
 		-- the strip: a planted soil bed with a red-and-white banded kerb down each side (bands STEP / 2 long)
 		local hash = math.floor(mid.X / STEP + 0.5) + math.floor(mid.Z / STEP + 0.5)
 		local kw = 0.42

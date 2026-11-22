@@ -471,7 +471,7 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 	local W = math.min(if compact then wide / 2 - 8 else half - 20, 86) -- the workshop's half width
 	local Z0, Z1 = -half + (if compact then 26 else 72), half - (if compact then 4 else 30) -- front wall, back wall
 	local H = 26
-	local DOOR_W, DOOR_H = 30, 18
+	local DOOR_W, DOOR_H = if compact and wide < 100 then 18 else 30, 18 -- (a narrow compact front: three 18-wide doors)
 	local bays = { -W * 0.62, 0, W * 0.62 } -- door middles (the tuning bay is the middle one)
 	local bayZ = (Z0 + Z1) / 2 - 4
 	local detail = kit.lodGroup(model, "Detail", (base * CFrame.new(0, 10, 0)).Position, 480)

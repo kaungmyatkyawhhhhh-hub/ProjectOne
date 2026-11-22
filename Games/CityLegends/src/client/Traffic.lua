@@ -1127,10 +1127,8 @@ local function racerSpots(npc: Npc): { { lat: number, seg: CityLayout.Segment? }
 	table.sort(spots, function(a, b)
 		return a.lat < b.lat
 	end)
-	local n = #spots
-	for k = 1, n - 1 do
-		table.insert(spots, { lat = (spots[k].lat + spots[k + 1].lat) / 2, seg = nil })
-	end
+	-- (owner, 2026-11-22: "make the npcs cars drive on their lane. some cars drive between both lanes taking up
+	-- space") no more splits: the line between two lanes is not a place to be, only whole lanes
 	return spots
 end
 
@@ -1216,7 +1214,8 @@ local function racerSide(npc: Npc, dt: number, obstacles: { Obstacle })
 		else
 			-- (owner, 2026-11-21) that gap closed: ease back to where the slide began (the way back shut too: stay),
 			-- and no new choice for a moment (it used to stop mid-lane and re-pick 0.2 s later: a wobble)
-			npc.offTo = if npc.offFrom and npc.offTo ~= npc.offFrom then npc.offFrom else npc.off
+			-- (2026-11-22: never "stay" between two lanes: keep heading for a whole lane, the one it came from)
+			npc.offTo = if npc.offFrom then npc.offFrom else npc.offTo
 			npc.sideT = math.max(npc.sideT, RACER.SideHold)
 		end
 	end

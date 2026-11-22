@@ -191,7 +191,7 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 		-- standing in it (door leaves, sill, handles) don't collide, so a player always gets in
 		local gap = Instance.new("Part")
 		gap.Anchored, gap.CanCollide, gap.Transparency = true, false, 1
-		gap.Size, gap.CFrame = Vector3.new(6, 8.4, 6), at(-5, 5.2, -27)
+		gap.Size, gap.CFrame = Vector3.new(6, 8.4, 7), at(template:GetAttribute("DoorX") or -5, 5.2, template:GetAttribute("DoorZ") or -27)
 		gap.Parent = model
 		local op = OverlapParams.new()
 		op.FilterType = Enum.RaycastFilterType.Include
