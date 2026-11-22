@@ -34,3 +34,8 @@ Owner (22 Nov): "make the rider auto dealership at its exact place. Right beside
 - Flyover: 8 of 21 nearby traffic cars were on the new deck, lines and piers seen.
 - **Not tested:** driving a player car over the new deck and its two joins, buying / test drive at the new dealership, its driveway, the menus' new names on a phone, Burmese text, the median fix after the last sync, night.
 - Place saved by me (version 1777, then once more). Studio restarted itself once during a scan; Team Create kept everything.
+
+## Pyay Road medians narrowed (owner, 22 Nov: "Medians is on the road ... blocking half the road")
+- Cause: `YangonMedians` took its width from the lane data (distance between the two inner lanes minus one lane), up to 9 studs, and laid it on the carriageway where the road has no real gap.
+- Now each piece rays across the road for the real gap between the two carriageways' road boxes (RoadBox R): it fills only that gap and moves to its middle. With no gap (one carriageway, painted centre line) it is a 1.3-stud strip on the centre line, and plants shrink with the strip (`plantK`). Pieces whose lanes are two apart with no gap are dropped (their middle is a traffic lane).
+- Play (Pyay Road, 27537, 29681): beds 0.6 wide, lanes clear both sides (picture in this folder, taken before the stray-piece rule). **The last rule (stray piece in a lane dropped) is synced and saved but not looked at in Play.**

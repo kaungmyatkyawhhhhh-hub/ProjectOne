@@ -165,7 +165,35 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 			if hit then
 				mid = Vector3.new(mid.X, hit.Position.Y, mid.Z)
 			end
+			-- (owner, 2026-11-22: "Medians is on the road ... blocking half the road") the strip takes only the REAL gap
+			-- between the two carriageways: rays across find where each one's road box (RoadBox R) starts. With no gap
+			-- (one carriageway, a painted centre line) it is a thin strip on the centre line.
+			local along = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+			if along.Magnitude > 0.01 then
+				local right = along.Unit:Cross(Vector3.yAxis)
+				local function edge(side: number): number
+					for t = 0, w / 2, 0.5 do
+						local h2 = workspace:Raycast(mid + right * (side * t) + Vector3.new(0, 6, 0), Vector3.new(0, -14, 0), rayParams)
+						if h2 and h2.Instance:GetAttribute("RoadBox") == "R" then
+							return t
+						end
+					end
+					return w / 2
+				end
+				local tl, tr = edge(-1), edge(1)
+				if tl + tr < 1.2 then
+					-- (lanes two apart with no gap between: their middle is a traffic lane, not the road's middle)
+					if w > 5 then
+						continue
+					end
+					w = 1.3
+				else
+					mid += right * ((tr - tl) / 2)
+					w = math.max(tl + tr - 0.5, 1.3)
+				end
+			end
 		end
+		local plantK = math.clamp(w / 4.5, 0.4, 1) -- plants shrink with a narrow strip, so nothing hangs over a lane
 		local len = (b - a).Magnitude
 		local cf = CFrame.lookAt(mid, mid + Vector3.new(b.X - a.X, 0, b.Z - a.Z))
 		-- the strip: a planted soil bed with a red-and-white banded kerb down each side (bands STEP / 2 long)
@@ -184,7 +212,7 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 			local src = kit and kit:FindFirstChild(name)
 			if src and src:IsA("Model") then
 				local c = src:Clone()
-				c:ScaleTo(src:GetScale() * k) -- (ScaleTo is absolute: times the kit's own scale)
+				c:ScaleTo(src:GetScale() * k * plantK) -- (ScaleTo is absolute: times the kit's own scale)
 				c:PivotTo(at * CFrame.Angles(0, rng:NextNumber(0, math.pi * 2), 0))
 				c.Parent = m
 			end
