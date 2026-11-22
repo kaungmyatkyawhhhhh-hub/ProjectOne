@@ -3514,7 +3514,9 @@ function Driving.step(dt: number)
 		local speedAbs = math.abs(fwdSpeed)
 		local steerRate = (if math.abs(steerIn) > math.abs(s.steer) then 6 else 8.5) / (1 + speedAbs / DF.SteerSlowdown)
 		s.steer += (steerIn - s.steer) * math.min(1, dt * steerRate)
-		local maxAngle = math.rad(36) * s.steerK / (1 + (speedAbs / 70) ^ 1.3)
+		-- (owner, 2026-11-22: "make the car steering lighter ... going fast in a curve the car understeer alot": the lock
+		-- fell away with speed from 70 studs/s; now from 96, about a third more lock at 150 mph)
+		local maxAngle = math.rad(36) * s.steerK / (1 + (speedAbs / 96) ^ 1.3)
 		local angle = s.steer * maxAngle
 		local yawRate = fwdSpeed * math.tan(angle) / s.wheelbase
 		local out: any = nil

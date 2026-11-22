@@ -512,7 +512,7 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 		mk(model, Vector3.new(1.6, H, Z1 - Z0), at(sx * W, H / 2, (Z0 + Z1) / 2), CONCRETE, Enum.Material.Concrete, { name = "SideWall" })
 	end
 	mk(model, Vector3.new(W * 2, H, 1.6), at(0, H / 2, Z1), CONCRETE, Enum.Material.Concrete, { name = "BackWall" })
-	mk(model, Vector3.new(W * 2 + 4, 1.6, Z1 - Z0 + 4), at(0, H + 0.8, (Z0 + Z1) / 2), if compact then Color3.fromRGB(64, 104, 150) else DARK, if compact then Enum.Material.Metal else Enum.Material.Concrete, { name = "Roof" }) -- (the real Optima Werkz shed has a blue metal roof)
+	mk(model, Vector3.new(W * 2 + 4, 1.6, Z1 - Z0 + 4), at(0, H + 0.8, (Z0 + Z1) / 2), if compact then Color3.fromRGB(168, 172, 176) else DARK, if compact then Enum.Material.Metal else Enum.Material.Concrete, { name = "Roof" }) -- (owner's satellite picture, 22 Nov: the real Optima Werkz shed has a light grey metal roof)
 	-- a dark band along the top of the facade, the name on it (plain white letters, no neon)
 	local band = mk(model, Vector3.new(W * 2 + 4, 5.5, 0.8), at(0, H - 2.6, Z0 - 1.2), DARK, Enum.Material.Metal, { name = "SignBand" })
 	kit.surfaceText(band, Enum.NormalId.Front, CU.Name, Color3.fromRGB(240, 240, 236), nil, nil, Enum.Font.GothamBlack, Vector2.new(1600, 110))

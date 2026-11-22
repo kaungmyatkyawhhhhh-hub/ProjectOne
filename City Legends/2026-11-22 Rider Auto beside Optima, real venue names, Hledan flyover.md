@@ -84,3 +84,12 @@ Owner (22 Nov): "make the rider auto dealership at its exact place. Right beside
 
 ## Helper agent
 - A background agent briefed for the rest of People's Park, the Shwedagon gate car parks and more trees died on a network error (HTTP 403) before building anything. Those three are still to do.
+
+## Thanlwin Road area from the owner's map picture + the real Optima front (22 Nov)
+- Owner's picture: `Owner ref - Optima Werkz and Rider Auto on Thanlwin Road (Google Maps satellite).webp`. Thanlwin Rd runs north-south (owner: "Thanlwin road will be the main one 1+1 road"); U Aung Kain St crosses north of Optima Werkz; a small lane runs between Optima and RIDER AUTO Premium Exclusive; PV Auto Car Sales at Rider's south-west corner; Mathnasium north of U Aung Kain St. Both sheds have light grey metal roofs. The game's roads already have this layout (Thanlwin's road boxes are 20 wide = 1+1).
+- Built (`Parks.ThanlwinRoad`): a double yellow centre line on Thanlwin Road from z 31150 to 31900, broken at the cross streets (24 parts); blue street name plates (Thanlwin Rd, U Aung Kain St), boards PV AUTO CAR SALES and Mathnasium (plain text); 22 trees round the two plots. Roofs: Optima light grey metal (Customs.lua), the compact showroom's light grey.
+- **Optima Werkz front** (owner's photo of the real workshop; the photo itself could not be saved, it was not in the session's image folder): `VenueLooks.optima` (server, after the build, compact site only): red fascia with gold OPTIMA WERKZ YANGON and a chequered flag, grey band, yellow canopy, grey concrete pillars and walls, tan paved forecourt; the old name band is switched off. Play picture in this folder. Differences left: 3 bays (the real one has 4; the tuning code is built round 3), flat canopy (real one is curved); the band under the fascia was still black in that picture, the recolour rule was widened after it and is not re-checked in Play.
+- Thanlwin Road has no NPC traffic lanes (lane data covers main routes only).
+
+## Steering lighter at speed (owner, 22 Nov: "when im splitting line or going fast in a curve or turn the car understeer alot")
+- `Driving.lua`: the steering lock fell away with speed from 70 studs/s; now from 96 (about a third more lock at 150 mph). `Config.DrivingFeel`: `SteerSlowdown` 230 -> 300 (the wheel turns faster at speed), `HighSpeedYaw` 320 -> 400 (the turn builds faster). Synced; **not driven** (feel can only be judged by the owner). Studio's Driving was the older copy: the sync also brought in the other job's committed stuck-car fix.

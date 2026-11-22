@@ -83,6 +83,77 @@ local function novotelCrown(hotel: Instance)
 	crown.Parent = hotel
 end
 
+-- (owner, 2026-11-22, a photo of the real workshop: "build optima werkz to look exactly like this") the compact
+-- Optima Werkz front: a red fascia with gold OPTIMA WERKZ YANGON and a chequered flag, a grey band under it, a yellow
+-- canopy over the bays, grey concrete pillars and walls, a tan paved forecourt. Numbers follow Customs.block's compact
+-- frame (lot 110 deep, 80 wide: half width 32, front wall 29 towards the street, 26 high, doors 18).
+local function optima(model: Instance)
+	local site = (Config.YangonVenues and Config.YangonVenues.Sites or {}).customs
+	if not site or not site.size or site.size >= 150 then
+		return
+	end
+	local c = Vector3.new(site.x, site.y, site.z)
+	local base = CFrame.lookAt(c, c + Vector3.new(site.fx, 0, site.fz).Unit)
+	local half, wide = site.size / 2, site.w or site.size
+	local W, Z0, H = math.min(wide / 2 - 8, 86), -half + 26, 26
+	local look = Instance.new("Model")
+	look.Name = "RealLookOptima"
+	local function box(name: string, size: Vector3, x: number, y: number, z: number, color: Color3, material: Enum.Material?): Part
+		local p = Instance.new("Part")
+		p.Name, p.Anchored, p.Size, p.CFrame, p.Color = name, true, size, base * CFrame.new(x, y, z), color
+		p.Material = material or Enum.Material.SmoothPlastic
+		p.CanCollide, p.CanQuery, p.CastShadow = false, false, false
+		p.TopSurface, p.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+		p.Parent = look
+		return p
+	end
+	local GREY, RED, YELLOW = Color3.fromRGB(146, 150, 148), Color3.fromRGB(214, 44, 30), Color3.fromRGB(240, 170, 34)
+	-- the old name band and the dark walls
+	for _, d in model:GetDescendants() do
+		if d:IsA("TextLabel") and string.find(string.upper(d.Text), "OPTIMA", 1, true) then
+			local g = d:FindFirstAncestorWhichIsA("SurfaceGui")
+			if g then
+				g.Enabled = false
+			end
+		elseif d:IsA("BasePart") and d.Transparency < 0.2 and (d.Size.Y > 12 or (d.Size.Y > 3 and math.max(d.Size.X, d.Size.Z) > 30)) and d.Color.R < 0.26 and d.Color.G < 0.26 and d.Color.B < 0.28 then
+			d.Color, d.Material = GREY, Enum.Material.Concrete
+		elseif d:IsA("BasePart") and d.Name == "Forecourt" then
+			d.Color, d.Material = Color3.fromRGB(176, 150, 118), Enum.Material.Pavement
+		end
+	end
+	local full = W * 2 + 4
+	box("GreyBand", Vector3.new(full, 6, 0.8), 0, 23.4, Z0 - 0.75, GREY, Enum.Material.Concrete)
+	local fascia = box("Fascia", Vector3.new(full, 9.4, 1.2), 0, 31, Z0 - 0.95, RED)
+	box("Canopy", Vector3.new(full + 3, 1.5, 5.4), 0, 19.3, Z0 - 3.2, YELLOW)
+	box("CanopyLip", Vector3.new(full + 3, 0.5, 5.6), 0, 20.25, Z0 - 3.2, Color3.fromRGB(226, 150, 24))
+	for _, x in { -W * 0.31, W * 0.31 } do
+		box("Pillar", Vector3.new(2.2, 18.6, 1.3), x, 9.3, Z0 - 0.7, GREY, Enum.Material.Concrete)
+	end
+	for _, x in { -(W + 0.2), W + 0.2 } do
+		box("Pillar", Vector3.new(3.8, 18.6, 1.3), x, 9.3, Z0 - 0.7, GREY, Enum.Material.Concrete)
+	end
+	local gui = Instance.new("SurfaceGui")
+	gui.Face, gui.SizingMode, gui.PixelsPerStud, gui.LightInfluence = Enum.NormalId.Front, Enum.SurfaceGuiSizingMode.PixelsPerStud, 30, 1
+	gui.Parent = fascia
+	local name = Instance.new("TextLabel")
+	name.BackgroundTransparency, name.Size, name.Position = 1, UDim2.fromScale(0.62, 0.42), UDim2.fromScale(0.19, 0.1)
+	name.Text, name.TextScaled, name.Font, name.TextColor3 = "OPTIMA WERKZ YANGON", true, Enum.Font.GothamBlack, Color3.fromRGB(250, 206, 60)
+	name.Parent = gui
+	local flag = Instance.new("Frame")
+	flag.BackgroundTransparency, flag.Size, flag.Position = 1, UDim2.fromScale(0.16, 0.26), UDim2.fromScale(0.42, 0.6)
+	flag.Rotation = -4
+	flag.Parent = gui
+	for i = 0, 7 do
+		for j = 0, 2 do
+			local sq = Instance.new("Frame")
+			sq.BorderSizePixel, sq.Size, sq.Position = 0, UDim2.fromScale(1 / 8, 1 / 3), UDim2.fromScale(i / 8, j / 3)
+			sq.BackgroundColor3 = if (i + j) % 2 == 0 then Color3.fromRGB(20, 20, 22) else Color3.fromRGB(245, 245, 245)
+			sq.Parent = flag
+		end
+	end
+	look.Parent = model
+end
+
 function VenueLooks.apply()
 	if Config.activeMap() ~= "Yangon" then
 		return
@@ -99,6 +170,10 @@ function VenueLooks.apply()
 			{ 186, 152, 106, Enum.Material.Limestone, Color3.fromRGB(178, 44, 40), Enum.Material.SmoothPlastic },
 		})
 		novotelCrown(hotel)
+	end
+	local customs = city:FindFirstChild("LegendsCustoms", true)
+	if customs and not customs:FindFirstChild("RealLookOptima") then
+		optima(customs)
 	end
 	local tower = city:FindFirstChild("Tower_aurum", true)
 	if tower and not tower:GetAttribute("RealLook") then
