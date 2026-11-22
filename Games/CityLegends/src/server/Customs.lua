@@ -300,6 +300,7 @@ function Customs.dress(kit: any, model: Model, at: (number, number, number) -> C
 	local W, Z0, Z1, H = d.W, d.Z0, d.Z1, d.H
 	local DOOR_W, DOOR_H = d.DOOR_W, d.DOOR_H
 	local bays: { number } = d.bays
+	local LH: number = d.liftHalf or 13.5 -- (half the gap between a lift's posts: narrower in the 4-bay compact shop)
 	local bayZ = d.bayZ
 	local detail = kit.lodGroup(model, "Remodel", at(0, 10, 0).Position, 480)
 	local face = Z0 - 0.8 -- the front wall's outer face
@@ -362,15 +363,15 @@ function Customs.dress(kit: any, model: Model, at: (number, number, number) -> C
 	for i, bx in bays do
 		if i ~= 2 then
 			for _, sx in { -1, 1 } do
-				mk(model, Vector3.new(1.6, 15, 1.6), at(bx + sx * 13.5, 7.5, bayZ), Color3.fromRGB(196, 40, 40), Enum.Material.Metal, { name = "LiftPost" })
-				deco(detail, Vector3.new(2.4, 0.5, 2.4), at(bx + sx * 13.5, 15.25, bayZ), DARK, Enum.Material.Metal)
-				deco(detail, Vector3.new(2.6, 0.4, 2.6), at(bx + sx * 13.5, 0.4, bayZ), DARK, Enum.Material.Metal)
+				mk(model, Vector3.new(1.6, 15, 1.6), at(bx + sx * LH, 7.5, bayZ), Color3.fromRGB(196, 40, 40), Enum.Material.Metal, { name = "LiftPost" })
+				deco(detail, Vector3.new(2.4, 0.5, 2.4), at(bx + sx * LH, 15.25, bayZ), DARK, Enum.Material.Metal)
+				deco(detail, Vector3.new(2.6, 0.4, 2.6), at(bx + sx * LH, 0.4, bayZ), DARK, Enum.Material.Metal)
 				for _, dz in { -4, 4 } do
-					deco(detail, Vector3.new(6, 0.5, 0.8), at(bx + sx * 10.5, 2.4, bayZ + dz) * CFrame.Angles(0, sx * math.rad(if dz < 0 then 12 else -12), 0), DARK, Enum.Material.Metal)
+					deco(detail, Vector3.new(6, 0.5, 0.8), at(bx + sx * (LH - 3), 2.4, bayZ + dz) * CFrame.Angles(0, sx * math.rad(if dz < 0 then 12 else -12), 0), DARK, Enum.Material.Metal)
 				end
 			end
 			-- an overhead beam with the hoses
-			deco(detail, Vector3.new(28.6, 1, 1), at(bx, 15.8, bayZ), Color3.fromRGB(196, 40, 40), Enum.Material.Metal)
+			deco(detail, Vector3.new(2 * LH + 1.6, 1, 1), at(bx, 15.8, bayZ), Color3.fromRGB(196, 40, 40), Enum.Material.Metal)
 		end
 	end
 	-- the TUNING bay lit like a stage: a dark ring round the plate, a light truss with spots
@@ -471,8 +472,12 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 	local W = math.min(if compact then wide / 2 - 8 else half - 20, 86) -- the workshop's half width
 	local Z0, Z1 = -half + (if compact then 26 else 72), half - (if compact then 4 else 30) -- front wall, back wall
 	local H = 26
-	local DOOR_W, DOOR_H = if compact and wide < 100 then 18 else 30, 18 -- (a narrow compact front: three 18-wide doors)
-	local bays = { -W * 0.62, 0, W * 0.62 } -- door middles (the tuning bay is the middle one)
+	-- (owner, 2026-11-22: "make optima werkz bigger with 4 slots to go in") the compact front has FOUR bays like the
+	-- real workshop: pitch = a door + a 2.4 pillar; the tuning bay is the second one
+	local pitch = (2 * W - 2.4) / 4
+	local DOOR_W, DOOR_H = if compact then pitch - 2.4 else 30, 18
+	local bays = if compact then { -1.5 * pitch, -0.5 * pitch, 0.5 * pitch, 1.5 * pitch } else { -W * 0.62, 0, W * 0.62 } -- door middles
+	local liftHalf = if compact then pitch / 2 else 13.5 -- the tuning lift's posts stand on the pillar lines
 	local bayZ = (Z0 + Z1) / 2 - 4
 	local detail = kit.lodGroup(model, "Detail", (base * CFrame.new(0, 10, 0)).Position, 480)
 
@@ -537,10 +542,10 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 	-- the tuning bay: a two-post lift either side and a turntable plate the car stops on
 	local tb = bays[2]
 	for _, sx in { -1, 1 } do
-		mk(model, Vector3.new(1.6, 15, 1.6), at(tb + sx * 13.5, 7.5, bayZ), STEEL, Enum.Material.Metal, { name = "LiftPost" })
-		deco(detail, Vector3.new(2.2, 0.5, 2.2), at(tb + sx * 13.5, 15.25, bayZ), DARK, Enum.Material.Metal)
-		deco(detail, Vector3.new(6, 0.5, 0.8), at(tb + sx * 10.5, 2.4, bayZ - 4), DARK, Enum.Material.Metal)
-		deco(detail, Vector3.new(6, 0.5, 0.8), at(tb + sx * 10.5, 2.4, bayZ + 4), DARK, Enum.Material.Metal)
+		mk(model, Vector3.new(1.6, 15, 1.6), at(tb + sx * liftHalf, 7.5, bayZ), STEEL, Enum.Material.Metal, { name = "LiftPost" })
+		deco(detail, Vector3.new(2.2, 0.5, 2.2), at(tb + sx * liftHalf, 15.25, bayZ), DARK, Enum.Material.Metal)
+		deco(detail, Vector3.new(6, 0.5, 0.8), at(tb + sx * (liftHalf - 3), 2.4, bayZ - 4), DARK, Enum.Material.Metal)
+		deco(detail, Vector3.new(6, 0.5, 0.8), at(tb + sx * (liftHalf - 3), 2.4, bayZ + 4), DARK, Enum.Material.Metal)
 	end
 	-- a camera rig and soft boxes for the "photo" look of the tuning screen
 	for _, a in { -0.8, 0.8 } do
@@ -583,7 +588,25 @@ function Customs.block(kit: any, parent: Instance, bi: number, bj: number, _cx: 
 		deco(detail, Vector3.new(0.8, 3.4, 3.4), at(bays[3] - 6 + k * 4, 4 + (k % 2) * 4, Z1 - 1.8) * CFrame.Angles(0, math.pi / 2, 0), Color3.fromRGB(176, 180, 186), Enum.Material.Metal, { shape = Enum.PartType.Cylinder })
 	end
 
-	Customs.dress(kit, model, at, { W = W, Z0 = Z0, Z1 = Z1, H = H, DOOR_W = DOOR_W, DOOR_H = DOOR_H, bays = bays, bayZ = bayZ })
+	Customs.dress(kit, model, at, { W = W, Z0 = Z0, Z1 = Z1, H = H, DOOR_W = DOOR_W, DOOR_H = DOOR_H, bays = bays, bayZ = bayZ, liftHalf = liftHalf })
+	if compact then
+		-- (four bays leave no room for the old lounge by the front: its counter and bench stood in the first doorway;
+		-- Play, 22 Nov) nothing of the dressing stands in a bay's drive-in line near the doors
+		local rem = model:FindFirstChild("Remodel")
+		for _, p in (if rem then rem:GetDescendants() else {}) do
+			if p:IsA("BasePart") and p.Size.Y > 0.6 then
+				local l = base:PointToObjectSpace(p.Position)
+				if l.Y < 8 and l.Z > Z0 - 4 and l.Z < Z0 + 16 then
+					for _, bx in bays do
+						if math.abs(l.X - bx) < DOOR_W / 2 + math.min(p.Size.X, p.Size.Z) / 2 then
+							p:Destroy()
+							break
+						end
+					end
+				end
+			end
+		end
+	end
 
 	-- the drive from the road onto the lot in front of the tuning bay, fitted to the real ground
 	-- (EntranceRamp)

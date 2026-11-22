@@ -126,11 +126,9 @@ local function optima(model: Instance)
 	local fascia = box("Fascia", Vector3.new(full, 9.4, 1.2), 0, 31, Z0 - 0.95, RED)
 	box("Canopy", Vector3.new(full + 3, 1.5, 5.4), 0, 19.3, Z0 - 3.2, YELLOW)
 	box("CanopyLip", Vector3.new(full + 3, 0.5, 5.6), 0, 20.25, Z0 - 3.2, Color3.fromRGB(226, 150, 24))
-	for _, x in { -W * 0.31, W * 0.31 } do
-		box("Pillar", Vector3.new(2.2, 18.6, 1.3), x, 9.3, Z0 - 0.7, GREY, Enum.Material.Concrete)
-	end
-	for _, x in { -(W + 0.2), W + 0.2 } do
-		box("Pillar", Vector3.new(3.8, 18.6, 1.3), x, 9.3, Z0 - 0.7, GREY, Enum.Material.Concrete)
+	local pitch = (2 * W - 2.4) / 4 -- (four bays: Customs.block's compact pitch)
+	for _, k in { -2, -1, 0, 1, 2 } do
+		box("Pillar", Vector3.new(2.5, 18.6, 1.3), k * pitch, 9.3, Z0 - 0.7, GREY, Enum.Material.Concrete)
 	end
 	local gui = Instance.new("SurfaceGui")
 	gui.Face, gui.SizingMode, gui.PixelsPerStud, gui.LightInfluence = Enum.NormalId.Front, Enum.SurfaceGuiSizingMode.PixelsPerStud, 30, 1

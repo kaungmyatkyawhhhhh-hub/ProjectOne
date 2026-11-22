@@ -93,3 +93,9 @@ Owner (22 Nov): "make the rider auto dealership at its exact place. Right beside
 
 ## Steering lighter at speed (owner, 22 Nov: "when im splitting line or going fast in a curve or turn the car understeer alot")
 - `Driving.lua`: the steering lock fell away with speed from 70 studs/s; now from 96 (about a third more lock at 150 mph). `Config.DrivingFeel`: `SteerSlowdown` 230 -> 300 (the wheel turns faster at speed), `HighSpeedYaw` 320 -> 400 (the turn builds faster). Synced; **not driven** (feel can only be judged by the owner). Studio's Driving was the older copy: the sync also brought in the other job's committed stuck-car fix.
+
+## Optima Werkz bigger, four bays (owner, 22 Nov: "make optima werkz bigger with 4 slots to go in")
+- Site: customs 31699, 31455, facing (-1, 0), y 75.5, size (depth) 130, w 88 (the whole real block width between U Aung Kain St and the lane). Building 72 wide x 100 deep.
+- `Customs.block` compact = FOUR bays: pitch = (2W - 2.4) / 4 = 17.4, doors 15 wide, pillars 2.4; the tuning bay is the second (`CustomsBay` 31706, 31464); lift posts stand on the pillar lines (`liftHalf`, also passed to `dress`). The old lounge's counter and bench stood in the first doorway: dressing parts in a bay's drive-in line near the doors are removed (compact only). `VenueLooks.optima` puts a pillar on every bay line.
+- Play: a car-size box (7.5 x 5) goes through three bays to the back; the fourth was blocked by the counter (fix synced after that run, **not re-tested**). 0 script errors. Picture in this folder; the band under the fascia is grey now.
+- Not tested: driving in and tuning, the paint booth's place in the 4-bay layout (its white frame is 26 wide, wider than a bay).

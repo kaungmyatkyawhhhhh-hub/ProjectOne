@@ -238,7 +238,7 @@ Config.YangonVenues = {
 		-- (owner, 2026-11-21: "move every venues to their actual place") the real places, from Google Maps: the lot (216
 		-- square) is the nearest free one beside the real pin, its front on a road. Old spots in the vault note.
 		dealership = { x = 31689.0, z = 31574.0, fx = -1, fz = 0, y = 73.5, size = 110, w = 80 }, -- RIDER AUTO Premium Exclusive (16.81529, 96.14526): compact, beside Optima, both face the road
-		customs = { x = 31689.0, z = 31454.0, fx = -1, fz = 0, y = 75.5, size = 110, w = 80 }, -- Optima Werkz (16.81564, 96.14513): compact
+		customs = { x = 31699.0, z = 31455.0, fx = -1, fz = 0, y = 75.5, size = 130, w = 88 }, -- Optima Werkz (16.81564, 96.14513): compact, 4 bays
 		bank = { x = 38525.0, z = 45372.0, fx = 1, fz = 0, y = 21.29 }, -- CB Bank head office (16.77423, 96.16742)
 		dropoff = { x = 35416.6, z = 27780.7, fx = 0.622, fz = -0.783, y = 36.12 }, -- by Myanmar Plaza
 		gems = { x = 35023.0, z = 18623.0, fx = 0.866, fz = -0.5, y = 63.70 }, -- Gems Museum (16.85471, 96.15632)
