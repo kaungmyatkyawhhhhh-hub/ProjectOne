@@ -58,3 +58,9 @@ Owner (22 Nov): "make the rider auto dealership at its exact place. Right beside
 - **Burmese:** the Burmese lines already carry the new venue names (the old names were written in Latin letters inside them, so the rename pass changed both). Nothing left to do there.
 - **Play, server box casts:** a car-size box (7 x 5) goes through all three compact workshop doors to the back; `CustomsBay` is at 31708, 31447. The compact showroom's front doorway lets a player-size box through but is tight (about 4 wide, 5.6 clear, a low sill), so `Dealership.fromBody` now switches collision off on the small pieces standing in the doorway (compact only). The counter prompt "Browse cars" is at 31703, 31559; five display stands have "View cars".
 - **Not tested:** that doorway fix in Play, a real walk-in with a character, tuning, the drive-out bay.
+
+## Medians, final rule (owner, 22 Nov, with a picture of a short loose piece: "fix those stuffs just laying on the middle of the road instead of connecting to the other main medians")
+- `YangonMedians` builds a strip ONLY in a real gap between the two carriageways (rays across find each side's road box). No gap = nothing (the thin centre-line strip of the first fix still stood in lanes on junction flares: taken out).
+- Each piece is its own `Piece` model; a run of fewer than 5 pieces (40 studs) that joins nothing is removed, unless it reaches its chunk's edge.
+- Play, 22 Nov: Pyay Road at 27537, 29681 = no strip, no stray piece (that stretch is one carriageway in the map); Kabar Aye by Myanmar Plaza = planted strip exactly inside the gap, lanes clear (pictures in this folder). Real Pyay Road has a median there: the map's road has no gap for one, so it needs the road re-baked as two carriageways.
+- Compact showroom door: the thing a low box hit is only the doormat (0.6 over the forecourt): walkable. Times City was tried for the Skyline tower: no free 216 lot within 360 studs, so it stays.

@@ -151,6 +151,8 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 	local roads = root and root:FindFirstChild("Roads")
 	local collide = roads and roads:FindFirstChild("Collide")
 	local rng = Random.new(string.len(key) * 7919 + (tonumber((string.gsub(key, "[^%d]", ""))) or 0) % 100000)
+	local chunkM = m
+	local runs: { any } = {} -- { piece model, start, end } of every piece built, in order
 	for idx, pc in pieces do
 		local a: Vector3, b: Vector3, w: number = pc[1], pc[2], pc[3]
 		local mid = (a + b) / 2
@@ -182,11 +184,9 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 				end
 				local tl, tr = edge(-1), edge(1)
 				if tl + tr < 1.2 then
-					-- (lanes two apart with no gap between: their middle is a traffic lane, not the road's middle)
-					if w > 5 then
-						continue
-					end
-					w = 1.3
+					-- (no gap: the middle is driving surface, a lane or a painted line. Play, 22 Nov: even a thin strip
+					-- there stood in a lane on the junction flares, so nothing is built)
+					continue
 				else
 					mid += right * ((tr - tl) / 2)
 					w = math.max(tl + tr - 0.5, 1.3)
@@ -194,6 +194,10 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 			end
 		end
 		local plantK = math.clamp(w / 4.5, 0.4, 1) -- plants shrink with a narrow strip, so nothing hangs over a lane
+		local m = Instance.new("Model") -- (this piece's own parts: a short loose run is taken out again below)
+		m.Name = "Piece"
+		m.Parent = chunkM
+		table.insert(runs, { m, a, b })
 		local len = (b - a).Magnitude
 		local cf = CFrame.lookAt(mid, mid + Vector3.new(b.X - a.X, 0, b.Z - a.Z))
 		-- the strip: a planted soil bed with a red-and-white banded kerb down each side (bands STEP / 2 long)
@@ -247,6 +251,27 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 				part(m, Vector3.new(ball, ball * 0.9, ball), at * CFrame.new(0, up + ball * 0.4, 0), LEAF[rng:NextInteger(1, #LEAF)], Enum.Material.Grass, Enum.PartType.Ball)
 			end
 		end
+	end
+	-- (owner, 2026-11-22: "stuffs just laying on the middle of the road instead of connecting to the other main medians")
+	-- a run of fewer than 5 pieces (40 studs) that joins nothing is removed, unless it reaches the chunk's edge (it may go
+	-- on in the next chunk)
+	local kx, kz = string.match(key, "^(-?%d+),(-?%d+)$")
+	local x0, z0 = (tonumber(kx) or 0) * CHUNK, (tonumber(kz) or 0) * CHUNK
+	local function atEdge(p: Vector3): boolean
+		return p.X - x0 < 12 or x0 + CHUNK - p.X < 12 or p.Z - z0 < 12 or z0 + CHUNK - p.Z < 12
+	end
+	local i = 1
+	while i <= #runs do
+		local j = i
+		while j < #runs and (runs[j + 1][2] - runs[j][3]).Magnitude < 1.5 do
+			j += 1
+		end
+		if j - i + 1 < 5 and not atEdge(runs[i][2]) and not atEdge(runs[j][3]) then
+			for k = i, j do
+				runs[k][1]:Destroy()
+			end
+		end
+		i = j + 1
 	end
 	m.Parent = folder
 	return m
