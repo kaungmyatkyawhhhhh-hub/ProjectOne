@@ -1,6 +1,6 @@
 --[[
 	CustomsClient
-	Legends Customs on the client (owner, 2026-10-23: "make the game ... cooler"):
+	Optima Werkz on the client (owner, 2026-10-23: "make the game ... cooler"):
 	  * paints every car that carries a "Custom" look (Customs.lua puts it on as JSON): paint and
 	    finish on the body's paint parts, a second colour, window tint, an underglow under the car,
 	    rim colour, headlight colour and the number plate. It works on the skin CarSkin builds: the
@@ -465,7 +465,7 @@ local function open()
 	end)
 	opening = false
 	if not asked or type(state) ~= "table" or not state.ok then
-		UI.toast(if asked and type(state) == "table" and state.message then state.message else "Can't open Legends Customs now", Theme.Warning)
+		UI.toast(if asked and type(state) == "table" and state.message then state.message else "Can't open Optima Werkz now", Theme.Warning)
 		return
 	end
 	local saved: Look = if type(state.look) == "table" then state.look else {}
@@ -901,9 +901,9 @@ local function open()
 			cash = tonumber(result.cash) or cash
 			if pay == "cp" then
 				cp -= tonumber(result.cpCost) or 0
-				UI.toast("Legends Customs: " .. tostring(result.cpCost) .. " CP", Theme.Accent2)
+				UI.toast("Optima Werkz: " .. tostring(result.cpCost) .. " CP", Theme.Accent2)
 			else
-				UI.toast("Legends Customs: " .. money(tonumber(result.cost) or 0), Theme.Money)
+				UI.toast("Optima Werkz: " .. money(tonumber(result.cost) or 0), Theme.Money)
 			end
 			finish()
 		else

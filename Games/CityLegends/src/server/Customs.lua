@@ -1,6 +1,6 @@
 --[[
 	Customs
-	Legends Customs, the city's tuning garage (owner, 2026-10-23: "make the game ... cooler"):
+	Optima Werkz, the city's tuning garage (owner, 2026-10-23: "make the game ... cooler"):
 	  * a drive-in workshop on its own city block (Config.Customs): a paved forecourt, three bays
 	    behind roll-up door openings (the middle one is the tuning bay with a two-post lift and a
 	    turntable plate), tool walls, tyre racks, a parts counter, warm workshop lights, the name over

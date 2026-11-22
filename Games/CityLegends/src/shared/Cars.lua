@@ -38,7 +38,7 @@ export type CarSpec = {
 	-- price, "used" the US used market, "collector" the market value
 	StatPrice: number?, -- the old game price: the show numbers worked from it stay the same (CarStats)
 	RearBias: boolean?, -- an all-wheel-drive car that sends more to the rear and slides like a rear-drive one
-	Source: string?, -- "Local" (sold at Legends Motors for cash) or "Import" (crates only, never the dealer); CarMeta
+	Source: string?, -- "Local" (sold at Rider Auto for cash) or "Import" (crates only, never the dealer); CarMeta
 	Rarity: string?, -- Common / Uncommon / Rare / Epic / Legendary / Mythic / Hypercar (crate tiers); CarMeta
 }
 
@@ -279,7 +279,7 @@ end
 ---------------------------------------------------------------------
 -- Series, trims and levels (owner, 2026-10-30: "dealership with trims like Midnight Racing")
 --   * a series is one car line; its cars are the trims, cheapest first (the dealer's trim chips)
---   * every car is sold at Legends Motors for its price (2026-11-03: no level locks, only class X
+--   * every car is sold at Rider Auto for its price (2026-11-03: no level locks, only class X
 --     needs Config.CarClasses.XLevel); you don't need the trim before. The car market is a second
 --     way to get cars.
 --   * a line with one car gets a SPORT and a TOP trim (owner: "add extra trims"): the same body,

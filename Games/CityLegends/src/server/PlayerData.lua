@@ -49,7 +49,7 @@ export type Profile = {
 	Chauffeur: { [string]: boolean }, -- chauffeur contracts (car ids from Config.Chauffeur.Fleet)
 	Luxe: { [string]: any }, -- VIP card, owned and worn flex items (Luxe.lua checks it)
 	Challenges: { [string]: any }, -- speed trap bests, drift and jump bests (Challenges.lua checks it)
-	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
+	Customs: { [string]: { [string]: any } }, -- per car id: its Optima Werkz look (Customs.lua checks it)
 	Goals: { [string]: any }, -- Legends Path, the daily streak and today's tasks (Goals.lua checks it)
 	Brands: { [string]: number }, -- brand XP per brand (Brands.lua)
 	-- car levels (2026-11-03, CarLevels.lua): per car id its level (1-50), XP inside that level, unspent

@@ -27,7 +27,7 @@ local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local PlateShop = {}
 
--- the office counter on the empty grass lot between Legends Customs and the realty, facing Kabar Aye
+-- the office counter on the empty grass lot between Optima Werkz and the realty, facing Kabar Aye
 -- Pagoda Road (Studio 19 Nov: pavement edge x 35398 at y 40.6, grass 38.5); its slab runs to the pavement
 PlateShop.OFFICE = CFrame.lookAt(Vector3.new(35414, 40.0, 22010), Vector3.new(35414 - 0.991, 40.0, 22010 - 0.136))
 local OFFICE_REACH = 30 -- studs from the counter for a claim

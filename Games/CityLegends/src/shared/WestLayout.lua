@@ -91,7 +91,7 @@ function WestLayout.site(name: string): (CFrame, number)
 end
 
 -- the dealership's frame (ground level at its lot's middle, facing out of the showroom) and lot
--- Legends Customs: its frame (ground level, facing out of the bay doors) and lot
+-- Optima Werkz: its frame (ground level, facing out of the bay doors) and lot
 function WestLayout.customs(): (CFrame, number)
 	local riv = WestLayout.rivieraSite("customs")
 	if riv then
@@ -188,7 +188,7 @@ function WestLayout.places(): { Place }
 	local bank = Config.Bank.Block
 	local bx = (CityLayout.roadCoord(bank[1]) + CityLayout.roadCoord(bank[1] + 1)) / 2
 	local bankRiv = WestLayout.rivieraSite("bank")
-	add("bank", "Legends Reserve Bank", if bankRiv then WestLayout.kerbFor(bankRiv, LOT) else onLane(bx, CityLayout.roadCoord(bank[2]), Vector3.new(1, 0, 0)))
+	add("bank", "CB Bank", if bankRiv then WestLayout.kerbFor(bankRiv, LOT) else onLane(bx, CityLayout.roadCoord(bank[2]), Vector3.new(1, 0, 0)))
 	for _, t in Config.Towers.List do
 		local tx = (CityLayout.roadCoord(t.block[1]) + CityLayout.roadCoord(t.block[1] + 1)) / 2
 		local riv = WestLayout.rivieraSite("tower_" .. t.id)
@@ -196,13 +196,13 @@ function WestLayout.places(): { Place }
 	end
 	-- the dealership
 	local dealerFrame, dealerLot = WestLayout.dealership()
-	add("dealership", "Legends Motors", WestLayout.kerbFor(dealerFrame, dealerLot))
+	add("dealership", "Rider Auto", WestLayout.kerbFor(dealerFrame, dealerLot))
 	local customsFrame, customsLot = WestLayout.customs()
-	add("customs", "Legends Customs", WestLayout.kerbFor(customsFrame, customsLot))
+	add("customs", "Optima Werkz", WestLayout.kerbFor(customsFrame, customsLot))
 	-- Downtown
 	for _, name in { "hotel", "rewards", "gems" } do
 		local frame, lot = WestLayout.site(name)
-		local label = if name == "hotel" then "Legends Grand Hotel" elseif name == "rewards" then "Legends Rewards" else "Gem Showcase"
+		local label = if name == "hotel" then "Novotel Yangon Max" elseif name == "rewards" then "Legends Rewards" else "Gems Museum"
 		add(name, label, WestLayout.kerbFor(frame, lot))
 	end
 	add("downtown", "Downtown", onLane(W.DowntownX + C.BlockSize / 2, 0, Vector3.new(-1, 0, 0)))

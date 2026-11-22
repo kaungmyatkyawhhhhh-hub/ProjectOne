@@ -237,7 +237,7 @@ Config.YangonVenues = {
 	Sites = {
 		-- (owner, 2026-11-21: "move every venues to their actual place") the real places, from Google Maps: the lot (216
 		-- square) is the nearest free one beside the real pin, its front on a road. Old spots in the vault note.
-		dealership = { x = 28398.0, z = 33909.0, fx = 0, fz = -1, y = 70.89 }, -- Rider Auto (16.80879, 96.13499)
+		dealership = { x = 32076.0, z = 31260.0, fx = -1, fz = 0, y = 78.37 }, -- RIDER AUTO Premium Exclusive (16.81529, 96.14526), across the road from Optima
 		customs = { x = 31773.0, z = 31265.0, fx = 0, fz = 1, y = 76.52 }, -- Optima Werkz (16.81564, 96.14513)
 		bank = { x = 38525.0, z = 45372.0, fx = 1, fz = 0, y = 21.29 }, -- CB Bank head office (16.77423, 96.16742)
 		dropoff = { x = 35416.6, z = 27780.7, fx = 0.622, fz = -0.783, y = 36.12 }, -- by Myanmar Plaza
@@ -390,7 +390,7 @@ Config.Economy = {
 	ActiveMult = 0.15, -- driving, cut-ups, races, drift, jumps, speed traps, chips, duels, property income
 	JobMult = 0.085, -- delivery jobs (back to back they paid far more than anything else)
 	HeistMult = 0.1, -- the bank
-	ShowcaseMult = 0.05, -- the Gem Showcase
+	ShowcaseMult = 0.05, -- the Gems Museum
 	GiftMult = 0.15, -- daily streak, weekly and welcome gifts
 	TaskMult = 0.1, -- daily tasks
 	PlaytimeCash = { 500, 1000, 1500, 3000 }, -- the 5 / 15 / 30 / 60 minute gifts (were 6K, 12K, 24K, 60K)
@@ -2051,9 +2051,9 @@ Config.Market = {
 ---------------------------------------------------------------------
 Config.Towers = {
 	List = {
-		{ id = "aurum", name = "AURUM RESIDENCES", block = { 2, 3 }, height = 300, price = 750000, rent = 12000, accent = Color3.fromRGB(255, 196, 92) },
+		{ id = "aurum", name = "LOTTE HOTEL YANGON", block = { 2, 3 }, height = 300, price = 750000, rent = 12000, accent = Color3.fromRGB(255, 196, 92) },
 		{ id = "skyline", name = "SKYLINE ONE", block = { 4, 1 }, height = 380, price = 3000000, rent = 45000, accent = Color3.fromRGB(0, 229, 255) },
-		{ id = "crown", name = "THE CROWN", block = { 1, 4 }, height = 460, price = 12000000, rent = 160000, accent = Color3.fromRGB(190, 110, 255) },
+		{ id = "crown", name = "KAN THAR YAR CENTRE", block = { 1, 4 }, height = 460, price = 12000000, rent = 160000, accent = Color3.fromRGB(190, 110, 255) },
 	},
 	RentCooldown = 24 * 3600, -- the wall safe refills once a day
 }
@@ -2218,7 +2218,7 @@ Config.YangonStreetLife = (function()
 end)()
 
 ---------------------------------------------------------------------
--- The Legends Grand Hotel Downtown (owner, 2026-10-22: "a large skyscraper hotel with valets",
+-- The Novotel Yangon Max Downtown (owner, 2026-10-22: "a large skyscraper hotel with valets",
 -- penthouse suites on the hotel that "pay out money every minute to their owners"). The suites
 -- are the top floors, lowest first. They pay while you're in the game (time offline doesn't
 -- pay), one payment per full minute.
@@ -2229,7 +2229,7 @@ end)()
 -- better than the one below (adds).
 ---------------------------------------------------------------------
 Config.Hotel = {
-	Name = "THE LEGENDS GRAND",
+	Name = "NOVOTEL YANGON MAX",
 	Accent = Color3.fromRGB(255, 200, 120), -- champagne gold
 	Neon = { Color3.fromRGB(255, 70, 170), Color3.fromRGB(40, 230, 220) }, -- Miami pink and teal
 	IncomeEvery = 60, -- seconds in the game per payment
@@ -2279,20 +2279,20 @@ Config.Chauffeur = {
 }
 
 ---------------------------------------------------------------------
--- The Legends Gem Showcase, Downtown (owner, 2026-10-22: "places to spend big money on rare,
+-- The Myanmar Gems Museum, Downtown (owner, 2026-10-22: "places to spend big money on rare,
 -- visible flex items like custom gems and accessories"). In-game cash only, never Robux. (The
 -- High-Rollers Casino was replaced by Legends Rewards on 2026-11-03; its VIP desk moved here and
 -- its vault heist was removed.)
 ---------------------------------------------------------------------
 Config.Luxe = {
-	-- VIP membership at the Gem Showcase's VIP desk: a title over your head and money off the
+	-- VIP membership at the Gems Museum's VIP desk: a title over your head and money off the
 	-- collection. A higher card replaces the lower one (you pay the difference)
 	Vip = {
 		{ id = 1, name = "GOLD CARD", title = "GOLD HIGH ROLLER", price = 250000, discount = 0.05, color = Color3.fromRGB(255, 200, 70) },
 		{ id = 2, name = "PLATINUM CARD", title = "PLATINUM HIGH ROLLER", price = 2500000, discount = 0.1, color = Color3.fromRGB(215, 230, 245) },
 		{ id = 3, name = "BLACK CARD", title = "BLACK CARD LEGEND", price = 25000000, discount = 0.15, color = Color3.fromRGB(190, 120, 255) },
 	},
-	-- wearables at the Gem Showcase: one per slot, everyone sees them on you (on foot)
+	-- wearables at the Gems Museum: one per slot, everyone sees them on you (on foot)
 	Slots = { "Neck", "Wrist", "Hand", "Ears", "Eyes", "Head" },
 	Items = {
 		{ id = "rope_silver", slot = "Neck", name = "Silver Rope Chain", price = 25000, metal = "silver", style = "chain" },
@@ -2329,7 +2329,7 @@ Config.Luxe = {
 		pink = Color3.fromRGB(255, 120, 200),
 		black = Color3.fromRGB(30, 30, 40),
 	},
-	-- the Gem Showcase's smash-and-grab: smash a case (the alarm), grab its gems; the showpiece
+	-- the Gems Museum's smash-and-grab: smash a case (the alarm), grab its gems; the showpiece
 	-- under the glass dome is worth the most and brings more stars
 	Showcase = {
 		SmashSeconds = 1.5,
@@ -2390,7 +2390,7 @@ Config.Rewards = {
 	-- went up to stay above what 3 prizes are worth on average)
 	-- (owner, 2026-11-03: "make the prices rarer to get ... add more low percentage like up to 0.5%
 	-- which will give a car and also add way more stuffs"): many small prizes, the big ones rare;
-	-- kinds: cash, spin (one more spin of the same kind), flex (a Gem Showcase piece you don't own,
+	-- kinds: cash, spin (one more spin of the same kind), flex (a Gems Museum piece you don't own,
 	-- at or under flexMax, or flexCash), car (a car you don't own, of carTiers at or under carMax,
 	-- or carCash)
 	Wheels = {
@@ -2508,11 +2508,11 @@ Config.Minimap = {
 }
 
 ---------------------------------------------------------------------
--- Legends Motors, the car dealership (owner, 2026-10-23: "add a dealership, a real location";
+-- Rider Auto, the car dealership (owner, 2026-10-23: "add a dealership, a real location";
 -- the HUD's SHOP became CARS, your own cars only). New cars are bought here only.
 ---------------------------------------------------------------------
 Config.Dealership = {
-	Name = "LEGENDS MOTORS",
+	Name = "RIDER AUTO",
 	Block = { 4, 2 }, -- the city block it stands on (east of the city centre)
 	Face = "W", -- the side its showroom looks out of (towards the city centre)
 	BuyRange = 260, -- a player must be this close to the showroom to buy
@@ -2566,12 +2566,12 @@ Config.Challenges = {
 }
 
 ---------------------------------------------------------------------
--- Legends Customs (owner, 2026-10-23: "make the game ... cooler"): a drive-in tuning garage.
+-- Optima Werkz (owner, 2026-10-23: "make the game ... cooler"): a drive-in tuning garage.
 -- Drive into its bay and press Y (or tap the pill) to restyle the car you're in: paint, finish,
 -- second colour, window tint, underglow, rims, number plate, headlights. Saved per car.
 ---------------------------------------------------------------------
 Config.Customs = {
-	Name = "LEGENDS CUSTOMS",
+	Name = "OPTIMA WERKZ",
 	Block = { 3, 1 }, -- the city block it stands on (north of the centre)
 	Face = "S", -- the side its bay doors look out of (towards the city centre)
 	BayRadius = 20, -- how close to the middle of the bay the car must stop
@@ -2674,7 +2674,7 @@ Config.Goals = {
 		{ id = "drift1", text = "Bank a drift", stat = "drifts", need = 1, cash = 3000, xp = 80 },
 		{ id = "jump1", text = "Land a jump", stat = "jumps", need = 1, cash = 3000, xp = 80 },
 		{ id = "car2", text = "Buy your second car", stat = "cars", need = 2, cash = 5000, xp = 120 },
-		{ id = "custom1", text = "Restyle a car at Legends Customs", stat = "customs", need = 1, cash = 4000, xp = 100 },
+		{ id = "custom1", text = "Restyle a car at Optima Werkz", stat = "customs", need = 1, cash = 4000, xp = 100 },
 		{ id = "job1", text = "Finish a delivery job", stat = "jobs", need = 1, cash = 4000, xp = 100 },
 		{ id = "lvl5", text = "Reach level 5", stat = "level", need = 5, cash = 6000, xp = 0 },
 		{ id = "pvp1", text = "Race against another player", stat = "pvp", need = 1, cash = 6000, xp = 150 },
@@ -2794,7 +2794,7 @@ Config.CarLevels = {
 	-- prices, up to BrandMax (5 cars). The brand levels (Config.Brands) stay as well (owner: "keep both")
 	BrandOff = 0.05,
 	BrandMax = 0.25,
-	-- Legends Customs looks can be paid with the car's CP too (owner: "both"): CP per change
+	-- Optima Werkz looks can be paid with the car's CP too (owner: "both"): CP per change
 	LookCp = { paint = 1, finish = 1, accent = 1, tint = 1, glow = 2, rim = 1, plate = 1, head = 1 },
 }
 
@@ -2810,7 +2810,7 @@ end
 Config.CarParts = {
 	-- (owner, 2026-11-03: "S2 and R and X cars that are already in that range stock from the
 	-- dealership, not tuneable except tyres, gearbox, suspension, exhaust, otherwise it would be too
-	-- overpowered"; PartData.Slots `top`; sound parts are fine on them, looks at Legends Customs aren't
+	-- overpowered"; PartData.Slots `top`; sound parts are fine on them, looks at Optima Werkz aren't
 	-- limited)
 	TopClasses = { S2 = true, R = true, X = true }, -- by the car's stock class
 	-- a part's price: its real price * Economy.PartPriceMult. Big parts (BigFrom and up) cost a little more
@@ -2840,7 +2840,7 @@ function Config.partCash(list: number, k: number, _swap: boolean?): number
 end
 
 -- Brand levels (owner, 2026-10-30, from the research: Midnight Racing's manufacturer levels):
--- driving a brand's cars levels the brand up; each level takes CustomsOff off Legends Customs on
+-- driving a brand's cars levels the brand up; each level takes CustomsOff off Optima Werkz on
 -- its cars (2026-11-03: cars have no level locks any more, so TrimEvery / TrimMax do nothing now)
 Config.Brands = {
 	XpPerMile = 12,
@@ -3077,7 +3077,7 @@ Config.Value = {
 	CollectorFloor = 0.8,
 	ConditionMax = 0.1, -- up to this much off for low health or an overdue service
 	HistoryBonus = 0.03, -- every service on time
-	SellShare = 0.6, -- what Legends Motors pays of a car's value
+	SellShare = 0.6, -- what Rider Auto pays of a car's value
 }
 
 Config.Service = {
@@ -3249,7 +3249,7 @@ Config.Jobs = (function()
 				ranks = { "Table Boy", "Tea Maker", "Head Brewer", "Shop Manager", "Tea House Owner" } },
 			{ id = "fuel", name = "Fuel Station", kind = "post", where = "Kabar Aye Fuel (the flyover station)", post = v(34600, 62.31, 29131), paycheck = 200,
 				ranks = { "Pump Attendant", "Cashier", "Shift Lead", "Station Manager", "Station Owner" } },
-			{ id = "dealer", name = "Dealership Staff", kind = "post", where = "Legends Motors, Kabar Aye", post = v(35424.4, 38.56, 22405.2), paycheck = 200,
+			{ id = "dealer", name = "Dealership Staff", kind = "post", where = "Rider Auto, Kabar Aye", post = v(35424.4, 38.56, 22405.2), paycheck = 200,
 				ranks = { "Car Washer", "Sales Associate", "Senior Sales", "Sales Manager", "General Manager" } },
 			{ id = "mall", name = "Mall Shop", kind = "post", where = "Golden Thread Boutique, Myanmar Plaza", post = v(34778, 40.5, 27640), paycheck = 200,
 				ranks = { "Shop Helper", "Sales Clerk", "Senior Clerk", "Floor Manager", "Boutique Owner" } },

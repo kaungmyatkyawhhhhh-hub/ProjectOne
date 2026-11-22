@@ -1,5 +1,5 @@
 --[[
-	CarStats (owner, 2026-10-31: the Legends Motors buy menu, like Midnight Racing's)
+	CarStats (owner, 2026-10-31: the Rider Auto buy menu, like Midnight Racing's)
 	The numbers the dealer menu shows for each car, worked out from its spec (Cars): weight, power,
 	torque, power-to-weight, braking, drive, seats, gearbox, fuel, MPG and a one-line description.
 	They are for show only; the car drives on its spec (TopSpeed, ZeroToSixty, Handling).

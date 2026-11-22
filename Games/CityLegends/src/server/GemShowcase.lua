@@ -1,6 +1,6 @@
 --[[
 	GemShowcase (server)
-	The Legends Gem Showcase on Legends Boulevard, Downtown (owner, 2026-10-22: rare, visible flex
+	The Myanmar Gems Museum on Legends Boulevard, Downtown (owner, 2026-10-22: rare, visible flex
 	items like custom gems and accessories, and you can steal from it).
 	  * Outside: a white stone gallery with a gold-framed glass front, a gold awning, the name in
 	    gold, a glowing diamond on the roof, palms and a giant turning gem over a reflecting pool.
@@ -172,8 +172,8 @@ local function glassCase(kit: any, parent: Instance, cf: CFrame, w: number, d: n
 	shards.RotSpeed = NumberRange.new(-300, 300)
 	shards.Rate = 0
 	shards.Parent = glass
-	local smash = prompt(glass, "Smash the case", "Legends Gem Showcase", S.SmashSeconds, 8)
-	local grab = prompt(glass, "Grab the stones", "Legends Gem Showcase", S.GrabSeconds, 8)
+	local smash = prompt(glass, "Smash the case", "Myanmar Gems Museum", S.SmashSeconds, 8)
+	local grab = prompt(glass, "Grab the stones", "Myanmar Gems Museum", S.GrabSeconds, 8)
 	grab.Enabled = false
 	local c: Case = { model = model, glass = glass, contents = contents, smash = smash, grab = grab, shards = shards, state = "whole", smashedAt = 0, showpiece = false }
 	table.insert(cases, c)
@@ -382,10 +382,10 @@ local function build(kit: any, parent: Instance, base: CFrame, lot: number)
 	local ds = deco(inside, Vector3.new(16, 3, 0.4), desk * CFrame.new(0, 10, 2.6), STONE, Enum.Material.Marble)
 	kit.surfaceText(ds, Enum.NormalId.Front, "CONCIERGE  ·  THE COLLECTION", GOLD, nil, nil, Enum.Font.Garamond, Vector2.new(700, 100))
 	local shopPart = deco(inside, Vector3.new(2, 2, 2), desk * CFrame.new(0, 3, -3.4), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
-	shopPrompt = prompt(shopPart, "Browse the collection", "Legends Gem Showcase", 0, 10)
+	shopPrompt = prompt(shopPart, "Browse the collection", "Myanmar Gems Museum", 0, 10)
 	-- the VIP cards are sold at the same desk (Luxe: a title and money off the collection)
 	local vipPart = deco(inside, Vector3.new(2, 2, 2), desk * CFrame.new(5, 3, -3.4), Color3.new(), Enum.Material.SmoothPlastic, { transparency = 1 })
-	local vp = prompt(vipPart, "VIP membership", "Legends Gem Showcase", 0, 10)
+	local vp = prompt(vipPart, "VIP membership", "Myanmar Gems Museum", 0, 10)
 	vp.KeyboardKeyCode = Enum.KeyCode.R
 	vp.GamepadKeyCode = Enum.KeyCode.ButtonY
 	vipPrompt = vp

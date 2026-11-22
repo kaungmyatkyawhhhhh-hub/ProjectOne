@@ -1,6 +1,6 @@
 --[[
 	Bank (server)
-	The Legends Reserve Bank and its robbery (owner, 2026-10-22: "add a bank which u can rob").
+	The CB Bank and its robbery (owner, 2026-10-22: "add a bank which u can rob").
 	  * A stone bank on its own city block: steps, columns, a marble hall with chandeliers and
 	    teller counters, and a round steel vault door at the back.
 	  * On foot, hold E at the vault door to crack it: the alarm rings, the door swings open and
@@ -405,7 +405,7 @@ function Bank.block(kit: any, parent: Instance, bi: number, bj: number, cx: numb
 		deco(model, Vector3.new(7, 1.6, 7), at(x, FLOOR + H - 6.8, colZ), STONE, WALL)
 	end
 	local beam = mk(model, Vector3.new(W + 6, 6, 14), at(0, FLOOR + H - 3, zFront + 4), STONE, WALL, { name = "Beam" })
-	kit.surfaceText(beam, Enum.NormalId.Front, "LEGENDS RESERVE BANK", GOLD, nil, 1, Enum.Font.Garamond, Vector2.new(1400, 80))
+	kit.surfaceText(beam, Enum.NormalId.Front, "CB BANK", GOLD, nil, 1, Enum.Font.Garamond, Vector2.new(1400, 80))
 	-- the attic above the beam, stepped back
 	mk(model, Vector3.new(W + 2, 5, 10), at(0, FLOOR + H + 2.5, zFront + 6), STONE_DARK, Enum.Material.Limestone, { name = "Attic" })
 	deco(model, Vector3.new(W + 8, 0.8, 15), at(0, FLOOR + H + 0.4, zFront + 4), STONE, WALL)
@@ -492,7 +492,7 @@ function Bank.block(kit: any, parent: Instance, bi: number, bj: number, cx: numb
 	promptPart.Name = "VaultPrompt"
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Crack the vault"
-	prompt.ObjectText = "Legends Reserve Bank"
+	prompt.ObjectText = "CB Bank"
 	prompt.HoldDuration = B.CrackSeconds
 	prompt.MaxActivationDistance = 12
 	prompt.RequiresLineOfSight = false

@@ -423,7 +423,7 @@ guard("HairpinHotel", function() require(script.Parent:WaitForChild("HairpinHote
 guard("Gate", function() require(script.Parent:WaitForChild("Gate")).init(ctx) end)
 guard("Hotel", function() Hotel.init(ctx) end)
 guard("Chauffeur", function() Chauffeur.init(ctx) end)
--- Legends Motors: new cars are bought there only (owner, 2026-10-23)
+-- Rider Auto: new cars are bought there only (owner, 2026-10-23)
 local Dealership = require(script.Parent:WaitForChild("Dealership"))
 guard("Dealership", function() Dealership.init(ctx) end)
 -- drift scoring, speed traps, jumps and the leaderboard
@@ -434,7 +434,7 @@ local Customs = require(script.Parent:WaitForChild("Customs"))
 guard("Customs", function() Customs.init(ctx) end)
 local PlateShop = require(script.Parent:WaitForChild("PlateShop"))
 guard("PlateShop", function() PlateShop.init(ctx) end) -- (2026-11-19) Myanmar number plates, the Plate Office
--- the Legends Gem Showcase, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
+-- the Myanmar Gems Museum, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
 -- Rewards (the daily reward, gifts, the wheels; it replaced the casino, 2026-11-03)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 guard("Luxe", function() Luxe.init(ctx) end)
@@ -502,7 +502,7 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 	local spec = Cars.get(carId)
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
 	PlateShop.applyTo(player, model, carId, opts) -- (2026-11-19) its Myanmar number plate
-	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (an event plate goes over it)
+	Customs.applyTo(player, model, carId) -- the car's Optima Werkz look (an event plate goes over it)
 	if opts and opts.job then
 		Customs.setOn(model, opts.look or {})
 		model:SetAttribute("JobCar", opts.job)
@@ -679,7 +679,7 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 	return { ok = true, message = "Purchased " .. spec.Name, price = price, data = PlayerData.snapshot(player) }
 end
 
--- a test drive at Legends Motors (owner, 2026-10-30): a dealer car you don't own, once each per
+-- a test drive at Rider Auto (owner, 2026-10-30): a dealer car you don't own, once each per
 -- visit, out of the drive-out bay
 local tested: { [Player]: { [string]: boolean } } = {}
 local lastTest: { [Player]: number } = {}

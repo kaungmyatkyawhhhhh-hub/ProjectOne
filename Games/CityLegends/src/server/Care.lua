@@ -635,7 +635,7 @@ handlers.roadside = function(player, kind)
 	return { ok = true, paid = price }
 end
 
--- selling at Legends Motors: the car goes, its record too
+-- selling at Rider Auto: the car goes, its record too
 handlers.sell = function(player, id)
 	local profile = PlayerData.get(player) :: any
 	if type(id) ~= "string" or not profile or not profile.Owned[id] then

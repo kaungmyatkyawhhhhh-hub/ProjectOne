@@ -165,7 +165,7 @@ function BankClient.init()
 			return
 		end
 		if info.kind == "robbery" then
-			UI.toast(`{info.by} is robbing the Legends Reserve Bank!`, Theme.Danger)
+			UI.toast(`{info.by} is robbing the CB Bank!`, Theme.Danger)
 		elseif info.kind == "grab" then
 			UI.popup("CASH GRABBED", tonumber(info.amount) or 0, Theme.Money)
 			Audio.cutUp(2, "CASH")

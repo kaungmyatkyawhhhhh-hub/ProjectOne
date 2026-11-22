@@ -321,6 +321,14 @@ function RivieraTraffic.build()
 			end
 		end
 		if la then
+			-- (2026-11-22) the Hledan flyover's new continuous deck: lanes lifted onto it
+			local fix = script.Parent:FindFirstChild("YangonDeckFix")
+			local okF, modF = pcall(function()
+				return fix and require(fix)
+			end)
+			if okF and modF then
+				modF.apply(la)
+			end
 			data = { lanes = la, links = li }
 		end
 	end

@@ -62,7 +62,7 @@ CarFinish.CARS = {
 	pleiad_gc8 = true,
 } :: { [string]: boolean }
 
--- Legends Customs' finishes on these cars
+-- Optima Werkz' finishes on these cars
 CarFinish.VARIANT = {
 	gloss = "CL_PaintGloss",
 	matte = "CL_PaintMatte",

@@ -1,6 +1,6 @@
 --[[
 	Dealership
-	Legends Motors, the city's car dealership (owner, 2026-10-23: "add a dealership, a real
+	Rider Auto, the city's car dealership (owner, 2026-10-23: "add a dealership, a real
 	location"; the HUD's SHOP became CARS and shows only the cars you have). New cars are bought
 	here, nowhere else:
 	  * a glass showroom on its own city block (Config.Dealership), facing the city centre: a
@@ -300,7 +300,7 @@ local function fromBody(kit: any, model: Model, template: Model, base: CFrame, l
 	end
 end
 
--- builds Legends Motors when (bi, bj) is its block
+-- builds Rider Auto when (bi, bj) is its block
 -- (CityBuilder asks this when baking the map: this block stays empty and is built at start)
 function Dealership.isBlock(bi: number, bj: number): boolean
 	return bi == D.Block[1] and bj == D.Block[2]
@@ -387,7 +387,7 @@ function Dealership.block(kit: any, parent: Instance, bi: number, bj: number, _c
 		EntranceRamp.build(model, rampIn, { width = SW - BX + 2, keep = { model }, notch = true })
 	end)
 
-	-- big LEGENDS MOTORS sign on the roof edge over the front glass
+	-- big RIDER AUTO sign on the roof edge over the front glass
 	local sign = mk(model, Vector3.new(SW * 1.3, 8, 1.2), at(-12, H + 6.5, Z0 - 1), Color3.fromRGB(14, 14, 18), Enum.Material.SmoothPlastic, { name = "DealerSign" })
 	kit.surfaceText(sign, Enum.NormalId.Front, D.Name, Color3.new(1, 1, 1), nil, nil, Enum.Font.GothamBlack, Vector2.new(1400, 170))
 	deco(model, Vector3.new(SW * 1.3 + 0.4, 0.4, 1.4), at(-12, H + 2.4, Z0 - 1), ACCENT, Enum.Material.Neon)

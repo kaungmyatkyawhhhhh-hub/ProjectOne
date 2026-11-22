@@ -11,7 +11,7 @@
 	    collection and the Legends Path; opens the GOALS screen) and SETTINGS (mini map on / off and
 	    corner, graphics, camera, units, gearbox, music and sound sliders, radio, controls).
 	  * CARS: your cars by brand (sort, search), a side panel with SPAWN, FAVOURITE, CUSTOMISE (a
-	    waypoint to Legends Customs) and MARKET; "Get more cars" sets a waypoint to Legends Motors.
+	    waypoint to Optima Werkz) and MARKET; "Get more cars" sets a waypoint to Rider Auto.
 	  * HOUSES (2026-11-04): the house standing in this server (TELEPORT HOME), your blueprints, the
 	    house settings (HousingClient's house menu) and Legends Realty (fast travel).
 	  * STORE: passes and products by name and exact effect, prices read from Roblox; greyed with
@@ -1610,7 +1610,7 @@ openClaim = function()
 		end
 	end
 	local page = openSub(if pack then "Starter Pack: pick your car" else "Pick your first car")
-	text({ Text = if pack then "One of these, yours for good. Cars you own are greyed out." else "It's yours for good. You can buy more at Legends Motors.", FontFace = MEDIUM, TextSize = 17, TextColor3 = SUB, Position = UDim2.fromOffset(136, 34), Size = UDim2.fromOffset(700, 22), Parent = page })
+	text({ Text = if pack then "One of these, yours for good. Cars you own are greyed out." else "It's yours for good. You can buy more at Rider Auto.", FontFace = MEDIUM, TextSize = 17, TextColor3 = SUB, Position = UDim2.fromOffset(136, 34), Size = UDim2.fromOffset(700, 22), Parent = page })
 	local picked: string? = nil
 	local cards: { [string]: TextButton } = {}
 	local confirm: TextButton
@@ -1974,7 +1974,7 @@ local function buildCars(page: Frame)
 			local s = spotById("customs")
 			if s then
 				Minimap.setWaypoint(s.cf.Position)
-				UI.toast("Waypoint: Legends Customs (on your map)", MINT)
+				UI.toast("Waypoint: Optima Werkz (on your map)", MINT)
 			end
 			outOfMenu()
 		end)
@@ -2010,7 +2010,7 @@ local function buildCars(page: Frame)
 			local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 1, -32), Parent = side })
 			text({ Text = "TRAILER", FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Size = UDim2.new(1, 0, 0, 16), Parent = body })
 			text({ Text = T.Name, FontFace = HEAVY, TextSize = 26, TextScaled = true, Position = UDim2.fromOffset(0, 18), Size = UDim2.new(1, 0, 0, 34), Parent = body })
-			local line = if not st.owned then "Buy one at Legends Motors: TRAILERS."
+			local line = if not st.owned then "Buy one at Rider Auto: TRAILERS."
 				elseif st.load then "On it: " .. (if Cars.ById[st.load] then Cars.ById[st.load].Name else st.load)
 				elseif st.hitched then "Hitched to your car."
 				elseif st.out then "Parked out on the road."
@@ -2142,12 +2142,12 @@ local function buildCars(page: Frame)
 		ic.Position = UDim2.fromOffset(30, 26)
 		ic.Active = false
 		ic.Interactable = false
-		text({ Text = "Get more cars  ·  Legends Motors", FontFace = HEAVY, TextSize = 18, TextColor3 = GOLD, Position = UDim2.fromOffset(60, 0), Size = UDim2.new(1, -70, 1, 0), Parent = more })
+		text({ Text = "Get more cars  ·  Rider Auto", FontFace = HEAVY, TextSize = 18, TextColor3 = GOLD, Position = UDim2.fromOffset(60, 0), Size = UDim2.new(1, -70, 1, 0), Parent = more })
 		focusable(more, function()
 			local s = spotById("dealership")
 			if s then
 				Minimap.setWaypoint(s.cf.Position)
-				UI.toast("Waypoint: Legends Motors (on your map)", MINT)
+				UI.toast("Waypoint: Rider Auto (on your map)", MINT)
 			end
 			outOfMenu()
 		end, GOLD)

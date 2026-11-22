@@ -178,7 +178,7 @@ local function garden(kit: any, parent: Instance, c: Vector3, face: Vector3)
 end
 
 -- a big screen on two posts, facing the street
-local SCREEN_TEXTS = { "CITY LEGENDS\nCUT UP · GET PAID", "LEGENDS LOOP\n8 KM OF HIGHWAY", "LEGENDS MOTORS\nNEW ARRIVALS", "NIGHT RUN\nTONIGHT 22:00" }
+local SCREEN_TEXTS = { "CITY LEGENDS\nCUT UP · GET PAID", "LEGENDS LOOP\n8 KM OF HIGHWAY", "RIDER AUTO\nNEW ARRIVALS", "NIGHT RUN\nTONIGHT 22:00" }
 local function screen(kit: any, parent: Instance, c: Vector3, face: Vector3, k: number)
 	local mk, deco = kit.mk, kit.deco
 	local base = CFrame.lookAt(c, c + face)

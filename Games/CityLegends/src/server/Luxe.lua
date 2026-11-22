@@ -1,9 +1,9 @@
 --[[
 	Luxe (server)
 	What the rich spend on Downtown (owner, 2026-10-22): VIP membership and flex items at the Legends
-	Gem Showcase (the VIP desk moved there from the casino, 2026-11-03).
+	Gems Museum (the VIP desk moved there from the casino, 2026-11-03).
 	  * VIP cards (Config.Luxe.Vip): a title over your head that everyone sees, and money off at the
-	    Gem Showcase. A higher card costs the difference.
+	    Gems Museum. A higher card costs the difference.
 	  * Wearables (Config.Luxe.Items, built by Flex): bought once, one worn per slot, welded onto
 	    your character so everyone sees them, saved in the profile's Luxe field.
 	  * Heist loot shared with the bank: Luxe.addLoot fills the same bag (the Loot attribute) that the

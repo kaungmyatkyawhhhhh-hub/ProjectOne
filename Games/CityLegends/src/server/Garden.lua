@@ -1,6 +1,6 @@
 --[[
 	Garden
-	Plaza dressing shared by the Downtown venues (Legends Rewards, the Gem Showcase): a palm tree and
+	Plaza dressing shared by the Downtown venues (Legends Rewards, the Gems Museum): a palm tree and
 	a marble fountain. (Moved out of the old Casino module, 2026-11-03.)
 ]]
 

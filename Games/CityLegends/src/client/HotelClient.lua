@@ -1,6 +1,6 @@
 --[[
 	HotelClient
-	The Legends Grand Hotel's valet (see server/Hotel.lua):
+	The Novotel Yangon Max's valet (see server/Hotel.lua):
 	  * stopped in the valet bay under the canopy, the action pill says VALET: Y hands the car over
 	    and you step out at the doors
 	  * the valet stand's "Get my car" only shows while the valet has your car; it brings the car

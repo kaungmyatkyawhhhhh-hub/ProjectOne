@@ -1,6 +1,6 @@
 --[[
 	Flex
-	Builds the Gem Showcase's wearables (Config.Luxe.Items) out of small parts: chains, pendants,
+	Builds the Gems Museum's wearables (Config.Luxe.Items) out of small parts: chains, pendants,
 	watches, rings, earrings, shades and crowns. Shared: the server welds them onto characters
 	(everyone sees them), the shop shows them on velvet busts and in its previews.
 

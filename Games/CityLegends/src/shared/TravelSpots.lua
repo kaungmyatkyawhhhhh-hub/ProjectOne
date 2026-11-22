@@ -1,7 +1,7 @@
 --[[
 	TravelSpots (shared)
 	The places the main menu's world map shows and fast travels to (owner, 2026-11-02): each venue
-	(WestLayout.places: Legends Motors, Legends Customs, the bank, the towers, the hotel, Legends Rewards,
+	(WestLayout.places: Rider Auto, Optima Werkz, the bank, the towers, the hotel, Legends Rewards,
 	the gem showcase, and Monaco's own spots), Legends Realty, the races' starts and the delivery
 	dispatches. Each spot: an id, a name, its symbol (MenuArt.venues), a line on what you do there,
 	and where you arrive: on the road outside, facing the way on (cf). Your own house is added by the

@@ -808,7 +808,7 @@ USE.bed = function(_rec, _p, who)
 	send(who, { kind = "sleep" })
 end
 USE.wardrobe = function(_rec, _p, who)
-	-- your outfit: the Flex pieces you own, worn or taken off (the Gem Showcase's screen)
+	-- your outfit: the Flex pieces you own, worn or taken off (the Gems Museum's screen)
 	if Luxe == nil then
 		local ok, m = pcall(function()
 			return require(script.Parent:WaitForChild("Luxe")) :: any

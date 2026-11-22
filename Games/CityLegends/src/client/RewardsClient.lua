@@ -437,7 +437,7 @@ local function pageProperty(body: Frame): (() -> ())?
 	local suite = p.suite
 	local sr = row(body, y, 52, false)
 	text(sr, "HOTEL SUITE", 15, Theme.Text, { Font = Enum.Font.GothamBlack, Position = UDim2.fromOffset(14, 6), Size = UDim2.new(1, -20, 0, 20) })
-	text(sr, if suite then suite.name .. " pays " .. UI.formatCash(suite.perMinute) .. " every minute you play, straight into your cash" else "Buy a suite at the Legends Grand Hotel: it pays every minute you play", 12, Theme.SubText, { Position = UDim2.fromOffset(14, 28), Size = UDim2.new(1, -20, 0, 18) })
+	text(sr, if suite then suite.name .. " pays " .. UI.formatCash(suite.perMinute) .. " every minute you play, straight into your cash" else "Buy a suite at the Novotel Yangon Max: it pays every minute you play", 12, Theme.SubText, { Position = UDim2.fromOffset(14, 28), Size = UDim2.new(1, -20, 0, 18) })
 	local b = button(if anyReady then "COLLECT RENT" else "NO SAFE READY", if anyReady then Theme.Money else Theme.Stroke, { Position = UDim2.new(0, 0, 1, -54), Size = UDim2.new(1, 0, 0, 50), TextSize = 20, ZIndex = 74, Parent = body })
 	b.TextColor3 = if anyReady then Theme.Money else Theme.SubText
 	if anyReady then
@@ -613,7 +613,7 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 		oddsPanel = op
 		label({ Text = "THE ODDS  ·  " .. (if n > 1 then "each of the 3 reels" else "the reel"), TextSize = 14, Font = Enum.Font.GothamBlack, TextColor3 = GOLD, Position = UDim2.fromOffset(14, 10), Size = UDim2.new(1, -28, 0, 18), ZIndex = 91, Parent = op })
 		for k, o in w.odds do
-			local prize = if o.car then "A free car (or " .. UI.formatCash(o.carCash or 0) .. ")" elseif o.flex then "A Gem Showcase jewel (or " .. UI.formatCash(o.flexCash or 0) .. ")" elseif o.part then "A free " .. tostring(o.part) .. " part" elseif o.spin then "One more spin" else UI.formatCash(o.cash)
+			local prize = if o.car then "A free car (or " .. UI.formatCash(o.carCash or 0) .. ")" elseif o.flex then "A Gems Museum jewel (or " .. UI.formatCash(o.flexCash or 0) .. ")" elseif o.part then "A free " .. tostring(o.part) .. " part" elseif o.spin then "One more spin" else UI.formatCash(o.cash)
 			label({ Text = prize, TextSize = 12, Font = Enum.Font.GothamBold, TextColor3 = Theme.Text, TextXAlignment = Enum.TextXAlignment.Left, Position = UDim2.fromOffset(14, 32 + (k - 1) * 21), Size = UDim2.new(1, -110, 0, 20), ZIndex = 91, Parent = op })
 			label({ Text = tostring(o.percent) .. "%", TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -14, 0, 32 + (k - 1) * 21), Size = UDim2.fromOffset(80, 20), ZIndex = 91, Parent = op })
 		end
@@ -738,7 +738,7 @@ local function pageWheel(body: Frame, id: string): (() -> ())?
 		end
 		for _, rr in result.reels do
 			if type(rr.flex) == "string" then
-				UI.toast("You won the " .. rr.flex .. "! Wear it from the Gem Showcase", GOLD)
+				UI.toast("You won the " .. rr.flex .. "! Wear it from the Gems Museum", GOLD)
 			elseif type(rr.part) == "string" then
 				UI.toast("You won the " .. rr.part .. "! It's in My Parts at the workshop", GOLD)
 			elseif rr.spin then

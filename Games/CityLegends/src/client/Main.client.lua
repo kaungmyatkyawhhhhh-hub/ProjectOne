@@ -844,12 +844,12 @@ game:GetService("ProximityPromptService").PromptTriggered:Connect(function(promp
 	end
 end)
 
--- the Legends Grand Hotel: the valet takes your car at the bay and brings it back to the door
+-- the Novotel Yangon Max: the valet takes your car at the bay and brings it back to the door
 startStep("Hotel", function()
 	require(script.Parent:WaitForChild("HotelClient")).init(requestDrive)
 end)
 startStep("Customs", function()
-	require(script.Parent:WaitForChild("CustomsClient")).init() -- Legends Customs (after the hotel: it chains the drive action)
+	require(script.Parent:WaitForChild("CustomsClient")).init() -- Optima Werkz (after the hotel: it chains the drive action)
 end)
 -- car levels, Car Points and the parts screen (2026-11-03; the garage's UPGRADE, the HUD strip)
 startStep("Plates", function()
@@ -868,7 +868,7 @@ task.spawn(HouseClient.init, function(id: string)
 	requestDrive(id)
 end)
 
--- Legends Motors, the dealership: its prompts open the buy screen, and cars leave by its bay
+-- Rider Auto, the dealership: its prompts open the buy screen, and cars leave by its bay
 local DealerOpen = remote("DealerOpen", "RemoteEvent") :: RemoteEvent
 local DealerCall = remote("DealerCall", "RemoteFunction") :: RemoteFunction
 
@@ -935,7 +935,7 @@ do
 			if type(lvl) == "number" and lvl > (tonumber(known[brand]) or 1) then
 				local off = math.floor((1 - Config.brandCustomsMult(lvl)) * 100 + 0.5)
 				UI.popup(brand .. " BRAND LV " .. lvl, 0, Config.Theme.Accent2)
-				UI.toast(off .. "% off at Legends Customs", Config.Theme.Accent2)
+				UI.toast(off .. "% off at Optima Werkz", Config.Theme.Accent2)
 			end
 		end
 		known = now
