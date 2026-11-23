@@ -77,6 +77,7 @@ Back to [[00 Roblox Playbook]]. Short, must-follow version of the three Playbook
 - **Update Announcements** (60 chars, 1 per 3 days) are the only notifications that reach under-13s. Use Experience Events (Notify Me) on the game page.
 - New content goes AFTER existing goals: never make an old goal further away.
 - Admin tools: server-checked permissions, every action logged, Ban API, test switches never in the live game.
+- **Before anyone publishes, run a "live check" (23 Nov 2026, City Legends was published with half-built landmarks; the place was later found holding the test DataStore name and a test helper module):** the save store is the live name, no test modules / stages / work-in-progress folders in Workspace, and every builder's work is either finished or parked in ServerStorage. Work an agent cannot finish in one run goes to ServerStorage at the end of the run, not left in Workspace.
 
 ## 9. Storefront
 - Art (from studying the 32 biggest games, see [[Playbook notes - Top games art study (Oct 2026)]]): ONE subject filling the frame, a face with clear emotion, tight crop breaking the edges, simple background, text = logo or one big number only, thumbnails tell a tiny story (threat vs you / before→after / huge reward), all thumbnails use ONE template and change one thing. Never copy a current hit's look.
