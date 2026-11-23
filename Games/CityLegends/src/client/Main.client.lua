@@ -261,8 +261,16 @@ local JUMP_FAR = 600
 -- wait + its 4 s guess. (Terrain graphics memory never settles soon after a jump: no usable "meshes done" signal.)
 local TERRAIN_SETTLE = 4
 local TERRAIN_SETTLE_PHONE = 6.5 -- shortcut: a guess (not measured on a phone), tune from a phone test
+-- (24 Nov, first-5 test: the first car out waited 6.5 s on phones, 4 s on PC, though its streets went quiet in
+-- 1.5 s) the start screen's map wait already streamed everything within NEAR_R of the menu orbit's centre, and the
+-- orbit looks down on it: a car coming out there, straight from the start screen, is no jump
+local menuAt: Vector3? = nil
 -- is `to` far from where the camera is now (call before moving the car or the camera there)
 local function isJump(to: Vector3): boolean
+	local m = menuAt
+	if m and Vector3.new(to.X - m.X, 0, to.Z - m.Z).Magnitude < NEAR_R then
+		return false
+	end
 	return (to - camera.CFrame.Position).Magnitude > JUMP_FAR
 end
 local function waitForMap(status: string, jumped: boolean?, near: Vector3?)
@@ -338,7 +346,8 @@ Weather.init() -- rain cycle (rare showers, starts clear), wet roads, mist, rain
 -- (the day / night cycle runs since the loading screen: morning, day, sunset, night)
 phase("world")
 -- (21 Nov) the map round the menu settles while the profile is still on its way (it used to wait after the steps)
-waitForMap("Loading the map...", false, if Config.activeMap() == "Yangon" then require(Shared:WaitForChild("MenuShots")).orbit().centre else nil)
+menuAt = if Config.activeMap() == "Yangon" then require(Shared:WaitForChild("MenuShots")).orbit().centre else nil
+waitForMap("Loading the map...", false, menuAt)
 phase("map")
 
 ---------------------------------------------------------------------
@@ -529,6 +538,7 @@ local function startOrbit()
 	end)
 end
 local function stopOrbit()
+	menuAt = nil -- (from here on the streets round the menu can stream out again)
 	if orbitConn then
 		orbitConn:Disconnect()
 		orbitConn = nil
