@@ -122,29 +122,52 @@ def _trim(p, other):
     return (k, cls, (round(nc[0], 4), round(nc[1], 4), round(nc[2], 4)), R0, U0, tuple(S2))
 
 
+def _reach(left, near):
+    """how far what is left of a piece reaches out from the other kerbs (studs)"""
+    if left.is_empty:
+        return 0.0
+    if not near:
+        return 99.0
+    u = shapely.union_all(near)
+    pts = shapely.get_coordinates(left)
+    return max(u.distance(shapely.points(pts)).tolist())
+
+
 def resolve(parts, cells=None):
     """parts with every crossing kerb pair fixed on its smaller piece; returns (parts, stats)"""
     ps, idx, polys = pairs(parts, cells)
-    gone, trimmed = set(), {}
+    gone, trimmed, raised = set(), {}, {}
+    tree = STRtree(np.array(polys, dtype=object)) if polys else None
+    tops = [_foot(parts[i])[1] for i in idx]
     for inter, a, b in ps:
         ia, ib = idx[a], idx[b]
         if ia in gone or ib in gone or ia in trimmed or ib in trimmed:
-            continue                              # one of them already moved: re-checked below
+            continue                              # one of them already moved: re-checked next round
         small, big = (a, b) if polys[a].area <= polys[b].area else (b, a)
         t = _trim(parts[idx[small]], polys[big])
-        if t is None:
-            gone.add(idx[small])
-        else:
+        if t is not None:
             trimmed[idx[small]] = t
-    out = [trimmed.get(i, p) for i, p in enumerate(parts) if i not in gone]
-    st = dict(pairs=len(ps), dropped=len(gone), trimmed=len(trimmed))
+            continue
+        # drop it only if that leaves no notch: what the other kerbs do not cover is a sliver, or sticks out away
+        # from them (a stray piece across the road / crossing); else keep both (one continuous kerb, e.g. two wedge
+        # fans on a gore bend) and only lift the smaller 0.06 when their tops are coplanar (no flicker)
+        f = polys[small]
+        near = [polys[j] for j in tree.query(f.buffer(0.5)) if j != small and idx[j] not in gone]
+        left = f.difference(shapely.union_all(near)) if near else f
+        if left.area < 0.15 or _reach(f.difference(polys[big]), [polys[big]]) > 1.5:
+            gone.add(idx[small])
+        elif abs(tops[small] - tops[big]) < 0.05 and idx[small] not in raised:
+            k, cls, pos, R, U, S = parts[idx[small]]
+            raised[idx[small]] = (k, cls, (pos[0], round(pos[1] + 0.06, 4), pos[2]), R, U, S)
+    out = [trimmed.get(i, raised.get(i, p)) for i, p in enumerate(parts) if i not in gone]
+    st = dict(pairs=len(ps), dropped=len(gone), trimmed=len(trimmed), raised=len(raised))
     if ps and (gone or trimmed):
         # pairs of pieces untouched in this round (a third piece in a cluster): another round
         out, st2 = resolve(out, cells)
         st = dict(pairs=st['pairs'], dropped=st['dropped'] + st2['dropped'], trimmed=st['trimmed'] + st2['trimmed'],
-                  left=st2.get('left', 0))
+                  raised=st['raised'] + st2['raised'], left=st2.get('left', 0))
     else:
-        st['left'] = len(ps)
+        st['left'] = len(ps)                      # kept on purpose: overlapping pieces of one kerb, tops apart
     return out, st
 
 
@@ -163,9 +186,16 @@ def _test():
     poly_a, _ = _foot(a)
     poly_t, _ = _foot(t[0])
     assert poly_a.intersection(poly_t).area < 1e-6
-    w = ('w', 'W', (1.5, 0.5, 0.0), (0, 0, 1), Y, (2.0, 1.0, 0.9))       # a wedge across a: dropped
+    w = ('w', 'W', (1.5, 0.5, 0.0), (0, 0, 1), Y, (4.0, 1.0, 0.9))       # a wedge across a, 2 studs out: dropped
     out, st = resolve([a, w])
     assert st['dropped'] == 1 and out == [a], (st, out)
+    # two wedge fans of one kerb lying over each other at 30 degrees, tops coplanar: dropping one would notch -> kept, lifted
+    r30 = (math.cos(math.radians(30)), 0, math.sin(math.radians(30)))
+    e = ('r', 'W', (0.0, 0.5, 0.0), I, Y, (2.0, 1.0, 0.9))
+    g = ('w', 'W', (0.3, 0.5, 0.1), r30, Y, (2.0, 1.0, 0.9))
+    out, st = resolve([e, g])
+    assert len(out) == 2 and st['raised'] == 1 and st['dropped'] == 0, (st, out)
+    assert abs(_foot(out[0])[1] - _foot(out[1])[1]) >= 0.05
     print('kerb_fix self-check ok')
 
 

@@ -17,7 +17,7 @@ import math, random, statistics, sys
 DROPS_MP = [955, 947, 1228, 1361, 1355, 1619, 1540, 1260, 1990, 2070, 1780, 2430]  # flat studs, MP dispatch -> each drop >= 900
 NEAREST = min(DROPS_MP)
 
-BASE = dict(guide=False, nearest=False, extra_time=0, hint_near=False, next_goal=False)
+BASE = dict(guide=False, nearest=False, extra_time=0, hint_near=False, next_goal=False, new_time=0)
 VERSIONS = {
     'A': dict(),                                               # live
     'B': dict(guide=True),                                     # auto-take Delivery + one-line hint + turning arrow + beam
@@ -25,6 +25,7 @@ VERSIONS = {
     'D': dict(guide=True, nearest=True, extra_time=40),        # + 40 s more on the first run (no "Too late")
     'E': dict(guide=True, nearest=True, extra_time=40, hint_near=True),                  # + "stop on the spot" when close
     'F': dict(guide=True, nearest=True, extra_time=40, hint_near=True, next_goal=True),  # + NEXT GOAL line after the pay
+    'G': dict(guide=True, nearest=True, extra_time=40, hint_near=True, next_goal=True, new_time=40),  # + 40 s on every run below level 5
 }
 
 
@@ -57,6 +58,7 @@ def kid(P, rng, patience_median, T=300.0, dt=0.25, log=None):
     found_jobs_at = None
     goal_known = False
     has_goal = False
+    xp, lvl = 0.0, 1
     run = None
     mile_left = 4600.0
     cut_rate = rng.uniform(1 / 30, 1 / 12)
@@ -99,7 +101,7 @@ def kid(P, rng, patience_median, T=300.0, dt=0.25, log=None):
                     if run['find'] <= 0:
                         d = NEAREST if P['nearest'] and guided else rng.choice(DROPS_MP)
                         road = d * rng.uniform(1.2, 1.5)
-                        limit = d / 53.6 + 25 + (P['extra_time'] if guided else 0)
+                        limit = d / 53.6 + 25 + (P['extra_time'] if guided else (P['new_time'] if lvl < 5 else 0))
                         stage, run = 'deliver', dict(d=d, left=road, t0=t, limit=limit)
                         reward(6, 'DELIVERY STARTED', True)
             elif stage == 'deliver':
@@ -115,13 +117,17 @@ def kid(P, rng, patience_median, T=300.0, dt=0.25, log=None):
                         stage, run = 'to dispatch', dict(dist=run['d'] * 1.2, find=rng.uniform(2, 10))
                     else:
                         cash = run['d'] * 0.34 + (run['limit'] - took) * 5
-                        reward(12, f'DELIVERED +${cash:.0f}', True)
+                        reward(12, f'DELIVERED +${cash:.0f}', True); xp += 80
                         goal_known = True
                         if P['next_goal'] and guided:
                             plan.append((t + 3, 5, 'NEXT GOAL: 2nd car', True)); has_goal = True
                         # the Delivery job stays on: JobsClient's label + beam point back to the nearest dispatch
                         guided = False
                         stage, run = 'to dispatch', dict(dist=run['d'] * rng.uniform(0.6, 1.2), find=rng.uniform(0, 6))
+            # XP: driving (mph / 90 per s), +80 a delivery; level n -> n+1 needs 32 * n^1.3 (Config.Progression)
+            xp += sps * 0.783 / 90 * dt
+            if xp >= 32 * lvl ** 1.3:
+                xp -= 32 * lvl ** 1.3; lvl += 1; reward(5, f'LEVEL {lvl}', True)
             # cut-ups and the first-mile goal
             if rng.random() < cut_rate * dt and sps > 40:
                 reward(2, 'cut-up +$')
