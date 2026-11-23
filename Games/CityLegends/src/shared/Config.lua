@@ -240,9 +240,9 @@ Config.YangonVenues = {
 		dealership = { x = 31689.0, z = 31574.0, fx = -1, fz = 0, y = 73.5, size = 110, w = 80 }, -- RIDER AUTO Premium Exclusive (16.81529, 96.14526): compact, beside Optima, both face the road
 		customs = { x = 31699.0, z = 31455.0, fx = -1, fz = 0, y = 75.5, size = 130, w = 88 }, -- Optima Werkz (16.81564, 96.14513): compact, 4 bays
 		bank = { x = 38525.0, z = 45372.0, fx = 1, fz = 0, y = 21.29 }, -- CB Bank head office (16.77423, 96.16742)
-		dropoff = { x = 35416.6, z = 27780.7, fx = 0.622, fz = -0.783, y = 36.12 }, -- by Myanmar Plaza
+		dropoff = { x = 35660.1, z = 27508.2, fx = -0.758, fz = -0.652, y = 36.84 }, -- by Myanmar Plaza (24 Nov: moved off a road that ran through it; was 35416.6, 27780.7)
 		gems = { x = 35023.0, z = 18623.0, fx = 0.866, fz = -0.5, y = 63.70 }, -- Gems Museum (16.85471, 96.15632)
-		rewards = { x = 35389.0, z = 22838.7, fx = -0.989, fz = -0.150, y = 37.06, w = 304 }, -- its car courts make it 304 wide
+		rewards = { x = 35461.7, z = 22353.3, fx = -0.991, fz = -0.135, y = 39.02, w = 304 }, -- its car courts make it 304 wide (24 Nov: moved off a road; was 35389.0, 22838.7)
 		-- square to the world axes (their towers and facade tiers are)
 		hotel = { x = 27227.0, z = 30361.0, fx = 1, fz = 0, y = 60.63 }, -- Novotel Yangon Max (16.82000, 96.13166)
 		tower_aurum = { x = 29226.0, z = 21923.0, fx = -1, fz = 0, y = 67.78 }, -- Lotte Hotel (16.84432, 96.13728)
@@ -3085,8 +3085,9 @@ Config.Service = {
 	-- (Yangon step 11, 2026-11-14: the workshop on New Road by the Racing Hub, built by CareVenues.service on a
 	-- YangonSites lot; Monaco's was Bay (15244.7, 3.7, 1082.7), Arrive from (15240, 4.7, 1036))
 	-- (1:1, 2026-11-17: on Kabar Aye Pagoda Road's east side, the venue row; CareVenues.service on its YangonSites lot)
-	Bay = Vector3.new(35140.3, 42.7, 24410.4), -- the middle of the workshop's middle bay (tools/riviera/CareVenues.luau)
-	Arrive = CFrame.lookAt(Vector3.new(35082.8, 42.7, 24402.8), Vector3.new(35140.3, 42.7, 24410.4)), -- fast travel: on the forecourt, facing the bay
+	-- (24 Nov: the workshop moved with its lot off a road that ran through it, to the lot at (35671.1, 25260.5) facing (0.259, 0.966); was Bay (35140.3, 42.7, 24410.4))
+	Bay = Vector3.new(35688.5, 48.7, 25286.9), -- the middle of the workshop's middle bay (tools/riviera/CareVenues.luau)
+	Arrive = CFrame.lookAt(Vector3.new(35703.4, 48.7, 25343.0), Vector3.new(35688.5, 48.7, 25286.9)), -- fast travel: on the forecourt, facing the bay
 	BayRadius = 22,
 	LiftSeconds = 4,
 	-- real-world prices; times Economy.PartPriceMult, times PriceK of the car (1 to MaxCarK)
