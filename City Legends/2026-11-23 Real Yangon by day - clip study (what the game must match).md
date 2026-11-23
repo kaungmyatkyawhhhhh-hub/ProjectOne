@@ -4,6 +4,31 @@ Source: `C:\Users\kaung\Downloads\ClipsToStudy\` (11 phone clips IMG_0927-0937, 
 
 Companion to [[2026-11-21 Real Yangon references - what the game must match]] (night). This one is **daytime**.
 
+## Full catalogues (24 Nov, every 2 s: every building, road, room, car, plate, sign, tree)
+- [[2026-11-24 Clip catalogue - old apartment block and flat interior (0927-0928)]]: 80-item build list.
+- [[2026-11-24 Clip catalogue - Waizayandar main road, junction condo, toll plaza, highway (0929, 0931, 0935, 0936)]]
+- [[2026-11-24 Clip catalogue - toddy palm avenue, big junction, Kone Baung St lanes (0930, 0933, 0934)]]: 51-item build list.
+- [[2026-11-24 Clip catalogue - YBS city drive and old highway (0932, 0937)]]
+
+61 full-size stills: `refs_23nov/IMG_<clip>_<sss>s.jpg` (captions in each catalogue's "Best stills" part).
+
+### Places proven by signs (match these 1 to 1)
+| Place | Clip @ s | In the game? |
+|---|---|---|
+| **Waizayandar Rd** (street sign) + Villa Nova office and white columned gate, 2 condo towers behind blue hoarding, Myanmar Football Academy pitches, flyover with THE QUEEN / Grand Royal billboards | 0929 @ 6-116 | Road is `road_08` (2-3 lanes a side, 5-6 m planted median, see [[2026-11-16 Audit - Yangon roads 1 to 1]]). The buildings are new: not in the map yet. |
+| **Kone Baung (14) St** residential lanes, FLYOVER shop, Royal-D lightbox, pagoda spire | 0934 @ 2-46 | Not in vault notes yet: township unknown. |
+| Mingalar Hotel, Laser Care Clinic (razor-wire wall), Lucky Seven Tea Shop | 0930 @ 30, 34, 120 | Unknown street. |
+| Myanmar Property Gallery, WEPOZT EXPRESS, Pet Food Mart, Studio & Wedding Service Centre | 0932 @ 54-156 | Unknown street. |
+| MAN CAVE / RANK shops under a white curved-balcony condo | 0931 @ 24 | Unknown street. |
+| Expressway toll plaza (LANE CASH), PRIME+ EV charging station, GOODWE billboard | 0935, 0936 | Outside the city map. |
+
+### New facts the earlier list missed
+- **Signals have red countdown digits** and some poles carry **solar panels**; a CCTV camera gantry spans the road (0930 @ 84-94, 0931).
+- **Plates:** black private (e.g. "BGO-11 6R-5379": region code on top), red taxis/buses (YBS 108 = 1L-2127, CNG taxi AA-1232).
+- **Taxis:** Dongfeng EV City Taxi (black "EX1 PRO"), white Probox taxi with yellow band, old City Taxi with door plate, navy/yellow CNG Corolla wagon. Buses: yellow King Long XMQ6119G (YBS 108, also route 10), purple YBS 12.
+- **Old highway stones:** big white ones every furlong (fractions 1/1 to 2/7 = miles/furlongs, read from the number sequence) + small blue "n KM" every 0.5 km; 100 km/h sign, chevron boards, white bridge parapet with red-white bands (0937).
+- **The flat:** dark red-brown strip timber floor, mint / blue / dark-green walls, "SAINT SUPER" collapsible gate over a teak arched-panel door, zig-zag stair rail, star-pattern arch fanlight (0927-0928).
+
 ## What each clip is
 | Clip | Length | What it shows |
 |---|---|---|
