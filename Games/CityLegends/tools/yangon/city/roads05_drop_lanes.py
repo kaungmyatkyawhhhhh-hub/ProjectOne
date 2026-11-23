@@ -35,6 +35,7 @@ def length(s):
 def patch(d):
     roads, out, log = d['roads'], [], []
     dropped = set()
+    top = max(int(float(r['rank'])) for r in roads if 'rank' in r)  # ranks are unique: a split piece takes a new last one
     for r in roads:
         if r['name'] in DROP:
             dropped.add(r['name'])
@@ -65,6 +66,8 @@ def patch(d):
             q['s'] = p
             if k:
                 q['name'] = r['name'] + 'abcdefgh'[k]
+                top += 1
+                q['rank'] = type(r['rank'])(top)
             for key in ('startsOnEnd', 'endsOnEnd'):
                 q.pop(key, None)  # the cut ends no longer meet what the whole road met
             out.append(q)
@@ -101,14 +104,16 @@ def main(paths):
 
 def test():
     s = [[34300.0 + 10 * k, 30.0, 43186.0, 1, 0, 0, 8.25, 8.25, 0, 1, 0, 0] for k in range(40)]
-    d = {'roads': [{'name': 'Lane #4266', 'half': '8.25', 'walkL': '3', 'walkR': '3', 's': s},
-                   {'name': 'Lane #19', 'half': '6', 's': s[:3]}, {'name': 'Keep', 'half': '6', 's': s[:3]}],
+    d = {'roads': [{'name': 'Lane #4266', 'rank': '5', 'half': '8.25', 'walkL': '3', 'walkR': '3', 's': s},
+                   {'name': 'Lane #19', 'rank': '6', 'half': '6', 's': s[:3]}, {'name': 'Keep', 'rank': '7', 'half': '6', 's': s[:3]}],
          'crossings': [['Lane #19', 1, 'Keep', 2], ['Keep', 1, 'Other', 2]], 'note': ''}
     patch(d)
     check(d)
     names = [r['name'] for r in d['roads']]
     assert names[0] == 'Lane #4266' and 'Keep' in names and 'Lane #19' not in names, names
     assert len(d['crossings']) == 1
+    ranks = [r['rank'] for r in d['roads']]
+    assert len(set(ranks)) == len(ranks), ranks
     print('test ok', names)
 
 
