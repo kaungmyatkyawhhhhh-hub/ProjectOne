@@ -98,6 +98,16 @@ end
 function Guide.init(ctx: any)
 	local call: RemoteFunction = ctx.remote("RemoteFunction", "GuideCall")
 	local lastCall: { [Player]: number } = {}
+	-- delivered = a delivery that paid (Activities notes "jobs"; a late one doesn't): the next goal
+	local note = ctx.note
+	ctx.note = function(player: Player, what: string, n: number, ...)
+		note(player, what, n, ...)
+		local profile = if what == "jobs" then profileOf(player) else nil
+		if profile and (tonumber(profile.Activities.guide) or DONE) < 4 then
+			set(player, profile, 4)
+			funnel(player, 4)
+		end
+	end
 	call.OnServerInvoke = function(player: Player, what: any, arg: any)
 		local h = if type(what) == "string" then handlers[what] else nil
 		local profile = profileOf(player)
