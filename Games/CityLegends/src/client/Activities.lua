@@ -376,7 +376,18 @@ local function showCard()
 	local bottom = if map then map:GetAttribute("Bottom") else nil
 	local y = (if type(bottom) == "number" then bottom else 230) + 12
 	if UI.isTouch then
-		y += 80
+		-- (24 Nov, first-5 test: under the minimap it lay on the GAS / BRAKE pedals) top left, beside the
+		-- icon column, a little smaller
+		card.AnchorPoint = Vector2.new(0, 0)
+		card.Position = UDim2.fromOffset(64, 52)
+		if not card:FindFirstChild("TouchScale") then
+			local sc = Instance.new("UIScale")
+			sc.Name = "TouchScale"
+			sc.Scale = 0.8
+			sc.Parent = card
+		end
+		card.Visible = true
+		return
 	end
 	card.Position = UDim2.new(1, -24, 0, y)
 	card.Visible = true

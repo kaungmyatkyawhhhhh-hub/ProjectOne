@@ -9,8 +9,7 @@
 	  * Player attribute "Guide" = the step while it runs: Activities sends the first parcel to the
 	    nearest drop; Offers and OffersClient show no shop card / pass link while it runs (Playbook:
 	    no shop offers in the tutorial).
-	  * Remote GuideCall: "get" -> { step, car, price } (the cheapest dealer car you don't own: the
-	    next goal), "step"(n) moves forward only, "skip".
+	  * Remote GuideCall: "step"(n) moves forward only, "skip".
 	  * Onboarding funnel (AnalyticsService, server only, counts in a published game) once per step,
 	    plus a custom event GuideSkipped (field: the step).
 	Studio hook: server player attribute TestGuide = true starts the guide again from step 1.
@@ -19,9 +18,7 @@
 local AnalyticsService = game:GetService("AnalyticsService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Cars = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Cars"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
 
 local Guide = {}
@@ -53,25 +50,7 @@ local function set(player: Player, profile: any, step: number)
 	player:SetAttribute("Guide", if step < DONE then step else nil)
 end
 
--- the next goal after the first job: the cheapest dealer (Local) car you don't own yet
-local function nextCar(profile: any): (string?, number?)
-	local best = nil
-	for _, c in Cars.List do
-		if (c.Price or 0) > 0 and not Cars.isImport(c.Id) and not (profile.Owned and profile.Owned[c.Id]) then
-			if not best or c.Price < best.Price then
-				best = c
-			end
-		end
-	end
-	return if best then best.Name else nil, if best then best.Price else nil
-end
-
 local handlers: { [string]: (Player, any, any) -> any } = {}
-
-handlers.get = function(_player, profile)
-	local car, price = nextCar(profile)
-	return { step = tonumber(profile.Activities.guide) or DONE, car = car, price = price }
-end
 
 handlers.step = function(player, profile, n)
 	local cur = tonumber(profile.Activities.guide) or DONE -- (not set yet: the join hasn't read the save)

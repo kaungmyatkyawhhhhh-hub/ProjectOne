@@ -297,9 +297,9 @@ local T: { [string]: { any } } = {
 	-- (24 Nov) the new-player guide (client/Guide.lua)
 	["guide.toDispatch"] = { "Drive to the green beam: your first delivery job", "အစိမ်းရောင် အလင်းတန်းဆီ မောင်းပါ: သင့်ရဲ့ ပထမဆုံး ပစ္စည်းပို့ အလုပ်" },
 	["guide.atDispatch"] = { "Stop next to the DELIVERY sign to load the parcel", "ပါဆယ်ထုပ် တင်ရန် DELIVERY ဆိုင်းဘုတ်နားမှာ ရပ်ပါ" },
-	["guide.toDrop"] = { "Deliver the parcel to %s: follow the arrow", "ပါဆယ်ထုပ်ကို %s သို့ ပို့ပါ: မြားအတိုင်း လိုက်ပါ" },
+	["guide.toDrop"] = { "Deliver to %s: follow the arrow", "%s သို့ ပို့ပါ: မြားအတိုင်း လိုက်ပါ" },
 	["guide.atDrop"] = { "Stop at the beam to deliver", "ပို့ရန် အလင်းတန်းနားမှာ ရပ်ပါ" },
-	["guide.nextGoal"] = { "Next goal: save %s for the %s", "နောက်ပန်းတိုင်: %s စုပြီး %s ကို ဝယ်ပါ" },
+	["guide.nextGoal"] = { "Next goal: %s · +%s", "နောက်ပန်းတိုင်: %s · +%s" },
 	["jobs.deliveryRing"] = { "DELIVERY · stop in the blue ring", "ပစ္စည်းပို့ · အပြာကွင်းထဲ ရပ်ပါ" },
 	["jobs.keepWorking"] = { "KEEP WORKING", "ဆက်လုပ်မည်" },
 	["jobs.stillOn"] = { "STILL ON SHIFT?", "အလုပ် ဆက်လုပ်နေတုန်းလား?" },

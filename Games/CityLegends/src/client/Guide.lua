@@ -2,14 +2,15 @@
 	Guide (client; owner approved 24 Nov 2026: "the first 5 minutes for new players"; vault
 	"City Legends/2026-11-24 First 5 minutes for new players.md"; server/Guide.lua keeps the step)
 	Runs only while the player attribute "Guide" is set (a new save). One hint pill at a time, in the
-	StartPrompt's slot and style (UI kit: panel, accent outline, pulsing accent badge), never over a
-	menu, a screen or the start-up prompt:
+	StartPrompt's style (UI kit: panel, accent outline, pulsing accent badge) at the top middle under the
+	level / job bars (the road and the car stay clear), never over a menu, a screen, the start-up
+	prompt, a popup or a toast:
 	  1  the menu's own "Pick your first car" does the talking (no pill)
 	  2  car out -> the Delivery job is taken for you (JobsClient then shows the dispatch label, the
 	     beam and the minimap blip); pill: "Drive to the green beam ..." with an arrow that turns
 	     toward the dispatch, "Stop next to the DELIVERY sign ..." when close
 	  3  a run started (Activities) -> "Deliver the parcel to <drop> ...", the beam on the drop
-	  4  paid -> after the pay popups: "Next goal: save $X for the <cheapest dealer car>" (tap: DEALER)
+	  4  paid -> after the pay popups: "Next goal: <the next Legends Path goal> · +$X" (tap: GOALS)
 	The X on the pill skips the whole guide (saved). Kid-sim numbers: tools/kidsim_first5.py.
 ]]
 
@@ -26,6 +27,7 @@ local Driving = require(script.Parent:WaitForChild("Driving"))
 local Activities = require(script.Parent:WaitForChild("Activities"))
 local Minimap = require(script.Parent:WaitForChild("Minimap"))
 local MainMenu = require(script.Parent:WaitForChild("MainMenu")) :: any
+local GoalsClient = require(script.Parent:WaitForChild("GoalsClient")) :: any
 
 local player = Players.LocalPlayer
 local Theme = Config.Theme
@@ -41,7 +43,7 @@ local call: RemoteFunction? = nil
 local pill: Frame? = nil
 local pillText: TextLabel
 local arrow: Frame
-local dealerMark: Frame
+local goalMark: Frame
 local badge: Frame
 local tapArea: TextButton
 local onTap: (() -> ())? = nil
@@ -64,11 +66,12 @@ end
 local function build()
 	local new, label, corner, stroke = kit.new, kit.label, kit.corner, kit.stroke
 	local touch = UI.isTouch
-	local h = if touch then 46 else 54
+	local h = if touch then 40 else 50
 	local f = new("Frame", {
 		Name = "GuideHint",
-		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 0.66, 0), -- (the StartPrompt's slot: clear of the GET OUT pill, the cash and the popups)
+		AnchorPoint = Vector2.new(0.5, 0),
+		-- (first test: in the StartPrompt's slot it hid the road, the dispatch sign and met the toasts)
+		Position = UDim2.new(0.5, 0, 0, if touch then 134 else 150),
 		Size = UDim2.fromOffset(if touch then 430 else 520, h),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.12,
@@ -90,24 +93,25 @@ local function build()
 			BackgroundColor3 = Theme.Panel,
 			BorderSizePixel = 0,
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, side * s * 0.13, 0.5, -s * 0.02),
-			Size = UDim2.fromOffset(s * 0.16, s * 0.52),
+			Position = UDim2.new(0.5, side * s * 0.167, 0.5, s * 0.07), -- (the two tops meet at the point)
+			Size = UDim2.fromOffset(s * 0.17, s * 0.52),
 			Rotation = -side * 40, -- (a ^: each bar's top leans in)
 			Parent = arrow,
 		}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }) })
 	end
-	dealerMark = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, Parent = badge })
-	kit.icon("dealer", dealerMark, s - 8, Theme.Panel)
+	goalMark = new("Frame", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1), Visible = false, Parent = badge })
+	kit.icon("flag", goalMark, s - 8, Theme.Panel) -- (the GOALS button's icon)
 	pillText = label({
 		Text = "",
-		TextSize = if touch then 17 else 20,
+		TextSize = if touch then 16 else 19,
+		TextScaled = true, -- (a long drop name: smaller, never cut)
 		Font = Enum.Font.GothamBold,
 		TextColor3 = Theme.Text,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Position = UDim2.fromOffset(h + 2, 0),
 		Size = UDim2.new(1, -(h + 2) - 40, 1, 0),
 		Parent = f,
-	})
+	}, { new("UITextSizeConstraint", { MaxTextSize = if touch then 16 else 19, MinTextSize = 10 }) })
 	tapArea = new("TextButton", { Text = "", BackgroundTransparency = 1, Size = UDim2.new(1, -38, 1, 0), Parent = f })
 	tapArea.Activated:Connect(function()
 		if onTap then
@@ -151,6 +155,7 @@ local function blocked(): boolean
 		or (MainMenu.isOpen and MainMenu.isOpen())
 		or UI.isGarageOpen()
 		or (hud ~= nil and hud:FindFirstChild("StartPrompt") ~= nil)
+		or UI.messageShowing()
 end
 
 local function show(text: string, target: Vector3?, tap: (() -> ())?)
@@ -160,7 +165,7 @@ local function show(text: string, target: Vector3?, tap: (() -> ())?)
 	pillText.Text = text
 	onTap = tap
 	arrow.Visible = target ~= nil
-	dealerMark.Visible = target == nil
+	goalMark.Visible = target == nil
 	local cam = Workspace.CurrentCamera
 	if target and cam then
 		-- (0 = straight ahead, turning as the target goes round the camera)
@@ -247,20 +252,20 @@ local function tick()
 			hide()
 			task.spawn(function()
 				task.wait(2.5) -- (after the DELIVERED / LEVEL popups)
-				local info = ask("get")
-				if type(info) ~= "table" or type(info.price) ~= "number" then
+				-- (first test: "the cheapest dealer car" was $110,000, hours away: the Legends Path's next
+				-- goal is minutes away, pays, and the GOALS screen shows the ones after it)
+				local _, _, goal = GoalsClient.getState()
+				if type(goal) ~= "table" or type(goal.text) ~= "string" then
 					report(DONE)
 					return
 				end
-				local text = string.format("Next goal: save %s for the %s", UI.formatCash(info.price), tostring(info.car))
+				local text = string.format("Next goal: %s · +%s", goal.text, UI.formatCash(tonumber(goal.cash) or 0))
 				local t0 = os.clock()
 				local tapped = false
 				while step() == 4 and os.clock() - t0 < GOAL_SECONDS and not tapped do
 					show(text, nil, function()
 						tapped = true
-						if UI.onDealerButton then
-							UI.onDealerButton()
-						end
+						GoalsClient.open()
 					end)
 					task.wait()
 				end
@@ -282,7 +287,7 @@ local function tick()
 			Minimap.setWaypoint(drop) -- (the beam on the drop; JobsClient clears its own when a run starts)
 		end
 		local close = here ~= nil and flat(here, drop) < NEAR
-		show(if close then "Stop at the beam to deliver" else string.format("Deliver the parcel to %s: follow the arrow", name), drop)
+		show(if close then "Stop at the beam to deliver" else string.format("Deliver to %s: follow the arrow", name), drop)
 		return
 	end
 	local target = if here then nearestDispatch(here) else nil

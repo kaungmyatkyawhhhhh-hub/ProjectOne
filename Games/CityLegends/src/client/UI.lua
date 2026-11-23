@@ -3352,6 +3352,11 @@ showPopup = function(text: string, amount: number, color: Color3)
 	end)
 end
 
+-- (24 Nov) a popup or a toast is on screen: the new-player guide's hint waits (never stacked)
+function UI.messageShowing(): boolean
+	return (popupHolder ~= nil and #popupHolder:GetChildren() > 0) or (toast ~= nil and toast.Visible and toast.TextTransparency < 0.5)
+end
+
 -- the UI kit for other screens (housing): the same buttons, labels, corners and strokes as here
 UI.kit = {
 	classBadge = classBadge,
