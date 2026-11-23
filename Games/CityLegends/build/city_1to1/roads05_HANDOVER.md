@@ -28,6 +28,24 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## REBUILD Road #25 valley + P8 deck end (23 Nov, DISTRICT REBUILD agent, HOME PC): state `rebuild_progress.json` "road25", "P8", "P9"
+- **Valley data fix:** `tools/yangon/city/roads05_valley_fix.py <roads.json>...` (idempotent, finds the apex by position, so lane subsets with
+  trimmed samples work): Road #25's hairpin samples 223..227 pulled 19.5 south onto Aung Yadana St's centre line, decks shortened by 6
+  samples each (#2 14..219, Road Flyover 231..458, last 10 deck samples eased to the ground), cut = inner deck samples, crossing
+  `[Road #25, 226, Aung Yadana Street, 195]` (1-based) so `YangonRoads.crossMouths` drops #25's slab on AY and cuts AY's kerbs. Applied to
+  the net roads.json, `roads05_L1234678/roads.json` (backups `roads_before_valleyfix.json`) and subset `roads05_RB3v` (= RB3x + fix; paint =
+  RB3x paint with AY / #25 items within 70 of (31525,45672) from a fresh subset paint run, old centre line kept).
+- 19x29 box rebuilt (139k parts, 0 MOUTH FAILED; slices out through the Studio LOG: `_G.RBXPRINT(label)` prints `P8SM` lines, then
+  `roads05_loggrab.py <tag>`), bake 36 meshes / 4,122 boxes, swapped (old in `SS.RB_OldR25C` with `Roads.CollideFix_Road25Valley` and 3 P boxes
+  that stood 0.7-1.7 over the #2 deck). DeckFeetCheck: Road #25 feet flush; only U Chit Maung BAD. Play-driven both feet (no step). Saved v1828-1831.
+- **Lanes on this PC:** `roads05_L1234678/lane_heights.txt` now exists here (fresh LaneHeights, 1,698 rows); LaneHeights rows printed into the
+  Studio log (`LHR ` lines) instead of a big MCP result. Result = the laptop's except Road #25 / Bo Min Gaung Street.
+- **U Chit Maung deck = P11, not a laptop file:** the deck north of the Banyar Dala junction lies in P11 (P8 box starts z 32653), so the P8
+  bake had no mesh for it (collision kept = invisible deck ending in the air at z 32256). It can only get a surface when P11 is built. Barrier
+  kept; `roads05_lanesubset.py` `NO_LANES` takes that deck out of the lane data (no NPC through the barrier).
+- **Traps:** Obsidian Git commits work in progress every few minutes (compare lanes with the commit BEFORE your session); `roads05_subset`
+  chunks give more modules after a json re-dump (42 vs 31: same data); a TestTeleport beside (not under) a deck keeps the car on the ground.
+
 ## REBUILD Road #25 + P6 (19 Nov, DISTRICT REBUILD agent 4): state `rebuild_progress.json` "road25", "P6"
 - **Road #25 second cause:** after the alignJunctions guard the rebuilt ramps still rose to the Dala flyover (D tops 39.6-40.2 for ~80 studs
   at both feet). `Roads.luau`'s EDGE PIN (each edge point on a bigger road takes its surface, ~line 715) had no height guard: now

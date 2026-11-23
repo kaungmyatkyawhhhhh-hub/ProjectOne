@@ -114,3 +114,7 @@ This note is the fix. It works in three parts:
 - **Reproduce a builder fault on a second, empty place.** Running the same build of just the three decks in the copy place showed the lift in minutes, without disturbing the main place's running district build.
 - **Edit-mode require caches a module:** a check module whose Source was updated still ran its old code (wrong BAD results). Always require a `:Clone()` of a tool module.
 - **Studio memory:** clearing the undo history (`ChangeHistoryService:ResetWaypoints()`) after a big build dropped Studio from 18 GB to 15 GB.
+## Lesson (23 Nov 2026, City Legends: Road #25 valley and the U Chit Maung deck end)
+- **Fix the data, not the collision.** The 23 Nov collision patch at the Road #25 valley stopped the bump but left the road surface wrong. The real fix was in the road data: the two ramps met in a hairpin on a pavement, so the hairpin was moved onto the carriageway and the crossing was recorded, then the cells were re-baked.
+- **Before "rebuilding" a piece, check which district it lies in.** The U Chit Maung deck had no road surface because it is in a district that is not in the game yet, not because a file was missing. The fix is to end the deck there with a barrier and take it out of the traffic data until that district is built.
+- **Long results go through the Studio log, not the tool result.** Print the result lines from Studio and read the log file. That avoids cut-off tool results and repeated calls.
