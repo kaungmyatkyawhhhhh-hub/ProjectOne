@@ -348,12 +348,13 @@
  "dala_bridge": "23 Nov: Landmarks.DalaBridge (2,384 parts) moved to ServerStorage.DalaBridge_WIP_21Nov (attribute PulledFromLive). To finish: remove the old generic deck (Cell_20x30 whole, re-bake 20x28/20x29/20x31 without 'Yangon-Dala Bridge'), filler boxes on the bend gaps, lane 828 -> new lanes, a proper Dala end (owner: no land beyond Dala), then move it back.",
  "place_size_23nov": "Removed: RB_OldP8, RB_PBoxOnDeck, TerrainBackup_21Nov, LampBackup_21Nov (24 cars, all 24 checked: 12 LampFx shells each), LampBackup_21Nov_beforeRealShapes, Backups.2026-11-08 x3 (door backups), TrafficModels_preBadges, Workspace._FixStage, _UvTest, KitPilot; ReplicatedStorage.ZZTestKit. Serialized size (SerializationService, sum of the parts, overstates the file): ~192.7 MB -> ~176 MB (16.7 MB removed). Saves v1820, v1823, v1824 all OK.",
  "P5": {
-  "status": "23 Nov home PC: OFFLINE DONE (district files + roads05_RB5 data), nothing uploaded, Studio steps not started",
+  "status": "24 Nov home PC: district in (v1863); roads after P10",
   "data": "R05_GROW=1700 roads05_subset.py net RB5 P5: 636 roads, 7 decks, 11 rings, 24 modules; subset.json boxes P5 + seam P4; deckfeet mirror 0; data pack imports/sync/rebuild_RB5_data.rbxmx 4,389,765 bytes (NOT uploaded)",
   "buildings": "DONE 23 Nov home PC: district_files.sh P5 --no-roads buildings (3.4 min, log district_files_P5_23nov.log): 3,166 buildings (126 dropped / 609 clipped by roads, 0 overlap), shells 3,995 parts in 26 cells, roofs 2,000, 0 pagodas; old outputs _pre_rebuild_P5",
   "plan": "P5 box x 16574..22967 z 17067..27347 -> 1536 cells x10..14 z11..17 (x 15360..23040 z 16896..27648; x14 = P4 seam column, seam at x 22967: P4's x14 cells hold P4 roads only, re-bake them whole with clip P5+P4; x10 / z11 / z17 = map edge side); bake R05_ONLY = the swap cells; lanes: lanesubset with P5 added.",
   "packs": "imports/sync/ygn1to1_p5/: place_p5_1..3.rbxmx (4.4 / 2.4 / 3.9 MB), terrain_p5_a/b.rbxmx, kit_*.glb, ygnkit_p5.rbxmx, night cells_1.glb 6.9 MB. NOT uploaded.",
   "resume": "After P10: same Studio chain; step boxes from 'plan' (3072 cols x5..7 + 1536 col x14 seam, rows z 16896..27648), bake R05_ONLY = 1536 x10..14 z11..17 clip P5+P4, lanes add P5.",
-  "uploaded": "24 Nov home PC: place 112687366100229 115586401623896 89817452503487, night 77114308908238, RB5 data 109085361307011 (all Approved; districts_assets.txt P5R)"
+  "uploaded": "24 Nov home PC: place 112687366100229 115586401623896 89817452503487, night 77114308908238, RB5 data 109085361307011 (all Approved; districts_assets.txt P5R)",
+  "district_moved": "DONE + SAVED v1863 24 Nov (while the P10 bake ran): DistrictPlace P5 load 3 packs, night 25 cells (no name dups), terrain 1153 tiles, green paint 1018 tiles (191,040 voxels) + far 2767 trees / 5534 parts (Far_keep merge 427 cells, 8 dups _old, 0 parts within 3 studs), Data_P5 replaced + Data_P5G 1010, shells 3,995 + roof parts 2,358 (no old shells in the box), 0 pagodas (pagoda n2583375434 at 19459,16909 is outside the box, kept). Packs + 26 TerrainP5_ modules removed."
  }
 }
