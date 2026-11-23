@@ -35,6 +35,12 @@ DROPS = ["Inya Lake Tea Shop", "Hledan Market Stall", "Kamayut Flats", "Universi
          "Bahan Garage", "Thingangyun Flats"]
 
 
+# (24 Nov 2026, owner decision) lots a road ran through, moved with tools/yangon/LotFinder.luau to the nearest free lot
+# beside a road (x, floor y, z, fx, fz); their Studio pads were YangonSites.prepare'd there
+MOVED = {'y1_high_3': (31799.3, 63.61, 28685.5, -0.271, -0.963), 'y1_high_10': (29676.7, 74.85, 26072.3, -0.902, 0.433),
+         'y1_mid_3': (29553.3, 92.96, 28155.2, 0.079, -0.997), 'y1_mid_11': (29322.9, 69.39, 25613.8, -0.699, 0.715)}
+
+
 def v3(p):
     return 'Vector3.new(%.1f, %.2f, %.1f)' % p
 
@@ -140,8 +146,9 @@ def main():
                 continue
             taken.append(poly)
             n += 1
+            x, y, z, fx, fz = MOVED.get('y1_%s_%d' % (zone, n), (c['x'], ok[1], c['z'], c['fx'], c['fz']))
             lots.append('\t\t{ id = "y1_%s_%d", zone = "%s", tier = %d, number = %d, x = %.1f, y = %.2f, z = %.1f, fx = %.3f, fz = %.3f, w = %d, d = %d },'
-                        % (zone, n, zone, tier, n, c['x'], ok[1], c['z'], c['fx'], c['fz'], w, d))
+                        % (zone, n, zone, tier, n, x, y, z, fx, fz, w, d))
             if n == want:
                 break
     # the hub: bays in a row 50 in from the lot's front, the spot on the pavement facing in
