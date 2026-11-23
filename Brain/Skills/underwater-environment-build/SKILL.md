@@ -227,6 +227,24 @@ end
 - **Toolbox assets** → not allowed for our games. Make our own (sheet skill).
 - **Multiple directional lights fighting** (V2 shows Unreal's warning) → in Roblox, one Sky plus one look per zone. Don't stack Atmospheres or ColorCorrections from two scripts.
 
+## 6b. Proven in MEGA BITE (23 Nov 2026 build: MB_SeabedLight, MB_GodRays, MB_SeamScatter, MB_SlopePaint)
+- **Light plates on hilly terrain:** don't use big flat plates. Use a client grid of small tiles (17×17, 10/16/26 studs by camera height) following a point just ahead of the camera, each raycast onto the Terrain and tilted to the normal.
+  - World-aligned texture offsets (`(-tileMinX + t*speed) % StudsPerTile`) make the pattern run across tiles with no seams.
+  - Round edge fade, depth fade, slope cut-off (normal.Y < 0.6), 24 Hz updates.
+  - Caustic strength that read well on pale sand: 0.85 and 0.5 (two layers, 26 and 41 studs per tile). Dapple at about 0.3 alpha max.
+- **Make the textures seamless:** blur with wrap-around (tile 3×3, blur, crop the centre). A plain blur leaves a seam. Use a domain-warped Voronoi for caustics (Poisson points, so there are no wedge artefacts).
+- **Beams:**
+  - `Segments = 1` uses ONLY the two end values of the Transparency curve. A curve that fades at both ends needs Segments 12–16.
+  - Beam parts above about 0.55 transparency hardly show. Keep the strong part (about 0.45) running most of the way down, and fade the top over about 25% of the length, above the view.
+  - A camera-following pool (12 shafts, 14–26 s lives, 3 s fades) gives sun shafts everywhere for the cost of 12 beams.
+- **Seam scatter:** spots next to a random host piece, just outside its footprint (0.75–1.25 × its radius + a few studs), never inside another piece.
+  - Kelp as tufts of 2–3. 3–6 spots per cluster was plenty: 337 clusters gave 2,036 pieces. 5–12 spots gave 2.8–3.6K, which was too many.
+- **Slope rock on existing terrain:** a materials-only pass (ReadVoxels, change the top 3 solid voxels by slope, WriteVoxels with the SAME occupancy).
+  - Keeps hand-dug pits and caves. Never re-run the height generator just to change materials.
+  - Dither by a position hash, with p = smoothstep((slope − 0.47) / 0.58).
+  - Lighten the rock colours (never-dark rule).
+- **Previewing a client effect:** if the player can't be moved by script (custom swim controllers pin it), rebuild a static copy of the effect in Edit and use `screen_capture` with a camera position. Delete the preview after.
+
 ## 7. Done checklist
 - [ ] Heroes readable through the haze from the next area.
 - [ ] Clusters plus breathers, not carpets.
