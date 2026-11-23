@@ -28,6 +28,20 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## REBUILD P9 IN + P10 / P5 offline (24 Nov, DISTRICT REBUILD agent, HOME PC): state `rebuild_progress.json` "P9", "P10", "P5"
+- **P9 DONE, saved v1853** (Play-tested, store back to v1): DistrictPlace (4 packs + night a/b, Far_keep merge 336 cells / 7 dups, old 2 pagodas
+  -> RB_OldP9.Temps) -> 12 step boxes 12x5..14x8 in ONE queued spawn (`stepCell` + `RoadBake05.collect`, slices printed as `P8SM` log lines,
+  ResetWaypoints per box; 0 MOUTH FAILED) -> `roads05_loggrab.py RB9` -> bake R05_ONLY 1536 x24..29 z10..16 (41 glbs, 16,513 boxes) -> PREP / SWAPGO
+  tag `P9swap` (SWAPGO's backup folder is `RB_Old<tag>`: `RB_OldP9` already held the pagodas) -> MapBugScan / KitOnRoad copies from `ServerStorage.P8Tools`
+  with AREAS / X0..Z1 gsubbed in the Source -> RoadVerge05 fill + trim per 3072 tile (one queued spawn) -> lanes L12346789 (LaneHeights rows printed
+  as `LHR` log lines; old 1,698 rows kept, 55 new) -> minimap FULL += P9 (grid re-laid 5x14: 73 tiles) -> DeckFeetCheck on the RB9 subset decks.
+- **Uploads by helper subagents** (41 glbs, 73 tiles); POSTing 4 at a time worked with one "Target is not reachable" retry each.
+- **Play kit (client):** claim the starter on a fresh test store (`ClaimStarter`), Return, then attributes `TestDrive`, `TestEngine` = true,
+  `TestGearbox` "Auto" (without the engine the throttle does nothing), `TestTeleport` then `TestThrottle` 0.6 and rays onto Roads.Collide every 0.25 s.
+- **Studio open trap:** the place open failed after 20 min (`StreamingWaiterFailure`, Start page, MCP unreachable); the coordinator relaunched it.
+- **P10 / P5 offline DONE:** `district_files.sh P10|P5 --no-roads buildings` (old outputs `_pre_rebuild_P10` / `_P5`), roads05_RB10 (clip P10+P9) and
+  roads05_RB5 (clip P5+P4) with data packs in imports/sync; nothing uploaded. Studio chain = P9's; boxes / swap cells in each entry's "plan".
+
 ## REBUILD Road #25 valley + P8 deck end (23 Nov, DISTRICT REBUILD agent, HOME PC): state `rebuild_progress.json` "road25", "P8", "P9"
 - **Valley data fix:** `tools/yangon/city/roads05_valley_fix.py <roads.json>...` (idempotent, finds the apex by position, so lane subsets with
   trimmed samples work): Road #25's hairpin samples 223..227 pulled 19.5 south onto Aung Yadana St's centre line, decks shortened by 6
