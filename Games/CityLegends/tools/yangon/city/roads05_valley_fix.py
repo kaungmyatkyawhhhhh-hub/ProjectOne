@@ -13,8 +13,9 @@ feet stood on AY's pavement (a kerb box across one ramp, a gap before the other)
 """
 import json, math, sys
 
-R25, AY, APEX, SHIFT = 'Road #25', 'Aung Yadana Street', 225, 6
-W = {223: 1 / 3, 224: 2 / 3, 225: 1.0, 226: 2 / 3, 227: 1 / 3}
+R25, AY, SHIFT = 'Road #25', 'Aung Yadana Street', 6
+APEX_XZ = (31522.44, 45701.64)  # sample 225 in the net; a lane subset trims samples (found by position)
+WD = {-2: 1 / 3, -1: 2 / 3, 0: 1.0, 1: 2 / 3, 2: 1 / 3}
 EASE = 10
 
 
@@ -34,17 +35,18 @@ def fix(path):
         return 'no Road #25 / AY'
     dk = {k['name']: k for k in d['decks'] if k['of'] == R25}
     a, b = dk['Road Flyover #2'], dk['Road Flyover']
-    if int(a['to']) != APEX:
-        return 'already patched'
     s, ay = R[R25]['s'], R[AY]
-    assert abs(s[APEX][0] - 31522.44) < 0.1 and abs(s[APEX][2] - 45701.64) < 0.1, 'apex moved: re-check the fix'
+    APEX = min(range(len(s)), key=lambda i: (s[i][0] - APEX_XZ[0]) ** 2 + (s[i][2] - APEX_XZ[1]) ** 2)
+    if int(a['to']) != APEX or math.hypot(s[APEX][0] - APEX_XZ[0], s[APEX][2] - APEX_XZ[1]) > 0.1:
+        return 'already patched (or the apex moved: re-check the fix)'
+    W = {APEX + k: w for k, w in WD.items()}
     old = {i: list(s[i]) for i in W}
     pull = ay_z(ay, s[APEX][0])[0] - s[APEX][2]
     for i, w in W.items():
         s[i][2] = round(s[i][2] + pull * w, 2)
         s[i][1] = round(ay_z(ay, s[i][0])[1], 2)
         s[i][6] = s[i][7] = 10.5
-    for i in range(222, 229):
+    for i in range(APEX - 3, APEX + 4):
         dx, dz = s[i + 1][0] - s[i - 1][0], s[i + 1][2] - s[i - 1][2]
         n = math.hypot(dx, dz)
         s[i][3], s[i][4] = round(dx / n, 4), round(dz / n, 4)
