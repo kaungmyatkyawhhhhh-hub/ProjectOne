@@ -48,7 +48,7 @@ def kid(P, rng, patience_median, T=300.0, dt=0.25, log=None):
     pick = rng.uniform(4, 12)
     phases = [('loading', load, 0.3), ('pick car', pick, 0.3)]
     plan = []  # (at, reward, what, new)
-    t_drive = load + pick + rng.uniform(2, 4)   # claim -> car out (engine on: phone)
+    t_drive = load + pick + rng.uniform(5, 8)   # claim -> car out (engine on: phone); Play test 24 Nov: 6.7 s ('Loading the streets' jump wait)
     phases.append(('car spawn', t_drive - load - pick, 0.6))
     plan.append((load + pick, 8, 'YOUR FIRST CAR', True))
 
