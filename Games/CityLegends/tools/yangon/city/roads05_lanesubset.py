@@ -52,6 +52,16 @@ for k in d.get('decks', []):
     if t - f < 1:
         continue
     decks.append(dict(k, s=k['s'][f + a - k['from']:t + a - k['from'] + 1], **{'from': f, 'to': t}))
+# (23 Nov) decks with no built road in the game (their meshes lie in a district not in the game): the road starts at
+# the deck's far end instead (a barrier stands there), so no lane runs on through it
+NO_LANES = {'U Chit Maung Road (Bridge) Flyover'}  # P11 not in the game; barrier Roads.DeckEnd_UChitMaung (P8)
+for k in [k for k in decks if k['name'] in NO_LANES and k['from'] == 0]:
+    r = names[k['of']]
+    t = k['to']
+    roads[roads.index(r)] = names[k['of']] = r = dict(r, s=r['s'][t:])
+    decks.remove(k)
+    decks = [dict(o, **{'from': o['from'] - t, 'to': o['to'] - t}) if o['of'] == k['of'] else o for o in decks]
+    print('no lanes on %s: %s starts at sample %d' % (k['name'], k['of'], t))
 d['roads'], d['decks'] = roads, decks
 d['roundabouts'] = [o for o in d.get('roundabouts', []) if area.contains(Point(o['c'][0], o['c'][2]))]
 d['note'] = d.get('note', '') + ' | lanes subset %s of %s (roads cut to the districts)' % ('+'.join(ds), src)
