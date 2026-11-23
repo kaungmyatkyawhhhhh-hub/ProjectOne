@@ -61,7 +61,7 @@ Code: `Games/CityLegends/tools/kidsim_first5.py` (results `tools/kidsim_first5_r
 4. The delivery card lay on the GAS / BRAKE pedals on phones: moved top left (an older bug, met in the first minute).
 5. Re-setting the waypoint after the minimap cleared it on arrival spammed "You've arrived" and kept the pill hidden: set once per target.
 6. Two labels on top of each other at the dispatch: JobsClient's own label off for delivery.
-7. Measured: the car comes out **6.7 s** after CLAIM (a second "Loading the streets" wait). Not changed (streaming); the sim was re-run with it.
+7. Measured: the car came out **6.7 s** after CLAIM (a second "Loading the streets" wait). Fixed afterwards: 1.0 s (section below).
 
 **Shots** (the existing HUD, top bars, job bar, delivery card and phone controls are in the same frame: same panels, outline and fonts):
 ![[2026-11-24 First 5 minutes - 1 pick your first car (Play).jpg]]
@@ -78,7 +78,7 @@ Code: `Games/CityLegends/tools/kidsim_first5.py` (results `tools/kidsim_first5_r
 - **Cause:** not the car (it arrives in 0.1 s) and not streaming (its streets went quiet in 1.5 s). `Main.client`'s `isJump` counted the first car out as a "jump" because the menu camera orbits 420+ studs UP over Myanmar Plaza, so `waitForMap` held the loading screen for the fixed terrain wait after a jump: `TERRAIN_SETTLE_PHONE` 6.5 s on phones (a guess in the code, never measured), 4 s on PC.
 - **Fix:** the start screen's own map wait has already streamed everything within 800 studs (`NEAR_R`) of the orbit's centre, and the orbit looks down on it: a car that comes out within 800 studs (flat) of the orbit's centre, straight from the start screen, is no jump (`menuAt`, cleared by `stopOrbit`). Fast travel and real jumps keep the old waits.
 - **Measured (Studio Play):** new save on `CityLegends_test`, phone layout: "car -> driving" **6.70 s before, 0.99 s after** (map wait 0.85 s). Owner's save on `CityLegends_v1`, PC, PLAY: 1.15 s (was about 4 s). The screenshot 1-2 s after CLAIM shows the roads and terrain fully drawn (no coarse terrain over the road). No script errors.
-- Kid sim: the 300 s stay of the shipped version was 70% with the 6.7 s wait; with ~1 s it is the first table's 66-70% range (the wait mostly cost kids in the first 30 s).
+- Kid sim re-run with 0.8-1.5 s: G stays 93% at 60 s / 68% at 5 min (70% with the 6.7 s wait: within the model's noise; it counts a loading screen as mild boredom). The real gain is 5.7 s less loading screen inside Roblox's 60 s bounce window, which the model can't price.
 ![[2026-11-24 First 5 minutes - car out 1 s after CLAIM, streets loaded (Play).jpg]]
 ![[2026-11-24 First 5 minutes - 2 drive to the job, Burmese (Play).jpg]]
 (the shorter Burmese step 2 line, one line)
