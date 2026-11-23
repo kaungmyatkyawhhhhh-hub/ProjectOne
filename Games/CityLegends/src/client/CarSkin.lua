@@ -29,6 +29,7 @@ local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local Cars = require(Shared:WaitForChild("Cars"))
 local Config = require(Shared:WaitForChild("Config"))
 local Plates = require(Shared:WaitForChild("Plates"))
+local PlateSpots = require(Shared:WaitForChild("PlateSpots"))
 local DialLooks = require(script.Parent:WaitForChild("DialLooks"))
 local BrandMarks = require(script.Parent:WaitForChild("BrandMarks"))
 local TailLights = require(script.Parent:WaitForChild("TailLights"))
@@ -70,6 +71,7 @@ CarSkin.CLUSTER_STYLE = {
 	porsha_gt3 = "LiveGT3RS", -- the 2019 model (2026-11-13), redrawn from the owner's photo ("Porsche991GT3" puts the old drawn one back; that one was laid out for the 718 cabin's hood)
 	bentz_cla45 = "AMG",
 	toyoka_supra_mk4 = "LiveSupra", -- the 1994 SZ-R model (2026-11-14), redrawn from the owner's photo ("SupraTRD" puts the old drawn one back; that one was laid out for the old model)
+	nisun_r34 = "LiveR34", -- the ARjun.JS model (2026-11-21): drawn from the real BNR34 layout (the model's hood has a plain face), with the start-up bulb check and the 7,500 shift lamp
 	toyoka_ae86 = "LiveAE86", -- a new car (2026-11-14): the model's own two dials redrawn sharp and live (no owner photo; tools/lambo/window_ae86.png)
 	ronin_cp9a_champ = "LiveEvo6c", -- a new car (2026-11-14): the model's own dials redrawn sharp and live (no owner photo; tools/lambo/window_evo6c.png)
 	ronin_cp9a = "LiveEvo6", -- a new car (2026-11-14): redrawn sharp and live from the owner's photo (tools/lambo/window_evo6.png; the Ronin CT9A will share the drawing)
@@ -137,6 +139,7 @@ CarSkin.CLUSTER_RECT = {
 	bnw_m3_e92_cabin = { at = Vector3.new(0.0017, 0.03, -0.3167), face = Vector3.new(0, 0.33, 0.94), w = 0.287, h = 0.143 }, -- the old E92 cabin's cluster hood (the F80's donor)
 	toyoka_chaser = { at = Vector3.new(-0.0082, 0.0490, -0.2638), face = Vector3.new(0.0081, 0.3344, 0.9424), w = 0.386, h = 0.092 }, -- the model's dash hood (tools/lambo/window_chaser.png), 2026-11-14
 	toyoka_supra_mk4 = { at = Vector3.new(-0.0002, 0.0143, -0.2554), face = Vector3.new(-0.0019, 0.2049, 0.9788), w = 0.380, h = 0.152 }, -- the model's hood over its three dials (tools/lambo/window_supra.png), 2026-11-14
+	nisun_r34 = { at = Vector3.new(-0.001, 0.0613, -0.1736), face = Vector3.new(0, 0.330, 0.944), w = 0.360, h = 0.160 }, -- the model's plain hood face (ray-cast from the driver's eye on build/r34/nisun_r34_lamps.blend), 2026-11-21
 	toyoka_ae86 = { at = Vector3.new(-0.0012, 0.0328, -0.2576), face = Vector3.new(0.0066, 0.6233, 0.7819), w = 0.346, h = 0.116 }, -- the model's hood over its two dials (tools/lambo/window_ae86.png), 2026-11-14
 	ronin_cp9a_champ = { at = Vector3.new(0.0001, -0.0038, -0.3014), face = Vector3.new(-0.0004, 0.3746, 0.9272), w = 0.312, h = 0.128 }, -- the model's hood over its dials (tools/lambo/window_evo6c.png), 2026-11-14
 	ronin_cp9a = { at = Vector3.new(-0.0026, -0.0039, -0.3183), face = Vector3.new(-0.0000, 0.4475, 0.8943), w = 0.298, h = 0.118 }, -- the model's hood (tools/lambo/window_evo6.png), 2026-11-14
@@ -197,6 +200,12 @@ CarSkin.CLUSTER_RECT = {
 	-- the frame are cut away, tools/svj_cluster_mask.png). Was: over the screen picture only.
 	lambrini_svj = { at = Vector3.new(-0.0016, 0.0524, -0.1748), face = Vector3.new(0.0007, 0.1363, 0.9907), w = 0.336, h = 0.136 },
 	lambrini_svj63 = { at = Vector3.new(-0.0005, 0.0411, -0.229), face = Vector3.new(0, 0.11, 0.9939), w = 0.324, h = 0.132 },
+} :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
+
+-- a second screen on the dash, the same way as CLUSTER_RECT (from the steering wheel's middle, metres right / up /
+-- back): the BNR34's multi-function display on top of the dash (client/R34Mfd draws it), 2026-11-21
+CarSkin.MFD_RECT = {
+	nisun_r34 = { at = Vector3.new(-0.335, 0.1273, -0.2081), face = Vector3.new(0, 0.087, 0.996), w = 0.150, h = 0.052 },
 } :: { [string]: { at: Vector3, face: Vector3, w: number, h: number } }
 
 -- live needles over a car's own dials, for models whose needles are only painted on (the
@@ -294,10 +303,6 @@ CarSkin.DIAL_NEEDLES = {
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0021, 0.0463, -0.2049), face = Vector3.new(0, 0.18, 0.9837), length = 0.043, scale = "0:178.5,1000:201.4,4000:269.9,7000:347.7,10000:424.0" },
 		{ kind = "digits", unit = "kmh", at = Vector3.new(0.0286, 0.0321, -0.2023), face = Vector3.new(0, 0.18, 0.9837), length = 0.0242, scale = "" },
 	},
-	nisun_r34 = {
-		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0541, 0.0125, -0.1938), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.6,180:125.6" },
-		{ kind = "rpm", unit = "rpm", at = Vector3.new(0.0656, 0.0126, -0.1935), face = Vector3.new(0, 0.314, 0.949), length = 0.047, scale = "0:-125.7,3000:-85.2,10000:125.3" },
-	},
 	porsha_boxster = { -- Boxster (labels too blurry to read: an even 243 degree sweep)
 		{ kind = "rpm", unit = "rpm", at = Vector3.new(-0.0008, 0.0489, -0.227), face = Vector3.new(0.0031, 0.2556, 0.9668), length = 0.0432, scale = "0:-122.0,8000:121.0" },
 		{ kind = "speed", unit = "kmh", at = Vector3.new(-0.0894, 0.0323, -0.2277), face = Vector3.new(-0.0042, 0.2663, 0.9639), length = 0.0346, scale = "0:-122.0,300:121.0" },
@@ -309,7 +314,7 @@ CarSkin.DIAL_NEEDLES = {
 	},
 } :: { [string]: { DialSpec } }
 
-CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bnw_m3_e92 = true, toyoka_chaser = true, toyoka_supra_mk4 = true, toyoka_ae86 = true, ronin_cp9a_champ = true, ronin_cp9a = true, pleiad_gc8 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
+CarSkin.LOW_ARMS = { audy_r8 = true, audy_r8_lw = true, audy_r8_4s = true, bnw_m5_e60 = true, bnw_m5_f90 = true, bnw_m4_f82 = true, porsha_gt3 = true, bnw_m3_e92 = true, toyoka_chaser = true, toyoka_supra_mk4 = true, nisun_r34 = true, toyoka_ae86 = true, ronin_cp9a_champ = true, ronin_cp9a = true, pleiad_gc8 = true, bentlee_bentayga = true, nisun_gtr = true, bnw_330i_g20 = true, bentlee_contgt = true, nisun_350z = true, astin_dbx = true, ferrara_599 = true, mclaran_12c = true, bentz_sls = true, bentz_sl65bs = true, lexis_lfa = true, lexis_lfa_circuit = true, bentz_s680 = true, bentz_gls = true, lambrini_countach = true } :: { [string]: boolean }
 
 -- dials drawn with no face of ours: only the needle over the model's own dial (its screen shows
 -- through), per car and dial number
@@ -441,7 +446,7 @@ CarSkin.STEER_MODEL = {
 	-- American
 	chevo_c6 = "AmericanFlat", chevo_c7 = "AmericanFlat", chevo_camaro = "AmericanFlat", dodger_challenger = "Dodge", bentz_gt63s = "Dodge",
 	-- Japanese and the rest
-	nisun_r34 = "JDM90s", mazdo_rx7 = "JDM90s", -- (toyoka_chaser and toyoka_supra_mk4 keep their models' own wheels since their 2026-11-14 conversions)
+	mazdo_rx7 = "JDM90s", -- (toyoka_chaser, toyoka_supra_mk4 and nisun_r34 keep their models' own wheels since their conversions of 2026-11-14 / 11-21)
 	mazdo_rx8 = "RX8",
 	-- (bugotti_veyron had the generated "Veyron" wheel; the new Veyrun models of 2026-11-03 keep their
 	-- own, owner: "use the steering wheel which came from the model")
@@ -1208,8 +1213,13 @@ function readGeneric(src: Instance, dims: { [string]: number }): Imported
 	-- tail lamps: parts named as tail / brake lights, the converted cars' measured lamp parts
 	-- (TailLights), and A-Chassis brake-light glow meshes (a "Brake" group, invisible when off)
 	-- (LampFx_Tail: a lens cut from the model's own lamp, tools/lamps, in place of measured spots)
-	local tails = if src:FindFirstChild("LampFx_TailL") then nil else TailLights[src.Name]
+	local cutTail = src:FindFirstChild("LampFx_TailL") ~= nil
+	local tails = if cutTail then nil else TailLights[src.Name]
 	local function isTail(d: BasePart): boolean
+		-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): the cut lens is the lamp, no second glow over the whole red lens
+		if cutTail then
+			return false
+		end
 		if tails then
 			for _, sh in tails.shells do
 				if d.Name == sh.name and (sh.size == nil or (d.Size - sh.size).Magnitude < 0.01) then
@@ -2862,6 +2872,22 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 				model:SetAttribute("OwnCluster", true) -- the model's own gauge screens stay off
 			end
 		end
+		local mfd = CarSkin.MFD_RECT[id]
+		if mfd and imported.steer and not liteMode then
+			local m = CarBuilder.STUDS_PER_METRE
+			local face = mfd.face.Unit
+			local pos = imported.steer.mount.Position + mfd.at * m + face * 0.002 * m
+			local p = Instance.new("Part")
+			p.Name = "DashMfd"
+			p.Size = Vector3.new(mfd.w * m, mfd.h * m, 0.02)
+			p.Transparency = 1
+			p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow, p.Massless = false, false, false, false, true
+			p.CFrame = groundCF * CFrame.lookAt(pos, pos - face, (Vector3.yAxis - face * face.Y).Unit)
+			p.Parent = skin
+			local w = Instance.new("WeldConstraint")
+			w.Part0, w.Part1 = root, p
+			w.Parent = p
+		end
 		-- our own dial over each of the car's dials (owner: "create your own cluster and replace that
 		-- old cluster"): a solid face with the car's scale, numbers and a red needle, so the old needle
 		-- and any washed-out print are covered (Driving turns the needles)
@@ -3051,7 +3077,67 @@ function CarSkin.apply(model: Model, destroyReplaced: boolean?, lite: boolean?):
 		params.FilterType = Enum.RaycastFilterType.Include
 		params.FilterDescendantsInstances = { skin }
 		local up = root.CFrame.UpVector
-		for _, side in { { -1, { 1.5, 1.8, 1.25, 2.1 } }, { 1, { 2.3, 2.0, 2.7, 1.7 } } } do
+		-- (owner, 2026-11-21: "make the license plates in the proper place? Some cars already have an license plate
+		-- thing") a model with its own plate holder gets our plate on it (PlateSpots: measured from the model), sized to
+		-- cover it; placed from the skin's own box in root space, like the exhaust tips
+		local spots = PlateSpots.of(id)
+		local lo, hi = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+		if spots then
+			for _, d in skin:GetDescendants() do
+				if d:IsA("BasePart") and d.Transparency < 1 and d.Name ~= "PlateText" then
+					local cf = root.CFrame:ToObjectSpace(d.CFrame)
+					local h = d.Size / 2
+					for sx = -1, 1, 2 do
+						for sy = -1, 1, 2 do
+							for sz = -1, 1, 2 do
+								local c = cf * Vector3.new(h.X * sx, h.Y * sy, h.Z * sz)
+								lo = lo:Min(c)
+								hi = hi:Max(c)
+							end
+						end
+					end
+				end
+			end
+		end
+		for _, side in { { -1, { 1.5, 1.8, 1.25, 2.1 }, "front" }, { 1, { 2.3, 2.0, 2.7, 1.7 }, "rear" } } do
+			local spot = spots and (spots :: any)[side[3]]
+			local len = hi.Z - lo.Z
+			if spot and len > 4 and len < 80 then
+				local t = math.rad(spot[3])
+				local n = Vector3.new(0, math.sin(t), side[1] * math.cos(t))
+				local z = if side[1] > 0 then hi.Z - spot[2] * len else lo.Z + spot[2] * len
+				-- (up from the ground line, not the skin's lowest point: the wheels are not on yet at this moment)
+				local at = Vector3.new((lo.X + hi.X) / 2, -height / 2 + spot[1] * len, z) + n * 0.03
+				local w, h = spot[4] * len, spot[5] * len
+				local wp, wn = root.CFrame * at, root.CFrame:VectorToWorldSpace(n)
+				if w / h < 1.7 or w / h > 2.8 then
+					-- (a long holder: a plain black plate over all of it (some models print their own number there),
+					-- then our plate's own shape in its middle)
+					local back = Instance.new("Part")
+					back.Name = "PlateBack"
+					back.Size = Vector3.new(w * 1.03, h * 1.03, 0.02)
+					back.Color = Color3.fromRGB(12, 12, 13)
+					back.Material = Enum.Material.SmoothPlastic
+					back.CanCollide = false
+					back.CanQuery = false
+					back.CanTouch = false
+					back.Massless = true
+					back.CastShadow = false
+					back.CFrame = CFrame.lookAt(wp - wn * 0.015, wp + wn, up)
+					back.Parent = skin
+					local bw = Instance.new("WeldConstraint")
+					bw.Part0 = root
+					bw.Part1 = back
+					bw.Parent = back
+					h = math.min(h, w / 2.2)
+					w = h * 2.2
+				else
+					w *= 1.03 -- (covers the model's blank plate)
+					h *= 1.03
+				end
+				plateAt(CFrame.lookAt(wp, wp + wn, up), Vector3.new(w, h, 0.02), Vector2.new(220, 100))
+				continue
+			end
 			local out = root.CFrame:VectorToWorldSpace(Vector3.new(0, 0, side[1])) -- -Z is the front
 			for _, y in side[2] do
 				local from = (groundCF * CFrame.new(0, y, side[1] * 20)).Position

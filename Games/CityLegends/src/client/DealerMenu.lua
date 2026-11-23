@@ -1,6 +1,6 @@
 --[[
 	DealerMenu (client) (owner, 2026-10-31: "make the UI look a lot better", like Midnight Racing's
-	dealership menu). E at the Legends Motors counter (or a display car's stand) opens it:
+	dealership menu). E at the Rider Auto counter (or a display car's stand) opens it:
 	  * the camera goes to a showroom stage built on this screen only, high above the city: a round
 	    room, a polished dark floor, a turntable under spotlights. The picked car stands there and the
 	    camera circles it slowly (drag to turn round it, scroll or pinch to come closer). The
@@ -1343,7 +1343,7 @@ local function build(root: Frame)
 		end
 	end
 
-	-- (2026-11-07) Price · Mileage · Condition → worth, and what Legends Motors pays
+	-- (2026-11-07) Price · Mileage · Condition → worth, and what Rider Auto pays
 	local function confirmSell(id: string)
 		local spec = Cars.get(id)
 		local over, card = modal(if compact then 470 else 540, if compact then 220 else 246, 90)
@@ -1366,7 +1366,7 @@ local function build(root: Frame)
 			if st and st.ok and line.Parent then
 				line.Text = st.breakdown
 				pays = st.sell
-				offer.Text = "Legends Motors pays " .. money(pays)
+				offer.Text = "Rider Auto pays " .. money(pays)
 			end
 		end)
 		yes.b.Activated:Connect(function()

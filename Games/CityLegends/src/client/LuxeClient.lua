@@ -1,6 +1,6 @@
 --[[
 	LuxeClient
-	The Legends Gem Showcase on screen (server: Luxe, GemShowcase):
+	The Myanmar Gems Museum on screen (server: Luxe, GemShowcase):
 	  * the shop (the concierge desk): pieces by slot with a 3D preview, the price (VIP money off),
 	    BUY / WEAR / TAKE OFF
 	  * the VIP desk (the same desk, R; moved here from the casino, 2026-11-03): the Gold, Platinum
@@ -215,12 +215,12 @@ local function preview(parent: Instance, it: Flex.Item)
 end
 
 ---------------------------------------------------------------------
--- The Gem Showcase's shop
+-- The Gems Museum's shop
 ---------------------------------------------------------------------
 local shopSlot = "Neck"
 
 local function openShop()
-	local _, body, cashLabel = window("LEGENDS GEM SHOWCASE", if (state.discount or 0) > 0 then string.format("The collection  ·  your VIP card takes %d%% off", math.floor(state.discount * 100 + 0.5)) else "The collection  ·  VIP members pay less (VIP desk, press R)", C.gold)
+	local _, body, cashLabel = window("MYANMAR GEMS MUSEUM", if (state.discount or 0) > 0 then string.format("The collection  ·  your VIP card takes %d%% off", math.floor(state.discount * 100 + 0.5)) else "The collection  ·  VIP members pay less (VIP desk, press R)", C.gold)
 	local tabs = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(0, 132, 1, 0), Parent = body }, {
 		new("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
@@ -365,7 +365,7 @@ local function openVip()
 			label({ Text = tier.name, Font = Enum.Font.GothamBlack, TextSize = 18, TextColor3 = Color3.new(1, 1, 1), Position = UDim2.new(0, 12, 1, -30), Size = UDim2.new(1, -24, 0, 22), Parent = face })
 			local perks = {
 				"Title over your head:\n◆ " .. tier.title .. " ◆",
-				string.format("%d%% off at the Gem Showcase", math.floor(tier.discount * 100 + 0.5)),
+				string.format("%d%% off at the Gems Museum", math.floor(tier.discount * 100 + 0.5)),
 			}
 			label({
 				Text = table.concat(perks, "\n\n"),
@@ -486,7 +486,7 @@ function LuxeClient.init()
 		elseif kind == "openVip" then
 			openVip()
 		elseif kind == "gemsRobbery" then
-			UI.toast(`{info.by} is smashing up the Legends Gem Showcase!`, Theme.Danger)
+			UI.toast(`{info.by} is smashing up the Myanmar Gems Museum!`, Theme.Danger)
 		elseif kind == "heartRobbery" then
 			UI.toast(`{info.by} is going for the Legends Heart!`, Theme.Danger)
 		elseif kind == "grab" then

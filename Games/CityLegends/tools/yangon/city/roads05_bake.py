@@ -109,7 +109,7 @@ def read_pages(folders):
     pages = {}
     for f in folders:
         for p in glob.glob(os.path.join(f, '*')):
-            if not (p.endswith('.txt') or p.endswith('.json')) or os.path.getsize(p) < 1000:
+            if not (p.endswith('.txt') or p.endswith('.json')) or os.path.getsize(p) < 30:
                 continue
             raw = open(p, encoding='utf-8', errors='replace').read()
             if p.endswith('.json') or raw.startswith('['):
@@ -592,6 +592,13 @@ def bake(tag):
         for t in ts:
             mid = (t[0] + t[1] + t[2]) / 3
             by[(kind, cell_of(mid[0], mid[2]))].append(t)
+    # gore barriers: yellow boxes in the yellow paint mesh (no new mesh kind), inside the subset's districts only
+    sub = os.path.join(D, 'subset.json')
+    clip = shapely.union_all([Polygon(b) for b in json.load(open(sub))['boxes']]) if os.path.exists(sub) else None
+    barriers = [p for p in gore_barriers(data) if clip is None or clip.contains(Point(p[2][0], p[2][2]))]
+    for p in barriers:
+        for t in faces_of(('B',) + p[1:]):
+            by[('LY', cell_of(p[2][0], p[2][2]))].append(t)
     # meshes
     gdir = os.path.join(D, 'glb')
     os.makedirs(gdir, exist_ok=True)
@@ -635,7 +642,7 @@ def bake(tag):
     for i, f in enumerate(files):
         write_glb(os.path.join(gdir, 'roads05_%d.glb' % (i + 1)), [(nm, m) for nm, m, _ in f], generator='roads05_bake.py')
     # collision
-    rows = collision(data, surf, parts)
+    rows = collision(data, surf, parts, barriers)
     if only:
         rows = [r for r in rows if cell_of(float(r.split()[1]), float(r.split()[3])) in only]
     cdir = os.path.join(D, 'collide')
@@ -662,7 +669,35 @@ def box_row(kind, c, R, U, S):
     return '%s %.2f %.2f %.2f %.4f %.4f %.4f %.4f %.4f %.4f %.2f %.2f %.2f' % ((kind,) + tuple(c) + tuple(R) + tuple(U) + tuple(S))
 
 
-def collision(data, surf, parts):
+GORE_N, GORE_PITCH, GORE_SIZE = 6, 5.0, (1.5, 2.6, 4.0)   # a row of yellow plastic barriers: across, high, along
+
+
+def gore_barriers(data):
+    """(21 Nov, owner's real flyover foot: the nose between the ramp and the ground lane is a row of yellow barriers)
+    box parts ('G', 'B', pos, R, U, S) at each foot of a deck with side lanes, on both deck edge lines run on GORE_N
+    barriers past the foot (in the 1-stud strip between the ramp and the side lane, SIDE_INNER_WALK). Only where the
+    ground road goes on past the foot (not at a butt onto another deck).
+    shortcut: both sides of every sided deck (all have two side lanes today); per side when a one-sided deck appears"""
+    cut = {k: set(v) for k, v in data['cut'].items()}
+    n_of = {r['name']: len(r['s']) for r in data['roads']}
+    out = []
+    for d in data.get('decks', []):
+        if not d.get('sides'):
+            continue
+        cr = cut.get(d['of'], set())
+        for q, past, sg in ((d['s'][0], d['from'] - 1, -1.0), (d['s'][-1], d['to'] + 1, 1.0)):
+            if not (0 <= past < n_of.get(d['of'], 0)) or past in cr:
+                continue
+            fx, fz = q[3] * sg, q[4] * sg                 # away from the deck
+            for lat in (-q[6] - 0.5, q[7] + 0.5):
+                for j in range(GORE_N):
+                    t = 2.0 + GORE_PITCH * j
+                    x, z = q[0] - q[4] * lat + fx * t, q[2] + q[3] * lat + fz * t
+                    out.append(('G', 'B', (x, q[1] + GORE_SIZE[1] / 2, z), (-q[4], 0.0, q[3]), (0.0, 1.0, 0.0), GORE_SIZE))
+    return out
+
+
+def collision(data, surf, parts, barriers=()):
     """carriageway and pavement boxes along each road (runs of up to MERGE samples while straight), the ring, decks
     from their surface, bridge pieces (walls, piers) as their own boxes"""
     rows = []
@@ -725,8 +760,8 @@ def collision(data, surf, parts):
             j = min(len(s) - 1, i + 2)
             rows.extend(strip_box(s[i], s[j], -s[i][6], s[i][7], 'D', 0.0, surf, 2.0, prefer='max'))
     # bridge pieces (parapets, ramp walls, girders, pier caps, piers): their own boxes
-    for p in parts:
-        if p[0] == 'B' and p[1] == 'B':
+    for p in list(parts) + list(barriers):
+        if p[0] in 'BG' and p[1] == 'B':
             c, R, U, Bk = frame(p[2], p[3], p[4])
             rows.append(box_row('W', c, R, U, p[5]))
     # (19 Nov, owner: cars hit things you can't see) pavement boxes only over pavement the builder really laid
@@ -773,6 +808,10 @@ def strip_box(a, b, lo, hi, kind, up, surf, thick, prefer='min'):
 
     def top(p):
         hs = surf.heights(p[0], p[2])
+        if kind == 'D':
+            # (21 Nov, U Chit Maung x Banyar Dala: a deck whose surface is not in this export took the height of the
+            # ground road under it, a 30-deep V in its boxes) only the deck's own surface counts, else the data height
+            hs = [h for h in hs if min(a[1], b[1]) - 8 < h < max(a[1], b[1]) + 8]
         if hs:
             return (max(hs) if prefer == 'max' else min(hs))
         return None

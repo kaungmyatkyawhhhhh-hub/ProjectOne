@@ -22,6 +22,9 @@ local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 
 local CityBuilder = require(script.Parent:WaitForChild("CityBuilder"))
 local PlayerData = require(script.Parent:WaitForChild("PlayerData"))
+-- (21 Nov, "make the loading screen load fast") start-up times in the Output: the systems (guard) and each profile
+-- load (the client's menu waits on it through GetData)
+local serverT0 = os.clock()
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local Police = require(script.Parent:WaitForChild("Police"))
 local Bank = require(script.Parent:WaitForChild("Bank"))
@@ -397,11 +400,14 @@ local ctx = {
 -- (19 Nov, owner: stuck with no GUI) each system starts in its own guard: one that errors is
 -- reported and the rest still start, so the remotes and handlers made after it (SpawnCar,
 -- ClaimStarter, FastTravel, MenuFocus) always exist and no client waits on them forever
+local guardTimes: { string } = {} -- (21 Nov) each system's start time, printed once the server is up
 local function guard(name: string, fn: () -> ())
+	local t0 = os.clock()
 	local ok, err = pcall(fn)
 	if not ok then
 		warn(string.format("[CityLegends] server start: %s failed: %s", name, tostring(err)))
 	end
+	table.insert(guardTimes, string.format("%s %.2f", name, os.clock() - t0))
 end
 guard("Goals", function() Goals.init(ctx) end)
 guard("CarLevels", function() CarLevels.init(ctx) end)
@@ -417,7 +423,7 @@ guard("HairpinHotel", function() require(script.Parent:WaitForChild("HairpinHote
 guard("Gate", function() require(script.Parent:WaitForChild("Gate")).init(ctx) end)
 guard("Hotel", function() Hotel.init(ctx) end)
 guard("Chauffeur", function() Chauffeur.init(ctx) end)
--- Legends Motors: new cars are bought there only (owner, 2026-10-23)
+-- Rider Auto: new cars are bought there only (owner, 2026-10-23)
 local Dealership = require(script.Parent:WaitForChild("Dealership"))
 guard("Dealership", function() Dealership.init(ctx) end)
 -- drift scoring, speed traps, jumps and the leaderboard
@@ -428,7 +434,7 @@ local Customs = require(script.Parent:WaitForChild("Customs"))
 guard("Customs", function() Customs.init(ctx) end)
 local PlateShop = require(script.Parent:WaitForChild("PlateShop"))
 guard("PlateShop", function() PlateShop.init(ctx) end) -- (2026-11-19) Myanmar number plates, the Plate Office
--- the Legends Gem Showcase, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
+-- the Myanmar Gems Museum, Downtown (VIP cards, flex items, the smash-and-grab), and Legends
 -- Rewards (the daily reward, gifts, the wheels; it replaced the casino, 2026-11-03)
 local Luxe = require(script.Parent:WaitForChild("Luxe"))
 guard("Luxe", function() Luxe.init(ctx) end)
@@ -496,7 +502,7 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 	local spec = Cars.get(carId)
 	local model = CarBuilder.build(spec, { interior = true, lights = true, anchored = false })
 	PlateShop.applyTo(player, model, carId, opts) -- (2026-11-19) its Myanmar number plate
-	Customs.applyTo(player, model, carId) -- the car's Legends Customs look (an event plate goes over it)
+	Customs.applyTo(player, model, carId) -- the car's Optima Werkz look (an event plate goes over it)
 	if opts and opts.job then
 		Customs.setOn(model, opts.look or {})
 		model:SetAttribute("JobCar", opts.job)
@@ -564,7 +570,10 @@ local function spawnFor(player: Player, carId: string, opts: { stolen: boolean?,
 		return
 	end
 	spawning[player] = nil
-	model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic -- the whole car arrives at once
+	-- (owner, 2026-11-21: "u cant see other people car when they spawn outside of ur render distance") Persistent:
+	-- every player's car reaches every client whole and stays, wherever it is (was Atomic: streamed out past the
+	-- streaming radius, so far cars and their headlights vanished); one car per player keeps it cheap
+	model.ModelStreamingMode = Enum.ModelStreamingMode.Persistent
 	model:PivotTo(spawnCF + Vector3.new(0, h / 2 + 0.3, 0))
 	ao.CFrame = spawnCF.Rotation
 	-- a big car reaches clients in pieces: they wait for this many before putting the body on
@@ -583,6 +592,7 @@ end
 ---------------------------------------------------------------------
 -- Remotes
 ---------------------------------------------------------------------
+print(string.format("[CityLegends] server: GetData answers from %.2fs", os.clock() - serverT0))
 GetData.OnServerInvoke = function(player: Player)
 	local timeout = os.clock() + 10
 	while not PlayerData.get(player) and os.clock() < timeout do
@@ -669,7 +679,7 @@ BuyCar.OnServerInvoke = function(player: Player, carId: any, colour: any)
 	return { ok = true, message = "Purchased " .. spec.Name, price = price, data = PlayerData.snapshot(player) }
 end
 
--- a test drive at Legends Motors (owner, 2026-10-30): a dealer car you don't own, once each per
+-- a test drive at Rider Auto (owner, 2026-10-30): a dealer car you don't own, once each per
 -- visit, out of the drive-out bay
 local tested: { [Player]: { [string]: boolean } } = {}
 local lastTest: { [Player]: number } = {}
@@ -769,6 +779,7 @@ local Care = require(script.Parent:WaitForChild("Care"))
 ctx.care = Care
 guard("Care", function() Care.init(ctx) end)
 guard("Parking", function() require(script.Parent:WaitForChild("Parking")).init(ctx, Police, Towers) end)
+task.defer(function() guard("VenueLooks", function() require(script.Parent:WaitForChild("VenueLooks")).apply() end) end) -- (2026-11-21) real places' colours on the venues beside them
 
 SpawnCar.OnServerEvent:Connect(function(player: Player, carId: any)
 	if type(carId) ~= "string" then
@@ -1331,7 +1342,9 @@ local function onPlayerAdded(player: Player)
 	watchConsoleUnlock(player)
 	watchConsoleEverything(player)
 	watchConsoleCarXp(player)
+	local loadT0 = os.clock()
 	PlayerData.load(player)
+	print(string.format("[CityLegends] profile of %s loaded in %.2fs (%.2fs after the server script started)", player.Name, os.clock() - loadT0, os.clock() - serverT0))
 	Brands.publish(player)
 	CarLevels.publish(player)
 	-- Studio play tests start with everything unlocked and the test cash (owner, 2026-10-23:
@@ -1363,6 +1376,7 @@ for _, p in Players:GetPlayers() do
 	task.spawn(onPlayerAdded, p)
 end
 
+print(string.format("[CityLegends] server start: %.2fs (%s)", os.clock() - serverT0, table.concat(guardTimes, ", ")))
 Players.PlayerRemoving:Connect(function(player)
 	local f = focusFolder:FindFirstChild(player.Name)
 	if f then

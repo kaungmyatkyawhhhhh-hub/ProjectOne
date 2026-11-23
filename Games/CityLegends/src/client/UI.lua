@@ -17,6 +17,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
+local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 local Cars = require(Shared:WaitForChild("Cars"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
@@ -50,6 +51,7 @@ UI.onChauffeurButton = nil :: (() -> ())? -- opens the chauffeur phone (Chauffeu
 UI.onDespawnButton = nil :: (() -> ())? -- puts your car away (Main.client)
 UI.onHouseButton = nil :: (() -> ())? -- the house menu (HousingClient)
 UI.onGoalsButton = nil :: (() -> ())? -- the GOALS screen (GoalsClient)
+UI.goalsReady = false -- the goals dot is showing (MainMenu's Goals card shows it too)
 UI.onJobsButton = nil :: (() -> ())? -- (19 Nov) the main menu's JOBS tab (Main.client)
 UI.onDealerButton = nil :: (() -> ())? -- (19 Nov) the dealer menu from anywhere (Main.client)
 UI.onShopButton = nil :: (() -> ())? -- (19 Nov) the main menu's STORE tab (Main.client)
@@ -1302,13 +1304,15 @@ local function buildSideButtons()
 	end
 
 	-- (owner, 2026-11-02: SETTINGS became MENU, the big-tile main menu; settings live in it)
+	-- (owner, 2026-11-21: "put menu at first, shop at second, cars at 3rd, dealer at 4th, goals at 5th, chaffuer at 6th")
 	local settingsBtn = sideButton("menu", "MENU", 1)
 	settingsBtn.Name = "MenuButton"
 	-- (owner, 2026-10-23: the SHOP became CARS, your own cars; new ones are sold at the dealership)
-	local shopBtn = sideButton("car", "CARS", 2)
+	local shopBtn = sideButton("car", "CARS", 3)
 	-- (owner, 2026-10-30: GIFTS became GOALS: Legends Path, daily tasks and the daily streak)
-	local giftBtn = sideButton("flag", "GOALS", 3)
-	local marketBtn = sideButton("chart", "MARKET", 4)
+	local giftBtn = sideButton("flag", "GOALS", 5)
+	giftBtn.Visible = false -- (owner, 2026-11-21: "nvm put goals and chauffeur in the menu"): the main menu's Goals card; its dot sits on MENU
+	local marketBtn = sideButton("chart", "MARKET", 7)
 	marketBtn.Visible = Config.Market.Enabled == true
 	marketBtn.Activated:Connect(function()
 		closePanels()
@@ -1317,8 +1321,8 @@ local function buildSideButtons()
 		end
 	end)
 	-- owner (2026-10-23): "add a function to despawn car"
-	local despawnBtn = sideButton("despawn", "DESPAWN", 6)
-	despawnBtn.Visible = not UI.isTouch
+	local despawnBtn = sideButton("despawn", "DESPAWN", 8)
+	despawnBtn.Visible = false -- (owner, 2026-11-21: "remove despawn and replace it with cars in the side buttons")
 	despawnBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onDespawnButton then
@@ -1326,7 +1330,7 @@ local function buildSideButtons()
 		end
 	end)
 	-- (owner, 2026-10-29: housing like Driving Empire's, a house button on the HUD)
-	local houseBtn = sideButton("house", "HOUSE", 7)
+	local houseBtn = sideButton("house", "HOUSE", 9)
 	houseBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onHouseButton then
@@ -1335,7 +1339,7 @@ local function buildSideButtons()
 	end)
 	-- (19 Nov, owner: make the dealership and the store easy to find) DEALER opens the dealer menu
 	-- from anywhere, SHOP the main menu's STORE tab; column order Dealer, Shop, Jobs, then the rest
-	local dealerBtn = sideButton("dealer", "DEALER", -3)
+	local dealerBtn = sideButton("dealer", "DEALER", 4)
 	dealerBtn.Name = "DealerButton"
 	dealerBtn.Activated:Connect(function()
 		closePanels()
@@ -1343,7 +1347,7 @@ local function buildSideButtons()
 			UI.onDealerButton()
 		end
 	end)
-	local storeBtn = sideButton("cart", "SHOP", -2)
+	local storeBtn = sideButton("cart", "SHOP", 2)
 	storeBtn.Name = "ShopButton"
 	storeBtn.Activated:Connect(function()
 		closePanels()
@@ -1368,14 +1372,18 @@ local function buildSideButtons()
 	player:GetAttributeChangedSignal("StoreUnseen"):Connect(paintStoreDot)
 	paintStoreDot()
 	-- (19 Nov, owner: jobs like Southwest Florida) JOBS: the main menu's JOBS tab
-	local jobsBtn = sideButton("jobs", "JOBS", -1)
+	local jobsBtn = sideButton("jobs", "JOBS", 10)
 	jobsBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onJobsButton then
 			UI.onJobsButton()
 		end
 	end)
-	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 5)
+	-- (owner, 2026-11-20: "only add the important buttons. 9 buttons is alot"): CARS, HOUSE and JOBS are tabs of
+	-- MENU, so their buttons are hidden: one column of Dealer, Shop, Menu, Goals, Chauffeur, Despawn
+	houseBtn.Visible, jobsBtn.Visible = false, false -- (21 Nov: CARS is back in the column, DESPAWN is out)
+	local chauffeurBtn = sideButton("phone", "CHAUFFEUR", 6)
+	chauffeurBtn.Visible = false -- (owner, 2026-11-21: "nvm put goals and chauffeur in the menu"): the main menu's Chauffeur card
 	chauffeurBtn.Activated:Connect(function()
 		closePanels()
 		if UI.onChauffeurButton then
@@ -1389,7 +1397,7 @@ local function buildSideButtons()
 		BackgroundColor3 = Theme.Danger,
 		Visible = false,
 		ZIndex = 3,
-		Parent = giftBtn,
+		Parent = settingsBtn, -- (21 Nov: GOALS moved into the menu, so MENU carries its dot)
 	}, { new("UICorner", { CornerRadius = UDim.new(1, 0) }), stroke(Theme.Background, 2, 0) })
 
 	-- settings: camera + music toggles (same actions as C and M)
@@ -1639,6 +1647,7 @@ local function refreshDaily(force: boolean?)
 	dailyCardTitle.Text = "DAILY STREAK  ·  DAY " .. streak.day
 	dailyPanelAmount.Text = amount
 	giftDot.Visible = ready
+	UI.goalsReady = ready
 	if ready then
 		dailyCardTime.Text = "READY!"
 		dailyCardTime.TextColor3 = Theme.Money
@@ -1741,7 +1750,7 @@ function UI.init()
 
 	refreshDaily(true)
 	local dailyTick = 0
-	RunService.RenderStepped:Connect(function(dt)
+	Frame.Connect(function(dt)
 		if displayedCash ~= targetCash then
 			local diff = targetCash - displayedCash
 			local step = math.max(1, math.abs(diff) * math.min(1, dt * 8))
@@ -1775,6 +1784,10 @@ end
 -- until the map round the player has streamed in (waitForMap), so the cap is only for a stuck load
 local loadingFrame: Frame? = nil
 local loadingSkipped = false
+-- (owner, 2026-11-21: "i am stuck in black screen after skipping loading") while Main.client's startup holds the
+-- screen (no menu to show yet), SKIP / LOADING_MAX keep it up with an honest status line instead of baring the view
+local loadingHold = false
+local loadingSkipAsked = false
 local LOADING_SKIP_AFTER = 5
 local LOADING_MAX = 45
 -- the loading screen shows the whole map behind the title (owner, 2026-10-30, in place of the intro
@@ -1836,7 +1849,9 @@ function UI.showLoading(text: string)
 		return
 	end
 	if loadingFrame then
-		(loadingFrame:FindFirstChild("Status") :: TextLabel).Text = text
+		if not loadingSkipAsked then
+			(loadingFrame:FindFirstChild("Status") :: TextLabel).Text = text
+		end
 		return
 	end
 	local f = new("Frame", { BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = if loadingCinematic then 1 else 0, Size = UDim2.fromScale(1, 1), ZIndex = 100, Parent = gui })
@@ -1870,14 +1885,21 @@ function UI.showLoading(text: string)
 	end)
 	loadingFrame = f
 	local function skip()
-		if loadingFrame == f then
+		if loadingFrame == f and loadingHold then
+			loadingSkipAsked = true;
+			(f:FindFirstChild("Status") :: TextLabel).Text = "Still loading the city..."
+			local b = f:FindFirstChild("Skip")
+			if b then
+				b:Destroy()
+			end
+		elseif loadingFrame == f then
 			f:Destroy()
 			loadingFrame = nil
 			loadingSkipped = true
 		end
 	end
 	task.delay(LOADING_SKIP_AFTER, function()
-		if loadingFrame ~= f then
+		if loadingFrame ~= f or loadingSkipAsked then
 			return
 		end
 		local b = button("SKIP", Theme.Accent, {
@@ -1898,8 +1920,22 @@ function UI.loadingVisible(): boolean
 	return loadingFrame ~= nil
 end
 
+-- on screen and nobody asked to skip: the waits a SKIP may cut short (the map settling) look at this
+function UI.loadingWaiting(): boolean
+	return loadingFrame ~= nil and not loadingSkipAsked
+end
+
+-- startup's hold (see loadingHold): on from the top of Main.client until the main menu can open
+function UI.setLoadingHold(on: boolean)
+	loadingHold = on
+end
+function UI.loadingHeld(): boolean
+	return loadingHold
+end
+
 function UI.hideLoading()
 	loadingSkipped = false
+	loadingSkipAsked = false
 	if loadingFrame then
 		loadingFrame:Destroy()
 		loadingFrame = nil
@@ -1913,7 +1949,19 @@ function UI.fade(toBlack: boolean, duration: number)
 	end
 	local f = fadeFrame :: Frame
 	local t = tween(f, duration, { BackgroundTransparency = if toBlack then 0 else 1 }, Enum.EasingStyle.Sine)
-	t.Completed:Wait()
+	-- (owner, 2026-11-20: a locked / minimised PC gives 0 render frames) never wait on the tween alone: if it
+	-- hasn't ended 0.25 s after its time, go on (Main.client's startup and every car spawn wait here)
+	local done = false
+	t.Completed:Once(function()
+		done = true
+	end)
+	local by = os.clock() + duration + 0.25
+	while not done and os.clock() < by do
+		task.wait()
+	end
+	if not done then
+		f.BackgroundTransparency = if toBlack then 0 else 1
+	end
 end
 
 local barTop: Frame? = nil
@@ -3258,7 +3306,7 @@ function UI.setCombo(combo: number)
 	tween(comboLabel, 0.25, { TextSize = 28 }, Enum.EasingStyle.Back)
 end
 
-RunService.RenderStepped:Connect(function()
+Frame.Connect(function()
 	if comboFrame and comboFrame.Visible then
 		local left = comboExpire - os.clock()
 		if left <= 0 then

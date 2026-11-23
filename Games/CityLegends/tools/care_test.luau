@@ -60,6 +60,11 @@ for _, spec in Cars.List do
 		evId = spec.Id
 	end
 end
+for _, spec in Cars.All do -- (19 Nov: every electric car is on an old model, so none is on sale)
+	if spec.Electric and not evId then
+		evId = spec.Id
+	end
+end
 check(newId and usedId and collectorId and evId, "found a new, used, collector and electric car")
 
 -- new cars

@@ -1788,7 +1788,10 @@ def deck_joints(data):
             if abs(a[1] - b[1]) > 1e-3:
                 b[1] = a[1]
                 ch = True
-            for k in (6, 7):
+            # (21 Nov, owner: "on almost every overhead road" the ground lanes beside the ramp were dead-end stubs behind a
+            # kerb and pavement) a deck WITH side lanes keeps roads05.py's gore width at its foot (deck + side lanes):
+            # the side lanes start on that end line, so narrowing the road to the deck left them ending on grass
+            for k in (() if dk.get('sides') else (6, 7)):
                 if b[k] > a[k] + 0.05:
                     b[k] = a[k]
                     ch = True
@@ -1804,6 +1807,25 @@ def deck_joints(data):
                             break
                         q[k] = round(cap, 2)
             n += ch
+    return n
+
+
+GORE_REACH = 150.0   # roads05.py's gore flare past a deck foot
+
+
+def gore_medians(data):
+    """(21 Nov, owner's flyover-foot picture: a pointed grass island in front of the ramp) no kerbed median inside the
+    gore flare of a deck with side lanes: the road forks there (the lanes stay apart by s[11], a painted median)"""
+    R = {r['name']: r for r in data['roads']}
+    n = 0
+    for dk in data['decks']:
+        if not dk.get('sides') or dk['of'] not in R:
+            continue
+        for f in (dk['s'][0], dk['s'][-1]):
+            for q in R[dk['of']]['s']:
+                if q[8] > 0 and math.hypot(q[0] - f[0], q[2] - f[2]) < GORE_REACH:
+                    q[8] = 0
+                    n += 1
     return n
 
 
@@ -2345,6 +2367,7 @@ def main():
                     if math.hypot(q[0] - mx, q[2] - mz) < rr and q[8] > 0:
                         q[8] = 0
                         st['median_samples_cleared'] += 1
+    st['gore_medians'] = gore_medians(data)
     st['stubs_dropped'] = drop_stubs(data)
     st['downtown_walks'] = downtown_walks(data)
     st['walk_match'] = walk_match(data)  # (J19) after every walk change

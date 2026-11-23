@@ -20,3 +20,5 @@ Others: `nisun_r34`, `dodger_challenger`, `xiaomo_su7`, `lexis_lx700`, `byt_u8`,
 
 ## Retired (owners keep them; not on sale)
 `suzaki_swift`, `toyoka_belta`, `toyoka_crown`, `byt_seal`, `mazdo_rx8`, `bnw_530i`, `bentz_e300`, `bentz_cla45`, `chevo_c6`, `ferrara_458`, `lambrini_urus`
+
+- **19 Nov evening:** old-model cars put away, see [[2026-11-19 Old-model cars put away]].

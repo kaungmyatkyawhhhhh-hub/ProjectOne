@@ -1,0 +1,1 @@
+{"id": "ferrara_458spider", "note": "HeadCore only: the projector face inside the headlamp (as on ferrara_458speciale, ax 0.63..0.71)", "roles": {"HeadCore": [{"part": "Body_Lamp", "in": [0.5, 0.9, 0.4, 0.85, -2.3, -1.5], "box": [0.63, 0.71, 0.545, 0.635, -2.035, -1.99], "off": 0.003}]}}

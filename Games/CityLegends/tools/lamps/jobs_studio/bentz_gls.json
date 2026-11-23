@@ -1,0 +1,1 @@
+{"id": "bentz_gls", "note": "tail only: the upper lamp (SeeThrough_Lens_Red2) between Rev and TurnR; the bumper strip (SeeThrough_Lens_Red) is a reflector and stays dark", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red2", "in": [0.3, 0.95, 1.0, 1.3, 2.1, 2.7], "box": [0.51, 0.79, -9, 9, -9, 9], "off": 0.006}]}}

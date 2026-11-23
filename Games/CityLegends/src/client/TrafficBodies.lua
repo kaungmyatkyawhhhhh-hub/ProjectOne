@@ -47,7 +47,8 @@ local function templates(): { Model }
 	local f = folder()
 	if f then
 		for _, m in f:GetChildren() do
-			if m:IsA("Model") and partOf(m, "Body") then
+			-- (20 Nov 2026) no copies of put-away old-model cars: TrafficMix.spawns (moving and parked cars)
+			if m:IsA("Model") and partOf(m, "Body") and TrafficMix.spawns(m.Name) then
 				table.insert(out, m)
 			end
 		end
@@ -215,7 +216,8 @@ local function prepare(template: Model): Model
 		if entry.rare then
 			-- the hook for a later chase bonus (17 Nov design): rare NPC supercars carry RareTraffic = their cap group
 			m:SetAttribute("RareTraffic", entry.rare)
-			m:SetAttribute("RacerMph", entry.mph)
+			m:SetAttribute("RacerMph", entry.mph and entry.mph * (TrafficMix.TrimSpeed[entry.trim or "BASE"] or 1))
+			m:SetAttribute("RareTrim", entry.trim)
 		end
 	end
 	return m

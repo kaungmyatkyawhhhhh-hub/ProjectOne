@@ -5,7 +5,7 @@
     residential streets are unmarked); (J25) a street with 2+ lanes a direction gets them (and its centre line). (J15) One smooth offset per boundary: the lane count is a 9-sample median, each
     line moves at most LANE_RATE sideways per stud, so a new lane tapers out of the kerb (no jogs, no side-by-side
     dashes); all lines are Chaikin-smoothed (no sample corners); clipped pieces under 3 studs are dropped
-  * centre: one solid white line on an undivided main road (never broken by a smaller road's mouth)
+  * centre: (21 Nov) a DOUBLE YELLOW line (centre_line) on an undivided main road (never broken by a smaller road's mouth)
   * yellow kerb lines (J15, owner ref 'Sule Square road'): along every kerb of a main road, outer and median, 0.9 in
   * junction boxes (where two main roads' carriageways overlap): nothing painted inside; (J15) two parallel roads under
     40 studs apart crossing one road make ONE box (owner ref 'double junction zebras and stop lines'), and each road's
@@ -217,6 +217,18 @@ class Grid:
 
     def hits(self, g, d):
         return any(x.distance(g) < d for c in self._cells(g.buffer(d).bounds) for x in self.cells.get(c, ()))
+
+
+CENTRE_GAP = 0.45     # between the two lines of a double yellow centre line
+
+
+def centre_line(P, ln, what, road, clip, deck=False):
+    """(21 Nov, owner: "use yellow lines on the ones that uses yellow in real life") the line between OPPOSING traffic on
+    an undivided two-way road (and a deck) is a double yellow line; lane dividers stay white"""
+    if ln is None:
+        return
+    for sg in (-1, 1):
+        P.line('LY', ln.offset_curve(sg * (CENTRE_GAP + CENTRE_W) / 2), CENTRE_W, what, road, clip, deck=deck)
 
 
 class Paint:
@@ -672,7 +684,7 @@ def build(data, signals=None):
                     if u1 - u0 < 2:
                         continue
                     ln = smooth([(s[a + j][0] - s[a + j][4] * c0[j], s[a + j][2] + s[a + j][3] * c0[j]) for j in range(u0, u1 + 1)])
-                    P.line('LW', ln, CENTRE_W, 'centre', r['name'], clip_mid)
+                    centre_line(P, ln, 'centre', r['name'], clip_mid)
                 # (J15) a painted median (lanes held apart, no kerbed median built): a solid line on each side of it
                 flush = [s[i][11] >= 1.2 and s[i][8] <= 0.3 for i in rng]
                 for u0, u1 in runs(flush):
@@ -744,11 +756,11 @@ def build(data, signals=None):
             ln = LineString(Point(*C).buffer(rr, 128).exterior.coords)
             for d in dashes(ln, DASH_ON, DASH_OFF):
                 P.line('LW', d, LINE_W, 'ring lane', g['name'], box_u)   # (J15) none in an arm's junction box
-    # decks: 2 + 2, a solid white centre line and dashed lane lines (no zebras, no boxes up there)
+    # decks: 2 + 2, a double yellow centre line and white dashed lane lines (no zebras, no boxes up there)
     for d in data.get('decks', []):
         s = d['s']
         rng = range(len(s))
-        P.line('LW', offset_line(s, lambda q: 0.0, rng), CENTRE_W, 'deck centre', d['name'], None, deck=True)
+        centre_line(P, offset_line(s, lambda q: 0.0, rng), 'deck centre', d['name'], None, deck=True)
         for sg in (-1, 1):
             ln = offset_line(s, lambda q, sg=sg: sg * q[10], rng)
             for dd in dashes(ln, DASH_ON, DASH_OFF):

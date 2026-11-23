@@ -106,9 +106,38 @@ function BankClient.init()
 	arrow.Visible = false
 	arrow.Parent = gui
 
+	-- (owner, 2026-11-21) the drop-off's ring, beam and DROP-OFF text show only while you carry loot
+	local marker: Model? = nil
+	local markerShown: boolean? = nil
+	local markerN = 0
+	local function showMarker(on: boolean)
+		if not (marker and marker.Parent) then
+			local city = workspace:FindFirstChild("City")
+			marker = (city and city:FindFirstChild("Dropoff") or workspace:FindFirstChild("Dropoff")) :: Model?
+			markerShown = nil
+			if not marker then
+				return
+			end
+		end
+		-- (parts streamed back in come back visible: the child count tells)
+		local n = #(marker :: Model):GetChildren()
+		if on == markerShown and n == markerN then
+			return
+		end
+		markerShown, markerN = on, n
+		for _, d in (marker :: Model):GetDescendants() do
+			if d:IsA("BillboardGui") then
+				d.Enabled = on
+			elseif d:IsA("BasePart") and (d.Name == "Marker" or d.Name == "Beam") then
+				d.LocalTransparencyModifier = if on then 0 else 1
+			end
+		end
+	end
+
 	RunService.RenderStepped:Connect(function()
 		local amount = (player:GetAttribute("Loot") :: number?) or 0
 		local drop = workspace:GetAttribute("Dropoff") :: Vector3?
+		showMarker(amount > 0)
 		if amount <= 0 or not drop then
 			card.Visible = false
 			arrow.Visible = false
@@ -136,7 +165,7 @@ function BankClient.init()
 			return
 		end
 		if info.kind == "robbery" then
-			UI.toast(`{info.by} is robbing the Legends Reserve Bank!`, Theme.Danger)
+			UI.toast(`{info.by} is robbing the CB Bank!`, Theme.Danger)
 		elseif info.kind == "grab" then
 			UI.popup("CASH GRABBED", tonumber(info.amount) or 0, Theme.Money)
 			Audio.cutUp(2, "CASH")

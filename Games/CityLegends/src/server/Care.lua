@@ -635,11 +635,14 @@ handlers.roadside = function(player, kind)
 	return { ok = true, paid = price }
 end
 
--- selling at Legends Motors: the car goes, its record too
+-- selling at Rider Auto: the car goes, its record too
 handlers.sell = function(player, id)
 	local profile = PlayerData.get(player) :: any
 	if type(id) ~= "string" or not profile or not profile.Owned[id] then
 		return { ok = false, message = "Not your car" }
+	end
+	if id == Cars.StarterId and not profile.Claimed then -- (2026-11-19) the free car comes back on every join until the first-car pick
+		return { ok = false, message = "You can't sell your last car" }
 	end
 	if not Dealership.near(player, ctx.getCar) then
 		return { ok = false, message = "Sell it at " .. Config.Dealership.Name }

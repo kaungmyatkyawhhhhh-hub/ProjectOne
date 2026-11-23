@@ -4,7 +4,7 @@
 	    get while driving it (Main's grantXp passes it on: driving, cut-ups, races, drifts, jumps,
 	    traps, duels, escapes, jobs, the bank; the same server checks), times FromPlayerXp
 	  * each level gives the car Car Points (CpPerLevel); CP or cash buy performance parts and pay for
-	    Legends Customs looks (Customs.lua asks spendCp)
+	    Optima Werkz looks (Customs.lua asks spendCp)
 	  * (2026-11-06, the workshop and the Part Shop) parts are PartData's: one per slot, bought for a
 	    car, installed or kept in My Parts (profile.PartBag). Uninstalling puts a part back there so it
 	    can go on another car. The price goes with the car, so a spare remembers the price factor it

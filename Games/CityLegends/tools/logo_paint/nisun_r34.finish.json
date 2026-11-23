@@ -1,0 +1,153 @@
+{
+ "id": "nisun_r34",
+ "_what": "ARjun.JS GTR-r34 (CC BY 4.0); materials r34_* come from nisun_r34_prep.py",
+ "roles": {
+  "^r34_paint($|\\.)": [
+   "Paint",
+   0.1,
+   0
+  ],
+  "^r34_carbon($|\\.)": [
+   "Carbon",
+   0.22,
+   0
+  ],
+  "^r34_grill($|\\.)": [
+   "Grille",
+   0.5,
+   0.2
+  ],
+  "^r34_trim($|\\.)": [
+   "Trim",
+   0.35,
+   0
+  ],
+  "^r34_rubber($|\\.)": [
+   "Rubber",
+   0.8,
+   0
+  ],
+  "^r34_rim($|\\.)": [
+   "Rim",
+   0.3,
+   0.6
+  ],
+  "^r34_disc($|\\.)": [
+   "Disc",
+   0.35,
+   0.85
+  ],
+  "^r34_caliper($|\\.)": [
+   "Brake",
+   0.3,
+   0.3
+  ],
+  "^r34_tyre($|\\.)": [
+   "Tyre",
+   0.8,
+   0
+  ],
+  "^r34_exhaust($|\\.)": [
+   "Exhaust",
+   0.25,
+   0.9
+  ],
+  "^r34_chrome($|\\.)": [
+   "Chrome",
+   0.1,
+   1.0
+  ],
+  "^r34_lens_red($|\\.)": [
+   "Lens_Red",
+   0.1,
+   0
+  ],
+  "^r34_lens_orange($|\\.)": [
+   "Lens_Orange",
+   0.1,
+   0
+  ],
+  "^r34_lamp($|\\.)": [
+   "Lamp",
+   0.16,
+   0.5
+  ],
+  "^r34_mirror($|\\.)": [
+   "Mirror",
+   0.06,
+   1.0
+  ],
+  "^r34_black($|\\.)": [
+   "Base",
+   0.6,
+   0
+  ],
+  "^r34_cabin($|\\.)": [
+   "Cabin",
+   0.6,
+   0
+  ],
+  "^r34_cabin_soft($|\\.)": [
+   "CabinTrim",
+   0.55,
+   0
+  ],
+  "^r34_cloth($|\\.)": [
+   "CabinCloth",
+   0.85,
+   0
+  ],
+  "^r34_door($|\\.)": [
+   "CabinDoor",
+   0.6,
+   0
+  ],
+  "^r34_headliner($|\\.)": [
+   "Headliner",
+   0.85,
+   0
+  ],
+  "^r34_carpet($|\\.)": [
+   "Carpet",
+   0.9,
+   0
+  ],
+  "^r34_leather($|\\.)": [
+   "Leather",
+   0.5,
+   0
+  ],
+  "^r34_alloy($|\\.)": [
+   "CabinMetal",
+   0.3,
+   0.8
+  ],
+  "^r34_screen($|\\.)": [
+   "Screen",
+   0.35,
+   0
+  ]
+ },
+ "lens": [
+  [
+   "^r34_lens_clear",
+   "Lens_Clear"
+  ],
+  [
+   "^r34_lens_red",
+   "Lens_Red"
+  ],
+  [
+   "^r34_lens_orange",
+   "Lens_Orange"
+  ]
+ ],
+ "dissolve": {
+  "Paint": 2.0,
+  "Carbon": 2.0,
+  "CabinDoor": 3.0
+ },
+ "thin": {
+  "Grille": 0.55
+ }
+}

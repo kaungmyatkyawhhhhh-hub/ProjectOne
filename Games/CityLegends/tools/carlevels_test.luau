@@ -275,7 +275,10 @@ end
 ---------------------------------------------------------------------
 -- the car list
 ---------------------------------------------------------------------
-check(Cars.StarterId == "kio_ev6", "the Orient EV6 is the free car")
+check(Cars.StarterId == "toyoka_ae86", "the AE86 is the free car (19 Nov: the Voltra's old model is put away)")
+for _, spec in Cars.List do
+	check(not Cars.OLD_MODELS[Cars.modelOf(spec.Id)], "no old-model car on sale: " .. spec.Id)
+end
 for id in Cars.RETIRED do
 	check(Cars.ById[id] ~= nil and not Cars.forSale(id) and Cars.SeriesOf[id] ~= nil, "retired " .. id .. " kept (owners) but not sold")
 end
@@ -528,6 +531,7 @@ local saved = {
 	PartBag = { in_cold = { 1.5, "x", 99 }, nothing = { 1 } },
 	CarSetup = { suzaki_swift = { final = 3, bad = 1 } },
 }
+local lastPayload
 local penv = table.clone(baseEnv)
 penv.game = {
 	GetService = function(_, name)
@@ -536,7 +540,8 @@ penv.game = {
 				return { GetAsync = function()
 					return saved
 				end, SetAsync = function() end, UpdateAsync = function(_, _, fn)
-					return fn(saved)
+					lastPayload = fn(saved)
+					return lastPayload
 				end }
 			end }
 		elseif name == "Players" then
@@ -569,9 +574,11 @@ end }
 local RealPlayerData = load("src/server/PlayerData.lua", penv)
 local oldPlayer = { UserId = 42, Name = "Old", Parent = {} }
 local pr = RealPlayerData.load(oldPlayer)
-check(pr.Owned.suzaki_swift and pr.Owned.bnw_530i and pr.Owned.chevo_c6 and pr.Owned.suzaki_swift_top and pr.Owned.bentz_cla45_sport, "an old save keeps its retired cars")
-check(pr.Owned.kio_ev6 == true, "and gets the free car")
-check(pr.Selected == "bnw_530i", "its selected retired car stays selected")
+check(pr.Shelved.suzaki_swift and pr.Shelved.bnw_530i and pr.Shelved.chevo_c6 and pr.Shelved.suzaki_swift_top and pr.Shelved.bentz_cla45_sport and not pr.Owned.suzaki_swift, "an old save's old-model cars are shelved, not lost")
+check(pr.Owned[Cars.StarterId] == true, "and gets the free car")
+check(pr.Selected == Cars.StarterId, "its selected car falls back to one it owns")
+RealPlayerData.save(oldPlayer)
+check(type(lastPayload) == "table" and lastPayload.Shelved == nil and table.find(lastPayload.Owned, Cars.StarterId) ~= nil and table.find(lastPayload.Owned, "suzaki_swift") ~= nil and table.find(lastPayload.Owned, "bentz_cla45_sport") ~= nil, "shelved cars are saved inside Owned (old code and an undo keep them)")
 check(pr.CarLevels.suzaki_swift == 7 and pr.CarLevels.bogus == nil and pr.CarLevels.bnw_530i == Config.CarLevels.Max, "car levels cleaned on load")
 check(pr.CarParts.suzaki_swift.intake == "in_short" and pr.CarParts.suzaki_swift.bogus == nil and pr.CarParts.suzaki_swift.tyres == nil, "an old save's parts become the new parts on load, bad ones cleaned")
 check(pr.CarParts.bugotti_chiron.block == nil and pr.CarParts.bugotti_chiron.tyres == "ty_road", "a top car's not-allowed part is dropped on load")
@@ -680,7 +687,7 @@ saved = {
 local both = RealPlayerData.load({ UserId = 44, Name = "BothUrus", Parent = {} })
 saved = { Claimed = true, Owned = { "kio_ev6", "xiaomo_su7_top" }, Selected = "xiaomo_su7_top", CarLevels = { xiaomo_su7_top = 9 } }
 local tester = RealPlayerData.load({ UserId = 45, Name = "Tester", Parent = {} })
-check(tester.Owned.kio_ev6 and not tester.Owned.xiaomo_su7_top and tester.Selected == "kio_ev6" and tester.CarLevels.xiaomo_su7_top == nil, "a deleted trim is dropped; the selected car falls back to one they own")
+check(tester.Owned[Cars.StarterId] and tester.Shelved.kio_ev6 and not tester.Owned.xiaomo_su7_top and tester.Selected == Cars.StarterId and tester.CarLevels.xiaomo_su7_top == nil, "a deleted trim is dropped; the selected car falls back to one they own")
 check(both.Owned.lambrini_urusp and not both.Owned.lambrini_urus, "owning both ends up with one")
 check(both.CarLevels.lambrini_urusp == 30 and both.CarXP.lambrini_urusp == 7 and both.Customs.lambrini_urusp.paint == "red", "the better car's progress stays")
 check(both.CarCP.lambrini_urusp == 4 + 10, "the other car's level CP is added")

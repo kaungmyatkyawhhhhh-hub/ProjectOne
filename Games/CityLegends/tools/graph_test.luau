@@ -20,7 +20,8 @@ local CFrameFixed = setmetatable({
 		return roblox.CFrame.fromMatrix(at, right, right:Cross(look), -look)
 	end,
 }, { __index = roblox.CFrame })
-local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, UDim2 = roblox.UDim2, Enum = roblox.Enum, CFrame = CFrameFixed, math = math, string = string, table = table, print = print, warn = warn, error = error }
+-- (20 Nov 2026) WestLayout.places asks workspace for the Yangon1to1 map since 17 Nov: there is none here (as in chauffeur_test)
+local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, UDim2 = roblox.UDim2, Enum = roblox.Enum, CFrame = CFrameFixed, math = math, string = string, table = table, print = print, warn = warn, error = error, workspace = { FindFirstChild = function() return nil end } }
 local modules = {}
 local function load(name: string): any
 	if modules[name] then

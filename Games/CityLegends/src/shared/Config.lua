@@ -235,17 +235,19 @@ Config.RivieraVenues = {
 Config.YangonVenues = {
 	On = true,
 	Sites = {
-		dealership = { x = 35454.1, z = 22409.3, fx = -0.991, fz = -0.135, y = 38.56 },
-		customs = { x = 35533.5, z = 21839.2, fx = -0.991, fz = -0.136, y = 41.08 },
-		bank = { x = 35609.5, z = 21267.0, fx = -0.992, fz = -0.128, y = 42.08 },
+		-- (owner, 2026-11-21: "move every venues to their actual place") the real places, from Google Maps: the lot (216
+		-- square) is the nearest free one beside the real pin, its front on a road. Old spots in the vault note.
+		dealership = { x = 31689.0, z = 31574.0, fx = -1, fz = 0, y = 73.5, size = 110, w = 80 }, -- RIDER AUTO Premium Exclusive (16.81529, 96.14526): compact, beside Optima, both face the road
+		customs = { x = 31699.0, z = 31455.0, fx = -1, fz = 0, y = 75.5, size = 130, w = 88 }, -- Optima Werkz (16.81564, 96.14513): compact, 4 bays
+		bank = { x = 38525.0, z = 45372.0, fx = 1, fz = 0, y = 21.29 }, -- CB Bank head office (16.77423, 96.16742)
 		dropoff = { x = 35416.6, z = 27780.7, fx = 0.622, fz = -0.783, y = 36.12 }, -- by Myanmar Plaza
-		gems = { x = 35653.1, z = 20934.2, fx = -0.992, fz = -0.130, y = 39.77 },
+		gems = { x = 35023.0, z = 18623.0, fx = 0.866, fz = -0.5, y = 63.70 }, -- Gems Museum (16.85471, 96.15632)
 		rewards = { x = 35389.0, z = 22838.7, fx = -0.989, fz = -0.150, y = 37.06, w = 304 }, -- its car courts make it 304 wide
 		-- square to the world axes (their towers and facade tiers are)
-		hotel = { x = 36030.1, z = 19832.9, fx = 0, fz = 1, y = 29.64 },
-		tower_aurum = { x = 34841.0, z = 19736.6, fx = 0, fz = 1, y = 39.07 },
+		hotel = { x = 27227.0, z = 30361.0, fx = 1, fz = 0, y = 60.63 }, -- Novotel Yangon Max (16.82000, 96.13166)
+		tower_aurum = { x = 29226.0, z = 21923.0, fx = -1, fz = 0, y = 67.78 }, -- Lotte Hotel (16.84432, 96.13728)
 		tower_skyline = { x = 36686.0, z = 24776.8, fx = 0, fz = 1, y = 34.0 },
-		tower_crown = { x = 34397.5, z = 20059.9, fx = 0, fz = -1, y = 40.2 },
+		tower_crown = { x = 39387.0, z = 39273.0, fx = 0, fz = -1, y = 35.86 }, -- Kan Thar Yar Centre (16.79233, 96.16963)
 		realty = { x = 35426.2, z = 22115.1, fx = -0.991, fz = -0.136, y = 40.35, size = 80 },
 	},
 }
@@ -306,8 +308,8 @@ Config.Lights.Cycle = (Config.Lights.Green + Config.Lights.Yellow + Config.Light
 -- NPC traffic
 ---------------------------------------------------------------------
 Config.Traffic = {
-	CarCount = 28, -- (2026-11-03: 38 -> 28, owner "reduce a little bit of traffic like 10 cars"; 90 -> 38 with the traffic now on the yellow routes only: about the same number of cars on them as before) -- in the city's streets, Monaco's too (owner, 2026-10-29: fewer; was 55 in all; 2026-11-02: 32 -> 40, "add more cars traffic"; 2026-11-03: 40 -> 64, "add more traffic cars throughout the map"; 64 -> 90 the same day, "add more traffic cars too"; phones get ~60%)
-	HighwayCars = 18, -- on the highways and the loop, well spaced to split lanes and speed past
+	CarCount = 46, -- (2026-11-03: 38 -> 28, owner "reduce a little bit of traffic like 10 cars"; 90 -> 38 with the traffic now on the yellow routes only: about the same number of cars on them as before) -- in the city's streets, Monaco's too (owner, 2026-10-29: fewer; was 55 in all; 2026-11-02: 32 -> 40, "add more cars traffic"; 2026-11-03: 40 -> 64, "add more traffic cars throughout the map"; 64 -> 90 the same day, "add more traffic cars too"; phones get ~60%)
+	HighwayCars = 30, -- on the highways and the loop, well spaced to split lanes and speed past
 	HighwayGap = 60, -- studs kept free round a highway car when one is placed (city: 22)
 	-- every car has its own pace, the inside lane runs faster than the outside ones, and each car's
 	-- speed drifts up and down a little, so cars never sit side by side for long and there are gaps
@@ -321,7 +323,7 @@ Config.Traffic = {
 	Accel = 28, -- studs/s^2
 	Brake = 70,
 	EmergencyBrake = 140,
-	StopGap = 4, -- studs left between bumpers in a stopped queue
+	StopGap = 15, -- studs between bumpers in a stopped queue (21 Nov, owner: a 1-car gap to cut through; was 4)
 	StopLineMargin = 1.2, -- studs between the front bumper and the stop line at a red light
 	-- Legends Isle's mountain roads (owner, 2026-10-30: "reduce traffic on the mountain")
 	MountainMax = 3, -- cars on the climbs and the mid ring at once
@@ -359,7 +361,7 @@ Config.Traffic = {
 	StreetRecycle = 260, -- a car off the routes this far from you goes back onto one
 	RivieraMax = 90, -- (64 before, then 32 before that, 2026-11-03: "add more traffic cars throughout the map"; 22 before that; owner 2026-11-02 again: "add more cars traffic")
 	-- (12 before that: "add a little more traffic, the city monaco is kinda dead")
-	FollowGap = 16, -- ...and at least a car length once moving (owner, 2026-10-29)...
+	FollowGap = 18, -- ...and at least a car length once moving (owner, 2026-10-29; 21 Nov: 16 -> 18)...
 	Headway = 0.5, -- ...plus this many seconds of travel
 	LookAhead = 70,
 	RecycleDistance = 700,
@@ -375,42 +377,8 @@ Config.Traffic = {
 }
 
 -- shown at the bottom of Settings (assets that ask for credit)
-Config.Credits = {
-	"Traffic cars: \"Low Poly cars pack\" by matisosanimation (CC BY 4.0)",
-	"Enfurecido L140, LB724, LB834 and LB834 ZV, LB744 models by Ddiaz Design",
-	"Enfurecido L147, Brava, Rosso Rampante F149 Riviera and F142 models by Ddiaz Design",
-	"Dearborn C346 model by Ddiaz Design",
-	"Stealth-Apex V10 Halo and Halo Circuit models by Ddiaz Design",
-	"Enfurecido Classico 5000 model by Ddiaz Design (CC BY)",
-	"Tri-Star Silber Z223 Royale V12 model by Ddiaz Design",
-	"Tri-Star Silber X167 Royale model by Black Snow (CC BY)",
-	"Speedmark P11 Spider model by Ddiaz Design (CC BY)",
-	"Tri-Star Silber C197 Wingdoor model by Ddiaz Design",
-	"British Vanguard Highland model by Ddiaz Design",
-	"Sovereign Grand Tourer model by Ddiaz Design",
-	"Horizon Z33 model by Ddiaz Design",
-	"Bavarica Werkz G20 Sport model by Ddiaz Design",
-	"Rosso Rampante F141 model by Ddiaz Design (CC BY)",
-	"Tri-Star Silber R230 V12 Track model by Ddiaz Design",
-	"Precision Type 42 V10 model by Ddiaz Design",
-	"Precision Type 42 V10 Lightweight model by Ddiaz Design",
-	"Precision 4S V10 model by Ddiaz Design",
-	"Bavarica Werkz E60 V10 model by Galaxy Car Showroom (CC BY 4.0)",
-	"Sovereign Highlands model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Horizon R35 model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Bavarica Werkz F90 model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Bavarica Werkz F82 model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Stuttgart 991.2 Track model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Bavarica Werkz E92 V8 model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Apex JZX100 Tourer model by GT Cars: Hyperspeed (CC BY 4.0)",
-	"Apex JZA80 model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Apex AE86 model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Ronin CP9A Champion model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Ronin CP9A model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Pleiad GC8 Wide model by Ddiaz Design (CC BY-NC-SA 4.0)",
-	"Car trailer: \"Flatbed Baked\" by 3DE_Study (CC BY 4.0)",
-	"Map shape: © OpenStreetMap contributors (ODbL)",
-}
+local okCredits, credits = pcall(function() return require(script.Parent:WaitForChild("Credits")) end)
+Config.Credits = if okCredits and type(credits) == "table" then credits else {} -- (in Credits.lua: this file is at Studio's size limit; tests with no Credits get none)
 
 ---------------------------------------------------------------------
 -- Economy
@@ -422,7 +390,7 @@ Config.Economy = {
 	ActiveMult = 0.15, -- driving, cut-ups, races, drift, jumps, speed traps, chips, duels, property income
 	JobMult = 0.085, -- delivery jobs (back to back they paid far more than anything else)
 	HeistMult = 0.1, -- the bank
-	ShowcaseMult = 0.05, -- the Gem Showcase
+	ShowcaseMult = 0.05, -- the Gems Museum
 	GiftMult = 0.15, -- daily streak, weekly and welcome gifts
 	TaskMult = 0.1, -- daily tasks
 	PlaytimeCash = { 500, 1000, 1500, 3000 }, -- the 5 / 15 / 30 / 60 minute gifts (were 6K, 12K, 24K, 60K)
@@ -597,7 +565,7 @@ Config.DrivingFeel = {
 	WeightGrip = 0.1, -- ...grips a little less
 	WeightInertia = 0.35, -- ...turns in slower (its turn builds and settles slower; was 0.5)
 	WeightBump = 0.6, -- ...and kerbs, landings and crashes throw it about less (a light car bounces more)
-	HighSpeedYaw = 320, -- the turn builds half as fast at this many studs/s (~250 mph): no snapping at speed (was 220)
+	HighSpeedYaw = 400, -- the turn builds half as fast at this many studs/s: no snapping at speed (22 Nov: was 320)
 	BrakeTurnIn = 0.25, -- braking loads the front: up to this much more turn-in
 	TrailBrakeLoose = 0.35, -- ...and lightens the rear: braking hard mid-corner, the rear can step out
 	SquatGrip = 0.3, -- pulling away loads the rear: a rear-drive car spins its tyres a little less
@@ -608,7 +576,7 @@ Config.DrivingFeel = {
 	StabilityAssist = 3,
 	TouchSteerAssist = 0.3,
 	CameraG = 0.35, -- the camera's lean and lag take the g this much (it was tuned to the old scale)
-	SteerSlowdown = 150, -- the wheel turns half as fast at this many studs/s (calm at speed)
+	SteerSlowdown = 300, -- the wheel turns half as fast at this many studs/s (22 Nov, owner: lighter; was 230, 150)
 	PowerOversteer = 0.6, -- traction control off: flooring it lets the rear step out this much more
 	BumpKick = 0.18, -- body pitch kick (radians/s) per stud of sudden ground change over 0.45 (kerbs, ramps; was 0.5 from 0.18, owner 2026-11-02: the car jerked on every stud)
 	LiftEase = 5, -- how fast the body rises to a bump under its wheels (per second; settling back is SettleEase)
@@ -649,7 +617,7 @@ Config.DrivingFeel = {
 	-- the speed effect (owner, 2026-11-03: "realistic wind blur, not cartoon lines"): from this speed
 	-- up to the car's top speed the near roadside blurs (depth of field) and the edges darken
 	WindFromMph = 75, -- (120 km/h)
-	WindFarBlur = 0.35, -- how much the street ahead and the roadside further off blur at top speed (0..1)
+	WindFarBlur = 0, -- (21 Nov, owner: "too grainy": Roblox's depth of field is noisy; was 0.35) -- how much the street ahead and the roadside further off blur at top speed (0..1)
 	WindStreaks = 0.8, -- the soft streaks at the screen's edge at top speed (0 = none)
 	ShiftPunchFov = 3, -- a flat-out upshift at high revs: the view kicks wider for a moment
 	ShiftBlur = 1,
@@ -1320,6 +1288,7 @@ local function supercarExhaust()
 			},
 			start = { idleAt = 3.3, fade = 0.5, out = 3.6, ends = 4.3, settleFrom = 1180, settle = 1.0, gain = 0.81 },
 		},
+		I6_RB26 = if script then require(script.Parent.ExhaustRB26)(Config.Sounds) else nil,
 		-- BMW S55 3.0 twin-turbo straight-6 (F82 M4): firing at the 3rd order with the 1.5 / 4.5 of its two
 		-- turbos; whine, a blow-off on the lift, a few burbles
 		I6_TWINTURBO = {
@@ -1395,14 +1364,19 @@ local function supercarExhaust()
 			sounds = {
 				Start = id(8393134777), -- "Nissan GTR R35 (VR38DETT) Startup" (EfiniRX): catches at 0.75 s, ~1,290 at its end
 				Idle = id(119747324235535), -- "nissan gtr idle" (jeemuzujamin), 1,255 rpm
-				Low = id(86018842069517), -- "r35 low rev" (imkn32), 3,320 rpm
-				Mid = id(130132947354022), -- "nissan gtr high" (jeemuzujamin), 5,862 rpm
-				High = id(106611475215254), -- "GTR R35" (vamytran78965), 6,907 rpm
+				-- (owner, 2026-11-21: "add new exhaust sounds for the GTR r35") one recordist's exterior set (FROZENSOLlD,
+				-- "GTR_<rpm>_<ON / OFF / RED>_OUT"): on-throttle loops, the redline, and coast recordings. The rpm is the
+				-- file's own name, not measured here. Old loops: 86018842069517 / 130132947354022 / 106611475215254
+				Low = id(110671849807653), -- "GTR_2500_ON_OUT"
+				Mid = id(114724502959075), -- "GTR_5500_ONLOOP_OUT"
+				High = id(78215344919914), -- "GTR_7200_RED_OUT"
+				LowOff = id(100077226098132), -- "GTR_2500_OFF_OUT": coasting
+				MidOff = id(84339007449917), -- "GTR_5500_OFF_OUT"
 				Turbo = Config.Sounds.SharedTurbo,
 				BlowOff = id(130283408353912), -- "VR38 Pop Off Flutter" (cezuuya)
 			},
 			bands = {
-				bands = { Idle = 1255, Low = 3320, Mid = 5862, High = 6907 },
+				bands = { Idle = 1255, Low = 2500, Mid = 5500, High = 7200 },
 				gains = { Idle = 0.48, Low = 0.69, Mid = 0.74, High = 0.57 },
 				reachDown = { Low = 0.5 }, whine = 0.6, bov = 0.5, turbo = 0.7,
 				coast = COAST, shiftCut = 0.06, liftPops = false, shiftPops = false,
@@ -1765,6 +1739,7 @@ local function supercarExhaust()
 		bnw_m5_f90 = { family = "V8_S63" },
 		bentlee_bentayga = { family = "V8_VW40", volume = 0.8, tone = { high = -4 } }, -- quieter and softer than the tuned RS7
 		nisun_gtr = { family = "V6_TWINTURBO" },
+		nisun_r34 = { family = "I6_RB26" },
 		-- (2026-11-13) the last nine imports with no set
 		astin_dbx = { family = "V8_M177", volume = 1.1, tone = { low = 2, drive = 0.06 }, bands = { shots = { Pops = 1.0 } } }, -- loud, a deep burble
 		bentz_gls = { family = "V8_M177", volume = 0.6, tone = { high = -5 }, bands = { turbo = 0.2, liftPops = false, coast = { mid = -5, high = -14 } } }, -- quiet, smooth, no pops
@@ -1801,12 +1776,16 @@ local function supercarExhaust()
 			continue
 		end
 		local fam = FAMILY[car.family]
+		if not fam then
+			continue
+		end
 		local with = car.with or {}
 		local sounds = merged(fam.sounds, with.sounds)
 		local bands = merged(merged(fam.bands, with.bands), car.bands)
 		for _, part in PARTS do
 			Config.Sounds["Exhaust_" .. carId .. "_" .. part] = sounds[part] -- (clears the old set's parts)
 		end
+		bands.twin = string.find(car.family, "TWIN") ~= nil -- (2026-11-21: the flutter's pitch, Audio)
 		Config.ExhaustBands[carId] = bands
 		Config.ExhaustStart[carId] = merged(fam.start, with.start)
 		Config.ExhaustVolume[carId] = car.volume or 1
@@ -1897,7 +1876,7 @@ Config.Police = {
 	RamCooldown = 6,
 	EscalateSeconds = 75, -- a chase this long adds a star...
 	EscalateMax = 3, -- ...up to here
-	CarId = "toyoka_crown", -- the police car's body
+	CarId = "toyoka_chaser", -- the police car's body
 }
 
 ---------------------------------------------------------------------
@@ -2072,9 +2051,9 @@ Config.Market = {
 ---------------------------------------------------------------------
 Config.Towers = {
 	List = {
-		{ id = "aurum", name = "AURUM RESIDENCES", block = { 2, 3 }, height = 300, price = 750000, rent = 12000, accent = Color3.fromRGB(255, 196, 92) },
+		{ id = "aurum", name = "LOTTE HOTEL YANGON", block = { 2, 3 }, height = 300, price = 750000, rent = 12000, accent = Color3.fromRGB(255, 196, 92) },
 		{ id = "skyline", name = "SKYLINE ONE", block = { 4, 1 }, height = 380, price = 3000000, rent = 45000, accent = Color3.fromRGB(0, 229, 255) },
-		{ id = "crown", name = "THE CROWN", block = { 1, 4 }, height = 460, price = 12000000, rent = 160000, accent = Color3.fromRGB(190, 110, 255) },
+		{ id = "crown", name = "KAN THAR YAR CENTRE", block = { 1, 4 }, height = 460, price = 12000000, rent = 160000, accent = Color3.fromRGB(190, 110, 255) },
 	},
 	RentCooldown = 24 * 3600, -- the wall safe refills once a day
 }
@@ -2239,7 +2218,7 @@ Config.YangonStreetLife = (function()
 end)()
 
 ---------------------------------------------------------------------
--- The Legends Grand Hotel Downtown (owner, 2026-10-22: "a large skyscraper hotel with valets",
+-- The Novotel Yangon Max Downtown (owner, 2026-10-22: "a large skyscraper hotel with valets",
 -- penthouse suites on the hotel that "pay out money every minute to their owners"). The suites
 -- are the top floors, lowest first. They pay while you're in the game (time offline doesn't
 -- pay), one payment per full minute.
@@ -2250,7 +2229,7 @@ end)()
 -- better than the one below (adds).
 ---------------------------------------------------------------------
 Config.Hotel = {
-	Name = "THE LEGENDS GRAND",
+	Name = "NOVOTEL YANGON MAX",
 	Accent = Color3.fromRGB(255, 200, 120), -- champagne gold
 	Neon = { Color3.fromRGB(255, 70, 170), Color3.fromRGB(40, 230, 220) }, -- Miami pink and teal
 	IncomeEvery = 60, -- seconds in the game per payment
@@ -2284,7 +2263,7 @@ Config.Chauffeur = {
 		rolls_cullinan = 432000,
 	},
 	-- the order the phone lists them in
-	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urusp", "brabos_g63", "bentz_s680", "rolls_wraith", "rolls_cullinan" },
+	Order = { "astin_dbx", "bentlee_contgt", "bentlee_bentayga", "bentz_gls", "lambrini_urusp", "bentz_s680" },
 	CityMph = 62, -- how fast the driver goes in town (owner, 2026-10-23: "drive faster"; was 44)
 	HighwayMph = 125, -- on the highway and the loop (was 92)
 	TurnMph = 22, -- round corners (highway ramps use their own speed; was 15)
@@ -2300,20 +2279,20 @@ Config.Chauffeur = {
 }
 
 ---------------------------------------------------------------------
--- The Legends Gem Showcase, Downtown (owner, 2026-10-22: "places to spend big money on rare,
+-- The Myanmar Gems Museum, Downtown (owner, 2026-10-22: "places to spend big money on rare,
 -- visible flex items like custom gems and accessories"). In-game cash only, never Robux. (The
 -- High-Rollers Casino was replaced by Legends Rewards on 2026-11-03; its VIP desk moved here and
 -- its vault heist was removed.)
 ---------------------------------------------------------------------
 Config.Luxe = {
-	-- VIP membership at the Gem Showcase's VIP desk: a title over your head and money off the
+	-- VIP membership at the Gems Museum's VIP desk: a title over your head and money off the
 	-- collection. A higher card replaces the lower one (you pay the difference)
 	Vip = {
 		{ id = 1, name = "GOLD CARD", title = "GOLD HIGH ROLLER", price = 250000, discount = 0.05, color = Color3.fromRGB(255, 200, 70) },
 		{ id = 2, name = "PLATINUM CARD", title = "PLATINUM HIGH ROLLER", price = 2500000, discount = 0.1, color = Color3.fromRGB(215, 230, 245) },
 		{ id = 3, name = "BLACK CARD", title = "BLACK CARD LEGEND", price = 25000000, discount = 0.15, color = Color3.fromRGB(190, 120, 255) },
 	},
-	-- wearables at the Gem Showcase: one per slot, everyone sees them on you (on foot)
+	-- wearables at the Gems Museum: one per slot, everyone sees them on you (on foot)
 	Slots = { "Neck", "Wrist", "Hand", "Ears", "Eyes", "Head" },
 	Items = {
 		{ id = "rope_silver", slot = "Neck", name = "Silver Rope Chain", price = 25000, metal = "silver", style = "chain" },
@@ -2350,7 +2329,7 @@ Config.Luxe = {
 		pink = Color3.fromRGB(255, 120, 200),
 		black = Color3.fromRGB(30, 30, 40),
 	},
-	-- the Gem Showcase's smash-and-grab: smash a case (the alarm), grab its gems; the showpiece
+	-- the Gems Museum's smash-and-grab: smash a case (the alarm), grab its gems; the showpiece
 	-- under the glass dome is worth the most and brings more stars
 	Showcase = {
 		SmashSeconds = 1.5,
@@ -2411,7 +2390,7 @@ Config.Rewards = {
 	-- went up to stay above what 3 prizes are worth on average)
 	-- (owner, 2026-11-03: "make the prices rarer to get ... add more low percentage like up to 0.5%
 	-- which will give a car and also add way more stuffs"): many small prizes, the big ones rare;
-	-- kinds: cash, spin (one more spin of the same kind), flex (a Gem Showcase piece you don't own,
+	-- kinds: cash, spin (one more spin of the same kind), flex (a Gems Museum piece you don't own,
 	-- at or under flexMax, or flexCash), car (a car you don't own, of carTiers at or under carMax,
 	-- or carCash)
 	Wheels = {
@@ -2523,27 +2502,27 @@ Config.Look = {
 Config.Minimap = {
 	Enabled = true,
 	-- (2026-11-03, the drawn map: a little wider, so the roads read as streets, not one big band)
-	ZoomNear = 0.32, -- pixels per stud when slow (about 320 studs across the radius)
+	ZoomNear = 0.24, -- px per stud when slow (20 Nov, owner: zoom out a bit; was 0.32)
 	ZoomFar = 0.09, -- ...and at FarMph and above (2026-11-19: 0.12 -> 0.09, owner: zoom out further)
 	FarMph = 150,
 }
 
 ---------------------------------------------------------------------
--- Legends Motors, the car dealership (owner, 2026-10-23: "add a dealership, a real location";
+-- Rider Auto, the car dealership (owner, 2026-10-23: "add a dealership, a real location";
 -- the HUD's SHOP became CARS, your own cars only). New cars are bought here only.
 ---------------------------------------------------------------------
 Config.Dealership = {
-	Name = "LEGENDS MOTORS",
+	Name = "RIDER AUTO",
 	Block = { 4, 2 }, -- the city block it stands on (east of the city centre)
 	Face = "W", -- the side its showroom looks out of (towards the city centre)
 	BuyRange = 260, -- a player must be this close to the showroom to buy
 	-- cars on the showroom turntables (one per brand zone)
-	Display = { "bnw_m5_e60", "bentz_e63s", "toyoka_supra_mk4", "nisun_r34", "porsha_panamera", "chevo_c7", "astin_vantage", "lexis_lc500" },
+	Display = { "bnw_m5_e60", "bentz_s680", "toyoka_supra_mk4", "nisun_gtr", "bentlee_bentayga", "nisun_350z", "toyoka_chaser", "lambrini_urusp" },
 	-- the ready-made building (ServerStorage.DealerBody, 2026-10-31): the car on the turntable and
 	-- the four indoor spots. The front car park stays empty for players to park in (owner,
 	-- 2026-10-31: "dont put cars infront the dealership"); Lot = { ids } would fill its bays.
 	Stage = "lambrini_lp750",
-	Indoor = { "ferrara_599", "rolls_wraith", "porsha_gt3", "bentz_g63" },
+	Indoor = { "ferrara_599", "bentlee_contgt", "porsha_gt3", "bentz_gls" },
 	-- test drives (owner, 2026-10-30, from the research: Vehicle Legends): any dealer car you don't
 	-- own, for a few minutes, once per car each visit; it pays less while you test it
 	TestSeconds = 300,
@@ -2587,12 +2566,12 @@ Config.Challenges = {
 }
 
 ---------------------------------------------------------------------
--- Legends Customs (owner, 2026-10-23: "make the game ... cooler"): a drive-in tuning garage.
+-- Optima Werkz (owner, 2026-10-23: "make the game ... cooler"): a drive-in tuning garage.
 -- Drive into its bay and press Y (or tap the pill) to restyle the car you're in: paint, finish,
 -- second colour, window tint, underglow, rims, number plate, headlights. Saved per car.
 ---------------------------------------------------------------------
 Config.Customs = {
-	Name = "LEGENDS CUSTOMS",
+	Name = "OPTIMA WERKZ",
 	Block = { 3, 1 }, -- the city block it stands on (north of the centre)
 	Face = "S", -- the side its bay doors look out of (towards the city centre)
 	BayRadius = 20, -- how close to the middle of the bay the car must stop
@@ -2695,7 +2674,7 @@ Config.Goals = {
 		{ id = "drift1", text = "Bank a drift", stat = "drifts", need = 1, cash = 3000, xp = 80 },
 		{ id = "jump1", text = "Land a jump", stat = "jumps", need = 1, cash = 3000, xp = 80 },
 		{ id = "car2", text = "Buy your second car", stat = "cars", need = 2, cash = 5000, xp = 120 },
-		{ id = "custom1", text = "Restyle a car at Legends Customs", stat = "customs", need = 1, cash = 4000, xp = 100 },
+		{ id = "custom1", text = "Restyle a car at Optima Werkz", stat = "customs", need = 1, cash = 4000, xp = 100 },
 		{ id = "job1", text = "Finish a delivery job", stat = "jobs", need = 1, cash = 4000, xp = 100 },
 		{ id = "lvl5", text = "Reach level 5", stat = "level", need = 5, cash = 6000, xp = 0 },
 		{ id = "pvp1", text = "Race against another player", stat = "pvp", need = 1, cash = 6000, xp = 150 },
@@ -2815,7 +2794,7 @@ Config.CarLevels = {
 	-- prices, up to BrandMax (5 cars). The brand levels (Config.Brands) stay as well (owner: "keep both")
 	BrandOff = 0.05,
 	BrandMax = 0.25,
-	-- Legends Customs looks can be paid with the car's CP too (owner: "both"): CP per change
+	-- Optima Werkz looks can be paid with the car's CP too (owner: "both"): CP per change
 	LookCp = { paint = 1, finish = 1, accent = 1, tint = 1, glow = 2, rim = 1, plate = 1, head = 1 },
 }
 
@@ -2831,7 +2810,7 @@ end
 Config.CarParts = {
 	-- (owner, 2026-11-03: "S2 and R and X cars that are already in that range stock from the
 	-- dealership, not tuneable except tyres, gearbox, suspension, exhaust, otherwise it would be too
-	-- overpowered"; PartData.Slots `top`; sound parts are fine on them, looks at Legends Customs aren't
+	-- overpowered"; PartData.Slots `top`; sound parts are fine on them, looks at Optima Werkz aren't
 	-- limited)
 	TopClasses = { S2 = true, R = true, X = true }, -- by the car's stock class
 	-- a part's price: its real price * Economy.PartPriceMult. Big parts (BigFrom and up) cost a little more
@@ -2861,7 +2840,7 @@ function Config.partCash(list: number, k: number, _swap: boolean?): number
 end
 
 -- Brand levels (owner, 2026-10-30, from the research: Midnight Racing's manufacturer levels):
--- driving a brand's cars levels the brand up; each level takes CustomsOff off Legends Customs on
+-- driving a brand's cars levels the brand up; each level takes CustomsOff off Optima Werkz on
 -- its cars (2026-11-03: cars have no level locks any more, so TrimEvery / TrimMax do nothing now)
 Config.Brands = {
 	XpPerMile = 12,
@@ -3098,7 +3077,7 @@ Config.Value = {
 	CollectorFloor = 0.8,
 	ConditionMax = 0.1, -- up to this much off for low health or an overdue service
 	HistoryBonus = 0.03, -- every service on time
-	SellShare = 0.6, -- what Legends Motors pays of a car's value
+	SellShare = 0.6, -- what Rider Auto pays of a car's value
 }
 
 Config.Service = {
@@ -3270,7 +3249,7 @@ Config.Jobs = (function()
 				ranks = { "Table Boy", "Tea Maker", "Head Brewer", "Shop Manager", "Tea House Owner" } },
 			{ id = "fuel", name = "Fuel Station", kind = "post", where = "Kabar Aye Fuel (the flyover station)", post = v(34600, 62.31, 29131), paycheck = 200,
 				ranks = { "Pump Attendant", "Cashier", "Shift Lead", "Station Manager", "Station Owner" } },
-			{ id = "dealer", name = "Dealership Staff", kind = "post", where = "Legends Motors, Kabar Aye", post = v(35424.4, 38.56, 22405.2), paycheck = 200,
+			{ id = "dealer", name = "Dealership Staff", kind = "post", where = "Rider Auto, Kabar Aye", post = v(35424.4, 38.56, 22405.2), paycheck = 200,
 				ranks = { "Car Washer", "Sales Associate", "Senior Sales", "Sales Manager", "General Manager" } },
 			{ id = "mall", name = "Mall Shop", kind = "post", where = "Golden Thread Boutique, Myanmar Plaza", post = v(34778, 40.5, 27640), paycheck = 200,
 				ranks = { "Shop Helper", "Sales Clerk", "Senior Clerk", "Floor Manager", "Boutique Owner" } },

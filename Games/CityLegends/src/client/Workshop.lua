@@ -1,7 +1,7 @@
 --[[
 	Workshop (client) (owner, 2026-11-06: "make the upgrading area way better ... add a part shop")
-	The car's upgrade screen, from the garage's UPGRADE, the menu and Legends Customs. The camera goes
-	to the Legends Customs workshop room, built on this screen only and high above the city (like the
+	The car's upgrade screen, from the garage's UPGRADE, the menu and Optima Werkz. The camera goes
+	to the Optima Werkz workshop room, built on this screen only and high above the city (like the
 	dealer's stage): the real car up on a two-post lift over a red ring, tool chests, a tyre rack, an
 	engine on a stand, warm strip lights, polished concrete.
 	Our own layout (imports/refs/ui/upgrades/workshop_mockup.png), phone first:
@@ -443,7 +443,7 @@ local function buildRoom(): Folder
 	local glow = part(f, Vector3.new(14, 0.05, 22), c * CFrame.new(0, 0.05, 0), Color3.fromRGB(255, 226, 190), nil, { Transparency = 1 })
 	surfaceLight(glow, Enum.NormalId.Top, Color3.fromRGB(255, 224, 186), 0.2, 12, 150)
 	-- the props, against the walls
-	sign(part(f, Vector3.new(34, 6.8, 0.4), CFrame.lookAt((c * CFrame.new(0, 15, -RD + 0.3)).Position, (c * CFrame.new(0, 15, 0)).Position), Color3.fromRGB(22, 23, 27)), "LEGENDS CUSTOMS", "WORKSHOP")
+	sign(part(f, Vector3.new(34, 6.8, 0.4), CFrame.lookAt((c * CFrame.new(0, 15, -RD + 0.3)).Position, (c * CFrame.new(0, 15, 0)).Position), Color3.fromRGB(22, 23, 27)), "OPTIMA WERKZ", "WORKSHOP")
 	for k = -2, 2 do
 		toolChest(f, c * CFrame.new(k * 8.2, 0, -RD + 2), if k % 2 == 0 then Color3.fromRGB(176, 40, 44) else Color3.fromRGB(40, 42, 50))
 	end
@@ -645,7 +645,7 @@ local function refreshStats()
 	ui.chipLetter.Text = cur.letter
 	ui.chipPi.Text = tostring(cur.pi)
 	ui.chip.BackgroundColor3 = cur.color
-	ui.subName.Text = string.format("CAR LEVEL %d  ·  LEGENDS CUSTOMS WORKSHOP", info.level)
+	ui.subName.Text = string.format("CAR LEVEL %d  ·  OPTIMA WERKZ WORKSHOP", info.level)
 	ui.cpText.Text = info.cp .. " CP"
 	ui.cashText.Text = money(ui.cash or UI.getCash())
 
@@ -1316,7 +1316,8 @@ local function dynoRun()
 			engine:crank()
 		end
 		task.wait(if spec.Electric then 0.2 else 1)
-		local flames = dynoFlames()
+		local flames = {} :: { ParticleEmitter } -- shortcut: dyno flames off with the driving ones (owner, 2026-11-21); was dynoFlames()
+		local _ = dynoFlames
 		local driven = CarStats.of(carId).drive
 		local spin = 0
 		local rate = 0
@@ -1384,8 +1385,12 @@ local function dynoRun()
 				pops -= 1
 				nextPop = now + 0.07 + math.random() * 0.12
 				engine:pop(0.6 + math.random() * 0.4)
+				-- (2026-11-21) flames only with the parts that make them (CarStats.flameLevel)
+				local fl = CarStats.flameLevel(tune)
 				for _, e in flames do
-					e:Emit(if tune.loud >= 2 or tune.decat then 7 else 3)
+					if fl > 0 then
+						e:Emit(if fl >= 2 then 11 elseif tune.loud >= 2 or tune.decat then 7 else 3)
+					end
 				end
 			end
 			task.wait()
@@ -1441,11 +1446,11 @@ local function setTab(name: string)
 		return
 	end
 	if name == "STYLE" then
-		-- (opened from Legends Customs: its paint screen is underneath)
+		-- (opened from Optima Werkz: its paint screen is underneath)
 		if savedHold and savedHold[1] then
 			Workshop.close()
 		else
-			showMsg("Paint and looks are at Legends Customs: stop in the tuning bay", GOLD)
+			showMsg("Paint and looks are at Optima Werkz: stop in the tuning bay", GOLD)
 		end
 		return
 	end

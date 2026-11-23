@@ -1,0 +1,126 @@
+{
+ "id": "bnw_330i_g20",
+ "roles": {
+  "HeadCore": [
+   {
+    "part": "Body_Lamp_p1",
+    "in": [
+     0.52,
+     0.56,
+     0.63,
+     0.7,
+     -2.0,
+     -1.85
+    ],
+    "off": 0.003
+   },
+   {
+    "part": "Body_Lamp_p1",
+    "in": [
+     0.7,
+     0.75,
+     0.63,
+     0.7,
+     -2.0,
+     -1.85
+    ],
+    "off": 0.003
+   },
+   {
+    "part": "SeeThrough_Lens_Clear",
+    "in": [
+     0.5,
+     0.56,
+     0.6,
+     0.67,
+     -2.05,
+     -1.88
+    ],
+    "off": 0.003
+   },
+   {
+    "part": "SeeThrough_Lens_Clear",
+    "in": [
+     0.7,
+     0.76,
+     0.6,
+     0.67,
+     -2.05,
+     -1.88
+    ],
+    "off": 0.003
+   }
+  ],
+  "HeadGlass": [
+   {
+    "part": "SeeThrough_Lens_Clear",
+    "in": [
+     0.6,
+     0.66,
+     0.64,
+     0.67,
+     -1.95,
+     -1.88
+    ],
+    "off": 0.008
+   }
+  ],
+  "TurnF": [
+   {
+    "part": "SeeThrough_Lens_Clear",
+    "in": [
+     0.63,
+     0.69,
+     0.68,
+     0.71,
+     -1.95,
+     -1.91
+    ],
+    "drape": "SeeThrough_Lens_Clear",
+    "off": 0.014
+   }
+  ],
+  "Tail": [
+   {
+    "part": "SeeThrough_Lens_Red",
+    "in": [
+     0.4,
+     0.7,
+     0.78,
+     0.87,
+     2.1,
+     2.35
+    ],
+    "off": 0.006
+   }
+  ],
+  "TurnR": [
+   {
+    "part": "SeeThrough_Lens_Clear",
+    "in": [
+     0.6,
+     0.7,
+     0.85,
+     0.89,
+     2.2,
+     2.25
+    ],
+    "off": 0.008
+   }
+  ],
+  "Rev": [
+   {
+    "part": "SeeThrough_Lens_Clear",
+    "in": [
+     0.4,
+     0.48,
+     0.85,
+     0.89,
+     2.3,
+     2.36
+    ],
+    "off": 0.008
+   }
+  ]
+ }
+}

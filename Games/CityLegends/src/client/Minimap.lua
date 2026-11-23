@@ -132,6 +132,30 @@ local function ringRoad(parent: Instance, c: Vector3, r: number, width: number, 
 end
 
 type Tile = { label: ImageLabel, image: string, centre: Vector3, half: Vector2, whole: boolean }
+-- (owner, 2026-11-20: "make sure the minimap never fails to load") every tile label is watched: a picture that was
+-- asked for and still hasn't loaded 9 s later is asked for again (a failed fetch never retries by itself), for as
+-- long as it takes. Weak keys: labels of a closed map view drop out.
+local watched: { [ImageLabel]: number } = setmetatable({}, { __mode = "k" }) :: any
+task.spawn(function()
+	while true do
+		task.wait(3)
+		local now = os.clock()
+		for label, since in watched do
+			if label.Image == "" or label.IsLoaded or not label.Parent then
+				watched[label] = now
+			elseif now - since > 9 then
+				watched[label] = now
+				local image = label.Image
+				label.Image = ""
+				task.defer(function()
+					if label.Image == "" then
+						label.Image = image
+					end
+				end)
+			end
+		end
+	end
+end)
 -- picture tiles of a map art module (MinimapArt's format) into `list`, over its backing colour (nil: no backing);
 -- `whole` marks the set the whole-map views load at once
 local function artTiles(map: Frame, art: any, back: Color3?, list: { Tile }, z: number?, whole: boolean?)
@@ -150,6 +174,7 @@ local function artTiles(map: Frame, art: any, back: Color3?, list: { Tile }, z: 
 		img.ScaleType = Enum.ScaleType.Stretch
 		img.ZIndex = z or 2
 		img.Parent = map
+		watched[img] = os.clock()
 		table.insert(list, { label = img, image = t.image, centre = Vector3.new(art.x0 + (t.col + 0.5) * art.tileStuds.X, 0, art.z0 + (t.row + 0.5) * art.tileStuds.Y), half = art.tileStuds / 2, whole = whole ~= false })
 	end
 end
@@ -990,7 +1015,28 @@ function Minimap.start()
 		loadNear(fullTiles, center, -1, -1) -- (the sharp tiles off while it is shut)
 	end
 	fClose.Activated:Connect(closeFull)
-	backdrop.Activated:Connect(closeFull)
+	-- (owner, 2026-11-21: "make the expanded map only close when i the X button": a drag that ended on the backdrop shut it)
+	-- (owner, later 2026-11-21: "when u click on the outside (not the map) u can exit the map") a TAP outside closes it:
+	-- the press must start on the backdrop and end within 12 px and 0.5 s, so a drag of the map ending outside doesn't
+	local downAt: Vector3? = nil
+	local downT = 0
+	backdrop.InputBegan:Connect(function(input)
+		local t = input.UserInputType
+		if t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch then
+			downAt = input.Position
+			downT = os.clock()
+		end
+	end)
+	backdrop.InputEnded:Connect(function(input)
+		local t = input.UserInputType
+		if (t == Enum.UserInputType.MouseButton1 or t == Enum.UserInputType.Touch) and downAt then
+			local moved = (input.Position - downAt).Magnitude
+			downAt = nil
+			if moved < 12 and os.clock() - downT < 0.5 and fullGui.Enabled then
+				closeFull()
+			end
+		end
+	end)
 	fPlus.Activated:Connect(function()
 		zoomBy(1.4)
 	end)

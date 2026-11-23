@@ -1,0 +1,1 @@
+{"id": "toyoka_supra_mk4", "note": "re-cut: outermost round lamp = tail/stop, second = turn, third = tail, inner = reverse (JZA80); from the old shells", "roles": {"Tail": [{"part": "LampFx_TurnRL", "off": 0.0}, {"part": "LampFx_TailL", "box": [0, 0.405, -9, 9, -9, 9], "off": 0.0}], "TurnR": [{"part": "LampFx_TailL", "box": [0.405, 9, -9, 9, -9, 9], "off": 0.0}]}}

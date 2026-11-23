@@ -21,6 +21,7 @@ local CarCare = require(Shared:WaitForChild("CarCare"))
 export type Profile = {
 	Cash: number,
 	Owned: { [string]: boolean },
+	Shelved: { [string]: boolean }?, -- owned cars on an old model, put away (Cars.OLD_MODELS); saved inside Owned
 	Selected: string,
 	Level: number,
 	XP: number, -- progress inside the current level
@@ -48,7 +49,7 @@ export type Profile = {
 	Chauffeur: { [string]: boolean }, -- chauffeur contracts (car ids from Config.Chauffeur.Fleet)
 	Luxe: { [string]: any }, -- VIP card, owned and worn flex items (Luxe.lua checks it)
 	Challenges: { [string]: any }, -- speed trap bests, drift and jump bests (Challenges.lua checks it)
-	Customs: { [string]: { [string]: any } }, -- per car id: its Legends Customs look (Customs.lua checks it)
+	Customs: { [string]: { [string]: any } }, -- per car id: its Optima Werkz look (Customs.lua checks it)
 	Goals: { [string]: any }, -- Legends Path, the daily streak and today's tasks (Goals.lua checks it)
 	Brands: { [string]: number }, -- brand XP per brand (Brands.lua)
 	-- car levels (2026-11-03, CarLevels.lua): per car id its level (1-50), XP inside that level, unspent
@@ -81,12 +82,13 @@ export type Settings = {
 	Graphics: string?, -- "Low" | "Medium" | "High" | "Ultra"
 	Performance: string?, -- (2026-11-19) "Auto" | "Low" | "Normal": low-end mode for cheap phones
 	Lang: string?, -- (2026-11-19) "auto" | "en" | "my": Settings > Language (client/LangUI, shared/Strings)
-	RenderDistance: string?, -- (2026-11-18) "Low" | "Medium" | "High" | "Ultra": client detail radius x0.5 / 0.75 / 1 / 1.5
+	RenderDistance: string?, -- (2026-11-18) "Low" | "Medium" | "High" | "Ultra" | "Max": client detail radius x0.5 / 0.75 / 1 / 1.5 / 3
 	Music: number?, -- 0..1
 	Sfx: number?, -- 0..1
 	Favs: { string }?, -- favourite cars (CARS tab)
 	HideKeys: boolean?, -- the on-screen controls hidden
 	Speedo: string?, -- the HUD speedometer: "Analogue" (default) | "Digital"
+	Traffic: boolean?, -- (2026-11-21) false = no NPC traffic
 	Assist: string?, -- driving assists: "Off" | "Low" | "Normal" (default)
 	TC: string?, -- (2026-11-08) traction control "Off" | "Sport" | "On"
 	ESC: string?, -- stability control "Off" | "Sport" | "On"
@@ -220,6 +222,7 @@ local function defaultProfile(): Profile
 	return {
 		Cash = Config.Economy.StartingCash,
 		Owned = { [Cars.StarterId] = true },
+		Shelved = {},
 		Selected = Cars.StarterId,
 		Level = 1,
 		XP = 0,
@@ -394,9 +397,15 @@ function PlayerData.load(player: Player): Profile?
 				-- (2026-11-04) a save that made the first-car pick owns just its list: the free car was
 				-- added back here on every join. Older saves (no Claimed) still get it
 				local owned: { [string]: boolean } = if saved.Claimed == true then {} else profile.Owned
+				-- (2026-11-19) a car on an old model stays in the save but is Shelved, not owned, until its new model is in
+				local shelved = (profile :: any).Shelved
 				for _, id in saved.Owned do
 					if type(id) == "string" and Cars.ById[id] then
-						owned[id] = true
+						if Cars.OLD_MODELS[Cars.modelOf(id)] or Cars.oldTrim(id) then -- (21 Nov: old trims too)
+							shelved[id] = true
+						else
+							owned[id] = true
+						end
 					end
 				end
 				if next(owned) then
@@ -710,6 +719,11 @@ local function payloadOf(profile: Profile, session: { [string]: any }?): { [stri
 	for id in profile.Owned do
 		table.insert(owned, id)
 	end
+	for id in (profile :: any).Shelved or {} do -- (saved with the owned cars: older code and an undo keep them)
+		if not profile.Owned[id] then
+			table.insert(owned, id)
+		end
+	end
 	local penthouses = {}
 	for id in profile.Penthouses do
 		table.insert(penthouses, id)
@@ -937,7 +951,7 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	if raw.Lang == "auto" or raw.Lang == "en" or raw.Lang == "my" then
 		profile.Settings.Lang = raw.Lang -- (2026-11-19) Settings > Language
 	end
-	if raw.RenderDistance == "Low" or raw.RenderDistance == "Medium" or raw.RenderDistance == "High" or raw.RenderDistance == "Ultra" then
+	if raw.RenderDistance == "Low" or raw.RenderDistance == "Medium" or raw.RenderDistance == "High" or raw.RenderDistance == "Ultra" or raw.RenderDistance == "Max" then
 		profile.Settings.RenderDistance = raw.RenderDistance -- (2026-11-18) client detail distance
 	end
 	if raw.Assist == "Off" or raw.Assist == "Low" or raw.Assist == "Normal" then
@@ -961,6 +975,9 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if type(raw.Marks) == "boolean" then
 		profile.Settings.Marks = raw.Marks -- tyre marks
+	end
+	if type(raw.Traffic) == "boolean" then
+		profile.Settings.Traffic = raw.Traffic -- (2026-11-21) NPC traffic on / off
 	end
 	if raw.Speedo == "Analogue" or raw.Speedo == "Digital" then
 		profile.Settings.Speedo = raw.Speedo -- the HUD speedometer style (2026-11-03)

@@ -14,6 +14,7 @@ local RunService = game:GetService("RunService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local UI = require(script.Parent:WaitForChild("UI"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
+local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 
 local CarDoors = {}
 
@@ -130,7 +131,7 @@ function CarDoors.init()
 	end)
 	Driving.onDoorKey = CarDoors.toggle
 	UI.onDoors = CarDoors.toggle
-	RunService.RenderStepped:Connect(step)
+	Frame.Connect(step)
 	-- the phone's DOORS button: in a car that has them, while stopped
 	local acc = 0
 	RunService.Heartbeat:Connect(function(dt)

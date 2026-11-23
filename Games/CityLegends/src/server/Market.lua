@@ -622,6 +622,9 @@ local function redeem(player: Player, d: Data, args: any): Result
 	if Cars.isImport(it.c) then -- (owner, 19 Nov 2026) Import-only cars come from crates, never for cash
 		return { ok = false, msg = "Import only: from crates (sell the unit instead)" }
 	end
+	if not Cars.forSale(it.c) then -- (2026-11-19) a car off sale (old model put away) can't be delivered
+		return { ok = false, msg = "Not for sale" }
+	end
 	table.remove(d.Stash, i)
 	profile.Owned[it.c] = true
 	return { ok = true, msg = "Delivered to your garage" }

@@ -1,0 +1,1 @@
+{"id": "ronin_cp9a_champ", "note": "re-cut Tail: only the lamp (centre ax > 0.45), not the boot garnish or the wing stop lamp, under the Rev / TurnR band", "roles": {"Tail": [{"part": "LampFx_TailL", "in": [0.45, 0.8, 0.7, 1.0, 1.9, 2.2], "box": [0, 9, -9, 0.885, -9, 9], "off": 0.0}]}}

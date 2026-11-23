@@ -151,7 +151,7 @@ local function target(): (Vector3?, string?)
 			end
 		end
 		if best then
-			return best.pos, "DELIVERY · stop in the blue ring"
+			return best.pos, "DELIVERY · stop here"
 		end
 	end
 	return nil, nil
@@ -211,7 +211,8 @@ local function refreshTarget()
 	local d = if job and job.kind == "post" then J.PostRadius * 2 else J.ArriveRadius * 1.4
 	p.Size = Vector3.new(0.3, d, d)
 	p.CFrame = CFrame.new(pos + Vector3.new(0, 0.35, 0)) * CFrame.Angles(0, 0, math.rad(90))
-	p.Transparency = 0.6
+	-- (owner, 2026-11-21: "remove the delivery job blue neon circle area"): no ring for delivery, label + waypoint only
+	p.Transparency = if job and job.id == "delivery" then 1 else 0.6
 	if ringLabel then
 		ringLabel.Text = text or ""
 	end
@@ -368,7 +369,10 @@ function JobsClient.init()
 			end
 		end)
 	end
-	setState(invoke("state"))
+	-- (21 Nov, "make the loading screen load fast") asked in the background: this round trip held the start 0.4-0.8 s
+	task.spawn(function()
+		setState(invoke("state"))
+	end)
 	RunService.Heartbeat:Connect(update)
 	-- (19 Nov) Roblox kicks after 20 idle minutes: a player on duty at a post is rejoined first (the
 	-- server decides and teleports; not officially approved by Roblox: watch moderation)

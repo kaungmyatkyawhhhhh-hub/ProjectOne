@@ -22,6 +22,7 @@ local CarSkin = require(script.Parent:WaitForChild("CarSkin"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 local OnFoot = require(script.Parent:WaitForChild("OnFoot"))
 local UI = require(script.Parent:WaitForChild("UI"))
+local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 
 local T = Config.Towing
 local TR = T.Trailer
@@ -498,7 +499,7 @@ local dressing: { [Instance]: number } = setmetatable({}, { __mode = "k" }) :: a
 function TrailerClient.init()
 	remotes = ReplicatedStorage:WaitForChild("Remotes")
 	refreshRay()
-	RunService.RenderStepped:Connect(step)
+	Frame.Connect(step)
 	task.spawn(function()
 		while true do
 			task.wait(0.2)

@@ -1,6 +1,6 @@
 --[[
 	PlateClient (19 Nov 2026): the NUMBER PLATES screen (server: PlateShop, shared: Plates).
-	Opens from the phone car menu (PLATES), Legends Customs (NUMBER PLATES button) and the Plate
+	Opens from the phone car menu (PLATES), Optima Werkz (NUMBER PLATES button) and the Plate
 	Office counter (PlateOpen). Built like the Customs panel (Theme colours, 14 px panel corners,
 	8 px buttons, Gotham weights that UIStyle turns into Builder Sans); phone first: on touch the
 	panel takes half the screen width, full height.

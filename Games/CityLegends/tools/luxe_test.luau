@@ -105,6 +105,7 @@ local paths = {
 	CarMeta = "src/shared/CarMeta.lua",
 	GemShowcase = "src/server/GemShowcase.lua",
 	Luxe = "src/server/Luxe.lua",
+	ExhaustRB26 = "src/shared/ExhaustRB26.lua",
 }
 env.require = function(x)
 	local name = x.name
@@ -113,7 +114,7 @@ env.require = function(x)
 	end
 	local path = paths[name] or error("require " .. tostring(name))
 	local menv = table.clone(env)
-	menv.script = { Parent = { Config = { name = "Config" }, CityLayout = { name = "CityLayout" }, WestLayout = { name = "WestLayout" }, IsleLayout = { name = "IsleLayout" }, WaitForChild = function(_, n)
+	menv.script = { Parent = { Config = { name = "Config" }, CityLayout = { name = "CityLayout" }, WestLayout = { name = "WestLayout" }, IsleLayout = { name = "IsleLayout" }, ExhaustRB26 = { name = "ExhaustRB26" }, WaitForChild = function(_, n)
 		return { name = n }
 	end } }
 	local m = luau.load(fs.readFile(root .. "/" .. path), { debugName = path, environment = menv })()

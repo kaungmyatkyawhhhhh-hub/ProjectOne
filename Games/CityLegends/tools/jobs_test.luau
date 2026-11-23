@@ -95,7 +95,7 @@ check(R.minLegSeconds(J, 3000) == 3000 / J.MaxSps, "a 3000-stud leg can't take u
 local short = 0
 for i, s in J.BusStops do
 	local n = J.BusStops[i % #J.BusStops + 1]
-	local d = Vector3.new(s.pos.X - n.pos.X, 0, s.pos.Z - n.pos.Z).Magnitude
+	local d = roblox.Vector3.new(s.pos.X - n.pos.X, 0, s.pos.Z - n.pos.Z).Magnitude
 	if d < 300 then
 		short += 1
 	end

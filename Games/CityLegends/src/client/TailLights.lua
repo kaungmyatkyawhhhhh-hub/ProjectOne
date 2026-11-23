@@ -8,14 +8,6 @@ export type Spot = { at: Vector3, face: Vector3, w: number, h: number }
 export type Tails = { shells: { { name: string, size: Vector3? } }, spots: { Spot }, wb: number? }
 
 return {
-	dearb_focus_rs = { -- (by hand, 2026-11-06: its lamps share one part with the headlights)
-		shells = {},
-		wb = 2.65,
-		spots = {
-			{ at = Vector3.new(-0.7, 0.65, 1.9), face = Vector3.new(-0.35, 0.1, 0.93), w = 0.3, h = 0.13 },
-			{ at = Vector3.new(0.7, 0.65, 1.9), face = Vector3.new(0.35, 0.1, 0.93), w = 0.3, h = 0.13 },
-		},
-	},
 	astin_db9 = {
 		shells = { { name = "SeeThrough_red_glass" } },
 		spots = {},
@@ -56,14 +48,6 @@ return {
 		shells = { { name = "SeeThrough_red_glass1" } },
 		spots = {},
 	},
-	bentz_gls = {
-		shells = { { name = "Body_gls_stop_001" } },
-		wb = 3.135,
-		spots = {
-			{ at = Vector3.new(-0.5982, 0.735, 2.6485), face = Vector3.new(-0.1062, 0.06, 0.9925), w = 0.4819, h = 0.1205 },
-			{ at = Vector3.new(0.6, 0.735, 2.6492), face = Vector3.new(0.1071, 0.0523, 0.9929), w = 0.4819, h = 0.1205 },
-		},
-	},
 	bentz_gt63s = {
 		shells = { { name = "SeeThrough_d2phong12SG1" } },
 		spots = {},
@@ -74,10 +58,6 @@ return {
 	},
 	bentz_s65_w221 = {
 		shells = { { name = "Body_sw221_lights_lod0_trans" } },
-		spots = {},
-	},
-	bentz_s680 = {
-		shells = { { name = "Body_Mphong19SG1" }, { name = "SeeThrough_Mphong3SG1" } },
 		spots = {},
 	},
 	bnw_530i = {
@@ -165,18 +145,6 @@ return {
 		shells = { { name = "SeeThrough_Red_glass" } },
 		spots = {},
 	},
-	ferrara_california = {
-		shells = { { name = "SeeThrough_Red_glass" } },
-		spots = {},
-	},
-	lambrini_countach = {
-		shells = {},
-		wb = 2.45,
-		spots = {
-			{ at = Vector3.new(-0.5815, 0.3856, 1.9664), face = Vector3.new(0, 0.0078, 1), w = 0.4018, h = 0.1005 },
-			{ at = Vector3.new(0.5815, 0.3856, 1.9664), face = Vector3.new(0, 0.0078, 1), w = 0.4018, h = 0.1005 },
-		},
-	},
 	lambrini_lp640 = {
 		shells = {},
 		wb = 2.6651,
@@ -184,18 +152,6 @@ return {
 			{ at = Vector3.new(-0.6498, 0.5344, 2.0808), face = Vector3.new(-0.1851, 0.5185, 0.8348), w = 0.4555, h = 0.1898 },
 			{ at = Vector3.new(0.6498, 0.5344, 2.0808), face = Vector3.new(0.1851, 0.5185, 0.8348), w = 0.4555, h = 0.1898 },
 		},
-	},
-	lambrini_lp700 = {
-		shells = {},
-		wb = 2.7,
-		spots = {
-			{ at = Vector3.new(-0.6232, 0.3988, 2.1657), face = Vector3.new(-0.1503, -0.5767, 0.803), w = 0.4708, h = 0.0942 },
-			{ at = Vector3.new(0.6232, 0.3988, 2.1657), face = Vector3.new(0.0947, -0.5103, 0.8547), w = 0.4708, h = 0.0942 },
-		},
-	},
-	lambrini_lp750 = {
-		shells = { { name = "Body_Brake_Light" }, { name = "Body_Taillights" } },
-		spots = {},
 	},
 	-- (added by hand, 2026-11-02: the SVJ's lamps share a part with the headlights, so spots
 	-- measured through its lens glass; the SVJ 63 has its own red lens part)
@@ -225,14 +181,6 @@ return {
 		spots = {
 			{ at = Vector3.new(-0.6072, 0.5054, 2.3338), face = Vector3.new(-0.2198, 0.809, 0.5452), w = 0.4636, h = 0.1005 },
 			{ at = Vector3.new(0.6034, 0.5052, 2.3369), face = Vector3.new(0.2226, 0.8048, 0.5503), w = 0.4632, h = 0.1004 },
-		},
-	},
-	lexis_lfa = {
-		shells = {},
-		wb = 2.605,
-		spots = {
-			{ at = Vector3.new(-0.6183, 0.4921, 2.1565), face = Vector3.new(-0.001, -0.0203, 0.9998), w = 0.3585, h = 0.0574 },
-			{ at = Vector3.new(0.6122, 0.4921, 2.1563), face = Vector3.new(0.279, 0.0557, 0.9587), w = 0.3585, h = 0.0574 },
 		},
 	},
 	lexis_lx700 = {
@@ -277,10 +225,6 @@ return {
 	},
 	nisun_gtr = {
 		shells = { { name = "SeeThrough_red_glass" } },
-		spots = {},
-	},
-	nisun_r34 = {
-		shells = { { name = "Body_red_glass" } },
 		spots = {},
 	},
 	porsha_boxster = {

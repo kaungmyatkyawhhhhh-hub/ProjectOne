@@ -29,6 +29,7 @@ local TweenService = game:GetService("TweenService")
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local LookFx = require(script.Parent:WaitForChild("LookFx"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
+local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 local Audio = require(script.Parent:WaitForChild("Audio"))
 
 local Weather = {}
@@ -506,7 +507,7 @@ function Weather.init()
 
 	local lastPos: Vector3? = nil
 	local camVel = Vector3.zero
-	RunService.RenderStepped:Connect(function(dt: number)
+	Frame.Connect(function(dt: number)
 		local cam = workspace.CurrentCamera
 		if not cam then
 			return

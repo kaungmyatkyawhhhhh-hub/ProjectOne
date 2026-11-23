@@ -25,7 +25,8 @@ local fakeWorkspace = {}
 function fakeWorkspace:FindFirstChild(_name: string): any
 	return nil
 end
-local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, CFrame = CFrameFixed, Enum = roblox.Enum, workspace = fakeWorkspace }
+-- (20 Nov 2026) ChauffeurRoute.graph yields with task.wait since 18-19 Nov (the server script timeout): nothing to yield to here
+local env = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, CFrame = CFrameFixed, Enum = roblox.Enum, workspace = fakeWorkspace, task = { wait = function() end } }
 local loaded = {}
 local function load(name: string): any
 	if loaded[name] then

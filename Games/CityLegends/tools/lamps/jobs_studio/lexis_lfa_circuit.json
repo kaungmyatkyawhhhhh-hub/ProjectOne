@@ -1,0 +1,1 @@
+{"id": "lexis_lfa_circuit", "note": "as lexis_lfa (not the low fog lamp)", "roles": {"Tail": [{"part": "SeeThrough_Lens_Red", "in": [0.4, 0.9, 0.65, 0.9, 1.6, 2.2], "off": 0.006}]}}

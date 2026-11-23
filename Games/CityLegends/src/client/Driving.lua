@@ -34,16 +34,21 @@ local avatarDesc: HumanoidDescription? = nil -- for the driver's arms
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Cars = require(Shared:WaitForChild("Cars"))
+local ExhaustTips = require(Shared:WaitForChild("ExhaustTips"))
 local CarStats = require(Shared:WaitForChild("CarStats"))
 local CarBuilder = require(Shared:WaitForChild("CarBuilder"))
 local CarPhysics = require(Shared:WaitForChild("CarPhysics"))
 local CityLayout = require(Shared:WaitForChild("CityLayout"))
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
+local WaterRescue = require(Shared:WaitForChild("WaterRescue"))
 
 local Traffic = require(script.Parent:WaitForChild("Traffic"))
 local UI = require(script.Parent:WaitForChild("UI"))
+local Frame = require(script.Parent:WaitForChild("Frame")) -- (2026-11-20) per-frame logic also runs with no render frames
 local Audio = require(script.Parent:WaitForChild("Audio"))
+local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
 local DashGauges = require(script.Parent:WaitForChild("DashGauges"))
+local R34Mfd = require(script.Parent:WaitForChild("R34Mfd"))
 local WorldFx = require(script.Parent:WaitForChild("WorldFx"))
 local CarLamps = require(script.Parent:WaitForChild("CarLamps"))
 local CameraLook = require(script.Parent:WaitForChild("CameraLook"))
@@ -87,8 +92,8 @@ Driving.escMode = 2
 Driving.abs = true
 Driving.help = 1
 Driving.loadHold = false -- the map round the car is still loading (Main.client's waitForMap): held too
-Driving.cameraHold = false -- another screen (Legends Customs) moves the camera for now
-Driving.workshopOpen = false -- the workshop has the camera (over Legends Customs too)
+Driving.cameraHold = false -- another screen (Optima Werkz) moves the camera for now
+Driving.workshopOpen = false -- the workshop has the camera (over Optima Werkz too)
 Driving.gearbox = "Auto" -- "Auto" | "Manual" (Settings or M; Q / E shift only in manual)
 Driving.units = "mph" -- "mph" | "kmh" (Settings): the HUD and every cluster
 Driving.onGearboxChanged = nil :: ((string) -> ())? -- Q / E or M changed the gearbox
@@ -146,6 +151,7 @@ type State = {
 	towPull: number,
 	towTurn: number,
 	applyTune: () -> (),
+	lampsOut: () -> (), -- (detach: lights and brake lamps off, told to everyone)
 	-- (2026-11-08) the two-axle model (CarPhysics): the car's numbers, its brakes, last step's acceleration and result,
 	-- each axle's grip under it; the keyboard throttle's ease; the kit-v2 wheels (blur, spokes, brake discs) and the
 	-- brakes' heat; the steering sent to the other players; the rev limiter
@@ -228,6 +234,7 @@ type State = {
 	gaugeGear: TextLabel?,
 	gaugeBar: Frame?,
 	dashUpdate: ((number, string, number) -> ())?,
+	mfdUpdate: ((number, number, number, number, boolean) -> ())?, -- a second dash screen (client/R34Mfd)
 	-- imported cars: their steering wheel and our arms, posed every frame on this client
 	localSteer: { { part: BasePart, offset: CFrame } },
 	localArms: { LocalArm },
@@ -335,6 +342,7 @@ type State = {
 	airRide: boolean,
 	popTune: string?, -- the ECU's map: pop, crackle, burble, antilag
 	popLoud: boolean, -- a straight pipe, muffler delete or decat
+	flameLevel: number, -- (2026-11-21) CarStats.flameLevel: 0 no exhaust flames (stock), 1 flames, 2 the Flame Tune
 	popGap: number, -- seconds between pops
 	nitroOn: boolean, -- a bottle is fitted
 	nitroDrain: number,
@@ -348,7 +356,8 @@ type State = {
 	wind: number?, -- the wind blur's strength now, 0..1
 	inTunnel: boolean?,
 	autoHintT: number?, -- when Q / E in automatic last showed its hint
-	seaT: number?, -- seconds on the water (back to the road after 2)
+	seaT: number?, -- seconds since the last water check (WaterRescue.Every)
+	holeT: number?, -- (2026-11-22) seconds stuck under a road (fell through a hole in its collision)
 	-- driving feel (Config.DrivingFeel)
 	yawRate: number, -- the car's turn now (it follows the wheel with some weight)
 	groundDist: number?, -- last ground ray distance (kerbs and bumps kick the body)
@@ -725,8 +734,34 @@ end
 ---------------------------------------------------------------------
 -- Exhaust tip positions in root space. A skinned car shows CarMesh's pipes,
 -- so mirror its placement; otherwise use the (visible) part-built pipes.
-local function exhaustTips(model: Model, root: BasePart): { Vector3 }
+local function exhaustTips(model: Model, root: BasePart, id: string?): { Vector3 }
 	local tips: { Vector3 } = {}
+	-- (2026-11-21) an imported model's tips measured from its own model file (ExhaustTips), placed from the skin's box
+	-- in root space: { across, up, in } x the skin's length from its middle, lowest and rear-most points (-Z = front)
+	local rows = if id then ExhaustTips.tipsOf(id) else nil
+	local skin = model:FindFirstChild("Skin")
+	if rows and skin then
+		local lo, hi = Vector3.new(math.huge, math.huge, math.huge), Vector3.new(-math.huge, -math.huge, -math.huge)
+		for _, d in skin:GetDescendants() do
+			if d:IsA("BasePart") and d.Transparency < 1 then
+				local cf = root.CFrame:ToObjectSpace(d.CFrame)
+				local h = d.Size / 2
+				for _, c in { Vector3.new(h.X, h.Y, h.Z), Vector3.new(-h.X, h.Y, h.Z), Vector3.new(h.X, -h.Y, h.Z), Vector3.new(h.X, h.Y, -h.Z), Vector3.new(-h.X, -h.Y, h.Z), Vector3.new(-h.X, h.Y, -h.Z), Vector3.new(h.X, -h.Y, -h.Z), Vector3.new(-h.X, -h.Y, -h.Z) } do
+					local p = cf * c
+					lo = lo:Min(p)
+					hi = hi:Max(p)
+				end
+			end
+		end
+		local len = hi.Z - lo.Z
+		if len > 4 and len < 80 then
+			local midX = (lo.X + hi.X) / 2
+			for _, r in rows do
+				table.insert(tips, Vector3.new(midX + r[1] * len, lo.Y + r[2] * len, hi.Z - r[3] * len))
+			end
+			return tips
+		end
+	end
 	if model:GetAttribute("Skinned") then
 		-- CarSkin stores the mesh's pipe tips (root space) as Exhaust1..n
 		local i = 1
@@ -751,10 +786,13 @@ local function exhaustTips(model: Model, root: BasePart): { Vector3 }
 	return tips
 end
 
+local exhaustSmoke: { [Instance]: { ParticleEmitter } } = {} -- [root] = its tips' smoke (2026-11-21)
 local function buildFlames(model: Model, root: BasePart, spec: Cars.CarSpec): ({ ParticleEmitter }, { Instance }, PointLight?)
 	local emitters: { ParticleEmitter } = {}
 	local parts: { Instance } = {}
-	local tips = exhaustTips(model, root)
+	local smokes: { ParticleEmitter } = {}
+	exhaustSmoke[root] = smokes
+	local tips = exhaustTips(model, root, spec.Id)
 	if #tips == 0 then
 		return emitters, parts, nil
 	end
@@ -790,6 +828,22 @@ local function buildFlames(model: Model, root: BasePart, spec: Cars.CarSpec): ({
 		e.ZOffset = 0.3
 		e.Parent = att
 		table.insert(emitters, e)
+		-- exhaust smoke: a grey puff that drifts and grows (pops, hard shifts, launches)
+		local sm = Instance.new("ParticleEmitter")
+		sm.Rate = 0
+		sm.Texture = "rbxasset://textures/particles/smoke_main.dds"
+		sm.EmissionDirection = Enum.NormalId.Back
+		sm.Lifetime = NumberRange.new(0.6, 1.2)
+		sm.Speed = NumberRange.new(2, 5)
+		sm.SpreadAngle = Vector2.new(25, 25)
+		sm.Acceleration = Vector3.new(0, 1.5, 0)
+		sm.Drag = 2
+		sm.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.4), NumberSequenceKeypoint.new(1, 2.6) })
+		sm.Color = ColorSequence.new(Color3.fromRGB(120, 120, 124), Color3.fromRGB(170, 170, 174))
+		sm.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.55), NumberSequenceKeypoint.new(1, 1) })
+		sm.LightInfluence = 1
+		sm.Parent = att
+		table.insert(smokes, sm)
 	end
 	local glowAtt = Instance.new("Attachment")
 	glowAtt.Name = "ExhaustGlow"
@@ -807,8 +861,18 @@ local function buildFlames(model: Model, root: BasePart, spec: Cars.CarSpec): ({
 end
 
 local function exhaustPop(s: State, strength: number)
+	-- (owner, 2026-11-21) flames only on a car tuned for them (CarStats.flameLevel); the Flame Tune's are bigger
+	if s.flameLevel <= 0 then
+		return
+	end
+	if s.flameLevel >= 2 then
+		strength *= 1.6
+	end
 	for _, e in s.flames do
 		e:Emit(math.max(1, math.floor((4 + math.random() * 4) * strength)))
+	end
+	for _, e in exhaustSmoke[s.root] or {} do
+		e:Emit(math.max(1, math.floor(2 * strength)))
 	end
 	s.flameGlow = math.max(s.flameGlow, 4 * strength)
 end
@@ -892,6 +956,8 @@ function Driving.detach()
 	for _, f in s.flameParts do
 		f:Destroy()
 	end
+	-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): getting out puts every lamp out, for everyone
+	s.lampsOut()
 	if s.lamps then
 		CarLamps.drive(nil, "off", "", false, false)
 		CarLamps.reset()
@@ -1231,14 +1297,76 @@ applyCamera = function()
 	end
 end
 
-function Driving.reset()
+-- (2026-11-21, owner: "make it so that when a car goes in water, they get teleported back to the nearest road
+-- near the water, facing the roads direction") is this point in Terrain water: its one 4-stud cell
+local function wetAt(p: Vector3): boolean
+	local c = Vector3.new(math.floor(p.X / 4), math.floor(p.Y / 4), math.floor(p.Z / 4)) * 4
+	local mats = workspace.Terrain:ReadVoxels(Region3.new(c, c + Vector3.new(4, 4, 4)), 4)
+	return mats[1][1][1] == Enum.Material.Water
+end
+local roadRay = RaycastParams.new()
+roadRay.FilterType = Enum.RaycastFilterType.Include
+local roadOverlap = OverlapParams.new()
+roadOverlap.FilterType = Enum.RaycastFilterType.Include
+-- (same day) the middle of the nearest lane on a DRY road, looking the way that lane drives: of the lane points
+-- nearest to `pos`, the first with a built carriageway or deck under it (the 1:1 map's collision boxes, RoadBox
+-- "R" / "D") and no water on it. Without lane data: the nearest road box's top, along its long axis. nil = no map
+local function roadNear(pos: Vector3): CFrame?
+	local map = workspace:FindFirstChild("Yangon1to1")
+	local roads = map and map:FindFirstChild("Roads")
+	local collide = roads and roads:FindFirstChild("Collide")
+	local g = if Config.activeMap() then RivieraTraffic.build() else nil
+	if g then
+		local list = WaterRescue.candidates(g.lanes, CityLayout.sample, pos, 8, 24)
+		for _, c in list do
+			local onRoad = true
+			if collide then
+				roadRay.FilterDescendantsInstances = { collide }
+				local h = workspace:Raycast(c.p + Vector3.new(0, 6, 0), Vector3.new(0, -16, 0), roadRay)
+				local kind = h and h.Instance:GetAttribute("RoadBox")
+				onRoad = kind == "R" or kind == "D"
+				if h and onRoad then
+					c.p = Vector3.new(c.p.X, h.Position.Y, c.p.Z)
+				end
+			end
+			c.dry = onRoad and not wetAt(c.p + Vector3.new(0, 2, 0))
+		end
+		local c = WaterRescue.pick(list)
+		if c then
+			local flat = Vector3.new(c.dir.X, 0, c.dir.Z)
+			return if flat.Magnitude > 0.01 then CFrame.lookAt(c.p, c.p + flat.Unit) else CFrame.new(c.p)
+		end
+	end
+	if collide then
+		roadOverlap.FilterDescendantsInstances = { collide }
+		for _, r in { 300, 1200, 4000 } do
+			local best: BasePart?, bd = nil, math.huge
+			for _, p in workspace:GetPartBoundsInRadius(pos, r, roadOverlap) do
+				local d = (p.Position - pos).Magnitude
+				if d < bd and p:GetAttribute("RoadBox") == "R" then
+					best, bd = p, d
+				end
+			end
+			if best then
+				-- (a road box lies along its road: length on Z, the top on the surface)
+				local top = best.Position + best.CFrame.UpVector * (best.Size.Y / 2)
+				local look = best.CFrame.LookVector
+				return CFrame.lookAt(top, top + Vector3.new(look.X, 0, look.Z).Unit)
+			end
+		end
+	end
+	return nil
+end
+
+-- (`from`: the road nearest to that point instead of to the car, 2026-11-21: where it went into the water)
+function Driving.reset(from: Vector3?)
 	local s = state
 	if not s then
 		return
 	end
 	-- (on the Monaco map its own lanes; CityLayout only knows the old city's)
-	local here = s.root.Position - Vector3.new(0, 2, 0)
-	local cf = (if Config.activeMap() then RivieraTraffic.nearestCFrame(here) else nil) or CityLayout.nearestLaneCFrame(s.root.Position)
+	local here = (from or s.root.Position) - Vector3.new(0, 2, 0)
+	local cf = roadNear(here) or CityLayout.nearestLaneCFrame(s.root.Position)
 	s.root.AssemblyLinearVelocity = Vector3.zero
 	s.root.AssemblyAngularVelocity = Vector3.zero
 	s.root.CFrame = cf + Vector3.new(0, s.halfHeight + 0.4, 0)
@@ -1425,23 +1553,25 @@ end
 
 -- tail lamps: off with the lights, dim red with them on, bright red while braking
 local TAIL_DIM, TAIL_BRAKE = Color3.fromRGB(150, 0, 6), Color3.fromRGB(255, 22, 22)
-local function setTails(s: State)
-	local braking = s.tailBrake == true
-	for _, t in s.tails do
+local function tailsLook(tails: { BasePart }, rearGlow: { any }, lightsOn: boolean, braking: boolean)
+	for _, t in tails do
 		local off = t:GetAttribute("TailOff") :: number?
 		if off then
 			-- a glowing copy over the model's own lamp: gone when the lights are off
 			t.Color = if braking then TAIL_BRAKE else TAIL_DIM
-			t.Transparency = if not s.lightsOn and not braking then 1 elseif braking then off * 0.3 else off
+			t.Transparency = if not lightsOn and not braking then 1 elseif braking then off * 0.3 else off
 		else
 			-- the lamp itself (our own bodies): darker when off
-			t.Color = if braking then TAIL_BRAKE elseif s.lightsOn then TAIL_DIM else Color3.fromRGB(60, 0, 4)
+			t.Color = if braking then TAIL_BRAKE elseif lightsOn then TAIL_DIM else Color3.fromRGB(60, 0, 4)
 		end
 	end
-	for _, g in s.rearGlow do
-		g.Enabled = s.lightsOn or braking
+	for _, g in rearGlow do
+		g.Enabled = lightsOn or braking
 		g.Brightness = if braking then 2.2 else 0.6
 	end
+end
+local function setTails(s: State)
+	tailsLook(s.tails, s.rearGlow, s.lightsOn, s.tailBrake == true)
 end
 
 local function setLights(s: State, on: boolean)
@@ -1616,10 +1746,11 @@ end
 
 -- other players' cars: their blinkers and lights, from the attributes the server sets on them
 type OtherWheel = { motor: Motor6D, knuckle: Motor6D?, front: boolean, radius: number, spin: number, blur: { BasePart }, spokes: { BasePart }, shown: number }
-type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number, engine: Audio.Engine?, eRpm: number, eThr: number, eGear: number, eOn: boolean?, eDistT: number }
+type OtherCar = { model: Model, L: { PointLight }, R: { PointLight }, lights: boolean?, smoke: { ParticleEmitter }, wheels: { OtherWheel }, kitBy: { [BasePart]: OtherWheel }, skinN: number, tails: { BasePart }?, tailN: number?, tailOn: boolean?, tailBrake: boolean?, engine: Audio.Engine?, eRpm: number, eThr: number, eGear: number, eOn: boolean?, eDistT: number }
 local others: { [Model]: OtherCar } = {}
 -- (2026-11-09) the other players' engines heard at once, and how far (studs)
-local OTHER_ENGINE_MAX, OTHER_ENGINE_RANGE = 3, 220
+-- (owner, 2026-11-21: "u can hear ur car sounds only") 4, 2 on a low-end phone (LowEnd.on)
+local OTHER_ENGINE_MAX, OTHER_ENGINE_RANGE = 4, 220
 local function otherCar(model: Model): OtherCar?
 	local found = others[model]
 	if found then
@@ -1725,6 +1856,24 @@ local function updateOthers(dt: number?)
 		end
 		-- its kit-v2 wheel pieces (the skin can come after the car)
 		local skin = model:FindFirstChild("Skin")
+		-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): its tail and brake lamps, as its
+		-- driver's game sends them (the same look as your own; no RearGlow lights: too many for a phone)
+		local tailN = if skin then #skin:GetChildren() else 0
+		local tails = o.tails
+		if not tails or o.tailN ~= tailN then
+			tails = {}
+			o.tails, o.tailN, o.tailOn = tails, tailN, nil
+			for _, d in model:GetDescendants() do
+				if d:IsA("BasePart") and d:GetAttribute("TailLight") then
+					table.insert(tails, d)
+				end
+			end
+		end
+		local tailOn, tailBrake = lights == true, model:GetAttribute("Brake") == true
+		if tailOn ~= o.tailOn or tailBrake ~= o.tailBrake then
+			o.tailOn, o.tailBrake = tailOn, tailBrake
+			tailsLook(tails, {}, tailOn, tailBrake)
+		end
 		if skin and #skin:GetChildren() ~= o.skinN then
 			o.skinN = #skin:GetChildren()
 			for _, w in o.wheels do
@@ -1812,7 +1961,7 @@ local function updateOthers(dt: number?)
 		return a.d < b.d
 	end)
 	local keep: { [OtherCar]: number } = {}
-	for i = 1, math.min(#near, OTHER_ENGINE_MAX) do
+	for i = 1, math.min(#near, if LowEnd.on then 2 else OTHER_ENGINE_MAX) do
 		keep[near[i].o] = near[i].d
 	end
 	for model, o in others do
@@ -2280,7 +2429,23 @@ function Driving.attach(model: Model)
 		local okDash, upd = pcall(DashGauges.build, dashPanel)
 		dashUpdate = if okDash then upd else nil
 	end
+	local okMfd, mfdUpdate = pcall(R34Mfd.build, model)
 	local flames, flameParts, flameLight = buildFlames(model, root, spec)
+	-- (owner, 2026-11-21) exhaust flames + smoke only on supercars and 5 hypercars (the 4 Aventadors, the Revuelto):
+	-- ExhaustTips.allowed; every other car keeps them off (they were off for all cars earlier that night)
+	if not ExhaustTips.allowed(spec.Id) then
+		for _, e in flames do
+			e:Destroy()
+		end
+		for _, e in exhaustSmoke[root] or {} do
+			e:Destroy()
+		end
+		exhaustSmoke[root] = nil
+		if flameLight then
+			flameLight:Destroy()
+		end
+		flames, flameLight = {}, nil
+	end
 	-- tyre smoke at each wheel's contact patch; strength follows the squeal
 	local smoke: { { emitter: ParticleEmitter, rear: boolean } } = {}
 	for _, j in root:GetChildren() do
@@ -2398,6 +2563,7 @@ function Driving.attach(model: Model)
 		gaugeGear = gGear,
 		gaugeBar = gBar,
 		dashUpdate = dashUpdate,
+		mfdUpdate = if okMfd then mfdUpdate else nil,
 		localSteer = localSteer,
 		localArms = localArms,
 		partNeedles = partNeedles,
@@ -2417,6 +2583,7 @@ function Driving.attach(model: Model)
 		towPull = 0,
 		towTurn = 0,
 		applyTune = function() end, -- (set by attach)
+		lampsOut = function() end, -- (set by attach)
 		cruiseUp = 0,
 		cruiseDown = 0,
 		cruiseI = 0,
@@ -2506,6 +2673,7 @@ function Driving.attach(model: Model)
 		rideWant = 0,
 		airRide = false,
 		popLoud = false,
+		flameLevel = 0,
 		popGap = 0.1,
 		nitroOn = false,
 		nitroDrain = Config.DrivingFeel.NitroDrain,
@@ -2536,6 +2704,33 @@ function Driving.attach(model: Model)
 		table.insert(s.flameColors, e.Color)
 	end
 	state = s
+	-- (2026-11-21) the skin can arrive after the car: try the exhaust tips again for a few seconds
+	if ExhaustTips.allowed(spec.Id) and #flames == 0 then
+		task.spawn(function()
+			for _ = 1, 6 do
+				task.wait(1.5)
+				if state ~= s or not root.Parent then
+					return
+				end
+				local f, fp, fl = buildFlames(model, root, spec)
+				if #f > 0 then
+					s.flames = f
+					for _, x in fp do
+						table.insert(s.flameParts, x)
+					end
+					s.flameLight = fl
+					s.flameColors = {}
+					for _, e in f do
+						table.insert(s.flameColors, e.Color)
+					end
+					return
+				end
+				for _, x in fp do
+					x:Destroy()
+				end
+			end
+		end)
+	end
 	UI.showShiftPaddles(UI.isTouch and s.manual)
 	-- (2026-11-08) the kit-v2 wheels' pieces by corner (CarSkin welds each wheel piece to its tyre part): the blurred
 	-- face, the spokes it stands in for, the brake discs (they glow after a hard stop)
@@ -2647,6 +2842,7 @@ function Driving.attach(model: Model)
 		s.airRide = tune.air
 		s.popTune = tune.pop
 		s.popLoud = tune.loud >= 2 or tune.decat
+		s.flameLevel = CarStats.flameLevel(tune)
 		s.popGap = if tune.pop == "crackle" then 0.05 elseif tune.pop == "burble" then 0.14 else 0.08
 		-- a nitrous bottle: its HUD, and how long it lasts
 		s.nitroOn = tune.nitro > 0
@@ -2696,6 +2892,11 @@ function Driving.attach(model: Model)
 		end
 	end
 	s.applyTune = applyTune
+	s.lampsOut = function()
+		s.tailBrake = false
+		setLights(s, false)
+		remote("CarSignals"):FireServer({ blinker = "", lights = false, beam = "off", brake = false, rev = false })
+	end
 	applyTune()
 	table.insert(s.connections, model:GetAttributeChangedSignal("Parts"):Connect(applyTune))
 	table.insert(s.connections, model:GetAttributeChangedSignal("Setup"):Connect(applyTune))
@@ -2725,7 +2926,7 @@ function Driving.attach(model: Model)
 	table.insert(s.connections, RunService.PreSimulation:Connect(function(dt)
 		Driving.step(dt)
 	end))
-	table.insert(s.connections, RunService.RenderStepped:Connect(function(dt)
+	table.insert(s.connections, Frame.Connect(function(dt)
 		Driving.render(dt)
 	end))
 	table.insert(s.connections, model.AncestryChanged:Connect(function(_, parent)
@@ -2739,6 +2940,7 @@ end
 -- Physics step
 ---------------------------------------------------------------------
 local rayParams = RaycastParams.new()
+local waterState = WaterRescue.new() -- (2026-11-21) the water timer and its cooldown: client/Driving's "in the sea" check
 rayParams.FilterType = Enum.RaycastFilterType.Exclude
 
 local function reportCrash(s: State, severity: number)
@@ -2991,9 +3193,16 @@ function Driving.step(dt: number)
 				s.pops = math.random(3, 5)
 				s.popTimer = 0.08
 			end
+		elseif s.flameLevel >= 2 and s.rpm > 0.4 then
+			-- (2026-11-21) the Flame Tune with no ECU map (S2 / R / X cars can't fit one): a burst of bangs + flames
+			s.pops = math.random(6, 9)
+			s.popTimer = 0.04
 		elseif s.rpm > 0.6 and liftMph > 30 and not noPops(s) and not noLiftPops(s) then
 			s.pops = math.random(2, 4)
 			s.popTimer = 0.04
+		elseif s.rpm > 0.75 and liftMph > 40 and #s.flames > 0 then
+			-- (2026-11-21) a silent flame + smoke lifting off high revs on the flame cars that have no pop sound
+			exhaustPop(s, 0.6)
 		end
 	end
 	s.throttleIn = throttle
@@ -3303,9 +3512,11 @@ function Driving.step(dt: number)
 		-- steering: speed-sensitive wheel angle, capped by lateral grip; the wheel turns slower and
 		-- finer at speed
 		local speedAbs = math.abs(fwdSpeed)
-		local steerRate = (if math.abs(steerIn) > math.abs(s.steer) then 4.2 else 7) / (1 + speedAbs / DF.SteerSlowdown)
+		local steerRate = (if math.abs(steerIn) > math.abs(s.steer) then 6 else 8.5) / (1 + speedAbs / DF.SteerSlowdown)
 		s.steer += (steerIn - s.steer) * math.min(1, dt * steerRate)
-		local maxAngle = math.rad(36) * s.steerK / (1 + (speedAbs / 70) ^ 1.3)
+		-- (owner, 2026-11-22: "make the car steering lighter ... going fast in a curve the car understeer alot": the lock
+		-- fell away with speed from 70 studs/s; now from 96, about a third more lock at 150 mph)
+		local maxAngle = math.rad(36) * s.steerK / (1 + (speedAbs / 96) ^ 1.3)
 		local angle = s.steer * maxAngle
 		local yawRate = fwdSpeed * math.tan(angle) / s.wheelbase
 		local out: any = nil
@@ -3730,16 +3941,56 @@ function Driving.step(dt: number)
 	-- (2026-11-04) in the sea: off a quay the car skates on the water or sits on the shallow seabed, and
 	-- never gets down to the check above. Two seconds of that and it's back on the road (the ray starts
 	-- above the car: from under the surface it would miss the water)
-	local sea = if root.Position.Y < 20 then workspace:Raycast(root.Position + Vector3.new(0, 8, 0), Vector3.new(0, -(s.halfHeight + 9.2), 0), rayParams) else nil
-	if sea and sea.Material == Enum.Material.Water then
-		s.seaT = (s.seaT or 0) + dt
-		if (s.seaT :: number) >= 2 then
-			s.seaT = 0
-			Driving.reset()
-			return
+	-- (2026-11-21, owner: "make it so that when a car goes in water, they get teleported back to the nearest road
+	-- near the water, facing the roads direction") the "Y < 20" gate missed Inya Lake (water at 40) and a sunk
+	-- car; now 5 checks a second at any height: water is the first thing under the car (a bridge deck or a road
+	-- beside the river is hit first, rain and pools are not Terrain water) or the body's middle is under water.
+	-- After WaterRescue.Hold: a quick fade, back onto the nearest dry road to where it went in, no penalty
+	s.seaT = (s.seaT or 0) + dt
+	if (s.seaT :: number) >= WaterRescue.Every then
+		local sea = workspace:Raycast(root.Position + Vector3.new(0, 8, 0), Vector3.new(0, -(s.halfHeight + 9.2), 0), rayParams)
+		local wet = (sea ~= nil and sea.Material == Enum.Material.Water) or wetAt(root.Position)
+		local from = WaterRescue.step(waterState, wet, root.Position, s.seaT :: number, os.clock())
+		-- (2026-11-22, owner: "in Sule, in some parts u can go through the road and get stuck in the ground") a car
+		-- that fell through a hole in the road's collision sits in the ground under the road: no road box under it,
+		-- a road box's top 4+ studs over it within 12 studs, and hardly moving. 2 s of that: back on the road
+		if not from and not wet then
+			local stuck = false
+			local map = workspace:FindFirstChild("Yangon1to1")
+			local roadsF = map and map:FindFirstChild("Roads")
+			local collideF = roadsF and roadsF:FindFirstChild("Collide")
+			local flat = Vector3.new(root.AssemblyLinearVelocity.X, 0, root.AssemblyLinearVelocity.Z).Magnitude
+			if collideF and flat < 8 then
+				roadRay.FilterDescendantsInstances = { collideF }
+				local under = workspace:Raycast(root.Position + Vector3.new(0, 1, 0), Vector3.new(0, -(s.halfHeight + 4), 0), roadRay)
+				if not under then
+					roadOverlap.FilterDescendantsInstances = { collideF }
+					local bottom = root.Position.Y - s.halfHeight
+					for _, p in workspace:GetPartBoundsInBox(CFrame.new(root.Position + Vector3.new(0, 10, 0)), Vector3.new(24, 30, 24), roadOverlap) do
+						if p:GetAttribute("RoadBox") and p.Position.Y + p.Size.Y / 2 > bottom + 4 then
+							stuck = true
+							break
+						end
+					end
+				end
+			end
+			s.holeT = if stuck then (s.holeT or 0) + (s.seaT :: number) else 0
+			if (s.holeT :: number) >= 2 then
+				s.holeT = 0
+				from = root.Position
+			end
 		end
-	else
 		s.seaT = 0
+		if from then
+			task.spawn(function()
+				UI.fade(true, 0.25)
+				if state == s then
+					Driving.reset(from)
+					UI.toast("Back on the road")
+				end
+				UI.fade(false, 0.35)
+			end)
+		end
 	end
 
 	if s.vyTarget and s.grounded then
@@ -3866,8 +4117,11 @@ function Driving.step(dt: number)
 	if effGear and s.soundGear and effGear ~= s.soundGear and math.abs(fs) > 2 and s.engineOn then
 		local isUp = effGear > s.soundGear
 		s.engine:shift(isUp, math.clamp(0.12 + 0.88 * frac / gearHi(effGear), 0.12, 1.02))
-		if isUp and throttle > 0.5 and (s.popTune or (not noPops(s) and not noShiftPops(s))) then
+		if isUp and throttle > 0.5 and (s.popTune or s.flameLevel >= 2 or (not noPops(s) and not noShiftPops(s))) then
 			exhaustPop(s, if s.popLoud then 1.4 else 1)
+		elseif isUp and throttle > 0.8 and s.rpm > 0.7 and #s.flames > 0 then
+			-- (2026-11-21) a flame + smoke on a hard, high-rev upshift for the flame cars with no pop sound
+			exhaustPop(s, 0.8)
 		end
 		-- the crackle map also crackles on the way down the gears
 		if not isUp and (s.popTune == "crackle" or s.popTune == "antilag") then
@@ -4081,6 +4335,9 @@ function Driving.render(dt: number)
 	if s.dashUpdate then
 		pcall(s.dashUpdate, mph, s.gear, s.rpm)
 	end
+	if s.mfdUpdate then
+		pcall(s.mfdUpdate, dt, mph, s.rpm, s.throttle, s.engineOn == true)
+	end
 	pcall(function()
 		if #s.partNeedles > 0 or #s.guiNeedles > 0 or #s.guiTexts > 0 or #s.dialNeedles > 0 then
 			local k = 1 - math.exp(-dt * 10) -- needles swing, they don't snap
@@ -4188,6 +4445,7 @@ function Driving.render(dt: number)
 		UI.setBlink(false, false)
 	end
 
+	local reversing = s.engineOn and (fwdSpeed < -1 or (s.manual and s.mgear < 0))
 	-- the new models' lamps (CarLamps): the beam it should be now, told to everyone when it changes
 	if s.lamps then
 		local beam = CarLamps.beamFor(s.engineOn, s.inTunnel == true)
@@ -4197,22 +4455,19 @@ function Driving.render(dt: number)
 			UI.setIndicators(indicatorState(s))
 			remote("CarSignals"):FireServer({ blinker = s.blinker, lights = s.lightsOn, beam = beam })
 		end
-		local reversing = s.engineOn and (fwdSpeed < -1 or (s.manual and s.mgear < 0))
 		CarLamps.drive(s.model, beam, s.blinker, s.blinker ~= "" and (s.blinkT % 0.8) < 0.4, reversing)
 		CarLamps.wet = Driving.wet
 	end
 
-	-- (2026-11-07) towing: the trailer's brake and reverse lamps, told to everyone when they change;
-	-- the camera turns round while reversing
-	local towReverse = false
-	if s.towTop then
-		towReverse = s.engineOn and (fwdSpeed < -1.5 or (s.manual and s.mgear < 0))
-		local braking = s.brakeIn > 0.2
-		if braking ~= s.towBrake or towReverse ~= s.towRev then
-			s.towBrake, s.towRev = braking, towReverse
-			remote("CarSignals"):FireServer({ brake = braking, rev = towReverse })
-		end
+	-- (owner, 2026-11-21: headlights and taillights without bugs, like the real cars): brake and reverse lamps told to
+	-- everyone when they change, towing or not (2026-11-07: the trailer's lamps show them too)
+	local braking = s.tailBrake == true
+	if braking ~= s.towBrake or reversing ~= s.towRev then
+		s.towBrake, s.towRev = braking, reversing
+		remote("CarSignals"):FireServer({ brake = braking, rev = reversing })
 	end
+	-- towing: the camera turns round while reversing
+	local towReverse = s.towTop ~= nil and s.engineOn and (fwdSpeed < -1.5 or (s.manual and s.mgear < 0))
 	s.towTurn += ((if towReverse then math.pi else 0) - s.towTurn) * math.min(1, dt * Config.Towing.Camera.Turn)
 	s.towPull += ((if s.towTop then 1 else 0) - s.towPull) * math.min(1, dt * 2)
 

@@ -13,6 +13,7 @@
 	steer onto the wheel lock, drift easier slides, launch a harder launch, redline onto the rev limit.
 	Sound and feel: pop ("pop", "crackle", "burble", "antilag"), loud (0-3), decat, bov, downpipe,
 	spool (a turbo's whistle), nitro (the bottle: 0.6 small, 1 big), air (lowers when parked).
+	flame (the Flame Tune: big exhaust flames; CarStats.flameLevel says which fitted parts make a car spit flames).
 	needs: "turbo", "super" or "forced" (a part that only works on one).
 	list: the real aftermarket price in dollars (PartData.Real, by slot and rarity; the old sheet's numbers
 	are in the tables below and no longer used). A car pays list * Config.Economy.PartPriceMult, and big
@@ -295,11 +296,13 @@ add("nitrous", "Tachyon", {
 -- EXHAUST
 add("downpipe", "Nightcoil", {
 	{ "U", "dp_sport", "Sport Downpipe", "down", 14000, { accel = 0.002, turboAccel = 0.004, downpipe = true }, { desc = "More power with a turbo, and a louder turbo" } },
-	{ "R", "dp_catless", "Catless Downpipe", "down", 40000, { accel = 0.003, turboAccel = 0.008, downpipe = true }, { desc = "More power with a turbo, and a louder turbo" } },
+	{ "R", "dp_catless", "Catless Downpipe", "down", 40000, { accel = 0.003, turboAccel = 0.008, downpipe = true, decat = true }, { desc = "More power with a turbo, a louder turbo, flames when you lift off" } },
 })
 add("catalyst", "Nightcoil", {
 	{ "C", "cat_flow", "High-Flow Catalyst", "decat", 6000, { accel = 0.003 } },
-	{ "E", "cat_decat", "Decat Pipe", "decat", 70000, { accel = 0.01, decat = true }, { sound = true, desc = "More power, louder crackles" } },
+	{ "E", "cat_decat", "Decat Pipe", "decat", 70000, { accel = 0.01, decat = true }, { sound = true, desc = "More power, louder crackles, flames when you lift off" } },
+	-- (owner, 2026-11-21: "only after you tune the car ... also add a flame tune") in the exhaust slots, so S2 / R / X cars can fit it
+	{ "L", "cat_flame", "Flame Tune", "decat", 250000, { accel = 0.012, decat = true, flame = true }, { sound = true, perk = "A decat with a flame map: big flames when you lift off, on upshifts and with every bang" } },
 })
 add("midpipe", "Nightcoil", {
 	{ "U", "mp_sport", "Sport Mid-Pipe", "straight", 15000, { accel = 0.01, speed = 0.005 } },

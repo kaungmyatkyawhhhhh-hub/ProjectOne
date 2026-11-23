@@ -66,6 +66,47 @@ local function contracts(player: Player): { [string]: boolean }?
 	return c
 end
 
+-- (20 Nov 2026, owner 19 Nov: "only new model cars are supposed to be in the game") The Rocket G, Nocturne and
+-- Grandeur left the phone because their models are old, but players had paid for those contracts and got nothing.
+-- Now: a paid contract on a put-away car is served by the fleet car nearest in price that the player has no
+-- contract for, free, for as long as the car is away. Nothing in the save changes and no money moves: the contract
+-- stays saved, and the day the car's id leaves Cars.OLD_MODELS it drives again by itself and the stand-in goes.
+-- (To show a returned car on the phone, also put its id back in Config.Chauffeur.Order.)
+local function available(carId: string): boolean
+	return CH.Fleet[carId] ~= nil and not Cars.OLD_MODELS[Cars.modelOf(carId)]
+end
+
+-- the cars these contracts can call right now: each contract's own car, or its stand-in while that car is away
+function Chauffeur.covered(c: { [string]: boolean }): { [string]: boolean }
+	local out: { [string]: boolean } = {}
+	local away = {}
+	for id, on in c do
+		if on == true and CH.Fleet[id] then
+			if available(id) then
+				out[id] = true
+			else
+				table.insert(away, id)
+			end
+		end
+	end
+	table.sort(away) -- (same stand-ins every time, whatever order the save lists them in)
+	for _, id in away do
+		local best: string? = nil
+		for other, price in CH.Fleet do
+			if available(other) and not out[other] then
+				local d, bd = math.abs(price - CH.Fleet[id]), if best then math.abs(CH.Fleet[best] - CH.Fleet[id]) else math.huge
+				if d < bd or (d == bd and other < (best :: string)) then
+					best = other
+				end
+			end
+		end
+		if best then
+			out[best] = true
+		end
+	end
+	return out
+end
+
 local function hrpOf(player: Player): BasePart?
 	local character = player.Character
 	return if character then character:FindFirstChild("HumanoidRootPart") :: BasePart? else nil
@@ -198,7 +239,7 @@ local handlers: { [string]: (Player, any, any) -> any } = {}
 handlers.state = function(player)
 	local c = contracts(player) or {}
 	local owned = {}
-	for id in c do
+	for id in Chauffeur.covered(c) do
 		table.insert(owned, id)
 	end
 	local ride = rides[player]
@@ -215,7 +256,10 @@ handlers.buy = function(player, carId)
 	if not (price and c and profile) then
 		return { ok = false, message = "Not in the fleet" }
 	end
-	if c[carId] then
+	if not available(carId) then
+		return { ok = false, message = "That car is away right now" } -- (never sell a contract nobody can call)
+	end
+	if c[carId] or Chauffeur.covered(c)[carId] then
 		return { ok = true, message = "Already on contract" }
 	end
 	if profile.Cash < price then
@@ -229,7 +273,7 @@ end
 
 handlers.call = function(player, carId, placeId)
 	local c = contracts(player)
-	if not (type(carId) == "string" and c and c[carId]) then
+	if not (type(carId) == "string" and c and Chauffeur.covered(c)[carId]) then
 		return { ok = false, message = "Sign a contract for that car first" }
 	end
 	local place = if type(placeId) == "string" then placeById[placeId] else nil
@@ -292,7 +336,7 @@ handlers.call = function(player, carId, placeId)
 	prompt.RequiresLineOfSight = false
 	-- (each client hides it; the rider's shows it once the car has stopped)
 	prompt.Parent = root
-	car.ModelStreamingMode = Enum.ModelStreamingMode.Atomic
+	car.ModelStreamingMode = Enum.ModelStreamingMode.Persistent -- (2026-11-21) seen from anywhere, like players' cars
 	car.Parent = folder
 	root:SetNetworkOwner(player)
 
@@ -576,5 +620,7 @@ function Chauffeur.isRiding(player: Player): boolean
 	local r = rides[player]
 	return r ~= nil and r.phase == "riding"
 end
+
+Chauffeur._handlers = handlers -- (tools/chauffeur_refund_test.luau)
 
 return Chauffeur

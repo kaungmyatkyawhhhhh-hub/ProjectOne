@@ -11,7 +11,7 @@
 	    collection and the Legends Path; opens the GOALS screen) and SETTINGS (mini map on / off and
 	    corner, graphics, camera, units, gearbox, music and sound sliders, radio, controls).
 	  * CARS: your cars by brand (sort, search), a side panel with SPAWN, FAVOURITE, CUSTOMISE (a
-	    waypoint to Legends Customs) and MARKET; "Get more cars" sets a waypoint to Legends Motors.
+	    waypoint to Optima Werkz) and MARKET; "Get more cars" sets a waypoint to Rider Auto.
 	  * HOUSES (2026-11-04): the house standing in this server (TELEPORT HOME), your blueprints, the
 	    house settings (HousingClient's house menu) and Legends Realty (fast travel).
 	  * STORE: passes and products by name and exact effect, prices read from Roblox; greyed with
@@ -1276,8 +1276,15 @@ local function openSettings()
 			f()
 		end
 	end)
+	-- (owner, 2026-11-21: "add a function to disable traffic") the NPC cars on or off (Traffic watches the attribute)
+	choices(row("Traffic"), { "ON", "OFF" }, function()
+		return if st.Traffic == false then "OFF" else "ON"
+	end, function(v)
+		st.Traffic = v == "ON"
+		player:SetAttribute("TrafficOff", st.Traffic == false or nil)
+	end)
 	-- (2026-11-18, owner: "add render distance to the settings") how far the client builds detail
-	choices(row("Render distance"), { "LOW", "MEDIUM", "HIGH", "ULTRA" }, function()
+	choices(row("Render distance"), { "LOW", "MEDIUM", "HIGH", "ULTRA", "MAX" }, function()
 		return string.upper(MainMenu.renderDistanceOf(st))
 	end, function(v)
 		st.RenderDistance = string.sub(v, 1, 1) .. string.lower(string.sub(v, 2))
@@ -1603,7 +1610,7 @@ openClaim = function()
 		end
 	end
 	local page = openSub(if pack then "Starter Pack: pick your car" else "Pick your first car")
-	text({ Text = if pack then "One of these, yours for good. Cars you own are greyed out." else "It's yours for good. You can buy more at Legends Motors.", FontFace = MEDIUM, TextSize = 17, TextColor3 = SUB, Position = UDim2.fromOffset(136, 34), Size = UDim2.fromOffset(700, 22), Parent = page })
+	text({ Text = if pack then "One of these, yours for good. Cars you own are greyed out." else "It's yours for good. You can buy more at Rider Auto.", FontFace = MEDIUM, TextSize = 17, TextColor3 = SUB, Position = UDim2.fromOffset(136, 34), Size = UDim2.fromOffset(700, 22), Parent = page })
 	local picked: string? = nil
 	local cards: { [string]: TextButton } = {}
 	local confirm: TextButton
@@ -1722,7 +1729,9 @@ local function buildCampaign(page: Frame)
 	end)
 
 	-- WORLD MAP (wide, top)
-	local mapTile = tile(page, x2, y0, c2 + 12 + c3, topH, { title = "World Map", titleSize = 32 })
+	-- (owner, 2026-11-21: "nvm put goals and chauffeur in the menu"): the right column is three equal cards (Settings,
+	-- Goals, Chauffeur), each about the size the Settings card had on a phone; the map is as wide as PLAY
+	local mapTile = tile(page, x2, y0, c2, topH, { title = "World Map", titleSize = 32 })
 	local mapPane = new("Frame", { Name = "MapPane", BackgroundColor3 = Color3.fromRGB(14, 34, 58), Size = UDim2.fromScale(1, 1), ZIndex = 1, Parent = mapTile })
 	local shadeL = new("Frame", { BackgroundColor3 = NAVY0, BorderSizePixel = 0, Size = UDim2.new(0.55, 0, 1, 0), ZIndex = 2, Parent = mapTile }, {
 		new("UIGradient", { Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.1), NumberSequenceKeypoint.new(1, 1) }) }),
@@ -1797,8 +1806,37 @@ local function buildCampaign(page: Frame)
 	end)
 
 	-- SETTINGS
-	local set = tile(page, x3, lowY, c3, lowH, { title = "Settings", sub = "Map, graphics, camera, sound", icon = "gear", iconSize = 64, titleSize = 30 })
+	local h3 = math.floor((hTall - 24) / 3)
+	local set = tile(page, x3, y0, c3, h3, { title = "Settings", sub = "Map, graphics, camera, sound", icon = "gear", iconSize = 64, titleSize = 30 })
 	focusable(set, openSettings)
+	-- GOALS and CHAUFFEUR: the same tile, with the HUD side buttons' own drawn icons
+	local function sideCard(row: number, title: string, caption: string, kind: string, open: () -> ()): TextButton
+		local b = tile(page, x3, y0 + row * (h3 + 12), c3, h3, { title = title, sub = caption, titleSize = 30 })
+		local art = new("Frame", { Name = "Art", BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -20, 0, 20), Size = UDim2.fromOffset(64, 64), ZIndex = 2, Parent = b })
+		UI.kit.icon(kind, art, 64, GOLD)
+		focusable(b, function()
+			outOfMenu(open)
+		end)
+		return b
+	end
+	local goals = sideCard(1, "Goals", "Daily tasks and rewards", "flag", function()
+		if api then
+			api.openGoals()
+		end
+	end)
+	-- the old GOALS side button's red dot: something to claim
+	local goalsDot = new("Frame", { Name = "Dot", BackgroundColor3 = Color3.fromRGB(255, 72, 72), AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.new(1, -20, 0, 20), Size = UDim2.fromOffset(14, 14), Visible = false, ZIndex = 4, Parent = goals }, {
+		new("UICorner", { CornerRadius = UDim.new(1, 0) }),
+		new("UIStroke", { Color = NAVY0, Thickness = 2 }),
+	})
+	table.insert(refreshers, function()
+		goalsDot.Visible = UI.goalsReady
+	end)
+	sideCard(2, "Chauffeur", "Call your driver", "phone", function()
+		if UI.onChauffeurButton then
+			UI.onChauffeurButton()
+		end
+	end)
 	return playFocus
 end
 
@@ -1936,7 +1974,7 @@ local function buildCars(page: Frame)
 			local s = spotById("customs")
 			if s then
 				Minimap.setWaypoint(s.cf.Position)
-				UI.toast("Waypoint: Legends Customs (on your map)", MINT)
+				UI.toast("Waypoint: Optima Werkz (on your map)", MINT)
 			end
 			outOfMenu()
 		end)
@@ -1972,7 +2010,7 @@ local function buildCars(page: Frame)
 			local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 1, -32), Parent = side })
 			text({ Text = "TRAILER", FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Size = UDim2.new(1, 0, 0, 16), Parent = body })
 			text({ Text = T.Name, FontFace = HEAVY, TextSize = 26, TextScaled = true, Position = UDim2.fromOffset(0, 18), Size = UDim2.new(1, 0, 0, 34), Parent = body })
-			local line = if not st.owned then "Buy one at Legends Motors: TRAILERS."
+			local line = if not st.owned then "Buy one at Rider Auto: TRAILERS."
 				elseif st.load then "On it: " .. (if Cars.ById[st.load] then Cars.ById[st.load].Name else st.load)
 				elseif st.hitched then "Hitched to your car."
 				elseif st.out then "Parked out on the road."
@@ -2104,12 +2142,12 @@ local function buildCars(page: Frame)
 		ic.Position = UDim2.fromOffset(30, 26)
 		ic.Active = false
 		ic.Interactable = false
-		text({ Text = "Get more cars  ·  Legends Motors", FontFace = HEAVY, TextSize = 18, TextColor3 = GOLD, Position = UDim2.fromOffset(60, 0), Size = UDim2.new(1, -70, 1, 0), Parent = more })
+		text({ Text = "Get more cars  ·  Rider Auto", FontFace = HEAVY, TextSize = 18, TextColor3 = GOLD, Position = UDim2.fromOffset(60, 0), Size = UDim2.new(1, -70, 1, 0), Parent = more })
 		focusable(more, function()
 			local s = spotById("dealership")
 			if s then
 				Minimap.setWaypoint(s.cf.Position)
-				UI.toast("Waypoint: Legends Motors (on your map)", MINT)
+				UI.toast("Waypoint: Rider Auto (on your map)", MINT)
 			end
 			outOfMenu()
 		end, GOLD)
@@ -2865,7 +2903,10 @@ end
 
 -- (2026-11-18) Render distance: a multiplier on the client detail radii (YangonKitStream's LOADs, WorldFx's
 -- LodRange lights), shared as player attribute RenderDist. High = the old distances; phones / Low graphics start on Medium.
-local RENDER_MULT = { Low = 0.5, Medium = 0.75, High = 1, Ultra = 1.5 }
+-- (21 Nov, owner: "put option for max graphic which loads 35% of the map around u") Max = x3. A true 35% of the
+-- built map is x8.1 (radius 8,140): tried in Play, 24 -> 8 FPS at 114,000 parts with a quarter of it loaded and
+-- still falling, so it is not shipped. x3 = 429 tiles / 64,000 parts (Ultra: 123 / 21,000), about half Ultra's FPS.
+local RENDER_MULT = { Low = 0.5, Medium = 0.75, High = 1, Ultra = 1.5, Max = 3 }
 function MainMenu.renderDistanceOf(st: { [string]: any }): string
 	if LowEnd.on then
 		return "Low" -- (2026-11-19) low-end mode
@@ -2883,6 +2924,7 @@ end
 local lastSettings: { [string]: any }? = nil
 function MainMenu.applySettings(st: { [string]: any })
 	lastSettings = st
+	player:SetAttribute("TrafficOff", st.Traffic == false or nil) -- (21 Nov) Settings > Traffic
 	MainMenu.applyRenderDistance(st)
 	if type(st.Minimap) == "table" then
 		Minimap.setVisible(st.Minimap.on ~= false)

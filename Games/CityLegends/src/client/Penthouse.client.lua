@@ -452,7 +452,7 @@ local HEADLINES = {
 	"NIGHT RACERS SPOTTED CUTTING UP TRAFFIC DOWNTOWN",
 	"RAIN EXPECTED TO CONTINUE ALL NIGHT",
 	"NEW HYPERCAR SPOTTED AT THE HARBOUR",
-	"CITY LEGENDS BANK RAISES SECURITY",
+	"CB BANK RAISES SECURITY",
 }
 
 type Tv = { gui: SurfaceGui, pages: { Frame }, prices: { number }, ticker: TextLabel, head: TextLabel, bars: { Frame }, t: number }

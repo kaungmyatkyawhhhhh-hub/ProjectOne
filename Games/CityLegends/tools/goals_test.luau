@@ -91,11 +91,11 @@ check(Config.taskCash(6000, 1) == 6000 and Config.taskCash(6000, 200) == 18000, 
 if okCars and type(Cars) == "table" and Cars.List then
 	local pool = 0
 	for _, spec in Cars.List do
-		if spec.Tier == "Mid" and spec.Price <= G.StreakCarMaxPrice then
+		if spec.Source == "Local" and spec.Price > 0 and spec.Price <= G.StreakCarMaxPrice then
 			pool += 1
 		end
 	end
-	check(pool >= 3, "day-7 cars to give: " .. pool .. " Mid cars at or under " .. G.StreakCarMaxPrice)
+	check(pool >= 1, "day-7 cars to give: " .. pool .. " Local cars at or under " .. G.StreakCarMaxPrice)
 else
 	print("skip day-7 car pool (Cars.lua did not load here)")
 end

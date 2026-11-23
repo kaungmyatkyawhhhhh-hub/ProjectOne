@@ -12,6 +12,7 @@ For a place already swapped (no re-bake needed: only P boxes change):
 -> <out file>: "-" lines (old P rows to delete, as written) and "+" lines (their clipped pieces). Studio:
 tools/yangon/MapBugScan.luau S.pboxSwap(text) deletes each old box (P, centre within 0.03) and adds the new ones.
 """
+G0 = __import__('os').path.abspath(__import__('os').path.join(__import__('os').path.dirname(__file__), '..', '..', '..')).replace(chr(92), '/')  # game folder (was a fixed D: path)
 import glob, math, os, pickle, sys
 
 import numpy as np
@@ -122,7 +123,7 @@ def clip(rows, parts):
 
 if __name__ == '__main__':
     tag, cdir, outp = sys.argv[1:4]
-    D = 'D:/ObsidianOne/Claude+Obsidian/Games/CityLegends/build/city_1to1/roads05_%s/' % tag
+    D = G0 + '/build/city_1to1/roads05_%s/' % tag
     parts = pickle.load(open(D + 'parts.pkl', 'rb'))
     # the bake's own scrap filter first (kerb / pavement scraps on a carriageway are not in the meshes)
     import json

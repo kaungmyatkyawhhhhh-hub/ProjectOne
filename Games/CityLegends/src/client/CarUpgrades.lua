@@ -212,10 +212,10 @@ function CarUpgrades.init()
 				if st.levelUp then
 					local name = Cars.get(st.carId).Name
 					UI.popup("CAR LEVEL " .. tostring(st.level), 0, GOLD)
-					UI.toast(string.format("+%d CP for the %s: spend it on parts (garage: UPGRADE) or Legends Customs", tonumber(st.gainedCp) or 0, name), GOLD)
+					UI.toast(string.format("+%d CP for the %s: spend it on parts (garage: UPGRADE) or Optima Werkz", tonumber(st.gainedCp) or 0, name), GOLD)
 					if (tonumber(st.level) or 0) >= L.Max then
 						task.delay(2.5, function()
-							UI.toast(Cars.upper(Cars.makeOf(name)) .. " brand bonus: cheaper at Legends Motors", GREEN)
+							UI.toast(Cars.upper(Cars.makeOf(name)) .. " brand bonus: cheaper at Rider Auto", GREEN)
 						end)
 					end
 				end

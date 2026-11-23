@@ -33,8 +33,31 @@ import bpy  # first: bmesh comes with it
 import bmesh
 import numpy as np
 from mathutils import Matrix, Vector
-from scipy.sparse import coo_matrix
-from scipy.sparse.csgraph import connected_components
+try:
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
+except ImportError:  # Blender builds without scipy (the laptop's Blender 5.2): numpy union-find
+    coo_matrix = None
+
+    def connected_components(edges, directed=False):
+        rows, cols, n = edges
+        parent = np.arange(n)
+        def find_all(p):
+            while True:
+                q = p[p]
+                if np.array_equal(q, p):
+                    return p
+                p = q
+        while True:
+            parent = find_all(parent)
+            a, b = parent[rows], parent[cols]
+            diff = a != b
+            if not diff.any():
+                break
+            lo, hi = np.minimum(a[diff], b[diff]), np.maximum(a[diff], b[diff])
+            np.minimum.at(parent, hi, lo)
+        _, lab = np.unique(parent, return_inverse=True)
+        return int(lab.max()) + 1 if n else 0, lab.ravel()
 
 MAX_TRIS = 18000
 BUDGET = 160000  # triangles for the whole car
@@ -299,7 +322,10 @@ def object_parts(o, weld):
     else:
         m = 0
         rows, cols = ev[:, 0], ev[:, 1]
-    g = coo_matrix((np.ones(len(rows)), (rows, cols)), shape=(n + m, n + m))
+    if coo_matrix is not None:
+        g = coo_matrix((np.ones(len(rows)), (rows, cols)), shape=(n + m, n + m))
+    else:
+        g = (np.asarray(rows, dtype=np.int64), np.asarray(cols, dtype=np.int64), n + m)
     _, lab = connected_components(g, directed=False)
     lab = lab[:n]
     order = np.argsort(lab, kind="stable")

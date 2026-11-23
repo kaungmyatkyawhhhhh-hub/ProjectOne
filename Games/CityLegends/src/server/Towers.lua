@@ -19,7 +19,7 @@
 
 	CityBuilder calls Towers.block for every city block; it returns true where it built a tower.
 	Towers.suite builds just a penthouse floor (and optionally the roof terrace) on another
-	building, for the Legends Grand Hotel's suites (Hotel.lua): same rooms, home, party mode and
+	building, for the Novotel Yangon Max's suites (Hotel.lua): same rooms, home, party mode and
 	showcase, with the elevator's lobby and roof stops set by that building. The hotel's suites
 	are tiers of one suite you upgrade (2026-11-03): a tier furnishes the floor (1: lounge, kitchen,
 	bedroom; 2: + the car turntable, the long sofa, art and the tall kitchen; 3: + the DJ booth and
@@ -1282,7 +1282,8 @@ refreshResidents = function()
 			if profile and profile.Penthouses[id] then
 				table.insert(names, p.DisplayName)
 				if not carId then
-					carId = profile.Showcase[id] or profile.Selected
+					local show = profile.Showcase[id]
+					carId = if show and profile.Owned[show] then show else profile.Selected -- (a sold or shelved car is not shown)
 					carOwner = profile
 				end
 			end
@@ -1292,7 +1293,7 @@ refreshResidents = function()
 			label.Text = text
 		end
 		setShowcase(rec, carId or Cars.CutsceneId)
-		-- the resident's Legends Customs look on it
+		-- the resident's Optima Werkz look on it
 		if carOwner and carId and rec.showcaseCar then
 			Customs.setOn(rec.showcaseCar, Customs.lookOf(carOwner, carId))
 		end

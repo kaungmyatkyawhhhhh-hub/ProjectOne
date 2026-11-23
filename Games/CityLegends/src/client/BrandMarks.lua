@@ -594,21 +594,6 @@ return {
 		},
 		hub = { at = Vector3.new(0.0013, -0.0119, 0.0691), face = Vector3.new(0.0009, 0.0377, 0.9993), r = 0.03, color = Color3.fromRGB(25, 26, 25) },
 	},
-	nisun_r34 = {
-		wb = 2.665,
-		hide = { { name = "Body_r1Nissan_SkylineGTRR34TN", size = Vector3.new(1.7113, 0.4078, 4.4458) } },
-		covers = {
-			{ emblem = false, disc = false, at = Vector3.new(-0.0057, 0.4691, 2.2329), face = Vector3.new(-0.1257, 0.1048, 0.9865), w = 0.1042, h = 0.0781, color = Color3.fromRGB(0, 0, 0) },
-			{ emblem = false, disc = false, at = Vector3.new(0, 0.1396, 2.2583), face = Vector3.new(0, 0.109, 0.994), w = 0.2874, h = 0.092, color = Color3.fromRGB(232, 232, 232) },
-		},
-		caps = {
-			FL = { r = 0.028, surface = 0.1106, color = Color3.fromRGB(111, 109, 101) },
-			FR = { r = 0.028, surface = 0.1106, color = Color3.fromRGB(111, 109, 101) },
-			RL = { r = 0.028, surface = 0.1105, color = Color3.fromRGB(111, 109, 101) },
-			RR = { r = 0.028, surface = 0.1105, color = Color3.fromRGB(111, 109, 101) },
-		},
-		hub = { at = Vector3.new(0.007, -0.0261, 0.0254), face = Vector3.new(0, 0.075, 0.9972), r = 0.03, color = Color3.fromRGB(34, 34, 34) },
-	},
 	porsha_boxster = {
 		wb = 2.475,
 		hide = { { name = "Body_pM_Badge_Max1" } },

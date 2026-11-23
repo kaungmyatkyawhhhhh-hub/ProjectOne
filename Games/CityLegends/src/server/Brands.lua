@@ -1,7 +1,7 @@
 --[[
 	Brands (owner, 2026-10-30, from the research: Midnight Racing's manufacturer levels)
 	Driving a brand's cars levels that brand up (miles and cut-ups, Config.Brands). A higher brand
-	level makes Legends Customs cheaper on its cars and opens its top trims a few levels sooner.
+	level makes Optima Werkz cheaper on its cars and opens its top trims a few levels sooner.
 	Saved as profile.Brands ({ BRAND = xp }); the levels are on the player as the "BrandLevels"
 	attribute (JSON { BRAND = level }) for the garage and the level-up toast.
 ]]

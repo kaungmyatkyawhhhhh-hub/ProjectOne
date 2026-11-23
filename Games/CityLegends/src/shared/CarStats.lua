@@ -1,5 +1,5 @@
 --[[
-	CarStats (owner, 2026-10-31: the Legends Motors buy menu, like Midnight Racing's)
+	CarStats (owner, 2026-10-31: the Rider Auto buy menu, like Midnight Racing's)
 	The numbers the dealer menu shows for each car, worked out from its spec (Cars): weight, power,
 	torque, power-to-weight, braking, drive, seats, gearbox, fuel, MPG and a one-line description.
 	They are for show only; the car drives on its spec (TopSpeed, ZeroToSixty, Handling).
@@ -259,6 +259,9 @@ export type Tune = {
 	speedDrive: number, -- the top speed from slots that aren't power slots
 	pop: string?,
 	decat: boolean,
+	boostMod: boolean, -- (2026-11-21) a boost part is fitted: the turbo flutters on a lift-off
+	twin: boolean, -- the twin-turbo kit: a quicker, higher flutter
+	flame: boolean, -- the Flame Tune (2026-11-21)
 	bov: boolean,
 	downpipe: boolean,
 	air: boolean,
@@ -286,11 +289,21 @@ local function needsMet(def: PartData.Part, forced: string?): boolean
 	return def.needs == nil or def.needs == forced
 end
 
+-- (owner, 2026-11-21: "make it so that only after you tune the car") which fitted parts make the exhaust spit flames,
+-- as on real cars (unburnt fuel lighting in a hot, open exhaust): 0 = none (a stock car: its catalyst burns it off),
+-- 1 = a decat / catless downpipe, or a crackle or anti-lag map, 2 = the Flame Tune (bigger, and on every upshift)
+function CarStats.flameLevel(tune: Tune): number
+	if tune.flame then
+		return 2
+	end
+	return if tune.decat or tune.pop == "crackle" or tune.pop == "antilag" then 1 else 0
+end
+
 local ADD = { "speed", "grip", "brake", "weight", "pi", "shift", "steer", "drift", "launch", "redline", "rally", "nitro" }
 function CarStats.tuneOf(parts: Parts?): Tune
 	local t: Tune = {
 		accel = 0, speed = 0, grip = 0, brake = 0, weight = 0, pi = 0, shift = 0, steer = 0, drift = 0, launch = 0, redline = 0,
-		rally = 0, nitro = 0, loud = 0, spool = 0, power = 0, driveK = 1, speedDrive = 0, decat = false, bov = false, downpipe = false, air = false,
+		rally = 0, nitro = 0, loud = 0, spool = 0, power = 0, driveK = 1, speedDrive = 0, decat = false, boostMod = false, twin = false, flame = false, bov = false, downpipe = false, air = false,
 	}
 	if not parts then
 		return t
@@ -329,6 +342,11 @@ function CarStats.tuneOf(parts: Parts?): Tune
 		t.spool = math.max(t.spool, fx.spool or 0)
 		t.pop = fx.pop or t.pop
 		t.decat = t.decat or fx.decat == true
+		t.flame = t.flame or fx.flame == true
+		t.twin = t.twin or def.icon == "twinTurbo"
+		if PartData.Slots[slot].cat == "boost" or fx.downpipe then
+			t.boostMod = true
+		end
 		t.bov = t.bov or fx.bov == true
 		t.downpipe = t.downpipe or fx.downpipe == true
 		t.air = t.air or fx.air == true
@@ -407,6 +425,15 @@ function CarStats.fits(id: string, partId: string, parts: Parts?): (boolean, str
 	end
 	if not CarStats.partAllowed(id, partId) then
 		return false, "S2, R and X cars take only tyres, gearbox, suspension and exhaust"
+	end
+	-- (2026-11-21) the Flame Tune only where the game shows exhaust flames (owner: supercars + the Aventadors / Revuelto)
+	if def.fx.flame then
+		local ok, tips = pcall(function()
+			return require(script.Parent:WaitForChild("ExhaustTips", 2))
+		end)
+		if ok and type(tips) == "table" and not tips.allowed(id) then
+			return false, "Only on supercars and the flame hypercars"
+		end
 	end
 	if parts and not needsMet(def, CarStats.forcedOf(parts)) then
 		return false, if def.needs == "super" then "Needs a supercharger" elseif def.needs == "turbo" then "Needs a turbo" else "Needs a turbo or supercharger"
