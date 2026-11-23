@@ -28,6 +28,16 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## REBUILD P10 + P5 IN (24 Nov, DISTRICT REBUILD agent, HOME PC): state `rebuild_progress.json` "P10", "P5"; P1-P10 now all in
+- **P10 DONE, saved v1875; P5 DONE, saved v1883** (both Play-tested, store back to v1). Same Studio chain as P9 (below), with these changes:
+- **Overlap:** P5's district move and road export ran in Studio while P10 baked offline; then P5 baked while P10 was swapped / cleaned. Never two bakes at once (one bake left 1.4 GB RAM free).
+- **Log marker:** the Studio log is one file per session and P10's labels (14x5..14x8) collide with P9's: print `RB10START` / `RB5START` (and `LH10START` / `LH5START` for LaneHeights) before the job and run `roads05_loggrab.py <tag> <copy of the log after the marker>`.
+- **P10 step boxes** 14x5..17x8 (1536 col x 44544..46080 + 3072 cols to 55296; rows z 15360/18432/21504/24576..26112); bake R05_ONLY 1536 x29..35 z10..16 (49 cells), 47 glbs / 19,038 boxes. **P5 step boxes** cols 15360..18432 (5), 18432..21504 (6), 21504..23040 (14 = P4 seam) x rows 16896..19968 (11), 19968..23040 (13), 23040..26112 (15), 26112..27648 (17); bake R05_ONLY 1536 x10..14 z11..17, 19 glbs / 7,932 boxes (33 cells: 10x12, 10x17 have no roads).
+- **PREP trap:** `_G.PREP`'s `LoadAsset` died with "HTTP 502" at glb 24 of 47 (fresh uploads). Used an inline PREP with a retrying loader (6 tries, 5 s x try); RebuildCell.luau itself is unchanged (load it once for `_G.SWAPGO`).
+- **Lanes:** tags `LP1to4P6to10` (after P10) and `LP1to10` (after P5; current: 1,322 lanes / 3,080 links / 0 dead ends, 26 modules, lane_heights 1,771 rows). Raw install -> QuickSync -> LaneHeights -> merge -> install -> QuickSync -> require 26/26.
+- **Minimap:** FULL now P1-P10. Adding P5 moved the detail grid's x0 (22667 -> 16273): every d_ tile changed (81 + o_0_0 / o_0_1 uploaded). YangonMapArt 6729 / 1630412133 synced.
+- **Left:** P11, P12 (not in the game); P11 lets the U Chit Maung deck (P8 note) get a surface.
+
 ## REBUILD P9 IN + P10 / P5 offline (24 Nov, DISTRICT REBUILD agent, HOME PC): state `rebuild_progress.json` "P9", "P10", "P5"
 - **P9 DONE, saved v1853** (Play-tested, store back to v1): DistrictPlace (4 packs + night a/b, Far_keep merge 336 cells / 7 dups, old 2 pagodas
   -> RB_OldP9.Temps) -> 12 step boxes 12x5..14x8 in ONE queued spawn (`stepCell` + `RoadBake05.collect`, slices printed as `P8SM` log lines,
