@@ -1,6 +1,6 @@
 ---
 tags: [brain, skills]
-updated: 2026-11-17
+updated: 2026-11-23
 ---
 # Skills index (Brain/Skills)
 Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are in [[00 Plugins index]]. Each folder holds the CURRENT copy of one of the owner's Claude skills (`<name>/SKILL.md` + any helper files).
@@ -25,6 +25,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/roblox-ui-pro/SKILL\|roblox-ui-pro]] | Use for ANY Roblox UI work: building, fixing, restyling or reviewing a HUD, shop, inventory, index, settings, popup, reward screen or menu. Correct ScreenGui setup (respawn, safe areas, phone/tablet/console, touch and gamepad), concrete design numbers, a house-style UI kit, AI-slop checks, and a Studio MCP loop that audits (`scripts/ui_audit.luau`) and screenshots the UI on real device sizes until it passes. Pairs with the art method in [[Best UI method (skill draft)]]. |
 | [[Skills/roblox-icon-thumbnail/SKILL\|roblox-icon-thumbnail]] | Use when making or judging a Roblox game icon, thumbnail or logo: research what kids click, render the real avatar, one-try ChatGPT prompts, add the logo in code, and test at real sizes. |
 | [[Skills/roblox-vfx-reveal/SKILL\|roblox-vfx-reveal]] | Use for Roblox VFX and big moments: combat hit VFX (impact frames, shake, FOV punch, shockwave, debris, flash), RNG/egg rarity reveal ladders with a top-tier cutscene, and reward title cards. Tested client kit `scripts/VFXKit.luau`. |
+| [[Skills/underwater-environment-build/SKILL\|underwater-environment-build]] | Use when building, decorating, lighting or fixing an underwater (or any natural) Roblox environment, e.g. MEGA BITE seas, reefs, biomes, landmarks: hand-placed heroes, slope-painted terrain, seeded scatter, caustic/dapple light plates, god rays, haze. |
 | [[Skills/what-if-animation/SKILL\|what-if-animation]] | Make a 15-25 s "What If" stick-figure animated episode from one topic line: script, free Piper voice, storyboard, Remotion/SVG animation, free synthesised sound, master to -14 LUFS. |
 | [[Skills/ytdlp-video-watch/SKILL\|ytdlp-video-watch]] | Use when the user shares a TikTok/YouTube/Shorts/Reels link or video to watch, break down or research: watch it in the browser (no download) or download with yt-dlp, extract frames, sound hits and transcript, then analyze. |
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
@@ -109,3 +110,4 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 - 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau rebirth card text now says DNA is kept.
 - 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau has an owner-only Admin window (button shown by a server attribute, every press checked on the server).
 - 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau admin window gained World Age +1/-1 rows.
+- 2026-11-23: added underwater-environment-build, from two videos watched frame by frame: DatBoiEle's Roblox underwater build (kvEf3pzKOqQ; every Lighting/Atmosphere/ColorCorrection/Bloom/Brushtool value read off his panels) and Lunar9's UE5 underwater landscape (HECwGXgGu50; layer painting, tiling, PCG scatter, depth mood). The Luau scripts in it (V1 look apply, seeded scatter, light plates, slope materials, depth mood) are Claude's own and not yet tested in Studio. Research note: [[2026-11-23 Research - Underwater environment videos (DatBoiEle Roblox + Lunar9 UE5)]].
