@@ -1,5 +1,7 @@
 # City Legends
 
+> **DAYTIME CLIP STUDY (2026-11-23):** 11 owner clips of real Yangon by day (stairwell, flat, main roads, YBS, side streets, toll plaza, old highway) studied; ranked list of what the game must match (wires, toddy palms, traffic mix, lane-arrow gantries). See [[2026-11-23 Real Yangon by day - clip study (what the game must match)]].
+
 > **TEST RUN (cloud, 2026-11-21, Lune 0.8.9): all 23 Lune tests pass** after the day's fixes (traffic dead ends + traps + unused inner lanes in `RivieraTraffic.lua`, `Garages.lua` destroy-while-walking for `world_test`). Repo only: sync to Studio on the PC (prompt `PC to-do - sync todays cloud fixes and finish last night`). Tests need the root: `lune run tools/<name>.luau .`.
 
 > **DEALER + SHOP ON THE HUD (2026-11-19, in Studio, not published):** dealer menu, buying and test drives from anywhere (own car back where the test started), SHOP with a "!" for unseen items, a Starter Pack card after the first race / paycheck, a "2x" chip and a Double Pay link, Seen / Prompted / Bought events. See [[2026-11-19 Discoverability - dealer, shop, starter card, pass reminders]].
