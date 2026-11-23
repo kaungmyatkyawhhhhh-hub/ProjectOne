@@ -131,7 +131,14 @@ local function build()
 	x.Activated:Connect(function()
 		f.Visible = false
 		player:SetAttribute("GuideSkipped", true) -- (hides it at once; the server's answer clears "Guide")
-		task.spawn(ask, "skip")
+		task.spawn(function()
+			for _ = 1, 5 do
+				if ask("skip") ~= nil then
+					break
+				end
+				task.wait(0.5)
+			end
+		end)
 	end)
 	pill = f
 end
@@ -161,7 +168,8 @@ local function show(text: string, target: Vector3?, tap: (() -> ())?)
 		arrow.Rotation = math.deg(math.atan2(v.X, -v.Z))
 	end
 	badge.BackgroundTransparency = 0.25 - 0.25 * math.cos(os.clock() * 4) -- (the StartPrompt's pulse)
-	(pill :: Frame).Visible = player:GetAttribute("GuideSkipped") ~= true and not blocked()
+	local p = pill :: Frame
+	p.Visible = player:GetAttribute("GuideSkipped") ~= true and not blocked()
 end
 
 local function hide()
@@ -203,7 +211,11 @@ local asked: { [number]: boolean } = {}
 local function report(n: number)
 	if not asked[n] then
 		asked[n] = true
-		task.spawn(ask, "step", n)
+		task.spawn(function()
+			if ask("step", n) == nil then
+				asked[n] = nil -- (no answer: the server's 0.2 s limit or not loaded yet; try again next check)
+			end
+		end)
 	end
 end
 
