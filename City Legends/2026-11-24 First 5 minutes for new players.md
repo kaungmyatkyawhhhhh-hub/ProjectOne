@@ -1,7 +1,7 @@
 ---
 tags: [city-legends, onboarding, first-session, mobile]
 created: 2026-11-24
-status: in Studio (saved, version 1895), not published
+status: in Studio (saved, version 1898), not published
 ---
 # City Legends: the first 5 minutes for new players (24 Nov 2026)
 
@@ -74,8 +74,16 @@ Code: `Games/CityLegends/tools/kidsim_first5.py` (results `tools/kidsim_first5_r
 ![[2026-11-24 First 5 minutes - 3b stop at the drop, Burmese (Play).jpg]]
 ![[2026-11-24 First 5 minutes - 4 next goal, Burmese (Play).jpg]]
 
+## The second loading after CLAIM: 6.7 s -> 1.0 s (24 Nov, saved v1898)
+- **Cause:** not the car (it arrives in 0.1 s) and not streaming (its streets went quiet in 1.5 s). `Main.client`'s `isJump` counted the first car out as a "jump" because the menu camera orbits 420+ studs UP over Myanmar Plaza, so `waitForMap` held the loading screen for the fixed terrain wait after a jump: `TERRAIN_SETTLE_PHONE` 6.5 s on phones (a guess in the code, never measured), 4 s on PC.
+- **Fix:** the start screen's own map wait has already streamed everything within 800 studs (`NEAR_R`) of the orbit's centre, and the orbit looks down on it: a car that comes out within 800 studs (flat) of the orbit's centre, straight from the start screen, is no jump (`menuAt`, cleared by `stopOrbit`). Fast travel and real jumps keep the old waits.
+- **Measured (Studio Play):** new save on `CityLegends_test`, phone layout: "car -> driving" **6.70 s before, 0.99 s after** (map wait 0.85 s). Owner's save on `CityLegends_v1`, PC, PLAY: 1.15 s (was about 4 s). The screenshot 1-2 s after CLAIM shows the roads and terrain fully drawn (no coarse terrain over the road). No script errors.
+- Kid sim: the 300 s stay of the shipped version was 70% with the 6.7 s wait; with ~1 s it is the first table's 66-70% range (the wait mostly cost kids in the first 30 s).
+![[2026-11-24 First 5 minutes - car out 1 s after CLAIM, streets loaded (Play).jpg]]
+![[2026-11-24 First 5 minutes - 2 drive to the job, Burmese (Play).jpg]]
+(the shorter Burmese step 2 line, one line)
+
 ## Not done / not tested
 - A real phone and a real drive by hand (the test teleported the car between the spots); the X tapped by finger (the skip remote was tested).
-- The shorter Burmese line for step 2 ("... ပထမဆုံး အလုပ်") is synced, but no shot of it yet (the older one wrapped to two lines).
 - The funnel only counts in the published game: check Creator Hub > Analytics > Funnels a week after publishing.
-- The 6.7 s second loading after CLAIM (spawn streaming): a separate job.
+- The terrain check after the faster spawn was by eye in Studio on a PC; a cheap phone meshes terrain slower: look once on a real phone right after CLAIM.
