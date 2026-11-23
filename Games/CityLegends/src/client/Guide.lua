@@ -72,7 +72,7 @@ local function build()
 		AnchorPoint = Vector2.new(0.5, 0),
 		-- (first test: in the StartPrompt's slot it hid the road, the dispatch sign and met the toasts)
 		Position = UDim2.new(0.5, 0, 0, if touch then 134 else 150),
-		Size = UDim2.fromOffset(if touch then 430 else 520, h),
+		Size = UDim2.fromOffset(if touch then 470 else 560, h),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.12,
 		Visible = false,
@@ -105,6 +105,7 @@ local function build()
 		Text = "",
 		TextSize = if touch then 16 else 19,
 		TextScaled = true, -- (a long drop name: smaller, never cut)
+		TextWrapped = false, -- (one line: wrapped it went to two small lines)
 		Font = Enum.Font.GothamBold,
 		TextColor3 = Theme.Text,
 		TextXAlignment = Enum.TextXAlignment.Left,
@@ -212,6 +213,16 @@ end
 
 local tookJob = false
 local goalShown = false
+-- (second test: setting the waypoint again after the minimap cleared it on arrival brought "You've
+-- arrived" back every check, and the hint waited behind it for good) once per target
+local wpFor: Vector3? = nil
+local function waypoint(pos: Vector3, here: Vector3?)
+	-- (again only when something else cleared it while you are still far: the minimap's arrival is 40)
+	if wpFor ~= pos or (Minimap.getWaypoint() == nil and here ~= nil and flat(here, pos) > NEAR) then
+		wpFor = pos
+		Minimap.setWaypoint(pos)
+	end
+end
 local asked: { [number]: boolean } = {}
 local function report(n: number)
 	if not asked[n] then
@@ -283,9 +294,7 @@ local function tick()
 		if s < 3 then
 			report(3)
 		end
-		if Minimap.getWaypoint() ~= drop then
-			Minimap.setWaypoint(drop) -- (the beam on the drop; JobsClient clears its own when a run starts)
-		end
+		waypoint(drop, here) -- (the beam on the drop; JobsClient clears its own when a run starts)
 		local close = here ~= nil and flat(here, drop) < NEAR
 		show(if close then "Stop at the beam to deliver" else string.format("Deliver to %s: follow the arrow", name), drop)
 		return
@@ -296,7 +305,7 @@ local function tick()
 		return
 	end
 	if Minimap.getWaypoint() == nil then
-		Minimap.setWaypoint(target) -- (JobsClient puts it there once the Delivery job is on; this covers a slow answer)
+		waypoint(target, here) -- (JobsClient puts it there once the Delivery job is on; this covers a slow answer)
 	end
 	local close = flat(here :: Vector3, target) < NEAR
 	show(if close then "Stop next to the DELIVERY sign to load the parcel" else "Drive to the green beam: your first delivery job", target)
