@@ -1,5 +1,6 @@
 # City Legends
 
+> **FIRST 5 MINUTES FOR NEW PLAYERS (2026-11-24, owner approved; in Studio, saved v1895, not published):** a new save gets a short skippable guide: pick a car -> the Delivery job is taken for you, a one-line hint with a turning arrow leads to the Myanmar Plaza dispatch -> first parcel to the nearest drop (Hledan Market) -> paid -> "Next goal" (the next Legends Path goal). Saved flag, onboarding funnel, no shop offers during it, English + Burmese. Kid sim: 5-minute stay 3% -> 70%. See [[2026-11-24 First 5 minutes for new players]].
 > **DAYTIME CLIP STUDY (2026-11-23):** 11 owner clips of real Yangon by day (stairwell, flat, main roads, YBS, side streets, toll plaza, old highway) studied; ranked list of what the game must match (wires, toddy palms, traffic mix, lane-arrow gantries). See [[2026-11-23 Real Yangon by day - clip study (what the game must match)]].
 
 > **TEST RUN (cloud, 2026-11-21, Lune 0.8.9): all 23 Lune tests pass** after the day's fixes (traffic dead ends + traps + unused inner lanes in `RivieraTraffic.lua`, `Garages.lua` destroy-while-walking for `world_test`). Repo only: sync to Studio on the PC (prompt `PC to-do - sync todays cloud fixes and finish last night`). Tests need the root: `lune run tools/<name>.luau .`.

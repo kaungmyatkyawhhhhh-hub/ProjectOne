@@ -26,7 +26,10 @@ created: 2026-11-09
 
 - 2026-11-09 Galaxy Sat 21 update (crew heists, jetpack, Forge rolls): physics + human timing (reaction, Hick's-law choice, Fitts' aiming, thumbstick speed, AFK odds) for 3 kid types → 9 config changes (tackle loop 5.9 → 0.5 per duel, gather 50% → 99%) → [[2026-11-09 Galaxy Incremental - Sat 21 balance sim (physics + human timing)]]
 
+- 2026-11-24 City Legends first 5 minutes (driving game, live numbers): stay 5 min 3% → 70% (guide: job taken for you + arrow + nearest first drop + next goal + extra delivery time below level 5) → [[City Legends/2026-11-24 First 5 minutes for new players]]
+
 ## Learned
+- 24 Nov (City Legends): in a driving game the driving itself is the "tap": model it as a slow boredom rate (0.2-0.35/s), not zero; model the LOOP after the first reward (the job keeps pointing to the next dispatch) or every version collapses at 2 min; and replace the sim's guessed waits with the Play test's measured ones (car out after CLAIM was 6.7 s, the sim guessed 2-4). The Play test found 6 things the sim can't see (hint over the sign it names, toast spam, a card on the pedals): always Play-test the guide at phone size after the sim.
 - 9 Nov (balance sim): simulate the KID, not only the maths: reaction time and phones' slower thumbs decided the tackle race (PC re-grab 1 s beat the 1.5 s wait), and AFK kids, not seconds, made the gather fail.
 - Read the server code, not just the config: the "no comets in tutorial steps 1-5" gate was the hidden cause.
 - It's a model: confirm with the real onboarding funnel after publishing.
