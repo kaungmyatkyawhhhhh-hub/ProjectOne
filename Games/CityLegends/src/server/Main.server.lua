@@ -447,6 +447,8 @@ guard("Store", function()
 end)
 -- (19 Nov) the Starter Pack card at a right moment, the STORE's "!", Seen / Prompted / Bought events
 guard("Offers", function() require(script.Parent:WaitForChild("Offers")).init(ctx) end)
+-- (24 Nov) the new-player guide: its step, save and onboarding funnel (client/Guide.lua shows it)
+guard("Guide", function() require(script.Parent:WaitForChild("Guide")).init(ctx) end)
 guard("GemShowcase", function() require(script.Parent:WaitForChild("GemShowcase")).init(ctx, Police, Luxe) end)
 
 local function despawn(player: Player)

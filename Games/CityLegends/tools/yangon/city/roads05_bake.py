@@ -577,6 +577,11 @@ def bake(tag):
                 road_tris.append(t)
     surf = Surface(road_tris)
     parts, scrap = drop_scraps(parts, data, surf)
+    # (24 Nov, P1-P3 map bugs) no kerb pieces lying across each other, no crumpled (leaning) kerb pieces
+    import roads05_kerb_fix
+    only0 = set(c for c in os.environ.get('R05_ONLY', '').split(',') if c)
+    parts, kerb_fix = roads05_kerb_fix.resolve(parts, only0 or None)
+    print('kerb fix:', kerb_fix)
     for p in parts:
         k = p[0]
         if k == 'R':
@@ -658,7 +663,7 @@ def bake(tag):
             k, buf, n = k + 1, [], 0
     if buf:
         open(os.path.join(cdir, 'Collide05_%d.txt' % k), 'w', newline='\n').write('\n'.join(buf))
-    st = dict(parts=len(parts), scraps_dropped=scrap, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
+    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
               paint_dropped=dropped, collision_boxes=len(rows), collide_files=k)
     json.dump(st, open(os.path.join(D, 'bake_stats.json'), 'w'), indent=1)
     print(json.dumps(st, indent=1))

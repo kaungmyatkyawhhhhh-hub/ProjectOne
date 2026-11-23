@@ -632,6 +632,9 @@ end)
 startStep("Offers", function()
 	require(script.Parent:WaitForChild("OffersClient")).init() -- (19 Nov) Starter Pack card, Double Pay link, store measuring
 end)
+startStep("Guide", function()
+	require(script.Parent:WaitForChild("Guide")).init() -- (24 Nov) the new-player guide: one-line hints, the arrow, the next goal
+end)
 startStep("Housing", function()
 	require(script.Parent:WaitForChild("HousingClient")).init() -- Legends Realty, claiming lots, the house menu
 end)

@@ -194,7 +194,7 @@ function OffersClient.init()
 	local jobPush = remotes:WaitForChild("JobPush", 20) :: RemoteEvent?
 	if jobPush then
 		jobPush.OnClientEvent:Connect(function(msg: any)
-			if type(msg) == "table" and msg.kind == "paid" and not msg.double then
+			if type(msg) == "table" and msg.kind == "paid" and not msg.double and not player:GetAttribute("Guide") then -- (not during the new-player guide)
 				task.delay(1.5, showPayLink) -- (after the PAYCHECK popup)
 			end
 		end)

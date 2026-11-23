@@ -473,6 +473,8 @@ handlers.cancel = function(player)
 	return { ok = true }
 end
 
+local NEW_LEVEL, NEW_GRACE = 5, 40 -- (24 Nov) new players' extra delivery time (not in Config: its size limit)
+
 handlers.jobStart = function(player, which)
 	local d = if type(which) == "number" then ActivityData.dispatch[which] else nil
 	local car = ctx.getCar(player)
@@ -493,9 +495,19 @@ handlers.jobStart = function(player, which)
 		return { ok = false }
 	end
 	local dest = options[math.random(1, #options)]
+	if player:GetAttribute("Guide") then
+		-- (24 Nov, the new-player guide: the first parcel goes to the nearest drop)
+		table.sort(options, function(x, y)
+			return flatDist(ActivityData.dropPoints[x].pos, d.pos) < flatDist(ActivityData.dropPoints[y].pos, d.pos)
+		end)
+		dest = options[1]
+	end
 	local dist = flatDist(ActivityData.dropPoints[dest].pos, d.pos)
-	local limit = dist / Config.mphToSps(A.JobMph) + A.JobGrace
-	runs[player] = { kind = "job", t0 = os.clock(), dest = dest, deadline = os.clock() + limit, dist = dist, cp = 0 }
+	-- (24 Nov, kid sim: a "Too late" early on loses new players) below NEW_LEVEL: NEW_GRACE more seconds, not paid as time bonus
+	local profile = PlayerData.get(player) :: any
+	local extra = if profile and (tonumber(profile.Level) or 1) < NEW_LEVEL then NEW_GRACE else 0
+	local limit = dist / Config.mphToSps(A.JobMph) + A.JobGrace + extra
+	runs[player] = { kind = "job", t0 = os.clock(), dest = dest, deadline = os.clock() + limit, dist = dist, cp = 0, extra = extra }
 	return { ok = true, dest = dest, limit = limit }
 end
 
@@ -515,7 +527,7 @@ handlers.jobFinish = function(player)
 		return { ok = true, late = true, cash = 0 }
 	end
 	local left = (run.deadline :: number) - now
-	local cash = math.floor(((run.dist :: number) * A.JobPayPerStud + math.max(0, left) * A.JobTimeBonus) * Store.earnMult(player, "job") * (if player:GetAttribute("DoublePay") == true then 2 else 1))
+	local cash = math.floor(((run.dist :: number) * A.JobPayPerStud + math.max(0, left - (run.extra or 0)) * A.JobTimeBonus) * Store.earnMult(player, "job") * (if player:GetAttribute("DoublePay") == true then 2 else 1))
 	PlayerData.addCash(player, cash)
 	ctx.grantXp(player, 80, "job")
 	ctx.note(player, "jobs", 1)

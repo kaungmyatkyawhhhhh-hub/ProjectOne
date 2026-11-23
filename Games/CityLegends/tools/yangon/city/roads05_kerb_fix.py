@@ -133,8 +133,28 @@ def _reach(left, near):
     return max(u.distance(shapely.points(pts)).tolist())
 
 
-def resolve(parts, cells=None):
+TILT = 15.0
+
+
+def tilted(p):
+    """a kerb piece whose tall (6-stud, mostly buried) axis leans > TILT degrees off vertical: a crumpled piece (it lies
+    across the road / median nose as a slanted plate)"""
+    k, cls, pos, R, U, S = p
+    R, U, B = _frame(R, U)
+    tall = [i for i in range(3) if abs(S[i] - 6.04) < 0.15]   # the builder's kerb depth (top + 6 buried)
+    if not tall:
+        return False
+    ax = (R, U, B)[tall[0]]
+    return abs(ax[1]) < math.cos(math.radians(TILT))
+
+
+def resolve(parts, cells=None, _top=True):
     """parts with every crossing kerb pair fixed on its smaller piece; returns (parts, stats)"""
+    n_tilt = 0
+    if _top:
+        keep = [not (p[0] in ('r', 'w') and (not cells or _cell(p[2][0], p[2][2]) in cells) and tilted(p)) for p in parts]
+        n_tilt = keep.count(False)
+        parts = [p for p, k in zip(parts, keep) if k]
     ps, idx, polys = pairs(parts, cells)
     gone, trimmed, raised = set(), {}, {}
     tree = STRtree(np.array(polys, dtype=object)) if polys else None
@@ -163,11 +183,13 @@ def resolve(parts, cells=None):
     st = dict(pairs=len(ps), dropped=len(gone), trimmed=len(trimmed), raised=len(raised))
     if ps and (gone or trimmed):
         # pairs of pieces untouched in this round (a third piece in a cluster): another round
-        out, st2 = resolve(out, cells)
+        out, st2 = resolve(out, cells, False)
         st = dict(pairs=st['pairs'], dropped=st['dropped'] + st2['dropped'], trimmed=st['trimmed'] + st2['trimmed'],
                   raised=st['raised'] + st2['raised'], left=st2.get('left', 0))
     else:
         st['left'] = len(ps)                      # kept on purpose: overlapping pieces of one kerb, tops apart
+    if _top:
+        st['tilted'] = n_tilt
     return out, st
 
 
@@ -186,9 +208,10 @@ def _test():
     poly_a, _ = _foot(a)
     poly_t, _ = _foot(t[0])
     assert poly_a.intersection(poly_t).area < 1e-6
-    w = ('w', 'W', (1.5, 0.5, 0.0), (0, 0, 1), Y, (4.0, 1.0, 0.9))       # a wedge across a, 2 studs out: dropped
-    out, st = resolve([a, w])
-    assert st['dropped'] == 1 and out == [a], (st, out)
+    a2 = ('r', 'B', (0.0, 0.5, 0.0), I, Y, (4.0, 1.0, 2.0))
+    w = ('w', 'W', (1.5, 0.5, 1.6), (0, 0, 1), Y, (3.6, 1.0, 1.2))       # a wedge across a2, 2.4 studs out: dropped
+    out, st = resolve([a2, w])
+    assert st['dropped'] == 1 and out == [a2], (st, out)
     # two wedge fans of one kerb lying over each other at 30 degrees, tops coplanar: dropping one would notch -> kept, lifted
     r30 = (math.cos(math.radians(30)), 0, math.sin(math.radians(30)))
     e = ('r', 'W', (0.0, 0.5, 0.0), I, Y, (2.0, 1.0, 0.9))
@@ -196,6 +219,9 @@ def _test():
     out, st = resolve([e, g])
     assert len(out) == 2 and st['raised'] == 1 and st['dropped'] == 0, (st, out)
     assert abs(_foot(out[0])[1] - _foot(out[1])[1]) >= 0.05
+    lean = ('r', 'W', (5.0, 0.5, 5.0), (0.21, -0.9, 0.38), (0.98, 0.21, -0.02), (6.04, 0.69, 0.4))
+    out, st = resolve([a, lean])
+    assert out == [a] and st['tilted'] == 1, st
     print('kerb_fix self-check ok')
 
 

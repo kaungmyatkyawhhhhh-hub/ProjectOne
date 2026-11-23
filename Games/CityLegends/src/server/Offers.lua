@@ -87,7 +87,7 @@ end
 
 -- a right moment (a finished race, a job paycheck): the Starter Pack card, if it's still wanted
 function Offers.moment(player: Player)
-	if offeredThisSession[player] or player:GetAttribute("StarterPack") == true then
+	if offeredThisSession[player] or player:GetAttribute("StarterPack") == true or player:GetAttribute("Guide") then -- (24 Nov: never during the new-player guide)
 		return
 	end
 	local profile = PlayerData.get(player) :: any
