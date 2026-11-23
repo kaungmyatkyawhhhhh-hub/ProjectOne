@@ -295,7 +295,7 @@ local T: { [string]: { any } } = {
 	["jobs.dropOff"] = { "DROP OFF", "ချရန်" },
 	["jobs.patrol"] = { "PATROL · stop for radar", "ကင်းလှည့် · radar အတွက် ရပ်ပါ" },
 	-- (24 Nov) the new-player guide (client/Guide.lua)
-	["guide.toDispatch"] = { "Drive to the green beam: your first delivery job", "အစိမ်းရောင် အလင်းတန်းဆီ မောင်းပါ: သင့်ရဲ့ ပထမဆုံး ပစ္စည်းပို့ အလုပ်" },
+	["guide.toDispatch"] = { "Drive to the green beam: your first delivery job", "အစိမ်းရောင် အလင်းတန်းဆီ မောင်းပါ: ပထမဆုံး အလုပ်" },
 	["guide.atDispatch"] = { "Stop next to the DELIVERY sign to load the parcel", "ပါဆယ်ထုပ် တင်ရန် DELIVERY ဆိုင်းဘုတ်နားမှာ ရပ်ပါ" },
 	["guide.toDrop"] = { "Deliver to %s: follow the arrow", "%s သို့ ပို့ပါ: မြားအတိုင်း လိုက်ပါ" },
 	["guide.atDrop"] = { "Stop at the beam to deliver", "ပို့ရန် အလင်းတန်းနားမှာ ရပ်ပါ" },

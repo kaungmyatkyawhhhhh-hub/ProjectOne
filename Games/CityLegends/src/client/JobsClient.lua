@@ -214,7 +214,8 @@ local function refreshTarget()
 	-- (owner, 2026-11-21: "remove the delivery job blue neon circle area"): no ring for delivery, label + waypoint only
 	p.Transparency = if job and job.id == "delivery" then 1 else 0.6
 	if ringLabel then
-		ringLabel.Text = text or ""
+		-- (24 Nov, first-5 test: at the dispatch it lay over the dispatch's own DELIVERY JOBS sign) none for delivery
+		ringLabel.Text = if job and job.id == "delivery" then "" else text or ""
 	end
 	myWaypoint = true
 	Minimap.setWaypoint(pos)
