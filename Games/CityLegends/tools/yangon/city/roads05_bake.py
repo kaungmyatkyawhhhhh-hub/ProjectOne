@@ -605,7 +605,7 @@ def bake(tag):
         for t in faces_of(('B',) + p[1:]):
             by[('LY', cell_of(p[2][0], p[2][2]))].append(t)
     # meshes
-    gdir = os.path.join(D, 'glb')
+    gdir = os.environ.get('R05_GLB_DIR') or os.path.join(D, 'glb')  # R05_GLB_DIR: write into the approved upload folder (imports/sync/...)
     os.makedirs(gdir, exist_ok=True)
     for f in glob.glob(os.path.join(gdir, '*.glb')):
         os.remove(f)
