@@ -47,6 +47,7 @@ local goalMark: Frame
 local badge: Frame
 local tapArea: TextButton
 local onTap: (() -> ())? = nil
+local topSlot = UDim2.new()
 
 local function ask(what: string, arg: any?): any
 	if not call then
@@ -67,11 +68,12 @@ local function build()
 	local new, label, corner, stroke = kit.new, kit.label, kit.corner, kit.stroke
 	local touch = UI.isTouch
 	local h = if touch then 40 else 50
+	topSlot = UDim2.new(0.5, 0, 0, if touch then 134 else 150)
 	local f = new("Frame", {
 		Name = "GuideHint",
 		AnchorPoint = Vector2.new(0.5, 0),
 		-- (first test: in the StartPrompt's slot it hid the road, the dispatch sign and met the toasts)
-		Position = UDim2.new(0.5, 0, 0, if touch then 134 else 150),
+		Position = topSlot,
 		Size = UDim2.fromOffset(if touch then 470 else 560, h),
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.12,
@@ -159,10 +161,15 @@ local function blocked(): boolean
 		or UI.messageShowing()
 end
 
-local function show(text: string, target: Vector3?, tap: (() -> ())?)
+local function show(text: string, target: Vector3?, tap: (() -> ())?, low: boolean?)
 	if not pill then
 		build()
 	end
+	-- (third test: close to the dispatch the top slot hid the DELIVERY sign it talks about: when you are
+	-- stopping there, the pill drops to the start-up prompt's slot over the bottom buttons)
+	local pp = pill :: Frame
+	pp.AnchorPoint = if low then Vector2.new(0.5, 1) else Vector2.new(0.5, 0)
+	pp.Position = if low then UDim2.new(0.5, 0, 0.66, 0) else topSlot
 	pillText.Text = text
 	onTap = tap
 	arrow.Visible = target ~= nil
@@ -296,7 +303,7 @@ local function tick()
 		end
 		waypoint(drop, here) -- (the beam on the drop; JobsClient clears its own when a run starts)
 		local close = here ~= nil and flat(here, drop) < NEAR
-		show(if close then "Stop at the beam to deliver" else string.format("Deliver to %s: follow the arrow", name), drop)
+		show(if close then "Stop at the beam to deliver" else string.format("Deliver to %s: follow the arrow", name), drop, nil, close)
 		return
 	end
 	local target = if here then nearestDispatch(here) else nil
@@ -308,7 +315,7 @@ local function tick()
 		waypoint(target, here) -- (JobsClient puts it there once the Delivery job is on; this covers a slow answer)
 	end
 	local close = flat(here :: Vector3, target) < NEAR
-	show(if close then "Stop next to the DELIVERY sign to load the parcel" else "Drive to the green beam: your first delivery job", target)
+	show(if close then "Stop next to the DELIVERY sign to load the parcel" else "Drive to the green beam: your first delivery job", target, nil, close)
 end
 
 function Guide.init()
