@@ -43,6 +43,7 @@
 - **U Chit Maung deck = P11, not a laptop file:** the deck north of the Banyar Dala junction lies in P11 (P8 box starts z 32653), so the P8
   bake had no mesh for it (collision kept = invisible deck ending in the air at z 32256). It can only get a surface when P11 is built. Barrier
   kept; `roads05_lanesubset.py` `NO_LANES` takes that deck out of the lane data (no NPC through the barrier).
+- **P9 offline DONE here (23 Nov):** district files (15,622 buildings, packs in `imports/sync/ygn1to1_p9`, night glb split a/b) + `roads05_RB9`; Studio steps next ("P9" resume in the progress file). P10 and P5 offline not started (inputs present on this PC).
 - **Traps:** Obsidian Git commits work in progress every few minutes (compare lanes with the commit BEFORE your session); `roads05_subset`
   chunks give more modules after a json re-dump (42 vs 31: same data); a TestTeleport beside (not under) a deck keeps the car on the ground.
 
