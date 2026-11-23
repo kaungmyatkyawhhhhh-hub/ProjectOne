@@ -28,6 +28,20 @@
   (Bahan Road (35388, 38010)), deck feet vs pavements, the Lane #3308 strip nose under the Banyar Dala deck (shot in the J37 note),
   pavement steps between roads, the univ_kabaraye side-lane road steps.
 
+## P1-P3 MAP BUGS 2 (24 Nov, MAP BUGS agent): kerbs, grounds, props; vault `City Legends/2026-11-24 P1-P3 map bug fixes.md`; state `rebuild_progress.json` "mapbugs_24nov"
+- **Kerb fix in the bake:** `tools/yangon/city/roads05_kerb_fix.py` (self-check `python roads05_kerb_fix.py test`), called by `roads05_bake.bake` right
+  after drop_scraps (R05_ONLY limits it): drops leaning kerb pieces (the 6.04-deep axis > 15 deg off vertical), resolves kerb_cross pairs on the smaller
+  piece (box cut back / dropped if a sliver or reaching > 1.5 out of the other; else both kept, smaller lifted 0.06 when tops are level). bake_stats has `kerb_fix`.
+- **Cell owners (which build each P1-P3 cell is in the place):** `owners()` in the vault note's method = RB12 (P1/P2 middle), RB4 (x18), RB4M (18x19),
+  RB6 (18x21, 19x21, 19x26-28), RB7 (20-22 x21 / x26), RBM (22x17, 22x18), RB9 (x24 z10-16), RB3x (21x27, 21x28), RB3v (19-21x29), RB8 (23x21, 23-27x26:
+  laptop, NOT re-baked), RB3 (rest of P3). Checked by R/D/M/W box counts per cell = place (only HoleFill boxes differ).
+- **Done:** 88 cells re-baked (R05_ONLY lists in `roads05_<tag>/r05_only_mb24.txt`, logs `bake_mb24.log`, glb ids `upload_ids_MB24.txt`), one collide pack
+  asset 102846355842608 (modules RColRB_MB24<tag>_k), swapped keeping the 4,773 `HoleFill` R boxes; 13 P boxes over decks removed after; new meshes
+  CollisionFidelity Box (place was over the save limit; Box = 3.5 KB vs 25 KB a mesh). Kit KitOnRoad P1-P3 (1,182 records), Green / Parks parts on R (76),
+  6 lot plates trimmed. Saved v1885 / v1899 / v1901 (store v1). Old meshes / boxes not kept (place size).
+- **Next:** re-bake the 6 RB8 cells on the laptop (the bake now has the fix); the old road meshes elsewhere are still CollisionFidelity Default
+  (~25 KB each): setting Box on all of them frees ~20 MB of place size if needed (~0.4 s a mesh).
+
 ## REBUILD P10 + P5 IN (24 Nov, DISTRICT REBUILD agent, HOME PC): state `rebuild_progress.json` "P10", "P5"; P1-P10 now all in
 - **P10 DONE, saved v1875; P5 DONE, saved v1883** (both Play-tested, store back to v1). Same Studio chain as P9 (below), with these changes:
 - **Overlap:** P5's district move and road export ran in Studio while P10 baked offline; then P5 baked while P10 was swapped / cleaned. Never two bakes at once (one bake left 1.4 GB RAM free).

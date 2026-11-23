@@ -385,5 +385,13 @@
   "playtest": "PASS 24 Nov (store CityLegends_test, same kit as P9/P10): Bayint Naung Bridge 2 flyover end foot up 156 studs D14/R14 gap 2.1 const, Thamaing Station flyover start foot up 156, Thamaing Station #2 start up 155, Baho Road #2 start foot (P4 seam) up 86 (gap 2.0-2.6, 0 steps), Baho Road #2 end up 122, 4 ground roads 111-115 studs R gap 2.0-2.3 (the x14 seam-column run: one ray past the box end, gap 1.5-2.1), 0 steps. No script errors in the log. Store back to v1 checked on the Server in a fresh Play.",
   "cleanup": "RB_OldP5swap (2,022 inst), KitTiles_P5 (6), P8Tools.MapBugScanP5 / KitOnRoadP5 deleted; no data modules left (Roads05_ 0, TerrainP 0, SyncHolding empty); saved v1883 (no 'File too large' in the log)",
   "shots": "City Legends/2026-11-24 rebuild P5 - Thamaing Station Road flyover (Play) - after.jpg; ... - Baho Road at the P4 seam (Play) - after.jpg"
+ },
+ "mapbugs_24nov": {
+  "status": "DONE 24 Nov (MAP BUGS agent, home PC): saved v1885 (kit / props / lots), v1899 (roads), v1901 (store back to CityLegends_v1, read on the Server)",
+  "kerbs": "791 crossing pairs + 600 leaning kerb pieces in the P1-P3 cells (RB8 cells excluded). roads05_kerb_fix.py in the bake: 600 leaning dropped, 406 pair pieces dropped, 105 lifted 0.06, 128 pairs kept overlapping (one kerb, tops apart). 88 cells re-baked from RBM RB4M RB3x RB3v RB7 RB6 RB9 RB4 RB12 RB3 (r05_only_mb24.txt each), 90 glbs (upload_ids_MB24.txt each), collide pack 102846355842608, 45,814 boxes; HoleFill 4,773 kept; 13 P boxes over decks removed; new meshes CollisionFidelity Box",
+  "not_done": "RB8-owned P1-P3 cells 23x21, 23x26, 24x26, 25x26, 26x26, 27x26 (no parts.pkl on this PC): re-bake on the laptop",
+  "grounds": "300 flat parts touch R boxes; 6 edge-overhang plates trimmed (Sites.tower_skyline, customs, lot_y1_low_1/3/6, lot_y1_mid_7: 0 left). Left (road through a building / venue): Bogyoke halls, Holy Trinity, Strand porch, Sites.rewards, service + CarCare.legends_service, dropoff, lot_y1_high_3/high_10/mid_3/mid_11; YCC plate (intended), MC / Sedona drives (kept 19 Nov)",
+  "props": "KitOnRoad P1-P3: 1,182 records (P1 354, P2 414, P1P 60, P2P 41, P1S 60, P1G 21, P2G 69, P3 159, P3G 4); Green.LakeEdge 50, Green.Far 2, Parks.ThanlwinRoad.CentreLine 24 removed (list mapbugs/mb24_removed.txt)",
+  "playtest": "PASS: MC median nose 57 studs maxvy 0.4; Kaba Aye Pagoda lane 57; downtown island off Strand Road 45 (gap 2.1-2.3); Thanlwin Road 45. No new script errors."
  }
 }
