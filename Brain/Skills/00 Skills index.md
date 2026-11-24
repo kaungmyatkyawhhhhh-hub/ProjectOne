@@ -1,6 +1,6 @@
 ---
 tags: [brain, skills]
-updated: 2026-11-23
+updated: 2026-11-24
 ---
 # Skills index (Brain/Skills)
 Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are in [[00 Plugins index]]. Each folder holds the CURRENT copy of one of the owner's Claude skills (`<name>/SKILL.md` + any helper files).
@@ -28,6 +28,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/underwater-environment-build/SKILL\|underwater-environment-build]] | Use when building, decorating, lighting or fixing an underwater (or any natural) Roblox environment, e.g. MEGA BITE seas, reefs, biomes, landmarks: hand-placed heroes, slope-painted terrain, seeded scatter, caustic/dapple light plates, god rays, haze. |
 | [[Skills/what-if-animation/SKILL\|what-if-animation]] | Make a 15-25 s "What If" stick-figure animated episode from one topic line: script, free Piper voice, storyboard, Remotion/SVG animation, free synthesised sound, master to -14 LUFS. |
 | [[Skills/ytdlp-video-watch/SKILL\|ytdlp-video-watch]] | Use when the user shares a TikTok/YouTube/Shorts/Reels link or video to watch, break down or research: watch it in the browser (no download) or download with yt-dlp, extract frames, sound hits and transcript, then analyze. |
+| [[Skills/watch-video/SKILL\|watch-video]] | Use whenever a video file or folder of videos must be watched, studied or described (phone clips, gameplay, references, ads, downloaded TikToks/YouTube). `video_watch.py` makes labelled frame sheets, close-up frames, sound pictures, cut list, GPS/time and an optional transcript; then every picture is opened and described. Made for Claude Code on the PC; installed in the vault's `.claude/skills` and `Games/CityLegends/.claude/skills`. |
 | [[Skills/play-roblox/SKILL\|play-roblox]] | Play a Roblox game in the Roblox PLAYER on this Windows PC (not Studio): see the game, walk, turn the camera, click buttons and 3D boards, open menus, with our own rbx.exe. Use for researching other games, playtesting live games, or any "play this Roblox game" task. (Local skill in `~/.claude/skills`, not a synced one.) |
 
 ## Log
@@ -112,3 +113,4 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 - 2026-11-18: roblox-ui-pro: EvolutionUI_example.luau admin window gained World Age +1/-1 rows.
 - 2026-11-23: added underwater-environment-build, from two videos watched frame by frame: DatBoiEle's Roblox underwater build (kvEf3pzKOqQ; every Lighting/Atmosphere/ColorCorrection/Bloom/Brushtool value read off his panels) and Lunar9's UE5 underwater landscape (HECwGXgGu50; layer painting, tiling, PCG scatter, depth mood). The Luau scripts in it (V1 look apply, seeded scatter, light plates, slope materials, depth mood) are Claude's own and not yet tested in Studio. Research note: [[2026-11-23 Research - Underwater environment videos (DatBoiEle Roblox + Lunar9 UE5)]].
 - 2026-11-23 (late): underwater-environment-build updated with the MEGA BITE build lessons (section 6b): camera-following light tiles on hilly terrain, seamless wrap-blur textures, Beam Segments=1 only uses the curve's end values, beams fainter than ~0.55 vanish, seam-scatter counts, a materials-only slope pass that keeps hand-dug terrain, and edit-time previews of client effects.
+- 2026-11-24: added watch-video (owner: "i want my claude code to watch the videos"). Script `video_watch.py` tested on the 23 Nov Yangon phone clips (IMG_0930/0931: sheets, sound pictures with the 1:47 horn visible, GPS read, `--at` and `--zoom`). Project copies in `.claude/skills/watch-video/` (vault root and Games/CityLegends) so Claude Code finds it.

@@ -173,3 +173,10 @@ Files: `MM Outfit Catalog\Assets\thumbs_nov\final\`. Genre refs: `...\refs\`.
   3. Colour: borrow the competitor's colour IDEA (warm golden-tan body vs a cool indigo→violet gradient, one hot-pink accent), never its layout.
 - **The numbers are a floor, not the goal:** the final measures darker (mean 0.24, 56% black) than the target band and still wins on read and story.
 - **Test in a mock of the real Roblox row** (paste the new icon over ours in the owner's screenshot with canvas JS). It shows "reads as a gym game" and "looks like a copy" better than isolated sizes.
+- **The owner still preferred Power Lifters over the story icon.** The final rule for gym/sim icons: POWER FANTASY > story.
+  - A cool, confident smirk (aspirational), not pain.
+  - One giant prop with a big number (1000 LB) = instant "heavy".
+  - A tight waist-up crop.
+  - A plain gradient background, no FX clutter.
+  - A warm body on a cool background.
+- **A detailed logo turns into a blob at row size.** Only put a logo on an icon if it's 2 simple bold words.

@@ -88,3 +88,28 @@ Square 1024 icon, Roblox Blender GFX. Image 1 = my character's head exactly. Ima
   - upload it as the icon with the v1903 + v1905 publish;
   - matching thumbnails in the same chat ("same exact style", 16:9, logo top-left in code);
   - compare the click rate after 3-4 days against 3.7%.
+
+## v4 "smirk + 1000 LB" (owner: "that one is better but power lifter one still better")
+**Why Power Lifters still won:** it's SIMPLER and a POWER FANTASY.
+- one cool, confident guy kids want to BE (not a pained effort face);
+- one huge prop with a number that says HEAVY;
+- a tight crop;
+- a clean background;
+- the warm orange body pops on cool purple.
+
+The deadlift + shadow icon had too many things (shadow monster, cracks, rays) and a pained face.
+
+**v4:**
+- huge orange-tan Bacon Hair cropped at the waist, a 3/4 pose;
+- a cool smirk with a raised eyebrow, looking at the viewer;
+- a barbell resting across his shoulders, one hand on it;
+- one giant hot-pink plate top-right with "1000 LB";
+- a plain indigo→violet gradient, a violet rim.
+
+**Measured:** mean 0.31 / near-black 42.5% at 64 px.
+
+**Logo test in the row mock:** our detailed Japanese-style logo (v9 pink) turns into an unreadable red blob at row size and covers his hair. Power Lifters' logo works because it's 2 plain bold words. → **Use v4 WITHOUT the logo.** For a logo-on-icon later, we'd need a simple 2-word bold version.
+
+**Files** (Downloads):
+- `gymarc_icon_v4_smirk_1000lb.png` (pick)
+- `gymarc_icon_v4_smirk_1000lb_logo.png`
