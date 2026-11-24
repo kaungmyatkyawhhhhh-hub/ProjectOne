@@ -86,6 +86,7 @@ Shots:
 - Deleted to keep the place small: `build/city_1to1/mapbugs/deleted_24nov_steps_fix.txt`.
 
 ## Left
+- **25 Nov:** the Maha Bandula #2 crest, Merchant into Strand and the 6 P8 kerb cells are done: [[2026-11-24 Road joins fix]].
 - The Maha Bandula #2 crest at 31st Street: 31st Street ranks above Maha Bandula #2 in the data (2097 vs 2378), so the main road is held level across the street. A rank fix would remove it.
 - Merchant Road where it runs into Strand Road (33903, 45889): the two surfaces meet unevenly (lumps of 0.2-0.3).
 - 347 lane points elsewhere on the map are still off the built road (LaneHeights, outside these cells). They were there before.

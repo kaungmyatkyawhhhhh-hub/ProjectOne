@@ -618,5 +618,100 @@
   "plan": "P12 box x 45984..55254 z 25357..35306 -> 1536 cells x29..35 z16..22 (49 cells; x29 = P11/P10/P8 column re-baked whole, z16 = P10 row, x35 / z22 = map edge). Step boxes 16: cols 44544..46080 (label 14), 46080..49152 (15), 49152..52224 (16), 52224..55296 (17) x rows 24576..26112 (8), 26112..29184 (9), 29184..32256 (10), 32256..35328 (11). Clip P12+P11+P10+P9+P8.",
   "buildings": "DONE 24 Nov home PC: district_files.sh P12 --no-roads buildings (16 min, log district_files_P12_24nov.log): 10,456 buildings (410 dropped / 2,620 clipped by the J37 net, 1 on a landmark site, 5 overlap), shells 13,426 parts in 36 cells, roofs 6,386, 1 pagoda (w1557635845 Shwe Oat Gu); night cells_1.glb 16.1 MB; old outputs _pre_rebuild_P12",
   "uploaded": "24 Nov: place 107463898225121 131446275893412 79840790976544 129305701304564, night 109082112905831, RB12P data 111510896129828 (all Approved; districts_assets.txt P12R)"
+ },
+ "joins_24nov": {
+  "status": "DONE 25 Nov: saved v1983 (Edit, store CityLegends_v1 read on the Server, lock released); Play-driven 3 spots; not published",
+  "code": "RoadBake05 v3 pages (smallest-three quaternion, body '~T~'), roads05_bake.decode_q reads v2+v3; RebuildCell requires RoadBake05:Clone(); roads05_chain.rerank: continuation (end within the other road's half of its end) + bigger-class guard",
+  "data": "roads05_rank_fix.py (Maha Bandula Road #2 2378 -> 118.5, 9 crossings records swapped) + roads05_merge_fix.py (Merchant onto Strand) on net (backups roads_before_rankfix.json), LP1to10 (same), new subset RB3r",
+  "data_assets": {
+   "RB3r": 84092535550178,
+   "RB3r_first_hung": 120380185803164,
+   "RB3r_b": 72117599162383,
+   "RB8s": 95224778874033
+  },
+  "boxes": {
+   "22x29": [
+    33792,
+    44544,
+    36864,
+    46080,
+    "RB3r"
+   ],
+   "23x26": [
+    35328,
+    39936,
+    36864,
+    41472,
+    "RB8s"
+   ],
+   "24x26": [
+    36864,
+    39936,
+    39936,
+    41472,
+    "RB8s"
+   ],
+   "26x26": [
+    39936,
+    39936,
+    43008,
+    41472,
+    "RB8s"
+   ]
+  },
+  "uploads": {
+   "STPJ3": {
+    "glb": [
+     128494014321180,
+     85531441500836,
+     98463897646471,
+     99258998228635
+    ],
+    "collide": 76294311494241,
+    "cells": [
+     "22x29",
+     "23x29"
+    ]
+   },
+   "STPJ8": {
+    "glb": [
+     100398536996987,
+     87657822255910,
+     122273915781023,
+     102693147498118,
+     107366317223933,
+     125726028324553,
+     81876691392469
+    ],
+    "collide": 72567730940350,
+    "cells": [
+     "23x26",
+     "24x26",
+     "25x26",
+     "26x26",
+     "27x26"
+    ]
+   }
+  },
+  "swap": "7 cells swapped; 790 HoleFill boxes in the row-26 cells all flush with the new collision: removed; old cells/boxes deleted; meshes Box / no shadow / CanCollide off",
+  "lanes": "lane_heights rows in the 7 cells dropped (185) and re-measured (145); roads05_lanes.py LP1to10 --install: 1326 lanes / 3080 links / 0 dead; synced 128676350092231 (raw 103768816070537); require 26/26",
+  "deckfeet": "4 ok, 0 bad (Set Yone, Thaketa)",
+  "measured": {
+   "MB2 x 31st (Play jolt)": [
+    18,
+    "no crest; run worst 9.0 at 35519 (grade change)"
+   ],
+   "Merchant into Strand (Play jolt)": [
+    26,
+    "smooth; run worst 7.2 at 34109 (data grade break)"
+   ],
+   "Strand cross tilt beside merge": [
+    "+-0.4",
+    "flat"
+   ],
+   "MB2 x 31st collide check": "off 0.12 steps 0.09"
+  },
+  "saves": "v1981 (swap + lanes), v1983 (after Play, store v1)",
+  "left": "v2 tilt in every older cell (map-wide rebuild); Merchant visual 0.4 under boxes at 33990-34070; MB2 west cells 20x29/21x29 still old rank relations; SPR last 150 studs 1-1.5 under data"
  }
 }
