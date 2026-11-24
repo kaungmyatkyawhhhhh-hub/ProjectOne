@@ -54,7 +54,7 @@ for k in d.get('decks', []):
     decks.append(dict(k, s=k['s'][f + a - k['from']:t + a - k['from'] + 1], **{'from': f, 'to': t}))
 # (23 Nov) decks with no built road in the game (their meshes lie in a district not in the game): the road starts at
 # the deck's far end instead (a barrier stands there), so no lane runs on through it
-NO_LANES = {'U Chit Maung Road (Bridge) Flyover'}  # P11 not in the game; barrier Roads.DeckEnd_UChitMaung (P8)
+NO_LANES = set()  # (25 Nov) U Chit Maung deck back in (P11 built, deck re-baked whole, barrier removed); was {'U Chit Maung Road (Bridge) Flyover'}
 for k in [k for k in decks if k['name'] in NO_LANES and k['from'] == 0]:
     r = names[k['of']]
     t = k['to']
