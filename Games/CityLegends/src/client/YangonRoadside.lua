@@ -182,7 +182,7 @@ local function resolve(poles, id: number): Vector3?
 		return nil -- not streamed / no map: try again later
 	end
 	local blockers = {}
-	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites" } do
+	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites", "Green" } do
 		local f = root:FindFirstChild(n)
 		if f then
 			table.insert(blockers, f)
@@ -345,7 +345,7 @@ local function buildBoard(m: Instance, b): boolean
 	-- the board stands square to the road, facing the traffic that comes along it
 	local cf = CFrame.lookAt(base, base - b.dir)
 	local blockers = {}
-	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites" } do
+	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites", "Green" } do
 		local f = root:FindFirstChild(n)
 		if f then
 			table.insert(blockers, f)
