@@ -5,7 +5,7 @@ def hero(file, colname):
     col = bpy.data.collections.get(colname) or collection(colname)
     root, pieces, marks = load_character(file, col, "face_bacon_smirk", face_glow=0.0)
     for p in pieces:
-        if p.type == "MESH" and p.data.materials and p.data.materials[0].name == "TankTop":
+        if p.type == "MESH" and p.data.materials and p.data.materials[0].name.startswith("TankTop"):
             p.data.materials[0] = MAT["skin"]
     # centre the feet at the origin
     import mathutils
