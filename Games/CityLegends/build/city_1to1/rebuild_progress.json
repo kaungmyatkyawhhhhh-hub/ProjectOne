@@ -419,7 +419,7 @@
   "next": "find what lifts the ground road start to 64.9 when sample 394 = 62.15 (Roads.luau deck-foot / alignJunctions easing), then rebuild 17x25 from RB6."
  },
  "steps_24nov": {
-  "status": "IN PROGRESS (ROAD STEPS FIX agent, home PC)",
+  "status": "SWAPPED + saved v1943; lanes synced (not saved); Play drive + shots NOT done",
   "code": "Roads.luau relax skips cut samples (Studio ClaudeTools.Roads = repo, 56,830 chars); roads05_bake.fit_boxes (plane-fit R boxes) + wedge grow; roads05.py smooth_chain + BRIDGE_NEAR; roads05_fix.repin_crossers in ring_level",
   "data": "roads05_steps_fix.py applied to net (backup roads_before_stepsfix.json), LP1to10 (same), new subsets RB6s RB3s RB7s RB8s (from RB6 RB3o RB7a RB8)",
   "data_assets": {
@@ -547,6 +547,48 @@
    }
   },
   "next": "lanes: drop lane_heights rows in the 10 cells, LaneHeights, roads05_lanes.py LP1to10 --install, sync, require; DeckFeetCheck done (2 ok); Play drive; notes",
-  "swap": "all 10 cells swapped (meshes + boxes), then boxes re-swapped (_b packs: roads05_pbox_clip drops P points over R / D tops), meshes Box + no shadow, 953 old road meshes set Box (0 CanCollide), backups deleted; saved v1943"
+  "swap": "all 10 cells swapped (meshes + boxes), then boxes re-swapped (_b packs: roads05_pbox_clip drops P points over R / D tops), meshes Box + no shadow, 953 old road meshes set Box (0 CanCollide), backups deleted; saved v1943",
+  "lanes": "lane_heights rows in the 10 cells re-measured (387 -> 8 off, the 8 fine); roads05_lanes LP1to10 --install 1322/3080/0 dead; 13 modules synced via 82883165921904 then 124290251871281; require 26/26 (redo QuickSync 124290251871281 if the save was lost)",
+  "unsaved_after_v1943": "QuickSync 124290251871281 (13 lane modules = repo), deleted SS.TrafficModels_old / TrafficModels_preDoors / RB_OldP9 (mapbugs/deleted_24nov_steps_fix.txt)",
+  "saves": "v1943 ok 13:05 UTC; 13:14-13:34 every save \"server publish request timed out\" (status.roblox.com all operational); Studio force-closed + relaunched 13:41 UTC",
+  "measured": {
+   "Ahlone foot": [
+    4.71,
+    0.1
+   ],
+   "Maha Bandula #2 x 31st": [
+    1.08,
+    0.2
+   ],
+   "Ziwaka": [
+    0.81,
+    0.13
+   ],
+   "Merchant": [
+    0.49,
+    0.23
+   ],
+   "Shwe Gone Dine": [
+    0.52,
+    0.19
+   ],
+   "Old Yay Ta Shay #2": [
+    0.29,
+    0.13
+   ],
+   "May Ni Gone deck end": [
+    0.69,
+    0.15
+   ],
+   "Arzani Lane #1957 (offline)": [
+    1.29,
+    0.12
+   ],
+   "Arzani cracks": [
+    "holes",
+    "none"
+   ],
+   "note": "collision, max dy between points 2 studs apart, every lane"
+  }
  }
 }

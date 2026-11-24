@@ -1,0 +1,15 @@
+Deleted from the main place (City Legends 121430381830562), 24 Nov 2026, ROAD STEPS FIX agent, on the coordinator's order
+(owner could not save: "could not upload place. File too large" at 12:25 / 12:33 / 12:42).
+
+This run's own backups (deleted 13:04, before save v1943 which worked):
+- ServerStorage.RB_OldSTP6 (old Cell_17x25, Cell_18x22 + 1500 boxes), RB_OldSTP3 (Cell_22x29, Cell_23x29 + 2038 boxes),
+  RB_OldSTP7 (Cell_21x25, 22x25, 22x24 + 1955 boxes), RB_OldSTP8 (Cell_23x21 + 592 boxes), RB_OldSTP7A (Cell_20x23, 21x23 + 1156 boxes),
+  RB_OldSTP6b / STP3b / STP8b / STP7Ab (first-pass boxes of the same cells, replaced by the P-box fix)
+- YangonData.Roads05_* data modules (RB6s / RB3s / RB7s / RB8s packs; assets 96974425801791 122092014388030 96556463633199 95224778874033)
+- 953 old road meshes set CollisionFidelity Box (were Default; 0 of them CanCollide): ~20 MB less
+
+Other leftovers (deleted 13:24, after save attempts failed with "Internal server error"):
+- ServerStorage.TrafficModels_old (646 descendants: the old CC BY low-poly pack, Traffic_A1..F6)
+- ServerStorage.TrafficModels_preDoors (224: old Belta, Camry, Crown, Alfard traffic copies before the 24 Nov door fix)
+- ServerStorage.RB_OldP9 (17: Temps, the 2 old P9 pagodas)
+Not found: TrafficModels_preBadges, KitTiles_*. Kept: MCCorner_old, MCSign_old, *Holding folders.
