@@ -27,7 +27,7 @@ OUT = os.path.join(geo.ROOT, 'imports', 'sync', 'minimap_1to1')  # (imports/: th
 TW, TH = 1024, 512
 SPP_DETAIL, SPP_OVER = 5.0, 16.0
 SS = 2  # drawn at twice the size, then shrunk (smooth edges)
-FULL = ('P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10')  # P5 24 Nov; P10 24 Nov; P9 24 Nov; in the game (roads built in Studio: P1-P3 18 Nov, P7 18 Nov night, P4 19 Nov)
+FULL = ('P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11')  # P11 24 Nov; P5 24 Nov; P10 24 Nov; P9 24 Nov; in the game (roads built in Studio: P1-P3 18 Nov, P7 18 Nov night, P4 19 Nov)
 ALL = ['P%d' % i for i in range(1, 13)]
 MARGIN = 300.0
 
