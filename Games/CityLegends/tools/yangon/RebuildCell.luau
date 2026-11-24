@@ -21,7 +21,8 @@ _G.RBXJob = function(label, box)
 			_G.RY.DECK_TOUCH = true
 			local log = _G.RY.stepCell(box, cellRoot)
 			J.st[label] = "collecting"
-			local B = require(game.ServerStorage.ClaudeTools.RoadBake05)
+			-- (24 Nov: require caches a ModuleScript's first Source for the session; a Clone gets the current one, v3 pages)
+			local B = require(game.ServerStorage.ClaudeTools.RoadBake05:Clone())
 			local info = B.collect(cellRoot, label)
 			local pages = _G.RoadBake05Pages
 			local ES = game:GetService("EncodingService")
@@ -88,7 +89,7 @@ _G.PREP = function(tag, glbs, colId)
 			NC.Name = tag .. "_NewCollide"
 			NC.Parent = SS
 			local nm = require(SS.ClaudeTools.YangonRoadMeshes).place(H, NM)
-			local nc, B = 0, require(SS.ClaudeTools.RoadBake05)
+			local nc, B = 0, require(SS.ClaudeTools.RoadBake05:Clone())
 			for _, t in text do
 				nc += B.collide(t, NC)
 			end
