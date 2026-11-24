@@ -585,6 +585,16 @@ def drop_scraps(parts, data, surf):
 def bake(tag):
     D = od(tag)
     parts = pickle.load(open(os.path.join(D, 'parts.pkl'), 'rb'))
+    # (25 Nov, P11) RebuildCell sets DECK_TOUCH, so a deck touching several step boxes is built (identically) in each:
+    # 5,771 exact copies in RB11 (U Chit Maung deck) = z-fighting meshes and doubled W / D boxes. Keep one of each.
+    seen, kept = set(), []
+    for p in parts:
+        key = (p[0], p[1]) + tuple(round(float(v), 2) for v in p[2]) + tuple(round(float(v), 3) for x in p[3:] for v in x)
+        if key not in seen:
+            seen.add(key)
+            kept.append(p)
+    print('duplicate parts dropped:', len(parts) - len(kept))
+    parts = kept
     data = json.load(open(os.path.join(D, 'roads.json'), encoding='utf-8'))
     paint = json.load(open(os.path.join(D, 'paint.json')))['items']
     by = collections.defaultdict(list)       # (kind, cell) -> triangles
@@ -950,6 +960,13 @@ def fit_boxes(P, lo, hi, surf, thick, ext=(0.0, 0.0)):
         M = np.array([[1.0, u, v] for u, v, _ in pts])
         y = np.array([h for _, _, h in pts])
         k, *_ = np.linalg.lstsq(M, y, rcond=None)
+        # (25 Nov, P11) probes on one line (the built road clipped at a district edge, a deck foot) leave the plane free
+        # to spin: boxes tilted 55-80 degrees stood as invisible walls. Such a fit, or one steeper than any road, keeps
+        # the data box
+        us, vs = [u for u, _, _ in pts], [v for _, v, _ in pts]
+        if max(us) - min(us) < 0.4 * L or max(vs) - min(vs) < 0.4 * (hi - lo - 1.2) or abs(k[1]) > 0.25 or abs(k[2]) > 0.25:
+            out.extend(strip_box(a, b, lo, hi, 'R', 0.0, surf, thick, ext=(e0, e1)))
+            return
         res = float(np.abs(M @ k - y).max())
         if res > FIT_TOL and L > 2 * FIT_MIN:
             if len(Q) > 2:
