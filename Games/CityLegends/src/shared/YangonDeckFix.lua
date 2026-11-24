@@ -62,16 +62,14 @@ D.S = {
 D.Spike = 1.5
 local function unspike(p): number
 	local n, m = 0, #p // 3
-	local y = {}
-	for i = 1, m do
-		y[i] = p[3 * i - 1]
-	end
 	for i = 2, m - 1 do
-		local a, b = y[i] - y[i - 1], y[i] - y[i + 1]
+		-- (in order, on the fixed heights: on Arzani a spike sits every second point, the ones between are right)
+		local y0, y1, y2 = p[3 * i - 4], p[3 * i - 1], p[3 * i + 2]
+		local a, b = y1 - y0, y1 - y2
 		if a * b > 0 and math.min(math.abs(a), math.abs(b)) > D.Spike then
 			local d1 = math.sqrt((p[3 * i - 2] - p[3 * i - 5]) ^ 2 + (p[3 * i] - p[3 * i - 3]) ^ 2)
 			local d2 = math.sqrt((p[3 * i + 1] - p[3 * i - 2]) ^ 2 + (p[3 * i + 3] - p[3 * i]) ^ 2)
-			p[3 * i - 1] = y[i - 1] + (y[i + 1] - y[i - 1]) * d1 / math.max(d1 + d2, 0.01)
+			p[3 * i - 1] = y0 + (y2 - y0) * d1 / math.max(d1 + d2, 0.01)
 			n += 1
 		end
 	end
