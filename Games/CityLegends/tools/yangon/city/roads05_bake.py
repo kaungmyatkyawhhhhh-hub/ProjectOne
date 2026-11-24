@@ -782,11 +782,25 @@ def collision(data, surf, parts, barriers=(), only=None):
                 if math.hypot(x - cx, z - cz) < g['r_in'] - ri / 5:
                     rows.append(box_row('M', (x, cy + 0.45 - 1.5, z), (1, 0, 0), (0, 1, 0), (ri / 2.5 + 0.2, 3, ri / 2.5 + 0.2)))
     # decks: boxes along the deck from its own surface
+    def head(a, b):
+        v = np.array([b[0] - a[0], b[2] - a[2]])
+        n = np.linalg.norm(v)
+        return v / n if n > 1e-6 else None
+
+    def bend(u, v):
+        return 0.0 if u is None or v is None else math.acos(max(-1.0, min(1.0, float(u @ v))))
     for d in data.get('decks', []):
         s = d['s']
         for i in range(0, len(s) - 1, 2):
             j = min(len(s) - 1, i + 2)
-            rows.extend(strip_box(s[i], s[j], -s[i][6], s[i][7], 'D', 0.0, surf, 2.0, prefer='max'))
+            # (24 Nov, Ahlone Road Flyover: a hole between two deck boxes on a bend, a lane point fell to the ground road)
+            # each end grows by tan(turn / 2) x the outer edge, as the road boxes do
+            u = head(s[i], s[j])
+            t0 = bend(u, head(s[i - 2], s[i])) if i >= 2 else 0.0
+            t1 = bend(u, head(s[j], s[min(len(s) - 1, j + 2)])) if j < len(s) - 1 else 0.0
+            edge = max(s[i][6], s[i][7])
+            ext = (min(math.tan(t0 / 2) * edge, 6.0), min(math.tan(t1 / 2) * edge, 6.0))
+            rows.extend(strip_box(s[i], s[j], -s[i][6], s[i][7], 'D', 0.0, surf, 2.0, prefer='max', ext=ext))
     # bridge pieces (parapets, ramp walls, girders, pier caps, piers): their own boxes
     for p in list(parts) + list(barriers):
         if p[0] in 'BG' and p[1] == 'B':
