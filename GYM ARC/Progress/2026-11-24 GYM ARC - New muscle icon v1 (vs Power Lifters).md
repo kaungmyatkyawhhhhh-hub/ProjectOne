@@ -186,3 +186,30 @@ The logo is on all four. In D it overlaps the left plate; in A it touches the du
 - `gymarc_icon_tough_A_curl.png` … `D_champion.png`
 
 **Tool note:** if a new prompt is typed while ChatGPT is still generating, Enter doesn't send. Check the box is empty / the stop button is gone first.
+
+## Roblox-style set of 12 (owner: "he look too orange and he looks too realistic and not robloxian")
+A NEW chat (chatgpt.com/c/6b05ab3f-7970-83ec-9671-7d9dd8cdbd90) so the realistic look doesn't carry over.
+
+**The key prompt block:** an actual ROBLOX AVATAR in Roblox Blender GFX.
+- blocky proportions;
+- SIMPLE, SMOOTH, CHUNKY stylized muscle blocks like a Roblox muscle-simulator avatar;
+- NO veins, NO striations, NO skin texture;
+- matte-satin plastic, light peach skin (NOT orange);
+- a flat black TOUGH face decal (angled brows, narrowed eyes, one-sided smirk).
+
+The first sheet came out Roblox but too small. Adding "Roblox muscle-simulator MAX proportions: giant blocky boulder shoulders, arms thicker than his head, V-shape, still smooth and blocky" gave the right size.
+
+| # | |
+|---|---|
+| 1-4 | lighter build, blue: curl / double biceps / arm wrestle / overhead |
+| 5 | HUGE curl, blue |
+| 6 | HUGE double biceps, green |
+| 7 | HUGE barbell on the shoulders, red |
+| 8 | HUGE overhead, gold |
+| 9 | before/after: a tiny noob looks up at his huge self, blue |
+| 10 | close-up: face + giant bicep, fire orange |
+| 11 | classic YELLOW noob skin, double biceps, cyan |
+| 12 | carrying two dumbbells toward the camera, frost |
+
+- No logo on this board: the page reload lost the keyed logo. Add the logo to the pick.
+- **Files** (Downloads): `gymarc_icon_roblox_board.png`, `gymarc_icon_roblox_01..12.png`.
