@@ -844,7 +844,9 @@ def collision(data, surf, parts, barriers=(), only=None):
             rows.append(box_row('W', c, R, U, p[5]))
     # (19 Nov, owner: cars hit things you can't see) pavement boxes only over pavement the builder really laid
     import roads05_pbox_clip
-    return roads05_pbox_clip.clip(rows, parts)
+    # (25 Nov, P11) a pavement box tilted past 25 degrees is a slice of a walk climbing a deck foot in the data (U Chit
+    # Maung x East Horse: 2-7 stud boxes standing 76 degrees, from y 30 to 58 under the deck): never a real pavement
+    return [r for r in roads05_pbox_clip.clip(rows, parts) if not (r[0] == 'P' and float(r.split()[8]) < 0.9)]
 
 
 def ramp_gaps(a, b, lo, hi, ramps):
