@@ -66,7 +66,7 @@ The first 10 are the old cards (same ids, so old saves convert). The 15 new ones
 - **Per slot:** `DNA`, `Muts` ("id:stars,..."), `MutEq`, `MutPityE`, `MutPityL`.
 - **Account** (`C.Slots.Account`): `MutTokens`, `MutReceipts`.
 - **Old saves:** owned cards become 1★ mutations and the best ones are equipped, as many as the slots allow. The old `Cards` / `CardOffer` are then cleared. Tested: Appetite + Glow + Tough at Fossil II → Glow and Tough equipped.
-- **Heads-up:** old players had every card active at once. Now only 1–2 are equipped, which is a nerf for them (the cards were free). No compensation was given; decide with the owner.
+- **Heads-up:** old players had every card active at once. Now only 1–2 are equipped, which is a nerf for them (the cards were free). **Owner decision (24 Nov): no compensation.**
 
 ## Not done / open
 - Phone layout not checked on a device. The window is 700×430 with the same AttachScale as Evolutions.
