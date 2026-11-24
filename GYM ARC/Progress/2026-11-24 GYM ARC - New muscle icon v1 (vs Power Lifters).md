@@ -264,3 +264,26 @@ Same logo chat, one try.
   - the owner uploads the icon with the v1903 + v1905 publish;
   - compare the click rate (3.7% baseline) after 3-4 days;
   - matching thumbnails + the in-game logo switch to blue v10.
+
+## v2 close-up (owner, 23:10: "power lifter one is still better. for some reason..")
+**Side-by-side read: the difference was FRAMING and ENERGY, not the character.**
+- Power Lifters: the character is HUGE and close (70% of the width, cropped at mid-thigh, leaning in); no empty space; a plate bigger than his chest, spilling off the edge; brighter and glowing (mean 0.34 vs our 0.25), warm lamps mixed with the cool colour; its colours repeat across the logo, plate and background.
+- Ours: full legs, a smaller figure, dead dark space, a normal-sized dumbbell, cold and dark.
+
+**Recompose prompt** (same character):
+- camera much closer, 70% width, cropped at mid-thigh, leaning in, a slightly low angle;
+- no empty space except the logo corner;
+- a ridiculously oversized dumbbell (plates bigger than his chest) cut by the bottom-left edge;
+- brighter, a rich blue glow + warm orange lamps;
+- the same render.
+
+**Result:** mean 0.35 / near-black 39% at 64 px (Power Lifters: 0.34 / 38%). Side by side it now has the same energy.
+
+**Files** (Downloads):
+- `GYMARC_ICON_v2_closeup_logo_512.png` (upload)
+- `GYMARC_ICON_v2_closeup_logo.png`
+- `GYMARC_ICON_v2_closeup_nologo.png`
+
+The comparison is in the vault.
+
+**Lesson for the recipe:** match the competitor's CAMERA DISTANCE, FRAME FILL, PROP SCALE and BRIGHTNESS. A matching style alone isn't enough.
