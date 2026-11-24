@@ -419,7 +419,7 @@
   "next": "find what lifts the ground road start to 64.9 when sample 394 = 62.15 (Roads.luau deck-foot / alignJunctions easing), then rebuild 17x25 from RB6."
  },
  "steps_24nov": {
-  "status": "SWAPPED + saved v1943; lanes synced (not saved); Play drive + shots NOT done",
+  "status": "DONE 24 Nov: saved v1956 (Edit, store CityLegends_v1 read on the Server, lock released); Play-driven all spots; not published",
   "code": "Roads.luau relax skips cut samples (Studio ClaudeTools.Roads = repo, 56,830 chars); roads05_bake.fit_boxes (plane-fit R boxes) + wedge grow; roads05.py smooth_chain + BRIDGE_NEAR; roads05_fix.repin_crossers in ring_level",
   "data": "roads05_steps_fix.py applied to net (backup roads_before_stepsfix.json), LP1to10 (same), new subsets RB6s RB3s RB7s RB8s (from RB6 RB3o RB7a RB8)",
   "data_assets": {
@@ -479,7 +479,8 @@
    "studio builds 6 boxes 0 MOUTH FAILED",
    "bakes",
    "uploads",
-   "swap v1943"
+   "swap v1943",
+   "Play drive + shots; 18x22 redo; final save v1956"
   ],
   "uploads": {
    "STP6": {
@@ -546,11 +547,10 @@
     "collide_b": 78526250008018
    }
   },
-  "next": "lanes: drop lane_heights rows in the 10 cells, LaneHeights, roads05_lanes.py LP1to10 --install, sync, require; DeckFeetCheck done (2 ok); Play drive; notes",
   "swap": "all 10 cells swapped (meshes + boxes), then boxes re-swapped (_b packs: roads05_pbox_clip drops P points over R / D tops), meshes Box + no shadow, 953 old road meshes set Box (0 CanCollide), backups deleted; saved v1943",
-  "lanes": "lane_heights rows in the 10 cells re-measured (387 -> 8 off, the 8 fine); roads05_lanes LP1to10 --install 1322/3080/0 dead; 13 modules synced via 82883165921904 then 124290251871281; require 26/26 (redo QuickSync 124290251871281 if the save was lost)",
+  "lanes": "final: lane_heights 1597 rows; 1322 / 3080 / 0 dead / deck_gaps 31; modules 4 + 10 synced 120032748201515 (13 before via 124290251871281); require 26/26",
   "unsaved_after_v1943": "QuickSync 124290251871281 (13 lane modules = repo), deleted SS.TrafficModels_old / TrafficModels_preDoors / RB_OldP9 (mapbugs/deleted_24nov_steps_fix.txt)",
-  "saves": "v1943 ok 13:05 UTC; 13:14-13:34 every save \"server publish request timed out\" (status.roblox.com all operational); Studio force-closed + relaunched 13:41 UTC",
+  "saves": "v1943 ok 13:05 UTC; 13:14-13:34 every save \"server publish request timed out\" (status.roblox.com all operational); Studio force-closed + relaunched 13:41 UTC; relaunch 13:41, save ok 13:57, v1949, v1952, v1954, v1956",
   "measured": {
    "Ahlone foot": [
     4.71,
@@ -589,6 +589,17 @@
     "none"
    ],
    "note": "collision, max dy between points 2 studs apart, every lane"
+  },
+  "redo_18x22": "18x22 rebuilt again with DECK_TOUCH (the May Ni Gone deck has its middle in 19x23: the first cell-only build lost its surface in 18x22); glbs 91260357463124 84389757049455; boxes STP6e 84542846484176 (P boxes never over a deck carriageway; deck boxes grow at bends: closed a hole in the Ahlone deck at 27140); RebuildCell RBXJob sets DECK_TOUCH now",
+  "play": {
+   "Ahlone foot": "rolls down the deck onto the foot, vy -1.2 steady, no bump",
+   "Maha Bandula #2 x 31st": "small crest at the 31st Street junction plateau, jerk 18 studs/s2 (car 34 mph); no 4-stud drop",
+   "Ziwaka": "jerk 4",
+   "Merchant": "smooth to 33920; jerk 26 at 33903 where Merchant merges into Strand Road (junction surface, not the listed spot)",
+   "Shwe Gone Dine": "jerk 4",
+   "Old Yay Ta Shay #2": "jerk 3.7",
+   "Arzani Lane #1957 + cracks": "jerk 3.5",
+   "May Ni Gone deck end": "jerk 8.6 (the data V at the foot: deck down, ground road up)"
   }
  }
 }

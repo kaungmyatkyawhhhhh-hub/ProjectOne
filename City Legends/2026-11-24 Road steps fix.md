@@ -4,7 +4,7 @@ created: 2026-11-24
 ---
 # Road steps fix: crests, deck feet and collision seams (24 Nov 2026)
 
-Follows [[2026-11-24 Road fix - Arzani Street deck and crests]] ("Crests and steps" table). Everything is fixed where it starts, in the shared builder, bake and generator code, so P11 / P12 and every later rebuild get it too. Ten cells were rebuilt whole with the batch 0.5 builder (Roads.luau + YangonRoads.luau) and swapped. Saved as **v1943** (store `CityLegends_v1`). Not published.
+Follows [[2026-11-24 Road fix - Arzani Street deck and crests]] ("Crests and steps" table). Everything is fixed where it starts, in the shared builder, bake and generator code, so P11 / P12 and every later rebuild get it too. Ten cells were rebuilt whole with the batch 0.5 builder (Roads.luau + YangonRoads.luau) and swapped. Final save **v1956**: in Edit, store `CityLegends_v1` (read on the Server), lock released, ready for the owner to publish. Not published.
 
 ## The causes and the fixes
 
@@ -49,8 +49,44 @@ A road at 5% climbs 0.1 in 2 studs, so about 0.1-0.2 is just the slope.
 | Arzani, Lane #1957 mouth (32836, 36243) | 1.29 (box 1.39 over the road) | 0.12 (offline check) |
 | Arzani box cracks (32969, 36326) / (33603, 36458) | cracks inside the carriageway | none (offline); 0.17 on the lanes in Studio |
 | Hledan Road #3 deck (25082, 28895) | 0.15-0.24 | not rebuilt: the 1.6 measured before was the probe's ray starting under the deck |
+| May Ni Gone deck end, 3 studs off the centre (after the 18x22 redo) | 2.53 (pavement box over the deck) | 0.14 |
 
-## Not done yet / left
-- The **Play drive** of each spot and the after shots are still to do. Every save after v1943 timed out ("server publish request timed out", Team Create). The lane sync and the deletion of TrafficModels_old, TrafficModels_preDoors and RB_OldP9 are not saved yet.
-- 347 lane points elsewhere on the map are still off the built road (LaneHeights, outside these cells). They were there before; they are not from this fix.
-- The new collision fit is only in the 10 rebuilt cells. Other cells keep their old boxes until they are next baked.
+## Play drive (test store `CityLegends_test`, then back to `CityLegends_v1`)
+The starter car was driven along each road's centre line with the test hooks (throttle, plus steering toward the next road point). "Jolt" is the biggest change in the car's up/down speed, in studs/s².
+
+| Spot | Result |
+|---|---|
+| Ahlone Road #3 deck foot | rolls down the deck onto the foot at a steady -1.2 studs/s up/down speed, no bump |
+| Maha Bandula Road #2 at 31st Street | no drop any more. A small crest is left where 31st Street crosses (jolt 18 at 34 mph; the 31st Street junction is flat across) |
+| Ziwaka Road | jolt 4 |
+| Merchant Road | smooth over the listed spot. Jolt 26 further on at (33903, 45889), where Merchant runs into Strand Road (the two road surfaces meet unevenly there) |
+| Shwe Gone Dine Road | jolt 4 |
+| Old Yay Ta Shay Street #2 | jolt 3.7 |
+| Arzani Street over Lane #1957's mouth and the old cracks | jolt 3.5 |
+| May Ni Gone Overpass deck end | jolt 8.6: the real dip at the foot (the deck comes down, the ground road climbs away) |
+
+Shots:
+- ![[2026-11-24 road steps fix - Ahlone Road 3 deck foot (Play) - after.jpg]]
+- ![[2026-11-24 road steps fix - Maha Bandula Road 2 at 31st Street (Play) - after.jpg]]
+- ![[2026-11-24 road steps fix - Ziwaka Road (Play) - after.jpg]]
+- ![[2026-11-24 road steps fix - Merchant Road (Play) - after.jpg]]
+- ![[2026-11-24 road steps fix - Shwe Gone Dine Road (Play) - after.jpg]]
+- ![[2026-11-24 road steps fix - Old Yay Ta Shay Street 2 (Play) - after.jpg]]
+- ![[2026-11-24 road steps fix - Arzani Street at Lane 1957 mouth (Play) - after.jpg]]
+- ![[2026-11-24 road steps fix - May Ni Gone Overpass deck end (Play) - after.jpg]]
+- Found in the drive and fixed: ![[2026-11-24 road steps fix - May Ni Gone deck end, deck surface missing (Play) - before redo.jpg]]
+  - The May Ni Gone deck's middle is in 19x23, so the cell-only build of 18x22 had no deck: the swap lost that deck's surface in the cell.
+  - 18x22 was rebuilt with `DECK_TOUCH` (every deck with a sample in the box is built). `RebuildCell.RBXJob` now always sets it.
+  - The same pass fixed two collision faults: a pavement box 2.5 over that deck's carriageway (`roads05_pbox_clip`: never over a deck carriageway), and a hole between two Ahlone deck boxes on a bend at (27140, 39890) (deck boxes now grow at bends like the road boxes).
+
+## Saves
+- v1943 (cells swapped).
+- From 13:14 UTC every save timed out ("server publish request timed out", status.roblox.com all green; this PC's network was dropping connections). The old file-too-large errors (12:25-12:42) came from the temporary data modules and backups, all deleted.
+- Studio was relaunched; then v1949, v1952, v1954, and **v1956** (final).
+- Deleted to keep the place small: `build/city_1to1/mapbugs/deleted_24nov_steps_fix.txt`.
+
+## Left
+- The Maha Bandula #2 crest at 31st Street: 31st Street ranks above Maha Bandula #2 in the data (2097 vs 2378), so the main road is held level across the street. A rank fix would remove it.
+- Merchant Road where it runs into Strand Road (33903, 45889): the two surfaces meet unevenly (lumps of 0.2-0.3).
+- 347 lane points elsewhere on the map are still off the built road (LaneHeights, outside these cells). They were there before.
+- The new collision fit is only in these 10 cells. Other cells keep their old boxes until they are next baked.
