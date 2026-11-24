@@ -393,5 +393,14 @@
   "grounds": "300 flat parts touch R boxes; 6 edge-overhang plates trimmed (Sites.tower_skyline, customs, lot_y1_low_1/3/6, lot_y1_mid_7: 0 left). Left (road through a building / venue): Bogyoke halls, Holy Trinity, Strand porch, Sites.rewards, service + CarCare.legends_service, dropoff, lot_y1_high_3/high_10/mid_3/mid_11; YCC plate (intended), MC / Sedona drives (kept 19 Nov)",
   "props": "KitOnRoad P1-P3: 1,182 records (P1 354, P2 414, P1P 60, P2P 41, P1S 60, P1G 21, P2G 69, P3 159, P3G 4); Green.LakeEdge 50, Green.Far 2, Parks.ThanlwinRoad.CentreLine 24 removed (list mapbugs/mb24_removed.txt)",
   "playtest": "PASS: MC median nose 57 studs maxvy 0.4; Kaba Aye Pagoda lane 57; downtown island off Strand Road 45 (gap 2.1-2.3); Thanlwin Road 45. No new script errors."
+ },
+ "overlaps_24nov": {
+  "status": "DONE 24 Nov (OVERLAPS FIX agent, home PC): saved v1906 / v1908 / v1911 (store v1, read on the Server); Play-tested; not published",
+  "lanes": "roads05_drop_lanes.py: Bogyoke Lane #19, #3804-#3810 dropped + 4 crossings; Lane #4266 cut at Holy Trinity -> Lane #4266 + Lane #4266b (rank 8566). Net + roads05_LP1to10 + roads05_RB3o patched; street roads only = traffic lanes unchanged",
+  "cells": "22x27 + 22x28 rebuilt (RB3o, box 33792,41472,35328,44544; 85,349 parts; 0 mouth failed), bake 22 meshes / 1,446 boxes, glbs 75691345510725 139602856215690 76543932010012, collide 81285422132367; HoleFill 468 kept / 100 dropped; backup deleted",
+  "terrain": "old beds filled along 492 dropped samples (460 fills); terrain over 24 R/P boxes cleared",
+  "strand": "strand_hotel moved (0,+1,-30): porch steps end at the pavement (z 46795), facade unchanged; forecourt terrain Pavement",
+  "lots": "LotFinder + YangonSites.prepare: rewards 35461.7,22353.3; service 35671.1,25260.5 (model moved by the lot transform, Config.Service Bay/Arrive, drives re-laid); dropoff 35660.1,27508.2; y1_high_3 31799.3,28685.5; y1_high_10 29676.7,26072.3; y1_mid_3 29553.3,28155.2; y1_mid_11 29322.9,25613.8 (Config + YangonWorld + world_1to1 MOVED, synced asset 123329058763909)",
+  "not_done": "Kaba Aye Pagoda lane-mouth raised kerb end (builder fault, not located)"
  }
 }

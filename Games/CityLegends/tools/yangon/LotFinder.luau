@@ -7,7 +7,7 @@
 	    w = width across the front, d = depth (YangonSites: size). The pad YangonSites.prepare lays is (w + 16) x (d + 10),
 	    3 studs behind the lot's middle. A candidate fronts a pavement (P box): its front edge 3 studs behind the pavement's
 	    outer side, facing it. Free = no road / pavement box, landmark, park, other lot pad, pagoda, car-care venue or deck
-	    in the pad grown by 6 (shells and far trees are fine: prepare deletes them), no water, the ground under it within
+	    in the pad grown by 6 at the sides and back (shells and far trees are fine: prepare deletes them), no water, the ground under it within
 	    16 studs of the floor, and the floor (the pavement top) within 3 of the road top in front.
 	    avoid = extra {CFrame, Vector3} boxes (lots already picked this run); self = its own pad's name (ignored).
 ]]
@@ -17,7 +17,12 @@ local F = {}
 local function blockers(): { Instance }
 	local Y = workspace.Yangon1to1
 	local t = {}
-	for _, n in { "Roads", "Landmarks", "Parks", "Sites", "CarCare", "Pagodas", "InyaBund" } do
+	for _, c in Y.Roads:GetChildren() do
+		if c.Name ~= "Meshes" then -- a road mesh's box is its whole 1536 cell: the collision boxes stand for the roads
+			table.insert(t, c)
+		end
+	end
+	for _, n in { "Landmarks", "Parks", "Sites", "CarCare", "Pagodas", "InyaBund" } do
 		local f = Y:FindFirstChild(n)
 		if f then
 			table.insert(t, f)
@@ -98,9 +103,10 @@ function F.find(o): { any }
 		end
 		local cf = CFrame.lookAt(k.c, k.c + k.f)
 		local mid = cf * CFrame.new(0, 0, 3)
-		local size = Vector3.new(o.w + 16 + 12, 300, o.d + 10 + 12)
+		local size = Vector3.new(o.w + 16 + 12, 300, o.d + 10 + 6)
+		local chk = mid * CFrame.new(0, 0, 3) -- grown at the sides and back only: the front must touch the pavement
 		local hit = false
-		for _, p in workspace:GetPartBoundsInBox(mid, size, blk) do
+		for _, p in workspace:GetPartBoundsInBox(chk, size, blk) do
 			if not (o.self and p.Name == o.self and p.Parent == Y.Sites) then -- its own old pad
 				hit = true
 				break

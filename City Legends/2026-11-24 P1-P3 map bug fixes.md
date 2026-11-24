@@ -58,7 +58,61 @@ Pictures:
 
 ## Left
 - **Six P1-P3 cells were built in the P8 rebuild** (23x21 and the P3 row 23x26-27x26). Their build files are on the laptop, so they still have the old kerbs. Re-bake them there with this fix.
-- **The venue and landmark conflicts listed in section 2.**
-- **The Kaba Aye Pagoda lane mouth** still shows one raised kerb end (seen in the shot). It is not a crossing or leaning piece, so it is a builder fault.
+- ~~The venue and landmark conflicts listed in section 2.~~ Done the same day, see "Roads through buildings and lots" below.
+- **The Kaba Aye Pagoda lane mouth** still shows one raised kerb end (seen in the shot). It is not a crossing or leaning piece, so it is a builder fault. Not fixed on 24 Nov: the spot could not be found from the shot quickly and a builder change means re-baking cells, so it is not a quick fix.
 - **The median nose and crumpled junction from the owner's drive:** the nose fixed above is a likely match. There are still no owner shots to confirm it.
 - **The repo copies of the kit tiles** (`imports/sync/ygn1to1_*`) still hold the removed records. Re-run the filter after any regenerate.
+
+## Roads through buildings and lots (24 Nov, OVERLAPS FIX agent)
+The owner's decisions for section 2, done and saved (v1906, v1908, v1911 with the store back on `CityLegends_v1`, read on the Server). Nothing is published.
+
+**1. Bogyoke Market: the lanes under the halls are gone.**
+- The 8 OSM service lanes inside the market (Lane #19, #3804-#3810) ran under the hall roofs. Every stretch of them outside the halls was 16 studs or less (just their mouths), so they were dropped whole, with their 4 lane crossings.
+- **Holy Trinity Cathedral:** the stretch of Lane #4266 that ran through the church (21 samples, its carriageway and pavement inside the nave or the tower) was dropped. The lane is now two pieces that stop at the church: the west piece (166 studs) and `Lane #4266b` (253 studs, along the east side to the tower).
+- **How:** `tools/yangon/city/roads05_drop_lanes.py` (self-check `test`) patched the net roads.json, the lane subset `roads05_LP1to10` and a new subset `roads05_RB3o` (RB3 + the drop). Cells 22x27 and 22x28 (the market and the church) were rebuilt whole with the batch 0.5 builder (`stepCell`, 85,349 parts, 0 mouth failures), baked (22 meshes, 1,446 boxes) and swapped. 468 of the 568 old hole-filler boxes were kept; 100 under the halls / church or next to no road were dropped.
+- **The old road beds were still in the ground:** a test car fell into a 2-9 stud trench by the church. The terrain along all 492 dropped samples was filled back to the ground beside it (460 fills), and the terrain left over 24 road boxes was cleared.
+- **Traffic lanes did not change:** these are `street` roads, and the traffic lanes are only built on main roads, so no lane re-run was needed.
+
+**2. Strand Hotel: the whole hotel moved back.**
+- The porch steps stood 22 studs into Strand Road, and the main facade itself was 4 studs into the carriageway. Squashing the porch to half its depth would have spoiled the front, so the whole hotel model moved 30 studs back (north) and 1 up.
+- The bottom step now ends at the back of the pavement (z 46795), and no road box touches the hotel.
+- The strip between the facade and the pavement is paved (terrain Pavement), like the real paved forecourt in front of the steps (photo `Strand_Hotel_Entrance` in the landmark refs). The lobby floor was cleared of terrain.
+
+**3. Lots moved to the nearest free spot beside a road** (`tools/yangon/LotFinder.luau`: candidates face a pavement box, and nothing but shells is allowed in the pad; then `YangonSites.prepare` on the new spot):
+
+| Lot | Old spot (x, z) | New spot (x, z), facing | Moved |
+|---|---|---|---|
+| Legends Rewards | 35389, 22839 | 35461.7, 22353.3, (-0.991, -0.135) | 491 |
+| Legends Service | 35171, 24404 | 35671.1, 25260.5, (0.259, 0.966) | 990 |
+| Drop-off | 35417, 27781 | 35660.1, 27508.2, (-0.758, -0.652) | 365 |
+| House y1_high_3 | 31271, 28460 | 31799.3, 28685.5, (-0.271, -0.963) | 574 |
+| House y1_high_10 | 29721, 26172 | 29676.7, 26072.3, (-0.902, 0.433) | 109 |
+| House y1_mid_3 | 29418, 28144 | 29553.3, 28155.2, (0.079, -0.997) | 136 |
+| House y1_mid_11 | 29452, 25750 | 29322.9, 25613.8, (-0.699, 0.715) | 188 |
+
+- **Code:** `Config.YangonVenues.Sites` (rewards, dropoff), `Config.Service.Bay` / `Arrive` (moved with the workshop), `src/shared/YangonWorld.lua` (the 4 house lots; `world_1to1.py` has them in `MOVED`, so a re-run keeps them). Synced into Studio.
+- **Legends Service** is a baked model: it moved by the same transform as its lot, and its drive ramps were re-laid from the forecourt to the new pavement edge (the old ones reached 20 studs into the carriageway).
+- Prompts, fast travel and the minimap read these positions, so they follow. Checked in Play: Rewards built with its 9 prompts, the service bay and arrive spot land on its floor and forecourt, and the 4 FOR SALE lots stand on the new spots. No road box lies under any new pad.
+
+**Play test** (store `CityLegends_test`, then back to `CityLegends_v1`, checked on the Server in a fresh Play):
+- **Bogyoke Aung San Road along the market front:** 176 studs, flat.
+- **Lane #4266b by the church:** 120 studs, height 37.16-37.18 the whole way, and the car stops at the lane's end kerb by the tower.
+- **Strand Road past the hotel:** 40 studs each way, flat.
+- **The venues:** driven past Rewards, Service, the drop-off and lot y1_high_3.
+- No new script errors.
+
+Pictures:
+![[2026-11-24 overlaps fix - Bogyoke Market front, no lanes under the halls (Play) - after.jpg]]
+![[2026-11-24 overlaps fix - Holy Trinity lane now stops at the church (Play) - after.jpg]]
+![[2026-11-24 overlaps fix - Strand Hotel porch at the pavement (Play) - after.jpg]]
+![[2026-11-24 overlaps fix - Strand Road past the Strand Hotel (Play) - after.jpg]]
+![[2026-11-24 overlaps fix - Legends Rewards on its new lot (Play) - after.jpg]]
+![[2026-11-24 overlaps fix - Legends Service on its new lot (Play) - after.jpg]]
+![[2026-11-24 overlaps fix - drop-off on its new lot (Play) - after.jpg]]
+![[2026-11-24 overlaps fix - house lot y1_high_3 on its new spot (Play) - after.jpg]]
+
+**Left:**
+- **Old lot spots:** the old pads were deleted, and the shells cleared there earlier stay cleared (flat ground beside the road).
+- **Lots driven by:** only y1_high_3 of the 4 house lots was driven past. The other 3 were checked by data (their FOR SALE models are on the new spots, they front a pavement, and no road box is under them).
+- **Bogyoke front:** 4 Bogyoke Aung San Road pavement boxes still touch the ends of the market's thin side walls by a few studs at the front facade. This was there before.
+- **Kaba Aye Pagoda lane mouth:** the raised kerb end is not fixed (see Left above).
