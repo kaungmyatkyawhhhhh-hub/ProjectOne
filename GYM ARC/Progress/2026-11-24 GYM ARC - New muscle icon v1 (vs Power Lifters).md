@@ -37,3 +37,19 @@ The live icon has the washed-out profile of the old galaxy icon that got 23x few
 
 ## Prompt (one try)
 Square 1024 icon, Roblox Blender GFX. Image 1 = my character's head exactly. Image 2 = quality ref only, don't copy. Image 3 = my best icon, match its hot pink + near-black. HUGE shirtless Roblox bodybuilder, waist up, low camera, leaning in. Rigid knurled barbell in both hands, mid-lift. One gigantic glowing hot-pink crystal plate with a dark steel rim filling the lower-left quarter. Face pure white key light, the brightest thing. Pink rim light. Dark gym, pink glow behind the head, near-black corners. Sparks only around the plate. 8% margins. No text or logo. Must read at 60 px.
+
+## v2 "violet overhead" (owner: "the powerlifter icon color scheme and the gradients are so good too, but dont copy exactly")
+- Same chat, one try.
+- **Colour (Power Lifters' idea, our own colours):**
+  - warm glossy golden-tan skin;
+  - a smooth gradient from deep indigo corners to electric violet behind him;
+  - violet rim light, hot-pink crystal plates as the only accent.
+- **Layout (not theirs):**
+  - front view, a giant barbell locked out OVERHEAD;
+  - the two plates cut off by the top corners;
+  - the head and a huge chest/abs in the middle.
+- **Measured at 64 px:** mean 0.32, near-black 43.6%, near-white 4.1%, clipped 20.7%. Passes the grade.
+- The face is small, so white% is low. A v3 could push in closer.
+- In the real row mock it looks clearly different from Power Lifters (v1 looked like its layout).
+- **Pick: v2.**
+- File: owner's Downloads\gymarc_icon_muscle_v2_violet.png. Move it to thumbs_nov.
