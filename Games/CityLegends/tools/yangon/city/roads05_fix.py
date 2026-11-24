@@ -432,14 +432,90 @@ def ring_level(data):
             ramp += 20
         worst = 0.0
         R = {id(r): r for r in near}
+        moved = collections.defaultdict(set)
         for (rid, i), ny in new.items():
             q = R[rid]['s'][i]
             worst = max(worst, abs(ny - q[1]))
+            if abs(ny - q[1]) > 0.05:
+                moved[R[rid]['name']].add(i)
             q[1] = round(ny, 3)
         g['level'] = round(4 + RING_FLAT + ramp, 1)
+        pins = repin_crossers(data, moved)
         if worst > 0.05:
-            out.append(dict(ring=g['name'], max_change=round(worst, 2), ramp=ramp, max_grade=round(steep, 3), at=at))
+            out.append(dict(ring=g['name'], max_change=round(worst, 2), ramp=ramp, max_grade=round(steep, 3), at=at, repinned=pins))
     return out
+
+
+REPIN_GRADE = 0.04  # a crossing road re-pinned to a moved road eases back to its own height at this grade (>= 40 studs)
+
+
+def repin_crossers(data, moved):
+    """(24 Nov, Maha Bandula Road #2 by Sule: ring_level lowered its arm 3.8 studs where 31st Street crosses it, 150
+    studs from the ring, and left 31st Street (the bigger road by rank) at the old height: the builder pinned
+    Maha Bandula's edges up to 31st Street, a 4.2 step in the main road) every other road whose samples lie on a
+    moved stretch (moved = {road name: changed sample indices}) takes that road's height there and eases back to its
+    own over |change| / REPIN_GRADE. Cut samples and samples that moved themselves stay. Returns the samples pinned."""
+    if not moved:
+        return 0
+    cutd = {k: set(v) for k, v in data['cut'].items()}
+    R = {r['name']: r for r in data['roads']}
+    segs = collections.defaultdict(list)    # 64-stud grid of the moved roads' segments near their moved stretches
+    for name, idx in moved.items():
+        s = R[name]['s']
+        near = {a for i in idx for a in range(i - 8, i + 8) if 0 <= a < len(s) - 1}
+        for a in near:
+            for k in {(int(s[a][0] // 64) + dx, int(s[a][2] // 64) + dz) for dx in (-1, 0, 1) for dz in (-1, 0, 1)}:
+                segs[k].append((name, a))
+    n = 0
+    for o in data['roads']:
+        s, cut, own = o['s'], cutd.get(o['name'], set()), moved.get(o['name'], set())
+        pin = {}
+        for j, q in enumerate(s):
+            if j in cut or j in own:
+                continue
+            best = None
+            for name, a in set(segs.get((int(q[0] // 64), int(q[2] // 64)), ())):
+                if name == o['name']:
+                    continue
+                A, B = R[name]['s'][a], R[name]['s'][a + 1]
+                vx, vz = B[0] - A[0], B[2] - A[2]
+                L2 = vx * vx + vz * vz
+                if L2 < 1e-9:
+                    continue
+                u = min(1.0, max(0.0, ((q[0] - A[0]) * vx + (q[2] - A[2]) * vz) / L2))
+                d = math.hypot(A[0] + vx * u - q[0], A[2] + vz * u - q[2])
+                right = (q[0] - A[0]) * -vz + (q[2] - A[2]) * vx > 0
+                h = A[7] if right else A[6]
+                hy = A[1] + (B[1] - A[1]) * u
+                # (the nearest segment decides: a wide road's far segments are within its half too)
+                if d < h and abs(hy - q[1]) < 8 and (best is None or d < best[0]):
+                    best = (d, hy, a in moved[name] or a + 1 in moved[name])
+            if best and best[2] and abs(best[1] - q[1]) > 0.05:
+                pin[j] = best[1]
+        if not pin:
+            continue
+        c = [0.0]
+        for j in range(1, len(s)):
+            c.append(c[-1] + math.hypot(s[j][0] - s[j - 1][0], s[j][2] - s[j - 1][2]))
+        P = sorted(pin)
+        delta = {j: pin[j] - s[j][1] for j in P}
+        new = {}
+        for j in range(len(s)):
+            if j in pin:
+                new[j] = pin[j]
+                continue
+            if j in cut:
+                continue
+            k = min(P, key=lambda p_: abs(c[p_] - c[j]))
+            L = max(40.0, abs(delta[k]) / REPIN_GRADE)
+            dist = abs(c[k] - c[j])
+            if dist < L:
+                u = dist / L
+                new[j] = s[j][1] + delta[k] * (1 - u * u * (3 - 2 * u))
+        for j, y in new.items():
+            s[j][1] = round(y, 3)
+        n += len(pin)
+    return n
 
 
 def butt_match(data):

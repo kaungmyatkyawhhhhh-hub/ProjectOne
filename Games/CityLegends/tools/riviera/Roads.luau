@@ -749,7 +749,10 @@ function Roads.build(data, opts)
 						held = true
 					end
 				end
-				table.insert(nodes, { i = i, j = j, held = held })
+				-- (24 Nov, Ahlone Road #3 deck foot: the cut samples under a deck are never built, but they were
+				-- neighbours here: their old heights, 7.8% up the deck, were walked down at EDGE_GRADE 5% and held the
+				-- built start 3 over its own foot (64.9 vs 61.82). A cut sample neither moves nor holds anything)
+				table.insert(nodes, { i = i, j = j, held = held, cut = cutSet ~= nil and cutSet[i] ~= nil })
 				i = j + 1
 			end
 			local function setY(nd, y)
@@ -764,7 +767,7 @@ function Roads.build(data, opts)
 			for _ = 1, 4 do
 				for k = 2, #nodes do
 					local nd, pv = nodes[k], nodes[k - 1]
-					if not nd.held then
+					if not nd.held and not nd.cut and not pv.cut then
 						local d = dist(pv, nd)
 						local y0 = edge[pv.j].Y
 						setY(nd, math.clamp(edge[nd.i].Y, y0 - GRADE * d - 0.02, y0 + GRADE * d + 0.02))
@@ -772,7 +775,7 @@ function Roads.build(data, opts)
 				end
 				for k = #nodes - 1, 1, -1 do
 					local nd, nx = nodes[k], nodes[k + 1]
-					if not nd.held then
+					if not nd.held and not nd.cut and not nx.cut then
 						local d = dist(nd, nx)
 						local y0 = edge[nx.i].Y
 						setY(nd, math.clamp(edge[nd.i].Y, y0 - GRADE * d - 0.02, y0 + GRADE * d + 0.02))

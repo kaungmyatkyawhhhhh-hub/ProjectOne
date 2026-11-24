@@ -647,7 +647,7 @@ def bake(tag):
     for i, f in enumerate(files):
         write_glb(os.path.join(gdir, 'roads05_%d.glb' % (i + 1)), [(nm, m) for nm, m, _ in f], generator='roads05_bake.py')
     # collision
-    rows = collision(data, surf, parts, barriers)
+    rows = collision(data, surf, parts, barriers, only=only)
     if only:
         rows = [r for r in rows if cell_of(float(r.split()[1]), float(r.split()[3])) in only]
     cdir = os.path.join(D, 'collide')
@@ -702,7 +702,7 @@ def gore_barriers(data):
     return out
 
 
-def collision(data, surf, parts, barriers=()):
+def collision(data, surf, parts, barriers=(), only=None):
     """carriageway and pavement boxes along each road (runs of up to MERGE samples while straight), the ring, decks
     from their surface, bridge pieces (walls, piers) as their own boxes"""
     rows = []
@@ -714,9 +714,11 @@ def collision(data, surf, parts, barriers=()):
         c = cut.get(r['name'], set())
         n = len(s)
         i = 0
+        prev_dir = None
         while i < n - 1:
             if i in c or (i + 1) in c:
                 i += 1
+                prev_dir = None
                 continue
             # extend while straight (heading within 2 degrees) and the width the same
             j = i + 1
@@ -730,12 +732,33 @@ def collision(data, surf, parts, barriers=()):
                     break
                 j += 1
             a, b = s[i], s[j]
+            # (24 Nov, Arzani box seams 1.6 deep) consecutive straight boxes leave a wedge open on the outside of each
+            # joint (2-4 degrees: up to 1.5 wide at the edge): each end grows by tan(turn / 2) x the outer edge
+            dr = np.array([b[0] - a[0], b[2] - a[2]])
+            dr = dr / max(np.linalg.norm(dr), 1e-9)
+            nx = np.array([s[j + 1][0] - b[0], s[j + 1][2] - b[2]]) if j + 1 < n and j + 1 not in c else None
+
+            def turn(u, v):
+                if v is None or np.linalg.norm(v) < 1e-6:
+                    return 0.0
+                return math.acos(max(-1.0, min(1.0, float(u @ (v / np.linalg.norm(v))))))
+            t0, t1 = turn(dr, prev_dir), turn(dr, nx)
+            prev_dir = dr
             spans = [(-a[6], a[7], 'R', 0.0)]
             if r['kind'] != 'street':
                 spans += [(-a[6] - r.get('walkL', 7.5), -a[6], 'P', 0.5), (a[7], a[7] + r.get('walkR', 7.5), 'P', 0.5)]
             for lat_lo, lat_hi, kind, up in spans:
-                for a2, b2 in (ramp_gaps(a, b, lat_lo, lat_hi, ramps) if kind == 'P' else [(a, b)]):
-                    rows.extend(strip_box(a2, b2, lat_lo, lat_hi, kind, up, surf, THK))
+                edge = max(abs(lat_lo), abs(lat_hi))
+                ext = (min(math.tan(t0 / 2) * edge, 6.0), min(math.tan(t1 / 2) * edge, 6.0))
+                if kind == 'R':
+                    # (the fit probes the surface: only for runs in the cells being baked; the rest stay plain)
+                    if only and not ({cell_of(a[0], a[2]), cell_of(b[0], b[2])} & only):
+                        rows.extend(strip_box(a, b, lat_lo, lat_hi, kind, up, surf, THK, ext=ext))
+                    else:
+                        rows.extend(fit_boxes(s[i:j + 1], lat_lo, lat_hi, surf, THK, ext))
+                    continue
+                for a2, b2 in ramp_gaps(a, b, lat_lo, lat_hi, ramps):
+                    rows.extend(strip_box(a2, b2, lat_lo, lat_hi, kind, up, surf, THK, ext=ext))
             i = j
     # roundabouts: 48 boxes round the ring, 48 round the pavement, an island disc of boxes
     for g in data.get('roundabouts', []):
@@ -799,7 +822,7 @@ def ramp_gaps(a, b, lo, hi, ramps):
     return [(at(t0), at(t1)) for t0, t1 in out]
 
 
-def strip_box(a, b, lo, hi, kind, up, surf, thick, prefer='min'):
+def strip_box(a, b, lo, hi, kind, up, surf, thick, prefer='min', ext=(0.0, 0.0)):
     pa = np.array([a[0], a[1], a[2]])
     pb = np.array([b[0], b[1], b[2]])
     fwd = pb - pa
@@ -838,9 +861,82 @@ def strip_box(a, b, lo, hi, kind, up, surf, thick, prefer='min'):
     if U[1] < 0:
         U = -U
     # box: X = right (width), Y = U (thickness), Z = along; the top face passes through A and Bp
-    ctr = (A + Bp) / 2 - U * (thick / 2)
+    ctr = (A + Bp) / 2 - U * (thick / 2) + fw * ((ext[1] - ext[0]) / 2)
     Rr = right
-    return [box_row(kind, ctr, Rr, U, (hi - lo, thick, length + 0.3))]
+    return [box_row(kind, ctr, Rr, U, (hi - lo, thick, length + 0.3 + ext[0] + ext[1]))]
+
+
+FIT_TOL = 0.12   # a carriageway box's top stays this close to the built surface under it, or the run is split
+FIT_MIN = 3.0    # never split a box shorter than this (studs along)
+
+
+def fit_boxes(P, lo, hi, surf, thick, ext=(0.0, 0.0)):
+    """(24 Nov, Arzani: a 1.25 hop at Lane #1957's oblique mouth, a side road's box planar over 88 studs running
+    into Arzani's carriageway) carriageway boxes whose top is the least-squares plane of the BUILT surface under
+    them (along and across: a box over a mouth tilts with the bigger road), the run P (samples, straight within 2
+    degrees) split in two until every probe of the surface is within FIT_TOL of the box top. The visible top is the
+    highest built surface within 4 of the road's own data height (never a deck over it)."""
+    out = []
+
+    def lerp(a, b, t):
+        return [x + (y - x) * t for x, y in zip(a[:3], b[:3])] + list(a[3:])
+
+    def one(Q, e0, e1):
+        a, b = Q[0], Q[-1]
+        pa, pb = np.array(a[:3], float), np.array(b[:3], float)
+        fwd = pb - pa
+        fwd[1] = 0
+        L = np.linalg.norm(fwd)
+        if L < 0.3 or hi - lo < 0.3:
+            return
+        fwd /= L
+        right = np.array([-fwd[2], 0, fwd[0]])
+        mid = (lo + hi) / 2
+        ref = lambda t: a[1] + (b[1] - a[1]) * t
+        pts = []
+        nl = max(3, min(7, int((hi - lo) / 6) + 2))
+        na = max(3, min(9, int(L / 6) + 2))
+        for ka in range(na):
+            t = ka / (na - 1)
+            for kl in range(nl):
+                lat = lo + 0.6 + (hi - lo - 1.2) * kl / (nl - 1)
+                x, z = pa[0] + fwd[0] * L * t + right[0] * lat, pa[2] + fwd[2] * L * t + right[2] * lat
+                hs = [h for h in surf.heights(x, z) if abs(h - ref(t)) < 4]
+                if hs:
+                    pts.append((L * t, lat - mid, max(hs)))
+        if len(pts) < 4:
+            out.extend(strip_box(a, b, lo, hi, 'R', 0.0, surf, thick, ext=(e0, e1)))
+            return
+        M = np.array([[1.0, u, v] for u, v, _ in pts])
+        y = np.array([h for _, _, h in pts])
+        k, *_ = np.linalg.lstsq(M, y, rcond=None)
+        res = float(np.abs(M @ k - y).max())
+        if res > FIT_TOL and L > 2 * FIT_MIN:
+            if len(Q) > 2:
+                m = len(Q) // 2
+                one(Q[:m + 1], e0, 0.0)
+                one(Q[m:], 0.0, e1)
+            else:
+                q = lerp(a, b, 0.5)
+                one([a, q], e0, 0.0)
+                one([q, b], 0.0, e1)
+            return
+        # box frame: F along the plane's slope, R across it (its cross tilt), U their normal (up)
+        F = np.array([fwd[0], k[1], fwd[2]])
+        F /= np.linalg.norm(F)
+        Rv = np.array([right[0], k[2], right[2]])
+        Rv -= (Rv @ F) * F
+        Rv /= np.linalg.norm(Rv)
+        U = np.cross(F, Rv)
+        if U[1] < 0:
+            U = -U
+        A3 = pa + right * mid
+        A3[1] = k[0]
+        length = L / math.sqrt(1 - F[1] ** 2) if abs(F[1]) < 1 else L
+        ctr = A3 + F * (length / 2) - U * (thick / 2) + F * ((e1 - e0) / 2)
+        out.append(box_row('R', ctr, Rv, U, ((hi - lo) / math.sqrt(1 - Rv[1] ** 2), thick, length + 0.3 + e0 + e1)))
+    one(list(P), ext[0], ext[1])
+    return out
 
 
 if __name__ == '__main__':

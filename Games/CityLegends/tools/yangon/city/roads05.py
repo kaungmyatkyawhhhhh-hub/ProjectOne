@@ -899,6 +899,24 @@ def widen_rate(v, c, k=0.12):
     return v
 
 
+BRIDGE_NEAR = 40.0   # a raised profile point is a deck only within this of an OSM bridge way
+SMOOTH_W = 16.0      # profile heights are smoothed along a road over +- this (two profile point spacings)
+
+
+def smooth_chain(v, c, W=SMOOTH_W):
+    """triangle-weighted mean over +- W studs of chainage (ends: the window shrinks): takes out the inverse-distance
+    stair (flat at each profile point, steep between) and keeps the grade"""
+    v = np.asarray(v, float)
+    c = np.asarray(c, float)
+    out = v.copy()
+    lo = np.searchsorted(c, c - W)
+    hi = np.searchsorted(c, c + W, side='right')
+    for i in range(len(v)):
+        w = np.maximum(0.0, 1.0 - np.abs(c[lo[i]:hi[i]] - c[i]) / W)
+        out[i] = float((v[lo[i]:hi[i]] * w).sum() / w.sum())
+    return out
+
+
 def ease_steps(v, c, L=EASE_W):
     """a piecewise-constant array eased linearly over L studs at each change (centred)"""
     v = np.asarray(v, float)
@@ -1141,6 +1159,16 @@ def finish(net):
     decks = []
     for r in roads:
         r['cut'] = np.zeros(len(r['P']), bool)
+    # (24 Nov, Arzani Street: the old P7 profile's "raised" run made a 1.2 km flyover deck where OSM has no bridge)
+    # a raised profile point counts only where an OSM bridge way lies near; elsewhere the road is ground
+    blines = [LineString(e.P) for e in net['edges'] if getattr(e, 'bridge', False) and len(e.P) > 1]
+    btree = STRtree(blines) if blines else None
+
+    def on_bridge(xz):
+        if btree is None:
+            return False
+        pt = Point(float(xz[0]), float(xz[1]))
+        return any(blines[int(k)].distance(pt) < BRIDGE_NEAR for k in btree.query(pt.buffer(BRIDGE_NEAR)))
     # heights (deck heights for raised samples kept separately)
     for r in roads:
         n = len(r['P'])
@@ -1152,10 +1180,12 @@ def finish(net):
             if r['main'] and H.traised is not None:
                 tr, R = H.traised
                 d, j = tr.query(r['P'][i], k=1, distance_upper_bound=40)
-                if np.isfinite(d):
+                if np.isfinite(d) and on_bridge(r['P'][i]):
                     yy, gg, dd = H.at(r['P'][i], r['keys'], allow_raised=True)
                     yr[i] = yy
-        r['y'], r['g'], r['yr'] = y, g, yr
+        # (24 Nov, Ziwaka / Shwe Gone Dine / Merchant: the profile points are ~15 studs apart and H.at's inverse-distance
+        # weights go flat at each point, so every other 8-stud sample changed grade by up to 8%) smoothed along the road
+        r['y'], r['g'], r['yr'] = smooth_chain(y, r['c']), g, yr
     # decks: a main road whose raised-near samples climb > 6 studs over the ground
     for r in roads:
         ok = np.isfinite(r['yr']) & (r['yr'] - r['g'] > 6.0)
