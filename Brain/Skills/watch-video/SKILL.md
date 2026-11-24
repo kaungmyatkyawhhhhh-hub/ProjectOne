@@ -7,6 +7,13 @@ description: Use whenever a video file or folder of videos must be watched, stud
 
 Claude can't play a video, but it can look at pictures. `video_watch.py` (next to this file) turns a video into pictures and numbers; then you **open every picture with the Read tool** and describe what is really in them.
 
+## Videos that live on the OTHER PC (owner's normal setup, 24 Nov 2026)
+The owner keeps videos on the PC linked to the Claude chat app and does NOT copy them to the Claude Code PC. The chat Claude runs `video_watch.py` there and puts the results in the vault, which reaches this PC through Obsidian Git (pull first). So:
+- Look for a **watch folder** in the vault before asking for a video: `<game folder>/watch_<date>_<name>/` (e.g. `City Legends/watch_2026-11-23_clips/`). It has `00 INDEX.md` and one folder per video with `WATCH.md`, `sheets/`, `frames.zip` (720 px wide frames, one per sheet slot, named `t<seconds>s.jpg`), `audio/`, `cuts.txt`, `info.json`. Unzip `frames.zip` into a temp folder OUTSIDE the vault (e.g. `python -c "import zipfile;zipfile.ZipFile('frames.zip').extractall(r'C:/Temp/watch/<clip>')"`) and delete it after.
+- Skip section 1 and go straight to section 2 (Look), using those files. The unzipped `frames/t<seconds>s.jpg` replace `--at` for close looks (720 px wide, enough for most signs and plates).
+- If a frame between slots or a sharper frame is needed, or a `--zoom` sound picture, write the list (video, seconds, why) into `00 INDEX.md` under "Requests for the chat Claude" and tell the owner to ask the chat Claude to make them. Never ask the owner to move the videos.
+- New videos: the owner puts them in `C:\Users\kaung\Downloads\ClipsToStudy` on the chat PC and asks the chat Claude to "prepare them for Claude Code".
+
 ## 0. One-time setup (only if the script says something is missing)
 ```
 python -m pip install numpy pillow imageio-ffmpeg

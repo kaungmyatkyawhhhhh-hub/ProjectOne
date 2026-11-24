@@ -1,0 +1,35 @@
+{
+ "file": "C:\\Users\\kaung\\Downloads\\ClipsToStudy\\IMG_0936.MOV  (on the chat PC, not in the vault)",
+ "bytes": 78775573,
+ "duration_s": 45.81,
+ "codec": "hevc",
+ "stored_size": [
+  1920,
+  1080
+ ],
+ "fps": 59.97,
+ "rotation": -90.0,
+ "shown_size": [
+  1080,
+  1920
+ ],
+ "portrait": true,
+ "has_audio": true,
+ "tags": {
+  "com.apple.quicktime.creationdate": "2026-11-23T12:56:12+0630",
+  "com.apple.quicktime.location.accuracy.horizontal": "19.300144",
+  "com.apple.quicktime.location.ISO6709": "+17.0789+096.1743+007.581/",
+  "com.apple.quicktime.make": "Apple",
+  "com.apple.quicktime.model": "iPhone 17 Pro",
+  "com.apple.quicktime.software": "27.0.1",
+  "encoder": "Lavf60.16.100",
+  "creation_time": "2026-11-23T06:26:12.000000Z"
+ },
+ "gps_start": {
+  "lat": 17.0789,
+  "lon": 96.1743,
+  "maps": "https://www.google.com/maps?q=17.0789,96.1743"
+ },
+ "sheet_every_s": 1,
+ "scene_cuts": 1
+}
