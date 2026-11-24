@@ -85,6 +85,11 @@ function D.cliff(a: Vector3, b: Vector3): boolean
 	return dy > 6 and dy > 0.5 * Vector2.new(b.X - a.X, b.Z - a.Z).Magnitude
 end
 
+-- (2026-11-24) only the deck road's own lanes are lifted, across its whole width: the old test (any lane within 21 of
+-- the middle, within 3.5 of the old top) lifted 12 points of Pyay Road #12, the ground road under the deck, 16 studs up
+-- onto it, and left Pyay Road #6's outer lane 3 at the old height where it ran 21-22 out (a step at each deck end)
+D.ROAD = "Pyay Road #6"
+D.HALF = 26
 function D.apply(lanes)
 	local S = D.S
 	local z0, z1 = S[1][2], S[#S][2]
@@ -106,7 +111,7 @@ function D.apply(lanes)
 					local cx = a[1] + (b[1] - a[1]) * t
 					local e = a[3] + (b[3] - a[3]) * t
 					local top = a[4] + (b[4] - a[4]) * t
-					if top > e + 0.05 and math.abs(p[k] - cx) < 21 and math.abs(p[k + 1] - e) < 3.5 then
+					if l.road == D.ROAD and top > e + 0.05 and math.abs(p[k] - cx) < D.HALF and math.abs(p[k + 1] - e) < 3.5 then
 						p[k + 1] += top - e
 						n += 1
 					end
