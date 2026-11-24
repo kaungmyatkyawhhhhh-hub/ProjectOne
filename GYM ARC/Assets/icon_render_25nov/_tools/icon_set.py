@@ -35,9 +35,14 @@ def build_set():
     frame_m = mat("WindowFrame", "#1B1D22", 0.4, 0.6)
     chrome = mat("Chrome", "#E6E9ED", 0.12, 1.0)
     iron = mat("IronBlack", "#16171A", 0.45, 0.6)
-    sky = bpy.data.materials.get("SkyWindow") or emission("SkyWindow", srgb("#DCEBFF"), 6.0)
+    sky = bpy.data.materials.get("SkyWindow") or emission("SkyWindow", srgb("#DCEBFF"), 9.0)
     box("Floor", (60, 60, 0.2), (0, -10, -0.1), floor_m, col)
     box("BackWall", (60, 0.4, 22), (0, -16, 11), wall_m, col)
+    box("Ceiling", (60, 40, 0.3), (0, -4, 17), wall_m, col)
+    panel = bpy.data.materials.get("CeilPanel") or emission("CeilPanel", srgb("#FFF6E8"), 12.0)
+    for i in range(-3, 4):
+        for j in range(4):
+            box(f"CeilLight{i}{j}", (5.5, 0.9, 0.1), (i * 7.5, -13 + j * 6, 16.8), panel, col)
     # three tall windows in the back wall, bright sky behind
     for i, x in enumerate((-12, 0, 12)):
         box(f"WinSky{i}", (8, 0.1, 11), (x, -15.75, 8.5), sky, col)
@@ -83,25 +88,24 @@ def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0):
         # the hub + label on the OUTER face
         zf = s * (1.55 + 0.62 + 0.28)
         pieces.append(cyl(f"DB_Hub{s}", 0.55, 0.12, (0, 0, zf), chrome, col, verts=48, bevel=0.03))
-        for j, ang in enumerate((90, -90)):
+        for j, (word, yy) in enumerate((("1000", 0.52), ("LB", -0.56))):
             bpy.ops.object.text_add(location=(0, 0, 0))
             t = bpy.context.active_object; t.name = f"DB_Text{s}{j}"
-            t.data.body = "1000 LB"; t.data.align_x = "CENTER"; t.data.align_y = "CENTER"
-            t.data.size = 0.62; t.data.extrude = 0.03
+            t.data.body = word; t.data.align_x = "CENTER"; t.data.align_y = "CENTER"
+            t.data.size = 0.47 * R if word == "1000" else 0.44 * R; t.data.extrude = 0.04
             try:
                 t.data.font = bpy.data.fonts.load(r"C:\Windows\Fonts\ariblk.ttf", check_existing=True)
             except Exception: pass
             t.data.materials.append(txt_m)
             link(t, col)
-            # place on the outer face, in a ring position (top / bottom of the hub), facing outward
-            r = (R + 0.55) / 2 + 0.05
-            t.location = (0, r * math.sin(math.radians(ang)), zf + s * 0.06)
+            # flat on the OUTER face (local XY plane), above / below the hub, reading upright
+            t.location = (0, yy * R, zf + s * 0.07)
             t.rotation_euler = (0, 0 if s > 0 else math.pi, 0)
-            if ang < 0: t.rotation_euler.z += math.pi
             pieces.append(t)
     for p in pieces: p.parent = root
     # orient: local Z -> axis, centred on the hand
-    z = Vector(axis).normalized(); x = z.orthogonal().normalized(); y = z.cross(x)
+    z = Vector(axis).normalized(); up = Vector((0, 0, 1))
+    y = (up - z * up.dot(z)).normalized(); x = y.cross(z)
     m = Matrix((x, y, z)).transposed().to_4x4(); m.translation = hand_obj.matrix_world.translation
     root.matrix_world = m @ Matrix.Scale(scale, 4)
     return root
