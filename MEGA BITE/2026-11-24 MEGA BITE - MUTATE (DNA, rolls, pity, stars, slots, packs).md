@@ -37,7 +37,29 @@ The first 10 are the old cards (same ids, so old saves convert). The 15 new ones
 - **Legendary:** Golden Glow (now +15% all EXP + the gold outline), **Lantern Glow** (lanternsharks glow), **Goblin Jaw** (slingshot jaw), **Whale Gulp** (the biggest fish).
 - **Mythic:** **Megalodon Blood**, **Ancient Fossil** (sharks are older than trees).
 - Every effect uses the old card fields (fish / predator / chest / quest EXP, health, heal delay, Gold Rush fill and time, shiny chance, all EXP), so **no gameplay script changed**. All go through `C.CardVal`, which now reads the equipped mutations with their stars.
-- New icons were **not** drawn: the new mutations reuse icons from our sheet (Sense, Eye, Stopwatch, Ram, Shake, Lantern, SeaLunge, Size, Crown, Ammonite...). Own icons are a ChatGPT art pipeline job.
+- **Own icons (added later on 24 Nov, ChatGPT art pipeline):** one 5×3 sheet, made in one try with the 14 Nov card sheet attached as the style reference. Files are in `UI/card_icons/`: the prompt (`prompt_mutations_24Nov.md`), the sheet, the cutter (`cut_mutation_icons.py`), 15 `mb_icon_Mut*.png` at 256² and `preview_mutations_24Nov.png`.
+  - **Keying lesson:** soft glows (the lanternshark, the tooth's ring) are see-through over magenta, so the usual 3 px fringe fix left a lilac or pink halo. The fix: in the glow icons' cells only, alpha = 1 − min(R,B)/255 on magenta-tinted pixels, then un-mix. Run globally, it broke the goblin shark's pink-peach skin.
+  - **Uploaded to group 33151111** as `K.Icons.Mut<Id>`, and each mutation's `icon` points at its own. Checked in Studio Play: all 25 icons load in COLLECTION.
+
+| Icon | Asset id | Moderation |
+|---|---|---|
+| MutLateralLine | 103184664360710 | Approved |
+| MutCountershade | 87338219799770 | Approved |
+| MutElectro | 111559581174316 | Approved |
+| MutToothBelt | 75793241989620 | Approved |
+| MutTiger | 77617968595385 | Approved |
+| MutHammer | 81529350190550 | Approved |
+| MutMako | 96037388443289 | Reviewing (shows in Studio) |
+| MutGreenland | 87882981514897 | Approved |
+| MutBull | 87814284448698 | Approved |
+| MutThresher | 115555643003001 | Reviewing |
+| MutLantern | 111985489510881 | Approved |
+| MutGoblin | 118574452460047 | Approved |
+| MutWhale | 117410553876447 | Approved |
+| MutMegalodon | 74154255225817 | Approved |
+| MutAncient | 102502032486709 | Approved |
+
+  Backups: `UIKit_preMutIcons_24Nov`, `GameConfig_preMutIcons_24Nov`.
 
 ## DNA (per slot) and free rolls
 - **DNA income** (MB_Cards server, a 1 s tick on the stats): per fish 1 + evolution ÷ 3; predator 10; chest 30; evolving 40 × the new stage; Fossilize 1,500 × the new tier (Ant gives 2,000 / 4,000 per rebirth). Tested: 10 fish + 1 chest = +40, Fossil I = +1,500.
@@ -70,7 +92,6 @@ The first 10 are the old cards (same ids, so old saves convert). The 15 new ones
 
 ## Not done / open
 - Phone layout not checked on a device. The window is 700×430 with the same AttachScale as Evolutions.
-- New mutation icons (ChatGPT art pipeline).
 - The products / pass ids (see TODO).
 - Store window: no MUTATE packs section in MB_StoreUI yet (they live in the MUTATE window).
 - Not tested: a real Robux purchase (needs the products made).
