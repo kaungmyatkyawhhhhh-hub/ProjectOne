@@ -124,3 +124,4 @@ Not 0 yet. The ones left are almost all at junctions at 0-30 mph: crossing / tur
 2. **Shots:** P3 traffic and a close-up of each type in Play (Play could not start).
 3. Switch-back check on the Server in a fresh Play (`CityLegends_v1`; the Edit source is back on it).
 4. **After the owner's phone test:** delete `ServerStorage.TrafficModels_old` and `TrafficModels_preBadges`.
+5. **Done 24 Nov:** racer bumps / hops and the missing rear doors: [[2026-11-24 Traffic fix - racer bumps and rear doors]].
