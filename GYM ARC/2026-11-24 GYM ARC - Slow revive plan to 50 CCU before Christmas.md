@@ -51,3 +51,15 @@ Built on:
   - the 5 Dec update pulls a test wave and those players stay;
   - Home rec gets back to ~2,000+ players/day.
 - **Checkpoint Sat 5 Dec:** if Home rec is still under ~800/day, move part of the $200 earlier (a short burst at the Christmas launch) so the update gets tested by more players.
+
+## Correction, 24 Nov 16:37: owner says real CCU is **2**, not ~15
+- 2 CCU ≈ ~250-300 players a day. Going to 50 is ~25x. That can't come from organic Home in 4 weeks; Home has almost stopped testing the game.
+- At 2 CCU almost every player joins an empty server. In a gym sim that's a bounce reason by itself (nobody to compare with).
+- **Changed decisions:**
+  1. **Use ads to re-test, not just to spike.** Split the $200:
+     - **$40 right after v1903+v1905 are published** (3-4 days, Plays objective): enough players to MEASURE whether the fixed first minutes work (first Growth Spurt, 3-min bounce, D1). It is also the "retrieval" nudge.
+     - **$60 at the Christmas launch (5 Dec)**: the update gets tested by real numbers of players, which is when Home decides whether to keep showing it.
+     - **$100 from ~19 Dec** (school break).
+  2. **The game must not feel empty.** Show the existing NPC lifters busier in the Starter Gym. Make the first server feel alive: a few NPCs on machines near the spawn, and leaderboard boards with NPC-free real top players. Keep MaxPlayers so new players land with others.
+  3. The 5 Dec Christmas update is treated as a **relaunch**: new icon, 4 new thumbnails, update name, group shout, Discord, TikTok clips.
+- **Honest target:** 50 CCU is realistic only while ads are running (as on 31 Oct-7 Nov). Organically, aim for **10-15 CCU by Christmas**, which would mean Home is recommending us again. That's what keeps players after the ads stop.
