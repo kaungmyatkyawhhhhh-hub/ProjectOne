@@ -72,6 +72,10 @@ class Cover:
         a, b = self.rtree.query(g, predicate='intersects')
         road = (self.rtops[b] > pts[a, 1] - 2.0) & (self.rtops[b] < pts[a, 1] + 0.2)
         cov[a[road]] = False
+        if getattr(self, 'dtree', None) is not None:
+            a, b = self.dtree.query(g, predicate='intersects')
+            deck = (self.dtops[b] > pts[a, 1] - 4.0) & (self.dtops[b] < pts[a, 1] + 0.2)
+            cov[a[deck]] = False
         return cov
 
 
@@ -133,9 +137,9 @@ def clip(rows, parts):
     cover = Cover(parts)
     dp, dt = deck_tops(rows)
     if dp:
-        cover.rpolys = np.concatenate([cover.rpolys, np.array(dp, dtype=object)])
-        cover.rtops = np.concatenate([cover.rtops, np.array(dt)])
-        cover.rtree = STRtree(cover.rpolys)
+        # (a deck's carriageway: no pavement box stands over it, however high; 24 Nov, 2.5 over the May Ni Gone deck)
+        cover.dpolys, cover.dtops = np.array(dp, dtype=object), np.array(dt)
+        cover.dtree = STRtree(cover.dpolys)
     out, changed = [], 0
     for r in rows:
         if r.split(' ', 1)[0] != 'P':
