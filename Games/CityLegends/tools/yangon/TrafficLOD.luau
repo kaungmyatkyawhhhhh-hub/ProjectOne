@@ -173,7 +173,14 @@ end
 
 local function visible(inst: Instance): { BasePart }
 	local out = {}
-	local all = inst:GetDescendants()
+	local all = {}
+	for _, d in inst:GetDescendants() do
+		-- (2026-11-24) an A-Chassis corner's suspension arms (see-through physics boxes) are no wheel: the Belta's
+		-- traffic copy had three of them for wheels
+		if not (d:IsA("BasePart") and under(d, inst, "suspension")) then
+			table.insert(all, d)
+		end
+	end
 	-- (a kit wheel's own Part is the physics cylinder; its looks are the parts inside it)
 	local inner = false
 	for _, d in all do
@@ -357,7 +364,8 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 			table.insert(keep, p)
 		end
 	end
-	-- a part in the paint parts' own colour and material is paint too (the Belta's door skins are named "H")
+	-- a door part in the paint parts' own colour and material is paint too (the Belta's door skins are named "H"; only
+	-- doors: on a black car every black trim would take the livery)
 	local paintLook: { [string]: boolean } = {}
 	local function lookKey(p: BasePart): string
 		return p.Material.Name .. tostring(p.Color)
@@ -373,7 +381,7 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 	-- (2026-11-24) the body cap trimmed by size only and cut the Camry's / Crown's rear door skins and side windows
 	-- (ties at the cut, one door of a pair kept): the shell (paint, glass, door parts) is never trimmed, only the rest
 	local function shell(p: BasePart): boolean
-		return isPatch(p.Name) or isPaint(p) or paintLook[lookKey(p)] == true or isGlass(p, lower(p.Name)) or under(p, src, "door")
+		return isPatch(p.Name) or isPaint(p) or isGlass(p, lower(p.Name)) or under(p, src, "door")
 	end
 	if maxBody and #keep > maxBody then
 		local rank: { [BasePart]: number } = {}
@@ -435,7 +443,7 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 			if c:IsA("MeshPart") then
 				c.TextureID = ""
 			end
-		elseif isPaint(p) or paintLook[lookKey(p)] then
+		elseif isPaint(p) or (paintLook[lookKey(p)] and under(p, src, "door")) then
 			c:SetAttribute("TrafficPaint", true)
 			c.Material = Enum.Material.SmoothPlastic
 			c.Reflectance = 0.08
@@ -460,7 +468,11 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 			local hadLook = p:FindFirstChildOfClass("SurfaceAppearance") ~= nil and not keepLook
 			tidy(c, keepLook)
 			c.CFrame = place * p.CFrame
-			if hadLook then
+			if p == wheelsFolder:FindFirstChild(corner) then
+				-- (an A-Chassis corner part is the wheel: a cylinder whose rim was a decal, gone with tidy) a dark tyre
+				c.Color = Color3.fromRGB(24, 24, 25)
+				c.Material = Enum.Material.SmoothPlastic
+			elseif hadLook then
 				local col, mat = roleColor(lower(p.Name))
 				if col then
 					c.Color = col
