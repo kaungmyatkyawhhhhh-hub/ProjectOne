@@ -142,3 +142,24 @@ Logo in code at 42% width, top-left (clear of the dumbbell). At 64 px: mean 0.30
 - `gymarc_icon_v5_blue_dumbbell_nologo.png`
 
 **If chosen:** the brand moves to the blue logo. Thumbnails and the in-game logo should follow later.
+
+## 12 alternatives (owner: "that icon way better but i want like 10 alternatives and i will choose the best one")
+Same chat as v5, 3 one-try 2x2 sheets. The new blue logo was added in code, hue-matched to each colour.
+
+| # | Idea |
+|---|---|
+| 1 | double-biceps flex, a 1000 LB dumbbell at his feet |
+| 2 | one-arm overhead dumbbell press |
+| 3 | barbell squat, 1000 LB plates both sides |
+| 4 | farmer's walk toward the camera with two dumbbells |
+| 5 | the v5 curl, emerald green |
+| 6 | the v5 curl, crimson red |
+| 7 | the v5 curl, magenta pink |
+| 8 | the v5 curl, frost white/cyan |
+| 9 | before/after: a tiny grey-tee noob looks up at his huge future self |
+| 10 | close-up: smirking face + giant flexed bicep (the face came out styled, not the classic decal) |
+| 11 | arm wrestling: slamming a sweating rival (the game's own feature) |
+| 12 | champion: barbell overhead under a spotlight, crowd silhouettes |
+
+- **Files** (Downloads): `gymarc_icon_choices_board.png`, `gymarc_icon_choice_01..12.png` (600 px previews). The board screenshot is in the vault.
+- **After the owner picks:** a full-size render of that one, the logo placed clear of the weights, the 60 px test.
