@@ -728,5 +728,13 @@
   },
   "saves": "v1981 (swap + lanes), v1983 (after Play, store v1)",
   "left": "v2 tilt in every older cell (map-wide rebuild); Merchant visual 0.4 under boxes at 33990-34070; MB2 west cells 20x29/21x29 still old rank relations; SPR last 150 studs 1-1.5 under data"
+ },
+ "street_realism_25Nov": {
+  "what": "client street dressing from the lane data, all districts: YangonRoadside (power poles every 105 studs on the kerb side of every traffic road, black-white banded foot, sagging Beam cable bundles, wires across the road every 3rd pole, junction box / cable coil / transformer, pole billboards with fictional ads every 9th pole) + YangonSignals blue lane-arrow panel under each mast arm",
+  "where": "src/client/YangonRoadside.lua (new), src/client/YangonSignals.lua, src/client/Main.client.lua (startStep YangonRoadside)",
+  "skips": "P1 tiles with Data_P1S (it has its own poles + cables), signalled junctions (radius + 18), decks, roads, medians, buildings / landmarks / parks / sites / green",
+  "cost": "0 saved parts, ~19 KB script; in Play ~170 parts + ~110 beams near the camera (LOAD 480, low-end 336 and 3 bundles instead of 5)",
+  "saved_version": 2023,
+  "playtest": "PASS 25 Nov: test store, before/after at Waizayandar Rd, its junction, Pyay Rd, Anawrahta Rd, Kabar Aye (P1: 0 new poles); store back to v1, checked on the Server; no script errors"
  }
 }
