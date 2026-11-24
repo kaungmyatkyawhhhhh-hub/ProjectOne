@@ -606,7 +606,8 @@
   "status": "IN PROGRESS 24 Nov (home PC, DISTRICT REBUILD agent)",
   "plan": "P11 box x 36074..45984 z 25357..32653 -> 1536 cells x23..29 z16..21 (42 cells, all edges: x23 = P1 column, z16 = P9/P2 row, z21 = P8 row, x29 = P10/P9 corner + P12 later; P12 rebuild re-bakes x29 whole). Step boxes 16: cols 35328..36864 (label 11), 36864..39936 (12), 39936..43008 (13), 43008..46080 (14) x rows 24576..26112 (8), 26112..29184 (9), 29184..32256 (10), 32256..33792 (11). Bake R05_ONLY = the 42 swap cells, clip P11+P1+P2+P7+P8+P9+P10.",
   "data": "R05_GROW=1700 roads05_subset.py net RB11 P11: 1568 roads, 14 decks, 1 ring, 54 modules (9,977,948 chars); subset.json boxes P11 + seams P1 P2 P7 P8 P9 P10; deckfeet mirror 0; data pack imports/sync/rebuild_RB11_data.rbxmx = asset 110812698823319 (Approved)",
-  "buildings": "running: district_files.sh P11 --no-roads buildings (log district_files_P11_24nov.log); old outputs _pre_rebuild_P11"
+  "buildings": "DONE 24 Nov home PC: district_files.sh P11 --no-roads buildings (13 min, log district_files_P11_24nov.log): 8,551 buildings (322 dropped / 1,941 clipped by the J37 net, 69 on landmark sites, 0 overlap), shells 10,727 parts in 30 cells, roofs 4,667, 2 pagodas; night cells_1.glb 18.5 MB (no split); old outputs _pre_rebuild_P11",
+  "uploaded": "24 Nov: place 74019969953612 93599109640402 109976488348246 111231067361156, night 97923810886432, RB11 data 110812698823319 (all Approved; districts_assets.txt P11R)"
  },
  "P12": {
   "status": "IN PROGRESS 24 Nov (after P11)",

@@ -91,6 +91,9 @@ local function enc(v: number): string
 	return CH[a] .. CH[b] .. CH[c]
 end
 
+-- (v3 pages: a page body starting with V3 holds smallest-three quaternions, see collect)
+local V3 = "~T~"
+local QS = 515000 -- 0.7072 * QS stays under enc's 364,499
 local SKIP = { Line = true, Zebra = true, Barrier = true }
 local BRIDGE = { Parapet = true, RampWall = true, Girder = true, PierCap = true, Pier = true, LegWall = true }
 
@@ -150,15 +153,32 @@ function M.collect(root: Instance, cell: string): string
 		local k = kindOf(p)
 		counts[k] = (counts[k] or 0) + 1
 		local x, y, z = math.floor(pos.X * 100 + 0.5), math.floor(pos.Y * 100 + 0.5), math.floor(pos.Z * 100 + 0.5)
-		local qx, qy, qz = quat(cf)
+		-- (24 Nov, ROAD JOINS FIX: v2 kept x, y, z x4000 and rebuilt w; a road wedge (right axis up) is a turn near
+		-- 180 degrees, w near 0, and w's error tilted its face up to 0.03 rad: 0.4-0.8 studs across Strand Road's
+		-- 65-stud triangles, the jolt where Merchant Road joins it) v3: the largest component is dropped (its index
+		-- 0-3 = x y z w, made positive) and the other three go in 3 characters at QS (error ~1e-6)
+		local q = { quat(cf) }
+		local big = 1
+		for j = 2, 4 do
+			if math.abs(q[j]) > math.abs(q[big]) then
+				big = j
+			end
+		end
+		local sg = if q[big] < 0 then -1 else 1
+		local rest = {}
+		for j = 1, 4 do
+			if j ~= big then
+				table.insert(rest, enc(q[j] * sg * QS))
+			end
+		end
 		local rec = k .. classOf(p) .. enc2(x - px) .. enc2(y - py) .. enc2(z - pz)
-			.. enc2(qx * 4000) .. enc2(qy * 4000) .. enc2(qz * 4000)
+			.. CH[big - 1] .. table.concat(rest)
 			.. enc2(s.X * 100) .. enc2(s.Y * 100) .. enc2(s.Z * 100)
 		px, py, pz = x, y, z
 		table.insert(buf, rec)
 		len += #rec
 		if len > 94000 then
-			table.insert(pages, table.concat(buf))
+			table.insert(pages, V3 .. table.concat(buf))
 			buf, len = {}, 0
 			px, py, pz = 0, 0, 0
 		end
@@ -167,7 +187,7 @@ function M.collect(root: Instance, cell: string): string
 		end
 	end
 	if #buf > 0 then
-		table.insert(pages, table.concat(buf))
+		table.insert(pages, V3 .. table.concat(buf))
 	end
 	_G.RoadBake05Pages = pages
 	_G.RoadBake05Cell = cell

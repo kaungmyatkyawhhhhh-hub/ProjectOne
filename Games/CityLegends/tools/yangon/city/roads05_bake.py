@@ -71,6 +71,7 @@ def decode(s):
 
 
 H2 = (NB * NB - 1) // 2
+QS = 515000  # (v3 pages) RoadBake05 QS
 
 
 def decode_q(s):
@@ -90,15 +91,40 @@ def decode_q(s):
         v = IDX[s[i]] * NB + IDX[s[i + 1]] - H2
         i += 2
         return v
+    def num3():
+        nonlocal i
+        if s[i] == '~':
+            j = s.index('~', i + 1)
+            v = int(s[i + 1:j])
+            i = j + 1
+            return v
+        v = IDX[s[i]] * NB * NB + IDX[s[i + 1]] * NB + IDX[s[i + 2]] - HALF
+        i += 3
+        return v
+    # (24 Nov, ROAD JOINS FIX) v3 body (RoadBake05 V3 = "~T~"): smallest-three quaternion, the dropped (largest)
+    # component's index 0-3 = x y z w, the other three x QS in 3 characters. v2 rebuilt a small w badly: road
+    # wedges (turns near 180 degrees) came out tilted up to 0.03 rad
+    v3 = s.startswith('~T~')
+    if v3:
+        i = 3
     while i < n:
         k, c = s[i], s[i + 1]
         i += 2
-        v = [num() for _ in range(9)]
+        if v3:
+            v = [num() for _ in range(3)]
+            big = IDX[s[i]]
+            i += 1
+            rest = [num3() / QS for _ in range(3)]
+            v += [0, 0, 0] + [num() for _ in range(3)]
+            q = rest[:big] + [math.sqrt(max(0.0, 1 - sum(t * t for t in rest)))] + rest[big:]
+            x, y, z, w = q
+        else:
+            v = [num() for _ in range(9)]
+            x, y, z = v[3] / 4000, v[4] / 4000, v[5] / 4000
+            w = math.sqrt(max(0.0, 1 - x * x - y * y - z * z))
         px += v[0]
         py += v[1]
         pz += v[2]
-        x, y, z = v[3] / 4000, v[4] / 4000, v[5] / 4000
-        w = math.sqrt(max(0.0, 1 - x * x - y * y - z * z))
         R = (1 - 2 * (y * y + z * z), 2 * (x * y + w * z), 2 * (x * z - w * y))
         U = (2 * (x * y - w * z), 1 - 2 * (x * x + z * z), 2 * (y * z + w * x))
         out.append((k, c, (px / 100, py / 100, pz / 100), R, U, (v[6] / 100, v[7] / 100, v[8] / 100)))
