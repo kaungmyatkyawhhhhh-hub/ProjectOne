@@ -9,6 +9,7 @@ Companion to [[2026-11-21 Real Yangon references - what the game must match]] (n
 - [[2026-11-24 Clip catalogue - Waizayandar main road, junction condo, toll plaza, highway (0929, 0931, 0935, 0936)]]
 - [[2026-11-24 Clip catalogue - toddy palm avenue, big junction, Kone Baung St lanes (0930, 0933, 0934)]]: 51-item build list.
 - [[2026-11-24 Clip catalogue - YBS city drive and old highway (0932, 0937)]]
+- [[2026-11-24 Clip study supplement - real locations, sound, traffic numbers (0927-0937)]]: GPS point of every clip, drive speeds, red-light waits, detector traffic counts and mix, and the sound of each clip (horn, chime, city/highway beds).
 
 61 full-size stills: `refs_23nov/IMG_<clip>_<sss>s.jpg` (captions in each catalogue's "Best stills" part).
 
@@ -57,5 +58,5 @@ Companion to [[2026-11-21 Real Yangon references - what the game must match]] (n
 10. **Interiors (if we build flats)**: concrete stairwell + thin steel rail, scissor gate over a wood door, red varnished wood floors (0927, 0928). See [[2026-11-16 Research - Yangon interiors catalogue]].
 
 ## Not checked
-- Exact streets (no clear road-name signs; only Villa Nova and Lucky Seven Tea Shop names).
+- Exact streets: now pinned by each clip's GPS start point (see the supplement).
 - Colours not measured in RGB (the night note did that; do it when matching a specific scene).
