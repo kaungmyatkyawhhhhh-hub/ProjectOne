@@ -3,7 +3,7 @@ import bpy, bmesh, math, random
 from mathutils import Matrix, Vector
 BASE = r"C:\ObsidianOne\Claude+Obsidian\GYM ARC\Assets"
 OBJDIR = BASE + r"\icon_render_25nov"
-TEX = BASE + r"\thumbs_nov\_tools\faces"
+TEX = BASE + r"\icon_render_25nov\_tools\faces"
 scene = bpy.context.scene
 # Roblox (x, y, z) -> Blender (x, -z, y); a Roblox CFrame -> a Blender matrix (objects built Z-up, front = +Y)
 M3 = Matrix(((1, 0, 0), (0, 0, -1), (0, 1, 0)))
