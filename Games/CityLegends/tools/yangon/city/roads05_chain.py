@@ -379,6 +379,12 @@ def continuations(data, reach=40.0, opposed=-0.7):  # (reach 12 -> 40: May Ni Go
     return dict(st)
 
 
+# (24 Nov, ROAD JOINS FIX) = roadnet.RANK: a road's OSM class
+CLASS = {'motorway': 0, 'trunk': 0, 'primary': 1, 'secondary': 2, 'tertiary': 3, 'motorway_link': 4, 'trunk_link': 4,
+         'primary_link': 4, 'secondary_link': 4, 'tertiary_link': 5, 'unclassified': 6, 'residential': 6, 'road': 6,
+         'living_street': 7, 'service': 8, 'track': 8}
+
+
 def rerank(data):
     """unique ranks again: old rank as the key, a road that ends inside another comes after it"""
     roads = data['roads']
@@ -396,7 +402,13 @@ def rerank(data):
                 if oi == xi:
                     continue
                 o = roads[oi]['s']
-                if min(math.hypot(o[e][0] - q[0], o[e][2] - q[2]) for e in (0, -1)) < 2:
+                # (24 Nov, ROAD JOINS FIX: Maha Bandula Road #2 (primary) sat at rank 2378 behind ~25 residential streets
+                # crossing it, held level at each: the 31st Street crest) not "ends inside" when the other road ENDS
+                # here too (a continuation: its end within its own half, not only 2 studs), nor when this road is of a
+                # bigger class (a main road's end landing inside a crossing street): the key decides those
+                if min(math.hypot(o[e][0] - q[0], o[e][2] - q[2]) for e in (0, -1)) < max(2.0, net.half_at(oi, bi)):
+                    continue
+                if CLASS.get(r.get('hw'), 6) < CLASS.get(roads[oi].get('hw'), 6):
                     continue
                 if net.poly_dist(oi, bi, q[0], q[2]) < net.half_at(oi, bi) and xi not in succ[oi]:
                     succ[oi].add(xi)

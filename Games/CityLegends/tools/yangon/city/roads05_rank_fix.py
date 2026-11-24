@@ -2,8 +2,9 @@
 
 Maha Bandula Road #2 (primary) ranked 2378, behind ~25 residential streets that cross it (31st Street 2097 ...): the
 builder pins the smaller road to the bigger one, so the main road was held level across each of those streets (the
-crest at 31st Street by Sule). The cause is in roads05.py's Kahn order (a bigger-class road ending inside a smaller
-one's carriageway pushed it behind; fixed there for re-runs). This moves the road's rank in the existing data:
+crest at 31st Street by Sule). A fresh roads05.py gives it 24; roads05_chain.rerank (run by roads05_fix) pushed it
+behind a stub its end lies in (fixed there for re-runs: continuations and bigger-class enders are not "ends inside").
+This moves the road's rank in the existing data:
 
   * it goes just after the roads that must stay above it: roads it ends inside, bigger-class roads it touches, and
     every road it touches OUTSIDE `BOX` (the cells rebuilt now; the cells outside keep what they were built with);
@@ -104,6 +105,15 @@ def test():
             before = json.load(open(src, encoding='utf-8'))
             ob = next(r for r in before['roads'] if r['name'] == o['name'])['rank']
             assert (ob < 2378) == (o['rank'] < m['rank']), o['name']
+    # the shared-code fix: roads05_chain.rerank keeps a main road at its key (a fresh roads05.py run gives it 24;
+    # before the guards its end inside the "Maha Bandula Road" stub pushed it to 582 in this subset)
+    import roads05_chain
+    d = json.load(open(src, encoding='utf-8'))
+    R = {r['name']: r for r in d['roads']}
+    R[ROAD]['rank'] = 23.5
+    roads05_chain.rerank(d)
+    print('rerank from the generator key:', R[ROAD]['rank'], '31st Street', R['31st Street']['rank'])
+    assert R[ROAD]['rank'] < 50 and R[ROAD]['rank'] < R['31st Street']['rank']
     print('ok')
 
 
