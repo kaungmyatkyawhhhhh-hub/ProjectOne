@@ -582,6 +582,24 @@ def drop_scraps(parts, data, surf):
     return [p for i, p in enumerate(parts) if keep[i]], dict(on_carriageway=k_on, lone=k_lone)
 
 
+def deck_spill(data, only):
+    """(25 Nov, DECK OVERLAP FIX) decks with a sample in the baked cells AND in cells outside them: {name: outside cells}.
+    A re-bake keeps only R05_ONLY's triangles, so such a deck's other cells keep their old build of it."""
+    out = {}
+    if not only:
+        return out
+    for d in data.get('decks', []):
+        h = d.get('half', 24)
+        cells = set()
+        for q in d['s']:
+            for dx in (-h, 0, h):
+                for dz in (-h, 0, h):
+                    cells.add(cell_of(q[0] + dx, q[2] + dz))
+        if cells & only and cells - only:
+            out[d['name']] = cells - only
+    return out
+
+
 def bake(tag):
     D = od(tag)
     parts = pickle.load(open(os.path.join(D, 'parts.pkl'), 'rb'))
@@ -597,6 +615,10 @@ def bake(tag):
     parts = kept
     data = json.load(open(os.path.join(D, 'roads.json'), encoding='utf-8'))
     paint = json.load(open(os.path.join(D, 'paint.json')))['items']
+    spill = deck_spill(data, set(c for c in os.environ.get('R05_ONLY', '').split(',') if c))
+    for name, cells in spill.items():
+        print('DECK SPILL: %s also lies in %s (not in R05_ONLY): those cells keep the OLD copy of this deck = overlap '
+              'at the seam. Re-bake them too (whole cells) unless the deck there is unchanged.' % (name, ','.join(sorted(cells))))
     by = collections.defaultdict(list)       # (kind, cell) -> triangles
     road_tris = []
     deck_box = []
