@@ -67,3 +67,24 @@ Square 1024 icon, Roblox Blender GFX. Image 1 = my character's head exactly. Ima
 - **B, the lift:** a low 3/4 view of a huge bacon mid-deadlift, an effort face (squeezed eyes, gritted teeth, an anger vein), pink plates, the floor cracking pink. The most energy; the clearest gym read at 60 px.
 - **C, before/after:** a nervous skinny bacon (sweat) and a smirking titan with a glowing eye, split by a diagonal pink crack. The clear hook, but it reads as 2 people, not one head.
 - Claude leans **B**, or **B with A's idea** (the deadlift with the titan shadow behind). Waiting for the owner's pick, then a full-size polish + grade + 60 px test.
+
+## FINAL: deadlift + titan shadow (owner: "this is way better")
+- Same chat, one try.
+- **The picture:**
+  - huge Bacon Hair mid-deadlift, low 3/4 camera, effort face (squeezed eyes, gritted teeth, anger vein, sweat);
+  - a bent barbell, giant hot-pink plates, the floor cracking with pink energy;
+  - behind him on the violet brick wall, his shadow is a giant flexing titan with glowing pink eyes;
+  - a warm spotlight from the top left; indigo corners.
+- **Grade:**
+  - raw mean 0.22 / near-black 60%;
+  - in-browser lift (gamma 0.85 + soft edge falloff) gives mean 0.24 / 55.6%;
+  - the body is the bright warm shape; the face is tan by design (warm-vs-cool scheme), not white.
+- **In the real Roblox row mock** it reads as "strong guy deadlifting + giant shadow". Clearly ours, not Power Lifters.
+- **Files** (owner's Downloads; move them to thumbs_nov):
+  - `gymarc_icon_deadlift_shadow_final.png` (graded);
+  - `gymarc_icon_deadlift_shadow_raw.png`;
+  - `gymarc_icon_concepts_ABC.png`.
+- **Next:**
+  - upload it as the icon with the v1903 + v1905 publish;
+  - matching thumbnails in the same chat ("same exact style", 16:9, logo top-left in code);
+  - compare the click rate after 3-4 days against 3.7%.
