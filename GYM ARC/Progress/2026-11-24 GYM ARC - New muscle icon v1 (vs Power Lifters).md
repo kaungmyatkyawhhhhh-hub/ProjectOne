@@ -232,3 +232,14 @@ Claude's guesses at what bugs him:
 Note: all four came back with the calmer tan skin.
 
 File: Downloads\gymarc_icon_test_skin_shape_head_world.png. The owner's pick tells us which fix matters; then combine the winners.
+
+## Tanned, Power Lifters look (owner: "make him tanned and look like the power lifters icon")
+Same logo chat, one try.
+- **Asked for Power Lifters' LOOK and finish, not its pose, plate, logo or colours:**
+  - deep golden bronze / orange-tan glossy skin with bright warm highlights;
+  - the same Roblox bodybuilder build (huge round shoulders/chest, blocky smooth arms, a clean 8-pack, thick legs, small black briefs);
+  - the same crisp render and tight head-to-knees framing.
+- **Kept ours:** Bacon Hair + smirk, navy + warm bokeh + electric-blue rim, blue "1000 LB" weights.
+- **2x2:** curl / double biceps / barbell across the shoulders / one-arm overhead dumbbell.
+- **Result:** the finish now matches Power Lifters closely. The hair came out streaky two-tone, not quite the classic Bacon Hair. Fix on the pick.
+- **Files** (Downloads): `gymarc_icon_tanned_PLlook_sheet.png`, `gymarc_icon_tanned_curl / double_biceps / barbell_shoulders / overhead.png`.
