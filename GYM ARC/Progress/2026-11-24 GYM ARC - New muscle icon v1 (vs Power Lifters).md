@@ -331,3 +331,31 @@ Board with Power Lifters for comparison + row-size thumbs. Files in Downloads (D
 4. Show the owner 3 proven, clearly different directions and let him point at the one he likes. Only THEN generate.
 
 **Current best:** the close-up v2 (GYMARC_ICON_v2_closeup_logo_512).
+
+## 03:07 Owner sent the Roblox search "gym" results (12 wide thumbnails). What is actually in it:
+| Game | Likes / players | Picture |
+|---|---|---|
+| Throw Protein for Gym Bros | sponsored | bright sky, Greek columns, a flying steak, "LEGENDARY!" flag |
+| Gym Star Simulator | 92% / **4K** | a huge cap+chain muscle guy flexing, angry, in a BRIGHT gym |
+| Gym Universe | 81% / **6K** | a SUNNY green field, a muscle Bacon Hair dragging a crowd of noobs by rope |
+| Muscle Legends | 88% / 3K | DARK, a glowing yellow lightning muscle silhouette, logo bottom-left |
+| Ultimate Gym Game | 93% / 358 | a b/w gym, a hunched guy at a red barbell |
+| Roll A Fist | sponsored | an anime red fist |
+| Power Lifters | 90% / 2.5K | the orange bodybuilder + purple 400 KG plates |
+| Gym League | 96% / 520 | a jungle waterfall, a green hulk with a laurel |
+| Strongman Simulator | 92% / 565 | BRIGHT blue, a tank-top guy lifting a barbell |
+| Gym Monster | 83% / 117 | a BRIGHT white gym, 100 KG kettlebells, a girl with hearts |
+| Run a Gym | sponsored | a top-down tycoon |
+| +1 Muscle to Arm Wrestle | – | BRIGHT light blue, a skinny vs huge arm wrestle, an "EASY!" bubble |
+
+**Findings:**
+1. The two biggest (6K, 4K) are BRIGHT daylight; most are bright. Our dark navy attempts go against the genre (and the owner's own "never dark" lighting rule).
+2. Many are funny stories with 2+ characters (crowd drag, "EASY!" arm wrestle, a girl with hearts).
+3. Search shows THUMBNAILS (16:9), not icons, so thumbnails matter as much as the icon.
+
+**3 directions offered (the owner picks one):**
+- **A:** bright funny story: our huge Bacon Hair beating Benny (our bully).
+- **B:** a bright hero in a bright gym (Gym Star style).
+- **C:** a dark glowing aura (Muscle Legends style), tied to our elemental alters.
+
+Screenshot saved: `refs/gym_search_results_25nov.png`.
