@@ -113,3 +113,32 @@ The deadlift + shadow icon had too many things (shadow monster, cracks, rays) an
 **Files** (Downloads):
 - `gymarc_icon_v4_smirk_1000lb.png` (pick)
 - `gymarc_icon_v4_smirk_1000lb_logo.png`
+
+## v5 + new logo v10 (owner: "powerlifters still look way better. i think our logo is worse than theirs too")
+**Side-by-side read of Power Lifters vs v4:**
+1. Their background is DARK (a dark gym, warm bokeh), so the body is the brightest thing. Ours was bright violet.
+2. They use only TWO colour families: purple logo + plates + background vs the orange body. We had 3 (orange, violet, pink).
+3. A full powerful pose (head to knees, wide stance) vs our cropped bust.
+4. A complete, balanced weight with the number printed like a real plate vs ours cut off.
+5. Their logo is 2 bold slanted words, 2 colours, a thin glow frame, readable at any size. Ours (manga style: sparks, barbell, katakana) is noise when small.
+
+**New logo v10** (chat chatgpt.com/c/6b057956-4624-83ec-9227-9a950aca2d13, one try, green-key background keyed in the browser):
+- "GYM" in white-silver chrome over a bigger "ARC" in electric-blue chrome;
+- heavy forward-slanted block letters, a thick black outline, a thin cyan glow;
+- readable at 70 px.
+- File: Downloads\gymarc_logo_v10_blue_simple.png (transparent).
+
+**Icon v5** (same chat, one try). Our own colour pair: orange's opposite, BLUE.
+- a dark navy gym with warm bokeh, a blue rim;
+- the Bacon Hair head with a cool sideways smirk;
+- a huge orange bodybuilder head to knees, wide stance;
+- curling a giant blue chrome dumbbell printed "1000 LB";
+- black shorts.
+
+Logo in code at 42% width, top-left (clear of the dumbbell). At 64 px: mean 0.30, near-black 50%. Next to Power Lifters in the row mock it holds up and is clearly a different game (blue vs purple).
+
+**Files** (Downloads):
+- `gymarc_icon_v5_blue_dumbbell_logo.png` (pick)
+- `gymarc_icon_v5_blue_dumbbell_nologo.png`
+
+**If chosen:** the brand moves to the blue logo. Thumbnails and the in-game logo should follow later.
