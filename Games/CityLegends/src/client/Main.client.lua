@@ -609,6 +609,9 @@ end)
 startStep("YangonMedians", function()
 	require(script.Parent:WaitForChild("YangonMedians")).start() -- (21 Nov) the planted middle strip of Pyay Road / Kabar Aye
 end)
+startStep("YangonRoadside", function()
+	require(script.Parent:WaitForChild("YangonRoadside")).start(WorldFx.qualityScale) -- (25 Nov) power poles and overhead wires
+end)
 startStep("Chauffeur", ChauffeurClient.init)
 startStep("Luxe", function()
 	require(script.Parent:WaitForChild("LuxeClient")).init() -- the gem shop and VIP cards, smash-and-grab messages

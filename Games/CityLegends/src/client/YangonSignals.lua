@@ -150,6 +150,45 @@ local function build(a, folder: Instance): Model
 	-- the head at the arm's end, its middle on the arm
 	local hp = armEnd - a.right * 3.2
 	head(m, CFrame.lookAt(hp, hp - a.dir), a.i, a.axis)
+	-- (2026-11-25, clips 0929 / 0931: "one blue lane-arrow sign on the mast arm") a blue panel hanging under the arm,
+	-- one arrow per approach lane: left on the inner lane, straight, straight + right on the outer lane
+	local lanes = math.clamp(#a.pts, 1, 5)
+	local pw = lanes * 2.3
+	if reach >= 14 and reach * 0.5 + pw / 2 < reach - 1 then
+		local pc = armStart - a.right * (reach * 0.5) - Vector3.new(0, 0.31 + 1.3, 0)
+		local panel = part(m, Vector3.new(pw, 2.6, 0.15), CFrame.lookAt(pc, pc - a.dir), Color3.fromRGB(16, 84, 168), Enum.Material.SmoothPlastic)
+		panel.Name = "LaneArrows"
+		local sg = Instance.new("SurfaceGui")
+		sg.Face = Enum.NormalId.Front
+		sg.LightInfluence = 1
+		sg.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+		sg.CanvasSize = Vector2.new(lanes * 46, 52)
+		sg.MaxDistance = 300
+		sg.Parent = panel
+		local list = Instance.new("UIListLayout")
+		list.FillDirection = Enum.FillDirection.Horizontal
+		list.Parent = sg
+		for k = 1, lanes do
+			local t = Instance.new("TextLabel")
+			t.BackgroundTransparency = 1
+			t.Size = UDim2.new(1 / lanes, 0, 1, 0)
+			t.Font = Enum.Font.SourceSansBold
+			t.TextScaled = true
+			t.TextColor3 = Color3.new(1, 1, 1)
+			-- (k = 1 is the viewer's left = the inner lane)
+			t.Text = if lanes == 1 then "↑" elseif k == 1 then "←" elseif k == lanes then "↱" else "↑"
+			t.LayoutOrder = k
+			t.Parent = sg
+			if k > 1 then
+				local sep = Instance.new("Frame")
+				sep.BorderSizePixel = 0
+				sep.BackgroundColor3 = Color3.new(1, 1, 1)
+				sep.Size = UDim2.new(0, 2, 0.8, 0)
+				sep.Position = UDim2.new(0, -1, 0.1, 0)
+				sep.Parent = t
+			end
+		end
+	end
 	m.Parent = folder
 	return m
 end
