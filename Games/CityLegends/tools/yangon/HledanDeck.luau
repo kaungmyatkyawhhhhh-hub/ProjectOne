@@ -1,4 +1,6 @@
 --!nocheck
+-- SUPERSEDED 25 Nov 2026: the deck it laid (Roads.HledanDeckFix) stacked over the baked deck (double deck). The data
+-- now has one Pyay Road deck (city/roads05_hledan_fix.py), cells 17x17..17x19 rebuilt, HledanDeckFix deleted. Do not run.
 --[[ The Hledan flyover (Pyay Road, by Novotel): one continuous deck (owner, 22 Nov: "fix the pyay road bridge near novotel").
 	Real: one bridge of about 860 m (OSM). The baked map has a high hump (deck top 73, z 27496-28240), a ramp down to the
 	ground (z 28517-28710) and a low hump (58.3, z 28834-29142). The road meshes are whole 1536-stud cells, so the dip

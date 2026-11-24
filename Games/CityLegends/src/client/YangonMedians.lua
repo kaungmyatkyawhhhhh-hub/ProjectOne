@@ -184,7 +184,7 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 		-- not on a bridge deck
 		if collide then
 			-- (also the Hledan flyover's added deck, 2026-11-22)
-			rayParams.FilterDescendantsInstances = { collide, roads:FindFirstChild("HledanDeckFix") }
+			rayParams.FilterDescendantsInstances = { collide }
 			local hit = workspace:Raycast(mid + Vector3.new(0, 6, 0), Vector3.new(0, -14, 0), rayParams)
 			if hit and hit.Instance:GetAttribute("RoadBox") == "D" then
 				continue

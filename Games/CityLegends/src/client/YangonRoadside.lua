@@ -196,7 +196,7 @@ local function resolve(poles, id: number): Vector3?
 	if medians then
 		table.insert(blockers, medians)
 	end
-	rayParams.FilterDescendantsInstances = { collide, roads:FindFirstChild("HledanDeckFix"), workspace.Terrain }
+	rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
 	overlap.FilterDescendantsInstances = blockers
 	-- the lane under the spot must not be a deck (no poles on flyovers)
 	local under = workspace:Raycast(p.pos - p.right * 10.5 + Vector3.new(0, 6, 0), Vector3.new(0, -14, 0), rayParams)
@@ -336,7 +336,7 @@ local function buildBoard(m: Instance, b): boolean
 	if not collide then
 		return false
 	end
-	rayParams.FilterDescendantsInstances = { collide, roads:FindFirstChild("HledanDeckFix"), workspace.Terrain }
+	rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
 	local hit = workspace:Raycast(b.pos + Vector3.new(0, 14, 0), Vector3.new(0, -30, 0), rayParams)
 	if not hit or not (hit.Instance == workspace.Terrain or hit.Instance:GetAttribute("RoadBox") == "P") then
 		return false
