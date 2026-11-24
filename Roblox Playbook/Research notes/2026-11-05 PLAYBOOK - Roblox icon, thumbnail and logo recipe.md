@@ -155,3 +155,21 @@ Files: `MM Outfit Catalog\Assets\thumbs_nov\final\`. Genre refs: `...\refs\`.
 **Logo on busy art:**
 - ChatGPT ignored "keep the top-left empty" on thumbnail 3 (the outfit cards sit there), so no logo there: the cards are the hook.
 - On thumbnail 2, size the logo to clear the "ID 02" tag (20% of the width).
+
+## Lessons 24 Nov (GYM ARC icon redo: "think with an artist's brain")
+- **A clean muscle render isn't an icon.** v1 and v2 (a bodybuilder bacon with a barbell, passing every number) were rejected by the owner. What failed, as an artist sees it:
+  - the flat smile on a straining body = a meme or pool toy;
+  - inflated glossy balloon muscles = the AI look;
+  - a frontal, symmetrical, static pose;
+  - flat front light with a sticker rim on everything;
+  - **no story or emotion.**
+- **What worked:**
+  1. Ask for a **3-concept sheet first** (1536x512, three 512 icons): one idea each. Prompt like a key-art illustrator:
+     - one clear idea, asymmetry plus a diagonal;
+     - ONE directional key light with real shadow shapes;
+     - a character who FEELS something (expressive decal faces: gritted teeth, squeezed eyes, sweat, anger vein);
+     - satin skin with firm sculpted muscles, not balloons.
+  2. Let the owner react, then **combine the strongest energy with the strongest story**. Final = "the lift" (effort face, bending bar, cracking floor) + "the shadow" (his shadow on the wall is a giant titan with pink eyes = the ARC hook).
+  3. Colour: borrow the competitor's colour IDEA (warm golden-tan body vs a cool indigo→violet gradient, one hot-pink accent), never its layout.
+- **The numbers are a floor, not the goal:** the final measures darker (mean 0.24, 56% black) than the target band and still wins on read and story.
+- **Test in a mock of the real Roblox row** (paste the new icon over ours in the owner's screenshot with canvas JS). It shows "reads as a gym game" and "looks like a copy" better than isolated sizes.

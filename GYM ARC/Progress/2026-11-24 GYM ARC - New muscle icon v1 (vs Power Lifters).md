@@ -53,3 +53,17 @@ Square 1024 icon, Roblox Blender GFX. Image 1 = my character's head exactly. Ima
 - In the real row mock it looks clearly different from Power Lifters (v1 looked like its layout).
 - **Pick: v2.**
 - File: owner's Downloads\gymarc_icon_muscle_v2_violet.png. Move it to thumbs_nov.
+
+## Owner: "i dont like both of them, think with an artist's brain"
+**Artist critique of v1/v2:**
+- The flat classic smile on a straining body reads as a meme or pool toy.
+- The muscles are inflated balloons with a glossy all-over sheen (the AI look).
+- Static frontal, symmetrical poses.
+- No story (the 23x winner asked "what does he become?").
+- Flat front light, with a sticker-like rim on everything.
+
+**Concept sheet** (new chat chatgpt.com/c/6b05653d-7634-83ec-a2f8-76b1a5d3ca7c, one try; Downloads\gymarc_icon_concepts_ABC.png). Asked for: one idea per icon, asymmetry and a diagonal, one directional key light, an emotional face, satin skin, Power Lifters' warm-vs-cool colour idea.
+- **A, the shadow:** skinny bacon in a grey tee, gritted teeth, a small dumbbell, a warm spotlight; on the violet wall his shadow is a giant flexing titan with pink eyes. The best story, but at 60 px the shadow goes murky.
+- **B, the lift:** a low 3/4 view of a huge bacon mid-deadlift, an effort face (squeezed eyes, gritted teeth, an anger vein), pink plates, the floor cracking pink. The most energy; the clearest gym read at 60 px.
+- **C, before/after:** a nervous skinny bacon (sweat) and a smirking titan with a glowing eye, split by a diagonal pink crack. The clear hook, but it reads as 2 people, not one head.
+- Claude leans **B**, or **B with A's idea** (the deadlift with the titan shadow behind). Waiting for the owner's pick, then a full-size polish + grade + 60 px test.
