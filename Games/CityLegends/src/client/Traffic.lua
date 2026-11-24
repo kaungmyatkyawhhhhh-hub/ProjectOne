@@ -227,7 +227,8 @@ local function placeNpc(npc: Npc, seg: CityLayout.Segment, s: number)
 	npc.off = 0
 	npc.offTo = 0
 	npc.plan = nil
-	npc.uturn = nil
+	npc.uturn = nil;
+	(npc :: any).prevSeg = nil
 	local pos, fwd = CityLayout.sample(seg, s)
 	npc.pos = pos
 	npc.fwd = fwd
@@ -731,7 +732,20 @@ end
 -- a racer's speed through a piece from its bend (a quadratic bezier): the heading change of that piece in degrees,
 -- 3% of its top speed off per degree (owner, 2026-11-21: TrafficMix.racerTurnSpeed), never under the junction turn speed
 local bendCache: { [any]: number } = setmetatable({}, { __mode = "k" }) :: any
-local function bendSpeed(npc: Npc, q: CityLayout.Segment): number
+local function endDir(q: CityLayout.Segment): Vector3
+	local d = q.p2 - q.p1
+	return if d.Magnitude > 0.01 then d.Unit else (q.p2 - q.p0).Unit
+end
+local function startDir(q: CityLayout.Segment): Vector3
+	local d = q.p1 - q.p0
+	return if d.Magnitude > 0.01 then d.Unit else (q.p2 - q.p0).Unit
+end
+-- (2026-11-24, racers bumping and hopping) the 1:1 lanes are straight pieces (p1 = the middle), so a piece's own bend
+-- was always 0: on a curve, a crest or a dip a racer kept its top speed and its nose snapped at every lane point. The
+-- corner where `prev` meets `q` counts now too, up and down included (a crest is a bend); 1 degree of it is chord noise
+-- and free, so straights keep their speed
+local JOINT_FREE = 1
+local function bendSpeed(npc: Npc, q: CityLayout.Segment, prev: CityLayout.Segment?): number
 	local deg = bendCache[q]
 	if deg == nil then
 		local a = (q.p1 - q.p0) * Vector3.new(1, 0, 1)
@@ -739,7 +753,42 @@ local function bendSpeed(npc: Npc, q: CityLayout.Segment): number
 		deg = if a.Magnitude > 0.1 and b.Magnitude > 0.1 then math.deg(math.acos(math.clamp(a.Unit:Dot(b.Unit), -1, 1))) else 0
 		bendCache[q] = deg
 	end
-	return TrafficMix.racerTurnSpeed(npc.racer or npc.maxSpeed, deg :: number, if q.turnSpeed then Config.mphToSps(q.turnSpeed) else TURN_SPEED)
+	local total = deg :: number
+	if prev and (prev.p2 - q.p0).Magnitude < 1 then
+		total += math.max(0, math.deg(math.acos(math.clamp(endDir(prev):Dot(startDir(q)), -1, 1))) - JOINT_FREE)
+	end
+	return TrafficMix.racerTurnSpeed(npc.racer or npc.maxSpeed, total, if q.turnSpeed then Config.mphToSps(q.turnSpeed) else TURN_SPEED)
+end
+
+-- a racer's place and heading on its way: near a joint of two pieces it runs a short curve round the corner (a
+-- quadratic from `w` before the joint to `w` after it, the joint its control point) instead of snapping its heading
+-- there; the height stays the lane's own (on the built road) and only the nose eases up or down
+local function racerSample(npc: Npc, seg: CityLayout.Segment, s: number): (Vector3, Vector3)
+	local pos, fwd = CityLayout.sample(seg, s)
+	local a, b, d = nil, nil, 0
+	local prev = (npc :: any).prevSeg
+	if npc.nextSeg and seg.length - s < 12 then
+		a, b, d = seg, npc.nextSeg, s - seg.length
+	elseif prev and s < 12 then
+		a, b, d = prev, seg, s
+	end
+	if not a or not b or (a.p2 - b.p0).Magnitude > 1 then
+		return pos, fwd
+	end
+	local w = math.min(math.clamp(npc.speed * 0.05, 2, 12), a.length / 2, b.length / 2)
+	if math.abs(d) >= w then
+		return pos, fwd
+	end
+	local A = CityLayout.sample(a, a.length - w)
+	local B = CityLayout.sample(b, w)
+	local C = (a.p2 + b.p0) / 2
+	local t = (d + w) / (2 * w)
+	local q = A * (1 - t) ^ 2 + C * (2 * t * (1 - t)) + B * t * t
+	local tan = (C - A) * (2 * (1 - t)) + (B - C) * (2 * t)
+	if tan.Magnitude < 1e-3 then
+		return pos, fwd
+	end
+	return Vector3.new(q.X, pos.Y, q.Z), tan.Unit
 end
 
 -- (owner, 2026-11-21: "also make it so that rare cars can race with each other") the piece a car takes after
@@ -882,14 +931,14 @@ end
 -- the highest speed now that still lets a racer slow for every bend, turn and red light within braking distance
 local function racerCap(npc: Npc, now: number): number
 	local seg = npc.seg
-	local cap = bendSpeed(npc, seg)
+	local cap = bendSpeed(npc, seg, (npc :: any).prevSeg)
 	local d = seg.length - npc.s
 	local reach = npc.speed * npc.speed / (2 * RACER.Brake) + 80
 	local q = npc.nextSeg
 	local prev = seg
 	local i = 0
 	while q and d < reach and i < 14 do
-		local v = bendSpeed(npc, q)
+		local v = bendSpeed(npc, q, prev)
 		if q.kind == "turn" and q.turning then
 			v = math.min(v, if q.turnSpeed then Config.mphToSps(q.turnSpeed) else TURN_SPEED)
 		end
@@ -1810,7 +1859,7 @@ function Traffic.update(dt: number)
 		-- advance along the path
 		-- (a few hops at most: a run of very short connectors can't spin this forever)
 		local snap = if npc.racer
-			then { npc.seg, npc.s, npc.nextSeg, npc.plan and table.clone(npc.plan :: any), npc.off, npc.offTo, npc.pos, npc.fwd }
+			then { npc.seg, npc.s, npc.nextSeg, npc.plan and table.clone(npc.plan :: any), npc.off, npc.offTo, npc.pos, npc.fwd, (npc :: any).prevSeg }
 			else nil
 		npc.s += npc.speed * dt
 		local hops = 0
@@ -1822,6 +1871,9 @@ function Traffic.update(dt: number)
 			end
 			npc.s -= npc.seg.length
 			local nxt = npc.nextSeg
+			if nxt then
+				(npc :: any).prevSeg = npc.seg
+			end
 			if not nxt then
 				-- a lane with no way on (owner, 2026-11-04: "the cars are bugging here"): the car used
 				-- to jump back to the start of its last piece, into the car behind, and the queue
@@ -1840,7 +1892,12 @@ function Traffic.update(dt: number)
 			racerSide(npc, dt, obstacleList)
 		end
 
-		local pos, fwd = CityLayout.sample(npc.seg, npc.s)
+		local pos, fwd
+		if npc.racer then
+			pos, fwd = racerSample(npc, npc.seg, npc.s)
+		else
+			pos, fwd = CityLayout.sample(npc.seg, npc.s)
+		end
 		if npc.racer then
 			-- a racer beside its lane's middle (sliding over, or on the line between two lanes)
 			local right = fwd:Cross(Vector3.yAxis)
@@ -1853,7 +1910,7 @@ function Traffic.update(dt: number)
 			local slid = npc.off ~= snap[5]
 			local hit = racerBlocked(npc, pos, fwd, snap[7], snap[8], obstacleList, slid)
 			if hit and slid then
-				local p2, f2 = CityLayout.sample(npc.seg, npc.s)
+				local p2, f2 = racerSample(npc, npc.seg, npc.s)
 				p2 += f2:Cross(Vector3.yAxis) * (snap[5] :: number)
 				if not racerBlocked(npc, p2, f2, snap[7], snap[8], obstacleList, false) then
 					npc.off, npc.offTo = snap[5], snap[5]
@@ -1862,7 +1919,8 @@ function Traffic.update(dt: number)
 				end
 			end
 			if hit then
-				npc.seg, npc.s, npc.nextSeg, npc.plan, npc.off, npc.offTo = snap[1], snap[2], snap[3], snap[4], snap[5], snap[5]
+				npc.seg, npc.s, npc.nextSeg, npc.plan, npc.off, npc.offTo = snap[1], snap[2], snap[3], snap[4], snap[5], snap[5];
+				(npc :: any).prevSeg = snap[9]
 				pos, fwd = snap[7], snap[8]
 				npc.sideT = math.max(npc.sideT, RACER.SideHold)
 				npc.speed = math.min(npc.speed, math.max(0, hit.speed * hit.fwd:Dot(fwd)) * 0.9)

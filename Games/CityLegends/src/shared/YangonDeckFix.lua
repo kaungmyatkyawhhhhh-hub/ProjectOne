@@ -56,6 +56,37 @@ D.S = {
 	{ 27386.3, 29141.8, 58.21, 58.21 },
 	{ 27390.5, 29157.3, 58.05, 58.05 },
 }
+-- (2026-11-24, racers hopping) a lane point the lane writer left at a deck's height over the ground road it runs on
+-- (Arzani Street: four single points 12-25 studs up, the road built under them) is put back on the line between its
+-- neighbours. Only a true spike: off BOTH neighbours by more than Spike studs the same way (a real step has one side flat).
+D.Spike = 1.5
+local function unspike(p): number
+	local n, m = 0, #p // 3
+	local y = {}
+	for i = 1, m do
+		y[i] = p[3 * i - 1]
+	end
+	for i = 2, m - 1 do
+		local a, b = y[i] - y[i - 1], y[i] - y[i + 1]
+		if a * b > 0 and math.min(math.abs(a), math.abs(b)) > D.Spike then
+			local d1 = math.sqrt((p[3 * i - 2] - p[3 * i - 5]) ^ 2 + (p[3 * i] - p[3 * i - 3]) ^ 2)
+			local d2 = math.sqrt((p[3 * i + 1] - p[3 * i - 2]) ^ 2 + (p[3 * i + 3] - p[3 * i]) ^ 2)
+			p[3 * i - 1] = y[i - 1] + (y[i + 1] - y[i - 1]) * d1 / math.max(d1 + d2, 0.01)
+			n += 1
+		end
+	end
+	return n
+end
+D.unspike = unspike
+
+-- a piece no car can drive: the lane drops or climbs more than 6 studs at over 1 in 2 (a deck that ends in the air
+-- over the road it was meant to come down to: Arzani Street at (32720, 36170), 129.6 -> 90.4 in 24 studs).
+-- RivieraTraffic does not join such a piece to the one before it, so traffic never drives off the edge.
+function D.cliff(a: Vector3, b: Vector3): boolean
+	local dy = math.abs(b.Y - a.Y)
+	return dy > 6 and dy > 0.5 * Vector2.new(b.X - a.X, b.Z - a.Z).Magnitude
+end
+
 function D.apply(lanes)
 	local S = D.S
 	local z0, z1 = S[1][2], S[#S][2]
@@ -64,6 +95,7 @@ function D.apply(lanes)
 		if l.yangon and not l.deckFix then
 			l.deckFix = true
 			local p = l.pts
+			unspike(p)
 			for k = 1, #p - 2, 3 do
 				local z = p[k + 2]
 				if z > z0 and z < z1 and p[k] > 27100 and p[k] < 27440 then

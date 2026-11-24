@@ -336,6 +336,12 @@ function RivieraTraffic.build()
 	dataLinks = mergeRouteEnds(dataLanes, dataLinks)
 	local all, lanes = {}, {}
 	local pieces = {} -- [laneIndex][pointIndex] = the piece starting at that point
+	-- (2026-11-24) a 1:1 piece that drops or climbs like a cliff (YangonDeckFix.cliff) is never driven onto
+	local cliffOk, cliffMod = pcall(function()
+		local m = script.Parent:FindFirstChild("YangonDeckFix")
+		return m and require(m)
+	end)
+	local isCliff = if cliffOk and cliffMod and cliffMod.cliff then cliffMod.cliff else nil
 	for li, l in dataLanes do
 		local pts = l.pts
 		local n = #pts // 3
@@ -364,6 +370,11 @@ function RivieraTraffic.build()
 				s.median = inRanges(l.median, k)
 			end
 			row[k] = seg
+			if l.yangon and isCliff and isCliff(a, b) then
+				-- (no way in: the lane's pieces before it end here and are pruned back to the last junction; no spawns on it)
+				(seg :: any).cliff = true
+				continue
+			end
 			table.insert(lanes, seg)
 			if k > 1 then
 				table.insert(row[k - 1].next, seg)
