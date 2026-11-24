@@ -26,6 +26,23 @@ rgb = im.copy()
 aa = np.clip(a[..., None], 0.05, 1)
 rgb[band] = ((im - (1 - aa) * M) / aa)[band]
 rgb = np.clip(rgb, 0, 255)
+# 24 Nov: soft GLOWS (lanternshark, the tooth's gold ring) are see-through over magenta, so the 3 px band leaves a purple /
+# pink halo. Glow colours have little 'magenta part' (cyan: no red, gold: no blue), so near the background:
+# magenta share k = (min(R,B) - G) / 255, alpha = 1 - k, colour = un-mixed.
+near = (ndi.distance_transform_edt(fg) <= 18) & fg
+# a glow colour has red OR blue near 0 (cyan / gold), so 1 - alpha = min(R, B) / 255; only on magenta-tinted pixels
+# (green clearly below both red and blue), which leaves white, navy outlines and skin tones alone
+mn = np.minimum(im[..., 0], im[..., 2])
+tint = im[..., 1] < mn - 10
+glowCells = np.zeros(fg.shape, bool)   # only the 2 glow icons: the goblin shark's pink-peach skin must stay as drawn
+for (gr, gc) in [(2, 0), (2, 3)]:   # MutLantern, MutMegalodon
+	glowCells[int(gr * H / 3):int((gr + 1) * H / 3), int(gc * W / 5):int((gc + 1) * W / 5)] = True
+k = np.where(near & tint & glowCells, np.clip(mn / 255.0, 0, 1), 0)
+a2 = np.minimum(a, 1 - k)
+fix = k > 0
+aa2 = np.clip(a2[..., None], 0.05, 1)
+rgb[fix] = np.clip((im - (1 - aa2) * M) / aa2, 0, 255)[fix]
+a = a2
 out = np.dstack([rgb, a * 255]).astype(np.uint8)
 # components
 lab2, n2 = ndi.label(a > 0.5)
