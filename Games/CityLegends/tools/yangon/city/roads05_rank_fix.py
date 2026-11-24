@@ -81,9 +81,18 @@ def fix(path):
         new = round(new + 0.01, 4)
     freed = [o for o in freed if o['rank'] > new]
     m['rank'] = new
+    # data.crossings list the smaller road first ([small, i, big, j, x, z], roads05_fix.crossings): YangonRoads lays the
+    # first one's mouth on the second. A record still naming the main road as the small one hung the Studio build
+    # (an hour, killed): swap every record whose order the new rank turned round
+    rank = {r['name']: r['rank'] for r in d['roads']}
+    swapped = 0
+    for x in d.get('crossings', []):
+        if ROAD in (x[0], x[2]) and rank[x[0]] < rank[x[2]]:
+            x[0], x[1], x[2], x[3] = x[2], x[3], x[0], x[1]
+            swapped += 1
     d['note'] = d.get('note', '') + ' | ' + NOTE
     json.dump(d, open(path, 'w', encoding='utf-8'), separators=(',', ':'))
-    return dict(road=ROAD, rank=(old, new), now_below=sorted((o['rank'], o['name']) for o in freed))
+    return dict(road=ROAD, rank=(old, new), crossings_swapped=swapped, now_below=sorted((o['rank'], o['name']) for o in freed))
 
 
 def test():
@@ -97,6 +106,7 @@ def test():
     R = {r['name']: r for r in d['roads']}
     m = R[ROAD]
     assert R['31st Street']['rank'] > m['rank'], '31st Street must rank below Maha Bandula Road #2 now'
+    assert all(R[x[0]]['rank'] > R[x[2]]['rank'] for x in d['crossings'] if ROAD in (x[0], x[2])), 'a crossing must list the smaller road first'
     ranks = [r['rank'] for r in d['roads']]
     assert len(set(ranks)) == len(ranks), 'ranks must stay unique'
     # nothing the road ends inside, no bigger road and nothing touched outside BOX changed sides
