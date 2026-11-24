@@ -1384,6 +1384,7 @@ def finish(net):
     net['rank_cycles'] = broken
     bad = sum(1 for x, ys in ends_on.items() for y in ys if roads[y]['rank'] > roads[x]['rank'])
     net['ends_on_smaller'] = bad
+    net['ends_on'] = ends_on
     # junction heights: smaller roads pinned to the bigger ones they touch (biggest first)
     for i in order:
         r = roads[i]
