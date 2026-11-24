@@ -2,11 +2,20 @@
 -- Paste into execute_luau (or require a ModuleScript copy) once per Studio session; they live in _G.
 -- Needs _G.RY = a loaded YangonRoads (require(ClaudeTools.YangonRoads:Clone()).load() with Roads05_* in YangonData).
 --   _G.RBXJob(label, {x0, z0, x1, z1})  build the box (spawned), collect pages, zstd+base64 slices; poll _G.RBX.st[label]
---   _G.RBXZ(label, k)                   slice k padded to 99,000 chars (one per call: the result lands in a tool-results file)
+--   _G.RBXRunStart() / _G.RBXRunEnd()   around a queue of RBXJobs for ONE bake: each deck goes into the pages once
+--   _G.RBXZ(label, k)                  slice k padded to 99,000 chars (one per call: the result lands in a tool-results file)
 --   _G.PREP(tag, {glb ids}, collideId)  LoadAsset the baked glbs + collide pack into ServerStorage.<tag>_NewMeshes/_NewCollide
 --   _G.SWAPGO(tag, {"21x27", ...}, "<tag>_NewMeshes", "<tag>_NewCollide")  old Cell_ + boxes (by box centre) -> ServerStorage.RB_Old<tag>
 -- Poll _G.SWP / _G.SWP2. Free with _G.RBX.slices = {} and _G.RY = nil after.
 _G.RBX = _G.RBX or { slices = {}, st = {}, log = {} }
+_G.RBXRunStart = function()
+	_G.RBX.deckRun = {}
+end
+_G.RBXRunEnd = function()
+	local r = _G.RBX.deckRun
+	_G.RBX.deckRun = nil
+	return r
+end
 _G.RBXJob = function(label, box)
 	local J = _G.RBX
 	J.st[label] = "building"
@@ -20,6 +29,23 @@ _G.RBXJob = function(label, box)
 			-- swap lost that deck's surface in the cell) build every deck with a sample in the box; the bake keeps only its cells
 			_G.RY.DECK_TOUCH = true
 			local log = _G.RY.stepCell(box, cellRoot)
+			-- (25 Nov, DECK OVERLAP FIX: DECK_TOUCH built a deck in every step box it touched and each copy went to the bake:
+			-- U Chit Maung 2-3 stacked copies in P11) one copy per deck per run: _G.RBXRunStart() before a queue of boxes for
+			-- one bake, _G.RBXRunEnd() after. The deck is still BUILT in every box (scrub / kerb seal at its feet need it),
+			-- but only the first box of the run keeps it for the pages. A single box with no run keeps every touching deck.
+			local decks = cellRoot:FindFirstChild("Decks")
+			if J.deckRun and decks then
+				local dropped = {}
+				for _, f in decks:GetChildren() do
+					if J.deckRun[f.Name] then
+						table.insert(dropped, f.Name)
+						f:Destroy()
+					else
+						J.deckRun[f.Name] = label
+					end
+				end
+				log ..= "\ndecks kept by an earlier box of this run (not paged again): " .. table.concat(dropped, ", ")
+			end
 			J.st[label] = "collecting"
 			-- (24 Nov: require caches a ModuleScript's first Source for the session; a Clone gets the current one, v3 pages)
 			local B = require(game.ServerStorage.ClaudeTools.RoadBake05:Clone())

@@ -57,7 +57,8 @@ end
 -- poles: id -> { pos (lane-derived), right (towards the kerb), dir, road, way, chunk, prev (id along the run), cross (id across) }
 local function plan(g, skipTile: (number, number) -> boolean)
 	local poles = {}
-	local chunks: { [string]: { number } } = {}
+	local boards = {}
+	local chunks: { [string]: { p: { number }, b: { any } } } = {}
 	local outer: { [string]: number } = {}
 	for _, l in g.lanesData do
 		if l.yangon and not l.skip then
@@ -111,8 +112,8 @@ local function plan(g, skipTile: (number, number) -> boolean)
 								local id = #poles + 1
 								local key = math.floor(pos.X / CHUNK) .. "," .. math.floor(pos.Z / CHUNK)
 								poles[id] = { pos = pos, right = right, dir = dir, road = baseRoad(l.road), way = l.way, chunk = key, prev = last }
-								chunks[key] = chunks[key] or {}
-								table.insert(chunks[key], id)
+								chunks[key] = chunks[key] or { p = {}, b = {} }
+								table.insert(chunks[key].p, id)
 								byRoad[baseRoad(l.road)] = byRoad[baseRoad(l.road)] or {}
 								table.insert(byRoad[baseRoad(l.road)], id)
 								last = id
@@ -154,6 +155,10 @@ local function plan(g, skipTile: (number, number) -> boolean)
 			end
 		end
 	end
+	for _, b in boards do
+		chunks[b.chunk] = chunks[b.chunk] or { p = {}, b = {} }
+		table.insert(chunks[b.chunk].b, b)
+	end
 	return poles, chunks
 end
 
@@ -177,7 +182,7 @@ local function resolve(poles, id: number): Vector3?
 		return nil -- not streamed / no map: try again later
 	end
 	local blockers = {}
-	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare" } do
+	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites" } do
 		local f = root:FindFirstChild(n)
 		if f then
 			table.insert(blockers, f)
@@ -279,11 +284,97 @@ local function buildPole(m: Instance, p, base: Vector3, id: number): BasePart
 	return shaft
 end
 
-local function buildChunk(poles, ids: { number }, folder: Instance, full: boolean): Model?
+-- pole billboards (clips 0929 / 0930: big boards on one green steel column by the main roads). Fictional brands only.
+local ADS = {
+	{ top = "SHWE PYAY", mid = "ဘိလပ်မြေ", low = "CEMENT  ·  09-420 118 300", a = Color3.fromRGB(196, 28, 32), b = Color3.fromRGB(120, 10, 14), t = Color3.fromRGB(255, 214, 64) },
+	{ top = "YADANAR 5G", mid = "အမြန်ဆုံး အင်တာနက်", low = "yadanar.net", a = Color3.fromRGB(20, 120, 210), b = Color3.fromRGB(8, 40, 110), t = Color3.new(1, 1, 1) },
+	{ top = "GOLDEN TEAK RESIDENCE", mid = "အိမ်ခန်း ရောင်းမည်", low = "09-450 123 456", a = Color3.fromRGB(30, 92, 60), b = Color3.fromRGB(10, 40, 26), t = Color3.fromRGB(236, 200, 110) },
+	{ top = "HILLTOP MILK TEA", mid = "လက်ဖက်ရည်", low = "3-in-1  ·  NEW TASTE", a = Color3.fromRGB(236, 150, 40), b = Color3.fromRGB(150, 70, 16), t = Color3.new(1, 1, 1) },
+	{ top = "LUCKY STAR", mid = "ခေါက်ဆွဲ", low = "INSTANT NOODLE", a = Color3.fromRGB(250, 206, 30), b = Color3.fromRGB(214, 110, 10), t = Color3.fromRGB(140, 16, 16) },
+	{ top = "ZAYAR PAINT", mid = "ဆေးသုတ်", low = "WEATHER SHIELD  ·  10 YEARS", a = Color3.fromRGB(110, 40, 150), b = Color3.fromRGB(40, 14, 70), t = Color3.new(1, 1, 1) },
+}
+local GREEN = Color3.fromRGB(46, 110, 64)
+local BOARD_W, BOARD_H, BOARD_Y = 18, 9, 18
+
+local function adFace(board: BasePart, face: Enum.NormalId, ad)
+	local sg = Instance.new("SurfaceGui")
+	sg.Face = face
+	sg.LightInfluence = 1
+	sg.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
+	sg.CanvasSize = Vector2.new(400, 200)
+	sg.MaxDistance = 600
+	sg.Parent = board
+	local bg = Instance.new("Frame")
+	bg.Size = UDim2.fromScale(1, 1)
+	bg.BorderSizePixel = 0
+	bg.BackgroundColor3 = Color3.new(1, 1, 1)
+	bg.Parent = sg
+	local grad = Instance.new("UIGradient")
+	grad.Color = ColorSequence.new(ad.a, ad.b)
+	grad.Rotation = 90
+	grad.Parent = bg
+	local function label(text: string, y: number, h: number, font: Enum.Font)
+		local t = Instance.new("TextLabel")
+		t.BackgroundTransparency = 1
+		t.Position = UDim2.fromScale(0.05, y)
+		t.Size = UDim2.fromScale(0.9, h)
+		t.Font = font
+		t.TextScaled = true
+		t.TextColor3 = ad.t
+		t.Text = text
+		t.Parent = bg
+	end
+	label(ad.top, 0.06, 0.3, Enum.Font.GothamBlack)
+	label(ad.mid, 0.38, 0.34, Enum.Font.GothamBold)
+	label(ad.low, 0.76, 0.16, Enum.Font.GothamBold)
+end
+
+local function buildBoard(m: Instance, b): boolean
+	local root = Config.mapRoot and Config.mapRoot()
+	local roads = root and root:FindFirstChild("Roads")
+	local collide = roads and roads:FindFirstChild("Collide")
+	if not collide then
+		return false
+	end
+	rayParams.FilterDescendantsInstances = { collide, roads:FindFirstChild("HledanDeckFix"), workspace.Terrain }
+	local hit = workspace:Raycast(b.pos + Vector3.new(0, 14, 0), Vector3.new(0, -30, 0), rayParams)
+	if not hit or not (hit.Instance == workspace.Terrain or hit.Instance:GetAttribute("RoadBox") == "P") then
+		return false
+	end
+	local base = Vector3.new(b.pos.X, hit.Position.Y, b.pos.Z)
+	-- the board stands square to the road, facing the traffic that comes along it
+	local cf = CFrame.lookAt(base, base - b.dir)
+	local blockers = {}
+	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites" } do
+		local f = root:FindFirstChild(n)
+		if f then
+			table.insert(blockers, f)
+		end
+	end
+	overlap.FilterDescendantsInstances = blockers
+	if #workspace:GetPartBoundsInBox(cf * CFrame.new(0, (BOARD_Y + BOARD_H) / 2 + 0.5, 0), Vector3.new(BOARD_W + 1, BOARD_Y + BOARD_H, 3), overlap) > 0 then
+		return false
+	end
+	-- one column (a foot, the shaft) up to the board's frame
+	part(m, Vector3.new(2.4, 1, 2.4), cf * CFrame.new(0, 0.5, 0), GREEN, Enum.Material.Metal)
+	part(m, Vector3.new(1.5, BOARD_Y - 1, 1.5), cf * CFrame.new(0, 1 + (BOARD_Y - 1) / 2, 0), GREEN, Enum.Material.Metal)
+	local board = part(m, Vector3.new(BOARD_W, BOARD_H, 0.7), cf * CFrame.new(0, BOARD_Y + BOARD_H / 2, 0), GREEN, Enum.Material.Metal)
+	local pick = (b.n - 1) % #ADS + 1
+	adFace(board, Enum.NormalId.Front, ADS[pick])
+	adFace(board, Enum.NormalId.Back, ADS[pick % #ADS + 1])
+	return true
+end
+
+local function buildChunk(poles, chunk, folder: Instance, full: boolean): Model?
 	local m = Instance.new("Model")
 	m.Name = "Roadside"
 	local any = false
-	for _, id in ids do
+	for _, b in chunk.b do
+		if buildBoard(m, b) then
+			any = true
+		end
+	end
+	for _, id in chunk.p do
 		local p = poles[id]
 		local base = resolve(poles, id)
 		if base then
