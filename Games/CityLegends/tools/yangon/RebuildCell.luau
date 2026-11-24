@@ -16,6 +16,9 @@ _G.RBXJob = function(label, box)
 			local cellRoot = Instance.new("Folder")
 			cellRoot.Name = "C" .. label
 			cellRoot.Parent = root
+			-- (24 Nov, May Ni Gone deck in 18x22: a cell box rebuilt alone has no deck whose middle lies outside it, so the
+			-- swap lost that deck's surface in the cell) build every deck with a sample in the box; the bake keeps only its cells
+			_G.RY.DECK_TOUCH = true
 			local log = _G.RY.stepCell(box, cellRoot)
 			J.st[label] = "collecting"
 			local B = require(game.ServerStorage.ClaudeTools.RoadBake05)
