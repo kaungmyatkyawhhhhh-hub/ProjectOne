@@ -69,7 +69,7 @@ def build_set():
 def plate_text_material():
     return bpy.data.materials.get("PlateText") or principled("PlateText", srgb("#FFFFFF"), 0.35)
 
-def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0, inner=1.55, center=None):
+def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0, inner=1.55, center=None, inner_text=False):
     """giant dumbbell held in hand_obj; axis = handle direction (world). Plates: deep electric-blue rubber, '1000 LB' in white."""
     col = clear_col("DUMBBELL")
     blue = mat("PlateBlue", "#0E5BFF", 0.42, 0.0, **{"Coat Weight": 0.25, "Coat Roughness": 0.3})
@@ -88,9 +88,10 @@ def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0, inner=1.55, center=None):
         # the hub + label on the OUTER face
         zf = s * (inner + 0.62 + 0.28)
         pieces.append(cyl(f"DB_Hub{s}", 0.34, 0.12, (0, 0, zf), chrome, col, verts=48, bevel=0.03))
-        for j, (word, yy) in enumerate((("1000", 0.50), ("LB", -0.53))):
+        faces = [(zf, s)] + ([(s * (inner - 0.28 - 0.02), -s)] if inner_text else [])
+        for (zface, sgn), (j, (word, yy)) in [(f, w) for f in faces for w in enumerate((("1000", 0.50), ("LB", -0.53)))]:
             bpy.ops.object.text_add(location=(0, 0, 0))
-            t = bpy.context.active_object; t.name = f"DB_Text{s}{j}"
+            t = bpy.context.active_object; t.name = f"DB_Text{s}{sgn}{j}"
             t.data.body = word; t.data.align_x = "CENTER"; t.data.align_y = "CENTER"
             t.data.size = 0.66 * R if word == "1000" else 0.6 * R; t.data.extrude = 0.04
             try:
@@ -99,8 +100,8 @@ def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0, inner=1.55, center=None):
             t.data.materials.append(txt_m)
             link(t, col)
             # flat on the OUTER face (local XY plane), above / below the hub, reading upright
-            t.location = (0, yy * R, zf + s * 0.07)
-            t.rotation_euler = (0, 0 if s > 0 else math.pi, 0)
+            t.location = (0, yy * R, zface + sgn * 0.07)
+            t.rotation_euler = (0, 0 if sgn > 0 else math.pi, 0)
             pieces.append(t)
     for p in pieces: p.parent = root
     # orient: local Z -> axis, centred on the hand
