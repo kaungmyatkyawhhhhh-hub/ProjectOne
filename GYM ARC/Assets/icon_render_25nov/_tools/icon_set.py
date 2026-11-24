@@ -69,7 +69,7 @@ def build_set():
 def plate_text_material():
     return bpy.data.materials.get("PlateText") or principled("PlateText", srgb("#FFFFFF"), 0.35)
 
-def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0):
+def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0, inner=1.55, center=None):
     """giant dumbbell held in hand_obj; axis = handle direction (world). Plates: deep electric-blue rubber, '1000 LB' in white."""
     col = clear_col("DUMBBELL")
     blue = mat("PlateBlue", "#0E5BFF", 0.42, 0.0, **{"Coat Weight": 0.25, "Coat Roughness": 0.3})
@@ -78,23 +78,23 @@ def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0):
     txt_m = plate_text_material()
     root = bpy.data.objects.new("DB_ROOT", None); col.objects.link(root)
     pieces = []
-    pieces.append(cyl("DB_Handle", 0.28, 3.2, (0, 0, 0), chrome, col, verts=48))
+    pieces.append(cyl("DB_Handle", 0.28 if inner < 2 else 0.2, 2 * inner + 0.1, (0, 0, 0), chrome, col, verts=48))
     for s in (-1, 1):
-        pieces.append(cyl(f"DB_Collar{s}", 0.42, 0.35, (0, 0, s * 1.15), chrome, col, verts=48, bevel=0.04))
+        pieces.append(cyl(f"DB_Collar{s}", 0.42, 0.35, (0, 0, s * (inner - 0.4)), chrome, col, verts=48, bevel=0.04))
         for k in range(2):
-            z = s * (1.55 + 0.62 * k)
+            z = s * (inner + 0.62 * k)
             p = cyl(f"DB_Plate{s}{k}", R - 0.1 * k, 0.55, (0, 0, z), blue, col, verts=96, bevel=0.08); pieces.append(p)
             pieces.append(cyl(f"DB_Rim{s}{k}", R - 0.1 * k + 0.02, 0.18, (0, 0, z), rimm, col, verts=96, bevel=0.05))
         # the hub + label on the OUTER face
-        zf = s * (1.55 + 0.62 + 0.28)
-        pieces.append(cyl(f"DB_Hub{s}", 0.55, 0.12, (0, 0, zf), chrome, col, verts=48, bevel=0.03))
-        for j, (word, yy) in enumerate((("1000", 0.52), ("LB", -0.56))):
+        zf = s * (inner + 0.62 + 0.28)
+        pieces.append(cyl(f"DB_Hub{s}", 0.34, 0.12, (0, 0, zf), chrome, col, verts=48, bevel=0.03))
+        for j, (word, yy) in enumerate((("1000", 0.50), ("LB", -0.53))):
             bpy.ops.object.text_add(location=(0, 0, 0))
             t = bpy.context.active_object; t.name = f"DB_Text{s}{j}"
             t.data.body = word; t.data.align_x = "CENTER"; t.data.align_y = "CENTER"
-            t.data.size = 0.47 * R if word == "1000" else 0.44 * R; t.data.extrude = 0.04
+            t.data.size = 0.66 * R if word == "1000" else 0.6 * R; t.data.extrude = 0.04
             try:
-                t.data.font = bpy.data.fonts.load(r"C:\Windows\Fonts\ariblk.ttf", check_existing=True)
+                t.data.font = bpy.data.fonts.load(r"C:\Windows\Fonts\impact.ttf", check_existing=True)
             except Exception: pass
             t.data.materials.append(txt_m)
             link(t, col)
@@ -106,7 +106,7 @@ def build_dumbbell(hand_obj, axis, R=1.85, scale=1.0):
     # orient: local Z -> axis, centred on the hand
     z = Vector(axis).normalized(); up = Vector((0, 0, 1))
     y = (up - z * up.dot(z)).normalized(); x = y.cross(z)
-    m = Matrix((x, y, z)).transposed().to_4x4(); m.translation = hand_obj.matrix_world.translation
+    m = Matrix((x, y, z)).transposed().to_4x4(); m.translation = Vector(center) if center is not None else hand_obj.matrix_world.translation
     root.matrix_world = m @ Matrix.Scale(scale, 4)
     return root
 
