@@ -1,9 +1,9 @@
 # GYM ARC icon render (25 Nov): load one exported pose as the hero (shirtless: the tank-top pieces get the skin).
 import bpy, os
 exec(open(r"C:\ObsidianOne\Claude+Obsidian\GYM ARC\Assets\icon_render_25nov\_tools\icon_lib.py").read(), globals())
-def hero(file, colname):
+def hero(file, colname, face="face_classic_smirk"):
     col = bpy.data.collections.get(colname) or collection(colname)
-    root, pieces, marks = load_character(file, col, "face_bacon_smirk", face_glow=0.0)
+    root, pieces, marks = load_character(file, col, face, face_glow=0.0)
     for p in pieces:
         if p.type == "MESH" and p.data.materials and p.data.materials[0].name.startswith("TankTop"):
             p.data.materials[0] = MAT["skin"]

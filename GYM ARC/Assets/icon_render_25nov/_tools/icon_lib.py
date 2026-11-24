@@ -41,7 +41,7 @@ def srgb(h):
     return (f(r), f(g), f(b))
 
 def skin_material(name, veins=False):
-    m = principled(name, srgb("#C9864F"), 0.36, 0.0, **{"Subsurface Weight": 0.18, "Subsurface Scale": 0.04, "Coat Weight": 0.35, "Coat Roughness": 0.18, "Specular IOR Level": 0.55})
+    m = principled(name, srgb("#B86E3A"), 0.36, 0.0, **{"Subsurface Weight": 0.18, "Subsurface Scale": 0.04, "Coat Weight": 0.15, "Coat Roughness": 0.25, "Specular IOR Level": 0.55})
     b = m.node_tree.nodes["Principled BSDF"]; b.inputs["Subsurface Radius"].default_value = (1.0, 0.45, 0.25)
     nt = m.node_tree
     if veins:
@@ -60,7 +60,7 @@ def skin_material(name, veins=False):
         nt.links.new(ramp.outputs["Color"], bump.inputs["Height"])
         nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
         mix = nt.nodes.new("ShaderNodeMix"); mix.data_type = "RGBA"; mix.inputs["Factor"].default_value = 0.0
-        mix.inputs["A"].default_value = (*srgb("#C9864F"), 1); mix.inputs["B"].default_value = (*srgb("#A05A3A"), 1)
+        mix.inputs["A"].default_value = (*srgb("#B86E3A"), 1); mix.inputs["B"].default_value = (*srgb("#A05A3A"), 1)
         fac = nt.nodes.new("ShaderNodeMath"); fac.operation = "MULTIPLY"; fac.inputs[1].default_value = 0.35
         nt.links.new(ramp.outputs["Color"], fac.inputs[0]); nt.links.new(fac.outputs[0], mix.inputs["Factor"])
         nt.links.new(mix.outputs["Result"], b.inputs["Base Color"])
@@ -105,7 +105,7 @@ def head_face_material(name, face, head_w, head_h, glow, dark=False):
     a = nt.nodes.new("ShaderNodeMath"); a.operation = "MULTIPLY"
     nt.links.new(img.outputs["Alpha"], a.inputs[0]); nt.links.new(front.outputs[0], a.inputs[1])
     mix = nt.nodes.new("ShaderNodeMix"); mix.data_type = "RGBA"
-    mix.inputs["A"].default_value = b.inputs["Base Color"].default_value if dark else (*srgb("#C9864F"), 1)
+    mix.inputs["A"].default_value = b.inputs["Base Color"].default_value if dark else (*srgb("#B86E3A"), 1)
     nt.links.new(a.outputs[0], mix.inputs["Factor"]); nt.links.new(img.outputs["Color"], mix.inputs["B"])
     nt.links.new(mix.outputs["Result"], b.inputs["Base Color"])
     gm = nt.nodes.new("ShaderNodeMix"); gm.data_type = "RGBA"; gm.inputs["A"].default_value = (0, 0, 0, 1)
