@@ -63,7 +63,9 @@ def fix(path):
     cut |= set(range(n0 + 1, n1))
     d['cut'][ROAD] = sorted(cut)
     d['note'] = d.get('note', '') + ' | ' + NOTE
-    json.dump(d, open(path, 'w', encoding='utf-8'), separators=(',', ':'), ensure_ascii=False)
+    tmp = path + '.tmp'
+    json.dump(d, open(tmp, 'w', encoding='utf-8'), separators=(',', ':'))
+    os.replace(tmp, path)  # (another agent may be reading this file)
     return dict(deck=KEEP, samples=(n0, n1), ramp=(iA, iB), dropped=DROP)
 
 
