@@ -85,7 +85,10 @@ local function plan(g, skipTile: (number, number) -> boolean)
 		return false
 	end
 	local byRoad: { [string]: { number } } = {}
-	for _, l in g.lanesData do
+	for li, l in g.lanesData do
+		if li % 150 == 0 then
+			task.wait() -- (Play, 25 Nov: the whole plan in one go was a 0.4 s hitch at start)
+		end
 		if l.yangon and not l.skip and l.lane == outer[l.road .. "|" .. l.way] then
 			local n = #l.pts // 3
 			local prevP: Vector3? = nil

@@ -176,7 +176,7 @@ local function build(a, folder: Instance): Model
 			t.TextScaled = true
 			t.TextColor3 = Color3.new(1, 1, 1)
 			-- (k = 1 is the viewer's left = the inner lane)
-			t.Text = if lanes == 1 then "↑" elseif k == 1 then "←" elseif k == lanes then "↱" else "↑"
+			t.Text = if lanes == 1 then "↑" elseif k == 1 then "←" elseif k == lanes then "↑→" else "↑" -- (↱ has no glyph in Roblox fonts)
 			t.LayoutOrder = k
 			t.Parent = sg
 			if k > 1 then
