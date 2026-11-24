@@ -629,10 +629,20 @@ def bake(tag):
     n_unknown = 0
     for p in parts:
         if p[0] == 'R':
-            for t in faces_of(p):
-                mid = (t[0] + t[1] + t[2]) / 3
-                by[('R', cell_of(mid[0], mid[2]))].append(t)
-                road_tris.append(t)
+            road_tris.extend(faces_of(p))
+    # (25 Nov, DECK OVERLAP FIX) at deck feet and deck-to-deck joins two slabs lay on one spot: keep the top surface only
+    import roads05_deck_join
+    zone = shapely.union_all([LineString([(q[0], q[2]) for q in d['s']]).buffer(d.get('half', 24) + 12)
+                              for d in data.get('decks', []) if len(d['s']) > 1]) if data.get('decks') else None
+    if zone is not None:
+        shapely.prepare(zone)
+        road_tris, deck_join = roads05_deck_join.resolve(road_tris, zone)
+        print('deck joins:', deck_join)
+    else:
+        deck_join = None
+    for t in road_tris:
+        mid = (t[0] + t[1] + t[2]) / 3
+        by[('R', cell_of(mid[0], mid[2]))].append(t)
     surf = Surface(road_tris)
     parts, scrap = drop_scraps(parts, data, surf)
     # (24 Nov, P1-P3 map bugs) no kerb pieces lying across each other, no crumpled (leaning) kerb pieces
@@ -721,7 +731,7 @@ def bake(tag):
             k, buf, n = k + 1, [], 0
     if buf:
         open(os.path.join(cdir, 'Collide05_%d.txt' % k), 'w', newline='\n').write('\n'.join(buf))
-    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
+    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, deck_join=deck_join, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
               paint_dropped=dropped, collision_boxes=len(rows), collide_files=k)
     json.dump(st, open(os.path.join(D, 'bake_stats.json'), 'w'), indent=1)
     print(json.dumps(st, indent=1))
