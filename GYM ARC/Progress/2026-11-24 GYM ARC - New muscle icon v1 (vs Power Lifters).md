@@ -287,3 +287,23 @@ Same logo chat, one try.
 The comparison is in the vault.
 
 **Lesson for the recipe:** match the competitor's CAMERA DISTANCE, FRAME FILL, PROP SCALE and BRIGHTNESS. A matching style alone isn't enough.
+
+## 25 Nov 02:57, owner: "this is way better but now we look like a direct copy of power lifters"
+**Why it reads as a copy:** Power Lifters' 3 signature elements are all mirrored:
+1. an orange-tan glossy bodybuilder on the right;
+2. a giant plate stack cut by the LEFT edge;
+3. the logo top-left.
+
+**Keep (the reasons it works):** a close camera, a full frame, a giant prop, brightness ~0.34, a warm body vs a cool background.
+
+**Change:** layout + hook, so it's clearly GYM ARC.
+
+**Plan (Chrome was asleep at 02:57; run these in the logo chat chatgpt.com/c/6b057956-4624-83ec-9227-9a950aca2d13 when the PC is on):** ONE 1254 image, 2x2, same character as the close-up (tanned glossy, clean Bacon Hair, smirk), same blue + warm-lamp colours, same close framing, no text but the weight number, no logo.
+- **A, MIRRORED:** he's on the LEFT two-thirds, turned three-quarter to the right; the giant blue dumbbell comes toward the camera on the RIGHT, cut by the bottom-right edge; the TOP-RIGHT corner stays empty for the logo.
+- **B, OVERHEAD FROM BELOW:** a worm's-eye camera right under him; he presses a giant blue barbell overhead, both plates cut by the top-left/top-right corners; the bottom-centre is empty dark floor/glow for the logo.
+- **C, GROWTH HOOK (unique to GYM ARC = getting TALLER):** he stands flexing next to a giant glowing height ruler / growth chart on the wall, his head past the glowing "7'0"" mark, a tiny silhouette of his old 4'0" self at the bottom of the ruler; the top-left is empty for the logo. No other weight.
+- **D, ARM WRESTLING (our feature):** a close low camera across the table; he easily slams a sweating rival's arm down, the table edge glowing blue, sparks of effort; his huge arm and grin fill the frame; the top-right is empty for the logo.
+
+**Logo:** placed in code in each variant's empty corner (top-right for A and D, bottom-centre for B, top-left for C).
+
+**Then:** a side-by-side next to Power Lifters at row size. The pick must read as "different game, same quality".
