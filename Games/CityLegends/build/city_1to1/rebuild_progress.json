@@ -473,6 +473,80 @@
    ],
    "G_21x23": "re-bake RB7a pages only (collision fit)"
   },
-  "done": []
+  "done": [
+   "code",
+   "data",
+   "studio builds 6 boxes 0 MOUTH FAILED",
+   "bakes",
+   "uploads",
+   "swap v1943"
+  ],
+  "uploads": {
+   "STP6": {
+    "glb": [
+     97737834917571,
+     93358586137341,
+     130736654517379
+    ],
+    "collide": 92219697016052,
+    "cells": [
+     "17x25",
+     "18x22"
+    ],
+    "collide_b": 72280874278607
+   },
+   "STP3": {
+    "glb": [
+     82861889541991,
+     97221874864779,
+     78346012361737,
+     112889998808862
+    ],
+    "collide": 120617826719909,
+    "cells": [
+     "22x29",
+     "23x29"
+    ],
+    "collide_b": 104485369937440
+   },
+   "STP7": {
+    "glb": [
+     83206862391873,
+     85520311637302,
+     94183252456642
+    ],
+    "collide": 110251540189822,
+    "cells": [
+     "21x25",
+     "22x25",
+     "22x24"
+    ]
+   },
+   "STP8": {
+    "glb": [
+     134505484708037
+    ],
+    "collide": 79500166698385,
+    "cells": [
+     "23x21"
+    ],
+    "collide_b": 139579815972385
+   },
+   "STP7A": {
+    "glb": [
+     132414278765404,
+     99059131245335
+    ],
+    "collide": 89886445326095,
+    "cells": [
+     "20x23",
+     "21x23"
+    ],
+    "note": "re-bake of RB7a pages (collision fit only)",
+    "collide_b": 78526250008018
+   }
+  },
+  "next": "lanes: drop lane_heights rows in the 10 cells, LaneHeights, roads05_lanes.py LP1to10 --install, sync, require; DeckFeetCheck done (2 ok); Play drive; notes",
+  "swap": "all 10 cells swapped (meshes + boxes), then boxes re-swapped (_b packs: roads05_pbox_clip drops P points over R / D tops), meshes Box + no shadow, 953 old road meshes set Box (0 CanCollide), backups deleted; saved v1943"
  }
 }

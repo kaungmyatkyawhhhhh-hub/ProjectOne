@@ -56,10 +56,21 @@ _G.PREP = function(tag, glbs, colId)
 			local H = Instance.new("Folder")
 			H.Name = tag .. "_Holding"
 			H.Parent = SS
-			for _, id in glbs do
-				IS:LoadAsset(id).Parent = H
+			-- (24 Nov: fresh uploads often answer HTTP 502 for a while) each LoadAsset retried 6 times, 5 s x try apart
+			local function load(id)
+				for t = 1, 6 do
+					local ok, m = pcall(IS.LoadAsset, IS, id)
+					if ok then
+						return m
+					end
+					task.wait(5 * t)
+				end
+				error("LoadAsset failed: " .. tostring(id))
 			end
-			local cm = IS:LoadAsset(colId)
+			for _, id in glbs do
+				load(id).Parent = H
+			end
+			local cm = load(colId)
 			local text = {}
 			for _, d in cm:GetDescendants() do
 				if d:IsA("ModuleScript") then

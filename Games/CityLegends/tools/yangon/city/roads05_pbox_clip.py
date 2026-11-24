@@ -55,6 +55,11 @@ class Cover:
         # bridge pieces (deck walls, girders, piers) count only as a walkway level with the box top (+-1)
         self.bridge = np.array([k == 'B' for k, *_ in parts if k in VIS])
         self.tree = STRtree(self.polys)
+        # (24 Nov, May Ni Gone Overpass deck end: a P box stood 0.7 over the deck's D box, "covered" by the ground
+        # road's pavement 6 below) a point with a road surface just under the box top (top - 2 .. top + 0.2) is over
+        # asphalt or a deck: never covered
+        self.rpolys, self.rtops = footprints(parts, ('R',))
+        self.rtree = STRtree(self.rpolys)
 
     def covered(self, pts):
         g = shapely.points(pts[:, [0, 2]])
@@ -64,6 +69,9 @@ class Cover:
         ok = (self.tops[b] > pts[a, 1] - 6.0) & (self.tops[b] < pts[a, 1] + 3.0)
         ok &= ~self.bridge[b] | (np.abs(self.tops[b] - pts[a, 1]) < 1.0)
         cov[a[ok]] = True
+        a, b = self.rtree.query(g, predicate='intersects')
+        road = (self.rtops[b] > pts[a, 1] - 2.0) & (self.rtops[b] < pts[a, 1] + 0.2)
+        cov[a[road]] = False
         return cov
 
 
@@ -106,8 +114,28 @@ def clip_row(row, cover):
     return out
 
 
+def deck_tops(rows):
+    """top faces of the deck boxes (D rows) as (polygons, top heights): a deck built in another cell has no R parts here"""
+    polys, tops = [], []
+    for r in rows:
+        if r.split(' ', 1)[0] != 'D':
+            continue
+        kind, c, R, U, S = parse(r)
+        Bk = np.cross(R, U)
+        top = c + U * S[1] / 2
+        pts = np.array([top + R * (a * S[0] / 2) + Bk * (b * S[2] / 2) for a in (-1, 1) for b in (-1, 1)])
+        polys.append(shapely.convex_hull(shapely.multipoints(pts[:, [0, 2]])))
+        tops.append(pts[:, 1].max())
+    return polys, tops
+
+
 def clip(rows, parts):
     cover = Cover(parts)
+    dp, dt = deck_tops(rows)
+    if dp:
+        cover.rpolys = np.concatenate([cover.rpolys, np.array(dp, dtype=object)])
+        cover.rtops = np.concatenate([cover.rtops, np.array(dt)])
+        cover.rtree = STRtree(cover.rpolys)
     out, changed = [], 0
     for r in rows:
         if r.split(' ', 1)[0] != 'P':
