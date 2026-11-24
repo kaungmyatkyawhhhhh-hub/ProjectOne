@@ -163,3 +163,26 @@ Same chat as v5, 3 one-try 2x2 sheets. The new blue logo was added in code, hue-
 
 - **Files** (Downloads): `gymarc_icon_choices_board.png`, `gymarc_icon_choice_01..12.png` (600 px previews). The board screenshot is in the vault.
 - **After the owner picks:** a full-size render of that one, the logo placed clear of the weights, the 60 px test.
+
+## Tough versions (owner: "he could be more defined and more tough")
+- Full 1024 renders (not 2x2 tiles, which lose detail).
+- **The added prompt block:**
+  - shredded, deep separation, striations, thick veins, huge traps, a thick neck;
+  - satin skin (not plastic-shiny);
+  - a HARD warm key from the upper right with deep carving shadows, plus the blue rim;
+  - face: narrowed eyes under thick angled brows, a hard stare at the camera, a one-sided smirk, a scar through one eyebrow, sweat.
+- After the first one: "Keep this exact character, face, muscles, skin, light and colours for the next ones" = consistent in one chat.
+
+**The four:**
+- **A:** curl (the v5 pose);
+- **B:** front double-biceps, dumbbell at his feet;
+- **C:** arm wrestling a sweating rival;
+- **D:** champion overhead under a spotlight, crowd.
+
+The logo is on all four. In D it overlaps the left plate; in A it touches the dumbbell top. Fix whichever is picked.
+
+**Files** (Downloads):
+- `gymarc_icon_tough_board.png`
+- `gymarc_icon_tough_A_curl.png` … `D_champion.png`
+
+**Tool note:** if a new prompt is typed while ChatGPT is still generating, Enter doesn't send. Check the box is empty / the stop button is gone first.

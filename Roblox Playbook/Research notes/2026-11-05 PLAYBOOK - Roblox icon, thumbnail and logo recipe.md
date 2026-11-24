@@ -180,3 +180,11 @@ Files: `MM Outfit Catalog\Assets\thumbs_nov\final\`. Genre refs: `...\refs\`.
   - A plain gradient background, no FX clutter.
   - A warm body on a cool background.
 - **A detailed logo turns into a blob at row size.** Only put a logo on an icon if it's 2 simple bold words.
+- **Power Lifters teardown (owner still preferred it):**
+  - dark background, body brightest;
+  - 2 colour families only (the logo, weight and background share one; the body is the other);
+  - a full head-to-knees power pose;
+  - a complete weight with the number printed like a real plate;
+  - a 2-word slanted chrome logo with a thin glow frame.
+
+  Copy the PRINCIPLES with our own pair: orange body vs navy/electric BLUE. A simple logo made on a #00FF00 key and keyed in the browser works in one try.
