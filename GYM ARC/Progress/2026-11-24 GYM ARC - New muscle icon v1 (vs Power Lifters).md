@@ -213,3 +213,22 @@ The first sheet came out Roblox but too small. Adding "Roblox muscle-simulator M
 
 - No logo on this board: the page reload lost the keyed logo. Add the logo to the pick.
 - **Files** (Downloads): `gymarc_icon_roblox_board.png`, `gymarc_icon_roblox_01..12.png`.
+
+## Owner back to the FIRST 12 (orange blue set): "these ones were better. there is just some stuff i dont like that i cant even describe"
+Claude's guesses at what bugs him:
+1. flat saturated orange, glossy everywhere (rubber-toy skin);
+2. balloon muscles everywhere, puffy legs, no V-shape;
+3. a small head, so the Bacon identity and personality get lost;
+4. the same template layout in every option;
+5. a generic bokeh background, no GYM ARC world;
+6. wonky AI "1000 LB" text.
+
+**Test sheet** (logo chat, one try), the same curl pose, each corner fixing one thing:
+- **SKIN:** warm light tan, matte-satin;
+- **SHAPE:** athletic V, normal legs;
+- **HEAD:** head +30%, cocky raised brow + wide smirk;
+- **WORLD:** the GYM ARC brick gym, hanging lamps, a blue evening window, side light.
+
+Note: all four came back with the calmer tan skin.
+
+File: Downloads\gymarc_icon_test_skin_shape_head_world.png. The owner's pick tells us which fix matters; then combine the winners.
