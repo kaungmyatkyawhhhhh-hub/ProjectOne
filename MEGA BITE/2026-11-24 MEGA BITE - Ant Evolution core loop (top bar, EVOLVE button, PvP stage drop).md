@@ -45,7 +45,7 @@ Follows [[2026-11-24 MEGA BITE - Title screen, slots, Evolutions window, fossil 
   - **Not tested in Play:** it needs 2 real players (Studio's Team Test with 2 clients). The code was compile-checked and the logic read through.
 
 ## Next (Ant systems still to copy, in order)
-1. **MUTATE:**
+1. **MUTATE:** done 24 Nov, see [[2026-11-24 MEGA BITE - MUTATE (DNA, rolls, pity, stars, slots, packs)]].
    - DNA currency, roll 1 token / 120 DNA, x5 rolls;
    - pity: Epic+ at 25, Legendary+ at 100;
    - stars for duplicates, mutation slots (1, +1 at Fossil II, +1 by pass);

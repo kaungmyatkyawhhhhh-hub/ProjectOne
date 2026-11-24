@@ -78,7 +78,7 @@ Build log: [[2026-11-24 MEGA BITE - Title screen, slots, Evolutions window, foss
 1. **Dropping a stage when eaten.** The owner decided on 11 Nov that being eaten costs nothing, so this wasn't copied.
 2. **A per-form EVOLVE button** instead of the auto-evolve with its cutscene.
 3. **A stage-gap fight block.**
-4. **A DNA currency with mutation rolls, pity and slots.** MEGA BITE has mutation cards.
+4. ~~**A DNA currency with mutation rolls, pity and slots.**~~ Built 24 Nov: [[2026-11-24 MEGA BITE - MUTATE (DNA, rolls, pity, stars, slots, packs)]].
 5. **Pets.**
 6. **Breeds as rebirth cosmetics.**
 7. **Lost Eggs collectibles.**
