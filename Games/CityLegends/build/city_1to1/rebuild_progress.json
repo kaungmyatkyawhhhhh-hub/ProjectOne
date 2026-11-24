@@ -631,7 +631,8 @@
   "district_moved": "DONE + SAVED v1985 24 Nov: DistrictPlace P12 load 4 packs, night 34 cells, terrain 1471 tiles, green paint 1406 tiles (355,359 voxels) + far 2716 trees / 5432 parts (Far_keep merge 506 cells, 12 dups _old, 0 parts within 3 studs), Data_P12 + Data_P12G 1389, shells 13,426 + roof parts 8,346, 1 pagoda (w1557635845 Shwe Oat Gu) on terrain via ClaudeTools.PagodaPlaceRows (none old in the box), no TEMP plates. Packs + 28 Terrain modules removed.",
   "exported": "DONE 24 Nov home PC: RB12P data 43 modules (asset 111510896129828, deleted after load), 16 step boxes 14x8..17x11 (x 44544/46080/49152/52224..55296; z 24576/26112/29184/32256..35328) in one queued spawn after 'RB12PGO', 0 MOUTH FAILED; loggrab RB12P -> 462 pages; RoadsBuildRB empty; saved v1992 (19:09 save failed: PublishService AssetUpload HTTP 500, Roblox side, same minutes as the glb upload 500s)",
   "baked": "DONE 24 Nov: collect (clip P12+P11+P10+P9+P8), bake R05_ONLY = 1536 x29..35 z16..22 (49 cells): 20 duplicate parts dropped, 437 meshes / 45 glbs, 19,204 boxes, 0 steep, 0 dup rows; collide imports/sync/rebuild_P12_collide.rbxmx",
-  "uploaded_roads": "45 glbs + collide 124872658309907 -> roads05_RB12P/upload_ids_P12.txt (all Approved)"
+  "uploaded_roads": "45 glbs + collide 124872658309907 -> roads05_RB12P/upload_ids_P12.txt (all Approved)",
+  "minimap_prep": "FULL += P12 (detail 89 tiles); 22 changed tiles uploaded as Image, all Approved (ids_P12_images.txt, ids.json 105 -> 111, old ids_before_P12.json); YangonMapArt.lua (7247 / 252259840) -> mapart_P12 asset 72721685013173"
  },
  "joins_24nov": {
   "status": "DONE 25 Nov: saved v1983 (Edit, store CityLegends_v1 read on the Server, lock released); Play-driven 3 spots; not published",
