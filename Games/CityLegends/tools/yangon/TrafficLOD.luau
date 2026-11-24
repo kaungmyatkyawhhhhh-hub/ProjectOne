@@ -21,12 +21,19 @@
 local T = {}
 
 local CM = game:GetService("ReplicatedStorage"):WaitForChild("CarModels")
+-- (2026-11-24) the roster's old bodies were put away on 19 Nov (ServerStorage.OldModelCars) but traffic still uses them
+local function sourceModel(id: string): Instance?
+	local old = game:GetService("ServerStorage"):FindFirstChild("OldModelCars")
+	return CM:FindFirstChild(id) or (old and old:FindFirstChild(id))
+end
 local CORNERS = { "FL", "FR", "RL", "RR" }
 
 -- whole groups that are never seen from outside (any ancestor with one of these names, lower case)
+-- (2026-11-24, owner: traffic copies missing their rear doors) no "misc": A-Chassis kits keep the four doors in
+-- Misc/FL..RR/Door (the Belta and Alfard copies had no doors); the steering wheel there is dropped by its SW group
 local DROP_GROUPS = {
 	interior = true, int = true, seats = true, seat = true, stuffs = true, suitcase = true, engine = true,
-	sw = true, cam = true, tk = true, hitbox = true, misc = true, plates = true, ["malaysian car plate"] = true,
+	sw = true, cam = true, tk = true, hitbox = true, plates = true, ["malaysian car plate"] = true,
 	accessories = true, lns = true, ["liftgate hydraulic arm part"] = true,
 }
 -- part names (lower case patterns)
@@ -210,7 +217,7 @@ local function tidy(p: BasePart, keepLook: boolean?)
 end
 
 function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
-	local src = CM:FindFirstChild(id)
+	local src = sourceModel(id)
 	if not src then
 		return nil, id .. ": not in CarModels"
 	end
@@ -350,15 +357,41 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 			table.insert(keep, p)
 		end
 	end
+	-- a part in the paint parts' own colour and material is paint too (the Belta's door skins are named "H")
+	local paintLook: { [string]: boolean } = {}
+	local function lookKey(p: BasePart): string
+		return p.Material.Name .. tostring(p.Color)
+	end
+	local function isPaint(p: BasePart): boolean
+		return string.find(lower(p.Name), "paint") ~= nil or under(p, src, "paint") or under(p, src, "^color$")
+	end
+	for _, p in keep do
+		if isPaint(p) then
+			paintLook[lookKey(p)] = true
+		end
+	end
+	-- (2026-11-24) the body cap trimmed by size only and cut the Camry's / Crown's rear door skins and side windows
+	-- (ties at the cut, one door of a pair kept): the shell (paint, glass, door parts) is never trimmed, only the rest
+	local function shell(p: BasePart): boolean
+		return isPatch(p.Name) or isPaint(p) or paintLook[lookKey(p)] == true or isGlass(p, lower(p.Name)) or under(p, src, "door")
+	end
 	if maxBody and #keep > maxBody then
+		local rank: { [BasePart]: number } = {}
+		for i, p in keep do
+			rank[p] = i
+		end
 		table.sort(keep, function(a, b)
-			local pa, pb = isPatch(a.Name), isPatch(b.Name)
+			local pa, pb = shell(a), shell(b)
 			if pa ~= pb then
-				return pa -- (badge covers first: never trimmed)
+				return pa -- (badge covers and the shell first: never trimmed)
 			end
-			return volume(a) > volume(b)
+			local va, vb = volume(a), volume(b)
+			if math.abs(va - vb) > 1e-4 then
+				return va > vb
+			end
+			return rank[a] < rank[b]
 		end)
-		while #keep > maxBody do
+		while #keep > maxBody and not shell(keep[#keep]) do
 			table.remove(keep)
 		end
 	end
@@ -402,7 +435,7 @@ function T.make(id: string, kind: string, maxBody: number?): (Model?, string)
 			if c:IsA("MeshPart") then
 				c.TextureID = ""
 			end
-		elseif string.find(n, "paint") or under(p, src, "paint") or under(p, src, "^color$") then
+		elseif isPaint(p) or paintLook[lookKey(p)] then
 			c:SetAttribute("TrafficPaint", true)
 			c.Material = Enum.Material.SmoothPlastic
 			c.Reflectance = 0.08
