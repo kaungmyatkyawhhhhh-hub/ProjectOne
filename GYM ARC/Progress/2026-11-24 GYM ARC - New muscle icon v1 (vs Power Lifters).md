@@ -307,3 +307,27 @@ The comparison is in the vault.
 **Logo:** placed in code in each variant's empty corner (top-right for A and D, bottom-centre for B, top-left for C).
 
 **Then:** a side-by-side next to Power Lifters at row size. The pick must read as "different game, same quality".
+
+## De-copy variants made (25 Nov 03:00, Chrome on DESKTOP-U07U90K, same chat, one try)
+- **A, mirrored:** a close-up on the left, the dumbbell "1000 LB" cut at the bottom-right, the logo top-right. Clearly not Power Lifters' layout.
+- **B, from below:** a worm's-eye overhead press, plates in the top corners, the logo bottom-centre. Shows a lot of crotch/briefs in the centre (weak).
+- **C, growth:** a 7 FT ruler + a tiny old-self silhouette, flexing. The game's own hook. The logo top-right covers his head → place it smaller / elsewhere if picked.
+- **D, arm wrestle:** a close-up slam on a sweating rival, the logo top-right. Our own feature, clearly different.
+
+Board with Power Lifters for comparison + row-size thumbs. Files in Downloads (DESKTOP-U07U90K): `gymarc_icon_decopy_board.png`, `gymarc_icon_decopy_A..D.png`.
+
+**Claude's pick:** A (same energy, clearly ours), or D (unique feature).
+
+## Name casing question (03:04)
+"Gym Arc" vs "GYM ARC": keep **GYM ARC** (all caps), matching the logo and every asset. Short 2-word caps read as a brand. Keep the update tag in brackets in front.
+
+## 03:07, owner: "all A,B,C,D is bad"
+**Stop guessing blind.** Every round so far has been Claude guessing one reference (Power Lifters) → either "worse than Power Lifters" or "a copy of Power Lifters".
+
+**Next (research first, owner rule):**
+1. Pull the live icons of the top 15-20 gym / strength / muscle / "+1 strength" sims (thumbnails.roblox.com API, live player counts).
+2. Put them on one board with Power Lifters + our close-up v2.
+3. Write down which directions the top ones use OTHER than Power Lifters' layout.
+4. Show the owner 3 proven, clearly different directions and let him point at the one he likes. Only THEN generate.
+
+**Current best:** the close-up v2 (GYMARC_ICON_v2_closeup_logo_512).
