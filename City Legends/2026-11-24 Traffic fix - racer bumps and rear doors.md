@@ -77,7 +77,7 @@ The 1:1 lanes are chains of straight pieces about 24 studs long. Traffic cars si
   - These are the traffic templates as TrafficBodies scales them, placed by the road in Play. In that run no Belta, Camry or Alfard had spawned near the camera.
 
 ## Left / not done
-- **The Arzani Street deck itself ends 39 studs in the air** (builder or data fault, also a drop for players). Traffic no longer drives there, but the road needs a ramp, or the deck needs cutting, in the roads05 builder, then `LaneHeights` and the lanes re-run.
+- ~~The Arzani Street deck itself ends 39 studs in the air~~ **Fixed 24 Nov (v1934):** OSM has no bridge there, so the deck was removed and Arzani is a ground road; cells rebuilt, lanes re-run, traffic drives it again. See [[2026-11-24 Road fix - Arzani Street deck and crests]].
 - The lane modules are unchanged. The fixes run when the lanes load (`YangonDeckFix`). After the next `roads05_lanes.py` run, the spike rule still applies, but fix the deck data at the source too.
-- The built crests (Maha Bandula #2, Ahlone #3 deck foot, and others) are real steps in the road for players. Racers now ease over them, but the roads are unchanged.
+- The built crests (Maha Bandula #2, Ahlone #3 deck foot, and others) are real steps in the road for players. Racers now ease over them, but the roads are unchanged. 24 Nov: measured and the causes found; Ahlone #3 tried and reverted; the rest still open (table in [[2026-11-24 Road fix - Arzani Street deck and crests]]).
 - `ServerStorage.TrafficModels_preDoors` can be deleted after the owner's phone test, along with `TrafficModels_old` and `TrafficModels_preBadges`.
