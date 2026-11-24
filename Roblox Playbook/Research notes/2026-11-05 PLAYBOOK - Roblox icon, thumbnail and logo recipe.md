@@ -194,3 +194,9 @@ Files: `MM Outfit Catalog\Assets\thumbs_nov\final\`. Genre refs: `...\refs\`.
   - light peach skin, a flat black decal face.
 
   Then push SIZE separately ("muscle-sim MAX proportions, arms thicker than his head, still smooth and blocky"). Asking for "defined" makes ChatGPT go realistic.
+
+## Lessons 25 Nov (GYM ARC icon rendered in Blender from the real avatar)
+- ChatGPT rounds all looked like AI images; the fix is the real in-game avatar posed in Studio and lit in Blender (real Roblox GFX). Pipeline + gotchas: [[2026-11-25 GYM ARC - Icon rendered in Blender from the real avatar]].
+- Use the smooth "max" body, not the lumpy "monster" one; scale head x1.3 and body width x1.14 for GFX appeal.
+- A weight number only reads when the plate FACE points at the camera; cheat the bar angle if needed. Condensed font (Impact) for 1000 / LB on two lines.
+- First tries were too far / too grey next to Power Lifters: camera close (character fills the frame, crop mid-thigh), bluish walls darker than the body, strong rims, f/1.6 depth of field.

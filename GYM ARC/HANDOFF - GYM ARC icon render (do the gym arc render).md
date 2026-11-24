@@ -47,3 +47,6 @@ If the owner says **"do the gym arc render"**, this is the task. Full history: [
 
 ## Best ChatGPT attempt so far (fallback only)
 `GYMARC_ICON_v2_closeup_logo_512.png` (owner's Downloads): owner said "way better" but "looks like a direct copy of Power Lifters".
+
+## Status 25 Nov ~05:00 (Claude, chat)
+Steps 1-4 done for the icon: 3 renders from the real avatar (A2 close flex = pick, A wider, B overhead press), logo in code, board vs Power Lifters. See [[2026-11-25 GYM ARC - Icon rendered in Blender from the real avatar]] (GYM ARC\Progress). Waiting for the owner's pick, then step 5 (16:9 thumbnails).
