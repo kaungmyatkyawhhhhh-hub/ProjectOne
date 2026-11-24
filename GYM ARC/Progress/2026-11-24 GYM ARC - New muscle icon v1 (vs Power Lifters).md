@@ -243,3 +243,24 @@ Same logo chat, one try.
 - **2x2:** curl / double biceps / barbell across the shoulders / one-arm overhead dumbbell.
 - **Result:** the finish now matches Power Lifters closely. The hair came out streaky two-tone, not quite the classic Bacon Hair. Fix on the pick.
 - **Files** (Downloads): `gymarc_icon_tanned_PLlook_sheet.png`, `gymarc_icon_tanned_curl / double_biceps / barbell_shoulders / overhead.png`.
+
+## FINAL PICK (owner, 22:59): the tanned curl (top-left of the Power Lifters-look sheet)
+- Final full-size render, same chat, one try. Fixes:
+  - the clean classic Bacon Hair (one solid orange-brown, no streaks);
+  - the top-left quarter empty;
+  - one clean "1000 LB".
+- **Result:**
+  - a tanned glossy bronze Roblox bodybuilder with a cocky raised-brow smirk;
+  - a blue chrome dumbbell curled at the shoulder;
+  - a navy gym with warm bokeh, an electric-blue rim.
+- New logo v10 keyed in the browser and placed top-left at 42% width.
+- **Measured at 64 px:** mean 0.25, near-black 60% (dark background, body pops). Reads at 150 / 100 / 60 px.
+- **Files** (owner's Downloads, move them to `GYM ARC\Assets\thumbs_nov\`):
+  - `GYMARC_ICON_FINAL_tanned_curl_logo.png` (1254)
+  - `GYMARC_ICON_FINAL_tanned_curl_logo_512.png` (for Roblox's 512 icon)
+  - `GYMARC_ICON_FINAL_tanned_curl_nologo.png`
+  - `gymarc_logo_v10_blue_simple.png`
+- **Next:**
+  - the owner uploads the icon with the v1903 + v1905 publish;
+  - compare the click rate (3.7% baseline) after 3-4 days;
+  - matching thumbnails + the in-game logo switch to blue v10.

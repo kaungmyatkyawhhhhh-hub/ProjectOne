@@ -188,3 +188,9 @@ Files: `MM Outfit Catalog\Assets\thumbs_nov\final\`. Genre refs: `...\refs\`.
   - a 2-word slanted chrome logo with a thin glow frame.
 
   Copy the PRINCIPLES with our own pair: orange body vs navy/electric BLUE. A simple logo made on a #00FF00 key and keyed in the browser works in one try.
+- **"Too realistic / too orange / not Robloxian" fix (24 Nov):** say it's an actual Roblox avatar in a Roblox GFX.
+  - blocky proportions;
+  - SIMPLE SMOOTH CHUNKY muscle blocks like a muscle-sim avatar, no veins, no striations, no skin texture;
+  - light peach skin, a flat black decal face.
+
+  Then push SIZE separately ("muscle-sim MAX proportions, arms thicker than his head, still smooth and blocky"). Asking for "defined" makes ChatGPT go realistic.
