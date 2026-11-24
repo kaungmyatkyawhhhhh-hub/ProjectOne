@@ -24,8 +24,14 @@ Companion to [[2026-11-21 Real Yangon references - what the game must match]] (n
 | Expressway toll plaza (LANE CASH), PRIME+ EV charging station, GOODWE billboard | 0935, 0936 | Outside the city map. |
 
 ### New facts the earlier list missed
-- **Signals have red countdown digits** and some poles carry **solar panels**; a CCTV camera gantry spans the road (0930 @ 84-94, 0931).
-- **Plates:** black private (e.g. "BGO-11 6R-5379": region code on top), red taxis/buses (YBS 108 = 1L-2127, CNG taxi AA-1232).
+- **Re-watch 24 Nov:** corrections and missed items for 0927-0931 are in [[2026-11-24 Clip re-watch - what the earlier studies missed (0927-0931)]]. Read it before using the 0927 and 0928 catalogue lines; some of their times and items don't match the frames.
+- **Signals:**
+  - City heads (0929, 0930) are lamp + 2-digit countdown + lamp, and the digits take the colour of the lit lamp.
+  - Left turns get their own phase: straight green lasts about 55 s while the left arrow stays red.
+  - The 0931 head has 4 sections and solar panels, with no lit countdown and no CCTV.
+  - Camera gantries are at 0929 (4 cameras) and 0930 (3 cameras).
+- **Plates:** black private (e.g. "BGO-11 6R-5379": region code on top), red taxis/buses (YBS 108 = 1L-2127, CNG taxi AA-1232). Plates have 3 lines: the region line "YGN-<n>" on top, the big number, and a small line below (YGN-9 HH-4164, YGN-42 5D-5303).
+- **Yellow zebra crossings** with a white stop line (0929 107 s). The bedroom walls in the old flat are screwed board panels, not plaster (0928).
 - **Taxis:** Dongfeng EV City Taxi (black "EX1 PRO"), white Probox taxi with yellow band, old City Taxi with door plate, navy/yellow CNG Corolla wagon. Buses: yellow King Long XMQ6119G (YBS 108, also route 10), purple YBS 12.
 - **Old highway stones:** big white ones every furlong (fractions 1/1 to 2/7 = miles/furlongs, read from the number sequence) + small blue "n KM" every 0.5 km; 100 km/h sign, chevron boards, white bridge parapet with red-white bands (0937).
 - **The flat:** dark red-brown strip timber floor, mint / blue / dark-green walls, "SAINT SUPER" collapsible gate over a teak arched-panel door, zig-zag stair rail, star-pattern arch fanlight (0927-0928).
@@ -37,7 +43,7 @@ Companion to [[2026-11-21 Real Yangon references - what the game must match]] (n
 | 0928 | 1:16 | Flat interior: dark red varnished wood floor, white walls, brown wood doors with brass knob, pale-green curtains over window bars, split AC, wood wardrobe, desk + PC. |
 | 0929 | 2:55 | Drive on a wide main road: tall condo towers under construction behind **blue hoarding**, **Villa Nova** white columned gate, double white centre line, median with red-white kerbs, big **billboards on poles**, palm + rain trees, guard booth with striped roof, black-white striped poles. |
 | 0930 | 2:17 | City drive: **toddy palm avenue**, poles with **massive wire bundles**, old 6-8 floor blocks with barred balconies and laundry, **EV City Taxi** (black SUV, red plate), "Lucky Seven Tea Shop" sign. |
-| 0931 | 0:35 | White 8-10 floor condo with curved balconies, overhead **blue lane-arrow signs on a gantry arm** with signal heads, black plates "BGO-11 6R-5379", Land Cruiser Prado. |
+| 0931 | 0:35 | White condo of about 10 floors with curved balconies. One **blue lane-arrow sign** (4 approach lanes) and a 4-section signal head on one mast arm. Black plates "BGO-11 6R-5379", Land Cruiser Prado. Stopped at the red from 12 s to the end. |
 | 0932 | 2:53 | **YBS buses**: yellow King Long (route 108, "YBS" + Burmese number, red Burmese text strip), a purple YBS 12; **CNG TAXI** (blue/yellow Corolla wagon, red plate); Range Rover; median turn island with red-white kerbs and a blue arrow sign; a man in longyi crossing. |
 | 0933 | 0:56 | Wide junction under trees, overhead wire curtains, lone signal on a mast arm, yellow YBS crossing, guard hut. |
 | 0934 | 0:56 | **Quiet side streets**: 2-3 floor houses with blue metal awnings, chain-link fences, overgrown trees, wire tangles, a pagoda spire behind houses, small vans parked on the verge. |

@@ -1,5 +1,7 @@
 # old apartment block and flat interior (0927-0928)
 
+> **Re-watch 24 Nov:** new items and corrections for these clips are in [[2026-11-24 Clip re-watch - what the earlier studies missed (0927-0931)]].
+
 Full catalogue, one frame every 2 s (times are ±2 s). Hub: [[2026-11-23 Real Yangon by day - clip study (what the game must match)]]. Stills: `refs_23nov/IMG_<clip>_<sss>s.jpg`. Items marked unsure are guesses.
 
 # Reference catalogue A: IMG_0927 (old apartment block, outside + stairwell) and IMG_0928 (inside a flat)

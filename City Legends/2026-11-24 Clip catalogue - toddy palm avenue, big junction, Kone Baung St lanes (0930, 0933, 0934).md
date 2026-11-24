@@ -1,5 +1,7 @@
 # toddy palm avenue, big junction, Kone Baung St lanes (0930, 0933, 0934)
 
+> **Re-watch 24 Nov:** new items and corrections for these clips are in [[2026-11-24 Clip re-watch - what the earlier studies missed (0927-0931)]].
+
 Full catalogue, one frame every 2 s (times are ±2 s). Hub: [[2026-11-23 Real Yangon by day - clip study (what the game must match)]]. Stills: `refs_23nov/IMG_<clip>_<sss>s.jpg`. Items marked unsure are guesses.
 
 # Yangon reference catalogue - clips IMG_0930, IMG_0933, IMG_0934
