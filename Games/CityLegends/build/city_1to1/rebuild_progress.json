@@ -603,7 +603,7 @@
   }
  },
  "P11": {
-  "status": "IN PROGRESS 24 Nov (home PC, DISTRICT REBUILD agent)",
+  "status": "DONE 25 Nov (home PC): district + J37 roads (42 cells, edges re-baked whole) + U Chit Maung deck surfaced, barrier out, back in the lanes + lanes LP1to11 + minimap + verge; Play-tested; saved v2007 (Edit, store v1, lock released)",
   "plan": "P11 box x 36074..45984 z 25357..32653 -> 1536 cells x23..29 z16..21 (42 cells, all edges: x23 = P1 column, z16 = P9/P2 row, z21 = P8 row, x29 = P10/P9 corner + P12 later; P12 rebuild re-bakes x29 whole). Step boxes 16: cols 35328..36864 (label 11), 36864..39936 (12), 39936..43008 (13), 43008..46080 (14) x rows 24576..26112 (8), 26112..29184 (9), 29184..32256 (10), 32256..33792 (11). Bake R05_ONLY = the 42 swap cells, clip P11+P1+P2+P7+P8+P9+P10.",
   "data": "R05_GROW=1700 roads05_subset.py net RB11 P11: 1568 roads, 14 decks, 1 ring, 54 modules (9,977,948 chars); subset.json boxes P11 + seams P1 P2 P7 P8 P9 P10; deckfeet mirror 0; data pack imports/sync/rebuild_RB11_data.rbxmx = asset 110812698823319 (Approved)",
   "buildings": "DONE 24 Nov home PC: district_files.sh P11 --no-roads buildings (13 min, log district_files_P11_24nov.log): 8,551 buildings (322 dropped / 1,941 clipped by the J37 net, 69 on landmark sites, 0 overlap), shells 10,727 parts in 30 cells, roofs 4,667, 2 pagodas; night cells_1.glb 18.5 MB (no split); old outputs _pre_rebuild_P11",
@@ -618,7 +618,9 @@
   "lanes": "LP1to11 (P1..P11; roads05_lanesubset NO_LANES now empty: U Chit Maung deck back in): 7832 roads (cut 129), 47 decks, 24 rings; lane_heights = LP1to10's rows minus 94 in the P11 cells, raw install synced (100068274938445), LaneHeights 475 rows after 'LH11START' (lh_new_25nov.txt), 135 new (113 in the P11 cells) -> 1,382 lanes / 3,247 links / 0 dead ends, 1,200 built heights, 23 deck gaps (none in P11); src/shared YangonLanes1to1_1..28 (was 26) synced (139826818162046), checksums equal (roads05_LP1to11_checksums.txt), require 28/28 ok",
   "minimap": "FULL += P11, 25 tiles Approved, YangonMapArt synced (6857 / 1826944164 = repo; mapart_P11 asset 116254227261321)",
   "deck_feet": "DeckFeetCheck on RB11 decks: 11 ok, 0 BAD, 2 not in the game (P12 side). U Chit Maung end at Banyar Dala (39948,32823): D tops 60.6 straight across (the old 44.8 / 29.9 dip is gone), Banyar Dala start flush",
-  "saved": "20:47 UTC save PublishSuccessful (after a Team Create 'Lost connection' drop at 20:35 closed the place: relaunched, the edits up to the lanes sync had survived on the TC server; mapart sync + barrier + deletes redone)"
+  "saved": "v2005 before Play, v2007 after Play (store v1)",
+  "playtest": "PASS 25 Nov ~21:00 UTC (saved v2005 before Play; store CityLegends_test, AE86 claimed, TestDrive + TestEngine + TestGearbox Auto + TestThrottle 0.6 + a steer-to-path hook TestSteer, rays onto Roads.Collide every 0.25 s): U Chit Maung deck start foot (38860 -> 39063) R -> D gap 2.03-2.10 const (stopped once by NPC traffic on the deck = lanes work), deck mid 39554 -> over the Banyar Dala junction (old dip at 39940,32800: vy 0.0 flat, D 62.7 const) -> Banyar Dala deck -> down its foot onto R at 33602 (vy -5 smooth, gap 1.93-2.12), 3 ground roads across the seams (Waizayandar at the P9 seam, No.1 Industrial Road #2 at the P1 seam, Than Thu Mar Road at the P8 seam) R only gap 2.05-2.08, 0 steps. No script errors (only the known sound / TexturePack / EditableMesh-budget lines). Store back to CityLegends_v1, read on the Server in a fresh Play (PlayerData.storeName = CityLegends_v1).",
+  "shots": "City Legends/2026-11-24 rebuild P11 - U Chit Maung flyover deck (Play) - after.jpg; ... - Waizayandar Road at the P9 seam (Play) - after.jpg"
  },
  "P12": {
   "status": "IN PROGRESS 24 Nov (after P11)",
