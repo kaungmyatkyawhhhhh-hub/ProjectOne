@@ -161,11 +161,13 @@ function F.shiftRecords(folder: Instance, key: string, first: number, last: numb
 	local out = {}
 	for k, r in recs do
 		if k >= first and k <= last then
-			local o = XAT[r.t]
+			local o = XAT[r.t] + 1 -- (x starts at this index inside the record; 26 Nov: an off-by-one here cut the type letter
+			-- and the streamer stopped reading the tile at that record)
 			local s = r.s
 			local xs = enc((r.x + dx - x0 + 16384) * 500, 4)
 			local zs = enc((r.z + dz - z0 + 16384) * 500, 4)
 			s = string.sub(s, 1, o - 1) .. xs .. string.sub(s, o + 4, o + 6) .. zs .. string.sub(s, o + 11)
+			assert(string.sub(s, 1, 1) == string.sub(r.s, 1, 1))
 			assert(#s == r.L)
 			table.insert(out, s)
 		else
