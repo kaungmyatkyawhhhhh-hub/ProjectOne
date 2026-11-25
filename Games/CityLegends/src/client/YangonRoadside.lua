@@ -9,6 +9,11 @@
 	  * side streets (road collision boxes RoadBox "R" with no traffic lane in them): a pole on one side every SIDE_CELL
 	    studs, one wire and two bundles to the next pole along the street, an amber lamp on every second pole (owner,
 	    21 Nov: side-street power-pole lamps are amber).
+	  * at big signalled junctions (3+ approaches): a camera gantry over the widest approach, a white arm with 3-4 cameras
+	    (clips 0929: 4 cameras, 0930: 3).
+	  * at real compound gates (OSM barrier=gate, Shared.YangonRoadsideData): a guard booth with a red-white striped roof.
+	  * round real construction sites (OSM landuse / building = construction): blue sheet hoarding.
+	  * billboards light up at night near the camera, like the lamps.
 	  * medians at least PALM_MEDIAN wide (the gap between the two ways' inner lanes): a row of toddy (palmyra) palms
 	    down the middle, clip 0930.
 
@@ -81,6 +86,28 @@ local function isNight(): boolean
 	return t < 6.2 or t > 17.8
 end
 
+-- the camera gantries' space, known from the plan (before anything is built): wires and poles keep out of it
+local gantryReg: { [string]: { Vector3 } } = {}
+local function gantryAdd(p: Vector3)
+	local k = math.floor(p.X / 32) .. "," .. math.floor(p.Z / 32)
+	gantryReg[k] = gantryReg[k] or {}
+	table.insert(gantryReg[k], p)
+end
+local function nearGantry(p: Vector3, r: number): boolean
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			for _, q in gantryReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
+				if (q - p).Magnitude < r then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+local GANTRY_BACK, GANTRY_SIDE, GANTRY_H = 30, 13, 20 -- studs before the stop line, out from the outer lane, arm height
+
 ---------------------------------------------------------------------
 -- the plan: main-road poles from the lanes
 ---------------------------------------------------------------------
@@ -88,7 +115,7 @@ end
 local function plan(g, skipTile: (number, number) -> boolean)
 	local poles = {}
 	local boards = {}
-	local chunks: { [string]: { p: { number }, b: { any }, palms: { Vector3 }? } } = {}
+	local chunks: { [string]: any } = {} -- key -> { p = pole ids, b = boards, palms, gantries, gates, hoard }
 	local laneGrid: { [string]: { Vector3 } } = {} -- every lane point, 48-stud cells (side streets are where none is)
 	local outer: { [string]: number } = {}
 	for _, l in g.lanesData do
@@ -251,6 +278,57 @@ local function plan(g, skipTile: (number, number) -> boolean)
 							table.insert(chunks[key].palms, mid)
 						end
 					end
+				end
+			end
+		end
+	end
+	-- camera gantries: at junctions with 3+ approaches, over the approach with the most lanes (3+)
+	local appr: { [string]: any } = {}
+	local byJ: { [number]: { any } } = {}
+	for _, sg in g.signals or {} do
+		local ang = math.atan2(sg.dir.X, sg.dir.Z)
+		local key = sg.i .. ":" .. (math.floor((ang + math.pi) / (math.pi / 6) + 0.5) % 12)
+		local a = appr[key]
+		if not a then
+			a = { i = sg.i, dir = Vector3.new(sg.dir.X, 0, sg.dir.Z).Unit, pts = {} }
+			appr[key] = a
+			byJ[sg.i] = byJ[sg.i] or {}
+			table.insert(byJ[sg.i], a)
+		end
+		table.insert(a.pts, sg.pos)
+	end
+	for _, list in byJ do
+		if #list >= 3 then
+			local best
+			for _, a in list do
+				if #a.pts >= 3 and (not best or #a.pts > #best.pts) then
+					best = a
+				end
+			end
+			if best then
+				local right = best.dir:Cross(Vector3.yAxis)
+				local outer, inner = best.pts[1], best.pts[1]
+				for _, q in best.pts do
+					if q:Dot(right) > outer:Dot(right) then
+						outer = q
+					end
+					if q:Dot(right) < inner:Dot(right) then
+						inner = q
+					end
+				end
+				local base = outer + right * GANTRY_SIDE - best.dir * GANTRY_BACK
+				local reach = math.clamp((base - (outer + inner) / 2):Dot(right) + 6, 14, 52)
+				local gt = { base = base, dir = best.dir, right = right, reach = reach, cams = math.min(#best.pts, 4) }
+				local key = math.floor(base.X / CHUNK) .. "," .. math.floor(base.Z / CHUNK)
+				chunks[key] = chunks[key] or { p = {}, b = {} }
+				chunks[key].gantries = chunks[key].gantries or {}
+				table.insert(chunks[key].gantries, gt)
+				for y = 0, GANTRY_H + 1, 2 do
+					gantryAdd(base + Vector3.new(0, y + 0.5, 0))
+				end
+				for d = 0, reach, 2 do
+					gantryAdd(base + Vector3.new(0, GANTRY_H, 0) - right * d)
+					gantryAdd(base + Vector3.new(0, GANTRY_H - 1.5, 0) - right * d)
 				end
 			end
 		end
@@ -521,7 +599,7 @@ local function poleClear(sets, base: Vector3, lampDir: Vector3?): boolean
 	end
 	for y = 1.5, POLE_H + 1, 2 do
 		local p = base + Vector3.new(0, y, 0)
-		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) then
+		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) or nearGantry(p, 2) then
 			return false
 		end
 	end
@@ -538,6 +616,18 @@ local function poleClear(sets, base: Vector3, lampDir: Vector3?): boolean
 			if blocked(sets, base + Vector3.new(0, POLE_H - 1.5, 0) + lampDir * d, 0.5) then
 				return false
 			end
+		end
+	end
+	return true
+end
+
+-- (owner via coordinator, 25 Nov: "keep poles off corner islands and small traffic islands") a pole spot must have
+-- land behind it, away from the street: an island has road there
+local function backed(at: Vector3, out: Vector3): boolean
+	for _, d in { 6, 12, 18 } do
+		local _, kind = ground(at + out * d)
+		if kind == "R" or kind == "D" or kind == "M" then
+			return false
 		end
 	end
 	return true
@@ -562,7 +652,7 @@ local function resolve(poles, id: number, sets): Vector3?
 		for _, along in { 0, 6, -6, 12, -12 } do
 			local at = p.pos + p.right * off + p.dir * along
 			local y, kind = ground(at)
-			if y and (kind == "P" or kind == "T") then
+			if y and (kind == "P" or kind == "T") and backed(at, p.right) then
 				local base = Vector3.new(at.X, y, at.Z)
 				if poleClear(sets, base, lamp) then
 					resolved[id] = base
@@ -611,7 +701,7 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 	local sag = (b - a).Magnitude * sagK
 	local pts = wirePoints(a, b, sag)
 	for _, q in pts do
-		if blocked(sets, q, width / 2 + 0.15) or nearPalm(q, 2.2) then
+		if blocked(sets, q, width / 2 + 0.15) or nearPalm(q, 2.2) or nearGantry(q, width / 2 + 1.5) then
 			return nil
 		end
 	end
@@ -653,6 +743,7 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 end
 
 local LIGHT_R = 220
+local AD_R = 320
 local function lampLight(head: BasePart, color: Color3)
 	local l = Instance.new("SpotLight")
 	l.Face = Enum.NormalId.Bottom
@@ -711,6 +802,7 @@ local function adFace(board: BasePart, face: Enum.NormalId, ad)
 	sg.LightInfluence = 1
 	sg.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
 	sg.CanvasSize = Vector2.new(400, 200)
+	CollectionService:AddTag(sg, "RoadsideAd") -- (lit at night near the camera by the main loop)
 	sg.MaxDistance = 600
 	sg.Parent = board
 	local bg = Instance.new("Frame")
@@ -932,7 +1024,7 @@ local function resolveSide(c, sets): Vector3?
 		for _, along in { 0, 6, -6, 12, -12 } do
 			local at = c.pos + c.n * off + c.axis * along
 			local y, kind = ground(at)
-			if y and (kind == "P" or kind == "T") then
+			if y and (kind == "P" or kind == "T") and backed(at, c.n) then
 				local base = Vector3.new(at.X, y, at.Z)
 				if poleClear(sets, base, lamp) then
 					sideResolved[c.id] = base
@@ -943,6 +1035,139 @@ local function resolveSide(c, sets): Vector3?
 	end
 	sideResolved[c.id] = false
 	return nil
+end
+
+---------------------------------------------------------------------
+-- camera gantries, guard booths, site hoarding
+---------------------------------------------------------------------
+local GANTRY_WHITE = Color3.fromRGB(232, 234, 236)
+local LENS = Color3.fromRGB(18, 20, 24)
+
+local function buildGantry(m: Instance, sets, gt): boolean
+	for _, back in { 0, 10, 20 } do
+		local at = gt.base - gt.dir * back
+		local y, kind = ground(at)
+		if y and (kind == "P" or kind == "T") then
+			local base = Vector3.new(at.X, y, at.Z)
+			local ok = not solidAt(CFrame.new(base + Vector3.new(0, GANTRY_H / 2 + 0.3, 0)), Vector3.new(1.4, GANTRY_H, 1.4))
+			if ok then
+				for yy = 1.5, GANTRY_H + 1, 2 do
+					if blocked(sets, base + Vector3.new(0, yy, 0), 0.8) or nearPalm(base + Vector3.new(0, yy, 0), 2.5) then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				for d = 1, gt.reach, 2 do
+					local q = base + Vector3.new(0, GANTRY_H - 0.8, 0) - gt.right * d
+					if blocked(sets, q, 1.4) or nearPalm(q, 2.5) or nearCross(q, 2) then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				local face = CFrame.lookAt(base, base - gt.dir) -- the cameras look back at the cars coming
+				part(m, Vector3.new(GANTRY_H, 0.8, 0.8), CFrame.new(base + Vector3.new(0, GANTRY_H / 2, 0)) * CFrame.Angles(0, 0, math.pi / 2), GANTRY_WHITE, Enum.Material.Metal, Enum.PartType.Cylinder)
+				-- the arm sits on the pole's top and runs out over the lanes
+				local armMid = base + Vector3.new(0, GANTRY_H + 0.25, 0) - gt.right * (gt.reach / 2)
+				part(m, Vector3.new(0.5, 0.5, gt.reach + 0.4), CFrame.lookAt(armMid, armMid - gt.right), GANTRY_WHITE, Enum.Material.Metal)
+				-- the cameras hang under the arm, evenly along its outer two thirds
+				for k = 1, gt.cams do
+					local d = gt.reach * (0.3 + 0.65 * (k - 0.5) / gt.cams)
+					local c = base + Vector3.new(0, GANTRY_H - 0.35, 0) - gt.right * d
+					local body = face.Rotation + c
+					part(m, Vector3.new(0.7, 0.7, 1.6), body, GANTRY_WHITE, Enum.Material.SmoothPlastic)
+					part(m, Vector3.new(0.5, 0.5, 0.12), body * CFrame.new(0, 0, -0.86), LENS, Enum.Material.Glass)
+				end
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local BOOTH_WALL = Color3.fromRGB(226, 220, 204)
+local ROOF_RED = Color3.fromRGB(190, 36, 32)
+
+local function buildBooth(m: Instance, sets, gate: Vector3): boolean
+	-- a spot beside the gate: off the road, on the pavement / ground, clear of walls and trees
+	for k = 0, 7 do
+		local a = k * math.pi / 4
+		local off = Vector3.new(math.cos(a), 0, math.sin(a))
+		local at = gate + off * 9
+		local y, kind = ground(at)
+		if y and (kind == "P" or kind == "T") then
+			local base = Vector3.new(at.X, y, at.Z)
+			local cf = CFrame.lookAt(base, base - off) -- the window faces the gate
+			local ok = not solidAt(cf * CFrame.new(0, 4.6, 0), Vector3.new(6.4, 8.6, 6.4))
+			if ok then
+				for _, o in { Vector3.new(0, 1, 0), Vector3.new(2.5, 1, 2.5), Vector3.new(-2.5, 1, 2.5), Vector3.new(2.5, 1, -2.5), Vector3.new(-2.5, 1, -2.5), Vector3.new(0, 4, 0), Vector3.new(0, 7.5, 0), Vector3.new(3, 7.6, 3), Vector3.new(-3, 7.6, -3) } do
+					local q = (cf * CFrame.new(o)).Position
+					if blocked(sets, q, 0.4) or nearPalm(q, 2) then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				-- off the road on all four corners
+				for _, o in { Vector3.new(3, 0, 3), Vector3.new(-3, 0, 3), Vector3.new(3, 0, -3), Vector3.new(-3, 0, -3) } do
+					local _, k2 = ground((cf * CFrame.new(o)).Position)
+					if k2 == "R" or k2 == "D" or k2 == "M" then
+						ok = false
+						break
+					end
+				end
+			end
+			if ok then
+				part(m, Vector3.new(5, 7, 5), cf * CFrame.new(0, 3.5, 0), BOOTH_WALL, Enum.Material.SmoothPlastic)
+				-- window (front) and door (side): thin sheets standing on the walls
+				part(m, Vector3.new(3.6, 2.2, 0.1), cf * CFrame.new(0, 4.6, -2.55), LENS, Enum.Material.Glass)
+				part(m, Vector3.new(0.1, 5.6, 2.2), cf * CFrame.new(2.55, 2.8, 0.6), Color3.fromRGB(96, 70, 52), Enum.Material.Wood)
+				-- the roof: red and white stripes side by side, overhanging the walls
+				for i = 0, 3 do
+					part(m, Vector3.new(1.6, 0.4, 6.4), cf * CFrame.new(-2.4 + i * 1.6, 7.2, 0), if i % 2 == 0 then ROOF_RED else WHITE, Enum.Material.SmoothPlastic)
+				end
+				return true
+			end
+		end
+	end
+	return false
+end
+
+local HOARD_BLUE = Color3.fromRGB(28, 86, 168)
+local HOARD_H = 7.5 -- 2.5 m
+
+local function buildHoarding(m: Instance, sets, panels: { any }): number
+	local made = 0
+	for _, pn in panels do
+		local y, kind = ground(pn.c)
+		if y and kind ~= "R" and kind ~= "D" and kind ~= "M" then
+			local base = Vector3.new(pn.c.X, y, pn.c.Z)
+			local cf = CFrame.lookAt(base, base + pn.n)
+			local ok = not solidAt(cf * CFrame.new(0, HOARD_H / 2 + 0.3, 0), Vector3.new(pn.w, HOARD_H - 0.4, 0.3))
+			if ok then
+				for x = -pn.w / 2 + 0.5, pn.w / 2 - 0.5, 1.5 do
+					for yy = 0.8, HOARD_H - 0.4, 2.2 do
+						if blocked(sets, (cf * CFrame.new(x, yy, 0)).Position, 0.2) then
+							ok = false
+							break
+						end
+					end
+					if not ok then
+						break
+					end
+				end
+			end
+			if ok then
+				part(m, Vector3.new(pn.w, HOARD_H, 0.25), cf * CFrame.new(0, HOARD_H / 2, 0), HOARD_BLUE, Enum.Material.DiamondPlate)
+				made += 1
+			end
+		end
+	end
+	return made
 end
 
 ---------------------------------------------------------------------
@@ -1016,6 +1241,19 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 		if buildBoard(m, sets, b) then
 			any = true
 		end
+	end
+	for _, gt in chunk and chunk.gantries or {} do
+		if buildGantry(m, sets, gt) then
+			any = true
+		end
+	end
+	for _, gate in chunk and chunk.gates or {} do
+		if buildBooth(m, sets, gate) then
+			any = true
+		end
+	end
+	if chunk and chunk.hoard and buildHoarding(m, sets, chunk.hoard) > 0 then
+		any = true
 	end
 	-- side streets: a pole per cell, wired to the next pole along the street
 	local mineSide = sideCandidates(key, ctx.laneGrid, ctx.inJunction, ctx.skipTile)
@@ -1107,6 +1345,57 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		end
 		local poles, chunks, laneGrid, inJunction = plan(g, skipTile)
 		local ctx = { poles = poles, laneGrid = laneGrid, inJunction = inJunction, skipTile = skipTile }
+		-- real OSM gates (guard booths) and construction sites (hoarding), into the chunks
+		local dataMod = Shared:FindFirstChild("YangonRoadsideData")
+		local okData, data = pcall(function()
+			return dataMod and require(dataMod)
+		end)
+		if okData and data then
+			local function chunkOf(x: number, z: number)
+				local key = math.floor(x / CHUNK) .. "," .. math.floor(z / CHUNK)
+				chunks[key] = chunks[key] or { p = {}, b = {} }
+				return chunks[key]
+			end
+			for xs, zs in string.gmatch(data.Gates or "", "(%-?[%d%.]+),(%-?[%d%.]+)") do
+				local x, z = tonumber(xs) :: number, tonumber(zs) :: number
+				local c = chunkOf(x, z)
+				c.gates = c.gates or {}
+				table.insert(c.gates, Vector3.new(x, 0, z))
+			end
+			for _, ring in data.Sites or {} do
+				local pts = {}
+				for xs, zs in string.gmatch(ring, "(%-?[%d%.]+),(%-?[%d%.]+)") do
+					table.insert(pts, Vector3.new(tonumber(xs) :: number, 0, tonumber(zs) :: number))
+				end
+				-- each panel faces out of the ring's middle
+				local mid = Vector3.zero
+				for _, q in pts do
+					mid += q
+				end
+				mid /= math.max(#pts, 1)
+				for k = 1, #pts - 1 do
+					local a, b = pts[k], pts[k + 1]
+					local len = (b - a).Magnitude
+					if len > 1 then
+						local d = (b - a).Unit
+						local nOut = d:Cross(Vector3.yAxis)
+						if nOut:Dot((a + b) / 2 - mid) < 0 then
+							nOut = -nOut
+						end
+						-- panels butt end to end; 0.2 kept clear at each corner so two edges' panels never meet
+						local usable = len - 0.4
+						local n = math.max(1, math.floor(usable / 8 + 0.5))
+						local w = usable / n
+						for i = 1, n do
+							local cpos = a + d * (0.2 + (i - 0.5) * w)
+							local c = chunkOf(cpos.X, cpos.Z)
+							c.hoard = c.hoard or {}
+							table.insert(c.hoard, { c = cpos, n = nOut, w = w - 0.02 })
+						end
+					end
+				end
+			end
+		end
 		-- the map folders the overlap query can't see into (visual meshes): indexed once, then as they stream in
 		task.spawn(function()
 			local root = Config.mapRoot and Config.mapRoot()
@@ -1140,6 +1429,15 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 				local h = l.Parent
 				if l:IsA("Light") and h and h:IsA("BasePart") then
 					l.Enabled = lampsOn and full and (h.Position - at).Magnitude < LIGHT_R
+				end
+			end
+			-- billboards: backlit (no light influence) at night within AD_R of the camera
+			for _, sg in CollectionService:GetTagged("RoadsideAd") do
+				local h = sg.Parent
+				if sg:IsA("SurfaceGui") and h and h:IsA("BasePart") then
+					local lit = lampsOn and (h.Position - at).Magnitude < AD_R
+					sg.LightInfluence = if lit then 0 else 1
+					sg.Brightness = if lit then 1.3 else 1
 				end
 			end
 			local cx, cz = math.floor(at.X / CHUNK), math.floor(at.Z / CHUNK)
