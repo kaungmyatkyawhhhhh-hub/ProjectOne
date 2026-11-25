@@ -954,6 +954,20 @@ def medians(data):
     return med
 
 
+def axis_angle(p):
+    """direction (degrees, 0-180) of a thin polygon's long side (its minimum rotated rectangle)"""
+    xy = list(p.minimum_rotated_rectangle.exterior.coords)
+    e1 = (xy[1][0] - xy[0][0], xy[1][1] - xy[0][1])
+    e2 = (xy[2][0] - xy[1][0], xy[2][1] - xy[1][1])
+    e = e1 if math.hypot(*e1) >= math.hypot(*e2) else e2
+    return math.degrees(math.atan2(e[1], e[0])) % 180
+
+
+def ang_diff(a, b):
+    d = abs(a - b) % 180
+    return min(d, 180 - d)
+
+
 def tidy(data, items):
     """final pass (17 Nov, paint QA: paint_off 438, zebra_median 129, stack_paint 89): every polygon clipped to its own
     surface (ground paint to the carriageways and rings, deck paint to the decks), off the medians, and never on a
@@ -971,6 +985,7 @@ def tidy(data, items):
     for d in data['decks']:
         deck.extend(quads(d['s']))
     G, M, D = Clip(*ground), Clip(*med), Clip(*deck)
+    FEET = unary_union([Point(q[0], q[2]).buffer(30) for d in data['decks'] if d['s'] for q in (d['s'][0], d['s'][-1])])         if data['decks'] else Polygon()
     rank = {w: i for i, w in enumerate(ORDER)}
     order = sorted(range(len(items)), key=lambda i: rank.get(items[i]['w'], len(ORDER)))
     kept = {}
@@ -992,9 +1007,18 @@ def tidy(data, items):
         Q = P.intersection(surf.local(P).buffer(0.15).buffer(-0.2))   # (J15) seams between two roads' quads closed first
         if not it.get('deck') and not M.is_empty:
             Q = Q.difference(M.local(Q).buffer(0.05)) if not Q.is_empty else Q
+        # (25 Nov, owner_bug_4: a zebra painted over a flyover ramp's path) no ground zebra / stop line on a deck's quads
+        if not it.get('deck') and it['w'] in ('zebra', 'stop') and not Q.is_empty:
+            Dl = D.local(Q)
+            if not Dl.is_empty:
+                Q = Q.difference(Dl.buffer(0.3))
         near = []
         for c in cells(P.bounds):
             near.extend(kept.get((c, bool(it.get("deck"))), ()))
+            # (25 Nov, owner_bug_4) at a deck foot the deck's lines land on the ground road: a ground line meeting them
+            # there is checked against them too (the crossing rule below)
+            if not it.get('deck') and it['w'] in LINE_KINDS and FEET.intersects(P):
+                near.extend(k for k in kept.get((c, True), ()) if k[1] in ('deck centre', 'deck lane') and FEET.intersects(k[0]))
         near = [k for k in set(near) if k[0].intersects(Q.buffer(0.6))] if not Q.is_empty else []
         if near:
             Q = Q.difference(unary_union([k[0] for k in near]).buffer(0.05))
@@ -1002,6 +1026,21 @@ def tidy(data, items):
             zs = [k[0] for k in near if k[1] in ('zebra', 'stop')]
             if zs and it['w'] in LINE_KINDS:
                 Q = Q.difference(unary_union(zs).buffer(0.6))
+            # (25 Nov, owner_bug_4: double yellow lines crossing each other at an angle) a line that runs across a line
+            # laid before it at more than 12 degrees stops there: only its longest piece is kept, 0.6 short of the other
+            if it['w'] in LINE_KINDS and not Q.is_empty:
+                xs = []
+                for k in near:
+                    if k[1] in LINE_KINDS + ('deck centre', 'deck lane') and k[0].intersects(P):
+                        zone = P.intersection(k[0]).buffer(4)   # the directions right where they meet (lines curve)
+                        a1, a2 = P.intersection(zone), k[0].intersection(zone)
+                        if not a1.is_empty and not a2.is_empty and ang_diff(axis_angle(a1), axis_angle(a2)) > 12:
+                            xs.append(k[0])
+                if xs:
+                    Q = Q.difference(unary_union(xs).buffer(0.6))
+                    pcs = polys_of(Q)
+                    Q = max(pcs, key=lambda p: p.area) if pcs else Q
+                    st['crossing'] = st.get('crossing', 0) + 1
         ps = [p for p in polys_of(Q) if p.area >= 0.3 and not p.interiors and p.area / max(p.length, 1e-6) > 0.1]
         if it['w'] == 'stop' and len(ps) > 1:
             ps = [max(ps, key=lambda p: p.area)]     # (J17) one stop line, no stub past a median nose
