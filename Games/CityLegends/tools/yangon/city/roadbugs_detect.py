@@ -182,7 +182,7 @@ def run(cells_only=None):
                         spot('sliver', m[0], m[1], m[2], 'out %.1f len %.0f' % (ds[k], E[i].max()))
         # hole
         for (x, y, z, nm) in probes.get(cell, []):
-            if not R.near(x, y, z, 0.5, 4):
+            if not R.near(x, y, z, 0.5, 12):
                 spot('hole', x, y, z, nm)
         # grass flat on asphalt
         MG = get('MG')

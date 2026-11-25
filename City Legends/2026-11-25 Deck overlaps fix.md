@@ -55,5 +55,12 @@ The 13 deck ends with two surfaces (D box, place, cell):
 - May Ni Gone deck end: gap 2.03-2.08, jolt 4.3.
 - Edit shots before / after: `2026-11-25 Deck overlaps - Hledan double deck (Edit) - before/after.jpg`, `... Lanmadaw deck foot (Edit) - before/after.jpg`.
 
+## Ramp walls standing in junctions (owner_bug_4, same day)
+Owner shot `refs_2026-11-25_owner_road_bugs/owner_bug_4.webp`: a flyover ramp's side wall runs at ground level through a junction.
+- **Scan (Studio, every W wall box):** 274 of 18,700 wall boxes stand up out of a road carriageway, at the feet of about 30 decks in 29 cells (11x11, 15x13, 15x25, 16x19, 17x17-17x19, 18x22, 18x26, 19x29, 20x28, 20x29, 21x27, 21x28, 22x19, 22x21, 22x23, 22x27, 23x27, 24x28, 25x20, 25x28, 26x20, 26x21, 27x19, 27x26, 28x22, 29x12, 33x14).
+- **Cause:** the builder's ramp walls start wherever the deck is a little over the TERRAIN (`DECK_GRADE_H` 1.2). In a junction the terrain under the road bed is lower than the road, so a full 6-stud wall stands at the deck foot even where the deck edge is level with the road beside it.
+- **Fix in the bake (`roads05_bake.drop_foot_walls`):** a bridge wall piece with road surface at the same level (within 1.2) on both sides retains nothing and is dropped, with its W collision box (`foot_walls.txt` lists them for a mesh-only swap). Real ramp walls (deck higher than the road beside) and parapets stay.
+- Re-bakes per owner build running; see the handover for what was swapped.
+
 ## Left
 - See the handover entry "DECK OVERLAPS FIX" for the cells still to swap in this pass and anything not done.
