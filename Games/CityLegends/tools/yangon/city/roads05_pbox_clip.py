@@ -69,6 +69,12 @@ class Cover:
         ok = (self.tops[b] > pts[a, 1] - 6.0) & (self.tops[b] < pts[a, 1] + 3.0)
         ok &= ~self.bridge[b] | (np.abs(self.tops[b] - pts[a, 1]) < 1.0)
         cov[a[ok]] = True
+        # (25 Nov, owner: "invisible parts on the roads", Kabar Aye flyover lower road by the fuel station) the highest
+        # built piece under each point: a box kept over a pavement 6 below stood 4-6 over the road beside it (a ceiling
+        # cars hit). clip_row seats each kept piece on its pavement instead.
+        self.last_top = np.full(len(pts), np.nan)
+        if ok.any():
+            np.fmax.at(self.last_top, a[ok], self.tops[b][ok])
         a, b = self.rtree.query(g, predicate='intersects')
         road = (self.rtops[b] > pts[a, 1] - 2.0) & (self.rtops[b] < pts[a, 1] + 0.2)
         cov[a[road]] = False
@@ -91,8 +97,15 @@ def clip_row(row, cover):
     across = (-W / 3, 0.0, W / 3)
     pts = np.array([top + R * a + Bk * ti for ti in t for a in across])
     cov = cover.covered(pts).reshape(n, 3)
+    ctop = getattr(cover, 'last_top', np.full(len(pts), np.nan)).reshape(n, 3)
+    def seat(mid, sl):
+        # top of the box onto the pavement it stands for when they are more than 0.3 apart
+        h = np.nanmedian(ctop[sl]) if np.isfinite(ctop[sl]).any() else np.nan
+        d = 0.0 if not np.isfinite(h) else h - (mid + U * S[1] / 2)[1]
+        return mid + np.array([0.0, d, 0.0]) if abs(d) > 0.3 else mid
     if cov.all():
-        return [row]
+        m2 = seat(c, (slice(None), slice(None)))
+        return [row] if m2 is c else [fmt(kind, m2, R, U, (S[0], S[1], S[2]))]
     out = []
     i = 0
     while i < n:
@@ -112,6 +125,7 @@ def clip_row(row, cover):
                     m += 1
                 l0, l1 = -W / 2 + k * W / 3, -W / 2 + (m + 1) * W / 3
                 mid = c + Bk * ((a0 + a1) / 2) + R * ((l0 + l1) / 2)
+                mid = seat(mid, (slice(i, j + 1), slice(k, m + 1)))
                 out.append(fmt(kind, mid, R, U, (l1 - l0, S[1], a1 - a0)))
                 k = m + 1
         i = j + 1
