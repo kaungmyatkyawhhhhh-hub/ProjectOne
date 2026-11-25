@@ -1,19 +1,30 @@
 --[[
-	YangonRoadside (client, 2026-11-25): the overhead wires of real daytime Yangon (vault "2026-11-23 Real Yangon by day -
-	clip study", item 1: "every city frame has them"; clips 0929, 0930, 0933, 0934). Concrete poles with a black-white
-	banded foot on the kerb side of every road, thick black cable bundles sagging from pole to pole, now and then a pair
-	of wires across the road, a junction box or a coil of spare cable on a pole, a transformer every few poles.
+	YangonRoadside (client, 2026-11-25): the street dressing of real daytime Yangon (vault "2026-11-23 Real Yangon by day -
+	clip study": item 1 "every city frame has them", item 2 toddy palm avenues, item 8 pole billboards; clips 0929-0934).
 
-	Placed by rule from RivieraTraffic's lane data (the same lanes the cars drive): every EVERY studs along the outermost
-	lane of each road and way, on the pavement (collision box RoadBox "P") or the grass verge (terrain), never on a road,
-	median, deck or building, never inside a signalled junction. Districts whose street layer already has poles and
-	cables (ReplicatedStorage.YgnKit.Data_<d>S, P1) are skipped there. Built only within LOAD studs of the camera, taken
-	down past DROP. Visual only: no collision, no rays, no touches, no shadows. Wires are Beams (no parts).
+	  * main roads (RivieraTraffic's lanes, the outermost lane of each road and way): a concrete pole every EVERY studs on
+	    the kerb side, black-white banded foot, thick black cable bundles sagging from pole to pole, now and then wires
+	    across the road, a junction box / coil of spare cable / transformer; a white LED lamp arm on every second pole
+	    (roads without a planted median: Pyay Road's median has its own lamps); a pole billboard now and then.
+	  * side streets (road collision boxes RoadBox "R" with no traffic lane in them): a pole on one side every SIDE_CELL
+	    studs, one wire and two bundles to the next pole along the street, an amber lamp on every second pole (owner,
+	    21 Nov: side-street power-pole lamps are amber).
+	  * wide medians (RoadBox "M" boxes at least PALM_MEDIAN wide): a row of toddy (palmyra) palms, clip 0930.
+
+	Nothing is placed on a road, median kerb, deck or building, inside a signalled junction, or where it would touch any
+	other visible part: the client-built kit (buildings' balconies, walls and trees in workspace.YgnKitNear: CanQuery is
+	off there, so they are tested point by point against each part's box), parks, landmarks, edge greenery, medians and
+	signals. A wire that would touch one is left out. A chunk waits until the kit tiles round it are built (attribute
+	Built). Districts whose street layer already has poles and cables (ReplicatedStorage.YgnKit.Data_<d>S, P1) are
+	skipped. Built only within LOAD studs of the camera, taken down past DROP. Visual only: no collision, no rays, no
+	touches, no shadows. Wires are Beams (no parts).
 
 	YangonRoadside.start(qualityScale)
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Lighting = game:GetService("Lighting")
+local CollectionService = game:GetService("CollectionService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
@@ -23,14 +34,25 @@ local YangonRoadside = {}
 
 local LOAD, DROP = 480, 640
 local CHUNK = 192
-local EVERY = 105 -- studs between poles (35 m)
+local EVERY = 105 -- studs between main-road poles (35 m)
+local SIDE_CELL = 96 -- one side-street pole per cell of this size (CHUNK is a multiple of it)
+local PALM_MEDIAN = 15 -- medians at least this wide (5 m) get toddy palms
+local PALM_EVERY = 30 -- studs between palms (10 m)
+local PALM_H = 45 -- trunk height (15 m)
 local POLE_H = 27 -- 9 m
 local BAND_H = 1.1
 local W = 0.95 -- pole width
+local TILE = 256 -- the kit's tile size
+local CELL = 16 -- the blocker grid
 local CONCRETE = Color3.fromRGB(150, 148, 142)
 local BLACK, WHITE = Color3.fromRGB(24, 24, 26), Color3.fromRGB(228, 228, 224)
 local CABLE = Color3.fromRGB(20, 20, 22)
 local BOXGREY = Color3.fromRGB(120, 124, 126)
+local GALV = Color3.fromRGB(170, 174, 178)
+local LED, LED_LIGHT = Color3.fromRGB(236, 244, 255), Color3.fromRGB(232, 240, 255)
+local AMBER, AMBER_LIGHT = Color3.fromRGB(255, 176, 92), Color3.fromRGB(255, 170, 96)
+local PALM_TRUNK = Color3.fromRGB(78, 74, 70)
+local NO_LAMPS = { ["Pyay Road"] = true, ["Kabar Aye Pagoda Road"] = true } -- their planted medians have lamps
 
 local function baseRoad(name: string?): string
 	return (string.gsub(name or "", "%s*#%d+$", ""))
@@ -54,11 +76,20 @@ local function part(parent: Instance, size: Vector3, cf: CFrame, color: Color3, 
 	return p
 end
 
+local function isNight(): boolean
+	local t = Lighting.ClockTime
+	return t < 6.2 or t > 17.8
+end
+
+---------------------------------------------------------------------
+-- the plan: main-road poles from the lanes
+---------------------------------------------------------------------
 -- poles: id -> { pos (lane-derived), right (towards the kerb), dir, road, way, chunk, prev (id along the run), cross (id across) }
 local function plan(g, skipTile: (number, number) -> boolean)
 	local poles = {}
 	local boards = {}
 	local chunks: { [string]: { p: { number }, b: { any } } } = {}
+	local laneGrid: { [string]: { Vector3 } } = {} -- every lane point, 48-stud cells (side streets are where none is)
 	local outer: { [string]: number } = {}
 	for _, l in g.lanesData do
 		if l.yangon and not l.skip then
@@ -89,6 +120,14 @@ local function plan(g, skipTile: (number, number) -> boolean)
 		if li % 150 == 0 then
 			task.wait() -- (Play, 25 Nov: the whole plan in one go was a 0.4 s hitch at start)
 		end
+		if l.yangon and not l.skip then
+			for k = 1, #l.pts // 3 do
+				local p = Vector3.new(l.pts[3 * k - 2], l.pts[3 * k - 1], l.pts[3 * k])
+				local key = math.floor(p.X / 48) .. "," .. math.floor(p.Z / 48)
+				laneGrid[key] = laneGrid[key] or {}
+				table.insert(laneGrid[key], p)
+			end
+		end
 		if l.yangon and not l.skip and l.lane == outer[l.road .. "|" .. l.way] then
 			local n = #l.pts // 3
 			local prevP: Vector3? = nil
@@ -108,7 +147,7 @@ local function plan(g, skipTile: (number, number) -> boolean)
 							local at = prevP:Lerp(p, t / len)
 							local right = dir:Cross(Vector3.yAxis)
 							local pos = at + right * 10.5
-							local tx, tz = math.floor(pos.X / 256), math.floor(pos.Z / 256)
+							local tx, tz = math.floor(pos.X / TILE), math.floor(pos.Z / TILE)
 							if inJunction(pos) or skipTile(tx, tz) then
 								last = nil
 							else
@@ -162,60 +201,301 @@ local function plan(g, skipTile: (number, number) -> boolean)
 		chunks[b.chunk] = chunks[b.chunk] or { p = {}, b = {} }
 		table.insert(chunks[b.chunk].b, b)
 	end
-	return poles, chunks
+	return poles, chunks, laneGrid, inJunction
 end
 
+---------------------------------------------------------------------
+-- what else is there: the parts nothing may touch
+---------------------------------------------------------------------
+local kitFolder: Instance? = nil
+local kitTiles: { [string]: boolean } = {} -- tile names ("i_j" and "Si_j") that have kit data
+local tileIndex = setmetatable({}, { __mode = "k" }) -- kit tile folder -> { [cellKey]: { BasePart } }
+local staticIndex: { [string]: { BasePart } } = {}
+local staticSeen = setmetatable({}, { __mode = "k" })
+
+local function cellKey(x: number, z: number): string
+	return math.floor(x / CELL) .. "," .. math.floor(z / CELL)
+end
+
+local function addPart(cells, q: BasePart, maxExt: number?)
+	if q.Transparency >= 1 or math.max(q.Size.X, q.Size.Y, q.Size.Z) < 0.5 then
+		return
+	end
+	local cf, h = q.CFrame, q.Size * 0.5
+	local ex = math.abs(cf.RightVector.X) * h.X + math.abs(cf.UpVector.X) * h.Y + math.abs(cf.LookVector.X) * h.Z + 2
+	local ez = math.abs(cf.RightVector.Z) * h.X + math.abs(cf.UpVector.Z) * h.Y + math.abs(cf.LookVector.Z) * h.Z + 2
+	local p = cf.Position
+	if ex > (maxExt or 120) or ez > (maxExt or 120) then
+		return -- (a huge box: ground plates and landmark walls; their collision boxes are found by solidAt)
+	end
+	for gx = math.floor((p.X - ex) / CELL), math.floor((p.X + ex) / CELL) do
+		for gz = math.floor((p.Z - ez) / CELL), math.floor((p.Z + ez) / CELL) do
+			local k = gx .. "," .. gz
+			local list = cells[k]
+			if not list then
+				list = {}
+				cells[k] = list
+			end
+			table.insert(list, q)
+		end
+	end
+end
+
+local function indexOf(f: Instance)
+	local cells = tileIndex[f]
+	if cells then
+		return cells
+	end
+	cells = {}
+	local n = 0
+	for _, q in f:GetDescendants() do
+		if q:IsA("BasePart") then
+			addPart(cells, q)
+			n += 1
+			if n % 2000 == 0 then
+				task.wait()
+			end
+		end
+	end
+	tileIndex[f] = cells
+	return cells
+end
+
+local function watchStatic(f: Instance)
+	local function add(q)
+		if q:IsA("BasePart") and not staticSeen[q] then
+			staticSeen[q] = true
+			addPart(staticIndex, q, 60)
+		end
+	end
+	local n = 0
+	for _, q in f:GetDescendants() do
+		add(q)
+		n += 1
+		if n % 3000 == 0 then
+			task.wait()
+		end
+	end
+	f.DescendantAdded:Connect(add)
+end
+
+-- every kit tile under the box has been built (or has no data)
+local function kitReady(x0: number, z0: number, x1: number, z1: number): boolean
+	local near = kitFolder or workspace:FindFirstChild("YgnKitNear")
+	kitFolder = near
+	for i = math.floor(x0 / TILE), math.floor(x1 / TILE) do
+		for j = math.floor(z0 / TILE), math.floor(z1 / TILE) do
+			for _, pre in { "", "S" } do
+				local name = pre .. i .. "_" .. j
+				if kitTiles[name] then
+					local f = near and near:FindFirstChild(name)
+					if not f or not f:GetAttribute("Built") then
+						return false
+					end
+				end
+			end
+		end
+	end
+	return true
+end
+
+-- the blockers round a box: kit tiles (indexed once each), the static map folders, the built medians and signals
+local function blockersFor(x0: number, z0: number, x1: number, z1: number)
+	local sets = { staticIndex }
+	local near = kitFolder
+	if near then
+		for i = math.floor(x0 / TILE), math.floor(x1 / TILE) do
+			for j = math.floor(z0 / TILE), math.floor(z1 / TILE) do
+				for _, pre in { "", "S" } do
+					local f = near:FindFirstChild(pre .. i .. "_" .. j)
+					if f then
+						table.insert(sets, indexOf(f))
+					end
+				end
+			end
+		end
+	end
+	local dyn = {}
+	for _, n in { "YangonMedians", "YangonSignals" } do
+		local f = workspace:FindFirstChild(n)
+		if f then
+			for _, m in f:GetChildren() do
+				local ok, cf, size = pcall(function()
+					return (m :: Model):GetBoundingBox()
+				end)
+				if ok and cf.X + size.X > x0 - 60 and cf.X - size.X < x1 + 60 and cf.Z + size.Z > z0 - 60 and cf.Z - size.Z < z1 + 60 then
+					for _, q in m:GetDescendants() do
+						if q:IsA("BasePart") then
+							addPart(dyn, q)
+						end
+					end
+				end
+			end
+		end
+	end
+	table.insert(sets, dyn)
+	return sets
+end
+
+local function blocked(sets, p: Vector3, margin: number): boolean
+	local k = cellKey(p.X, p.Z)
+	for _, cells in sets do
+		local list = cells[k]
+		if list then
+			for _, q in list do
+				if q.Parent then
+					local lp = q.CFrame:PointToObjectSpace(p)
+					local h = q.Size
+					if math.abs(lp.X) < h.X * 0.5 + margin and math.abs(lp.Y) < h.Y * 0.5 + margin and math.abs(lp.Z) < h.Z * 0.5 + margin then
+						return true
+					end
+				end
+			end
+		end
+	end
+	return false
+end
+
+-- my own things other chunks must keep clear of: palm trunks and the wires across roads (flat 32-stud grid)
+local palmReg: { [string]: { any } } = {} -- { pos, chunk key }
+local crossReg: { [string]: { any } } = {}
+local function regKey(x: number, z: number): string
+	return math.floor(x / 32) .. "," .. math.floor(z / 32)
+end
+local function regAdd(reg, p: Vector3, owner: string)
+	local k = regKey(p.X, p.Z)
+	reg[k] = reg[k] or {}
+	table.insert(reg[k], { p, owner })
+end
+local function regPurge(owner: string)
+	for _, reg in { palmReg, crossReg } do
+		for _, list in reg do
+			for i = #list, 1, -1 do
+				if list[i][2] == owner then
+					table.remove(list, i)
+				end
+			end
+		end
+	end
+end
+local function nearPalm(p: Vector3, r: number): boolean
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			for _, e in palmReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
+				local q = e[1]
+				if Vector3.new(p.X - q.X, 0, p.Z - q.Z).Magnitude < r and p.Y > q.Y - 1 and p.Y < q.Y + PALM_H + 12 then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+local function nearCross(p: Vector3, r: number): boolean
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			for _, e in crossReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
+				if (e[1] - p).Magnitude < r then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+---------------------------------------------------------------------
+-- building
+---------------------------------------------------------------------
 local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Include
 local overlap = OverlapParams.new()
 overlap.FilterType = Enum.RaycastFilterType.Include
 
--- where a pole really stands: on the pavement or the verge, near its lane-derived spot; nil if nowhere fits
+local function mapParts()
+	local root = Config.mapRoot and Config.mapRoot()
+	local roads = root and root:FindFirstChild("Roads")
+	local collide = roads and roads:FindFirstChild("Collide")
+	return root, collide
+end
+
+-- the ground under a spot: its height and kind ("P" pavement, "T" terrain, else the RoadBox letter or nil)
+local function ground(at: Vector3): (number?, string?)
+	local _, collide = mapParts()
+	if not collide then
+		return nil, nil
+	end
+	rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
+	local hit = workspace:Raycast(at + Vector3.new(0, 14, 0), Vector3.new(0, -30, 0), rayParams)
+	if not hit then
+		return nil, nil
+	end
+	if hit.Instance == workspace.Terrain then
+		return hit.Position.Y, "T"
+	end
+	return hit.Position.Y, hit.Instance:GetAttribute("RoadBox")
+end
+
+-- the shells and other query-able map parts (buildings' collision, landmarks' collision ...)
+local function solidAt(box: CFrame, size: Vector3): boolean
+	local root = mapParts()
+	if not root then
+		return true
+	end
+	local list = {}
+	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites", "Green" } do
+		local f = root:FindFirstChild(n)
+		if f then
+			table.insert(list, f)
+		end
+	end
+	overlap.FilterDescendantsInstances = list
+	return #workspace:GetPartBoundsInBox(box, size, overlap) > 0
+end
+
+-- a pole standing at base is clear of everything (own lamp arm included when lampDir is given)
+local function poleClear(sets, base: Vector3, lampDir: Vector3?): boolean
+	if solidAt(CFrame.new(base + Vector3.new(0, POLE_H / 2 + 0.2, 0)), Vector3.new(W + 0.6, POLE_H, W + 0.6)) then
+		return false
+	end
+	for y = 1.5, POLE_H + 1, 2 do
+		local p = base + Vector3.new(0, y, 0)
+		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) then
+			return false
+		end
+	end
+	if lampDir then
+		for d = 1, 8, 1.5 do
+			if blocked(sets, base + Vector3.new(0, POLE_H - 1.5, 0) + lampDir * d, 0.5) then
+				return false
+			end
+		end
+	end
+	return true
+end
+
+-- resolved pole spots (main-road poles): id -> base | false; nil = not known yet (kit round it not built)
 local resolved: { [number]: Vector3 | false } = {}
-local function resolve(poles, id: number): Vector3?
+local function resolve(poles, id: number, sets): Vector3?
 	local r = resolved[id]
 	if r ~= nil then
 		return r or nil
 	end
 	local p = poles[id]
-	local root = Config.mapRoot and Config.mapRoot()
-	local roads = root and root:FindFirstChild("Roads")
-	local collide = roads and roads:FindFirstChild("Collide")
-	if not collide then
-		return nil -- not streamed / no map: try again later
-	end
-	local blockers = {}
-	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites", "Green" } do
-		local f = root:FindFirstChild(n)
-		if f then
-			table.insert(blockers, f)
-		end
-	end
-	local signals = workspace:FindFirstChild("YangonSignals")
-	if signals then
-		table.insert(blockers, signals)
-	end
-	local medians = workspace:FindFirstChild("YangonMedians")
-	if medians then
-		table.insert(blockers, medians)
-	end
-	rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
-	overlap.FilterDescendantsInstances = blockers
 	-- the lane under the spot must not be a deck (no poles on flyovers)
-	local under = workspace:Raycast(p.pos - p.right * 10.5 + Vector3.new(0, 6, 0), Vector3.new(0, -14, 0), rayParams)
-	if under and under.Instance:GetAttribute("RoadBox") == "D" then
+	local _, under = ground(p.pos - p.right * 10.5)
+	if under == "D" then
 		resolved[id] = false
 		return nil
 	end
+	local lamp = if id % 2 == 0 and not NO_LAMPS[p.road] then -p.right else nil
 	for _, off in { 0, -1.5, 1.5, 3, 4.5 } do
-		local at = p.pos + p.right * off
-		local hit = workspace:Raycast(at + Vector3.new(0, 14, 0), Vector3.new(0, -30, 0), rayParams)
-		if hit then
-			local kind = hit.Instance:GetAttribute("RoadBox")
-			if kind == "P" or hit.Instance == workspace.Terrain then
-				local base = Vector3.new(at.X, hit.Position.Y, at.Z)
-				local box = CFrame.new(base + Vector3.new(0, POLE_H / 2 + 0.2, 0))
-				if #workspace:GetPartBoundsInBox(box, Vector3.new(W + 0.6, POLE_H, W + 0.6), overlap) == 0 then
+		for _, along in { 0, 6, -6, 12, -12 } do
+			local at = p.pos + p.right * off + p.dir * along
+			local y, kind = ground(at)
+			if y and (kind == "P" or kind == "T") then
+				local base = Vector3.new(at.X, y, at.Z)
+				if poleClear(sets, base, lamp) then
 					resolved[id] = base
 					return base
 				end
@@ -227,12 +507,12 @@ local function resolve(poles, id: number): Vector3?
 end
 
 -- the cable anchors of a pole (world positions), by slot: 1-2 the top arm's ends, 3-5 the bundles on the road side
-local function anchors(p, base: Vector3): { Vector3 }
-	local road = -p.right
+local function anchors(dir: Vector3, right: Vector3, base: Vector3): { Vector3 }
+	local road = -right
 	local top = base + Vector3.new(0, POLE_H + 0.35, 0)
 	return {
-		top + p.dir * 2.2,
-		top - p.dir * 2.2,
+		top + dir * 2.2,
+		top - dir * 2.2,
 		base + Vector3.new(0, POLE_H - 4.2, 0) + road * (W / 2 + 0.2),
 		base + Vector3.new(0, POLE_H - 5.4, 0) + road * (W / 2 + 0.25),
 		base + Vector3.new(0, POLE_H - 6.3, 0) + road * (W / 2 + 0.2),
@@ -241,7 +521,31 @@ end
 
 local DOWN = CFrame.fromMatrix(Vector3.zero, Vector3.new(0, -1, 0), Vector3.new(1, 0, 0)) -- an attachment whose axis points down
 
-local function wire(holder: BasePart, a: Vector3, b: Vector3, width: number, sagK: number)
+-- the points of a sagging wire (the beam's own curve), ends left out
+local function wirePoints(a: Vector3, b: Vector3, sag: number): { Vector3 }
+	local out = {}
+	local p1, p2 = a + Vector3.new(0, -sag, 0), b + Vector3.new(0, -sag, 0)
+	local n = math.max(2, math.ceil((b - a).Magnitude / 4))
+	for i = 1, n - 1 do
+		local t = i / n
+		local u = 1 - t
+		local q = a * (u * u * u) + p1 * (3 * u * u * t) + p2 * (3 * u * t * t) + b * (t * t * t)
+		if (q - a).Magnitude > 2 and (q - b).Magnitude > 2 then
+			table.insert(out, q)
+		end
+	end
+	return out
+end
+
+-- a wire from a to b, unless it would touch something; returns its points when built
+local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: number, sagK: number, color: Color3?): { Vector3 }?
+	local sag = (b - a).Magnitude * sagK
+	local pts = wirePoints(a, b, sag)
+	for _, q in pts do
+		if blocked(sets, q, width / 2 + 0.15) or nearPalm(q, 2.2) then
+			return nil
+		end
+	end
 	-- (parent first: a WorldCFrame set before parenting is taken as local)
 	local a0 = Instance.new("Attachment")
 	a0.Parent = holder
@@ -249,20 +553,31 @@ local function wire(holder: BasePart, a: Vector3, b: Vector3, width: number, sag
 	local a1 = Instance.new("Attachment")
 	a1.Parent = holder
 	a1.WorldCFrame = CFrame.new(b) * DOWN
-	local sag = (b - a).Magnitude * sagK
 	local beam = Instance.new("Beam")
 	beam.Attachment0, beam.Attachment1 = a0, a1
 	beam.CurveSize0, beam.CurveSize1 = sag, -sag
 	beam.Width0, beam.Width1 = width, width
-	beam.Color = ColorSequence.new(CABLE)
+	beam.Color = ColorSequence.new(color or CABLE)
 	beam.LightInfluence = 1
 	beam.Segments = 8
 	beam.FaceCamera = true
 	beam.Parent = holder
+	return pts
 end
 
-local function buildPole(m: Instance, p, base: Vector3, id: number): BasePart
-	local look = CFrame.lookAt(base, base + p.dir)
+local lampsOn = isNight()
+local lampsAllowed = true
+local function lampLight(head: BasePart, color: Color3)
+	local l = Instance.new("SpotLight")
+	l.Face = Enum.NormalId.Bottom
+	l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = color, 4, 60, 135, false
+	l.Enabled = lampsOn and lampsAllowed
+	CollectionService:AddTag(l, "RoadsideLamp")
+	l.Parent = head
+end
+
+local function buildPole(m: Instance, dir: Vector3, right: Vector3, base: Vector3, id: number, lamp: string?): BasePart
+	local look = CFrame.lookAt(base, base + dir)
 	-- the black-white banded foot, then the concrete shaft (stacked, not overlapping)
 	for b = 0, 3 do
 		part(m, Vector3.new(W, BAND_H, W), look * CFrame.new(0, BAND_H * (b + 0.5), 0), if b % 2 == 0 then BLACK else WHITE, Enum.Material.SmoothPlastic)
@@ -271,8 +586,7 @@ local function buildPole(m: Instance, p, base: Vector3, id: number): BasePart
 	local shaft = part(m, Vector3.new(W, shaftH, W), look * CFrame.new(0, 4 * BAND_H + shaftH / 2, 0), CONCRETE, Enum.Material.Concrete)
 	-- the top arm along the road, sitting on the pole's top
 	part(m, Vector3.new(0.35, 0.35, 5), look * CFrame.new(0, POLE_H + 0.175, 0), CONCRETE, Enum.Material.Concrete)
-	-- road-side fittings against the pole's face (the road is -right = the look frame's -X... computed in world terms)
-	local roadSide = CFrame.lookAt(base, base - p.right) -- facing the road
+	local roadSide = CFrame.lookAt(base, base - right) -- facing the road (-Z of this frame points at it)
 	if id % 3 == 0 then
 		part(m, Vector3.new(1.3, 1.8, 0.7), roadSide * CFrame.new(0, 11, -(W / 2 + 0.35)), BOXGREY, Enum.Material.Metal) -- junction box
 	elseif id % 3 == 1 then
@@ -283,6 +597,12 @@ local function buildPole(m: Instance, p, base: Vector3, id: number): BasePart
 		for s = -1, 1, 2 do
 			part(m, Vector3.new(2.6, 1.5, 1.5), roadSide * CFrame.new(s * 0.8, 19, W / 2 + 0.75) * CFrame.Angles(0, 0, math.pi / 2), BOXGREY, Enum.Material.Metal, Enum.PartType.Cylinder)
 		end
+	end
+	if lamp then
+		-- a galvanised arm out over the road from the pole's face, the lamp head under its end
+		part(m, Vector3.new(0.3, 0.3, 7), roadSide * CFrame.new(0, POLE_H - 1.5, -(W / 2 + 3.5)), GALV, Enum.Material.Metal)
+		local head = part(m, Vector3.new(0.9, 0.3, 2.2), roadSide * CFrame.new(0, POLE_H - 1.8, -(W / 2 + 6.2)), if lamp == "amber" then AMBER else LED, Enum.Material.Neon)
+		lampLight(head, if lamp == "amber" then AMBER_LIGHT else LED_LIGHT)
 	end
 	return shaft
 end
@@ -332,33 +652,32 @@ local function adFace(board: BasePart, face: Enum.NormalId, ad)
 	label(ad.low, 0.76, 0.16, Enum.Font.GothamBold)
 end
 
-local function buildBoard(m: Instance, b): boolean
-	local root = Config.mapRoot and Config.mapRoot()
-	local roads = root and root:FindFirstChild("Roads")
-	local collide = roads and roads:FindFirstChild("Collide")
-	if not collide then
+local function buildBoard(m: Instance, sets, b): boolean
+	local y, kind = ground(b.pos)
+	if not y or not (kind == "P" or kind == "T") then
 		return false
 	end
-	rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
-	local hit = workspace:Raycast(b.pos + Vector3.new(0, 14, 0), Vector3.new(0, -30, 0), rayParams)
-	if not hit or not (hit.Instance == workspace.Terrain or hit.Instance:GetAttribute("RoadBox") == "P") then
-		return false
-	end
-	local base = Vector3.new(b.pos.X, hit.Position.Y, b.pos.Z)
+	local base = Vector3.new(b.pos.X, y, b.pos.Z)
 	-- the board stands square to the road, facing the traffic that comes along it
 	local cf = CFrame.lookAt(base, base - b.dir)
-	local blockers = {}
-	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites", "Green" } do
-		local f = root:FindFirstChild(n)
-		if f then
-			table.insert(blockers, f)
-		end
-	end
-	overlap.FilterDescendantsInstances = blockers
-	if #workspace:GetPartBoundsInBox(cf * CFrame.new(0, (BOARD_Y + BOARD_H) / 2 + 0.5, 0), Vector3.new(BOARD_W + 1, BOARD_Y + BOARD_H, 3), overlap) > 0 then
+	if solidAt(cf * CFrame.new(0, (BOARD_Y + BOARD_H) / 2 + 0.5, 0), Vector3.new(BOARD_W + 1, BOARD_Y + BOARD_H, 3)) then
 		return false
 	end
-	-- one column (a foot, the shaft) up to the board's frame
+	-- the column, then a grid over the board's face, against everything else round it
+	for yy = 1.5, BOARD_Y, 2 do
+		local p = (cf * CFrame.new(0, yy, 0)).Position
+		if blocked(sets, p, 1) or nearPalm(p, 3) or nearCross(p, 3) then
+			return false
+		end
+	end
+	for x = -BOARD_W / 2, BOARD_W / 2, 3 do
+		for yy = BOARD_Y, BOARD_Y + BOARD_H, 3 do
+			local p = (cf * CFrame.new(x, yy, 0)).Position
+			if blocked(sets, p, 0.6) or nearPalm(p, 3) or nearCross(p, 2) then
+				return false
+			end
+		end
+	end
 	part(m, Vector3.new(2.4, 1, 2.4), cf * CFrame.new(0, 0.5, 0), GREEN, Enum.Material.Metal)
 	part(m, Vector3.new(1.5, BOARD_Y - 1, 1.5), cf * CFrame.new(0, 1 + (BOARD_Y - 1) / 2, 0), GREEN, Enum.Material.Metal)
 	local board = part(m, Vector3.new(BOARD_W, BOARD_H, 0.7), cf * CFrame.new(0, BOARD_Y + BOARD_H / 2, 0), GREEN, Enum.Material.Metal)
@@ -368,49 +687,305 @@ local function buildBoard(m: Instance, b): boolean
 	return true
 end
 
-local function buildChunk(poles, chunk, folder: Instance, full: boolean): Model?
-	local m = Instance.new("Model")
-	m.Name = "Roadside"
-	local any = false
-	for _, b in chunk.b do
-		if buildBoard(m, b) then
-			any = true
-		end
+---------------------------------------------------------------------
+-- toddy palms on wide medians (clip 0930: a row of tall palmyra palms on the median)
+---------------------------------------------------------------------
+local palmProto: Model? = nil
+local function palmModel(): Model?
+	if palmProto then
+		return palmProto
 	end
-	for _, id in chunk.p do
-		local p = poles[id]
-		local base = resolve(poles, id)
-		if base then
-			any = true
-			local shaft = buildPole(m, p, base, id)
-			local mine = anchors(p, base)
-			-- the run back to the previous pole
-			local prevBase = p.prev and resolve(poles, p.prev)
-			if prevBase then
-				local q = poles[p.prev]
-				local theirs = anchors(q, prevBase)
-				local span = (mine[1] - theirs[1]).Magnitude
-				if span < EVERY * 1.6 then
-					wire(shaft, theirs[1], mine[1], 0.12, 0.05)
-					wire(shaft, theirs[2], mine[2], 0.12, 0.055)
-					wire(shaft, theirs[3], mine[3], 0.42, 0.065) -- the thick bundles
-					if full then
-						wire(shaft, theirs[4], mine[4], 0.3, 0.08)
-						wire(shaft, theirs[5], mine[5], 0.22, 0.095)
+	local kit = ReplicatedStorage:FindFirstChild("RoadsideKit")
+	local src = kit and kit:FindFirstChild("ToddyPalm")
+	if src and src:IsA("Model") then
+		palmProto = src
+	end
+	return palmProto
+end
+
+local function buildPalms(m: Instance, sets, key: string, x0: number, z0: number): number
+	local proto = palmModel()
+	local _, collide = mapParts()
+	if not proto or not collide then
+		return 0
+	end
+	overlap.FilterDescendantsInstances = { collide }
+	local boxes = workspace:GetPartBoundsInBox(CFrame.new(x0 + CHUNK / 2, 0, z0 + CHUNK / 2), Vector3.new(CHUNK, 2000, CHUNK), overlap)
+	local made = 0
+	for _, bx in boxes do
+		if bx:GetAttribute("RoadBox") == "M" then
+			local sx, sz = bx.Size.X, bx.Size.Z
+			local short, long = math.min(sx, sz), math.max(sx, sz)
+			local axis = if sx >= sz then bx.CFrame.RightVector else bx.CFrame.LookVector
+			axis = Vector3.new(axis.X, 0, axis.Z).Unit
+			if short >= PALM_MEDIAN and long >= 2 * PALM_EVERY then
+				local c = bx.Position
+				local top = c.Y + bx.Size.Y / 2
+				for t = -long / 2 + PALM_EVERY / 2, long / 2 - PALM_EVERY / 2, PALM_EVERY do
+					local at = c + axis * t
+					-- the palm belongs to the chunk it stands in
+					if at.X >= x0 and at.X < x0 + CHUNK and at.Z >= z0 and at.Z < z0 + CHUNK then
+						local y, kind = ground(at)
+						local base = Vector3.new(at.X, y or top, at.Z)
+						local ok = y ~= nil and (kind == "M" or kind == "T") and not nearPalm(base, PALM_EVERY * 0.6)
+						if ok then
+							-- (a flyover's median has the ground road under it: no palms up there)
+							rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
+							local below = workspace:Raycast(base - Vector3.new(0, 2, 0), Vector3.new(0, -60, 0), rayParams)
+							if below and base.Y - below.Position.Y > 8 then
+								ok = false
+							end
+						end
+						if ok then
+							for yy = 1.5, PALM_H, 3 do
+								local p = base + Vector3.new(0, yy, 0)
+								if blocked(sets, p, 1.2) or nearCross(p, 2.5) then
+									ok = false
+									break
+								end
+							end
+						end
+						if ok then
+							-- the crown: nothing within its radius
+							for _, o in { Vector3.zero, Vector3.new(6, 0, 0), Vector3.new(-6, 0, 0), Vector3.new(0, 0, 6), Vector3.new(0, 0, -6) } do
+								if blocked(sets, base + Vector3.new(0, PALM_H + 2, 0) + o, 1.5) then
+									ok = false
+									break
+								end
+							end
+						end
+						if ok then
+							local c2 = proto:Clone()
+							c2:PivotTo(CFrame.new(base) * CFrame.Angles(0, (math.floor(at.X) * 7 + math.floor(at.Z)) % 360 * math.pi / 180, 0))
+							c2.Parent = m
+							regAdd(palmReg, base, key)
+							made += 1
+						end
 					end
 				end
 			end
-			local crossBase = p.cross and resolve(poles, p.cross)
+		end
+	end
+	return made
+end
+
+---------------------------------------------------------------------
+-- side streets: road boxes with no traffic lane in them
+---------------------------------------------------------------------
+local sideCache: { [string]: { any } } = {}
+local function sideCandidates(key: string, laneGrid, inJunction): { any }
+	local hit = sideCache[key]
+	if hit then
+		return hit
+	end
+	local _, collide = mapParts()
+	if not collide then
+		return {}
+	end
+	local kx, kz = string.match(key, "^(%-?%d+),(%-?%d+)$")
+	local x0, z0 = (tonumber(kx) :: number) * CHUNK, (tonumber(kz) :: number) * CHUNK
+	overlap.FilterDescendantsInstances = { collide }
+	local boxes = workspace:GetPartBoundsInBox(CFrame.new(x0 + CHUNK / 2, 0, z0 + CHUNK / 2), Vector3.new(CHUNK + 160, 2000, CHUNK + 160), overlap)
+	local function nearLane(p: Vector3, r: number): boolean
+		local cx, cz = math.floor(p.X / 48), math.floor(p.Z / 48)
+		for dx = -1, 1 do
+			for dz = -1, 1 do
+				for _, q in laneGrid[(cx + dx) .. "," .. (cz + dz)] or {} do
+					if Vector3.new(p.X - q.X, 0, p.Z - q.Z).Magnitude < r then
+						return true
+					end
+				end
+			end
+		end
+		return false
+	end
+	local best: { [string]: any } = {}
+	for _, bx in boxes do
+		if bx:GetAttribute("RoadBox") == "R" then
+			local sx, sz = bx.Size.X, bx.Size.Z
+			local short, long = math.min(sx, sz), math.max(sx, sz)
+			local axis = if sx >= sz then bx.CFrame.RightVector else bx.CFrame.LookVector
+			axis = Vector3.new(axis.X, 0, axis.Z)
+			if axis.Magnitude > 0.5 and short >= 10 and short <= 36 and long >= 10 and (long >= 1.3 * short or long >= 40) and not nearLane(bx.Position, short / 2 + 10) then
+				axis = axis.Unit
+				if axis.X < -0.01 or (math.abs(axis.X) <= 0.01 and axis.Z < 0) then
+					axis = -axis -- one way round for the whole street
+				end
+				local n = axis:Cross(Vector3.yAxis) -- the pole side: the same side all along a straight street
+				for t = -long / 2, long / 2, 12 do
+					local p = bx.Position + axis * t + n * (short / 2 + 3.5)
+					if p.X >= x0 and p.X < x0 + CHUNK and p.Z >= z0 and p.Z < z0 + CHUNK then
+						local gx, gz = math.floor(p.X / SIDE_CELL), math.floor(p.Z / SIDE_CELL)
+						local ck = gx .. "," .. gz
+						local mid = Vector3.new((gx + 0.5) * SIDE_CELL, p.Y, (gz + 0.5) * SIDE_CELL)
+						local d = Vector3.new(p.X - mid.X, 0, p.Z - mid.Z).Magnitude
+						if not best[ck] or d < best[ck].d then
+							best[ck] = { pos = p, axis = axis, n = n, d = d }
+						end
+					end
+				end
+			end
+		end
+	end
+	local list = {}
+	for ck, c in best do
+		if not inJunction(c.pos) and not nearLane(c.pos, 24) then
+			c.id = ck
+			table.insert(list, c)
+		end
+	end
+	table.sort(list, function(a, b)
+		return a.id < b.id
+	end)
+	sideCache[key] = list
+	return list
+end
+
+local sideResolved: { [string]: Vector3 | false } = {}
+local function sideHash(c): number
+	local gx, gz = string.match(c.id, "^(%-?%d+),(%-?%d+)$")
+	return math.abs((tonumber(gx) :: number) * 3 + (tonumber(gz) :: number) * 5)
+end
+local function resolveSide(c, sets): Vector3?
+	local r = sideResolved[c.id]
+	if r ~= nil then
+		return r or nil
+	end
+	local lamp = if sideHash(c) % 2 == 0 then -c.n else nil
+	for _, off in { 0, 1.5, -1, 3 } do
+		for _, along in { 0, 6, -6, 12, -12 } do
+			local at = c.pos + c.n * off + c.axis * along
+			local y, kind = ground(at)
+			if y and (kind == "P" or kind == "T") then
+				local base = Vector3.new(at.X, y, at.Z)
+				if poleClear(sets, base, lamp) then
+					sideResolved[c.id] = base
+					return base
+				end
+			end
+		end
+	end
+	sideResolved[c.id] = false
+	return nil
+end
+
+---------------------------------------------------------------------
+-- a chunk
+---------------------------------------------------------------------
+local function chunkXZ(key: string): (number, number)
+	local kx, kz = string.match(key, "^(%-?%d+),(%-?%d+)$")
+	return (tonumber(kx) :: number) * CHUNK, (tonumber(kz) :: number) * CHUNK
+end
+
+-- nil = not ready yet (try again later); false = nothing here
+local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boolean): Model | false | nil
+	local x0, z0 = chunkXZ(key)
+	local _, collide = mapParts()
+	if not collide then
+		return nil
+	end
+	-- the kit round the chunk (and its neighbours, for the wires out of it) must be built first
+	if not kitReady(x0 - 110, z0 - 110, x0 + CHUNK + 110, z0 + CHUNK + 110) then
+		return nil
+	end
+	regPurge(key)
+	local sets = blockersFor(x0 - CHUNK, z0 - CHUNK, x0 + 2 * CHUNK, z0 + 2 * CHUNK)
+	local poles = ctx.poles
+	local m = Instance.new("Model")
+	m.Name = "Roadside"
+	local any = false
+	-- palms first (their trunks are what the cross wires keep off)
+	if buildPalms(m, sets, key, x0, z0) > 0 then
+		any = true
+	end
+	task.wait()
+	for _, id in chunk and chunk.p or {} do
+		local p = poles[id]
+		local base = resolve(poles, id, sets)
+		if base then
+			any = true
+			local lamp = if id % 2 == 0 and not NO_LAMPS[p.road] then "white" else nil
+			local shaft = buildPole(m, p.dir, p.right, base, id, lamp)
+			local mine = anchors(p.dir, p.right, base)
+			-- the run back to the previous pole
+			local prevBase = p.prev and resolve(poles, p.prev, sets)
+			if prevBase then
+				local q = poles[p.prev]
+				local theirs = anchors(q.dir, q.right, prevBase)
+				if (mine[1] - theirs[1]).Magnitude < EVERY * 1.6 then
+					wire(shaft, sets, theirs[1], mine[1], 0.12, 0.05)
+					wire(shaft, sets, theirs[2], mine[2], 0.12, 0.055)
+					wire(shaft, sets, theirs[3], mine[3], 0.42, 0.065) -- the thick bundles
+					if full then
+						wire(shaft, sets, theirs[4], mine[4], 0.3, 0.08)
+						wire(shaft, sets, theirs[5], mine[5], 0.22, 0.095)
+					end
+				end
+			end
+			local crossBase = p.cross and resolve(poles, p.cross, sets)
 			if crossBase then
-				local theirs = anchors(poles[p.cross], crossBase)
-				wire(shaft, mine[1], theirs[1], 0.12, 0.045)
-				wire(shaft, mine[3], theirs[3], 0.28, 0.06)
+				local q = poles[p.cross]
+				local theirs = anchors(q.dir, q.right, crossBase)
+				for _, pr in { { 1, 0.12, 0.045 }, { 3, 0.28, 0.06 } } do
+					local pts = wire(shaft, sets, mine[pr[1]], theirs[pr[1]], pr[2], pr[3])
+					for _, s in pts or {} do
+						regAdd(crossReg, s, key)
+					end
+				end
+			end
+		end
+	end
+	task.wait()
+	for _, b in chunk and chunk.b or {} do
+		if buildBoard(m, sets, b) then
+			any = true
+		end
+	end
+	-- side streets: a pole per cell, wired to the next pole along the street
+	local mineSide = sideCandidates(key, ctx.laneGrid, ctx.inJunction)
+	if #mineSide > 0 then
+		local around = {}
+		for dx = -1, 1 do
+			for dz = -1, 1 do
+				local k2 = math.floor(x0 / CHUNK + dx) .. "," .. math.floor(z0 / CHUNK + dz)
+				for _, c in sideCandidates(k2, ctx.laneGrid, ctx.inJunction) do
+					table.insert(around, c)
+				end
+			end
+		end
+		for _, c in mineSide do
+			local base = resolveSide(c, sets)
+			if base then
+				any = true
+				local h = sideHash(c)
+				local shaft = buildPole(m, c.axis, c.n, base, h, if h % 2 == 0 then "amber" else nil)
+				-- the next pole forward along the street
+				local best, bd = nil, 150
+				for _, o in around do
+					if o ~= c then
+						local d = Vector3.new(o.pos.X - c.pos.X, 0, o.pos.Z - c.pos.Z)
+						local len = d.Magnitude
+						if len > 45 and len < bd and d.Unit:Dot(c.axis) > 0.92 then
+							best, bd = o, len
+						end
+					end
+				end
+				local ob = best and resolveSide(best, sets)
+				if ob then
+					local mine = anchors(c.axis, c.n, base)
+					local theirs = anchors(best.axis, best.n, ob)
+					wire(shaft, sets, mine[1], theirs[1], 0.12, 0.05)
+					wire(shaft, sets, mine[3], theirs[3], 0.36, 0.065)
+					if full then
+						wire(shaft, sets, mine[4], theirs[4], 0.26, 0.085)
+					end
+				end
 			end
 		end
 	end
 	if not any then
 		m:Destroy()
-		return nil
+		return false
 	end
 	m.Parent = folder
 	return m
@@ -422,6 +997,17 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		return
 	end
 	started = true
+	Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
+		local n = isNight()
+		if n ~= lampsOn then
+			lampsOn = n
+			for _, l in CollectionService:GetTagged("RoadsideLamp") do
+				if l:IsA("Light") then
+					l.Enabled = n and lampsAllowed
+				end
+			end
+		end
+	end)
 	task.spawn(function()
 		local g
 		for _ = 1, 60 do
@@ -434,20 +1020,45 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		if not g or not g.lanesData then
 			return
 		end
-		-- tiles whose street layer already has poles and cables
+		-- the kit's tiles (which tile names will be built), and the tiles whose street layer has poles and cables
 		local kit = ReplicatedStorage:FindFirstChild("YgnKit")
-		local function skipTile(i: number, j: number): boolean
-			if not kit then
-				return false
-			end
-			for _, f in kit:GetChildren() do
-				if string.match(f.Name, "^Data_P%d+S$") and f:FindFirstChild(i .. "_" .. j) then
-					return true
+		local streetTiles: { [string]: boolean } = {}
+		for _, f in (kit and kit:GetChildren()) or {} do
+			if f:IsA("Folder") and string.sub(f.Name, 1, 5) == "Data_" then
+				local meta = f:FindFirstChild("Meta")
+				local pre = if meta and string.find(meta.Value, "LOAD=", 1, true) then "S" else ""
+				for _, v in f:GetChildren() do
+					if v:IsA("StringValue") and v.Name ~= "Meta" then
+						kitTiles[pre .. v.Name] = true
+						if string.match(f.Name, "^Data_P%d+S$") then
+							streetTiles[v.Name] = true
+						end
+					end
 				end
 			end
-			return false
 		end
-		local poles, chunks = plan(g, skipTile)
+		local function skipTile(i: number, j: number): boolean
+			return streetTiles[i .. "_" .. j] == true
+		end
+		local poles, chunks, laneGrid, inJunction = plan(g, skipTile)
+		local ctx = { poles = poles, laneGrid = laneGrid, inJunction = inJunction }
+		-- the map folders the overlap query can't see into (visual meshes): indexed once, then as they stream in
+		task.spawn(function()
+			local root = Config.mapRoot and Config.mapRoot()
+			if root then
+				for _, n in { "Parks", "Landmarks", "Pagodas" } do
+					local f = root:FindFirstChild(n)
+					if f then
+						watchStatic(f)
+					end
+				end
+				local green = root:FindFirstChild("Green")
+				local edges = green and green:FindFirstChild("Edges")
+				if edges then
+					watchStatic(edges)
+				end
+			end
+		end)
 		local folder = Instance.new("Folder")
 		folder.Name = "YangonRoadside"
 		folder.Parent = workspace
@@ -455,6 +1066,14 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		while true do
 			local q = if qualityScale then qualityScale() else 1
 			local full = q > 0.5
+			if lampsAllowed ~= full then
+				lampsAllowed = full
+				for _, l in CollectionService:GetTagged("RoadsideLamp") do
+					if l:IsA("Light") then
+						l.Enabled = lampsOn and full
+					end
+				end
+			end
 			local load = if full then LOAD else LOAD * 0.7
 			local cam = workspace.CurrentCamera
 			local at = if cam then cam.CFrame.Position else Vector3.zero
@@ -464,11 +1083,14 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 			for dx = -reach, reach do
 				for dz = -reach, reach do
 					local key = (cx + dx) .. "," .. (cz + dz)
-					if chunks[key] and built[key] == nil and made < 3 then
+					if built[key] == nil and made < 2 then
 						local mx, mz = (cx + dx + 0.5) * CHUNK, (cz + dz + 0.5) * CHUNK
 						if Vector3.new(mx - at.X, 0, mz - at.Z).Magnitude < load then
-							built[key] = buildChunk(poles, chunks[key], folder, full) or false
-							made += 1
+							local r = buildChunk(ctx, key, chunks[key], folder, full)
+							if r ~= nil then
+								built[key] = r
+								made += 1
+							end
 						end
 					end
 				end
@@ -480,10 +1102,11 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 					if m then
 						m:Destroy()
 					end
+					regPurge(key)
 					built[key] = nil
 				end
 			end
-			task.wait(if made >= 3 then 0.05 else 1)
+			task.wait(if made >= 2 then 0.05 else 1)
 		end
 	end)
 end
