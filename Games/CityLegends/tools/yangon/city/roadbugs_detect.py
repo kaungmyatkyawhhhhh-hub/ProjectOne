@@ -225,7 +225,7 @@ def cell_job(arg):
                             ys = R.ys(pc.x, pc.y)
                             spot('gap', pc.x, 0, pc.y, 'area %.0f' % h.area)
         # hole
-        for (x, y, z, nm) in probes.get(cell, []):
+        for (x, y, z, nm) in (probes.get(cell, []) if os.environ.get('RB_HOLE') else []):
             if not R.near(x, y, z, 0.5, 12):
                 spot('hole', x, y, z, nm)
         # grass flat on asphalt
@@ -362,6 +362,19 @@ def cell_job(arg):
 def run(cells_only=None, procs=int(os.environ.get('RB_PROCS', 3))):
     import multiprocessing as mp
     match = json.load(open(os.path.join(OUT, 'match.json')))['match']
+    ov = os.environ.get('RB_OVERRIDE')
+    if ov:
+        import glob as _g
+        from roadbugs_index import glb_names
+        newm = {}
+        for f in _g.glob(os.path.join(ov, '*.glb')):
+            for mm in glb_names(f)['meshes']:
+                pp = mm['name'].split('_')
+                newm['ov_' + mm['name']] = dict(cell=pp[1].split('s')[0], kind=pp[0], glb=os.path.relpath(f, ROOT), name=mm['name'])
+        cov = set(v['cell'] for v in newm.values())
+        match = {k: v for k, v in match.items() if v['cell'] not in cov}
+        match.update(newm)
+        print('override cells', sorted(cov))
     bycell = collections.defaultdict(list)
     for m in match.values():
         if cells_only and m['cell'] not in cells_only:
