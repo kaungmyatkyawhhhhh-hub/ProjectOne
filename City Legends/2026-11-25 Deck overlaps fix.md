@@ -15,7 +15,7 @@ Scan files: `Games/CityLegends/build/city_1to1/deck_dups_25nov/` (`scan.py`, `de
 | Old invisible boxes under a flyover | `Roads.CollideFix_MyanmarPlazaFlyover` (21 Nov): 150 of 270 lay on today's road boxes, 81 of them 0.4-1.6 studs higher (invisible bumps) |
 | Deck meshes doubled (triangle scan of every R mesh in the 64 deck cells) | 0 left (the P11 copies of the U Chit Maung deck were already re-baked by the P11 agent) |
 | Two road surfaces on one spot at deck ends (0-1.4 apart, crossing = z-fighting) | 13 deck ends (list below) |
-| Deck with collision but no visible surface | Baho Road Flyover #2 south end, x ~23000, z 20370-20670 (cells 14x13 / 15x13, P5/P4 seam): NOT fixed |
+| Deck with collision but no visible surface | Baho Road Flyover #2 south end, x ~23000, z 20370-20670 (cells 14x13 / 15x13, P5/P4 seam): FIXED (cells rebuilt, v2089) |
 
 The 13 deck ends with two surfaces (D box, place, cell):
 - Pyay Road deck north foot (27263, 27133) 17x17 and south foot (27415, 29250) 17x19
@@ -60,7 +60,15 @@ Owner shot `refs_2026-11-25_owner_road_bugs/owner_bug_4.webp`: a flyover ramp's 
 - **Scan (Studio, every W wall box):** 274 of 18,700 wall boxes stand up out of a road carriageway, at the feet of about 30 decks in 29 cells (11x11, 15x13, 15x25, 16x19, 17x17-17x19, 18x22, 18x26, 19x29, 20x28, 20x29, 21x27, 21x28, 22x19, 22x21, 22x23, 22x27, 23x27, 24x28, 25x20, 25x28, 26x20, 26x21, 27x19, 27x26, 28x22, 29x12, 33x14).
 - **Cause:** the builder's ramp walls start wherever the deck is a little over the TERRAIN (`DECK_GRADE_H` 1.2). In a junction the terrain under the road bed is lower than the road, so a full 6-stud wall stands at the deck foot even where the deck edge is level with the road beside it.
 - **Fix in the bake (`roads05_bake.drop_foot_walls`):** a bridge wall piece with road surface at the same level (within 1.2) on both sides retains nothing and is dropped, with its W collision box (`foot_walls.txt` lists them for a mesh-only swap). Real ramp walls (deck higher than the road beside) and parapets stay.
-- Re-bakes per owner build running; see the handover for what was swapped.
+- **Done (after 3 power cuts):** 14 re-bakes, meshes swapped in 27 cells, 230 wall boxes removed; saved v2081, v2084, v2086. Level raised to 2.0 after a Play drive at the owner's junction (Pyay deck south foot) still stopped on a 1.3-2 stud wall; 17x17 / 17x19 (Pyay feet) and 22x27 (Shwedagon Pagoda Road deck start) re-baked with it.
+- **Play (test store, traffic hidden):** a car driven straight across the owner's junction, through both old wall lines (x 27500 -> 27340 at z ~29240), never stopped. Shots: `2026-11-25 Deck overlaps - Pyay deck foot junction, owner_bug_4 (Edit) - after.jpg`, `... driven through the old wall line (Play) - after.jpg`.
+- **W boxes standing in a carriageway: 274 -> about 180.** The rest are walls with a real step (the deck 2+ studs over the road beside it: retaining walls) or gores. Looked at by eye: 22x23 (Kabar Aye deck start) = wall ends at a gore with yellow barriers, fine; 22x21 = two walls on the 95-high Kabar Aye deck end, deck level; 22x27 fixed. Cells re-baked with 1.2 (not 2.0) may still have 1.2-2 stud walls at deck feet: a re-run with the 2.0 rule fixes them.
+
+## Baho Road Flyover #2 (same day)
+- Cells 14x13 + 15x13 rebuilt whole from subset `roads05_RB45b` (P5 + P4, one stepCell box {21504, 19968, 24576, 21504}, 0 MOUTH FAILED, 9 piers): all 44 deck boxes now have a visible surface. Saved v2089. Lanes unchanged (no lane rows there).
 
 ## Left
+- 28x22 (U Chit Maung area, laptop build) not re-baked.
+- Deck feet re-baked with the 1.2 rule may still keep 1.2-2 stud walls; the bake now uses 2.0, a re-run clears them.
+- The zebra / double yellow across the deck foot in owner_bug_4: markings, with the road-surface agent.
 - See the handover entry "DECK OVERLAPS FIX" for the cells still to swap in this pass and anything not done.

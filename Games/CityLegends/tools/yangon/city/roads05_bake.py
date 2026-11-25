@@ -595,7 +595,7 @@ def drop_scraps(parts, data, surf):
     return [p for i, p in enumerate(parts) if keep[i]], dict(on_carriageway=k_on, lone=k_lone)
 
 
-def drop_foot_walls(parts, surf, probe=1.5, level=1.2):
+def drop_foot_walls(parts, surf, probe=1.5, level=2.0):  # (2.0: the Pyay deck foot kept 1.3-2 stud walls in the junction)
     """(25 Nov, owner_bug_4: a flyover ramp's side wall ran at ground level through a junction) a bridge wall piece
     ('B' kind, thin, standing) with road surface on BOTH sides at the same level (within `level`), and its bottom under
     that surface, retains nothing: it is a deck foot's wall standing in a junction or across a carriageway. Dropped (the
