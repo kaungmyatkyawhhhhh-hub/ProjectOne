@@ -5,7 +5,8 @@
     residential streets are unmarked); (J25) a street with 2+ lanes a direction gets them (and its centre line). (J15) One smooth offset per boundary: the lane count is a 9-sample median, each
     line moves at most LANE_RATE sideways per stud, so a new lane tapers out of the kerb (no jogs, no side-by-side
     dashes); all lines are Chaikin-smoothed (no sample corners); clipped pieces under 3 studs are dropped
-  * centre: (21 Nov) a DOUBLE YELLOW line (centre_line) on an undivided main road (never broken by a smaller road's mouth)
+  * centre: (21 Nov) a DOUBLE YELLOW line (centre_line) on an undivided main road; (25 Nov) broken at every side road's
+    mouth like the lane lines (owner shot 4: yellow lines running into the junction)
   * yellow kerb lines (J15, owner ref 'Sule Square road'): along every kerb of a main road, outer and median, 0.9 in
   * junction boxes (where two main roads' carriageways overlap): nothing painted inside; (J15) two parallel roads under
     40 studs apart crossing one road make ONE box (owner ref 'double junction zebras and stop lines'), and each road's
@@ -685,7 +686,9 @@ def build(data, signals=None):
                     if u1 - u0 < 2:
                         continue
                     ln = smooth([(s[a + j][0] - s[a + j][4] * c0[j], s[a + j][2] + s[a + j][3] * c0[j]) for j in range(u0, u1 + 1)])
-                    centre_line(P, ln, 'centre', r['name'], clip_mid)
+                    # (25 Nov, owner_bug_4 / lead: "yellow lines running into the junction") the double yellow stops
+                    # at a side road's mouth like the lane lines (clip_road), it no longer runs on across it
+                    centre_line(P, ln, 'centre', r['name'], clip_road)
                 # (J15) a painted median (lanes held apart, no kerbed median built): a solid line on each side of it
                 flush = [s[i][11] >= 1.2 and s[i][8] <= 0.3 for i in rng]
                 for u0, u1 in runs(flush):
