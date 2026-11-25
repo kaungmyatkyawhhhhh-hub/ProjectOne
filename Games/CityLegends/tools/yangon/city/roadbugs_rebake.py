@@ -35,7 +35,7 @@ def owners():
         if g.startswith('p8:'):
             by[v['cell']].add('P8_laptop')
             continue
-        d = '/'.join(g.split('/')[-3:-1]) if '/roads05_' in g else g.split('/')[-2]
+        d = '/'.join(g.split('/')[-3:-1]) if g.startswith('build/') else g.split('/')[-2]
         by[v['cell']].add(DIR2TAG.get(d, '?' + d))
     return by
 
@@ -44,8 +44,12 @@ def plan(counts_file, kinds):
     c = json.load(open(counts_file))['cells']
     own = owners()
     tags, skip = collections.defaultdict(list), {}
+    excl = set(x for x in os.environ.get('RB_EXCLUDE', '').split(',') if x)   # cells another agent is re-baking
     for cell, v in sorted(c.items()):
         if not any(v.get(k, 0) for k in kinds):
+            continue
+        if cell in excl:
+            skip[cell] = ['excluded (other agent)']
             continue
         o = own.get(cell, set())
         if len(o) != 1 or next(iter(o)).startswith('?') or 'P8_laptop' in o:

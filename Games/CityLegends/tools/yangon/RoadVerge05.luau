@@ -139,7 +139,8 @@ M.TRIM_D = 6
 M.TRIM_MIN = 0.6
 M.TRIM_TO = 1.2
 M.TRIM_D_R = 9     -- beside a carriageway box (its mesh pavement + 1.5)
-function M.trim(x0: number, z0: number, x1: number, z1: number): string
+-- (25 Nov) `only`: a list of road boxes (RoadTerrainPoke's hits) to trim round instead of every box in the window
+function M.trim(x0: number, z0: number, x1: number, z1: number, only: { BasePart }?): string
 	local col = workspace.Yangon1to1.Roads.Collide
 	local rpT = RaycastParams.new()
 	rpT.FilterType = Enum.RaycastFilterType.Include
@@ -147,7 +148,7 @@ function M.trim(x0: number, z0: number, x1: number, z1: number): string
 	local cut: { [number]: number } = {}
 	local cutR: { [number]: number } = {}   -- (from carriageway boxes)
 	local n = 0
-	for i, p in col:GetChildren() do
+	for i, p in only or col:GetChildren() do
 		local c = p.Position
 		local kind = p:GetAttribute("RoadBox")
 		if (kind == "P" or kind == "R") and c.X >= x0 and c.X <= x1 and c.Z >= z0 and c.Z <= z1 then
