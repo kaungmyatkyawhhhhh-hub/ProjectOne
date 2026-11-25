@@ -69,3 +69,9 @@ Next: 16:9 thumbnails in the SAME look (our Blender render for layout -> ChatGPT
 - RULE: skin = smooth SATIN, almost matte Roblox plastic (a clean toy / premium GFX), soft broad highlights only on the tops of shoulders, pecs, arms; even light golden-orange; soft shading, no wet streaks or dark wet grooves. Never glossy/oily. My grade_color.py (more saturation + deeper orange shadows) made it worse: do NOT use it on satin skin; use only `_tools/grade_guy_soft.py` (contrast x1.15, local 0.2, colour kept).
 - Same "change ONLY the SKIN MATERIAL" follow-up sent in both ChatGPT chats (icon: "Re-render Roblox Icon"; thumbnail: "Create Roblox Thumbnail").
 - **Current icon: `GYMARC_ICON_H_matte.png` / `_512.png`** (replaces G). **Thumbnail / ad #1: `GYMARC_THUMB_T1_flex_matte.png`.** Board `gymarc_matte_board.jpg`.
+
+## Correction 08:30: owner "no, the last icon was okay, this new thumbnail is bad, it needs texturization and colouring again"
+- **Icon G stays final** (`GYMARC_ICON_G_warm.png`). The satin icon H is NOT wanted; the earlier "satin, almost matte" rule is withdrawn. The complaint was about the THUMBNAIL's skin only.
+- Skin rule now: match icon G exactly (same sculpted plastic with bright clean highlights on the muscle tops, same rich golden-orange, same carving shadows). Every new creative attaches the G no-logo image as the style reference and says "match image 2's skin exactly".
+- T1 fixed: ChatGPT follow-up "change ONLY his skin to match image 2 exactly" (raw `gymarc_thumb_T1_gpt_v3_matchG.png`) + `grade_guy.py` (the same definition pass G had). `_tools/match_skin.py` (Lab mean/std match) helped on the raw but makes green blotches on clipped highlights after grade_guy: run it before grading or not at all.
+- **Thumbnail / ad #1: `GYMARC_THUMB_T1_flex_v3.png`.**
