@@ -20,6 +20,8 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local IS_STUDIO = RunService:IsStudio()
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local StreetLife = require(script.Parent:WaitForChild("YangonStreetLife"))
@@ -183,6 +185,9 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 		end
 	end
 	w.held = true
+	if IS_STUDIO and Players.LocalPlayer then
+		Players.LocalPlayer:SetAttribute("PedHitLog", string.format("rag %.0f kmh t=%.1f", speed / Config.mphToSps(KMH), os.clock()))
+	end
 	table.insert(rags, { w = w, t0 = os.clock(), made = made, nocol = nocol, start = w.pos, phase = "rag", pt = 0 })
 	Audio.play("thud", math.clamp(0.35 + speed / 120, 0.35, 0.8), 0.75 + math.random() * 0.1, P[1])
 	if car == Driving.getModel() and Driving.slowBy then
@@ -205,6 +210,9 @@ local function stumble(w: any, root: BasePart, v: Vector3)
 		StreetLife.pose(w, false)
 	end
 	w.bumpT = os.clock()
+	if IS_STUDIO and Players.LocalPlayer then
+		Players.LocalPlayer:SetAttribute("PedHitLog", string.format("stumble t=%.1f", os.clock()))
+	end
 	Audio.play("thud", 0.18, 1.1, w.fig.parts[1])
 end
 
@@ -318,6 +326,37 @@ local function step(dt: number)
 			end
 		end
 		i += 1
+	end
+
+	-- Studio test hook: player attribute TestPedAhead = studs puts the nearest free walker that far ahead of your car
+	local lp = Players.LocalPlayer
+	if IS_STUDIO and lp then
+		lp:SetAttribute("PedRagdolls", #rags)
+		local ahead = lp:GetAttribute("TestPedAhead")
+		local model = Driving.getModel()
+		local root = model and model.PrimaryPart
+		if type(ahead) == "number" and root then
+			lp:SetAttribute("TestPedAhead", nil)
+			local best, bestD = nil, math.huge
+			for _, w in StreetLife.walkers() do
+				local d = (w.pos - root.Position).Magnitude
+				if not w.held and not w.gone and d < bestD then
+					best, bestD = w, d
+				end
+			end
+			if best then
+				local fwd = Vector3.new(root.CFrame.LookVector.X, 0, root.CFrame.LookVector.Z).Unit
+				local at = root.Position + fwd * ahead
+				rayParams.FilterDescendantsInstances = { workspace:FindFirstChild("PlayerCars") :: Instance, best.fig.model }
+				local hit = workspace:Raycast(at + Vector3.new(0, 8, 0), Vector3.new(0, -30, 0), rayParams)
+				best.pos = if hit then hit.Position else at - Vector3.new(0, 2, 0)
+				if best.mode ~= "stand" then
+					best.mode = "pause"
+					best.timer = 20
+				end
+				StreetLife.pose(best, false)
+			end
+		end
 	end
 
 	-- cars against walkers
