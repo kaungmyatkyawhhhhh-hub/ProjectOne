@@ -818,7 +818,7 @@
    "districts": "P1-P12 all have walkers"
   },
   "modules": "YangonStreetLife (more = 2, 3, 4) 185k/185k/185k/96k; pack imports/sync/walkers_26nov.rbxmx (checksums 675702372 842424232 316532736 1672697730)",
-  "studio": "pending: lock held by ROAD BUG SWEEP agent",
+  "studio": "NOT INSTALLED: studio.lock held by ROAD BUG SWEEP agent the whole time (waited ~75 min, 26 Nov 00:30-01:45 local). Before installing: the box dumps predate v2115 (2987 P boxes re-seated, 159 removed) and the RB3/RB4/RB5 swaps: re-dump R/D/M + P boxes (15-char records, sliced 99,990 chars a call, last slice padded), re-run streetlife_1to1.py + walkers_check.py (0), re-pack, then with the lock: PATCH asset 133014134133489 with imports/sync/walkers_26nov.rbxmx, LoadAsset, copy the 4 ModuleScripts into ReplicatedStorage.Shared (YangonStreetLife3/4 are new), check lengths/checksums, save, Play-test on CityLegends_test, back to CityLegends_v1, save. Never publish.",
   "rerun": "after any road swap: re-dump boxes from Studio, YANGON_SCALE=1to1 python streetlife_1to1.py P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12, python walkers_check.py must print 0",
   "not_done": "street (non-main road) pavements have no walkers; no road crossings (walkers turn back at junction mouths); no parked cars / standing spots"
  }
