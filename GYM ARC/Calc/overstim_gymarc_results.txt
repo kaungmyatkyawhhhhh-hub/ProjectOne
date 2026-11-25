@@ -8,6 +8,8 @@ F  + intro captions shorter (8 s cutscene)                                      
 G  + tutorial lines stay at least words / 1.5 + 0.5 s (7-year-old reading speed)                   10            55% of 15      1
 H  + one queue per screen strip (a line waits for the one before it; notifications go to the side)        7            42% of 15      0
 I  + side HUD hides while a centre card is open; Benny story shot 5 -> 7.5 s                        0            28% of 15      0
+J  + every tutorial line leads with a big icon + a 3D arrow / glow on the target (words become optional)        0             2% of 15      0
+K  + Benny story caption 9 -> 5 words (e.g. 'BENNY: You? Beat ME? Ha!')                             0             0% of 15      0
 
 LIVE top collisions:
    band: Strong legs! Now let's train your CORE  x  NEW PERSONAL RECORD banner
@@ -19,9 +21,4 @@ LIVE most-missed KEY messages (kids of 2,000):
     1075  band: Let's lift! Taking you to the Flat Bench  (gone before read)
 
 FINAL most-missed KEY messages:
-     336  band: Let's lift! Taking you to the Flat Bench  (gone before read)
-     336  coach dialog: Welcome! Lift to fill your GROWTH SPURT bar...  (gone before read)
-     336  band: Great set! Now let's train your LEGS  (gone before read)
-     336  band: Legs are growing too! Do 5 reps  (gone before read)
-     336  band: Strong legs! Now let's train your CORE  (gone before read)
 FINAL collisions: []

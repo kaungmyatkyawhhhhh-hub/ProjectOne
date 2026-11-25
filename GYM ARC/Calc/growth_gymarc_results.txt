@@ -1,0 +1,30 @@
+calibration, live build no ads: tile CCU late Nov 7, mid Dec 9  (real: 2-15)
+calibration, RELEASE ad week: tile CCU peak 112  (real: 50-100)
+
+version (cumulative)                                                                   tile CCU 20-31 Dec: low(10%) / median   Jan   chance >=1,100  >=1,830
+A  live v1914 + $200 ads at Christmas                                                       8 /     13      12        0%        0%   crowd -3.3
+B  + first-5-min fixes (Phase 2b): session 12 -> 16 min, D1 6 -> 8%                        17 /     33      32        0%        0%   crowd -1.7
+C  + Christmas update: Advent calendar (daily return), winter gym                          68 /    110     112        0%        0%   crowd 0.3
+D  + lag pass on phones (fewer phone quits)                                                92 /    154     158        0%        0%   crowd 0.9
+E  + play together: SPOT ME duo lifts, gift drops pay everyone nearby                      99 /    164     169        0%        0%   crowd 1.0
+F  + friend invite = a bonus Advent present for BOTH (Roblox invite prompt)               108 /    178     184        0%        0%   crowd 1.1
+G  + new icon G + thumbnails (Home click rate 3.3% -> ~4.5%)                              137 /    235     246        0%        0%   crowd 1.6
+H  + ranked arm-wrestle weekly board (weekly return)                                      154 /    260     283        0%        0%   crowd 1.8
+I  + fixed-time GIFT RUSH events 3x a day (players log in together = higher peaks)        215 /    364     401        2%        0%   crowd 2.3
+J  + Roblox experience notifications (opt-in): 'Gift Rush in 10 min', 'today's present is ready'    299 /    503     575        8%        1%   crowd 2.9
+K  + 1 short video a day (TikTok/Shorts: the GROW transform, Benny) ~ +150 plays/day      325 /    539     617        8%        1%   crowd 3.0
+M  + AFK training spot: auto-lifts at 30% speed while idle, a gift every 20 min AFK (avg +10 min stay)    531 /    885    1012       34%        8%   crowd 3.8
+N  + 7-day login streak + codes in Discord/group (D1 +, D7 +)                             630 /   1061    1247       47%       14%   crowd 4.1
+O  + move the $200 into the school holiday (19-23 Dec) instead of 5-7 Dec                 794 /   1229    1269       64%       20%   crowd 4.4
+
+with everything A-I built, ad budget options (owner's decision):
+  $200 in the holiday (plan after L)               low    794  median   1229  Jan   1269   >=1,100   64%  >=1,830   20%  crowd 4.4
+  $200 + half the game's earnings back into ads    low   1222  median   2028  Jan   2958   >=1,100   94%  >=1,830   60%  crowd 5.2
+  $200 + all earnings back into ads                low   1299  median   2182  Jan   3119   >=1,100   96%  >=1,830   66%  crowd 5.3
+  $400 in the holiday                              low   1142  median   1641  Jan   1474   >=1,100   92%  >=1,830   37%  crowd 4.9
+  $400 + half the earnings back                    low   1702  median   2600  Jan   3497   >=1,100  100%  >=1,830   84%  crowd 5.6
+  $800 in the holiday                              low   1777  median   2387  Jan   1925   >=1,100  100%  >=1,830   88%  crowd 5.5
+  5%-CTR creatives (cost per play x0.66) + half the earnings back low   1822  median   2961  Jan   5322   >=1,100  100%  >=1,830   90%  crowd 5.8
+  5%-CTR creatives + all the earnings back         low   2027  median   3374  Jan   6094   >=1,100  100%  >=1,830   94%  crowd 6.1
+  SENSITIVITY: AFK spot only +5 min, 5% creatives + half back low   1481  median   2392  Jan   4293   >=1,100   98%  >=1,830   74%  crowd 5.5
+  SENSITIVITY: Roblox recommends us half as much, 5% creatives + half back low   1308  median   1981  Jan   3274   >=1,100   96%  >=1,830   58%  crowd 5.2

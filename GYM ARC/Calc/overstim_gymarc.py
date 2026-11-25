@@ -36,7 +36,7 @@ def elements(V):
         add(89, 300, "INVITE FRIENDS card", "bottom", 1.5, False, 10)
     add(96, 108, "GROWTH SPURT READY card", "centre", 1.5, True, 6)
     add(102.4, 108.5, "GROW transform (full screen)", "full", 2.0, True, 4)
-    add(109, 116.5 if V.get("story_long") else 114.2, "Benny story shot (letterbox + caption)", "full", 2.0, True, 9)
+    add(109, 116.5 if V.get("story_long") else 114.2, "Benny story shot (letterbox + caption)", "full", 2.0, True, 5 if V.get("story_short") else 9)
     # after Growth Spurt 1 the HUD opens up at once (screenshots 114-160 s)
     if not V.get("calm_hud"):
         add(114.5, 300, "left: DEAL tile + red badge", "left", 0.5, False, 1)
@@ -94,6 +94,7 @@ def kid(E, rng):
     for e in E:
         if not e[5]: continue
         shown = e[1] - e[0]; need = e[6] / read + 0.5
+        if ICON[0] and e[3] in ("top", "bottom") and e[6] > 0: need = min(need, 1.2 + 0.5)   # icon + arrow: understood in ~1.2 s without reading
         if "card" in e[2] and e[3] == "centre": shown = 99   # a card waits for a tap
         same = [o for o in E if o is not e and o[3] == e[3] and o[0] < e[1] and e[0] < o[1] and o[3] != "full"]
         why = None
@@ -111,9 +112,9 @@ def collisions(E):
                 k = f"{a[2]}  x  {b[2]}"; out[k] = out.get(k, 0) + 1
     return sorted(out.items(), key=lambda kv: -kv[1])
 
-HIDE = [0]
+HIDE = [0]; ICON = [0]
 def run(V, n=2000, seed=2):
-    HIDE[0] = V.get("hide", 0)
+    HIDE[0] = V.get("hide", 0); ICON[0] = V.get("icons", 0)
     rng = random.Random(seed); E = elements(V); ov = []; keys = sum(1 for e in E if e[5]); m7 = []; whys = {}
     for _ in range(n):
         o, missed, age = kid(E, rng); ov.append(o)
@@ -132,6 +133,8 @@ VERS = [
     ("G  + tutorial lines stay at least words / 1.5 + 0.5 s (7-year-old reading speed)", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1}),
     ("H  + one queue per screen strip (a line waits for the one before it; notifications go to the side)", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1}),
     ("I  + side HUD hides while a centre card is open; Benny story shot 5 -> 7.5 s", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1}),
+    ("J  + every tutorial line leads with a big icon + a 3D arrow / glow on the target (words become optional)", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1, "icons": 1}),
+    ("K  + Benny story caption 9 -> 5 words (e.g. 'BENNY: You? Beat ME? Ha!')", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1, "icons": 1, "story_short": 1}),
 ]
 
 if __name__ == "__main__":

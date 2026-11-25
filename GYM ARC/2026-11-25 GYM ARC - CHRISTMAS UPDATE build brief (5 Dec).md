@@ -126,7 +126,8 @@ Source: [[2026-11-25 GYM ARC - Kid sims on live v1914 (debate, impatient, overst
 3. **Intro cutscene 18 s → 8 s** (`IntroCutsceneLength = 8`; keep the first big shot and the title, cut the captions to ≤ 8 words).
 4. **Calm HUD before Growth Spurt 2:** no DEAL / FREE 1,000 / PLUS +20% / INVITE +10% tiles and no red "!" / NEW badges until the player has done Growth Spurt 2 (`CalmHudUntilSpurt = 2`). The INVITE card only after Growth Spurt 2 and never while on a machine.
 5. **One queue per screen strip:** the top strip (tutorial band, notifications, NEW PERSONAL RECORD) shows one line at a time; the next waits; PERSONAL RECORD and notifications become a side toast during the tutorial. KEY tutorial lines stay at least `words / 1.5 + 0.5` s. While a centre card is open (Benny, GROW READY, a reward), hide the side cards and the top strip.
-6. **Benny story shot 5 s → 7.5 s** (slow readers missed its caption).
+6. **Benny story shot 5 s → 7.5 s** and its caption 9 → 5 words (e.g. "BENNY: You? Beat ME? Ha!"); slow readers missed it.
+6b. **Every tutorial line leads with a big icon + a 3D arrow / glow on the target** (dumbbell icon + arrow to the bench, leg icon + arrow to the leg machine, Benny's face + arrow to his table). Words become optional: half the players are non-English and the slowest 7-year-olds read ~1 word/s. Re-run (26 Nov): KEY messages missed by 7-year-olds 28% → 0%.
 7. **The FREE GIFT (Phase 2) goes through the same queue:** it glows AFTER the intro and the first tutorial line, never on top of them.
 8. **Cheap-looking spots (quality-nerd kid):**
    - trainer NPCs (e.g. LOU 03) never between the camera and the player: fade them (LocalTransparencyModifier) when they block the view;
@@ -135,8 +136,18 @@ Source: [[2026-11-25 GYM ARC - Kid sims on live v1914 (debate, impatient, overst
    - flat card palm leaves at the beach → real leaf meshes (low tris);
    - the floating red/black plate sign → put it on a post;
    - 3 plate/rack variants (colour + wear) so the same prop doesn't repeat in one view.
-- **Tests (add to the checklist):** a NEW player reaches Benny's card with no key press; GROW starts ≤ 2 s after READY; no DEAL/INVITE/badge before Growth Spurt 2; never two lines on the top strip at once; phone screenshots of the plaza, beach, ProGym show none of the 5 spots.
+- **Tests (add to the checklist):** every tutorial line has an icon + arrow; a NEW player reaches Benny's card with no key press; GROW starts ≤ 2 s after READY; no DEAL/INVITE/badge before Growth Spurt 2; never two lines on the top strip at once; phone screenshots of the plaza, beach, ProGym show none of the 5 spots.
 - Expected (model): stay past 3 min ~54% → ~96%; overload 370 s → 0 s per 10 min; cheap tells 8.7 → 0.4 per 10 min.
+
+## Phase 2c: crowd levers (so the game tile shows 1,000+ players; from the CCU growth model, 26 Nov)
+Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobody plays it, it's dead"). These raise how many players come back and stay. Build the cheap ones with Phase 2-5.
+1. **Friend invite = a bonus Advent present for BOTH** (Roblox invite prompt from the calendar; the friend gets it on first join).
+2. **GIFT RUSH 3 times a day at fixed times** (e.g. 15:00, 19:00, 23:00 UTC): gift drops every minute for 10 min. A countdown on the tree.
+3. **Roblox experience notifications (opt-in, after the first calendar claim):** "Today's present is ready", "Gift Rush in 10 min".
+4. **AFK gift spot** (a cosy chair by the tree): sitting idle pays a small coin trickle + 5 Candy Canes every 20 min. No reps, so the AUTO REP pass (best seller) keeps its value.
+5. **7-day login streak** (in the calendar UI) + one code per week in the Discord and the group.
+6. After Christmas (January): the ranked arm-wrestle weekly board.
+- Tests: invite reward lands for both; Gift Rush fires at the 3 times in a test server (dev hook to fast-forward); notifications only after opt-in; AFK spot pays 5 🍬 / 20 min and never reps.
 
 ## Phase 3: Winter gym + launch
 - **Winter look** (gated by `LiveEvents.Unlocked("Christmas")`, removable after 6 Jan):
@@ -204,7 +215,8 @@ Source: [[2026-11-25 GYM ARC - Kid sims on live v1914 (debate, impatient, overst
 
 ## Ads tie-in (owner)
 - Ad creative #6 "CHRISTMAS UPDATE" goes live the moment the update launches (it's in `Assets\ads_creatives_25nov\`).
-- The $200 burst starts 5-6 Dec: [[2026-11-25 GYM ARC - Ad creatives, the 10 for the test]].
+- The $200 burst: [[2026-11-25 GYM ARC - Ad creatives, the 10 for the test]]. **Changed 26 Nov (growth model): run it 19-23 Dec** (school holidays, when Roblox has the most kids and our Gift Rush/calendar are running) instead of 5-7 Dec: tile CCU over 20-31 Dec median ~1,060 → ~1,230 for the same money. Launch day can use a small $20-30 test of the 10 creatives to find the 5%-CTR ones.
+- Owner's choice (money): putting half of the game's earnings back into ads from 19 Dec is what lifts the chance of 1,830+ players from ~20% to ~60% (~90% if the creatives hold 5% CTR) in the model.
 - Update the game title for the event: `[🎄CHRISTMAS] GYM ARC` and the description's first line.
 
 ## Report after each phase

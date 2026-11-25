@@ -1,0 +1,7 @@
+design only + $200 in the holiday: low (10%)     CCU   794 crowd 3.6: agree   60%  1st  73%  cons: crowd              | +-1 test worst 56%, came back: [('crowd', 15488)]
+design only + $200 in the holiday: median        CCU  1229 crowd 4.4: agree  100%  1st  95%  cons: none               | +-1 test worst 57%, came back: [('crowd', 7210)]
++ half the earnings back into ads: low (10%)     CCU  1222 crowd 4.4: agree  100%  1st  95%  cons: none               | +-1 test worst 57%, came back: [('crowd', 7210)]
++ half the earnings back into ads: median        CCU  2028 crowd 5.2: agree  100%  1st  96%  cons: none               | +-1 test worst 100%, came back: []
+$400 + half the earnings back: low (10%)         CCU  1702 crowd 4.9: agree  100%  1st  96%  cons: none               | +-1 test worst 57%, came back: [('crowd', 7210)]
+5% creatives + half back: low (10%)              CCU  1822 crowd 5.0: agree  100%  1st  96%  cons: none               | +-1 test worst 100%, came back: []
+5% creatives + half back: median                 CCU  2961 crowd 5.8: agree  100%  1st  96%  cons: none               | +-1 test worst 100%, came back: []
