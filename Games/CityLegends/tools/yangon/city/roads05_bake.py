@@ -654,8 +654,20 @@ def bake(tag):
             kept.append(p)
     print('duplicate parts dropped:', len(parts) - len(kept))
     parts = kept
+    # (25 Nov) R05_ONLY: only the parts within 300 studs of those cells are worked (a one-cell re-bake of a district
+    # took an hour turning all 700k parts into faces)
+    only_cells = [c for c in os.environ.get('R05_ONLY', '').split(',') if c]
+    if only_cells:
+        win = shapely.union_all([sbox(int(c.split('x')[0]) * CELL - 300, int(c.split('x')[1]) * CELL - 300,
+                                      (int(c.split('x')[0]) + 1) * CELL + 300, (int(c.split('x')[1]) + 1) * CELL + 300) for c in only_cells])
+        shapely.prepare(win)
+        n0 = len(parts)
+        parts = [p for p in parts if win.contains(Point(p[2][0], p[2][2]))]
+        print('R05_ONLY window: parts', n0, '->', len(parts))
     data = json.load(open(os.path.join(D, 'roads.json'), encoding='utf-8'))
     paint = json.load(open(os.path.join(D, 'paint.json')))['items']
+    if only_cells:
+        paint = [it for it in paint if win.contains(Point(it['p'][0][0], it['p'][0][1]))]
     spill = deck_spill(data, set(c for c in os.environ.get('R05_ONLY', '').split(',') if c))
     for name, cells in spill.items():
         print('DECK SPILL: %s also lies in %s (not in R05_ONLY): those cells keep the OLD copy of this deck = overlap '
