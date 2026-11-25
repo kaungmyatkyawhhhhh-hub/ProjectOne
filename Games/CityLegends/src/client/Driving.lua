@@ -1221,6 +1221,14 @@ function Driving.setTow(kg: number?)
 	end
 end
 
+-- (2026-11-26, PedHits) a small speed loss: the car keeps share k of its ground speed
+function Driving.slowBy(k: number)
+	local s = state
+	if s then
+		s.vel = Vector3.new(s.vel.X * k, s.vel.Y, s.vel.Z * k)
+	end
+end
+
 -- ground speed in studs per second (0 when not driving)
 function Driving.getSpeed(): number
 	return if state then Vector3.new(state.vel.X, 0, state.vel.Z).Magnitude else 0

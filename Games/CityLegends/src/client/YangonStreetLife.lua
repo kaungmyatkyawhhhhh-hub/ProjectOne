@@ -416,7 +416,7 @@ local HAIR_LONG, HAIR_LONG_AT = Vector3.new(1.34, 1.25, 0.9), Vector3.new(0, 4.7
 type Figure = { model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal, scale: number, hairAt: Vector3, bald: boolean }
 type Walker = {
 	fig: Figure, mode: string, path: { Vector3 }?, k: number, dir: number, pos: Vector3, yaw: number, speed: number,
-	lat: number, phase: number, acc: number, timer: number, spot: number?,
+	lat: number, phase: number, acc: number, timer: number, spot: number?, held: boolean?, gone: boolean?,
 }
 
 local figPool: { Figure } = {}
@@ -713,7 +713,8 @@ local function pedTick(cam: Vector3, cap: number)
 	local k = 1
 	while k <= #active do
 		local w = active[k]
-		if #active > want or flat(w.pos, cam) > cfg.PedKeep then
+		-- (PedHits: a walker knocked over is held until it is up; `gone` = it faded out, put someone new elsewhere)
+		if w.gone or (not w.held and (#active > want or flat(w.pos, cam) > cfg.PedKeep)) then
 			retire(k)
 		else
 			k += 1
@@ -733,7 +734,9 @@ end
 local function pedFrame(dt: number, cam: Vector3)
 	for _, w in active do
 		w.acc += dt
-		if w.mode == "stand" then
+		if w.held or w.gone then
+			w.acc = 0
+		elseif w.mode == "stand" then
 			-- now and then a look round
 			w.timer -= dt
 			if w.timer <= 0 then
@@ -810,6 +813,12 @@ function YangonStreetLife.start(qualityScale: (() -> number)?)
 		end)
 	end)
 end
+
+-- (PedHits, 2026-11-26) the walkers out now, and the posing function for standing one up
+function YangonStreetLife.walkers(): { any }
+	return active
+end
+YangonStreetLife.pose = pose
 
 -- (for a look in Studio: how many are out)
 function YangonStreetLife.stats(): { cars: number, built: number, people: number }
