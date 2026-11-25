@@ -41,3 +41,8 @@ Why the pure Blender renders looked bad (Claude's own diagnosis): background as 
 - 64 px: mean 0.347, 11% near-black (Power Lifters 0.337 / 29%).
 - ChatGPT chat: "Re-render Roblox Icon".
 - Lesson: our render gives the real character, pose and layout; ChatGPT gives the finish. Neither alone was good enough.
+
+## Update 07:15: owner "why is it so tanned now, it looks bad cuz its dark and contrast is bad"
+- The owner REJECTS the dark tan (it reads dark and muddy). Skin = the LIGHT bright orange-peach Roblox skin like Power Lifters, the lightest thing in the image, soft orange shadows (never brown). This replaces the handoff's "golden-bronze tan".
+- Same ChatGPT chat, one follow-up: lighter skin, a bright sunny gym, cooler/darker background behind him.
+- Result: `GYMARC_ICON_D_light.png` / `_512.png` (raw `gymarc_icon_gpt_repaint_v3.png`), board `gymarc_icon_light_board.jpg`. 64 px mean 0.504, 6% near-black.
