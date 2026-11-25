@@ -376,7 +376,7 @@ def run(cells_only=None, procs=int(os.environ.get('RB_PROCS', 3))):
         import glob as _g
         from roadbugs_index import glb_names
         newm = {}
-        for f in _g.glob(os.path.join(ov, '*.glb')):
+        for f in [f for d in ov.split(';') for f in _g.glob(os.path.join(d, '*.glb'))]:
             for mm in glb_names(f)['meshes']:
                 pp = mm['name'].split('_')
                 newm['ov_' + mm['name']] = dict(cell=pp[1].split('s')[0], kind=pp[0], glb=os.path.relpath(f, ROOT), name=mm['name'])
