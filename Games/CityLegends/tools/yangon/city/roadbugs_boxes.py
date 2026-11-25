@@ -6,7 +6,9 @@ Checks every collision box of Workspace.Yangon1to1.Roads (Collide + the old Coll
 road meshes really in the place (match.json): 3 x 3 points on each box top.
   float   the top is > 0.3 over the highest visible surface under it (within 8) and no visible surface is within 0.3 of
           it, at >= 3 points: an invisible step / ceiling (a pavement box left 4-6 over the lower road)
-  bare    no visible surface at all under >= 6 of the points: collision with no road there
+  sunk    the top is > 0.3 under the visible road at >= 3 points (a dip)
+  bare    no visible surface at the box (none under it, or only a deck far above / ground far below) at >= 6 of the
+          points: collision with no road there (the fuel station forecourt under the Kabar Aye flyover)
 Walls (W) stand up on purpose and are skipped.
     python roadbugs_boxes.py [boxes file] -> roadbugs_25nov/boxes_bad.txt ("kind_of_bug folder kind cx cy cz ... seat_dy")
 """
@@ -39,7 +41,7 @@ def job(arg):
         U = np.array(list(map(float, r[9:12])))
         Sz = np.array(list(map(float, r[12:15])))
         L = np.cross(R, U)
-        fl, bare, gaps = 0, 0, []
+        fl, bare, gaps, sk, ups = 0, 0, [], 0, []
         for a in (-0.4, 0, 0.4):
             for b in (-0.4, 0, 0.4):
                 top = c + R * Sz[0] * a + U * Sz[1] / 2 + L * Sz[2] * b
@@ -53,10 +55,19 @@ def job(arg):
                 if below:
                     fl += 1
                     gaps.append(top[1] - max(below))
+                else:
+                    above = [y for y in ys if top[1] < y < top[1] + 8]
+                    if above:
+                        sk += 1   # the box is under the visible road (sunk): a dip
+                        ups.append(min(above) - top[1])
+                    else:
+                        bare += 1   # only a deck far above / ground far below: nothing visible at the box
         if bare >= 6:
             out.append(('bare', r, 0.0))
         elif fl >= 3:
             out.append(('float', r, -float(np.median(gaps))))
+        elif sk >= 3:
+            out.append(('sunk', r, float(np.median(ups))))
     return cell, out
 
 
