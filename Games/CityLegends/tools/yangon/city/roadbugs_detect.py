@@ -145,6 +145,7 @@ def run(cells_only=None):
             bycell[m['cell']][m['kind']].append(tri[m['name']])
     d, jpts, car, probes = load_net()
     jtree = STRtree([Point(p) for p in jpts])
+    dtree = STRtree([LineString([(q[0], q[2]) for q in dk['s']]).buffer(dk.get('half', 24) + 6) for dk in d['decks'] if len(dk['s']) > 1])
     counts, spots = {}, collections.defaultdict(list)
     for cell in sorted(bycell):
         K = {k: (np.concatenate(v) if v else np.zeros((0, 3, 3))) for k, v in bycell[cell].items()}
@@ -154,6 +155,9 @@ def run(cells_only=None):
         def spot(kind, x, y, z, info=''):
             c[kind] += 1
             spots[kind].append((cell, round(float(x), 1), round(float(y), 1), round(float(z), 1), info))
+        def near_deck(m):
+            return len(dtree.query(Point(m[0], m[2]), predicate='dwithin', distance=6)) > 0
+
         def near_j(x, z, r):
             return len(jtree.query(Point(x, z).buffer(r))) > 0
         # carriageway of the data in this cell (+ neighbours' quads that reach in)
@@ -174,10 +178,18 @@ def run(cells_only=None):
                 k = int(np.argmax(ds))
                 if ds[k] > 4:
                     # the part reaching out must lie on nothing else (a fan wedge inside a junction is covered by others)
-                    q = t[k] * 0.8 + t.mean(0) * 0.2
-                    cov = sum(1 for a8 in range(8) if R.near(q[0] + 3 * math.cos(a8 * math.pi / 4), q[1],
-                                                               q[2] + 3 * math.sin(a8 * math.pi / 4), 0.05, 3))
-                    if cov <= 4:
+                    # a spike into the grass has bare ground on BOTH long sides; a fan wedge by a kerb has asphalt on one
+                    e = [t[1] - t[0], t[2] - t[1], t[0] - t[2]]
+                    L = max(e, key=lambda v: v[0] ** 2 + v[2] ** 2)
+                    dl = np.array([L[0], L[2]]) / (math.hypot(L[0], L[2]) + 1e-9)
+                    nv = np.array([-dl[1], dl[0]])
+                    bare = 0
+                    for f in (0.35, 0.5, 0.65):
+                        q = t[k] * f + (t.sum(0) - t[k]) / 2 * (1 - f)
+                        a1 = R.near(q[0] + nv[0] * 2, q[1], q[2] + nv[1] * 2, 0.05, 3)
+                        a2 = R.near(q[0] - nv[0] * 2, q[1], q[2] - nv[1] * 2, 0.05, 3)
+                        bare += (not a1) and (not a2)
+                    if bare >= 2 and not near_deck(t.mean(0)):
                         m = t.mean(0)
                         spot('sliver', m[0], m[1], m[2], 'out %.1f len %.0f' % (ds[k], E[i].max()))
         # hole

@@ -203,7 +203,15 @@ function M.trim(x0: number, z0: number, x1: number, z1: number): string
 	for k, y in cut do
 		cells += 1
 		local x, z = (k // 100000) * 4 + 2, (k % 100000) * 4 + 2
-		local g = workspace:Raycast(Vector3.new(x, y + 40, z), Vector3.new(0, -80, 0), rpT)
+		-- (25 Nov, road bug sweep) the centre ray alone missed the swell between cell centres: 4,893 road boxes still had
+		-- grass 0.12-4.9 over their top (grass lying on the asphalt). Test the centre and 4 points near the corners.
+		local g, gy = nil, -math.huge
+		for _, o in { { 0, 0 }, { 1.8, 1.8 }, { -1.8, 1.8 }, { 1.8, -1.8 }, { -1.8, -1.8 } } do
+			local h = workspace:Raycast(Vector3.new(x + o[1], y + 40, z + o[2]), Vector3.new(0, -80, 0), rpT)
+			if h and h.Position.Y > gy then
+				g, gy = h, h.Position.Y
+			end
+		end
 		if g and g.Material ~= Enum.Material.Water and g.Position.Y > y + M.TRIM_TO - M.TRIM_MIN then
 			workspace.Terrain:FillBlock(CFrame.new(x, y + 10, z), Vector3.new(4, 20, 4), Enum.Material.Air)
 			carved += 1
