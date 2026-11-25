@@ -653,6 +653,7 @@ def build(data, signals=None):
         clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
         clip_edge = Clip(edge_np, zz, mouth_u, fills.buffer(2))
         one = bool(r.get('oneway'))
+        stn = np.concatenate([[0.0], np.cumsum([math.hypot(s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2]) for i in range(1, len(s))])])
         for idx, out in LL.get(r['name'], ()):
             a, b = idx[0], idx[-1]
             rng = range(a, b + 1)
@@ -701,7 +702,9 @@ def build(data, signals=None):
                         if v1 - v0 < 1:
                             continue
                         ln = smooth([(s[idx[j]][0] - s[idx[j]][4] * t[j], s[idx[j]][2] + s[idx[j]][3] * t[j]) for j in range(v0, v1 + 1)])
-                        for d in dashes(ln, DASH_ON, DASH_OFF):
+                        # (25 Nov, owner: lane lines that don't line up) every line's dashes keep step with the road's
+                        # centre-line distance, so dashes of side-by-side lanes and both sides of a junction line up
+                        for d in dashes(ln, DASH_ON, DASH_OFF, stn[idx[v0]] % (DASH_ON + DASH_OFF)):
                             P.line('LW', d, LINE_W, 'lane', r['name'], clip_road, min_len=MIN_PIECE)
     # roundabouts
     for g in rings:

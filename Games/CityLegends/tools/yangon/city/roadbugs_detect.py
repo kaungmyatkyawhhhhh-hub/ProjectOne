@@ -347,7 +347,7 @@ def cell_job(arg):
         return cell, dict(c), spots
 
 
-def run(cells_only=None, procs=4):
+def run(cells_only=None, procs=int(os.environ.get('RB_PROCS', 3))):
     import multiprocessing as mp
     match = json.load(open(os.path.join(OUT, 'match.json')))['match']
     bycell = collections.defaultdict(list)
