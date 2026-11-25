@@ -9,7 +9,7 @@
 	  * side streets (road collision boxes RoadBox "R" with no traffic lane in them): a pole on one side every SIDE_CELL
 	    studs, one wire and two bundles to the next pole along the street, an amber lamp on every second pole (owner,
 	    21 Nov: side-street power-pole lamps are amber).
-	  * at big signalled junctions (3+ approaches): a camera gantry over the widest approach, a white arm with 3-4 cameras
+	  * at big signalled junctions (4+ approaches, 4+ lanes): a camera gantry over the widest approach, 3-4 cameras
 	    (clips 0929: 4 cameras, 0930: 3).
 	  * at real compound gates (OSM barrier=gate, Shared.YangonRoadsideData): a guard booth with a red-white striped roof.
 	  * round real construction sites (OSM landuse / building = construction): blue sheet hoarding.
@@ -282,7 +282,7 @@ local function plan(g, skipTile: (number, number) -> boolean)
 			end
 		end
 	end
-	-- camera gantries: at junctions with 3+ approaches, over the approach with the most lanes (3+)
+	-- camera gantries: at junctions with 4+ approaches, over the approach with the most lanes (4+)
 	local appr: { [string]: any } = {}
 	local byJ: { [number]: { any } } = {}
 	for _, sg in g.signals or {} do
@@ -298,10 +298,10 @@ local function plan(g, skipTile: (number, number) -> boolean)
 		table.insert(a.pts, sg.pos)
 	end
 	for _, list in byJ do
-		if #list >= 3 then
+		if #list >= 4 then
 			local best
 			for _, a in list do
-				if #a.pts >= 3 and (not best or #a.pts > #best.pts) then
+				if #a.pts >= 4 and (not best or #a.pts > #best.pts) then
 					best = a
 				end
 			end
@@ -318,7 +318,7 @@ local function plan(g, skipTile: (number, number) -> boolean)
 				end
 				local base = outer + right * GANTRY_SIDE - best.dir * GANTRY_BACK
 				local reach = math.clamp((base - (outer + inner) / 2):Dot(right) + 6, 14, 52)
-				local gt = { base = base, dir = best.dir, right = right, reach = reach, cams = math.min(#best.pts, 4) }
+				local gt = { base = base, dir = best.dir, right = right, reach = reach, cams = 3 + best.i % 2 }
 				local key = math.floor(base.X / CHUNK) .. "," .. math.floor(base.Z / CHUNK)
 				chunks[key] = chunks[key] or { p = {}, b = {} }
 				chunks[key].gantries = chunks[key].gantries or {}
@@ -499,8 +499,10 @@ local function regAdd(reg, p: Vector3, owner: string)
 	reg[k] = reg[k] or {}
 	table.insert(reg[k], { p, owner })
 end
+local poleReg: { [string]: { any } } = {} -- my built poles' bases
+local wireReg: { [string]: { any } } = {} -- my built wires' points
 local function regPurge(owner: string)
-	for _, reg in { palmReg, crossReg } do
+	for _, reg in { palmReg, crossReg, poleReg, wireReg } do
 		for _, list in reg do
 			for i = #list, 1, -1 do
 				if list[i][2] == owner then
@@ -516,6 +518,31 @@ local function nearPalm(p: Vector3, r: number): boolean
 			for _, e in palmReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
 				local q = e[1]
 				if Vector3.new(p.X - q.X, 0, p.Z - q.Z).Magnitude < r and p.Y > q.Y - 1 and p.Y < q.Y + PALM_H + 12 then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+local function nearPole(p: Vector3, r: number): boolean
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			for _, e in poleReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
+				local q = e[1]
+				if Vector3.new(p.X - q.X, 0, p.Z - q.Z).Magnitude < r and p.Y > q.Y - 1 and p.Y < q.Y + POLE_H + 1 then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+local function nearWire(p: Vector3, r: number): boolean
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			for _, e in wireReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
+				if (e[1] - p).Magnitude < r then
 					return true
 				end
 			end
@@ -602,9 +629,12 @@ local function poleClear(sets, base: Vector3, lampDir: Vector3?): boolean
 	end
 	for y = 1.5, POLE_H + 1, 2 do
 		local p = base + Vector3.new(0, y, 0)
-		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) or nearGantry(p, 2) then
+		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) or nearGantry(p, 2) or nearWire(p, W / 2 + 0.5) then
 			return false
 		end
+	end
+	if nearPole(base + Vector3.new(0, 1, 0), 6) then
+		return false
 	end
 	-- the top arm (5 long along the road, either way round): its ends
 	for _, d in { Vector3.xAxis, Vector3.zAxis } do
@@ -707,6 +737,10 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 		if blocked(sets, q, width / 2 + 0.15) or nearPalm(q, 2.2) or nearGantry(q, width / 2 + 1.5) then
 			return nil
 		end
+		-- (Play, 25 Nov: a top wire ran through the next road's pole) my own poles, away from this wire's two ends
+		if (q - a).Magnitude > 3.5 and (q - b).Magnitude > 3.5 and nearPole(q, W / 2 + width / 2 + 0.25) then
+			return nil
+		end
 	end
 	-- (Play, 25 Nov: wires ran through shell roofs) the buildings' own boxes along the wire's box
 	local list = solidList()
@@ -742,6 +776,10 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 	beam.Segments = 8
 	beam.FaceCamera = true
 	beam.Parent = holder
+	local owner = holder:GetAttribute("Chunk")
+	for _, q in pts do
+		regAdd(wireReg, q, owner or "")
+	end
 	return pts
 end
 
@@ -764,6 +802,9 @@ local function buildPole(m: Instance, dir: Vector3, right: Vector3, base: Vector
 	end
 	local shaftH = POLE_H - 4 * BAND_H
 	local shaft = part(m, Vector3.new(W, shaftH, W), look * CFrame.new(0, 4 * BAND_H + shaftH / 2, 0), CONCRETE, Enum.Material.Concrete)
+	local owner = m:GetAttribute("Chunk") or ""
+	shaft:SetAttribute("Chunk", owner)
+	regAdd(poleReg, base, owner)
 	-- the top arm along the road, sitting on the pole's top
 	part(m, Vector3.new(0.35, 0.35, 5), look * CFrame.new(0, POLE_H + 0.175, 0), CONCRETE, Enum.Material.Concrete)
 	local roadSide = CFrame.lookAt(base, base - right) -- facing the road (-Z of this frame points at it)
@@ -1197,6 +1238,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 	local poles = ctx.poles
 	local m = Instance.new("Model")
 	m.Name = "Roadside"
+	m:SetAttribute("Chunk", key)
 	local any = false
 	-- palms first (their trunks are what the cross wires keep off)
 	if buildPalms(m, sets, key, chunk and chunk.palms) > 0 then
