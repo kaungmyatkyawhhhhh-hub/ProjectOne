@@ -64,3 +64,8 @@ Fix:
 ## 08:05 OWNER APPROVED G ("this is way better")
 **Final icon: `GYMARC_ICON_G_warm.png` (upload `GYMARC_ICON_G_warm_512.png`).** Not uploaded yet.
 Next: 16:9 thumbnails in the SAME look (our Blender render for layout -> ChatGPT finish in one chat -> Man face -> warm lamps in a dark gym -> grade_guy.py + grade_color.py -> logo in code), in a new chat.
+
+## Update 08:25: owner "the skin looks so bad, too glossy, like wet flesh of orange meat"
+- RULE: skin = smooth SATIN, almost matte Roblox plastic (a clean toy / premium GFX), soft broad highlights only on the tops of shoulders, pecs, arms; even light golden-orange; soft shading, no wet streaks or dark wet grooves. Never glossy/oily. My grade_color.py (more saturation + deeper orange shadows) made it worse: do NOT use it on satin skin; use only `_tools/grade_guy_soft.py` (contrast x1.15, local 0.2, colour kept).
+- Same "change ONLY the SKIN MATERIAL" follow-up sent in both ChatGPT chats (icon: "Re-render Roblox Icon"; thumbnail: "Create Roblox Thumbnail").
+- **Current icon: `GYMARC_ICON_H_matte.png` / `_512.png`** (replaces G). **Thumbnail / ad #1: `GYMARC_THUMB_T1_flex_matte.png`.** Board `gymarc_matte_board.jpg`.

@@ -31,3 +31,6 @@ One big hero, a bright clean face (the Man face), one focal point, one huge numb
 - After 3-5 days: any creative under ~3% CTR -> off; replace with a variant of the best one (same idea, new pose/colour).
 - Keep the winner as the Home thumbnail too (Thumbnail Personalization).
 - Log each creative's CTR here after each run.
+
+## Status
+- #1 1000 LB flex: done, `Assets\icon_render_25nov\GYMARC_THUMB_T1_flex_matte.png` (satin skin; the glossy T1 was rejected as 'wet orange meat').
