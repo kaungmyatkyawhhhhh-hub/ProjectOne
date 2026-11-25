@@ -28,7 +28,8 @@ from roadbugs_index import read_glb, ROOT, OUT
 
 NET = os.path.join(ROOT, 'build', 'city_1to1', 'roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12')
 CELL = 1536.0
-KINDS = ('sliver', 'hole', 'grass_flat', 'median_jct', 'median_stub', 'kerb_loose', 'paint_cross', 'yellow_jct',
+SPIKE_ANG = float(os.environ.get('SPIKE_ANG', 40))
+KINDS = ('spike', 'hole', 'grass_flat', 'median_jct', 'median_stub', 'kerb_loose', 'paint_cross', 'yellow_jct',
          'lone_dash', 'wall_low')
 
 
@@ -131,24 +132,30 @@ def load_net():
     return d, jpts, car, probes
 
 
-def run(cells_only=None):
-    match = json.load(open(os.path.join(OUT, 'match.json')))['match']
-    bycell = collections.defaultdict(lambda: collections.defaultdict(list))
-    files = collections.defaultdict(list)
-    for m in match.values():
-        if cells_only and m['cell'] not in cells_only:
-            continue
-        files[m['glb']].append(m)
-    for f, ms in files.items():
-        tri = read_glb(os.path.join(ROOT, f))
-        for m in ms:
-            bycell[m['cell']][m['kind']].append(tri[m['name']])
+_G = {}
+
+
+def _init():
     d, jpts, car, probes = load_net()
-    jtree = STRtree([Point(p) for p in jpts])
-    dtree = STRtree([LineString([(q[0], q[2]) for q in dk['s']]).buffer(dk.get('half', 24) + 6) for dk in d['decks'] if len(dk['s']) > 1])
-    counts, spots = {}, collections.defaultdict(list)
-    for cell in sorted(bycell):
-        K = {k: (np.concatenate(v) if v else np.zeros((0, 3, 3))) for k, v in bycell[cell].items()}
+    _G.update(d=d, car=car, probes=probes, jtree=STRtree([Point(p) for p in jpts]),
+              dtree=STRtree([LineString([(q[0], q[2]) for q in dk['s']]).buffer(dk.get('half', 24) + 6)
+                             for dk in d['decks'] if len(dk['s']) > 1]))
+
+
+def cell_job(arg):
+    cell, ms = arg
+    if not _G:
+        _init()
+    car, probes, jtree, dtree = _G['car'], _G['probes'], _G['jtree'], _G['dtree']
+    byk = collections.defaultdict(list)
+    cache = {}
+    for m in ms:
+        if m['glb'] not in cache:
+            cache[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
+        byk[m['kind']].append(cache[m['glb']][m['name']])
+    spots = collections.defaultdict(list)
+    if True:
+        K = {k: (np.concatenate(v) if v else np.zeros((0, 3, 3))) for k, v in byk.items()}
         get = lambda k: K.get(k, np.zeros((0, 3, 3)))
         R = Surf(get('R'))
         c = collections.Counter()
@@ -165,33 +172,30 @@ def run(cells_only=None):
         quads = [q for dx in (-1, 0, 1) for dz in (-1, 0, 1) for q in car.get('%dx%d' % (cx + dx, cz + dz), [])]
         cw = shapely.union_all(quads) if quads else Polygon()
         shapely.prepare(cw)
-        # sliver
-        T = R.T
-        if len(T):
-            A = angles(T)
-            E = np.stack([np.linalg.norm(T[:, 1] - T[:, 0], axis=1), np.linalg.norm(T[:, 2] - T[:, 1], axis=1),
-                          np.linalg.norm(T[:, 0] - T[:, 2], axis=1)], 1)
-            cand = np.where((A.min(1) < 3.0) & (E.max(1) > 20))[0]
-            for i in cand:
-                t = T[i]
-                ds = [cw.distance(Point(p[0], p[2])) for p in t]
-                k = int(np.argmax(ds))
-                if ds[k] > 4:
-                    # the part reaching out must lie on nothing else (a fan wedge inside a junction is covered by others)
-                    # a spike into the grass has bare ground on BOTH long sides; a fan wedge by a kerb has asphalt on one
-                    e = [t[1] - t[0], t[2] - t[1], t[0] - t[2]]
-                    L = max(e, key=lambda v: v[0] ** 2 + v[2] ** 2)
-                    dl = np.array([L[0], L[2]]) / (math.hypot(L[0], L[2]) + 1e-9)
-                    nv = np.array([-dl[1], dl[0]])
-                    bare = 0
-                    for f in (0.35, 0.5, 0.65):
-                        q = t[k] * f + (t.sum(0) - t[k]) / 2 * (1 - f)
-                        a1 = R.near(q[0] + nv[0] * 2, q[1], q[2] + nv[1] * 2, 0.05, 3)
-                        a2 = R.near(q[0] - nv[0] * 2, q[1], q[2] - nv[1] * 2, 0.05, 3)
-                        bare += (not a1) and (not a2)
-                    if bare >= 2 and not near_deck(t.mean(0)):
-                        m = t.mean(0)
-                        spot('sliver', m[0], m[1], m[2], 'out %.1f len %.0f' % (ds[k], E[i].max()))
+        # spike: a sharp tip on the outline of the asphalt (sawtooth teeth at a clip seam, slivers into the grass)
+        if len(R.T):
+            U = shapely.union_all([p.buffer(0.03, join_style=2) for p in R.P])
+            for g in getattr(U, 'geoms', [U]):
+                for ring in [g.exterior] + list(g.interiors):
+                    xy = np.array(ring.coords)[:-1]
+                    if len(xy) < 3:
+                        continue
+                    seen = set()
+                    for i in range(len(xy)):
+                        p0, p1, p2 = xy[i - 1], xy[i], xy[(i + 1) % len(xy)]
+                        u, v = p0 - p1, p2 - p1
+                        lu, lv = np.linalg.norm(u), np.linalg.norm(v)
+                        if lu < 3 or lv < 3:
+                            continue
+                        ang = math.degrees(math.acos(max(-1, min(1, (u @ v) / (lu * lv)))))
+                        if ang < SPIKE_ANG:
+                            mid = (p1 + (p0 + p2) / 2) / 2
+                            if g.contains(Point(mid)) and not near_deck((p1[0], 0, p1[1])):  # a convex tip (not a notch)
+                                key = (round(p1[0] / 6), round(p1[1] / 6))
+                                if key not in seen:
+                                    seen.add(key)
+                                    ys = [yy for yy in R.ys(mid[0], mid[1])]
+                                    spot('spike', p1[0], ys[0] if ys else 0, p1[1], 'ang %.0f' % ang)
         # hole
         for (x, y, z, nm) in probes.get(cell, []):
             if not R.near(x, y, z, 0.5, 12):
@@ -324,8 +328,25 @@ def run(cells_only=None):
                     if key not in seen:
                         seen.add(key)
                         spot('wall_low', m[0], m[1], m[2])
-        counts[cell] = dict(c)
-        print(cell, dict(c), flush=True)
+        return cell, dict(c), spots
+
+
+def run(cells_only=None, procs=4):
+    import multiprocessing as mp
+    match = json.load(open(os.path.join(OUT, 'match.json')))['match']
+    bycell = collections.defaultdict(list)
+    for m in match.values():
+        if cells_only and m['cell'] not in cells_only:
+            continue
+        bycell[m['cell']].append(m)
+    counts, spots = {}, collections.defaultdict(list)
+    jobs = sorted(bycell.items())
+    with mp.Pool(procs) as pool:
+        for cell, c, sp in pool.imap_unordered(cell_job, jobs):
+            counts[cell] = c
+            for k, v in sp.items():
+                spots[k].extend(v)
+            print(cell, c, flush=True)
     tot = collections.Counter()
     for v in counts.values():
         tot.update(v)

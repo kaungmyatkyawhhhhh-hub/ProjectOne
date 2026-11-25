@@ -798,8 +798,9 @@ local function buildPalms(m: Instance, sets, key: string, spots: { Vector3 }?): 
 	local made = 0
 	for _, at in spots do
 		local y, kind = ground(at)
-		-- on the median (its box, grass or a paved strip), never on a carriageway or a deck
-		local ok = y ~= nil and (kind == "M" or kind == "T" or kind == "P")
+		-- on the median: its kerbed strip is a mesh over the road's own collision box (R), so R counts (the spot is
+		-- 14+ studs from either inner lane's middle); never on a deck or a wall
+		local ok = y ~= nil and (kind == "R" or kind == "M" or kind == "T" or kind == "P")
 		local base = Vector3.new(at.X, y or at.Y, at.Z)
 		if ok then
 			ok = not nearPalm(base, PALM_EVERY * 0.6)
