@@ -170,23 +170,42 @@ def run(cells_only=None):
             cand = np.where((A.min(1) < 3.0) & (E.max(1) > 20))[0]
             for i in cand:
                 t = T[i]
-                out = max(cw.distance(Point(p[0], p[2])) for p in t)
-                if out > 4:
-                    m = t.mean(0)
-                    spot('sliver', m[0], m[1], m[2], 'out %.1f len %.0f' % (out, E[i].max()))
+                ds = [cw.distance(Point(p[0], p[2])) for p in t]
+                k = int(np.argmax(ds))
+                if ds[k] > 4:
+                    # the part reaching out must lie on nothing else (a fan wedge inside a junction is covered by others)
+                    q = t[k] * 0.8 + t.mean(0) * 0.2
+                    cov = sum(1 for a8 in range(8) if R.near(q[0] + 3 * math.cos(a8 * math.pi / 4), q[1],
+                                                               q[2] + 3 * math.sin(a8 * math.pi / 4), 0.05, 3))
+                    if cov <= 4:
+                        m = t.mean(0)
+                        spot('sliver', m[0], m[1], m[2], 'out %.1f len %.0f' % (ds[k], E[i].max()))
         # hole
         for (x, y, z, nm) in probes.get(cell, []):
-            if not R.near(x, y, z, 0.5, 4):
+            if not R.near(x, y, z, 0.5, 12):
                 spot('hole', x, y, z, nm)
         # grass flat on asphalt
         MG = get('MG')
         if len(MG):
             uy, area = up(MG)
-            for t in MG[(uy > 0.5) & (area > 0.05)]:
-                m = t.mean(0)
-                ys = [yy for yy in R.ys(m[0], m[2]) if yy < m[1] + 0.3]
-                if ys and m[1] - max(ys) < 0.3:
-                    spot('grass_flat', m[0], m[1], m[2], 'dy %.2f' % (m[1] - max(ys)))
+            kerbs = np.concatenate([get('KR'), get('KW')])
+            KS = Surf(kerbs) if len(kerbs) else None
+            top0 = MG[(uy > 0.5) & (area > 0.05)]
+            if len(top0):
+                U0 = shapely.union_all([p.buffer(0.05) for p in polys(top0)])
+                for g in getattr(U0, 'geoms', [U0]):
+                    pc = g.representative_point()
+                    ys = R.ys(pc.x, pc.y)
+                    my = [t for t in top0 if Polygon([(t[0, 0], t[0, 2]), (t[1, 0], t[1, 2]), (t[2, 0], t[2, 2])]).buffer(0.1).covers(pc)]
+                    gy = my[0][:, 1].mean() if my else None
+                    if gy is None or not ys or min(abs(gy - yy) for yy in ys) > 0.4:
+                        continue
+                    # a median / island is ringed by kerbs; grass lying loose on the asphalt is not
+                    ring = g.exterior
+                    n = max(4, int(ring.length / 2))
+                    lined = sum(1 for k2 in range(n) if KS is not None and KS.dist(*ring.interpolate(k2 / n, normalized=True).coords[0], 2.5) < 2.0)
+                    if lined / n < 0.5:
+                        spot('grass_flat', pc.x, gy, pc.y, 'area %.0f lined %.0f%%' % (g.area, 100 * lined / n))
             # median pieces
             top = MG[(uy > 0.5) & (area > 1e-3)]
             if len(top):

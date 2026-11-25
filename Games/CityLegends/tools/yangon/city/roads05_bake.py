@@ -608,7 +608,7 @@ def drop_foot_walls(parts, surf, probe=1.5, level=1.2):
         lev = []
         for sgn in (-1, 1):
             q = c + side * sgn * (S[0] / 2 + probe)
-            hs = [h for h in surf.heights(q[0], q[2]) if bottom + 0.3 < h < c[1] + S[1] / 2]
+            hs = [h for h in surf.heights(q[0], q[2]) if bottom + 0.3 < h < c[1] + S[1] / 2 + 4.0]  # (+4: an upright under a ramp band sees the deck above it)
             lev.append(max(hs) if hs else None)
         if lev[0] is not None and lev[1] is not None and abs(lev[0] - lev[1]) < level:
             n.append(p)
