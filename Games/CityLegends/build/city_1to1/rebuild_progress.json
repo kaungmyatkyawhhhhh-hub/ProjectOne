@@ -776,5 +776,11 @@
   "next": "rescan terrain + trim(only) -> save; detect 'before' with gap; roadbugs_rebake.py plan (RB_EXCLUDE) + bake per tag + upload + _G.MSWAP mesh-only per cell; detect after; Play test; note",
   "lock": "released after v2054",
   "rebake": "roadbugs_rebake.py plan (spikes of run 1, RB_EXCLUDE deck-agent cells) -> 13 tags / 78 cells baking in turn into imports/sync/RBUG_<tag>_glb (RB5 done: 8 cells, spike 13 -> 2, gap 0 except 14x15)"
+ },
+ "street_realism_25Nov_pass3": {
+  "what": "poles off islands (land behind each pole), billboards backlit at night near the camera, camera gantries at 51 big junctions, guard booths at OSM gates, blue hoarding round 23 OSM construction sites; wires leave poles at a shallow angle; own poles/wires keep apart",
+  "data": "src/shared/YangonRoadsideData.lua (tools/yangon/city/roadside_data.py)",
+  "saved_version": 2066,
+  "playtest": "PASS 25 Nov: test store; overlap audit 0 hits at 2 spots; store back to v1, checked on the Server"
  }
 }

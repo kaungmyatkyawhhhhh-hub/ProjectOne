@@ -110,9 +110,55 @@ Pictures (Play):
 Cost:
 - About 450-520 parts and about 170 wires near the camera. No saved map parts, except the 2-part palm kit and about 42 KB of script.
 
+## Pass 3 (25 Nov, afternoon): islands, lit billboards, gantries, guard booths, hoarding
+Saved as **v2066**, on `CityLegends_v1`. Checked on the Server in Play: the store reads `CityLegends_v1` and the roadside pieces start. Not published. The PC lost power three times during this pass. Each time I checked the scripts in Studio and git against checksums before going on, and nothing was lost.
+
+**1. No poles on corner islands or small traffic islands:**
+- A pole spot now needs land behind it, away from the street: 6, 12 and 18 studs out must not be road, median or deck.
+- The corner-island pole from pass 2 is gone.
+
+**2. Billboards light up at night:**
+- Within about 107 m of the camera, the ad faces glow at night (no light influence, a little brighter).
+- No extra lights, so it costs phones nothing.
+
+**3. Camera gantries and guard booths:**
+- **Camera gantries:** at the 51 big signalled junctions (4+ approaches, widest approach 4+ lanes), a white pole and arm 10 m before the stop line with 3 or 4 white cameras (clips 0929: 4, 0930: 3).
+  - Wires and poles keep out of the gantry's space. It is known from the plan, before anything is built.
+- **Guard booths:** at real OSM gates (`barrier=gate`, 561 in the map).
+  - A cream booth with windows on three sides, a door at the back and a red-white striped roof.
+  - It stands 3-6 m from the gate, off the road on all four corners, and clear of walls and trees.
+  - Many gates have no free spot, so they get no booth (2 near Thingangyun's gate cluster in the test).
+
+**4. Blue sheet hoarding:**
+- Only round real construction sites: OSM `landuse=construction` or `building=construction`, 23 sites in the map.
+- Panels are 2.5 m tall, butted end to end, with a gap at each corner so two edges never meet.
+- A panel is left out where it would cross a road, a tree, a building or the kerb.
+- Example: the big site south-east of Kabar Aye (83 panels).
+
+**Also fixed while testing:**
+- **Wire ends:** wires now leave each pole at a shallow angle. Before, their ends dropped straight down beside the pole and ran through its top.
+- **Top wires:** they tie to the arm end nearer the other pole.
+- **My own pieces:** poles and wires keep out of each other. A pole is known from the moment its spot is chosen, and wires are logged a stud apart.
+
+**Overlap check in Play, after the fixes:** 0 hits at the Thingangyun gate cluster (306 parts, 42 wires) and 0 at the Waizayandar junction (484 parts, 137 wires).
+
+Data:
+- `src/shared/YangonRoadsideData.lua`, from `tools/yangon/city/roadside_data.py` (OSM extract, ODbL), about 12 KB.
+
+Pictures (Play):
+- `2026-11-25 Street realism - camera gantry at Waizayandar junction (Play) - after.jpg`
+- `2026-11-25 Street realism - guard booth at a compound gate (Play) - after.jpg`
+- `2026-11-25 Street realism - blue hoarding at a real construction site (Play) - after.jpg`
+- `2026-11-25 Street realism - blue hoarding close (Play) - after.jpg`
+- `2026-11-25 Street realism - lit billboard and camera gantry at night (Play) - after.jpg`
+
+Not touched:
+- road meshes, kerbs, paint and lanes (the road-bug agent's work)
+- the sky
+- the zebra crossings
+
 ## Checks and known limits
 - The overlap check samples points against each part's box. A round crown's box is a little bigger than the crown, so a few poles stand further from trees than they need to.
-- A side-street pole can stand on a small corner island at an unsignalled junction (seen once).
 - Some pole spots and wires near the edge of the loaded area appear only once the camera comes closer (they wait for the kit there).
 - Kit tree trunks are only as good as their boxes (no trunk parts were found in the kit).
 - The Hledan deck fix was removed by the deck agent while this was being built, so the ray filter uses only the road boxes and terrain (git and Studio match).
