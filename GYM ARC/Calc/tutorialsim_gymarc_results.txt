@@ -8,14 +8,18 @@ F  + after the bench: PICK your next muscle (3 glowing machines), dash 2 s      
 G  + YOU tap GROW, 4 s transform; Benny story 4 s (3-word caption); Coral 4 s; all skippable after 1 s   99%   99%   99%   95%   95%   95%    2 s
 H  + Benny: YOU tap to win (winnable at 2 taps/s; Benny tires if you're slow)                      99%   99%   99%   96%   96%   96%    2 s
 I  + intro 8 s -> 5 s, one shot: you, the gym, BENNY's taunt (skippable after 1 s)                100%  100%  100%   96%   96%   96%    2 s
+J  + GO TRAIN stretch paid in steps (bar 50/75/90% coins, a new machine each GO)                  100%  100%  100%   96%   96%   96%    2 s
+K  + Benny walks into your GROW shot and challenges you (no story shot, no walk, no card read)    100%  100%  100%  100%  100%  100%    2 s
+L  + the skip (tap after 1 s) modelled: a bored kid taps through a scene                          100%  100%  100%  100%  100%  100%    2 s
 
 sensitivity: how much does a reward that happened BY ITSELF count (AUTO_PAY)?  (3 min / 5 min)
-  AUTO_PAY 0.35: live  35/ 35%   Phase 2b only  87/ 87%   new tutorial  96/ 96%
-  AUTO_PAY 0.65: live  49/ 49%   Phase 2b only  89/ 89%   new tutorial  96/ 96%
-  AUTO_PAY 1.00: live  50/ 50%   Phase 2b only  89/ 89%   new tutorial  96/ 96%
+  AUTO_PAY 0.35: live  35/ 35%   Phase 2b only  87/ 87%   new tutorial 100/100%
+  AUTO_PAY 0.65: live  49/ 49%   Phase 2b only  89/ 89%   new tutorial 100/100%
+  AUTO_PAY 1.00: live  50/ 50%   Phase 2b only  89/ 89%   new tutorial 100/100%
 sensitivity: patience median (new tutorial vs live), 3 min / 5 min
-  patience  7 s: live  20/ 20%   new  81/ 81%
-  patience 11 s: live  49/ 49%   new  96/ 96%
-  patience 16 s: live  70/ 70%   new  99/ 99%
+  patience  5 s: live   8/  8%   new  96/ 92%
+  patience  7 s: live  20/ 20%   new  99/ 98%
+  patience 11 s: live  49/ 49%   new 100/100%
+  patience 16 s: live  70/ 70%   new 100/100%
 check: kids who need the hint (30% don't tap at first) - D without the hint:
   C-without-hint:   99%   99%   99%   88%   88%   88%

@@ -17,11 +17,15 @@ def elements(V):
     add(0.6, 18.7, "intro cutscene", "full", 2.0, True, 18 if V.get("intro_short") is None else 8)
     # tutorial band (top centre) per step; it re-shows every 12 s for ~3 s on long steps
     add(20.0, 24.0, "band: Let's lift! Taking you to the Flat Bench", "top", 1.0, True, 8)
-    add(20.5, 24.5, "coach dialog: Welcome! Lift to fill your GROWTH SPURT bar...", "bottom", 1.5, True, 15)
+    if V.get("tut2d_fix"):   # the coach's line comes during the dash to the bench, 8 words, and never on a machine (as live)
+        add(18.8, 23.5, "coach dialog: Welcome! Lift to GROW TALLER!", "bottom", 1.5, True, 6)
+    else: add(20.5, 24.5, "coach dialog: Welcome! Lift to fill your GROWTH SPURT bar...", "bottom", 1.5, True, 15)
     add(24.0, 34.0, "machine HUD (REP, stamina, weight panel)", "right", 0.5, False, 0)
     add(25.0, 34.5, "band: Every rep fills your GROWTH SPURT bar", "top", 1.0, True, 8)
     add(25.5, 26.5, "first-rep big moment flash", "centre", 1.0, False, 0)
-    add(34.0, 96.0, "machine HUD", "right", 0.5, False, 0)
+    if V.get("tut2d_fix"):   # off the machine while you pick (autoLeave): no machine HUD under the pick screen
+        add(34.0, 36.5, "machine HUD", "right", 0.5, False, 0); add(41.0, 96.0, "machine HUD", "right", 0.5, False, 0)
+    else: add(34.0, 96.0, "machine HUD", "right", 0.5, False, 0)
     for t, txt in ((36, "Great set! Now let's train your LEGS"), (48, "Legs are growing too! Do 5 reps"),
                    (58, "Strong legs! Now let's train your CORE"), (66, "Your CORE is growing!"),
                    (74, "Last one: BACK!"), (84, "Fill your GROWTH SPURT bar to GROW TALLER!")):
@@ -29,6 +33,7 @@ def elements(V):
     # the personal-record banner lands on the same top strip as the tutorial band (seen at 81-84 s)
     pr = V.get("pr_side")
     for t in (44, 60, 81):
+        if V.get("tut2d_fix") and t < 90: continue   # fix: in the tutorial the combo pop IS the record cheer
         add(t + 0.2, t + 3.0, "NEW PERSONAL RECORD banner", "side" if pr else "top", 0.5 if pr else 1.0, False, 3)
     add(70, 73, "Growth Spurt 50%/75% coins toast", "side", 0.5, False, 4)
     # invite card from 89 s, bottom centre, stays (it was still on screen at 205 s)
@@ -59,6 +64,14 @@ def elements(V):
             add(t, t + 3.5, "band: Beat BENNY at arm wrestling to open the Beach Gym!", "top", 1.0, True, 11); t += 12.3
     words = 15 if V.get("short_card") else 44
     add(stall_end, stall_end + 8, "Benny's card (quote, stake, strength, 2 buttons)", "centre", 2.0, True, words)
+    if V.get("tut2d"):   # 26 Nov tutorial redesign: what it adds on screen during the lifts
+        fx = V.get("tut2d_fix")
+        for a in range(28 if fx else 26, 66, 2): add(a, a + 0.8, "+EXP pop / muscle swell", "world" if fx else "side", 0.1 if fx else 0.25, False, 0)
+        for a in (30, 40, 50, 60): add(a, a + 1.0, "combo x5! / x10!", "world" if fx else "side", 0.25 if fx else 0.5, False, 1)
+        h0 = 34.6 if fx else 24   # fix: the hand waits until the coach line and the bands are gone
+        add(h0, h0 + 3, "hand tapping REP (only if no tap 3 s)", "right", 0.5, False, 0)
+        add(36.5, 41, "PICK YOUR NEXT MUSCLE: 3 big buttons", "centre", 1.5, True, 4)
+        add(66, 70, "Benny walks in: challenge card 'Big now? Prove it!' [ARM WRESTLE] (waits for the tap)", "centre", 1.5, True, 4)
     if V.get("queue"):   # one queue per strip: a line waits for the one before it; non-KEY toasts never on the tutorial strip
         out = []; busy = {}
         for e in sorted(E, key=lambda e: (e[0], not e[5])):
@@ -108,7 +121,7 @@ def collisions(E):
     out = {}
     for i, a in enumerate(E):
         for b in E[i + 1:]:
-            if a[3] == b[3] and a[3] not in ("full", "left", "right") and a[0] < b[1] and b[0] < a[1]:
+            if a[3] == b[3] and a[3] not in ("full", "left", "right", "world") and a[0] < b[1] and b[0] < a[1]:
                 k = f"{a[2]}  x  {b[2]}"; out[k] = out.get(k, 0) + 1
     return sorted(out.items(), key=lambda kv: -kv[1])
 
@@ -135,6 +148,8 @@ VERS = [
     ("I  + side HUD hides while a centre card is open; Benny story shot 5 -> 7.5 s", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1}),
     ("J  + every tutorial line leads with a big icon + a 3D arrow / glow on the target (words become optional)", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1, "icons": 1}),
     ("K  + Benny story caption 9 -> 5 words (e.g. 'BENNY: You? Beat ME? Ha!')", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1, "icons": 1, "story_short": 1}),
+    ("L  + the 26 Nov tutorial redesign on screen (+EXP pops, combo, hand, pick screen, Benny walks in)", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1, "icons": 1, "story_short": 1, "tut2d": 1}),
+    ("M  + pops + combo float over the muscle in 3D (not HUD); no RECORD banner in the tutorial; hand waits for the coach line", {"pr_side": 1, "invite_later": 1, "calm_hud": 1, "benny_auto": 1, "short_card": 1, "intro_short": 1, "min_read": 1, "queue": 1, "hide": 1, "story_long": 1, "icons": 1, "story_short": 1, "tut2d": 1, "tut2d_fix": 1}),
 ]
 
 if __name__ == "__main__":

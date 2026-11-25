@@ -19,6 +19,7 @@ A heuristic model, not real kids. The real check is the onboarding funnel after 
 import random, math, statistics as st
 P = dict(watch=0.1, tap=0.03, drag=0.4, rew=6.0)   # from impatientkid_gymarc.py calibration
 DRAG_AFTER = 6.0
+SKIPPABLE = ("intro cutscene", "GROW transform", "Benny story shot", "Coral story + walk to beach")
 AUTO_RATE = 0.03   # boredom per s while the game plays itself; calibrated with calib_tutorial.py (live: ~79% past 60 s, ~49% past 3 min; funnel says ~85% / ~62%, the old sim 90/54)
 
 def timeline(V):
@@ -48,19 +49,37 @@ def timeline(V):
         t += 5 * rep
         ev.append((t, "reward", 0.8, "goal % up / personal record", own))
     fill = V.get("fill_to_ready", max(0, 96 - t - 0.6) * (rep / 1.3))
-    ev.append((t, k, fill, "GO TRAIN reps to READY", own)); t += fill
+    ev.append((t, k, fill, "GO TRAIN reps to READY", own))
+    if V.get("spurt_steps"):   # the GO TRAIN stretch paid in steps: bar 50% / 75% / 90% + each new machine
+        for j in range(1, int(fill // 7) + 1): ev.append((t + j * 7, "reward", 1.0, "growth bar step / new machine", own))
+    t += fill
     ev.append((t, "reward", 2.0, "GROWTH SPURT READY", own)); t += V.get("ready_gap", 6)
     grow = V.get("grow", 6.0)
     ev.append((t, "watch", grow, "GROW transform", False))
     ev.append((t + grow - 1, "reward", 4.0, "you grew TALLER", bool(V.get("grow_tap")) or own)); t += grow
-    ev.append((t, "watch", V.get("benny_story", 5.0), "Benny story shot", False)); t += V.get("benny_story", 5.0)
-    ev.append((t, "watch", 2.5, "walked to Benny's table", False)); t += 2.5
-    if V.get("benny_auto_card"):
+    if V.get("benny_comes"):   # Benny walks INTO the end of your GROW shot and challenges you there: one tap = the match
+        ev.append((t, "tap", 1.5, "Benny: 'Big now? Prove it!' [ARM WRESTLE]", True)); t += 1.5
+        ev.append((t, "watch", 1.5, "dash to his table", False)); t += 1.5
+    else:
+        ev.append((t, "watch", V.get("benny_story", 5.0), "Benny story shot", False)); t += V.get("benny_story", 5.0)
+        ev.append((t, "watch", 2.5, "walked to Benny's table", False)); t += 2.5
+    if V.get("benny_comes"):
+        pass
+    elif V.get("benny_auto_card"):
         ev.append((t, "watch", 1.5, "Benny's card opens", False)); t += 1.5
     else:
         ev.append((t, "stall", "find", "standing at Benny's table, nothing opens", False))
-    ev.append(("S+0", "watch", 3, "Benny's card", False))
+    if not V.get("benny_comes"): ev.append(("S+0", "watch", 3, "Benny's card", False))
     wrestle_own = bool(V.get("wrestle_tap"))
+    if V.get("benny_comes"):   # the match starts the moment you reach his table
+        ev.append(("S+0", "tap", 8, "arm wrestle Benny", True))
+        ev.append(("S+8", "reward", 4.0, "BEAT BENNY: Beach Gym + 900 coins", True))
+        ev.append(("S+10", "watch", V.get("coral", 8.0), "Coral story + walk to beach", False))
+        c = 10 + V.get("coral", 8.0)
+        ev.append((f"S+{c}", "reward", 2.0, "new gym: the beach", False))
+        ev.append((f"S+{c}", k, 300, "beach reps", own))
+        for j in range(1, 12): ev.append((f"S+{c + j * 12}", "reward", 0.8 * juice, "beach milestone", own))
+        return ev
     ev.append(("S+3", "tap" if wrestle_own else "auto", 8 if wrestle_own else 15, "arm wrestle Benny", wrestle_own))
     ev.append(("S+11" if wrestle_own else "S+18", "reward", 4.0, "BEAT BENNY: Beach Gym + 900 coins", wrestle_own))
     ev.append(("S+13" if wrestle_own else "S+20", "watch", V.get("coral", 8.0), "Coral story + walk to beach", False))
@@ -94,6 +113,17 @@ def kid_run(V, rng, patience, auto_pay):
         kind = None
         for e in ev:
             if e[1] in ("watch", "tap", "auto", "stall") and e[0] <= t < e[0] + e[2]: kind = e[1]
+        if kind == "watch" and V.get("skip") and bored > 0.5 * patience:
+            for i, e in enumerate(ev):   # skip the scene he's in (after its first second); later events move up
+                if e[1] == "watch" and e[0] + 1.0 <= t < e[0] + e[2] and e[3] in SKIPPABLE:
+                    cut = e[0] + e[2] - t
+                    ev = [(x[0] - cut if x[0] > e[0] else x[0], *x[1:]) for x in ev]
+                    ev[i] = (e[0], e[1], t - e[0], e[3], e[4])
+                    rewards = sorted([x for x in ev if x[1] == "reward"], key=lambda x: x[0])
+                    break
+            kind = None
+            for e in ev:
+                if e[1] in ("watch", "tap", "auto", "stall") and e[0] <= t < e[0] + e[2]: kind = e[1]
         if kind == "tap" and not knows:
             if learned_at is None: learned_at = t + min(hint, rng.uniform(2, 15))
             if t < learned_at: kind = "stall"
@@ -134,6 +164,9 @@ VERS = [
     ("G  + YOU tap GROW, 4 s transform; Benny story 4 s (3-word caption); Coral 4 s; all skippable after 1 s", dict(PHASE2B, own=True, rep_s=0.7, hint=3, juice=1.8, choice=True, move=2.0, walk=2.0, grow=4, grow_tap=True, benny_story=4, coral=4)),
     ("H  + Benny: YOU tap to win (winnable at 2 taps/s; Benny tires if you're slow)", dict(PHASE2B, own=True, rep_s=0.7, hint=3, juice=1.8, choice=True, move=2.0, walk=2.0, grow=4, grow_tap=True, benny_story=4, coral=4, wrestle_tap=True)),
     ("I  + intro 8 s -> 5 s, one shot: you, the gym, BENNY's taunt (skippable after 1 s)", dict(PHASE2B, own=True, rep_s=0.7, hint=3, juice=1.8, choice=True, move=2.0, walk=2.0, grow=4, grow_tap=True, benny_story=4, coral=4, wrestle_tap=True, intro=5)),
+    ("J  + GO TRAIN stretch paid in steps (bar 50/75/90% coins, a new machine each GO)", dict(PHASE2B, own=True, rep_s=0.7, hint=3, juice=1.8, choice=True, move=2.0, walk=2.0, grow=4, grow_tap=True, benny_story=4, coral=4, wrestle_tap=True, intro=5, spurt_steps=True)),
+    ("K  + Benny walks into your GROW shot and challenges you (no story shot, no walk, no card read)", dict(PHASE2B, own=True, rep_s=0.7, hint=3, juice=1.8, choice=True, move=2.0, walk=2.0, grow=4, grow_tap=True, benny_story=4, coral=4, wrestle_tap=True, intro=5, spurt_steps=True, benny_comes=True)),
+    ("L  + the skip (tap after 1 s) modelled: a bored kid taps through a scene", dict(PHASE2B, own=True, rep_s=0.7, hint=3, juice=1.8, choice=True, move=2.0, walk=2.0, grow=4, grow_tap=True, benny_story=4, coral=4, wrestle_tap=True, intro=5, spurt_steps=True, benny_comes=True, skip=True)),
 ]
 
 if __name__ == "__main__":
@@ -146,7 +179,7 @@ if __name__ == "__main__":
         a, _ = run(VERS[0][1], auto_pay=ap); b, _ = run(VERS[1][1], auto_pay=ap); z, _ = run(VERS[-1][1], auto_pay=ap)
         print(f"  AUTO_PAY {ap:.2f}: live {a[180]:3.0f}/{a[300]:3.0f}%   Phase 2b only {b[180]:3.0f}/{b[300]:3.0f}%   new tutorial {z[180]:3.0f}/{z[300]:3.0f}%")
     print("sensitivity: patience median (new tutorial vs live), 3 min / 5 min")
-    for med in (7, 11, 16):
+    for med in (5, 7, 11, 16):
         a, _ = run(VERS[0][1], med=med); z, _ = run(VERS[-1][1], med=med)
         print(f"  patience {med:2d} s: live {a[180]:3.0f}/{a[300]:3.0f}%   new {z[180]:3.0f}/{z[300]:3.0f}%")
     print("check: kids who need the hint (30% don't tap at first) - D without the hint:")
