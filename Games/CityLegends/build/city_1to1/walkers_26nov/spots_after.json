@@ -28,9 +28,9 @@
 "median_segments": 0
 },
 "P6": {
-"paths": 598,
-"points": 7192,
-"segments": 6594,
+"paths": 599,
+"points": 7204,
+"segments": 6605,
 "bad_points": 0,
 "bad_segments": 0,
 "bad_paths": 0,
@@ -92,8 +92,8 @@
 },
 "P7": {
 "paths": 318,
-"points": 4287,
-"segments": 3969,
+"points": 4286,
+"segments": 3968,
 "bad_points": 0,
 "bad_segments": 0,
 "bad_paths": 0,
@@ -109,9 +109,9 @@
 "median_segments": 0
 },
 "out": {
-"paths": 8,
-"points": 190,
-"segments": 182,
+"paths": 7,
+"points": 170,
+"segments": 163,
 "bad_points": 0,
 "bad_segments": 0,
 "bad_paths": 0,
