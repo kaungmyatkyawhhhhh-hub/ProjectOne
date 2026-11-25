@@ -33,3 +33,11 @@ Nothing uploaded, nothing published, place not saved. Waiting for the owner's pi
 ## Next (after the owner picks)
 - Matching 16:9 thumbnails (search shows thumbnails): same set, wider camera, the hero left/right third, the logo in the free side.
 - Upload: Creator Hub > Places > Icon / Thumbnails (owner).
+
+## Update 06:45: owner "why they look so bad" -> "we need some chatgpt help too"
+Why the pure Blender renders looked bad (Claude's own diagnosis): background as bright as the body (2% near-black vs Power Lifters 29%), raw in-game meshes (lumps, abs/shorts seam), flat one-tone skin, a crude hand-drawn face, a toy-like plate, an empty gym.
+**Fix that worked: hybrid.** Our Blender render (A2 raw, no logo) attached to ChatGPT as the LAYOUT, + bacon_real_v1.png (head) + Power Lifters (quality only). Prompt: "RE-RENDER image 1 ... KEEP its exact layout ... UPGRADE ONLY THE FINISH". 1 follow-up in the same chat fixed the hair (solid Bacon Hair, not spiky), skin (bronze, less neon), smirk, and over-sharpening.
+- Result: `GYMARC_ICON_C_gpt_finish.png` / `_512.png` (logo v10 bottom-left in code). Raw: `gymarc_icon_gpt_repaint_v1/v2.png`. Board: `gymarc_icon_gpt_board.jpg`.
+- 64 px: mean 0.347, 11% near-black (Power Lifters 0.337 / 29%).
+- ChatGPT chat: "Re-render Roblox Icon".
+- Lesson: our render gives the real character, pose and layout; ChatGPT gives the finish. Neither alone was good enough.
