@@ -550,6 +550,20 @@ local function nearWire(p: Vector3, r: number): boolean
 	end
 	return false
 end
+-- any of my wires passing through a pole's column (flat distance, the pole's height)
+local function wireInColumn(base: Vector3, r: number): boolean
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			for _, e in wireReg[(math.floor(base.X / 32) + dx) .. "," .. (math.floor(base.Z / 32) + dz)] or {} do
+				local q = e[1]
+				if q.Y > base.Y and q.Y < base.Y + POLE_H + 1.5 and Vector3.new(q.X - base.X, 0, q.Z - base.Z).Magnitude < r then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
 local function nearCross(p: Vector3, r: number): boolean
 	for dx = -1, 1 do
 		for dz = -1, 1 do
@@ -633,7 +647,7 @@ local function poleClear(sets, base: Vector3, lampDir: Vector3?): boolean
 			return false
 		end
 	end
-	if nearPole(base + Vector3.new(0, 1, 0), 6) then
+	if nearPole(base + Vector3.new(0, 1, 0), 6) or wireInColumn(base, W / 2 + 0.6) then
 		return false
 	end
 	-- the top arm (5 long along the road, either way round): its ends
@@ -744,7 +758,7 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 			return nil
 		end
 		-- (Play, 25 Nov: a top wire ran through the next road's pole) my own poles, away from this wire's two ends
-		if (q - a).Magnitude > 3.5 and (q - b).Magnitude > 3.5 and nearPole(q, W / 2 + width / 2 + 0.25) then
+		if (q - a).Magnitude > 1 and (q - b).Magnitude > 1 and nearPole(q, W / 2 + width / 2 + 0.25) then
 			return nil
 		end
 	end
@@ -789,9 +803,17 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 	beam.Segments = 8
 	beam.FaceCamera = true
 	beam.Parent = holder
-	local owner = holder:GetAttribute("Chunk")
-	for _, q in pts do
-		regAdd(wireReg, q, owner or "")
+	-- registered densely (a stud apart), so a pole placed later can find it
+	local owner = holder:GetAttribute("Chunk") or ""
+	local prev = a
+	local all = table.clone(pts)
+	table.insert(all, b)
+	for _, q in all do
+		local n = math.max(1, math.ceil((q - prev).Magnitude))
+		for i = 1, n do
+			regAdd(wireReg, prev:Lerp(q, i / n), owner)
+		end
+		prev = q
 	end
 	return pts
 end
@@ -1180,9 +1202,11 @@ local function buildBooth(m: Instance, sets, gate: Vector3): boolean
 			end
 			if ok then
 				part(m, Vector3.new(5, 7, 5), cf * CFrame.new(0, 3.5, 0), BOOTH_WALL, Enum.Material.SmoothPlastic)
-				-- window (front) and door (side): thin sheets standing on the walls
+				-- windows on three sides and a door at the back: thin sheets standing on the walls
 				part(m, Vector3.new(3.6, 2.2, 0.1), cf * CFrame.new(0, 4.6, -2.55), LENS, Enum.Material.Glass)
-				part(m, Vector3.new(0.1, 5.6, 2.2), cf * CFrame.new(2.55, 2.8, 0.6), Color3.fromRGB(96, 70, 52), Enum.Material.Wood)
+				part(m, Vector3.new(0.1, 2.2, 3.4), cf * CFrame.new(2.55, 4.6, 0), LENS, Enum.Material.Glass)
+				part(m, Vector3.new(0.1, 2.2, 3.4), cf * CFrame.new(-2.55, 4.6, 0), LENS, Enum.Material.Glass)
+				part(m, Vector3.new(2.2, 5.6, 0.1), cf * CFrame.new(0, 2.8, 2.55), Color3.fromRGB(96, 70, 52), Enum.Material.Wood)
 				-- the roof: red and white stripes side by side, overhanging the walls
 				for i = 0, 3 do
 					part(m, Vector3.new(1.6, 0.4, 6.4), cf * CFrame.new(-2.4 + i * 1.6, 7.2, 0), if i % 2 == 0 then ROOF_RED else WHITE, Enum.Material.SmoothPlastic)
