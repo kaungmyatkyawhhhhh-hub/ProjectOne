@@ -32,11 +32,34 @@ Pictures:
 - P11 district v1959; road export saved; first swap v1994; after the re-swap a Team Create drop ("Lost connection") closed the place at 20:35 UTC. After a relaunch the work was there except the map art sync and barrier removal (redone). Saved 20:47 UTC, v2005 (before Play), v2007 (after Play).
 - The 19:09 UTC save failed with "PublishService AssetUpload failed" (Roblox's upload side, the same minutes 4 road uploads failed); it worked 10 minutes later.
 
-## P12 (Thingangyun / South Okkalapa, east of P11): in, but paused
-- **District:** 10,456 buildings (shells 13,426 parts, roof parts 8,346), 34 night window cells, terrain, grass, 2,716 far trees and the Shwe Oat Gu pagoda on the ground. Saved v1985.
-- **Roads:** the J37 road build in 49 mesh cells (437 meshes) with 19,204 collision boxes; the P11 / P10 / P8 edge column rebuilt whole. 0 failed junction mouths. 0 duplicate boxes or meshes, 0 tilted boxes. Terrain over the roads cleared, 1 far tree on a road removed. Saved v2029.
-- **Paused by the lead** (a road-builder fix for slivers, grass and median pieces on the road, median stubs and markings is under way): P12 will be built again with the fixed builder. Not done yet: street props on the roads, the grass verge, NPC lanes (traffic does not drive in P12 yet), the minimap (tiles uploaded, not switched on in the game), flyover feet check, Play test, pictures.
+## P12 (Thingangyun / South Okkalapa, east of P11): done 25 Nov, saved v2109
+- **District:** 10,456 buildings (shells 13,426 parts, roof parts 8,346), 34 night window cells, terrain, grass, 2,716 far trees and the Shwe Oat Gu pagoda on the ground.
+- **Roads:** first swapped on 25 Nov night, then paused by the lead for the road-bug fixes. Re-baked on 25 Nov with the new bake (roads cut exactly at district edges, small holes filled, the deck rules) and fresh markings (double yellow centre lines, lane dashes in step). 49 mesh cells, 429 meshes, 19,206 collision boxes; the P11 / P10 / P8 edge column rebuilt whole. 0 duplicate boxes or meshes, 0 tilted boxes.
+- **Clean-up:** no terrain over the roads, no trees on them, 6 street props on the roads removed, the grass verge raised and trimmed.
+- **Flyover feet:** Waizayandar (two decks), Kamarkyi Bridge, Road Flyover #4 and #5: all 9 feet flush.
+- **Road-bug detector on the 49 P12 cells (first bake -> re-bake):**
+
+| Kind | Before | After |
+|---|---|---|
+| Sawtooth spikes into the grass | 24 | 4 |
+| Bare gaps in the road | 71 | 22 |
+| Loose kerb pieces on the road | 31 | 4 |
+| Median stubs | 60 | 60 |
+| Median in a junction | 2 | 2 |
+| Lone lane dashes | 113 | 111 |
+| Yellow paint near a junction | 8 | 202 (see below) |
+| Grass on the road, crossing lines, low ramp walls | 0 | 0 |
+
+  The yellow count went up because the new markings draw the owner's double yellow centre line, and that line runs on past side-road mouths (the old paint had a white centre line). Checked on a top view: it is the centre line, not paint inside the junction.
+- **Traffic:** NPC lanes now cover all of P1 to P12: 1,469 lanes, 3,465 links, 0 dead ends; all 30 lane modules load. 39 of 46 NPC cars were driving in P12 during the test.
+- **Minimap:** P12 in colour (22 tiles, all approved).
+- **Play test (test save):** Road Flyover #5 up and down, the Kamarkyi Bridge flyover, and two ground roads across the P11 and P10 edges. No steps, no script errors. Store put back to `CityLegends_v1` and saved v2109. Studio would not start a second Play for the Server check, so the store was read in Edit.
+
+Pictures:
+- ![[2026-11-25 rebuild P12 - Road Flyover 5 ramp foot (Play) - after.jpg]]
+- ![[2026-11-25 rebuild P12 - Than Thu Mar Road at the P10 seam (Play) - after.jpg]]
 
 ## What's left
-- P12: rebuild its roads with the fixed builder, then the steps above.
-- The old place-wide issue: every cell baked before 24 Nov still has the small tilt from the old page format (joins fix note).
+- P11 still has the bake from before the road-bug fixes, except the cells the road-bug sweep re-baked. A re-bake with the new bake would tidy its seams like P12's.
+- In P12, kinds the bake can't fix: 60 median stubs, 111 lone dashes and 4 spikes at mouth notches (builder / data work in the road-bug note).
+- Road Flyover #4 also lies in P8's cell 29x23 (laptop bake). It is the same deck, so it was left alone.
