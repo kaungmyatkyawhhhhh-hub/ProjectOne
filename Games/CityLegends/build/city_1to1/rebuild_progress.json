@@ -797,5 +797,29 @@
   "data": "src/shared/YangonRoadsideData.lua (tools/yangon/city/roadside_data.py)",
   "saved_version": 2066,
   "playtest": "PASS 25 Nov: test store; overlap audit 0 hits at 2 spots; store back to v1, checked on the Server"
+ },
+ "walkers_26nov": {
+  "owner": "people are walking on the road near myanmar plaza",
+  "cause": "src/shared/YangonStreetLife*.lua made 17 Nov 01:05 from the P1-P3 roads before J18-J37 and the P1-P12 rebuilds; never re-run. Main-road paths only for P1-P3; P4-P12 had almost none.",
+  "fix": "streetlife_1to1.py on the whole network roads05_P1..P12 + walkers_check.Clipper: each point on a place P box (its top = height), no walker band (lat 0.3..2.4) on an R/D/M box within 4 studs of height. Box dumps from Studio in walkers_26nov/roadboxes_place.txt (R/D/M) + paveboxes_place.txt (P), 15 chars a box.",
+  "counts_before": {
+   "paths": 1026,
+   "segments": 19292,
+   "on_carriageway_segments": 1780,
+   "on_carriageway_points": 2674,
+   "off_pavement_points": 3084,
+   "near_myanmar_plaza_600": 37
+  },
+  "counts_after": {
+   "paths": 4583,
+   "segments": 53441,
+   "on_carriageway_segments": 0,
+   "off_pavement_points": 0,
+   "districts": "P1-P12 all have walkers"
+  },
+  "modules": "YangonStreetLife (more = 2, 3, 4) 185k/185k/185k/96k; pack imports/sync/walkers_26nov.rbxmx (checksums 675702372 842424232 316532736 1672697730)",
+  "studio": "pending: lock held by ROAD BUG SWEEP agent",
+  "rerun": "after any road swap: re-dump boxes from Studio, YANGON_SCALE=1to1 python streetlife_1to1.py P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12, python walkers_check.py must print 0",
+  "not_done": "street (non-main road) pavements have no walkers; no road crossings (walkers turn back at junction mouths); no parked cars / standing spots"
  }
 }
