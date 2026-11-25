@@ -123,10 +123,10 @@ tags: [gymarc, christmas, advent-calendar, build-brief, claude-code]
 Source: [[2026-11-25 GYM ARC - Kid sims on live v1914 (debate, impatient, overstimulated, quality nerd)]]. Each fix is a config value or a small change; grep for the names, don't rebuild systems.
 1. **Benny never stalls** (the biggest bounce cause: kids stood 40-120 s at his table with nothing open). When the BeatBenny tutorial step walks the player to his table, open Benny's card by itself after the walk (`BennyAutoOpenDelay = 0.6` s), swing the camera to his face (`BennyCamFocus = true`), keep the band line ON (no 3-of-12 s blink) and cut the card text to ≤ 15 words. Keep the E prompt as a backup.
 2. **GROW right when READY:** when the Growth Spurt bar is full, start the transform after `GrowReadyGap = 1.5` s (was ~6 s of waiting on the READY card).
-3. **Intro cutscene 18 s → 8 s** (`IntroCutsceneLength = 8`; keep the first big shot and the title, cut the captions to ≤ 8 words).
+3. **Intro cutscene 18 s → 5 s** (26 Nov: see Phase 2d item 9; one shot, skippable after 1 s).
 4. **Calm HUD before Growth Spurt 2:** no DEAL / FREE 1,000 / PLUS +20% / INVITE +10% tiles and no red "!" / NEW badges until the player has done Growth Spurt 2 (`CalmHudUntilSpurt = 2`). The INVITE card only after Growth Spurt 2 and never while on a machine.
 5. **One queue per screen strip:** the top strip (tutorial band, notifications, NEW PERSONAL RECORD) shows one line at a time; the next waits; PERSONAL RECORD and notifications become a side toast during the tutorial. KEY tutorial lines stay at least `words / 1.5 + 0.5` s. While a centre card is open (Benny, GROW READY, a reward), hide the side cards and the top strip.
-6. **Benny story shot 5 s → 7.5 s** and its caption 9 → 5 words (e.g. "BENNY: You? Beat ME? Ha!"); slow readers missed it.
+6. **Benny story shot 4 s with a 3-word caption** ("You? Beat ME?"; 26 Nov, replaces 7.5 s / 5 words: 3 words fit the slowest readers in 4 s).
 6b. **Every tutorial line leads with a big icon + a 3D arrow / glow on the target** (dumbbell icon + arrow to the bench, leg icon + arrow to the leg machine, Benny's face + arrow to his table). Words become optional: half the players are non-English and the slowest 7-year-olds read ~1 word/s. Re-run (26 Nov): KEY messages missed by 7-year-olds 28% → 0%.
 7. **The FREE GIFT (Phase 2) goes through the same queue:** it glows AFTER the intro and the first tutorial line, never on top of them.
 8. **Cheap-looking spots (quality-nerd kid):**
@@ -138,6 +138,21 @@ Source: [[2026-11-25 GYM ARC - Kid sims on live v1914 (debate, impatient, overst
    - 3 plate/rack variants (colour + wear) so the same prop doesn't repeat in one view.
 - **Tests (add to the checklist):** every tutorial line has an icon + arrow; a NEW player reaches Benny's card with no key press; GROW starts ≤ 2 s after READY; no DEAL/INVITE/badge before Growth Spurt 2; never two lines on the top strip at once; phone screenshots of the plaza, beach, ProGym show none of the 5 spots.
 - Expected (model): stay past 3 min ~54% → ~96%; overload 370 s → 0 s per 10 min; cheap tells 8.7 → 0.4 per 10 min.
+
+## Phase 2d: the tutorial plays itself → YOUR taps (owner 26 Nov: "the tutorial is boring", "the intro cutscene and cutscenes too")
+Source: [[2026-11-26 GYM ARC - Tutorial and cutscene redesign (your taps, short scenes)]]. Keep every autoGo (walking was dead time) and every saved step number. Only the taps and the scenes change. Grep for the names; don't rebuild the tutorial.
+1. `TutorialAutoReps = false`, `TutorialAutoPump = false`: in MachineClient's tutorial loop (the `UIBus.TutorialRunning()` branch) stop the automatic taps/reps. The PUMP bar fills from the player's own reps (`TutorialPumpPerRep = 0.25`) and pumps itself when full (still no manual pump lesson: owner, 3 Nov).
+2. `TapHintDelay = 3`: no tap for 3 s on a tutorial machine → the REP button pulses + an animated hand taps it (once per step; not under the joystick / jump button).
+3. Tutorial rep juice: every 2nd rep the trained muscle's pump flash, "+EXP" pops rising from the muscle, combo "x5!" / "x10!", the clank pitch +2% per rep in a set.
+4. **PICK YOUR NEXT MUSCLE** after StopBench: the Squat Rack, Crunch Bench and Pull-Up Bar glow with big icons (leg / abs / back) + three big buttons. The pick = that step's autoGo. The other two glow until done, any order (`ChoiceGroup = { "GoSquat", "GoCrunch", "GoPullUp" }`; step IDs stay, the client picks which one runs next).
+5. `AutoGoDash = true`, `AutoGoSeconds = 2`: the autoGo move is a 2 s dash with speed lines + a whoosh (was 3-4.5 s).
+6. GROW is the player's tap: the READY card's GROW button pulses (no auto press); `GrowTransformSeconds = 4`; it ends on the player flexing + the next tease.
+7. Story shots: Benny 4 s (3-word caption), Coral 4 s (≤ 3 words). `CutsceneSkipAfter = 1` for EVERY cutscene, the first view included (tap anywhere; skipping still gives everything). NPC faces in frame (Phase 2b).
+8. Benny match, no auto push: winnable at 2 taps/s; if the player taps < 1/s for 3 s, show "BENNY IS TIRED!" and weaken his push so every kid wins by tapping; the TAP button pulses with the hand after 2 s of no tap.
+9. `IntroCutsceneLength = 5`: one shot (wide gym → push-in on YOU → Benny's 3-word taunt on screen → control). Skippable after 1 s.
+10. `AutoTrainAfter = 5`: GO TRAIN (until Growth Spurt 1) presses itself only after 5 s with no press.
+- Tests: a new player who doesn't touch the screen gets the hand within 3 s and the tutorial does NOT move on by itself; tapping REP fills the pump; the muscle pick works in any order and saves; every cutscene skips after 1 s and still pays; Benny can be beaten at 2 taps/s, and at 0.8 taps/s after "BENNY IS TIRED!"; intro ≤ 5 s; phone screenshots of the hand and the pick screen.
+- Expected (model): stay past 3 min ~49% (live) → ~89% with Phase 2b → ~96% with 2b + 2d. If Experiments are set up, A/B auto vs taps on the funnel.
 
 ## Phase 2c: crowd levers (so the game tile shows 1,000+ players; from the CCU growth model, 26 Nov)
 Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobody plays it, it's dead"). These raise how many players come back and stay. Build the cheap ones with Phase 2-5.
@@ -197,7 +212,8 @@ Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobod
 - [ ] Christmas Alters: buy, wear, unwear, rejoin; other players see the skin.
 - [ ] Gift drop: lands on the ground, the first tap pays, nearby players get their share, despawns.
 
-**First 5 minutes (Phase 2b)**
+**First 5 minutes (Phase 2b + 2d)**
+- [ ] No auto reps/pump in the tutorial; hand after 3 s; muscle pick any order; every cutscene skips after 1 s; Benny won by tapping; intro ≤ 5 s.
 - [ ] New player: Benny's card opens by itself at his table (no E press); camera shows his face.
 - [ ] GROW starts ≤ 2 s after READY; intro ≤ 8 s.
 - [ ] No DEAL / INVITE / red badge before Growth Spurt 2; never two lines on the top strip at once.

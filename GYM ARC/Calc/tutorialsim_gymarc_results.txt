@@ -1,0 +1,21 @@
+version (cumulative)                                                                               15s   30s   60s    2m    3m    5m  dead
+A  live v1914 (plays itself, 18 s intro)                                                           97%   79%   79%   70%   49%   49%    6 s
+B  Phase 2b only (8 s intro, Benny card opens, GROW on READY)                                      99%   99%   99%   94%   89%   89%    2 s
+C  + YOUR taps lift: no auto reps / auto pump in the tutorial (pump fills from your reps)          99%   99%   99%   88%   88%   88%    2 s
+D  + pulsing REP + hand after 3 s of no tap                                                        99%   99%   99%   88%   88%   88%    2 s
+E  + juice: every 2nd rep the muscle visibly swells, +EXP pops, combo x5                           99%   99%   99%   90%   90%   90%    2 s
+F  + after the bench: PICK your next muscle (3 glowing machines), dash 2 s                         99%   99%   99%   88%   88%   88%    2 s
+G  + YOU tap GROW, 4 s transform; Benny story 4 s (3-word caption); Coral 4 s; all skippable after 1 s   99%   99%   99%   95%   95%   95%    2 s
+H  + Benny: YOU tap to win (winnable at 2 taps/s; Benny tires if you're slow)                      99%   99%   99%   96%   96%   96%    2 s
+I  + intro 8 s -> 5 s, one shot: you, the gym, BENNY's taunt (skippable after 1 s)                100%  100%  100%   96%   96%   96%    2 s
+
+sensitivity: how much does a reward that happened BY ITSELF count (AUTO_PAY)?  (3 min / 5 min)
+  AUTO_PAY 0.35: live  35/ 35%   Phase 2b only  87/ 87%   new tutorial  96/ 96%
+  AUTO_PAY 0.65: live  49/ 49%   Phase 2b only  89/ 89%   new tutorial  96/ 96%
+  AUTO_PAY 1.00: live  50/ 50%   Phase 2b only  89/ 89%   new tutorial  96/ 96%
+sensitivity: patience median (new tutorial vs live), 3 min / 5 min
+  patience  7 s: live  20/ 20%   new  81/ 81%
+  patience 11 s: live  49/ 49%   new  96/ 96%
+  patience 16 s: live  70/ 70%   new  99/ 99%
+check: kids who need the hint (30% don't tap at first) - D without the hint:
+  C-without-hint:   99%   99%   99%   88%   88%   88%
