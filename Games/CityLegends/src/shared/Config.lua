@@ -3155,7 +3155,7 @@ Config.Fuel = {
 		{ id = "fuel_corniche", name = "Riviera Fuel Corniche", pumps = { Vector3.new(14337.4, 448.6, -1681.8), Vector3.new(14351.3, 448.6, -1680.2), Vector3.new(14335.5, 448.6, -1664.9), Vector3.new(14349.4, 448.6, -1663.3) }, chargers = { Vector3.new(14376.8, 448.6, -1678.3), Vector3.new(14375.7, 448.6, -1669.3), Vector3.new(14374.7, 448.6, -1660.4) }, arrive = CFrame.new(14336.4, 451.2, -1673.3, -0.1130, 0.0000, -0.9936, 0.0000, 1.0000, 0.0000, 0.9936, 0.0000, -0.1130) },
 		-- Yangon (build step 9, 2026-11-13): on New Road by Optima Werkz (tools/yangon/YangonSites.luau S.fuel)
 		-- (1:1, 2026-11-17) the real Myawady station on Kabar Aye Pagoda Road by the flyover (places_1to1.py, Data_P1P): its 8 pumps
-		{ id = "fuel_yangon", name = "Kabar Aye Fuel", pumps = { Vector3.new(34606.32, 62.91, 29147.38), Vector3.new(34603.18, 62.91, 29140.24), Vector3.new(34621.32, 62.91, 29140.79), Vector3.new(34618.18, 62.91, 29133.65), Vector3.new(34595.54, 62.91, 29122.82), Vector3.new(34592.4, 62.91, 29115.68), Vector3.new(34610.53, 62.91, 29116.24), Vector3.new(34607.4, 62.91, 29109.09) }, chargers = { Vector3.new(34595.54, 62.91, 29122.82), Vector3.new(34592.4, 62.91, 29115.68), Vector3.new(34610.53, 62.91, 29116.24), Vector3.new(34607.4, 62.91, 29109.09) }, arrive = CFrame.lookAt(Vector3.new(34596, 65.2, 29165), Vector3.new(34606.9, 65.2, 29128.2)) },
+		{ id = "fuel_yangon", name = "Kabar Aye Fuel", pumps = { Vector3.new(34609.54, 62.91, 29154.71), Vector3.new(34606.4, 62.91, 29147.57), Vector3.new(34624.54, 62.91, 29148.12), Vector3.new(34621.4, 62.91, 29140.98), Vector3.new(34598.76, 62.91, 29130.15), Vector3.new(34595.62, 62.91, 29123.01), Vector3.new(34613.75, 62.91, 29123.57), Vector3.new(34610.62, 62.91, 29116.42) }, chargers = { Vector3.new(34598.76, 62.91, 29130.15), Vector3.new(34595.62, 62.91, 29123.01), Vector3.new(34613.75, 62.91, 29123.57), Vector3.new(34610.62, 62.91, 29116.42) }, arrive = CFrame.lookAt(Vector3.new(34599.22, 65.2, 29172.33), Vector3.new(34610.12, 65.2, 29135.53)) },
 	} :: { { id: string, name: string, pumps: { Vector3 }, chargers: { Vector3 }, arrive: CFrame } },
 }
 
@@ -3248,7 +3248,7 @@ Config.Jobs = (function()
 				ranks = { "Cadet", "Constable", "Sergeant", "Inspector", "Traffic Chief" } },
 			{ id = "tea", name = "Tea Shop", kind = "post", where = "Shwe Lahpet Tea Shop, Inya Lake", post = v(35553.1, 36.92, 27386.1), paycheck = 200,
 				ranks = { "Table Boy", "Tea Maker", "Head Brewer", "Shop Manager", "Tea House Owner" } },
-			{ id = "fuel", name = "Fuel Station", kind = "post", where = "Kabar Aye Fuel (the flyover station)", post = v(34600, 62.31, 29131), paycheck = 200,
+			{ id = "fuel", name = "Fuel Station", kind = "post", where = "Kabar Aye Fuel (the flyover station)", post = v(34603.22, 62.31, 29138.33), paycheck = 200,
 				ranks = { "Pump Attendant", "Cashier", "Shift Lead", "Station Manager", "Station Owner" } },
 			{ id = "dealer", name = "Dealership Staff", kind = "post", where = "Rider Auto, Kabar Aye", post = v(35424.4, 38.56, 22405.2), paycheck = 200,
 				ranks = { "Car Washer", "Sales Associate", "Senior Sales", "Sales Manager", "General Manager" } },

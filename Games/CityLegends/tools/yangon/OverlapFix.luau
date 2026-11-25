@@ -400,4 +400,61 @@ function F.nightExport(part: MeshPart, boxes)
 	return lines, removed
 end
 
+-- compound walls: a WCOL collision box that goes into a placed thing, with every record whose parts stand inside it
+-- (the wall's visible pieces): all dropped (the wall stops at the placed thing)
+function F.dropWalls(rows)
+	local byTile = {}
+	for _, r in rows do
+		if r.bkind == "kit" and r.bname == "WCOL" then
+			local fname, key = string.match(r.b, "^%a+:([^:]+):(.+)$")
+			local k = fname .. "|" .. key
+			byTile[k] = byTile[k] or { fname = fname, key = key, w = {} }
+			table.insert(byTile[k].w, { cf = r.bcf, size = r.bsize, pos = r.bpos, a = r.a })
+		end
+	end
+	local total = 0
+	for _, e in byTile do
+		local folder = RS.YgnKit:FindFirstChild(e.fname)
+		local v = folder and folder:FindFirstChild(e.key)
+		if v then
+			local recs = F.recordsOf(folder, v)
+			local drop, why = {}, {}
+			for k, r in recs or {} do
+				local holder = Instance.new("Folder")
+				local ps = F.buildRecord(folder, v, r, holder)
+				local all, any, hitW = true, false, nil
+				for _, q in ps do
+					if q:IsA("BasePart") then
+						any = true
+						local inside = false
+						for _, w in e.w do
+							if inBoxXZ(w.cf, w.size, q.Position, 0.6) and math.abs(q.Position.Y - w.pos.Y) <= w.size.Y / 2 + 1 then
+								inside, hitW = true, w
+								break
+							end
+						end
+						if not inside then
+							all = false
+							break
+						end
+					end
+				end
+				holder:Destroy()
+				breathe()
+				if any and all then
+					drop[k] = true
+					why[hitW.a] = true
+				end
+			end
+			local ws = {}
+			for a in why do
+				table.insert(ws, a)
+			end
+			total += F.drop(folder, v, drop, "compound wall into " .. table.concat(ws, "/"))
+		end
+	end
+	log("dropWalls: " .. total)
+	return total
+end
+
 return F
