@@ -588,7 +588,7 @@ def drop_foot_walls(parts, surf, probe=1.5, level=1.2):
     that surface, retains nothing: it is a deck foot's wall standing in a junction or across a carriageway. Dropped (the
     W collision boxes come from these parts, so they go too). Walls of a real ramp keep a level step between the
     deck and the ground road beside it; parapets of an elevated deck have no road surface outside at deck level."""
-    keep, n = [], 0
+    keep, n = [], []
     for p in parts:
         if p[0] != 'B':
             keep.append(p)
@@ -611,7 +611,7 @@ def drop_foot_walls(parts, surf, probe=1.5, level=1.2):
             hs = [h for h in surf.heights(q[0], q[2]) if bottom + 0.3 < h < c[1] + S[1] / 2]
             lev.append(max(hs) if hs else None)
         if lev[0] is not None and lev[1] is not None and abs(lev[0] - lev[1]) < level:
-            n += 1
+            n.append(p)
             continue
         keep.append(p)
     return keep, n
@@ -681,6 +681,9 @@ def bake(tag):
     surf = Surface(road_tris)
     parts, scrap = drop_scraps(parts, data, surf)
     parts, foot_walls = drop_foot_walls(parts, surf)
+    # (their W boxes: a mesh-only swap leaves the old ones in the place; this list finds them by centre)
+    open(os.path.join(D, 'foot_walls.txt'), 'w').write(''.join('%s %.2f %.2f %.2f' % ((cell_of(p[2][0], p[2][2]),) + tuple(p[2])) + chr(10) for p in foot_walls))
+    foot_walls = len(foot_walls)
     print('deck foot walls dropped:', foot_walls)
     # (24 Nov, P1-P3 map bugs) no kerb pieces lying across each other, no crumpled (leaning) kerb pieces
     import roads05_kerb_fix
@@ -768,7 +771,7 @@ def bake(tag):
             k, buf, n = k + 1, [], 0
     if buf:
         open(os.path.join(cdir, 'Collide05_%d.txt' % k), 'w', newline='\n').write('\n'.join(buf))
-    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, deck_join=deck_join, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
+    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, deck_join=deck_join, foot_walls=foot_walls, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
               paint_dropped=dropped, collision_boxes=len(rows), collide_files=k)
     json.dump(st, open(os.path.join(D, 'bake_stats.json'), 'w'), indent=1)
     print(json.dumps(st, indent=1))

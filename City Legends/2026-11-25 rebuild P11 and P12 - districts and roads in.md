@@ -32,5 +32,11 @@ Pictures:
 - P11 district v1959; road export saved; first swap v1994; after the re-swap a Team Create drop ("Lost connection") closed the place at 20:35 UTC. After a relaunch the work was there except the map art sync and barrier removal (redone). Saved 20:47 UTC, v2005 (before Play), v2007 (after Play).
 - The 19:09 UTC save failed with "PublishService AssetUpload failed" (Roblox's upload side, the same minutes 4 road uploads failed); it worked 10 minutes later.
 
-## P12
-(see below)
+## P12 (Thingangyun / South Okkalapa, east of P11): in, but paused
+- **District:** 10,456 buildings (shells 13,426 parts, roof parts 8,346), 34 night window cells, terrain, grass, 2,716 far trees and the Shwe Oat Gu pagoda on the ground. Saved v1985.
+- **Roads:** the J37 road build in 49 mesh cells (437 meshes) with 19,204 collision boxes; the P11 / P10 / P8 edge column rebuilt whole. 0 failed junction mouths. 0 duplicate boxes or meshes, 0 tilted boxes. Terrain over the roads cleared, 1 far tree on a road removed. Saved v2029.
+- **Paused by the lead** (a road-builder fix for slivers, grass and median pieces on the road, median stubs and markings is under way): P12 will be built again with the fixed builder. Not done yet: street props on the roads, the grass verge, NPC lanes (traffic does not drive in P12 yet), the minimap (tiles uploaded, not switched on in the game), flyover feet check, Play test, pictures.
+
+## What's left
+- P12: rebuild its roads with the fixed builder, then the steps above.
+- The old place-wide issue: every cell baked before 24 Nov still has the small tilt from the old page format (joins fix note).
