@@ -42,11 +42,11 @@ local FLAT_K = 3 -- the walkable flat's floor
 local FY = FLAT_K * H
 
 local C = {
-	cream = Color3.fromRGB(205, 200, 170), wing = Color3.fromRGB(178, 176, 152), plinth = Color3.fromRGB(118, 116, 104),
-	mould = Color3.fromRGB(92, 98, 80), band = Color3.fromRGB(214, 210, 186),
+	cream = Color3.fromRGB(218, 206, 160), wing = Color3.fromRGB(190, 182, 148), plinth = Color3.fromRGB(118, 116, 104),
+	mould = Color3.fromRGB(112, 116, 98), band = Color3.fromRGB(214, 210, 186),
 	stair = Color3.fromRGB(220, 210, 165), ceil = Color3.fromRGB(235, 235, 230), step = Color3.fromRGB(125, 125, 120),
 	nose = Color3.fromRGB(226, 222, 205), rail = Color3.fromRGB(30, 30, 30), landing = Color3.fromRGB(172, 168, 158),
-	dirt = Color3.fromRGB(88, 84, 74), wood = Color3.fromRGB(160, 115, 60), green = Color3.fromRGB(105, 148, 122),
+	dirt = Color3.fromRGB(88, 84, 74), wood = Color3.fromRGB(160, 115, 60), green = Color3.fromRGB(78, 118, 98),
 	frost = Color3.fromRGB(182, 192, 186), steel = Color3.fromRGB(45, 48, 50), honey = Color3.fromRGB(190, 130, 50),
 	gateW = Color3.fromRGB(210, 205, 195), gateB = Color3.fromRGB(100, 55, 45), zinc = Color3.fromRGB(200, 200, 195),
 	truss = Color3.fromRGB(130, 55, 40), floorD = Color3.fromRGB(85, 35, 25), floorB = Color3.fromRGB(128, 78, 48),
@@ -202,7 +202,7 @@ local FACES = {
 }
 local WIN_W, WIN_Y0, WIN_Y1 = 4.2, 3.2, 8.0
 local STRIP = { 47.8, 51.8 } -- the green glass stair strip on BC, y 10.6 .. 49.4
-local ARCH = { 43.0, 47.4, 6.6, 2.2 } -- s0, s1, rectangle top, radius
+local ARCH = { 43.0, 47.4, 6.3, 2.2 } -- s0, s1, rectangle top, radius
 
 local function windowAt(f, s0, s1, y0, y1, glass: Color3, hood: boolean, ac: boolean)
 	local n_out = f.c
@@ -245,7 +245,7 @@ local function windowAt(f, s0, s1, y0, y1, glass: Color3, hood: boolean, ac: boo
 		local acs = s1 + 1.6
 		local cf = faceCF(f.axis, acs, y0 + 1.2, n_out, f.sg)
 		P("ACUnit", Vector3.new(2.4, 1.8, 0.9), cf * CFrame.new(0, 0, 0.75), C.white, Mat.SmoothPlastic, true)
-		P("ACFan", Vector3.new(0.05, 1.3, 1.3), cf * CFrame.new(0.3, 0, 1.225) * CFrame.Angles(0, math.rad(90), 0), C.galv, Mat.Metal, true, Enum.PartType.Cylinder)
+		P("ACFan", Vector3.new(0.05, 1.3, 1.3), cf * CFrame.new(0.3, 0, 1.24) * CFrame.Angles(0, math.rad(90), 0), C.galv, Mat.Metal, true, Enum.PartType.Cylinder)
 		P("ACBracket", Vector3.new(2.0, 0.1, 1.2), cf * CFrame.new(0, -0.95, 0.6), C.steel, Mat.Metal, true)
 	end
 	local _ = n_in
@@ -331,14 +331,14 @@ local function arch()
 		local y0 = rTop + r * i / steps
 		local y1 = rTop + r * (i + 1) / steps
 		local hw = math.sqrt(math.max(0, r * r - (y0 + (y1 - y0) / 2 - rTop) ^ 2))
-		box("ArchFill", s0, y0, 28.0, cx - hw, y1, 28.6, C.cream, Mat.Plaster)
-		box("ArchFill", cx + hw, y0, 28.0, s1, y1, 28.6, C.cream, Mat.Plaster)
+		variant(box("ArchFill", s0, y0, 28.0, cx - hw, y1, 28.6, C.cream, Mat.Plaster), "YgnRenderStained")
+		variant(box("ArchFill", cx + hw, y0, 28.0, s1, y1, 28.6, C.cream, Mat.Plaster), "YgnRenderStained")
 	end
 	-- trim: 9 short segments round the arc + two jamb strips, standing 0.15 proud
 	for i = 0, 8 do
 		local a = math.rad(i * 180 / 9 + 10)
-		local px, py = cx + math.cos(a) * (r + 0.2), rTop + math.sin(a) * (r + 0.2)
-		P("ArchTrim", Vector3.new(0.35, 0.62, 0.15), CFrame.new(px, py, 28.675) * CFrame.Angles(0, 0, a), C.band, Mat.Plaster, true)
+		local px, py = cx + math.cos(a) * (r + 0.15), rTop + math.sin(a) * (r + 0.15)
+		P("ArchTrim", Vector3.new(0.32, 0.5, 0.13), CFrame.new(px, py, 28.685) * CFrame.Angles(0, 0, a), C.band, Mat.Plaster, true)
 	end
 	box("ArchTrim", s0 - 0.4, 0, 28.6, s0, rTop, 28.75, C.band, Mat.Plaster, true)
 	box("ArchTrim", s1, 0, 28.6, s1 + 0.4, rTop, 28.75, C.band, Mat.Plaster, true)
@@ -367,7 +367,7 @@ local function groundUnits()
 	local n = 16
 	for i = 0, n do
 		local x = x0 + (x1 - x0) * i / n
-		box("FoldGate", x - 0.06, 0.05, 28.3, x + 0.06, 7.9, 28.38, C.gateB, Mat.Metal, true)
+		box("FoldGate", x - 0.06, 0.05, 28.3, x + 0.06, 7.9, 28.375, C.gateB, Mat.Metal, true)
 	end
 	local bay = (x1 - x0) / n
 	for i = 0, n - 1 do
@@ -377,12 +377,12 @@ local function groundUnits()
 			local len = math.sqrt(bay * bay + 2.4 * 2.4) - 0.2
 			local ang = math.atan2(2.4, bay)
 			P("FoldGateX", Vector3.new(len, 0.07, 0.04), CFrame.new(cx, y, 28.4) * CFrame.Angles(0, 0, ang), C.gateB, Mat.Metal, true)
-			P("FoldGateX", Vector3.new(len, 0.07, 0.04), CFrame.new(cx, y, 28.44) * CFrame.Angles(0, 0, -ang), C.gateB, Mat.Metal, true)
+			P("FoldGateX", Vector3.new(len, 0.07, 0.04), CFrame.new(cx, y, 28.445) * CFrame.Angles(0, 0, -ang), C.gateB, Mat.Metal, true)
 		end
 	end
 	box("FoldGateRail", x0, 7.92, 28.18, x1, 8.0, 28.46, C.gateB, Mat.Metal, true)
 	-- the white notice on it (generic: "no parking")
-	local sign = box("Notice", 31, 5.6, 28.46, 34, 7.0, 28.5, C.white, Mat.SmoothPlastic, true)
+	local sign = box("Notice", 31, 5.6, 28.47, 34, 7.0, 28.51, C.white, Mat.SmoothPlastic, true)
 	if sign then
 		text(sign, Enum.NormalId.Back, "ကားမရပ်ရ", Color3.fromRGB(20, 20, 20), C.white)
 	end
@@ -397,7 +397,7 @@ local function carport()
 	local run = z1 - z0
 	local slope = math.atan2(yW - yF, run)
 	local len = run / math.cos(slope)
-	local roof = P("CarportRoof", Vector3.new(42.4, 0.12, len), CFrame.new(31.2, (yW + yF) / 2 + 0.3, (z0 + z1) / 2) * CFrame.Angles(-slope, 0, 0), C.zinc, Mat.Metal)
+	local roof = P("CarportRoof", Vector3.new(42.4, 0.12, len), CFrame.new(31.2, (yW + yF) / 2 + 0.3, (z0 + z1) / 2) * CFrame.Angles(slope, 0, 0), C.zinc, Mat.Metal)
 	variant(roof, "YgnCorrugatedZinc")
 	roof.Size = Vector3.new(42.2, 0.12, len - 0.05)
 	-- front beam (truss top chord), bottom chord, Z diagonals, posts
@@ -407,7 +407,7 @@ local function carport()
 	local bw = (52.2 - 10.2) / bays
 	for i = 0, bays - 1 do
 		local cx = 10.2 + bw * (i + 0.5)
-		local dy = 0.95
+		local dy = 0.72
 		local l = math.sqrt(bw * bw + dy * dy) - 0.15
 		P("TrussDiag", Vector3.new(l, 0.18, 0.2), CFrame.new(cx, yF - 0.825, 42.45) * CFrame.Angles(0, 0, (if i % 2 == 0 then 1 else -1) * math.atan2(dy, bw)), C.truss, Mat.Metal, true)
 	end
@@ -416,15 +416,15 @@ local function carport()
 	end
 	-- rafters from wall to beam
 	for _, x in { 16, 24.4, 31.2, 38.4, 45.5 } do
-		P("Rafter", Vector3.new(0.18, 0.3, len - 0.6), CFrame.new(x, (yW + yF) / 2 + 0.06, (z0 + z1) / 2 - 0.1) * CFrame.Angles(-slope, 0, 0), C.truss, Mat.Metal, true)
+		P("Rafter", Vector3.new(0.18, 0.3, len - 0.6), CFrame.new(x, (yW + yF) / 2 + 0.06, (z0 + z1) / 2 - 0.1) * CFrame.Angles(slope, 0, 0), C.truss, Mat.Metal, true)
 	end
 	-- scalloped brown edging where the roof meets the wall
 	for x = 11, 51.5, 1.5 do
-		P("Scallop", Vector3.new(0.7, 1.2, 1.2), CFrame.new(x, 10.15, 29.6), Color3.fromRGB(120, 72, 52), Mat.Slate, true, Enum.PartType.Cylinder)
+		P("Scallop", Vector3.new(0.7, 1.2, 1.2), CFrame.new(x, 10.15, 29.6), Color3.fromRGB(150, 88, 62), Mat.SmoothPlastic, true, Enum.PartType.Cylinder)
 	end
 	-- blue PVC drainpipe down beside the arch and across above it
-	box("PipeBlue", 48.9, 0.2, 28.64, 49.25, 9.2, 28.99, Color3.fromRGB(150, 185, 205), Mat.SmoothPlastic, true)
-	box("PipeBlue", 43.0, 9.2, 28.64, 49.25, 9.55, 28.99, Color3.fromRGB(150, 185, 205), Mat.SmoothPlastic, true)
+	box("PipeBlue", 48.9, 0.2, 28.64, 49.25, 8.55, 28.99, Color3.fromRGB(150, 185, 205), Mat.SmoothPlastic, true)
+	box("PipeBlue", 47.9, 8.55, 28.64, 49.25, 8.9, 28.99, Color3.fromRGB(150, 185, 205), Mat.SmoothPlastic, true)
 	-- junction box with wires above the band
 	box("JunctionBox", 40.2, 10.5, 28.6, 41.4, 11.9, 28.95, C.galv, Mat.Metal, true)
 	-- breeze blocks, loose
@@ -485,26 +485,28 @@ local function stairWalls()
 		table.insert(opensW, { DOOR[1], DOOR[2], k * H, k * H + DOOR[3] })
 		table.insert(opensE, { DOOR[1], DOOR[2], k * H, k * H + DOOR[3] })
 	end
-	wall("Z", "StairWall", 11.0, 28.0, 41.8, 42.4, 0, 49.4, opensW, C.stair, Mat.Plaster, false, "YgnRenderStained")
-	wall("Z", "StairWall", 11.0, 28.0, 52.4, 53.0, 0, 49.4, opensE, C.stair, Mat.Plaster, false, "YgnRenderStained")
-	box("StairWall", 42.4, 0, 11.0, 52.4, 49.4, 11.6, C.stair, Mat.Plaster)
+	-- (painted inside walls: SmoothPlastic; the place's Plaster override reads as sand and the stained variant as grey)
+	wall("Z", "StairWall", 11.0, 28.0, 41.8, 42.4, 0, 49.4, opensW, C.stair, Mat.SmoothPlastic, false)
+	wall("Z", "StairWall", 11.0, 28.0, 52.4, 53.0, 0, 49.4, opensE, C.stair, Mat.SmoothPlastic, false)
+	box("StairWall", 42.4, 0, 11.0, 52.4, 49.4, 11.6, C.stair, Mat.SmoothPlastic)
 	box("StairGround", 42.4, -1.9, 11.6, 52.4, 0, 28.0, C.landing, Mat.Concrete)
 	for k = 1, FLOORS - 1 do
-		local l = box("Landing", 42.4, k * H - 0.6, LAND_Z, 52.4, k * H, 28.0, C.landing, Mat.Concrete)
-		variant(l :: Part, "YgnConcreteStained")
+		box("Landing", 42.4, k * H - 0.6, LAND_Z, 52.4, k * H, 28.0, C.landing, Mat.Concrete)
+		box("Soffit", 42.4, k * H - 0.64, LAND_Z, 52.4, k * H - 0.6, 28.0, C.ceil, Mat.SmoothPlastic, true)
 	end
 	for k = 0, FLOORS - 2 do
 		local y = k * H + RISE
-		local l = box("HalfLanding", 42.4, y - 0.6, SZ0, 52.4, y, HALF_Z, C.landing, Mat.Concrete)
-		variant(l :: Part, "YgnConcreteStained")
+		box("HalfLanding", 42.4, y - 0.6, SZ0, 52.4, y, HALF_Z, C.landing, Mat.Concrete)
+		box("Soffit", 42.4, y - 0.64, SZ0, 52.4, y - 0.6, HALF_Z, C.ceil, Mat.SmoothPlastic, true)
 	end
+	-- the facade's inside face in the stair gets the stair paint (a 0.01 sheet; the arch and the glass strip left open)
+	wall("X", "StairFacadePaint", 42.4, 52.4, 27.99, 28.0, 0, 49.4, { { ARCH[1], ARCH[2], 0, ARCH[3] + ARCH[4] }, { STRIP[1], STRIP[2], 10.6, 49.4 } }, C.stair, Mat.SmoothPlastic, true)
 	-- dirt band along the walls of each landing (plates on the wall faces)
 	for k = 0, FLOORS - 1 do
 		local y = k * H
 		box("DirtBand", 52.35, y, LAND_Z, 52.4, y + 0.45, DOOR[1] - 0.1, C.dirt, Mat.Plaster, true)
 		if k > 0 then
-			box("DirtBand", 42.4, y, LAND_Z, 42.45, y + 0.45, DOOR[1] - 0.1, C.dirt, Mat.Plaster, true)
-			box("DirtBand", 42.45, y, 27.95, 47.8, y + 0.45, 28.0, C.dirt, Mat.Plaster, true)
+			box("DirtBand", 42.8, y, 27.95, 47.8, y + 0.45, 27.99, C.dirt, Mat.Plaster, true)
 		end
 		if k < FLOORS - 1 then
 			box("DirtBand", 42.4, y + RISE, 11.6, 52.4, y + RISE + 0.45, 11.65, C.dirt, Mat.Plaster, true)
@@ -582,7 +584,7 @@ local function flight(name, xr, pr, zFrom, zTo, base)
 	local turn = (dir > 0) ~= wedgeRisesPlusZ()
 	w.CFrame = F * CFrame.new((pr[1] + pr[2]) / 2, base + RISE / 2, (zFrom + zTo) / 2) * (if turn then CFrame.Angles(0, math.pi, 0) else CFrame.new())
 	w.Color = C.stair
-	w.Material = Mat.Plaster
+	w.Material = Mat.SmoothPlastic
 	w.Anchored = true
 	w.Parent = parent
 	count += 1
@@ -593,7 +595,7 @@ local function flight(name, xr, pr, zFrom, zTo, base)
 	local my = base + RISE / 2
 	local nrm = Vector3.new(0, math.cos(ang), -dir * math.sin(ang)) -- up and back along the flight
 	local c = Vector3.new((pr[1] + pr[2]) / 2, my, mz) + nrm * (cap / 2)
-	P("ParapetCap", Vector3.new(pr[2] - pr[1], cap, L), CFrame.new(c) * CFrame.Angles(dir * ang * -1, 0, 0), C.stair, Mat.Plaster)
+	P("ParapetCap", Vector3.new(pr[2] - pr[1], cap, L), CFrame.new(c) * CFrame.Angles(dir * ang * -1, 0, 0), C.stair, Mat.SmoothPlastic)
 	-- rail posts sit on the cap top
 	local top0 = Vector3.new(0, base, zFrom) + nrm * cap
 	local top1 = Vector3.new(0, base + RISE, zTo) + nrm * cap
@@ -642,7 +644,7 @@ local function stairProps()
 	for _, x in { 42.45, 44.55, 46.7 } do
 		box("StoreGrilleFrame", x, 0, 23.97, x + 0.1, 7.2, 24.0, C.galv, Mat.Metal, true)
 	end
-	box("StoreInfill", 42.4, 7.2, 23.8, 46.8, 8.75, 24.0, C.stair, Mat.Plaster)
+	box("StoreInfill", 42.4, 7.2, 23.8, 46.8, 8.75, 24.0, C.stair, Mat.SmoothPlastic)
 	box("Padlock", 44.4, 3.4, 24.0, 44.7, 3.8, 24.12, Color3.fromRGB(190, 190, 195), Mat.Metal, true)
 	-- junk inside: an old bicycle wheel
 	P("BikeWheel", Vector3.new(0.12, 2.0, 2.0), CFrame.new(44.0, 1.05, 20.5), C.black, Mat.Rubber, true, Enum.PartType.Cylinder)
@@ -668,7 +670,7 @@ local function stairProps()
 	box("BlackPanel", 47.0, RISE, 11.66, 48.6, RISE + 3.2, 12.06, Color3.fromRGB(35, 35, 38), Mat.SmoothPlastic)
 	-- half landing 2: a white woven sack and an orange broom
 	box("Sack", 51.2, H + RISE, 11.66, 52.35, H + RISE + 1.4, 12.6, Color3.fromRGB(225, 222, 210), Mat.Fabric, true)
-	P("Broom", Vector3.new(0.12, 4.6, 0.12), CFrame.new(42.7, H + RISE + 2.35, 12.0) * CFrame.Angles(0.15, 0, 0), Color3.fromRGB(230, 120, 30), Mat.Plastic, true)
+	P("Broom", Vector3.new(0.12, 4.6, 0.12), CFrame.new(42.95, H + RISE + 2.4, 12.4) * CFrame.Angles(0.15, 0, 0), Color3.fromRGB(230, 120, 30), Mat.Plastic, true)
 end
 
 -- a closed flat door with a brown collapsible gate in front (locked flats), on the wall at x (landing side sgn)
@@ -699,15 +701,15 @@ end
 local function ourDoor()
 	local y = FY
 	-- door leaf open 90 degrees inward, standing by the facade wall inside the flat
-	local leaf = box("OurDoor", 41.8 - 3.4, y, 27.68, 41.8, y + DOOR[3] - 0.05, 27.88, C.honey, Mat.Wood)
+	local leaf = box("OurDoor", 41.66 - 3.4, y + 0.05, 27.66, 41.66, y + DOOR[3] - 0.05, 27.86, C.honey, Mat.Wood)
 	if leaf then
 		leaf.Reflectance = 0.06
 	end
 	-- arch panel + two rectangular panels on the leaf's open face (towards the hall, -z)
-	box("DoorPanel", 41.8 - 2.9, y + 4.2, 27.62, 41.8 - 0.5, y + 6.4, 27.68, Color3.fromRGB(176, 118, 44), Mat.Wood, true)
-	box("DoorPanel", 41.8 - 2.9, y + 0.6, 27.62, 41.8 - 1.8, y + 3.8, 27.68, Color3.fromRGB(176, 118, 44), Mat.Wood, true)
-	box("DoorPanel", 41.8 - 1.6, y + 0.6, 27.62, 41.8 - 0.5, y + 3.8, 27.68, Color3.fromRGB(176, 118, 44), Mat.Wood, true)
-	P("Knob", Vector3.new(0.3, 0.3, 0.3), CFrame.new(41.8 - 3.15, y + 3.3, 27.5), Color3.fromRGB(95, 70, 45), Mat.Metal, true, Enum.PartType.Ball)
+	box("DoorPanel", 41.8 - 2.9, y + 4.2, 27.6, 41.8 - 0.5, y + 6.4, 27.66, Color3.fromRGB(176, 118, 44), Mat.Wood, true)
+	box("DoorPanel", 41.8 - 2.9, y + 0.6, 27.6, 41.8 - 1.8, y + 3.8, 27.66, Color3.fromRGB(176, 118, 44), Mat.Wood, true)
+	box("DoorPanel", 41.8 - 1.6, y + 0.6, 27.6, 41.8 - 0.5, y + 3.8, 27.66, Color3.fromRGB(176, 118, 44), Mat.Wood, true)
+	P("Knob", Vector3.new(0.3, 0.3, 0.3), CFrame.new(41.8 - 3.15, y + 3.3, 27.43), Color3.fromRGB(95, 70, 45), Mat.Metal, true, Enum.PartType.Ball)
 	-- raised white step in the opening, white frame round it on the landing side
 	box("Threshold", 41.8, y, DOOR[1], 42.4, y + 0.3, DOOR[2], C.white, Mat.SmoothPlastic)
 	box("DoorFrame", 42.4, y, DOOR[1] - 0.25, 42.47, y + DOOR[3] + 0.25, DOOR[1], C.white, Mat.SmoothPlastic, true)
@@ -724,11 +726,11 @@ local function ourDoor()
 		text(stamp, Enum.NormalId.Right, "ZAYA SUPER", Color3.fromRGB(150, 145, 135))
 	end
 	-- the dried leaf and twig bundle tied at eye height
-	P("TwigBundle", Vector3.new(1.2, 0.4, 0.4), CFrame.new(43.3, y + 5.6, 27.4) * CFrame.Angles(0, 0, math.rad(90)), Color3.fromRGB(110, 85, 60), Mat.Wood, true, Enum.PartType.Cylinder)
+	P("TwigBundle", Vector3.new(1.2, 0.3, 0.3), CFrame.new(43.0, y + 5.6, 26.75) * CFrame.Angles(0, 0, math.rad(90)), Color3.fromRGB(110, 85, 60), Mat.Wood, true, Enum.PartType.Cylinder)
 	local r = Random.new(1106)
 	for i = 0, 6 do
-		local a = i * math.pi * 2 / 7
-		P("DryLeaf", Vector3.new(0.05, 0.55, 0.4), CFrame.new(43.3 + math.cos(a) * 0.42, y + 5.2 + r:NextNumber(0, 0.6), 27.4 + math.sin(a) * 0.32) * CFrame.Angles(0, a, r:NextNumber(-0.5, 0.5)), Color3.fromRGB(125, 95, 65), Mat.Fabric, true)
+		-- dried leaves hung in thin layers (each its own z slice, turned only in its plane)
+		P("DryLeaf", Vector3.new(0.45, 0.6, 0.05), CFrame.new(43.0 + r:NextNumber(-0.25, 0.25), y + 5.3 + r:NextNumber(0, 0.6), 26.95 + i * 0.1) * CFrame.Angles(0, 0, r:NextNumber(-0.8, 0.8)), Color3.fromRGB(125, 95, 65), Mat.Fabric, true)
 	end
 	-- bare LED bulb in a plain wall holder above the gate
 	box("BulbHolder", 42.4, y + 8.0, 25.8, 42.6, y + 8.25, 26.1, C.white, Mat.SmoothPlastic, true)
@@ -744,23 +746,23 @@ local CEIL = 9.4
 
 local function flatShell()
 	-- floor (dark boards; the bedroom lighter), ceiling, flat walls; linings give each room its own paint
-	local f1 = fb("FloorBoards", 0, 19.4, 0.6, 28.0, -0.6, 0, C.floorD, Mat.WoodPlanks)
-	if f1 then
-		f1.Reflectance = 0.04
+	for _, r in { { 0, 9.0, 0.6, 28.0, C.floorD }, { 9.0, 19.4, 0.6, 13.6, C.floorD }, { 9.0, 19.4, 13.6, 28.0, C.floorB } } do
+		local f1 = fb("FloorBoards", r[1], r[2], r[3], r[4], -0.6, 0, r[5], Mat.WoodPlanks)
+		if f1 then
+			f1.Reflectance = 0.04
+		end
 	end
-	-- (the bedroom boards are a separate plate on top: 0.02 thick)
-	fb("FloorBoardsBed", 9.05, 19.35, 13.65, 27.95, 0, 0.02, C.floorB, Mat.WoodPlanks, true)
-	fb("Ceiling", 0, 19.4, 0.6, 28.0, CEIL, CEIL + 0.6, C.ceil, Mat.Plaster)
+	fb("Ceiling", 0, 19.4, 0.6, 28.0, CEIL, CEIL + 0.6, C.ceil, Mat.SmoothPlastic)
 	-- outer partition to the next flat (west) and the stair-side wall below the stair core
-	fb("FlatWall", 19.4, 20.0, 0.6, 28.0, 0, CEIL, C.hall, Mat.Plaster)
-	fb("FlatWall", -0.6, 0, 0.6, 11.0, 0, CEIL, C.hall, Mat.Plaster)
+	fb("FlatWall", 19.4, 20.0, 0.6, 28.0, 0, CEIL, C.hall, Mat.SmoothPlastic)
+	fb("FlatWall", -0.6, 0, 0.6, 11.0, 0, CEIL, C.hall, Mat.SmoothPlastic)
 	-- inner walls
 	local doorK = { 14.0, 17.4 }
-	wall("Z", "W1", 10.4, 19.5, 41.8 - 5.4, 41.8 - 4.8, FY, FY + CEIL, { { doorK[1], doorK[2], FY, FY + 7.0 } }, C.hall, Mat.Plaster)
-	fb("W2", 5.4, 8.4, 18.9, 19.5, 0, CEIL, C.hall, Mat.Plaster)
-	wall("Z", "W3", 13.0, 28.0, 41.8 - 9.0, 41.8 - 8.4, FY, FY + CEIL, { { 20.4, 23.8, FY, FY + 7.0 } }, C.hall, Mat.Plaster)
-	fb("W4", 9.0, 19.4, 13.0, 13.6, 0, CEIL, C.hall, Mat.Plaster)
-	fb("W5", 4.8, 19.4, 9.8, 10.4, 0, CEIL, C.hall, Mat.Plaster)
+	wall("Z", "W1", 10.4, 19.5, 41.8 - 5.4, 41.8 - 4.8, FY, FY + CEIL, { { doorK[1], doorK[2], FY, FY + 7.0 } }, C.hall, Mat.SmoothPlastic)
+	fb("W2", 5.4, 8.4, 18.9, 19.5, 0, CEIL, C.hall, Mat.SmoothPlastic)
+	wall("Z", "W3", 13.0, 28.0, 41.8 - 9.0, 41.8 - 8.4, FY, FY + CEIL, { { 20.4, 23.8, FY, FY + 7.0 } }, C.hall, Mat.SmoothPlastic)
+	fb("W4", 9.0, 19.4, 13.0, 13.6, 0, CEIL, C.hall, Mat.SmoothPlastic)
+	fb("W5", 4.8, 19.4, 9.8, 10.4, 0, CEIL, C.hall, Mat.SmoothPlastic)
 	-- closed kitchen / bath door in W1
 	fb("KDoor", 4.95, 5.25, doorK[1], doorK[2], 0, 7.0, Color3.fromRGB(150, 120, 60), Mat.Wood)
 	P("Knob", Vector3.new(0.28, 0.28, 0.28), CFrame.new(36.99, FY + 3.3, doorK[1] + 0.5), Color3.fromRGB(95, 70, 45), Mat.Metal, true, Enum.PartType.Ball)
@@ -770,10 +772,10 @@ end
 local function lining(name, fx0, fx1, z0, z1, color, opens)
 	local d = 0.05
 	-- walls along fz (at fx0 and fx1): axis Z
-	wall("Z", name, z0, z1, 41.8 - fx0 - d, 41.8 - fx0, FY, FY + CEIL, opens.fx0 or {}, color, Mat.Plaster, true)
-	wall("Z", name, z0, z1, 41.8 - fx1, 41.8 - fx1 + d, FY, FY + CEIL, opens.fx1 or {}, color, Mat.Plaster, true)
-	wall("X", name, 41.8 - fx1 + d, 41.8 - fx0 - d, z0, z0 + d, FY, FY + CEIL, opens.z0 or {}, color, Mat.Plaster, true)
-	wall("X", name, 41.8 - fx1 + d, 41.8 - fx0 - d, z1 - d, z1, FY, FY + CEIL, opens.z1 or {}, color, Mat.Plaster, true)
+	wall("Z", name, z0, z1, 41.8 - fx0 - d, 41.8 - fx0, FY, FY + CEIL, opens.fx0 or {}, color, Mat.SmoothPlastic, true)
+	wall("Z", name, z0, z1, 41.8 - fx1, 41.8 - fx1 + d, FY, FY + CEIL, opens.fx1 or {}, color, Mat.SmoothPlastic, true)
+	wall("X", name, 41.8 - fx1 + d, 41.8 - fx0 - d, z0, z0 + d, FY, FY + CEIL, opens.z0 or {}, color, Mat.SmoothPlastic, true)
+	wall("X", name, 41.8 - fx1 + d, 41.8 - fx0 - d, z1 - d, z1, FY, FY + CEIL, opens.z1 or {}, color, Mat.SmoothPlastic, true)
 end
 
 local function skirting(fx0, fx1, z0, z1, gaps)
@@ -819,7 +821,7 @@ local function rooms()
 	lining("LinB", 9.0, 19.4, 13.6, 28.0, C.mint, { fx0 = { o(20.4, 23.8, 0, 7.0) }, z1 = { bedWin } })
 	skirting(9.0, 19.4, 13.6, 28.0, { fx0 = { skG(20.4, 23.8) } })
 	-- the window wall's blue paint is a second plate over the mint lining (0.02 in front)
-	wall("X", "LinBBlue", 41.8 - 19.4 + 0.05 + 0.08, 41.8 - 9.0 - 0.05 - 0.08, 28.0 - 0.07, 28.0 - 0.05, FY + 0.35, FY + CEIL, { bedWin }, C.blue, Mat.Plaster, true)
+	wall("X", "LinBBlue", 41.8 - 19.4 + 0.05 + 0.08, 41.8 - 9.0 - 0.05 - 0.08, 28.0 - 0.07, 28.0 - 0.05, FY + 0.35, FY + CEIL, { bedWin }, C.blue, Mat.SmoothPlastic, true)
 end
 
 local function windowsInside()
@@ -832,7 +834,7 @@ local function windowsInside()
 	box("Grille", (x0 + x1) / 2 - 0.05, FY + 3.2, 27.8, (x0 + x1) / 2 + 0.05, FY + 8.0, 27.85, Color3.fromRGB(215, 215, 210), Mat.Metal, true)
 	box("CurtainRail", x0 - 1.2, FY + 8.45, 27.6, x1 + 1.2, FY + 8.55, 27.7, Color3.fromRGB(200, 200, 205), Mat.Metal, true)
 	for _, c in { { x0 - 1.1, x0 + 0.9 }, { x1 - 0.9, x1 + 1.1 } } do
-		local cu = box("Curtain", c[1], FY + 2.2, 27.5, c[2], FY + 8.4, 27.58, C.curtain, Mat.Fabric, true)
+		local cu = box("Curtain", c[1], FY + 2.2, 27.5, c[2], FY + 8.4, 27.58, C.curtain, Mat.SmoothPlastic, true)
 		local _ = cu
 	end
 	local ac = box("SplitAC", x0 + 0.2, FY + 8.6, 27.15, x1 - 0.2, FY + 9.35, 27.93, C.white, Mat.SmoothPlastic, true)
@@ -873,19 +875,19 @@ local function furniture()
 	for i = 0, 2 do
 		local z0 = 24.3 + i * 1.2
 		fb("ScreenFrame", 7.9, 8.15, z0, z0 + 1.15, 0, 6.2, C.brown, Mat.Wood)
-		fb("ScreenPaper", 7.85, 7.9, z0 + 0.12, z0 + 1.03, 0.6, 5.9, Color3.fromRGB(200, 180, 140), Mat.Fabric, true)
+		fb("ScreenPaper", 7.85, 7.9, z0 + 0.12, z0 + 1.03, 0.6, 5.9, Color3.fromRGB(200, 180, 140), Mat.SmoothPlastic, true)
 	end
 	fb("DrawerTower", 5.5, 6.9, 19.64, 20.69, 0, 4.2, C.white, Mat.Plastic)
 	for i = 0, 3 do
 		fb("DrawerHandle", 5.9, 6.5, 20.69, 20.75, 0.6 + i * 1.0, 0.75 + i * 1.0, Color3.fromRGB(80, 80, 85), Mat.Plastic, true)
 	end
-	fb("ClothesPile", 5.6, 6.8, 19.69, 20.59, 4.2, 4.6, Color3.fromRGB(120, 140, 170), Mat.Fabric, true)
+	fb("ClothesPile", 5.6, 6.8, 19.69, 20.59, 4.2, 4.6, Color3.fromRGB(120, 140, 170), Mat.SmoothPlastic, true)
 	-- bicycle against the facade wall (two wheels, a frame)
-	for _, fxw in { 3.9, 6.1 } do
+	for _, fxw in { 4.1, 6.3 } do
 		P("BikeWheel", Vector3.new(0.12, 2.2, 2.2), CFrame.new(41.8 - fxw, FY + 1.1, 27.6) * CFrame.Angles(0, math.rad(90), 0), C.black, Mat.Rubber, true, Enum.PartType.Cylinder)
 	end
-	P("BikeFrame", Vector3.new(2.4, 0.14, 0.14), CFrame.new(41.8 - 5.0, FY + 1.9, 27.4) * CFrame.Angles(0, 0, math.rad(8)), C.white, Mat.Metal, true)
-	P("BikeSeat", Vector3.new(0.7, 0.15, 0.3), CFrame.new(41.8 - 5.6, FY + 2.6, 27.4), C.black, Mat.Fabric, true)
+	P("BikeFrame", Vector3.new(2.4, 0.14, 0.14), CFrame.new(41.8 - 5.2, FY + 1.9, 27.4) * CFrame.Angles(0, 0, math.rad(8)), C.white, Mat.Metal, true)
+	P("BikeSeat", Vector3.new(0.7, 0.15, 0.3), CFrame.new(41.8 - 5.8, FY + 2.6, 27.4), C.black, Mat.SmoothPlastic, true)
 	fb("Slippers", 1.0, 1.7, 22.9, 23.2, 0, 0.12, Color3.fromRGB(205, 185, 150), Mat.Rubber, true)
 	fb("Slippers", 1.0, 1.7, 23.3, 23.6, 0, 0.12, Color3.fromRGB(205, 185, 150), Mat.Rubber, true)
 	-- hall ceiling lamp
@@ -905,8 +907,8 @@ local function furniture()
 			books("Book", x + 0.2, x + 0.95, 12.2, 17.8, y + 0.1, 1.35, 30 + i)
 		end
 	end
-	fb("ChairMaroon", 3.4, 4.6, 17.4, 18.6, 1.4, 1.6, Color3.fromRGB(110, 30, 40), Mat.Fabric)
-	fb("ChairMaroonBack", 4.4, 4.6, 17.4, 18.6, 1.6, 3.4, Color3.fromRGB(110, 30, 40), Mat.Fabric)
+	fb("ChairMaroon", 3.4, 4.6, 17.4, 18.6, 1.4, 1.6, Color3.fromRGB(110, 30, 40), Mat.SmoothPlastic)
+	fb("ChairMaroonBack", 4.4, 4.6, 17.4, 18.6, 1.6, 3.4, Color3.fromRGB(110, 30, 40), Mat.SmoothPlastic)
 	for _, p in { { 3.45, 17.45 }, { 4.45, 17.45 }, { 3.45, 18.45 }, { 4.45, 18.45 } } do
 		fb("ChairLeg", p[1], p[1] + 0.1, p[2], p[2] + 0.1, 0, 1.4, Color3.fromRGB(40, 40, 42), Mat.Metal, true)
 	end
@@ -915,15 +917,15 @@ local function furniture()
 		fb("CalendarLine", 4.69, 4.7, 11.1, 12.3, 4.7 + i * 0.3, 4.72 + i * 0.3, Color3.fromRGB(170, 170, 170), Mat.SmoothPlastic, true)
 	end
 	-- long room: red vinyl chair, round white side table, wicker stool, bags, boxes, tall wardrobe, tube light, plain frame
-	fb("RedChairSeat", 3.0, 4.5, 4.6, 6.1, 1.5, 1.8, Color3.fromRGB(175, 45, 40), Mat.Fabric)
-	fb("RedChairBack", 3.0, 4.5, 6.0, 6.25, 1.8, 3.8, Color3.fromRGB(175, 45, 40), Mat.Fabric)
+	fb("RedChairSeat", 3.0, 4.5, 4.6, 6.1, 1.5, 1.8, Color3.fromRGB(175, 45, 40), Mat.SmoothPlastic)
+	fb("RedChairBack", 3.0, 4.5, 6.0, 6.25, 1.8, 3.8, Color3.fromRGB(175, 45, 40), Mat.SmoothPlastic)
 	for _, p in { { 3.05, 4.65 }, { 4.35, 4.65 }, { 3.05, 5.9 }, { 4.35, 5.9 } } do
 		fb("ChairLeg", p[1], p[1] + 0.1, p[2], p[2] + 0.1, 0, 1.5, Color3.fromRGB(200, 200, 205), Mat.Metal, true)
 	end
 	P("SideTable", Vector3.new(0.15, 1.8, 1.8), CFrame.new(41.8 - 6.0, FY + 2.0, 5.3) * CFrame.Angles(0, 0, math.rad(90)), C.white, Mat.Plastic, false, Enum.PartType.Cylinder)
 	fb("SideTableLeg", 5.95, 6.05, 5.25, 5.35, 0, 1.92, C.white, Mat.Plastic, true)
-	P("WickerStool", Vector3.new(1.4, 1.2, 1.2), CFrame.new(41.8 - 7.8, FY + 0.6, 7.6) * CFrame.Angles(0, 0, math.rad(90)), Color3.fromRGB(190, 150, 90), Mat.Fabric, false, Enum.PartType.Cylinder)
-	fb("ShoppingBag", 8.8, 10.0, 8.3, 9.6, 0, 1.6, Color3.fromRGB(200, 170, 120), Mat.Fabric, true)
+	P("WickerStool", Vector3.new(1.4, 1.2, 1.2), CFrame.new(41.8 - 7.8, FY + 0.7, 7.6) * CFrame.Angles(0, 0, math.rad(90)), Color3.fromRGB(190, 150, 90), Mat.Wood, false, Enum.PartType.Cylinder)
+	fb("ShoppingBag", 8.8, 10.0, 8.3, 9.6, 0, 1.6, Color3.fromRGB(200, 170, 120), Mat.SmoothPlastic, true)
 	fb("ShoppingBag", 10.1, 11.0, 8.5, 9.6, 0, 1.3, C.white, Mat.Plastic, true)
 	fb("Box", 12.8, 15.2, 0.75, 2.6, 0, 1.6, Color3.fromRGB(170, 130, 85), Mat.Cardboard)
 	fb("Box", 13.2, 14.9, 0.9, 2.4, 1.6, 2.8, Color3.fromRGB(160, 120, 80), Mat.Cardboard)
@@ -936,22 +938,22 @@ local function furniture()
 	end
 	fb("TubeConduit", 19.25, 19.35, 2.45, 2.55, 7.75, CEIL, C.white, Mat.Plastic, true)
 	local frame = P("PlainFrame", Vector3.new(2.4, 1.8, 0.08), CFrame.new(41.8 - 12.0, FY + 5.6, 9.71) * CFrame.Angles(0, 0, math.rad(3)), Color3.fromRGB(110, 80, 50), Mat.Wood, true)
-	P("FrameMat", Vector3.new(2.0, 1.4, 0.02), CFrame.new(41.8 - 12.0, FY + 5.6, 9.66) * CFrame.Angles(0, 0, math.rad(3)), Color3.fromRGB(205, 195, 170), Mat.Fabric, true)
+	P("FrameMat", Vector3.new(2.0, 1.4, 0.02), CFrame.new(41.8 - 12.0, FY + 5.6, 9.66) * CFrame.Angles(0, 0, math.rad(3)), Color3.fromRGB(205, 195, 170), Mat.SmoothPlastic, true)
 	local _ = frame
 	-- bedroom
 	-- bed against the far wall (fx 19.4), honey-yellow frame
 	fb("BedBase", 13.6, 19.0, 14.0, 17.0, 0, 1.4, C.yellowWood, Mat.Wood)
 	fb("Headboard", 19.0, 19.25, 13.9, 17.1, 0, 3.6, C.yellowWood, Mat.Wood)
-	fb("Mattress", 13.7, 19.0, 14.05, 16.95, 1.4, 2.2, Color3.fromRGB(240, 236, 232), Mat.Fabric)
+	fb("Mattress", 13.7, 19.0, 14.05, 16.95, 1.4, 2.2, Color3.fromRGB(240, 236, 232), Mat.SmoothPlastic)
 	local r = Random.new(928)
 	for i = 0, 7 do
 		local fx = r:NextNumber(14.0, 18.4)
 		local z = r:NextNumber(14.2, 16.6)
-		fb("SheetFlower", fx, fx + 0.25, z, z + 0.25, 2.2, 2.21, Color3.fromRGB(230, 150, 170), Mat.Fabric, true)
+		fb("SheetFlower", fx, fx + 0.25, z, z + 0.25, 2.2, 2.21, Color3.fromRGB(230, 150, 170), Mat.SmoothPlastic, true)
 	end
-	fb("Pillow", 17.6, 18.9, 14.4, 16.6, 2.2, 2.7, Color3.fromRGB(235, 228, 205), Mat.Fabric, true)
-	fb("Blanket", 14.2, 16.4, 14.3, 16.2, 2.21, 2.75, Color3.fromRGB(120, 130, 175), Mat.Fabric, true)
-	fb("Blanket", 15.0, 16.0, 14.8, 15.9, 2.75, 3.05, Color3.fromRGB(110, 120, 168), Mat.Fabric, true)
+	fb("Pillow", 17.6, 18.9, 14.4, 16.6, 2.2, 2.7, Color3.fromRGB(235, 228, 205), Mat.SmoothPlastic, true)
+	fb("Blanket", 14.2, 16.4, 14.3, 16.2, 2.21, 2.75, Color3.fromRGB(120, 130, 175), Mat.SmoothPlastic, true)
+	fb("Blanket", 15.0, 16.0, 14.8, 15.9, 2.75, 3.05, Color3.fromRGB(110, 120, 168), Mat.SmoothPlastic, true)
 	-- air cooler with a square grid front
 	fb("AirCooler", 12.0, 13.2, 14.0, 15.0, 0.25, 3.2, C.white, Mat.Plastic)
 	fb("CoolerCastor", 12.1, 13.1, 14.1, 14.9, 0, 0.25, Color3.fromRGB(60, 60, 60), Mat.Rubber, true)
@@ -996,14 +998,14 @@ local function furniture()
 	for i = 0, 2 do
 		fb("DrawerFront", 11.2, 11.24, 14.1, 15.3, 0.2 + i * 0.75, 0.85 + i * 0.75, Color3.fromRGB(78, 52, 36), Mat.Wood, true)
 	end
-	fb("DeskMat", 9.8, 11.2, 15.4, 17.6, 2.65, 2.67, Color3.fromRGB(110, 110, 112), Mat.Fabric, true)
+	fb("DeskMat", 9.8, 11.2, 15.4, 17.6, 2.65, 2.67, Color3.fromRGB(110, 110, 112), Mat.SmoothPlastic, true)
 	fb("MonitorStand", 9.3, 9.6, 16.3, 16.7, 2.65, 3.1, C.black, Mat.Metal, true)
 	fb("Monitor", 9.25, 9.4, 15.0, 18.0, 3.1, 4.8, C.black, Mat.SmoothPlastic, true)
 	fb("Keyboard", 10.2, 10.6, 15.6, 17.4, 2.67, 2.75, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
 	fb("Mouse", 10.3, 10.55, 17.6, 17.8, 2.67, 2.78, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
 	fb("Tower", 9.14, 10.6, 18.35, 19.15, 0, 2.2, Color3.fromRGB(28, 28, 30), Mat.SmoothPlastic)
-	fb("OfficeSeat", 11.8, 13.2, 15.3, 16.7, 1.6, 1.85, C.black, Mat.Fabric)
-	fb("OfficeBack", 13.0, 13.2, 15.3, 16.7, 1.85, 4.2, C.black, Mat.Fabric)
+	fb("OfficeSeat", 11.8, 13.2, 15.3, 16.7, 1.6, 1.85, C.black, Mat.SmoothPlastic)
+	fb("OfficeBack", 13.0, 13.2, 15.3, 16.7, 1.85, 4.2, C.black, Mat.SmoothPlastic)
 	fb("OfficeStem", 12.45, 12.55, 15.95, 16.05, 0.2, 1.6, Color3.fromRGB(60, 60, 62), Mat.Metal, true)
 	fb("OfficeBase", 11.9, 13.1, 15.4, 16.6, 0, 0.2, C.black, Mat.Plastic, true)
 	-- upright piano (dark wood) by the door wall, a blank whiteboard with green tape corners
@@ -1028,12 +1030,12 @@ local function furniture()
 	fb("ClockFace", 16.32, 17.08, 13.73, 13.75, 7.72, 8.48, C.white, Mat.SmoothPlastic, true)
 	fb("ClockHand", 16.67, 16.73, 13.75, 13.76, 8.1, 8.4, C.black, Mat.SmoothPlastic, true)
 	-- mint drop beam across the ceiling, board-panel joints on the bedroom walls, the twisted red/black wire
-	fb("DropBeam", 9.05, 19.35, 20.9, 21.6, CEIL - 0.7, CEIL, C.mint, Mat.Plaster)
+	fb("DropBeam", 9.05, 19.35, 20.9, 21.6, CEIL - 0.7, CEIL, C.mint, Mat.SmoothPlastic)
 	for z = 16, 26, 4 do
-		fb("PanelJoint", 19.33, 19.35, z, z + 0.06, 3.0, CEIL - 0.01, Color3.fromRGB(150, 170, 160), Mat.Plaster, true)
+		fb("PanelJoint", 19.33, 19.35, z, z + 0.06, 3.0, CEIL - 0.01, Color3.fromRGB(150, 170, 160), Mat.SmoothPlastic, true)
 	end
 	for fx = 12, 18, 4 do
-		fb("PanelJoint", fx, fx + 0.06, 13.65, 13.67, 0.36, 4.5, Color3.fromRGB(150, 170, 160), Mat.Plaster, true)
+		fb("PanelJoint", fx, fx + 0.06, 13.65, 13.67, 0.36, 4.5, Color3.fromRGB(150, 170, 160), Mat.SmoothPlastic, true)
 	end
 	fb("TwistedWire", 19.28, 19.33, 27.88, 27.93, 0.36, CEIL, Color3.fromRGB(120, 25, 25), Mat.Rubber, true)
 	-- bedroom door: dark red-brown frame on the hall side, panelled leaf open into the bedroom
@@ -1045,7 +1047,7 @@ local function furniture()
 	fb("BedDoorPanel", 9.5, 12.0, 23.80, 23.85, 0.6, 3.5, Color3.fromRGB(135, 100, 45), Mat.Wood, true)
 	P("Knob", Vector3.new(0.3, 0.3, 0.3), CFrame.new(41.8 - 12.2, FY + 3.3, 23.68), Color3.fromRGB(95, 70, 45), Mat.Metal, true, Enum.PartType.Ball)
 	-- two bags on hooks by the bedroom door (W3, bedroom side)
-	fb("HookBag", 9.05, 9.5, 18.6, 19.4, 3.4, 4.6, C.black, Mat.Fabric, true)
+	fb("HookBag", 9.05, 9.5, 18.6, 19.4, 3.4, 4.6, C.black, Mat.SmoothPlastic, true)
 end
 
 local function container(): (Model, Model)
@@ -1210,14 +1212,50 @@ function M.check(): string
 			task.wait()
 		end
 	end
+	-- exact box-box test (separating axes) with a tolerance; GetPartsInPart only proposes the pairs (it has a margin)
+	local function deep(p: BasePart, q: BasePart): boolean
+		local A, Bc = p.CFrame, q.CFrame
+		local ha, hb = p.Size / 2, q.Size / 2
+		local ax = { A.RightVector, A.UpVector, A.LookVector }
+		local bx = { Bc.RightVector, Bc.UpVector, Bc.LookVector }
+		local axes = {}
+		for _, v in ax do
+			table.insert(axes, v)
+		end
+		for _, v in bx do
+			table.insert(axes, v)
+		end
+		for _, u in ax do
+			for _, v in bx do
+				local c = u:Cross(v)
+				if c.Magnitude > 1e-4 then
+					table.insert(axes, c.Unit)
+				end
+			end
+		end
+		local d = Bc.Position - A.Position
+		for _, L in axes do
+			local ra = math.abs(ax[1]:Dot(L)) * ha.X + math.abs(ax[2]:Dot(L)) * ha.Y + math.abs(ax[3]:Dot(L)) * ha.Z
+			local rb = math.abs(bx[1]:Dot(L)) * hb.X + math.abs(bx[2]:Dot(L)) * hb.Y + math.abs(bx[3]:Dot(L)) * hb.Z
+			if math.abs(d:Dot(L)) > ra + rb - 0.01 then
+				return false
+			end
+		end
+		return true
+	end
 	local op = OverlapParams.new()
 	op.FilterType = Enum.RaycastFilterType.Include
 	op.FilterDescendantsInstances = { m }
 	local seen = {}
 	for _, p in other do
-		for _, q in workspace:GetPartsInPart(p, op) do
+		local size = p.Size
+		p.Size = size - Vector3.new(0.04, 0.04, 0.04) -- touching faces are fine; real overlaps only
+		local hits = workspace:GetPartsInPart(p, op)
+		p.Size = size
+		for _, q in hits do
 			local key = if p:GetDebugId() < q:GetDebugId() then p:GetDebugId() .. q:GetDebugId() else q:GetDebugId() .. p:GetDebugId()
-			if q ~= p and not seen[key] then
+			local wedgePair = p:IsA("WedgePart") or q:IsA("WedgePart")
+			if q ~= p and not seen[key] and not wedgePair and deep(p, q) then
 				seen[key] = true
 				table.insert(bad, "(rot) " .. p.Name .. "~" .. q.Name .. string.format(" @%.1f,%.1f,%.1f", (inv * p.CFrame).X, (inv * p.CFrame).Y, (inv * p.CFrame).Z))
 			end
@@ -1239,7 +1277,16 @@ function M.check(): string
 	for k in world do
 		table.insert(wl, k)
 	end
-	return string.format("%d parts, %d overlaps inside, %d map parts touched\n%s\nMAP: %s", #parts, #bad, #wl, table.concat(bad, "\n", 1, math.min(#bad, 60)), table.concat(wl, ", ", 1, math.min(#wl, 20)))
+	local groups, gl = {}, {}
+	for _, b in bad do
+		local k = string.match(b, "^(.-) @")
+		groups[k] = (groups[k] or 0) + 1
+	end
+	for k, n in groups do
+		table.insert(gl, n .. " " .. k)
+	end
+	table.sort(gl)
+	return string.format("%d parts, %d overlaps inside, %d map parts touched\nGROUPS: %s\n%s\nMAP: %s", #parts, #bad, #wl, table.concat(gl, "; "), table.concat(bad, "\n", 1, math.min(#bad, 30)), table.concat(wl, ", ", 1, math.min(#wl, 20)))
 end
 
 return M
