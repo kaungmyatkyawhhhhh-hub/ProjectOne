@@ -162,3 +162,45 @@ night windows at night.
 
 ![[2026-11-26 Overlaps 2 - hotel on its new free lot (Play) - after.jpg]]
 ![[2026-11-26 Overlaps 2 - house lot y1_mid_9 on its new spot (Play) - after.jpg]]
+
+## Round 3 (26 Nov, coordinator: hotel back on the real site, P1-P3 buildings against today's roads, floor edges)
+
+### Hotel back on the real Novotel site, renamed (v2162)
+- The 2.7 km move is undone. The hotel stands on the real Novotel Yangon Max site on Pyay Road (OSM way 471327865).
+  The OSM outline is turned about 16 degrees, and the largest square-to-the-world box inside it (264 x 156) is too
+  small for the 200-wide podium. So the hotel now turns with its road: `Hotel.lua` `facadeTurned` builds square and then
+  turns with the lot frame. It sits on a 200 lot facing the south service road (`Config.YangonVenues.Sites.hotel`
+  x 27333.3, z 30048.6, fx -0.264, fz -0.965).
+- The temple next door was checked against its OSM outline and it matches. The temple model is right; the old hotel lot
+  was wrong.
+- New name (made up): **PYAY ROYAL HOTEL** / Pyay Royal Hotel (Config.Hotel.Name, Hotel.lua letters, WestLayout label,
+  Strings `rew.suiteBuy` in English and Burmese, RewardsClient). The Burmese line keeps the name in Latin letters, with no
+  kinzi.
+- **Real brand names still on signs** (reported, not changed): JUNCTION CITY, THE CENTRAL, Mathnasium, PV AUTO CAR SALES,
+  RIDER AUTO / PREMIUM EXCLUSIVE - YANGON (DealerBody), GeoHomes (HouseBodies), SWAN MOBILE 5G, yangonation., AUTOCULT.
+  Allowed by the owner: CB BANK, MELIA, SEDONA, MYANMAR PLAZA. Letters made as 3D meshes were not searched.
+
+### P1, P2, P3 buildings re-made against today's roads (v2173, v2174, v2176)
+- `buildings_1to1.py P1 / P2 / P3` was run against today's road nets (P1 5,242 buildings, P2 6,286, P3 11,247). This is
+  the same step P4-P12 got. Then `BUILDINGS_ONLY=1 place_pack.py` made the packs (new switch: shells, roofs and kit
+  data only; terrain, green and pagodas stay as they are).
+- The detail meshes (`Data_P1..3`), night windows and collision shells were swapped together. The new tool is
+  `tools/yangon/RebuildSwap.luau`:
+  - It finds the old shells and roofs from the old `Shell_*.txt` records (asset 92302468599227), first exact, then
+    within 10 studs. 1,600 P1 parts in Studio came from an older run than the saved records.
+  - Leftovers more than 40 studs inside the district box are swept up too (P1 175, P2 29).
+  - Everything goes to `ServerStorage.OverlapFixBackup.RebuildOld_P1..3`.
+  - New shells inside a KeepOut box (venue / house lots and the shells deleted there before) are left out:
+    P1 164, P2 81, P3 4.
+- Night windows: `tools/yangon/city/night_keepout.py` cuts the panes inside the KeepOut boxes out of the new night
+  cells before upload. That cut 2,710 panes in P1, 1,183 in P2 and 153 in P3. Pack ids:
+  `build/city_1to1/overlapfix_26nov/rebuild_ids_26nov.txt`.
+- No new kit pieces were needed: every P1-P3 piece id was already in `YgnKit.Templates`.
+- Not re-run: green (trees) and street props. Their data is unchanged, and the overlap check covers them.
+
+### Buildings touching roads
+- Rule as in round 2: no shell or roof inside an R / D / M / W road box or within 1 stud of one.
+- **Before 1,448, after the re-run 184, after trimming 0** (141,367 road boxes, 197,171 shell and roof parts, map-wide).
+  - 174 parts were cut back from the road side (mostly under 1 stud, the largest 6.9).
+  - 10 thin slivers were removed.
+  - Originals are in `OverlapFixBackup.RoadTrim26`. List: `build/city_1to1/overlapfix_26nov/road_trim_round3.txt`.
