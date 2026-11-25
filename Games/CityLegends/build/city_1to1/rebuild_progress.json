@@ -188,7 +188,7 @@
    "x19 z22..25 and x23 z22..25 cells hold only P7 roads: P6 / P8 must re-bake them whole (clip P7+P6 / P7+P8)"
   ]
  },
- "next_district": "24 Nov: P1-P10 all in (P9, P10, P5 rebuilt 23-24 Nov). Left: P11 and P12 (not in the game; P11 also fixes the U Chit Maung deck end / barrier, see P8 'deck_dip_23nov_home').",
+ "next_district": "25 Nov: P1-P11 all in. P12 district + roads in (v2029) but PAUSED until the road-builder fix (see P12.status).",
  "P4": {
   "status": "DONE 19 Nov (DISTRICT REBUILD agent 2): district moved (J37 re-clear), roads swapped (52 cells), cleaned, verge, lanes L12347, minimap, Play-tested, Hledan deck feet fixed (cell 16x18), backup deleted, saved v1566.",
   "plan": "swap 1536 cells x14..18 z11..21 whole (x18 = P1/P2 seam: subset.json clip = P4+P1+P2); step boxes: x 21504..24576 / 24576..27648 / 27648..29184 (labels 7/8/9) x rows z 16896..18432 (label 5), 3072 z6..z10 (labels 6..10) = 18 boxes",
@@ -623,7 +623,7 @@
   "shots": "City Legends/2026-11-24 rebuild P11 - U Chit Maung flyover deck (Play) - after.jpg; ... - Waizayandar Road at the P9 seam (Play) - after.jpg"
  },
  "P12": {
-  "status": "IN PROGRESS 24 Nov (after P11)",
+  "status": "PAUSED 25 Nov 00:20 UTC by the lead (road-builder fix in progress: sawtooth slivers, grass / median pieces on the road, median stubs, markings): P12 district + roads are IN (saved v2029) but NOT done: kit props on road, verge, lanes (LP1to12 subset ready in roads05_LP1to12, lane_heights = LP1to11 rows), minimap art sync (mapart_P12 asset 72721685013173 uploaded, NOT synced: Studio map art still shows P1-P11), DeckFeetCheck, Play test. After the builder fix: re-export P12 (RB12P data 111510896129828) with the fixed builder, re-bake, swap, then the rest.",
   "data": "R05_GROW=1700 roads05_subset.py net RB12P P12 (tag RB12P: RB12 is the old P1+P2 subset): 1078 roads, 8 decks, 4 rings, 43 modules; subset.json boxes P12 + seams P11 P10 P9 P8; deckfeet mirror 0; data pack imports/sync/rebuild_RB12P_data.rbxmx = asset 111510896129828 (Approved)",
   "plan": "P12 box x 45984..55254 z 25357..35306 -> 1536 cells x29..35 z16..22 (49 cells; x29 = P11/P10/P8 column re-baked whole, z16 = P10 row, x35 / z22 = map edge). Step boxes 16: cols 44544..46080 (label 14), 46080..49152 (15), 49152..52224 (16), 52224..55296 (17) x rows 24576..26112 (8), 26112..29184 (9), 29184..32256 (10), 32256..35328 (11). Clip P12+P11+P10+P9+P8.",
   "buildings": "DONE 24 Nov home PC: district_files.sh P12 --no-roads buildings (16 min, log district_files_P12_24nov.log): 10,456 buildings (410 dropped / 2,620 clipped by the J37 net, 1 on a landmark site, 5 overlap), shells 13,426 parts in 36 cells, roofs 6,386, 1 pagoda (w1557635845 Shwe Oat Gu); night cells_1.glb 16.1 MB; old outputs _pre_rebuild_P12",
@@ -632,7 +632,8 @@
   "exported": "DONE 24 Nov home PC: RB12P data 43 modules (asset 111510896129828, deleted after load), 16 step boxes 14x8..17x11 (x 44544/46080/49152/52224..55296; z 24576/26112/29184/32256..35328) in one queued spawn after 'RB12PGO', 0 MOUTH FAILED; loggrab RB12P -> 462 pages; RoadsBuildRB empty; saved v1992 (19:09 save failed: PublishService AssetUpload HTTP 500, Roblox side, same minutes as the glb upload 500s)",
   "baked": "DONE 24 Nov: collect (clip P12+P11+P10+P9+P8), bake R05_ONLY = 1536 x29..35 z16..22 (49 cells): 20 duplicate parts dropped, 437 meshes / 45 glbs, 19,204 boxes, 0 steep, 0 dup rows; collide imports/sync/rebuild_P12_collide.rbxmx",
   "uploaded_roads": "45 glbs + collide 124872658309907 -> roads05_RB12P/upload_ids_P12.txt (all Approved)",
-  "minimap_prep": "FULL += P12 (detail 89 tiles); 22 changed tiles uploaded as Image, all Approved (ids_P12_images.txt, ids.json 105 -> 111, old ids_before_P12.json); YangonMapArt.lua (7247 / 252259840) -> mapart_P12 asset 72721685013173"
+  "minimap_prep": "FULL += P12 (detail 89 tiles); 22 changed tiles uploaded as Image, all Approved (ids_P12_images.txt, ids.json 105 -> 111, old ids_before_P12.json); YangonMapArt.lua (7247 / 252259840) -> mapart_P12 asset 72721685013173",
+  "swapped": "25 Nov 00:0x UTC (after a 2 h Studio outage: the first PREP at 22:07 died with the place; P12swap_Holding left empty, deleted, PREP re-run): PREP 437 meshes / 19,204 boxes; SWAPGO old 13 cells (x29 z16-22 = P11b/P8 builds, 30-35 x16 = P10's) + 5,160 boxes -> RB_OldP12swap (deleted, 5,272 inst; restore x29 from roads05_RB11/upload_ids_P11b.txt if ever needed); meshes Box / no shadow / no collide-query (437). Checks: 0 duplicate boxes, 0 steep, 0 duplicate meshes in x29-35 z16-22; 1 duplicate W box at the U Chit Maung south foot (38900,31313, P11) deleted. Terrain over R 2 -> 0, stray 0; 1 far tree part on R removed. Saved v2029 (store v1)."
  },
  "joins_24nov": {
   "status": "DONE 25 Nov: saved v1983 (Edit, store CityLegends_v1 read on the Server, lock released); Play-driven 3 spots; not published",
