@@ -28,6 +28,7 @@ from roadbugs_index import read_glb, ROOT, OUT
 
 NET = os.path.join(ROOT, 'build', 'city_1to1', 'roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12')
 CELL = 1536.0
+FAST = os.environ.get('RB_FAST') == '1'   # spike + gap only (the surface kinds the re-bake fixes)
 SPIKE_ANG = float(os.environ.get('SPIKE_ANG', 75))
 KINDS = ('spike', 'gap', 'hole', 'grass_flat', 'median_jct', 'median_stub', 'kerb_loose', 'paint_cross', 'yellow_jct',
          'lone_dash', 'wall_low')
@@ -237,7 +238,7 @@ def cell_job(arg):
             if not R.near(x, y, z, 0.5, 12):
                 spot('hole', x, y, z, nm)
         # grass flat on asphalt
-        MG = get('MG')
+        MG = get('MG') if not FAST else np.zeros((0, 3, 3))
         if len(MG):
             uy, area = up(MG)
             kerbs = np.concatenate([get('KR'), get('KW')])
@@ -272,7 +273,7 @@ def cell_job(arg):
         # loose kerbs
         side = np.concatenate([get('P'), get('MG')])
         S = Surf(side)
-        for k in ('KR', 'KW'):
+        for k in (('KR', 'KW') if not FAST else ()):
             Kt = get(k)
             if not len(Kt):
                 continue
@@ -284,7 +285,7 @@ def cell_job(arg):
                     spot('kerb_loose', m[0], m[1], m[2], k)
         # paint crossing / yellow in junction / lone dash
         pt = []
-        for k in ('L', 'LY'):
+        for k in (('L', 'LY') if not FAST else ()):
             Pk = get(k)
             if len(Pk):
                 uy, area = up(Pk)
@@ -318,7 +319,7 @@ def cell_job(arg):
                     if key not in seen:
                         seen.add(key)
                         spot('yellow_jct', m[0], m[1], m[2])
-        Lw = get('L')
+        Lw = get('L') if not FAST else np.zeros((0, 3, 3))
         if len(Lw):
             uy, area = up(Lw)
             Lw = Lw[(uy > 0.5) & (area > 0.01)]
@@ -351,7 +352,7 @@ def cell_job(arg):
                 if not ok:
                     spot('lone_dash', cpt.x, 0, cpt.y, 'len %.1f' % ln)
         # bridge concrete at ground level in a junction
-        B = get('B')
+        B = get('B') if not FAST else np.zeros((0, 3, 3))
         if len(B):
             seen = set()
             for t in B:
