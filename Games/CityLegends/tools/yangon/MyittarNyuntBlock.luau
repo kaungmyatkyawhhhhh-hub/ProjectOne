@@ -60,6 +60,15 @@ local Mat = Enum.Material
 
 local parent: Instance
 local count = 0
+local pieceId: number? = nil -- set while one piece of furniture is made (M.grow moves it as one)
+local pieceN = 0
+local function asPiece(f)
+	pieceN += 1
+	local prev = pieceId
+	pieceId = pieceN
+	f()
+	pieceId = prev
+end
 local hasVariant = {}
 
 local function variant(p: BasePart?, name: string?)
@@ -92,6 +101,9 @@ local function P(name: string, size: Vector3, cf: CFrame, color: Color3, mat: En
 		p.CanCollide = false
 		p.CanTouch = false
 		p.CastShadow = false
+	end
+	if pieceId then
+		p:SetAttribute("Piece", pieceId)
 	end
 	p.Parent = parent
 	count += 1
@@ -204,7 +216,7 @@ local WIN_W, WIN_Y0, WIN_Y1 = 4.2, 3.2, 8.0
 local STRIP = { 47.8, 51.8 } -- the green glass stair strip on BC, y 10.6 .. 49.4
 local ARCH = { 43.0, 47.4, 6.3, 2.2 } -- s0, s1, rectangle top, radius
 
-local function windowAt(f, s0, s1, y0, y1, glass: Color3, hood: boolean, ac: boolean)
+local function windowAt(f, s0, s1, y0, y1, glass: Color3, hood: boolean, ac: boolean, win: string?)
 	local n_out = f.c
 	local n_in = f.c - f.sg * T
 	local mid0, mid1 = n_out - f.sg * 0.15, n_out - f.sg * 0.45 -- frame depth inside the opening
@@ -222,6 +234,18 @@ local function windowAt(f, s0, s1, y0, y1, glass: Color3, hood: boolean, ac: boo
 		if g then
 			g.Reflectance = 0.08
 			g.CanCollide = true -- (ground windows: no walking into the hollow block)
+			if win then
+				-- the flat's panes: real see-through glass that a click / tap frosts (src/server/FlatWindows.server.lua)
+				g.Name = "FlatPane"
+				g.Color = Color3.fromRGB(205, 225, 222)
+				g.Transparency = 0.6
+				g.Reflectance = 0.12
+				g:SetAttribute("Win", win)
+				game:GetService("CollectionService"):AddTag(g, "FlatWindowPane")
+				local cd = Instance.new("ClickDetector")
+				cd.MaxActivationDistance = 16
+				cd.Parent = g
+			end
 		end
 	end
 	-- (no drip plates: flat dark plates read as holes in Play; the stained render already carries the mould)
@@ -310,7 +334,7 @@ local function exterior()
 			local ours = k == FLAT_K and (f.id == "AB" or ((f.id == "FA" or f.id == "BC") and s < 42))
 			local glass = if ours then C.frost else C.green
 			local ac = (f.id == "BC" or f.id == "DE") and k >= 2 and (i % 3 == 0)
-			windowAt(f, s - WIN_W / 2, s + WIN_W / 2, k * H + WIN_Y0, k * H + WIN_Y1, glass, k >= 1, ac)
+			windowAt(f, s - WIN_W / 2, s + WIN_W / 2, k * H + WIN_Y0, k * H + WIN_Y1, glass, k >= 1, ac, if ours then f.id .. "_" .. s else nil)
 		end
 	end
 	-- corner columns where two faces meet on the outside (the bands stop short of them)
@@ -869,13 +893,18 @@ end
 -- window grilles inside every flat window: horizontal bars in the lining's hole, one upright behind them
 local function grilles()
 	local gc = Color3.fromRGB(215, 215, 210)
+	local function nq(p: Part?)
+		if p then
+			p.CanQuery = false
+		end
+	end
 	local function rowX(x0, x1, zb0, zb1, zu0, zu1)
 		for i = 1, 9 do
 			local y = WY0 + i * 0.48
-			xb("Grille", x0, x1, zb0, zb1, y - 0.04, y + 0.04, gc, Mat.Metal, true)
+			nq(xb("Grille", x0, x1, zb0, zb1, y - 0.04, y + 0.04, gc, Mat.Metal, true))
 		end
 		local m = (x0 + x1) / 2
-		xb("Grille", m - 0.05, m + 0.05, zu0, zu1, WY0, WY1, gc, Mat.Metal, true)
+		nq(xb("Grille", m - 0.05, m + 0.05, zu0, zu1, WY0, WY1, gc, Mat.Metal, true))
 	end
 	for _, s in { { 3.9, 8.1 }, { 13.9, 18.1 }, { 29.9, 34.1 } } do
 		rowX(s[1], s[2], 0.65, 0.75, 0.75, 0.8)
@@ -886,10 +915,10 @@ local function grilles()
 	for _, s in { { 6.9, 11.1 }, { 17.5, 21.7 } } do
 		for i = 1, 9 do
 			local y = WY0 + i * 0.48
-			xb("Grille", 0.65, 0.75, s[1], s[2], y - 0.04, y + 0.04, gc, Mat.Metal, true)
+			nq(xb("Grille", 0.65, 0.75, s[1], s[2], y - 0.04, y + 0.04, gc, Mat.Metal, true))
 		end
 		local m = (s[1] + s[2]) / 2
-		xb("Grille", 0.75, 0.8, m - 0.05, m + 0.05, WY0, WY1, gc, Mat.Metal, true)
+		nq(xb("Grille", 0.75, 0.8, m - 0.05, m + 0.05, WY0, WY1, gc, Mat.Metal, true))
 	end
 end
 
@@ -897,80 +926,420 @@ local function booksX(x0, x1, z0, z1, y, h, seed)
 	books("Book", 41.8 - x1, 41.8 - x0, z0, z1, y, h, seed)
 end
 
-local function chair(x, z, face, color, mat)
-	-- a simple chair: seat, 4 legs, back on the side away from "face" (+1: faces +x, -1: -x, 2: +z, -2: -z)
-	xb("ChairSeat", x - 0.55, x + 0.55, z - 0.55, z + 0.55, 1.45, 1.65, color, mat)
-	for _, o in { { -0.5, -0.5 }, { 0.4, -0.5 }, { -0.5, 0.4 }, { 0.4, 0.4 } } do
-		xb("ChairLeg", x + o[1], x + o[1] + 0.1, z + o[2], z + o[2] + 0.1, 0, 1.45, Color3.fromRGB(60, 45, 35), Mat.Wood, true)
+-- ===== furniture (26 Nov, pass 2: owner "the furniture looks like placeholder blocks") =====
+-- Every piece is made of its real parts (legs, frames, doors with seams, handles, cushions, panels) and they only
+-- butt together: nothing overlaps (B.check). Colours and kinds from the clips; nothing personal (see the vault note).
+local SP, WD, MT = Mat.SmoothPlastic, Mat.Wood, Mat.Metal
+local TEAK = Color3.fromRGB(130, 80, 40)
+local DARKWOOD = Color3.fromRGB(70, 42, 28)
+local CHROME = Color3.fromRGB(200, 200, 205)
+local GOLD = Color3.fromRGB(212, 172, 60)
+
+local function cyl(name, x, y0, y1, z, d, color, mat, deco)
+	return xp(name, Vector3.new(y1 - y0, d, d), x, (y0 + y1) / 2, z, color, mat, deco, Enum.PartType.Cylinder, VCYL)
+end
+local function ball(name, x, y, z, d, color, mat, deco)
+	return xp(name, Vector3.new(d, d, d), x, y, z, color, mat, deco, Enum.PartType.Ball)
+end
+
+-- a part in a turned frame: c = local CFrame of the piece's origin on the floor (yaw only), o = offset, s = size
+local function rp(name, c: CFrame, ox, oy, oz, sx, sy, sz, color, mat, deco, shape)
+	return P(name, Vector3.new(sx, sy, sz), c * CFrame.new(ox, oy, oz), color, mat, deco, shape)
+end
+local YAW = { [1] = -math.pi / 2, [-1] = math.pi / 2, [2] = math.pi, [-2] = 0 } -- face +x, -x, +z, -z
+
+-- a wooden / vinyl chair: legs, seat, cushion, back posts, top rail, two slats; "face" = the way the sitter looks
+local function chairRaw(x, z, face, color, mat, cushion, legColor)
+	local c = CFrame.new(x, FY, z) * CFrame.Angles(0, YAW[face], 0)
+	local lc = legColor or color
+	for _, o in { { -0.47, -0.47 }, { 0.47, -0.47 }, { -0.47, 0.47 }, { 0.47, 0.47 } } do
+		rp("ChairLeg", c, o[1], 0.725, o[2], 0.1, 1.45, 0.1, lc, mat, true)
 	end
-	if face == 1 then
-		xb("ChairBack", x - 0.55, x - 0.4, z - 0.55, z + 0.55, 1.65, 3.4, color, mat)
-	elseif face == -1 then
-		xb("ChairBack", x + 0.4, x + 0.55, z - 0.55, z + 0.55, 1.65, 3.4, color, mat)
-	elseif face == 2 then
-		xb("ChairBack", x - 0.55, x + 0.55, z - 0.55, z - 0.4, 1.65, 3.4, color, mat)
-	else
-		xb("ChairBack", x - 0.55, x + 0.55, z + 0.4, z + 0.55, 1.65, 3.4, color, mat)
+	rp("ChairSeat", c, 0, 1.51, 0, 1.1, 0.12, 1.1, color, mat)
+	if cushion then
+		rp("ChairCushion", c, 0, 1.645, -0.05, 1.0, 0.15, 0.95, cushion, SP, true)
 	end
+	for _, sx in { -0.47, 0.47 } do
+		rp("ChairPost", c, sx, 2.47, 0.47, 0.1, 1.8, 0.1, lc, mat, true)
+	end
+	rp("ChairRail", c, 0, 3.15, 0.47, 0.84, 0.3, 0.1, color, mat, true)
+	for _, sx in { -0.15, 0.15 } do
+		rp("ChairSlat", c, sx, 2.36, 0.47, 0.12, 1.28, 0.06, color, mat, true)
+	end
+end
+
+-- a desk / office chair on a five-star base
+local function officeChairRaw(x, z, face, color)
+	local c = CFrame.new(x, FY, z) * CFrame.Angles(0, YAW[face], 0)
+	rp("ChairHub", c, 0, 0.16, 0, 0.12, 0.5, 0.5, C.black, Mat.Plastic, true, Enum.PartType.Cylinder).CFrame = F * c * CFrame.new(0, 0.16, 0) * VCYL
+	for i = 0, 4 do
+		local a = i * math.pi * 2 / 5
+		local leg = c * CFrame.Angles(0, a, 0)
+		rp("ChairStarLeg", leg, 0, 0.17, -0.68, 0.12, 0.1, 0.62, C.black, Mat.Plastic, true)
+		rp("ChairCaster", leg, 0, 0.06, -0.95, 0.12, 0.12, 0.12, C.black, Mat.Rubber, true, Enum.PartType.Ball)
+	end
+	rp("ChairGasLift", c, 0, 0.885, 0, 1.33, 0.14, 0.14, Color3.fromRGB(60, 60, 62), MT, true, Enum.PartType.Cylinder).CFrame = F * c * CFrame.new(0, 0.885, 0) * VCYL
+	rp("ChairSeat", c, 0, 1.7, 0, 1.4, 0.3, 1.35, color, SP)
+	rp("ChairBackBar", c, 0, 1.9, 0.6, 0.25, 0.1, 0.15, C.black, MT, true)
+	rp("ChairBack", c, 0, 3.0, 0.62, 1.3, 2.1, 0.2, color, SP)
+end
+
+-- a two-door wardrobe facing +z or +x: body, doors with a seam, raised panels, handles, cornice
+local function wardrobeRaw(x0, x1, z0, z1, h, front, color)
+	local function fb2(name, s0, s1, n0, n1, y0, y1, col, mat, deco)
+		if front == "+z" then
+			return xb(name, s0, s1, n0, n1, y0, y1, col, mat, deco)
+		end
+		return xb(name, n0, n1, s0, s1, y0, y1, col, mat, deco)
+	end
+	local s0, s1, n0, n1 = x0, x1, z0, z1
+	if front == "+x" then
+		s0, s1, n0, n1 = z0, z1, x0, x1
+	end
+	local sm = (s0 + s1) / 2
+	fb2("WardrobeBody", s0, s1, n0, n1 - 0.06, 0, h, color, WD)
+	for _, d in { { s0 + 0.06, sm - 0.02 }, { sm + 0.02, s1 - 0.06 } } do
+		fb2("WardrobeDoor", d[1], d[2], n1 - 0.06, n1, 0.3, h - 0.12, color, WD)
+		fb2("WardrobePanel", d[1] + 0.2, d[2] - 0.2, n1, n1 + 0.03, h * 0.55, h - 0.55, color:Lerp(Color3.new(0, 0, 0), 0.12), WD, true)
+		fb2("WardrobePanel", d[1] + 0.2, d[2] - 0.2, n1, n1 + 0.03, 0.65, h * 0.5, color:Lerp(Color3.new(0, 0, 0), 0.12), WD, true)
+	end
+	fb2("WardrobeHandle", sm - 0.16, sm - 0.1, n1 + 0.03, n1 + 0.09, h * 0.45, h * 0.57, Color3.fromRGB(190, 155, 80), MT, true)
+	fb2("WardrobeHandle", sm + 0.1, sm + 0.16, n1 + 0.03, n1 + 0.09, h * 0.45, h * 0.57, Color3.fromRGB(190, 155, 80), MT, true)
+	fb2("WardrobeCornice", s0 - 0.06, s1 + 0.06, n0, n1 + 0.1, h, h + 0.12, color:Lerp(Color3.new(0, 0, 0), 0.2), WD)
+end
+
+-- a bed with its head at z0: posts, headboard, footboard, rails, mattress, pillow, folded blanket
+local function bedRaw(x0, x1, z0, z1, frame, sheet, blanket, seed)
+	for _, x in { x0, x1 - 0.25 } do
+		xb("BedPost", x, x + 0.25, z0, z0 + 0.25, 0, 3.8, frame, WD)
+		xb("BedPost", x, x + 0.25, z1 - 0.25, z1, 0, 1.8, frame, WD)
+	end
+	xb("Headboard", x0 + 0.25, x1 - 0.25, z0 + 0.05, z0 + 0.2, 1.0, 3.4, frame, WD)
+	xb("HeadboardRail", x0 + 0.25, x1 - 0.25, z0, z0 + 0.25, 3.4, 3.6, frame, WD)
+	xb("Footboard", x0 + 0.25, x1 - 0.25, z1 - 0.2, z1 - 0.05, 0.6, 1.6, frame, WD)
+	xb("BedRail", x0, x0 + 0.12, z0 + 0.25, z1 - 0.25, 0.5, 1.0, frame, WD)
+	xb("BedRail", x1 - 0.12, x1, z0 + 0.25, z1 - 0.25, 0.5, 1.0, frame, WD)
+	xb("BedSlats", x0 + 0.12, x1 - 0.12, z0 + 0.25, z1 - 0.25, 0.8, 1.0, frame:Lerp(Color3.new(0, 0, 0), 0.3), WD)
+	xb("Mattress", x0 + 0.15, x1 - 0.15, z0 + 0.3, z1 - 0.3, 1.0, 1.75, sheet, SP)
+	xb("Pillow", x0 + 0.4, x1 - 0.4, z0 + 0.45, z0 + 1.35, 1.75, 2.05, Color3.fromRGB(236, 230, 210), SP, true)
+	xb("PillowTop", x0 + 0.5, x1 - 0.5, z0 + 0.55, z0 + 1.25, 2.05, 2.2, Color3.fromRGB(236, 230, 210), SP, true)
+	xb("BlanketFolded", x0 + 0.2, x1 - 0.2, z1 - 1.7, z1 - 0.35, 1.75, 2.0, blanket, SP, true)
+	xb("BlanketFold", x0 + 0.3, x1 - 0.3, z1 - 1.6, z1 - 0.9, 2.0, 2.12, blanket:Lerp(Color3.new(1, 1, 1), 0.15), SP, true)
+	if seed then
+		local r = Random.new(seed)
+		for _ = 1, 8 do
+			local x = r:NextNumber(x0 + 0.3, x1 - 0.55)
+			local z = r:NextNumber(z0 + 1.5, z1 - 1.95)
+			xb("SheetFlower", x, x + 0.22, z, z + 0.22, 1.75, 1.76, Color3.fromRGB(230, 150, 170), SP, true)
+		end
+	end
+end
+
+local function bedXRaw(x0, x1, z0, z1, frame, sheet, blanket, seed)
+	for _, z in { z0, z1 - 0.25 } do
+		xb("BedPost", x0, x0 + 0.25, z, z + 0.25, 0, 3.8, frame, WD)
+		xb("BedPost", x1 - 0.25, x1, z, z + 0.25, 0, 1.8, frame, WD)
+	end
+	xb("Headboard", x0 + 0.05, x0 + 0.2, z0 + 0.25, z1 - 0.25, 1.0, 3.4, frame, WD)
+	xb("HeadboardRail", x0, x0 + 0.25, z0 + 0.25, z1 - 0.25, 3.4, 3.6, frame, WD)
+	xb("Footboard", x1 - 0.2, x1 - 0.05, z0 + 0.25, z1 - 0.25, 0.6, 1.6, frame, WD)
+	xb("BedRail", x0 + 0.25, x1 - 0.25, z0, z0 + 0.12, 0.5, 1.0, frame, WD)
+	xb("BedRail", x0 + 0.25, x1 - 0.25, z1 - 0.12, z1, 0.5, 1.0, frame, WD)
+	xb("BedSlats", x0 + 0.25, x1 - 0.25, z0 + 0.12, z1 - 0.12, 0.8, 1.0, frame:Lerp(Color3.new(0, 0, 0), 0.3), WD)
+	xb("Mattress", x0 + 0.3, x1 - 0.3, z0 + 0.15, z1 - 0.15, 1.0, 1.75, sheet, SP)
+	local zm = (z0 + z1) / 2
+	for _, pz in { { z0 + 0.35, zm - 0.1 }, { zm + 0.1, z1 - 0.35 } } do
+		xb("Pillow", x0 + 0.45, x0 + 1.35, pz[1], pz[2], 1.75, 2.05, Color3.fromRGB(236, 230, 210), SP, true)
+		xb("PillowTop", x0 + 0.55, x0 + 1.25, pz[1] + 0.1, pz[2] - 0.1, 2.05, 2.2, Color3.fromRGB(236, 230, 210), SP, true)
+	end
+	xb("BlanketFolded", x1 - 1.7, x1 - 0.35, z0 + 0.2, z1 - 0.2, 1.75, 2.0, blanket, SP, true)
+	xb("BlanketFold", x1 - 1.6, x1 - 0.9, z0 + 0.3, z1 - 0.3, 2.0, 2.12, blanket:Lerp(Color3.new(1, 1, 1), 0.15), SP, true)
+	if seed then
+		local r = Random.new(seed)
+		for _ = 1, 8 do
+			local x = r:NextNumber(x0 + 1.5, x1 - 1.95)
+			local z = r:NextNumber(z0 + 0.3, z1 - 0.55)
+			xb("SheetFlower", x, x + 0.22, z, z + 0.22, 1.75, 1.76, Color3.fromRGB(230, 150, 170), SP, true)
+		end
+	end
+end
+
+local function chair(x, z, face, color, mat, cushion, legColor)
+	asPiece(function()
+		chairRaw(x, z, face, color, mat, cushion, legColor)
+	end)
+end
+
+local function officeChair(x, z, face, color)
+	asPiece(function()
+		officeChairRaw(x, z, face, color)
+	end)
+end
+
+local function wardrobe(x0, x1, z0, z1, h, front, color)
+	asPiece(function()
+		wardrobeRaw(x0, x1, z0, z1, h, front, color)
+	end)
+end
+
+local function bed(x0, x1, z0, z1, frame, sheet, blanket, seed)
+	asPiece(function()
+		bedRaw(x0, x1, z0, z1, frame, sheet, blanket, seed)
+	end)
+end
+
+local function bedX(x0, x1, z0, z1, frame, sheet, blanket, seed)
+	asPiece(function()
+		bedXRaw(x0, x1, z0, z1, frame, sheet, blanket, seed)
+	end)
+end
+
+local function flushLamp(name, x, z, range)
+	cyl(name .. "Rim", x, CEIL - 0.15, CEIL, z, 1.6, Color3.fromRGB(225, 225, 220), SP, true)
+	local d = cyl(name, x, CEIL - 0.25, CEIL - 0.15, z, 1.3, Color3.fromRGB(255, 250, 238), Mat.Neon, true)
+	light(d, range or 16, 0.75, Color3.fromRGB(255, 244, 225))
+end
+
+local function tubeLight(name, x0, x1, z0, z1, lit)
+	-- a ceiling batten with its tube
+	xb(name .. "Batten", x0, x1, z0, z1, CEIL - 0.15, CEIL, C.white, SP, true)
+	local alongX = (x1 - x0) > (z1 - z0)
+	local t = if alongX
+		then xb(name, x0 + 0.2, x1 - 0.2, (z0 + z1) / 2 - 0.06, (z0 + z1) / 2 + 0.06, CEIL - 0.27, CEIL - 0.15, Color3.fromRGB(240, 245, 250), Mat.Neon, true)
+		else xb(name, (x0 + x1) / 2 - 0.06, (x0 + x1) / 2 + 0.06, z0 + 0.2, z1 - 0.2, CEIL - 0.27, CEIL - 0.15, Color3.fromRGB(240, 245, 250), Mat.Neon, true)
+	if lit and t then
+		light(t, 16, 0.7, Color3.fromRGB(232, 240, 255))
+	end
+end
+
+local function ceilingFanRaw(x, z)
+	cyl("FanRod", x, CEIL - 1.0, CEIL, z, 0.12, Color3.fromRGB(235, 235, 230), MT, true)
+	cyl("FanMotor", x, CEIL - 1.4, CEIL - 1.0, z, 0.7, Color3.fromRGB(235, 235, 230), MT, true)
+	for i = 0, 2 do
+		local c = CFrame.new(x, FY + CEIL - 1.25, z) * CFrame.Angles(0, i * math.pi * 2 / 3 + 0.4, 0)
+		rp("FanBlade", c, 0, 0, -1.6, 0.45, 0.05, 2.0, Color3.fromRGB(240, 240, 236), SP, true)
+	end
+end
+
+local function curtainsRaw(x0, x1, zc)
+	-- rail and two pale panels drawn to the sides of a window on the south (BC) wall
+	xb("CurtainRail", x0 - 1.0, x1 + 1.0, zc + 0.1, zc + 0.2, 8.45, 8.55, CHROME, MT, true)
+	xb("Curtain", x0 - 1.0, x0 + 0.5, zc, zc + 0.08, 2.6, 8.4, C.curtain, SP, true).CanQuery = false
+	xb("Curtain", x1 - 0.5, x1 + 1.0, zc, zc + 0.08, 2.6, 8.4, C.curtain, SP, true).CanQuery = false
+end
+
+local function ceilingFan(x, z)
+	asPiece(function()
+		ceilingFanRaw(x, z)
+	end)
+end
+local function curtains(x0, x1, zc)
+	asPiece(function()
+		curtainsRaw(x0, x1, zc)
+	end)
+end
+
+-- a bicycle standing along x in the plane z = zb (its middle at x = xc): spoked wheels with knobbly tyres, a pink
+-- frame (main triangle in the plane, stays and fork either side of the wheels), white fork, saddle, bars, cranks, pedals
+local function bicycleRaw(xc, zb)
+	local PINK, WHITE, TYRE = Color3.fromRGB(226, 118, 160), Color3.fromRGB(238, 238, 235), Color3.fromRGB(26, 26, 28)
+	local R = 1.1
+	local function tube(name, a: Vector2, b: Vector2, dz, th, col, ca: number?, cb: number?)
+		-- (ends cut short so tubes meeting at a joint never run into each other)
+		local d = b - a
+		local u = d.Unit
+		a, b = a + u * (ca or 0.22), b - u * (cb or 0.22)
+		d = b - a
+		local len = d.Magnitude
+		local mid = (a + b) / 2
+		local ang = math.atan2(d.Y, d.X)
+		P(name, Vector3.new(len, th, 0.08), CFrame.new(xc + mid.X, FY + mid.Y, zb + dz) * CFrame.Angles(0, 0, ang), col, MT, true)
+	end
+	for _, hx in { -1.65, 1.65 } do
+		local hub = Vector2.new(hx, R)
+		xp("BikeHub", Vector3.new(0.2, 0.25, 0.25), xc + hx, R, zb, CHROME, MT, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
+		for k = 0, 11 do
+			local a = k * math.pi / 6
+			local c = CFrame.new(xc + hx, FY + R, zb) * CFrame.Angles(0, 0, a)
+			P("BikeTyre", Vector3.new(0.5, 0.16, 0.12), c * CFrame.new(0, R - 0.08, 0), TYRE, Mat.Rubber, true)
+		end
+		for k = 0, 7 do
+			local a = k * math.pi / 4 + 0.2
+			local c = CFrame.new(xc + hx, FY + R, zb) * CFrame.Angles(0, 0, a)
+			P("BikeSpoke", Vector3.new(0.025, R - 0.16 - 0.17, 0.025), c * CFrame.new(0, 0.17 + (R - 0.16 - 0.17) / 2, 0), CHROME, MT, true)
+		end
+		local _ = hub
+	end
+	local BB, ST, HT, HB = Vector2.new(-0.2, 0.95), Vector2.new(-0.55, 2.6), Vector2.new(0.95, 2.75), Vector2.new(1.0, 2.3)
+	local RH, FH = Vector2.new(-1.65, R), Vector2.new(1.65, R)
+	tube("BikeSeatTube", BB, ST, 0, 0.13, PINK)
+	tube("BikeTopTube", ST, HT, 0, 0.12, PINK, 0.22, 0.3)
+	tube("BikeDownTube", BB, HB, 0, 0.14, PINK, 0.22, 0.3)
+	tube("BikeHeadTube", HB, HT, 0, 0.16, PINK, 0, 0)
+	for _, dz in { -0.15, 0.15 } do
+		tube("BikeChainStay", BB, RH, dz, 0.08, PINK)
+		tube("BikeSeatStay", ST, RH, dz, 0.07, PINK)
+		tube("BikeFork", HB, FH, dz, 0.09, WHITE, 0.1, 0.22)
+	end
+	-- seat post + saddle, stem + handlebar with grips
+	tube("BikeSeatPost", ST, ST + Vector2.new(-0.06, 0.42), 0, 0.07, CHROME, 0.12, 0)
+	xb("BikeSaddle", xc + ST.X - 0.45, xc + ST.X + 0.25, zb - 0.14, zb + 0.14, ST.Y + 0.42, ST.Y + 0.55, C.black, SP, true)
+	tube("BikeStem", HT, HT + Vector2.new(0.05, 0.3), 0, 0.07, CHROME, 0.05, 0)
+	xb("BikeBar", xc + HT.X - 0.0, xc + HT.X + 0.12, zb - 0.6, zb + 0.6, HT.Y + 0.3, HT.Y + 0.4, C.black, MT, true)
+	xb("BikeGrip", xc + HT.X - 0.02, xc + HT.X + 0.14, zb - 0.75, zb - 0.6, HT.Y + 0.28, HT.Y + 0.42, C.black, Mat.Rubber, true)
+	xb("BikeGrip", xc + HT.X - 0.02, xc + HT.X + 0.14, zb + 0.6, zb + 0.75, HT.Y + 0.28, HT.Y + 0.42, C.black, Mat.Rubber, true)
+	-- chainring, cranks and pedals
+	xp("BikeChainring", Vector3.new(0.04, 0.6, 0.6), xc + BB.X, BB.Y, zb + 0.22, Color3.fromRGB(70, 70, 74), MT, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
+	xb("BikeCrank", xc + BB.X - 0.04, xc + BB.X + 0.04, zb + 0.25, zb + 0.31, BB.Y - 0.5, BB.Y - 0.05, CHROME, MT, true)
+	xb("BikeCrank", xc + BB.X - 0.04, xc + BB.X + 0.04, zb - 0.31, zb - 0.25, BB.Y + 0.05, BB.Y + 0.5, CHROME, MT, true)
+	xb("BikePedal", xc + BB.X - 0.2, xc + BB.X + 0.2, zb + 0.31, zb + 0.55, BB.Y - 0.58, BB.Y - 0.5, C.black, Mat.Plastic, true)
+	xb("BikePedal", xc + BB.X - 0.2, xc + BB.X + 0.2, zb - 0.55, zb - 0.31, BB.Y + 0.5, BB.Y + 0.58, C.black, Mat.Plastic, true)
+end
+local function bicycle(xc, zb)
+	asPiece(function()
+		bicycleRaw(xc, zb)
+	end)
 end
 
 local function doorLeaf(name, x0, x1, z0, z1, color)
-	xb(name, x0, x1, z0, z1, 0.05, 6.95, color, Mat.Wood)
+	xb(name, x0, x1, z0, z1, 0.05, 6.95, color, WD)
 end
 
 local function furniture()
-	local SP, WD = Mat.SmoothPlastic, Mat.Wood
-	local gold = Color3.fromRGB(212, 172, 60)
-	-- ---------- living room ----------
-	-- TV on a low cabinet against the yellow room's wall, facing the front door; the couch along the same wall
-	xb("TVCabinet", 24.6, 26.0, 21.0, 25.6, 0, 1.8, Color3.fromRGB(80, 50, 32), WD)
-	xb("TV", 25.1, 25.25, 21.3, 25.3, 1.8, 4.6, C.black, SP)
-	xb("CouchBase", 24.6, 27.0, 17.9, 20.8, 0, 1.4, Color3.fromRGB(95, 100, 118), SP)
-	xb("CouchBack", 24.6, 25.2, 17.9, 20.8, 1.4, 3.0, Color3.fromRGB(95, 100, 118), SP)
-	xb("CouchArm", 25.2, 27.0, 17.9, 18.3, 1.4, 2.2, Color3.fromRGB(95, 100, 118), SP)
-	xb("CouchArm", 25.2, 27.0, 20.4, 20.8, 1.4, 2.2, Color3.fromRGB(95, 100, 118), SP)
-	-- treadmill in the far (north-east) corner, away from the door
-	xb("Treadmill", 37.4, 41.5, 13.3, 15.3, 0, 0.55, Color3.fromRGB(55, 58, 62), SP)
-	xb("TreadmillBelt", 37.8, 41.1, 13.6, 15.0, 0.55, 0.6, C.black, Mat.Rubber, true)
-	xb("TreadmillPost", 40.9, 41.1, 13.4, 13.6, 0.55, 3.8, Color3.fromRGB(70, 72, 76), Mat.Metal)
-	xb("TreadmillPost", 40.9, 41.1, 15.0, 15.2, 0.55, 3.8, Color3.fromRGB(70, 72, 76), Mat.Metal)
-	xb("TreadmillConsole", 40.6, 41.2, 13.4, 15.2, 3.8, 4.3, C.black, SP)
-	-- the entrance things from the clip: folding screen (plain panels), white drawer tower, bicycle, slippers
-	for i = 0, 2 do
-		local z0 = 24.6 + i * 1.1
-		xb("ScreenFrame", 35.6, 35.85, z0, z0 + 1.05, 0, 6.2, C.brown, WD)
-		xb("ScreenPaper", 35.55, 35.6, z0 + 0.12, z0 + 0.93, 0.6, 5.9, Color3.fromRGB(200, 180, 140), SP, true)
+	-- ---------- living room (owner's mark-up 26 Nov: couch on the yellow room's wall, TV between the windows) ----------
+	xb("Rug", 27.5, 30.6, 19.2, 24.8, 0, 0.03, Color3.fromRGB(140, 50, 40), SP, true)
+	xb("RugField", 27.8, 30.3, 19.5, 24.5, 0.03, 0.035, Color3.fromRGB(190, 150, 90), SP, true)
+	-- TV cabinet on the window wall, doors and knobs facing the room (-z); TV on a stand, thin bezel, dim picture
+	for _, x in { 30.45, 34.15 } do
+		for _, z in { 26.6, 27.6 } do
+			xb("CabinetLeg", x, x + 0.15, z, z + 0.15, 0, 0.3, DARKWOOD, WD, true)
+		end
 	end
-	xb("DrawerTower", 40.2, 41.6, 17.0, 18.05, 0, 4.2, C.white, Mat.Plastic)
+	xb("TVCabinet", 30.35, 34.4, 26.5, 27.85, 0.3, 1.75, TEAK, WD)
+	xb("TVCabinetTop", 30.3, 34.45, 26.4, 27.85, 1.75, 1.85, TEAK:Lerp(Color3.new(0, 0, 0), 0.15), WD)
+	for _, d in { { 30.45, 32.33 }, { 32.42, 34.3 } } do
+		xb("CabinetDoor", d[1], d[2], 26.45, 26.5, 0.4, 1.65, TEAK:Lerp(Color3.new(1, 1, 1), 0.06), WD)
+	end
+	xb("CabinetKnob", 32.15, 32.28, 26.39, 26.45, 0.95, 1.1, GOLD, MT, true)
+	xb("CabinetKnob", 32.47, 32.6, 26.39, 26.45, 0.95, 1.1, GOLD, MT, true)
+	xb("TVStandBase", 32.0, 32.8, 26.9, 27.5, 1.85, 1.9, C.black, MT, true)
+	xb("TVStandNeck", 32.3, 32.5, 27.05, 27.2, 1.9, 2.3, C.black, MT, true)
+	xb("TVPanel", 30.5, 34.3, 27.05, 27.2, 2.3, 4.5, Color3.fromRGB(18, 18, 20), SP)
+	xb("TVScreenSky", 30.6, 34.2, 27.02, 27.05, 3.45, 4.4, Color3.fromRGB(58, 80, 112), Mat.Neon, true)
+	xb("TVScreenLand", 30.6, 34.2, 27.02, 27.05, 2.4, 3.45, Color3.fromRGB(52, 72, 56), Mat.Neon, true)
+	cyl("PlantPot", 34.0, 1.85, 2.25, 26.7, 0.35, Color3.fromRGB(170, 90, 60), SP, true)
+	ball("PlantLeaves", 34.0, 2.5, 26.7, 0.5, Color3.fromRGB(60, 120, 60), SP, true)
+	-- coffee table on the rug
+	for _, x in { 28.05, 29.8 } do
+		for _, z in { 20.35, 23.5 } do
+			xb("TableLeg", x, x + 0.15, z, z + 0.15, 0.035, 1.35, TEAK, WD, true)
+		end
+	end
+	xb("CoffeeShelf", 28.2, 29.8, 20.35, 23.65, 0.4, 0.5, TEAK, WD, true)
+	xb("CoffeeTop", 28.0, 30.0, 20.3, 23.7, 1.35, 1.5, TEAK, WD)
+	cyl("FruitBowl", 29.0, 1.5, 1.68, 21.5, 0.7, Color3.fromRGB(235, 235, 230), SP, true)
+	xb("Magazine", 28.5, 29.3, 22.6, 23.2, 1.5, 1.52, Color3.fromRGB(200, 70, 60), SP, true)
+	-- couch (teak frame, maroon cushions) against the yellow room's wall, facing into the room
+	for _, x in { 24.7, 26.9 } do
+		for _, z in { 18.9, 24.9 } do
+			xb("CouchLeg", x, x + 0.2, z, z + 0.2, 0, 0.35, DARKWOOD, WD, true)
+		end
+	end
+	xb("CouchBase", 24.6, 27.2, 18.8, 25.2, 0.35, 1.0, TEAK, WD)
+	xb("CouchArm", 24.6, 27.2, 18.8, 19.35, 1.0, 2.3, TEAK, WD)
+	xb("CouchArm", 24.6, 27.2, 24.65, 25.2, 1.0, 2.3, TEAK, WD)
+	xb("CouchArmPad", 25.15, 27.2, 18.8, 19.35, 2.3, 2.4, Color3.fromRGB(110, 40, 40), SP, true)
+	xb("CouchArmPad", 25.15, 27.2, 24.65, 25.2, 2.3, 2.4, Color3.fromRGB(110, 40, 40), SP, true)
+	xb("CouchBack", 24.6, 25.15, 19.35, 24.65, 1.0, 3.0, TEAK, WD)
+	for _, z in { { 19.38, 21.08 }, { 21.15, 22.85 }, { 22.92, 24.62 } } do
+		xb("SeatCushion", 25.15, 27.1, z[1], z[2], 1.0, 1.6, Color3.fromRGB(110, 40, 40), SP)
+		xb("BackCushion", 25.15, 25.65, z[1], z[2], 1.6, 2.95, Color3.fromRGB(118, 44, 44), SP, true)
+	end
+	xb("ThrowPillow", 25.65, 26.0, 19.5, 20.3, 1.6, 2.4, Color3.fromRGB(210, 170, 90), SP, true)
+	xb("ThrowPillow", 25.65, 26.0, 23.7, 24.5, 1.6, 2.4, Color3.fromRGB(210, 170, 90), SP, true)
+	-- treadmill in the far (north-east) corner: deck, belt, side rails, motor hood, uprights, handrails, console
+	xb("TreadmillFoot", 37.45, 37.75, 13.3, 15.3, 0, 0.15, C.black, Mat.Rubber, true)
+	xb("TreadmillFoot", 40.25, 40.55, 13.3, 15.3, 0, 0.15, C.black, Mat.Rubber, true)
+	xb("TreadmillDeck", 37.4, 40.6, 13.3, 15.3, 0.15, 0.5, Color3.fromRGB(60, 63, 68), SP)
+	xb("TreadmillBelt", 37.55, 40.5, 13.6, 15.0, 0.5, 0.55, Color3.fromRGB(22, 22, 24), Mat.Rubber, true)
+	xb("TreadmillRail", 37.4, 40.6, 13.3, 13.6, 0.5, 0.58, Color3.fromRGB(150, 155, 160), MT, true)
+	xb("TreadmillRail", 37.4, 40.6, 15.0, 15.3, 0.5, 0.58, Color3.fromRGB(150, 155, 160), MT, true)
+	xb("TreadmillHood", 40.6, 41.5, 13.3, 15.3, 0.15, 0.9, Color3.fromRGB(45, 47, 52), SP)
+	for _, z in { 13.35, 15.05 } do
+		xb("TreadmillUpright", 41.0, 41.2, z, z + 0.2, 0.9, 3.8, Color3.fromRGB(70, 72, 76), MT)
+		xb("TreadmillHandrail", 39.6, 41.0, z, z + 0.2, 3.3, 3.45, Color3.fromRGB(40, 40, 44), Mat.Rubber, true)
+	end
+	xb("TreadmillConsole", 40.7, 41.3, 13.55, 15.05, 3.8, 4.4, Color3.fromRGB(35, 36, 40), SP)
+	xb("TreadmillDisplay", 40.66, 40.7, 13.9, 14.7, 4.0, 4.3, Color3.fromRGB(60, 150, 110), Mat.Neon, true)
+	xb("TreadmillKey", 40.64, 40.7, 14.8, 14.9, 3.9, 4.0, C.red, SP, true)
+	-- entrance things from the clip: drawer tower, slippers (the folding screen is gone: owner's mark-up)
+	xb("DrawerTowerTop", 40.2, 41.6, 17.0, 18.05, 4.05, 4.2, C.white, Mat.Plastic)
+	xb("DrawerTowerFrame", 40.3, 41.6, 17.0, 18.05, 0, 4.05, Color3.fromRGB(225, 225, 222), Mat.Plastic)
 	for i = 0, 3 do
-		xb("DrawerHandle", 40.14, 40.2, 17.25, 17.8, 0.6 + i * 1.0, 0.75 + i * 1.0, Color3.fromRGB(80, 80, 85), Mat.Plastic, true)
+		xb("Drawer", 40.24, 40.3, 17.05, 18.0, 0.1 + i * 1.0, 0.95 + i * 1.0, Color3.fromRGB(240, 240, 238), Mat.Plastic)
+		xb("DrawerHandle", 40.18, 40.24, 17.3, 17.75, 0.45 + i * 1.0, 0.6 + i * 1.0, Color3.fromRGB(80, 80, 85), Mat.Plastic, true)
 	end
 	xb("ClothesPile", 40.3, 41.5, 17.1, 17.95, 4.2, 4.6, Color3.fromRGB(120, 140, 170), SP, true)
-	for _, x in { 31.5, 33.7 } do
-		xp("BikeWheel", Vector3.new(0.12, 2.2, 2.2), x, 1.1, 27.6, C.black, Mat.Rubber, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
-	end
-	xp("BikeFrame", Vector3.new(2.4, 0.14, 0.14), 32.6, 1.9, 27.4, C.white, Mat.Metal, true, nil, CFrame.Angles(0, 0, math.rad(8)))
-	xp("BikeSeat", Vector3.new(0.7, 0.15, 0.3), 33.2, 2.6, 27.4, C.black, SP, true)
+	-- the bicycle (pink, as in the clip), moved to the hall wall: it stood where the TV goes
+	bicycle(13.9, 13.75)
+	-- the folding screen beside the front door on its hinge side (owner's mark-up), clear of the open leaf
+	asPiece(function()
+		for i = 0, 2 do
+			local z0 = 18.35 + i * 1.1
+			xb("ScreenFrame", 39.9, 40.15, z0, z0 + 1.05, 0, 6.2, C.brown, WD)
+			xb("ScreenPaper", 39.85, 39.9, z0 + 0.12, z0 + 0.93, 0.6, 5.9, Color3.fromRGB(200, 180, 140), SP, true)
+		end
+	end)
 	xb("Slippers", 39.5, 40.2, 25.0, 25.3, 0, 0.12, Color3.fromRGB(205, 185, 150), Mat.Rubber, true)
 	xb("Slippers", 39.5, 40.2, 25.4, 25.7, 0, 0.12, Color3.fromRGB(205, 185, 150), Mat.Rubber, true)
-	local lamp = xb("CeilingLamp", 32.5, 33.5, 19.5, 20.5, CEIL - 0.25, CEIL, Color3.fromRGB(250, 248, 240), Mat.Neon, true)
-	if lamp then
-		light(lamp, 20, 0.8, Color3.fromRGB(255, 244, 225))
+	curtains(25.65, 29.85, 27.5)
+	curtains(34.9, 39.1, 27.5)
+	flushLamp("LivingLamp", 33.0, 20.5, 20)
+	ceilingFan(33.0, 15.8)
+	xb("ClockFrame", 31.0, 32.0, 12.9, 12.98, 7.0, 8.0, DARKWOOD, WD, true)
+	xb("ClockFace", 31.12, 31.88, 12.98, 13.0, 7.12, 7.88, C.white, SP, true)
+	xb("ClockHand", 31.47, 31.53, 13.0, 13.01, 7.5, 7.8, C.black, SP, true)
+	-- the shrine: cabinet with doors, stepped tiers with gold trim, a backdrop, a small seated figure with a lit halo,
+	-- two small pagodas, flowers, a candle and water cups (generic, nothing copied)
+	local shrineWood = Color3.fromRGB(95, 32, 26)
+	xb("ShrineCabinet", 0.75, 5.2, 25.46, 27.75, 0, 2.4, shrineWood, WD)
+	for _, d in { { 0.9, 2.9 }, { 3.05, 5.05 } } do
+		xb("ShrineDoor", d[1], d[2], 25.4, 25.46, 0.3, 2.1, shrineWood:Lerp(Color3.new(0, 0, 0), 0.1), WD)
 	end
-	-- the shrine table in the south-west corner (generic: a seated figure and two small stupas, flowers)
-	xb("ShrineTable", 0.75, 5.2, 25.4, 27.75, 0, 2.8, Color3.fromRGB(85, 30, 25), WD)
-	xb("ShrineTier", 0.75, 5.2, 26.9, 27.75, 2.8, 3.6, Color3.fromRGB(85, 30, 25), WD)
-	xb("ShrineFigureBase", 2.4, 3.5, 27.0, 27.7, 3.6, 3.85, gold, SP).Reflectance = 0.15
-	xb("ShrineFigure", 2.6, 3.3, 27.1, 27.6, 3.85, 4.55, gold, SP).Reflectance = 0.15
-	xp("ShrineFigureHead", Vector3.new(0.42, 0.42, 0.42), 2.95, 4.76, 27.35, gold, SP, true, Enum.PartType.Ball)
-	for _, x in { 1.4, 4.4 } do
-		xp("StupaBase", Vector3.new(0.25, 0.6, 0.6), x, 3.725, 27.35, gold, SP, true, Enum.PartType.Cylinder, VCYL)
-		xp("StupaBell", Vector3.new(0.5, 0.5, 0.5), x, 4.1, 27.35, gold, SP, true, Enum.PartType.Ball)
-		xp("StupaSpire", Vector3.new(0.55, 0.12, 0.12), x, 4.63, 27.35, gold, SP, true, Enum.PartType.Cylinder, VCYL)
+	xb("ShrineKnob", 2.75, 2.85, 25.34, 25.4, 1.15, 1.3, GOLD, MT, true)
+	xb("ShrineKnob", 3.1, 3.2, 25.34, 25.4, 1.15, 1.3, GOLD, MT, true)
+	xb("ShrineTop", 0.7, 5.25, 25.35, 27.75, 2.4, 2.5, shrineWood, WD)
+	xb("ShrineTier", 0.85, 5.1, 26.3, 27.75, 2.5, 3.0, shrineWood, WD)
+	xb("ShrineTrim", 0.85, 5.1, 26.27, 26.3, 2.9, 3.0, GOLD, MT, true)
+	xb("ShrineTier", 0.85, 5.1, 26.3, 27.75, 3.0, 3.1, GOLD, MT)
+	xb("ShrineTier", 1.4, 4.55, 26.9, 27.75, 3.1, 3.6, shrineWood, WD)
+	xb("ShrineTrim", 1.4, 4.55, 26.87, 26.9, 3.5, 3.6, GOLD, MT, true)
+	xb("ShrineTier", 1.4, 4.55, 26.9, 27.75, 3.6, 3.7, GOLD, MT)
+	xb("ShrineBackdrop", 1.2, 4.75, 27.7, 27.75, 3.7, 5.6, Color3.fromRGB(150, 40, 30), SP)
+	xb("ShrineBackdropTrim", 1.2, 4.75, 27.66, 27.7, 5.45, 5.6, GOLD, MT, true)
+	cyl("FigureLotus", 2.975, 3.7, 3.9, 27.3, 0.8, GOLD, SP, true)
+	xb("FigureLegs", 2.55, 3.4, 27.05, 27.55, 3.9, 4.15, GOLD, SP, true)
+	xb("FigureBody", 2.7, 3.25, 27.15, 27.45, 4.15, 4.75, GOLD, SP, true)
+	ball("FigureHead", 2.975, 4.94, 27.3, 0.38, GOLD, SP, true)
+	cyl("FigureTop", 2.975, 5.13, 5.25, 27.3, 0.12, GOLD, SP, true)
+	xp("FigureHalo", Vector3.new(0.03, 0.9, 0.9), 2.975, 4.9, 27.635, Color3.fromRGB(255, 205, 130), Mat.Neon, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
+	for _, x in { 1.1, 4.8 } do
+		cyl("PagodaBase", x, 3.1, 3.25, 27.2, 0.5, GOLD, SP, true)
+		cyl("PagodaTerrace", x, 3.25, 3.37, 27.2, 0.4, GOLD, SP, true)
+		ball("PagodaBell", x, 3.56, 27.2, 0.38, GOLD, SP, true)
+		cyl("PagodaSpire", x, 3.75, 4.2, 27.2, 0.08, GOLD, SP, true)
+		ball("PagodaTip", x, 4.26, 27.2, 0.1, GOLD, SP, true)
 	end
-	for _, x in { 1.3, 4.6 } do
-		xp("Vase", Vector3.new(0.6, 0.4, 0.4), x, 3.1, 26.2, Color3.fromRGB(40, 110, 70), SP, true, Enum.PartType.Cylinder, VCYL)
-		xp("Flowers", Vector3.new(0.5, 0.5, 0.5), x, 3.67, 26.2, Color3.fromRGB(240, 200, 60), SP, true, Enum.PartType.Ball)
+	for _, x in { 2.0, 3.95 } do
+		cyl("Vase", x, 3.1, 3.5, 26.55, 0.28, Color3.fromRGB(40, 110, 70), SP, true)
+		for i = -1, 1 do
+			ball("Flower", x + i * 0.21, 3.62, 26.55, 0.2, if i == 0 then Color3.fromRGB(240, 200, 60) else Color3.fromRGB(235, 235, 225), SP, true)
+		end
+	end
+	cyl("Candle", 2.97, 3.1, 3.45, 26.55, 0.15, Color3.fromRGB(245, 240, 225), SP, true)
+	ball("CandleFlame", 2.97, 3.5, 26.55, 0.08, Color3.fromRGB(255, 190, 90), Mat.Neon, true)
+	for _, x in { 1.8, 2.97, 4.15 } do
+		cyl("WaterCup", x, 2.5, 2.62, 25.7, 0.16, CHROME, MT, true)
 	end
 	-- ---------- hall ----------
 	xb("Bookshelf", 10.0, 10.15, 16.15, 17.15, 0, 6.6, C.pine, WD)
@@ -983,177 +1352,299 @@ local function furniture()
 			booksX(10.2, 15.8, 16.2, 17.0, y + 0.1, 1.35, 30 + i)
 		end
 	end
-	chair(3.1, 13.9, -2, Color3.fromRGB(110, 30, 40), SP) -- the maroon folding chair
-	chair(6.2, 13.9, -2, Color3.fromRGB(150, 110, 60), WD) -- the rattan-back chair
-	xb("Towel", 5.65, 6.75, 14.45, 14.5, 2.2, 3.3, Color3.fromRGB(220, 120, 50), SP, true)
+	chair(3.1, 13.9, -2, Color3.fromRGB(110, 30, 40), SP, nil, Color3.fromRGB(40, 40, 44)) -- maroon folding chair
+	chair(6.2, 13.9, -2, Color3.fromRGB(150, 110, 60), WD, Color3.fromRGB(190, 160, 110)) -- rattan-back chair
+	xb("Towel", 5.65, 6.75, 14.52, 14.56, 2.2, 3.3, Color3.fromRGB(220, 120, 50), SP, true)
 	xb("CalendarPage", 2.5, 3.9, 12.9, 12.95, 4.5, 6.4, C.white, SP, true)
 	for i = 0, 4 do
 		xb("CalendarLine", 2.6, 3.8, 12.95, 12.96, 4.7 + i * 0.3, 4.72 + i * 0.3, Color3.fromRGB(170, 170, 170), SP, true)
 	end
-	-- ---------- back room W (the clip's long dark room: storage and clutter) ----------
-	xb("TallWardrobe", 0.75, 3.65, 0.75, 2.6, 0, 7.4, Color3.fromRGB(55, 35, 25), WD)
-	xb("WardrobeHandle", 3.65, 3.71, 1.6, 1.8, 3.4, 4.0, Color3.fromRGB(180, 150, 80), Mat.Metal, true)
+	flushLamp("HallLamp", 6.0, 15.0, 14)
+	-- ---------- back room W (the clip's dark storage room) ----------
+	wardrobe(0.75, 3.55, 0.75, 2.6, 7.2, "+z", Color3.fromRGB(55, 35, 25))
 	xb("Box", 8.8, 11.2, 0.75, 2.6, 0, 1.6, Color3.fromRGB(170, 130, 85), Mat.Cardboard)
-	xb("Box", 9.1, 10.9, 0.9, 2.4, 1.6, 2.8, Color3.fromRGB(160, 120, 80), Mat.Cardboard)
-	xp("RedTub", Vector3.new(0.9, 1.4, 1.4), 6.0, 0.45, 1.6, C.red, Mat.Plastic, true, Enum.PartType.Cylinder, VCYL)
-	chair(5.2, 5.7, -2, Color3.fromRGB(175, 45, 40), SP) -- red vinyl chair
-	xp("SideTable", Vector3.new(0.15, 1.8, 1.8), 7.6, 2.0, 5.6, C.white, Mat.Plastic, false, Enum.PartType.Cylinder, VCYL)
-	xb("SideTableLeg", 7.55, 7.65, 5.55, 5.65, 0, 1.92, C.white, Mat.Plastic, true)
-	xp("WickerStool", Vector3.new(1.4, 1.2, 1.2), 9.6, 0.7, 8.0, Color3.fromRGB(190, 150, 90), WD, false, Enum.PartType.Cylinder, VCYL)
+	xb("BoxTape", 9.9, 10.1, 0.75, 2.6, 1.6, 1.61, Color3.fromRGB(225, 200, 120), Mat.Plastic, true)
+	xb("Box", 9.1, 10.9, 0.9, 2.4, 1.61, 2.8, Color3.fromRGB(160, 120, 80), Mat.Cardboard)
+	xb("BoxTape", 9.1, 10.9, 1.55, 1.75, 2.8, 2.81, Color3.fromRGB(225, 200, 120), Mat.Plastic, true)
+	cyl("RedTub", 6.0, 0, 0.9, 1.6, 1.4, C.red, Mat.Plastic, true)
+	cyl("RedTubRim", 6.0, 0.9, 1.0, 1.6, 1.5, C.red, Mat.Plastic, true)
+	chair(5.2, 5.7, -2, Color3.fromRGB(175, 45, 40), SP, nil, CHROME)
+	cyl("SideTableBase", 7.6, 0, 0.1, 5.6, 0.9, C.white, Mat.Plastic, true)
+	cyl("SideTableStem", 7.6, 0.1, 1.93, 5.6, 0.14, C.white, Mat.Plastic, true)
+	cyl("SideTableTop", 7.6, 1.93, 2.08, 5.6, 1.8, C.white, Mat.Plastic)
+	cyl("Stool", 9.6, 0, 0.25, 8.0, 1.2, Color3.fromRGB(150, 110, 60), WD)
+	cyl("Stool", 9.6, 0.25, 1.15, 8.0, 1.0, Color3.fromRGB(195, 160, 100), WD)
+	cyl("Stool", 9.6, 1.15, 1.35, 8.0, 1.2, Color3.fromRGB(150, 110, 60), WD)
 	xb("ShoppingBag", 1.0, 2.2, 9.4, 10.6, 0, 1.6, Color3.fromRGB(200, 170, 120), SP, true)
+	xb("BagHandle", 1.5, 1.7, 9.6, 9.65, 1.6, 2.0, Color3.fromRGB(200, 170, 120), SP, true)
+	xb("BagHandle", 1.5, 1.7, 10.35, 10.4, 1.6, 2.0, Color3.fromRGB(200, 170, 120), SP, true)
 	xb("ShoppingBag", 1.0, 1.9, 10.8, 11.9, 0, 1.3, C.white, Mat.Plastic, true)
-	local tube = xb("TubeLight", 11.9, 12.05, 4.0, 5.8, 7.6, 7.75, Color3.fromRGB(240, 245, 250), Mat.Neon, true)
-	if tube then
-		light(tube, 16, 0.7, Color3.fromRGB(230, 240, 255))
-	end
-	xb("TubeConduit", 11.95, 12.05, 4.85, 4.95, 7.75, CEIL, C.white, Mat.Plastic, true)
+	tubeLight("BackTube", 5.2, 7.6, 4.2, 4.5, true)
 	xp("PlainFrame", Vector3.new(0.08, 1.8, 2.4), 12.01, 5.6, 8.7, Color3.fromRGB(110, 80, 50), WD, true, nil, CFrame.Angles(math.rad(3), 0, 0))
 	xp("FrameMat", Vector3.new(0.02, 1.4, 2.0), 11.96, 5.6, 8.7, Color3.fromRGB(205, 195, 170), SP, true, nil, CFrame.Angles(math.rad(3), 0, 0))
 	doorLeaf("RoomDoor", 10.85, 11.05, 9.45, 12.2, Color3.fromRGB(150, 115, 55))
-	-- ---------- bedroom M (generic) ----------
-	xb("BedHead", 21.5, 24.35, 0.76, 1.06, 0, 3.4, Color3.fromRGB(120, 80, 45), WD)
-	xb("BedBase", 21.5, 24.35, 1.06, 7.0, 0, 1.3, Color3.fromRGB(120, 80, 45), WD)
-	xb("Mattress", 21.6, 24.3, 1.1, 6.95, 1.3, 2.0, Color3.fromRGB(235, 232, 225), SP)
-	xb("Pillow", 22.0, 23.9, 1.3, 2.4, 2.0, 2.45, Color3.fromRGB(230, 225, 205), SP, true)
-	xb("Blanket", 21.7, 24.2, 3.6, 6.6, 2.0, 2.3, Color3.fromRGB(150, 120, 160), SP, true)
-	xb("Wardrobe", 12.85, 14.75, 3.0, 6.4, 0, 6.8, Color3.fromRGB(70, 42, 28), WD)
+	-- ---------- bedroom M ----------
+	bed(21.5, 24.35, 0.76, 7.0, Color3.fromRGB(120, 80, 45), Color3.fromRGB(235, 232, 225), Color3.fromRGB(150, 120, 160))
+	wardrobe(12.85, 14.75, 3.0, 6.4, 6.8, "+x", DARKWOOD)
 	xb("SmallTable", 16.5, 18.5, 7.5, 8.7, 2.4, 2.55, C.pine, WD)
 	for _, o in { { 16.55, 7.55 }, { 18.35, 7.55 }, { 16.55, 8.55 }, { 18.35, 8.55 } } do
-		xb("TableLeg", o[1], o[1] + 0.1, o[2], o[2] + 0.1, 0, 2.4, C.white, Mat.Metal, true)
+		xb("TableLeg", o[1], o[1] + 0.1, o[2], o[2] + 0.1, 0, 2.4, C.white, MT, true)
 	end
+	cyl("TableLampBase", 17.0, 2.55, 2.65, 7.9, 0.4, C.white, SP, true)
+	cyl("TableLampStem", 17.0, 2.65, 3.3, 7.9, 0.06, C.white, SP, true)
+	cyl("TableLampShade", 17.0, 3.3, 3.75, 7.9, 0.6, Color3.fromRGB(240, 230, 200), SP, true)
+	chair(17.5, 9.8, -2, TEAK, WD)
+	flushLamp("RoomMLamp", 18.6, 6.4, 14)
 	doorLeaf("RoomDoor", 19.4, 19.6, 9.45, 12.2, Color3.fromRGB(150, 115, 55))
-	-- ---------- dining room: fridge by the outer wall, round wooden table by the door to the living room ----------
-	xb("Fridge", 25.3, 27.3, 0.75, 2.6, 0, 5.6, Color3.fromRGB(232, 232, 228), SP)
-	xb("FridgeHandle", 26.9, 27.0, 2.6, 2.66, 2.5, 4.0, Color3.fromRGB(150, 150, 155), Mat.Metal, true)
-	xp("DiningTable", Vector3.new(0.15, 3.6, 3.6), 30.7, 2.55, 9.0, Color3.fromRGB(140, 90, 50), WD, false, Enum.PartType.Cylinder, VCYL)
-	xb("DiningTableLeg", 30.6, 30.8, 8.9, 9.1, 0, 2.475, Color3.fromRGB(110, 70, 40), WD)
-	chair(27.55, 9.0, 1, Color3.fromRGB(140, 90, 50), WD)
-	chair(33.85, 9.0, -1, Color3.fromRGB(140, 90, 50), WD)
-	chair(30.7, 5.95, 2, Color3.fromRGB(140, 90, 50), WD)
-	xb("PendantCord", 30.65, 30.75, 8.95, 9.05, 7.6, CEIL, C.black, SP, true)
-	local shade = xp("PendantShade", Vector3.new(0.6, 1.2, 1.2), 30.7, 7.3, 9.0, Color3.fromRGB(250, 245, 230), Mat.Neon, true, Enum.PartType.Cylinder, VCYL)
-	light(shade, 18, 0.7, Color3.fromRGB(255, 240, 215))
-	-- ---------- kitchen ----------
-	xb("Counter", 35.1, 41.7, 0.75, 2.6, 0, 2.9, Color3.fromRGB(200, 190, 170), WD)
-	xb("Counter", 39.8, 41.7, 2.6, 6.3, 0, 2.9, Color3.fromRGB(200, 190, 170), WD)
-	xb("CounterTop", 35.1, 41.7, 0.75, 2.6, 2.9, 3.0, Color3.fromRGB(120, 125, 125), Mat.Slate)
-	xb("CounterTop", 39.8, 41.7, 2.6, 6.3, 2.9, 3.0, Color3.fromRGB(120, 125, 125), Mat.Slate)
-	xb("GasStove", 36.0, 37.6, 1.0, 2.3, 3.0, 3.25, C.black, Mat.Metal)
-	xp("Pot", Vector3.new(0.6, 0.9, 0.9), 36.5, 3.55, 1.65, Color3.fromRGB(180, 180, 185), Mat.Metal, true, Enum.PartType.Cylinder, VCYL)
-	xp("RiceCooker", Vector3.new(0.8, 0.9, 0.9), 40.7, 3.4, 4.0, C.white, SP, true, Enum.PartType.Cylinder, VCYL)
-	xb("WaterDispenser", 35.2, 36.2, 4.8, 5.8, 0, 3.6, C.white, SP)
-	xp("WaterBottle", Vector3.new(1.2, 0.8, 0.8), 35.7, 4.2, 5.3, Color3.fromRGB(110, 170, 220), SP, true, Enum.PartType.Cylinder, VCYL)
-	-- ---------- bathroom: toilet, shower pipe, a bucket; its door opens in (out, it blocked the way to the kitchen) ----------
-	xb("ToiletBowl", 40.4, 41.2, 10.8, 11.6, 0, 1.2, C.white, SP)
-	xb("ToiletTank", 41.2, 41.65, 10.5, 11.9, 1.0, 2.6, C.white, SP)
-	xb("ShowerPipe", 41.55, 41.65, 9.0, 9.1, 0.5, 6.4, Color3.fromRGB(200, 200, 205), Mat.Metal, true)
-	xb("ShowerArm", 41.2, 41.55, 8.95, 9.15, 6.4, 6.55, Color3.fromRGB(200, 200, 205), Mat.Metal, true)
-	xp("ShowerHead", Vector3.new(0.08, 0.5, 0.5), 41.15, 6.35, 9.05, Color3.fromRGB(200, 200, 205), Mat.Metal, true, Enum.PartType.Cylinder, VCYL)
-	xp("Bucket", Vector3.new(0.9, 0.8, 0.8), 39.4, 0.45, 11.2, Color3.fromRGB(60, 120, 200), Mat.Plastic, true, Enum.PartType.Cylinder, VCYL)
+	-- ---------- dining room: fridge in the outer wall's kitchen-side corner (owner), round wooden table by the living-room door, a sideboard ----------
+	xb("FridgeBody", 32.3, 34.3, 0.75, 2.45, 0, 5.6, Color3.fromRGB(205, 205, 202), SP)
+	xb("FridgeKick", 32.35, 34.25, 2.45, 2.5, 0, 0.25, Color3.fromRGB(60, 60, 62), SP, true)
+	xb("FridgeDoor", 32.3, 34.3, 2.45, 2.6, 0.25, 3.85, Color3.fromRGB(238, 238, 235), SP)
+	xb("FreezerDoor", 32.3, 34.3, 2.45, 2.6, 3.9, 5.6, Color3.fromRGB(238, 238, 235), SP)
+	for _, h in { { 1.6, 3.4 }, { 4.1, 5.0 } } do
+		xb("FridgeHandle", 33.95, 34.05, 2.66, 2.72, h[1], h[2], CHROME, MT, true)
+		xb("FridgeHandleFoot", 33.95, 34.05, 2.6, 2.66, h[1], h[1] + 0.1, CHROME, MT, true)
+		xb("FridgeHandleFoot", 33.95, 34.05, 2.6, 2.66, h[2] - 0.1, h[2], CHROME, MT, true)
+	end
+	xb("FridgeMagnetNote", 32.6, 33.1, 2.6, 2.61, 3.0, 3.6, Color3.fromRGB(250, 240, 150), SP, true)
+	cyl("TableTop", 30.7, 2.48, 2.63, 9.0, 3.6, Color3.fromRGB(145, 92, 50), WD)
+	cyl("TableColumn", 30.7, 0.12, 2.48, 9.0, 0.35, Color3.fromRGB(110, 70, 40), WD)
+	xb("TableFoot", 29.8, 31.6, 8.9, 9.1, 0, 0.12, Color3.fromRGB(110, 70, 40), WD, true)
+	xb("TableFoot", 30.6, 30.8, 8.1, 8.9, 0, 0.12, Color3.fromRGB(110, 70, 40), WD, true)
+	xb("TableFoot", 30.6, 30.8, 9.1, 9.9, 0, 0.12, Color3.fromRGB(110, 70, 40), WD, true)
+	cyl("Thermos", 30.2, 2.63, 3.4, 8.7, 0.35, Color3.fromRGB(200, 60, 60), SP, true)
+	cyl("Cup", 31.2, 2.63, 2.85, 9.3, 0.22, C.white, SP, true)
+	chair(27.55, 9.0, 1, TEAK, WD, Color3.fromRGB(200, 170, 120))
+	chair(33.85, 9.0, -1, TEAK, WD, Color3.fromRGB(200, 170, 120))
+	chair(30.7, 5.95, 2, TEAK, WD, Color3.fromRGB(200, 170, 120))
+	xb("PendantCord", 30.65, 30.75, 8.95, 9.05, 7.9, CEIL, C.black, SP, true)
+	cyl("PendantShade", 30.7, 7.4, 7.9, 9.0, 1.4, Color3.fromRGB(225, 205, 160), SP, true)
+	local bulb = ball("PendantBulb", 30.7, 7.25, 9.0, 0.3, Color3.fromRGB(255, 240, 210), Mat.Neon, true)
+	light(bulb, 16, 0.75, Color3.fromRGB(255, 236, 205))
+	xb("Sideboard", 25.2, 26.4, 4.0, 8.0, 0.2, 2.5, TEAK, WD)
+	xb("SideboardPlinth", 25.2, 26.3, 4.0, 8.0, 0, 0.2, DARKWOOD, WD)
+	for _, d in { { 4.08, 5.98 }, { 6.02, 7.92 } } do
+		xb("SideboardDoor", 26.4, 26.45, d[1], d[2], 0.3, 2.4, TEAK:Lerp(Color3.new(1, 1, 1), 0.06), WD)
+	end
+	xb("SideboardKnob", 26.45, 26.5, 5.85, 5.95, 1.3, 1.45, GOLD, MT, true)
+	xb("SideboardKnob", 26.45, 26.5, 6.05, 6.15, 1.3, 1.45, GOLD, MT, true)
+	cyl("Jar", 25.8, 2.5, 3.1, 4.6, 0.4, Color3.fromRGB(230, 200, 120), SP, true)
+	cyl("Jar", 25.8, 2.5, 2.9, 5.3, 0.35, Color3.fromRGB(200, 120, 70), SP, true)
+	-- ---------- kitchen: base cabinets with doors, a counter top with a steel sink, the gas stove with a pot ----------
+	local CAB = Color3.fromRGB(205, 195, 172)
+	xb("KitchenCabinet", 35.1, 37.9, 0.75, 2.5, 0, 2.9, CAB, WD)
+	xb("KitchenCabinet", 37.9, 39.3, 0.75, 2.5, 0, 2.4, CAB, WD)
+	xb("KitchenCabinet", 39.3, 41.7, 0.75, 2.5, 0, 2.9, CAB, WD)
+	for _, d in { { 35.15, 36.48 }, { 36.52, 37.85 }, { 37.95, 39.25 }, { 39.35, 40.48 }, { 40.52, 41.65 } } do
+		xb("KitchenDoor", d[1], d[2], 2.5, 2.56, 0.2, 2.3, CAB:Lerp(Color3.new(1, 1, 1), 0.15), WD)
+		xb("KitchenHandle", (d[1] + d[2]) / 2 - 0.2, (d[1] + d[2]) / 2 + 0.2, 2.56, 2.6, 2.0, 2.1, CHROME, MT, true)
+	end
+	local TOP = Color3.fromRGB(110, 115, 118)
+	xb("CounterTop", 35.05, 37.9, 0.7, 2.65, 2.9, 3.05, TOP, Mat.Slate)
+	xb("CounterTop", 39.3, 41.7, 0.7, 2.65, 2.9, 3.05, TOP, Mat.Slate)
+	xb("CounterTop", 37.9, 39.3, 0.7, 1.0, 2.9, 3.05, TOP, Mat.Slate)
+	xb("CounterTop", 37.9, 39.3, 2.3, 2.65, 2.9, 3.05, TOP, Mat.Slate)
+	xb("SinkBottom", 37.95, 39.25, 1.05, 2.25, 2.4, 2.5, CHROME, MT)
+	xb("SinkWall", 37.95, 39.25, 1.05, 1.11, 2.5, 3.0, CHROME, MT, true)
+	xb("SinkWall", 37.95, 39.25, 2.19, 2.25, 2.5, 3.0, CHROME, MT, true)
+	xb("SinkWall", 37.95, 38.01, 1.11, 2.19, 2.5, 3.0, CHROME, MT, true)
+	xb("SinkWall", 39.19, 39.25, 1.11, 2.19, 2.5, 3.0, CHROME, MT, true)
+	cyl("Tap", 38.6, 3.05, 3.6, 0.85, 0.1, CHROME, MT, true)
+	xb("TapSpout", 38.55, 38.65, 0.9, 1.35, 3.5, 3.6, CHROME, MT, true)
+	xb("SideCabinet", 39.85, 41.7, 2.65, 6.3, 0, 2.9, CAB, WD)
+	for _, d in { { 2.8, 4.4 }, { 4.5, 6.2 } } do
+		xb("KitchenDoor", 39.79, 39.85, d[1], d[2], 0.2, 2.3, CAB:Lerp(Color3.new(1, 1, 1), 0.15), WD)
+		xb("KitchenHandle", 39.75, 39.79, (d[1] + d[2]) / 2 - 0.2, (d[1] + d[2]) / 2 + 0.2, 2.0, 2.1, CHROME, MT, true)
+	end
+	xb("CounterTop", 39.7, 41.75, 2.65, 6.35, 2.9, 3.05, TOP, Mat.Slate)
+	xb("GasStove", 40.0, 41.5, 3.0, 5.6, 3.05, 3.3, Color3.fromRGB(28, 28, 30), MT)
+	for _, z in { 3.7, 4.9 } do
+		cyl("Burner", 40.75, 3.3, 3.36, z, 0.6, Color3.fromRGB(70, 70, 72), MT, true)
+		xp("StoveKnob", Vector3.new(0.05, 0.16, 0.16), 39.975, 3.18, z, CHROME, MT, true, Enum.PartType.Cylinder)
+	end
+	cyl("Pot", 40.75, 3.36, 3.96, 3.7, 0.8, Color3.fromRGB(185, 185, 190), MT, true)
+	cyl("PotLid", 40.75, 3.96, 4.0, 3.7, 0.82, Color3.fromRGB(165, 165, 170), MT, true)
+	ball("PotKnob", 40.75, 4.05, 3.7, 0.1, C.black, SP, true)
+	xb("PotHandle", 40.68, 40.82, 3.28, 3.29, 3.75, 3.82, C.black, SP, true)
+	xb("PotHandle", 40.68, 40.82, 4.11, 4.12, 3.75, 3.82, C.black, SP, true)
+	cyl("Kettle", 40.75, 3.36, 3.9, 4.9, 0.6, Color3.fromRGB(200, 60, 50), MT, true)
+	cyl("RiceCooker", 36.2, 3.05, 3.75, 1.7, 0.8, C.white, SP, true)
+	cyl("RiceCookerLid", 36.2, 3.75, 3.85, 1.7, 0.7, Color3.fromRGB(190, 190, 192), SP, true)
+	xb("WallShelf", 35.3, 37.6, 0.65, 1.3, 6.0, 6.1, CAB, WD, true)
+	for i, x in { 35.6, 36.2, 36.8, 37.3 } do
+		cyl("ShelfJar", x, 6.1, 6.5 + (i % 2) * 0.15, 0.95, 0.3, Color3.fromRGB(220, 200 - i * 20, 120), SP, true)
+	end
+	xb("WaterDispenser", 35.2, 36.2, 4.8, 5.8, 0, 3.4, C.white, SP)
+	xb("DispenserTap", 35.6, 35.8, 4.74, 4.8, 2.2, 2.4, Color3.fromRGB(60, 120, 200), SP, true)
+	cyl("WaterBottle", 35.7, 3.4, 4.7, 5.3, 0.85, Color3.fromRGB(120, 175, 215), SP, true)
+	tubeLight("KitchenTube", 37.2, 37.5, 2.5, 5.5, true)
+	-- ---------- bathroom: a sitting toilet, the shower pipe with valve and head, a water drum with dipper, a bucket ----------
+	xb("ToiletPedestal", 40.6, 41.25, 10.85, 11.45, 0, 0.9, C.white, SP)
+	xb("ToiletBowl", 40.35, 41.25, 10.7, 11.6, 0.9, 1.35, C.white, SP)
+	cyl("ToiletSeat", 40.8, 1.35, 1.41, 11.15, 0.85, Color3.fromRGB(245, 245, 242), SP, true)
+	xb("ToiletLid", 41.18, 41.24, 10.75, 11.55, 1.41, 2.3, Color3.fromRGB(245, 245, 242), SP, true)
+	xb("ToiletTank", 41.25, 41.7, 10.55, 11.75, 1.25, 2.6, C.white, SP)
+	cyl("FlushButton", 41.47, 2.6, 2.65, 11.15, 0.18, CHROME, MT, true)
+	xb("ShowerPipe", 41.55, 41.65, 9.0, 9.1, 0.5, 6.4, CHROME, MT, true)
+	xp("ShowerValve", Vector3.new(0.1, 0.3, 0.3), 41.5, 3.8, 9.05, CHROME, MT, true, Enum.PartType.Cylinder)
+	xb("ShowerArm", 41.2, 41.55, 8.95, 9.15, 6.4, 6.55, CHROME, MT, true)
+	cyl("ShowerHead", 41.15, 6.31, 6.39, 9.05, 0.5, CHROME, MT, true)
+	cyl("WaterDrum", 39.3, 0, 2.0, 11.5, 1.2, Color3.fromRGB(50, 110, 190), Mat.Plastic, true)
+	cyl("Dipper", 39.3, 2.0, 2.2, 11.5, 0.45, Color3.fromRGB(240, 200, 60), Mat.Plastic, true)
+	cyl("Bucket", 40.6, 0, 0.8, 9.0, 0.8, Color3.fromRGB(60, 120, 200), Mat.Plastic, true)
+	cyl("FloorDrain", 40.0, 0, 0.01, 10.0, 0.3, Color3.fromRGB(150, 150, 152), MT, true)
+	for _, y in { 3.0, 6.0 } do
+		xb("TileLine", 41.74, 41.75, 7.05, 12.25, y, y + 0.03, Color3.fromRGB(95, 130, 115), SP, true)
+		xb("TileLine", 38.65, 41.75, 7.05, 7.06, y, y + 0.03, Color3.fromRGB(95, 130, 115), SP, true)
+		xb("TileLine", 38.65, 41.75, 12.24, 12.25, y, y + 0.03, Color3.fromRGB(95, 130, 115), SP, true)
+	end
+	local bb = ball("BathBulb", 40.2, CEIL - 0.2, 9.8, 0.3, Color3.fromRGB(255, 245, 225), Mat.Neon, true)
+	cyl("BathBulbHolder", 40.2, CEIL - 0.05, CEIL, 9.8, 0.25, C.white, SP, true)
+	light(bb, 10, 0.6, Color3.fromRGB(255, 240, 215))
 	doorLeaf("BathDoor", 38.65, 41.4, 8.0, 8.2, Color3.fromRGB(170, 175, 170))
-	-- the sink outside the bathroom, in the corner by the kitchen / dining
+	-- the sink outside the bathroom, in the kitchen / dining corner
 	xb("SinkPedestal", 35.6, 36.0, 11.6, 12.0, 0, 2.4, C.white, SP)
 	xb("SinkBasin", 35.1, 36.5, 11.1, 12.25, 2.4, 2.9, C.white, SP)
-	xb("SinkTap", 35.75, 35.85, 12.0, 12.25, 2.9, 3.25, Color3.fromRGB(200, 200, 205), Mat.Metal, true)
-	xb("SinkMirror", 35.2, 36.4, 12.25, 12.3, 3.6, 5.4, Color3.fromRGB(180, 200, 205), SP, true).Reflectance = 0.3
+	xb("SinkBowl", 35.3, 36.3, 11.25, 12.05, 2.9, 2.91, Color3.fromRGB(205, 210, 212), SP, true)
+	xb("SinkTap", 35.75, 35.85, 12.08, 12.25, 2.9, 3.25, CHROME, MT, true)
+	xb("MirrorFrame", 35.1, 36.5, 12.27, 12.3, 3.5, 5.5, DARKWOOD, WD, true)
+	xb("Mirror", 35.2, 36.4, 12.25, 12.27, 3.6, 5.4, Color3.fromRGB(180, 200, 205), SP, true).Reflectance = 0.3
+	xb("SoapShelf", 35.3, 36.3, 12.0, 12.25, 3.25, 3.32, C.white, SP, true)
 	-- ---------- yellow room (the clip's room with the desk) ----------
-	xb("Headboard", 9.35, 12.25, 17.95, 18.2, 0, 3.6, C.yellowWood, WD)
-	xb("BedBase", 9.35, 12.25, 18.2, 24.1, 0, 1.4, C.yellowWood, WD)
-	xb("Mattress", 9.45, 12.15, 18.25, 24.05, 1.4, 2.2, Color3.fromRGB(240, 236, 232), SP)
-	local r = Random.new(928)
-	for _ = 0, 7 do
-		local x = r:NextNumber(9.6, 11.8)
-		local z = r:NextNumber(19.8, 23.6)
-		xb("SheetFlower", x, x + 0.25, z, z + 0.25, 2.2, 2.21, Color3.fromRGB(230, 150, 170), SP, true)
+	-- owner's mark-up: wardrobe in the north-west corner, small shelves next to it, the big book shelf between the
+	-- wardrobe and the bed, the bed's head on the west wall (lower left), piano on the east wall, PC desk + chair in the
+	-- south-east corner
+	bedX(9.35, 15.6, 22.0, 26.3, C.yellowWood, Color3.fromRGB(240, 236, 232), Color3.fromRGB(120, 130, 175), 928)
+	xb("SideTop", 9.35, 10.75, 26.4, 27.8, 2.1, 2.25, C.pine, WD)
+	xb("SideShelf", 9.5, 10.6, 26.55, 27.65, 0.8, 0.88, C.pine, WD, true)
+	for _, o in { { 9.4, 26.45 }, { 10.6, 26.45 }, { 9.4, 27.65 }, { 10.6, 27.65 } } do
+		xb("SideLeg", o[1], o[1] + 0.1, o[2], o[2] + 0.1, 0, 2.1, C.white, MT, true)
 	end
-	xb("Pillow", 9.7, 11.9, 18.35, 19.6, 2.2, 2.7, Color3.fromRGB(235, 228, 205), SP, true)
-	xb("Blanket", 9.8, 11.7, 20.2, 22.4, 2.21, 2.75, Color3.fromRGB(120, 130, 175), SP, true)
-	xb("SideTop", 9.35, 10.75, 24.3, 25.7, 2.1, 2.25, C.pine, WD)
-	for _, o in { { 9.4, 24.35 }, { 10.6, 24.35 }, { 9.4, 25.55 }, { 10.6, 25.55 } } do
-		xb("SideLeg", o[1], o[1] + 0.1, o[2], o[2] + 0.1, 0, 2.1, C.white, Mat.Metal, true)
-	end
-	xb("Tissues", 9.5, 10.0, 24.5, 24.9, 2.25, 2.6, Color3.fromRGB(240, 220, 110), Mat.Cardboard, true)
-	xp("ClampLamp", Vector3.new(0.5, 0.5, 0.5), 10.4, 2.5, 25.3, C.white, Mat.Plastic, true, Enum.PartType.Ball)
-	for _, p in { { 9.35, 25.9 }, { 10.53, 25.9 }, { 9.35, 27.68 }, { 10.53, 27.68 } } do
-		xb("ShelfPost", p[1], p[1] + 0.12, p[2], p[2] + 0.12, 0, 6.0, C.white, Mat.Metal)
+	xb("Tissues", 9.5, 10.0, 26.6, 27.0, 2.25, 2.6, Color3.fromRGB(240, 220, 110), Mat.Cardboard, true)
+	cyl("LampBase", 10.4, 2.25, 2.33, 27.3, 0.35, C.black, MT, true)
+	cyl("LampStem", 10.4, 2.33, 3.0, 27.3, 0.05, C.black, MT, true)
+	ball("LampHead", 10.4, 3.2, 27.3, 0.4, C.white, SP, true)
+	-- the big book shelf (white X-braced frame, pine shelves) facing the bed
+	for _, p in { { 9.35, 20.0 }, { 12.08, 20.0 }, { 9.35, 20.88 }, { 12.08, 20.88 } } do
+		xb("ShelfPost", p[1], p[1] + 0.12, p[2], p[2] + 0.12, 0, 6.0, C.white, MT)
 	end
 	for i = 0, 3 do
 		local y = 0.3 + i * 1.8
-		xb("PineShelf", 9.35, 10.65, 26.02, 27.68, y, y + 0.1, C.pine, WD)
-		booksX(9.45, 10.55, 26.1, 27.6, y + 0.1, 1.4, 40 + i)
+		xb("PineShelf", 9.47, 12.08, 20.0, 21.0, y, y + 0.1, C.pine, WD)
+		booksX(9.55, 12.0, 20.1, 20.9, y + 0.1, 1.4, 40 + i)
 	end
-	local bl = math.sqrt(1.3 ^ 2 + 5.6 ^ 2) - 0.3
-	local ba = math.atan2(1.3, 5.6)
-	xp("ShelfBrace", Vector3.new(0.06, bl, 0.04), 10.0, 3.0, 25.86, C.white, Mat.Metal, true, nil, CFrame.Angles(0, 0, ba))
-	xp("ShelfBrace", Vector3.new(0.06, bl, 0.04), 10.0, 3.0, 25.82, C.white, Mat.Metal, true, nil, CFrame.Angles(0, 0, -ba))
-	xb("AirCooler", 12.6, 13.8, 18.0, 19.0, 0.25, 3.2, C.white, Mat.Plastic)
-	xb("CoolerCastor", 12.7, 13.7, 18.1, 18.9, 0, 0.25, Color3.fromRGB(60, 60, 60), Mat.Rubber, true)
-	for i = 0, 3 do
-		xb("CoolerGrid", 12.8, 13.6, 19.0, 19.04, 0.8 + i * 0.55, 1.15 + i * 0.55, Color3.fromRGB(150, 155, 160), Mat.Plastic, true)
+	local bl = math.sqrt(0.76 ^ 2 + 5.6 ^ 2) - 0.3
+	local ba = math.atan2(0.76, 5.6)
+	xp("ShelfBrace", Vector3.new(0.04, bl, 0.06), 12.24, 3.0, 20.5, C.white, MT, true, nil, CFrame.Angles(ba, 0, 0))
+	xp("ShelfBrace", Vector3.new(0.04, bl, 0.06), 12.28, 3.0, 20.5, C.white, MT, true, nil, CFrame.Angles(-ba, 0, 0))
+	-- the small shelves by the wardrobe (two low open units with decorations)
+	for i, x0 in { 13.3, 14.75 } do
+		xb("SmallShelfSide", x0, x0 + 0.08, 17.95, 19.15, 0, 3.0, C.white, Mat.Plastic)
+		xb("SmallShelfSide", x0 + 1.27, x0 + 1.35, 17.95, 19.15, 0, 3.0, C.white, Mat.Plastic)
+		for _, y in { 0, 1.45, 2.9 } do
+			xb("SmallShelfBoard", x0 + 0.08, x0 + 1.27, 17.95, 19.15, y, y + 0.1, C.pine, WD)
+		end
+		booksX(x0 + 0.15, x0 + 1.2, 18.05, 19.05, 0.1, 1.15, 50 + i)
 	end
-	-- round wall light (white diffuser, blue-silver rim) on surface conduit, a square clock
-	xp("WallLightRim", Vector3.new(0.08, 1.6, 1.6), 13.0, 6.4, 17.94, Color3.fromRGB(140, 165, 200), Mat.Metal, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
-	local wl = xp("WallLight", Vector3.new(0.06, 1.2, 1.2), 13.0, 6.4, 18.01, Color3.fromRGB(250, 250, 248), Mat.Neon, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
+	ball("SoftToy", 13.7, 1.8, 18.6, 0.5, Color3.fromRGB(150, 190, 230), SP, true)
+	cyl("PenMug", 14.3, 1.55, 1.85, 18.5, 0.3, Color3.fromRGB(230, 80, 70), SP, true)
+	cyl("Jar", 15.3, 1.55, 2.05, 18.5, 0.35, Color3.fromRGB(240, 220, 170), SP, true)
+	xb("Planter", 15.6, 16.0, 18.3, 18.8, 3.0, 3.35, Color3.fromRGB(220, 215, 200), SP, true)
+	ball("PlanterLeaves", 15.8, 3.6, 18.55, 0.5, Color3.fromRGB(130, 170, 70), SP, true)
+	-- air cooler by the bed's foot: castors, body, louvres (facing the bed), water window, top cap with buttons
+	for _, x in { 16.4, 17.3 } do
+		for _, z in { 25.15, 25.85 } do
+			ball("Castor", x, 0.1, z, 0.2, C.black, Mat.Rubber, true)
+		end
+	end
+	xb("AirCooler", 16.25, 17.45, 25.0, 26.0, 0.2, 3.0, Color3.fromRGB(235, 235, 232), Mat.Plastic)
+	xb("CoolerCap", 16.3, 17.4, 25.05, 25.95, 3.0, 3.2, Color3.fromRGB(215, 215, 212), Mat.Plastic)
+	xb("CoolerButtons", 16.55, 17.15, 25.6, 25.8, 3.2, 3.23, Color3.fromRGB(60, 140, 200), Mat.Neon, true)
+	for i = 0, 5 do
+		xb("CoolerLouvre", 16.21, 16.25, 25.1, 25.9, 1.1 + i * 0.3, 1.22 + i * 0.3, Color3.fromRGB(150, 155, 160), Mat.Plastic, true)
+	end
+	xb("CoolerWater", 16.22, 16.25, 25.2, 25.8, 0.45, 0.85, Color3.fromRGB(150, 190, 220), Mat.Plastic, true)
+	-- round wall light (white diffuser, blue-silver rim) on surface conduit, a square clock, a ceiling fan
+	xp("WallLightRim", Vector3.new(0.08, 1.6, 1.6), 13.6, 6.4, 17.94, Color3.fromRGB(140, 165, 200), MT, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
+	local wl = xp("WallLight", Vector3.new(0.06, 1.2, 1.2), 13.6, 6.4, 18.01, Color3.fromRGB(250, 250, 248), Mat.Neon, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
 	light(wl, 18, 0.8, Color3.fromRGB(245, 248, 255))
-	xb("Conduit", 12.95, 13.05, 17.9, 17.98, 7.2, CEIL, C.white, Mat.Plastic, true)
-	xb("ClockFrame", 10.0, 11.0, 17.9, 17.98, 7.6, 8.6, Color3.fromRGB(70, 45, 30), WD, true)
+	xb("Conduit", 13.55, 13.65, 17.9, 17.98, 7.2, CEIL, C.white, Mat.Plastic, true)
+	xb("ClockFrame", 10.0, 11.0, 17.9, 17.98, 7.6, 8.6, DARKWOOD, WD, true)
 	xb("ClockFace", 10.12, 10.88, 17.98, 18.0, 7.72, 8.48, C.white, SP, true)
 	xb("ClockHand", 10.47, 10.53, 18.0, 18.01, 8.1, 8.4, C.black, SP, true)
-	xb("Wardrobe", 14.2, 17.6, 17.95, 19.85, 0, 6.8, Color3.fromRGB(70, 42, 28), WD)
-	xb("WardrobeHandle", 15.8, 16.0, 19.85, 19.91, 3.2, 3.8, Color3.fromRGB(190, 155, 80), Mat.Metal, true)
-	xb("BoxOnTop", 14.5, 17.2, 18.1, 19.6, 6.8, 7.9, Color3.fromRGB(165, 125, 80), Mat.Cardboard, true)
-	-- desk with a drawer pedestal, a dark monitor, keyboard, mouse; a black tower under it; an office chair
-	xb("DeskTop", 21.55, 23.85, 21.3, 24.2, 2.45, 2.65, C.brown, WD)
-	xb("DeskPedestal", 21.75, 23.85, 22.9, 24.2, 0, 2.45, Color3.fromRGB(62, 40, 28), WD)
-	xb("DeskLeg", 21.55, 21.75, 21.3, 21.5, 0, 2.45, C.brown, WD)
-	xb("DeskLeg", 23.65, 23.85, 21.3, 21.5, 0, 2.45, C.brown, WD)
+	ceilingFan(17.0, 25.6)
+	wardrobe(9.35, 12.9, 18.0, 19.85, 6.8, "+z", DARKWOOD)
+	xb("BoxOnTop", 9.6, 12.6, 18.1, 19.6, 6.92, 7.9, Color3.fromRGB(165, 125, 80), Mat.Cardboard, true)
+	xb("BoxTape", 9.6, 12.6, 18.75, 18.95, 7.9, 7.91, Color3.fromRGB(235, 200, 60), Mat.Plastic, true)
+	-- PC desk in the south-east corner against the east wall: drawer pedestal (handles), monitor with a thin bezel
+	-- and a dim screen, keyboard, mouse; a black tower; a desk chair on a five-star base
+	xb("DeskTop", 21.55, 23.85, 24.8, 27.75, 2.45, 2.65, C.brown, WD)
+	xb("DeskPedestal", 21.75, 23.85, 26.4, 27.75, 0, 2.45, Color3.fromRGB(62, 40, 28), WD)
+	xb("DeskLeg", 21.55, 21.75, 24.8, 25.0, 0, 2.45, C.brown, WD)
+	xb("DeskLeg", 23.65, 23.85, 24.8, 25.0, 0, 2.45, C.brown, WD)
 	for i = 0, 2 do
-		xb("DrawerFront", 21.69, 21.75, 23.0, 24.1, 0.2 + i * 0.75, 0.85 + i * 0.75, Color3.fromRGB(78, 52, 36), WD, true)
+		xb("DrawerFront", 21.69, 21.75, 26.5, 27.65, 0.2 + i * 0.75, 0.85 + i * 0.75, Color3.fromRGB(78, 52, 36), WD, true)
+		xb("DrawerPull", 21.65, 21.69, 26.85, 27.25, 0.5 + i * 0.75, 0.58 + i * 0.75, GOLD, MT, true)
 	end
-	xb("DeskMat", 22.0, 23.2, 21.6, 23.8, 2.65, 2.67, Color3.fromRGB(110, 110, 112), SP, true)
-	xb("MonitorStand", 23.45, 23.75, 22.6, 23.0, 2.65, 3.1, C.black, Mat.Metal, true)
-	xb("Monitor", 23.3, 23.45, 21.6, 24.0, 3.1, 4.8, C.black, SP, true)
-	xb("Keyboard", 22.2, 22.6, 21.8, 23.6, 2.67, 2.75, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
-	xb("Mouse", 22.25, 22.5, 23.7, 23.9, 2.67, 2.78, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
-	xb("Tower", 22.3, 23.5, 21.55, 22.35, 0, 2.2, Color3.fromRGB(28, 28, 30), SP)
-	xb("OfficeSeat", 19.9, 21.3, 22.0, 23.4, 1.6, 1.85, C.black, SP)
-	xb("OfficeBack", 19.9, 20.1, 22.0, 23.4, 1.85, 4.2, C.black, SP)
-	xb("OfficeStem", 20.55, 20.65, 22.65, 22.75, 0.2, 1.6, Color3.fromRGB(60, 60, 62), Mat.Metal, true)
-	xb("OfficeBase", 20.0, 21.2, 22.1, 23.3, 0, 0.2, C.black, Mat.Plastic, true)
-	-- upright piano (dark wood) against the east wall, a blank whiteboard over it with green tape corners
-	xb("Piano", 22.3, 23.85, 24.5, 27.8, 0, 3.9, Color3.fromRGB(58, 36, 26), WD)
-	xb("PianoKeys", 21.5, 22.3, 24.6, 27.7, 2.2, 2.35, Color3.fromRGB(245, 245, 240), SP)
+	xb("DeskMat", 22.0, 23.2, 25.1, 27.3, 2.65, 2.67, Color3.fromRGB(110, 110, 112), SP, true)
+	xb("MonitorStand", 23.45, 23.75, 26.1, 26.5, 2.65, 2.7, C.black, MT, true)
+	xb("MonitorNeck", 23.5, 23.6, 26.25, 26.35, 2.7, 3.1, C.black, MT, true)
+	xb("Monitor", 23.3, 23.45, 25.1, 27.5, 3.1, 4.8, Color3.fromRGB(18, 18, 20), SP, true)
+	xb("MonitorScreen", 23.27, 23.3, 25.18, 27.42, 3.18, 4.72, Color3.fromRGB(34, 44, 66), Mat.Neon, true)
+	xb("Webcam", 23.33, 23.43, 26.2, 26.4, 4.8, 4.9, C.black, SP, true)
+	xb("Keyboard", 22.2, 22.6, 25.3, 27.1, 2.67, 2.75, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
+	xb("Mouse", 22.25, 22.5, 27.2, 27.4, 2.67, 2.78, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
+	xb("Tower", 22.3, 23.5, 25.05, 25.85, 0, 2.2, Color3.fromRGB(28, 28, 30), SP)
+	xb("TowerButton", 22.26, 22.3, 25.4, 25.5, 1.9, 2.0, Color3.fromRGB(120, 200, 255), Mat.Neon, true)
+	officeChair(20.4, 26.2, 1, C.black)
+	-- upright piano (dark wood): cheeks, key bed, keys, fallboard, music desk, kickboard, pedals, lid
+	local PW = Color3.fromRGB(58, 36, 26)
+	xb("PianoBody", 22.6, 23.85, 20.45, 23.45, 0, 3.9, PW, WD)
+	xb("PianoCheek", 21.4, 23.85, 20.30, 20.45, 0, 2.6, PW, WD)
+	xb("PianoCheek", 21.4, 23.85, 23.45, 23.60, 0, 2.6, PW, WD)
+	xb("PianoCheekTop", 22.6, 23.85, 20.30, 20.45, 2.6, 3.9, PW, WD)
+	xb("PianoCheekTop", 22.6, 23.85, 23.45, 23.60, 2.6, 3.9, PW, WD)
+	xb("PianoKeyBed", 21.4, 22.6, 20.45, 23.45, 2.0, 2.2, PW, WD)
+	xb("PianoKeys", 21.45, 22.3, 20.50, 23.40, 2.2, 2.3, Color3.fromRGB(245, 245, 240), SP)
 	for i = 0, 10 do
-		local z = 24.8 + i * 0.28
-		xb("PianoBlackKey", 21.6, 22.05, z, z + 0.1, 2.35, 2.45, C.black, SP, true)
+		local z = 20.65 + i * 0.26
+		xb("PianoBlackKey", 21.9, 22.3, z, z + 0.1, 2.3, 2.38, C.black, SP, true)
 	end
-	xb("MusicStack", 22.6, 23.6, 25.2, 26.6, 3.9, 4.5, Color3.fromRGB(240, 238, 230), SP, true)
-	xb("Whiteboard", 23.88, 23.95, 24.8, 27.2, 4.6, 6.4, C.white, SP, true)
-	for _, p in { { 24.8, 4.6 }, { 26.9, 4.6 }, { 24.8, 6.1 }, { 26.9, 6.1 } } do
+	xb("PianoFallboard", 22.3, 22.6, 20.45, 23.45, 2.2, 2.55, PW, WD)
+	xb("PianoMusicDesk", 22.4, 22.6, 20.80, 23.10, 2.55, 3.4, PW, WD, true)
+	xb("SheetMusic", 22.37, 22.4, 21.10, 22.70, 2.7, 3.3, Color3.fromRGB(245, 243, 235), SP, true)
+	xb("PianoKick", 22.45, 22.6, 20.45, 23.45, 0.3, 2.0, PW:Lerp(Color3.new(0, 0, 0), 0.15), WD)
+	for _, z in { 21.5, 21.9, 22.3 } do
+		xb("PianoPedal", 22.15, 22.45, z, z + 0.15, 0.15, 0.25, GOLD, MT, true)
+	end
+	xb("PianoLid", 22.55, 23.85, 20.45, 23.45, 3.9, 3.98, PW:Lerp(Color3.new(0, 0, 0), 0.1), WD)
+	xb("MusicStack", 22.8, 23.6, 21.00, 22.40, 3.98, 4.5, Color3.fromRGB(240, 238, 230), SP, true)
+	xb("WhiteboardFrame", 23.9, 23.95, 20.50, 23.10, 4.5, 6.5, Color3.fromRGB(170, 172, 175), MT, true)
+	xb("Whiteboard", 23.88, 23.9, 20.60, 23.00, 4.6, 6.4, C.white, SP, true)
+	for _, p in { { 20.6, 4.6 }, { 22.7, 4.6 }, { 20.6, 6.1 }, { 22.7, 6.1 } } do
 		xb("GreenTape", 23.87, 23.88, p[1], p[1] + 0.3, p[2], p[2] + 0.3, Color3.fromRGB(70, 160, 80), Mat.Plastic, true)
 	end
 	-- window: curtains on a chrome rail, the split AC above (brand made up)
-	xb("CurtainRail", 11.7, 18.3, 27.6, 27.7, 8.45, 8.55, Color3.fromRGB(200, 200, 205), Mat.Metal, true)
-	xb("Curtain", 11.6, 13.6, 27.5, 27.58, 2.2, 8.4, C.curtain, SP, true)
-	xb("Curtain", 16.4, 18.4, 27.5, 27.58, 2.2, 8.4, C.curtain, SP, true)
+	curtains(12.9, 17.1, 27.5)
 	xb("SplitAC", 13.1, 16.9, 27.15, 27.93, 8.6, 9.35, C.white, SP, true)
+	xb("ACVent", 13.3, 16.7, 27.12, 27.15, 8.62, 8.72, Color3.fromRGB(190, 192, 195), SP, true)
 	local logo = xb("ACLogo", 14.5, 15.5, 27.12, 27.15, 8.95, 9.2, C.white, SP, true)
 	if logo then
 		text(logo, Enum.NormalId.Front, "KOOLA", Color3.fromRGB(80, 110, 160))
 	end
 	-- mint drop beam, board-panel joints, the twisted red / black wire in a corner
 	xb("DropBeam", 9.25, 23.95, 22.6, 23.3, CEIL - 0.7, CEIL, C.mint, SP)
-	for _, z in { 20.0, 24.0 } do
-		xb("PanelJoint", 9.25, 9.27, z, z + 0.06, 3.7, CEIL - 0.01, Color3.fromRGB(150, 170, 160), SP, true)
+	for _, z in { 21.6, 24.0 } do
+		xb("PanelJoint", 9.25, 9.27, z, z + 0.06, 3.85, CEIL - 0.01, Color3.fromRGB(150, 170, 160), SP, true)
 	end
 	xb("TwistedWire", 23.9, 23.95, 27.85, 27.9, 0.36, CEIL, Color3.fromRGB(120, 25, 25), Mat.Rubber, true)
 	-- the yellow room's door: dark red-brown frame on the hall side, panelled leaf open into the room
 	xb("DoorFrameRB", 18.75, 19.0, 17.14, 17.2, 0, 7.25, C.frameRB, WD, true)
 	xb("DoorFrameRB", 22.4, 22.65, 17.14, 17.2, 0, 7.25, C.frameRB, WD, true)
 	xb("DoorFrameRB", 19.0, 22.4, 17.14, 17.2, 7.0, 7.25, C.frameRB, WD, true)
-	doorLeaf("YellowDoor", 22.2, 22.4, 17.95, 21.2, Color3.fromRGB(150, 115, 55))
-	xb("DoorPanel", 22.14, 22.2, 18.3, 20.8, 3.9, 6.4, Color3.fromRGB(135, 100, 45), WD, true)
-	xb("DoorPanel", 22.14, 22.2, 18.3, 20.8, 0.6, 3.5, Color3.fromRGB(135, 100, 45), WD, true)
+	doorLeaf("YellowDoor", 19.0, 19.2, 17.95, 21.2, Color3.fromRGB(150, 115, 55))
+	xb("DoorPanel", 19.2, 19.26, 18.3, 20.8, 3.9, 6.4, Color3.fromRGB(135, 100, 45), WD, true)
+	xb("DoorPanel", 19.2, 19.26, 18.3, 20.8, 0.6, 3.5, Color3.fromRGB(135, 100, 45), WD, true)
 end
 
 local function container(): (Model, Model)
@@ -1184,6 +1675,198 @@ local function container(): (Model, Model)
 	return ext, ins
 end
 
+-- ===== spacious (owner 26 Nov: "the building is bigger in real life", "its spacious. in game its so tight") =====
+-- After the build, the block west of the stair wall (x < 41.8) and north of the front-door line (z < 24) is stretched by
+-- GROW in plan: walls, slabs, linings, windows, grilles and doors stretch; furniture keeps its true size and moves as
+-- whole pieces (each piece keeps its gap to the wall it stands at); the stair core and its landings never move.
+M.GROW = 1.3
+local XB, ZB = 41.8, 24.0
+local function tx(x: number): number
+	return if x < XB then XB - (XB - x) * M.GROW else x
+end
+local function tz(z: number): number
+	return if z < ZB then ZB - (ZB - z) * M.GROW else z
+end
+local STRUCT = { "^Wall", "^Lin", "^Skirting", "^FloorBoards", "^Ceiling", "^FlatWall", "^Grille", "^RoomDoor", "^BathDoor",
+	"^YellowDoor", "^DoorPanel", "^DoorFrameRB", "^OurDoor", "^PanelJoint", "^DropBeam", "^TileLine", "^TwistedWire" }
+local function isStruct(n: string): boolean
+	for _, pat in STRUCT do
+		if string.match(n, pat) then
+			return true
+		end
+	end
+	return false
+end
+local CARPORT = { CarportPad = true, CarportRoof = true, TrussTop = true, TrussBottom = true, TrussDiag = true, CarportPost = true,
+	Rafter = true, Scallop = true, PipeBlue = true, JunctionBox = true, BreezeBlock = true }
+
+local function localBox(p: BasePart, inv: CFrame): (Vector3, Vector3)
+	local cf = inv * p.CFrame
+	local s = p.Size / 2
+	local ext = Vector3.new(
+		math.abs(cf.RightVector.X) * s.X + math.abs(cf.UpVector.X) * s.Y + math.abs(cf.LookVector.X) * s.Z,
+		math.abs(cf.RightVector.Y) * s.X + math.abs(cf.UpVector.Y) * s.Y + math.abs(cf.LookVector.Y) * s.Z,
+		math.abs(cf.RightVector.Z) * s.X + math.abs(cf.UpVector.Z) * s.Y + math.abs(cf.LookVector.Z) * s.Z)
+	return cf.Position - ext, cf.Position + ext
+end
+
+-- stretch one part: its axes that lie along the frame's X / Z take the new extent; the rest only move
+local function stretch(p: BasePart, inv: CFrame)
+	local cf = inv * p.CFrame
+	local lo, hi = localBox(p, inv)
+	local block = not p:IsA("Part") or (p :: Part).Shape == Enum.PartType.Block
+	local nx0, nx1, nz0, nz1 = tx(lo.X), tx(hi.X), tz(lo.Z), tz(hi.Z)
+	local size = p.Size
+	local axes = { cf.RightVector, cf.UpVector, cf.LookVector }
+	local comps = { size.X, size.Y, size.Z }
+	if block and p:IsA("Part") then
+		for i, a in axes do
+			if math.abs(a.X) > 0.999 then
+				comps[i] = nx1 - nx0
+			elseif math.abs(a.Z) > 0.999 then
+				comps[i] = nz1 - nz0
+			end
+		end
+	end
+	local c = cf.Position
+	local nc = Vector3.new(if block then (nx0 + nx1) / 2 else tx(c.X), c.Y, if block then (nz0 + nz1) / 2 else tz(c.Z))
+	p.Size = Vector3.new(comps[1], comps[2], comps[3])
+	p.CFrame = F * (CFrame.new(nc) * (cf - cf.Position))
+end
+
+function M.grow(): string
+	local m = workspace:FindFirstChild(M.NAME, true)
+	local inv = F:Inverse()
+	local flatLo, flatHi = FY - 1.0, FY + CEIL + 0.7
+	local furniture, moved, rigid = {}, 0, 0
+	local walls = {} -- structural boxes of the flat (before the stretch) for the anchors
+	for _, p in m:GetDescendants() do
+		if not p:IsA("BasePart") then
+			continue
+		end
+		local lo, hi = localBox(p, inv)
+		local stairCore = p:IsDescendantOf(m.Inside) and lo.X >= XB - 0.001 and lo.Z >= 10.99
+		if stairCore or CARPORT[p.Name] then
+			rigid += 1
+		elseif p:IsDescendantOf(m.Inside) and (lo.Y + hi.Y) / 2 > flatLo and (lo.Y + hi.Y) / 2 < flatHi and not isStruct(p.Name) then
+			table.insert(furniture, { p = p, lo = lo, hi = hi })
+		else
+			if p:IsDescendantOf(m.Inside) and isStruct(p.Name) then
+				table.insert(walls, { lo = lo, hi = hi })
+			end
+			stretch(p, inv)
+			moved += 1
+		end
+	end
+	-- furniture: pieces = parts that touch (union-find on boxes 0.06 apart); each piece moves as one
+	local n = #furniture
+	local parentOf = {}
+	for i = 1, n do
+		parentOf[i] = i
+	end
+	local function find(i)
+		while parentOf[i] ~= i do
+			parentOf[i] = parentOf[parentOf[i]]
+			i = parentOf[i]
+		end
+		return i
+	end
+	local tol = 0.06
+	for i = 1, n do
+		local a = furniture[i]
+		for j = i + 1, n do
+			local b = furniture[j]
+			if a.lo.X <= b.hi.X + tol and b.lo.X <= a.hi.X + tol and a.lo.Y <= b.hi.Y + tol and b.lo.Y <= a.hi.Y + tol and a.lo.Z <= b.hi.Z + tol and b.lo.Z <= a.hi.Z + tol then
+				parentOf[find(i)] = find(j)
+			end
+		end
+		if i % 300 == 0 then
+			task.wait()
+		end
+	end
+	local firstOf = {}
+	for i = 1, n do
+		local pid = furniture[i].p:GetAttribute("Piece")
+		if pid then
+			if firstOf[pid] then
+				parentOf[find(i)] = find(firstOf[pid])
+			else
+				firstOf[pid] = i
+			end
+		end
+	end
+	local groups = {}
+	for i = 1, n do
+		local r = find(i)
+		local g = groups[r]
+		if not g then
+			g = { parts = {}, lo = furniture[i].lo, hi = furniture[i].hi }
+			groups[r] = g
+		end
+		table.insert(g.parts, furniture[i].p)
+		g.lo = g.lo:Min(furniture[i].lo)
+		g.hi = g.hi:Max(furniture[i].hi)
+	end
+	-- the nearest wall face on each side of a piece (within 1.5 studs): keep that gap; otherwise move its middle
+	local function gapSide(g, axis): string
+		local best, side = 1.5, "mid"
+		for _, w in walls do
+			local overlapY = w.lo.Y < g.hi.Y and g.lo.Y < w.hi.Y
+			if overlapY then
+				if axis == "X" and w.lo.Z < g.hi.Z and g.lo.Z < w.hi.Z then
+					local d1, d2 = g.lo.X - w.hi.X, w.lo.X - g.hi.X
+					if d1 >= -0.01 and d1 < best then
+						best, side = d1, "lo"
+					end
+					if d2 >= -0.01 and d2 < best then
+						best, side = d2, "hi"
+					end
+				elseif axis == "Z" and w.lo.X < g.hi.X and g.lo.X < w.hi.X then
+					local d1, d2 = g.lo.Z - w.hi.Z, w.lo.Z - g.hi.Z
+					if d1 >= -0.01 and d1 < best then
+						best, side = d1, "lo"
+					end
+					if d2 >= -0.01 and d2 < best then
+						best, side = d2, "hi"
+					end
+				end
+			end
+		end
+		return side
+	end
+	local pieces = 0
+	for _, g in groups do
+		local sx, sz = gapSide(g, "X"), gapSide(g, "Z")
+		local dx = if sx == "lo" then tx(g.lo.X) - g.lo.X elseif sx == "hi" then tx(g.hi.X) - g.hi.X else tx((g.lo.X + g.hi.X) / 2) - (g.lo.X + g.hi.X) / 2
+		local dz = if sz == "lo" then tz(g.lo.Z) - g.lo.Z elseif sz == "hi" then tz(g.hi.Z) - g.hi.Z else tz((g.lo.Z + g.hi.Z) / 2) - (g.lo.Z + g.hi.Z) / 2
+		local shift = F:VectorToWorldSpace(Vector3.new(dx, 0, dz))
+		for _, p in g.parts do
+			p.CFrame = p.CFrame + shift
+		end
+		pieces += 1
+	end
+	-- close the slot the stretch opens between the flat's stair-side wall and the stair core's west wall
+	parent = m.Inside
+	box("FlatWall", 41.8, FY, tz(11.0), 42.4, FY + CEIL, 11.0, C.hall, Mat.SmoothPlastic)
+	-- keep the clients' kit detail out of the bigger footprint
+	local ko = ReplicatedStorage.YgnKit:FindFirstChild("KeepOut")
+	local old = ko and ko:FindFirstChild("MyittarNyunt_grown")
+	if old then
+		old:Destroy()
+	end
+	if ko then
+		local b = Instance.new("Part")
+		b.Name = "MyittarNyunt_grown"
+		b.Anchored, b.CanCollide, b.CanQuery, b.CanTouch = true, false, false, false
+		b.Transparency = 1
+		local x0, x1, z0, z1 = tx(0) - 3, 83, tz(0) - 3, 47
+		b.Size = Vector3.new(x1 - x0, 80, z1 - z0)
+		b.CFrame = F * CFrame.new((x0 + x1) / 2, 25, (z0 + z1) / 2)
+		b.Parent = ko
+	end
+	return string.format("grown x%.2f: %d stretched, %d rigid, %d furniture parts in %d pieces", M.GROW, moved, rigid, n, pieces)
+end
+
 function M.build(): string
 	count = 0
 	local ext, ins = container()
@@ -1212,7 +1895,8 @@ function M.build(): string
 	rooms()
 	grilles()
 	furniture()
-	return string.format("built %d parts (exterior %d, inside %d)", count, #ext:GetDescendants(), #ins:GetDescendants())
+	local g = if M.GROW ~= 1 then M.grow() else ""
+	return string.format("built %d parts (exterior %d, inside %d); %s", count, #ext:GetDescendants(), #ins:GetDescendants(), g)
 end
 
 -- move the old 1-storey shell boxes to ServerStorage and keep the clients' kit detail out of the footprint + carport
