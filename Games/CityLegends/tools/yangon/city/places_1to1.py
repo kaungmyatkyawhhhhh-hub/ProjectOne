@@ -474,7 +474,7 @@ def lines_rect(o, cx, cz, ux, uz, L, Wd, y, w=0.1 * 3, code="PLN"):
     o.box(cx - ux * (L - w / 2), y, cz - uz * (L - w / 2), w, 0.08, 2 * Wd - 2 * w, ux, uz, code)
 
 
-def fuel_station(o, st, keep_off, rng):
+def fuel_station(o, st, keep_off, rng, bld=None):
     lot = Polygon(st["lot"]).buffer(0)
     lot = lot.difference(keep_off)
     if lot.geom_type == "MultiPolygon":
@@ -508,6 +508,22 @@ def fuel_station(o, st, keep_off, rng):
         cpoly = Polygon([P(a_c - cl / 2, b_c - cd / 2), P(a_c + cl / 2, b_c - cd / 2), P(a_c + cl / 2, b_c + cd / 2),
                          P(a_c - cl / 2, b_c + cd / 2)])
         um = a_c
+    # (26 Nov, owner: "the gas station and a building is merged in together") the canopy keeps 1.5 m clear of every
+    # building (kit walls, awnings and roofs reach ~1 m past a footprint): slide it along the road, inside the lot
+    if bld is not None and not st.get("canopy") and cpoly.intersects(bld):
+        for step in range(1, 13):
+            for sgn in (1, -1):
+                d = sgn * step * M(0.5)
+                cand = Polygon([(x + ux * d, z + uz * d) for x, z in cpoly.exterior.coords])
+                if not cand.intersects(bld) and lot.buffer(M(0.5)).contains(cand):
+                    print("  canopy slid %.1f m along the road, clear of the buildings" % (d / M(1)))
+                    cpoly, um = cand, um + d
+                    break
+            else:
+                continue
+            break
+        else:
+            print("  WARNING canopy of %s stays within 1.5 m of a building" % st["id"])
     if st.get("canopy"):
         cpoly = Polygon(st["canopy"])
         (ccx, ccz), (cux, cuz), chl, chw = frame_of(cpoly, prefer=(ux, uz))
@@ -793,7 +809,7 @@ def build():
     for st in items["fuel"]:
         # plain colours only: the canopy fascia from the satellite roof / brand where known (Myawaddy: green, measured)
         st["colour"] = "PFG"
-        res["fuel"].append(fuel_station(o, st, keep_off, rng))
+        res["fuel"].append(fuel_station(o, st, keep_off, rng, bld=unary_union([b.buffer(M(1.5)) for b in bpolys])))
     for pk in items["parking"]:
         res["parking"].append(dict(id=pk["id"], bays=parking(o, pk, keep_off)))
     for pt in items["pitch"]:
@@ -814,6 +830,17 @@ def build():
             bad_bld += 1
             print("  in a building:", code, round(fpoly.centroid.x, 1), round(fpoly.centroid.y, 1), round(y0, 1))
     o.stats["check_on_road"] = bad_road
+    # (26 Nov) the buildings a place cleared must be gone from the buildings layer this build is checked against, and
+    # that layer must be the one in the place: P2's New Day station was built over a buildings run made before the
+    # places plan, so its 4 "cleared" buildings stayed standing in the forecourt while this check read a newer plots.json
+    live_ids = {p_["id"] for p_ in plots}
+    left = [(k, it.get("id"), c) for k, v in items.items() for it in v for c in (it.get("cleared") or []) if c in live_ids]
+    for k, iid, c in left:
+        print("  CLEARED BUILDING STILL BUILT:", k, iid, c)
+    o.stats["check_cleared_still_built"] = len(left)
+    if os.path.getmtime(os.path.join(B1, "buildings_%s" % TAG, "plots.json")) < os.path.getmtime(os.path.join(OUT, "places.json")):
+        print("  WARNING buildings_%s/plots.json is older than places.json: re-run buildings_1to1.py %s and apply its shells"
+              " (PlacesApply) first, then run tools/yangon/OverlapCheck.luau in Studio after the places go in" % (TAG, TAG))
     keep = unary_union(o.keep + [b[0] for b in o.boxes]).buffer(M(0.5))
     kl = [list(map(list, g.exterior.coords)) for g in (keep.geoms if keep.geom_type == "MultiPolygon" else [keep])]
     json.dump(kl, open(os.path.join(OUT, "keepout.json"), "w"))

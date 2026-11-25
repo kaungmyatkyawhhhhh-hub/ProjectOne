@@ -17,6 +17,7 @@ local RS = game:GetService("ReplicatedStorage")
 local SS = game:GetService("ServerStorage")
 
 local F = {}
+F.DRY = false -- true: only log what would change
 F.LOG = {}
 _G.OVLFIX_LOG = F.LOG
 
@@ -44,6 +45,14 @@ local function enc(v: number, n: number): string
 		v = (v - d) / 64
 	end
 	return table.concat(t)
+end
+
+local lastYield = os.clock()
+local function breathe() -- (long loops yield so Studio and the MCP stay alive)
+	if os.clock() - lastYield > 0.05 then
+		task.wait()
+		lastYield = os.clock()
+	end
 end
 
 local function log(s: string)
@@ -104,13 +113,21 @@ local function tileOf(v: StringValue): (number, number)
 	return tonumber(i) :: number, tonumber(j) :: number
 end
 
+-- build one record alone (its parts), in a holder outside the DataModel
+local KD, T
+local function kd()
+	if not KD then
+		KD = require(RS.Shared.YangonKitData:Clone())
+		T = KD.index(RS.YgnKit.Templates)
+	end
+	return KD, T
+end
+
 -- rewrite a tile without the records whose index is in drop
 function F.drop(folder: Instance, v: StringValue, drop: { [number]: boolean }, why: string)
-	local meta = require(RS.Shared.YangonKitData:Clone()).meta(folder)
-	local i, j = tileOf(v)
-	local recs = F.records(v.Value, i, j, meta.tile)
+	local recs = F.recordsOf(folder, v)
 	if not recs then
-		log("SKIP compact tile " .. folder.Name .. "." .. v.Name)
+		log("SKIP unreadable tile " .. folder.Name .. "." .. v.Name)
 		return 0
 	end
 	local keep, n = {}, 0
@@ -122,7 +139,7 @@ function F.drop(folder: Instance, v: StringValue, drop: { [number]: boolean }, w
 			table.insert(keep, r.s)
 		end
 	end
-	if n > 0 then
+	if n > 0 and not F.DRY then
 		backup(folder, v)
 		v.Value = table.concat(keep)
 	end
@@ -159,15 +176,19 @@ function F.shiftRecords(folder: Instance, key: string, first: number, last: numb
 	log(string.format("shift %s.%s records %d..%d by (%.2f, %.2f)", folder.Name, key, first, last, dx, dz))
 end
 
--- build one record alone (its parts), in a holder outside the DataModel
-local KD, T
-local function kd()
-	if not KD then
-		KD = require(RS.Shared.YangonKitData:Clone())
-		T = KD.index(RS.YgnKit.Templates)
+-- the records of a tile; a compact ("!") tile is laid out first by YangonKitData.expand (the old record format, which
+-- the streamer reads too), so its buildings and walls can be edited record by record
+function F.recordsOf(folder: Instance, v: StringValue)
+	local K = kd()
+	local meta = K.meta(folder)
+	local i, j = tileOf(v)
+	local s = v.Value
+	if string.sub(s, 1, 1) == "!" then
+		s = K.expand(s, i, j, meta)
 	end
-	return KD, T
+	return F.records(s, i, j, meta.tile)
 end
+
 function F.buildRecord(folder: Instance, v: StringValue, r, holder: Instance)
 	local K, TT = kd()
 	local meta = K.meta(folder)
@@ -195,9 +216,7 @@ function F.dropDetail(rows, exact)
 		local folder = RS.YgnKit:FindFirstChild(e.fname)
 		local v = folder and folder:FindFirstChild(e.key)
 		if v then
-			local meta = kd().meta(folder)
-			local i, j = tileOf(v)
-			local recs = F.records(v.Value, i, j, meta.tile)
+			local recs = F.recordsOf(folder, v)
 			if recs then
 				local drop = {}
 				local reasons = {}
@@ -221,6 +240,7 @@ function F.dropDetail(rows, exact)
 						end
 					end
 					holder:Destroy()
+					breathe()
 				end
 				local why = {}
 				for _, w in reasons do
@@ -252,6 +272,9 @@ end
 -- inside the footprints grown 1.5 studs)
 function F.deleteBuilding(shell: BasePart, reason: string)
 	local cell = shell.Parent
+	if not cell or not cell.Parent or cell.Parent.Name ~= "Shell" then
+		return nil, nil, 0 -- (already taken with another shell of the same building)
+	end
 	local boxes = { { cf = shell.CFrame, size = shell.Size } }
 	local parts = {}
 	for _, q in cell:GetDescendants() do
@@ -262,25 +285,27 @@ function F.deleteBuilding(shell: BasePart, reason: string)
 			end
 		end
 	end
-	local root = SS:FindFirstChild("OverlapFixBackup") or Instance.new("Folder")
-	root.Name = "OverlapFixBackup"
-	root.Parent = SS
-	local sh = root:FindFirstChild("Shells") or Instance.new("Folder")
-	sh.Name = "Shells"
-	sh.Parent = root
 	local c = Vector3.zero
 	for _, q in parts do
 		c += q.Position
 	end
 	c /= #parts
 	local tag = string.format("%s_%d_%d", cell.Name, math.round(c.X), math.round(c.Z))
-	local bf = Instance.new("Folder")
-	bf.Name = tag
-	bf:SetAttribute("Reason", reason)
-	bf:SetAttribute("From", cell:GetFullName())
-	bf.Parent = sh
-	for _, q in parts do
-		q.Parent = bf
+	if not F.DRY then
+		local root = SS:FindFirstChild("OverlapFixBackup") or Instance.new("Folder")
+		root.Name = "OverlapFixBackup"
+		root.Parent = SS
+		local sh = root:FindFirstChild("Shells") or Instance.new("Folder")
+		sh.Name = "Shells"
+		sh.Parent = root
+		local bf = Instance.new("Folder")
+		bf.Name = tag
+		bf:SetAttribute("Reason", reason)
+		bf:SetAttribute("From", cell:GetFullName())
+		bf.Parent = sh
+		for _, q in parts do
+			q.Parent = bf
+		end
 	end
 	log(string.format("delete building %s (%d shell/roof parts): %s", tag, #parts, reason))
 	-- kit records
@@ -294,9 +319,7 @@ function F.deleteBuilding(shell: BasePart, reason: string)
 				for dj = -1, 1 do
 					local v = folder:FindFirstChild((ti + di) .. "_" .. (tj + dj))
 					if v then
-						local meta = kd().meta(folder)
-						local i, j = tileOf(v)
-						local recs = F.records(v.Value, i, j, meta.tile)
+						local recs = F.recordsOf(folder, v)
 						if recs then
 							local drop = {}
 							for k, r in recs do
@@ -320,6 +343,7 @@ function F.deleteBuilding(shell: BasePart, reason: string)
 									end
 								end
 								holder:Destroy()
+								breathe()
 								if any and all then
 									drop[k] = true
 								end
@@ -334,6 +358,46 @@ function F.deleteBuilding(shell: BasePart, reason: string)
 		end
 	end
 	return boxes, tag, nrec
+end
+
+-- the night-window mesh of a cell without the panes inside the given XZ boxes (grown 2 studs): kept triangles as text
+-- lines for tools/yangon/city/night_cut.py ("ax ay az bx by bz cx cy cz r g b", world studs); returns lines, removed
+function F.nightExport(part: MeshPart, boxes)
+	local AS = game:GetService("AssetService")
+	local em = AS:CreateEditableMeshAsync(Content.fromUri(part.MeshId))
+	local s = part.Size / part.MeshSize
+	local cf = part.CFrame
+	local lines, removed = {}, 0
+	for _, f in em:GetFaces() do
+		local vs = em:GetFaceVertices(f)
+		local w = {}
+		for k = 1, 3 do
+			w[k] = cf * (em:GetPosition(vs[k]) * s)
+		end
+		local c = (w[1] + w[2] + w[3]) / 3
+		breathe()
+		local inside = false
+		for _, b in boxes do
+			if inBoxXZ(b.cf, b.size, c, 2) then
+				inside = true
+				break
+			end
+		end
+		if inside then
+			removed += 1
+		else
+			local col = Color3.new(1, 1, 1)
+			pcall(function()
+				local cs = em:GetFaceColors(f)
+				col = em:GetColor(cs[1])
+			end)
+			table.insert(lines, string.format("%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %d %d %d", w[1].X, w[1].Y, w[1].Z,
+				w[2].X, w[2].Y, w[2].Z, w[3].X, w[3].Y, w[3].Z, math.round(col.R * 255), math.round(col.G * 255), math.round(col.B * 255)))
+		end
+	end
+	em:Destroy()
+	log(string.format("night %s: %d panes kept, %d removed", part:GetFullName(), #lines, removed))
+	return lines, removed
 end
 
 return F

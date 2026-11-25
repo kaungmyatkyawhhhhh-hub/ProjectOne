@@ -25,6 +25,21 @@ local SS = game:GetService("ServerStorage")
 
 local O = {}
 O.TOL = 0.5
+-- things built onto each other on purpose (not counted): a venue on its own pad, the Meliá joined to Myanmar Plaza (owner,
+-- 16 Nov), signs / floodlights / shops mounted on a landmark, the plinth on The Central's plaza
+O.JOINED = {
+	["CarCare:legends_service|Sites:service"] = true,
+	["Landmarks:MyanmarCentre|Landmarks:Sedona"] = true,
+	["Landmarks:IrlSigns21Nov:MyanmarPlaza_LED|Landmarks:MyanmarCentre"] = true,
+	["Landmarks:IrlSigns21Nov:MyanmarPlaza_LEDFrame|Landmarks:MyanmarCentre"] = true,
+	["Landmarks:IrlSigns21Nov:Billboards|Landmarks:MyanmarCentre"] = true,
+	["Landmarks:IrlNight21Nov:SuleShops|Landmarks:Sule"] = true,
+	["Landmarks:IrlNight21Nov:SuleRoundabout|Landmarks:Sule"] = true,
+	["Landmarks:IrlSigns21Nov:TheCentral_Plinth|Parks:TheCentral"] = true,
+}
+local function joined(a: string, b: string): boolean
+	return O.JOINED[a .. "|" .. b] or O.JOINED[b .. "|" .. a] or false
+end
 O.KIT_PAD = 24 -- studs round a thing's box: kit tiles in reach are built
 
 local function axes(cf: CFrame)
@@ -156,7 +171,18 @@ function O.run(opts)
 	tmp.Parent = SS
 	local dmap = districtMap(root)
 	local function districtAt(x: number, z: number): string
-		return dmap[math.floor(x / 256) .. "_" .. math.floor(z / 256)] or "?"
+		local i, j = math.floor(x / 256), math.floor(z / 256)
+		for r = 0, 4 do -- (a landmark site has no kit tile of its own: the nearest tile's district)
+			for di = -r, r do
+				for dj = -r, r do
+					local d = dmap[(i + di) .. "_" .. (j + dj)]
+					if d then
+						return d
+					end
+				end
+			end
+		end
+		return "?"
 	end
 
 	local function buildTile(folder: Instance, v: StringValue, meta, parent: Instance)
@@ -387,7 +413,7 @@ function O.run(opts)
 			check(a, b)
 		end)
 		gridQuery(placedGrid, lo, hi, function(b)
-			if b.group ~= a.group and a.group < b.group then
+			if b.group ~= a.group and a.group < b.group and not joined(a.group, b.group) then
 				local k = a.part:GetDebugId() .. b.part:GetDebugId()
 				if not pairSeen[k] then
 					pairSeen[k] = true
