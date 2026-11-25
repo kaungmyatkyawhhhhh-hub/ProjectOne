@@ -175,6 +175,17 @@ Source: [[2026-11-26 GYM ARC - The 10-minute plan (minutes 3-10)]]. Only for a p
 - Tests: a fresh player (FreshPlayer) reaches GS2 by ~4:00, no tour, the claim toast works; on a full muscle, "FULL! Next" moves them in 3 s; no R$ popup before GS3; gifts at 2/4/6/8/10 min with the chip; the sky is day at 10 min on a server started at 15:00 game time.
 - Expected (model, calibrated to live): of the players past 3 min, ~56% (live) → **~100% stay past 10 min** (92% for very impatient kids); mean session ~18 → ~27 min. Ceiling, not a promise. Add funnel steps "GS2", "GS3", "10 min in session".
 
+## Phase 2f: long sessions, minutes 10-60 (owner 26 Nov: "very long average session even with the very impatient kids")
+Source: [[2026-11-26 GYM ARC - Long sessions even for impatient kids (minutes 10-60)]]. Grep for the names; small changes on top of what's there.
+1. Growth Spurt steps: at 25 / 50 / 75% of every Growth Spurt bar, a visible body step (MuscleRig look) + a coin pop + a short sting (`SpurtStepShares = { 0.25, 0.5, 0.75 }`).
+2. THE RUNWAY for new players (first 3 sessions): 30 s before a show, a big JOIN card in the centre queue; one tap = dash to the stage (`RunwayJoinCardSessions = 3`). Their first 2 shows: NPC fill models pose weaker so the newcomer reaches the podium.
+3. Trainer rolls from anywhere: when coins ≥ `Trainers.RollCost` (150), a "ROLL READY" chip (top-left, clear of the joystick); tap = the roll card on the spot. In the first session it pulses at most every 4 min (`RollChipEvery = 240`).
+4. Playtime gifts every 5 min to 60 min after the Phase 2e ones: Config/Playtime `Gifts` at 15, 20, 25, 30, 35, 40, 45, 50, 55, 60 min, trainer rolls at 20 / 40 / 60.
+5. Server event every 15 min: "PROTEIN DROP: x2 gains for 3 min" for the whole server, a countdown on the chip (`ProteinDropEvery = 900`, `ProteinDropSeconds = 180`). Reuse the GIFT RUSH system (Phase 2c) so one system runs both.
+6. AFK gift chair from Phase 2c stays (coins + Candy Canes, no reps).
+- Tests: the 25/50/75% steps fire once each per spurt; the RUNWAY card queues behind other cards and never covers a KEY message; the ROLL READY chip opens the roll card off-Agency and respects the 4-min limit; gifts at the new minutes; a Protein Drop fires every 15 min in a test server (dev hook to fast-forward) and stacks correctly with other boosts.
+- Expected (model): mean session for very impatient kids ~7 → ~37 min (patience 7 s: ~10 → ~46). Relative, not a forecast (the model caps at 60 and has no lag/bugs/real life). Add funnel steps "20 min", "first roll", "first show".
+
 ## Phase 2c: crowd levers (so the game tile shows 1,000+ players; from the CCU growth model, 26 Nov)
 Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobody plays it, it's dead"). These raise how many players come back and stay. Build the cheap ones with Phase 2-5.
 1. **Friend invite = a bonus Advent present for BOTH** (Roblox invite prompt from the calendar; the friend gets it on first join).
@@ -232,6 +243,9 @@ Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobod
 - [ ] Candy Canes: earn rate in range (~40-60/h); pass doubles them; saved.
 - [ ] Christmas Alters: buy, wear, unwear, rejoin; other players see the skin.
 - [ ] Gift drop: lands on the ground, the first tap pays, nearby players get their share, despawns.
+
+**Minutes 10-60 (Phase 2f)**
+- [ ] Spurt steps at 25/50/75%; RUNWAY join card for new players; ROLL READY chip works off-Agency; gifts every 5 min to 60; Protein Drop every 15 min.
 
 **First 10 minutes (Phase 2e)**
 - [ ] GS2 by ~4:00; no quests tour, one-tap claim; FULL! Next works; no R$ popup before GS3; gifts every 2 min + chip; day sky at 10 min.

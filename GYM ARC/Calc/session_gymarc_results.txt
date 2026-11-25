@@ -1,0 +1,11 @@
+version (cumulative)                                                                                 mean@5s  mean@7s  mean@11s   [patience 5 s: 10m 20m 30m 45m]
+A  minutes 3-60 as live (only the first 3 min fixed)                                                    6.8      10.4      18.1        2%    0%    0%    0%
+B  + the 10-minute plan (Phase 2e)                                                                     18.1      25.8      37.1       88%   29%   20%    2%
+C  + every Growth Spurt bar pays 3 visible steps (25/50/75%: the body changes, a coin pop)             22.7      31.4      43.7       92%   42%   32%   12%
+D  + THE RUNWAY: new players get a big JOIN card + auto-walk, 90% join (was ~35%)                      25.5      34.8      46.6       91%   55%   39%   13%
+E  + shows every 150 s for servers with new players (half the wait)                                    20.7      31.1      44.1       88%   34%   28%   10%
+F  + a trainer roll every ~4 min from earned coins (roll price tuned to first-session coins)           34.0      44.7      54.2       91%   75%   56%   36%
+G  + 3 first-day quests that finish at ~12, ~18, ~25 min (each a chest)                                31.8      41.8      53.9       90%   72%   55%   28%
+H  + playtime gifts every 5 min to 60 min (live: 15, 20, 25, 30, 40, 60), rolls at 20/40/60            35.5      47.4      56.4       89%   72%   59%   42%
+I  + a server event every 15 min (3-min x2 gains 'PROTEIN DROP', the whole server)                     36.1      48.4      56.3       90%   79%   60%   39%
+J  + the AFK gift chair (Phase 2c): a bored kid may park there instead of leaving                      40.7      50.3      56.5       94%   86%   69%   48%
