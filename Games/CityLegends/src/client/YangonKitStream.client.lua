@@ -305,6 +305,9 @@ RunService.Heartbeat:Connect(function(dt)
 				jobs[key] = nil
 				clearKeepOut(folders[key], key)
 				built[key] = true
+				if folders[key] then
+					folders[key]:SetAttribute("Built", true) -- (25 Nov) YangonRoadside waits for this before placing poles
+				end
 				setShells(key, true)
 			end
 		end

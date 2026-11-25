@@ -582,6 +582,41 @@ def drop_scraps(parts, data, surf):
     return [p for i, p in enumerate(parts) if keep[i]], dict(on_carriageway=k_on, lone=k_lone)
 
 
+def drop_foot_walls(parts, surf, probe=1.5, level=1.2):
+    """(25 Nov, owner_bug_4: a flyover ramp's side wall ran at ground level through a junction) a bridge wall piece
+    ('B' kind, thin, standing) with road surface on BOTH sides at the same level (within `level`), and its bottom under
+    that surface, retains nothing: it is a deck foot's wall standing in a junction or across a carriageway. Dropped (the
+    W collision boxes come from these parts, so they go too). Walls of a real ramp keep a level step between the
+    deck and the ground road beside it; parapets of an elevated deck have no road surface outside at deck level."""
+    keep, n = [], 0
+    for p in parts:
+        if p[0] != 'B':
+            keep.append(p)
+            continue
+        c, R, U, Bk = frame(p[2], p[3], p[4])
+        S = p[5]
+        if U[1] < 0.9 or S[0] > 1.3 or S[1] < 1.5:   # only upright walls about 1 thick (X = thickness)
+            keep.append(p)
+            continue
+        bottom = c[1] - S[1] / 2
+        side = np.array([R[0], 0.0, R[2]])
+        Ls = np.linalg.norm(side)
+        if Ls < 1e-6:
+            keep.append(p)
+            continue
+        side /= Ls
+        lev = []
+        for sgn in (-1, 1):
+            q = c + side * sgn * (S[0] / 2 + probe)
+            hs = [h for h in surf.heights(q[0], q[2]) if bottom + 0.3 < h < c[1] + S[1] / 2]
+            lev.append(max(hs) if hs else None)
+        if lev[0] is not None and lev[1] is not None and abs(lev[0] - lev[1]) < level:
+            n += 1
+            continue
+        keep.append(p)
+    return keep, n
+
+
 def deck_spill(data, only):
     """(25 Nov, DECK OVERLAP FIX) decks with a sample in the baked cells AND in cells outside them: {name: outside cells}.
     A re-bake keeps only R05_ONLY's triangles, so such a deck's other cells keep their old build of it."""
@@ -645,6 +680,8 @@ def bake(tag):
         by[('R', cell_of(mid[0], mid[2]))].append(t)
     surf = Surface(road_tris)
     parts, scrap = drop_scraps(parts, data, surf)
+    parts, foot_walls = drop_foot_walls(parts, surf)
+    print('deck foot walls dropped:', foot_walls)
     # (24 Nov, P1-P3 map bugs) no kerb pieces lying across each other, no crumpled (leaning) kerb pieces
     import roads05_kerb_fix
     only0 = set(c for c in os.environ.get('R05_ONLY', '').split(',') if c)
