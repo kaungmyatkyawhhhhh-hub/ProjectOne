@@ -774,8 +774,9 @@
   "terrain": "DONE v2054: grass over road boxes 4,893 (805 > 0.5) -> 155 (38 > 0.3, 13 > 0.5, 1 > 1). The trim could not reach it (smooth terrain bulges in from full voxels next to the carved cells); fix = carve a 6x6 Air column down to road top - 2 at every 6-stud sample of an R box with terrain > 0.12 over it, 2 passes (inline job, see vault note). 12x11 RBUG5 swap saved in v2054 too.",
   "deck_agent_cells_excluded": "20x28 23x27 24x28 25x28 22x27 19x29 20x29 21x27 21x28 17x17 17x18 17x19 11x11 18x22 27x26 29x12 34x12 18x26 25x20 26x20 (+ FWRB11 cells)",
   "next": "rescan terrain + trim(only) -> save; detect 'before' with gap; roadbugs_rebake.py plan (RB_EXCLUDE) + bake per tag + upload + _G.MSWAP mesh-only per cell; detect after; Play test; note",
-  "lock": "released after v2054",
-  "rebake": "roadbugs_rebake.py plan (spikes of run 1, RB_EXCLUDE deck-agent cells) -> 13 tags / 78 cells baking in turn into imports/sync/RBUG_<tag>_glb (RB5 done: 8 cells, spike 13 -> 2, gap 0 except 14x15)"
+  "lock": "released after v2070",
+  "rebake": "roadbugs_rebake.py plan (spikes of run 1, RB_EXCLUDE deck-agent cells) -> 13 tags / 78 cells baking in turn into imports/sync/RBUG_<tag>_glb (RB5 done: 8 cells, spike 13 -> 2, gap 0 except 14x15)",
+  "swaps": "v2070: mesh-only swaps RBUG_RB5 (8 cells), RB4 (8), RB4F (1), RB6 (7), RB12 (8) = 32 cells (ids in build/city_1to1/roadbugs_25nov/upload_ids.txt); backups deleted. Uploaded, not swapped yet: RB3 (8), RB7s (2), RB7 (1), RB11 (4), RB9 (4), RB8s (1). Baking: RB10, RB12P."
  },
  "street_realism_25Nov_pass3": {
   "what": "poles off islands (land behind each pole), billboards backlit at night near the camera, camera gantries at 51 big junctions, guard booths at OSM gates, blue hoarding round 23 OSM construction sites; wires leave poles at a shallow angle; own poles/wires keep apart",
