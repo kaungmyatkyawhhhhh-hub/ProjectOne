@@ -50,3 +50,5 @@ If the owner says **"do the gym arc render"**, this is the task. Full history: [
 
 ## Status 25 Nov ~05:00 (Claude, chat)
 Steps 1-4 done for the icon: 3 renders from the real avatar (A2 close flex = pick, A wider, B overhead press), logo in code, board vs Power Lifters. See [[2026-11-25 GYM ARC - Icon rendered in Blender from the real avatar]] (GYM ARC\Progress). Waiting for the owner's pick, then step 5 (16:9 thumbnails).
+
+## 25 Nov 08:05: icon DONE, owner approved `Assets\icon_render_25nov\GYMARC_ICON_G_warm.png`. Next: step 5, thumbnails in the same look (see the progress note for the method).

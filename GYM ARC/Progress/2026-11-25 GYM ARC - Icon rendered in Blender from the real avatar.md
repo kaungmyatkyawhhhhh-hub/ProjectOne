@@ -52,3 +52,15 @@ Why the pure Blender renders looked bad (Claude's own diagnosis): background as 
 - FACE (owner, sent the picture twice): the classic Roblox "Man" face: thick dark arched brows, white eyes with dark pupils, a thin lopsided smirk rising to the right, a small cheek line on the right. Attached it to the same ChatGPT chat: "change ONLY the FACE: use EXACTLY the face from the image I just attached". (First try said "Image generation failed"; Try again worked.) Raw `gymarc_icon_gpt_repaint_v5_manface.png`.
 - Owner: "more contrast & ONLY A BIT more definition on our guy" -> done in code, not ChatGPT: `_tools/grade_guy.py` (skin-hue mask; brightness contrast x1.25 around his mid tone + local contrast 0.3 at 14 px; colour kept, a first version that also raised saturation turned him too red, so contrast is on brightness only). No-logo graded: `gymarc_icon_v5_graded_nologo.png`.
 - **Current: `GYMARC_ICON_F_manface.png` / `_512.png`**, board `gymarc_icon_F_board.jpg`. 64 px mean 0.338 / 34% near-black.
+
+## Update 08:10: owner "something is off, like the colouring"
+Measured vs Power Lifters (skin = orange pixels): PL skin sat 0.82 / value 0.93 / shadows 0.49, frame 41% warm vs 22% cool. F: skin sat 0.72, value 1.00 (highlights clipped = flat plastic), shadows only 0.64, frame 29% warm vs 31% cool (cold blue background + blue plate, skin looked pasted on).
+Fix:
+1. ChatGPT, same chat: change ONLY the background lights: about half warm amber lamps / orange bokeh / a warm glow on the back wall, a few blue LEDs kept low (raw `gymarc_icon_gpt_repaint_v6_warmlights.png`).
+2. Code: `_tools/grade_guy.py` then `_tools/grade_color.py` (skin: highlights un-clipped to ~0.93, shadows deeper, saturation up toward 0.82, hue nudged to PL's golden 24; a warm split-tone on mids/highlights). Bug fixed: the hue nudge must only touch orange pixels, or the blue rim turns green.
+- **Current: `GYMARC_ICON_G_warm.png` / `_512.png`**, board `gymarc_icon_G_board.jpg`. 64 px mean 0.327 / 34% near-black, 34% warm / 21% cool.
+- Rule for this look: dark background WITH warm lamps (not all blue), golden-orange skin that never clips to white, the blue plate as the one big cool colour.
+
+## 08:05 OWNER APPROVED G ("this is way better")
+**Final icon: `GYMARC_ICON_G_warm.png` (upload `GYMARC_ICON_G_warm_512.png`).** Not uploaded yet.
+Next: 16:9 thumbnails in the SAME look (our Blender render for layout -> ChatGPT finish in one chat -> Man face -> warm lamps in a dark gym -> grade_guy.py + grade_color.py -> logo in code), in a new chat.
