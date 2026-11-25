@@ -711,12 +711,18 @@ local function anchors(dir: Vector3, right: Vector3, base: Vector3): { Vector3 }
 	}
 end
 
-local DOWN = CFrame.fromMatrix(Vector3.zero, Vector3.new(0, -1, 0), Vector3.new(1, 0, 0)) -- an attachment whose axis points down
+-- (Play, 25 Nov: with the curve's handles straight down, a wire dropped steeply next to the pole it ends on and ran
+-- through its top) the handles point a third of the way along the span, sag below: the wire leaves each pole at a
+-- shallow angle. P1 = a + (b - a) / 3 - sag, P2 = b - (b - a) / 3 - sag.
+local function handles(a: Vector3, b: Vector3, sag: number): (Vector3, Vector3)
+	local third = (b - a) / 3
+	return a + third - Vector3.new(0, sag, 0), b - third - Vector3.new(0, sag, 0)
+end
 
 -- the points of a sagging wire (the beam's own curve), ends left out
 local function wirePoints(a: Vector3, b: Vector3, sag: number): { Vector3 }
 	local out = {}
-	local p1, p2 = a + Vector3.new(0, -sag, 0), b + Vector3.new(0, -sag, 0)
+	local p1, p2 = handles(a, b, sag)
 	local n = math.max(2, math.ceil((b - a).Magnitude / 4))
 	for i = 1, n - 1 do
 		local t = i / n
@@ -761,15 +767,22 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 		end
 	end
 	-- (parent first: a WorldCFrame set before parenting is taken as local)
+	-- a Beam's handles run along each attachment's axis (its X): P1 = A0 + axis0 * CurveSize0, P2 = A1 - axis1 * CurveSize1
+	local p1, p2 = handles(a, b, sag)
+	local function frame(at: Vector3, axis: Vector3): CFrame
+		local up = if math.abs(axis.Unit.Y) > 0.99 then Vector3.xAxis else Vector3.yAxis
+		local y = (up - axis.Unit * up:Dot(axis.Unit)).Unit
+		return CFrame.fromMatrix(at, axis.Unit, y)
+	end
 	local a0 = Instance.new("Attachment")
 	a0.Parent = holder
-	a0.WorldCFrame = CFrame.new(a) * DOWN
+	a0.WorldCFrame = frame(a, p1 - a)
 	local a1 = Instance.new("Attachment")
 	a1.Parent = holder
-	a1.WorldCFrame = CFrame.new(b) * DOWN
+	a1.WorldCFrame = frame(b, b - p2)
 	local beam = Instance.new("Beam")
 	beam.Attachment0, beam.Attachment1 = a0, a1
-	beam.CurveSize0, beam.CurveSize1 = sag, -sag
+	beam.CurveSize0, beam.CurveSize1 = (p1 - a).Magnitude, (b - p2).Magnitude
 	beam.Width0, beam.Width1 = width, width
 	beam.Color = ColorSequence.new(color or CABLE)
 	beam.LightInfluence = 1
@@ -1137,10 +1150,10 @@ local ROOF_RED = Color3.fromRGB(190, 36, 32)
 
 local function buildBooth(m: Instance, sets, gate: Vector3): boolean
 	-- a spot beside the gate: off the road, on the pavement / ground, clear of walls and trees
-	for k = 0, 7 do
-		local a = k * math.pi / 4
+	for k = 0, 23 do
+		local a = (k % 8) * math.pi / 4 + (k // 8) * math.pi / 8
 		local off = Vector3.new(math.cos(a), 0, math.sin(a))
-		local at = gate + off * 9
+		local at = gate + off * (9 + (k // 8) * 4) -- 9, 13, 17 studs out (the gate stands on its driveway)
 		local y, kind = ground(at)
 		if y and (kind == "P" or kind == "T") then
 			local base = Vector3.new(at.X, y, at.Z)
@@ -1230,7 +1243,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 		return nil
 	end
 	-- the kit round the chunk (and its neighbours, for the wires out of it) must be built first
-	if not kitReady(x0 - 110, z0 - 110, x0 + CHUNK + 110, z0 + CHUNK + 110) then
+	if not kitReady(x0 - 170, z0 - 170, x0 + CHUNK + 170, z0 + CHUNK + 170) then
 		return nil
 	end
 	regPurge(key)
