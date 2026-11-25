@@ -703,6 +703,7 @@ local function resolve(poles, id: number, sets): Vector3?
 				local base = Vector3.new(at.X, y, at.Z)
 				if poleClear(sets, base, lamp) then
 					resolved[id] = base
+					regAdd(poleReg, base, "") -- (kept for good: resolved spots never change)
 					return base
 				end
 			end
@@ -731,6 +732,12 @@ end
 local function handles(a: Vector3, b: Vector3, sag: number): (Vector3, Vector3)
 	local third = (b - a) / 3
 	return a + third - Vector3.new(0, sag, 0), b - third - Vector3.new(0, sag, 0)
+end
+
+-- (Play, 25 Nov: a top wire tied to the far end of a pole's top arm ran over the pole's own top) the top arm's end
+-- nearer the other pole
+local function near(t: { Vector3 }, other: Vector3): Vector3
+	return if (t[1] - other).Magnitude <= (t[2] - other).Magnitude then t[1] else t[2]
 end
 
 -- the points of a sagging wire (the beam's own curve), ends left out
@@ -837,9 +844,7 @@ local function buildPole(m: Instance, dir: Vector3, right: Vector3, base: Vector
 	end
 	local shaftH = POLE_H - 4 * BAND_H
 	local shaft = part(m, Vector3.new(W, shaftH, W), look * CFrame.new(0, 4 * BAND_H + shaftH / 2, 0), CONCRETE, Enum.Material.Concrete)
-	local owner = m:GetAttribute("Chunk") or ""
-	shaft:SetAttribute("Chunk", owner)
-	regAdd(poleReg, base, owner)
+	shaft:SetAttribute("Chunk", m:GetAttribute("Chunk") or "")
 	-- the top arm along the road, sitting on the pole's top
 	part(m, Vector3.new(0.35, 0.35, 5), look * CFrame.new(0, POLE_H + 0.175, 0), CONCRETE, Enum.Material.Concrete)
 	local roadSide = CFrame.lookAt(base, base - right) -- facing the road (-Z of this frame points at it)
@@ -1107,6 +1112,7 @@ local function resolveSide(c, sets): Vector3?
 				local base = Vector3.new(at.X, y, at.Z)
 				if poleClear(sets, base, lamp) then
 					sideResolved[c.id] = base
+					regAdd(poleReg, base, "")
 					return base
 				end
 			end
@@ -1296,8 +1302,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 				local q = poles[p.prev]
 				local theirs = anchors(q.dir, q.right, prevBase)
 				if (mine[1] - theirs[1]).Magnitude < EVERY * 1.6 then
-					wire(shaft, sets, theirs[1], mine[1], 0.12, 0.05)
-					wire(shaft, sets, theirs[2], mine[2], 0.12, 0.055)
+					wire(shaft, sets, near(theirs, base), near(mine, prevBase), 0.12, 0.05)
 					wire(shaft, sets, theirs[3], mine[3], 0.42, 0.065) -- the thick bundles
 					if full then
 						wire(shaft, sets, theirs[4], mine[4], 0.3, 0.08)
@@ -1310,7 +1315,9 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 				local q = poles[p.cross]
 				local theirs = anchors(q.dir, q.right, crossBase)
 				for _, pr in { { 1, 0.12, 0.045 }, { 3, 0.28, 0.06 } } do
-					local pts = wire(shaft, sets, mine[pr[1]], theirs[pr[1]], pr[2], pr[3])
+					local from = if pr[1] == 1 then near(mine, crossBase) else mine[pr[1]]
+					local to = if pr[1] == 1 then near(theirs, base) else theirs[pr[1]]
+					local pts = wire(shaft, sets, from, to, pr[2], pr[3])
 					for _, s in pts or {} do
 						regAdd(crossReg, s, key)
 					end
@@ -1370,7 +1377,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 				if ob then
 					local mine = anchors(c.axis, c.n, base)
 					local theirs = anchors(best.axis, best.n, ob)
-					wire(shaft, sets, mine[1], theirs[1], 0.12, 0.05)
+					wire(shaft, sets, near(mine, ob), near(theirs, base), 0.12, 0.05)
 					wire(shaft, sets, mine[3], theirs[3], 0.36, 0.065)
 					if full then
 						wire(shaft, sets, mine[4], theirs[4], 0.26, 0.085)
