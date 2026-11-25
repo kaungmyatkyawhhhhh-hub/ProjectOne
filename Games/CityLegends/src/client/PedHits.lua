@@ -402,11 +402,9 @@ local function step(dt: number)
 								local at = w.pos + Vector3.new(0, 2.5 * w.fig.scale, 0)
 								local hv = root:GetVelocityAtPosition(at)
 								local hs = Vector3.new(hv.X, 0, hv.Z).Magnitude
-								if hs >= ragSps then
-									if not ragdoll(w, car, root, at, hv, hs) then
-										stumble(w, root, hv)
-									end
-								elseif not w.bumpT or os.clock() - w.bumpT > 0.6 then
+								local ok = hs >= ragSps and ragdoll(w, car, root, at, hv, hs)
+								-- (slow, or 6 ragdolls out already: a stumble, at most one each 0.6 s)
+								if not ok and (not w.bumpT or os.clock() - w.bumpT > 0.6) then
 									stumble(w, root, hv)
 								end
 							end

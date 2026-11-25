@@ -837,5 +837,12 @@
   "building": "OSM way 1430305132 (20 m from GPS 16.803,96.1859; inner-corner stair strip); game had it as 1-floor 'hall' shell (2 KWG boxes in Cell_24_19)",
   "tool": "tools/yangon/MyittarNyuntBlock.luau (hideShell / build / check / undo)",
   "status": "builder written, waiting for the Studio lock"
+ },
+ "ped_hits_26Nov": {
+  "what": "cars fling YangonStreetLife walkers as ragdolls (src/client/PedHits.lua + hooks in YangonStreetLife / Driving.slowBy / Main); Mild band: no drag under the car (body never collides with the hitting car), get up after 3.5 s or fade + respawn",
+  "tuning": "stumble 3-10 km/h, ragdoll >10 km/h, max 6, float 0.6, friction 0.35, side 0.3, lift 0.4 (10-45), car keeps 94%",
+  "saved_version": "2148 (+ tuning save after it)",
+  "playtest": "PASS 26 Nov: test store; 7 km/h stumble, 30 km/h 6 m, 60 km/h 19 m, 99 km/h 53 m (fades); cap 6 held; 0 leftover parts/constraints; ~56-60 FPS; server-owned car fling ok; store back to v1, checked on the Server",
+  "vault": "City Legends/2026-11-26 Walker hits - ragdoll fling (Mild).md"
  }
 }
