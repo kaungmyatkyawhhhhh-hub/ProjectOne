@@ -859,5 +859,12 @@
    "Cell_18x21": 85466899587087
   },
   "log": "overlapfix_26nov/fix_log_round2.txt"
+ },
+ "overlaps_26nov_round3": {
+  "hotel": "v2162: back on the real Novotel Yangon Max site (OSM 471327865), turned with its road (Hotel.lua facadeTurned), 200 lot; renamed PYAY ROYAL HOTEL",
+  "p1p3_rebuild": "buildings_1to1.py P1/P2/P3 vs today's roads; BUILDINGS_ONLY place_pack; RebuildSwap swap (old -> OverlapFixBackup.RebuildOld_P1..3); KeepOut drops P1 164 / P2 81 / P3 4; night cells cut by night_keepout.py; saved v2173 (P1), v2174 (P2), v2176 (P3)",
+  "ids": "build/city_1to1/overlapfix_26nov/rebuild_ids_26nov.txt",
+  "road_touch": "1448 -> 184 after re-run -> 0 after trimming 174 / dropping 10 (v2177); originals OverlapFixBackup.RoadTrim26",
+  "pending": "OverlapCheck re-run, hollow-ground edges in Play, Play test test->v1->Server, delete RebuildOld backups after the Play test; road-touch re-check after the road-sweep agent's RB10/RB6 swaps"
  }
 }

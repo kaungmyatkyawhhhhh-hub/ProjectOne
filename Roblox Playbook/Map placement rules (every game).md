@@ -173,3 +173,15 @@ This note is the fix. It works in three parts:
 - **Trees planted on a pavement strip along a lot edge are not "on the lot".** Cut the pad back to the pavement first; move a tree only where the ground behind it is not road, and log every tree you have to delete.
 - **Air over a floor needs to go 4 studs down, not 0.3.** Smooth terrain draws its surface from a whole 4-stud voxel: Terrain:FillBlock with Air from 0.3 under a floor's top left the grass showing through 133 floors. Clear from 4 under (8 where a bank meets the edge) and check again by raycast; write empty voxels for the last few points.
 - **Buildings made against an old road net stay in the new roads.** 1,283 of 1,448 building parts touching a road were in the three districts whose buildings were never re-run after the road rebuild. After every road rebuild, re-run the buildings of that district (or list it as owed), and run the building-vs-road-box check.
+
+## Lesson (26 Nov 2026, City Legends round 3: re-running a placed district)
+- **What is in Studio may not be the last build on disk.** When P1's buildings were re-run, 1,600 of the placed shells
+  matched no record of the last saved run, because Studio held an older run. To swap a district, match the old parts
+  by name and tile within a few studs, then sweep whatever is left deep inside the district box. Back it all up, and
+  count before and after.
+- **A district re-run must respect every lot cleared since.** Leave out new shells inside the KeepOut boxes, and cut the
+  night-window panes inside them before uploading (`night_keepout.py`). If you skip this, cleared venue and house lots
+  get their buildings and lit windows back.
+- **A venue on a turned real site turns with its road.** The Novotel outline is turned 16 degrees, and no
+  square-to-the-world box inside it fits the podium. Build the venue square, then turn the whole frame
+  (`Hotel.lua facadeTurned`). Don't move the venue to a far square lot.
