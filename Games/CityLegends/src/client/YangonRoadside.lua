@@ -51,7 +51,6 @@ local BOXGREY = Color3.fromRGB(120, 124, 126)
 local GALV = Color3.fromRGB(170, 174, 178)
 local LED, LED_LIGHT = Color3.fromRGB(236, 244, 255), Color3.fromRGB(232, 240, 255)
 local AMBER, AMBER_LIGHT = Color3.fromRGB(255, 176, 92), Color3.fromRGB(255, 170, 96)
-local PALM_TRUNK = Color3.fromRGB(78, 74, 70)
 local NO_LAMPS = { ["Pyay Road"] = true, ["Kabar Aye Pagoda Road"] = true } -- their planted medians have lamps
 
 local function baseRoad(name: string?): string
@@ -565,13 +564,12 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 	return pts
 end
 
-local lampsOn = isNight()
-local lampsAllowed = true
+local LIGHT_R = 220
 local function lampLight(head: BasePart, color: Color3)
 	local l = Instance.new("SpotLight")
 	l.Face = Enum.NormalId.Bottom
 	l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = color, 4, 60, 135, false
-	l.Enabled = lampsOn and lampsAllowed
+	l.Enabled = false -- (the main loop turns on the near ones at night)
 	CollectionService:AddTag(l, "RoadsideLamp")
 	l.Parent = head
 end
@@ -773,7 +771,7 @@ end
 -- side streets: road boxes with no traffic lane in them
 ---------------------------------------------------------------------
 local sideCache: { [string]: { any } } = {}
-local function sideCandidates(key: string, laneGrid, inJunction): { any }
+local function sideCandidates(key: string, laneGrid, inJunction, skipTile): { any }
 	local hit = sideCache[key]
 	if hit then
 		return hit
@@ -829,7 +827,7 @@ local function sideCandidates(key: string, laneGrid, inJunction): { any }
 	end
 	local list = {}
 	for ck, c in best do
-		if not inJunction(c.pos) and not nearLane(c.pos, 24) then
+		if not inJunction(c.pos) and not nearLane(c.pos, 24) and not skipTile(math.floor(c.pos.X / TILE), math.floor(c.pos.Z / TILE)) then
 			c.id = ck
 			table.insert(list, c)
 		end
@@ -942,13 +940,13 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 		end
 	end
 	-- side streets: a pole per cell, wired to the next pole along the street
-	local mineSide = sideCandidates(key, ctx.laneGrid, ctx.inJunction)
+	local mineSide = sideCandidates(key, ctx.laneGrid, ctx.inJunction, ctx.skipTile)
 	if #mineSide > 0 then
 		local around = {}
 		for dx = -1, 1 do
 			for dz = -1, 1 do
 				local k2 = math.floor(x0 / CHUNK + dx) .. "," .. math.floor(z0 / CHUNK + dz)
-				for _, c in sideCandidates(k2, ctx.laneGrid, ctx.inJunction) do
+				for _, c in sideCandidates(k2, ctx.laneGrid, ctx.inJunction, ctx.skipTile) do
 					table.insert(around, c)
 				end
 			end
@@ -997,17 +995,6 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		return
 	end
 	started = true
-	Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-		local n = isNight()
-		if n ~= lampsOn then
-			lampsOn = n
-			for _, l in CollectionService:GetTagged("RoadsideLamp") do
-				if l:IsA("Light") then
-					l.Enabled = n and lampsAllowed
-				end
-			end
-		end
-	end)
 	task.spawn(function()
 		local g
 		for _ = 1, 60 do
@@ -1041,7 +1028,7 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 			return streetTiles[i .. "_" .. j] == true
 		end
 		local poles, chunks, laneGrid, inJunction = plan(g, skipTile)
-		local ctx = { poles = poles, laneGrid = laneGrid, inJunction = inJunction }
+		local ctx = { poles = poles, laneGrid = laneGrid, inJunction = inJunction, skipTile = skipTile }
 		-- the map folders the overlap query can't see into (visual meshes): indexed once, then as they stream in
 		task.spawn(function()
 			local root = Config.mapRoot and Config.mapRoot()
@@ -1066,17 +1053,17 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		while true do
 			local q = if qualityScale then qualityScale() else 1
 			local full = q > 0.5
-			if lampsAllowed ~= full then
-				lampsAllowed = full
-				for _, l in CollectionService:GetTagged("RoadsideLamp") do
-					if l:IsA("Light") then
-						l.Enabled = lampsOn and full
-					end
-				end
-			end
 			local load = if full then LOAD else LOAD * 0.7
 			local cam = workspace.CurrentCamera
 			local at = if cam then cam.CFrame.Position else Vector3.zero
+			-- the lamps' lights: at night, normal quality, within LIGHT_R of the camera (phones: few lights)
+			local lampsOn = isNight()
+			for _, l in CollectionService:GetTagged("RoadsideLamp") do
+				local h = l.Parent
+				if l:IsA("Light") and h and h:IsA("BasePart") then
+					l.Enabled = lampsOn and full and (h.Position - at).Magnitude < LIGHT_R
+				end
+			end
 			local cx, cz = math.floor(at.X / CHUNK), math.floor(at.Z / CHUNK)
 			local reach = math.ceil(load / CHUNK)
 			local made = 0
