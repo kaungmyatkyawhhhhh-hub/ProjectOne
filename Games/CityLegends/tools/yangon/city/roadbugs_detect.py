@@ -29,7 +29,7 @@ from roadbugs_index import read_glb, ROOT, OUT
 NET = os.path.join(ROOT, 'build', 'city_1to1', 'roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12')
 CELL = 1536.0
 SPIKE_ANG = float(os.environ.get('SPIKE_ANG', 75))
-KINDS = ('spike', 'hole', 'grass_flat', 'median_jct', 'median_stub', 'kerb_loose', 'paint_cross', 'yellow_jct',
+KINDS = ('spike', 'gap', 'hole', 'grass_flat', 'median_jct', 'median_stub', 'kerb_loose', 'paint_cross', 'yellow_jct',
          'lone_dash', 'wall_low')
 
 
@@ -212,6 +212,18 @@ def cell_job(arg):
                                     seen.add(key)
                                     ys = [yy for yy in R.ys(mid[0], mid[1])]
                                     spot('spike', p1[0], ys[0] if ys else 0, p1[1], 'ang %.0f' % ang)
+        # gap: a small bare patch enclosed by road surfaces (grass showing through at a mouth corner, shot 3)
+        if len(R.T) and os.environ.get('RB_GAP', '1') == '1':
+            surf_all = [R.P] + [Surf(get(k)).P for k in ('P', 'KR', 'KW', 'MG', 'B') if len(get(k))]
+            UA = shapely.union_all([p.buffer(0.05, join_style=2) for ps in surf_all for p in ps])
+            for g in getattr(UA, 'geoms', [UA]):
+                for ring in g.interiors:
+                    h = Polygon(ring)
+                    if 1.5 < h.area < 600:
+                        pc = h.representative_point()
+                        if not near_deck((pc.x, 0, pc.y)):
+                            ys = R.ys(pc.x, pc.y)
+                            spot('gap', pc.x, 0, pc.y, 'area %.0f' % h.area)
         # hole
         for (x, y, z, nm) in probes.get(cell, []):
             if not R.near(x, y, z, 0.5, 12):
