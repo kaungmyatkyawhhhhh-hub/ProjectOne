@@ -371,6 +371,57 @@
    "35x13",
    "35x14",
    "35x15"
+  ],
+  "RB12P": [
+   "29x16",
+   "29x17",
+   "29x18",
+   "29x19",
+   "29x20",
+   "29x21",
+   "29x22",
+   "30x16",
+   "30x17",
+   "30x18",
+   "30x19",
+   "30x20",
+   "30x21",
+   "30x22",
+   "31x16",
+   "31x17",
+   "31x18",
+   "31x19",
+   "31x20",
+   "31x21",
+   "31x22",
+   "32x16",
+   "32x17",
+   "32x18",
+   "32x19",
+   "32x20",
+   "32x21",
+   "32x22",
+   "33x16",
+   "33x17",
+   "33x18",
+   "33x19",
+   "33x20",
+   "33x21",
+   "33x22",
+   "34x16",
+   "34x17",
+   "34x18",
+   "34x19",
+   "34x20",
+   "34x21",
+   "34x22",
+   "35x16",
+   "35x17",
+   "35x18",
+   "35x19",
+   "35x20",
+   "35x21",
+   "35x22"
   ]
  },
  "skipped": {
@@ -471,27 +522,6 @@
   "28x26": [
    "P8_laptop"
   ],
-  "29x16": [
-   "excluded (other agent)"
-  ],
-  "29x17": [
-   "excluded (other agent)"
-  ],
-  "29x18": [
-   "excluded (other agent)"
-  ],
-  "29x19": [
-   "excluded (other agent)"
-  ],
-  "29x20": [
-   "excluded (other agent)"
-  ],
-  "29x21": [
-   "excluded (other agent)"
-  ],
-  "29x22": [
-   "excluded (other agent)"
-  ],
   "29x23": [
    "P8_laptop"
   ],
@@ -503,132 +533,6 @@
   ],
   "29x26": [
    "P8_laptop"
-  ],
-  "30x16": [
-   "excluded (other agent)"
-  ],
-  "30x17": [
-   "excluded (other agent)"
-  ],
-  "30x18": [
-   "excluded (other agent)"
-  ],
-  "30x19": [
-   "excluded (other agent)"
-  ],
-  "30x20": [
-   "excluded (other agent)"
-  ],
-  "30x21": [
-   "excluded (other agent)"
-  ],
-  "30x22": [
-   "excluded (other agent)"
-  ],
-  "31x16": [
-   "excluded (other agent)"
-  ],
-  "31x17": [
-   "excluded (other agent)"
-  ],
-  "31x18": [
-   "excluded (other agent)"
-  ],
-  "31x19": [
-   "excluded (other agent)"
-  ],
-  "31x20": [
-   "excluded (other agent)"
-  ],
-  "31x21": [
-   "excluded (other agent)"
-  ],
-  "31x22": [
-   "excluded (other agent)"
-  ],
-  "32x16": [
-   "excluded (other agent)"
-  ],
-  "32x17": [
-   "excluded (other agent)"
-  ],
-  "32x18": [
-   "excluded (other agent)"
-  ],
-  "32x19": [
-   "excluded (other agent)"
-  ],
-  "32x20": [
-   "excluded (other agent)"
-  ],
-  "32x21": [
-   "excluded (other agent)"
-  ],
-  "32x22": [
-   "excluded (other agent)"
-  ],
-  "33x16": [
-   "excluded (other agent)"
-  ],
-  "33x17": [
-   "excluded (other agent)"
-  ],
-  "33x18": [
-   "excluded (other agent)"
-  ],
-  "33x19": [
-   "excluded (other agent)"
-  ],
-  "33x20": [
-   "excluded (other agent)"
-  ],
-  "33x21": [
-   "excluded (other agent)"
-  ],
-  "33x22": [
-   "excluded (other agent)"
-  ],
-  "34x16": [
-   "excluded (other agent)"
-  ],
-  "34x17": [
-   "excluded (other agent)"
-  ],
-  "34x18": [
-   "excluded (other agent)"
-  ],
-  "34x19": [
-   "excluded (other agent)"
-  ],
-  "34x20": [
-   "excluded (other agent)"
-  ],
-  "34x21": [
-   "excluded (other agent)"
-  ],
-  "34x22": [
-   "excluded (other agent)"
-  ],
-  "35x16": [
-   "excluded (other agent)"
-  ],
-  "35x17": [
-   "excluded (other agent)"
-  ],
-  "35x18": [
-   "excluded (other agent)"
-  ],
-  "35x19": [
-   "excluded (other agent)"
-  ],
-  "35x20": [
-   "excluded (other agent)"
-  ],
-  "35x21": [
-   "excluded (other agent)"
-  ],
-  "35x22": [
-   "excluded (other agent)"
   ]
  },
  "kinds": [
