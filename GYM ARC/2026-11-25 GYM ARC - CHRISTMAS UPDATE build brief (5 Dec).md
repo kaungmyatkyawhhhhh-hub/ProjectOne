@@ -162,6 +162,19 @@ Source: [[2026-11-26 GYM ARC - Tutorial and cutscene redesign (your taps, short 
 - Tests: a new player who doesn't touch the screen gets the hand within 3 s and the tutorial does NOT move on by itself; tapping REP fills the pump; the muscle pick works in any order and saves; every cutscene skips after 1 s and still pays; Benny can be beaten at 2 taps/s, and at 0.8 taps/s after "BENNY IS TIRED!"; intro ≤ 5 s; phone screenshots of the hand and the pick screen.
 - Expected (model): stay past 3 min ~49% (live) → ~89% with Phase 2b → **over 90% even for very impatient kids** with 2b + 2d (96% at 5 s patience, ~100% at 11 s; a ceiling, lag and bugs aren't modelled). Overload 0 s, KEY messages missed 0%. If Experiments are set up, A/B auto vs taps on the funnel.
 
+## Phase 2e: minutes 3-10 (owner 26 Nov: "now we need them to play for 10 minutes")
+Source: [[2026-11-26 GYM ARC - The 10-minute plan (minutes 3-10)]]. Only for a player's FIRST session (until they leave, or 15 min) unless it says otherwise. Grep for the names; small changes.
+1. Beach grind 70 → 40 reps: Config/Onboarding BeachChest / BeachCore / BeachLegs / BeachBack `count = 10` each (step IDs and numbers stay).
+2. No QUESTS TOUR in the first session (the Tour that opens DailyQuests after Growth Spurt 2). Instead one toast: "DAY 1 STREAK: +750 · CLAIM" (one tap). CLAIM must never be blocked by a tour. The tour's SKIP button hides with the tour.
+3. No paid offers before Growth Spurt 3: StarterSticky, the stamina REFILL / ENDLESS offer, DEAL tag (extends Phase 2b's calm HUD). `CalmOffersUntilSpurt = 3`.
+4. GO TRAIN for the whole first session: when the muscle you're on is FULL for the current spurt, show "FULL! Next: CHEST" and take the player there after 3 s unless they tap STAY (`FirstSessionAutoNext = 3`). The "Heavier weight open! Tap +" guide line only while on a machine.
+5. No stamina wall in the first session: stamina refills while walking / dashing; the first time it hits 0, a free Energy Shake drops into the hotbar with the tap hand (`FirstSessionStaminaRefill = true`).
+6. Playtime gifts: count from join (tutorial included), every 2 min (2, 4, 6, 8, **10 = a free trainer roll**), then every 5 min; a small countdown chip under the coins ("GIFT in 0:45"), not under the joystick / jump button (`PlaytimeGiftTimes = { 120, 240, 360, 480, 600, 900, 1200, ... }`, `BigGiftAt = 600`).
+7. A new player's sky stays day for their first 15 min (DayNightClient: hold ClockTime at the day value while `SessionSeconds < 900` and it's their first session), or lift `NightOutdoorAmbient` so night is never dark (owner rule 13 Nov).
+- Bugs to fix with it: CLAIM blocked during the tour; SKIP left on screen; the "Heavier weight" line off-machine; the GS1 READY card flashing again for ~1 s after GROW.
+- Tests: a fresh player (FreshPlayer) reaches GS2 by ~4:00, no tour, the claim toast works; on a full muscle, "FULL! Next" moves them in 3 s; no R$ popup before GS3; gifts at 2/4/6/8/10 min with the chip; the sky is day at 10 min on a server started at 15:00 game time.
+- Expected (model, calibrated to live): of the players past 3 min, ~56% (live) → **~100% stay past 10 min** (92% for very impatient kids); mean session ~18 → ~27 min. Ceiling, not a promise. Add funnel steps "GS2", "GS3", "10 min in session".
+
 ## Phase 2c: crowd levers (so the game tile shows 1,000+ players; from the CCU growth model, 26 Nov)
 Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobody plays it, it's dead"). These raise how many players come back and stay. Build the cheap ones with Phase 2-5.
 1. **Friend invite = a bonus Advent present for BOTH** (Roblox invite prompt from the calendar; the friend gets it on first join).
@@ -219,6 +232,9 @@ Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobod
 - [ ] Candy Canes: earn rate in range (~40-60/h); pass doubles them; saved.
 - [ ] Christmas Alters: buy, wear, unwear, rejoin; other players see the skin.
 - [ ] Gift drop: lands on the ground, the first tap pays, nearby players get their share, despawns.
+
+**First 10 minutes (Phase 2e)**
+- [ ] GS2 by ~4:00; no quests tour, one-tap claim; FULL! Next works; no R$ popup before GS3; gifts every 2 min + chip; day sky at 10 min.
 
 **First 5 minutes (Phase 2b + 2d)**
 - [ ] No auto reps/pump in the tutorial; hand after 3 s; muscle pick any order; every cutscene skips after 1 s; Benny walks into the GROW shot and is won by tapping; intro ≤ 5 s; no RECORD banner in the tutorial; pops float over the muscle.
