@@ -1,0 +1,12 @@
+DRV MP lower road #5 (fuel station side): reached 7/7 end 34522 61.4 29068 stops 0 maxJolt 16.7 y 62.2..68.4 
+DRV MP lower road by fuel station: reached 4/4 end 34526 61.0 29013 stops 7 maxJolt 153.2 y 58.1..69.3 STOP at 34530 66.6 29314 speed 35->1 ; STOP at 34524 66.2 29304 speed 26->0 ; STOP at 34476 60.3 28990 speed 49->25 ; STOP at 34460 63.1 29065 speed 35->0 ; STOP at 34530 63.2 29155 speed 38->24 ; 
+DRV MP lower road #6 (other side): reached 4/8 end 34521 66.2 29244 stops 7 maxJolt 34.9 y 58.9..80.9 STOP at 34548 62.3 29153 speed 27->2 ; STOP at 34535 62.3 29078 speed 26->4 ; STOP at 34484 60.2 28978 speed 37->2 ; STOP at 34488 60.2 29035 speed 26->1 ; STOP at 34588 69.9 29385 speed 56->15 ; ST
+DRV MP lower road #6 retry: reached 6/6 end 34554 66.8 29282 stops 0 maxJolt 1.2 y 62.4..66.5 
+DRV P6 Baho Road junction / Baho Road #3: reached 11/11 end 26916 35.3 36702 stops 0 maxJolt 1.3 y 33.9..35.1 
+DRV P5 Hlaing Tharyar edge / 1st Thiri Mon Street: reached 10/10 end 19633 18.6 17391 stops 0 maxJolt 10.5 y 16.5..18.6 
+DRV P10 junction / Lane #310: reached 11/11 end 47223 14.3 19271 stops 0 maxJolt 6.9 y 12.2..14.2 
+DRV P3 downtown / 25th Street: reached 11/11 end 34366 35.2 45186 stops 0 maxJolt 5.8 y 32.5..35.0 
+DRV P4 Hledan / Nar Nat Taw Rd #2: reached 11/11 end 25666 64.8 29845 stops 0 maxJolt 2.8 y 43.2..65.7 
+DRV P12 junction / Paw San Hmwe Street: reached 11/11 end 50504 18.9 30230 stops 0 maxJolt 0.5 y 19.0..19.1 
+DRV P9 / Byamaso Street: reached 11/11 end 41246 19.0 20023 stops 0 maxJolt 0.3 y 19.0..20.0 
+DRV P11 / Moe Kaung Road: reached 11/11 end 40072 27.3 28179 stops 0 maxJolt 1.0 y 25.8..27.2 
