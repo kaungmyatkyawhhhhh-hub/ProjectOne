@@ -437,7 +437,7 @@ local function pageProperty(body: Frame): (() -> ())?
 	local suite = p.suite
 	local sr = row(body, y, 52, false)
 	text(sr, "HOTEL SUITE", 15, Theme.Text, { Font = Enum.Font.GothamBlack, Position = UDim2.fromOffset(14, 6), Size = UDim2.new(1, -20, 0, 20) })
-	text(sr, if suite then suite.name .. " pays " .. UI.formatCash(suite.perMinute) .. " every minute you play, straight into your cash" else "Buy a suite at the Novotel Yangon Max: it pays every minute you play", 12, Theme.SubText, { Position = UDim2.fromOffset(14, 28), Size = UDim2.new(1, -20, 0, 18) })
+	text(sr, if suite then suite.name .. " pays " .. UI.formatCash(suite.perMinute) .. " every minute you play, straight into your cash" else "Buy a suite at the Pyay Royal Hotel: it pays every minute you play", 12, Theme.SubText, { Position = UDim2.fromOffset(14, 28), Size = UDim2.new(1, -20, 0, 18) })
 	local b = button(if anyReady then "COLLECT RENT" else "NO SAFE READY", if anyReady then Theme.Money else Theme.Stroke, { Position = UDim2.new(0, 0, 1, -54), Size = UDim2.new(1, 0, 0, 50), TextSize = 20, ZIndex = 74, Parent = body })
 	b.TextColor3 = if anyReady then Theme.Money else Theme.SubText
 	if anyReady then

@@ -1,6 +1,6 @@
 --[[
 	Hotel
-	The Novotel Yangon Max, Downtown on Ocean Drive (owner, 2026-10-22: "add a large skyscraper
+	The Pyay Royal Hotel (26 Nov: made-up name; was the real Novotel Yangon Max brand), Downtown on Ocean Drive (owner, 2026-10-22: "add a large skyscraper
 	hotel with valets and you can buy a penthouse on the hotel"; "Downtown penthouse suites pay out
 	money every minute to their owners").
 
@@ -435,11 +435,25 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	local function light(p: BasePart, color: Color3, range: number, brightness: number)
 		kit.addLight("PointLight", p, color, range, brightness)
 	end
-	-- world centre and size of a box given in the hotel's frame (for axis-aligned helpers)
-	local function worldBox(lx: number, lz: number, sx: number, sz: number): (number, number, number, number)
+	-- the tower's facade tiers: kit.facadeTier builds axis-aligned boxes, so they are built square to the world round
+	-- their middle and then turned with the frame (26 Nov: the hotel stands on the real Novotel site, square to its
+	-- road, not to the world axes)
+	local function facadeTurned(fine: Instance, pal: any, lx: number, lz: number, sx: number, sz: number, y0: number, y1: number)
 		local c = at(lx, 0, lz).Position
-		local alongX = math.abs(frame.RightVector.X) > 0.5
-		return c.X, c.Z, if alongX then sx else sz, if alongX then sz else sx
+		local tmpM, tmpF = Instance.new("Model"), Instance.new("Model")
+		kit.facadeTier(tmpM, c.X, c.Z, sx, sz, y0, y1, pal, true, nil, tmpF)
+		local turn = CFrame.new(c) * frame.Rotation * CFrame.new(-c)
+		for _, pair in { { tmpM, model }, { tmpF, fine } } do
+			for _, d in pair[1]:GetChildren() do
+				if d:IsA("BasePart") then
+					d.CFrame = turn * d.CFrame
+				elseif d:IsA("Model") then
+					d:PivotTo(turn * d:GetPivot())
+				end
+				d.Parent = pair[2]
+			end
+			pair[1]:Destroy()
+		end
 	end
 	-- a Miami palm: a gently leaning ringed trunk, drooping fronds and coconuts
 	local function palm(par: Instance, x: number, z: number, h: number, y0: number?)
@@ -603,7 +617,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	dbox(model, 125, 0.3, 0.3, 0, 18.95, cz0 - 0.1, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
 	-- the fascia: a black iron board with the name in gold letters, an iron crest on top
 	local fascia = dbox(model, 100, 5.4, 0.6, 0, 24.2, cz0 + 0.6, IRON, Enum.Material.Metal)
-	goldLetters(fascia, Enum.NormalId.Front, "NOVOTEL YANGON MAX", 10, 1.5)
+	goldLetters(fascia, Enum.NormalId.Front, "PYAY ROYAL HOTEL", 10, 1.5)
 	dbox(model, 101, 0.4, 0.8, 0, 21.4, cz0 + 0.6, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
 	dbox(model, 101, 0.4, 0.8, 0, 27.0, cz0 + 0.6, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
 	for k = -3, 3 do
@@ -1015,13 +1029,11 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 		end
 	end
 	local fine1 = kit.lodGroup(model, "Facade1", at(0, (BODY1.y0 + BODY1.y1) / 2, TOWER_Z).Position, 900)
-	local bx, bz, bw, bd = worldBox(0, TOWER_Z, BODY1.w, BODY1.d)
-	kit.facadeTier(model, bx, bz, bw, bd, groundY + BODY1.y0, groundY + BODY1.y1, pal, true, nil, fine1)
+	facadeTurned(fine1, pal, 0, TOWER_Z, BODY1.w, BODY1.d, groundY + BODY1.y0, groundY + BODY1.y1)
 	balconies(fine1, BODY1)
 	cornice(fine1, BODY1)
 	local fine2 = kit.lodGroup(model, "Facade2", at(0, (BODY2.y0 + BODY2.y1) / 2, TOWER_Z).Position, 1000)
-	local b2x, b2z, b2w, b2d = worldBox(0, TOWER_Z, BODY2.w, BODY2.d)
-	kit.facadeTier(model, b2x, b2z, b2w, b2d, groundY + BODY2.y0, groundY + BODY2.y1, pal, true, nil, fine2)
+	facadeTurned(fine2, pal, 0, TOWER_Z, BODY2.w, BODY2.d, groundY + BODY2.y0, groundY + BODY2.y1)
 	balconies(fine2, { w = BODY2.w, d = BODY2.d, y0 = BODY2.y0, y1 = BODY2.y1 - 14 })
 	cornice(fine2, BODY2)
 	-- the landmark from far away: the stone body, its window strips, cornices and name band always
@@ -1048,7 +1060,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	-- the name round the top of the tower, under the crown: a stone band with gold letters
 	local band = deco(shell, Vector3.new(b2w + 0.8, 10, b2d + 0.8), CFrame.new(b2x, groundY + BODY2.y1 - 6, b2z), RIV_LIGHT, Enum.Material.Limestone)
 	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right } do
-		goldLetters(band, face, "NOVOTEL YANGON MAX", 10, 1.6)
+		goldLetters(band, face, "PYAY ROYAL HOTEL", 10, 1.6)
 	end
 	dbox(shell, BODY2.w + 1.6, 0.6, BODY2.d + 1.6, 0, BODY2.y1 - 11.3, TOWER_Z, GOLD, Enum.Material.Metal)
 	dbox(shell, BODY2.w + 1.6, 0.6, BODY2.d + 1.6, 0, BODY2.y1 - 0.7, TOWER_Z, GOLD, Enum.Material.Metal)
