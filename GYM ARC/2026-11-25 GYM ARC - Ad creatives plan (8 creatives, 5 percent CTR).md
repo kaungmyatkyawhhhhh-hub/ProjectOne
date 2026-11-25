@@ -32,5 +32,4 @@ One big hero, a bright clean face (the Man face), one focal point, one huge numb
 - Keep the winner as the Home thumbnail too (Thumbnail Personalization).
 - Log each creative's CTR here after each run.
 
-## Status
-- #1 1000 LB flex: done, `Assets\icon_render_25nov\GYMARC_THUMB_T1_flex_matte.png` (satin skin; the glossy T1 was rejected as 'wet orange meat').
+## 25 Nov 08:40: superseded by [[2026-11-25 GYM ARC - Ad creatives study (5 percent CTR, audience)]] (10 creatives, neon hooks; our own ad data).
