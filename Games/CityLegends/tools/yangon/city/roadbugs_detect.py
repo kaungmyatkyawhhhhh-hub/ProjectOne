@@ -28,7 +28,7 @@ from roadbugs_index import read_glb, ROOT, OUT
 
 NET = os.path.join(ROOT, 'build', 'city_1to1', 'roads05_P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12')
 CELL = 1536.0
-SPIKE_ANG = float(os.environ.get('SPIKE_ANG', 40))
+SPIKE_ANG = float(os.environ.get('SPIKE_ANG', 75))
 KINDS = ('spike', 'hole', 'grass_flat', 'median_jct', 'median_stub', 'kerb_loose', 'paint_cross', 'yellow_jct',
          'lone_dash', 'wall_low')
 
@@ -143,7 +143,7 @@ def _init():
 
 
 def cell_job(arg):
-    cell, ms = arg
+    cell, ms, nbms = arg
     if not _G:
         _init()
     car, probes, jtree, dtree = _G['car'], _G['probes'], _G['jtree'], _G['dtree']
@@ -153,6 +153,11 @@ def cell_job(arg):
         if m['glb'] not in cache:
             cache[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
         byk[m['kind']].append(cache[m['glb']][m['name']])
+    nbR = []
+    for m in nbms:
+        if m['glb'] not in cache:
+            cache[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
+        nbR.append(cache[m['glb']][m['name']])
     spots = collections.defaultdict(list)
     if True:
         K = {k: (np.concatenate(v) if v else np.zeros((0, 3, 3))) for k, v in byk.items()}
@@ -174,7 +179,18 @@ def cell_job(arg):
         shapely.prepare(cw)
         # spike: a sharp tip on the outline of the asphalt (sawtooth teeth at a clip seam, slivers into the grass)
         if len(R.T):
-            U = shapely.union_all([p.buffer(0.03, join_style=2) for p in R.P])
+            # (the neighbours' asphalt within 80 studs too: triangles go to a cell by their middle, so a cell's own outline
+            # is toothed along its border)
+            x0c, z0c = cx * CELL, cz * CELL
+            NB_ = [T2 for T2 in nbR if len(T2)]
+            allP = list(R.P)
+            if NB_:
+                T2 = np.concatenate(NB_)
+                c2 = T2.mean(1)
+                T2 = T2[(c2[:, 0] > x0c - 80) & (c2[:, 0] < x0c + CELL + 80) & (c2[:, 2] > z0c - 80) & (c2[:, 2] < z0c + CELL + 80)]
+                allP += Surf(T2).P
+            U = shapely.union_all([p.buffer(0.03, join_style=2) for p in allP])
+            cellbox = Polygon([(x0c, z0c), (x0c + CELL, z0c), (x0c + CELL, z0c + CELL), (x0c, z0c + CELL)])
             for g in getattr(U, 'geoms', [U]):
                 for ring in [g.exterior] + list(g.interiors):
                     xy = np.array(ring.coords)[:-1]
@@ -190,7 +206,7 @@ def cell_job(arg):
                         ang = math.degrees(math.acos(max(-1, min(1, (u @ v) / (lu * lv)))))
                         if ang < SPIKE_ANG:
                             mid = (p1 + (p0 + p2) / 2) / 2
-                            if g.contains(Point(mid)) and not near_deck((p1[0], 0, p1[1])):  # a convex tip (not a notch)
+                            if g.contains(Point(mid)) and cellbox.contains(Point(p1)) and not near_deck((p1[0], 0, p1[1])):  # a convex tip (not a notch)
                                 key = (round(p1[0] / 6), round(p1[1] / 6))
                                 if key not in seen:
                                     seen.add(key)
@@ -340,7 +356,14 @@ def run(cells_only=None, procs=4):
             continue
         bycell[m['cell']].append(m)
     counts, spots = {}, collections.defaultdict(list)
-    jobs = sorted(bycell.items())
+    allR = collections.defaultdict(list)
+    for m in match.values():
+        if m['kind'] == 'R':
+            allR[m['cell']].append(m)
+    def nb(cell):
+        cx, cz = map(int, cell.split('x'))
+        return [m for dx in (-1, 0, 1) for dz in (-1, 0, 1) if dx or dz for m in allR.get('%dx%d' % (cx + dx, cz + dz), [])]
+    jobs = [(c, ms, nb(c)) for c, ms in sorted(bycell.items())]
     with mp.Pool(procs) as pool:
         for cell, c, sp in pool.imap_unordered(cell_job, jobs):
             counts[cell] = c
