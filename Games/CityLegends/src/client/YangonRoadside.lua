@@ -747,7 +747,7 @@ local function buildPalms(m: Instance, sets, key: string, x0: number, z0: number
 						end
 						if ok then
 							-- the crown: nothing within its radius
-							for _, o in { Vector3.zero, Vector3.new(6, 0, 0), Vector3.new(-6, 0, 0), Vector3.new(0, 0, 6), Vector3.new(0, 0, -6) } do
+							for _, o in { Vector3.zero, Vector3.new(10, 0, 0), Vector3.new(-10, 0, 0), Vector3.new(0, 0, 10), Vector3.new(0, 0, -10), Vector3.new(0, -5, 0), Vector3.new(0, 5, 0) } do
 								if blocked(sets, base + Vector3.new(0, PALM_H + 2, 0) + o, 1.5) then
 									ok = false
 									break
