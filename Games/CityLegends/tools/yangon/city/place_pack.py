@@ -169,14 +169,15 @@ def write(k, items):
 
 def main():
     ref = Refs("Q")
-    items1 = [inner(os.path.join(SYNC, "terrain_%s_a.rbxmx" % T), "TA"),
-              inner(os.path.join(SYNC, "ygnkit_%s.rbxmx" % T), "DK"),
-              inner(os.path.join(ROOT, "imports", "sync", "ygn1to1_green", "green_%s.rbxmx" % T), "GR")]
+    # (26 Nov) BUILDINGS_ONLY=1: a buildings re-run of a district already in the place (P1-P3 against today's roads):
+    # no terrain, no green, no pagodas, only the kit data, the shells and the roofs
+    only_b = os.environ.get("BUILDINGS_ONLY") == "1"
+    items1 = ([] if only_b else [inner(os.path.join(SYNC, "terrain_%s_a.rbxmx" % T), "TA")]) +         [inner(os.path.join(SYNC, "ygnkit_%s.rbxmx" % T), "DK")] +         ([] if only_b else [inner(os.path.join(ROOT, "imports", "sync", "ygn1to1_green", "green_%s.rbxmx" % T), "GR")])
     write(1, items1)
     shell, roofs, n, nc = shell_items(ref)
-    items2 = [inner(os.path.join(SYNC, "terrain_%s_b.rbxmx" % T), "TB"), string_value(ref, "Roofs", roofs)]
+    items2 = ([] if only_b else [inner(os.path.join(SYNC, "terrain_%s_b.rbxmx" % T), "TB")]) + [string_value(ref, "Roofs", roofs)]
     pg = os.path.join(B1, "pagodas_%s.txt" % TAG)
-    if os.path.exists(pg):
+    if os.path.exists(pg) and not only_b:
         items2.append(string_value(ref, "PagodaData", open(pg, encoding="utf-8").read()))
     write(2, items2)
     for k, sh in enumerate(shell):
