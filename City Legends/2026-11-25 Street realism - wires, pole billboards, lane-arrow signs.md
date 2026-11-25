@@ -64,7 +64,7 @@ Started from `Main.client.lua` (`startStep("YangonRoadside", ...)`, after the me
 | Spot | Before | After |
 |---|---|---|
 | Waizayandar Road | `2026-11-25 Street realism - Waizayandar Road (Play) - before.jpg` | `... - after.jpg` |
-| Waizayandar junction (signal) | `2026-11-25 Street realism - Waizayandar junction signal (Play) - before.jpg` | `... - after.jpg` (lane panel; the shot is from before the ↑→ fix) |
+| Waizayandar junction (signal) | `2026-11-25 Street realism - Waizayandar junction signal (Play) - before.jpg` | `... - after.jpg` (retaken in pass 2 with the ↑→ arrow) |
 | Pyay Road | `2026-11-25 Street realism - Pyay Road (Play) - before.jpg` | `... - after.jpg` |
 | Anawrahta Road | `2026-11-25 Street realism - Anawrahta Road (Play) - before.jpg` | `... - after.jpg` |
 | Pole billboard | | `2026-11-25 Street realism - pole billboard by Waizayandar Road (Play) - after.jpg` |
@@ -74,17 +74,51 @@ Started from `Main.client.lua` (`startStep("YangonRoadside", ...)`, after the me
 - Test save `CityLegends_test` for the shots.
 - Then the store went back to `CityLegends_v1`, saved (v2023), and was checked on the Server in Play (store = CityLegends_v1, YangonRoadside started, no errors).
 
+## Pass 2 (25 Nov, later): no overlaps, side streets, toddy palms, lamps
+Saved as **v2036**, then the store was switched back to v1 and saved again: that save timed out, but Studio then reported no unsaved changes, so it went through. Not published.
+
+**1. Nothing touches anything (owner's no-overlap rule):**
+- Every pole, lamp arm, top arm, billboard, palm and wire is tested before it is built, against:
+  - the kit near the camera: balconies, walls, AC boxes and **tree crowns** in `YgnKitNear`. Their CanQuery is off, so they are tested point by point against each part's box;
+  - building shells and roofs, parks, landmarks, edge greenery, the planted medians and the signal poles.
+- A pole that would touch something moves up to 12 studs along the kerb or 4.5 studs across it, or is skipped. A wire that would touch something (a balcony on a narrow pavement, a crown, a roof) is left out.
+- A chunk now waits until the kit tiles round it are built: `YangonKitStream` sets attribute `Built` on each finished tile folder.
+- Check in Play near Waizayandar: 516 new parts and 178 wires, **0 overlaps** with any other visible part. The first pass had 4 (tree crowns, a kit part, shell roofs).
+
+**2. Side streets:**
+- Every road collision box (`RoadBox` R) with no traffic lane in it is a side street.
+- One pole per 96-stud cell goes on one side of the street, with one wire and two bundles to the next pole along it, and an **amber** lamp on every second pole (owner, 21 Nov: side-street power-pole lamps are amber).
+- P1 is still skipped (it has its own street layer).
+
+**3. Toddy palm rows (clip 0930):**
+- A palm every 30 studs (10 m) down the middle of any median at least 15 studs (5 m) wide, measured as the gap between the two ways' inner lanes.
+- Never on a flyover, and never where the crown would touch a tree, a building or the planted-median shrubs (so Pyay Road mostly keeps its shrubs).
+- The kit piece is `ReplicatedStorage.RoadsideKit.ToddyPalm`: a 15 m dark trunk and a generated palmyra crown (round fan-leaf head with dry leaves under it, 6.7 m wide). 2 parts.
+- About 610 spots are planned over the map (before the junction and clearance checks), most on U Wisara, Bayint Naung, Waizayandar, No.1 Industrial and Pyay roads. Spots that fail the checks get no palm.
+
+**4. Street lamps on main roads:**
+- Every second main-road pole carries a galvanised arm with a white LED head over the road.
+- Pyay Road and Kabar Aye Pagoda Road are left out (their planted medians already have lamps).
+- The lights are on only at night, at normal quality, and within 220 studs of the camera: about 5 of 32 lit in the test, to keep phones fast.
+
+Pictures (Play):
+- `2026-11-25 Street realism - toddy palm median on Waizayandar Road (Play) - after.jpg`
+- `2026-11-25 Street realism - pole lamps and palms at night, Waizayandar (Play) - after.jpg`
+- `2026-11-25 Street realism - side-street pole with amber lamp (Play) - after.jpg`
+- `2026-11-25 Street realism - Waizayandar junction signal (Play) - after.jpg` (retaken with ↑→)
+
+Cost:
+- About 450-520 parts and about 170 wires near the camera. No saved map parts, except the 2-part palm kit and about 42 KB of script.
+
 ## Checks and known limits
-- Overlap: a box test of every new part against everything near it found no building or road hits. Only tree crowns (kit trees `OK*_ot1`) overlap some poles and one board column, which is a pole through foliage. Kit trees can't be ray-tested (CanQuery off), so the code cannot avoid them yet.
-- Wires on narrow pavements run close to old-block facades and may brush balconies (visual only).
-- Side streets without traffic lanes get no poles yet (P1's street layer has them, other districts don't).
-- The Hledan deck fix was removed by the deck agent while this was being built, so the ray filter now uses only the road boxes and terrain (git and Studio match).
+- The overlap check samples points against each part's box. A round crown's box is a little bigger than the crown, so a few poles stand further from trees than they need to.
+- A side-street pole can stand on a small corner island at an unsignalled junction (seen once).
+- Some pole spots and wires near the edge of the loaded area appear only once the camera comes closer (they wait for the kit there).
+- Kit tree trunks are only as good as their boxes (no trunk parts were found in the kit).
+- The Hledan deck fix was removed by the deck agent while this was being built, so the ray filter uses only the road boxes and terrain (git and Studio match).
 
 ## Left (ranked)
-1. Poles and wires on side streets (needs street data outside the lane set, like P1's `Data_P1S`).
-2. Toddy (fan) palm rows along avenues (clip 0930).
-3. Street lamps on undivided main roads (twin-arm lamps on the median or kerb poles).
-4. Hazy, paler day sky. Careful: the owner called the old Yangon haze "too foggy" (16 Nov), so it needs his OK and a side-by-side.
-5. Yellow zebra crossings with a white stop line (road paint: owned by the road builder, not touched here).
-6. Blue hoarding round building sites, guard booths with striped roofs, camera gantries.
-7. A phone check on a real device (FPS with the poles).
+1. Phone check on a real device (FPS with poles, palms and lamps at night).
+2. Blue hoarding round building sites, guard booths with striped roofs, camera gantries.
+3. Lit billboards at night (night note item 4).
+4. Not ours: the hazy day sky (owner: the old haze was too foggy) and the yellow zebra crossings (road builder).

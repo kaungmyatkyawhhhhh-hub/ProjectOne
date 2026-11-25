@@ -757,5 +757,12 @@
   "lanes": "LP1to11: 323 rows in the box dropped, raw install, LaneHeights 223 new rows, install 1382 lanes / 3247 links / 0 dead ends; 28/28 = repo, require 28/28 (QuickSync 78479439197618, 123173594724987, 86037210226063)",
   "deckfeet": "Pyay deck 2 ok / 0 BAD",
   "play": "CityLegends_test, traffic hidden: Pyay deck end to end gap 1.91-2.27, worst jolt 15.1 at the 73 -> 6.8% grade break; Lanmadaw -> Myoma 1.89-2.18 jolt 12.8; May Ni Gone end 2.03-2.08 jolt 4.3; store back to v1"
+ },
+ "street_realism_25Nov_pass2": {
+  "what": "YangonRoadside pass 2: nothing touches other parts (kit trees, balconies, walls, shells/roofs, parks, landmarks, medians, signals tested point by point; kit tiles must be Built first: YangonKitStream sets attribute Built), side-street poles + wires + amber lamps from RoadBox R boxes with no lane, toddy palms down medians 15+ studs wide (lane gap), white LED lamp arm on every 2nd main-road pole (not Pyay / Kabar Aye), lights only at night within 220 studs, normal quality",
+  "kit": "ReplicatedStorage.RoadsideKit.ToddyPalm (Concrete trunk 45 + Assistant-generated palmyra crown MeshPart 20x15x20)",
+  "files": "src/client/YangonRoadside.lua, src/client/YangonKitStream.client.lua (Built attribute), src/client/YangonSignals.lua (arrow glyph)",
+  "saved_version": "2036, then the store switch-back save (timed out, Studio then reported no unsaved changes)",
+  "playtest": "PASS 25 Nov: test store; overlap audit in Play 516 parts / 178 wires: 0 hits; palms on Waizayandar median; night lamps; store back to v1 checked on the Server"
  }
 }
