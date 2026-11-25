@@ -153,11 +153,11 @@ def cell_job(arg):
         if m['glb'] not in cache:
             cache[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
         byk[m['kind']].append(cache[m['glb']][m['name']])
-    nbR = []
+    nbR, nbA = [], []
     for m in nbms:
         if m['glb'] not in cache:
             cache[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
-        nbR.append(cache[m['glb']][m['name']])
+        (nbR if m['kind'] == 'R' else nbA).append(cache[m['glb']][m['name']])
     spots = collections.defaultdict(list)
     if True:
         K = {k: (np.concatenate(v) if v else np.zeros((0, 3, 3))) for k, v in byk.items()}
@@ -215,13 +215,21 @@ def cell_job(arg):
         # gap: a small bare patch enclosed by road surfaces (grass showing through at a mouth corner, shot 3)
         if len(R.T) and os.environ.get('RB_GAP', '1') == '1':
             surf_all = [R.P] + [Surf(get(k)).P for k in ('P', 'KR', 'KW', 'MG', 'B') if len(get(k))]
+            # (the neighbour cells' surfaces near the border too: a wide wedge whose middle is next door covers this side)
+            x0c, z0c = cx * CELL, cz * CELL
+            for T2 in nbR + nbA:
+                if len(T2):
+                    c2 = T2.mean(1)
+                    T2 = T2[(c2[:, 0] > x0c - 80) & (c2[:, 0] < x0c + CELL + 80) & (c2[:, 2] > z0c - 80) & (c2[:, 2] < z0c + CELL + 80)]
+                    if len(T2):
+                        surf_all.append(Surf(T2).P)
             UA = shapely.union_all([p.buffer(0.05, join_style=2) for ps in surf_all for p in ps])
             for g in getattr(UA, 'geoms', [UA]):
                 for ring in g.interiors:
                     h = Polygon(ring)
                     if 1.5 < h.area < 600:
                         pc = h.representative_point()
-                        if not near_deck((pc.x, 0, pc.y)):
+                        if cellbox.contains(pc) and not near_deck((pc.x, 0, pc.y)):
                             ys = R.ys(pc.x, pc.y)
                             spot('gap', pc.x, 0, pc.y, 'area %.0f' % h.area)
         # hole
@@ -383,7 +391,7 @@ def run(cells_only=None, procs=int(os.environ.get('RB_PROCS', 3))):
     counts, spots = {}, collections.defaultdict(list)
     allR = collections.defaultdict(list)
     for m in match.values():
-        if m['kind'] == 'R':
+        if m['kind'] in ('R', 'P', 'KR', 'KW', 'MG', 'B'):
             allR[m['cell']].append(m)
     def nb(cell):
         cx, cz = map(int, cell.split('x'))
