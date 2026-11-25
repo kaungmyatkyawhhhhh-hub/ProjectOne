@@ -6,8 +6,13 @@ side), one point every STEP studs, broken where a point is on another road's car
 roundabout or a deck (cut samples). Each path runs with its road on its LEFT. The Myanmar Plaza mall's
 shoppers (YangonStreetLifeMall1to1.lua, same format) become YangonStreetLifeMall.
 shortcut: no parked cars or standing spots (C / S lines) yet; streetlife.py's rules can be ported when there is time.
+26 Nov (owner: "people are walking on the road near myanmar plaza"): the 17 Nov paths came from the P1-P3 data before the
+J18-J37 passes and the district rebuilds, so whole runs lay on today's carriageways. Now every run is also cut to the
+surfaces IN THE PLACE (walkers_check.Clipper: each point on a pavement box, taking its height; no walker band on a road,
+deck or median box), from the Studio dumps in build/city_1to1/walkers_26nov/. Re-dump them after any road swap, re-run
+this, then walkers_check.py must print 0.
 
-    YANGON_SCALE=1to1 python streetlife_1to1.py <roads05 tags> <district> [<district> ...]
+    YANGON_SCALE=1to1 python streetlife_1to1.py <roads05 tag of the whole network>
 """
 import json, math, os, sys
 
@@ -15,6 +20,7 @@ from shapely.geometry import Point
 from shapely.strtree import STRtree
 
 import geo
+from walkers_check import Clipper, decode, OUT as WC_OUT
 from roads05_clear import road_polys
 
 OX, OZ = 27900, -6500   # streetlife.py's origin (decimetres from here)
@@ -22,7 +28,7 @@ STEP = 16.0
 MAXCHARS = 185000
 
 
-def main(tag, districts):
+def main(tag):
     data = json.load(open(os.path.join(geo.BUILD, 'city_1to1', 'roads05_' + tag, 'roads.json'), encoding='utf-8'))
     cw, _ = road_polys(data)
     cut = {k: set(v) for k, v in data['cut'].items()}
@@ -53,6 +59,10 @@ def main(tag, districts):
                     run, last = [], None
             if len(run) >= 4:
                 lines.append(run)
+    raw = len(lines)
+    clip = Clipper(decode(os.path.join(WC_OUT, 'roadboxes_place.txt')) + decode(os.path.join(WC_OUT, 'paveboxes_place.txt')))
+    lines = [r for run in lines for r in clip.clip(run)]
+    print('%d raw runs -> %d after the place clip' % (raw, len(lines)))
     out = []
     for run in lines:
         q = [(round((x - OX) * 10), round((z - OZ) * 10), round(y * 10)) for x, y, z in run]
@@ -83,4 +93,4 @@ def main(tag, districts):
 
 if __name__ == '__main__':
     assert geo.ONE_TO_ONE, 'run with YANGON_SCALE=1to1'
-    main(sys.argv[1], sys.argv[2:])
+    main(sys.argv[1])
