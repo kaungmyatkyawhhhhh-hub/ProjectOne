@@ -35,12 +35,15 @@ local function panesOf(id: string): { BasePart }
 	return out
 end
 
-local function click(p: BasePart)
+-- frost = a lower, softer tick; clear = a brighter one, so the ear tells the two states apart
+local function click(p: BasePart, frost: boolean)
 	local s = Instance.new("Sound")
 	s.SoundId = "rbxasset://sounds/volume_slider.ogg"
-	s.Volume = 0.35
-	s.PlaybackSpeed = 1.6
-	s.RollOffMaxDistance = 40
+	s.Volume = if frost then 0.3 else 0.35
+	s.PlaybackSpeed = if frost then 1.15 else 1.8
+	s.RollOffMode = Enum.RollOffMode.InverseTapered
+	s.RollOffMinDistance = 4
+	s.RollOffMaxDistance = 30
 	s.Parent = p
 	s:Play()
 	s.Ended:Once(function()
@@ -67,7 +70,7 @@ local function toggle(p: BasePart)
 	for _, q in panesOf(id) do
 		look(q, frosted[id])
 	end
-	click(p)
+	click(p, frosted[id] == true)
 end
 
 local function add(p: Instance)

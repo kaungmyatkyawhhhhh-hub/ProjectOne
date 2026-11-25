@@ -1056,13 +1056,50 @@ local function wardrobeRaw(x0, x1, z0, z1, h, front, color)
 		s0, s1, n0, n1 = z0, z1, x0, x1
 	end
 	local sm = (s0 + s1) / 2
-	fb2("WardrobeBody", s0, s1, n0, n1 - 0.06, 0, h, color, WD)
+	-- a hollow carcass (back, sides, top, plinth) with a shelf, a hanging rail, clothes on it, folded clothes and a shoe box
+	-- (owner: "make the wardrobe open too with clothes inside"); everything stays inside the closed doors
+	local nb = n1 - 0.06
+	fb2("WardrobeBack", s0, s1, n0, n0 + 0.08, 0, h, color, WD)
+	fb2("WardrobeSide", s0, s0 + 0.08, n0 + 0.08, nb, 0, h, color, WD)
+	fb2("WardrobeSide", s1 - 0.08, s1, n0 + 0.08, nb, 0, h, color, WD)
+	fb2("WardrobeTop", s0 + 0.08, s1 - 0.08, n0 + 0.08, nb, h - 0.1, h, color, WD)
+	fb2("WardrobePlinth", s0 + 0.08, s1 - 0.08, n0 + 0.08, nb, 0, 0.3, color:Lerp(Color3.new(0, 0, 0), 0.25), WD)
+	fb2("WardrobeShelf", s0 + 0.08, s1 - 0.08, n0 + 0.08, nb, 1.5, 1.56, color:Lerp(Color3.new(1, 1, 1), 0.1), WD, true)
+	local nm = (n0 + 0.08 + nb) / 2
+	local railY = h - 0.6
+	local inner0, inner1 = s0 + 0.08, s1 - 0.08
+	if front == "+z" then
+		P("WardrobeRail", Vector3.new(inner1 - inner0, 0.08, 0.08), CFrame.new((inner0 + inner1) / 2, FY + railY, nm), Color3.fromRGB(190, 190, 195), MT, true, Enum.PartType.Cylinder)
+	else
+		P("WardrobeRail", Vector3.new(inner1 - inner0, 0.08, 0.08), CFrame.new(nm, FY + railY, (inner0 + inner1) / 2) * CFrame.Angles(0, math.rad(90), 0), Color3.fromRGB(190, 190, 195), MT, true, Enum.PartType.Cylinder)
+	end
+	local CLOTHES = { Color3.fromRGB(70, 80, 95), Color3.fromRGB(150, 140, 120), Color3.fromRGB(95, 60, 55), Color3.fromRGB(60, 85, 70), Color3.fromRGB(200, 195, 185), Color3.fromRGB(110, 70, 90) }
+	local count = math.floor((inner1 - inner0 - 0.3) / 0.5)
+	local depth = math.min(1.25, (nb - n0 - 0.08) - 0.3)
+	for i = 0, count - 1 do
+		local sc = inner0 + 0.35 + i * 0.5
+		local long = (i % 3 == 1) -- a longyi or a long jacket now and then
+		local top = railY - 0.04
+		local bot = if long then 1.75 else 2.6 + (i % 2) * 0.2
+		local th = 0.12 + (i % 2) * 0.05
+		local d = depth - (i % 3) * 0.08
+		local yaw = math.rad(((i * 37) % 9) - 4)
+		local col = CLOTHES[(i % #CLOTHES) + 1]
+		local cf = if front == "+z" then CFrame.new(sc, FY + (top + bot) / 2, nm) * CFrame.Angles(0, yaw, 0) else CFrame.new(nm, FY + (top + bot) / 2, sc) * CFrame.Angles(0, math.rad(90) + yaw, 0)
+		P("HangingCloth", Vector3.new(th, top - bot, d), cf, col, SP, true)
+	end
+	-- folded clothes on the shelf, a shoe box on the plinth
+	local fw = math.min(1.0, (inner1 - inner0) / 2 - 0.1)
+	fb2("FoldedClothes", inner0 + 0.1, inner0 + 0.1 + fw, nm - 0.45, nm + 0.45, 1.56, 1.76, CLOTHES[2], SP, true)
+	fb2("FoldedClothes", inner0 + 0.14, inner0 + 0.06 + fw, nm - 0.4, nm + 0.4, 1.76, 1.94, CLOTHES[4], SP, true)
+	fb2("FoldedClothes", inner1 - 0.1 - fw, inner1 - 0.1, nm - 0.45, nm + 0.45, 1.56, 1.78, CLOTHES[5], SP, true)
+	fb2("ShoeBox", inner0 + 0.15, inner0 + 1.05, nm - 0.45, nm + 0.35, 0.3, 0.75, Color3.fromRGB(170, 130, 85), Mat.Cardboard, true)
 	for i, d in { { s0 + 0.06, sm - 0.02 }, { sm + 0.02, s1 - 0.06 } } do
 		-- each door turns on its outer edge; front +z: left door -100, right +100; front +x: left +100, right -100
 		local hs = if i == 1 then d[1] else d[2]
 		local ang = if front == "+z" then (if i == 1 then -100 else 100) else (if i == 1 then 100 else -100)
 		local hx, hz = if front == "+z" then hs else n1, if front == "+z" then n1 else hs
-		openable("WardrobeDoor", { Kind = "hinge", Angle = ang, BuiltOpen = false, Sound = "cabinet", Label = "Wardrobe" }, hx, FY + h * 0.5, hz, function()
+		openable("WardrobeDoor", { Kind = "hinge", Angle = ang, BuiltOpen = false, Sound = "wardrobe", Label = "Wardrobe" }, hx, FY + h * 0.5, hz, function()
 			fb2("WardrobeDoor", d[1], d[2], n1 - 0.06, n1, 0.3, h - 0.12, color, WD)
 			fb2("WardrobePanel", d[1] + 0.2, d[2] - 0.2, n1, n1 + 0.03, h * 0.55, h - 0.55, color:Lerp(Color3.new(0, 0, 0), 0.12), WD, true)
 			fb2("WardrobePanel", d[1] + 0.2, d[2] - 0.2, n1, n1 + 0.03, 0.65, h * 0.5, color:Lerp(Color3.new(0, 0, 0), 0.12), WD, true)
@@ -1360,9 +1397,6 @@ local function furniture()
 		end)
 	end
 	xb("ClothesPile", 40.3, 41.5, 17.1, 17.95, 4.2, 4.6, Color3.fromRGB(120, 140, 170), SP, true)
-	-- the bicycle (pink, as in the clip): upside down on its saddle and grips against the window wall under the window by
-	-- the door, front wheel towards the door (owner's mark-up)
-	bicycle(37.3, 26.45, true)
 	-- the folding screen beside the front door on its hinge side (owner's mark-up), clear of the open leaf
 	asPiece(function()
 		for i = 0, 2 do
@@ -1487,10 +1521,37 @@ local function furniture()
 		P("Knob", Vector3.new(0.28, 0.28, 0.28), CFrame.new(19.26, FY + 3.3, 9.9), Color3.fromRGB(95, 70, 45), Mat.Metal, true, Enum.PartType.Ball)
 	end)
 	-- ---------- dining room: fridge in the outer wall's kitchen-side corner (owner), round wooden table by the living-room door, a sideboard ----------
-	xb("FridgeBody", 32.3, 34.3, 0.75, 2.45, 0, 5.6, Color3.fromRGB(205, 205, 202), SP)
+	-- hollow body: back, sides, top, bottom, a divider; shelves and plain food inside; a lamp lit while a door is open
+	local FW, FIN = Color3.fromRGB(205, 205, 202), Color3.fromRGB(232, 236, 238)
+	xb("FridgeBack", 32.3, 34.3, 0.75, 0.85, 0.25, 5.6, FW, SP)
+	xb("FridgeSide", 32.3, 32.4, 0.85, 2.45, 0.25, 5.6, FW, SP)
+	xb("FridgeSide", 34.2, 34.3, 0.85, 2.45, 0.25, 5.6, FW, SP)
+	xb("FridgeBase", 32.3, 34.3, 0.75, 2.45, 0, 0.25, FW, SP)
+	xb("FridgeTop", 32.4, 34.2, 0.85, 2.45, 5.5, 5.6, FW, SP)
+	xb("FridgeBottom", 32.4, 34.2, 0.85, 2.45, 0.25, 0.35, FIN, SP, true)
+	xb("FridgeDivider", 32.4, 34.2, 0.85, 2.45, 3.85, 3.9, FIN, SP)
+	for _, y in { 1.4, 2.6, 4.7 } do
+		xb("FridgeShelf", 32.4, 34.2, 0.85, 2.4, y, y + 0.04, Color3.fromRGB(215, 230, 235), SP, true)
+	end
+	cyl("FridgeBottle", 32.7, 0.35, 1.25, 1.6, 0.25, Color3.fromRGB(90, 160, 90), SP, true)
+	cyl("FridgeBottle", 33.05, 0.35, 1.15, 1.6, 0.25, Color3.fromRGB(230, 230, 235), SP, true)
+	xb("FridgeBox", 33.4, 34.0, 1.2, 2.0, 0.35, 0.75, Color3.fromRGB(230, 170, 80), SP, true)
+	xb("FridgeTub", 32.6, 33.3, 1.1, 1.9, 1.44, 1.74, Color3.fromRGB(240, 235, 210), SP, true)
+	ball("FridgeFruit", 33.7, 1.6, 1.5, 0.32, Color3.fromRGB(220, 90, 60), SP, true)
+	ball("FridgeFruit", 33.9, 1.6, 1.9, 0.3, Color3.fromRGB(240, 200, 60), SP, true)
+	xb("FridgeCarton", 32.6, 33.0, 1.1, 1.5, 2.64, 3.24, Color3.fromRGB(240, 240, 240), SP, true)
+	cyl("FridgeJar", 33.6, 2.64, 3.04, 1.6, 0.35, Color3.fromRGB(200, 120, 60), SP, true)
+	xb("FreezerTray", 32.6, 34.0, 1.0, 2.2, 4.74, 4.94, Color3.fromRGB(210, 225, 235), SP, true)
+	local lamp = xb("FridgeLamp", 33.1, 33.5, 1.0, 1.3, 3.75, 3.85, Color3.fromRGB(235, 245, 255), Mat.Neon, true)
+	if lamp then
+		local l = Instance.new("PointLight")
+		l.Range, l.Brightness, l.Color, l.Shadows, l.Enabled = 6, 1.2, Color3.fromRGB(225, 240, 255), false, false
+		l.Parent = lamp
+		game:GetService("CollectionService"):AddTag(lamp, "FridgeLight")
+	end
 	xb("FridgeKick", 32.35, 34.25, 2.45, 2.5, 0, 0.25, Color3.fromRGB(60, 60, 62), SP, true)
 	for i, dd in { { 0.25, 3.85, 1.6, 3.4 }, { 3.9, 5.6, 4.1, 5.0 } } do
-		openable(if i == 1 then "FridgeDoor" else "FreezerDoor", { Kind = "hinge", Angle = 88, BuiltOpen = false, Sound = "fridge", Label = "Fridge" }, 34.3, FY + (dd[1] + dd[2]) / 2, 2.6, function()
+		openable(if i == 1 then "FridgeDoor" else "FreezerDoor", { Kind = "hinge", Angle = 88, BuiltOpen = false, Sound = "fridge", Label = "Fridge", LightTag = "FridgeLight" }, 34.3, FY + (dd[1] + dd[2]) / 2, 2.6, function()
 			xb(if i == 1 then "FridgeDoor" else "FreezerDoor", 32.3, 34.3, 2.45, 2.6, dd[1], dd[2], Color3.fromRGB(238, 238, 235), SP)
 			xb("FridgeHandle", 32.55, 32.65, 2.66, 2.72, dd[3], dd[4], CHROME, MT, true)
 			xb("FridgeHandleFoot", 32.55, 32.65, 2.6, 2.66, dd[3], dd[3] + 0.1, CHROME, MT, true)
@@ -1601,10 +1662,6 @@ local function furniture()
 	local bb = ball("BathBulb", 40.2, CEIL - 0.2, 9.8, 0.3, Color3.fromRGB(255, 245, 225), Mat.Neon, true)
 	cyl("BathBulbHolder", 40.2, CEIL - 0.05, CEIL, 9.8, 0.25, C.white, SP, true)
 	light(bb, 10, 0.6, Color3.fromRGB(255, 240, 215))
-	openable("BathDoor", { Kind = "hinge", Angle = -90, BuiltOpen = true, Sound = "door", Label = "Bathroom" }, 38.6, FY + 3.5, 8.0, function()
-		doorLeaf("BathDoor", 38.6, 41.35, 8.0, 8.2, Color3.fromRGB(170, 175, 170))
-		P("Knob", Vector3.new(0.28, 0.28, 0.28), CFrame.new(41.0, FY + 3.3, 8.34), Color3.fromRGB(180, 180, 185), Mat.Metal, true, Enum.PartType.Ball)
-	end)
 	-- the sink outside the bathroom, in the kitchen / dining corner
 	xb("SinkPedestal", 35.6, 36.0, 11.6, 12.0, 0, 2.4, C.white, SP)
 	xb("SinkBasin", 35.1, 36.5, 11.1, 12.25, 2.4, 2.9, C.white, SP)
@@ -1627,19 +1684,20 @@ local function furniture()
 	cyl("LampBase", 10.4, 2.25, 2.33, 27.3, 0.35, C.black, MT, true)
 	cyl("LampStem", 10.4, 2.33, 3.0, 27.3, 0.05, C.black, MT, true)
 	ball("LampHead", 10.4, 3.2, 27.3, 0.4, C.white, SP, true)
-	-- the big book shelf (white X-braced frame, pine shelves) facing the bed
-	for _, p in { { 9.35, 20.0 }, { 12.08, 20.0 }, { 9.35, 20.88 }, { 12.08, 20.88 } } do
+	-- the big book shelf (white X-braced frame, pine shelves): back on the west wall, shelves facing into the room
+	-- (owner's sketch), between the wardrobe and the bed's head
+	for _, p in { { 9.35, 20.0 }, { 10.53, 20.0 }, { 9.35, 21.83 }, { 10.53, 21.83 } } do
 		xb("ShelfPost", p[1], p[1] + 0.12, p[2], p[2] + 0.12, 0, 6.0, C.white, MT)
 	end
 	for i = 0, 3 do
 		local y = 0.3 + i * 1.8
-		xb("PineShelf", 9.47, 12.08, 20.0, 21.0, y, y + 0.1, C.pine, WD)
-		booksX(9.55, 12.0, 20.1, 20.9, y + 0.1, 1.4, 40 + i)
+		xb("PineShelf", 9.35, 10.65, 20.12, 21.83, y, y + 0.1, C.pine, WD)
+		booksX(9.45, 10.55, 20.2, 21.75, y + 0.1, 1.4, 40 + i)
 	end
-	local bl = math.sqrt(0.76 ^ 2 + 5.6 ^ 2) - 0.3
-	local ba = math.atan2(0.76, 5.6)
-	xp("ShelfBrace", Vector3.new(0.04, bl, 0.06), 12.24, 3.0, 20.5, C.white, MT, true, nil, CFrame.Angles(ba, 0, 0))
-	xp("ShelfBrace", Vector3.new(0.04, bl, 0.06), 12.28, 3.0, 20.5, C.white, MT, true, nil, CFrame.Angles(-ba, 0, 0))
+	local bl = math.sqrt(1.06 ^ 2 + 5.6 ^ 2) - 0.3
+	local ba = math.atan2(1.06, 5.6)
+	xp("ShelfBrace", Vector3.new(0.06, bl, 0.02), 10.0, 3.0, 19.965, C.white, MT, true, nil, CFrame.Angles(0, 0, ba))
+	xp("ShelfBrace", Vector3.new(0.06, bl, 0.02), 10.0, 3.0, 19.985, C.white, MT, true, nil, CFrame.Angles(0, 0, -ba))
 	-- the small shelves by the wardrobe (two low open units with decorations)
 	for i, x0 in { 13.3, 14.75 } do
 		xb("SmallShelfSide", x0, x0 + 0.08, 17.95, 19.15, 0, 3.0, C.white, Mat.Plastic)
@@ -1679,31 +1737,31 @@ local function furniture()
 	wardrobe(9.35, 12.9, 18.0, 19.85, 6.8, "+z", DARKWOOD)
 	xb("BoxOnTop", 9.6, 12.6, 18.1, 19.6, 6.92, 7.9, Color3.fromRGB(165, 125, 80), Mat.Cardboard, true)
 	xb("BoxTape", 9.6, 12.6, 18.75, 18.95, 7.9, 7.91, Color3.fromRGB(235, 200, 60), Mat.Plastic, true)
-	-- PC desk in the south-east corner, its back to the east wall: you sit facing the wall (owner: "the table & chair
-	-- needs to face the right side"). Wider top (1.3 m) with the monitor, keyboard, mouse and the PC case on it.
-	xb("DeskTop", 21.2, 23.85, 23.75, 27.8, 2.45, 2.65, C.brown, WD)
-	xb("DeskPedestal", 21.45, 23.85, 26.3, 27.8, 0, 2.45, Color3.fromRGB(62, 40, 28), WD)
-	xb("DeskLeg", 21.25, 21.45, 23.8, 24.0, 0, 2.45, C.brown, WD)
-	xb("DeskLeg", 23.6, 23.8, 23.8, 24.0, 0, 2.45, C.brown, WD)
-	xb("DeskModesty", 23.65, 23.85, 24.0, 26.3, 0.6, 2.45, C.brown, WD)
+	-- PC desk in the south-east corner with its back on the south wall: you sit facing that wall (owner: "the pc set up &
+	-- chair needs to face the other wall"). Wide top (1.35 m) with the monitor, keyboard, mouse and the PC case on it.
+	xb("DeskTop", 19.8, 23.85, 25.15, 27.8, 2.45, 2.65, C.brown, WD)
+	xb("DeskPedestal", 22.35, 23.85, 25.4, 27.8, 0, 2.45, Color3.fromRGB(62, 40, 28), WD)
+	xb("DeskLeg", 19.85, 20.05, 25.2, 25.4, 0, 2.45, C.brown, WD)
+	xb("DeskLeg", 19.85, 20.05, 27.6, 27.8, 0, 2.45, C.brown, WD)
+	xb("DeskModesty", 20.05, 22.35, 27.6, 27.8, 0.6, 2.45, C.brown, WD)
 	for i = 0, 2 do
-		openable("Drawer", { Kind = "drawer", SlideL = Vector3.new(-0.9, 0, 0), BuiltOpen = false, Sound = "drawer", Label = "Drawer", Reach = 6 }, 21.39, FY + 0.2 + i * 0.75, 26.4, function()
-			xb("DrawerFront", 21.39, 21.45, 26.4, 27.7, 0.2 + i * 0.75, 0.85 + i * 0.75, Color3.fromRGB(78, 52, 36), WD)
-			xb("DrawerPull", 21.35, 21.39, 26.85, 27.25, 0.5 + i * 0.75, 0.58 + i * 0.75, GOLD, MT, true)
+		openable("Drawer", { Kind = "drawer", SlideL = Vector3.new(0, 0, -0.9), BuiltOpen = false, Sound = "drawer", Label = "Drawer", Reach = 6 }, 22.45, FY + 0.2 + i * 0.75, 25.34, function()
+			xb("DrawerFront", 22.45, 23.75, 25.34, 25.4, 0.2 + i * 0.75, 0.85 + i * 0.75, Color3.fromRGB(78, 52, 36), WD)
+			xb("DrawerPull", 22.9, 23.3, 25.3, 25.34, 0.5 + i * 0.75, 0.58 + i * 0.75, GOLD, MT, true)
 		end)
 	end
-	xb("DeskMat", 21.6, 22.9, 24.1, 26.4, 2.65, 2.67, Color3.fromRGB(110, 110, 112), SP, true)
-	xb("MonitorStand", 23.25, 23.65, 24.95, 25.55, 2.65, 2.7, C.black, MT, true)
-	xb("MonitorNeck", 23.4, 23.5, 25.2, 25.3, 2.7, 3.1, C.black, MT, true)
-	xb("Monitor", 23.1, 23.25, 24.05, 26.45, 3.1, 4.8, Color3.fromRGB(18, 18, 20), SP, true)
-	xb("MonitorScreen", 23.07, 23.1, 24.13, 26.37, 3.18, 4.72, Color3.fromRGB(34, 44, 66), Mat.Neon, true)
-	xb("Webcam", 23.13, 23.23, 25.15, 25.35, 4.8, 4.9, C.black, SP, true)
-	xb("Keyboard", 21.9, 22.3, 24.3, 26.1, 2.67, 2.75, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
-	xb("Mouse", 21.95, 22.2, 26.2, 26.4, 2.67, 2.78, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
-	xb("Tower", 22.35, 23.7, 26.8, 27.45, 2.65, 4.05, Color3.fromRGB(28, 28, 30), SP)
-	xb("TowerButton", 22.31, 22.35, 27.05, 27.15, 3.75, 3.85, Color3.fromRGB(120, 200, 255), Mat.Neon, true)
-	xb("TowerVent", 22.31, 22.35, 26.9, 27.35, 2.8, 3.5, Color3.fromRGB(55, 55, 60), SP, true)
-	officeChair(20.0, 25.2, 1, C.black)
+	xb("DeskMat", 20.7, 22.9, 25.5, 26.8, 2.65, 2.67, Color3.fromRGB(110, 110, 112), SP, true)
+	xb("MonitorStand", 21.4, 22.0, 27.3, 27.7, 2.65, 2.7, C.black, MT, true)
+	xb("MonitorNeck", 21.65, 21.75, 27.45, 27.55, 2.7, 3.1, C.black, MT, true)
+	xb("Monitor", 20.5, 22.9, 27.2, 27.35, 3.1, 4.8, Color3.fromRGB(18, 18, 20), SP, true)
+	xb("MonitorScreen", 20.58, 22.82, 27.17, 27.2, 3.18, 4.72, Color3.fromRGB(34, 44, 66), Mat.Neon, true)
+	xb("Webcam", 21.6, 21.8, 27.23, 27.33, 4.8, 4.9, C.black, SP, true)
+	xb("Keyboard", 20.8, 22.6, 25.7, 26.1, 2.67, 2.75, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
+	xb("Mouse", 22.7, 22.9, 25.75, 26.0, 2.67, 2.78, Color3.fromRGB(35, 35, 38), Mat.Plastic, true)
+	xb("Tower", 23.0, 23.65, 26.1, 27.45, 2.65, 4.05, Color3.fromRGB(28, 28, 30), SP)
+	xb("TowerButton", 23.25, 23.35, 26.06, 26.1, 3.75, 3.85, Color3.fromRGB(120, 200, 255), Mat.Neon, true)
+	xb("TowerVent", 23.1, 23.55, 26.06, 26.1, 2.8, 3.5, Color3.fromRGB(55, 55, 60), SP, true)
+	officeChair(21.3, 23.95, 2, C.black)
 	-- the digital upright piano, white plastic, full 88-key width (1.4 m): cheeks, key bed, white keys, black keys,
 	-- fallboard with the gold strip, music desk, kickboard, 3 pedals, lid
 	local PW = Color3.fromRGB(242, 242, 238)
@@ -1990,6 +2048,181 @@ function M.grow(): string
 	return string.format("grown x%.2f: %d stretched, %d rigid, %d furniture parts in %d pieces", M.GROW, moved, rigid, n, pieces)
 end
 
+-- ===== the owner's own furniture placing (26 Nov) =====
+-- He moved the living room and bathroom furniture by hand in Studio. Those parts are kept in
+-- tools/yangon/MyittarNyuntOwnerEdits.luau (ServerStorage.ClaudeTools.MyittarNyuntOwnerEdits): every rebuild removes its
+-- own furniture in those two rooms and puts his parts back exactly; the TV cabinet's doors and the drawer tower's
+-- drawers become openables where he put them.
+local KEEP = { Knob = true, Peephole = true, Hinge = true }
+local function inLiving(c: Vector3)
+	return c.X >= 19.4 and c.X < 41.8 and c.Z >= 9.5
+end
+local function inBath(c: Vector3)
+	return c.X >= 37.0 and c.X < 41.8 and c.Z >= 1.8 and c.Z <= 8.85
+end
+local function ownerEdits(ins: Instance): string
+	local mod = ServerStorage:FindFirstChild("ClaudeTools") and ServerStorage.ClaudeTools:FindFirstChild("MyittarNyuntOwnerEdits")
+	if not mod then
+		return "owner edits: data missing (kept the builder's furniture)"
+	end
+	local rows = require(mod:Clone())
+	local inv = F:Inverse()
+	local removed = 0
+	-- the builder's own openables in those rooms go too (not the front door or its gate)
+	for _, m in ins:GetChildren() do
+		local h = m:IsA("Model") and m:GetAttribute("Kind") and m:FindFirstChild("Hinge")
+		if h and m.Name ~= "FrontDoor" and m.Name ~= "FrontGate" then
+			local c = (inv * h.CFrame).Position
+			if c.Y > FY - 1 and c.Y < FY + CEIL + 0.7 and (inLiving(c) or inBath(c)) then
+				m:Destroy()
+				removed += 1
+			end
+		end
+	end
+	for _, p in ins:GetDescendants() do
+		if p:IsA("BasePart") and not KEEP[p.Name] and not isStruct(p.Name) and not p:FindFirstAncestorWhichIsA("Model"):GetAttribute("Kind") then
+			local c = (inv * p.CFrame).Position
+			if c.Y > FY - 1 and c.Y < FY + CEIL + 0.7 and (inLiving(c) or inBath(c)) then
+				p:Destroy()
+				removed += 1
+			end
+		end
+	end
+	local made = {}
+	parent = ins
+	for _, r in rows do
+		local q = Instance.new("Part")
+		q.Name = r.n
+		q.Shape = Enum.PartType[r.shape]
+		q.Size = Vector3.new(r.s[1], r.s[2], r.s[3])
+		q.CFrame = F * CFrame.new(table.unpack(r.cf))
+		q.Color = Color3.fromRGB(r.c[1], r.c[2], r.c[3])
+		q.Material = Enum.Material[r.mat]
+		q.Reflectance, q.Transparency = r.refl, r.tr
+		q.CanCollide, q.CastShadow, q.CanQuery = r.col, r.sh, r.q
+		q.CanTouch = r.col
+		q.Anchored = true
+		q.TopSurface, q.BottomSurface = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth
+		if r.n == "TVScreenSky" then
+			q.Color = Color3.fromRGB(34, 46, 64) -- a dim picture (his place, our brightness)
+		elseif r.n == "TVScreenLand" then
+			q.Color = Color3.fromRGB(30, 42, 32)
+		end
+		if r.light then
+			light(q, r.light[1], r.light[2], Color3.fromRGB(r.light[3], r.light[4], r.light[5]))
+		end
+		q.Parent = ins
+		table.insert(made, q)
+	end
+	-- his TV cabinet doors and drawer-tower drawers become openables where they stand
+	local function nearest(name: string, to: BasePart): BasePart?
+		local best, bd = nil, 1.2
+		for _, q in made do
+			if q.Name == name and q.Parent == ins then
+				local d = (q.Position - to.Position).Magnitude
+				if d < bd then
+					best, bd = q, d
+				end
+			end
+		end
+		return best
+	end
+	local function wrap(name: string, attrs, hingeWorld: Vector3, parts: { BasePart })
+		local m = Instance.new("Model")
+		m.Name = name
+		for k, v in attrs do
+			m:SetAttribute(k, v)
+		end
+		m.Parent = ins
+		for _, q in parts do
+			q.Parent = m
+		end
+		local h = Instance.new("Part")
+		h.Name = "Hinge"
+		h.Size = Vector3.new(0.02, 0.02, 0.02)
+		h.CFrame = F.Rotation + hingeWorld
+		h.Anchored, h.CanCollide, h.CanQuery, h.CanTouch = true, false, false, false
+		h.Transparency = 1
+		h.Parent = m
+		game:GetService("CollectionService"):AddTag(m, "Openable")
+	end
+	local cab
+	for _, q in made do
+		if q.Name == "TVCabinet" then
+			cab = q
+		end
+	end
+	local nOpen = 0
+	for _, q in made do
+		if q.Name == "CabinetDoor" and cab and q.Parent == ins then
+			-- hinge on the door's outer end (away from the cabinet's middle along the door), swinging away from the cabinet
+			local right = q.CFrame.RightVector
+			local side = if (q.Position - cab.Position):Dot(right) >= 0 then 1 else -1
+			local hingeW = q.Position + right * side * q.Size.X / 2
+			local out = q.Position - cab.Position
+			out = (out - right * out:Dot(right)).Unit
+			local best, ang = -1e9, 100
+			for _, a in { 100, -100 } do
+				local moved = (CFrame.new(hingeW) * CFrame.Angles(0, math.rad(a), 0) * CFrame.new(-hingeW) * q.CFrame).Position
+				local score = (moved - q.Position):Dot(out)
+				if score > best then
+					best, ang = score, a
+				end
+			end
+			local parts = { q }
+			local k = nearest("CabinetKnob", q)
+			if k then
+				table.insert(parts, k)
+			end
+			wrap("CabinetDoor", { Kind = "hinge", Angle = ang, BuiltOpen = false, Sound = "cabinet", Label = "Cabinet" }, hingeW, parts)
+			nOpen += 1
+		end
+	end
+	local frame
+	for _, q in made do
+		if q.Name == "DrawerTowerFrame" then
+			frame = q
+		end
+	end
+	for _, q in made do
+		if q.Name == "Drawer" and frame and q.Parent == ins then
+			local thin = q.CFrame.RightVector
+			local dir = if (q.Position - frame.Position):Dot(thin) >= 0 then thin else -thin
+			local slideL = F:VectorToObjectSpace(dir * 0.8)
+			local parts = { q }
+			local hnd = nearest("DrawerHandle", q)
+			if hnd then
+				table.insert(parts, hnd)
+			end
+			wrap("Drawer", { Kind = "drawer", SlideL = slideL, BuiltOpen = false, Sound = "drawer", Label = "Drawer", Reach = 6 }, q.Position, parts)
+			nOpen += 1
+		end
+	end
+	return string.format("owner edits: %d builder parts out, %d of his back, %d openables", removed, #made, nOpen)
+end
+
+-- things made after the owner's furniture: the upside-down bike and the bathroom's sliding door (post-grow coordinates)
+local function extras(ins: Instance): string
+	parent = ins
+	-- the bicycle (pink, as in the clip): upside down on its saddle and grips under the window by the door, front wheel
+	-- towards the door (owner's mark-up)
+	bicycle(35.6, 26.45, true)
+	-- the bathroom's sliding door (owner: "the bathroom door is supposed to be a sliding door") on the dining side of its
+	-- wall, under a top track; it slides along the wall
+	local wx0 = tx(38.0) -- the wall's dining-side face
+	local z0, z1 = tz(8.0), tz(11.0)
+	box("SlideTrack", wx0 - 0.26, FY + 7.25, z0 - 4.3, wx0, FY + 7.37, z1 + 0.15, C.galv, Mat.Metal, true)
+	openable("BathDoor", { Kind = "drawer", SlideL = Vector3.new(0, 0, -(z1 - z0)), BuiltOpen = false, Sound = "slider", Label = "Bathroom", Reach = 8 }, wx0 - 0.2, FY + 3.5, z1, function()
+		box("BathSlider", wx0 - 0.2, FY + 0.05, z0 - 0.1, wx0 - 0.04, FY + 7.2, z1 + 0.1, Color3.fromRGB(170, 175, 170), Mat.Wood)
+		box("BathSliderPanel", wx0 - 0.26, FY + 0.8, z0 + 0.3, wx0 - 0.2, FY + 6.4, z1 - 0.3, Color3.fromRGB(155, 160, 155), Mat.Wood, true)
+		box("BathSliderPull", wx0 - 0.32, FY + 2.9, z1 - 0.45, wx0 - 0.26, FY + 4.1, z1 - 0.35, C.galv, Mat.Metal, true)
+		for _, zz in { z0 + 0.4, z1 - 0.4 } do
+			P("SlideRoller", Vector3.new(0.08, 0.18, 0.18), CFrame.new(wx0 - 0.12, FY + 7.29, zz), C.galv, Mat.Metal, true, Enum.PartType.Cylinder)
+		end
+	end)
+	return "extras: bike + bath slider"
+end
+
 function M.build(): string
 	count = 0
 	local ext, ins = container()
@@ -2019,6 +2252,7 @@ function M.build(): string
 	grilles()
 	furniture()
 	local g = if M.GROW ~= 1 then M.grow() else ""
+	g ..= " | " .. ownerEdits(ins) .. " | " .. extras(ins)
 	return string.format("built %d parts (exterior %d, inside %d); %s", count, #ext:GetDescendants(), #ins:GetDescendants(), g)
 end
 
