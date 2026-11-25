@@ -39,6 +39,10 @@ Before, for each district (bad segments): P1 340, P2 212, P3 1,170, P4 17, P7 10
 3. `python walkers_check.py`: it must print 0.
 4. Sync the 4 modules into `ReplicatedStorage.Shared` (`pack_sync.py` -> asset 133014134133489 -> LoadAsset).
 
+## Studio: NOT installed yet (26 Nov)
+- The fix is in the repo only. The Studio lock was held by the road bug sweep the whole time (waited about 75 minutes), so the 4 modules are not in the place and there was no Play test, no shots, no save.
+- The road boxes changed after my dump (v2115: 2,987 pavement boxes re-seated, 159 removed; more cells swapped after). So right before installing: dump the boxes again, re-run the two scripts (must be 0), then install. Steps are in `rebuild_progress.json` under `walkers_26nov`.
+
 ## Not done
 - Walkers only use main-road pavements, not side-street pavements.
 - No crossings: walkers never cross a road, even at zebras.
