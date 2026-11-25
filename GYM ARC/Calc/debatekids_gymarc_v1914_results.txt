@@ -1,0 +1,32 @@
+CALIBRATION: % of friend groups with no veto on each rival
+  Arm Wrestle Sim         59.9%
+  RIVALS                  59.2%
+  Gym Star Simulator      34.8%
+  99 Nights               34.5%
+  Power Lifters           34.5%
+  Brookhaven RP           33.8%
+  DONT SPLASH             33.8%
+  Murder Mystery 2        33.2%
+  Steal a Brainrot        17.9%
+  Gym League              17.3%
+  Muscle Legends          17.2%
+  +1 Break Walls           8.5%
+  Project: Iron            1.2%
+
+version                                                                                                      agree  1st   top objections (groups of 3,000)
+V0  build v1914 today                                                                                           4%    7%  fair_money 1241; phone 1223; crowd 1202
+V1  + FIRST 3 MINUTES: shorter intro, auto-open Benny's card on arrival, no dead gap after Spurt 1              8%   15%  fair_money 1241; phone 1223; crowd 1202
+V2  + CALM OFFERS: no DEAL / PLUS / FREE 1,000 tiles before Growth Spurt 2, one offer at a time                18%   31%  phone 1223; crowd 1202; pvp_thrill 1160
+V3  + LAG PASS finish: auto low-end on phones, particle caps, far town streamed out                            35%   45%  crowd 1202; pvp_thrill 1160
+V4  + PLAY TOGETHER: SPOT ME duo lifts + Christmas gift drops pay everyone nearby                              35%   47%  crowd 1202; pvp_thrill 1160
+V5  + REAL PVP: ranked player arm wrestling with a weekly board                                                60%   64%  crowd 1202
+V6  + CHRISTMAS UPDATE (5 Dec): Advent calendar, winter gym, Christmas Alters                                  60%   69%  crowd 1202
+V7  + launch push (MARKETING): $200 ads + 10 creatives + Discord/group + code                                 100%   94%  none
+final, groups that want a gym game: agree 100%  1st pick 99%
+final, groups picking from the big hits: agree 100%  1st pick 89%
+robustness (+-1): agree median 100% (worst 57%), 1st median 92%; objections that came back: [('crowd', 7210)]
+if the crowd stays 2/10: agree 60%, 1st 71%, top: [('crowd: "nobody plays it, it\'s dead"', 1202)]
+if the crowd stays 3/10: agree 60%, 1st 72%, top: [('crowd: "nobody plays it, it\'s dead"', 1202)]
+if the crowd stays 4/10: agree 100%, 1st 94%, top: []
+seed 5: agree 100%  1st 94%
+seed 6: agree 100%  1st 94%

@@ -1,0 +1,17 @@
+version                                                                                        15s   30s   60s    2m    3m    5m  longest dead (median)
+A  live v1914                                                                                  98%   90%   90%   79%   54%   54%      6 s
+B  + intro cutscene 18 s -> 8 s (keep Benny's taunt, cut the walk-up shots; SKIP after 3 s)   100%  100%  100%   78%   54%   54%      6 s
+C  + Benny's card opens by itself when the tutorial walks you to his table                    100%  100%  100%   86%   85%   84%      6 s
+D  + GROW right when READY (no 6 s wait on the READY card)                                    100%  100%  100%   99%   96%   92%      2 s
+E  + (Christmas) free gift under the tree in the first 10 s                                   100%  100%  100%   99%   97%   92%      2 s
+
+sensitivity (version E):
+  median patience  7 s:  100%  100%  100%   92%   85%   70%
+  median patience 11 s:  100%  100%  100%   99%   97%   92%
+  median patience 16 s:  100%  100%  100%  100%   99%   98%
+  live, patience  7 s:       85%   60%   60%   45%   28%   28%
+  live, patience 11 s:       98%   90%   90%   79%   54%   54%
+  live, patience 16 s:      100%   98%   98%   92%   72%   71%
+  B with prompt-find rate 0.05/s: 3m 26%  5m 26%
+  B with prompt-find rate 0.15/s: 3m 54%  5m 54%
+  B with prompt-find rate 0.30/s: 3m 74%  5m 73%

@@ -1,0 +1,27 @@
+version                                                                                      overload s/10min  KEY missed (7 y)   collisions
+A  live v1914                                                                                     370            50% of 18      1
+B  + PERSONAL RECORD as a side toast (not on the tutorial line)                                   370            50% of 18      0
+C  + INVITE card only after Growth Spurt 2, and never while on a machine                          290            50% of 18      0
+D  + calm HUD before Growth Spurt 2: no DEAL / FREE / PLUS / INVITE tiles, no red badges           15            50% of 18      0
+E  + Benny: his card opens by itself, line stays on, card text 44 -> 15 words                       7            58% of 15      0
+F  + intro captions shorter (8 s cutscene)                                                          7            58% of 15      0
+G  + tutorial lines stay at least words / 1.5 + 0.5 s (7-year-old reading speed)                   10            55% of 15      1
+H  + one queue per screen strip (a line waits for the one before it; notifications go to the side)        7            42% of 15      0
+I  + side HUD hides while a centre card is open; Benny story shot 5 -> 7.5 s                        0            28% of 15      0
+
+LIVE top collisions:
+   band: Strong legs! Now let's train your CORE  x  NEW PERSONAL RECORD banner
+LIVE most-missed KEY messages (kids of 2,000):
+    2000  coach dialog: Welcome! Lift to fill your GROWTH SPURT bar...  (gone before read)
+    2000  Benny's card (quote, stake, strength, 2 buttons)  (shown during overload)
+    1916  band: Beat BENNY at arm wrestling to open the Beach Gym!  (gone before read)
+    1126  band: Strong legs! Now let's train your CORE  (covered)
+    1075  band: Let's lift! Taking you to the Flat Bench  (gone before read)
+
+FINAL most-missed KEY messages:
+     336  band: Let's lift! Taking you to the Flat Bench  (gone before read)
+     336  coach dialog: Welcome! Lift to fill your GROWTH SPURT bar...  (gone before read)
+     336  band: Great set! Now let's train your LEGS  (gone before read)
+     336  band: Legs are growing too! Do 5 reps  (gone before read)
+     336  band: Strong legs! Now let's train your CORE  (gone before read)
+FINAL collisions: []

@@ -1,0 +1,9 @@
+version                                                                        tells/10min  wows   like%   top tells (per kid)
+A  live v1914                                                                      8.7     3.5      0   trainer ghost over the camera 2.4; same plate/rack prop again 1.2; own body hides the NPC you need 1.0
+B  + Benny: camera swings to his face + card opens (no hidden NPC)                 6.7     3.4      8   trainer ghost over the camera 2.5; same plate/rack prop again 1.2; blank black screen/board 0.9
+C  + plaza black box -> a real centrepiece (gold trophy)                           6.0     3.9     17   trainer ghost over the camera 2.4; same plate/rack prop again 1.2; blank black screen/board 0.9
+D  + blank screens -> live leaderboard / poster art                                5.1     4.3     47   trainer ghost over the camera 2.4; same plate/rack prop again 1.2; flat card palm leaves 0.8
+E  + trainer NPCs never between the camera and the player (fade/offset)            2.7     4.3     99   same plate/rack prop again 1.2; flat card palm leaves 0.8; floating sign (no post) 0.8
+F  + palm leaves as real meshes, sign on a post                                    1.2     4.3    100   same plate/rack prop again 1.2
+G  + Christmas dressing (spawn lights + snow, beach tree)                          1.2     5.8    100   same plate/rack prop again 1.2
+H  + 3 plate/rack variants (colour + wear) so the same prop doesn't repeat         0.4     5.8    100   same plate/rack prop again 0.4

@@ -50,6 +50,7 @@ tags: [gymarc, christmas, advent-calendar, build-brief, claude-code]
 |---|---|---|
 | 1 | **Advent calendar** (24 days, opened from a Christmas tree in the gym) + claim reveal + sound | 30 Nov |
 | 2 | **Candy Canes** event currency (earned from training) + the day-one free present for new players (first-3-minutes hook) | 30 Nov |
+| 2b | **First-5-minutes fixes from the 4 kid sims** (Benny auto-open, GROW on READY, 8 s intro, calm HUD before Growth Spurt 2, one queue per screen strip, the 5 cheap-looking spots). Small, and the biggest bounce fix: do it with Phase 2 | 30 Nov |
 | 3 | **Winter gym** (snow outside, garlands, a big tree, warm lights) + the LiveEvents launch (countdown, cutscene, reward) | 2 Dec |
 | 4 | **Christmas Alters** (3 limited skins bought with Candy Canes, worn from Inventory > Alters) | 3 Dec |
 | 5 | **Gift drops** in servers (a present falls every ~10 min; the first player to tap it gets Candy Canes, everyone nearby gets a small share) | 3 Dec |
@@ -118,6 +119,25 @@ tags: [gymarc, christmas, advent-calendar, build-brief, claude-code]
   - **After the first Growth Spurt:** ComeBackClient shows TOMORROW's present ("Day 2: a mystery present!").
   - Analytics funnel steps: `Xmas_FreeGift_Claimed`, `Xmas_First60s_Growth`, `Xmas_GoalChip_Seen`.
 
+## Phase 2b: first-5-minutes fixes (from the 4 kid sims on live v1914, 25 Nov)
+Source: [[2026-11-25 GYM ARC - Kid sims on live v1914 (debate, impatient, overstimulated, quality nerd)]]. Each fix is a config value or a small change; grep for the names, don't rebuild systems.
+1. **Benny never stalls** (the biggest bounce cause: kids stood 40-120 s at his table with nothing open). When the BeatBenny tutorial step walks the player to his table, open Benny's card by itself after the walk (`BennyAutoOpenDelay = 0.6` s), swing the camera to his face (`BennyCamFocus = true`), keep the band line ON (no 3-of-12 s blink) and cut the card text to ≤ 15 words. Keep the E prompt as a backup.
+2. **GROW right when READY:** when the Growth Spurt bar is full, start the transform after `GrowReadyGap = 1.5` s (was ~6 s of waiting on the READY card).
+3. **Intro cutscene 18 s → 8 s** (`IntroCutsceneLength = 8`; keep the first big shot and the title, cut the captions to ≤ 8 words).
+4. **Calm HUD before Growth Spurt 2:** no DEAL / FREE 1,000 / PLUS +20% / INVITE +10% tiles and no red "!" / NEW badges until the player has done Growth Spurt 2 (`CalmHudUntilSpurt = 2`). The INVITE card only after Growth Spurt 2 and never while on a machine.
+5. **One queue per screen strip:** the top strip (tutorial band, notifications, NEW PERSONAL RECORD) shows one line at a time; the next waits; PERSONAL RECORD and notifications become a side toast during the tutorial. KEY tutorial lines stay at least `words / 1.5 + 0.5` s. While a centre card is open (Benny, GROW READY, a reward), hide the side cards and the top strip.
+6. **Benny story shot 5 s → 7.5 s** (slow readers missed its caption).
+7. **The FREE GIFT (Phase 2) goes through the same queue:** it glows AFTER the intro and the first tutorial line, never on top of them.
+8. **Cheap-looking spots (quality-nerd kid):**
+   - trainer NPCs (e.g. LOU 03) never between the camera and the player: fade them (LocalTransparencyModifier) when they block the view;
+   - the plain black box in the middle of the Hall of Fame plaza → a real centrepiece (gold trophy on a plinth), built with the roblox-3d-model-from-sheet skill, low tris;
+   - blank black screens/boards at the Hall of Fame and ProGym → live leaderboards or poster art;
+   - flat card palm leaves at the beach → real leaf meshes (low tris);
+   - the floating red/black plate sign → put it on a post;
+   - 3 plate/rack variants (colour + wear) so the same prop doesn't repeat in one view.
+- **Tests (add to the checklist):** a NEW player reaches Benny's card with no key press; GROW starts ≤ 2 s after READY; no DEAL/INVITE/badge before Growth Spurt 2; never two lines on the top strip at once; phone screenshots of the plaza, beach, ProGym show none of the 5 spots.
+- Expected (model): stay past 3 min ~54% → ~96%; overload 370 s → 0 s per 10 min; cheap tells 8.7 → 0.4 per 10 min.
+
 ## Phase 3: Winter gym + launch
 - **Winter look** (gated by `LiveEvents.Unlocked("Christmas")`, removable after 6 Jan):
   - snow on roofs, ledges and the street outside;
@@ -165,6 +185,12 @@ tags: [gymarc, christmas, advent-calendar, build-brief, claude-code]
 - [ ] Candy Canes: earn rate in range (~40-60/h); pass doubles them; saved.
 - [ ] Christmas Alters: buy, wear, unwear, rejoin; other players see the skin.
 - [ ] Gift drop: lands on the ground, the first tap pays, nearby players get their share, despawns.
+
+**First 5 minutes (Phase 2b)**
+- [ ] New player: Benny's card opens by itself at his table (no E press); camera shows his face.
+- [ ] GROW starts ≤ 2 s after READY; intro ≤ 8 s.
+- [ ] No DEAL / INVITE / red badge before Growth Spurt 2; never two lines on the top strip at once.
+- [ ] No trainer between camera and player; plaza, screens, palms, sign fixed (phone screenshots).
 
 **Launch**
 - [ ] LiveEvents: countdown, launch cutscene with 2 players, launch reward once, NEWS entry, the NEW popup.
