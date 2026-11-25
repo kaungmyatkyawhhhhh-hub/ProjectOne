@@ -39,9 +39,15 @@ Before, for each district (bad segments): P1 340, P2 212, P3 1,170, P4 17, P7 10
 3. `python walkers_check.py`: it must print 0.
 4. Sync the 4 modules into `ReplicatedStorage.Shared` (`pack_sync.py` -> asset 133014134133489 -> LoadAsset).
 
-## Studio: NOT installed yet (26 Nov)
-- The fix is in the repo only. The Studio lock was held by the road bug sweep the whole time (waited about 75 minutes), so the 4 modules are not in the place and there was no Play test, no shots, no save.
-- The road boxes changed after my dump (v2115: 2,987 pavement boxes re-seated, 159 removed; more cells swapped after). So right before installing: dump the boxes again, re-run the two scripts (must be 0), then install. Steps are in `rebuild_progress.json` under `walkers_26nov`.
+## In Studio (26 Nov, saved v2140, final v2142)
+- Boxes dumped again after the road agent's v2115-v2135 changes (122,607 R/D/M + 51,693 P). Re-run: 0 segments on a carriageway, 0 points off a pavement, in every district.
+- The 4 modules went in by asset 133014134133489 (rev 285); lengths 184,977 / 185,096 / 185,044 / 95,596, checksums matched. Play log: "YangonStreetLife: ... 4583 paths (1.94 s)", no walker errors.
+- Play on `CityLegends_test`. A client check every second tested each walker's feet against the collision boxes: Myanmar Plaza 1,757 walker checks, Sule 271, Hledan / Pyay Road 448. All on a pavement box, **0 on the road**.
+- Store back on `CityLegends_v1` (checked on the Server in Play: `storeName = CityLegends_v1`), saved v2142.
+
+![[2026-11-26 Walkers - Myanmar Plaza in Play.jpg]]
+![[2026-11-26 Walkers - Sule in Play.jpg]]
+![[2026-11-26 Walkers - Hledan Pyay Road in Play.jpg]]
 
 ## Not done
 - Walkers only use main-road pavements, not side-street pavements.
