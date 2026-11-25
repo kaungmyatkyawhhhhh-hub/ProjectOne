@@ -558,7 +558,10 @@ local function ground(at: Vector3): (number?, string?)
 		return nil, nil
 	end
 	rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
-	local hit = workspace:Raycast(at + Vector3.new(0, 14, 0), Vector3.new(0, -30, 0), rayParams)
+	-- (a flat map point, Y = 0: the OSM gates and sites) from high up: the top surface there
+	local hit = if at.Y == 0
+		then workspace:Raycast(at + Vector3.new(0, 600, 0), Vector3.new(0, -1200, 0), rayParams)
+		else workspace:Raycast(at + Vector3.new(0, 14, 0), Vector3.new(0, -30, 0), rayParams)
 	if not hit then
 		return nil, nil
 	end
