@@ -46,3 +46,9 @@ Why the pure Blender renders looked bad (Claude's own diagnosis): background as 
 - The owner REJECTS the dark tan (it reads dark and muddy). Skin = the LIGHT bright orange-peach Roblox skin like Power Lifters, the lightest thing in the image, soft orange shadows (never brown). This replaces the handoff's "golden-bronze tan".
 - Same ChatGPT chat, one follow-up: lighter skin, a bright sunny gym, cooler/darker background behind him.
 - Result: `GYMARC_ICON_D_light.png` / `_512.png` (raw `gymarc_icon_gpt_repaint_v3.png`), board `gymarc_icon_light_board.jpg`. 64 px mean 0.504, 6% near-black.
+
+## Update 07:50-08:00: Power Lifters contrast, the Man face, more contrast on the guy
+- LIKED LOOK = Power Lifters contrast: dark moody navy/black background (~1/3 near-black), light glowing orange skin as the brightest thing, glossy white highlights, a thin electric-blue rim light. Not the bright daytime gym (D), not a dark tan (C). -> `GYMARC_ICON_E_contrast.png` (raw v4), 64 px mean 0.333 / 34% near-black (PL 0.337 / 29%).
+- FACE (owner, sent the picture twice): the classic Roblox "Man" face: thick dark arched brows, white eyes with dark pupils, a thin lopsided smirk rising to the right, a small cheek line on the right. Attached it to the same ChatGPT chat: "change ONLY the FACE: use EXACTLY the face from the image I just attached". (First try said "Image generation failed"; Try again worked.) Raw `gymarc_icon_gpt_repaint_v5_manface.png`.
+- Owner: "more contrast & ONLY A BIT more definition on our guy" -> done in code, not ChatGPT: `_tools/grade_guy.py` (skin-hue mask; brightness contrast x1.25 around his mid tone + local contrast 0.3 at 14 px; colour kept, a first version that also raised saturation turned him too red, so contrast is on brightness only). No-logo graded: `gymarc_icon_v5_graded_nologo.png`.
+- **Current: `GYMARC_ICON_F_manface.png` / `_512.png`**, board `gymarc_icon_F_board.jpg`. 64 px mean 0.338 / 34% near-black.
