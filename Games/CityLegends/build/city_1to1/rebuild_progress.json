@@ -767,7 +767,7 @@
   "playtest": "PASS 25 Nov: test store; overlap audit in Play 516 parts / 178 wires: 0 hits; palms on Waizayandar median; night lamps; store back to v1 checked on the Server"
  },
  "roadbugs_25nov": {
-  "status": "IN PROGRESS 25 Nov (ROAD BUG SWEEP agent, home PC): owner 'countless bugs' on roads (shots City Legends/refs_2026-11-25_owner_road_bugs)",
+  "status": "DONE (wave 1) 25 Nov: 76 cells re-baked with the exact district-edge clip + gap fill and swapped mesh-only; saved v2070 (32 cells) and v2094 (44 cells); backups deleted; lock released",
   "detector": "tools/yangon/city/roadbugs_index.py (place mesh list RMLIST from Studio log -> match.json, local glbs), roadbugs_p8.py (P8 laptop meshes dumped from Studio with EditableMesh), roadbugs_detect.py (kinds spike/gap/grass_flat/median_jct/median_stub/kerb_loose/paint_cross/yellow_jct/lone_dash/wall_low; RB_OVERRIDE=<glb dir> for a new bake), roadbugs_view.py (top-down png); Studio tools/yangon/RoadTerrainPoke.luau (terrain over R boxes); out build/city_1to1/roadbugs_25nov/",
   "fixes_in_code": "roads05_bake: parts kept within roads05_clip.PAD of the districts + every triangle cut exactly on the district edge (roads05_clip.py, test) = no sawtooth at seams / map edge; roads05_gapfill.py (test) closes holes < 600 sq studs in the surface union (grass triangles at mouth corners, cracks); R05_ONLY window (one-cell bake ~2 min instead of ~1 h). roads05_paint: lane dashes keep step with the road's centre-line distance (not rolled out). RoadVerge05.trim: 5-point terrain test + `only` box list.",
   "proved": "12x11 (RB5, P5 map edge): spike 4 -> 0, gap 5 -> 0; tag RBUG5 glbs 136214023578226 97836712691678 swapped mesh-only (old in SS.RB_OldRBUG5), survived the power cut (Team Create), NOT yet saved",
@@ -776,7 +776,11 @@
   "next": "rescan terrain + trim(only) -> save; detect 'before' with gap; roadbugs_rebake.py plan (RB_EXCLUDE) + bake per tag + upload + _G.MSWAP mesh-only per cell; detect after; Play test; note",
   "lock": "released after v2070",
   "rebake": "roadbugs_rebake.py plan (spikes of run 1, RB_EXCLUDE deck-agent cells) -> 13 tags / 78 cells baking in turn into imports/sync/RBUG_<tag>_glb (RB5 done: 8 cells, spike 13 -> 2, gap 0 except 14x15)",
-  "swaps": "v2070: mesh-only swaps RBUG_RB5 (8 cells), RB4 (8), RB4F (1), RB6 (7), RB12 (8) = 32 cells (ids in build/city_1to1/roadbugs_25nov/upload_ids.txt); backups deleted. Uploaded, not swapped yet: RB3 (8), RB7s (2), RB7 (1), RB11 (4), RB9 (4), RB8s (1). Baking: RB10, RB12P."
+  "swaps": "v2070: RB5 RB4 RB4F RB6 RB12 (32 cells); v2094: RB3 RB7s RB7 RB11 RB9 RB8s RB10 RB12P (44 cells). ids build/city_1to1/roadbugs_25nov/upload_ids.txt",
+  "counts": "on the 76 cells: spike 143 -> 45, gap 313 -> 135 (RB_FAST detector with the new glbs). Whole map before: spike 180, gap 1,900, terrain over roads 4,893 boxes -> 155.",
+  "old_wall_rule": "my 76 re-bakes ran before the deck agent's 2.0-stud foot-wall rule: cells with bridge walls among them keep the 1.2 rule: 16x18 16x19 17x24 20x27 23x28 25x27 26x26 27x10 33x12 35x18 35x20 (15x13 was rebuilt after by the deck agent)",
+  "paint": "roads05_paint: dash phase by centre-line distance; no ground zebra / stop line on deck quads; a line crossing a line laid before it at > 12 deg (also deck lines at a deck foot) keeps only its longest piece. NOT rolled out (needs a paint re-run per build + re-bake). Tested on RB4h: 1 crossing removed; owner_bug_4's crossing not reproduced from RB4h's paint (the place's paint there came from another bake).",
+  "not_done": "crumpled kerbs + grass pocket at mouth corners (builder corners), median nose wedges into junctions (data: blunt median ends), lane dash alignment roll-out, remaining gap cells (305 cells had gaps; only the 76 spike cells re-baked), P8 laptop cells (no pages here), Play drive test"
  },
  "street_realism_25Nov_pass3": {
   "what": "poles off islands (land behind each pole), billboards backlit at night near the camera, camera gantries at 51 big junctions, guard booths at OSM gates, blue hoarding round 23 OSM construction sites; wires leave poles at a shallow angle; own poles/wires keep apart",
