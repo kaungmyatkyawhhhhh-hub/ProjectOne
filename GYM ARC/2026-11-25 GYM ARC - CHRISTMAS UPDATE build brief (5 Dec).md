@@ -151,8 +151,16 @@ Source: [[2026-11-26 GYM ARC - Tutorial and cutscene redesign (your taps, short 
 8. Benny match, no auto push: winnable at 2 taps/s; if the player taps < 1/s for 3 s, show "BENNY IS TIRED!" and weaken his push so every kid wins by tapping; the TAP button pulses with the hand after 2 s of no tap.
 9. `IntroCutsceneLength = 5`: one shot (wide gym → push-in on YOU → Benny's 3-word taunt on screen → control). Skippable after 1 s.
 10. `AutoTrainAfter = 5`: GO TRAIN (until Growth Spurt 1) presses itself only after 5 s with no press.
+11. GO TRAIN stretch paid in steps: the Growth Spurt bar pays small coins at 50 / 75 / 90% with a pop, and each GO goes to a machine the player hasn't used yet when there is one.
+12. **Benny comes to YOU** (replaces his story shot, the walk to his table and reading his card): at the end of the GROW transform Benny walks into the shot. A challenge card ("Big now? Prove it!" + ARM WRESTLE) waits for the tap → a 1.5 s dash to his table → the match starts at once.
+13. Screen rules for all of this (overstimulated-kid check):
+    - +EXP pops and the combo float over the trained muscle in 3D (BillboardGui on the muscle), not in the HUD;
+    - no NEW PERSONAL RECORD banner while the tutorial runs (the combo pop is the cheer);
+    - the tap hand waits until the coach line has gone;
+    - the coach's welcome = 6 words ("Welcome! Lift to GROW TALLER!"), shown during the dash to the bench, never on a machine;
+    - no machine HUD under the PICK screen.
 - Tests: a new player who doesn't touch the screen gets the hand within 3 s and the tutorial does NOT move on by itself; tapping REP fills the pump; the muscle pick works in any order and saves; every cutscene skips after 1 s and still pays; Benny can be beaten at 2 taps/s, and at 0.8 taps/s after "BENNY IS TIRED!"; intro ≤ 5 s; phone screenshots of the hand and the pick screen.
-- Expected (model): stay past 3 min ~49% (live) → ~89% with Phase 2b → ~96% with 2b + 2d. If Experiments are set up, A/B auto vs taps on the funnel.
+- Expected (model): stay past 3 min ~49% (live) → ~89% with Phase 2b → **over 90% even for very impatient kids** with 2b + 2d (96% at 5 s patience, ~100% at 11 s; a ceiling, lag and bugs aren't modelled). Overload 0 s, KEY messages missed 0%. If Experiments are set up, A/B auto vs taps on the funnel.
 
 ## Phase 2c: crowd levers (so the game tile shows 1,000+ players; from the CCU growth model, 26 Nov)
 Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobody plays it, it's dead"). These raise how many players come back and stay. Build the cheap ones with Phase 2-5.
@@ -213,7 +221,7 @@ Source: same sims note, section 5. Kids veto a game under ~1,100 players ("nobod
 - [ ] Gift drop: lands on the ground, the first tap pays, nearby players get their share, despawns.
 
 **First 5 minutes (Phase 2b + 2d)**
-- [ ] No auto reps/pump in the tutorial; hand after 3 s; muscle pick any order; every cutscene skips after 1 s; Benny won by tapping; intro ≤ 5 s.
+- [ ] No auto reps/pump in the tutorial; hand after 3 s; muscle pick any order; every cutscene skips after 1 s; Benny walks into the GROW shot and is won by tapping; intro ≤ 5 s; no RECORD banner in the tutorial; pops float over the muscle.
 - [ ] New player: Benny's card opens by itself at his table (no E press); camera shows his face.
 - [ ] GROW starts ≤ 2 s after READY; intro ≤ 8 s.
 - [ ] No DEAL / INVITE / red badge before Growth Spurt 2; never two lines on the top strip at once.

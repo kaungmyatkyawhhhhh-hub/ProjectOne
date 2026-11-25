@@ -71,17 +71,36 @@ Same kid as the impatient sim, plus OWN vs AUTO:
 | F + pick your next muscle, 2 s dash | 99% | 88% | 88% | 88% |
 | G + you tap GROW (4 s), Benny / Coral 4 s, skip after 1 s | 99% | 95% | 95% | 95% |
 | H + you tap to beat Benny (he tires if you're slow) | 99% | 96% | 96% | 96% |
-| **I + intro 5 s, one shot** | **100%** | **96%** | **96%** | **96%** |
+| I + intro 5 s, one shot | 100% | 96% | 96% | 96% |
+| J (owner: "we need over 90%") + the GO TRAIN stretch paid in steps (bar 50/75/90% coins, a new machine each GO) | 100% | 96% | 96% | 96% |
+| K + Benny walks into the end of your GROW shot and challenges you; dash to his table; the match starts at once | 100% | 100% | 100% | 100% |
+| **L + the skip modelled (a bored kid taps through a scene after 1 s)** | **100%** | **100%** | **100%** | **100%** |
 
-Sensitivity:
+Sensitivity (version L):
 | Test | Live (3 min) | New tutorial (3 min) |
 |---|---|---|
-| AUTO_PAY 0.35 | 35% | 97% |
-| AUTO_PAY 0.65 | 49% | 97% |
-| AUTO_PAY 1.0 | 50% | 97% |
-| Patience 7 s | 20% | 85% |
-| Patience 11 s | 49% | 97% |
-| Patience 16 s | 70% | 99% |
+| AUTO_PAY 0.35 | 35% | 100% |
+| AUTO_PAY 0.65 | 49% | 100% |
+| AUTO_PAY 1.0 | 50% | 100% |
+| Patience 5 s (very impatient) | 8% | 96% |
+| Patience 7 s | 20% | 99% |
+| Patience 11 s | 49% | 100% |
+| Patience 16 s | 70% | 100% |
+
+**Round 2 (owner 04:26, "we need over 90% still playing after 3 mins"):**
+- At version I the median kid was at 96%, but the impatient ones (7 s patience) only 85-88%. They all quit at 75-95 s: GROW 4 s + Benny story 4 s + the walk 2.5 s + the card 1.5 s + reading the card 3 s = ~15 s of watching in a row, right after a 34 s GO TRAIN stretch with no new rewards.
+- J pays the GO TRAIN stretch in steps; K removes the 15 s chain (Benny comes to YOU at the end of your GROW). Now even very impatient kids (5 s) stay 96% past 3 min.
+- 100% is a model ceiling, not a promise: lag on cheap phones, bugs and kids who simply don't like gym games aren't in it. The goal it supports: **over 90% past 3 min**, now with margin at every patience level.
+
+**Overstimulated-kid check of the redesign** (`overstim_gymarc.py`, versions L-M):
+- The new things first OVERLOADED the screen (version L: 4 s overload per 10 min, 18% KEY missed by 7-year-olds, 4 collisions with the RECORD banner).
+- Fixed (version M: **0 s overload, 0% missed, 0 collisions**):
+  - the +EXP pops and the combo float over the muscle in 3D, not in the HUD;
+  - no NEW PERSONAL RECORD banner during the tutorial (the combo pop is the cheer);
+  - the hand waits until the coach line has gone;
+  - the coach's welcome is 6 words, shown during the dash to the bench, never on a machine;
+  - no machine HUD under the PICK screen (you're off the machine);
+  - Benny's challenge waits for the tap.
 
 What the model says, honestly:
 - **The biggest gains come from shorter, skippable cutscenes and doing the Benny match yourself (G, H)**, on top of Phase 2b.
