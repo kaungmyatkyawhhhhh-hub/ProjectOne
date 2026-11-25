@@ -94,3 +94,71 @@ The stations show no brand text (green fascia only). In-game names: "Kabar Aye F
 - Night panes were checked by numbers, not looked at at night.
 - Edit screenshots near the stations are unreliable while the Yangon preview plugin is on: it caches the kit data at
   start and showed the deleted building until Studio was restarted. Judge in Play.
+
+## Round 2 (26 Nov, owner: fix the 24 left, "some buildings are touching the road", "some grass is overlapping the building floors")
+Saved v2147, v2156, v2158 (store back on CityLegends_v1, checked on the Server). Not published. Log:
+`build/city_1to1/overlapfix_26nov/fix_log_round2.txt`; everything removed is in `ServerStorage.OverlapFixBackup`
+(`Shells`, `PrepareTaken`, `ParkTrees`, `Parts2`, `Night`, tile copies).
+
+### Check 1: placed things overlapping (the 24 left)
+**Before 24 thing pairs -> after 0** (the last checker run found 1, a tree crown into a 3-stud wall piece; that piece
+was dropped after).
+- **5 Shwedagon edge buildings deleted** (their walls / roofs ran into the landmark's hill trees and terrace), 34 kit
+  records, and night cells 18x20 / 18x21 re-made without their windows (`tools/yangon/city/night_pages.py`).
+- **Edges under 2 studs trimmed:** 3 shells cut back 1.0-1.7 studs (pagoda w289328798, The Central, the P1 car park);
+  Sedona's invisible ground collision tiles cut 1.2 off the neighbour building (one 9 x 5 tile under the building edge
+  deleted); The Central car park asphalt cut 1.2-1.3; New Day's forecourt strip cut 1.6 off the building to the north;
+  an Optima-neighbours park tree moved 2.5 studs off a roof; the Fountain Garden walk now stops at the view-point steps.
+- **Lots moved** (`LotFinder`, only spots with no building on them, then `YangonSites.prepare`; every shell / far tree
+  it took is copied in the backup):
+
+| Lot | Old spot (x, z) | New spot (x, z), facing | Why |
+|---|---|---|---|
+| house `y1_mid_9` | 29434.5, 25999.2 | 29174.1, 25500.9, (-0.508, 0.861) | stood on a real OSM car park |
+| house `y1_mid_2` | 29539.2, 26808.4 | 29670.6, 26772.7, (0.977, -0.215) | against a building wall |
+| house `y1_mid_12` | 29176.6, 26823.7 | 28705.6, 27915.7, (-0.075, 0.997) | a road ran 20 studs into it |
+| house `y1_low_1` | 28628.4, 28058.6 | 28790.2, 28071.5, (0.075, -0.997) | 8 road boxes in it |
+| hotel | 27227, 30361 | 25391.2, 32424.9, (1, 0) | the real Chinese temple stood 100 studs deep in its lot |
+
+  - **The hotel is now 2.7 km west of the Novotel pin.** It needs a lot square to the world axes, 216 wide, and there
+    is none free near the pin (checked out to 3 km: the nearest with no buildings is this one). Its sign still reads
+    NOVOTEL YANGON MAX. If the owner wants it back by the pin, the hotel must get smaller or the temple model must move.
+  - **Customs and dealership did not move.** They stand at the real Optima Werkz / RIDER AUTO spots, and the nearest
+    free lots are 1.4 km away. The Thanlwin Road trees stood on the pavement strip along their pad edges, so the pads
+    were cut back 1.4-6.3 studs, 10 trees / signs moved 3.5-11 studs, and **12 trees whose roots stood in the pads with
+    the road right behind them were deleted** (copies in `ParkTrees`).
+  - Code: `Config.YangonVenues.Sites.hotel`, `src/shared/YangonWorld.lua` (4 house lots), `world_1to1.py` `MOVED`
+    (synced into Studio).
+- 52 + 2 tree / wall records dropped where they stood in a new lot.
+
+### Check 2: buildings, walls and lots touching the road
+Rule checked: no building shell or lot pad inside a carriageway / deck / median / wall box (R, D, M, W) or within 1 stud
+of one. Pavement boxes are allowed (buildings stand on the pavement side of the kerb).
+- **Lots: before 11 lots (26 box pairs) -> after 0.** 8 pads cut back off the road (+1 stud gap): customs 1.5,
+  dealership 9.6, gems 18.7, tower_skyline 12.5, low_12 7.0, low_3 3.5, low_6 0.7, low_9 0.6; 2 house lots moved (above).
+- **Buildings: 1,448 shell parts, NOT fixed.** P1 489, P2 476, P3 318 (1,283 together), P4 32, P6 31, P7 24, P11 20,
+  P8 19, P9 16, P12 12, P5 9, P10 2. 563 of them go more than 2 studs into the road box; 398 only sit inside the 1-stud gap.
+  List: `build/city_1to1/overlapfix_26nov/buildings_touching_roads.txt`.
+  - **Cause:** P1-P3's buildings were made on 16 Nov against the road net before J37. The roads were rebuilt after,
+    but these three districts' buildings never were. P4-P12 were re-run against the J37 net and have few left.
+  - **Why not fixed now:** the visible building is the client kit detail plus the night-window mesh, not the shell.
+    Trimming only shells would leave the facades in the road. The right fix is the same district re-run P4-P12 got
+    (`district_files.sh P1 --no-roads buildings`, then the DistrictPlace swap), for P1, P2 and P3. It regenerates every
+    building there, so it needs its own batch and lock time. Then re-run this check, and re-apply today's P1/P2
+    building deletions (the places plan already drops New Day's canopy buildings).
+
+### Check 3: grass on floors
+Floors: lot pads, venue / car-care floors and plates, landmark and park floors, plazas, walks, steps and every
+places-data slab (797). Grass: terrain Grass / LeafyGrass / Ground / Mud, and grass parts (lawns, beds).
+- **Before: terrain grass at or over the floor on 133 floors, 43 grass parts level with a floor (176) -> after 0 / 0.**
+- Terrain: cleared over each floor's footprint from 4 studs under its top (a 4-stud voxel under a floor still drew
+  its surface over it: Air from 0.3 under did nothing), 8 under where it still showed, and the last few points written
+  as empty voxels. Grass parts: cut off the floor, or lowered to 0.1 under its top when a cut would take over 40%.
+
+### Checked in Play
+CityLegends_test, then back to CityLegends_v1 and read on the Server. The hotel builds whole on its new lot, the house lot
+y1_mid_9 shows its pad and FOR SALE sign beside the road. Not looked at: each trimmed lot pad, the grass fixes by eye,
+night windows at night.
+
+![[2026-11-26 Overlaps 2 - hotel on its new free lot (Play) - after.jpg]]
+![[2026-11-26 Overlaps 2 - house lot y1_mid_9 on its new spot (Play) - after.jpg]]

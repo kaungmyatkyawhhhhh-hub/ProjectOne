@@ -844,5 +844,18 @@
   "saved_version": "2148 (+ tuning save after it)",
   "playtest": "PASS 26 Nov: test store; 7 km/h stumble, 30 km/h 6 m, 60 km/h 19 m, 99 km/h 53 m (fades); cap 6 held; 0 leftover parts/constraints; ~56-60 FPS; server-owned car fling ok; store back to v1, checked on the Server",
   "vault": "City Legends/2026-11-26 Walker hits - ragdoll fling (Mild).md"
+ },
+ "overlaps_26nov_round2": {
+  "what": "OVERLAP FIX agent round 2: the 24 leftovers, buildings / lots touching roads, grass on floors (vault note 2026-11-26 Overlaps - gas stations and buildings merged.md, section Round 2)",
+  "check1_overlaps": "24 -> 0 thing pairs (5 Shwedagon edge buildings deleted + night 18x20/18x21 re-made, edge trims, hotel + 4 house lots moved, customs/dealership pads trimmed, 12 Thanlwin Road trees deleted (backup ParkTrees), 10 moved)",
+  "check2_roads": "lots 11 -> 0 (8 pads trimmed +1 stud gap, 2 lots moved); building shells 1448 parts NOT fixed (P1 489, P2 476, P3 318; list overlapfix_26nov/buildings_touching_roads.txt): needs district_files.sh P1/P2/P3 --no-roads buildings + DistrictPlace swap",
+  "check3_grass": "176 -> 0 (terrain over 133 floors cleared from top - 4/-8 + voxel writes; 43 grass parts cut or lowered 0.1 under the floor)",
+  "moved": "hotel 27227,30361 -> 25391.2,32424.9 (2.7 km, nearest free axis lot); y1_mid_9 -> 29174.1,25500.9; y1_mid_2 -> 29670.6,26772.7; y1_mid_12 -> 28705.6,27915.7; y1_low_1 -> 28790.2,28071.5",
+  "saved": "v2147, v2156, v2158 (store CityLegends_v1, checked on the Server)",
+  "night_ids": {
+   "Cell_18x20": 102393654299344,
+   "Cell_18x21": 85466899587087
+  },
+  "log": "overlapfix_26nov/fix_log_round2.txt"
  }
 }
