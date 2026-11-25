@@ -90,4 +90,19 @@ end
 for _, p in CollectionService:GetTagged(TAG) do
 	add(p)
 end
+
+-- Studio test hook (Play only, never live): ServerStorage.FlatWindowsTest:Invoke(windowId) switches that window
+if game:GetService("RunService"):IsStudio() then
+	local f = Instance.new("BindableFunction")
+	f.Name = "FlatWindowsTest"
+	f.OnInvoke = function(id: string)
+		local ps = panesOf(id)
+		if ps[1] then
+			last[id] = nil
+			toggle(ps[1])
+		end
+		return frosted[id] == true, #ps
+	end
+	f.Parent = game:GetService("ServerStorage")
+end
 CollectionService:GetInstanceAddedSignal(TAG):Connect(add)
