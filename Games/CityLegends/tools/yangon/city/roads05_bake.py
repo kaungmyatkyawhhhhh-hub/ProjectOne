@@ -728,6 +728,17 @@ def bake(tag):
             ncut += len(T0) - len(T1)
             by[key] = list(T1)
         print('district edge clip: triangle count change', -ncut)
+    # (25 Nov) small bare patches inside the surfaces (grass holes at mouth corners, seam cracks) closed (roads05_gapfill)
+    import roads05_gapfill
+    keep = [Point(g['c'][0], g['c'][2]).buffer(g['r_in'] + 1) for g in data.get('roundabouts', [])]
+    keep += [Polygon([(q[0], q[2]) for q in isl]).buffer(1) if len(isl) >= 3 else Point(isl[0][0], isl[0][2]).buffer(4)
+             for isl in data.get('islands', []) if isl]
+    keep += [Polygon([(q[0], q[2]) for q in f]).buffer(1) for f in data.get('fills', []) if len(f) >= 3]
+    if zone is not None:
+        keep.append(zone)
+    only_g = set(c for c in os.environ.get('R05_ONLY', '').split(',') if c) or set(c for (_, c) in by)
+    gapfill = roads05_gapfill.fill(by, only_g, shapely.union_all(keep) if keep else None)
+    print('gap fill:', gapfill)
     # meshes
     gdir = os.environ.get('R05_GLB_DIR') or os.path.join(D, 'glb')  # R05_GLB_DIR: write into the approved upload folder (imports/sync/...)
     os.makedirs(gdir, exist_ok=True)
@@ -788,7 +799,7 @@ def bake(tag):
             k, buf, n = k + 1, [], 0
     if buf:
         open(os.path.join(cdir, 'Collide05_%d.txt' % k), 'w', newline='\n').write('\n'.join(buf))
-    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, deck_join=deck_join, foot_walls=foot_walls, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
+    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, gap_fill=gapfill, deck_join=deck_join, foot_walls=foot_walls, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
               paint_dropped=dropped, collision_boxes=len(rows), collide_files=k)
     json.dump(st, open(os.path.join(D, 'bake_stats.json'), 'w'), indent=1)
     print(json.dumps(st, indent=1))
