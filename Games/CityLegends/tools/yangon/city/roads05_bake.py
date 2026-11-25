@@ -334,6 +334,13 @@ def collect(tag, folders):
     clip = shapely.union_all([Polygon(b) for b in json.load(open(sub))['boxes']]) if os.path.exists(sub) else None
     import roads05_clip
     padc = clip.buffer(roads05_clip.PAD) if clip is not None else None
+    # (25 Nov) R05_ONLY at collect time too: only the parts near those cells are kept (a re-bake of a few cells of a
+    # 1.8M-part district needs little memory; the pickle then holds only them)
+    only_cells = [c for c in os.environ.get('R05_ONLY', '').split(',') if c]
+    if only_cells:
+        win = shapely.union_all([sbox(int(c.split('x')[0]) * CELL - 300, int(c.split('x')[1]) * CELL - 300,
+                                      (int(c.split('x')[0]) + 1) * CELL + 300, (int(c.split('x')[1]) + 1) * CELL + 300) for c in only_cells])
+        padc = win if padc is None else padc.intersection(win)
     if padc is not None:
         shapely.prepare(padc)
     cells = collections.defaultdict(dict)
@@ -353,7 +360,7 @@ def collect(tag, folders):
             fmt, body = pg[k]
             ps.extend(decode_q(body) if fmt == 'Q' else decode(body))
         n0 = len(ps)
-        if clip is not None:  # a subset build (roads05_subset.py): only parts near its districts
+        if padc is not None:  # a subset build (roads05_subset.py): only parts near its districts
             # (25 Nov) parts within roads05_clip.PAD of the districts too: bake() cuts the triangles exactly on the
             # district edge. A centre test kept every other wedge of a road crossing the edge (sawtooth teeth).
             ps = [q for q in ps if padc.contains(Point(q[2][0], q[2][2]))]
