@@ -459,4 +459,72 @@ function F.dropWalls(rows)
 	return total
 end
 
+-- (round 2) cut a box back from one side until it is clear of `others` (each { cf, size }) by 0.1; nil if no single side does
+function F.shrinkPlan(cf: CFrame, size: Vector3, others)
+	local depth = _G.OVLmod.depth
+	local best
+	for _, ax in { { "X", 1 }, { "X", -1 }, { "Z", 1 }, { "Z", -1 } } do
+		local full = if ax[1] == "X" then size.X else size.Z
+		local function at(c)
+			local ns = if ax[1] == "X" then Vector3.new(size.X - c, size.Y, size.Z) else Vector3.new(size.X, size.Y, size.Z - c)
+			local off = if ax[1] == "X" then Vector3.new(-ax[2] * c / 2, 0, 0) else Vector3.new(0, 0, -ax[2] * c / 2)
+			return cf * CFrame.new(off), ns
+		end
+		local function clear(c)
+			local ncf, ns = at(c)
+			for _, b in others do
+				if depth(ncf, ns, b.cf, b.size) > -0.1 then
+					return false
+				end
+			end
+			return true
+		end
+		local lo, hi = 0, full * 0.6
+		if clear(hi) then
+			for _ = 1, 30 do
+				local m = (lo + hi) / 2
+				if clear(m) then hi = m else lo = m end
+			end
+			if not best or hi < best.cut then
+				local ncf, ns = at(hi)
+				best = { cf = ncf, size = ns, cut = hi, axis = ax[1] .. (if ax[2] > 0 then "+" else "-") }
+			end
+		end
+	end
+	return best
+end
+
+-- (round 2) cut several sides of a flat pad: each item goes to the side that frees it with the smallest cut
+function F.multiCut(cf: CFrame, size: Vector3, others)
+	local cuts = { ["X+"] = 0, ["X-"] = 0, ["Z+"] = 0, ["Z-"] = 0 }
+	for _, o in others do
+		local l = cf:PointToObjectSpace(o.cf.Position)
+		local rx, ry, rz = o.cf.RightVector * o.size.X / 2, o.cf.UpVector * o.size.Y / 2, o.cf.LookVector * o.size.Z / 2
+		local function ext(a: Vector3)
+			return math.abs(rx:Dot(a)) + math.abs(ry:Dot(a)) + math.abs(rz:Dot(a))
+		end
+		local ex, ey, ez = ext(cf.RightVector), ext(cf.UpVector), ext(cf.LookVector)
+		local need = {
+			["X+"] = size.X / 2 - (l.X - ex) + 0.1, ["X-"] = size.X / 2 - (-l.X - ex) + 0.1,
+			["Z+"] = size.Z / 2 - (l.Z - ez) + 0.1, ["Z-"] = size.Z / 2 - (-l.Z - ez) + 0.1,
+		}
+		local clear = math.abs(l.Y) >= size.Y / 2 + ey
+		for _, v in need do
+			if v <= 0.1 then
+				clear = true
+			end
+		end
+		if not clear then
+			local bs, bv = nil, math.huge
+			for k, v in need do
+				if v < bv then bs, bv = k, v end
+			end
+			cuts[bs] = math.max(cuts[bs], bv)
+		end
+	end
+	local ns = Vector3.new(size.X - cuts["X+"] - cuts["X-"], size.Y, size.Z - cuts["Z+"] - cuts["Z-"])
+	local off = Vector3.new((cuts["X-"] - cuts["X+"]) / 2, 0, (cuts["Z-"] - cuts["Z+"]) / 2)
+	return cf * CFrame.new(off), ns, cuts
+end
+
 return F
