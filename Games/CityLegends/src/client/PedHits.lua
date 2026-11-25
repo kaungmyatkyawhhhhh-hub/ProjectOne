@@ -13,8 +13,8 @@
 	    back to its path; if they landed somewhere bad (off the pavement level, far away, nothing under them) they
 	    fade out and the walker system puts someone new elsewhere.
 	  * kept in Roblox's Mild violence band (lead's decision, vault note 2026-11-26): no blood, no injury, no
-	    screams, no numbers, and no "dragged under the car" (the body never collides with the car that hit it
-	    for the first NOCOL_TIME, so it is thrown clear instead of being caught under it).
+	    screams, no numbers, and no "dragged under the car" (the body never collides with the car that hit it,
+	    and is thrown off to the side, so it is never caught and pushed along by it).
 	  * at most MAX_RAGDOLLS at once (the oldest gets up early); everything a ragdoll makes is destroyed after.
 ]]
 
@@ -36,16 +36,19 @@ local STUMBLE_KMH = 3 -- slower than this a car just stands against them
 local RAG_KMH = 10 -- faster than this: a ragdoll
 local MAX_RAGDOLLS = 6
 local THROW = 1.05 -- share of the car's speed the body leaves with
-local LIFT_K, LIFT_MIN, LIFT_MAX = 0.3, 8, 38 -- upward speed: x car speed, studs/s floor and cap
-local SIDE_K = 0.18 -- an off-centre hit throws them sideways too
+local LIFT_K, LIFT_MIN, LIFT_MAX = 0.4, 10, 45 -- upward speed: x car speed, studs/s floor and cap
+local SIDE_K = 0.3 -- thrown off to the side the car hit them on, clear of its path
 local SPIN_K, SPIN_MAX = 0.18, 14 -- tumble (rad/s per stud/s, cap)
-local MAX_THROW = 140 -- studs/s, whatever the car's speed
-local NOCOL_TIME = 0.6 -- seconds the body ignores the car that hit it
+local MAX_THROW = 100 -- studs/s, whatever the car's speed
+-- Roblox's gravity (196 studs/s2) is ~6.7x real at 3 studs a metre: a body thrown with real speeds dropped and stopped
+-- in half a second (tested). Lifting part of it gives real-looking throws: about 6 m at 30 km/h, 20 m at 60 km/h.
+local FLOAT = 0.6 -- share of gravity taken off the ragdoll
+-- the body never touches the car that hit it (no "dragged along by the car": Mild band, lead's decision 26 Nov)
 local GET_UP, GIVE_UP = 3.5, 7 -- seconds: earliest stand-up (once still), latest
 local STILL = 3 -- studs/s: "still"
 local STAND_TIME = 0.55 -- seconds of the stand-up blend
 local FADE_TIME = 0.6
-local BAD_DROP, BAD_FAR = 4, 40 -- studs from the walker's height / start that count as "landed somewhere bad"
+local BAD_DROP, BAD_FAR = 4, 120 -- studs from the walker's height / start that count as "landed somewhere bad"
 local CAR_KEEP = 0.94 -- your car keeps this share of its speed per ragdoll hit
 local CHECK_R = 320 -- only cars this near the camera are checked
 
@@ -54,7 +57,7 @@ local COLLIDE = { [1] = true, [2] = true, [4] = true, [5] = true, [6] = true }
 
 type Rag = { w: any, t0: number, made: { Instance }, nocol: { Instance }, start: Vector3, phase: string, pt: number, from: { CFrame }?, to: { CFrame }? }
 local rags: { Rag } = {}
-local physics = PhysicalProperties.new(0.8, 0.55, 0.05, 1, 1)
+local physics = PhysicalProperties.new(0.8, 0.35, 0.05, 1, 1)
 
 local function attach(p: BasePart, at: Vector3, axis: number, made: { Instance }): Attachment
 	local a = Instance.new("Attachment")
@@ -166,12 +169,26 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 		p.CustomPhysicalProperties = physics
 		p.Anchored = false
 	end
+	for k in COLLIDE do
+		local p = P[k]
+		local a = Instance.new("Attachment")
+		a.Parent = p
+		local f = Instance.new("VectorForce")
+		f.Attachment0 = a
+		f.RelativeTo = Enum.ActuatorRelativeTo.World
+		f.ApplyAtCenterOfMass = true
+		f.Force = Vector3.new(0, p.AssemblyMass * workspace.Gravity * FLOAT, 0)
+		f.Parent = p
+		table.insert(made, a)
+		table.insert(made, f)
+	end
 	-- the throw: the car's velocity where it touched, some lift, a sideways share, a tumble (head back toward the car)
 	local flat = Vector3.new(v.X, 0, v.Z)
 	local dir = if flat.Magnitude > 0.01 then flat.Unit else root.CFrame.LookVector
 	local right = dir:Cross(Vector3.yAxis)
 	local off = (at - root.Position):Dot(right)
-	local throw = flat * THROW + right * math.sign(off) * speed * SIDE_K
+	local side = if math.abs(off) > 0.3 then math.sign(off) elseif math.random() < 0.5 then -1 else 1
+	local throw = flat * THROW + right * side * speed * SIDE_K
 	if throw.Magnitude > MAX_THROW then
 		throw = throw.Unit * MAX_THROW
 	end
@@ -284,12 +301,6 @@ local function step(dt: number)
 			continue
 		end
 		if r.phase == "rag" then
-			if #r.nocol > 0 and age > NOCOL_TIME then
-				for _, n in r.nocol do
-					n:Destroy()
-				end
-				table.clear(r.nocol)
-			end
 			if P[1].Position.Y < -500 then
 				r.phase = "fade"
 				finish(i)
