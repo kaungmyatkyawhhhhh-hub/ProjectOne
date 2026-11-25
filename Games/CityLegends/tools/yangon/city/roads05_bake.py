@@ -332,6 +332,10 @@ def collect(tag, folders):
     pages = read_pages(folders)
     sub = os.path.join(od(tag), 'subset.json')
     clip = shapely.union_all([Polygon(b) for b in json.load(open(sub))['boxes']]) if os.path.exists(sub) else None
+    import roads05_clip
+    padc = clip.buffer(roads05_clip.PAD) if clip is not None else None
+    if padc is not None:
+        shapely.prepare(padc)
     cells = collections.defaultdict(dict)
     for (cell, k), (_, body, fmt) in pages.items():
         cells[cell][k] = (fmt, body)
@@ -349,8 +353,10 @@ def collect(tag, folders):
             fmt, body = pg[k]
             ps.extend(decode_q(body) if fmt == 'Q' else decode(body))
         n0 = len(ps)
-        if clip is not None:  # a subset build (roads05_subset.py): only parts whose centre is in its districts
-            ps = [q for q in ps if clip.contains(Point(q[2][0], q[2][2]))]
+        if clip is not None:  # a subset build (roads05_subset.py): only parts near its districts
+            # (25 Nov) parts within roads05_clip.PAD of the districts too: bake() cuts the triangles exactly on the
+            # district edge. A centre test kept every other wedge of a road crossing the edge (sawtooth teeth).
+            ps = [q for q in ps if padc.contains(Point(q[2][0], q[2][2]))]
         report[cell] = dict(pages=len(ks), missing=missing, parts=len(ps), clipped=n0 - len(ps))
         parts.extend(ps)
     pickle.dump(parts, open(os.path.join(od(tag), 'parts.pkl'), 'wb'))
@@ -712,6 +718,16 @@ def bake(tag):
     for p in barriers:
         for t in faces_of(('B',) + p[1:]):
             by[('LY', cell_of(p[2][0], p[2][2]))].append(t)
+    # (25 Nov) every triangle cut exactly on the subset's district edge (roads05_clip): no sawtooth at a seam / map edge
+    if clip is not None:
+        import roads05_clip
+        ncut = 0
+        for key in list(by):
+            T0 = np.array(by[key], dtype=float).reshape(-1, 3, 3)
+            T1 = roads05_clip.clip_tris(T0, clip)
+            ncut += len(T0) - len(T1)
+            by[key] = list(T1)
+        print('district edge clip: triangle count change', -ncut)
     # meshes
     gdir = os.environ.get('R05_GLB_DIR') or os.path.join(D, 'glb')  # R05_GLB_DIR: write into the approved upload folder (imports/sync/...)
     os.makedirs(gdir, exist_ok=True)
@@ -755,7 +771,8 @@ def bake(tag):
     for i, f in enumerate(files):
         write_glb(os.path.join(gdir, 'roads05_%d.glb' % (i + 1)), [(nm, m) for nm, m, _ in f], generator='roads05_bake.py')
     # collision
-    rows = collision(data, surf, parts, barriers, only=only)
+    # (25 Nov) the parts kept past the district edge for the exact cut lay no collision (as before the pad)
+    rows = collision(data, surf, [p for p in parts if clip is None or clip.contains(Point(p[2][0], p[2][2]))], barriers, only=only)
     if only:
         rows = [r for r in rows if cell_of(float(r.split()[1]), float(r.split()[3])) in only]
     cdir = os.path.join(D, 'collide')
