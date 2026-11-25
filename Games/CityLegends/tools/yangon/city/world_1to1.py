@@ -38,7 +38,9 @@ DROPS = ["Inya Lake Tea Shop", "Hledan Market Stall", "Kamayut Flats", "Universi
 # (24 Nov 2026, owner decision) lots a road ran through, moved with tools/yangon/LotFinder.luau to the nearest free lot
 # beside a road (x, floor y, z, fx, fz); their Studio pads were YangonSites.prepare'd there
 MOVED = {'y1_high_3': (31799.3, 63.61, 28685.5, -0.271, -0.963), 'y1_high_10': (29676.7, 74.85, 26072.3, -0.902, 0.433),
-         'y1_mid_3': (29553.3, 92.96, 28155.2, 0.079, -0.997), 'y1_mid_11': (29322.9, 69.39, 25613.8, -0.699, 0.715)}
+         'y1_mid_3': (29553.3, 92.96, 28155.2, 0.079, -0.997), 'y1_mid_11': (29322.9, 69.39, 25613.8, -0.699, 0.715),
+         # (26 Nov, overlap fix) y1_mid_9 sat on a real OSM car park, y1_mid_2 against a building wall
+         'y1_mid_9': (29174.1, 67.43, 25500.9, -0.508, 0.861), 'y1_mid_2': (29670.6, 81.75, 26772.7, 0.977, -0.215)}
 
 
 def v3(p):

@@ -244,7 +244,7 @@ Config.YangonVenues = {
 		gems = { x = 35023.0, z = 18623.0, fx = 0.866, fz = -0.5, y = 63.70 }, -- Gems Museum (16.85471, 96.15632)
 		rewards = { x = 35461.7, z = 22353.3, fx = -0.991, fz = -0.135, y = 39.02, w = 304 }, -- its car courts make it 304 wide (24 Nov: moved off a road; was 35389.0, 22838.7)
 		-- square to the world axes (their towers and facade tiers are)
-		hotel = { x = 27227.0, z = 30361.0, fx = 1, fz = 0, y = 60.63 }, -- Novotel Yangon Max (16.82000, 96.13166)
+		hotel = { x = 25391.2, z = 32424.9, fx = 1, fz = 0, y = 41.67 }, -- (26 Nov: off the real Chinese temple; nearest free axis lot) was 27227, 30361 by Novotel Yangon Max
 		tower_aurum = { x = 29226.0, z = 21923.0, fx = -1, fz = 0, y = 67.78 }, -- Lotte Hotel (16.84432, 96.13728)
 		tower_skyline = { x = 36686.0, z = 24776.8, fx = 0, fz = 1, y = 34.0 },
 		tower_crown = { x = 39387.0, z = 39273.0, fx = 0, fz = -1, y = 35.86 }, -- Kan Thar Yar Centre (16.79233, 96.16963)
