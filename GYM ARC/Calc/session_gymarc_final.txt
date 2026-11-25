@@ -1,0 +1,8 @@
+PLAN (B C D F H I, no E/G)   patience  5 s: mean  36.7 min | still playing 10m  92% 20m  78% 30m  60% 45m  41%
+PLAN (B C D F H I, no E/G)   patience  7 s: mean  46.2 min | still playing 10m  98% 20m  92% 30m  80% 45m  64%
+PLAN (B C D F H I, no E/G)   patience 11 s: mean  55.9 min | still playing 10m 100% 20m  99% 30m  96% 45m  90%
+PLAN (B C D F H I, no E/G)   patience 16 s: mean  59.3 min | still playing 10m 100% 20m 100% 30m 100% 45m  99%
+PLAN + AFK chair (J)         patience  5 s: mean  38.9 min | still playing 10m  94% 20m  82% 30m  65% 45m  44%
+PLAN + AFK chair (J)         patience  7 s: mean  49.6 min | still playing 10m  98% 20m  94% 30m  86% 45m  74%
+PLAN + AFK chair (J)         patience 11 s: mean  57.5 min | still playing 10m 100% 20m 100% 30m  98% 45m  93%
+PLAN + AFK chair (J)         patience 16 s: mean  59.3 min | still playing 10m 100% 20m 100% 30m 100% 45m  98%
