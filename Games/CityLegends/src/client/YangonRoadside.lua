@@ -9,7 +9,8 @@
 	  * side streets (road collision boxes RoadBox "R" with no traffic lane in them): a pole on one side every SIDE_CELL
 	    studs, one wire and two bundles to the next pole along the street, an amber lamp on every second pole (owner,
 	    21 Nov: side-street power-pole lamps are amber).
-	  * wide medians (RoadBox "M" boxes at least PALM_MEDIAN wide): a row of toddy (palmyra) palms, clip 0930.
+	  * medians at least PALM_MEDIAN wide (the gap between the two ways' inner lanes): a row of toddy (palmyra) palms
+	    down the middle, clip 0930.
 
 	Nothing is placed on a road, median kerb, deck or building, inside a signalled junction, or where it would touch any
 	other visible part: the client-built kit (buildings' balconies, walls and trees in workspace.YgnKitNear: CanQuery is
@@ -87,7 +88,7 @@ end
 local function plan(g, skipTile: (number, number) -> boolean)
 	local poles = {}
 	local boards = {}
-	local chunks: { [string]: { p: { number }, b: { any } } } = {}
+	local chunks: { [string]: { p: { number }, b: { any }, palms: { Vector3 }? } } = {}
 	local laneGrid: { [string]: { Vector3 } } = {} -- every lane point, 48-stud cells (side streets are where none is)
 	local outer: { [string]: number } = {}
 	for _, l in g.lanesData do
@@ -199,6 +200,60 @@ local function plan(g, skipTile: (number, number) -> boolean)
 	for _, b in boards do
 		chunks[b.chunk] = chunks[b.chunk] or { p = {}, b = {} }
 		table.insert(chunks[b.chunk].b, b)
+	end
+	-- toddy palm spots: the middle of a median at least PALM_MEDIAN wide (between the two ways' inner lanes, a lane
+	-- being 12 wide), every PALM_EVERY studs, not in a junction
+	local back: { [string]: { Vector3 } } = {}
+	for _, l in g.lanesData do
+		if l.yangon and not l.skip and l.way == -1 and l.lane == 1 then
+			for k = 1, #l.pts // 3 do
+				local q = Vector3.new(l.pts[3 * k - 2], l.pts[3 * k - 1], l.pts[3 * k])
+				local key = baseRoad(l.road) .. "|" .. math.floor(q.X / 64) .. "," .. math.floor(q.Z / 64)
+				back[key] = back[key] or {}
+				table.insert(back[key], q)
+			end
+		end
+	end
+	for li, l in g.lanesData do
+		if li % 300 == 0 then
+			task.wait()
+		end
+		if l.yangon and not l.skip and l.way == 1 and l.lane == 1 then
+			local road = baseRoad(l.road)
+			local acc = 0
+			local prevP: Vector3? = nil
+			for k = 1, #l.pts // 3 do
+				local p = Vector3.new(l.pts[3 * k - 2], l.pts[3 * k - 1], l.pts[3 * k])
+				if prevP then
+					acc += Vector3.new(p.X - prevP.X, 0, p.Z - prevP.Z).Magnitude
+				end
+				prevP = p
+				if acc >= PALM_EVERY then
+					acc = 0
+					local best, bd = nil, math.huge
+					local cx, cz = math.floor(p.X / 64), math.floor(p.Z / 64)
+					for dx = -1, 1 do
+						for dz = -1, 1 do
+							for _, q in back[road .. "|" .. (cx + dx) .. "," .. (cz + dz)] or {} do
+								local d = Vector3.new(q.X - p.X, 0, q.Z - p.Z).Magnitude
+								if d < bd and math.abs(q.Y - p.Y) < 4 then
+									best, bd = q, d
+								end
+							end
+						end
+					end
+					if best and bd >= 12 + PALM_MEDIAN and bd <= 60 then
+						local mid = (p + best) / 2
+						if not inJunction(mid) then
+							local key = math.floor(mid.X / CHUNK) .. "," .. math.floor(mid.Z / CHUNK)
+							chunks[key] = chunks[key] or { p = {}, b = {} }
+							chunks[key].palms = chunks[key].palms or {}
+							table.insert(chunks[key].palms, mid)
+						end
+					end
+				end
+			end
+		end
 	end
 	return poles, chunks, laneGrid, inJunction
 end
@@ -734,67 +789,56 @@ local function palmModel(): Model?
 	return palmProto
 end
 
-local function buildPalms(m: Instance, sets, key: string, x0: number, z0: number): number
+local function buildPalms(m: Instance, sets, key: string, spots: { Vector3 }?): number
 	local proto = palmModel()
 	local _, collide = mapParts()
-	if not proto or not collide then
+	if not proto or not collide or not spots then
 		return 0
 	end
-	overlap.FilterDescendantsInstances = { collide }
-	local boxes = workspace:GetPartBoundsInBox(CFrame.new(x0 + CHUNK / 2, 0, z0 + CHUNK / 2), Vector3.new(CHUNK, 2000, CHUNK), overlap)
 	local made = 0
-	for _, bx in boxes do
-		if bx:GetAttribute("RoadBox") == "M" then
-			local sx, sz = bx.Size.X, bx.Size.Z
-			local short, long = math.min(sx, sz), math.max(sx, sz)
-			local axis = if sx >= sz then bx.CFrame.RightVector else bx.CFrame.LookVector
-			axis = Vector3.new(axis.X, 0, axis.Z).Unit
-			if short >= PALM_MEDIAN and long >= 2 * PALM_EVERY then
-				local c = bx.Position
-				local top = c.Y + bx.Size.Y / 2
-				for t = -long / 2 + PALM_EVERY / 2, long / 2 - PALM_EVERY / 2, PALM_EVERY do
-					local at = c + axis * t
-					-- the palm belongs to the chunk it stands in
-					if at.X >= x0 and at.X < x0 + CHUNK and at.Z >= z0 and at.Z < z0 + CHUNK then
-						local y, kind = ground(at)
-						local base = Vector3.new(at.X, y or top, at.Z)
-						local ok = y ~= nil and (kind == "M" or kind == "T") and not nearPalm(base, PALM_EVERY * 0.6)
-						if ok then
-							-- (a flyover's median has the ground road under it: no palms up there)
-							rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
-							local below = workspace:Raycast(base - Vector3.new(0, 2, 0), Vector3.new(0, -60, 0), rayParams)
-							if below and base.Y - below.Position.Y > 8 then
-								ok = false
-							end
-						end
-						if ok then
-							for yy = 1.5, PALM_H, 3 do
-								local p = base + Vector3.new(0, yy, 0)
-								if blocked(sets, p, 1.2) or nearCross(p, 2.5) then
-									ok = false
-									break
-								end
-							end
-						end
-						if ok then
-							-- the crown: nothing within its radius
-							for _, o in { Vector3.zero, Vector3.new(10, 0, 0), Vector3.new(-10, 0, 0), Vector3.new(0, 0, 10), Vector3.new(0, 0, -10), Vector3.new(0, -5, 0), Vector3.new(0, 5, 0) } do
-								if blocked(sets, base + Vector3.new(0, PALM_H + 2, 0) + o, 1.5) then
-									ok = false
-									break
-								end
-							end
-						end
-						if ok then
-							local c2 = proto:Clone()
-							c2:PivotTo(CFrame.new(base) * CFrame.Angles(0, (math.floor(at.X) * 7 + math.floor(at.Z)) % 360 * math.pi / 180, 0))
-							c2.Parent = m
-							regAdd(palmReg, base, key)
-							made += 1
-						end
-					end
+	for _, at in spots do
+		local y, kind = ground(at)
+		-- on the median (its box, grass or a paved strip), never on a carriageway or a deck
+		local ok = y ~= nil and (kind == "M" or kind == "T" or kind == "P")
+		local base = Vector3.new(at.X, y or at.Y, at.Z)
+		if ok then
+			ok = not nearPalm(base, PALM_EVERY * 0.6)
+		end
+		if ok then
+			-- (a flyover's median has the ground road under it: no palms up there)
+			rayParams.FilterDescendantsInstances = { collide, workspace.Terrain }
+			local below = workspace:Raycast(base - Vector3.new(0, 2, 0), Vector3.new(0, -60, 0), rayParams)
+			if below and base.Y - below.Position.Y > 8 then
+				ok = false
+			end
+		end
+		if ok then
+			for yy = 1.5, PALM_H, 3 do
+				local p = base + Vector3.new(0, yy, 0)
+				if blocked(sets, p, 1.2) or nearCross(p, 2.5) then
+					ok = false
+					break
 				end
 			end
+		end
+		if ok then
+			-- the crown: nothing within its radius
+			for _, o in { Vector3.zero, Vector3.new(10, 0, 0), Vector3.new(-10, 0, 0), Vector3.new(0, 0, 10), Vector3.new(0, 0, -10), Vector3.new(0, -5, 0), Vector3.new(0, 5, 0) } do
+				if blocked(sets, base + Vector3.new(0, PALM_H + 6, 0) + o, 1.5) then
+					ok = false
+					break
+				end
+			end
+		end
+		if ok and solidAt(CFrame.new(base + Vector3.new(0, (PALM_H + 15) / 2 + 0.5, 0)), Vector3.new(3, PALM_H + 15, 3)) then
+			ok = false
+		end
+		if ok then
+			local c2 = proto:Clone()
+			c2:PivotTo(CFrame.new(base) * CFrame.Angles(0, (math.floor(at.X) * 7 + math.floor(at.Z)) % 360 * math.pi / 180, 0))
+			c2.Parent = m
+			regAdd(palmReg, base, key)
+			made += 1
 		end
 	end
 	return made
@@ -926,7 +970,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 	m.Name = "Roadside"
 	local any = false
 	-- palms first (their trunks are what the cross wires keep off)
-	if buildPalms(m, sets, key, x0, z0) > 0 then
+	if buildPalms(m, sets, key, chunk and chunk.palms) > 0 then
 		any = true
 	end
 	task.wait()

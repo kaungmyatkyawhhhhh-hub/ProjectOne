@@ -23,8 +23,18 @@ def glb_names(path):
     return js
 
 
+class _P8:
+    def __init__(self, path):
+        self.path = path
+
+    def __getitem__(self, name):
+        return np.load(os.path.join(OUT, 'p8', name + '.npy'))
+
+
 def read_glb(path):
-    """-> {name: (N,3,3) float world triangles}"""
+    """-> {name: (N,3,3) float world triangles}  (a 'p8:' path = triangles dumped from Studio, roadbugs_p8.py)"""
+    if 'p8:' in path.replace(os.sep, '/'):
+        return _P8(path)
     with open(path, 'rb') as f:
         data = f.read()
     ln = struct.unpack_from('<I', data, 12)[0]
