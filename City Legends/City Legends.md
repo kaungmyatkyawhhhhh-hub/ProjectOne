@@ -1,5 +1,7 @@
 # City Legends
 
+> **MYITTAR NYUNT BLOCK (2026-11-26, saved v2171, not published):** the old 5-storey walk-up from clips 0927/0928 (OSM 1430305132, Waizayandar Road south end) is part-built with a walkable dog-leg stair and the floor-3 flat laid out to the owner's sketch (living, yellow room, back room, bedroom, dining, kitchen, bath, shrine); generic furniture only (privacy). [[2026-11-26 Myittar Nyunt block - walkable stair and flat]]
+>
 > **WALKER HITS (2026-11-26, saved v2148+, not published):** cars knock walkers over: a stumble below 10 km/h, above it a ragdoll thrown by the car's speed (6 m at 30 km/h, 19 m at 60 km/h) that gets back up after about 3.5 s and walks on (or fades and respawns if it lands far or somewhere bad). Kept in Roblox's Mild band: no blood, no injury, and NOT dragged under the car (lead's decision: that would raise the age rating; the owner can overrule). Max 6 at once, client-only, every player sees it. [[2026-11-26 Walker hits - ragdoll fling (Mild)]]
 
 > **ROAD JOINS FIX (2026-11-25, saved v1983, not published):** Maha Bandula #2 now outranks the streets it crosses by Sule (no crest at 31st Street), Merchant meets Strand flush (jolt 26 gone), the 5 P8 cells with old kerbs rebuilt. Found and fixed the bake's rotation precision bug (wide road triangles tilted up to 0.8 studs map-wide; only rebuilt cells are clean). See [[2026-11-24 Road joins fix]].

@@ -833,10 +833,12 @@
   "backups": "ServerStorage.OverlapFixBackup: delete after the owner has looked"
  },
  "myittar_nyunt_26nov": {
-  "what": "walkable old walk-up block + flat from clips IMG_0927/0928 (owner 26 Nov)",
-  "building": "OSM way 1430305132 (20 m from GPS 16.803,96.1859; inner-corner stair strip); game had it as 1-floor 'hall' shell (2 KWG boxes in Cell_24_19)",
-  "tool": "tools/yangon/MyittarNyuntBlock.luau (hideShell / build / check / undo)",
-  "status": "builder written, waiting for the Studio lock"
+  "what": "walkable old walk-up block + floor-3 flat from clips IMG_0927/0928; flat rebuilt to the owner's sketch",
+  "building": "OSM 1430305132 (footprint confirmed by Esri/Google roofs; 26.7 x 9.5/14.8 m, 5 storeys)",
+  "tool": "tools/yangon/MyittarNyuntBlock.luau (hideShell / build / check / undo); Studio ServerStorage.ClaudeTools.MyittarNyuntBlock; sync asset 129577219835240",
+  "status": "DONE 26 Nov: saved v2171, 2528 parts, 0 overlaps, Play walk 36/37 (fixed), store v1 checked on Server, lock released",
+  "backup": "ServerStorage.YangonSiteHidden.MyittarNyuntBlock (2 KWG shells) + YgnKit.KeepOut MyittarNyunt_0/1/carport",
+  "note": "City Legends/2026-11-26 Myittar Nyunt block - walkable stair and flat.md"
  },
  "ped_hits_26Nov": {
   "what": "cars fling YangonStreetLife walkers as ragdolls (src/client/PedHits.lua + hooks in YangonStreetLife / Driving.slowBy / Main); Mild band: no drag under the car (body never collides with the hitting car), get up after 3.5 s or fade + respawn",
