@@ -435,11 +435,11 @@ local function ground(at: Vector3): (number?, string?)
 	return hit.Position.Y, hit.Instance:GetAttribute("RoadBox")
 end
 
--- the shells and other query-able map parts (buildings' collision, landmarks' collision ...)
-local function solidAt(box: CFrame, size: Vector3): boolean
+-- the shells and other query-able map parts (buildings' collision and roofs, landmarks' collision ...)
+local function solidList(): { Instance }?
 	local root = mapParts()
 	if not root then
-		return true
+		return nil
 	end
 	local list = {}
 	for _, n in { "Buildings", "Landmarks", "Parks", "Pagodas", "CarCare", "Sites", "Green" } do
@@ -447,6 +447,13 @@ local function solidAt(box: CFrame, size: Vector3): boolean
 		if f then
 			table.insert(list, f)
 		end
+	end
+	return list
+end
+local function solidAt(box: CFrame, size: Vector3): boolean
+	local list = solidList()
+	if not list then
+		return true
 	end
 	overlap.FilterDescendantsInstances = list
 	return #workspace:GetPartBoundsInBox(box, size, overlap) > 0
@@ -461,6 +468,14 @@ local function poleClear(sets, base: Vector3, lampDir: Vector3?): boolean
 		local p = base + Vector3.new(0, y, 0)
 		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) then
 			return false
+		end
+	end
+	-- the top arm (5 long along the road, either way round): its ends
+	for _, d in { Vector3.xAxis, Vector3.zAxis } do
+		for sgn = -1, 1, 2 do
+			if blocked(sets, base + Vector3.new(0, POLE_H + 0.2, 0) + d * (2.6 * sgn), 0.4) then
+				return false
+			end
 		end
 	end
 	if lampDir then
@@ -543,6 +558,24 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 	for _, q in pts do
 		if blocked(sets, q, width / 2 + 0.15) or nearPalm(q, 2.2) then
 			return nil
+		end
+	end
+	-- (Play, 25 Nov: wires ran through shell roofs) the buildings' own boxes along the wire's box
+	local list = solidList()
+	if list then
+		overlap.FilterDescendantsInstances = list
+		local lo, hi = a:Min(b) - Vector3.new(1, sag + 1, 1), a:Max(b) + Vector3.new(1, 1, 1)
+		local near = workspace:GetPartBoundsInBox(CFrame.new((lo + hi) / 2), hi - lo, overlap)
+		if #near > 0 then
+			local cells = {}
+			for _, q in near do
+				addPart(cells, q, 400)
+			end
+			for _, q in pts do
+				if blocked({ cells }, q, width / 2 + 0.15) then
+					return nil
+				end
+			end
 		end
 	end
 	-- (parent first: a WorldCFrame set before parenting is taken as local)
