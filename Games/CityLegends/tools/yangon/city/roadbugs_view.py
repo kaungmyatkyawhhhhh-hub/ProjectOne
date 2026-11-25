@@ -21,6 +21,18 @@ ORDER = ['R', 'P', 'MG', 'B', 'KR', 'KW', 'LZ', 'L', 'LY']
 
 def view(x, z, size, out, spots=None, title=''):
     match = json.load(open(os.path.join(OUT, 'match.json')))['match']
+    ov = os.environ.get('RB_OVERRIDE')   # a new bake's glb folder: its cells replace the place's
+    if ov:
+        import glob as _g
+        from roadbugs_index import glb_names
+        newm = {}
+        for f in _g.glob(os.path.join(ov, '*.glb')):
+            for mm in glb_names(f)['meshes']:
+                pp = mm['name'].split('_')
+                newm['ov_' + mm['name']] = dict(cell=pp[1].split('s')[0], kind=pp[0], glb=os.path.relpath(f, ROOT), name=mm['name'])
+        cov = set(v['cell'] for v in newm.values())
+        match = {k: v for k, v in match.items() if v['cell'] not in cov}
+        match.update(newm)
     x0, z0, x1, z1 = x - size / 2, z - size / 2, x + size / 2, z + size / 2
     cells = set('%dx%d' % (cx, cz) for cx in range(int(x0 // 1536), int(x1 // 1536) + 1)
                 for cz in range(int(z0 // 1536), int(z1 // 1536) + 1))
