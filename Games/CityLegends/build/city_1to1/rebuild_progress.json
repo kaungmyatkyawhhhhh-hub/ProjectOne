@@ -831,5 +831,11 @@
   "saved": "v2128, v2131, v2133, v2135 (store back on CityLegends_v1, checked on the Server)",
   "left": "24 thing pairs: house lots y1_mid_9 (on an OSM place) and y1_mid_2, hotel pad under the Chinese temple, Thanlwin Road park trees on customs/dealership pads (lots to move), 9 Shwedagon edge buildings (2-11 studs; need another night re-make), edges <= 1.6 studs, Fountain Garden vs Shwedagon view point (5.0)",
   "backups": "ServerStorage.OverlapFixBackup: delete after the owner has looked"
+ },
+ "myittar_nyunt_26nov": {
+  "what": "walkable old walk-up block + flat from clips IMG_0927/0928 (owner 26 Nov)",
+  "building": "OSM way 1430305132 (20 m from GPS 16.803,96.1859; inner-corner stair strip); game had it as 1-floor 'hall' shell (2 KWG boxes in Cell_24_19)",
+  "tool": "tools/yangon/MyittarNyuntBlock.luau (hideShell / build / check / undo)",
+  "status": "builder written, waiting for the Studio lock"
  }
 }
