@@ -822,5 +822,14 @@
   "studio": "NOT INSTALLED: studio.lock held by ROAD BUG SWEEP agent the whole time (waited ~75 min, 26 Nov 00:30-01:45 local). Before installing: the box dumps predate v2115 (2987 P boxes re-seated, 159 removed) and the RB3/RB4/RB5 swaps: re-dump R/D/M + P boxes (15-char records, sliced 99,990 chars a call, last slice padded), re-run streetlife_1to1.py + walkers_check.py (0), re-pack, then with the lock: PATCH asset 133014134133489 with imports/sync/walkers_26nov.rbxmx, LoadAsset, copy the 4 ModuleScripts into ReplicatedStorage.Shared (YangonStreetLife3/4 are new), check lengths/checksums, save, Play-test on CityLegends_test, back to CityLegends_v1, save. Never publish.",
   "rerun": "after any road swap: re-dump boxes from Studio, YANGON_SCALE=1to1 python streetlife_1to1.py P1_P2_P3_P4_P5_P6_P7_P8_P9_P10_P11_P12, python walkers_check.py must print 0",
   "not_done": "street (non-main road) pavements have no walkers; no road crossings (walkers turn back at junction mouths); no parked cars / standing spots"
+ },
+ "overlaps_26nov": {
+  "what": "OVERLAP FIX agent: owner 'the gas station and a building is merged in together' (Myanmar Plaza). New map-wide checker tools/yangon/OverlapCheck.luau (placed things vs shells, kit detail, trees, props, each other; exact mesh pass) + fixer tools/yangon/OverlapFix.luau; vault note City Legends/2026-11-26 Overlaps - gas stations and buildings merged.md",
+  "cause": "P2 buildings in the place are the run made before the places plan: New Day's 4 'cleared' footprints (its canopy read as buildings) were never removed; places_1to1 build checked a newer plots.json. Myawady canopy 0.5 studs from the shophouse wall (lot cut at footprint + 0.6 m).",
+  "counts": "thing pairs 1009 -> 24, part pairs 3092 -> 139 (172 joined-by-design pairs not counted)",
+  "done": "47 buildings deleted (shells in ServerStorage.OverlapFixBackup.Shells, 515 kit records), 8 night cell meshes re-made without their panes (ids build/city_1to1/overlapfix_26nov/night_ids.json, old meshes in OverlapFixBackup.Night), 910 tree/prop + 445 compound-wall/leftover + 96 car-park records dropped, New Day slab cut into 45 strips clear of its drive roads, Myawady canopy group moved (3.216, 7.325) + Config.Fuel pumps / Jobs post moved; log overlapfix_26nov/fix_log.txt; tile backups OverlapFixBackup.<Data folder>",
+  "saved": "v2128, v2131, v2133, v2135 (store back on CityLegends_v1, checked on the Server)",
+  "left": "24 thing pairs: house lots y1_mid_9 (on an OSM place) and y1_mid_2, hotel pad under the Chinese temple, Thanlwin Road park trees on customs/dealership pads (lots to move), 9 Shwedagon edge buildings (2-11 studs; need another night re-make), edges <= 1.6 studs, Fountain Garden vs Shwedagon view point (5.0)",
+  "backups": "ServerStorage.OverlapFixBackup: delete after the owner has looked"
  }
 }
