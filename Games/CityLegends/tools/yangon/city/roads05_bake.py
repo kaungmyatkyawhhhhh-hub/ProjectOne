@@ -715,6 +715,10 @@ def bake(tag):
     only0 = set(c for c in os.environ.get('R05_ONLY', '').split(',') if c)
     parts, kerb_fix = roads05_kerb_fix.resolve(parts, only0 or None)
     print('kerb fix:', kerb_fix)
+    # (25 Nov, road bug sweep) no single-kerb median nose wedges reaching into junctions: the median ends 2 kerbs wide
+    import roads05_nose
+    parts, nose_dropped = roads05_nose.drop(parts, data)
+    print('median nose parts dropped:', nose_dropped)
     for p in parts:
         k = p[0]
         if k == 'R':
@@ -818,7 +822,7 @@ def bake(tag):
             k, buf, n = k + 1, [], 0
     if buf:
         open(os.path.join(cdir, 'Collide05_%d.txt' % k), 'w', newline='\n').write('\n'.join(buf))
-    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, gap_fill=gapfill, deck_join=deck_join, foot_walls=foot_walls, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
+    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, gap_fill=gapfill, nose_dropped=nose_dropped, deck_join=deck_join, foot_walls=foot_walls, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
               paint_dropped=dropped, collision_boxes=len(rows), collide_files=k)
     json.dump(st, open(os.path.join(D, 'bake_stats.json'), 'w'), indent=1)
     print(json.dumps(st, indent=1))

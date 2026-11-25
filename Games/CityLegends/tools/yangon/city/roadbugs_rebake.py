@@ -8,7 +8,7 @@ Owner of a cell = the tag whose glbs the place's meshes of that cell came from (
 from two bakes, from a laptop bake with no pages here (P8) or from an unknown tag are listed as skipped.
 The data (roads.json, paint.json, subset.json) is copied from the owner's folder unchanged: the meshes keep their build.
 """
-import collections, json, os, shutil, subprocess, sys
+import collections, json, os, re, shutil, subprocess, sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from roadbugs_index import OUT, ROOT
@@ -36,12 +36,18 @@ def owners():
             by[v['cell']].add('P8_laptop')
             continue
         d = '/'.join(g.split('/')[-3:-1]) if g.startswith('build/') else g.split('/')[-2]
-        by[v['cell']].add(DIR2TAG.get(d, '?' + d))
+        t = DIR2TAG.get(d)
+        if t is None:   # (re-bakes of a build: RBUG_<tag>_glb, FW<tag>_glb, DJ<tag>_glb, <tag>_glb)
+            m = re.match(r'^(?:RBUG_|FW|DJ)?(RB[0-9A-Za-z]+?)(?:[SJ])?_glb$', d)
+            t = m.group(1) if m and os.path.isdir(os.path.join(B, 'roads05_' + m.group(1))) else '?' + d
+        by[v['cell']].add(t)
     return by
 
 
 def plan(counts_file, kinds):
-    c = json.load(open(counts_file))['cells']
+    c = json.load(open(counts_file))['cells'] if kinds != ['all'] else {}
+    if kinds == ['all']:   # every cell in the place, whatever its counts
+        c = {k: {'all': 1} for k in owners()}
     own = owners()
     tags, skip = collections.defaultdict(list), {}
     excl = set(x for x in os.environ.get('RB_EXCLUDE', '').split(',') if x)   # cells another agent is re-baking
@@ -60,12 +66,13 @@ def plan(counts_file, kinds):
             skip[cell] = [t + ' (no pages)']
             continue
         tags[t].append(cell)
-    json.dump(dict(tags=tags, skipped=skip, kinds=kinds), open(os.path.join(OUT, 'rebake_plan.json'), 'w'), indent=1)
+    plan_file = os.environ.get('RB_PLAN', 'rebake_plan.json')
+    json.dump(dict(tags=tags, skipped=skip, kinds=kinds), open(os.path.join(OUT, plan_file), 'w'), indent=1)
     print(json.dumps(dict(tags={k: len(v) for k, v in tags.items()}, skipped=skip), indent=1))
 
 
 def bake(tag):
-    p = json.load(open(os.path.join(OUT, 'rebake_plan.json')))
+    p = json.load(open(os.path.join(OUT, os.environ.get('RB_PLAN', 'rebake_plan.json'))))
     cells = p['tags'][tag]
     src = os.path.join(B, 'roads05_' + tag)
     dst = os.path.join(B, 'roads05_' + tag + '_RBUG')
@@ -73,8 +80,12 @@ def bake(tag):
     for f in ('roads.json', 'paint.json', 'subset.json'):
         if os.path.exists(os.path.join(src, f)):
             shutil.copy(os.path.join(src, f), dst)
+    if os.environ.get('RB_REPAINT') == '1':   # (25 Nov) fresh paint for the build's data with the current paint rules
+        with open(os.path.join(dst, 'paint.log'), 'w') as log:
+            subprocess.run([sys.executable, 'roads05_paint.py', tag + '_RBUG'], cwd=os.path.dirname(os.path.abspath(__file__)),
+                           env=dict(os.environ, YANGON_SCALE='1to1'), stdout=log, stderr=subprocess.STDOUT, check=True)
     env = dict(os.environ, YANGON_SCALE='1to1', R05_ONLY=','.join(cells),
-               R05_GLB_DIR=os.path.join(ROOT, 'imports', 'sync', 'RBUG_%s_glb' % tag))
+               R05_GLB_DIR=os.path.join(ROOT, 'imports', 'sync', os.environ.get('RB_GLB_PREFIX', 'RBUG_') + '%s_glb' % tag))
     here = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(dst, 'rbug.log'), 'w') as log:
         subprocess.run([sys.executable, 'roads05_bake.py', tag + '_RBUG', 'collect', os.path.join(src, 'pages')], cwd=here,
