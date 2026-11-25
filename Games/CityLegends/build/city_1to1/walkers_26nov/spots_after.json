@@ -1,0 +1,122 @@
+{
+"per": {
+"P4": {
+"paths": 401,
+"points": 4493,
+"segments": 4092,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P2": {
+"paths": 228,
+"points": 2932,
+"segments": 2704,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P1": {
+"paths": 228,
+"points": 3519,
+"segments": 3291,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P6": {
+"paths": 598,
+"points": 7192,
+"segments": 6594,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P9": {
+"paths": 343,
+"points": 4875,
+"segments": 4532,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P11": {
+"paths": 350,
+"points": 4597,
+"segments": 4247,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P12": {
+"paths": 339,
+"points": 4520,
+"segments": 4181,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P3": {
+"paths": 903,
+"points": 10283,
+"segments": 9380,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P8": {
+"paths": 419,
+"points": 4605,
+"segments": 4186,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P10": {
+"paths": 343,
+"points": 4960,
+"segments": 4617,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P7": {
+"paths": 318,
+"points": 4287,
+"segments": 3969,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"P5": {
+"paths": 105,
+"points": 1571,
+"segments": 1466,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+},
+"out": {
+"paths": 8,
+"points": 190,
+"segments": 182,
+"bad_points": 0,
+"bad_segments": 0,
+"bad_paths": 0,
+"median_segments": 0
+}
+},
+"spots": []
+}

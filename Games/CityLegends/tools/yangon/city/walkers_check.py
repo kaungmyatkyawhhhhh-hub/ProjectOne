@@ -127,8 +127,9 @@ class Clipper:
         """run: [(x, y, z)] -> list of sub-runs with every point on a pavement and no segment band on a carriageway"""
         pts = []
         for x, y, z in run:
+            x, z = round(x, 1), round(z, 1)   # the modules store decimetres: test what is written
             py = self.pave_y(x, y, z)
-            pts.append((x, py, z) if py is not None else None)
+            pts.append((x, round(py, 1), z) if py is not None else None)
         bad = set()
         ss = []
         for k in range(len(pts) - 1):
@@ -218,8 +219,14 @@ if __name__ == '__main__':
     mdir = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, 'src', 'shared')
     boxes = decode(bpath)
     print('%d boxes: %s' % (len(boxes), {k: sum(1 for b in boxes if b[0] == k) for k in 'RDM'}))
-    per, spots = check(boxes, load_paths(mdir))
+    paths = load_paths(mdir)
+    per, spots = check(boxes, paths)
     report(per, spots, mdir)
+    ppath = os.path.join(OUT, 'paveboxes_place.txt')
+    if os.path.exists(ppath):   # every street path point on a pavement box (the mall's gallery paths are indoors)
+        clip = Clipper(boxes + decode(ppath))
+        off = sum(1 for n, _, pts in paths if 'Mall' not in n for x, y, z in pts if clip.pave_y(x, y, z) is None)
+        print('  street path points not on a pavement box: %d' % off)
     os.makedirs(OUT, exist_ok=True)
     tag = os.environ.get('WC_TAG', 'check')
     json.dump({'per': per, 'spots': spots}, open(os.path.join(OUT, 'spots_%s.json' % tag), 'w'), indent=0)
