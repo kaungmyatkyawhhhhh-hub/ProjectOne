@@ -4,7 +4,7 @@ created: 2026-11-27
 ---
 # Map explore, speed effects, HUD toggles, motion (27 Nov 2026)
 
-**Owner:** "Yes, build them". These are the five ideas left at the end of [[2026-11-26 UI pass - sounds, HUD buttons, guide pill]], all from [[2026-11-26 Research - Driving-game UI, sound and motion (gap study)]] and the TDS study. Saved in Studio, not published.
+**Owner:** "Yes, build them". These are the five ideas left at the end of [[2026-11-26 UI pass - sounds, HUD buttons, guide pill]], all from [[2026-11-26 Research - Driving-game UI, sound and motion (gap study)]] and the TDS study. Saved in Studio as version 2245, not published.
 
 ## What already existed (not doubled)
 - Settings > Camera already had shake, head movement, motion blur, chase FOV and calm motion.
@@ -64,3 +64,8 @@ created: 2026-11-27
 
 ## Trap found
 `ScriptEditorService:UpdateSourceAsync` hung in Team Create on 27 Nov, even for a tiny edit; a plain `inst.Source = ...` worked. `tools/studio_sync_pairs.py` now writes Source directly, finds changed and new files from git, and writes non-ASCII text as `\u{...}` escapes. Pasted UTF-8 got garbled once: the "•••" characters.
+
+**The save trap, after (27 Nov):**
+- With those stuck `UpdateSourceAsync` calls in the session, every save to Roblox failed after 240 s. The log said "server publish request timed out" then "Internal server error", 3 times, and Studio also showed "SelectDragger is not responding".
+- Closing and reopening Studio fixed it. The place reopened at version 2241, so the scripts were put back from the repo with plain Source writes, and the save worked: 108 s for a test save, then version 2245.
+- **Rule:** never call `UpdateSourceAsync` from the MCP in Team Create. If a save fails with that log, restart Studio and re-sync from git.
