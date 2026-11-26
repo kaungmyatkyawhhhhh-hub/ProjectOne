@@ -40,6 +40,8 @@ local YangonRoadside = {}
 
 local LOAD, DROP = 480, 640
 local CHUNK = 192
+local MH_EVERY, MH_END, MH_JUNCTION = 230, 60, 70 -- manholes: studs apart along a lane, kept off lane ends and junctions
+local outerPts: { [string]: { any } } = {} -- 64-stud cells -> outer-lane points { p, dir } (bus stops snap to them)
 local EVERY = 105 -- studs between main-road poles (35 m)
 local SIDE_CELL = 96 -- one side-street pole per cell of this size (CHUNK is a multiple of it)
 local PALM_MEDIAN = 15 -- medians at least this wide (5 m) get toddy palms
@@ -157,6 +159,16 @@ local function plan(g, skipTile: (number, number) -> boolean)
 		end
 		if l.yangon and not l.skip and l.lane == outer[l.road .. "|" .. l.way] then
 			local n = #l.pts // 3
+			-- (27 Nov) the outer lanes' points with their direction: bus stops snap to them
+			for k = 1, n - 1 do
+				local p = Vector3.new(l.pts[3 * k - 2], l.pts[3 * k - 1], l.pts[3 * k])
+				local d = Vector3.new(l.pts[3 * k + 1] - p.X, 0, l.pts[3 * k + 3] - p.Z)
+				if d.Magnitude > 0.01 then
+					local key = math.floor(p.X / 64) .. "," .. math.floor(p.Z / 64)
+					outerPts[key] = outerPts[key] or {}
+					table.insert(outerPts[key], { p = p, dir = d.Unit })
+				end
+			end
 			local prevP: Vector3? = nil
 			local acc = (string.len(l.road) * 37) % EVERY -- both sides of a road don't line up
 			local last: number? = nil
@@ -333,6 +345,56 @@ local function plan(g, skipTile: (number, number) -> boolean)
 			end
 		end
 	end
+	-- (27 Nov, TorqX street-level gap) manhole covers: one every MH_EVERY studs along each main-road lane (offset by
+	-- lane), in a wheel track, never within MH_END of a lane's ends or MH_JUNCTION of a signalled junction's edge (zebras,
+	-- stop lines and arrows are there). Every district, P1 too (its street layer has none).
+	for li, l in g.lanesData do
+		if li % 300 == 0 then
+			task.wait()
+		end
+		if l.yangon and not l.skip then
+			local n = #l.pts // 3
+			local total = 0
+			for k = 2, n do
+				total += Vector3.new(l.pts[3 * k - 2] - l.pts[3 * k - 5], 0, l.pts[3 * k] - l.pts[3 * k - 3]).Magnitude
+			end
+			local acc = (li * 53) % MH_EVERY
+			local run = 0
+			for k = 2, n do
+				local a = Vector3.new(l.pts[3 * k - 5], l.pts[3 * k - 4], l.pts[3 * k - 3])
+				local b = Vector3.new(l.pts[3 * k - 2], l.pts[3 * k - 1], l.pts[3 * k])
+				local seg = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+				local len = seg.Magnitude
+				if len > 0.01 then
+					local t = 0
+					while acc + (len - t) >= MH_EVERY do
+						t += MH_EVERY - acc
+						acc = 0
+						local s = run + t
+						if s > MH_END and s < total - MH_END then
+							local dir = seg.Unit
+							local at = a:Lerp(b, t / len) + dir:Cross(Vector3.yAxis) * (if (li + k) % 2 == 0 then 2.6 else -2.6)
+							local near = false
+							for _, j in junctions do
+								if Vector3.new(at.X - j.c.X, 0, at.Z - j.c.Z).Magnitude < j.r + MH_JUNCTION then
+									near = true
+									break
+								end
+							end
+							if not near then
+								local key = math.floor(at.X / CHUNK) .. "," .. math.floor(at.Z / CHUNK)
+								chunks[key] = chunks[key] or { p = {}, b = {} }
+								chunks[key].mh = chunks[key].mh or {}
+								table.insert(chunks[key].mh, { at = at, n = li + k })
+							end
+						end
+					end
+					acc += len - t
+					run += len
+				end
+			end
+		end
+	end
 	return poles, chunks, laneGrid, inJunction
 end
 
@@ -500,9 +562,10 @@ local function regAdd(reg, p: Vector3, owner: string)
 	table.insert(reg[k], { p, owner })
 end
 local poleReg: { [string]: { any } } = {} -- my built poles' bases
+local stopReg: { [string]: { any } } = {} -- (27 Nov) my built bus stops' footprint points (poles keep off them)
 local wireReg: { [string]: { any } } = {} -- my built wires' points
 local function regPurge(owner: string)
-	for _, reg in { palmReg, crossReg, poleReg, wireReg } do
+	for _, reg in { palmReg, crossReg, poleReg, wireReg, stopReg } do
 		for _, list in reg do
 			for i = #list, 1, -1 do
 				if list[i][2] == owner then
@@ -568,6 +631,20 @@ local function nearCross(p: Vector3, r: number): boolean
 	for dx = -1, 1 do
 		for dz = -1, 1 do
 			for _, e in crossReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
+				if (e[1] - p).Magnitude < r then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+-- a point within r (3D) of one of my bus stops' footprint points
+local function nearStop(p: Vector3, r: number): boolean
+	for dx = -1, 1 do
+		for dz = -1, 1 do
+			for _, e in stopReg[(math.floor(p.X / 32) + dx) .. "," .. (math.floor(p.Z / 32) + dz)] or {} do
 				if (e[1] - p).Magnitude < r then
 					return true
 				end
@@ -643,7 +720,7 @@ local function poleClear(sets, base: Vector3, lampDir: Vector3?): boolean
 	end
 	for y = 1.5, POLE_H + 1, 2 do
 		local p = base + Vector3.new(0, y, 0)
-		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) or nearGantry(p, 2) or nearWire(p, W / 2 + 0.5) then
+		if blocked(sets, p, W / 2 + 0.25) or nearPalm(p, 2.5) or nearGantry(p, 2) or nearWire(p, W / 2 + 0.5) or nearStop(p, 1.6) then
 			return false
 		end
 	end
@@ -880,12 +957,22 @@ local ADS = {
 local GREEN = Color3.fromRGB(46, 110, 64)
 local BOARD_W, BOARD_H, BOARD_Y = 18, 9, 18
 
-local function adFace(board: BasePart, face: Enum.NormalId, ad)
+-- (27 Nov) the bus shelters' lit ad ends and the free-standing ad panels beside them (portrait 1.2 x 1.8 m; research:
+-- "1-2 lit advertising panels" per YBS shelter). Fictional brands, Burmese in Myanmar Unicode, no kinzi.
+local SHELTER_ADS = {
+	{ top = "NAGA X9", mid = "ဖုန်းအသစ်", low = "5G  ·  108MP", a = Color3.fromRGB(16, 22, 34), b = Color3.fromRGB(20, 120, 140), t = Color3.fromRGB(120, 240, 230) },
+	{ top = "SHWE LA", mid = "လက်ဖက်ရည်", low = "3-in-1 TEA MIX", a = Color3.fromRGB(150, 60, 20), b = Color3.fromRGB(70, 26, 8), t = Color3.fromRGB(255, 220, 150) },
+	{ top = "THAZIN NET", mid = "အင်တာနက် အမြန်", low = "SIM ·  1,500 Ks", a = Color3.fromRGB(110, 40, 170), b = Color3.fromRGB(40, 10, 80), t = Color3.fromRGB(150, 255, 120) },
+	{ top = "MINGALAR", mid = "ခေါက်ဆွဲ", low = "HOT & SPICY", a = Color3.fromRGB(230, 40, 30), b = Color3.fromRGB(140, 10, 10), t = Color3.fromRGB(255, 230, 60) },
+	{ top = "MYA PEARL", mid = "အအေး", low = "ICE COLD SODA", a = Color3.fromRGB(30, 170, 120), b = Color3.fromRGB(8, 80, 60), t = Color3.new(1, 1, 1) },
+}
+
+local function adFace(board: BasePart, face: Enum.NormalId, ad, portrait: boolean?)
 	local sg = Instance.new("SurfaceGui")
 	sg.Face = face
 	sg.LightInfluence = 1
 	sg.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize
-	sg.CanvasSize = Vector2.new(400, 200)
+	sg.CanvasSize = if portrait then Vector2.new(200, 300) else Vector2.new(400, 200)
 	CollectionService:AddTag(sg, "RoadsideAd") -- (lit at night near the camera by the main loop)
 	sg.MaxDistance = 600
 	sg.Parent = board
@@ -909,9 +996,182 @@ local function adFace(board: BasePart, face: Enum.NormalId, ad)
 		t.Text = text
 		t.Parent = bg
 	end
-	label(ad.top, 0.06, 0.3, Enum.Font.GothamBlack)
-	label(ad.mid, 0.38, 0.34, Enum.Font.GothamBold)
-	label(ad.low, 0.76, 0.16, Enum.Font.GothamBold)
+	if portrait then
+		label(ad.top, 0.1, 0.16, Enum.Font.GothamBlack)
+		label(ad.mid, 0.36, 0.22, Enum.Font.GothamBold)
+		label(ad.low, 0.78, 0.08, Enum.Font.GothamBold)
+	else
+		label(ad.top, 0.06, 0.3, Enum.Font.GothamBlack)
+		label(ad.mid, 0.38, 0.34, Enum.Font.GothamBold)
+		label(ad.low, 0.76, 0.16, Enum.Font.GothamBold)
+	end
+end
+
+-- a shelter's ad box (template part SAD_busd, tag ShelterAd: P1's street-layer shelters and ours): both faces dressed
+-- when a copy enters the Workspace, the ad picked by its position
+local function dressShelterAd(q: Instance)
+	if not q:IsA("BasePart") or not q:IsDescendantOf(workspace) or q:FindFirstChildWhichIsA("SurfaceGui") then
+		return
+	end
+	local i = (math.floor(q.Position.X / 7) + math.floor(q.Position.Z / 11)) % #SHELTER_ADS + 1
+	adFace(q, Enum.NormalId.Right, SHELTER_ADS[i], true)
+	adFace(q, Enum.NormalId.Left, SHELTER_ADS[i % #SHELTER_ADS + 1], true)
+end
+
+---------------------------------------------------------------------
+-- (27 Nov) YBS bus stops at the real OSM stops off P1 (P1's street layer has its own), and manhole covers
+---------------------------------------------------------------------
+local KD = require(Shared:WaitForChild("YangonKitData"))
+local stopKit = nil
+local function kitPieces(pid: string)
+	if not stopKit then
+		local store = ReplicatedStorage:FindFirstChild("YgnKit")
+		store = store and store:FindFirstChild("Templates")
+		if not store then
+			return nil
+		end
+		stopKit = KD.index(store)
+	end
+	return stopKit[pid]
+end
+-- clone a street-kit piece the way YangonKitData lays a P record
+local function kitPut(m: Instance, pid: string, cf: CFrame): boolean
+	local pieces = kitPieces(pid)
+	if not pieces then
+		return false
+	end
+	for _, tp in pieces do
+		local q = tp.part:Clone()
+		q.Size = tp.size
+		q.CFrame = cf * CFrame.new(tp.c) * (tp.r or CFrame.identity)
+		q.Parent = m
+	end
+	return true
+end
+
+local SHELTER_L, SHELTER_D = 13.2, 5.4 -- the busd piece's box (plinth) along / across
+-- every point of a box (local frame cf, half sizes hx / hz, heights 0.5..h) is clear of the kit, the map and my things;
+-- the ground under its corners and middle is pavement / grass at one height (returned)
+local function spotClear(sets, cf: CFrame, hx: number, hz: number, h: number): number?
+	local ys = {}
+	for _, c in { { 0, 0 }, { -hx, -hz }, { hx, -hz }, { -hx, hz }, { hx, hz } } do
+		local y, kind = ground((cf * CFrame.new(c[1], 0, c[2])).Position)
+		if not y or not (kind == "P" or kind == "T") then
+			return nil
+		end
+		table.insert(ys, y)
+	end
+	if math.max(table.unpack(ys)) - math.min(table.unpack(ys)) > 0.3 then
+		return nil
+	end
+	local base = cf - cf.Position + Vector3.new(cf.X, ys[1], cf.Z)
+	if solidAt(base * CFrame.new(0, h / 2 + 0.3, 0), Vector3.new(2 * hx, h, 2 * hz)) then
+		return nil
+	end
+	for x = -hx, hx, 1.5 do
+		for z = -hz, hz, 1.5 do
+			for y = 0.6, h, 1.5 do
+				local p = (base * CFrame.new(x, y, z)).Position
+				if blocked(sets, p, 0.3) or nearPole(p, 1.4) or nearPalm(p, 2.5) or nearGantry(p, 2) or nearStop(p, 1) then
+					return nil
+				end
+			end
+		end
+	end
+	return ys[1]
+end
+local function stopReserve(cf: CFrame, hx: number, hz: number, h: number, owner: string)
+	for x = -hx, hx, 1.5 do
+		for z = -hz, hz, 1.5 do
+			for y = 1, h, 2 do
+				regAdd(stopReg, (cf * CFrame.new(x, y, z)).Position, owner)
+			end
+		end
+	end
+end
+
+local function buildStop(m: Instance, sets, s, key: string): boolean
+	-- the frame: +X along the traffic, +Y up, +Z away from the road (the shelter's open side, -Z, faces the road)
+	local function frame(depth: number, along: number): CFrame
+		local at = s.p + s.right * depth + s.dir * along
+		return CFrame.fromMatrix(at, s.dir, Vector3.yAxis, s.right)
+	end
+	if s.kind == "S" then
+		for _, along in { 0, 8, -8, 16, -16 } do
+			-- (Play, 27 Nov: the pavement runs about 5-13 studs out from the outer lane's middle, with grass 1-2 studs
+			-- lower behind it) the whole strip must stand on one level of pavement
+			for _, depth in { 9, 10.5, 12 } do
+				-- the shelter, the bin past its open end and an ad panel past its ad end, as one strip
+				local cf = frame(depth, along)
+				local y = spotClear(sets, cf * CFrame.new(1.6, 0, 0), SHELTER_L / 2 + 6.2, SHELTER_D / 2 + 0.2, 9.5)
+				if y then
+					local base = cf - cf.Position + Vector3.new(cf.X, y, cf.Z)
+					if not kitPut(m, "busd", base) then
+						return false
+					end
+					kitPut(m, "bin", base * CFrame.new(-SHELTER_L / 2 - 2.2, 0, 0.6))
+					-- the free-standing ad panel: 1.2 x 1.8 m on two legs, faces along the road
+					local pcf = base * CFrame.new(SHELTER_L / 2 + 4.5, 0, 0.4) * CFrame.Angles(0, math.pi / 2, 0)
+					for sx = -1, 1, 2 do
+						part(m, Vector3.new(0.3, 2.4, 0.3), pcf * CFrame.new(sx * 1.6, 1.2, 0), GALV, Enum.Material.Metal)
+					end
+					local panel = part(m, Vector3.new(4, 5.8, 0.5), pcf * CFrame.new(0, 2.4 + 2.9, 0), Color3.fromRGB(200, 202, 206), Enum.Material.Metal)
+					local n = (math.floor(s.p.X) + math.floor(s.p.Z)) % #SHELTER_ADS + 1
+					adFace(panel, Enum.NormalId.Front, SHELTER_ADS[n % #SHELTER_ADS + 1], true)
+					adFace(panel, Enum.NormalId.Back, SHELTER_ADS[(n + 1) % #SHELTER_ADS + 1], true)
+					stopReserve(base * CFrame.new(1.6, 0, 0), SHELTER_L / 2 + 6.2, SHELTER_D / 2 + 0.2, 9.5, key)
+					return true
+				end
+			end
+		end
+	end
+	-- a pole stop (most real stops; also where no shelter fits)
+	for _, along in { 0, 6, -6, 12, -12 } do
+		for _, depth in { 7, 8.5, 10 } do
+			local cf = frame(depth, along)
+			local y = spotClear(sets, cf, 1, 0.5, 9.5)
+			if y then
+				local base = cf - cf.Position + Vector3.new(cf.X, y, cf.Z)
+				if kitPut(m, "busp", base * CFrame.Angles(0, math.pi / 2, 0)) then
+					stopReserve(base, 1, 0.5, 9.5, key)
+					return true
+				end
+				return false
+			end
+		end
+	end
+	return false
+end
+
+-- a manhole cover on a lane: only on a flat stretch of road box (5 rays agree on one plane), lifted 0.04 off it
+local MH_IRON = Color3.fromRGB(58, 56, 52)
+local MH_RUST = Color3.fromRGB(92, 72, 58)
+local function buildManhole(m: Instance, h): boolean
+	local y, kind = ground(h.at)
+	if not y or kind ~= "R" then
+		return false
+	end
+	local hs = {}
+	for _, d in { Vector3.new(1.4, 0, 0), Vector3.new(-1.4, 0, 0), Vector3.new(0, 0, 1.4), Vector3.new(0, 0, -1.4) } do
+		local yy, k2 = ground(h.at + d)
+		if not yy or k2 ~= "R" or math.abs(yy - y) > 0.15 then
+			return false
+		end
+		table.insert(hs, yy)
+	end
+	-- one plane: each opposite pair averages to the middle (no box seam or crown under it)
+	if math.abs(hs[1] + hs[2] - 2 * y) > 0.02 or math.abs(hs[3] + hs[4] - 2 * y) > 0.02 then
+		return false
+	end
+	local up = Vector3.new(-(hs[1] - hs[2]) / 2.8, 1, -(hs[3] - hs[4]) / 2.8).Unit
+	local at = Vector3.new(h.at.X, y, h.at.Z)
+	local rust = h.n % 3 == 0
+	local r = if rust then 2.0 else 2.4
+	-- a Cylinder's axis is X: lay it along the road's normal; bottom 0.04 over the road, top 0.18
+	local cf = CFrame.fromMatrix(at + up * 0.11, up, up:Cross(Vector3.xAxis).Magnitude > 0.1 and up:Cross(Vector3.xAxis).Unit or Vector3.zAxis)
+	local p = part(m, Vector3.new(0.14, r, r), cf, if rust then MH_RUST else MH_IRON, if rust then Enum.Material.CorrodedMetal else Enum.Material.DiamondPlate, Enum.PartType.Cylinder)
+	p.Name = "Manhole"
+	return true
 end
 
 local function buildBoard(m: Instance, sets, b): boolean
@@ -1344,6 +1604,16 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 	if chunk and chunk.hoard and buildHoarding(m, sets, chunk.hoard) > 0 then
 		any = true
 	end
+	for _, s in chunk and chunk.stops or {} do
+		if buildStop(m, sets, s, key) then
+			any = true
+		end
+	end
+	for _, h in chunk and chunk.mh or {} do
+		if buildManhole(m, h) then
+			any = true
+		end
+	end
 	-- side streets: a pole per cell, wired to the next pole along the street
 	local mineSide = sideCandidates(key, ctx.laneGrid, ctx.inJunction, ctx.skipTile)
 	if #mineSide > 0 then
@@ -1400,6 +1670,10 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		return
 	end
 	started = true
+	CollectionService:GetInstanceAddedSignal("ShelterAd"):Connect(dressShelterAd)
+	for _, q in CollectionService:GetTagged("ShelterAd") do
+		dressShelterAd(q)
+	end
 	task.spawn(function()
 		local g
 		for _ = 1, 60 do
@@ -1450,6 +1724,29 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 				local c = chunkOf(x, z)
 				c.gates = c.gates or {}
 				table.insert(c.gates, Vector3.new(x, 0, z))
+			end
+			-- (27 Nov) bus stops: snapped to the nearest outer lane they stand to the right of (Myanmar drives on the
+			-- right), off P1's street-layer tiles
+			for xs, zs, ks in string.gmatch(data.Stops or "", "(%-?[%d%.]+),(%-?[%d%.]+),(%a)") do
+				local x, z = tonumber(xs) :: number, tonumber(zs) :: number
+				local best, bd = nil, 40
+				local cx, cz = math.floor(x / 64), math.floor(z / 64)
+				for dx = -1, 1 do
+					for dz = -1, 1 do
+						for _, q in outerPts[(cx + dx) .. "," .. (cz + dz)] or {} do
+							local off = Vector3.new(x - q.p.X, 0, z - q.p.Z)
+							local d = off.Magnitude
+							if d < bd and off:Dot(q.dir:Cross(Vector3.yAxis)) > -2 then
+								best, bd = q, d
+							end
+						end
+					end
+				end
+				if best and not skipTile(math.floor(best.p.X / TILE), math.floor(best.p.Z / TILE)) and not inJunction(best.p) then
+					local c = chunkOf(best.p.X, best.p.Z)
+					c.stops = c.stops or {}
+					table.insert(c.stops, { p = best.p, dir = best.dir, right = best.dir:Cross(Vector3.yAxis), kind = ks })
+				end
 			end
 			for _, ring in data.Sites or {} do
 				local pts = {}

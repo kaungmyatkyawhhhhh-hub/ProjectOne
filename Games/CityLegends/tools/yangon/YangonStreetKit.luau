@@ -15,6 +15,8 @@
 	K.templates(holding)              -> n templates into ReplicatedStorage.YgnKit.Templates (CollisionFidelity Box)
 	K.preview(centre, radius)         -> Edit only: builds the street tiles within radius into Workspace._StreetPreview
 	K.unpreview()
+	K.shelterAd()                     -> (27 Nov) the invisible SAD_busd piece over the shelter's ad box: its two faces get
+	                                     lit made-up ads on each client (YangonRoadside, tag ShelterAd, lit at night)
 ]]
 
 local RS = game:GetService("ReplicatedStorage")
@@ -172,6 +174,27 @@ function K.unpreview()
 	if out then
 		out:Destroy()
 	end
+end
+
+-- (27 Nov) the bus shelter's ad box (street_kit.py make_bus_stops: SPL plates 0.06 thick at x = L/2 - 0.3 -+ 0.36, 4.8 x
+-- 3.2, centre y 3.6, z 0.2): an invisible Part whose X faces sit 0.08 in front of each plate (no flicker); YangonRoadside
+-- puts a SurfaceGui ad on each when a copy enters the Workspace. Not in the .glb (no mesh: only the picture shows).
+function K.shelterAd(): Instance
+	local store = RS.YgnKit.Templates
+	local old = store:FindFirstChild("SAD_busd")
+	if old then
+		old:Destroy()
+	end
+	local q = Instance.new("Part")
+	q.Name = "SAD_busd"
+	q.Anchored, q.CanCollide, q.CanQuery, q.CanTouch, q.CastShadow = true, false, false, false, false
+	q.Transparency = 1
+	q.Size = Vector3.new(0.94, 4.8, 3.2)
+	q:SetAttribute("C", Vector3.new(6.0, 3.6, 0.2))
+	q:SetAttribute("S", Vector3.new(0.94, 4.8, 3.2))
+	CollectionService:AddTag(q, "ShelterAd")
+	q.Parent = store
+	return q
 end
 
 return K
