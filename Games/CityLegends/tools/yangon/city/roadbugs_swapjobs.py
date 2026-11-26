@@ -9,8 +9,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 from roadbugs_index import glb_names, ROOT, OUT
 
 tag = sys.argv[1]
-ids = dict(l.split() for l in open(os.path.join(OUT, 'ids_RBA_%s.txt' % tag)) if l.strip())
-gdir = os.path.join(ROOT, 'imports', 'sync', 'RBA_%s_glb' % tag)
+PRE = os.environ.get('RB_GLB_PREFIX', 'RBA_')   # (26 Nov) round 3 bakes are RBC_
+ids = dict(l.split() for l in open(os.path.join(OUT, 'ids_%s%s.txt' % (PRE, tag))) if l.strip())
+gdir = os.path.join(ROOT, 'imports', 'sync', '%s%s_glb' % (PRE, tag))
 cells_of = {f: sorted(set(m['name'].split('_')[1].split('s')[0] for m in glb_names(os.path.join(gdir, f))['meshes'])) for f in ids}
 # group glbs into connected sets by shared cells (a cell's meshes may be split over two glbs)
 groups = []
@@ -22,6 +23,6 @@ for f, cs in cells_of.items():
     groups.append(ng)
 out = []
 for k, (fs, cs) in enumerate(sorted(groups, key=lambda g: sorted(g[1]))):
-    out.append('{"RBA_%s_%d",{%s},{%s}}' % (tag, k, ','.join(ids[f] for f in sorted(fs)), ','.join('"%s"' % c for c in sorted(cs))))
+    out.append('{"%s%s_%d",{%s},{%s}}' % (PRE, tag, k, ','.join(ids[f] for f in sorted(fs)), ','.join('"%s"' % c for c in sorted(cs))))
 print('{' + ',\n'.join(out) + '}')
 print('-- %d jobs, %d cells' % (len(out), sum(len(g[1]) for g in groups)), file=sys.stderr)
