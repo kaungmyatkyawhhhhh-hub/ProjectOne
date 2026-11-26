@@ -71,3 +71,19 @@ Owner: "the tds one is so cinematic". Asked about the length, the owner picked *
 **Checked in Play** (fresh player, two videos): every beat above, no errors.
 
 **Watch:** the Intro funnel (`Intro_Done` seconds / skipped) for drop-off against the 5 s version. **Not checked:** phone size.
+
+## Pass 3 (v1961, saved, NOT published): calmer
+Owner: "the cheering sound at the end of the intro cutscene is too long. also i think the intro is overstimulating".
+
+- **The crowd cheer is out.** It was a long clip on SoundService that kept playing after the scene. The choir now fades out with the vision (0.6 s).
+- **Flashes:** `flash()` is a glow, starting at 55 % see-through instead of a full-screen gold or white frame. The white flash leaving the vision is gone.
+- **Shakes cut by more than half:** the bar drop 1.2 → 0.5, the shove 1.4 → 0.6, the landing 0.8 → 0.3.
+- **Vision sparkles:** 30 → 10 a second.
+- **Benny planting his feet:** one thump, not two stacked hits.
+- **GuiGuard flicker:** `StoryCaption` is always enabled, so any scripted camera counted as a cutscene. The tutorial's walk to the bench therefore hid the HUD again right after the intro. `StoryCaption` is now never held and never counts as a cutscene.
+
+**Checked in Play:**
+- the vision glow;
+- no cutscene sounds left playing after the intro ends (only the music bed fading out);
+- MainHud did not flip in the 6 s after the intro;
+- no errors.
