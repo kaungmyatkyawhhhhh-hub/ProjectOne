@@ -341,4 +341,5 @@ def main():
         render([near], far)
 
 
-main()
+if __name__ == "__main__":   # palm_tree.py imports the helpers
+    main()
