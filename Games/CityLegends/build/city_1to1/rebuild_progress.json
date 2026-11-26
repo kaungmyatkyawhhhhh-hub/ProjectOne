@@ -836,9 +836,19 @@
   "what": "walkable old walk-up block + floor-3 flat from clips IMG_0927/0928; flat rebuilt to the owner's sketch",
   "building": "OSM 1430305132 (footprint confirmed by Esri/Google roofs; 26.7 x 9.5/14.8 m, 5 storeys)",
   "tool": "tools/yangon/MyittarNyuntBlock.luau (hideShell / build / check / undo); Studio ServerStorage.ClaudeTools.MyittarNyuntBlock; sync asset 129577219835240",
-  "status": "DONE 26 Nov: saved v2171, 2528 parts, 0 overlaps, Play walk 36/37 (fixed), store v1 checked on Server, lock released",
+  "status": "round 3 done",
   "backup": "ServerStorage.YangonSiteHidden.MyittarNyuntBlock (2 KWG shells) + YgnKit.KeepOut MyittarNyunt_0/1/carport",
-  "note": "City Legends/2026-11-26 Myittar Nyunt block - walkable stair and flat.md"
+  "note": "City Legends/2026-11-26 Myittar Nyunt block - walkable stair and flat.md",
+  "saved_version": 2193,
+  "parts": 3107,
+  "overlaps": "0 builder; 2 = owner treadmill feet 0.04 into floor, kept as he placed them",
+  "map_parts_touched": 0,
+  "round3": "owner living+bath edits read back (109/109 exact), 34 openables with per-type sounds, fridge light, wardrobe clothes, bath slider, frost/clear ticks, rounder bike tyres",
+  "scripts": {
+   "Openables.server.lua": 11418,
+   "FlatWindows.server.lua": 3387
+  },
+  "updated": "2026-11-26"
  },
  "ped_hits_26Nov": {
   "what": "cars fling YangonStreetLife walkers as ragdolls (src/client/PedHits.lua + hooks in YangonStreetLife / Driving.slowBy / Main); Mild band: no drag under the car (body never collides with the hitting car), get up after 3.5 s or fade + respawn",

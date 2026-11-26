@@ -1074,16 +1074,16 @@ local function wardrobeRaw(x0, x1, z0, z1, h, front, color)
 		P("WardrobeRail", Vector3.new(inner1 - inner0, 0.08, 0.08), CFrame.new(nm, FY + railY, (inner0 + inner1) / 2) * CFrame.Angles(0, math.rad(90), 0), Color3.fromRGB(190, 190, 195), MT, true, Enum.PartType.Cylinder)
 	end
 	local CLOTHES = { Color3.fromRGB(70, 80, 95), Color3.fromRGB(150, 140, 120), Color3.fromRGB(95, 60, 55), Color3.fromRGB(60, 85, 70), Color3.fromRGB(200, 195, 185), Color3.fromRGB(110, 70, 90) }
-	local count = math.floor((inner1 - inner0 - 0.3) / 0.5)
+	local count = math.floor((inner1 - inner0 - 0.4) / 0.4)
 	local depth = math.min(1.25, (nb - n0 - 0.08) - 0.3)
 	for i = 0, count - 1 do
-		local sc = inner0 + 0.35 + i * 0.5
+		local sc = inner0 + 0.4 + i * 0.4
 		local long = (i % 3 == 1) -- a longyi or a long jacket now and then
 		local top = railY - 0.04
-		local bot = if long then 1.75 else 2.6 + (i % 2) * 0.2
-		local th = 0.12 + (i % 2) * 0.05
+		local bot = if long then 2.05 else 2.6 + (i % 2) * 0.2
+		local th = 0.24 + (i % 2) * 0.05 -- real garments bunch up: shirts on hangers read as soft slabs, not sticks
 		local d = depth - (i % 3) * 0.08
-		local yaw = math.rad(((i * 37) % 9) - 4)
+		local yaw = math.rad(((i * 37) % 7) - 3)
 		local col = CLOTHES[(i % #CLOTHES) + 1]
 		local cf = if front == "+z" then CFrame.new(sc, FY + (top + bot) / 2, nm) * CFrame.Angles(0, yaw, 0) else CFrame.new(nm, FY + (top + bot) / 2, sc) * CFrame.Angles(0, math.rad(90) + yaw, 0)
 		P("HangingCloth", Vector3.new(th, top - bot, d), cf, col, SP, true)
@@ -1270,10 +1270,12 @@ local function bicycleRaw(xc, zb, flip: boolean?)
 	for _, hx in { -1.65, 1.65 } do
 		local hub = Vector2.new(hx, R)
 		xp("BikeHub", Vector3.new(0.2, 0.25, 0.25), xc + hx, fy(R), zb, CHROME, MT, true, Enum.PartType.Cylinder, CFrame.Angles(0, math.rad(90), 0))
-		for k = 0, 11 do
-			local a = k * math.pi / 6
+		-- 24 segments whose inner edges just meet: reads as a round tyre, not a ring of blocks
+		local TN = 24
+		for k = 0, TN - 1 do
+			local a = k * 2 * math.pi / TN
 			local c = CFrame.new(xc + hx, FY + fy(R), zb) * CFrame.Angles(0, 0, a)
-			P("BikeTyre", Vector3.new(0.5, 0.16, 0.12), c * CFrame.new(0, R - 0.08, 0), TYRE, Mat.Rubber, true)
+			P("BikeTyre", Vector3.new(2 * (R - 0.16) * math.tan(math.pi / TN) - 0.005, 0.16, 0.12), c * CFrame.new(0, R - 0.08, 0), TYRE, Mat.Rubber, true)
 		end
 		for k = 0, 7 do
 			local a = k * math.pi / 4 + 0.2
@@ -2216,9 +2218,6 @@ local function extras(ins: Instance): string
 		box("BathSlider", wx0 - 0.2, FY + 0.05, z0 - 0.1, wx0 - 0.04, FY + 7.2, z1 + 0.1, Color3.fromRGB(170, 175, 170), Mat.Wood)
 		box("BathSliderPanel", wx0 - 0.26, FY + 0.8, z0 + 0.3, wx0 - 0.2, FY + 6.4, z1 - 0.3, Color3.fromRGB(155, 160, 155), Mat.Wood, true)
 		box("BathSliderPull", wx0 - 0.32, FY + 2.9, z1 - 0.45, wx0 - 0.26, FY + 4.1, z1 - 0.35, C.galv, Mat.Metal, true)
-		for _, zz in { z0 + 0.4, z1 - 0.4 } do
-			P("SlideRoller", Vector3.new(0.08, 0.18, 0.18), CFrame.new(wx0 - 0.12, FY + 7.29, zz), C.galv, Mat.Metal, true, Enum.PartType.Cylinder)
-		end
 	end)
 	return "extras: bike + bath slider"
 end
@@ -2325,7 +2324,8 @@ function M.check(): string
 	local m = workspace:FindFirstChild(M.NAME, true)
 	local parts = {}
 	for _, p in m:GetDescendants() do
-		if p:IsA("BasePart") then
+		-- an openable's Hinge is an invisible 0.02 pivot marker with no collision, not geometry
+		if p:IsA("BasePart") and p.Name ~= "Hinge" then
 			table.insert(parts, p)
 		end
 	end
@@ -2402,7 +2402,7 @@ function M.check(): string
 		for _, q in hits do
 			local key = if p:GetDebugId() < q:GetDebugId() then p:GetDebugId() .. q:GetDebugId() else q:GetDebugId() .. p:GetDebugId()
 			local wedgePair = p:IsA("WedgePart") or q:IsA("WedgePart")
-			if q ~= p and not seen[key] and not wedgePair and deep(p, q) then
+			if q ~= p and q.Name ~= "Hinge" and not seen[key] and not wedgePair and deep(p, q) then
 				seen[key] = true
 				table.insert(bad, "(rot) " .. p.Name .. "~" .. q.Name .. string.format(" @%.1f,%.1f,%.1f", (inv * p.CFrame).X, (inv * p.CFrame).Y, (inv * p.CFrame).Z))
 			end
