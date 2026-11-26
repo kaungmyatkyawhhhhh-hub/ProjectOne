@@ -84,6 +84,10 @@ Give the coding Claude: ImageLabel ScaleType Slice + SliceCenter; particles use 
 - **A stone button with a padlock in the middle can't be 9-sliced into a wide button** (the padlock stretches); for "Owned" just dim the card instead.
 - **Typing into ChatGPT:** the `computer type` action can arrive late or not at all. Use JS: focus `.ProseMirror`, `document.execCommand('insertText', false, prompt)`, wait about 1.5 s, then click `[data-testid="send-button"]`. Poll for `main img[alt^="Generated image"]` in 36 s chunks; the JS call times out at 45 s. When ChatGPT shows only the latest few images, the newest is the last `main img` wider than 800 px.
 
+## Lessons (26 Nov, GYM ARC icon scan: owner "there is still placeholder icon, this trophy icon and then coin icon")
+- An icon scan must include the UI kit's shared helpers (the coin, icon tiles, result/reward cards, toasts, the top-bar currency), not only feature configs: the owner found the coin and the win-card trophy after the first scan. Grep the kit for every place a line-icon NAME becomes an object picture, and fix it once there (a name → art map such as `UI.IconArt`); buttons, tabs and settings keep line icons.
+- Cutting a grid sheet: ChatGPT's pieces cross the cell lines. Assign each piece to the cell its CENTRE falls in (label the whole sheet, glow to the nearest piece) instead of cropping cells; a tiny-size icon (the coin) keeps only its main body, no sparkles.
+
 ## Tool setup notes (the workspace is temporary)
 - The tools live in a Python venv (numpy, scipy, Pillow; optional torch + spandrel, rembg). Hugging Face needs huggingface.co + *.hf.co allowed; GitHub release downloads need github.com.
 - Check every model's LICENCE before use (commercial game). Prefer MIT/Apache/CC0/CC-BY.
