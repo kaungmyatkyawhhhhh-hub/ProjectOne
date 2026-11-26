@@ -1153,6 +1153,11 @@ local menuApi = {
 			UI.onPhotoButton()
 		end
 	end,
+	-- (owner, 26 Nov: "in the main menu, make the cars tab same with the side button cars tab in game")
+	openCars = function()
+		MainMenu.close()
+		openGarage(true)
+	end,
 }
 MainMenu.init(menuApi)
 MainMenu.applySettings(settings)

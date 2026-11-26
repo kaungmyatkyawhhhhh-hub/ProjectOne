@@ -250,6 +250,7 @@ type Api = {
 	openGoals: () -> (),
 	openMarket: () -> (),
 	openPhoto: () -> (),
+	openCars: (() -> ())?,
 	onClosed: (() -> ())?,
 }
 local api: Api? = nil
@@ -2592,6 +2593,11 @@ local housesFocus: { Focus } = {}
 local jobsFocus: { Focus } = {}
 
 switchTab = function(name: string)
+	-- (owner, 26 Nov) CARS is the same garage as the HUD's CARS button (closing it comes back to the menu)
+	if name == "CARS" and api and api.openCars then
+		api.openCars()
+		return
+	end
 	tabName = name
 	for n, b in tabButtons do
 		local on = n == name
