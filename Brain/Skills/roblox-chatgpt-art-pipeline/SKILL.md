@@ -98,6 +98,7 @@ Give the coding Claude: ImageLabel ScaleType Slice + SliceCenter; particles use 
 ## Lessons (26 Nov, GYM ARC card GFX: owner "gemini is better at generating images that dont look AI generated")
 - For images that must NOT look AI-made (card illustrations, render enhancement, anything players judge by eye), use **Google Gemini** image generation in the owner's Chrome instead of ChatGPT. Same one-try prompt rules, same keying and cutting; attach the real render (Blender/Studio) as the reference and ask Gemini to keep its pose, character and clothing exactly.
 - ChatGPT stays an option for raw sheets (icons, VFX on black) when Gemini can't do the layout; say which tool made each piece in the asset table.
+- (27 Nov, owner: "he do exactly as you say, u just told him almost the same thing as the current state") Gemini follows the prompt literally. To ENHANCE or REDESIGN a screen, never describe the current look: give the screenshot as "content only, do NOT keep its look", attach 1-2 reference screens of the target style (e.g. TDS mode picker, RIVALS matchmaking), study them first, and describe the target design in detail (materials, type, alignment, which element is lifted, what to avoid). List the exact words and data to keep.
 
 ## Tool setup notes (the workspace is temporary)
 - The tools live in a Python venv (numpy, scipy, Pillow; optional torch + spandrel, rembg). Hugging Face needs huggingface.co + *.hf.co allowed; GitHub release downloads need github.com.
