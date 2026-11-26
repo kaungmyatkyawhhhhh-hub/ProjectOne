@@ -11,7 +11,8 @@ kind per 1536 cell:
   median_stub median grass piece under 25 sq studs (wedge / stub)
   kerb_loose  kerb top triangle over the asphalt, > 3 studs from any pavement / median grass (kerb lying on the road, shot 4)
   paint_cross two paint triangles (L / LY) overlapping at > 10 deg (lines crossing, shot 4)
-  yellow_jct  yellow paint < 10 studs from a junction / crossing point (yellow running into the junction, shot 4)
+  yellow_jct  yellow paint lying on the carriageways of two roads at once (26 Nov; was: < 10 studs from a junction /
+              crossing point) (yellow running into the junction, shot 4)
   lone_dash   white lane dash with no other lane mark in line within 40 studs (shot 1)
   wall_low    bridge concrete (B) triangle within 2.5 studs of the asphalt, < 30 studs from a junction / crossing (ramp wall
               at ground level in a junction, shot 4: DECK agent's, report only)
@@ -107,6 +108,7 @@ def load_net():
         deck_rng[dk['of']].append((dk['from'] - 2, dk['to'] + 2))
     cut = {k: set(v) for k, v in d['cut'].items()}
     car = collections.defaultdict(list)   # cell -> carriageway quads (2D) of ground roads
+    carn = collections.defaultdict(list)  # (26 Nov) the same with the road's name (yellow_jct: paint on two roads at once)
     probes = collections.defaultdict(list)  # cell -> (x, y, z, road) points that must have asphalt
     for r in d['roads']:
         s = r['s']
@@ -122,6 +124,7 @@ def load_net():
                          (b[0] - b[4] * hr, b[2] + b[3] * hr), (a[0] - nx * hr, a[2] - nz * hr)])
             if q.is_valid and q.area > 0:
                 car[cell_of(a[0], a[2])].append(q)
+                carn[cell_of(a[0], a[2])].append((q, r['name']))
             if r.get('kind') != 'street' or True:
                 med = a[8] if len(a) > 8 else 0
                 for f in (0.55, -0.55):
@@ -130,6 +133,7 @@ def load_net():
                     if abs(off) <= med / 2 + 1:
                         continue
                     probes[cell_of(a[0], a[2])].append((a[0] + nx * off, a[1], a[2] + nz * off, r['name']))
+    _G['carn'] = carn
     return d, jpts, car, probes
 
 
@@ -319,9 +323,19 @@ def cell_job(arg):
                             spot('paint_cross', m[0], m[1], m[2], '%s/%s %.0f' % (k, pt[j][0], math.degrees(da)))
             ys_ = [q for q in pt if q[0] == 'LY']
             seen = set()
+            # (26 Nov) yellow IN a junction = lying on the carriageways of two different roads at once (owner shot 4:
+            # yellow running into the junction). The old test (10 studs of a junction's middle point) also counted
+            # lines ending right at a narrow side street's mouth edge
+            jq = [qn for dx in (-1, 0, 1) for dz in (-1, 0, 1) for qn in _G['carn'].get('%dx%d' % (cx + dx, cz + dz), [])]
+            jt = STRtree([q for q, _ in jq]) if jq else None
+            def on_two(x, z):
+                if jt is None:
+                    return False
+                pt_ = Point(x, z)
+                return len(set(jq[int(i)][1] for i in jt.query(pt_, predicate='intersects'))) >= 2
             for k, t, a in ys_:
                 m = t.mean(0)
-                if near_j(m[0], m[2], 10):
+                if on_two(m[0], m[2]):
                     key = (round(m[0] / 6), round(m[2] / 6))
                     if key not in seen:
                         seen.add(key)

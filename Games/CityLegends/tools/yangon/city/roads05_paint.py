@@ -714,8 +714,17 @@ def build(data, signals=None):
                         ln = smooth([(s[idx[j]][0] - s[idx[j]][4] * t[j], s[idx[j]][2] + s[idx[j]][3] * t[j]) for j in range(v0, v1 + 1)])
                         # (25 Nov, owner: lane lines that don't line up) every line's dashes keep step with the road's
                         # centre-line distance, so dashes of side-by-side lanes and both sides of a junction line up
-                        for d in dashes(ln, DASH_ON, DASH_OFF, stn[idx[v0]] % (DASH_ON + DASH_OFF)):
-                            P.line('LW', d, LINE_W, 'lane', r['name'], clip_road, min_len=MIN_PIECE)
+                        # (26 Nov, road bug sweep round 3: lone dashes) the line is cut by the clip FIRST; a piece left
+                        # with room for one dash only (a short approach between a zebra and a stop line) gets none
+                        ph0 = stn[idx[v0]] % (DASH_ON + DASH_OFF)
+                        cut_l = ln.difference(clip_road.local(ln)) if not clip_road.is_empty else ln
+                        for seg in lines_of(cut_l):
+                            ph = (ph0 + ln.project(Point(seg.coords[0]))) % (DASH_ON + DASH_OFF)
+                            ds = [d for d in dashes(seg, DASH_ON, DASH_OFF, ph) if d.length >= MIN_PIECE]
+                            if len(ds) < 2:
+                                continue
+                            for d in ds:
+                                P.line('LW', d, LINE_W, 'lane', r['name'], None, min_len=MIN_PIECE)
     # roundabouts
     for g in rings:
         C = np.array([g['c'][0], g['c'][2]])

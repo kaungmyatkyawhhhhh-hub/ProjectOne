@@ -88,8 +88,10 @@ def bake(tag):
                R05_GLB_DIR=os.path.join(ROOT, 'imports', 'sync', os.environ.get('RB_GLB_PREFIX', 'RBUG_') + '%s_glb' % tag))
     here = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(dst, 'rbug.log'), 'w') as log:
-        subprocess.run([sys.executable, 'roads05_bake.py', tag + '_RBUG', 'collect', os.path.join(src, 'pages')], cwd=here,
-                       env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+        # (26 Nov) RB_SKIP_COLLECT=1: reuse parts.pkl from the last collect (same pages, same plan cells)
+        if not (os.environ.get('RB_SKIP_COLLECT') == '1' and os.path.exists(os.path.join(dst, 'parts.pkl'))):
+            subprocess.run([sys.executable, 'roads05_bake.py', tag + '_RBUG', 'collect', os.path.join(src, 'pages')], cwd=here,
+                           env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
         subprocess.run([sys.executable, 'roads05_bake.py', tag + '_RBUG', 'bake'], cwd=here, env=env, stdout=log,
                        stderr=subprocess.STDOUT, check=True)
     print(tag, 'baked', len(cells), 'cells ->', env['R05_GLB_DIR'])
