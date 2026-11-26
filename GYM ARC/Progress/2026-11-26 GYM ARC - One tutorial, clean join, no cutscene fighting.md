@@ -135,3 +135,11 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
   - the HUD comes back;
   - preview: Assets/picker_gemini/picker_ingame_v4.jpg.
 - TestTutorialStep removed.
+
+## Pass 12 (27 Nov): finish quality, "must not look like placeholder UI" (in Studio, NOT saved yet)
+- Pressable base: a darker base (bottom colour, 45% darker) sits 6 px under each card. The card sinks 3 px on press and comes back on release or on leave.
+- Gradient: three stops (top lightened 8%, top at 0.45, bottom).
+- Surface: a soft white top shine (0.8 to 1 over the top half) replaced the radial light and the grain, which had read as streaks.
+- The watermark stays as the one signature detail per card.
+- Card entry stagger dropped; the panel still fades and slides.
+- Preview, with BACK hovered: Assets/picker_gemini/picker_ingame_v5.jpg.
