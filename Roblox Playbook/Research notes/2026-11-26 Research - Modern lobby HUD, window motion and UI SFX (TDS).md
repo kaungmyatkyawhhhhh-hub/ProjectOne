@@ -156,3 +156,26 @@ No voice.
     - the quest tracker is a frameless text block on the right.
 
 Not covered: the in-match HUD, phone layout, and the exact sounds (measured, not heard).
+
+## Applied to GYM ARC (v1952, saved, NOT published)
+Owner: "Yes, apply it" (points 1-3). All of it is in the kit, so every Kit.Modal window gets it.
+
+| Point | Change |
+|---|---|
+| Blur | `Kit.BlurSize` 4 → 14; tweens in over 0.12 s and out over 0.1 s |
+| HUD steps aside | `Kit.HudAside` runs when the first window opens and the last one closes. HudBottom, Hotbar, RightColumn, ActiveBoosts and TalentBar fade and slide 16-24 px toward their edge (0.1 s out, 0.14 s back). The left menu already folds by itself. |
+| Cascade | `Theme.FadeWindow(root, true, time, cascade)`: grid cells and scrolling-list rows fade in top-left → bottom-right, 30 ms apart (at most 0.42 s), each growing from 0.92 through a temporary "CascadePop" UIScale. Cards with their own UIScale only fade. |
+| Faster close | `Kit.CloseTime = 0.1` (opening stays 0.18) |
+
+Also fixed: the right-column pager's right arrow. A Kit.Button's own list-laid icon doesn't draw its Rotation, so the icon is turned inside a holder frame.
+
+**Checked in Play** (Inventory → Auras):
+- the world blurs;
+- hotbar, right column and boosts step aside;
+- cards cascade in row by row;
+- the X closes it, and the HUD and blur come back.
+
+**Not checked:**
+- phone size;
+- windows with very long lists (the cascade caps at 0.42 s);
+- the loop shine on hotbar cards and the skill-tree style reveal (points 7-8, not done).
