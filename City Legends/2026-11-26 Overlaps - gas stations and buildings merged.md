@@ -249,3 +249,6 @@ CityLegends_test -> back to CityLegends_v1 (read on the Server: v1, the hotel bu
   `rew.suiteBuy` (English and Burmese) and RewardsClient. Repo and Studio both.
 - Kept: the real-site position and the name-band crash fix.
 - The other real sign names listed above stay as they are, under the same rule.
+- Checked after the power cut: Studio had kept the revert. Play on CityLegends_test: the hotel built whole (4,783 parts,
+  NOVOTEL YANGON MAX, no errors). Back to CityLegends_v1, read on the Server, saved **v2200**.
+![[2026-11-26 Overlaps 3 - Novotel Yangon Max front, name reverted (Play) - after.jpg]]
