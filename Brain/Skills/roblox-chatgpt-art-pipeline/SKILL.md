@@ -95,6 +95,10 @@ Give the coding Claude: ImageLabel ScaleType Slice + SliceCenter; particles use 
 - (later the same day) the owner rejected that whole popup: the chunky glossy sheet style (gold rims, bolts, sparkles, glossy pills) reads as AI-made and NOT modern for UI chrome. Do not use ChatGPT for frames / cards / buttons of a modern screen: build them in code (flat colour, blur behind, see roblox-ui-pro's popup lesson). The owner now makes card pictures himself.
 - (superseded) A whole popup in one sheet works: empty window panel (gold rim, bolts, diamond plate, chevron header band) + empty coloured cards + an empty gold pill; use the panel at its own aspect (no 9-slice) and place content in fractions of it.
 
+## Lessons (26 Nov, GYM ARC card GFX: owner "gemini is better at generating images that dont look AI generated")
+- For images that must NOT look AI-made (card illustrations, render enhancement, anything players judge by eye), use **Google Gemini** image generation in the owner's Chrome instead of ChatGPT. Same one-try prompt rules, same keying and cutting; attach the real render (Blender/Studio) as the reference and ask Gemini to keep its pose, character and clothing exactly.
+- ChatGPT stays an option for raw sheets (icons, VFX on black) when Gemini can't do the layout; say which tool made each piece in the asset table.
+
 ## Tool setup notes (the workspace is temporary)
 - The tools live in a Python venv (numpy, scipy, Pillow; optional torch + spandrel, rembg). Hugging Face needs huggingface.co + *.hf.co allowed; GitHub release downloads need github.com.
 - Check every model's LICENCE before use (commercial game). Prefer MIT/Apache/CC0/CC-BY.
