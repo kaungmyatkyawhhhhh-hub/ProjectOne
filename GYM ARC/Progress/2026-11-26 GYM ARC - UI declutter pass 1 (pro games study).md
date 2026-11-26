@@ -25,7 +25,19 @@ Study: [[Pro games - play study]] (Grow a Garden, Pet Simulator 99, Gym League, 
 
 Checked in Play (PC): no window on join, the card reads right, 0 new errors. Not checked: phone size, a fresh player.
 
-## Pass 2 (next): the pro patterns
+## Pass 2 done (v1939, saved, NOT published)
+| Item | Result | Where |
+|---|---|---|
+| Claim → countdown | the streak window's claimed button reads "NEXT IN 5h 12m" (ticks every 20 s while open), not "Come back tomorrow" | DailyClient |
+| Signs in the world | already there: the nearest machine's sign says "Locked" + what it needs | MachineSignsClient (no change) |
+| Left footer | INVITE, FREE and PLUS take turns in ONE slot (10 s each); a row on its break is unparented, its script still drives it | SideMenu (RotatingFooters, RotateSeconds) |
+| Hide pop-ups | already there: Settings has Hints, EXP popups, Announcements | no change |
+| Odds | already there: Trainer Agency and Run Cards ODDS | no change |
+| Streak card | checked: slides away after 12 s unclaimed | DailyClient |
+![[GYM ARC now/06-pass2-invite-slot.jpg]] ![[GYM ARC now/07-pass2-plus-slot-toast-gone.jpg]]
+Not checked: phone size (the Studio viewport is PC; needs the Device Emulator by hand), a fresh player. One REWARDS hub (Daily + Advent + Codes + Free as tabs) not done: Advent stays its own pill as the season event (pro rule: the season pass is the one extra button).
+
+## Pass 2 plan (was)
 1. Claim → "Next reward in 23:59" countdown on every claim button (Gym League detail).
 2. Signs on locked machines/gyms: "Needs 5'2"" in the world instead of HUD text (Arm Wrestle, PS99).
 3. One REWARDS hub: Daily streak + quests + Advent + Codes + Like reward as tabs of one window, one top-bar pill with one red dot.
