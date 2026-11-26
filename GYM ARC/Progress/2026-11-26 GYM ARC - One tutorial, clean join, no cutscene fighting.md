@@ -150,3 +150,4 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 - The heading reads "What will you train next?". The machine glows are hidden while the picker shows and come back after the pick. The countdown is a 220x6 bar with a darker track and a hairline stroke, and the timer text is white 15 pt.
 - The halftone is `Assets/pick_surface/halftone_corner.png` = rbxassetid://113657059550288. The faint watermark version sits behind the `PICK_WATERMARK` flag, which is off.
 - Previews: `picker_ingame_v6a_halftone.jpg` and `picker_ingame_v6b_watermark.jpg`. The auto-pick → Squat Rack → HUD return flow was verified. The place is not saved.
+- Owner picked B (27 Nov): PICK_WATERMARK = true, so the faint silhouettes are on and the halftone is off.
