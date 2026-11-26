@@ -21,18 +21,52 @@ local Players = game:GetService("Players")
 
 local TAG = "Openable"
 local SECONDS = { hinge = 0.62, drawer = 0.45, gate = 0.7 }
-local OPEN_SOUND = "rbxassetid://9113204879" -- Config.DoorFeel.OpenSound
-local CLOSE_SOUND = "rbxassetid://9113205539" -- Config.DoorFeel.CloseSound
-local CLICK = "rbxasset://sounds/volume_slider.ogg"
+-- one sound set per kind of thing, each with its own open and close (owner: "every interactable thing have a sound
+-- effect that is related to its animation & interaction"). Ids are Pro Sound Effects (Roblox's official SFX partner,
+-- public domain) plus the game's car-door set (Config.DoorFeel) and built-in clicks. A spec is
+-- { id, volume, pitch, from (s), length (s) or nil }. "start" plays as the motion starts, "settle" when it stops.
+local CAR_OPEN = "rbxassetid://9113204879" -- Config.DoorFeel.OpenSound
+local CAR_CLOSE = "rbxassetid://9113205539" -- Config.DoorFeel.CloseSound
+local DOOR_SQUEAK = "rbxassetid://9114154805" -- Door, open and close, soft close, squeak
+local DOOR_LATCH = "rbxassetid://9114142431" -- Door latch open and close, house interior
+local SMALL_DOOR = "rbxassetid://9114154986" -- Door, open and close, soft close, squeak (4)
+local WOOD_KNOCK = "rbxassetid://9120915768" -- Wood impacts, deep thudding, hollow
+local CHAIN = "rbxassetid://9116216027" -- Lamp pull chain (small metal clinks: hangers)
+local DRAWER = "rbxassetid://9113658569" -- Cabinet drawer open and close, rollers
+local SLIDER = "rbxassetid://9114153584" -- Door, wood, slide open and close, bang shut
+local SCRAPE = "rbxassetid://9116893799" -- Metal tank scrape (gate dragging in its track)
+local RATTLE = "rbxassetid://9118209193" -- Boxy metal shake, rattle
+local CLANG = "rbxassetid://9116684884" -- Metal impacts, multiple hits, rattles
 local THUD = "rbxasset://sounds/action_jump_land.mp3"
-local SLIDE = "rbxasset://sounds/action_get_up.mp3"
--- per kind: { open = { id, volume, pitch }, close = { ... }, extra on close }
 local SOUNDS = {
-	door = { open = { OPEN_SOUND, 0.5, 0.8 }, close = { CLOSE_SOUND, 0.55, 0.75 }, closeExtra = { THUD, 0.35, 0.8 } },
-	cabinet = { open = { OPEN_SOUND, 0.3, 1.45 }, close = { CLOSE_SOUND, 0.35, 1.5 }, closeExtra = { CLICK, 0.3, 1.2 } },
-	fridge = { open = { OPEN_SOUND, 0.35, 1.15 }, close = { CLOSE_SOUND, 0.45, 1.05 }, closeExtra = { THUD, 0.25, 1.3 } },
-	drawer = { open = { SLIDE, 0.35, 1.6 }, close = { SLIDE, 0.35, 1.9 }, closeExtra = { CLICK, 0.3, 1.0 } },
-	gate = { open = { SLIDE, 0.4, 0.75 }, close = { SLIDE, 0.4, 0.7 }, closeExtra = { CLOSE_SOUND, 0.4, 1.7 } },
+	door = {
+		open = { start = { { DOOR_LATCH, 0.4, 1.0, 0, 0.35 }, { DOOR_SQUEAK, 0.35, 0.95, 0, 1.1 } } },
+		close = { start = { { DOOR_SQUEAK, 0.25, 1.05, 0.2, 0.6 } }, settle = { { CAR_CLOSE, 0.45, 0.7, 0, nil }, { DOOR_LATCH, 0.35, 1.1, 0.4, 0.4 } } },
+	},
+	wardrobe = {
+		open = { start = { { SMALL_DOOR, 0.3, 1.2, 0, 0.8 } }, settle = { { CHAIN, 0.25, 1.3, 0, 0.6 } } },
+		close = { start = { { SMALL_DOOR, 0.2, 1.3, 0.3, 0.5 } }, settle = { { WOOD_KNOCK, 0.3, 1.5, 0, 0.5 } } },
+	},
+	cabinet = {
+		open = { start = { { SMALL_DOOR, 0.25, 1.45, 0, 0.6 } } },
+		close = { settle = { { WOOD_KNOCK, 0.25, 1.9, 0, 0.4 } } },
+	},
+	fridge = {
+		open = { start = { { CAR_OPEN, 0.3, 1.35, 0, 0.5 } } },
+		close = { settle = { { CAR_CLOSE, 0.4, 1.15, 0, nil }, { THUD, 0.2, 1.4, 0, nil } } },
+	},
+	drawer = {
+		open = { start = { { DRAWER, 0.35, 1.0, 0, 0.55 } } },
+		close = { start = { { DRAWER, 0.3, 1.05, 0.7, 0.5 } }, settle = { { WOOD_KNOCK, 0.2, 2.0, 0, 0.3 } } },
+	},
+	slider = {
+		open = { start = { { SLIDER, 0.4, 0.95, 0, 0.7 } } },
+		close = { start = { { SLIDER, 0.35, 1.0, 0, 0.6 } }, settle = { { WOOD_KNOCK, 0.25, 1.3, 0, 0.4 } } },
+	},
+	gate = {
+		open = { start = { { RATTLE, 0.3, 1.1, 0, 0.6 }, { SCRAPE, 0.25, 1.4, 0, 0.7 } } },
+		close = { start = { { SCRAPE, 0.25, 1.3, 0.3, 0.6 } }, settle = { { CLANG, 0.35, 1.2, 0, 0.7 } } },
+	},
 }
 
 type Item = {
@@ -46,20 +80,45 @@ type Item = {
 }
 local items: { [Model]: Item } = {}
 
-local function play(where: BasePart, s: { any }?)
-	if not s then
+local function play(where: BasePart, specs: { any }?)
+	for _, sp in specs or {} do
+		local snd = Instance.new("Sound")
+		snd.SoundId = sp[1]
+		snd.Volume = sp[2]
+		snd.PlaybackSpeed = sp[3] * (0.96 + math.random() * 0.08)
+		snd.TimePosition = sp[4] or 0
+		snd.RollOffMode = Enum.RollOffMode.InverseTapered
+		snd.RollOffMinDistance = 4
+		snd.RollOffMaxDistance = 30
+		snd.Parent = where
+		snd:Play()
+		local len = sp[5]
+		if len then
+			task.delay(len / snd.PlaybackSpeed, function()
+				if snd.Parent then
+					-- a short fade instead of a hard cut
+					TweenService:Create(snd, TweenInfo.new(0.08), { Volume = 0 }):Play()
+				end
+			end)
+		end
+		task.delay(4, function()
+			snd:Destroy()
+		end)
+	end
+end
+
+local function lights(m: Model, on: boolean)
+	local tag = m:GetAttribute("LightTag")
+	if typeof(tag) ~= "string" then
 		return
 	end
-	local snd = Instance.new("Sound")
-	snd.SoundId = s[1]
-	snd.Volume = s[2]
-	snd.PlaybackSpeed = s[3] * (0.96 + math.random() * 0.08)
-	snd.RollOffMaxDistance = 45
-	snd.Parent = where
-	snd:Play()
-	task.delay(4, function()
-		snd:Destroy()
-	end)
+	for _, p in CollectionService:GetTagged(tag) do
+		for _, l in p:GetDescendants() do
+			if l:IsA("Light") then
+				l.Enabled = on
+			end
+		end
+	end
 end
 
 -- pose of every part at progress a (0 = built, 1 = the other state); a can overshoot 1 a little (Back ease)
@@ -159,14 +218,14 @@ local function toggle(it: Item)
 	local from = 1 - target
 	it.moving = true
 	setCollide(it, false)
-	local snd = SOUNDS[m:GetAttribute("Sound") or "door"] or SOUNDS.door
+	local set = SOUNDS[m:GetAttribute("Sound") or "door"] or SOUNDS.door
+	local snd = if wantOpen then set.open else set.close
+	play(it.hinge, snd.start)
 	if wantOpen then
-		play(it.hinge, snd.open)
+		lights(m, true)
 		if kind == "gate" then
 			lattice(it, false)
 		end
-	else
-		play(it.hinge, snd.close)
 	end
 	local v = Instance.new("NumberValue")
 	v.Value = from
@@ -184,8 +243,9 @@ local function toggle(it: Item)
 		if p then
 			p.ActionText = if wantOpen then "Close" else "Open"
 		end
+		play(it.hinge, snd.settle)
 		if not wantOpen then
-			play(it.hinge, snd.closeExtra)
+			lights(m, false)
 			if kind == "gate" then
 				lattice(it, true)
 			end
