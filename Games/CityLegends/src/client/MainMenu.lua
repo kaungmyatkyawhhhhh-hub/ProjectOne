@@ -10,8 +10,7 @@
 	    map: venue symbols, a card with FAST TRAVEL and SET WAYPOINT), ACHIEVEMENTS (the cars
 	    collection and the Legends Path; opens the GOALS screen) and SETTINGS (mini map on / off and
 	    corner, graphics, camera, units, gearbox, music and sound sliders, radio, controls).
-	  * CARS: your cars by brand (sort, search), a side panel with SPAWN, FAVOURITE, CUSTOMISE (a
-	    waypoint to Optima Werkz) and MARKET; "Get more cars" sets a waypoint to Rider Auto.
+	  * CARS: opens the HUD's garage (26 Nov; the old cars page was removed).
 	  * HOUSES (2026-11-04): the house standing in this server (TELEPORT HOME), your blueprints, the
 	    house settings (HousingClient's house menu) and Legends Realty (fast travel).
 	  * STORE: passes and products by name and exact effect, prices read from Roblox; greyed with
@@ -36,8 +35,6 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Strings = require(Shared:WaitForChild("Strings"))
 local Cars = require(Shared:WaitForChild("Cars"))
-local CarStats = require(Shared:WaitForChild("CarStats"))
-local CarCare = require(Shared:WaitForChild("CarCare"))
 local TravelSpots = require(Shared:WaitForChild("TravelSpots"))
 local IsleLayout = require(Shared:WaitForChild("IsleLayout"))
 
@@ -52,8 +49,6 @@ local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
 local DayCycle = require(script.Parent:WaitForChild("DayCycle"))
 local MenuArt = require(script.Parent:WaitForChild("MenuArt"))
 local DealerArt = require(script.Parent:WaitForChild("DealerArt"))
-local TrailerClient = require(script.Parent:WaitForChild("TrailerClient"))
-local CareClient = require(script.Parent:WaitForChild("CareClient"))
 local CarUpgrades = require(script.Parent:WaitForChild("CarUpgrades"))
 
 local MainMenu = {}
@@ -392,9 +387,6 @@ local function here(): Vector3
 	return workspace.CurrentCamera.Focus.Position
 end
 
-local function spotById(id: string): TravelSpots.Spot?
-	return TravelSpots.get(id)
-end
 
 ---------------------------------------------------------------------
 -- Background, top bar, tabs, hints
@@ -1841,376 +1833,6 @@ local function buildCampaign(page: Frame)
 	return playFocus
 end
 
-local favs: { [string]: boolean } = {}
-local function loadFavs()
-	table.clear(favs)
-	local st = if api then api.settings else nil
-	for _, id in (st and st.Favs) or {} do
-		favs[id] = true
-	end
-end
-
-local function buildCars(page: Frame)
-	local listW = 760
-	local sortBy = "Brand"
-	local search = ""
-	local selected: string? = data().Selected
-	local header = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(0, listW, 0, 40), Parent = page })
-	local count = text({ Text = "", FontFace = HEAVY, TextSize = 22, Size = UDim2.fromOffset(200, 40), Parent = header })
-	local sorts = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(200, 3), Size = UDim2.fromOffset(330, 34), Parent = header }, {
-		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6) }),
-	})
-	local box = new("TextBox", {
-		PlaceholderText = "Search",
-		Text = "",
-		FontFace = BOLD,
-		TextSize = 16,
-		TextColor3 = WHITE,
-		PlaceholderColor3 = SUB,
-		BackgroundColor3 = BLUE,
-		ClearTextOnFocus = false,
-		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, 0, 0, 3),
-		Size = UDim2.fromOffset(210, 34),
-		TextXAlignment = Enum.TextXAlignment.Left,
-		Parent = header,
-	}, { corner(8), new("UIPadding", { PaddingLeft = UDim.new(0, 12) }) })
-	local scroll = new("ScrollingFrame", {
-		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(0, 48),
-		Size = UDim2.new(0, listW, 1, -48),
-		CanvasSize = UDim2.fromOffset(0, 0),
-		ScrollBarThickness = 6,
-		ScrollBarImageColor3 = GOLD,
-		BorderSizePixel = 0,
-		Parent = page,
-	})
-	local side = new("Frame", { BackgroundColor3 = PANEL, BackgroundTransparency = 0.05, Position = UDim2.fromOffset(listW + 16, 0), Size = UDim2.new(1, -listW - 16, 1, 0), Parent = page }, { corner(10) })
-
-	local fillSide: () -> ()
-	local trailerSide: (spec: any) -> ()
-	local rebuild: () -> ()
-
-	fillSide = function()
-		for _, c in side:GetChildren() do
-			if not c:IsA("UICorner") then
-				c:Destroy()
-			end
-		end
-		local spec = selected and Cars.ById[selected]
-		if not spec then
-			text({ Text = "Pick a car", FontFace = HEAVY, TextSize = 24, Position = UDim2.fromOffset(20, 18), Size = UDim2.fromOffset(300, 30), Parent = side })
-			return
-		end
-		local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 1, -32), Parent = side })
-		text({ Text = Cars.upper(Cars.makeOf(spec.Name)), FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Size = UDim2.new(1, 0, 0, 16), Parent = body })
-		text({ Text = spec.Name, FontFace = HEAVY, TextSize = 26, TextScaled = true, Position = UDim2.fromOffset(0, 18), Size = UDim2.new(1, -40, 0, 34), Parent = body })
-		new("Frame", { BackgroundColor3 = spec.Color, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 20), Size = UDim2.fromOffset(30, 30), Parent = body }, {
-			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
-			new("UIStroke", { Color = WHITE, Thickness = 2 }),
-		})
-		UI.classBadgeFor(spec.Id, partsOf(spec.Id), { Height = 22, Position = UDim2.fromOffset(0, 58), Parent = body })
-		local info = if UI.carInfo then UI.carInfo(spec.Id) else nil
-		text({ Text = (if info then "CAR LV " .. info.level .. "  ·  " .. info.cp .. " CP  ·  " else "") .. string.upper(Cars.ClassLabels[spec.Class] or spec.Class), FontFace = BOLD, TextSize = 14, TextColor3 = SUB, Position = UDim2.fromOffset(74, 58), Size = UDim2.new(1, -74, 0, 22), TextTruncate = Enum.TextTruncate.AtEnd, Parent = body })
-		carStats(body, 92, spec)
-		-- (2026-11-07) miles and worth, from the server's book
-		local worth = text({ Text = "", FontFace = BOLD, TextSize = 13, TextColor3 = SUB, Position = UDim2.fromOffset(0, 192), Size = UDim2.new(1, 0, 0, 16), TextTruncate = Enum.TextTruncate.AtEnd, Parent = body })
-		CareClient.info(spec.Id, function(st: any)
-			if st and st.ok and worth.Parent then
-				local alert = if st.check == 2 then "  ·  ENGINE NEEDS REPAIR" elseif st.check == 1 or st.due < 0 then "  ·  SERVICE DUE" else ""
-				worth.Text = CarCare.milesText(st.miles) .. "  ·  WORTH " .. CarCare.money(st.value) .. alert
-			end
-		end)
-		-- (2026-11-07) a car with a hitch
-		local towKg = CarStats.towKg(spec.Id)
-		if towKg > 0 then
-			text({ Text = "TOWS " .. string.format("%d,%03d", towKg // 1000, towKg % 1000) .. " KG", FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, TextXAlignment = Enum.TextXAlignment.Right, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -38, 0, 0), Size = UDim2.fromOffset(120, 16), Parent = body })
-		end
-		local by = 210
-		local driving = Driving.getModel()
-		local spawn = button(if driving and driving:GetAttribute("CarId") == spec.Id then "DRIVING ✓" else "SPAWN", MINT, { Position = UDim2.fromOffset(0, by), Size = UDim2.new(1, 0, 0, 48), TextSize = 22, Parent = body })
-		focusable(spawn, function()
-			if ((player:GetAttribute("Wanted") :: number?) or 0) > 0 then
-				UI.toast("Lose the police first", RED)
-				return
-			end
-			local Activities = require(script.Parent:WaitForChild("Activities")) :: any
-			if Activities.getTarget and Activities.getTarget() then
-				UI.toast("Finish your race or job first", RED)
-				return
-			end
-			closeMenu()
-			if api then
-				api.drive(spec.Id)
-			end
-		end, GOLD)
-		local fav = button(if favs[spec.Id] then "★ FAVOURITE" else "☆ FAVOURITE", GOLD, { Position = UDim2.fromOffset(0, by + 56), Size = UDim2.new(0.5, -4, 0, 40), TextSize = 16, Parent = body })
-		-- (2026-11-03) the car's performance parts (CarUpgrades)
-		local upgrade = button("UPGRADE", GOLD, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + 56), Size = UDim2.new(0.5, -4, 0, 40), TextSize = 16, Parent = body })
-		focusable(upgrade, function()
-			if UI.onUpgrade then
-				UI.onUpgrade(spec.Id)
-			end
-		end, GOLD)
-		focusable(fav, function()
-			if favs[spec.Id] then
-				favs[spec.Id] = nil
-			else
-				favs[spec.Id] = true
-			end
-			local list = {}
-			for id in favs do
-				table.insert(list, id)
-			end
-			if api then
-				api.settings.Favs = list
-				api.saveSettings()
-			end
-			fillSide()
-			rebuild()
-		end)
-		local half = UDim2.new(0.5, -4, 0, 40)
-		local custom = button("CUSTOMISE", BLUE, { Position = UDim2.fromOffset(0, by + 104), Size = half, TextSize = 16, Parent = body })
-		focusable(custom, function()
-			local s = spotById("customs")
-			if s then
-				Minimap.setWaypoint(s.cf.Position)
-				UI.toast("Waypoint: Optima Werkz (on your map)", MINT)
-			end
-			outOfMenu()
-		end)
-		if Config.Market.Enabled then
-			local market = button("SELL / MARKET", BLUE, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + 104), Size = half, TextSize = 16, Parent = body })
-			focusable(market, function()
-				outOfMenu(function()
-					if api then
-						api.openMarket()
-					end
-				end)
-			end)
-		end
-		-- (2026-11-07) the trailer (the market's slot while the market is off; under it when it's on)
-		local trailerBtn = button("TRAILER", BLUE, { AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, by + (if Config.Market.Enabled then 152 else 104)), Size = half, TextSize = 16, Parent = body })
-		focusable(trailerBtn, function()
-			trailerSide(spec)
-		end)
-	end
-
-	-- what you can do with the trailer, with the car picked in the list
-	trailerSide = function(spec: any)
-		TrailerClient.state(function(st: any)
-			if not side.Parent or selected ~= spec.Id then
-				return
-			end
-			for _, c in side:GetChildren() do
-				if not c:IsA("UICorner") then
-					c:Destroy()
-				end
-			end
-			local T = Config.Towing.Trailer
-			local body = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 16), Size = UDim2.new(1, -40, 1, -32), Parent = side })
-			text({ Text = "TRAILER", FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Size = UDim2.new(1, 0, 0, 16), Parent = body })
-			text({ Text = T.Name, FontFace = HEAVY, TextSize = 26, TextScaled = true, Position = UDim2.fromOffset(0, 18), Size = UDim2.new(1, 0, 0, 34), Parent = body })
-			local line = if not st.owned then "Buy one at Rider Auto: TRAILERS."
-				elseif st.load then "On it: " .. (if Cars.ById[st.load] then Cars.ById[st.load].Name else st.load)
-				elseif st.hitched then "Hitched to your car."
-				elseif st.out then "Parked out on the road."
-				else "In your garage."
-			text({ Text = line, FontFace = BOLD, TextSize = 15, TextColor3 = SUB, TextWrapped = true, Position = UDim2.fromOffset(0, 58), Size = UDim2.new(1, 0, 0, 40), Parent = body })
-			local y = 104
-			local function row(label: string, color: Color3, fn: () -> ())
-				local b = button(label, color, { Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 44), TextSize = 17, Parent = body })
-				focusable(b, fn, color)
-				y += 52
-			end
-			local driving = Driving.getModel()
-			local inThis = driving ~= nil and driving:GetAttribute("CarId") == spec.Id
-			if st.owned and not st.hitched then
-				if CarStats.towKg(spec.Id) > 0 then
-					row("TOW WITH THIS CAR", MINT, function()
-						closeMenu()
-						if inThis then
-							TrailerClient.call("take")
-						elseif api then
-							api.drive(spec.Id)
-							TrailerClient.takeWhenIn(spec.Id)
-						end
-					end)
-				else
-					text({ Text = "This car can't tow. Pick one with the TOWS tag.", FontFace = MEDIUM, TextSize = 14, TextColor3 = SUB, TextWrapped = true, Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 40), Parent = body })
-					y += 44
-				end
-				if not st.out then
-					row("PARK IT HERE", BLUE, function()
-						outOfMenu(function()
-							TrailerClient.call("park")
-						end)
-					end)
-				end
-			end
-			if st.out and not st.load and not inThis then
-				row("LOAD THIS CAR", GOLD, function()
-					outOfMenu(function()
-						TrailerClient.call("load", spec.Id)
-					end)
-				end)
-			end
-			if st.out then
-				row("PUT TRAILER AWAY", BLUE, function()
-					outOfMenu(function()
-						TrailerClient.call("stow")
-					end)
-				end)
-			end
-			row("BACK", BLUE, fillSide)
-		end)
-	end
-
-	local function card(parent: Instance, x: number, y: number, w: number, h: number, id: string)
-		local spec = Cars.ById[id]
-		local isSel = id == selected
-		local b: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = if isSel then Color3.fromRGB(46, 50, 68) else Color3.fromRGB(26, 29, 42), Position = UDim2.fromOffset(x, y), Size = UDim2.fromOffset(w, h), Parent = parent }, { corner(8) })
-		if isSel then
-			new("UIStroke", { Color = MINT, Thickness = 3, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Parent = b })
-		end
-		local parts = partsOf(id)
-		local letter = CarStats.classOf(id, parts)
-		new("Frame", { BackgroundColor3 = Config.CarClasses.Colors[letter] or MINT, BorderSizePixel = 0, Size = UDim2.new(0, 5, 1, 0), Parent = b }, { corner(3) })
-		text({ Text = spec.Name, FontFace = HEAVY, TextSize = 17, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(16, 10), Size = UDim2.new(1, -60, 0, 20), Parent = b })
-		local info = if UI.carInfo then UI.carInfo(id) else nil
-		text({ Text = (if info then "LV " .. info.level .. "  ·  " else "") .. speedText(spec.TopSpeed) .. "  ·  " .. string.format("%.1f s", spec.ZeroToSixty), FontFace = BOLD, TextSize = 13, TextColor3 = SUB, TextTruncate = Enum.TextTruncate.AtEnd, Position = UDim2.fromOffset(16, 34), Size = UDim2.new(1, -78, 0, 16), Parent = b })
-		UI.classBadgeFor(id, parts, { Height = 18, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -10, 0, 33), Parent = b })
-		new("Frame", { BackgroundColor3 = spec.Color, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, -10, 0, 10), Size = UDim2.fromOffset(20, 20), Parent = b }, {
-			new("UICorner", { CornerRadius = UDim.new(1, 0) }),
-			new("UIStroke", { Color = WHITE, Thickness = 1.5 }),
-		})
-		local tags = (if favs[id] then "★ " else "") .. (if id == data().Selected then "✔ SELECTED" else "")
-		if tags ~= "" then
-			text({ Text = tags, FontFace = HEAVY, TextSize = 13, TextColor3 = GOLD, Position = UDim2.fromOffset(16, 54), Size = UDim2.new(1, -24, 0, 16), Parent = b })
-		end
-		focusable(b, function()
-			selected = id
-			fillSide()
-			rebuild()
-		end, MINT)
-	end
-
-	rebuild = function()
-		for _, c in scroll:GetChildren() do
-			c:Destroy()
-		end
-		local owned = ownedList()
-		count.Text = string.format("%d / %d owned", ownedOnSale(), #Cars.List)
-		local q = string.lower(search)
-		local list = {}
-		for _, id in owned do
-			local spec = Cars.ById[id]
-			if q == "" or string.find(string.lower(spec.Name), q, 1, true) then
-				table.insert(list, id)
-			end
-		end
-		local function key(id: string): any
-			local s = Cars.ById[id]
-			return s
-		end
-		table.sort(list, function(a, b)
-			local sa, sb = key(a), key(b)
-			if (favs[a] ~= nil) ~= (favs[b] ~= nil) then
-				return favs[a] ~= nil
-			end
-			if sortBy == "Price" then
-				return sa.Price > sb.Price
-			elseif sortBy == "Speed" then
-				return sa.TopSpeed > sb.TopSpeed
-			elseif sortBy == "Newest" then
-				return (sa.Order or 0) > (sb.Order or 0)
-			end
-			local ma, mb = Cars.makeOf(sa.Name), Cars.makeOf(sb.Name)
-			if ma ~= mb then
-				return ma < mb
-			end
-			return (sa.Order or 0) < (sb.Order or 0)
-		end)
-		local cols, gap = 3, 10
-		local cw, ch = (listW - 12 - (cols - 1) * gap) / cols, 78
-		local y = 0
-		-- "Get more cars" first
-		local more: TextButton = new("TextButton", { AutoButtonColor = false, Text = "", BackgroundColor3 = Color3.fromRGB(60, 46, 14), Position = UDim2.fromOffset(0, y), Size = UDim2.fromOffset(listW - 12, 52), Parent = scroll }, {
-			corner(8),
-			new("UIStroke", { Color = GOLD, Thickness = 2, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }),
-		})
-		local ic = venueIcon(more, "dealership", 36)
-		ic.Position = UDim2.fromOffset(30, 26)
-		ic.Active = false
-		ic.Interactable = false
-		text({ Text = "Get more cars  ·  Rider Auto", FontFace = HEAVY, TextSize = 18, TextColor3 = GOLD, Position = UDim2.fromOffset(60, 0), Size = UDim2.new(1, -70, 1, 0), Parent = more })
-		focusable(more, function()
-			local s = spotById("dealership")
-			if s then
-				Minimap.setWaypoint(s.cf.Position)
-				UI.toast("Waypoint: Rider Auto (on your map)", MINT)
-			end
-			outOfMenu()
-		end, GOLD)
-		y += 64
-		local lastGroup = nil
-		local col = 0
-		for _, id in list do
-			local spec = Cars.ById[id]
-			local group = if favs[id] then "FAVOURITES" elseif sortBy == "Brand" then Cars.upper(Cars.makeOf(spec.Name)) else nil
-			if group ~= lastGroup and group then
-				if col > 0 then
-					y += ch + gap
-					col = 0
-				end
-				text({ Text = group, FontFace = HEAVY, TextSize = 15, TextColor3 = GOLD, Position = UDim2.fromOffset(2, y), Size = UDim2.fromOffset(400, 22), Parent = scroll })
-				y += 26
-				lastGroup = group
-			end
-			card(scroll, col * (cw + gap), y, cw, ch, id)
-			col += 1
-			if col >= cols then
-				col = 0
-				y += ch + gap
-			end
-		end
-		if col > 0 then
-			y += ch + gap
-		end
-		scroll.CanvasSize = UDim2.fromOffset(0, y)
-	end
-
-	for k, name in { "Brand", "Price", "Speed", "Newest" } do
-		local b = new("TextButton", { AutoButtonColor = false, Text = name, FontFace = HEAVY, TextSize = 14, Size = UDim2.fromOffset(76, 34), LayoutOrder = k, Parent = sorts }, { corner(8) })
-		local function paint()
-			b.BackgroundColor3 = if sortBy == name then MINT else BLUE
-			b.TextColor3 = if sortBy == name then NAVY0 else WHITE
-		end
-		paint()
-		table.insert(refreshers, paint)
-		b.MouseEnter:Connect(hoverSound)
-		b.Activated:Connect(function()
-			selectSound()
-			sortBy = name
-			for _, r in refreshers do
-				r()
-			end
-			rebuild()
-		end)
-	end
-	box:GetPropertyChangedSignal("Text"):Connect(function()
-		search = box.Text
-		rebuild()
-	end)
-	return function()
-		loadFavs()
-		selected = selected or data().Selected
-		table.clear(focusList)
-		fillSide()
-		rebuild()
-	end
-end
-
 local STORE_ICON = { store_vip = "crown", store_cash2x = "cash", store_starter = "gift", store_bundle = "cash", store_garage = "garage" }
 -- the pass tiles' owned flags (player attributes set by server/Store.lua)
 local STORE_PASS_ATTR: { [string]: string } = { cash2x = "Cash2x", vip = "Vip", doublepay = "DoublePay" }
@@ -2585,7 +2207,6 @@ end
 ---------------------------------------------------------------------
 -- Tabs, open, close
 ---------------------------------------------------------------------
-local carsRefresh: (() -> ())? = nil
 local playFocus: Focus? = nil
 local campaignFocus: { Focus } = {}
 local storeFocus: { Focus } = {}
@@ -2638,8 +2259,6 @@ switchTab = function(name: string)
 			table.insert(focusList, f)
 		end
 		setFocus(focusList[1])
-	elseif name == "CARS" and carsRefresh then
-		carsRefresh()
 	end
 	-- (a little slide in)
 	local p = pages[name]
@@ -2685,8 +2304,6 @@ local function build()
 	table.clear(focusList)
 	playFocus = buildCampaign(pages.CAMPAIGN)
 	campaignFocus = table.clone(focusList)
-	table.clear(focusList)
-	carsRefresh = buildCars(pages.CARS)
 	table.clear(focusList)
 	buildStore(pages.STORE)
 	storeFocus = table.clone(focusList)
@@ -2796,7 +2413,6 @@ end
 
 function MainMenu.init(a: Api)
 	api = a
-	loadFavs()
 	build()
 	-- (18 Nov) a Starter Pack bought from the STORE tab: its car pick opens right away
 	player:GetAttributeChangedSignal("StarterPick"):Connect(function()
@@ -2817,7 +2433,6 @@ function MainMenu.open(start: boolean?)
 	if api then
 		pcall(api.refresh)
 	end
-	loadFavs()
 	startMode = start == true
 	isOpen = true
 	UI.modalOpen = true

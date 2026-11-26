@@ -731,7 +731,7 @@ local function pedTick(cam: Vector3, cap: number)
 	end
 end
 
-local function pedFrame(dt: number, cam: Vector3)
+local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 	for _, w in active do
 		w.acc += dt
 		if w.held or w.gone then
@@ -748,6 +748,10 @@ local function pedFrame(dt: number, cam: Vector3)
 		else
 			local d = flat(w.pos, cam)
 			local every = if d < 70 then 0 elseif d < 140 then 0.1 else 0.25
+			-- (2026-11-26, FPS) behind the camera and not right beside it: out of view, posed at the far rate
+			if d > 20 and (w.pos - cam):Dot(look) < 0 then
+				every = 0.25
+			end
 			if w.acc >= every then
 				local moving = stepWalk(w, w.acc)
 				w.acc = 0
@@ -793,7 +797,8 @@ function YangonStreetLife.start(qualityScale: (() -> number)?)
 		local carCap, pedCap = caps()
 		local carAcc, pedAcc, capAcc = cfg.CarCheck, cfg.PedCheck, 0
 		RunService.Heartbeat:Connect(function(dt: number)
-			local cam = (workspace.CurrentCamera or camera).CFrame.Position
+			local camCF = (workspace.CurrentCamera or camera).CFrame
+			local cam = camCF.Position
 			capAcc += dt
 			if capAcc > 3 then
 				capAcc = 0
@@ -809,7 +814,7 @@ function YangonStreetLife.start(qualityScale: (() -> number)?)
 				pedAcc = 0
 				pedTick(cam, pedCap)
 			end
-			pedFrame(dt, cam)
+			pedFrame(dt, cam, camCF.LookVector)
 		end)
 	end)
 end

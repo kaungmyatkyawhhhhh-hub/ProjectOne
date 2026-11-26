@@ -1,0 +1,1989 @@
+--[[
+	DashGauges clusters drawn on a fixed design canvas, and the live (photo-art) clusters (client/DashGauges)
+	Moved out of the parent module (2026-11-26: Studio caps a script at 200,000 characters).
+	The parent calls this once with its helpers and gets the builders back.
+	The parent's KMH changes later, so it is read through a getter (its live value).
+]]
+
+type Update = (mph: number, gear: string, rpm: number) -> ()
+
+return function(E: any)
+	local BLUE = E.BLUE
+	local DIM = E.DIM
+	local DashGauges = E.DashGauges
+	local RED = E.RED
+	local WHITE = E.WHITE
+	local alt = E.alt
+	local altUnit = E.altUnit
+	local bar = E.bar
+	local clock = E.clock
+	local dial = E.dial
+	local new = E.new
+	local numbers = E.numbers
+	local spd = E.spd
+	local speedScale = E.speedScale
+	local text = E.text
+	local unit = E.unit
+
+	---------------------------------------------------------------------
+	-- Clusters drawn on a fixed design canvas (design pixels, W x H), kept in proportion inside the
+	-- panel, which is filled with the background colour so it covers the car's own screen
+	---------------------------------------------------------------------
+	type Design = {
+		area: Frame,
+		rect: (x: number, y: number, w: number, h: number, color: Color3, z: number?, rot: number?, transp: number?) -> Frame,
+		round: (x: number, y: number, r: number, color: Color3?, z: number?, stroke: Color3?, strokeW: number?) -> Frame,
+		seg: (cx: number, cy: number, a: number, r0: number, r1: number, w: number, color: Color3, z: number?, transp: number?) -> Frame,
+		arc: (cx: number, cy: number, a0: number, a1: number, r: number, w: number, color: Color3, z: number?, transp: number?, step: number?) -> { Frame },
+		label: (t: string, x: number, y: number, h: number, color: Color3, font: Enum.Font?, z: number?, wChars: number?) -> TextLabel,
+		needle: (cx: number, cy: number, r0: number, r1: number, w: number, color: Color3, z: number?) -> Frame,
+		line: (x0: number, y0: number, x1: number, y1: number, w: number, color: Color3, z: number?, transp: number?) -> Frame,
+	}
+
+	local function design(gui: SurfaceGui, W: number, H: number, bg: Color3): Design
+		local back = new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = bg, BorderSizePixel = 0 }, gui)
+		local area = new("Frame", {
+			BackgroundTransparency = 1,
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(1, 1),
+		}, back)
+		new("UIAspectRatioConstraint", { AspectRatio = W / H }, area)
+		-- canvas pixels per design pixel (the SurfaceGui is 300 canvas pixels high)
+		local px = 300 / H
+		local D = {} :: any
+		D.area = area
+		function D.rect(x: number, y: number, w: number, h: number, color: Color3, z: number?, rot: number?, transp: number?): Frame
+			return new("Frame", {
+				BorderSizePixel = 0,
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(x / W, y / H),
+				Size = UDim2.fromScale(w / W, h / H),
+				BackgroundColor3 = color,
+				BackgroundTransparency = transp or 0,
+				Rotation = rot or 0,
+				ZIndex = z or 1,
+			}, area)
+		end
+		function D.round(x: number, y: number, r: number, color: Color3?, z: number?, stroke: Color3?, strokeW: number?): Frame
+			local f = D.rect(x, y, 2 * r, 2 * r, color or Color3.new(), z)
+			f.BackgroundTransparency = if color then 0 else 1
+			new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, f)
+			if stroke then
+				new("UIStroke", { Color = stroke, Thickness = (strokeW or 2) * px, ApplyStrokeMode = Enum.ApplyStrokeMode.Border }, f)
+			end
+			return f
+		end
+		-- a bar along the radius at angle a (degrees clockwise from 12) from r0 to r1
+		function D.seg(cx: number, cy: number, a: number, r0: number, r1: number, w: number, color: Color3, z: number?, transp: number?): Frame
+			local t = math.rad(a)
+			local mid = (r0 + r1) / 2
+			return D.rect(cx + mid * math.sin(t), cy - mid * math.cos(t), w, r1 - r0, color, z, a, transp)
+		end
+		-- an arc band of short segments; returns them in order (to light them up one by one)
+		function D.arc(cx: number, cy: number, a0: number, a1: number, r: number, w: number, color: Color3, z: number?, transp: number?, step: number?): { Frame }
+			local n = math.max(2, math.floor(math.abs(a1 - a0) / (step or 2.5)))
+			local out = {}
+			for i = 0, n - 1 do
+				local a = a0 + (a1 - a0) * (i + 0.5) / n
+				table.insert(out, D.seg(cx, cy, a, r - w / 2, r + w / 2, math.abs(a1 - a0) / n * math.pi / 180 * r + 1.2, color, z, transp))
+			end
+			return out
+		end
+		function D.label(t: string, x: number, y: number, h: number, color: Color3, font: Enum.Font?, z: number?, wChars: number?): TextLabel
+			local l = text(area, t, UDim2.fromScale(x / W, y / H), UDim2.fromScale(h * 0.62 * (wChars or math.max(#t, 1)) / W, h / H), color, font)
+			l.ZIndex = z or 3
+			return l
+		end
+		-- a needle turning about (cx, cy): a bar from r0 (negative: a tail) to r1; turn it by Rotation
+		function D.needle(cx: number, cy: number, r0: number, r1: number, w: number, color: Color3, z: number?): Frame
+			local R = math.max(r1, -r0)
+			local box = new("Frame", {
+				BackgroundTransparency = 1,
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.fromScale(cx / W, cy / H),
+				Size = UDim2.fromScale(2 * R / W, 2 * R / H),
+				ZIndex = z or 4,
+			}, area)
+			new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, new("Frame", {
+				BorderSizePixel = 0,
+				AnchorPoint = Vector2.new(0.5, 0),
+				Position = UDim2.fromScale(0.5, (R - r1) / (2 * R)),
+				Size = UDim2.fromScale(w / (2 * R), (r1 - r0) / (2 * R)),
+				BackgroundColor3 = color,
+				ZIndex = z or 4,
+			}, box))
+			return box
+		end
+		function D.line(x0: number, y0: number, x1: number, y1: number, w: number, color: Color3, z: number?, transp: number?): Frame
+			local dx, dy = x1 - x0, y1 - y0
+			return D.rect((x0 + x1) / 2, (y0 + y1) / 2, w, math.sqrt(dx * dx + dy * dy), color, z, math.deg(math.atan2(dx, -dy)), transp)
+		end
+		return D :: Design
+	end
+
+	-- angle on a dial from a table of { value, angle } points (in order of value)
+	local function angleOn(points: { { number } }, v: number): number
+		for i = 1, #points - 1 do
+			local a, b = points[i], points[i + 1]
+			if v <= b[1] or i == #points - 1 then
+				return a[2] + (b[2] - a[2]) * math.clamp((v - a[1]) / (b[1] - a[1]), 0, if i == #points - 1 then 1 else 1)
+			end
+		end
+		return points[#points][2]
+	end
+
+	-- BMW M3 F80 / M4 F82 (owner's photo): two dark dials in chrome rings, white numbers, red needles,
+	-- orange / red shift lights at the top of the rev counter, small fuel and oil temperature dials at
+	-- the sides, the M stripes, digital speed, outside temperature, odometers, gear and drive modes
+	local function bmwF80(gui: SurfaceGui): Update
+		local D = design(gui, 1000, 420, Color3.fromRGB(12, 13, 16))
+		local FACE = Color3.fromRGB(26, 27, 31)
+		local INNER = Color3.fromRGB(16, 17, 20)
+		local CHROME = Color3.fromRGB(196, 199, 205)
+		local NEEDLE = Color3.fromRGB(232, 46, 30)
+		local GREY = Color3.fromRGB(176, 179, 186)
+		local function dialBase(cx: number, cy: number)
+			D.round(cx, cy, 152, CHROME, 1)
+			D.round(cx, cy, 148, FACE, 1)
+			D.round(cx, cy, 62, INNER, 1)
+		end
+		-- speedometer: 0 at 7:30, top at 4:30
+		local SX, SY = 300, 190
+		dialBase(SX, SY)
+		local top = if E.get_KMH() then 320 else 200
+		local step = if E.get_KMH() then 40 else 20
+		local function sAng(v: number): number
+			return -135 + 270 * v / top
+		end
+		for v = 0, top, step / 2 do
+			local major = v % step == 0
+			D.seg(SX, SY, sAng(v), if major then 130 else 139, 148, if major then 4 else 2, if major then WHITE else GREY, 2)
+			if major then
+				local t = math.rad(sAng(v))
+				D.label(tostring(v), SX + 106 * math.sin(t), SY - 106 * math.cos(t), 24, WHITE, Enum.Font.GothamMedium, 3)
+			end
+		end
+		D.label(unit(), SX, SY - 42, 18, GREY, Enum.Font.GothamMedium, 3)
+		local sNeedle = D.needle(SX, SY, -20, 140, 6, NEEDLE, 5)
+		D.round(SX, SY, 16, Color3.fromRGB(18, 18, 20), 6, Color3.fromRGB(70, 70, 76), 2)
+		-- rev counter: 4 at the top, 30 degrees per 1000 rpm
+		local TX, TY = 700, 190
+		dialBase(TX, TY)
+		local function tAng(v: number): number
+			return -120 + 30 * v
+		end
+		for v = 0, 8, 0.5 do
+			local major = v % 1 == 0
+			D.seg(TX, TY, tAng(v), if major then 130 else 139, 148, if major then 4 else 2, if major then WHITE else GREY, 2)
+			if major and v > 0 then
+				local t = math.rad(tAng(v))
+				D.label(tostring(v), TX + 106 * math.sin(t), TY - 106 * math.cos(t), 26, WHITE, Enum.Font.GothamMedium, 3)
+			end
+		end
+		D.arc(TX, TY, tAng(6.4), tAng(7.2), 144, 8, Color3.fromRGB(255, 140, 30), 3, 0, 3)
+		D.arc(TX, TY, tAng(7.2), tAng(8), 144, 8, Color3.fromRGB(232, 30, 26), 3, 0, 3)
+		D.label("1/min x 1000", TX, TY - 42, 15, GREY, Enum.Font.GothamMedium, 3)
+		D.label("READY", TX - 72, TY + 52, 11, GREY, Enum.Font.GothamMedium, 3)
+		local tNeedle = D.needle(TX, TY, -20, 140, 6, NEEDLE, 5)
+		D.round(TX, TY, 16, Color3.fromRGB(18, 18, 20), 6, Color3.fromRGB(70, 70, 76), 2)
+		-- small fuel (left) and oil temperature (right) dials
+		for _, sd in { { 82, 265, { "0", "1/2", "1" }, 0.82 }, { 918, 265, if E.get_KMH() then { "70", "120", "170" } else { "160", "250", "340" }, 0.45 } } do
+			local x, y = sd[1] :: number, sd[2] :: number
+			D.round(x, y, 64, CHROME, 1)
+			D.round(x, y, 61, FACE, 1)
+			local labels = sd[3] :: { string }
+			for i, l in labels do
+				local a = math.rad(-110 + (i - 1) * 110)
+				D.seg(x, y, -110 + (i - 1) * 110, 50, 60, 3, WHITE, 2)
+				D.label(l, x + 36 * math.sin(a), y - 36 * math.cos(a), 15, WHITE, Enum.Font.GothamMedium, 3)
+			end
+			local n = D.needle(x, y, -8, 52, 4, NEEDLE, 5)
+			n.Rotation = -110 + 220 * (sd[4] :: number)
+			D.round(x, y, 8, Color3.fromRGB(18, 18, 20), 6)
+		end
+		D.label(if E.get_KMH() then "°C" else "°F", 918, 300, 12, GREY, Enum.Font.GothamMedium, 3)
+		-- middle: M stripes, digital speed, outside temperature, odometers, gear, drive modes
+		-- (brand mark removed: owner, 2026-10-17)
+		local speedText = D.label("0", 492, 316, 34, WHITE, Enum.Font.GothamBold, 3, 3)
+		local unitText = D.label(unit(), 548, 322, 14, GREY, Enum.Font.GothamMedium, 3, 4)
+		D.label(if E.get_KMH() then "+12 °C" else "+53 °F", 500, 352, 16, WHITE, Enum.Font.GothamMedium, 3)
+		D.label("04868", 445, 388, 18, Color3.fromRGB(230, 160, 60), Enum.Font.GothamMedium, 3)
+		D.label("070.4", 560, 388, 18, Color3.fromRGB(230, 160, 60), Enum.Font.GothamMedium, 3)
+		local gearText = D.label("N", 700, 360, 40, WHITE, Enum.Font.GothamBold, 3, 1.6)
+		D.label("Sport      Sport Plus", 700, 400, 12, Color3.fromRGB(120, 124, 132), Enum.Font.GothamMedium, 3)
+		return function(mph: number, g: string, rpm: number)
+			local v = if E.get_KMH() then mph * 1.609 else mph
+			sNeedle.Rotation = sAng(math.clamp(v, 0, top))
+			tNeedle.Rotation = tAng(math.clamp(rpm, 0, 1) * 7.6)
+			speedText.Text = spd(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+		end
+	end
+
+	-- BMW Live Cockpit (owner's photo, a G30 in Sport): black screen, two open dials with a dark red glow
+	-- that lights up red as they sweep, short red needles at the rim, big digital speed in the left and
+	-- the gear in the right, clock and outside temperature at the top, the M stripes with red road
+	-- lines under them, odometers at the bottom, small gauges at the far sides
+	local function bmwLiveCockpit(gui: SurfaceGui): Update
+		local D = design(gui, 1000, 380, Color3.fromRGB(4, 4, 6))
+		local RING = Color3.fromRGB(188, 191, 198)
+		local GLOW = Color3.fromRGB(96, 10, 12)
+		local LIT = Color3.fromRGB(214, 34, 30)
+		local GREY = Color3.fromRGB(150, 152, 160)
+		-- left: speed. km/h as on the real cluster; mph spread over the same sweep
+		local LX, LY = 290, 200
+		local sPts = if E.get_KMH() then { { 0, -138 }, { 50, -100 }, { 100, -55 }, { 150, -11 }, { 200, 35 }, { 260, 93 } }
+			else { { 0, -138 }, { 40, -80 }, { 80, -22 }, { 120, 35 }, { 160, 93 } }
+		-- right: revs (x1000)
+		local RX, RY = 710, 200
+		local rPts = { { 0, -95 }, { 1, -66 }, { 2, -34 }, { 3, 0 }, { 4, 38 }, { 5, 73 }, { 6, 107 }, { 7, 137 } }
+		local function dialFrame(cx: number, cy: number, pts: { { number } }, labels: { { number } }, redFrom: number?): { Frame }
+			local a0, a1 = pts[1][2], pts[#pts][2]
+			D.arc(cx, cy, a0 - 4, a1 + 4, 170, 3, RING, 2, 0, 2)
+			D.arc(cx, cy, a0, a1, 145, 30, GLOW, 1, 0.1)
+			D.arc(cx, cy, a0, a1, 118, 24, Color3.fromRGB(44, 5, 7), 1, 0.2)
+			D.arc(cx, cy, a0, a1, 160, 2.5, Color3.fromRGB(200, 36, 36), 2, 0.1, 2)
+			local lit = D.arc(cx, cy, a0, a1, 145, 30, LIT, 2, 1)
+			local top = pts[#pts][1]
+			local step = labels[2][1] - labels[1][1]
+			for v = 0, top, step / 5 do
+				local major = math.abs(v / step - math.floor(v / step + 0.5)) < 1e-6
+				local red = redFrom ~= nil and v >= redFrom
+				D.seg(cx, cy, angleOn(pts, v), if major then 150 else 156, 162, if major then 3 else 1.5, if red then Color3.fromRGB(255, 60, 50) else WHITE, 3)
+			end
+			for _, l in labels do
+				local t = math.rad(angleOn(pts, l[1]))
+				local red = redFrom ~= nil and l[1] >= redFrom
+				D.label(tostring(l[2]), cx + 116 * math.sin(t), cy - 116 * math.cos(t), 24, if red then Color3.fromRGB(255, 70, 60) else WHITE, Enum.Font.GothamMedium, 3)
+			end
+			return lit
+		end
+		local sLabels = {}
+		for _, p in sPts do
+			table.insert(sLabels, { p[1], p[1] })
+		end
+		local sLit = dialFrame(LX, LY, sPts, sLabels, nil)
+		local rLabels = {}
+		for v = 0, 7 do
+			table.insert(rLabels, { v, v })
+		end
+		local rLit = dialFrame(RX, RY, rPts, rLabels, 6)
+		local sNeedle = D.needle(LX, LY, 118, 172, 7, Color3.fromRGB(246, 54, 44), 5)
+		local rNeedle = D.needle(RX, RY, 118, 172, 7, Color3.fromRGB(246, 54, 44), 5)
+		D.round(LX, LY, 74, Color3.fromRGB(0, 0, 0), 3)
+		local speedText = D.label("0", LX, LY - 4, 72, WHITE, Enum.Font.GothamBold, 4, 3)
+		local unitText = D.label(unit(), LX, LY + 44, 14, GREY, Enum.Font.GothamMedium, 4, 4)
+		D.round(RX, RY, 74, Color3.fromRGB(0, 0, 0), 3)
+		local gearText = D.label("P", RX, RY - 4, 80, WHITE, Enum.Font.GothamBold, 4, 1.4)
+		D.label("1/min x1000", RX, RY + 48, 12, GREY, Enum.Font.GothamMedium, 4)
+		-- middle: clock and temperature, the M stripes and red road lines, odometers
+		D.rect(500, 48, 80, 2, Color3.fromRGB(70, 70, 78), 2)
+		local clockText = D.label(clock(), 500, 72, 30, WHITE, Enum.Font.GothamMedium, 3)
+		D.label(if E.get_KMH() then "+14.5°C" else "+58°F", 500, 104, 14, GREY, Enum.Font.GothamMedium, 3)
+		D.rect(500, 120, 80, 2, Color3.fromRGB(70, 70, 78), 2)
+		-- (brand mark removed: owner, 2026-10-17)
+		D.line(468, 205, 330, 330, 4, Color3.fromRGB(196, 30, 30), 2, 0.15)
+		D.line(532, 205, 670, 330, 4, Color3.fromRGB(196, 30, 30), 2, 0.15)
+		local bar = D.rect(500, 352, 340, 30, Color3.fromRGB(12, 12, 14), 2)
+		new("UICorner", { CornerRadius = UDim.new(0.5, 0) }, bar)
+		new("UIStroke", { Color = Color3.fromRGB(70, 70, 78), Thickness = 1.5 }, bar)
+		D.label(if E.get_KMH() then "TOTAL 82176 km" else "TOTAL 51063 mi", 418, 352, 13, WHITE, Enum.Font.GothamMedium, 3)
+		D.label(if E.get_KMH() then "TRIP 0053.7 km" else "TRIP 0033.4 mi", 585, 352, 13, WHITE, Enum.Font.GothamMedium, 3)
+		-- far sides: oil temperature (left) and fuel (right) arcs
+		D.arc(60, 300, -150, -40, 52, 9, Color3.fromRGB(150, 22, 24), 2, 0.1, 4)
+		D.arc(60, 300, -150, -40, 59, 2, RING, 2, 0, 4)
+		D.label(if E.get_KMH() then "162 km" else "101 mi", 82, 340, 13, WHITE, Enum.Font.GothamMedium, 3)
+		D.arc(940, 300, 40, 150, 52, 9, Color3.fromRGB(150, 22, 24), 2, 0.1, 4)
+		D.arc(940, 300, 40, 150, 59, 2, RING, 2, 0, 4)
+		D.label("AUTO H", 918, 235, 12, Color3.fromRGB(110, 220, 130), Enum.Font.GothamBold, 3)
+		D.label("SPORT", 742, 352, 14, Color3.fromRGB(236, 80, 44), Enum.Font.GothamBold, 3)
+		local function light(lit: { Frame }, frac: number)
+			local n = math.floor(#lit * math.clamp(frac, 0, 1) + 0.5)
+			for i, f in lit do
+				f.BackgroundTransparency = if i <= n then 0.15 else 1
+			end
+		end
+		local sTop = sPts[#sPts][1]
+		return function(mph: number, g: string, rpm: number)
+			local v = math.clamp(if E.get_KMH() then mph * 1.609 else mph, 0, sTop)
+			local revs = math.clamp(rpm, 0, 1) * 6.8
+			sNeedle.Rotation = angleOn(sPts, v)
+			rNeedle.Rotation = angleOn(rPts, revs)
+			local s0, s1 = sPts[1][2], sPts[#sPts][2]
+			light(sLit, (angleOn(sPts, v) - s0) / (s1 - s0))
+			local r0, r1 = rPts[1][2], rPts[#rPts][2]
+			light(rLit, (angleOn(rPts, revs) - r0) / (r1 - r0))
+			speedText.Text = spd(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			clockText.Text = clock()
+		end
+	end
+
+	-- Lexus LX 700h's 12.3-inch digital meter: a big ringed rev counter in the middle with a blue sweep,
+	-- the digital speed and gear inside it; the hybrid system indicator (CHG / ECO / PWR) and fuel on
+	-- the left; clock, outside temperature, a lane-assist picture, READY and the odometer on the right
+	local function lexusLX700(gui: SurfaceGui): Update
+		local D = design(gui, 1000, 420, Color3.fromRGB(6, 8, 12))
+		local SILVER = Color3.fromRGB(176, 182, 194)
+		local BLUE = Color3.fromRGB(70, 168, 255)
+		local GREY = Color3.fromRGB(140, 148, 162)
+		local CX, CY = 500, 212
+		D.round(CX, CY, 176, SILVER, 1)
+		D.round(CX, CY, 172, Color3.fromRGB(10, 12, 18), 1)
+		D.round(CX, CY, 132, Color3.fromRGB(14, 17, 25), 1, Color3.fromRGB(56, 64, 80), 2)
+		local function ang(v: number): number
+			return -135 + 270 * v / 8
+		end
+		for v = 0, 8, 0.5 do
+			local major = v % 1 == 0
+			D.seg(CX, CY, ang(v), if major then 152 else 160, 168, if major then 4 else 2, if v >= 6.5 then Color3.fromRGB(240, 60, 50) else WHITE, 3)
+			if major then
+				local t = math.rad(ang(v))
+				D.label(tostring(v), CX + 116 * math.sin(t), CY - 116 * math.cos(t), 22, Color3.fromRGB(214, 220, 232), Enum.Font.GothamMedium, 3)
+			end
+		end
+		D.arc(CX, CY, ang(0), ang(8), 143, 6, Color3.fromRGB(24, 34, 52), 2, 0)
+		local sweep = D.arc(CX, CY, ang(0), ang(8), 143, 6, BLUE, 3, 1)
+		local speedText = D.label("0", CX, CY + 2, 92, WHITE, Enum.Font.GothamBold, 4, 3)
+		local unitText = D.label(unit(), CX, CY + 56, 16, GREY, Enum.Font.GothamMedium, 4, 4)
+		local gearBox = D.rect(CX, CY - 78, 46, 36, Color3.fromRGB(14, 17, 25), 4)
+		new("UICorner", { CornerRadius = UDim.new(0.2, 0) }, gearBox)
+		new("UIStroke", { Color = Color3.fromRGB(130, 140, 160), Thickness = 1.5 }, gearBox)
+		local gearText = D.label("P", CX, CY - 78, 26, WHITE, Enum.Font.GothamBold, 5, 1.4)
+		D.label("x1000r/min", CX, CY + 92, 12, GREY, Enum.Font.GothamMedium, 4)
+		D.label("NORMAL", CX, 400, 15, BLUE, Enum.Font.GothamBold, 3)
+		-- left: hybrid system indicator and fuel
+		D.label("HYBRID SYSTEM", 185, 100, 13, GREY, Enum.Font.GothamMedium, 3)
+		D.rect(125, 140, 80, 10, Color3.fromRGB(40, 120, 220), 2)
+		D.rect(205, 140, 80, 10, Color3.fromRGB(50, 190, 170), 2)
+		D.rect(285, 140, 80, 10, Color3.fromRGB(70, 74, 86), 2)
+		D.label("CHG", 105, 168, 12, GREY, Enum.Font.GothamMedium, 3)
+		D.label("ECO", 205, 168, 12, GREY, Enum.Font.GothamMedium, 3)
+		D.label("PWR", 300, 168, 12, GREY, Enum.Font.GothamMedium, 3)
+		local hybrid = D.rect(125, 140, 4, 26, WHITE, 4)
+		D.label("E", 98, 292, 14, GREY, Enum.Font.GothamMedium, 3)
+		D.label("F", 290, 292, 14, GREY, Enum.Font.GothamMedium, 3)
+		for i = 1, 8 do
+			D.rect(110 + i * 19.5, 292, 15, 12, if i <= 6 then WHITE else Color3.fromRGB(46, 50, 60), 2)
+		end
+		D.label(if E.get_KMH() then "620 km" else "385 mi", 194, 330, 20, WHITE, Enum.Font.GothamMedium, 3)
+		-- right: clock, temperature, lane picture, READY, odometer
+		local clockText = D.label(clock(), 815, 92, 28, WHITE, Enum.Font.GothamMedium, 3)
+		D.label(if E.get_KMH() then "24°C" else "75°F", 815, 124, 15, GREY, Enum.Font.GothamMedium, 3)
+		D.line(772, 320, 798, 186, 3, Color3.fromRGB(110, 120, 140), 2)
+		D.line(858, 320, 832, 186, 3, Color3.fromRGB(110, 120, 140), 2)
+		local car = D.rect(815, 288, 34, 22, Color3.fromRGB(200, 206, 218), 3)
+		new("UICorner", { CornerRadius = UDim.new(0.3, 0) }, car)
+		D.label("READY", 815, 350, 15, Color3.fromRGB(80, 220, 120), Enum.Font.GothamBold, 3)
+		D.label(if E.get_KMH() then "ODO 2315 km" else "ODO 1438 mi", 815, 388, 13, GREY, Enum.Font.GothamMedium, 3)
+		return function(mph: number, g: string, rpm: number)
+			local r = math.clamp(rpm, 0, 1)
+			local n = math.floor(#sweep * r * 6.4 / 8 + 0.5)
+			for i, f in sweep do
+				f.BackgroundTransparency = if i <= n then 0 else 1
+			end
+			-- the hybrid needle: charging when coasting, eco when easy, power when pushing
+			hybrid.Position = UDim2.fromScale((95 + 230 * r) / 1000, 140 / 420)
+			speedText.Text = spd(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			clockText.Text = clock()
+		end
+	end
+
+	-- Aventador LP700-4 (owner, 2026-10-17: "watch the aventador cluster and copy exactly like that",
+	-- from an LP700-4 0-353 km/h video): one wide dark screen with grey angular side panels, a big round
+	-- rev counter in the middle (silver ring, black band with white 0-9, red from 8.5, a cyan ring
+	-- round a dark navy face, a cyan arc below), a white needle with a glowing red tip, slanted white
+	-- digital speed and a big red italic gear inside, a lime drive-mode badge and the odometer below.
+	-- Left: clock, date, outside temperature, two upright bar gauges with red tops and the fuel bar.
+	-- Right: water and oil temperature bars, a green light lamp, the range and the use bars.
+	-- The needle climbs smoothly with the revs and snaps straight down on each upshift, like the video.
+	-- No maker's name or badge on it (owner, 2026-10-17)
+	local function aventadorLP700(gui: SurfaceGui): Update
+		local D = design(gui, 1000, 436, Color3.fromRGB(16, 16, 18))
+		local PANEL = Color3.fromRGB(26, 30, 38)
+		local EDGE = Color3.fromRGB(92, 98, 110)
+		local SILVER = Color3.fromRGB(184, 190, 200)
+		local BAND = Color3.fromRGB(8, 8, 10)
+		local NAVY = Color3.fromRGB(11, 43, 76)
+		local CYAN = Color3.fromRGB(0, 174, 239)
+		local LRED = Color3.fromRGB(230, 26, 26)
+		local TIP = Color3.fromRGB(255, 32, 32)
+		local LIME = Color3.fromRGB(198, 223, 32)
+		local GREY = Color3.fromRGB(160, 166, 178)
+		local OFF = Color3.fromRGB(52, 58, 70)
+		local function italic(l: TextLabel)
+			l.FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Italic)
+		end
+		-- the side panels: grey edged, their outer corners cut at an angle
+		for _, side in { -1, 1 } do
+			local cx = 500 + side * 318
+			D.rect(cx, 228, 330, 330, EDGE, 1)
+			D.rect(cx, 228, 324, 324, PANEL, 1)
+			for _, cy in { 63, 393 } do
+				D.rect(cx + side * 165, cy, 120, 120, Color3.fromRGB(16, 16, 18), 1, 45)
+			end
+		end
+		-- left: clock, date and outside temperature
+		local clockText = D.label(clock(), 120, 116, 36, WHITE, Enum.Font.GothamMedium, 3)
+		D.label(os.date("%d.%m.%Y") :: string, 120, 152, 15, GREY, Enum.Font.GothamMedium, 3)
+		D.label(if E.get_KMH() then "+14 °C" else "+57 °F", 120, 180, 17, WHITE, Enum.Font.GothamMedium, 3)
+		-- thin amber rules between the lines of the screen (refs/aventador_lp700_cluster_lit_crop.jpg)
+		for _, y in { 92, 136, 166, 198 } do
+			D.rect(132, y, 150, 1.5, Color3.fromRGB(196, 120, 30), 2, 0, 0.35)
+		end
+		-- an upright bar gauge of white segments with red tops; returns a setter (0..1)
+		local function column(x: number, name: string, value: number): (number) -> ()
+			local segs: { Frame } = {}
+			local N = 12
+			for i = 1, N do
+				local red = i >= N - 1
+				table.insert(segs, D.rect(x, 322 - (i - 1) * 17, 22, 12, if red then LRED else WHITE, 2))
+				if i % 3 == 1 then
+					D.rect(x - 18, 322 - (i - 1) * 17, 7, 2, GREY, 2)
+				end
+			end
+			D.label(name, x, 350, 12, GREY, Enum.Font.GothamMedium, 3)
+			local function set(v: number)
+				local lit = math.floor(v * N + 0.5)
+				for i, s in segs do
+					s.BackgroundTransparency = if i <= lit then 0 else 0.82
+				end
+			end
+			set(value)
+			return set
+		end
+		column(222, "OIL bar", 0.55)
+		column(262, "BAR", 0.4)
+		-- fuel along the lower left
+		D.label("FUEL", 70, 374, 12, GREY, Enum.Font.GothamMedium, 3)
+		for i = 1, 10 do
+			D.rect(88 + i * 14, 374, 11, 11, if i == 1 then LRED elseif i <= 7 then WHITE else OFF, 2)
+		end
+		-- right: water and oil temperature, the light lamp, range and use
+		local water = column(740, "H2O °C", 0.3)
+		local oil = column(780, "OIL °C", 0.25)
+		local lamp = D.rect(862, 118, 46, 22, Color3.fromRGB(70, 210, 90), 3)
+		new("UICorner", { CornerRadius = UDim.new(0.4, 0) }, lamp)
+		for i = -1, 1 do
+			D.rect(895, 118 + i * 8, 14, 3, Color3.fromRGB(70, 210, 90), 3)
+		end
+		D.rect(812, 250, 18, 26, GREY, 3)
+		D.rect(825, 244, 6, 14, GREY, 3)
+		D.label(if E.get_KMH() then "90 km" else "56 mi", 880, 250, 26, WHITE, Enum.Font.GothamMedium, 3)
+		D.label(if E.get_KMH() then "l/100km" else "mpg", 880, 290, 12, GREY, Enum.Font.GothamMedium, 3)
+		for i = 1, 8 do
+			D.rect(820 + i * 13, 330 - i * 2, 9, 14 + i * 4, if i <= 5 then WHITE else OFF, 2)
+		end
+
+		-- the rev counter: 0 at about 7:50, 9 at about 3:50, a gap at the bottom
+		local CX, CY = 500, 218
+		local function ang(v: number): number
+			return -125 + 240 * v / 9
+		end
+		D.round(CX, CY, 212, SILVER, 2)
+		D.round(CX, CY, 205, BAND, 2)
+		D.arc(CX, CY, ang(8.5), ang(9), 196, 12, Color3.fromRGB(150, 12, 12), 3, 0, 1.5)
+		for v = 0, 9, 0.25 do
+			local major = v % 1 == 0
+			local half = v % 0.5 == 0
+			D.seg(CX, CY, ang(v), if major then 176 else if half then 186 else 192, 202, if major then 5 else 2.5, if v >= 8.5 then TIP else WHITE, 4)
+			if major then
+				local t = math.rad(ang(v))
+				D.label(tostring(v), CX + 152 * math.sin(t), CY - 152 * math.cos(t), if v == 9 then 40 else 32, if v == 9 then LRED else WHITE, Enum.Font.GothamBold, 4)
+			end
+		end
+		-- the lit sweep along the inside of the band, following the needle
+		local sweep = D.arc(CX, CY, ang(0), ang(9), 129, 6, CYAN, 4, 1, 2.5)
+		D.round(CX, CY, 125, CYAN, 4)
+		D.round(CX, CY, 120, NAVY, 4)
+		-- the cyan status arc below the middle
+		D.arc(CX, CY, 125, 235, 100, 3, CYAN, 5, 0.15, 3)
+		D.label("x1000 r/min", CX, CY - 62, 13, GREY, Enum.Font.GothamMedium, 5)
+		local gearText = D.label("N", CX + 66, CY - 6, 78, LRED, Enum.Font.GothamBlack, 6, 1.2)
+		italic(gearText)
+		local speedText = D.label("0", CX + 40, CY + 62, 44, WHITE, Enum.Font.GothamBold, 6, 3)
+		italic(speedText)
+		local unitText = D.label(unit(), CX + 40, CY + 92, 14, GREY, Enum.Font.GothamMedium, 6, 4)
+		local badge = D.rect(CX - 58, CY + 64, 72, 22, LIME, 6)
+		new("UICorner", { CornerRadius = UDim.new(0.25, 0) }, badge)
+		D.label("CORSA", CX - 58, CY + 64, 15, Color3.fromRGB(16, 20, 8), Enum.Font.GothamBlack, 7)
+		D.label(if E.get_KMH() then "002714 km" else "001686 mi", CX, CY + 160, 16, Color3.fromRGB(90, 220, 220), Enum.Font.GothamMedium, 4) -- cyan, like the real one
+		-- the needle: a white arm with a glowing red tip
+		local arm = D.needle(CX, CY, -24, 150, 7, WHITE, 8)
+		local glow = D.needle(CX, CY, 148, 200, 13, TIP, 8)
+		glow.ZIndex = 8
+		for _, f in glow:GetChildren() do
+			(f :: Frame).BackgroundTransparency = 0.6
+		end
+		local tip = D.needle(CX, CY, 146, 198, 6, TIP, 9)
+		D.round(CX, CY, 20, Color3.fromRGB(14, 16, 22), 10, SILVER, 3)
+
+		local born = os.clock()
+		local shown, lastT, lastClock = 0, born, 0
+		return function(mph: number, g: string, rpm: number)
+			local now = os.clock()
+			local dt = math.clamp(now - lastT, 0, 0.1)
+			lastT = now
+			-- the game's revs (0..1) run to the 8.5k limiter; a little bounce on the limiter
+			local target = math.clamp(rpm, 0, 1) * 8.5
+			if rpm >= 0.985 then
+				target -= math.random() * 0.25
+			end
+			-- climbs smoothly, snaps down on an upshift
+			local k = if target < shown - 0.3 then 30 else 14
+			shown += (target - shown) * math.min(1, dt * k)
+			local a = ang(shown)
+			arm.Rotation = a
+			glow.Rotation = a
+			tip.Rotation = a
+			local n = math.floor(#sweep * shown / 9 + 0.5)
+			for i, f in sweep do
+				f.BackgroundTransparency = if i <= n then 0.1 else 1
+			end
+			speedText.Text = spd(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			-- the engine warms up as it is driven
+			water(math.min(0.62, 0.3 + (now - born) / 600))
+			oil(math.min(0.55, 0.25 + (now - born) / 900))
+			if now - lastClock > 5 then
+				lastClock = now
+				clockText.Text = clock()
+			end
+		end
+	end
+
+	-- Bugatti Veyron 16.4 (2026-10-23, from real photos: imports/refs/veyron_cluster_lit_vitesse.jpg and
+	-- veyron_cluster_crop.png): black, five round dials in thin silver rings. The big rev counter in the
+	-- middle (white 0-8, "1/min x 1000", a wide blue band, red needle, a small grey screen low inside
+	-- with the gear and speed), the power meter left (0-1001 hp, blue band, red needle), the speedometer
+	-- right (to 280 mph, km/h inside, blue band, red needle) and two small dials up between them (fuel,
+	-- oil temperature). No maker's logo on the faces (owner, 2026-10-17)
+	local function veyron(gui: SurfaceGui): Update
+		-- laid out on the model's own five dials (owner, 2026-10-24: "the tachometer cluster isn't
+		-- lined up"): the rev counter in the middle, the small fuel and oil dials up at its sides, the
+		-- power meter and speedometer below them, close in; measured from the driver's seat in Studio
+		local D = design(gui, 1100, 546, Color3.fromRGB(5, 5, 7))
+		-- only the dials' area is filled (the panel's spare width stays clear over the dash)
+		local back = D.area.Parent :: Frame
+		back.BackgroundTransparency = 1
+		D.area.BackgroundColor3 = Color3.fromRGB(5, 5, 7)
+		D.area.BackgroundTransparency = 0
+		new("UICorner", { CornerRadius = UDim.new(0.12, 0) }, D.area)
+		local SILVER = Color3.fromRGB(200, 204, 212)
+		local FACE = Color3.fromRGB(9, 10, 14)
+		local VBLUE = Color3.fromRGB(46, 70, 210)
+		local NEEDLE = Color3.fromRGB(235, 34, 30)
+		local GREY = Color3.fromRGB(150, 154, 164)
+		-- a dial: silver ring, face, blue band, ticks and numbers from a0 to a1 (degrees clockwise from 12);
+		-- returns a setter (0..1) for its red needle
+		local function vdial(cx: number, cy: number, r: number, labels: { string }, a0: number, a1: number, band: { number }?, numSize: number, minor: number?): (number) -> ()
+			D.round(cx, cy, r, FACE, 2, SILVER, 3)
+			local steps = #labels - 1
+			local function ang(f: number): number
+				return a0 + (a1 - a0) * f
+			end
+			if band then
+				D.arc(cx, cy, ang(band[1]), ang(band[2]), r * 0.62, r * 0.16, VBLUE, 3, 0.1, 2)
+			end
+			local per = minor or 2
+			for i = 0, steps * per do
+				local f = i / (steps * per)
+				local major = i % per == 0
+				D.seg(cx, cy, ang(f), r * (if major then 0.84 else 0.89), r * 0.95, if major then 3.5 else 2, if major then Color3.new(1, 1, 1) else GREY, 4)
+				if major then
+					local t = math.rad(ang(f))
+					D.label(labels[i // per + 1], cx + r * 0.7 * math.sin(t), cy - r * 0.7 * math.cos(t), numSize, Color3.new(1, 1, 1), Enum.Font.GothamMedium, 4)
+				end
+			end
+			local arm = D.needle(cx, cy, -r * 0.14, r * 0.86, math.max(3, r * 0.035), NEEDLE, 8)
+			D.round(cx, cy, r * 0.11, Color3.fromRGB(150, 154, 162), 9, SILVER, 2)
+			local shown = 0
+			return function(v: number)
+				shown += (math.clamp(v, 0, 1) - shown) * 0.35
+				arm.Rotation = ang(shown)
+			end
+		end
+		-- the two small dials up between the big ones (not lit, like the photo)
+		local function small(cx: number, label: string, v: number)
+			D.round(cx, 114, 74, FACE, 2, SILVER, 3)
+			D.arc(cx, 114, -120, 120, 60, 3, GREY, 3, 0.4, 6)
+			D.label(label, cx, 150, 15, GREY, Enum.Font.GothamMedium, 4)
+			D.needle(cx, 114, -8, 54, 4, NEEDLE, 5).Rotation = -120 + 240 * v
+			D.round(cx, 114, 9, Color3.fromRGB(150, 154, 162), 6)
+		end
+		small(215, "FUEL", 0.7)
+		small(885, "OIL °C", 0.45)
+
+		-- the rev counter: 0 at the bottom left round to 8 at the bottom right
+		-- the power meter (left) and the speedometer (right), low and close in, under the rev counter's
+		-- edge (drawn first so the rev counter sits over them, like the model's)
+		local setPower = vdial(172, 384, 157, numbers(0, 1000, 100), -150, 120, { 0.1, 0.75 }, 19)
+		D.label("hp", 172, 484, 15, GREY, Enum.Font.GothamMedium, 5)
+		local speedLabels, endMph = speedScale(280, 20)
+		local setSpeed = vdial(928, 384, 157, speedLabels, -125, 130, { 0.05, 0.6 }, if #speedLabels > 10 then 15 else 19)
+		local unitText = D.label(unit(), 928, 484, 15, GREY, Enum.Font.GothamMedium, 5)
+		local setRpm = vdial(550, 210, 200, numbers(0, 8, 1), -138, 138, { 0.2, 0.82 }, 30, 4)
+		D.label("1/min x 1000", 550, 350, 13, GREY, Enum.Font.GothamMedium, 5)
+		local screen = D.rect(550, 287, 92, 70, Color3.fromRGB(58, 62, 70), 5)
+		new("UICorner", { CornerRadius = UDim.new(0.08, 0) }, screen)
+		local gearText = D.label("P", 550, 273, 34, Color3.new(1, 1, 1), Enum.Font.GothamBold, 6, 1.2)
+		local speedText = D.label("0", 550, 307, 16, Color3.fromRGB(220, 224, 232), Enum.Font.GothamMedium, 6, 4)
+
+		local lastPower = 0
+		return function(mph: number, g: string, rpm: number)
+			setRpm(math.clamp(rpm, 0, 1) * 6.4 / 8) -- the W16's limiter is 6,400 rpm
+			setSpeed(mph / endMph)
+			-- power in use: the revs times how hard it is pulling (more at low speed), 1001 hp flat out
+			local p = math.clamp(rpm, 0, 1) * (if mph > 1 then 1 else 0.2)
+			lastPower += (p - lastPower) * 0.2
+			setPower(lastPower * 1.001)
+			gearText.Text = g
+			speedText.Text = spd(mph) .. " " .. unit()
+			unitText.Text = unit()
+		end
+	end
+
+	---------------------------------------------------------------------
+	-- Supercar and hypercar clusters copied from the real cars (owner, 2026-10-24: "an exact 1 to 1
+	-- replica of the real one"). Each is laid out from the reference photos and video frames in
+	-- imports/refs (see its README); makers' names and logos are left out.
+	---------------------------------------------------------------------
+
+	-- a round gauge on a design canvas. g: cx, cy, r (face), face, stroke / strokeW (its edge), ring /
+	-- ringR and bezel / bezelR (rings behind it), px / py (the needle's pivot, if not the middle),
+	-- points ({ value, angle } in order; angles in degrees clockwise from 12), bands ({ from, to, r, w,
+	-- color, transp? }), ticks ({ from, to, step, r0, r1, w, color, redFrom?, redColor? }), labels
+	-- ({ text, value, color?, size? }) at numR, numSize, numColor, font, needle ({ r0, r1, w, color }),
+	-- hub ({ r, color, stroke?, strokeW? }). Returns a setter taking a value on the gauge's scale.
+	local function gauge(D: Design, g: any): (number) -> ()
+		local cx, cy = g.cx, g.cy
+		local px, py = g.px or cx, g.py or cy
+		local z = g.z or 2
+		if g.bezel then
+			D.round(cx, cy, g.bezelR or g.r * 1.12, g.bezel, z, g.bezelStroke, g.bezelStrokeW)
+		end
+		if g.ring then
+			D.round(cx, cy, g.ringR or g.r * 1.05, g.ring, z)
+		end
+		if g.face then
+			D.round(cx, cy, g.r, g.face, z, g.stroke, g.strokeW)
+		end
+		local function ang(v: number): number
+			return angleOn(g.points, v)
+		end
+		for _, b in g.bands or {} do
+			D.arc(px, py, ang(b[1]), ang(b[2]), b[3], b[4], b[5], z + 1, b[6], 1.5)
+		end
+		for _, t in g.ticks or {} do
+			local v = t[1]
+			while v <= t[2] + 1e-6 do
+				local red = t[8] ~= nil and v >= t[8] - 1e-6
+				D.seg(px, py, ang(v), t[4], t[5], t[6], if red then (t[9] or RED) else t[7], z + 2)
+				v += t[3]
+			end
+		end
+		for _, l in g.labels or {} do
+			local a = math.rad(ang(l[2]))
+			local rr = g.numR or g.r * 0.72
+			D.label(l[1], px + rr * math.sin(a), py - rr * math.cos(a), l[4] or g.numSize or g.r * 0.2, l[3] or g.numColor or WHITE, g.font or Enum.Font.GothamMedium, z + 3)
+		end
+		local n = g.needle
+		local arm = D.needle(px, py, n[1], n[2], n[3], n[4], z + 5)
+		if g.hub then
+			D.round(px, py, g.hub[1], g.hub[2], z + 6, g.hub[3], g.hub[4])
+		end
+		local shown = g.points[1][1]
+		local smooth = g.smooth or 0.35
+		arm.Rotation = ang(shown)
+		return function(v: number)
+			shown += (v - shown) * smooth
+			arm.Rotation = ang(shown)
+		end
+	end
+
+	-- speedometer numbers in the player's unit on an mph scale (every stepMph mph or every stepKmh
+	-- km/h up to topMph), and the matching tick specs (majors at the numbers, minors between)
+	local function speedLabels(topMph: number, stepMph: number, stepKmh: number, color: Color3?, size: number?): { any }
+		local out = {}
+		if E.get_KMH() then
+			for k = 0, topMph * 1.609 + 0.5, stepKmh do
+				table.insert(out, { tostring(k), k / 1.609, color, size })
+			end
+		else
+			for m = 0, topMph, stepMph do
+				table.insert(out, { tostring(m), m, color, size })
+			end
+		end
+		return out
+	end
+	local function speedTicks(topMph: number, stepMph: number, stepKmh: number, per: number, major: { any }, minor: { any }): { any }
+		local step = if E.get_KMH() then stepKmh / 1.609 else stepMph
+		local top = if E.get_KMH() then math.floor(topMph * 1.609 / stepKmh) * stepKmh / 1.609 else topMph
+		return {
+			{ 0, top, step / per, minor[1], minor[2], minor[3], minor[4] },
+			{ 0, top, step, major[1], major[2], major[3], major[4] },
+		}
+	end
+
+	-- a quarter of a disc as thin slices (sx, sy: which quarter, +1 / -1), for screens cut into a dial
+	local function quarter(D: Design, cx: number, cy: number, r: number, color: Color3, z: number, sx: number, sy: number)
+		local n = 28
+		for i = 0, n - 1 do
+			local xm = r * (i + 0.5) / n
+			local h = math.sqrt(math.max(r * r - xm * xm, 0))
+			D.rect(cx + sx * xm, cy + sy * h / 2, r / n + 0.8, h, color, z)
+		end
+	end
+
+	local function rounded(f: Frame, k: number?): Frame
+		new("UICorner", { CornerRadius = UDim.new(k or 0.12, 0) }, f)
+		return f
+	end
+
+	-- Ferrari F430 (refs f430_*): carbon panel; yellow rev counter 0-10 in a silver bezel with a
+	-- white-ticked black ring, red from 8,500, the lower right quarter cut out dark with the blue
+	-- screen, the small gear screen above the hub, red-orange needle; water temperature, oil
+	-- temperature and oil pressure dials on the left (pivots low, needles sweep across the top);
+	-- the black speedometer on the right with its yellow inner scale and the green odometer
+	local function f430(gui: SurfaceGui): Update
+		local D = design(gui, 1180, 420, Color3.fromRGB(24, 24, 26))
+		local BLACK = Color3.fromRGB(14, 14, 16)
+		local SILVER = Color3.fromRGB(192, 194, 198)
+		local NEEDLE = Color3.fromRGB(244, 92, 24)
+		local INK = Color3.fromRGB(22, 20, 16)
+		local cx, cy = 618, 212
+		-- the rev counter
+		D.round(cx, cy, 206, SILVER, 2)
+		for i = 0, 35 do -- the bezel's own dark marks
+			D.seg(cx, cy, i * 10, 186, 203, if i % 3 == 0 then 3 else 1.5, Color3.fromRGB(70, 72, 76), 3)
+		end
+		D.round(cx, cy, 183, BLACK, 3)
+		local pts = { { 0, 176 }, { 1, 200 }, { 2, 225 }, { 3, 250 }, { 4, 275 }, { 5, 303 }, { 6, 331 }, { 7, 361 }, { 8, 391 }, { 9, 419 }, { 10, 443 } }
+		local labels = {}
+		for k = 1, 10 do
+			table.insert(labels, { tostring(k), k, INK, 46 })
+		end
+		table.insert(labels, { "0", 0, WHITE, 30 })
+		local setRpm = gauge(D, {
+			cx = cx, cy = cy, r = 160, face = Color3.fromRGB(240, 178, 18), z = 4,
+			points = pts,
+			bands = { { 8.5, 10, 150, 14, Color3.fromRGB(214, 34, 26) } },
+			ticks = { { 0, 10, 0.2, 165, 178, 2.5, WHITE, 8.5, Color3.fromRGB(230, 50, 40) }, { 0, 10, 1, 162, 181, 5, WHITE } },
+			labels = labels, numR = 122, font = Enum.Font.JosefinSans,
+			needle = { -16, 152, 5, NEEDLE }, hub = { 25, Color3.fromRGB(26, 26, 28), Color3.fromRGB(80, 82, 86), 2 },
+		})
+		quarter(D, cx, cy, 160, Color3.fromRGB(38, 38, 40), 5, 1, 1)
+		D.label("rpm x1000", cx - 52, cy + 50, 14, INK, Enum.Font.JosefinSans, 7, 9)
+		D.rect(cx, cy - 72, 44, 56, Color3.fromRGB(16, 16, 18), 7)
+		local gearText = D.label("N", cx, cy - 72, 36, Color3.fromRGB(240, 240, 240), Enum.Font.GothamBold, 8, 1)
+		rounded(D.rect(cx + 84, cy + 82, 92, 80, Color3.fromRGB(20, 26, 104), 7), 0.14)
+		D.label("SPORT", cx + 84, cy + 82, 14, Color3.fromRGB(150, 170, 255), Enum.Font.GothamMedium, 8, 5)
+
+		-- the three small dials on the left: face, a scale across the top, the pivot low in the middle
+		local function small(x: number, y: number, lo: number, mid: number, hi: number, redFrom: number?, unitText: string, icon: string): (number) -> ()
+			local p = { { lo, -52 }, { mid, -3 }, { hi, 46 } }
+			local labs = { { tostring(lo), lo, WHITE, 25 }, { tostring(mid), mid, WHITE, 25 }, { tostring(hi), hi, WHITE, 25 } }
+			local set = gauge(D, {
+				cx = x, cy = y, r = 84, face = BLACK, stroke = Color3.fromRGB(46, 46, 50), strokeW = 3, z = 2,
+				px = x, py = y + 36, points = p,
+				ticks = { { lo, hi, (hi - lo) / 10, 92, 104, 3.5, WHITE, redFrom, Color3.fromRGB(220, 40, 30) } },
+				bands = if redFrom then { { redFrom, hi, 98, 12, Color3.fromRGB(210, 34, 26) } } else nil,
+				labels = labs, numR = 70, font = Enum.Font.JosefinSans,
+				needle = { 0, 84, 4, NEEDLE }, hub = { 17, Color3.fromRGB(30, 30, 32), Color3.fromRGB(70, 70, 74), 2 },
+			})
+			D.label(unitText, x - 46, y + 30, 18, WHITE, Enum.Font.JosefinSans, 6, #unitText)
+			D.label(icon, x + 46, y + 30, 16, WHITE, Enum.Font.GothamMedium, 6, 2)
+			return set
+		end
+		local setWater = small(106, 250, 140, 210, 280, 258, "°F", "≈")
+		local setOilT = small(298, 124, 120, 230, 340, 310, "°F", "♨")
+		local setOilP = small(306, 316, 0, 70, 140, nil, "lb/in²", "◒")
+
+		-- the speedometer (mph outside, km/h on the yellow inner ring, or the other way round)
+		local sx, sy = 1012, 222
+		local spts = { { 0, -166 }, { 20, -144 }, { 40, -123 }, { 60, -104 }, { 80, -83 }, { 100, -58 }, { 120, -35 }, { 140, -8 }, { 160, 15 }, { 180, 38 }, { 200, 60 }, { 220, 82 }, { 240, 104 } }
+		local setSpeed = gauge(D, {
+			cx = sx, cy = sy, r = 166, face = BLACK, stroke = Color3.fromRGB(58, 60, 64), strokeW = 3, z = 2,
+			points = spts,
+			ticks = speedTicks(220, 20, 40, 2, { 138, 160, 4, WHITE }, { 148, 160, 2, WHITE }),
+			labels = speedLabels(220, 20, 40, WHITE, 25), numR = 122, font = Enum.Font.JosefinSans,
+			needle = { -20, 150, 5, Color3.fromRGB(232, 40, 28) }, hub = { 30, Color3.fromRGB(26, 26, 28), Color3.fromRGB(70, 70, 74), 2 },
+		})
+		-- the inner scale in the other unit (yellow)
+		local YEL = Color3.fromRGB(226, 186, 40)
+		D.arc(sx, sy, -166, 82, 90, 1.6, YEL, 4)
+		local per = if E.get_KMH() then 20 else 30 -- mph or km/h steps on the inner ring
+		local k = per
+		while k <= (if E.get_KMH() then 220 else 350) do
+			local m = if E.get_KMH() then k else k / 1.609
+			local a = math.rad(angleOn(spts, m))
+			D.seg(sx, sy, math.deg(a), 90, 97, 1.6, YEL, 4)
+			D.label(tostring(k), sx + 74 * math.sin(a), sy - 74 * math.cos(a), 12, YEL, Enum.Font.JosefinSans, 5)
+			k += per
+		end
+		rounded(D.rect(sx + 74, sy - 34, 92, 28, Color3.fromRGB(12, 40, 10), 6), 0.1)
+		D.label("038184", sx + 74, sy - 34, 22, Color3.fromRGB(150, 255, 60), Enum.Font.Code, 7, 6)
+		local unitText = D.label(unit(), sx + 4, sy + 74, 16, WHITE, Enum.Font.JosefinSans, 6, 4)
+		for i = 0, 7 do -- the green fuel bars low on the right
+			D.rect(sx + 108 + i * 9, sy + 178 - i * 2, 6, 16 + i * 4, Color3.fromRGB(150, 230, 40), 6)
+		end
+
+		local warm = 0
+		return function(mph: number, g: string, rpm: number)
+			local r = math.clamp(rpm, 0, 1)
+			setRpm(0.8 + r * 7.7) -- idles near 1,000 and red-lines at 8,500 (rpm 0..1 is idle to the limiter)
+			setSpeed(mph)
+			warm = math.min(warm + 0.002, 1)
+			setWater(150 + 52 * warm)
+			setOilT(140 + 80 * warm)
+			setOilP(25 + 75 * r)
+			gearText.Text = g
+			unitText.Text = unit()
+		end
+	end
+
+	-- Audi R8 type 42 (refs r8_*): two dials in chrome-ringed pods, a thin red ring inside each, white
+	-- numbers, red needles; rev counter 0-10 (red from 8,700, 9 and 10 in red) with the clock and date
+	-- screen, speedometer with the odometer screen, oil temperature and battery dials at the outer
+	-- ends, fuel and coolant in the small top panel, the driver screen in the middle
+	local function r8(gui: SurfaceGui): Update
+		local D = design(gui, 1000, 360, Color3.fromRGB(8, 9, 11))
+		local CHROME = Color3.fromRGB(196, 200, 206)
+		local FACE = Color3.fromRGB(14, 17, 18)
+		local RRED = Color3.fromRGB(205, 24, 20)
+		local NEEDLE = Color3.fromRGB(236, 44, 26)
+		local font = Enum.Font.Arial
+		-- the pods: chrome outlines round both dials and their outer wings
+		for _, side in { -1, 1 } do
+			local x = 500 + side * 200
+			rounded(D.rect(x + side * 40, 196, 360, 250, Color3.fromRGB(10, 12, 13), 1), 0.45)
+			local outline = rounded(D.rect(x + side * 40, 196, 360, 250, FACE, 1), 0.45)
+			outline.BackgroundTransparency = 1
+			new("UIStroke", { Color = CHROME, Thickness = 3 * 300 / 360 }, outline)
+		end
+		local function pod(x: number, pts: { { number } }, labels: { any }, ticks: { any }, redFrom: number?): (number) -> ()
+			D.round(x, 196, 152, Color3.fromRGB(150, 154, 160), 2)
+			D.round(x, 196, 146, FACE, 2)
+			D.arc(x, 196, pts[1][2], pts[#pts][2], 136, 3, RRED, 3)
+			if redFrom then
+				D.arc(x, 196, angleOn(pts, redFrom), pts[#pts][2], 129, 7, RRED, 3)
+			end
+			return gauge(D, {
+				cx = x, cy = 196, r = 140, z = 3, points = pts, ticks = ticks,
+				labels = labels, numR = 102, font = font,
+				needle = { -14, 128, 4.5, NEEDLE }, hub = { 20, Color3.fromRGB(24, 26, 28), Color3.fromRGB(160, 164, 170), 3 },
+			})
+		end
+		local rpts = { { 0, -140 }, { 10, 140 } }
+		local rl = {}
+		for k = 0, 10 do
+			table.insert(rl, { tostring(k), k, if k >= 9 then Color3.fromRGB(240, 40, 30) else WHITE, 30 })
+		end
+		local setRpm = pod(300, rpts, rl, { { 0, 10, 0.25, 128, 136, 2, WHITE, 8.75, RRED }, { 0, 10, 1, 120, 136, 4, WHITE, 9, RRED } }, 8.75)
+		D.label("1/min x 1000", 300, 140, 12, WHITE, font, 6, 12)
+		rounded(D.rect(300, 270, 104, 42, Color3.fromRGB(4, 4, 6), 6), 0.1)
+		local clockText = D.label(clock(), 300, 260, 18, WHITE, Enum.Font.Code, 7, 5)
+		D.label(os.date("%d.%m.%Y") :: string, 300, 281, 13, WHITE, Enum.Font.Code, 7, 10)
+		local spts = { { 0, -140 }, { 224, 140 } }
+		local setSpeed = pod(700, spts, speedLabels(220, 20, 40, WHITE, 24), speedTicks(220, 20, 40, 2, { 120, 136, 3.5, WHITE }, { 128, 136, 2, WHITE }))
+		local unitText = D.label(unit(), 700, 140, 13, WHITE, font, 6, 4)
+		rounded(D.rect(700, 270, 104, 42, Color3.fromRGB(4, 4, 6), 6), 0.1)
+		D.label("10 610", 700, 260, 18, WHITE, Enum.Font.Code, 7, 6)
+		local tripText = D.label("0.0", 700, 281, 13, WHITE, Enum.Font.Code, 7, 6)
+		-- small dials at the outer ends of the pods
+		local function end_(x: number, flip: number, lo: string, hi: string, v: number, sym: string)
+			D.round(x, 236, 46, FACE, 3, Color3.fromRGB(120, 124, 130), 2)
+			D.arc(x, 236, -150 * flip, -30 * flip, 38, 2, WHITE, 4)
+			D.label(lo, x + 26 * flip, 262, 11, WHITE, font, 5, 3)
+			D.label(hi, x - 6 * flip, 204, 11, RRED, font, 5, 3)
+			D.label(sym, x + 14 * flip, 236, 13, WHITE, Enum.Font.GothamMedium, 5, 2)
+			D.needle(x, 236, -4, 36, 3, NEEDLE, 6).Rotation = (-150 + 120 * v) * flip
+			D.round(x, 236, 8, Color3.fromRGB(24, 26, 28), 7, Color3.fromRGB(150, 154, 160), 1.5)
+		end
+		end_(92, 1, "50", "150", 0.55, "°C")
+		end_(908, -1, "9", "16", 0.5, "▭")
+		-- the top panel: coolant and fuel
+		local top = rounded(D.rect(500, 48, 200, 72, Color3.fromRGB(16, 19, 20), 2), 0.18)
+		new("UIStroke", { Color = CHROME, Thickness = 2.5 * 300 / 360 }, top)
+		for i, x in { 452, 548 } do
+			D.arc(x, 76, -62, 62, 44, 2, WHITE, 3)
+			D.label(if i == 1 then "90" else "1/2", x, 38, 11, WHITE, font, 4, 3)
+			D.label(if i == 1 then "≈" else "⛽", x + 28, 74, 11, WHITE, Enum.Font.GothamMedium, 4, 1)
+			D.needle(x, 76, -3, 44, 3, NEEDLE, 5).Rotation = if i == 1 then 0 else 40
+			D.round(x, 76, 7, Color3.fromRGB(24, 26, 28), 6, Color3.fromRGB(150, 154, 160), 1.5)
+		end
+		-- the driver screen in the middle
+		rounded(D.rect(500, 214, 112, 128, Color3.fromRGB(3, 3, 5), 2), 0.06)
+		D.line(452, 184, 548, 184, 1.5, Color3.fromRGB(200, 200, 200), 3)
+		D.line(452, 244, 548, 244, 1.5, Color3.fromRGB(200, 200, 200), 3)
+		local outsideText = D.label("+19°C", 500, 170, 16, WHITE, Enum.Font.Code, 4, 6)
+		local gearText = D.label("N", 500, 214, 34, WHITE, Enum.Font.Code, 4, 1)
+		local speedText = D.label("0 " .. unit(), 500, 262, 15, WHITE, Enum.Font.Code, 4, 7)
+
+		local trip = 0
+		return function(mph: number, g: string, rpm: number)
+			setRpm(0.8 + math.clamp(rpm, 0, 1) * 7.9) -- the V10 red-lines at 8,700
+			setSpeed(mph)
+			trip += mph / 3600 / 60
+			tripText.Text = string.format("%.1f", if E.get_KMH() then trip * 1.609 else trip)
+			gearText.Text = g
+			speedText.Text = spd(mph) .. " " .. unit()
+			unitText.Text = unit()
+			clockText.Text = clock()
+			outsideText.Text = if E.get_KMH() then "+19°C" else "+66°F"
+		end
+	end
+
+	-- McLaren 12C (refs 12c_*): one big rev counter in the middle (black face in a silver ring, white
+	-- numbers 1-9 every 30 degrees, a red-orange block from 8,500, red needle), the speed in orange
+	-- digits inside it, the gearbox mode left and the gear right in orange, and two screens in the
+	-- silver-rimmed wings: trip computer on the left; handling / powertrain modes and the oil, water
+	-- and fuel bars on the right
+	local function mp412c(gui: SurfaceGui): Update
+		local D = design(gui, 1000, 380, Color3.fromRGB(10, 10, 12))
+		local SILVER = Color3.fromRGB(176, 178, 184)
+		local ORANGE = Color3.fromRGB(255, 122, 24)
+		local GREY = Color3.fromRGB(150, 152, 158)
+		local font = Enum.Font.Arial
+		-- the wings: a silver-rimmed screen each side, running out from under the dial
+		for _, side in { -1, 1 } do
+			local wing = rounded(D.rect(500 + side * 268, 232, 420, 196, Color3.fromRGB(13, 13, 16), 1), 0.16)
+			new("UIStroke", { Color = SILVER, Thickness = 4 * 300 / 380 }, wing)
+		end
+		-- the dial
+		local cx, cy = 500, 190
+		D.round(cx, cy, 188, Color3.fromRGB(46, 46, 50), 2, SILVER, 9)
+		local pts = { { 0, -181 }, { 1, -151 }, { 2, -122 }, { 3, -90 }, { 4, -61 }, { 5, -31 }, { 6, 0 }, { 7, 30 }, { 8, 61 }, { 9, 91 }, { 10, 121 } }
+		local labels = {}
+		for k = 1, 9 do
+			table.insert(labels, { tostring(k), k, if k == 9 then Color3.fromRGB(255, 70, 40) else WHITE, 40 })
+		end
+		local setRpm = gauge(D, {
+			cx = cx, cy = cy, r = 172, face = Color3.fromRGB(12, 12, 14), z = 3,
+			points = pts,
+			bands = { { 8.5, 9.15, 150, 26, Color3.fromRGB(232, 64, 30) } },
+			ticks = { { 1.5, 8.5, 1, 128, 160, 3.5, WHITE }, { 1, 9, 1, 152, 162, 3, WHITE } },
+			labels = labels, numR = 108, font = font,
+			needle = { -16, 150, 5, Color3.fromRGB(240, 36, 26) }, hub = { 20, Color3.fromRGB(20, 20, 22), Color3.fromRGB(60, 60, 64), 2 },
+		})
+		D.label("x1000 r/min", cx, cy - 34, 12, WHITE, font, 6, 11)
+		local speedText = D.label("0", cx + 80, cy + 60, 58, ORANGE, Enum.Font.Arial, 7, 3)
+		local unitText = D.label(unit(), cx + 86, cy + 98, 14, ORANGE, font, 7, 4)
+		-- gearbox mode (left) and gear (right), just outside the dial
+		rounded(D.rect(cx - 202, cy - 34, 36, 54, Color3.fromRGB(28, 16, 8), 4), 0.15)
+		D.label("M", cx - 202, cy - 34, 40, ORANGE, Enum.Font.ArialBold, 5, 1)
+		rounded(D.rect(cx + 202, cy - 34, 36, 54, Color3.fromRGB(28, 16, 8), 4), 0.15)
+		local gearText = D.label("N", cx + 202, cy - 34, 40, ORANGE, Enum.Font.ArialBold, 5, 1)
+		-- left screen: the trip computer
+		local lx = 168
+		D.label("HOME", lx - 52, 196, 12, WHITE, font, 3, 4)
+		D.line(lx - 80, 206, lx + 70, 206, 1, GREY, 3)
+		local clockText = D.label(clock(), lx + 86, 196, 20, WHITE, font, 3, 5)
+		D.label("ODOMETER", lx - 36, 222, 11, ORANGE, font, 3, 8)
+		D.label("TEMPERATURE", lx + 90, 222, 11, ORANGE, font, 3, 11)
+		local odoText = D.label("8377.1 km", lx - 30, 248, 18, WHITE, font, 3, 9)
+		local tempText = D.label("19 °C", lx + 96, 248, 18, WHITE, font, 3, 5)
+		D.label("TRIP", lx - 62, 276, 11, ORANGE, font, 3, 4)
+		D.label("RANGE", lx + 96, 276, 11, ORANGE, font, 3, 5)
+		local tripText = D.label("0.0 km", lx - 40, 302, 18, WHITE, font, 3, 7)
+		D.label("--- km", lx + 96, 302, 16, WHITE, font, 3, 6)
+		-- right screen: modes and the oil, water and fuel bars
+		local rx = 800
+		D.label("HANDLING", rx - 74, 212, 11, WHITE, font, 3, 8)
+		D.label("SPORT", rx - 74, 228, 16, WHITE, font, 3, 5)
+		D.label("POWERTRAIN", rx - 74, 262, 11, WHITE, font, 3, 10)
+		D.label("SPORT", rx - 74, 278, 16, WHITE, font, 3, 5)
+		local bars = {}
+		for i, name in { "OIL", "WATER", "FUEL" } do
+			local y = 200 + (i - 1) * 38
+			D.label(name, rx - 6, y, 12, ORANGE, font, 3, #name)
+			local back = D.rect(rx + 40, y + 16, 132, 13, Color3.fromRGB(16, 16, 18), 3)
+			new("UIStroke", { Color = GREY, Thickness = 1 }, back)
+			bars[i] = new("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(150, 150, 152), Size = UDim2.fromScale(0.2, 1), ZIndex = 4 }, back)
+		end
+		bars[3].Size = UDim2.fromScale(0.78, 1)
+		D.label("(P)", rx + 152, 210, 16, Color3.fromRGB(230, 40, 30), font, 3, 3)
+
+		local warm, trip = 0, 0
+		return function(mph: number, g: string, rpm: number)
+			setRpm(1 + math.clamp(rpm, 0, 1) * 7.5) -- 1,000 at idle, the limiter at 8,500
+			speedText.Text = spd(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			warm = math.min(warm + 0.002, 1)
+			bars[1].Size = UDim2.fromScale(0.2 + 0.3 * warm, 1)
+			bars[2].Size = UDim2.fromScale(0.25 + 0.3 * warm, 1)
+			trip += mph / 3600 / 60
+			local km = E.get_KMH()
+			tripText.Text = string.format("%.1f %s", if km then trip * 1.609 else trip, if km then "km" else "mi")
+			odoText.Text = if km then "8377.1 km" else "5205.4 mi"
+			tempText.Text = if km then "19 °C" else "66 °F"
+			clockText.Text = clock()
+		end
+	end
+
+	-- Ferrari 458 Italia (refs 458_*, owner's car has the Speciale cabin): the yellow rev counter in
+	-- the middle (black numbers 1-10 every 30 degrees, 9 and 10 in red, red ladder from 9,000, the
+	-- gear in orange in the small screen low on the right, red needle) in a black hood; the left
+	-- screen shows the speed on a drawn dial, the right one the map
+	local function ferrari458(gui: SurfaceGui): Update
+		local D = design(gui, 1100, 400, Color3.fromRGB(9, 9, 11))
+		local INK = Color3.fromRGB(22, 20, 16)
+		local RED9 = Color3.fromRGB(214, 30, 24)
+		local cx, cy = 550, 200
+		D.round(cx, cy, 196, Color3.fromRGB(22, 22, 24), 2, Color3.fromRGB(90, 92, 96), 2)
+		D.round(cx, cy, 182, Color3.fromRGB(236, 236, 232), 2)
+		local pts = { { 0, 150 }, { 10, 450 } }
+		local labels = {}
+		for k = 1, 10 do
+			table.insert(labels, { tostring(k), k, if k >= 9 then RED9 else INK, 40 })
+		end
+		local setRpm = gauge(D, {
+			cx = cx, cy = cy, r = 176, face = Color3.fromRGB(240, 180, 20), z = 3,
+			points = pts,
+			bands = { { 9, 10, 160, 18, RED9 } },
+			ticks = { { 1, 10, 0.2, 160, 172, 2, INK, 9, RED9 }, { 1, 10, 1, 148, 174, 4.5, INK, 9, RED9 } },
+			labels = labels, numR = 124, font = Enum.Font.JosefinSans,
+			needle = { -22, 158, 5, Color3.fromRGB(222, 32, 22) }, hub = { 26, Color3.fromRGB(18, 18, 20), Color3.fromRGB(70, 70, 74), 2 },
+		})
+		D.label("RPM x1000", cx + 66, cy + 34, 13, INK, Enum.Font.JosefinSans, 7, 9)
+		rounded(D.rect(cx + 72, cy + 84, 58, 62, Color3.fromRGB(26, 22, 18), 7), 0.12)
+		local gearText = D.label("N", cx + 72, cy + 84, 44, Color3.fromRGB(255, 146, 30), Enum.Font.GothamBold, 8, 1)
+		-- left screen: the drawn speedometer with the speed in digits
+		local lx, ly = 190, 222
+		rounded(D.rect(lx, ly, 300, 210, Color3.fromRGB(4, 6, 10), 1), 0.08)
+		local setSpeed = gauge(D, {
+			cx = lx, cy = ly + 18, r = 96, z = 2,
+			points = { { 0, -125 }, { 220, 125 } },
+			ticks = speedTicks(220, 20, 40, 2, { 84, 96, 3, WHITE }, { 90, 96, 1.5, DIM }),
+			labels = speedLabels(220, 40, 80, WHITE, 15), numR = 70, font = Enum.Font.GothamMedium,
+			needle = { -6, 88, 3, Color3.fromRGB(230, 40, 30) }, hub = { 8, Color3.fromRGB(40, 40, 44) },
+		})
+		local speedText = D.label("0", lx, ly + 60, 30, WHITE, Enum.Font.GothamBold, 4, 3)
+		local unitText = D.label(unit(), lx, ly + 86, 12, DIM, Enum.Font.GothamMedium, 4, 4)
+		D.label("SPORT", lx - 112, ly - 88, 12, Color3.fromRGB(255, 196, 40), Enum.Font.GothamBold, 4, 5)
+		local clockText = D.label(clock(), lx + 112, ly - 88, 12, WHITE, Enum.Font.GothamMedium, 4, 5)
+		-- right screen: the map (roads on a dark background, the car's arrow in the middle)
+		local rx, ry = 910, 222
+		rounded(D.rect(rx, ry, 300, 210, Color3.fromRGB(28, 44, 66), 1), 0.08)
+		for _, l in { { -140, 40, 140, -30 }, { -60, -100, -10, 100 }, { 20, -100, 110, 100 }, { -140, -50, 140, -70 }, { 60, 0, 140, 60 } } do
+			D.line(rx + l[1], ry + l[2], rx + l[3], ry + l[4], 5, Color3.fromRGB(196, 206, 220), 2)
+		end
+		D.line(rx - 140, ry + 70, rx + 140, ry + 30, 8, Color3.fromRGB(240, 186, 60), 2)
+		D.round(rx, ry + 10, 10, Color3.fromRGB(255, 80, 40), 3, WHITE, 2)
+		return function(mph: number, g: string, rpm: number)
+			setRpm(1 + math.clamp(rpm, 0, 1) * 8) -- the limiter at 9,000
+			setSpeed(mph)
+			speedText.Text = spd(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			clockText.Text = clock()
+		end
+	end
+
+	-- Ferrari California (refs california_*): red rev counter in a bronze-silver bezel (white numbers,
+	-- 8-10 in orange-red, red from 7,500, two thin rings inside, white needle) with the gear in the
+	-- shield-shaped screen low on the right; the speedometer on the right, dark blue face; the screen
+	-- on the left with the green top line (clock, comfort mode, outside temperature), the water and oil
+	-- dials drawn on it, the fuel bar and the odometer
+	local function ferrariCalifornia(gui: SurfaceGui): Update
+		local D = design(gui, 1100, 400, Color3.fromRGB(14, 14, 16))
+		local ORED = Color3.fromRGB(255, 84, 40)
+		local cx, cy = 520, 200
+		D.round(cx, cy, 190, Color3.fromRGB(196, 184, 172), 2)
+		D.round(cx, cy, 176, Color3.fromRGB(16, 16, 18), 2)
+		local pts = { { 0, 178 }, { 1, 195 }, { 2, 220 }, { 3, 248 }, { 4, 275 }, { 5, 303 }, { 6, 330 }, { 7, 357 }, { 8, 385 }, { 9, 412 }, { 10, 440 } }
+		local labels = {}
+		for k = 1, 10 do
+			table.insert(labels, { tostring(k), k, if k >= 8 then ORED else WHITE, 40 })
+		end
+		table.insert(labels, { "0", 0, WHITE, 30 })
+		local setRpm = gauge(D, {
+			cx = cx, cy = cy, r = 160, face = Color3.fromRGB(140, 26, 28), z = 3,
+			points = pts,
+			bands = { { 7.5, 10, 160, 10, Color3.fromRGB(230, 50, 30) } },
+			ticks = { { 0, 10, 0.25, 164, 174, 2, WHITE, 7.5, ORED }, { 0, 10, 1, 160, 176, 4, WHITE, 8, ORED } },
+			labels = labels, numR = 124, font = Enum.Font.JosefinSans,
+			needle = { -18, 152, 5, Color3.fromRGB(236, 236, 236) }, hub = { 22, Color3.fromRGB(20, 20, 22), Color3.fromRGB(80, 80, 84), 2 },
+		})
+		D.arc(cx, cy, angleOn(pts, 2), angleOn(pts, 8), 92, 1.5, Color3.fromRGB(230, 210, 210), 4)
+		D.arc(cx, cy, angleOn(pts, 2), angleOn(pts, 8), 100, 1.5, Color3.fromRGB(230, 210, 210), 4)
+		D.label("RPM", cx + 64, cy + 2, 16, WHITE, Enum.Font.JosefinSans, 6, 3)
+		D.label("x 1000", cx + 64, cy + 20, 11, WHITE, Enum.Font.JosefinSans, 6, 6)
+		local shield = rounded(D.rect(cx + 84, cy + 78, 96, 84, Color3.fromRGB(178, 168, 156), 7), 0.18)
+		new("UIStroke", { Color = Color3.fromRGB(240, 240, 240), Thickness = 2 }, shield)
+		local gearText = D.label("N", cx + 84, cy + 76, 46, Color3.fromRGB(232, 120, 30), Enum.Font.GothamBold, 8, 1)
+		-- the speedometer
+		local sx, sy = 880, 222
+		D.round(sx, sy, 148, Color3.fromRGB(40, 40, 44), 2)
+		local setSpeed = gauge(D, {
+			cx = sx, cy = sy, r = 140, face = Color3.fromRGB(16, 22, 54), z = 3,
+			points = { { 0, -155 }, { 220, 150 } },
+			ticks = speedTicks(220, 20, 30, 2, { 112, 128, 3, WHITE }, { 120, 128, 1.5, WHITE }),
+			labels = speedLabels(220, 20, 30, WHITE, 22), numR = 140 * 0.66, font = Enum.Font.JosefinSans,
+			needle = { -14, 124, 4, Color3.fromRGB(236, 236, 236) }, hub = { 18, Color3.fromRGB(20, 20, 22), Color3.fromRGB(80, 80, 84), 2 },
+		})
+		D.arc(sx, sy, -155, 150, 108, 1.2, WHITE, 4)
+		local unitText = D.label(unit(), sx + 44, sy - 4, 15, WHITE, Enum.Font.JosefinSans, 6, 4)
+		-- the left screen
+		local lx, ly = 176, 214
+		rounded(D.rect(lx, ly, 280, 200, Color3.fromRGB(8, 8, 10), 2), 0.06)
+		D.rect(lx, ly - 86, 266, 20, Color3.fromRGB(70, 180, 70), 3)
+		local clockText = D.label(clock(), lx - 100, ly - 86, 13, Color3.fromRGB(10, 30, 10), Enum.Font.GothamBold, 4, 5)
+		D.label("COMFORT", lx, ly - 86, 13, Color3.fromRGB(10, 30, 10), Enum.Font.GothamBold, 4, 7)
+		local tempText = D.label("79°F", lx + 104, ly - 86, 13, Color3.fromRGB(10, 30, 10), Enum.Font.GothamBold, 4, 4)
+		local function screenDial(x: number, lo: string, mid: string, hi: string, v: number)
+			D.arc(x, ly + 4, -120, 120, 52, 2, WHITE, 3)
+			D.label(lo, x - 40, ly + 44, 11, WHITE, Enum.Font.GothamMedium, 4, 3)
+			D.label(mid, x, ly - 32, 11, WHITE, Enum.Font.GothamMedium, 4, 3)
+			D.label(hi, x + 40, ly + 44, 11, WHITE, Enum.Font.GothamMedium, 4, 3)
+			D.needle(x, ly + 4, -4, 46, 3, Color3.fromRGB(230, 40, 30), 5).Rotation = -120 + 240 * v
+		end
+		screenDial(lx - 66, "140", "210", "280", 0.55)
+		screenDial(lx + 66, "120", "240", "300", 0.45)
+		for i = 0, 9 do
+			D.rect(lx - 118 + i * 9, ly + 76, 6, 10, if i < 7 then Color3.fromRGB(236, 90, 30) else Color3.fromRGB(60, 60, 62), 4)
+		end
+		D.label("0  1/2  1", lx - 76, ly + 90, 9, WHITE, Enum.Font.GothamMedium, 4, 9)
+		local odoText = D.label("9024 mi", lx + 76, ly + 84, 14, WHITE, Enum.Font.GothamMedium, 4, 7)
+		return function(mph: number, g: string, rpm: number)
+			setRpm(0.8 + math.clamp(rpm, 0, 1) * 6.9) -- the V8's limiter at 7,700
+			setSpeed(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			clockText.Text = clock()
+			tempText.Text = if E.get_KMH() then "26°C" else "79°F"
+			odoText.Text = if E.get_KMH() then "14523 km" else "9024 mi"
+		end
+	end
+
+	-- Porsche 911 GT3 991.2 (refs gt3_*): five round instruments in black hoods; the rev counter in the
+	-- middle has a grey face, dark numbers 0-10, yellow ticks, red from 9,500, an orange needle, the
+	-- P R N D M strip and gear box, and the digital speed in its screen at the bottom; the speedometer
+	-- left of it (black, white numbers 0-225 mph, yellow ticks), oil temperature and pressure far left,
+	-- the round screen right of it (map) and fuel and water temperature far right
+	local function porsche991gt3(gui: SurfaceGui): Update
+		local D = design(gui, 1200, 470, Color3.fromRGB(8, 8, 10))
+		local YEL = Color3.fromRGB(226, 206, 60)
+		local ORANGE = Color3.fromRGB(255, 136, 20)
+		local FACE = Color3.fromRGB(12, 12, 14)
+		local HOOD = Color3.fromRGB(26, 26, 28)
+		local font = Enum.Font.SourceSansSemibold
+		local cy = 240
+		-- the outer pair first (they sit behind the others)
+		local function combo(x: number, topLabels: { any }, topPts: { { number } }, botLabels: { any }, botPts: { { number } }): ((number) -> (), (number) -> ())
+			D.round(x, cy + 20, 132, HOOD, 2)
+			D.round(x, cy + 20, 122, FACE, 2)
+			local a = gauge(D, { cx = x, cy = cy + 20, r = 122, z = 2, points = topPts,
+				ticks = { { topPts[1][1], topPts[#topPts][1], (topPts[#topPts][1] - topPts[1][1]) / 8, 100, 114, 3, YEL } },
+				labels = topLabels, numR = 80, font = font,
+				needle = { -8, 104, 4, ORANGE }, hub = { 14, Color3.fromRGB(30, 30, 32) } })
+			local b = gauge(D, { cx = x, cy = cy + 20, r = 122, z = 2, points = botPts,
+				ticks = { { botPts[1][1], botPts[#botPts][1], (botPts[#botPts][1] - botPts[1][1]) / 5, 100, 114, 3, YEL } },
+				labels = botLabels, numR = 80, font = font,
+				needle = { -8, 104, 4, ORANGE } })
+			return a, b
+		end
+		local setOilT, setOilP = combo(132,
+			{ { "150", 150, WHITE, 22 }, { "250", 250, WHITE, 22 }, { "300", 300, WHITE, 22 } }, { { 150, -75 }, { 300, 20 } },
+			{ { "0", 0, WHITE, 22 }, { "1", 1, WHITE, 22 }, { "2", 2, WHITE, 22 }, { "3", 3, WHITE, 22 }, { "4", 4, WHITE, 22 }, { "5", 5, WHITE, 22 } }, { { 0, -120 }, { 5, -205 } })
+		local setFuel, setWater = combo(1068,
+			{ { "0", 0, WHITE, 22 }, { "1/2", 0.5, WHITE, 22 }, { "4/4", 1, WHITE, 22 } }, { { 0, -20 }, { 1, 75 } },
+			{ { "140", 140, WHITE, 22 }, { "210", 210, WHITE, 22 }, { "250", 250, WHITE, 22 } }, { { 140, 205 }, { 250, 120 } })
+		-- the round screen (map) right of the rev counter
+		D.round(860, cy, 160, HOOD, 3)
+		D.round(860, cy, 146, Color3.fromRGB(176, 150, 150), 3)
+		for _, l in { { -120, 60, 130, 10 }, { -30, -130, 20, 130 }, { 40, -120, 120, 80 }, { -130, -40, 100, -90 } } do
+			D.line(860 + l[1], cy + l[2], 860 + l[3], cy + l[4], 5, Color3.fromRGB(236, 196, 70), 4)
+		end
+		D.line(740, cy + 80, 990, cy + 64, 7, Color3.fromRGB(206, 40, 40), 4)
+		D.round(880, cy + 70, 12, Color3.fromRGB(255, 120, 30), 5, WHITE, 2)
+		-- the speedometer left of the rev counter
+		D.round(372, cy, 160, HOOD, 3)
+		local setSpeed = gauge(D, {
+			cx = 372, cy = cy, r = 148, face = FACE, z = 3,
+			points = { { 0, -130 }, { 225, 40 } },
+			ticks = speedTicks(225, 25, 40, 4, { 126, 144, 4, YEL }, { 136, 144, 2, YEL }),
+			labels = speedLabels(225, 25, 40, WHITE, 26), numR = 100, font = font,
+			needle = { -16, 130, 5, ORANGE }, hub = { 20, Color3.fromRGB(30, 30, 32), Color3.fromRGB(56, 56, 60), 2 },
+		})
+		local unitText = D.label(unit(true), 372, cy - 58, 12, WHITE, font, 6, 4)
+		rounded(D.rect(410, cy + 100, 120, 44, Color3.fromRGB(4, 4, 6), 6), 0.1)
+		D.label("36352", 400, cy + 90, 22, WHITE, Enum.Font.Code, 7, 5)
+		local tripText = D.label("0.0", 410, cy + 112, 18, WHITE, Enum.Font.Code, 7, 5)
+		-- the rev counter in the middle (on top of the others)
+		local cx = 620
+		D.round(cx, cy, 196, HOOD, 5)
+		D.round(cx, cy, 184, Color3.fromRGB(6, 6, 8), 5)
+		local pts = { { 0, -132 }, { 1, -106 }, { 2, -81 }, { 3, -57 }, { 4, -29 }, { 5, 1 }, { 6, 30 }, { 7, 58 }, { 8, 83 }, { 9, 110 }, { 10, 136 } }
+		local labels = {}
+		for k = 0, 10 do
+			table.insert(labels, { tostring(k), k, Color3.fromRGB(44, 44, 46), 40 })
+		end
+		local setRpm = gauge(D, {
+			cx = cx, cy = cy, r = 176, face = Color3.fromRGB(128, 130, 134), z = 6,
+			points = pts,
+			bands = { { 9.5, 10, 168, 12, Color3.fromRGB(226, 40, 30) } },
+			ticks = { { 0, 10, 0.25, 160, 172, 2, YEL }, { 0, 10, 1, 152, 174, 4.5, YEL } },
+			labels = labels, numR = 128, font = font,
+			needle = { -24, 158, 6, ORANGE }, hub = { 30, Color3.fromRGB(26, 26, 28), Color3.fromRGB(56, 56, 60), 2 },
+		})
+		-- the lower part of the face is a shade darker; the speed screen sits at the bottom
+		local lower = rounded(D.rect(cx, cy + 142, 210, 56, Color3.fromRGB(10, 10, 12), 11), 0.45)
+		lower.BackgroundTransparency = 0
+		local speedText = D.label("0", cx - 12, cy + 142, 42, WHITE, Enum.Font.Code, 13, 3)
+		local unitText2 = D.label(unit(true), cx + 62, cy + 142, 14, WHITE, font, 13, 4)
+		D.rect(cx - 6, cy + 74, 34, 52, Color3.fromRGB(26, 26, 28), 11)
+		local gearText = D.label("N", cx - 6, cy + 74, 36, WHITE, Enum.Font.Code, 13, 1)
+		local strip = { "P", "R", "N", "D" }
+		for i, s in strip do
+			D.label(s, cx + 66, cy + 26 + i * 18, 15, Color3.fromRGB(240, 240, 240), font, 13, 1)
+		end
+		D.label("M", cx + 42, cy + 100, 15, Color3.fromRGB(240, 240, 240), font, 13, 1)
+
+		local warm, trip = 0, 0
+		return function(mph: number, g: string, rpm: number)
+			local r = math.clamp(rpm, 0, 1)
+			setRpm(0.8 + r * 8.2) -- the flat six revs to 9,000
+			setSpeed(mph)
+			warm = math.min(warm + 0.002, 1)
+			setOilT(170 + 60 * warm)
+			setOilP(1 + 3.5 * r)
+			setFuel(DashGauges.fuelShare)
+			setWater(150 + 50 * warm)
+			trip += mph / 3600 / 60
+			tripText.Text = string.format("%.1f", if E.get_KMH() then trip * 1.609 else trip)
+			speedText.Text = spd(mph)
+			unitText.Text = unit(true)
+			unitText2.Text = unit(true)
+			gearText.Text = g
+		end
+	end
+
+	-- Lamborghini Murcielago LP640 (refs lp640_*): black dials on a dark panel, white numbers and
+	-- ticks, yellow needles; two small dials staggered far left (oil temperature, oil pressure), the
+	-- rev counter (0-9, red from 8,000), the big speedometer with its inner second scale, the screen
+	-- and two more small dials (fuel, water) on the right
+	local function murcielagoLP640(gui: SurfaceGui): Update
+		local D = design(gui, 1150, 400, Color3.fromRGB(20, 20, 22))
+		local FACE = Color3.fromRGB(10, 10, 12)
+		local NEEDLE = Color3.fromRGB(246, 186, 30)
+		local font = Enum.Font.GothamMedium
+		local function small(x: number, y: number, lo: string, hi: string, v: number, red: boolean?)
+			D.round(x, y, 50, FACE, 2, Color3.fromRGB(70, 70, 74), 2)
+			D.arc(x, y, -60, 60, 40, 2, WHITE, 3)
+			if red then
+				D.arc(x, y, 40, 60, 40, 5, Color3.fromRGB(230, 40, 30), 4)
+			end
+			D.label(lo, x - 30, y - 4, 12, WHITE, font, 4, 3)
+			D.label(hi, x + 30, y - 4, 12, WHITE, font, 4, 3)
+			D.needle(x, y + 14, -4, 42, 3, NEEDLE, 5).Rotation = -60 + 120 * v
+			D.round(x, y + 14, 8, Color3.fromRGB(30, 30, 32), 6)
+		end
+		small(70, 236, "50", "150", 0.55, true)
+		small(150, 180, "0", "10", 0.45)
+		small(1006, 180, "0", "1", 0.7)
+		small(1086, 236, "50", "130", 0.5, true)
+		-- the rev counter
+		local rx, ry = 360, 210
+		D.round(rx, ry, 170, Color3.fromRGB(40, 40, 44), 2)
+		local rl = {}
+		for k = 0, 9 do
+			table.insert(rl, { tostring(k), k, if k >= 8 then Color3.fromRGB(240, 50, 40) else WHITE, 30 })
+		end
+		local setRpm = gauge(D, {
+			cx = rx, cy = ry, r = 164, face = FACE, z = 2,
+			points = { { 0, -135 }, { 9, 125 } },
+			bands = { { 8, 9, 146, 12, Color3.fromRGB(226, 36, 28) } },
+			ticks = { { 0, 9, 0.25, 142, 154, 2, WHITE, 8, Color3.fromRGB(240, 50, 40) }, { 0, 9, 1, 132, 156, 5, WHITE, 8, Color3.fromRGB(240, 50, 40) } },
+			labels = rl, numR = 104, font = font,
+			needle = { -18, 146, 5, NEEDLE }, hub = { 20, Color3.fromRGB(30, 30, 32), Color3.fromRGB(70, 70, 74), 2 },
+		})
+		D.label("RPM x 1000", rx, ry - 48, 11, WHITE, font, 5, 10)
+		-- the speedometer
+		local sx, sy = 690, 200
+		D.round(sx, sy, 184, Color3.fromRGB(40, 40, 44), 2)
+		local setSpeed = gauge(D, {
+			cx = sx, cy = sy, r = 178, face = FACE, z = 2,
+			points = { { 0, -138 }, { 220, 138 } },
+			ticks = speedTicks(220, 20, 40, 2, { 144, 170, 5, WHITE }, { 156, 170, 2.5, WHITE }),
+			labels = speedLabels(220, 20, 40, WHITE, 28), numR = 122, font = font,
+			needle = { -20, 160, 5, NEEDLE }, hub = { 24, Color3.fromRGB(30, 30, 32), Color3.fromRGB(70, 70, 74), 2 },
+		})
+		-- the inner ring in the other unit
+		D.arc(sx, sy, -138, 138, 80, 1.5, WHITE, 3)
+		local per = if E.get_KMH() then 20 else 40
+		local k = per
+		while k <= (if E.get_KMH() then 200 else 340) do
+			local m = if E.get_KMH() then k else k / 1.609
+			local a = -138 + 276 * m / 220
+			D.seg(sx, sy, a, 80, 88, 1.5, WHITE, 3)
+			local t = math.rad(a)
+			D.label(tostring(k), sx + 66 * math.sin(t), sy - 66 * math.cos(t), 11, WHITE, font, 4)
+			k += per
+		end
+		local unitText = D.label(unit(), sx, sy + 56, 13, WHITE, font, 5, 4)
+		-- the screen
+		rounded(D.rect(916, 282, 116, 54, Color3.fromRGB(96, 100, 104), 2), 0.08)
+		local gearText = D.label("N", 890, 282, 32, Color3.fromRGB(20, 24, 28), Enum.Font.Code, 3, 1)
+		local clockText = D.label(clock(), 940, 282, 18, Color3.fromRGB(20, 24, 28), Enum.Font.Code, 3, 5)
+		return function(mph: number, g: string, rpm: number)
+			setRpm(0.8 + math.clamp(rpm, 0, 1) * 7.4) -- the V12 red-lines at 8,200
+			setSpeed(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			clockText.Text = clock()
+		end
+	end
+
+	-- Lamborghini Gallardo LP570-4 Superleggera (refs gallardo_*): white-faced dials in silver rings on
+	-- a carbon panel: the rev counter on the left (black numbers 0-10, red from 8,500 with 9 and 10
+	-- in red), the speedometer on the right, a small white dial low at each outer end (oil temperature,
+	-- fuel), the screen in the middle; red needles
+	local function gallardoSL(gui: SurfaceGui): Update
+		local D = design(gui, 1150, 400, Color3.fromRGB(26, 26, 28))
+		local WFACE = Color3.fromRGB(236, 236, 232)
+		local INK = Color3.fromRGB(20, 20, 22)
+		local RRED = Color3.fromRGB(214, 30, 24)
+		local SILVER = Color3.fromRGB(184, 188, 194)
+		local NEEDLE = Color3.fromRGB(232, 60, 24)
+		local font = Enum.Font.GothamMedium
+		local function small(x: number, y: number, lo: string, hi: string, v: number)
+			D.round(x, y, 64, SILVER, 2)
+			D.round(x, y, 58, WFACE, 2)
+			D.arc(x, y, -120, 120, 48, 2, INK, 3)
+			D.label(lo, x - 30, y + 28, 12, INK, font, 4, 3)
+			D.label(hi, x + 30, y + 28, 12, RRED, font, 4, 3)
+			D.needle(x, y, -6, 46, 3, NEEDLE, 5).Rotation = -120 + 240 * v
+			D.round(x, y, 9, Color3.fromRGB(30, 30, 32), 6)
+		end
+		small(78, 300, "50", "150", 0.5)
+		small(1072, 300, "0", "1/1", 0.7)
+		local function big(x: number, set: any): (number) -> ()
+			D.round(x, 200, 186, SILVER, 2)
+			D.round(x, 200, 178, Color3.fromRGB(40, 40, 42), 2)
+			set.cx, set.cy, set.r, set.face, set.z = x, 200, 170, WFACE, 2
+			return gauge(D, set)
+		end
+		local rl = {}
+		for k = 0, 10 do
+			table.insert(rl, { tostring(k), k, if k >= 9 then RRED else INK, 34 })
+		end
+		local setRpm = big(310, {
+			points = { { 0, -140 }, { 10, 140 } },
+			bands = { { 8.5, 10, 156, 16, RRED } },
+			ticks = { { 0, 10, 0.25, 150, 164, 2, INK, 8.5, RRED }, { 0, 10, 1, 140, 166, 5, INK, 8.5, RRED } },
+			labels = rl, numR = 112, font = font,
+			needle = { -20, 152, 5, NEEDLE }, hub = { 22, Color3.fromRGB(30, 30, 32), SILVER, 2 },
+		})
+		D.label("RPM x 1000", 310, 260, 12, INK, font, 5, 10)
+		local setSpeed = big(840, {
+			points = { { 0, -140 }, { 220, 140 } },
+			ticks = speedTicks(220, 20, 40, 2, { 140, 166, 4, INK }, { 152, 166, 2, INK }),
+			labels = speedLabels(220, 20, 40, INK, 26), numR = 116, font = font,
+			needle = { -20, 152, 5, NEEDLE }, hub = { 22, Color3.fromRGB(30, 30, 32), SILVER, 2 },
+		})
+		local unitText = D.label(unit(), 840, 260, 13, INK, font, 5, 4)
+		-- the screen in the middle
+		local scr = rounded(D.rect(575, 190, 150, 110, Color3.fromRGB(8, 14, 24), 2), 0.08)
+		new("UIStroke", { Color = SILVER, Thickness = 2 }, scr)
+		local gearText = D.label("N", 575, 170, 46, Color3.fromRGB(120, 220, 255), Enum.Font.GothamBold, 3, 1)
+		local speedText = D.label("0 " .. unit(), 575, 222, 16, Color3.fromRGB(200, 230, 255), Enum.Font.GothamMedium, 3, 7)
+		D.label("CORSA", 575, 276, 13, Color3.fromRGB(150, 230, 60), Enum.Font.GothamBold, 3, 5)
+		return function(mph: number, g: string, rpm: number)
+			setRpm(0.8 + math.clamp(rpm, 0, 1) * 7.7) -- the V10 red-lines at 8,500
+			setSpeed(mph)
+			unitText.Text = unit()
+			gearText.Text = g
+			speedText.Text = spd(mph) .. " " .. unit()
+		end
+	end
+
+	-- Lamborghini Aventador SV (refs aventador_sv_cluster_lit_video*, owner 2026-10-24: "the rpm circle
+	-- is too round unlike the real one"): the wide yellow screen (flat top, straight sides, cut in to a
+	-- narrow bottom), the rev band a flat oval sweep from 2 low on the left over the top to 10 low on
+	-- the right (white bars lit up to the revs, red from 8,500, 9 and 10 in red), the big italic gear,
+	-- R 1234567 A, STRADA and the odometer, "Fasten Seatbelt" at the bottom; outside the yellow: mph and
+	-- rpm tags, the speed and the revs in white digits; small yellow screens left (clock, date, outside
+	-- temperature, two bar gauges) and right (range, the car picture)
+	local function aventadorSV(gui: SurfaceGui): Update
+		local YELLOW = Color3.fromRGB(250, 206, 30)
+		local INK = Color3.fromRGB(14, 14, 16)
+		local DARK = Color3.fromRGB(10, 11, 13)
+		local LAMBO_RED = Color3.fromRGB(228, 30, 30)
+		local D = design(gui, 1000, 402, DARK)
+		local italic = Font.new("rbxasset://fonts/families/BuilderSans.json", Enum.FontWeight.Heavy, Enum.FontStyle.Italic)
+		local cx = 500
+		-- the yellow screen: a band of thin rows, each as wide as the shape is at that height
+		local top, sideEnd, bottom = 18, 190, 252
+		local halfTop, halfBottom = 240, 104
+		for y = top, bottom, 2 do
+			local half = if y <= sideEnd then halfTop else halfTop + (halfBottom - halfTop) * (y - sideEnd) / (bottom - sideEnd)
+			if y < top + 14 then -- rounded top corners
+				local k = (y - top) / 14
+				half -= 14 * (1 - math.sqrt(1 - (1 - k) ^ 2))
+			end
+			D.rect(cx, y + 1, half * 2, 2.6, YELLOW, 1)
+		end
+		-- the rev band: a flat oval round a point low in the middle
+		local ox, oy, rx, ry = cx, 216, 232, 188
+		local t0, t1 = -76, 76 -- degrees from the top: 2 at t0, 10 at t1 (the ends stay up at the sides)
+		local function at(t: number, k: number): (number, number)
+			local a = math.rad(t)
+			return ox + math.sin(a) * rx * k, oy - math.cos(a) * ry * k
+		end
+		local function tFor(v: number): number
+			return t0 + (t1 - t0) * (v - 2) / 8
+		end
+		-- the dark band under the bars
+		for i = 0, 120 do
+			local t = t0 - 2 + (t1 - t0 + 4) * i / 120
+			local x0, y0 = at(t, 0.92)
+			local x1, y1 = at(t, 1.08)
+			D.line(x0, y0, x1, y1, 7, Color3.fromRGB(28, 26, 22), 2)
+		end
+		local bars: { { frame: Frame, v: number } } = {}
+		local n = 64
+		for i = 0, n - 1 do
+			local v = 2 + 8 * (i + 0.5) / n
+			local t = tFor(v)
+			local x0, y0 = at(t, 0.93)
+			local x1, y1 = at(t, 1.06)
+			table.insert(bars, { frame = D.line(x0, y0, x1, y1, 3.2, WHITE, 3), v = v })
+		end
+		for v = 2, 10 do
+			local x, y = at(tFor(v), 0.82)
+			local l = D.label(tostring(v), x, y, 30, if v >= 9 then LAMBO_RED else INK, Enum.Font.GothamBold, 4, 1.1)
+			l.FontFace = italic
+		end
+		-- an orange marker at 2
+		local mx0, my0 = at(t0 - 1.5, 0.9)
+		local mx1, my1 = at(t0 - 1.5, 1.1)
+		D.line(mx0, my0, mx1, my1, 4, Color3.fromRGB(255, 120, 20), 4)
+		-- the gear, big and italic
+		local gear = D.label("N", cx, 112, 150, INK, Enum.Font.GothamBlack, 5, 1)
+		gear.FontFace = italic
+		-- R 1234567 A
+		local gearLabels: { [string]: TextLabel } = {}
+		local order = { "R", "1", "2", "3", "4", "5", "6", "7", "A" }
+		for i, gname in order do
+			local x = if gname == "R" then cx - 66 else cx + 40 + (i - 2) * 15
+			local l = D.label(gname, x, 172, 24, INK, Enum.Font.GothamBold, 5, 1)
+			l.FontFace = italic
+			gearLabels[gname] = l
+		end
+		-- STRADA and the odometer
+		rounded(D.rect(cx - 82, 198, 92, 18, Color3.fromRGB(16, 32, 70), 4), 0.3)
+		D.label("STRADA", cx - 82, 198, 13, WHITE, Enum.Font.GothamBold, 5, 6)
+		rounded(D.rect(cx + 92, 198, 100, 18, INK, 4), 0.3)
+		local odo = D.label("000590 mi", cx + 92, 198, 13, WHITE, Enum.Font.GothamBold, 5, 9)
+		-- the message pill at the bottom
+		rounded(D.rect(cx, 232, 150, 26, Color3.fromRGB(42, 40, 34), 4), 0.35)
+		D.label("Fasten Seatbelt", cx, 232, 14, WHITE, Enum.Font.GothamMedium, 5, 13)
+		-- outside the yellow: tags and the white digits
+		local unitTag = D.label(unit(), 212, 202, 15, LAMBO_RED, Enum.Font.GothamBold, 5, 3)
+		D.label("rpm", 788, 202, 15, LAMBO_RED, Enum.Font.GothamBold, 5, 3)
+		local speed = D.label("0", 268, 236, 40, WHITE, Enum.Font.GothamBold, 5, 3)
+		speed.TextXAlignment = Enum.TextXAlignment.Right
+		local altText = D.label("0 " .. altUnit(), 330, 248, 12, DIM, Enum.Font.GothamMedium, 5, 7)
+		local revs = D.label("970", 724, 236, 40, WHITE, Enum.Font.GothamBold, 5, 4)
+		revs.TextXAlignment = Enum.TextXAlignment.Right
+		D.label("SET", 420, 286, 12, DIM, Enum.Font.GothamMedium, 5, 3)
+		D.label("0.0", 590, 286, 12, DIM, Enum.Font.GothamMedium, 5, 3)
+		-- "3D" lit green top right in the yellow
+		D.label("3D", cx + 210, 40, 16, Color3.fromRGB(40, 170, 60), Enum.Font.GothamBlack, 5, 2)
+		-- left: the clock box and two bar gauges
+		local lx, rxSide = 86, 914
+		rounded(D.rect(lx, 176, 128, 62, YELLOW, 2), 0.1)
+		local clockText = D.label(clock(), lx, 158, 20, INK, Enum.Font.GothamBold, 3, 5)
+		D.label(os.date("%d.%m.%Y") :: string, lx, 178, 12, INK, Enum.Font.GothamMedium, 3, 10)
+		local temp = D.label("84.5 °F", lx, 196, 13, INK, Enum.Font.GothamBold, 3, 7)
+		for i, v in { 0.55, 0.42 } do
+			local bx = lx - 18 + (i - 1) * 36
+			D.rect(bx, 268, 12, 76, Color3.fromRGB(38, 40, 44), 2)
+			D.rect(bx, 306 - 76 * v / 2, 12, 76 * v, WHITE, 3)
+			D.rect(bx, 236, 12, 12, LAMBO_RED, 3)
+			D.label(if i == 1 then "°C" else "bar", bx, 220, 10, DIM, Enum.Font.GothamMedium, 3, 3)
+		end
+		-- right: the range box and the car picture
+		rounded(D.rect(rxSide, 176, 128, 62, YELLOW, 2), 0.1)
+		D.rect(rxSide - 34, 176, 14, 22, INK, 3)
+		D.label("60 mi", rxSide + 14, 176, 20, INK, Enum.Font.GothamBold, 3, 5)
+		rounded(D.rect(rxSide, 262, 34, 70, Color3.fromRGB(236, 236, 236), 3), 0.45)
+		D.rect(rxSide, 250, 26, 22, Color3.fromRGB(60, 66, 80), 4)
+
+		local shown, last, lastGear = 0, 0, ""
+		local unlit, lit = Color3.fromRGB(150, 146, 136), WHITE
+		local redUnlit, redLit = Color3.fromRGB(120, 40, 34), Color3.fromRGB(255, 40, 30)
+		return function(mph: number, g: string, rpm: number)
+			shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+			local v = 0.9 + shown * 7.6 -- 900 at idle up to the 8,500 limiter
+			for _, b in bars do
+				local red = b.v >= 8.5
+				b.frame.BackgroundColor3 = if b.v <= v then (if red then redLit else lit) else (if red then redUnlit else unlit)
+			end
+			gear.Text = g
+			speed.Text = spd(mph)
+			altText.Text = alt(mph) .. " " .. altUnit()
+			unitTag.Text = unit()
+			revs.Text = tostring(math.floor(v * 1000 / 10) * 10)
+			local key = if tonumber(g) then g elseif g == "R" then "R" else ""
+			if key ~= lastGear then
+				if gearLabels[lastGear] then
+					gearLabels[lastGear].TextColor3 = INK
+				end
+				if gearLabels[key] then
+					gearLabels[key].TextColor3 = LAMBO_RED
+				end
+				lastGear = key
+			end
+			if os.clock() - last > 5 then
+				last = os.clock()
+				clockText.Text = clock()
+				temp.Text = if E.get_KMH() then "29.2 °C" else "84.5 °F"
+				odo.Text = if E.get_KMH() then "000950 km" else "000590 mi"
+			end
+		end
+	end
+
+	-- the gearbox the driver has picked (Driving sets it): the SVJ screen's drive mode follows it
+	DashGauges.gearbox = "Auto"
+
+	-- Aventador SVJ (owner, 2026-11-02): the real SVJ screen, redrawn sharp from the owner's photo
+	-- (tools/svj_cluster_art.py draws the pictures and writes SVJClusterArt). The picture is the
+	-- whole screen with the rev band unlit; on top go the lit blocks, the red marker at the revs and
+	-- the readouts as slanted glyph sprites: the gear, the gear strip, the drive mode (CORSA when the
+	-- driver changes gear, STRADA in automatic), the odometer, the speed and its unit, the clock, the
+	-- date and the range. No maker's marks; no car picture (owner).
+	local function aventadorSVJ(gui: SurfaceGui): Update
+		local Art = require(script.Parent.Parent:WaitForChild("SVJClusterArt")) :: any
+		gui.CanvasSize = Vector2.new(gui.CanvasSize.X * 2, 600) -- twice the usual: the pictures are sharp
+		local W, H = Art.W, Art.H
+		local D = design(gui, W, H, Color3.new(0, 0, 0))
+		local area = D.area
+		-- (2026-11-03) fills the panel exactly (the panel is fitted to the car's cluster frame), with
+		-- nothing behind it: the picture's cut-away corners stay see-through
+		local ratio = area:FindFirstChildOfClass("UIAspectRatioConstraint")
+		if ratio then
+			ratio:Destroy()
+		end
+		local back = area.Parent :: Frame
+		back.BackgroundTransparency = 1
+		local SOFT = Color3.fromRGB(170, 190, 215)
+		local split = Art.split / W
+		new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[1], Size = UDim2.fromScale(split, 1), ZIndex = 1 }, area)
+		new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[2], Position = UDim2.fromScale(split, 0), Size = UDim2.fromScale(1 - split, 1), ZIndex = 1 }, area)
+		local function place(l: ImageLabel, e: { number }, x: number, y: number, k: number)
+			l.Image = Art.sheets[e[1]]
+			l.ImageRectOffset = Vector2.new(e[2], e[3])
+			l.ImageRectSize = Vector2.new(e[4], e[5])
+			l.Position = UDim2.fromScale(x / W, y / H)
+			l.Size = UDim2.fromScale(e[4] / Art.A * k / W, e[5] / Art.A * k / H)
+		end
+		local function sprite(z: number): ImageLabel
+			return new("ImageLabel", { BackgroundTransparency = 1, ZIndex = z, Visible = false }, area)
+		end
+		-- the lit blocks (each a cut-out of the band lit, laid exactly over its unlit self)
+		local blocks: { { s: ImageLabel, v: number } } = {}
+		for _, b in Art.blocks do
+			local s = sprite(2)
+			place(s, b, b[6], b[7], 1)
+			table.insert(blocks, { s = s, v = b[8] })
+		end
+		-- the red marker across the band at the revs
+		local dial = Art.dial
+		local function at(v: number, k: number): (number, number)
+			local a = math.rad(dial.t0 + dial.tv * v)
+			return dial.cx + math.sin(a) * dial.rx * k, dial.cy - math.cos(a) * dial.ry * k
+		end
+		local marker = D.rect(0, 0, 2.6, 1, Color3.fromRGB(255, 40, 40), 3)
+		-- a readout: glyphs on a line, its middle at y; align "l" / "r" / "m" at x; size in design px
+		local function readout(fontName: string, x: number, y: number, size: number, align: string, maxLen: number, tint: Color3?): (string) -> ()
+			local f = Art.fonts[fontName]
+			local k = size / f.size
+			local pool: { ImageLabel } = {}
+			for i = 1, maxLen do
+				pool[i] = sprite(3)
+				pool[i].ImageColor3 = tint or Color3.new(1, 1, 1)
+			end
+			local last: string? = nil
+			return function(s: string)
+				if s == last then
+					return
+				end
+				last = s
+				local width = 0
+				for i = 1, math.min(#s, maxLen) do
+					local g = f.glyphs[s:sub(i, i)]
+					width += if g then g[8] * k else 0
+				end
+				local pen = if align == "r" then x - width elseif align == "m" then x - width / 2 else x
+				for i = 1, maxLen do
+					local g = if i <= #s then f.glyphs[s:sub(i, i)] else nil
+					if g and g[4] > 0 then
+						place(pool[i], g, pen + g[6] * k, y + g[7] * k, k)
+						pool[i].Visible = true
+					else
+						pool[i].Visible = false
+					end
+					if g then
+						pen += g[8] * k
+					end
+				end
+			end
+		end
+		-- a whole word (the drive mode, the speed unit), centred on (x, y)
+		local function word(x: number, y: number): (string) -> ()
+			local l = sprite(3)
+			local last: string? = nil
+			return function(name: string)
+				if name ~= last then
+					last = name
+					local e = Art.words[name]
+					place(l, e, x - e[8] / 2 + e[6], y + e[7], 1)
+					l.Visible = true
+				end
+			end
+		end
+		local gear = readout("gear", 582, 226, 132, "m", 1)
+		local stripLeft = readout("small", 505, 201, 15, "r", 9, SOFT)
+		local stripRight = readout("small", 655, 201, 15, "l", 9, SOFT)
+		local mode = word(425, 258)
+		local odo = readout("small", 805, 258, 14, "r", 9)
+		local speed = readout("big", 868, 334, 50, "r", 3)
+		local unitWord = word(849, 370)
+		local clockText = readout("small", 18, 150, 20, "l", 5)
+		local dateText = readout("small", 18, 172, 10, "l", 10)
+		local range = readout("small", 1000, 146, 19, "l", 4)
+		local ORDER = { "R", "N", "1", "2", "3", "4", "5", "6", "7" }
+
+		local shown, last = 0, -10
+		local fuelLeft = 0.8
+		return function(mph: number, g: string, rpm: number)
+			shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+			local v = 0.9 + shown * 7.9 -- 900 at idle up to the 8,800 limiter
+			local flash = shown > 0.97 and (os.clock() * 8) % 2 < 1
+			for _, b in blocks do
+				b.s.Visible = b.v < v and not flash
+			end
+			local x0, y0 = at(v, 0.805 + 0.055 * (math.abs(v - 5) / 5) ^ 2 - 0.01)
+			local x1, y1 = at(v, 1.035)
+			local dx, dy = x1 - x0, y1 - y0
+			marker.Position = UDim2.fromScale((x0 + x1) / 2 / W, (y0 + y1) / 2 / H)
+			marker.Size = UDim2.fromScale(2.6 / W, math.sqrt(dx * dx + dy * dy) / H)
+			marker.Rotation = math.deg(math.atan2(dx, -dy))
+			gear(g)
+			local i = table.find(ORDER, g) or 2
+			stripLeft(table.concat(ORDER, "", 1, i - 1))
+			stripRight(if i < #ORDER then table.concat(ORDER, "", i + 1, #ORDER) else "")
+			mode(if DashGauges.gearbox == "Manual" then "CORSA" else "STRADA")
+			speed(spd(mph))
+			unitWord(unit())
+			if os.clock() - last > 5 then
+				last = os.clock()
+				clockText(clock())
+				dateText(os.date("%d.%m.%Y") :: string)
+				local miles = DashGauges.odoMiles or 426
+				odo(if E.get_KMH() then string.format("%06d km", math.floor(miles * 1.609)) else string.format("%06d mi", math.floor(miles)))
+				fuelLeft = DashGauges.fuelShare
+				range(tostring(math.floor((if E.get_KMH() then 560 else 348) * fuelLeft)))
+			end
+		end
+	end
+
+	-- what the car is doing that the screens show (Driving sets these)
+	DashGauges.lightsOn = false
+	DashGauges.tcOff = false
+	-- (2026-11-07) CareClient sets these: the real odometer and fuel, the check engine light; Driving the cruise speed
+	DashGauges.odoMiles = nil :: number?
+	DashGauges.fuelShare = 0.8
+	DashGauges.waterShare = nil :: number? -- the water temperature, C 0 .. H 1 (client/R34Mfd sets it; 0.5 when nil)
+	DashGauges.checkEngine = 0
+	DashGauges.cruiseMph = nil :: number?
+
+	-- the Revuelto, Aventador SV and Huracan screens (owner, 2026-11-04: redrawn 1:1 from the owner's
+	-- photos and made to work). tools/lambo/cluster_live.py draws the picture and the pieces over it
+	-- and writes LamboClusterArt: lit rev blocks, a rev tape that fills, the rev marker, the gear, the
+	-- readouts as glyph sprites, signs that show when something is true.
+	local function pointOn(pts: { number }, v: number): number
+		local n = #pts
+		if v <= pts[1] then
+			return pts[2]
+		end
+		for i = 1, n - 3, 2 do
+			if v <= pts[i + 2] then
+				local a, b = pts[i], pts[i + 2]
+				return pts[i + 1] + (pts[i + 3] - pts[i + 1]) * (if b > a then (v - a) / (b - a) else 1)
+			end
+		end
+		return pts[n]
+	end
+
+	local function liveCluster(gui: SurfaceGui, name: string, flag: string?): Update
+		local Art = (require(script.Parent.Parent:WaitForChild("LamboClusterArt")) :: any)[name]
+		gui.CanvasSize = Vector2.new(gui.CanvasSize.X * 2, 600) -- twice the usual: the pictures are sharp
+		local W, H, A = Art.W, Art.H, Art.A
+		local D = design(gui, W, H, Color3.new(0, 0, 0))
+		local area = D.area
+		local ratio = area:FindFirstChildOfClass("UIAspectRatioConstraint")
+		if ratio then
+			ratio:Destroy() -- (fills the panel, which is fitted to the car's screen)
+		end
+		if Art.clear then
+			(area.Parent :: Frame).BackgroundTransparency = 1 -- (behind the car's frame: the cut-away corners stay see-through)
+		end
+		local split = Art.split / W
+		local bg1 = new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[1], Size = UDim2.fromScale(split, 1), ZIndex = 1 }, area)
+		local bg2 = new("ImageLabel", { BackgroundTransparency = 1, Image = Art.bg[2], Position = UDim2.fromScale(split, 0), Size = UDim2.fromScale(1 - split, 1), ZIndex = 1 }, area)
+		local function sprite(e: { any }, left: number, top: number, z: number): ImageLabel
+			return new("ImageLabel", {
+				BackgroundTransparency = 1,
+				Image = Art.sheets[e[1]],
+				ImageRectOffset = Vector2.new(e[2], e[3]),
+				ImageRectSize = Vector2.new(e[4], e[5]),
+				Position = UDim2.fromScale(left / W, top / H),
+				Size = UDim2.fromScale(e[4] / A / W, e[5] / A / H),
+				Visible = false,
+				ZIndex = z,
+			}, area)
+		end
+		local blocks: { { l: ImageLabel, v: number, mph: boolean } } = {}
+		for _, e in Art.blocks do
+			table.insert(blocks, { l = sprite(e, e[6], e[7], 2), v = e[8], mph = e[9] == "mph" }) -- (e[9] "mph": lit by the speed)
+		end
+		local fills: { any } = {}
+		for _, e in Art.fills do
+			local l = sprite(e, e[6], e[7], 2)
+			l.Visible = true
+			table.insert(fills, { l = l, e = e })
+		end
+		local fuels: { any } = {}
+		for _, e in Art.fuels or {} do
+			local l = sprite(e, e[6], e[7], 2)
+			l.Visible = true
+			table.insert(fuels, { l = l, e = e })
+		end
+		local shows: { { l: ImageLabel, when: string } } = {}
+		for _, e in Art.shows do
+			table.insert(shows, { l = sprite(e, e[6], e[7], 3), when = e[8] })
+		end
+		-- rotating needles: a picture drawn pointing up, its pivot in its middle, turned by a table of value, angle
+		local needles: { { l: ImageLabel, bind: string, pts: { number }, alt: { number }? } } = {}
+		for _, e in Art.needles or {} do
+			local l = sprite(e, e[6] - e[4] / A / 2, e[7] - e[5] / A / 2, 4)
+			l.Visible = true
+			table.insert(needles, { l = l, bind = e[8], pts = e[9], alt = e[10] })
+		end
+		local marker = Art.marker
+		local mark = if marker then D.rect(0, 0, marker.w, 1, Color3.fromRGB(marker.color[1], marker.color[2], marker.color[3]), 4) else nil
+		local halo = if marker and marker.glow > 0 then D.rect(0, 0, marker.w * marker.glow, 1, Color3.fromRGB(marker.color[1], marker.color[2], marker.color[3]), 4, 0, 0.6) else nil
+		local gears: { [string]: ImageLabel } = {}
+		for ch, e in Art.gear.sprites do
+			gears[ch] = sprite(e, Art.gear.x - e[4] / A / 2, Art.gear.y - e[5] / A / 2, 5)
+		end
+		-- a line of glyphs, its middle at y; align "l" / "r" / "m" at x
+		local readouts: { any } = {}
+		for _, r in Art.readouts do
+			local pool: { ImageLabel } = {}
+			for i = 1, r.len do
+				pool[i] = new("ImageLabel", {
+					BackgroundTransparency = 1,
+					ImageColor3 = Color3.fromRGB(r.color[1], r.color[2], r.color[3]),
+					Visible = false,
+					ZIndex = 6,
+				}, area)
+			end
+			table.insert(readouts, { r = r, pool = pool, f = Art.fonts[r.font], last = false })
+		end
+		local function setText(o: any, s: string?)
+			if s == o.last then
+				return
+			end
+			o.last = s
+			local r, f = o.r, o.f
+			local text = s or ""
+			local width = 0
+			for i = 1, math.min(#text, r.len) do
+				local g = f[text:sub(i, i)]
+				width += if g then g[8] else 0
+			end
+			local pen = if r.align == "r" then r.x - width elseif r.align == "m" then r.x - width / 2 else r.x
+			for i = 1, r.len do
+				local g = if i <= #text then f[text:sub(i, i)] else nil
+				local l = o.pool[i]
+				if g then
+					l.Image = Art.sheets[g[1]]
+					l.ImageRectOffset = Vector2.new(g[2], g[3])
+					l.ImageRectSize = Vector2.new(g[4], g[5])
+					l.Position = UDim2.fromScale((pen + g[6]) / W, (r.y + g[7]) / H)
+					l.Size = UDim2.fromScale(g[4] / A / W, g[5] / A / H)
+					pen += g[8]
+				end
+				l.Visible = g ~= nil
+			end
+		end
+		local labels: { { t: TextLabel, l: any } } = {}
+		for _, l in Art.labels do
+			local t = new("TextLabel", {
+				BackgroundTransparency = 1,
+				AnchorPoint = Vector2.new(0, 0.5),
+				Position = UDim2.fromScale(l.x / W, l.y / H),
+				Size = UDim2.fromScale(l.w / W, l.h / H),
+				Font = Enum.Font.Roboto,
+				TextColor3 = Color3.fromRGB(l.color[1], l.color[2], l.color[3]),
+				TextScaled = true,
+				TextXAlignment = Enum.TextXAlignment.Left,
+				Text = "",
+				ZIndex = 6,
+			}, area)
+			table.insert(labels, { t = t, l = l })
+		end
+
+		local ORDER = { "R", "N", "1", "2", "3", "4", "5", "6", "7" }
+		local vals: { [string]: string } = { bandFM = "FM", temp = "100.5", tempUnit = "°F", gAccel = "0.0", gBrake = "0.0" }
+		local shown, slow = 0, -10
+		local lastMph, lastT, accel = 0, os.clock(), 0
+		local odo = (Art.odo or 350) + 0.0
+		local fuelLeft = 0.8
+		local tripFrom: number? = nil -- (this drive: the trip line of a screen)
+		local audio: any = nil
+		local born = os.clock() -- ("start": the bulb check of the first seconds)
+		return function(mph: number, g: string, rpm: number)
+			shown += (math.clamp(rpm, 0, 1) - shown) * 0.35
+			local v = Art.idle + shown * (Art.redline - Art.idle)
+			local now = os.clock()
+			local dt = now - lastT
+			if dt > 0.1 then
+				accel += ((mph - lastMph) * 0.447 / dt / 9.8 - accel) * 0.4
+				odo += mph * dt / 3600
+				lastMph, lastT = mph, now
+			end
+			local corsa = DashGauges.gearbox == "Manual"
+			local state: { [string]: boolean } = {
+				always = true,
+				parked = mph < 1,
+				moving = mph >= 1,
+				corsa = corsa,
+				sport = not corsa,
+				lights = DashGauges.lightsOn == true,
+				tcoff = DashGauges.tcOff == true,
+				accel = accel > 0.1,
+				kmh = E.get_KMH(),
+				mph = not E.get_KMH(),
+				gearN = g == "N",
+				gearR = g == "R",
+				gearD = tonumber(g) ~= nil,
+				start = now - born < 2.6,
+			}
+			if flag then
+				state[flag] = true -- (a car's own touch on a shared screen: the SV's mark)
+			end
+			for _, b in blocks do
+				b.l.Visible = b.v < (if b.mph then mph else v)
+			end
+			for _, f in fills do
+				local e = f.e
+				local frac = math.clamp(pointOn(e[9], v + e[8]), 0, 1)
+				f.l.ImageRectSize = Vector2.new(e[4] * frac, e[5])
+				f.l.Size = UDim2.fromScale(e[4] * frac / A / W, e[5] / A / H)
+			end
+			for _, f in fuels do
+				local e = f.e
+				local frac = math.clamp(DashGauges.fuelShare or 0.8, 0, 1)
+				f.l.ImageRectSize = Vector2.new(e[4] * frac, e[5])
+				f.l.Size = UDim2.fromScale(e[4] * frac / A / W, e[5] / A / H)
+			end
+			for _, s in shows do
+				s.l.Visible = state[s.when] == true
+			end
+			for _, n in needles do
+				-- ("dial": a speedometer whose numbers follow the player's units, with a table for each)
+				local value = if n.bind == "rpm" then v elseif n.bind == "fuel" then (DashGauges.fuelShare or 0.8) elseif n.bind == "water" then (DashGauges.waterShare or 0.5) elseif n.bind == "kmh" or (n.bind == "dial" and E.get_KMH()) then mph * 1.609 else mph
+				n.l.Rotation = pointOn(if n.bind == "dial" and not E.get_KMH() then n.alt else n.pts, value)
+			end
+			if mark and marker then
+				local p = marker.pts
+				local xs: { { number } } = { {}, {}, {}, {} }
+				for i = 1, #p, 5 do
+					for k = 1, 4 do
+						table.insert(xs[k], p[i])
+						table.insert(xs[k], p[i + k])
+					end
+				end
+				local x0, y0, x1, y1 = pointOn(xs[1], v), pointOn(xs[2], v), pointOn(xs[3], v), pointOn(xs[4], v)
+				local dx, dy = x1 - x0, y1 - y0
+				local pos = UDim2.fromScale((x0 + x1) / 2 / W, (y0 + y1) / 2 / H)
+				local size = math.sqrt(dx * dx + dy * dy) / H
+				local rot = math.deg(math.atan2(dx, -dy))
+				mark.Position, mark.Size, mark.Rotation = pos, UDim2.fromScale(marker.w / W, size), rot
+				if halo then
+					halo.Position, halo.Size, halo.Rotation = pos, UDim2.fromScale(marker.w * marker.glow / W, size), rot
+				end
+			end
+			for ch, l in gears do
+				l.Visible = ch == g
+			end
+			local i = table.find(ORDER, g) or 2
+			vals.speed = spd(mph)
+			vals.alt = alt(mph)
+			vals.rpm = tostring(math.floor(v * 100) * 10)
+			vals.unit, vals.altUnit, vals.distUnit = unit(), altUnit(), if E.get_KMH() then "km" else "mi"
+			vals.mode = if corsa then "CORSA" else "SPORT"
+			vals.driveMode = if corsa then "SPORT" else "NORMAL"
+			vals.gearLeft = table.concat(ORDER, "", 1, i - 1)
+			vals.gearRight = table.concat(ORDER, "", i + 1, #ORDER) .. (if corsa then "" else "A")
+			vals.gearLeft4 = table.concat(ORDER, "", math.max(i - 4, 1), i - 1)
+			vals.gearRight4 = table.concat(ORDER, "", i + 1, math.min(i + 4, #ORDER))
+			vals.gearPrev = if i >= 4 then ORDER[i - 1] else ""
+			vals.gearNext = if i >= 3 and i < #ORDER then ORDER[i + 1] else ""
+			vals.gAccel = string.format("%.1f", math.max(accel, 0))
+			vals.gBrake = string.format("%.1f", math.max(-accel, 0))
+			if now - slow > 5 then
+				slow = now
+				vals.clock = clock()
+				vals.date = os.date("%d.%m.%Y") :: string
+				local miles = DashGauges.odoMiles or odo
+				vals.odo = string.format("%06d", math.floor(if E.get_KMH() then miles * 1.609 else miles))
+				vals.odoTrim = tostring(math.floor(if E.get_KMH() then miles * 1.609 else miles))
+				tripFrom = tripFrom or miles
+				vals.trip = string.format("%.1f", (miles - tripFrom) * (if E.get_KMH() then 1.609 else 1))
+				fuelLeft = DashGauges.fuelShare
+				vals.range = tostring(math.floor((if E.get_KMH() then 500 else 310) * fuelLeft))
+				if not audio then
+					local ok, m = pcall(function()
+						return require(script.Parent.Parent:WaitForChild("Audio")) :: any
+					end)
+					audio = if ok then m else false
+				end
+				if audio then
+					local ok, st = pcall(audio.stationName)
+					vals.station = if ok then st else ""
+					vals.stationShort = vals.station
+				end
+				for _, l in labels do
+					l.t.Text = vals[l.l.bind] or ""
+				end
+			end
+			for _, o in readouts do
+				local r = o.r
+				setText(o, if not r.when or state[r.when] then vals[r.bind] else nil)
+			end
+			for _, l in labels do
+				l.t.Visible = not l.l.when or state[l.l.when] == true
+			end
+			local tint = Art.tint
+			if tint then
+				local c = if state[tint[1]] then Color3.fromRGB(tint[2], tint[3], tint[4]) else Color3.new(1, 1, 1)
+				bg1.ImageColor3, bg2.ImageColor3 = c, c
+			end
+		end
+	end
+
+	return { aventadorLP700 = aventadorLP700, aventadorSV = aventadorSV, aventadorSVJ = aventadorSVJ, bmwF80 = bmwF80, bmwLiveCockpit = bmwLiveCockpit, f430 = f430, ferrari458 = ferrari458, ferrariCalifornia = ferrariCalifornia, gallardoSL = gallardoSL, lexusLX700 = lexusLX700, liveCluster = liveCluster, mp412c = mp412c, murcielagoLP640 = murcielagoLP640, porsche991gt3 = porsche991gt3, r8 = r8, veyron = veyron }
+end

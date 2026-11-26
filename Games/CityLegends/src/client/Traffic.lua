@@ -1625,7 +1625,8 @@ function Traffic.update(dt: number)
 	table.clear(movedParts)
 	table.clear(movedCFrames)
 	frameCount += 1
-	local camPos = if workspace.CurrentCamera then workspace.CurrentCamera.CFrame.Position else Vector3.zero
+	local camCF = if workspace.CurrentCamera then workspace.CurrentCamera.CFrame else CFrame.identity
+	local camPos, camLook = camCF.Position, camCF.LookVector
 
 	for _idx, npc in Traffic.cars do
 		-- (2026-11-06, FPS: a car far from the camera thinks every 3rd frame, with the time saved up)
@@ -1963,7 +1964,10 @@ function Traffic.update(dt: number)
 		if dist < 140 then
 			npc.root.AssemblyLinearVelocity = fwd * npc.speed
 		end
-		if not far or (frameCount + _idx) % 3 == 0 then
+		-- (2026-11-26, FPS: BulkMoveTo was over half of this function) a car behind the camera and not right
+		-- beside it is out of view: its transform goes every 3rd frame too, like a far one
+		local unseen = dist > 40 and (pos - camPos):Dot(camLook) < 0
+		if not (far or unseen) or (frameCount + _idx) % 3 == 0 then
 			local up = Vector3.new(0, npc.height / 2, 0)
 			table.insert(movedParts, npc.root)
 			table.insert(movedCFrames, CFrame.lookAt(pos + up, pos + up + look))

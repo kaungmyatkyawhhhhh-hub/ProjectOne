@@ -189,6 +189,7 @@ local trapSide: { [string]: number } = {}
 
 local rayParams = RaycastParams.new()
 rayParams.FilterType = Enum.RaycastFilterType.Exclude
+local rayModel: Instance?, rayChar: Instance? = nil, nil -- (2026-11-26) the filter is set again only when these change
 
 local function endRun(lost: boolean)
 	if runOn and not lost and points >= 50 and report then
@@ -277,7 +278,11 @@ local function step(dt: number)
 	end
 
 	-- air: nothing under the car
-	rayParams.FilterDescendantsInstances = { model, player.Character :: Instance }
+	local char = player.Character
+	if model ~= rayModel or char ~= rayChar then
+		rayModel, rayChar = model, char
+		rayParams.FilterDescendantsInstances = { model, char :: Instance }
+	end
 	local hit = workspace:Raycast(pos, Vector3.new(0, -9, 0), rayParams)
 	if not hit then
 		if airT == 0 then

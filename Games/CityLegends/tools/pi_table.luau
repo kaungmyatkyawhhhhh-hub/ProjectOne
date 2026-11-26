@@ -16,6 +16,7 @@ local function load(path: string, env: { [string]: any }): any
 	return luau.load(fs.readFile(root .. "/" .. path), { debugName = path, environment = env })()
 end
 local Config = load("src/shared/Config.lua", baseEnv)
+load("src/shared/ConfigFeel.lua", baseEnv)(Config) -- (26 Nov) Camera + DrivingFeel live in ConfigFeel.lua now
 -- (19 Nov 2026) Cars.lua requires shared/CarMeta (the fair prices, Local / Import, rarity)
 local carsEnv = table.clone(baseEnv)
 carsEnv.script = { Parent = { WaitForChild = function(_, n) return n end } }

@@ -106,6 +106,8 @@ local paths = {
 	GemShowcase = "src/server/GemShowcase.lua",
 	Luxe = "src/server/Luxe.lua",
 	ExhaustRB26 = "src/shared/ExhaustRB26.lua",
+	ConfigFeel = "src/shared/ConfigFeel.lua",
+	ConfigSounds = "src/shared/ConfigSounds.lua",
 }
 env.require = function(x)
 	local name = x.name

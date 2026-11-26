@@ -14,6 +14,7 @@ local function load(path: string, env: { [string]: any }): any
 end
 local baseEnv = { Color3 = roblox.Color3, Vector3 = roblox.Vector3, Vector2 = roblox.Vector2, UDim2 = roblox.UDim2, Enum = roblox.Enum, CFrame = roblox.CFrame }
 local Config = load("src/shared/Config.lua", baseEnv)
+load("src/shared/ConfigFeel.lua", baseEnv)(Config) -- (26 Nov) Camera + DrivingFeel live in ConfigFeel.lua now
 -- (19 Nov 2026) Cars.lua requires shared/CarMeta (the fair prices, Local / Import, rarity)
 local carsEnv = table.clone(baseEnv)
 carsEnv.script = { Parent = { WaitForChild = function(_, n) return n end } }
