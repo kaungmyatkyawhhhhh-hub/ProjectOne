@@ -190,3 +190,7 @@ This note is the fix. It works in three parts:
   and make the floor deeper with its top fixed, rather than refilling terrain (a refill bulges back over the floor).
 - **After changing how a venue is laid out, run it in Play and read the Output.** The hotel's turn change left 3 helper
   values unset, and half the tower stopped building. Studio edits never showed it.
+- **Before overruling a name, a place or a look, check the game's CLAUDE.md for an owner decision.** On 26 Nov the lead
+  had the Novotel hotel renamed to a made-up name under "fictional brands only". But the owner's 22 Nov rule says venues
+  carry the real name of the place they stand by. The general rule is the default; a later owner decision beats it.
+  Grep CLAUDE.md and the vault for the name first.
