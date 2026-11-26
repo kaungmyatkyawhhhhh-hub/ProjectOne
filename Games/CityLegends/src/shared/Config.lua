@@ -2229,7 +2229,7 @@ end)()
 -- better than the one below (adds).
 ---------------------------------------------------------------------
 Config.Hotel = {
-	Name = "PYAY ROYAL HOTEL",
+	Name = "NOVOTEL YANGON MAX",
 	Accent = Color3.fromRGB(255, 200, 120), -- champagne gold
 	Neon = { Color3.fromRGB(255, 70, 170), Color3.fromRGB(40, 230, 220) }, -- Miami pink and teal
 	IncomeEvery = 60, -- seconds in the game per payment

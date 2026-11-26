@@ -1,6 +1,6 @@
 --[[
 	Hotel
-	The Pyay Royal Hotel (26 Nov: made-up name; was the real Novotel Yangon Max brand), Downtown on Ocean Drive (owner, 2026-10-22: "add a large skyscraper
+	The Novotel Yangon Max (real venue name, owner rule 22 Nov; a 26 Nov rename to a made-up name was reverted), Downtown on Ocean Drive (owner, 2026-10-22: "add a large skyscraper
 	hotel with valets and you can buy a penthouse on the hotel"; "Downtown penthouse suites pay out
 	money every minute to their owners").
 
@@ -617,7 +617,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	dbox(model, 125, 0.3, 0.3, 0, 18.95, cz0 - 0.1, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
 	-- the fascia: a black iron board with the name in gold letters, an iron crest on top
 	local fascia = dbox(model, 100, 5.4, 0.6, 0, 24.2, cz0 + 0.6, IRON, Enum.Material.Metal)
-	goldLetters(fascia, Enum.NormalId.Front, "PYAY ROYAL HOTEL", 10, 1.5)
+	goldLetters(fascia, Enum.NormalId.Front, "NOVOTEL YANGON MAX", 10, 1.5)
 	dbox(model, 101, 0.4, 0.8, 0, 21.4, cz0 + 0.6, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
 	dbox(model, 101, 0.4, 0.8, 0, 27.0, cz0 + 0.6, GOLD, Enum.Material.Metal, { reflectance = 0.2 })
 	for k = -3, 3 do
@@ -1060,7 +1060,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	-- the name round the top of the tower, under the crown: a stone band with gold letters
 	local band = dbox(shell, BODY2.w + 0.8, 10, BODY2.d + 0.8, 0, BODY2.y1 - 6, TOWER_Z, RIV_LIGHT, Enum.Material.Limestone)
 	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right } do
-		goldLetters(band, face, "PYAY ROYAL HOTEL", 10, 1.6)
+		goldLetters(band, face, "NOVOTEL YANGON MAX", 10, 1.6)
 	end
 	dbox(shell, BODY2.w + 1.6, 0.6, BODY2.d + 1.6, 0, BODY2.y1 - 11.3, TOWER_Z, GOLD, Enum.Material.Metal)
 	dbox(shell, BODY2.w + 1.6, 0.6, BODY2.d + 1.6, 0, BODY2.y1 - 0.7, TOWER_Z, GOLD, Enum.Material.Metal)

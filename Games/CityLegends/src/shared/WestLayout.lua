@@ -205,7 +205,7 @@ function WestLayout.places(): { Place }
 	-- Downtown
 	for _, name in { "hotel", "rewards", "gems" } do
 		local frame, lot = WestLayout.site(name)
-		local label = if name == "hotel" then "Pyay Royal Hotel" elseif name == "rewards" then "Legends Rewards" else "Gems Museum"
+		local label = if name == "hotel" then "Novotel Yangon Max" elseif name == "rewards" then "Legends Rewards" else "Gems Museum"
 		add(name, label, WestLayout.kerbFor(frame, lot))
 	end
 	add("downtown", "Downtown", onLane(W.DowntownX + C.BlockSize / 2, 0, Vector3.new(-1, 0, 0)))
