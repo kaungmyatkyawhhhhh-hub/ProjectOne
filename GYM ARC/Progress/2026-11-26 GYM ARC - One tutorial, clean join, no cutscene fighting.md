@@ -77,3 +77,12 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 
 - TutorialClient: the panel is the image at its own aspect (560x427 at UIScale 0.86, pops in with Back easing), each choice is one ImageButton (card + hero + gold pill with dark italic word, Theme.BindPress). First card sheet came back with sunburst rays: redone with "NO sunburst", green key.
 - Checked on PC in Play (screenshot). Not checked: phone size, the real path to the picker (needs a full bench set).
+
+## Pass 6 (v1969): the muscle picker in the modern style, no ChatGPT art, no viewports
+- Owner on v1964: "this is very bad. study modern GUI's", then "the pictures that chatgpt made look very AI generated and not modern GUI looking", "dont use view port frame for anything", "ill try to make pictures with chatgpt myself".
+- Studied: our TDS lobby frames (store, towers), the TDS research note, two web searches. Modern = no frame, the world blurred, dark glass + bright art, one solid colour per card, the card is the button.
+- TutorialClient PICK YOUR NEXT MUSCLE now: no panel; `PickBlur` (Lighting BlurEffect, Kit.BlurSize, 0.12 s in / 0.1 s out) and Kit.HudAside while it shows; white "PICK YOUR NEXT MUSCLE" header with a rule line sized to the title; "Auto-picks in Ns" countdown; three solid cards (legs red, abs gold, back purple; 148x188, 8 px corners, light edge, dark bottom fade) with the word and the machine name; hover lights the edge, a pick snaps a gold outline; cards slide in 50 ms apart.
+- Card pictures: `PICK[id].image` in TutorialClient (empty now; the owner makes them). The Art ImageLabel is 160x190, bottom 30 px above the card bottom, so a picture can break out of the top.
+- Tried and removed the same day: ChatGPT frame/card/button sheet (v1964) and a live 3D preview (owner: no ViewportFrames). The ChatGPT files stay in `Assets/pick_muscle_2026-11-26/` but are unused.
+- ViewportFrames still in the game (to swap for pictures when the owner has them): TitanPreview (Titan Serum), AdventClient (gift boxes), MirrorClient, PlateForgeUI, PumpShopClient (plates), TrainerPortrait, CoachDialog / CoachPortrait.
+- Checked on PC in Play (screenshot). Not checked: phone size.

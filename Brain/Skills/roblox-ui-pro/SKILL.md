@@ -23,6 +23,13 @@ Never decorate a broken layout.
 
 The fix is `assets/develuper-kit/hud.html`, the mock look as a generator. It has 9-slice insets per piece and a parametric face generator for the species portraits. **When the owner shows a mock they like, match the mock**, not the kit, and start a HUD from `hud.html`. Ask for or make a ChatGPT mock of the screen early; it is a cheap target.
 
+**Popup lesson (26 Nov 2026, GYM ARC muscle picker).** A ChatGPT-art popup (gold bolted frame, sparkles, glossy pills, cartoon hero icons) got "this is very bad. study modern GUI's", then "the pictures that chatgpt made look very AI generated and not modern GUI looking". What passed is the TDS lobby look (vault: `Research - Modern lobby HUD ... (TDS)`):
+- no frame: the world blurs (BlurEffect ~14, 0.12 s in) and the HUD steps aside; the choices float;
+- a white header with a thin rule line after it, a small grey helper line under it (e.g. "Auto-picks in 4s");
+- solid-colour cards (one colour per choice, top-lit gradient, 8 px corners, a 1.5 px light edge), the name inside the card on a dark bottom fade, the card itself is the button (hover lights the edge, the pick snaps a gold outline), cards slide in 50 ms apart;
+- the art fills the card and may break out of the top. **No ViewportFrames anywhere** (owner: "laggy and theres no good lighting"); art is a plain image, and the owner makes the pictures himself unless he asks.
+- Never put a heavy ornamental frame around a modern popup.
+
 **The look is settled.** The house style is Develuper's "UI 10x", copied 1:1. The owner approved it on 18 Nov 2026 ("these are so great") after rejecting four other looks. Use it for every game unless the owner asks for something else. Build new pieces with the kit's generator. Never hand-tune by eye, and never draw plates out of Frames and UIStroke.
 
 ## Files

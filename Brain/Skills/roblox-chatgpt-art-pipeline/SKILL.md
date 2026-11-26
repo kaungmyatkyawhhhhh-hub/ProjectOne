@@ -92,7 +92,8 @@ Give the coding Claude: ImageLabel ScaleType Slice + SliceCenter; particles use 
 - Card/tile backgrounds: "a radial glow" or "sunlit glow" makes ChatGPT draw SUNBURST RAYS (against GYM ARC's no-sunburst rule). Always write "NO sunburst, NO light rays, NO radiating stripes; a smooth soft radial glow" for card insides.
 - A purple/violet piece on a MAGENTA key gets its pink centre eaten: purple art goes on a GREEN #00FF00 sheet with "no pink, no magenta".
 - A picker / choice popup must not reuse the art of another system (the Run Cards emblems): draw each choice as the hero DOING the action (squat, crunch, pull-up) with the worked part glowing; readable and clearly new.
-- A whole popup in one sheet works: empty window panel (gold rim, bolts, diamond plate, chevron header band) + empty coloured cards + an empty gold pill; use the panel at its own aspect (no 9-slice) and place content in fractions of it.
+- (later the same day) the owner rejected that whole popup: the chunky glossy sheet style (gold rims, bolts, sparkles, glossy pills) reads as AI-made and NOT modern for UI chrome. Do not use ChatGPT for frames / cards / buttons of a modern screen: build them in code (flat colour, blur behind, see roblox-ui-pro's popup lesson). The owner now makes card pictures himself.
+- (superseded) A whole popup in one sheet works: empty window panel (gold rim, bolts, diamond plate, chevron header band) + empty coloured cards + an empty gold pill; use the panel at its own aspect (no 9-slice) and place content in fractions of it.
 
 ## Tool setup notes (the workspace is temporary)
 - The tools live in a Python venv (numpy, scipy, Pillow; optional torch + spandrel, rembg). Hugging Face needs huggingface.co + *.hf.co allowed; GitHub release downloads need github.com.
