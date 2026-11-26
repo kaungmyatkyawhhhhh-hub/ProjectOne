@@ -80,14 +80,21 @@ def main():
     for i, r in enumerate(rows):
         kind = r[2].replace('RMesh', '')
         px, py, pz, sx, sy, sz = map(float, r[3:9])
-        best = None
+        best, bd = None, None
         for dx in (-0.1, 0, 0.1):
             for dz in (-0.1, 0, 0.1):
                 for dsx in (-0.1, 0, 0.1):
                     for dsz in (-0.1, 0, 0.1):
-                        for c in idx.get((kind, round(px + dx, 1), round(pz + dz, 1), round(sx + dsx, 1), round(sz + dsz, 1)), []):
+                        k = (kind, round(px + dx, 1), round(pz + dz, 1), round(sx + dsx, 1), round(sz + dsz, 1))
+                        for c in idx.get(k, []):
                             if abs(c[2] - py) < 0.15 and abs(c[3] - sy) < 0.15:
-                                best = c  # last = newest file
+                                # (26 Nov) the CLOSEST mesh wins (two bakes 0.03 apart both fit the 0.1 window: the last
+                                # one seen was an older bake); a tie goes to the newer file (list order = mtime)
+                                q = c[1].split('_')
+                                d = (abs(num(q[2]) - px) + abs(num(q[4]) - pz) + abs(num(q[5]) - sx) + abs(num(q[7]) - sz)
+                                     + abs(c[2] - py) + abs(c[3] - sy))
+                                if bd is None or d <= bd:
+                                    best, bd = c, d
         if best:
             match[i] = dict(cell=r[1][5:], kind=kind, glb=os.path.relpath(best[0], ROOT), name=best[1], meshid=r[9])
         else:

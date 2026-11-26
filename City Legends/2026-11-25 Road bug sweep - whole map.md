@@ -91,3 +91,22 @@ Looked at the exported meshes at 5+ spots per kind before changing anything.
 - **Invisible boxes, current place:** 299 float (mostly deck feet, deck agent's), 2 bare: same as after v2125.
 - **Swap blocked:** `InsertService:LoadAsset` answers "User is not authorized to access Asset" for every road asset in group 33151111, new and old (Studio user 1834504124, place creator group 33151111). The place is unchanged (no cells swapped); empty holding folders removed. Needs the owner to check Studio's signed-in account / the group's asset permissions; then run `batch1-3.lua` with `tools/yangon/RoadMeshSwap.luau`.
 - Trap: in Git Bash, `pwd` gives `/d/...`; Python reads a `;`-list of those as missing folders (`RB_OVERRIDE` silently did nothing). Use `pwd -W`.
+
+### Round 3 swapped (26 Nov, after the owner fixed Studio's account)
+- All 381 cells swapped in three batches (saved v2210, v2216, then the batch 3 save after the Play test), backups deleted. Changed cells: `build/city_1to1/roadbugs_25nov/changed_cells_round3.txt` (every cell but the 29 P8 laptop cells, 22x18, 22x22, 18x19 and 21x29). Collision boxes untouched (mesh-only swap).
+- **Play drive (test store):** the same 10 routes, all to the end with 0 stops; worst jolt 26.2 (MP lower road #5, was 38.6); `play_drive_round3.txt`. Store back to `CityLegends_v1` (read from PlayerData in Edit: Play would not start a second time, the known MCP trap). Never published.
+- **Real after-counts (same place, fixed detector):**
+
+| Kind | Before | Predicted | After |
+|---|---|---|---|
+| Small medians | 169 | 38 | **38** |
+| Medians in junctions | 23 | 27 | 27 |
+| Lone dashes | 764 | 423 | **423** |
+| Yellow in a junction | 60 | 31 | **31** |
+| Paint lines crossing | 97 | 91 | 97 |
+| Kerbs on the road | 94 | 95 | 94 |
+| Holes | 949 | 948 | 867 |
+| Spikes | 69 | 69 | 69 |
+| Low ramp walls | 879 | 873 | 873 |
+
+- Detector trap fixed: `roadbugs_index.py` took the LAST glb within 0.1 studs, so a mesh of an older bake 0.03 studs off won (30x16 / 35x19 showed the old yellow); it now takes the closest by the exact numbers in the mesh name.
