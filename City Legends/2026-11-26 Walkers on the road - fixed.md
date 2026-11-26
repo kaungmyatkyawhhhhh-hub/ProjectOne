@@ -63,3 +63,5 @@ Lesson filed in [[Map placement rules (every game)]] (26 Nov).
 - Studio has two identical copies of `Client.SVJClusterArt` (left alone, same content).
 
 ![[2026-11-26 Walkers - Myanmar Plaza pre-publish check (v2203).jpg]]
+
+- **Published by the owner (26 Nov) as v2203.**
