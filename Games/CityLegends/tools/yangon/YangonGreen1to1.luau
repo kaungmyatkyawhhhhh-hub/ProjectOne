@@ -542,6 +542,10 @@ function G.farOld(holding: Instance, store: Instance?)
 			table.insert(pieces, q)
 		end
 	end
+	-- (27 Nov) the rain tree has its own one-part far look (tools/yangon/RainTree.luau)
+	if store:FindFirstChild("OKF_ot1far") then
+		pieces = { store.OKF_ot1far }
+	end
 	local cells, n, k = {}, 0, 0
 	for _, text in pages(holding, "Far") do
 		for line in string.gmatch(text, "[^\n]+") do
@@ -564,7 +568,7 @@ function G.farOld(holding: Instance, store: Instance?)
 					local p = q:Clone()
 					local C, S, R = q:GetAttribute("C"), q:GetAttribute("S"), q:GetAttribute("R")
 					p.Size = S * s
-					p.CFrame = cf * CFrame.new(C * s) * R
+					p.CFrame = cf * CFrame.new(C * s) * (R or CFrame.identity)
 					p.CastShadow = false
 					p:SetAttribute("T", tile)
 					p.Parent = cell
