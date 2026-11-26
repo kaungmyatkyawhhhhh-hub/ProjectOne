@@ -486,6 +486,7 @@ local function nightNow(): number
 	end
 	return if h < 12 then 1 - ramp(5.6, 7.6) else ramp(17.8, 19.9)
 end
+CarLamps.night = nightNow -- (2026-11-26) Driving's tail glow on the road
 
 function CarLamps.reset()
 	CarLamps.mode = "auto"

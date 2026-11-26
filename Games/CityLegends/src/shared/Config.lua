@@ -687,8 +687,8 @@ Config.DrivingFeel = {
 	NitroFov = 10,
 	NitroBlur = 1.5,
 	-- skid marks (scaled down on phones)
-	SkidMax = 200, -- the newest this many strips (2026-11-03: was 140)
-	SkidLife = 45, -- seconds before a mark has faded away (was 7)
+	SkidMax = 240, -- the newest this many strips (phones 120, low-end 60)
+	SkidLife = 10, -- seconds before a mark has faded away (26 Nov)
 
 	-- (2026-11-08, Prompts/A million times better wheels (new models).md, Part 2) the two-axle tyre model
 	-- (shared/CarPhysics.lua) with each car's real numbers (shared/CarPhysicsData.lua). Enabled = false goes back to

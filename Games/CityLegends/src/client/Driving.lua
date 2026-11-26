@@ -293,6 +293,7 @@ type State = {
 	tails: { BasePart }, -- tail lamps (TailLight parts): dim with the lights on, bright when braking
 	rearGlow: { PointLight },
 	tailBrake: boolean?,
+	roadGlow: SpotLight?, -- (2026-11-26) the tail lamps' red light on the road behind
 	dashPanel: BasePart?,
 	-- drivetrain feel
 	agear: number, -- the automatic gearbox's gear (1..GEARS)
@@ -581,18 +582,28 @@ local function sparks(at: Vector3, normal: Vector3, count: number)
 end
 
 -- skid marks: a pool of thin dark strips under the rear tyres that fade out
-type Skid = { part: BasePart, born: number, base: number }
+type Skid = { part: BasePart, born: number, base: number, life: number }
 local skids: { Skid } = {}
 local skidNext = 1
 local skidFolder: Folder? = nil
+-- (2026-11-26) how many strips and how long they stay: PC Config (240, 10 s), phones 120 / 8 s, low-end 60 / 6 s
+local function skidBudget(): (number, number)
+	if LowEnd.on then
+		return 60, 6
+	elseif UI.isTouch then
+		return 120, 8
+	end
+	return Config.DrivingFeel.SkidMax, Config.DrivingFeel.SkidLife
+end
+-- (2026-11-26) the strip's middle this far up the road's normal: 0.02 thick, its underside 0.06 over the road (no flicker)
+local SKID_LIFT = 0.07
 -- (2026-11-03) as wide as the tyre, darker the harder it slips, laid on the road's own slope
 local function skidMark(a: Vector3, b: Vector3, width: number?, dark: number?, normal: Vector3?)
 	local len = (b - a).Magnitude
 	if len < 0.3 or len > 20 or not Driving.marks then
 		return
 	end
-	local DF = Config.DrivingFeel
-	local cap = math.floor(DF.SkidMax * fxQuality())
+	local cap, life = skidBudget()
 	if not skidFolder then
 		local f = Instance.new("Folder")
 		f.Name = "SkidMarks"
@@ -611,14 +622,17 @@ local function skidMark(a: Vector3, b: Vector3, width: number?, dark: number?, n
 		p.Material = Enum.Material.SmoothPlastic
 		p.Color = Color3.fromRGB(18, 18, 20)
 		p.Parent = skidFolder
-		entry = { part = p, born = 0, base = 0.35 }
+		entry = { part = p, born = 0, base = 0.35, life = 10 }
 		skids[skidNext] = entry
 	end
-	local base = 0.62 - 0.4 * math.clamp(dark or 0.5, 0, 1) -- see-through, darker with a harder slide
-	entry.part.Size = Vector3.new(width or 0.85, 0.04, len + 0.1)
-	entry.part.CFrame = CFrame.lookAt((a + b) / 2, b, normal or Vector3.yAxis)
+	local base = 0.72 - 0.37 * math.clamp(dark or 0.5, 0, 1) -- soft and see-through (0.35-0.72), darker with a harder slide
+	local up = normal or Vector3.yAxis
+	local mid = (a + b) / 2 + up * SKID_LIFT
+	entry.part.Size = Vector3.new(width or 0.85, 0.02, len + 0.02)
+	entry.part.CFrame = CFrame.lookAt(mid, mid + (b - a), up)
 	entry.part.Transparency = base
 	entry.base = base
+	entry.life = life
 	entry.born = os.clock()
 	skidNext = skidNext % math.max(cap, 1) + 1
 end
@@ -634,20 +648,21 @@ local LOOSE_SURFACE = {
 local skidFadeT = 0
 local function fadeSkids(dt: number)
 	skidFadeT += dt
-	if skidFadeT < 0.25 then
+	if skidFadeT < 0.1 then
 		return
 	end
 	skidFadeT = 0
-	local life = Config.DrivingFeel.SkidLife
 	local now = os.clock()
 	for _, e in skids do
 		if e.born > 0 then
-			local age = (now - e.born) / life
+			local age = (now - e.born) / e.life
 			if age >= 1 then
 				e.born = 0
 				e.part.Transparency = 1
 			else
-				e.part.Transparency = e.base + (1 - e.base) * age * age
+				-- (2026-11-26) full strength for the first half of its life, then a smooth fade out
+				local t = math.clamp(age * 2 - 1, 0, 1)
+				e.part.Transparency = e.base + (1 - e.base) * t * t * (3 - 2 * t)
 			end
 		end
 	end
@@ -851,8 +866,8 @@ local function buildFlames(model: Model, root: BasePart, spec: Cars.CarSpec): ({
 	glowAtt.Parent = root
 	table.insert(parts, glowAtt)
 	local light = Instance.new("PointLight")
-	light.Color = Color3.fromRGB(130, 160, 255)
-	light.Range = 9
+	light.Color = Color3.fromRGB(255, 140, 50)
+	light.Range = 12
 	light.Brightness = 0
 	light.Shadows = false
 	light.Enabled = false
@@ -874,7 +889,7 @@ local function exhaustPop(s: State, strength: number)
 	for _, e in exhaustSmoke[s.root] or {} do
 		e:Emit(math.max(1, math.floor(2 * strength)))
 	end
-	s.flameGlow = math.max(s.flameGlow, 4 * strength)
+	s.flameGlow = math.max(s.flameGlow, math.min(6, 4.5 * strength)) -- (2026-11-26) capped: every flash ~0.12 s
 end
 
 -- a car's exhaust settings (Config.ExhaustBands; a SPORT / TOP trim has its base car's)
@@ -2803,6 +2818,29 @@ function Driving.attach(model: Model)
 			table.insert(s.rearGlow, d)
 		end
 	end
+	-- (2026-11-26) the tail lamps' red glow on the road behind: one SpotLight aimed down and back from the lamps'
+	-- middle (in flameParts so detach takes it away); this car only, off in low-end
+	if #s.tails > 0 then
+		local sum = Vector3.zero
+		for _, t in s.tails do
+			sum += root.CFrame:PointToObjectSpace(t.Position)
+		end
+		local at = sum / #s.tails + Vector3.new(0, -0.2, 0.7) -- behind the bumper: lights the road, not the car
+		local att = Instance.new("Attachment")
+		att.Name = "TailRoadGlow"
+		att.CFrame = CFrame.lookAt(at, at + Vector3.new(0, -1, 0.9))
+		att.Parent = root
+		local l = Instance.new("SpotLight")
+		l.Color = Color3.fromRGB(255, 28, 18)
+		l.Range = 14
+		l.Angle = 90
+		l.Brightness = 0
+		l.Shadows = false
+		l.Enabled = false
+		l.Parent = att
+		table.insert(s.flameParts, att)
+		s.roadGlow = l
+	end
 	-- the tuned numbers (performance parts), again whenever a part is bought while the car is out
 	local function applyTune()
 		local id = model:GetAttribute("CarId") :: string
@@ -3180,6 +3218,11 @@ function Driving.step(dt: number)
 		s.blurPulse = math.max(s.blurPulse, DF.LaunchBlur)
 		s.camLag += 2.5
 		s.shake = math.max(s.shake, 0.35)
+		-- (2026-11-26) a launch cracks two or three pops out of the pipes (once per launch: no spam)
+		if not s.electric and s.pops == 0 and (s.popTune or s.flameLevel >= 2 or not noPops(s)) then
+			s.pops = math.random(2, 3)
+			s.popTimer = 0.06
+		end
 	end
 	s.throttle += (throttle - s.throttle) * math.min(1, dt * 10)
 	-- lifting off at high revs: a short crackle of pops + flames
@@ -3205,10 +3248,10 @@ function Driving.step(dt: number)
 			-- (2026-11-21) the Flame Tune with no ECU map (S2 / R / X cars can't fit one): a burst of bangs + flames
 			s.pops = math.random(6, 9)
 			s.popTimer = 0.04
-		elseif s.rpm > 0.6 and liftMph > 30 and not noPops(s) and not noLiftPops(s) then
-			s.pops = math.random(2, 4)
+		elseif s.rpm > 0.55 and liftMph > 30 and not noPops(s) and not noLiftPops(s) then
+			s.pops = math.random(3, 5) -- (2026-11-26: was rpm 0.6, 2-4 pops)
 			s.popTimer = 0.04
-		elseif s.rpm > 0.75 and liftMph > 40 and #s.flames > 0 then
+		elseif s.rpm > 0.7 and liftMph > 40 and #s.flames > 0 then
 			-- (2026-11-21) a silent flame + smoke lifting off high revs on the flame cars that have no pop sound
 			exhaustPop(s, 0.6)
 		end
@@ -3901,10 +3944,17 @@ function Driving.step(dt: number)
 			local P = s.axle :: any
 			for _, c in s.corners do
 				local amount = if c.front then s.smokeF else math.max(s.smokeR, if s.drifting then 0.6 else 0)
+				-- (2026-11-26) faint marks braking hard (ABS too) and from the driven tyres on a launch
+				if s.brakeIn > 0.8 and mphNow > 20 then
+					amount = math.max(amount, 0.3)
+				end
+				if s.launch > 0 and (if c.front then s.drive ~= "RWD" else s.drive ~= "FWD") then
+					amount = math.max(amount, 0.4)
+				end
 				local hard = c.mat ~= nil and (AX.Surface[(c.mat :: Enum.Material).Name] or 1) >= 0.85
-				if s.grounded and c.hit and hard and amount > 0.15 and mphNow > 6 then
+				if s.grounded and c.hit and hard and amount > 0.15 and mphNow > (if s.launch > 0 or s.burnout then 1 else 6) then
 					local p = root.CFrame:PointToWorldSpace(c.at)
-					p = Vector3.new(p.X, (c.hit :: Vector3).Y + 0.03, p.Z)
+					p = Vector3.new(p.X, (c.hit :: Vector3).Y, p.Z) -- skidMark lifts it off the road
 					local w = math.clamp((if c.front then P.tyreF else P.tyreR) / 1000 * 3 * 0.9, 0.5, 1.3)
 					if c.skid then
 						skidMark(c.skid :: Vector3, p, w, math.clamp(amount, 0.25, 1), c.nrm)
@@ -3920,7 +3970,7 @@ function Driving.step(dt: number)
 		s.skidT += dt
 		if s.skidT > 0.05 then
 			s.skidT = 0
-			local y = hit.Position.Y + 0.03
+			local y = hit.Position.Y
 			local cf = CFrame.new(root.Position) * CFrame.Angles(0, s.yaw, 0)
 			local back = s.wheelbase * 0.5
 			local l = cf:PointToWorldSpace(Vector3.new(-(s.width / 2 - 1.1), 0, back))
@@ -4568,7 +4618,7 @@ function Driving.render(dt: number)
 			e.Color = s.flameColors[i] or e.Color
 		end
 		if s.flameLight then
-			s.flameLight.Color = Color3.fromRGB(130, 160, 255)
+			s.flameLight.Color = Color3.fromRGB(255, 140, 50)
 		end
 	end
 	s.boostWas = s.boosting
@@ -4600,9 +4650,15 @@ function Driving.render(dt: number)
 		end
 	end
 	if s.flameLight then
-		s.flameGlow = math.max(0, s.flameGlow - dt * 40)
+		-- (2026-11-26) an orange flash at the tips that also lights the road under them, ~0.12 s a pop
+		s.flameGlow = math.max(0, s.flameGlow - dt * 50)
 		s.flameLight.Brightness = s.flameGlow
-		s.flameLight.Enabled = s.flameGlow > 0
+		s.flameLight.Enabled = s.flameGlow > 0 and not LowEnd.on
+	end
+	if s.roadGlow then
+		local braking = s.tailBrake == true
+		s.roadGlow.Brightness = (if braking then 1.2 else 0.35) * (0.15 + 0.85 * CarLamps.night())
+		s.roadGlow.Enabled = (s.lightsOn or braking) and not LowEnd.on
 	end
 
 	if Driving.cameraHold then
