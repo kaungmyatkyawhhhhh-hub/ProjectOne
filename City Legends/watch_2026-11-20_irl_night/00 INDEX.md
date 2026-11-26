@@ -4,8 +4,11 @@ Made 27 Nov 2026 by the chat Claude on the chat PC with `Brain/Skills/watch-vide
 
 Recorded 20 Nov 2026, about 18:48-20:00, at night (photo GPS: 16.84 N 96.15 E down to 16.776 N 96.146 E, from the Kabar Aye side down toward downtown). Check each WATCH.md for the clip's own GPS and time.
 
-## IMPORTANT: IMG_0808 is missing (owner: "the most important one")
-IMG_0808.MOV (3:51, 475 MB) is over the 400 MB limit for copying off the chat PC, and the Windows Photos trim failed. When it arrives split in two (see Requests), its watch folders go here as IMG_0808_part1 / IMG_0808_part2. Study it first when it lands.
+## IMPORTANT: IMG_0808, study it FIRST (owner: "the most important one")
+The original (3:51, recorded 19:41:49, GPS 16.7750, 96.1393) was too big to copy, so the owner trimmed it on the iPhone into two halves:
+- [[IMG_0808_part1/WATCH|IMG_0808_part1]]: 1:55.9 long, the start of the video.
+- [[IMG_0808_part2/WATCH|IMG_0808_part2]]: 1:58.1 long, the end of the video. The two halves add up to ~3 s more than the original, so part 2 probably starts around 1:53 of the original with a few seconds of overlap (not checked; match the frames at the seam). Sound pictures are in each half's `audio/` (the iPhone's spatial-audio track can't be read; the normal stereo track was used).
+What it shows (chat Claude's quick look at part1's first sheet only): driving across a big **cable-stayed bridge at night**: cream/beige concrete pylons (tall A/H shape with a slot window near the top), fans of cream stay cables, cream cylindrical cable-anchor caps along the side barrier, tall lamp posts with cold white lamps, a yellow centre line, metal guard rail. The GPS fits the Yangon–Dala bridge; confirm from signs in the frames. The game already has a "Dala Bridge WIP" (see [[2026-11-23 Live cleanup - half-finished builders, place size, road fixes]]), so this is the reference for building it properly: pylon shape and count, cable count and fan pattern, deck lanes, lamp spacing, anchor caps, night lighting.
 
 ## Videos
 | Clip | Length (s) | Sheet every (s) | Frames in zip | GPS start | Recorded |
@@ -67,4 +70,4 @@ What the photos show (quick look by the chat Claude; check yourself):
 | photos/IMG_0818.jpg | 2026:11:20 19:56:30 | [16.779622, 96.151047] |
 
 ## Requests for the chat Claude
-- IMG_0808: owner to get it under 400 MB (e.g. trim it on the iPhone into two halves, 0:00-2:00 and 1:55-3:51, and put both in IrlReferences), then ask the chat Claude to prepare them.
+- (done 27 Nov) IMG_0808 arrived as two halves and is prepared above.

@@ -193,12 +193,24 @@ SR = 22050
 
 
 def load_audio(path, a=None, b=None):
+    # iPhones can store spatial audio (APAC) as the first track, which ffmpeg can't decode:
+    # try the default pick first, then each audio track in turn until one decodes.
+    for amap in (None, 0, 1, 2, 3):
+        x = _load_audio(path, a, b, amap)
+        if len(x):
+            return x
+    return x
+
+
+def _load_audio(path, a=None, b=None, amap=None):
     args = ["-v", "error"]
     if a is not None:
         args += ["-ss", str(a)]
     args += ["-i", str(path)]
     if b is not None:
         args += ["-t", str(b - (a or 0))]
+    if amap is not None:
+        args += ["-map", f"0:a:{amap}"]
     args += ["-vn", "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"]
     raw, _ = run(args, binary=True)
     return np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
