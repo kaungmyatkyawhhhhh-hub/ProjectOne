@@ -152,3 +152,4 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 - Previews: `picker_ingame_v6a_halftone.jpg` and `picker_ingame_v6b_watermark.jpg`. The auto-pick → Squat Rack → HUD return flow was verified. The place is not saved.
 - Owner picked B (27 Nov): PICK_WATERMARK = true, so the faint silhouettes are on and the halftone is off.
 - Changed back right after: the owner said "nvm do A". PICK_WATERMARK = false, halftone only (final).
+- Final, from the owner: "actually both". The halftone is always on, and PICK_WATERMARK = true adds the faint silhouettes on top. Preview: `picker_ingame_v6c_both.jpg`.
