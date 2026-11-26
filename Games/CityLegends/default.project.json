@@ -39,7 +39,7 @@
       "$className": "Workspace",
       "$properties": {
         "StreamingEnabled": true,
-        "StreamingTargetRadius": 640,
+        "StreamingTargetRadius": 2048,
         "StreamOutBehavior": "Opportunistic",
         "Gravity": 196.2
       }

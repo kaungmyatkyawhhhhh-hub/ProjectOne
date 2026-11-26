@@ -39,3 +39,21 @@ Saved as version 2249, not published.
 - The lines' worn look, once Roblox clears the pictures (check: `ContentProvider:PreloadAsync` returns Success).
 - Raising `StreamingTargetRadius` 640 -> 1024 so MAX shows roads and landmarks further. It costs every player memory, and most are on phones: owner's call.
 - The rest of the reference list: more street props (bus shelters with lit ads), manholes / painted arrows, a golden-hour menu shot with sun haze.
+
+## Streaming radius (owner: "how about 4096"), measured 27 Nov
+Studio Play on this PC, spawn on Kabar Aye, settled values (what streams in from the server; MAX's building detail is separate):
+
+| `StreamingTargetRadius` | parts streamed | farthest road | fps (settled) | fps while loading |
+|---|---|---|---|---|
+| 640 (before) | 14,400 | 1,320 studs | 59 | 55 |
+| 1024 | 15,300 | 1,805 | 59 | 59 |
+| **2048 (set)** | **22,800** | **2,931** | **57-59** | **52** |
+| 4096 | 43,600 | 5,835 | 46-48 | 25-34, for about 20 s |
+
+- **Picked 2048 (version 2252, `default.project.json` matches).**
+  - About 2.2x the road reach of 640 for no frame-rate cost on this PC.
+- **4096 isn't worth it for most players:**
+  - 3x the parts and about 12 fps less on a gaming PC once loaded;
+  - 25 fps while it loads, again on every fast travel;
+  - most players are on cheap phones, so expect worse there, and memory is the risk.
+- Not measured on a real phone. Studio's memory tags count all of Studio, so only part counts and fps compare.
