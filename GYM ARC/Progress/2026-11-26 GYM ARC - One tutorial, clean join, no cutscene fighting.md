@@ -110,3 +110,28 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 ## Pass 10: picker hides everything else (saved v1985) + Gemini mockup
 - Owner: "while that selection is showing up, hide all the other ui and dont let them show". TutorialClient `hideOtherUi`: every other ScreenGui/BillboardGui in PlayerGui, the Tutorial gui's other pieces and Roblox's chat/player list/backpack go off while the pick shows; anything that turns itself on meanwhile is turned off again; each one's own state comes back on close. Tested in Play (TestTutorialStep = 5, removed after): only Tutorial enabled during the pick, all HUD back after the auto-pick.
 - Gemini enhance of the picker: `Assets/picker_gemini/picker_gemini_v1.png` (from `picker_v1985_ingame.jpg`). It kept the layout almost 1:1; differences: a small icon by TRAINS, a softer centre glow, slightly larger cards with a lighter glass edge.
+
+## Pass 11 (27 Nov): final picker brief, typography cards (in Studio, NOT saved yet)
+- Owner's final brief: typography-led landscape cards with faint muscle watermarks.
+- TutorialClient cards:
+  - 240x160 cards, 12 px corners;
+  - UIGradient from the brief's hex colours;
+  - a 1.5 px edge in the border colour;
+  - Montserrat Heavy Italic word (48) with a soft drop shadow;
+  - Montserrat SemiBold machine name (16).
+- Art layer: a CanvasGroup holding the light, the grain at 0.96 and the watermark at 0.88, cropped on the right.
+- No AUTO chip: the auto card gets a brighter 2 px edge and scale 1.03.
+- The subtitle is gone and the veil is at 0.72.
+- A tap closes the pick at once (pickClosing set in choose), so a double tap picks only once.
+- First pick keeps 15 s (Onboarding.FirstPickAfter).
+- Watermarks: from Gemini, as white silhouettes on black, keyed to alpha and cut into three PNGs (Assets/pick_watermarks):
+  - legs rbxassetid://95894521061407;
+  - abs rbxassetid://70713789605335;
+  - back rbxassetid://100418555780735.
+- Grain: reused the existing tileable PICK_GRAIN, so no new Gemini texture.
+- Tested in Play:
+  - the picker shows;
+  - an ABS double click picks once and sends the player to the Crunch Bench;
+  - the HUD comes back;
+  - preview: Assets/picker_gemini/picker_ingame_v4.jpg.
+- TestTutorialStep removed.
