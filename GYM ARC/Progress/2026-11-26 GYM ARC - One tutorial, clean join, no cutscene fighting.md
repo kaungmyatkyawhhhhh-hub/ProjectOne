@@ -100,3 +100,9 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 - Studio's glTF export drops assets we don't own; the OBJ export keeps the geometry but scrambles the body UVs and drops clothing. Fix: take the real clothing templates from Studio's cache (rbx-storage), and box-project them onto each body part using the part frames from Studio (`pick_card_gfx/blender_uv_clothing.py` + `legs_part_cframes.json`). Arms read the shirt only, legs the pants only, torso both.
 - Face: the owner picked face 33 from the cache sheet (`textures/face.png`).
 - Render: Cycles 1536x2048, 192 samples, denoise, AgX, 80 mm, transparent film, key/fill/rim, shadow catcher with key-light shadows only. `LEGS_render_v1.png` (preview on blue and white: `LEGS_render_v1_preview.png`). Waiting for the owner's review before ABS and BACK.
+
+## Pass 9: picker cards without pictures (saved v1983)
+- Owner: "lets just do without picture, texts & details with designs only". The LEGS render (Pass 8) is parked, not wired in.
+- TutorialClient PICK cards (168x224): machine name top-left, an AUTO chip on the card the countdown will pick, the big word, a rule, "TRAINS" and one row per muscle from Config.Machines muscles (name + a bar as long as its share: Squat = Quads 100 / Glutes 50 / Lower Back 30, Crunch = Abs 100 / Obliques 60, Pull-Up = Lats 100 / Biceps 50 / Rear Delts 40).
+- Timer says which card it picks ("Auto-picks LEGS in 12s") and its bar takes that card's colour; on a pick the other cards dim; veil 0.72 -> 0.6; subtitle "Each machine trains different muscles".
+- Checked in Play at PC size (screenshot); no script errors. Phone size not emulated (the panel is 344 pt tall in a ~400 pt phone root, so it fits on paper).
