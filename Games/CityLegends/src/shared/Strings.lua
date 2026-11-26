@@ -420,6 +420,7 @@ local T: { [string]: { any } } = {
 	["foot.slowDown"] = { "Slow down to get out", "ဆင်းရန် အရှိန် လျှော့ပါ" },
 	["foot.cantGetOut"] = { "Can't get out here", "ဒီမှာ ဆင်းလို့ မရပါ" },
 	["foot.noSeat"] = { "No free seat here", "ဒီမှာ ထိုင်ခုံ မလွတ်ပါ" },
+	["foot.sprint"] = { "SPRINT", "SPRINT" },
 
 	-- daily gift and streak
 	["daily.gift"] = { "DAILY GIFT", "နေ့စဉ် လက်ဆောင်" },

@@ -14,6 +14,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local UI = require(script.Parent:WaitForChild("UI"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
+local Sprint = require(script.Parent:WaitForChild("Sprint"))
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 
@@ -189,6 +190,7 @@ end
 
 function OnFoot.init()
 	remotes = ReplicatedStorage:WaitForChild("Remotes") :: Folder
+	Sprint.init(OnFoot) -- (2026-11-26) Shift / L3 / the phone's SPRINT button
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or UI.modalOpen then
 			return

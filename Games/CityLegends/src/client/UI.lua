@@ -389,6 +389,8 @@ local touchFuel: Frame? = nil
 UI.onCarKey = nil :: ((Enum.KeyCode) -> ())? -- a driving key from the phone's buttons (Driving sets it)
 UI.onNitroTouch = nil :: ((boolean) -> ())? -- the N2O button held / let go (Driving sets it)
 UI.showNitroButton = function(_on: boolean) end
+UI.onSprintTouch = nil :: (() -> ())? -- (2026-11-26) the on-foot SPRINT button tapped (client/Sprint)
+UI.setSprintButton = function(_show: boolean, _on: boolean) end -- (set when the touch controls are built)
 UI.closeCarMenu = function() end
 -- (19 Nov, owner: "the driving buttons are so messy and cant see anything while driving ... some
 -- important buttons in mobile driving are missing"; his reference: Driving Empire, where 80% play on
@@ -480,6 +482,31 @@ function UI.buildTouchControls()
 		end
 		label({ Text = name, TextSize = 12, Font = Enum.Font.GothamBlack, TextColor3 = color, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -6), Size = UDim2.new(1, 0, 0, 16), Parent = b })
 		return b
+	end
+	-- (2026-11-26) on foot: the round SPRINT button left of Roblox's jump button (a tap toggles it;
+	-- client/Sprint switches it off when you stop walking), lit in the accent colour while on
+	local sprintHolder = cluster(sg, Vector2.new(1, 1), UDim2.new(1, -104, 1, -24), 64, 64)
+	sprintHolder.Visible = false
+	local sprintBtn = touchButton(sprintHolder, "SPRINT", UDim2.new(0, 0, 1, 0), UDim2.fromOffset(64, 64), Theme.Accent, function()
+		if UI.onSprintTouch then
+			UI.onSprintTouch()
+		end
+	end, function() end, true)
+	sprintBtn.Name = "SprintButton"
+	local sprintStroke = sprintBtn:FindFirstChildOfClass("UIStroke") :: UIStroke
+	local sprintShown, sprintLit = false, false
+	UI.setSprintButton = function(show: boolean, on: boolean)
+		show = show and hud.Visible and touchOnFoot
+		if show ~= sprintShown then
+			sprintShown = show
+			sprintHolder.Visible = show
+		end
+		if on ~= sprintLit then
+			sprintLit = on
+			sprintBtn.BackgroundColor3 = if on then Theme.Accent:Lerp(Theme.Panel, 0.45) else Theme.Panel
+			sprintStroke.Color = if on then WHITE else Theme.Accent
+			sprintStroke.Thickness = if on then 3 else 2
+		end
 	end
 	local noop = function() end
 	local function key(k: Enum.KeyCode): () -> ()
