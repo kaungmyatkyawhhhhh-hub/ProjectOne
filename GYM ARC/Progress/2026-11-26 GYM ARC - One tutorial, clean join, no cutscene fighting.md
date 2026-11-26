@@ -143,3 +143,10 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 - The watermark stays as the one signature detail per card.
 - Card entry stagger dropped; the panel still fades and slides.
 - Preview, with BACK hovered: Assets/picker_gemini/picker_ingame_v5.jpg.
+
+## Pass 13: Soft Sporty (27 Nov)
+- The owner said the cards were too big and still looked like placeholders. Gemini made 3 surface variations (`Assets/picker_gemini/picker_softsporty_gemini.png`). I used row B: a tone-on-tone halftone from the corner.
+- Cards are 176x112 with a gap of 14 (about 26% narrower) and symmetrical. The gradient is restrained. The border is a lighter tint of each card's colour, and the selected state is a brighter tint, not white. There is a 1 px inner top highlight and the same 5 px lip in a darker shade on every card, and the auto card is no longer scaled up. The text shadow is soft, in the lip colour. The text is optically centred, about 2 px left and 1 px up.
+- The heading reads "What will you train next?". The machine glows are hidden while the picker shows and come back after the pick. The countdown is a 220x6 bar with a darker track and a hairline stroke, and the timer text is white 15 pt.
+- The halftone is `Assets/pick_surface/halftone_corner.png` = rbxassetid://113657059550288. The faint watermark version sits behind the `PICK_WATERMARK` flag, which is off.
+- Previews: `picker_ingame_v6a_halftone.jpg` and `picker_ingame_v6b_watermark.jpg`. The auto-pick → Squat Rack → HUD return flow was verified. The place is not saved.

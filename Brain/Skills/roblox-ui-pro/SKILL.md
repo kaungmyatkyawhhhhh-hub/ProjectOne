@@ -71,6 +71,16 @@ Write a short plan; skip it only for a one-line tweak. It covers:
 - **What else can pop up at the same time.** Two things never shout at once; use the toast queue.
 - **Choice screens are for kids (owner, 27 Nov 2026, GYM ARC muscle picker):** "dont make it overcomplicated or overstimulating with many texts and making them hard to choose". Each option gets one big icon, one big word and at most one short line. No stat bars, percentages or lists on the cards. Show one clear default. Modern references (TDS, RIVALS) give the style, not the amount of detail.
 - **Simple doesn't mean plain (owner, 27 Nov 2026):** flat dark cards with thin line icons read as unfinished ("plain background"). Keep the text few, but fill each card's surface: either a lit art scene in the top two-thirds with a dark text band below (TDS mode cards), or a rich colour fill (gradient, faint stripes, grain, top shine, a huge faded silhouette as a watermark).
+- **Finished, not placeholder: craft over decoration (owner, 27 Nov 2026, "Soft Sporty"):**
+  - Big cards look like placeholder buttons. Make a short tutorial choice about 25% narrower (GYM ARC: 3 × 176×112, gap 14).
+  - Use symmetrical cards. The slanted edges were tried and rejected because the text looked off-centre.
+  - Borders are a lighter tint of the card's own colour, never white, and that includes the selected state.
+  - Add a 1 px inner top highlight and a lip in a darker shade of the same hue. Every card gets the same lip; the default card is never scaled up.
+  - Text shadow: a soft one in the lip colour.
+  - Centre text optically on the face, not the lip: about 2 px left for italics and about 1 px up for all-caps.
+  - A surface texture must be tone-on-tone and barely visible, e.g. a halftone in the lip colour at 0.86 transparency.
+  - Hide world highlights (machine glows) while a choice screen is up.
+  - Countdown: a 6 px bar with a darker track and a hairline stroke, plus white 15 pt text.
 
 ## 3. Build it correctly
 
