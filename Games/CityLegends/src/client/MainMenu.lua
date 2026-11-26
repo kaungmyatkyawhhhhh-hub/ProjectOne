@@ -2606,11 +2606,13 @@ end
 -- still falling, so it is not shipped. x3 = 429 tiles / 64,000 parts (Ultra: 123 / 21,000), about half Ultra's FPS.
 local RENDER_MULT = { Low = 0.5, Medium = 0.75, High = 1, Ultra = 1.5, Max = 3 }
 function MainMenu.renderDistanceOf(st: { [string]: any }): string
-	if LowEnd.on then
-		return "Low" -- (2026-11-19) low-end mode
-	end
+	-- (27 Nov, owner: "why is the render distance so low rn even though its max") a choice the player made wins; low-end
+	-- mode (Auto drops into it under 28 fps) only sets the default. Before, it forced Low under a row still saying MAX
 	if RENDER_MULT[st.RenderDistance] then
 		return st.RenderDistance
+	end
+	if LowEnd.on then
+		return "Low" -- (2026-11-19) low-end mode
 	end
 	return if UI.isTouch or st.Graphics == "Low" then "Medium" else "High"
 end
