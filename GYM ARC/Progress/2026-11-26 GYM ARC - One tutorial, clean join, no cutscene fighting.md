@@ -38,7 +38,7 @@ Guard rules learned: never hold windows (Kit.Modals): the loading screen pre-dra
 Join video: loading → menu → intro with no HUD on screen, HUD comes in once after the intro. Pick panel art, pager (1/2, arrows), no new errors.
 Not checked: the growth-spurt / alter / gym-reveal cutscenes with the guard (covered by name), phone size.
 
-## Pass 2 (v1957, saved, NOT published): the HUD eases in
+## Pass 2 (v1956, saved, NOT published): the HUD eases in
 Owner: "there is still the overstimulating GUI's loading in a millisecond at the start".
 
 A frame-by-frame log from the first client frame (a test LocalScript in ReplicatedFirst, removed afterwards) showed:
