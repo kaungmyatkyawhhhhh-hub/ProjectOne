@@ -37,3 +37,22 @@ Guard rules learned: never hold windows (Kit.Modals): the loading screen pre-dra
 ## Checked in Play
 Join video: loading → menu → intro with no HUD on screen, HUD comes in once after the intro. Pick panel art, pager (1/2, arrows), no new errors.
 Not checked: the growth-spurt / alter / gym-reveal cutscenes with the guard (covered by name), phone size.
+
+## Pass 2 (v1957, saved, NOT published): the HUD eases in
+Owner: "there is still the overstimulating GUI's loading in a millisecond at the start".
+
+A frame-by-frame log from the first client frame (a test LocalScript in ReplicatedFirst, removed afterwards) showed:
+- the loading and menu stretch is clean: windows pre-draw only under the loading screen;
+- the moment the hold ended (the Play shot / the intro over), about 20 HUD ScreenGuis switched on in ONE frame: top bar, side menu, right cards, hotbar, toasts. That snap was the "millisecond" pop.
+
+Fix in `ReplicatedFirst.GuiGuard`: when the hold ends, the HUD eases in by area:
+- the top bar and side menu at 0 s;
+- the right column at 0.1 s;
+- the boosts at 0.16 s;
+- TalentBar at 0.2 s;
+- the bottom bar and hotbar at 0.24 s;
+- everything else at 0.34 s.
+
+Each one fades up over 0.28 s with `Theme.FadeWindow`. The parts in `Kit.HudAsideParts` also glide in from their edge (Back easing, 0.32 s). If a gui's own script changes Enabled while it waits, the gui is handed back to the script.
+
+Checked in Play (returning player: menu → PLAY → town shot): the HUD fades in by area, with no one-frame pop. Not checked: phone size; a fresh player after the intro (same code path).
