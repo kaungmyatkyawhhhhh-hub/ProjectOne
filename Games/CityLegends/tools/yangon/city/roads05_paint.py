@@ -221,6 +221,7 @@ class Grid:
 
 
 CENTRE_GAP = 0.45     # between the two lines of a double yellow centre line
+CENTRE_BACK = 12.0    # (26 Nov) the double yellow stops this far before a crossing main road (4 m: zebra + gap)
 
 
 def centre_line(P, ln, what, road, clip, deck=False):
@@ -631,6 +632,7 @@ def build(data, signals=None):
         is_main = r['kind'] in ('route', 'side')
         g = cw[r['name']]
         mouths = []
+        big_cross = []
         for j in tree.query(g):
             o = roads[int(j)]
             if o['name'] == r['name']:
@@ -644,6 +646,10 @@ def build(data, signals=None):
                 # carriageway (a road running alongside behind a thin island no longer wipes this road's kerb line)
                 mouths.append(unary_union([cw[o['name']].buffer(0.5), x.buffer(4)]) if o['rank'] > r['rank']
                               else cw[o['name']].buffer(1))
+                # (26 Nov, road bug sweep round 3) a crossing MAIN road: the double yellow stops CENTRE_BACK before its
+                # carriageway (where the real paint ends: at the zebra / stop line), not 1-4 studs before it
+                if o['kind'] in ('route', 'side'):
+                    big_cross.append(x.buffer(CENTRE_BACK))
         # (J17) where the data's centre line steps back on itself (a geometry fault, listed in the paint handover) every
         # line of this road would scribble: no paint of this road within its width there
         fo = folds(s)
@@ -652,6 +658,7 @@ def build(data, signals=None):
         clip_mid = Clip(clip_all, fold_u) if fo else clip_all
         mouth_u = unary_union(mouths) if mouths else Polygon()
         clip_road = Clip(clip_all, mouth_u) if mouths else clip_all
+        clip_centre = Clip(clip_all, mouth_u, unary_union(big_cross)) if big_cross else clip_road
         clip_edge = Clip(edge_np, zz, mouth_u, fills.buffer(2))
         one = bool(r.get('oneway'))
         stn = np.concatenate([[0.0], np.cumsum([math.hypot(s[i][0] - s[i - 1][0], s[i][2] - s[i - 1][2]) for i in range(1, len(s))])])
@@ -688,7 +695,7 @@ def build(data, signals=None):
                     ln = smooth([(s[a + j][0] - s[a + j][4] * c0[j], s[a + j][2] + s[a + j][3] * c0[j]) for j in range(u0, u1 + 1)])
                     # (25 Nov, owner_bug_4 / lead: "yellow lines running into the junction") the double yellow stops
                     # at a side road's mouth like the lane lines (clip_road), it no longer runs on across it
-                    centre_line(P, ln, 'centre', r['name'], clip_road)
+                    centre_line(P, ln, 'centre', r['name'], clip_centre)
                 # (J15) a painted median (lanes held apart, no kerbed median built): a solid line on each side of it
                 flush = [s[i][11] >= 1.2 and s[i][8] <= 0.3 for i in rng]
                 for u0, u1 in runs(flush):

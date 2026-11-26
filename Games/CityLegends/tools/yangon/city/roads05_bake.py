@@ -729,6 +729,13 @@ def bake(tag):
         for t in faces_of(p, surf):
             mid = (t[0] + t[1] + t[2]) / 3
             by[(KIND[k], cell_of(mid[0], mid[2]))].append(t)
+    # (26 Nov, road bug sweep round 3) the slits YangonRoads.buildMedians leaves at every median joint closed
+    import roads05_median_join
+    mj_extra, median_join = roads05_median_join.fill(parts, data, lambda p: faces_of(p, surf), surf, only0 or None)
+    for k, t in mj_extra:
+        mid = (t[0] + t[1] + t[2]) / 3
+        by[(KIND[k], cell_of(mid[0], mid[2]))].append(t)
+    print('median joints:', median_join)
     ptris, dropped = paint_tris(paint, surf, surf, road_refy(data))
     for kind, ts in ptris.items():
         for t in ts:
@@ -822,7 +829,7 @@ def bake(tag):
             k, buf, n = k + 1, [], 0
     if buf:
         open(os.path.join(cdir, 'Collide05_%d.txt' % k), 'w', newline='\n').write('\n'.join(buf))
-    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, gap_fill=gapfill, nose_dropped=nose_dropped, deck_join=deck_join, foot_walls=foot_walls, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
+    st = dict(parts=len(parts), scraps_dropped=scrap, kerb_fix=kerb_fix, gap_fill=gapfill, nose_dropped=nose_dropped, median_join=median_join, deck_join=deck_join, foot_walls=foot_walls, deck_spill={k: sorted(v) for k, v in spill.items()}, paint_steep=PAINT_STEEP[0], unknown=n_unknown, meshes=len(named), files=len(files), triangles=dict(tri_count),
               paint_dropped=dropped, collision_boxes=len(rows), collide_files=k)
     json.dump(st, open(os.path.join(D, 'bake_stats.json'), 'w'), indent=1)
     print(json.dumps(st, indent=1))

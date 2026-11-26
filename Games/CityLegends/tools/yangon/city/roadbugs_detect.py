@@ -155,10 +155,13 @@ def cell_job(arg):
             cache[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
         byk[m['kind']].append(cache[m['glb']][m['name']])
     nbR, nbA = [], []
+    nbSide = []   # (26 Nov) the neighbours' pavement / median grass: a kerb at a cell edge has its pavement next door
     for m in nbms:
         if m['glb'] not in cache:
             cache[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
         (nbR if m['kind'] == 'R' else nbA).append(cache[m['glb']][m['name']])
+        if m['kind'] in ('P', 'MG'):
+            nbSide.append(cache[m['glb']][m['name']])
     spots = collections.defaultdict(list)
     if True:
         K = {k: (np.concatenate(v) if v else np.zeros((0, 3, 3))) for k, v in byk.items()}
@@ -271,8 +274,12 @@ def cell_job(arg):
                     if len(hit):
                         spot('median_jct', pc.x, top[:, :, 1].mean(), pc.y, 'area %.0f' % g.area)
         # loose kerbs
-        side = np.concatenate([get('P'), get('MG')])
-        S = Surf(side)
+        side = [get('P'), get('MG')]
+        for T2 in nbSide:
+            if len(T2):
+                c2 = T2.mean(1)
+                side.append(T2[(c2[:, 0] > cx * CELL - 80) & (c2[:, 0] < (cx + 1) * CELL + 80) & (c2[:, 2] > cz * CELL - 80) & (c2[:, 2] < (cz + 1) * CELL + 80)])
+        S = Surf(np.concatenate(side))
         for k in (('KR', 'KW') if not FAST else ()):
             Kt = get(k)
             if not len(Kt):
@@ -344,9 +351,15 @@ def cell_job(arg):
                         continue
                     h = mr[j]
                     v = np.array([h[0].centroid.x - cpt.x, h[0].centroid.y - cpt.y])
-                    along = abs(v @ ax)
-                    lat = abs(v[0] * ax[1] - v[1] * ax[0])
-                    if lat < 1.5 and along < 40 and abs(abs(h[3] @ ax) - 1) < 0.02:
+                    # (26 Nov) against the two dashes' mean direction: on a curve (a roundabout ring, r 90) the next dash
+                    # is turned ~15 deg and off the first one's axis, but the chord between them runs along the mean
+                    a2 = h[3] if h[3] @ ax >= 0 else -h[3]
+                    if a2 @ ax < math.cos(math.radians(30)):
+                        continue
+                    am = (ax + a2) / np.linalg.norm(ax + a2)
+                    along = abs(v @ am)
+                    lat = abs(v[0] * am[1] - v[1] * am[0])
+                    if lat < 1.5 and along < 40:
                         ok = True
                         break
                 if not ok:

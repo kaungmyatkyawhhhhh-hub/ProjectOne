@@ -37,7 +37,9 @@ def zones(data):
 
 
 def drop(parts, data):
-    Z = zones(data)
+    # (26 Nov) + median runs shorter than roads05_median_join.SHORT (a stray 8-stud piece in a junction box)
+    import roads05_median_join
+    Z = zones(data).union(roads05_median_join.short_zones(data))
     if Z.is_empty:
         return parts, 0
     shapely.prepare(Z)
@@ -46,8 +48,8 @@ def drop(parts, data):
 
 
 def _test():
-    # a road along +z with a median that is 3 wide, then narrows 3 -> 0.5 -> 0 over two samples
-    s = [[0, 0, z, 0, 1, 0, 10, 10, m, 2, 4, m] for z, m in ((0, 3), (10, 3), (20, 0.5), (30, 0))]
+    # a road along +z with a median that is 3 wide (40 studs: not a short run), then narrows 3 -> 0.5 -> 0 over two samples
+    s = [[0, 0, z, 0, 1, 0, 10, 10, m, 2, 4, m] for z, m in ((-30, 3), (-20, 3), (-10, 3), (0, 3), (10, 3), (20, 0.5), (30, 0))]
     data = dict(roads=[dict(name='a', s=s)])
     parts = [('r', 'W', (0.0, 0.5, 15.0), (1, 0, 0), (0, 1, 0), (1, 1, 1)),   # on the 3 -> 0.5 piece: two kerbs at the start
              ('r', 'W', (0.0, 0.5, 25.0), (1, 0, 0), (0, 1, 0), (1, 1, 1)),   # the 0.5 -> 0 tip

@@ -4041,6 +4041,7 @@ end
 -- overlap; a piece whose width changes (a nose) is laid exactly (triangles), as one kerb-coloured nose where it
 -- is too narrow for two kerbs. The asphalt runs on under the median.
 M.MEDIAN_KERB_W = 0.9
+M.MEDIAN_SHORT = 24 -- (26 Nov) a median run shorter than this (studs) is a stray piece in a junction: not laid
 M.medianLook = {
 	fill = { Material = Enum.Material.Grass, Color = Color3.fromRGB(84, 108, 56) },
 	-- (J15, owner ADD: downtown medians are paved terrazzo noses or a white concrete barrier with a railing; the
@@ -4116,12 +4117,67 @@ function M.buildMedians(names: { string })
 		end
 		local KW = M.MEDIAN_KERB_W
 		local kTop, fTop = M.CURB_UP + 0.1, M.CURB_UP - 0.05
+		-- (26 Nov, road bug sweep round 3) a median run shorter than MEDIAN_SHORT studs (two samples left inside a
+		-- junction box by the data) is a stray piece: not laid. (roads05_median_join.short_zones does the same in the bake)
+		local shortRun = {}
+		do
+			local i = 1
+			while i <= o.n do
+				if (s[i][9] or 0) < 0.15 then
+					i += 1
+					continue
+				end
+				local j = i
+				while j + 1 <= o.n and (s[j + 1][9] or 0) >= 0.15 do
+					j += 1
+				end
+				local L = 0
+				for k = i, j - 1 do
+					L += Vector2.new(s[k + 1][1] - s[k][1], s[k + 1][3] - s[k][3]).Magnitude
+				end
+				if L < M.MEDIAN_SHORT then
+					for k = math.max(1, i - 1), j do
+						shortRun[k] = true
+					end
+				end
+				i = j + 1
+			end
+		end
+		-- (26 Nov) the joints: each piece's end corners per strip (fill, kerb -1, kerb +1) at its top, kept for the next
+		-- piece, which lays an exact quad from them to its own start corners (blocks are shortened at both ends so they
+		-- never overlap; the slit that left showed the asphalt through the median)
+		local prevEnd: { [string]: { Vector3 } }? = nil
+		local prevI = -1
+		local function joint(key: string, props: { [string]: any }, c1: Vector3, c2: Vector3, th: number)
+			local e = prevEnd and prevEnd[key]
+			if not e then
+				return
+			end
+			-- (pair the corners by distance: the two pieces' own left / right never get crossed)
+			if (e[1] - c1).Magnitude + (e[2] - c2).Magnitude > (e[1] - c2).Magnitude + (e[2] - c1).Magnitude then
+				c1, c2 = c2, c1
+			end
+			local d1, d2 = (e[1] - c1).Magnitude, (e[2] - c2).Magnitude
+			if d1 < 1 and d2 < 1 and math.max(d1, d2) > 0.005 then
+				quad(props, e[1], e[2], c2, c1, th)
+			end
+		end
+		-- a block's top corners at its start (pa) and end (pb): block() lays it along CFrame.lookAt(mid, pb), top at +top
+		local function blockEnds(pa: Vector3, pb: Vector3, width: number, top: number): (Vector3, Vector3, Vector3, Vector3)
+			local cf = CFrame.lookAt((pa + pb) / 2, pb)
+			local h = (pb - pa).Magnitude / 2
+			return cf * Vector3.new(-width / 2, top, h), cf * Vector3.new(width / 2, top, h), cf * Vector3.new(-width / 2, top, -h), cf * Vector3.new(width / 2, top, -h)
+		end
 		for i = 1, o.n - 1 do
 			local a, b = s[i], s[i + 1]
 			local ma, mb = a[9] or 0, b[9] or 0
-			if cut[i] or cut[i + 1] or (ma < 0.15 and mb < 0.15) or not own((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) or M.inCorner((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) then
+			if cut[i] or cut[i + 1] or shortRun[i] or (ma < 0.15 and mb < 0.15) or not own((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) or M.inCorner((a[1] + b[1]) / 2, (a[3] + b[3]) / 2) then
 				continue
 			end
+			if prevI ~= i - 1 then
+				prevEnd = nil
+			end
+			local curEnd: { [string]: { Vector3 } } = {}
 			any = true
 			pieces += 1
 			local ya, yb = surf(i), surf(i + 1)
@@ -4152,14 +4208,19 @@ function M.buildMedians(names: { string })
 				local dir = (B - A) / len
 				local P, Q = A + dir * ta, B - dir * tb
 				local r = ((rA + rB) / 2).Unit
-				-- the two kerbs, two bands each (the kerbs' 3.2-stud rhythm)
+				-- the two kerbs, two bands each (the kerbs' 3.2-stud rhythm; (26 Nov) the bands butt: their touching ends
+				-- are inside the kerb, never seen, and the old 0.02 gap was a slit to the asphalt)
 				for _, side in { -1, 1 } do
 					local off = r * side * (m - KW / 2 + 0.05)
 					for kb = 0, 1 do
 						local u0, u1 = kb / 2, (kb + 1) / 2
 						local props = { Name = "MedianKerb", Material = pal.kerbMaterial, Color = if ((i * 2 + kb) % 2 == 1) then (pal.kerbBand or pal.kerb) else pal.kerb }
-						block(props, P:Lerp(Q, u0) + off, P:Lerp(Q, u1) + off - dir * (if kb == 0 then 0.02 else 0), KW, kTop, 3)
+						block(props, P:Lerp(Q, u0) + off, P:Lerp(Q, u1) + off, KW, kTop, 3)
 					end
+					local sl, sr, el, er = blockEnds(P + off, Q + off, KW, kTop)
+					local key = "k" .. side
+					joint(key, { Name = "MedianKerb", Material = pal.kerbMaterial, Color = if (i * 2) % 2 == 1 then (pal.kerbBand or pal.kerb) else pal.kerb, CastShadow = false }, sl, sr, kTop + 3)
+					curEnd[key] = { el, er }
 				end
 				local fw = 2 * (m - KW + 0.1) -- (its sides 0.05 under the kerbs)
 				local style = o.medianStyle
@@ -4167,6 +4228,11 @@ function M.buildMedians(names: { string })
 					local props = table.clone(M.medianLook[if style == "paved" or style == "barrier" then "paved" else "fill"])
 					props.Name = "Median"
 					block(props, P, Q, fw, fTop, 3)
+					local sl, sr, el, er = blockEnds(P, Q, fw, fTop)
+					local jp = table.clone(props)
+					jp.CastShadow = false
+					joint("f", jp, sl, sr, fTop + 3)
+					curEnd.f = { el, er }
 				end
 				if style == "barrier" and fw > 0.9 then
 					-- a barrier wall on the paved fill's middle (its faces 0.25 inside the fill's: no shared plane) and a
@@ -4196,15 +4262,23 @@ function M.buildMedians(names: { string })
 				else
 					for _, side in { -1, 1 } do
 						local props = { Name = "MedianKerb", Material = pal.kerbMaterial, Color = band, CastShadow = false }
-						quad(props, at(A, rA, side * (ma - KW + 0.05), kTop), at(A, rA, side * ma, kTop), at(B, rB, side * mb, kTop), at(B, rB, side * (mb - KW + 0.05), kTop), kTop + 3)
+						local a1, a2 = at(A, rA, side * (ma - KW + 0.05), kTop), at(A, rA, side * ma, kTop)
+						local b1, b2 = at(B, rB, side * mb, kTop), at(B, rB, side * (mb - KW + 0.05), kTop)
+						quad(props, a1, a2, b1, b2, kTop + 3)
+						joint("k" .. side, props, a1, a2, kTop + 3)
+						curEnd["k" .. side] = { b2, b1 }
 					end
 					local props = table.clone(M.medianLook[if o.medianStyle == "paved" or o.medianStyle == "barrier" then "paved" else "fill"])
 					props.Name = "Median"
 					props.CastShadow = false
 					local fa, fb = ma - KW + 0.1, mb - KW + 0.1
 					quad(props, at(A, rA, -fa, fTop), at(A, rA, fa, fTop), at(B, rB, fb, fTop), at(B, rB, -fb, fTop), fTop + 3)
+					joint("f", props, at(A, rA, -fa, fTop), at(A, rA, fa, fTop), fTop + 3)
+					curEnd.f = { at(B, rB, -fb, fTop), at(B, rB, fb, fTop) }
 				end
 			end
+			-- (a single-kerb nose piece leaves curEnd empty: no joint across it)
+			prevEnd, prevI = curEnd, i
 			if pieces % 60 == 0 then
 				task.wait()
 			end
