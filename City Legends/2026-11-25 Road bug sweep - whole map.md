@@ -53,3 +53,24 @@ State and ids: `Games/CityLegends/build/city_1to1/rebuild_progress.json` "roadbu
 - **Full re-bake:** every cell whose build has pages on this PC (332 + the 49 P12 cells) re-collected and re-baked with all of the fixes above + the exact district-edge clip + gap fill + the deck agent's 2-stud wall rule, then swapped mesh-only (`roadbugs_rebake.py plan x all`, `run_all.sh`, `roadbugs_swapjobs.py`, `tools/yangon/RoadMeshSwap.luau`). Not re-baked: the 29 P8 laptop cells (no pages here), 4 cells mixed from two builds, 21x29 (R25B).
 - **Invisible parts on the roads (owner):** `roadbugs_boxes.py` checks every road collision box against the visible road meshes. Kabar Aye flyover lower road by the fuel station: a pavement box from the bake stood 4-6 studs over the lower road (the pavement-box clip counted a pavement 6 studs below as "built pavement under it") and a box tilted 55 degrees (an old bad plane fit). Cause fixed in `roads05_pbox_clip.py` (a kept box is seated on the pavement it stands for). Map-wide: 3,153 boxes over the visible road (> 0.3), 74 with no road under them, 86 tilted > 25 degrees -> 2,987 seated, 159 removed (log `build/city_1to1/roadbugs_25nov/invisible_boxes_fixed_log.txt`); moves inside deck areas were reverted (153 deck boxes left for the deck agent), ground boxes beside decks re-done. After: 296 float (mostly at deck feet), 2 bare, 0 tilted.
 - **Crumpled kerbs at mouth corners:** not fixed. The pieces stick radially out of the corner arc; a bake filter could not tell them from real kerb pieces without dropping 20% of all kerbs. Needs the builder's corner code (YangonRoads buildCorners / mouths).
+
+## Final result (26 Nov, place v2178 -> saved v2202)
+Whole map, 415 cells, 3,791 road meshes (re-listed from the place; 29 P8 cells read from the Studio mesh dump). Detector `roadbugs_detect.py` (`counts_final.json`, `spots_final.json`). "Same spot" = bug spots at the same place (4-stud grid) as before.
+
+| Kind | Before (25 Nov) | After | Same spot | Note |
+|---|---|---|---|---|
+| Spike (sawtooth into the grass) | 180 | 69 | 64 | left ones are in cells baked the same way before (P8 laptop cells, mixed cells, builder mouth notches) |
+| Gap (holes in the road surface) | 1,900 | 949 | - | the old "hole" count (1,847) was replaced by this better one |
+| Kerb lying on the road | 404 | 195 | 167 | the rest are the crumpled mouth corners (builder) |
+| Median stub (small median piece) | 169 | 169 | 169 | NOT fixed: every spot is the same, also in re-baked cells, so these are not the one-kerb nose wedges the nose rule drops. Cause not found yet |
+| Median piece in a junction | 23 | 23 | 23 | NOT fixed, same as above |
+| Paint lines crossing | 81 | 97 | 64 | the paint re-run removed some and the new centre lines added some |
+| Yellow line near a junction | 140 | 301 | 65 | went UP: the new double yellow centre lines (lead / owner rule) stop at side-road mouths but still come within 10 studs of a junction point at big crossings |
+| Lone lane dash | 1,503 | 1,507 | 1,129 | not better: the dash phase change did not line the dashes up across mouths |
+| Low ramp wall in a junction | 878 | 879 | 831 | this count also catches the deck agent's new 2-stud walls (the test is 2.5 studs), so it can't show their fix |
+| Grass over the road (terrain) | 4,893 boxes | 155 | - | v2054 |
+| Invisible boxes over the road | 3,153 float / 74 bare / 86 tilted | ~296 / 2 / 0 | - | v2115 + v2125; 153 deck boxes left for the deck agent |
+
+- **Play drive (test store, 26 Nov, `build/city_1to1/roadbugs_25nov/play_drive_26nov_final.txt`):** 10 routes, every one to its end with 0 stops: Baho Road (P6, RB6 cells), 1st Thiri Mon Street (P5), Lane #310 (P10, RB10 cells), 25th Street (P3), Nar Nat Taw Road (P4), Paw San Hmwe Street (P12), Byamaso Street (P9), Moe Kaung Road (P11, RB11 cells), and both Kabar Aye flyover lower roads by Myanmar Plaza. Worst jolt 38.6 on lower road #5 going down from the deck foot (16.7 on 25 Nov, no stop either time); all others 12.1 or less.
+- Store switched back to `CityLegends_v1`, checked on the Server ("storeName CityLegends_v1"), saved **v2202**. Never published.
+- **Still to do:** median stubs + median pieces in junctions (find what they are first), crumpled kerbs at mouth corners (builder corner code), yellow lines at big crossings (check against real roads: the owner rule keeps double yellow where real roads have it), lone dashes across mouths, the 29 P8 laptop cells and the 4 mixed cells + 21x29 (not re-baked), the low-wall test needs a lower threshold to measure the deck agent's walls.
