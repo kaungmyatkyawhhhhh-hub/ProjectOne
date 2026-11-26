@@ -263,6 +263,50 @@ local TABS = { "CAMPAIGN", "CARS", "HOUSES", "JOBS", "STORE" } -- (19 Nov: JOBS)
 local tabButtons: { [string]: TextButton } = {}
 local tabBadges: { [string]: Frame } = {}
 local pages: { [string]: Frame } = {}
+-- (26 Nov, TDS study: a window's cards build in top-left to bottom-right, ~40 ms apart) each card grows from 0.92
+local function enterCards(page: Instance?)
+	if not page or calm then
+		return
+	end
+	task.defer(function()
+		local list = {}
+		local function collect(from: Instance)
+			for _, c in from:GetChildren() do
+				if c:IsA("GuiObject") and c.Visible and c.AbsoluteSize.X > 40 and c.AbsoluteSize.Y > 30 then
+					table.insert(list, c)
+				end
+			end
+		end
+		collect(page)
+		if #list == 1 then -- (a page holding one scroller or frame: its cards)
+			local only = list[1]
+			table.clear(list)
+			collect(only)
+		end
+		table.sort(list, function(a, b)
+			local pa, pb = a.AbsolutePosition, b.AbsolutePosition
+			return pa.Y + pa.X * 0.5 < pb.Y + pb.X * 0.5
+		end)
+		for i, c in list do
+			if i > 14 then
+				break -- (a long list: the first screenful is enough)
+			end
+			-- (the cards' own UIScale, the hover one, if they have it: two UIScales on one frame don't add up)
+			local s = c:FindFirstChildOfClass("UIScale")
+			if not s then
+				local ns = Instance.new("UIScale")
+				ns.Name = "EnterScale"
+				ns.Parent = c
+				s = ns
+			end
+			local sc = s :: UIScale
+			sc.Scale = 0.92
+			task.delay((i - 1) * 0.04, function()
+				tween(sc, 0.28, { Scale = 1 }, Enum.EasingStyle.Back)
+			end)
+		end
+	end)
+end
 local sub: Frame? = nil -- an open page on top (world map, settings, claim)
 local topLeft: Frame
 local topRight: Frame
@@ -1402,6 +1446,14 @@ local function openSettings()
 		t.blur = v == "ON"
 		setFx(t)
 	end)
+	-- (26 Nov, driving-game study: a strength setting for the speed effects; Unbound's off switch ended the argument)
+	choices(row("Speed effects"), { "OFF", "LOW", "NORMAL" }, function()
+		return levelName(Driving.camFx.speed or 1)
+	end, function(v)
+		local t = fx()
+		t.speed = LEVEL[v]
+		setFx(t)
+	end)
 	do
 		local r = row("Chase camera FOV")
 		local holder = new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -8, 0.5, 0), Size = UDim2.fromOffset(180, 34), Parent = r })
@@ -1512,6 +1564,19 @@ local function openSettings()
 	end, function(v)
 		st.HideKeys = v == "HIDE"
 		UI.toggleControls(v == "SHOW")
+	end)
+	-- (26 Nov) HUD parts you can hide (the minimap and the controls already could)
+	choices(row("Level bar"), { "SHOW", "HIDE" }, function()
+		return if st.HudLevel == false then "HIDE" else "SHOW"
+	end, function(v)
+		st.HudLevel = v == "SHOW"
+		UI.setHudPart("level", v == "SHOW")
+	end)
+	choices(row("Goals tracker"), { "SHOW", "HIDE" }, function()
+		return if st.HudGoals == false then "HIDE" else "SHOW"
+	end, function(v)
+		st.HudGoals = v == "SHOW"
+		UI.setHudPart("goals", v == "SHOW")
 	end)
 
 	heading("SOUND")
@@ -2240,6 +2305,9 @@ switchTab = function(name: string)
 	for n, p in pages do
 		p.Visible = n == name
 	end
+	if os.clock() - openedAt > 0.2 then
+		enterCards(pages[name])
+	end
 	setFocus(nil)
 	table.clear(focusList)
 	if name == "CAMPAIGN" then
@@ -2461,6 +2529,7 @@ function MainMenu.open(start: boolean?)
 		closeSub()
 	end
 	switchTab("CAMPAIGN")
+	enterCards(pages.CAMPAIGN)
 	-- a new player: straight to the pick
 	if not claimed() and startMode then
 		task.defer(openClaim)
@@ -2563,6 +2632,8 @@ function MainMenu.applySettings(st: { [string]: any })
 	LookFx.load(st.Look)
 	LowEnd.applyWorld() -- (after the saved look: low-end keeps glow / rays / depth of field off)
 	UI.setSpeedoStyle(if st.Speedo == "Digital" then "Digital" else "Analogue")
+	UI.setHudPart("level", st.HudLevel ~= false)
+	UI.setHudPart("goals", st.HudGoals ~= false)
 	MainMenu.applyAids(st)
 	Driving.smoke = if st.Smoke == "Off" then 0 elseif st.Smoke == "Low" then 0.5 else 1
 	Driving.marks = st.Marks ~= false

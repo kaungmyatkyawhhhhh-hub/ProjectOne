@@ -236,6 +236,7 @@ local fuelBack: Frame? = nil
 local fuelText: TextLabel? = nil
 local lampButton: TextButton? = nil
 local lampMark: TextLabel? = nil
+local hudLevelOff = false -- (26 Nov) Settings > Level bar: HIDE
 -- (26 Nov) declared here: the touch controls (built above its body) draw their small buttons with it
 local icon: (kind: string, parent: Instance, size: number, color: Color3?) -> Frame
 local BEAM_BLUE = Color3.fromRGB(80, 160, 255)
@@ -2879,10 +2880,80 @@ function UI.setSpeed(mph: number, frac: number, gear: string, rpm: number, launc
 			touchMoving = moving
 			local bars = hud:FindFirstChild("TopBars")
 			if bars then
-				(bars :: Frame).Visible = not moving
+				(bars :: Frame).Visible = not moving and not hudLevelOff
 			end
 			pillFade(moving)
 		end
+	end
+end
+
+-- (26 Nov, TDS study: a diagonal shine sweeps across a reward once) a white band glides over a card or a title.
+-- A copy on top (a title already wearing a UIGradient can't take a second one), gone when it has passed
+function UI.shine(target: GuiObject, delay: number?, time: number?)
+	if GuiService.ReducedMotionEnabled then
+		return
+	end
+	task.delay(delay or 0, function()
+		if not target.Parent then
+			return
+		end
+		local o: GuiObject
+		local strong = 0.15
+		if target:IsA("TextLabel") or target:IsA("TextButton") then
+			local t = target :: TextLabel
+			o = new("TextLabel", {
+				BackgroundTransparency = 1,
+				Text = t.Text,
+				RichText = t.RichText,
+				FontFace = t.FontFace,
+				TextSize = t.TextSize,
+				TextScaled = t.TextScaled,
+				TextWrapped = t.TextWrapped,
+				TextXAlignment = t.TextXAlignment,
+				TextYAlignment = t.TextYAlignment,
+				TextColor3 = WHITE,
+				Size = UDim2.fromScale(1, 1),
+				ZIndex = t.ZIndex + 1,
+				Parent = t,
+			})
+		else
+			strong = 0.6
+			o = new("Frame", { BackgroundColor3 = WHITE, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), ZIndex = target.ZIndex + 1, Parent = target })
+			local c = target:FindFirstChildOfClass("UICorner")
+			if c then
+				c:Clone().Parent = o
+			end
+		end
+		local g = new("UIGradient", {
+			Rotation = 20,
+			Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 1),
+				NumberSequenceKeypoint.new(0.4, 1),
+				NumberSequenceKeypoint.new(0.5, strong),
+				NumberSequenceKeypoint.new(0.6, 1),
+				NumberSequenceKeypoint.new(1, 1),
+			}),
+			Offset = Vector2.new(-1, 0),
+			Parent = o,
+		})
+		local tw = tween(g, time or 0.7, { Offset = Vector2.new(1, 0) }, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+		tw.Completed:Connect(function()
+			o:Destroy()
+		end)
+	end)
+end
+
+-- (26 Nov) Settings > Level bar / Goals tracker (HUD parts the player can hide; FH5 / Unbound let you)
+UI.hudGoalsOff = false -- (GoalsClient reads it)
+function UI.setHudPart(part: string, on: boolean)
+	if part == "level" then
+		hudLevelOff = not on
+		local bars = hud and hud:FindFirstChild("TopBars")
+		if bars then
+			(bars :: Frame).Visible = on and not (UI.isTouch and touchMoving)
+		end
+	elseif part == "goals" then
+		UI.hudGoalsOff = not on
 	end
 end
 
@@ -3331,6 +3402,7 @@ function UI.levelUp(level: number, reward: number)
 	local cash = label({ Text = if reward > 0 then "+" .. formatCash(reward) else "", TextSize = 24, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, Position = UDim2.fromOffset(0, 104), Size = UDim2.new(1, 0, 0, 28), ZIndex = 71, Parent = f })
 	local cashStroke = new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = cash })
 	tween(scale, 0.45, { Scale = 1 }, Enum.EasingStyle.Back)
+	UI.shine(title, 0.35, 0.8)
 	UI.flash(Theme.Accent2)
 	Audio.ui("LevelUp") -- (26 Nov: the night-drive stinger; the music steps back under it)
 	UI.toast("Level " .. level .. " reached!" .. (if reward > 0 then "  +" .. formatCash(reward) else ""), Theme.Accent2)
@@ -3419,6 +3491,7 @@ showPopup = function(text: string, amount: number, color: Color3)
 	-- coloured by kind and already have Audio.cutUp
 	if amount > 0 and color == Theme.Money then
 		Audio.ui("Cash")
+		UI.shine(money, 0.12, 0.5)
 	end
 	new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = money })
 	main.TextSize = 50

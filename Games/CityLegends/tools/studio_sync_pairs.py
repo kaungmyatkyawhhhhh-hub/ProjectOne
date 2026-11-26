@@ -1,19 +1,26 @@
 """Make one execute_luau script that copies changed src files into Studio as find/replace pairs (26 Nov 2026).
 Each file's Studio Source must equal the git base (default HEAD); the script checks the length first and reports
 "<name> base <len>" if not, "<name> MISS" if a pair is not found, else "<name> <new len>/<want>".
-Usage (from Games/CityLegends): python tools/studio_sync_pairs.py [base] > out.luau   (then paste into execute_luau, Edit)
+Usage (from Games/CityLegends): python tools/studio_sync_pairs.py [base [files...]] > out.luau (no files: every src file changed since base, new ones too)   (then paste into execute_luau, Edit)
+Writes Source directly (27 Nov: ScriptEditorService:UpdateSourceAsync hung in Team Create; a plain Source write worked).
 Line-based diff: fast on 140k-character files (a character diff took minutes)."""
 import subprocess, difflib, sys
 
-FILES = {
-    'src/client/Guide.lua': 'game.StarterPlayer.StarterPlayerScripts.Client.Guide',
-    'src/client/UI.lua': 'game.StarterPlayer.StarterPlayerScripts.Client.UI',
-    'src/client/Audio.lua': 'game.StarterPlayer.StarterPlayerScripts.Client.Audio',
-    'src/shared/ConfigSounds.lua': 'game.ReplicatedStorage.Shared.ConfigSounds',
-    'src/client/MainMenu.lua': 'game.StarterPlayer.StarterPlayerScripts.Client.MainMenu',
-    'src/client/Workshop.lua': 'game.StarterPlayer.StarterPlayerScripts.Client.Workshop',
-    'src/client/DealerMenu.lua': 'game.StarterPlayer.StarterPlayerScripts.Client.DealerMenu',
-}
+def inst_of(f):
+    """repo path -> the Studio instance path (Rojo layout: client / server / shared; folder modules = init.lua)"""
+    root = {'src/client/': 'game.StarterPlayer.StarterPlayerScripts.Client', 'src/server/': 'game.ServerScriptService.Server', 'src/shared/': 'game.ReplicatedStorage.Shared'}
+    for k, v in root.items():
+        if f.startswith(k):
+            rest = f[len(k):]
+            for ext in ('.client.lua', '.server.lua', '.lua'):
+                if rest.endswith(ext):
+                    rest = rest[:-len(ext)]
+                    break
+            parts = [x for x in rest.split('/') if x != 'init']
+            return v + ''.join('[%s]' % lit(x) for x in parts)
+    raise SystemExit('not a src file: ' + f)
+
+
 BASE = sys.argv[1] if len(sys.argv) > 1 else 'HEAD'
 NL = '\n'
 
@@ -70,15 +77,30 @@ def gen(old, new, inst):
     body = ','.join('{%s,%s}' % (lit(s), lit(n)) for s, n, *_ in reversed(out))
     return ('do local inst=%s local src=inst.Source:gsub("\\r","") if #src~=%d then table.insert(R,inst.Name.." base "..#src) '
             'else local ok=true for _,p in {%s} do local i,j=string.find(src,p[1],1,true) if not i then ok=false break end '
-            'src=src:sub(1,i-1)..p[2]..src:sub(j+1) end if ok then SES:UpdateSourceAsync(inst,function() return src end) '
+            'src=src:sub(1,i-1)..p[2]..src:sub(j+1) end if ok then inst.Source=src '
             'table.insert(R,inst.Name.." "..#inst.Source.."/%d") else table.insert(R,inst.Name.." MISS") end end end'
             % (inst, len(old.encode()), body, len(new.encode())))
 
 
+def git(*a):
+    return subprocess.run(['git', *a], capture_output=True, encoding='utf-8')
+
+
+FILES = sys.argv[2:] or [f.replace('Games/CityLegends/', '') for f in git('diff', '--name-only', BASE, '--', 'src').stdout.split()]
+FILES += [f for f in git('ls-files', '--others', '--exclude-standard', 'src').stdout.split() if f not in FILES]
 print('local SES=game:GetService("ScriptEditorService") local R={}')
-for f, inst in FILES.items():
-    old = subprocess.run(['git', 'show', f'{BASE}:Games/CityLegends/{f}'], capture_output=True, encoding='utf-8').stdout.replace('\r', '')
+for f in FILES:
+    inst = inst_of(f)
+    r = git('show', f'{BASE}:Games/CityLegends/{f}')
     new = open(f, encoding='utf-8').read().replace('\r', '')
+    if r.returncode != 0:  # a new file: make the ModuleScript under its parent and fill it
+        parent, name = inst.rsplit('[', 1)
+        name = name[:-1]
+        print('do local p=%s local m=p:FindFirstChild(%s) or Instance.new("ModuleScript") m.Name=%s m.Parent=p '
+              'm.Source=%s table.insert(R,m.Name.." new "..#m.Source.."/%d") end'
+              % (parent, name, name, lit(new), len(new.encode())))
+        continue
+    old = r.stdout.replace('\r', '')
     if old != new:
         print(gen(old, new, inst))
 print('return table.concat(R,"\\n")')

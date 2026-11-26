@@ -76,7 +76,7 @@ export type Profile = {
 export type Settings = {
 	Units: string, -- "mph" | "kmh"
 	Gearbox: string, -- "Auto" | "Manual"
-	CamFx: { shake: number, head: number, blur: boolean, fov: number }?, -- Settings > Camera
+	CamFx: { shake: number, head: number, blur: boolean, fov: number, speed: number? }?, -- Settings > Camera (speed: 26 Nov, speed FOV + lines)
 	-- the main menu's settings (2026-11-02)
 	Minimap: { on: boolean, corner: string }?, -- shown, and which corner ("TopRight" ...)
 	Graphics: string?, -- "Low" | "Medium" | "High" | "Ultra"
@@ -88,6 +88,8 @@ export type Settings = {
 	Favs: { string }?, -- favourite cars (CARS tab)
 	HideKeys: boolean?, -- the on-screen controls hidden
 	Speedo: string?, -- the HUD speedometer: "Analogue" (default) | "Digital"
+	HudLevel: boolean?, -- (26 Nov) false = the level / job bars hidden
+	HudGoals: boolean?, -- (26 Nov) false = the Legends Path tracker hidden
 	Traffic: boolean?, -- (2026-11-21) false = no NPC traffic
 	Assist: string?, -- driving assists: "Off" | "Low" | "Normal" (default)
 	TC: string?, -- (2026-11-08) traction control "Off" | "Sport" | "On"
@@ -930,6 +932,7 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 			shake = level(fx.shake) or 1,
 			head = level(fx.head) or 1,
 			blur = fx.blur ~= false,
+			speed = level(fx.speed) or 1,
 			fov = if fov and fov == fov then math.clamp(math.floor(fov + 0.5), Config.Camera.FovMin, Config.Camera.FovMax) else Config.Camera.Immersive.Fov,
 		}
 	end
@@ -978,6 +981,12 @@ function PlayerData.setSettings(player: Player, raw: any, into: Profile?)
 	end
 	if type(raw.Traffic) == "boolean" then
 		profile.Settings.Traffic = raw.Traffic -- (2026-11-21) NPC traffic on / off
+	end
+	if type(raw.HudLevel) == "boolean" then
+		profile.Settings.HudLevel = raw.HudLevel
+	end
+	if type(raw.HudGoals) == "boolean" then
+		profile.Settings.HudGoals = raw.HudGoals
 	end
 	if raw.Speedo == "Analogue" or raw.Speedo == "Digital" then
 		profile.Settings.Speedo = raw.Speedo -- the HUD speedometer style (2026-11-03)

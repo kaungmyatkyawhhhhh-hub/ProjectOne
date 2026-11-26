@@ -474,7 +474,7 @@ function GoalsClient.init()
 			local card = hudGui and hudGui:FindFirstChild("RunCard")
 			if t then
 				-- (2026-11-04) on a phone not while driving: there it would cover the combo
-				t.Visible = not (card and (card :: Frame).Visible) and not (UI.isTouch and Driving.isDriving())
+				t.Visible = not (card and (card :: Frame).Visible) and not (UI.isTouch and Driving.isDriving()) and not UI.hudGoalsOff
 			end
 		end
 	end)

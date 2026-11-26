@@ -513,6 +513,7 @@ return function(E: any)
 		-- Driving.camFx (shake, head movement, motion blur, outside FOV).
 		local C = Config.Camera
 		local cfx = Driving.camFx
+		local spd = cfx.speed or 1 -- (26 Nov) Settings > Speed effects: the speed FOV widening and speed lines
 		local mode = Driving.cameraMode
 		local interior = mode == "Interior"
 		s.shake = math.max(0, s.shake - dt * 2.5)
@@ -596,7 +597,7 @@ return function(E: any)
 		local targetFov
 		local rootCF = root.CFrame
 		if interior then
-			targetFov = C.InteriorFov + C.MaxFovBoost * C.InteriorFovBoost * speedFrac ^ 1.5
+			targetFov = C.InteriorFov + C.MaxFovBoost * C.InteriorFovBoost * speedFrac ^ 1.5 * spd
 			local H = C.Head
 			local hk = cfx.head
 			local mouseLook = 0
@@ -630,7 +631,7 @@ return function(E: any)
 			-- height off to one side, closer, with more blur
 			local low = mode == "Low"
 			local LC = C.Low
-			targetFov = cfx.fov + (if low then (LC.Fov - IC.Fov) + LC.FovBoost * fx ^ 1.25 else IC.FovBoost * fx ^ 1.25)
+			targetFov = cfx.fov + (if low then (LC.Fov - IC.Fov) + LC.FovBoost * fx ^ 1.25 * spd else IC.FovBoost * fx ^ 1.25 * spd)
 			local back = if low then LC.Distance + s.camLag * 0.6 + fx * LC.SpeedPull else IC.Distance + s.camLag + fx * IC.SpeedPull
 			local up = if low then LC.Height else IC.Height - fx * 0.5
 			back += s.towPull * Config.Towing.Camera.Back
@@ -653,7 +654,7 @@ return function(E: any)
 			local blurFrom = if low then LC.BlurFrom else IC.BlurFrom
 			setBlur(math.max(blurMax * math.max(0, fx - blurFrom) ^ 1.3, s.blurPulse))
 		else
-			targetFov = cfx.fov + (C.ChaseFov - IC.Fov) + C.MaxFovBoost * fx ^ 1.4
+			targetFov = cfx.fov + (C.ChaseFov - IC.Fov) + C.MaxFovBoost * fx ^ 1.4 * spd
 			-- follow the direction of travel a little when drifting
 			local velDir = if s.vel.Magnitude > 5 then s.vel.Unit else fwd
 			if s.vel:Dot(fwd) < -5 then
@@ -702,7 +703,7 @@ return function(E: any)
 			E.get_windDof().FocusDistance = 30
 			E.get_windDof().InFocusRadius = 90 - 40 * w
 		end
-		UI.setSpeedLines((s.wind or 0) * DF.WindStreaks)
-		setVignette(DF.Vignette * (s.wind or 0) * (if interior then 0.5 else 1))
+		UI.setSpeedLines((s.wind or 0) * DF.WindStreaks * spd)
+		setVignette(DF.Vignette * (s.wind or 0) * (if interior then 0.5 else 1) * spd)
 	end
 end

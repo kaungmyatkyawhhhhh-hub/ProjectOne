@@ -62,9 +62,13 @@ local Driving = {}
 Driving.cameraMode = "Immersive" -- "Immersive" | "Low" | "Chase" | "Interior" (owner, 2026-10-22: an immersive view that feels fast)
 -- Settings > Camera (owner, 2026-10-29): shake and head movement 0 (off) / 0.5 (low) / 1 (normal),
 -- motion blur on or off, the outside cameras' FOV. Reduced Motion starts shake and head off.
-Driving.camFx = { shake = 1, head = 1, blur = true, fov = Config.Camera.Immersive.Fov }
-function Driving.setCamFx(fx: { shake: number?, head: number?, blur: boolean?, fov: number? })
+-- speed (26 Nov): Settings > Speed effects, scales the speed FOV widening and the speed lines (0 / 0.5 / 1)
+Driving.camFx = { shake = 1, head = 1, blur = true, fov = Config.Camera.Immersive.Fov, speed = 1 }
+function Driving.setCamFx(fx: { shake: number?, head: number?, blur: boolean?, fov: number?, speed: number? })
 	local c = Driving.camFx
+	if type(fx.speed) == "number" then
+		c.speed = math.clamp(fx.speed, 0, 1)
+	end
 	if type(fx.shake) == "number" then
 		c.shake = math.clamp(fx.shake, 0, 1)
 	end

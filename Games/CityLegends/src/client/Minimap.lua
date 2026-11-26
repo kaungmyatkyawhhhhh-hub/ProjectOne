@@ -351,9 +351,86 @@ end
 -- instead just add a loading screen of the map"): returns the middle and size of what's worth
 -- showing (Legends Isle in the west to the Legends Loop in the east), in world studs
 local wholeLists: { [Frame]: { Tile } } = setmetatable({}, { __mode = "k" }) :: any
+-- (2026-11-26, the driving-game study's "roads not driven yet": Forza Horizon tints them) the 512-stud cells you
+-- haven't been to yet are drawn darker on every map. The server marks them (server/Explore) and sends the bitset as
+-- player attribute "Explored"; each map redraws only the rows that changed (runs of dark cells = one frame each)
+local ExploreGrid = require(Shared:WaitForChild("Explore"))
+local FOG = Color3.fromRGB(6, 10, 22)
+type Fog = { folder: Folder, rows: { [number]: { Frame } }, bits: { boolean }? }
+local fogMaps: { [Frame]: Fog } = setmetatable({}, { __mode = "k" }) :: any -- (weak: a map frame that goes is dropped)
+local function fogRow(fog: Fog, r: number, bits: { boolean })
+	for _, f in fog.rows[r] or {} do
+		f:Destroy()
+	end
+	local list = {}
+	local run: number? = nil
+	local G = ExploreGrid
+	for c = 0, G.COLS do
+		local dark = c < G.COLS and not bits[r * G.COLS + c + 1]
+		if dark and not run then
+			run = c
+		elseif not dark and run then
+			local f = Instance.new("Frame")
+			f.BorderSizePixel = 0
+			f.BackgroundColor3 = FOG
+			f.BackgroundTransparency = 0.5
+			f.Position = UDim2.fromOffset(G.X0 + run * G.CELL, G.Z0 + r * G.CELL)
+			f.Size = UDim2.fromOffset((c - run) * G.CELL, G.CELL)
+			f.ZIndex = 4 -- (over the tiles 2-3, under the names 8)
+			f.Parent = fog.folder
+			table.insert(list, f)
+			run = nil
+		end
+	end
+	fog.rows[r] = list
+end
+local function fogUpdate()
+	local raw = player:GetAttribute("Explored")
+	if type(raw) ~= "string" then
+		return -- (nothing from the server yet: no fog rather than a wholly dark map)
+	end
+	local bits = ExploreGrid.decode(raw)
+	local G = ExploreGrid
+	-- (every map, parented or not yet: the menu's map pane is drawn before it is put on screen)
+	for _, fog in fogMaps do
+		local old = fog.bits
+		for r = 0, G.ROWS - 1 do
+			local changed = old == nil
+			if old then
+				for i = r * G.COLS + 1, (r + 1) * G.COLS do
+					if bits[i] ~= old[i] then
+						changed = true
+						break
+					end
+				end
+			end
+			if changed then
+				fogRow(fog, r, bits)
+			end
+		end
+		fog.bits = bits
+	end
+end
+player:GetAttributeChangedSignal("Explored"):Connect(fogUpdate)
+local function addFog(map: Frame)
+	if not (YArt and Config.activeMap() == "Yangon") or fogMaps[map] then
+		return
+	end
+	local folder = Instance.new("Folder")
+	folder.Name = "Fog"
+	folder.Parent = map
+	fogMaps[map] = { folder = folder, rows = {}, bits = nil }
+	fogUpdate()
+end
+function Minimap.exploredPct(): number?
+	local v = player:GetAttribute("ExploredPct")
+	return if type(v) == "number" then v else nil
+end
+
 function Minimap.drawWhole(frame: Frame): (Vector2, Vector2)
 	-- the overview at once; the sharp tiles only through Minimap.sharpen (a zoomed-in menu map)
 	local list = drawMap(frame)
+	addFog(frame)
 	showWhole(list)
 	wholeLists[frame] = list
 	-- the places' names, in world studs like the map (so they scale with it)
@@ -568,6 +645,7 @@ function Minimap.start()
 	map.Size = UDim2.fromOffset(0, 0)
 	map.Parent = pivot
 	local tiles = drawMap(map)
+	addFog(map)
 	-- the overview always underneath; the sharp tiles near you get their picture (checked twice a second) and
 	-- lose it again far behind you
 	showWhole(tiles)
@@ -910,11 +988,34 @@ function Minimap.start()
 	fmap.Size = UDim2.fromOffset(0, 0)
 	fmap.Parent = fpivot
 	local fullTiles = drawMap(fmap)
+	addFog(fmap)
 	local flayer = Instance.new("Frame")
 	flayer.BackgroundTransparency = 1
 	flayer.Size = UDim2.fromScale(1, 1)
 	flayer.ZIndex = 20
 	flayer.Parent = win
+	-- (26 Nov) how much of Yangon you've driven, bottom left of the big map (the help line has the top left)
+	do
+		local pct = Instance.new("TextLabel")
+		pct.Name = "ExploredPct"
+		pct.BackgroundTransparency = 1
+		pct.AnchorPoint = Vector2.new(0, 1)
+		pct.Position = UDim2.new(0, 14, 1, -10)
+		pct.Size = UDim2.fromOffset(260, 22)
+		pct.Font = Enum.Font.GothamBlack
+		pct.TextSize = 18
+		pct.TextXAlignment = Enum.TextXAlignment.Left
+		pct.TextColor3 = Color3.fromRGB(236, 226, 200)
+		pct.TextStrokeTransparency = 0.4
+		pct.ZIndex = 30
+		pct.Parent = win
+		local function show()
+			local v = Minimap.exploredPct()
+			pct.Text = if v then string.format("EXPLORED %.1f%%", v) else ""
+		end
+		show()
+		player:GetAttributeChangedSignal("ExploredPct"):Connect(show)
+	end
 	local fixedFull: { Blip } = {}
 	for _, b in fixed do
 		local glyph = b.frame:FindFirstChildOfClass("TextLabel")
