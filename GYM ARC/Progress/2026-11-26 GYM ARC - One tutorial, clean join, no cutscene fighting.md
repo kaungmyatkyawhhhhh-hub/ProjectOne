@@ -94,3 +94,9 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 - Cards: hover 1.04 + brighter edge, press 0.96, warm confirm edge, panel fades/slides out. Phone check: 844x390 and 667x375 fit (panel 312 / 280 px tall).
 - GFX: default Bacon Hair R15 (Motorcycle Shirt 144076358, Dark Green Jeans 144076760, Smile 144075659, Pal Hair) posed in Studio on the real SquatRack / CrunchBench / PullUpBar with an FK + two-bone-IK poser (`Assets/pick_card_gfx/GFXPoser.luau`, recipes at the bottom). The game's own NPC poses were captured too (`poses_from_game.json`) but crunch/pull-up NPCs don't animate, so the hand-posed ones are better.
 - Blocker: Studio's Export as glTF refuses Pal Hair (mesh 29938421 + texture 29938532, permission-locked) and one gym mesh (123480233606534); the place closed during the export. No Blender render exists yet. No asset ids for card art yet.
+
+## Pass 8: LEGS card render (Blender)
+- Studio saved v1980: the final GFXHero (Superhero body, Man Face head, Pal Hair, owner's shirt 10048957253 and shorts 14185753437) posed in the squat rack, scenes kept in ServerStorage._GFXExport.
+- Studio's glTF export drops assets we don't own; the OBJ export keeps the geometry but scrambles the body UVs and drops clothing. Fix: take the real clothing templates from Studio's cache (rbx-storage), and box-project them onto each body part using the part frames from Studio (`pick_card_gfx/blender_uv_clothing.py` + `legs_part_cframes.json`). Arms read the shirt only, legs the pants only, torso both.
+- Face: the owner picked face 33 from the cache sheet (`textures/face.png`).
+- Render: Cycles 1536x2048, 192 samples, denoise, AgX, 80 mm, transparent film, key/fill/rim, shadow catcher with key-light shadows only. `LEGS_render_v1.png` (preview on blue and white: `LEGS_render_v1_preview.png`). Waiting for the owner's review before ABS and BACK.
