@@ -86,3 +86,11 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 - Tried and removed the same day: ChatGPT frame/card/button sheet (v1964) and a live 3D preview (owner: no ViewportFrames). The ChatGPT files stay in `Assets/pick_muscle_2026-11-26/` but are unused.
 - ViewportFrames still in the game (to swap for pictures when the owner has them): TitanPreview (Titan Serum), AdventClient (gift boxes), MirrorClient, PlateForgeUI, PumpShopClient (plates), TrainerPortrait, CoachDialog / CoachPortrait.
 - Checked on PC in Play (screenshot). Not checked: phone size.
+
+## Pass 7 (v1972): picker to the owner's brief + Blender GFX start
+- Muscle picker rebuilt to the brief: centred title, no rule line, ~40% less gap, no panel, exact 3:4 cards (radial light 75701970852689 + brushed grain 131298143741442, colour-matched 1.5px edge, bottom shade), art slot = top 78% (`PICK[id].image`, empty until the renders exist), big LEGS/ABS/BACK, small machine names, thin strokes.
+- HUD: top HUD fades to 30%, stamina hidden, blur + 0.72 veil; all restored after the pick (checked in Play).
+- Countdown: first tutorial pick 15 s (`Onboarding.FirstPickAfter`), later picks `AutoTrainAfter` (5 s); thin depleting bar + small "Auto-selecting in Ns"; a manual pick cancels it; one pick only (`pickClosing`).
+- Cards: hover 1.04 + brighter edge, press 0.96, warm confirm edge, panel fades/slides out. Phone check: 844x390 and 667x375 fit (panel 312 / 280 px tall).
+- GFX: default Bacon Hair R15 (Motorcycle Shirt 144076358, Dark Green Jeans 144076760, Smile 144075659, Pal Hair) posed in Studio on the real SquatRack / CrunchBench / PullUpBar with an FK + two-bone-IK poser (`Assets/pick_card_gfx/GFXPoser.luau`, recipes at the bottom). The game's own NPC poses were captured too (`poses_from_game.json`) but crunch/pull-up NPCs don't animate, so the hand-posed ones are better.
+- Blocker: Studio's Export as glTF refuses Pal Hair (mesh 29938421 + texture 29938532, permission-locked) and one gym mesh (123480233606534); the place closed during the export. No Blender render exists yet. No asset ids for card art yet.
