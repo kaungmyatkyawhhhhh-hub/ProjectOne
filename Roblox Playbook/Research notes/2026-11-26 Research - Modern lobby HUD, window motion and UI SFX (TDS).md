@@ -178,4 +178,23 @@ Also fixed: the right-column pager's right arrow. A Kit.Button's own list-laid i
 **Not checked:**
 - phone size;
 - windows with very long lists (the cascade caps at 0.42 s);
-- the loop shine on hotbar cards and the skill-tree style reveal (points 7-8, not done).
+- the loop shine and the skill-tree style reveal: done in v1955, below.
+
+## Applied: hotbar shine and the tile reveal (v1955, saved, NOT published)
+Owner: "do the hotbar shine and skill tree reveal too" (points 7-8). GYM ARC has no skill tree, so the reveal went on its two tile maps: YOUR ROAD and the STAR TRACK.
+
+| Point | Change |
+|---|---|
+| Hotbar shine | HotbarClient `makeShine(face)`: a white Frame per slot, a 25° UIGradient with a narrow band (45 % white). Every 2 s the band's Offset tweens -1.2 → 1.2 over 0.55 s, slot by slot 80 ms apart. |
+| Tile reveal | `Theme.BurstReveal(items, center, corner)`: every tile starts at scale 0.35 under a white shape. Tiles pop to full size with Back easing, the nearest first, 35 ms per step. The white then drains away ring by ring, 60 ms per step, so the colour fills in from the middle outwards. RoadClient centres it on your current stop, StarTrackClient on your star. |
+| No double motion | `Kit.Modal{ noCascade = true }` turns off the window cascade for these two windows. The Road also plays the Whoosh on opening, like the Star Track. |
+
+**Checked in Play** (video):
+- the shine sweeps slots 1 → 5;
+- the Road opens white and fills from the "you are here" stop;
+- the Star Track fills from star 1.
+
+**Not checked:**
+- phone size;
+- the buy-flash spreading to the neighbours: the Road and the Star Track have no buy action.
+
