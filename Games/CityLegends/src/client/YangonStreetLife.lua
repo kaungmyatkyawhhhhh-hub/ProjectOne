@@ -8,10 +8,12 @@
 	    pooled. Every Config.YangonStreetLife.CarCheck seconds the spots within CarRadius of the camera (a 128-stud
 	    grid, never a full scan) fill up to CarMax, nearest first; a car goes back to the pool past CarKeep. 70% are
 	    repainted white / silver / grey (Yangon's Probox / Mark II / Hiace look), half up on the pavement on main roads.
-	  * people: 8 parts each (shirt, head with a face, hair, longyi, two arms, two feet), men in longyi and shirt,
+	  * people: 8 parts each (shirt, head with a face, hair, longyi, two arms, two feet; since 27 Nov low-poly
+	    MeshParts from tools/people/people_mesh.py, the old blocks only if they fail to load), men in longyi and shirt,
 	    women in htamein and blouse, monks in maroon robes now and then (more near monasteries and pagodas), kids in
 	    the green and white school uniform near schools. They walk the pavement paths at 3-5 studs a second and turn
-	    back where the pavement ends, or stand at bus stops, tea shops and shop fronts. Anchored, no collisions, moved
+	    back where the pavement ends (spread across the pavement, drifting, a third in twos, stopping now and then),
+	    or stand at bus stops, tea shops and shop fronts (off the exact mark and facing). Anchored, no collisions, moved
 	    with BulkMoveTo: near ones a few dozen times a second, far ones a few times. At most PedMax within PedRadius.
 	  * counts follow the graphics setting: qualityScale() at or under LowScale (Low) halves them.
 ]]
@@ -406,56 +408,175 @@ local FACES = {
 }
 
 -- the parts (feet on the ground, facing -Z): 1 shirt, 2 head, 3 hair, 4 longyi, 5 / 6 arms, 7 / 8 feet
-local SIZES = {
-	Vector3.new(2, 2, 1), Vector3.new(2, 1, 1), Vector3.new(1.32, 0.32, 1.32), Vector3.new(2, 1.75, 1.1),
-	Vector3.new(1, 2, 1), Vector3.new(1, 2, 1), Vector3.new(0.8, 0.35, 1), Vector3.new(0.8, 0.35, 1),
+-- (27 Nov, owner: "the street people look like blocky Roblox figures") two bodies in one layout: GEO.real = the
+-- Blender pieces of tools/people/people_mesh.py (imports/people/people.json: centres and sizes in studs, 1.6-1.8 m
+-- people at 3 studs a metre, ~1,700 triangles), GEO.blocks = the old 8 blocks, only if the meshes fail to load.
+-- cen = each part's centre, shoulder = the right shoulder pivot (the left is mirrored), neck / waist = PedHits' joints.
+type Geo = {
+	cen: { Vector3 }, size: { Vector3 }, hair: { [string]: { Vector3 } }, shoulder: Vector3, neck: Vector3,
+	waist: Vector3, swing: number, stride: number,
 }
-local HAIR_SHORT, HAIR_SHORT_AT = Vector3.new(1.32, 0.32, 1.32), Vector3.new(0, 5.05, 0.02)
-local HAIR_LONG, HAIR_LONG_AT = Vector3.new(1.34, 1.25, 0.9), Vector3.new(0, 4.75, 0.3)
+local GEO: { [string]: Geo } = {
+	real = {
+		cen = {
+			Vector3.new(0, 3.52, -0.005), Vector3.new(0, 4.72, 0.02), Vector3.new(0, 4.939, 0.057), Vector3.new(0, 1.685, 0),
+			Vector3.new(-0.5675, 2.995, -0.0507), Vector3.new(0.5675, 2.995, -0.0507), Vector3.new(-0.19, 0.25, -0.075),
+			Vector3.new(0.19, 0.25, -0.075),
+		},
+		size = {
+			Vector3.new(1.56, 1.8, 0.79), Vector3.new(0.57, 0.92, 0.6), Vector3.new(0.5695, 0.6671, 0.6934), Vector3.new(0.98, 2.93, 0.72),
+			Vector3.new(0.325, 2.07, 0.3525), Vector3.new(0.325, 2.07, 0.3525), Vector3.new(0.3, 0.5, 0.75), Vector3.new(0.3, 0.5, 0.75),
+		},
+		hair = { -- kind = { centre, size }
+			short = { Vector3.new(0, 4.939, 0.057), Vector3.new(0.5695, 0.6671, 0.6934) },
+			bun = { Vector3.new(0, 4.907, 0.095), Vector3.new(0.5695, 0.7306, 0.7695) },
+		},
+		shoulder = Vector3.new(0.54, 4.15, 0), neck = Vector3.new(0, 4.4, 0), waist = Vector3.new(0, 3, 0),
+		swing = 0.22, stride = 0.35, -- (short sleeves are on the shirt: the arm swings less)
+	},
+	blocks = {
+		cen = {
+			Vector3.new(0, 3, 0), Vector3.new(0, 4.5, 0), Vector3.new(0, 5.05, 0.02), Vector3.new(0, 1.225, 0),
+			Vector3.new(-1.5, 3, 0), Vector3.new(1.5, 3, 0), Vector3.new(-0.5, 0.175, -0.1), Vector3.new(0.5, 0.175, -0.1),
+		},
+		size = {
+			Vector3.new(2, 2, 1), Vector3.new(2, 1, 1), Vector3.new(1.32, 0.32, 1.32), Vector3.new(2, 1.75, 1.1),
+			Vector3.new(1, 2, 1), Vector3.new(1, 2, 1), Vector3.new(0.8, 0.35, 1), Vector3.new(0.8, 0.35, 1),
+		},
+		hair = {
+			short = { Vector3.new(0, 5.05, 0.02), Vector3.new(1.32, 0.32, 1.32) },
+			bun = { Vector3.new(0, 4.75, 0.3), Vector3.new(1.34, 1.25, 0.9) },
+		},
+		shoulder = Vector3.new(1.5, 3.5, 0), neck = Vector3.new(0, 4, 0), waist = Vector3.new(0, 2, 0),
+		swing = 0.4, stride = 0.45,
+	},
+}
+-- the pieces (Model asset 94912674677470, group 33151111; tools/people/people_mesh.py checks 0 near-parallel faces
+-- under 0.05 studs between them, the no-flicker rule) and the pictures: Decals, since a MeshPart's TextureID
+-- ignores alpha (the heads came out black): the face on the head's Front (1 plain, 2 thanaka on the cheeks), the
+-- flip-flop strap on each foot's Top; transparent round them, so the part's Color is the skin
+local MESH = {
+	Torso = 95116517230231, Head = 122525154005592, HairShort = 125077740186727, HairBun = 74908404628379,
+	Longyi = 117548162675945, ArmL = 90339926999789, ArmR = 140321970177029, Foot = 101755076151555,
+}
+local PIECE = { "Torso", "Head", "HairShort", "Longyi", "ArmL", "ArmR", "Foot", "Foot" }
+local FACE = { "rbxassetid://127110709777252", "rbxassetid://139673625040739" }
+local SANDAL_STRAP = "rbxassetid://127958667677139"
+local templates: { [string]: MeshPart }? = nil
+local picsOk = false
 
-type Figure = { model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal, scale: number, hairAt: Vector3, bald: boolean }
+type Figure = {
+	model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal?, scale: number, hairAt: Vector3, bald: boolean,
+	geo: Geo, hairKind: string,
+}
 type Walker = {
 	fig: Figure, mode: string, path: { Vector3 }?, k: number, dir: number, pos: Vector3, yaw: number, speed: number,
 	lat: number, phase: number, acc: number, timer: number, spot: number?, held: boolean?, gone: boolean?,
+	latLo: number?, latHi: number?,
 }
 
+local pedWant = 0 -- people wanted out now (pedTick)
 local figPool: { Figure } = {}
 local active: { Walker } = {}
 local spotBusy: { [number]: boolean } = {}
+
+local function quiet(p: BasePart)
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+end
+
+-- the mesh templates, once (AssetService on the client, meshes the game's group owns); left nil = the old blocks
+local function loadTemplates()
+	local AssetService = game:GetService("AssetService")
+	local t = {}
+	for name, id in MESH do
+		local uri = "rbxassetid://" .. id
+		local opts = { CollisionFidelity = Enum.CollisionFidelity.Box, RenderFidelity = Enum.RenderFidelity.Automatic }
+		local ok, mp = pcall(function()
+			return AssetService:CreateMeshPartAsync(Content.fromUri(uri), opts)
+		end)
+		if not ok then
+			ok, mp = pcall(function()
+				return (AssetService :: any):CreateMeshPartAsync(uri, opts)
+			end)
+		end
+		if not ok or not mp then
+			warn("[CityLegends] YangonStreetLife: people meshes failed, blocks instead:", mp)
+			return
+		end
+		quiet(mp)
+		mp.Material = Enum.Material.SmoothPlastic -- (Fabric glittered on the longyi)
+		if name == "Head" or name == "Foot" then
+			local d = Instance.new("Decal")
+			d.Name = "pic"
+			d.Face = if name == "Head" then Enum.NormalId.Front else Enum.NormalId.Top
+			d.Parent = mp
+		end
+		t[name] = mp
+	end
+	templates = t
+	-- the pictures only once they load (a fresh image sits in moderation a while): plain skin until then
+	task.spawn(function()
+		local ContentProvider = game:GetService("ContentProvider")
+		local all = { FACE[1], FACE[2], SANDAL_STRAP }
+		for _ = 1, 40 do
+			local good = 0
+			pcall(function()
+				ContentProvider:PreloadAsync(all, function(_, status)
+					if status == Enum.AssetFetchStatus.Success then
+						good += 1
+					end
+				end)
+			end)
+			if good == #all then
+				picsOk = true
+				return
+			end
+			task.wait(30)
+		end
+	end)
+end
 
 local function newFigure(): Figure
 	local model = Instance.new("Model")
 	model.Name = "Person"
 	local parts = {}
-	local face: Decal = nil :: any
-	for k, size in SIZES do
-		local p = Instance.new("Part")
-		p.Name = "P" .. k
-		p.Anchored = true
-		p.CanCollide = false
-		p.CanQuery = false
-		p.CanTouch = false
-		p.CastShadow = false
-		p.Size = size
-		p.Material = Enum.Material.SmoothPlastic
-		p.TopSurface = Enum.SurfaceType.Smooth
-		p.BottomSurface = Enum.SurfaceType.Smooth
-		if k == 2 then
-			local mesh = Instance.new("SpecialMesh")
-			mesh.MeshType = Enum.MeshType.Head
-			mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
-			mesh.Parent = p
-			face = Instance.new("Decal")
-			face.Name = "face"
-			face.Face = Enum.NormalId.Front
-			face.Parent = p
-		elseif k == 4 then
-			p.Material = Enum.Material.Fabric
+	local face: Decal? = nil
+	local geo = if templates then GEO.real else GEO.blocks
+	for k = 1, 8 do
+		local p: BasePart
+		if templates then
+			p = templates[PIECE[k]]:Clone()
+		else
+			p = Instance.new("Part")
+			quiet(p)
+			p.Material = if k == 4 then Enum.Material.Fabric else Enum.Material.SmoothPlastic
+			p.TopSurface = Enum.SurfaceType.Smooth
+			p.BottomSurface = Enum.SurfaceType.Smooth
+			if k == 2 then
+				local mesh = Instance.new("SpecialMesh")
+				mesh.MeshType = Enum.MeshType.Head
+				mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+				mesh.Parent = p
+				local d = Instance.new("Decal")
+				d.Name = "face"
+				d.Face = Enum.NormalId.Front
+				d.Parent = p
+				face = d
+			end
 		end
+		p.Name = "P" .. k
+		p.Size = geo.size[k]
 		p.Parent = model
 		parts[k] = p
 	end
-	return { model = model, parts = parts, cfs = table.create(#SIZES, CFrame.new()), face = face, scale = 1, hairAt = HAIR_SHORT_AT, bald = false }
+	return {
+		model = model, parts = parts, cfs = table.create(8, CFrame.new()), face = face, scale = 1,
+		hairAt = geo.hair.short[1], bald = false, geo = geo, hairKind = "short",
+	}
 end
 
 local function pick<T>(list: { T }): T
@@ -492,55 +613,90 @@ end
 
 local function dress(f: Figure, who: string)
 	local skin = pick(SKIN)
-	local top, low, armL, armR, hairLong, bald
+	local g = f.geo
+	local real = g == GEO.real
+	local top, low, hairKind, bald
+	local armL = nil
 	if who == "monk" then
 		local robe = pick(ROBE)
-		top, low, armL, armR, hairLong, bald = robe, robe, robe, skin, false, true -- the robe over the left shoulder
+		top, low, armL, hairKind, bald = robe, robe, robe, "short", true -- the robe over the left shoulder
 	elseif who == "kid" then
-		local girl = rng:NextNumber() < 0.5
-		top, low, hairLong, bald = UNIFORM_TOP, UNIFORM_LONGYI, girl, false
-		armL = if rng:NextNumber() < 0.7 then skin else top
-		armR = armL
+		top, low, hairKind, bald = UNIFORM_TOP, UNIFORM_LONGYI, if rng:NextNumber() < 0.5 then "bun" else "short", false
 	elseif who == "woman" then
-		top, low, hairLong, bald = pick(WOMEN_TOP), pick(WOMEN_LONGYI), true, false
-		armL = if rng:NextNumber() < 0.5 then skin else top
-		armR = armL
+		top, low, hairKind, bald = pick(WOMEN_TOP), pick(WOMEN_LONGYI), "bun", false
 	else
-		top, low, hairLong, bald = pick(MEN_SHIRT), pick(MEN_LONGYI), false, false
-		armL = if rng:NextNumber() < 0.65 then skin else top
-		armR = armL
+		top, low, hairKind, bald = pick(MEN_SHIRT), pick(MEN_LONGYI), "short", false
 	end
-	local s = if who == "kid" then rng:NextNumber(0.66, 0.78) else rng:NextNumber(0.93, 1.03)
+	-- real bodies: short sleeves are on the shirt, so the arms are skin; the blocks' arms are sleeves or skin
+	if not armL then
+		armL = if real or rng:NextNumber() < 0.6 then skin else top
+	end
+	local armR = if real or who == "monk" then skin else armL
+	local girl = who == "woman" or (who == "kid" and hairKind == "bun")
+	local s = if who == "kid" then rng:NextNumber(0.66, 0.78) elseif girl then rng:NextNumber(0.91, 0.98)
+		else rng:NextNumber(0.95, 1.03)
 	f.scale = s
 	f.bald = bald
-	local colours = { top, skin, HAIR, low, armL, armR, SANDAL, SANDAL }
+	-- the hair piece: a real body swaps the mesh (a MeshPart's MeshId can't change at run time)
+	if real and templates and f.hairKind ~= hairKind then
+		local old = f.parts[3]
+		local p = templates[if hairKind == "bun" then "HairBun" else "HairShort"]:Clone()
+		p.Name = "P3"
+		p.Parent = f.model
+		f.parts[3] = p
+		old:Destroy()
+	end
+	f.hairKind = hairKind
+	local hair = g.hair[hairKind]
+	f.hairAt = hair[1]
+	local narrow = if girl then 0.92 else 1 -- women and girls a little narrower in the shoulders and longyi
+	local feet = if real then skin else SANDAL -- (real feet: the atlas draws the sandal over the skin)
+	local colours = { top, skin, HAIR, low, armL, armR, feet, feet }
 	for k, p in f.parts do
 		p.Color = colours[k]
-		p.Size = SIZES[k] * s
+		local sz = if k == 3 then hair[2] else g.size[k]
+		if k == 1 or k == 4 then
+			sz = Vector3.new(sz.X * narrow, sz.Y, sz.Z)
+		end
+		p.Size = sz * s
 	end
-	local hair = f.parts[3]
-	hair.Size = (if hairLong then HAIR_LONG else HAIR_SHORT) * s
-	hair.Transparency = if bald then 1 else 0
-	f.hairAt = if hairLong then HAIR_LONG_AT else HAIR_SHORT_AT
-	f.face.Texture = pick(FACES)
+	f.parts[3].Transparency = if bald then 1 else 0
+	if f.face then
+		f.face.Texture = pick(FACES)
+	elseif picsOk then
+		local face = f.parts[2]:FindFirstChild("pic") :: Decal?
+		if face then
+			face.Texture = FACE[if girl and rng:NextNumber() < 0.6 then 2 else 1] -- thanaka on most women's cheeks
+		end
+		for _, k in { 7, 8 } do
+			local strap = f.parts[k]:FindFirstChild("pic") :: Decal?
+			if strap then
+				strap.Texture = SANDAL_STRAP
+			end
+		end
+	end
 end
 
 local function pose(w: Walker, moving: boolean)
 	local f = w.fig
+	local g = f.geo
+	local cen = g.cen
 	local s = f.scale
 	local root = CFrame.new(w.pos) * CFrame.Angles(0, w.yaw, 0)
 	local sw = if moving then math.sin(w.phase) else 0
 	local bob = if moving then math.abs(math.cos(w.phase)) * 0.06 * s else 0
-	local up = CFrame.new(0, bob, 0)
+	local up = root * CFrame.new(0, bob, 0)
+	local shR = g.shoulder
+	local shL = Vector3.new(-shR.X, shR.Y, shR.Z)
 	local cfs = f.cfs
-	cfs[1] = root * up * CFrame.new(0, 3 * s, 0)
-	cfs[2] = root * up * CFrame.new(0, 4.5 * s, 0)
-	cfs[3] = root * up * CFrame.new(f.hairAt * s)
-	cfs[4] = root * CFrame.new(0, 1.225 * s + bob * 0.5, 0) * CFrame.Angles(sw * 0.03, 0, 0)
-	cfs[5] = root * up * CFrame.new(-1.5 * s, 3.5 * s, 0) * CFrame.Angles(-sw * 0.4, 0, 0) * CFrame.new(0, -0.5 * s, 0)
-	cfs[6] = root * up * CFrame.new(1.5 * s, 3.5 * s, 0) * CFrame.Angles(sw * 0.4, 0, 0) * CFrame.new(0, -0.5 * s, 0)
-	cfs[7] = root * CFrame.new(-0.5 * s, (0.175 + math.max(0, sw) * 0.12) * s, (-0.1 - sw * 0.45) * s)
-	cfs[8] = root * CFrame.new(0.5 * s, (0.175 + math.max(0, -sw) * 0.12) * s, (-0.1 + sw * 0.45) * s)
+	cfs[1] = up * CFrame.new(cen[1] * s)
+	cfs[2] = up * CFrame.new(cen[2] * s)
+	cfs[3] = up * CFrame.new(f.hairAt * s)
+	cfs[4] = root * CFrame.new(cen[4] * s + Vector3.new(0, bob * 0.5, 0)) * CFrame.Angles(sw * 0.03, 0, 0)
+	cfs[5] = up * CFrame.new(shL * s) * CFrame.Angles(-sw * g.swing, 0, 0) * CFrame.new((cen[5] - shL) * s)
+	cfs[6] = up * CFrame.new(shR * s) * CFrame.Angles(sw * g.swing, 0, 0) * CFrame.new((cen[6] - shR) * s)
+	cfs[7] = root * CFrame.new(cen[7] * s + Vector3.new(0, math.max(0, sw) * 0.12 * s, -sw * g.stride * s))
+	cfs[8] = root * CFrame.new(cen[8] * s + Vector3.new(0, math.max(0, -sw) * 0.12 * s, sw * g.stride * s))
 	workspace:BulkMoveTo(f.parts, cfs, Enum.BulkMoveMode.FireCFrameChanged)
 end
 
@@ -591,6 +747,13 @@ local function stepWalk(w: Walker, dt: number): boolean
 		end
 		return false
 	end
+	-- (27 Nov) now and then a stop on the way: a look at a shop, the phone, the street
+	if rng:NextNumber() < dt / 45 then
+		w.mode = "pause"
+		w.timer = rng:NextNumber(2, 7)
+		w.yaw += rng:NextNumber(0.5, 1.6) * (if rng:NextNumber() < 0.5 then -1 else 1)
+		return false
+	end
 	local remaining = w.speed * dt
 	for _ = 1, 4 do
 		local t = target(w)
@@ -617,6 +780,10 @@ local function stepWalk(w: Walker, dt: number): boolean
 			w.pos = t
 			w.k += w.dir
 			remaining -= L
+			-- drift across the pavement a little at each point (no one walks a ruled line)
+			if w.latLo then
+				w.lat = math.clamp(w.lat + rng:NextNumber(-0.5, 0.5), w.latLo, w.latHi :: number)
+			end
 		else
 			w.pos += to * (remaining / L)
 			remaining = 0
@@ -648,6 +815,12 @@ local function spawnWalker(cam: Vector3, gap: number, radius: number): boolean
 	if d < gap or d > radius then
 		return false
 	end
+	-- (27 Nov, owner: people in rows) never on top of someone: no one within 8 studs
+	for _, o in active do
+		if flat(o.pos, p) < 8 then
+			return false
+		end
+	end
 	local cfg = Config.YangonStreetLife
 	local who = whoAt(p.X, p.Z)
 	local speed = rng:NextNumber(cfg.WalkSpeed[1], cfg.WalkSpeed[2])
@@ -655,24 +828,37 @@ local function spawnWalker(cam: Vector3, gap: number, radius: number): boolean
 		speed = math.min(speed, 3.4)
 	end
 	local dir = if rng:NextNumber() < 0.5 then 1 else -1
-	local wide = pathWide[pi]
-	local w: Walker = {
-		fig = takeFigure(who), mode = "walk", path = pts, k = if dir > 0 then k else k + 1, dir = dir, pos = p, yaw = 0,
-		speed = speed, lat = if wide then rng:NextNumber(0.3, 2.4) else rng:NextNumber(-0.4, 0.5), phase = rng:NextNumber(0, 6), acc = 0,
-		timer = 0, spot = nil,
-	}
-	-- start on the line, shifted sideways like the rest of the walk
-	local t = target(w)
-	if t then
-		local dd = Vector3.new(t.X - p.X, 0, t.Z - p.Z)
-		if dd.Magnitude > 0.05 then
-			dd = dd.Unit
-			w.pos = p + Vector3.new(-dd.Z, 0, dd.X) * (w.lat * w.dir)
-			w.yaw = math.atan2(-dd.X, -dd.Z)
+	-- across the pavement (lat > 0 away from the kerb): the whole width, not one line (narrow paths are the middle
+	-- of a pavement, wide ones its kerb side)
+	local lo, hi = if pathWide[pi] then -0.6 else -1.5, if pathWide[pi] then 3 else 1.5
+	local function walker(f: Figure, lat: number, sp: number, phase: number): Walker
+		local w: Walker = {
+			fig = f, mode = "walk", path = pts, k = if dir > 0 then k else k + 1, dir = dir, pos = p, yaw = 0,
+			speed = sp, lat = lat, phase = phase, acc = 0, timer = 0, spot = nil, latLo = lo, latHi = hi,
+		}
+		-- start on the line, shifted sideways like the rest of the walk
+		local t = target(w)
+		if t then
+			local dd = Vector3.new(t.X - p.X, 0, t.Z - p.Z)
+			if dd.Magnitude > 0.05 then
+				dd = dd.Unit
+				w.pos = p + Vector3.new(-dd.Z, 0, dd.X) * (w.lat * w.dir)
+				w.yaw = math.atan2(-dd.X, -dd.Z)
+			end
 		end
+		table.insert(active, w)
+		pose(w, true)
+		return w
 	end
-	table.insert(active, w)
-	pose(w, true)
+	local lat = rng:NextNumber(lo, hi)
+	local phase = rng:NextNumber(0, 6)
+	walker(takeFigure(who), lat, speed, phase)
+	-- a third walk in twos, side by side at one pace (friends, a couple, a parent and child)
+	if who ~= "monk" and rng:NextNumber() < 0.3 and #active < pedWant then
+		local side = if lat + 1.3 <= hi then 1.3 else -1.3
+		local who2 = if who == "kid" or rng:NextNumber() < 0.15 then "kid" elseif rng:NextNumber() < 0.5 then "man" else "woman"
+		walker(takeFigure(who2), lat + side, speed, phase + 1.3)
+	end
 	return true
 end
 
@@ -693,9 +879,11 @@ local function spawnStander(cam: Vector3, gap: number, radius: number): boolean
 		return false
 	end
 	spotBusy[i] = true
+	-- (27 Nov) not on the spot's exact mark nor its exact facing, so a row of spots never reads as a line-up
+	p += Vector3.new(rng:NextNumber(-0.8, 0.8), 0, rng:NextNumber(-0.8, 0.8))
 	local w: Walker = {
-		fig = takeFigure(whoAt(p.X, p.Z)), mode = "stand", path = nil, k = 0, dir = 1, pos = p, yaw = spotYaw[i],
-		speed = 0, lat = 0, phase = 0, acc = 0, timer = rng:NextNumber(4, 14), spot = i,
+		fig = takeFigure(whoAt(p.X, p.Z)), mode = "stand", path = nil, k = 0, dir = 1, pos = p,
+		yaw = spotYaw[i] + rng:NextNumber(-0.6, 0.6), speed = 0, lat = 0, phase = 0, acc = 0, timer = rng:NextNumber(4, 14), spot = i,
 	}
 	table.insert(active, w)
 	pose(w, false)
@@ -710,6 +898,7 @@ local function pedTick(cam: Vector3, cap: number)
 	elseif cam.Y > 300 then
 		want = math.floor(cap / 3)
 	end
+	pedWant = want
 	local k = 1
 	while k <= #active do
 		local w = active[k]
@@ -772,6 +961,7 @@ function YangonStreetLife.start(qualityScale: (() -> number)?)
 	started = true
 	task.spawn(function()
 		local t0 = os.clock()
+		loadTemplates()
 		parse()
 		if #carX == 0 and #paths == 0 then
 			return

@@ -139,10 +139,15 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 	local s = f.scale
 	local made: { Instance } = {}
 	-- neck, shoulders, hip; hair and sandals ride along
-	socket(P[1], Vector3.new(0, 1 * s, 0), P[2], Vector3.new(0, -0.5 * s, 0), 1, 35, 40, made)
-	socket(P[1], Vector3.new(-1.5 * s, 0.5 * s, 0), P[5], Vector3.new(0, 0.5 * s, 0), -1, 100, 70, made)
-	socket(P[1], Vector3.new(1.5 * s, 0.5 * s, 0), P[6], Vector3.new(0, 0.5 * s, 0), -1, 100, 70, made)
-	socket(P[1], Vector3.new(0, -1 * s, 0), P[4], Vector3.new(0, 0.775 * s, 0), -1, 40, 30, made)
+	-- (27 Nov) joints from the figure's body layout (YangonStreetLife GEO: the real pieces or the old blocks)
+	local g = f.geo
+	local c = g.cen
+	local shR = g.shoulder
+	local shL = Vector3.new(-shR.X, shR.Y, shR.Z)
+	socket(P[1], (g.neck - c[1]) * s, P[2], (g.neck - c[2]) * s, 1, 35, 40, made)
+	socket(P[1], (shL - c[1]) * s, P[5], (shL - c[5]) * s, -1, 100, 70, made)
+	socket(P[1], (shR - c[1]) * s, P[6], (shR - c[6]) * s, -1, 100, 70, made)
+	socket(P[1], (g.waist - c[1]) * s, P[4], (g.waist - c[4]) * s, -1, 40, 30, made)
 	weld(P[2], P[3], made)
 	weld(P[4], P[7], made)
 	weld(P[4], P[8], made)
