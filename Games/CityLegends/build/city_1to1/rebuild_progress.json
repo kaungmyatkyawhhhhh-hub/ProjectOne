@@ -865,6 +865,10 @@
   "p1p3_rebuild": "buildings_1to1.py P1/P2/P3 vs today's roads; BUILDINGS_ONLY place_pack; RebuildSwap swap (old -> OverlapFixBackup.RebuildOld_P1..3); KeepOut drops P1 164 / P2 81 / P3 4; night cells cut by night_keepout.py; saved v2173 (P1), v2174 (P2), v2176 (P3)",
   "ids": "build/city_1to1/overlapfix_26nov/rebuild_ids_26nov.txt",
   "road_touch": "1448 -> 184 after re-run -> 0 after trimming 174 / dropping 10 (v2177); originals OverlapFixBackup.RoadTrim26",
-  "pending": "OverlapCheck re-run, hollow-ground edges in Play, Play test test->v1->Server, delete RebuildOld backups after the Play test; road-touch re-check after the road-sweep agent's RB10/RB6 swaps"
+  "pending": "delete nothing more; kit facades near trimmed shells not viewed; night not viewed",
+  "overlap_check": "631 real pairs after the re-run -> 0 (v2184)",
+  "hollow_ground": "8 pads deepened 2-3 studs (top fixed), gaps 0.4-2.0 -> 0; checked in Play",
+  "hotel_fix": "Hotel.lua name band used removed worldBox vars (nil error in Play) -> built in the hotel frame",
+  "save_fix": "v2178: backups deleted (manifest in vault), DealerBody_before_* + StraightLinkOld removed"
  }
 }

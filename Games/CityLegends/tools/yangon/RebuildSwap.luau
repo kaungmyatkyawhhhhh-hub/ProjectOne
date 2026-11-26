@@ -3,8 +3,9 @@
 	(P1-P3 re-made against today's roads). Uses DistrictPlace's packs (place_<tag>_1..3 = Data_<tag>, Roofs, Shell cells).
 
 	local R = require(ServerStorage.ClaudeTools.RebuildSwap:Clone())
-	R.removeOld(tag, oldText, box)  -- old S / R records (the old Shell_*.txt joined) -> matching shells + roofs, the old
-	                                 -- NWH night parts (bbox mostly in box = {x0, z0, x1, z1}) and Data_<tag> moved to
+	R.removeOld(tag, oldText, box, nightBox) -- old S / R records (the old Shell_*.txt joined) -> matching shells + roofs
+	                                 -- with their centre in box = {x0, z0, x1, z1} (grow it: edge buildings), the old
+	                                 -- NWH night parts (bbox mostly in nightBox, the exact district box) and Data_<tag> moved to
 	                                 -- ServerStorage.OverlapFixBackup.RebuildOld_<tag>
 	R.placeNew(tag)                  -- after DistrictPlace load + kit: Data_<tag> in, shells merged into existing Cell_ models,
 	                                 -- roofs; new shells / roofs with their centre in a KeepOut box are dropped (counted)
@@ -100,7 +101,7 @@ local function inBox(box, p)
 	return p.X >= box[1] and p.X <= box[3] and p.Z >= box[2] and p.Z <= box[4]
 end
 
-function R.removeOld(tag, oldText, box)
+function R.removeOld(tag, oldText, box, nightBox)
 	return run("removeOld " .. tag, function()
 		local bf = backupFolder(tag)
 		local B, nExp, miss = expected(oldText)
@@ -128,8 +129,9 @@ function R.removeOld(tag, oldText, box)
 				if q:IsA("BasePart") then
 					local c, s = q.Position, q.Size
 					local ax0, az0, ax1, az1 = c.X - s.X / 2, c.Z - s.Z / 2, c.X + s.X / 2, c.Z + s.Z / 2
-					local ix = math.max(0, math.min(ax1, box[3]) - math.max(ax0, box[1]))
-					local iz = math.max(0, math.min(az1, box[4]) - math.max(az0, box[2]))
+					local nb = nightBox or box
+					local ix = math.max(0, math.min(ax1, nb[3]) - math.max(ax0, nb[1]))
+					local iz = math.max(0, math.min(az1, nb[4]) - math.max(az0, nb[2]))
 					if ix * iz > 0.5 * s.X * s.Z then
 						q:SetAttribute("FromCell", cell.Name)
 						q.Parent = nightB

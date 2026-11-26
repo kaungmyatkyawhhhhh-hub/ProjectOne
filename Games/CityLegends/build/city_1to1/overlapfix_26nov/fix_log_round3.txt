@@ -1,0 +1,15 @@
+26 Nov round 3 - P1 building swap (v2173)
+removeOld P1: 10,339 old shell / roof parts -> ServerStorage.OverlapFixBackup.RebuildOld_P1.Shell (exact record match 8,865; within 1.5 studs 655; flat 10 studs 644 = the older placed version and round-2 cut pieces; 175 more left deep inside the P1 box, > 40 studs from its edge); 30 old NWH night parts -> RebuildOld_P1.Night; old Data_P1 -> RebuildOld_P1
+placeNew P1: 10,454 shell + roof parts in; 164 inside KeepOut boxes (lots / venues / earlier deletions) -> RebuildOld_P1.NewInKeepOut; night 30 cells (asset 108224117491265, 2,710 panes in KeepOut cut out)
+26 Nov round 3 - P2 building swap (v2174)
+removeOld P2: 12,954 old parts -> RebuildOld_P2 (exact 12,916, flat 10 studs 9, 29 more inside the P2 box > 40 from its edge); 46 NWH; old Data_P2
+placeNew P2: 12,782 in; 81 inside KeepOut -> RebuildOld_P2.NewInKeepOut; night 45 cells (78684182181468, 1,183 panes cut)
+26 Nov round 3 - P3 building swap (v2176)
+removeOld P3: 14,673 old parts -> RebuildOld_P3 (exact 14,672 + 1); 44 NWH; old Data_P3
+placeNew P3: 14,182 in; 4 inside KeepOut -> RebuildOld_P3.NewInKeepOut; night 43 cells (103970095932412 + 105224911540316, 153 panes cut)
+road touch check (R / D / M / W boxes + 1 stud gap, all 141,367 road boxes, 197,171 shell + roof parts map-wide): 184 after the swap (was 1,448) -> trimmed 174 + dropped 10 slivers -> 0 (v2177). Originals in ServerStorage.OverlapFixBackup.RoadTrim26 (attribute FromCell). List: road_trim_round3.txt
+26 Nov round 3 - overlap check after the swap: 631 real pairs / 61 groups (the new P1-P3 buildings came back on venue / house lots, landmarks and parks)
+fix 1: 12 buildings deleted (shells -> OverlapFixBackup.Shells, 128 kit records); 225 compound-wall records; 6 street-prop records (Sedona); night panes of the 12 cut (7 cells, asset 75359284329355)
+fix 2: 2,214 kit records whose parts all stand inside a KeepOut box (+3) dropped (buildings whose shell placeNew left out: their facades would have stayed as loose panels)
+fix 3: 13 records into placed things + 5 records of two shell-less buildings (Strand Hotel site, Thanlwin Road park)
+after fixes 1-2: 36 pairs; fix 3 -> re-check running; saved v2184

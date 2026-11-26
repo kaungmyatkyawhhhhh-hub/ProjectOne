@@ -1058,7 +1058,7 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 		end
 	end
 	-- the name round the top of the tower, under the crown: a stone band with gold letters
-	local band = deco(shell, Vector3.new(b2w + 0.8, 10, b2d + 0.8), CFrame.new(b2x, groundY + BODY2.y1 - 6, b2z), RIV_LIGHT, Enum.Material.Limestone)
+	local band = dbox(shell, BODY2.w + 0.8, 10, BODY2.d + 0.8, 0, BODY2.y1 - 6, TOWER_Z, RIV_LIGHT, Enum.Material.Limestone)
 	for _, face in { Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right } do
 		goldLetters(band, face, "PYAY ROYAL HOTEL", 10, 1.6)
 	end

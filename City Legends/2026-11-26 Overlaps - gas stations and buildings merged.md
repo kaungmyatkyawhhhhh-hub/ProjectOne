@@ -204,3 +204,38 @@ night windows at night.
   - 174 parts were cut back from the road side (mostly under 1 stud, the largest 6.9).
   - 10 thin slivers were removed.
   - Originals are in `OverlapFixBackup.RoadTrim26`. List: `build/city_1to1/overlapfix_26nov/road_trim_round3.txt`.
+
+### Overlap check after the re-run
+- **0 -> 631 real pairs -> 0** (v2184; 4,098 box pairs checked, 0 real). The new P1-P3 buildings had come back on lots,
+  landmarks and parks.
+  - 12 buildings were deleted. Their night panes were cut from 7 cells (asset 75359284329355).
+  - 225 compound-wall records and 6 street props by Sedona were dropped.
+  - **2,214 kit records whose parts all stood inside a KeepOut box were dropped.** These were the facades of buildings
+    whose shell `placeNew` had left out; they would have stayed as loose panels.
+  - 18 more records were dropped near the Strand Hotel, The Central and the Thanlwin Road / Optima parks.
+- Grass check: not re-run. The floors and terrain did not change in round 3.
+
+### Hollow ground under floors
+- Measured in Play (Server, terrain raycasts every 4 studs along each edge of the 55 lot / venue pads). 8 pads had
+  open air under an edge, 0.4 to 2.0 studs deep: gems 2.0, rewards 1.0, lot_y1_mid_1 1.0, high_1 0.9, high_10 0.8,
+  mid_6 0.7, hotel 0.5, low_10 0.4. Cause: round 2 cleared terrain 4 studs under each floor top (the grass fix), and
+  the ground dips under some edges.
+- **Fix, with no flicker:** each of those pads was made 2-3 studs deeper. The top stays where it was, so the side face
+  now reaches into the ground and no faces share a plane. Attributes `SkirtAdded` / `SkirtOldSizeY` record the change.
+- Checked in Play at the gems corner and along the Rewards edge. Both sit on the ground with no gap.
+
+### Hotel bug found in Play, fixed
+- The Play test showed `Hotel:1061: attempt to perform arithmetic (add) on nil`: the turn change had removed the
+  `worldBox` values the name band used. Because of that, the top name band and everything built after it were missing.
+  The band is now built in the hotel's own frame. In Play the hotel builds whole (4,783 parts) with no errors.
+
+### Checked in Play
+CityLegends_test -> back to CityLegends_v1 (read on the Server: v1, the hotel built) -> saved.
+- 0 building parts touching a road after the road agent's last swaps (141,367 road boxes).
+- Not looked at: kit facades on the client near every trimmed shell (they follow the shells' old faces, at most 6.9
+  studs on one building, most under 1), and night windows at night.
+
+![[2026-11-26 Overlaps 3 - Pyay Royal Hotel on the real Novotel site (Play) - after.jpg]]
+![[2026-11-26 Overlaps 3 - Pyay Royal Hotel front (Play) - after.jpg]]
+![[2026-11-26 Overlaps 3 - Rewards pad edge on the ground (Play) - after.jpg]]
+![[2026-11-26 Overlaps 3 - gems pad corner (Play) - after.jpg]]

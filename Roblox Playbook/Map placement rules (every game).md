@@ -185,3 +185,8 @@ This note is the fix. It works in three parts:
 - **A venue on a turned real site turns with its road.** The Novotel outline is turned 16 degrees, and no
   square-to-the-world box inside it fits the podium. Build the venue square, then turn the whole frame
   (`Hotel.lua facadeTurned`). Don't move the venue to a far square lot.
+- **Clearing terrain under a floor can open a gap at its edge.** After Air was written 4 studs under each pad (to stop
+  grass showing through), the ground dipped under 8 pad edges, by up to 2 studs. Measure along every edge by raycast,
+  and make the floor deeper with its top fixed, rather than refilling terrain (a refill bulges back over the floor).
+- **After changing how a venue is laid out, run it in Play and read the Output.** The hotel's turn change left 3 helper
+  values unset, and half the tower stopped building. Studio edits never showed it.
