@@ -2062,4 +2062,20 @@ function Traffic.near(pos: Vector3, radius: number): { Npc }
 	return out
 end
 
+-- (2026-11-26) a traffic lane passes within r studs (flat) of pos, at pos's height give or take dy: Driving's safety
+-- floor asks it when the road under a fast car hasn't streamed in (the lanes are data, always there)
+function Traffic.laneAt(pos: Vector3, r: number, dy: number): boolean
+	for _, lanes in { cityLanes, highwayLanes } do
+		if #lanes > 0 then
+			for _, seg in lanesNear(lanes, pos, r) do
+				local b = laneBox[seg]
+				if pos.Y >= b[1].Y - dy and pos.Y <= b[2].Y + dy then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
 return Traffic

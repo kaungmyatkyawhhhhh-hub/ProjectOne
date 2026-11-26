@@ -409,6 +409,7 @@ local function guard(name: string, fn: () -> ())
 	end
 	table.insert(guardTimes, string.format("%s %.2f", name, os.clock() - t0))
 end
+guard("StreamAhead", function() require(script.Parent:WaitForChild("StreamAhead")).init() end) -- (2026-11-26) the road ahead of fast cars streams in first
 guard("Goals", function() Goals.init(ctx) end)
 guard("CarLevels", function() CarLevels.init(ctx) end)
 guard("OnFoot", function() OnFoot.init(ctx) end)

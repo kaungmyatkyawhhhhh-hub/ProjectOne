@@ -46,11 +46,48 @@ return function(E: any)
 	local waterState = E.waterState
 	local wetAt = E.wetAt
 	local yawFromLook = E.yawFromLook
+	local Traffic = require(script.Parent.Parent:WaitForChild("Traffic"))
 
 	local rayModel: Instance?, rayTraffic: Instance? = nil, nil
+	-- (2026-11-26, owner: "when u go fast, the next map chunk takes long to load and u just fall off the map")
+	-- safety floor: just off a road, no road collision box within 15 studs at the car's own level, and either nothing
+	-- under the car for FLOOR_DROP studs or a traffic lane right here at the road's height, means the road there
+	-- hasn't streamed in yet (a real jump or drop has its road close by). An
+	-- invisible floor then follows under the car at the last road height until the road arrives (checked 10
+	-- times a second), at most FLOOR_MAX s; after that it falls as before. The server's StreamAhead foci make
+	-- the road arrive sooner; this only catches what's left.
+	local FLOOR_MAX = 3 -- (a gap fills in well under this; nothing by then = a real drop: fall and reset as before)
+	-- ground further below than this with no road near = a deck or road that hasn't loaded (a flyover is 17+ studs
+	-- up); nearer ground (a hop in a park, a kerb) is a real surface and the car just lands on it
+	local FLOOR_DROP = 14
+	local floorPart: BasePart? = nil
+	local floorT, floorCheck, lastGroundY, lastGroundT = 0, 0, 0, -1e9
+	local lastGroundPart: Instance? = nil
+	-- (the car's own spot: streaming arrives part by part, so the next carriageway or the pavement can be in while the
+	-- road under the car is not; thin: the road UNDER a flyover is not the deck the car is on)
+	local floorBox = Vector3.new(30, 16, 30)
+	local function dropFloor()
+		if floorPart then
+			floorPart.Parent = nil
+		end
+	end
+	local function mapLoadedNear(at: Vector3): boolean
+		-- (the whole Roads folder: the Myanmar Plaza flyover's boxes are in CollideFix_*, not Collide)
+		local map = workspace:FindFirstChild("Yangon1to1")
+		local roadsF = map and map:FindFirstChild("Roads")
+		if not roadsF then
+			return true -- (not the Yangon map: never make a floor)
+		end
+		roadOverlap.FilterDescendantsInstances = { roadsF }
+		roadOverlap.MaxParts = 1
+		local any = #workspace:GetPartBoundsInBox(CFrame.new(at), floorBox, roadOverlap) > 0
+		roadOverlap.MaxParts = 0
+		return any
+	end
 	function Driving.step(dt: number)
 		local s = E.get_state()
 		if not s or not s.root.Parent then
+			dropFloor()
 			return
 		end
 		dt = math.min(dt, 1 / 20)
@@ -293,8 +330,70 @@ return function(E: any)
 				end
 			end
 			s.groundDist = hit.Distance
+			lastGroundY, lastGroundT, lastGroundPart = hit.Position.Y, os.clock(), hit.Instance
 		else
 			s.groundDist = nil
+		end
+		-- the safety floor (see FLOOR_MAX above)
+		do
+			local now = os.clock()
+			local up = floorPart ~= nil and floorPart.Parent ~= nil
+			if up or (not hit and now >= floorCheck) then
+				floorCheck = now + 0.1
+				local pos = root.Position
+				if up then
+					local timedOut = now - floorT > FLOOR_MAX
+					if timedOut or mapLoadedNear(pos) then
+						dropFloor()
+						up = false
+						if timedOut then
+							floorCheck = now + 5 -- (still nothing there: off the map's edge; fall and reset as before)
+						end
+					end
+				elseif now - lastGroundT < 3
+					and lastGroundPart ~= nil
+					and (lastGroundPart :: Instance):GetAttribute("RoadBox") ~= nil -- (left a road, not a park or a ramp prop)
+					and not mapLoadedNear(pos)
+					and (
+						not workspace:Raycast(pos, Vector3.new(0, -(s.halfHeight + FLOOR_DROP), 0), rayParams)
+						-- (ground close below but a traffic lane runs here at the road's height: the road itself is
+						-- what's missing; landing on the ground would leave the car under it when it arrives)
+						or Traffic.laneAt(Vector3.new(pos.X, lastGroundY, pos.Z), 8, 4)
+					)
+				then
+					local f = floorPart
+					if not f then
+						local np = Instance.new("Part")
+						np.Name = "StreamSafetyFloor"
+						np.Anchored = true
+						np.Transparency = 1
+						np.CastShadow = false
+						np.CanTouch = false
+						np.Material = Enum.Material.Asphalt
+						np.Size = Vector3.new(60, 2, 60)
+						floorPart = np
+						f = np
+					end
+					-- (at the last road height; a car already a little below it is lifted back up)
+					local top = lastGroundY
+					local bottom = pos.Y - s.halfHeight
+					if bottom < top and top - bottom < 10 then
+						root.CFrame += Vector3.new(0, top - bottom + 0.2, 0)
+						pos = root.Position
+					end
+					;(f :: BasePart).CFrame = CFrame.new(pos.X, top - 1, pos.Z)
+					;(f :: BasePart).Parent = workspace
+					floorT, up = now, true
+					local v = root.AssemblyLinearVelocity
+					if v.Y < 0 then
+						root.AssemblyLinearVelocity = Vector3.new(v.X, 0, v.Z)
+					end
+				end
+			end
+			if up and floorPart then
+				local pos = root.Position
+				floorPart.CFrame = CFrame.new(pos.X, floorPart.Position.Y, pos.Z)
+			end
 		end
 		-- the suspension: a ray down from each wheel finds the road under it; how far the wheel sits
 		-- from where it should be is its spring's travel. The springs together carry the body (one
