@@ -69,6 +69,7 @@ Write a short plan; skip it only for a one-line tweak. It covers:
   - pressed or disabled.
 - **Input:** touch, mouse and gamepad; what is selected first; how to close.
 - **What else can pop up at the same time.** Two things never shout at once; use the toast queue.
+- **Choice screens are for kids (owner, 27 Nov 2026, GYM ARC muscle picker):** "dont make it overcomplicated or overstimulating with many texts and making them hard to choose". Each option gets one big icon, one big word and at most one short line. No stat bars, percentages or lists on the cards. Show one clear default. Modern references (TDS, RIVALS) give the style, not the amount of detail.
 
 ## 3. Build it correctly
 
