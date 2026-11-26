@@ -6,7 +6,7 @@ created: 2026-11-26
 
 Owner, 26 Nov: "from the video clips that u had to watch, make the interior of that building too, its in myita nyunt". Later the same day the owner drew the real room plan (`refs_2026-11-26_owner_flat_layout/owner_flat_layout_topdown.webp`) and the flat was rebuilt to it.
 
-**Saved: version 2171 (Studio, not published).** Earlier saves on the way: 2165.
+**Saved: version 2193 (Studio, not published).** Earlier saves on the way: 2165, 2171, 2179, 2181, 2189, 2191.
 
 ## Which building
 - Both clips start at GPS 16.803, 96.1859 (phone GPS, about ±10-20 m). The clip after them (0929) starts 1 km north on Waizayandar Road, so this is the south end of that road.
@@ -62,7 +62,7 @@ Owner, 26 Nov: "from the video clips that u had to watch, make the interior of t
 - The gate stamp "SAINT SUPER" is now **ZAYA SUPER**. The AC brand is **KOOLA**. There are no GPU / PSU / keyboard brand boxes and no energy-drink can.
 - The whiteboard is blank, with no schedule. The calendar has grid lines only. The folding screen has plain paper panels, not the landscape print.
 - There are no posters, map, photos or picture frames with content: the one frame holds a plain mat.
-- No trophies, VR headset or soft toys. No RGB PC: just a black tower and a dark monitor. The chair is a plain black office chair, not the black / light-blue gaming chair. The piano is a dark wood upright, not the white digital one.
+- No trophies, VR headset or soft toys. No RGB PC: just a black tower and a dark monitor. The chair is a plain black office chair, not the black / light-blue gaming chair. The piano is a generic white 88-key one (the owner asked for white plastic); it has no brand or logo.
 - The shrine is a generic altar: no copy of the family's statues.
 
 ## Shots
@@ -75,3 +75,40 @@ Owner, 26 Nov: "from the video clips that u had to watch, make the interior of t
 - The two unlabelled rooms were made the clip's dark clutter room (west) and a plain bedroom (middle). The kitchen has no window because it sits against the stair.
 - The other flats are locked. The floors above and below the flat are closed.
 - Not tested on a real phone.
+
+## Round 2 (26 Nov): spacious, owner mark-ups, glass
+- **Spacious** (owner: "the rooms & furnitures are not that tight in real life"): the plan west of the stair and north of the door line is stretched x1.3 (`M.grow()`). Walls and floors stretch; each piece of furniture moves whole and keeps its gap to its wall. The flat went from about **13.7 x 9.1 m to 17.8 x 11.8 m**. The stair core and carport did not move. The grown area has no map parts in it.
+- **Owner mark-ups:**
+  - Gaming room: bed on the west wall, a box frame with **no legs** (frame sits on the floor). Wardrobe in the NW corner, small and big shelves, a white 1.4 m 88-key piano on the right wall.
+  - Bookshelf turned onto the west wall, facing the room. PC desk with its back on the window wall, PC tower on the desk, wider desk.
+  - Living room: screen and armchair gone, couch on the gaming-room wall, TV between the windows, folding screen beside the front door on its hinge side.
+  - Fridge in the outer-wall corner on the kitchen side.
+  - A pink bike under the left living-room window, upside down on its saddle and bars, front wheel toward the door.
+- **Windows:** clear see-through glass. Click or tap a pane and it frosts; click again and it clears (`src/server/FlatWindows.server.lua`, tag `FlatWindowPane`).
+
+## Round 3 (26 Nov): owner's own furniture kept, everything opens, sounds
+- **The owner hand-placed the living room and bathroom furniture in Studio.** His 109 parts were read back into `tools/yangon/MyittarNyuntOwnerEdits.luau` (post-grow local CFrames, sizes, colours, materials). Every rebuild now deletes the builder's pieces in those two rooms and puts his back exactly. Checked after the rebuild: **109 of 109 match to 0.01 studs**.
+- **Bathroom door is a sliding door** on a top track, sliding along the dining-side wall.
+- **Everything opens** (`src/server/Openables.server.lua`, tag `Openable`, one shared server script): front door and its folding gate, 4 room doors, bath slider, 6 wardrobe doors, fridge and freezer doors, 13 cupboard / shrine / sideboard doors, 7 drawers. That is 34 in all, each with a ProximityPrompt (E / X button). Hinged things swing about 0.6 s and drawers slide about 0.45 s, both on an ease-out with a little settle. Collision is off while moving, and nothing closes on a player standing in it.
+- **Fridge:** hollow, with shelves, generic food and a lamp that lights when the door opens and goes off when it closes.
+- **Wardrobes:** hollow, with a hanging rail, shirts and a long longyi on hangers, folded clothes on a shelf and a shoe box. The clothes stay inside the doors.
+
+### Sounds (one table in `Openables.server.lua`, 3D on the moving part, heard to about 30 studs, calm volume)
+| Thing | Opening | Closing |
+|---|---|---|
+| Door (front, rooms) | latch click 9114142431 + soft door swing 9114154805 | short swing 9114154805, then thud 9113205539 + latch 9114142431 as it shuts |
+| Gate (folding lattice) | metal rattle 9118209193 + track scrape 9116893799 | scrape 9116893799, then clang 9116684884 as it shuts |
+| Bath slider | wood slide 9114153584 | wood slide 9114153584, then soft knock 9120915768 |
+| Wardrobe | small door creak 9114154986, then hanger clinks 9116216027 | creak 9114154986, then wood knock 9120915768 |
+| Cupboard / shrine / sideboard | small creak 9114154986 (higher pitch) | wood knock 9120915768 |
+| Drawer | drawer on rollers 9113658569 | rollers 9113658569, then light knock 9120915768 |
+| Fridge / freezer | seal pop 9113204879 (game's car door open, pitched up) | car door close 9113205539 + soft thud (built-in action_jump_land) |
+| Window | built-in volume_slider tick, bright (clearing) | same tick, lower and softer (frosting) |
+
+The ids are Pro Sound Effects sounds (Roblox's free public library) and the game's own car-door sounds from `Config.DoorFeel`. Each sound plays only its matching part of the clip, then fades out over 0.08 s.
+
+### Checks (round 3)
+- Rebuild: 3,107 parts, 0 map parts touched. The only overlap left is the owner's own treadmill feet, sunk 0.04 studs into the floor. That is his placement, left as he set it; no faces line up, so it cannot flicker.
+- Play on the test store: every kind opened and closed through the test hook and moved back to within 0.004 studs; the right sounds fired; the fridge light came on and went off. Store back to v1, then saved **v2193**.
+- Shots (Play): wardrobe open with clothes; fridge open; bathroom slider open; front door open with the screen and bike; bike close-up; living room (owner's layout); window frosted next to a clear one; PC desk on the window wall (`... (Play) - after.jpg`).
+- Not done: no sound check by ear (Studio audio can't be heard from here), and no test on a real phone.

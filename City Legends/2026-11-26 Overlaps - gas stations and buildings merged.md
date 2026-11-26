@@ -239,3 +239,13 @@ CityLegends_test -> back to CityLegends_v1 (read on the Server: v1, the hotel bu
 ![[2026-11-26 Overlaps 3 - Pyay Royal Hotel front (Play) - after.jpg]]
 ![[2026-11-26 Overlaps 3 - Rewards pad edge on the ground (Play) - after.jpg]]
 ![[2026-11-26 Overlaps 3 - gems pad corner (Play) - after.jpg]]
+
+### Hotel name reverted (26 Nov, coordinator)
+- The rename to "Pyay Royal Hotel" was a mistake and is undone. The owner's rule of 22 Nov in
+  `Games/CityLegends/CLAUDE.md` says venues carry the real name of the place they stand by (Rider Auto, Optima Werkz,
+  Novotel Yangon Max, Lotte, Kan Thar Yar, CB Bank, Myanmar Gems Museum). That rule beats the fictional-names rule,
+  which still holds for cars.
+- Back to **NOVOTEL YANGON MAX** in: the sign, the name band, `Config.Hotel.Name`, the WestLayout label, Strings
+  `rew.suiteBuy` (English and Burmese) and RewardsClient. Repo and Studio both.
+- Kept: the real-site position and the name-band crash fix.
+- The other real sign names listed above stay as they are, under the same rule.
