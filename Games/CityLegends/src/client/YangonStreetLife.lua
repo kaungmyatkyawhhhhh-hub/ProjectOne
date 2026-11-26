@@ -463,7 +463,6 @@ local PIECE = { "Torso", "Head", "HairShort", "Longyi", "ArmL", "ArmR", "Foot", 
 local FACE = { "rbxassetid://127110709777252", "rbxassetid://139673625040739" }
 local SANDAL_STRAP = "rbxassetid://127958667677139"
 local templates: { [string]: MeshPart }? = nil
-local picsOk = false
 
 type Figure = {
 	model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal?, scale: number, hairAt: Vector3, bald: boolean,
@@ -518,26 +517,6 @@ local function loadTemplates()
 		t[name] = mp
 	end
 	templates = t
-	-- the pictures only once they load (a fresh image sits in moderation a while): plain skin until then
-	task.spawn(function()
-		local ContentProvider = game:GetService("ContentProvider")
-		local all = { FACE[1], FACE[2], SANDAL_STRAP }
-		for _ = 1, 40 do
-			local good = 0
-			pcall(function()
-				ContentProvider:PreloadAsync(all, function(_, status)
-					if status == Enum.AssetFetchStatus.Success then
-						good += 1
-					end
-				end)
-			end)
-			if good == #all then
-				picsOk = true
-				return
-			end
-			task.wait(30)
-		end
-	end)
 end
 
 local function newFigure(): Figure
@@ -663,7 +642,9 @@ local function dress(f: Figure, who: string)
 	f.parts[3].Transparency = if bald then 1 else 0
 	if f.face then
 		f.face.Texture = pick(FACES)
-	elseif picsOk then
+	else
+		-- (a picture not loaded yet draws nothing: the plain skin shows; PreloadAsync said Failure for these in
+		-- Studio even while they drew, so it is no gate)
 		local face = f.parts[2]:FindFirstChild("pic") :: Decal?
 		if face then
 			face.Texture = FACE[if girl and rng:NextNumber() < 0.6 then 2 else 1] -- thanaka on most women's cheeks
