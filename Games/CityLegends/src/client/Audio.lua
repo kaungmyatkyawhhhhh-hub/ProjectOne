@@ -303,8 +303,67 @@ function Audio.play(key: string, volume: number, speed: number?, parent: Instanc
 	return s
 end
 
+-- (2026-11-26) the UI sound family (Config.Sounds.UI*): one sound per press. A button's own sound (Audio.ui) wins over
+-- the plain click its kit button also plays: the click waits 30 ms and stays quiet if a UI sound came in between
+local lastUi = 0
+local UI_FALLBACK = { Tab = { "tick", 1.9 }, Open = { "swoosh", 1.3 }, Close = { "swoosh", 1.0 }, Confirm = { "tick", 2.2 }, Cash = { "tick", 2.6 }, LevelUp = { "boom", 1.0 }, Error = { "tick", 0.9 } }
+local UI_VOLUME = { Tab = 0.5, Open = 0.5, Close = 0.45, Confirm = 0.6, Cash = 0.55, LevelUp = 0.7, Error = 0.5 }
+-- the music steps back under a big moment (NFS Unbound's mix rule: the most important sound wins), then returns
+local duckUntil = 0
+local function duck(depth: number, hold: number)
+	local m = musicSound
+	if not m or musicMuted then
+		return
+	end
+	local full = (Config.Sounds.MusicVolume or 0.22) * musicLevel
+	m.Volume = full * depth
+	duckUntil = os.clock() + hold
+	task.delay(hold, function()
+		if os.clock() >= duckUntil - 0.01 and musicSound == m and not musicMuted then
+			game:GetService("TweenService"):Create(m, TweenInfo.new(0.5), { Volume = (Config.Sounds.MusicVolume or 0.22) * musicLevel }):Play()
+		end
+	end)
+end
+function Audio.ui(name: string, pitch: number?)
+	local at = os.clock()
+	lastUi = at
+	-- a window closing as another opens (CARS in the menu opens the garage): only the opening is heard
+	if name == "Close" then
+		task.delay(0.04, function()
+			if lastUi == at then
+				Audio.uiNow(name, pitch)
+			end
+		end)
+		return
+	end
+	Audio.uiNow(name, pitch)
+end
+function Audio.uiNow(name: string, pitch: number?)
+	local key = "UI" .. name
+	if custom[key] then
+		Audio.play(key, UI_VOLUME[name] or 0.5, pitch)
+	else
+		local f = UI_FALLBACK[name] or { "tick", 1.6 }
+		Audio.play(f[1], 0.35, f[2] * (pitch or 1))
+	end
+	if name == "LevelUp" then
+		duck(0.35, 1.3)
+	elseif name == "Confirm" then
+		duck(0.6, 0.6)
+	end
+end
 function Audio.click()
-	Audio.play("tick", 0.35, 1.6)
+	local at = os.clock()
+	task.delay(0.03, function()
+		if lastUi >= at then
+			return
+		end
+		if custom.UIClick then
+			Audio.play("UIClick", 0.5)
+		else
+			Audio.play("tick", 0.35, 1.6)
+		end
+	end)
 end
 
 -- cut-up reward: swoosh + a chime that climbs with the combo

@@ -235,6 +235,9 @@ local fuelFill: Frame? = nil
 local fuelBack: Frame? = nil
 local fuelText: TextLabel? = nil
 local lampButton: TextButton? = nil
+local lampMark: TextLabel? = nil
+-- (26 Nov) declared here: the touch controls (built above its body) draw their small buttons with it
+local icon: (kind: string, parent: Instance, size: number, color: Color3?) -> Frame
 local BEAM_BLUE = Color3.fromRGB(80, 160, 255)
 local settingsPanel: Frame
 local camFxPanel: Frame
@@ -611,28 +614,31 @@ function UI.buildTouchControls()
 	end
 
 	-- middle: CAM, LIGHTS, RADIO, ••• under the GET OUT pill (makePill puts it here)
-	local icons = new("Frame", { Name = "Icons", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, 0), Size = UDim2.fromOffset(172, 44), Parent = holder })
+	-- (26 Nov, modern-HUD study: touch targets 44 pt+, no text under 18 px over gameplay) drawn icons, not 8-10 px
+	-- words: they read the same in Burmese (the LIGHTS word became a long Burmese one that didn't fit)
+	local icons = new("Frame", { Name = "Icons", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, 0), Size = UDim2.fromOffset(188, 44), Parent = holder })
 	icons.Parent = middle
-	local function small(text: string, x: number, color: Color3, onDown: () -> (), onUp: (() -> ())?): TextButton
-		local b = touchButton(icons, text, at(x, 0), UDim2.fromOffset(40, 40), color, onDown, onUp or noop)
-		b.TextSize = 10
+	local function small(kind: string, x: number, color: Color3, onDown: () -> (), onUp: (() -> ())?): TextButton
+		local b = touchButton(icons, "", at(x, 0), UDim2.fromOffset(44, 44), color, onDown, onUp or noop)
+		b.Name = kind
+		icon(kind, b, 24)
 		return b
 	end
-	small("CAM", 0, BLUE, function()
+	small("camera", 0, BLUE, function()
 		if UI.onCameraButton then
 			UI.onCameraButton()
 		end
 	end)
 	-- (2026-11-07) the new models' headlights: tap = next mode, hold = flash (Driving.lampPress / lampRelease)
-	lampButton = small("LIGHTS", 44, GREEN, key(Enum.KeyCode.L), function()
+	lampButton = small("headlight", 48, GREEN, key(Enum.KeyCode.L), function()
 		if UI.onLampRelease then
 			UI.onLampRelease()
 		end
 	end)
-	lampButton.TextSize = 8
-	small("RADIO", 88, BLUE, key(Enum.KeyCode.R)).TextSize = 9
-	local moreBtn = small("•••", 132, Theme.Accent2, noop)
-	moreBtn.TextSize = 14
+	-- the lamp mode as one letter in the corner (A auto, L low, H high; off = the red ring)
+	lampMark = label({ Text = "", TextSize = 11, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Text, AnchorPoint = Vector2.new(1, 1), Position = UDim2.new(1, -3, 1, -1), Size = UDim2.fromOffset(12, 12), Parent = lampButton })
+	small("radio", 96, BLUE, key(Enum.KeyCode.R))
+	local moreBtn = small("dots", 144, Theme.Accent2, noop)
 
 	-- the ••• car menu: a panel over the middle, in the side panels' style; ••• (now X) closes it
 	local COLS, TW, TH, GAP, TOP = 5, 64, 44, 6, 26
@@ -724,7 +730,12 @@ function UI.buildTouchControls()
 	end
 	local function setOpen(open: boolean)
 		panel.Visible = open
-		moreBtn.Text = if open then "X" else "•••"
+		moreBtn.Text = if open then "X" else ""
+		moreBtn.TextSize = 18
+		local dots = moreBtn:FindFirstChildOfClass("Frame")
+		if dots then
+			dots.Visible = not open
+		end
 	end
 	UI.closeCarMenu = function()
 		setOpen(false)
@@ -756,7 +767,7 @@ end
 ---------------------------------------------------------------------
 -- Icons: drawn from plain frames (no image assets) on a 32x32 grid
 ---------------------------------------------------------------------
-local function icon(kind: string, parent: Instance, size: number, color: Color3?): Frame
+function icon(kind: string, parent: Instance, size: number, color: Color3?): Frame
 	local k = size / 32
 	local col = color or WHITE
 	local canvas = new("Frame", {
@@ -871,6 +882,35 @@ local function icon(kind: string, parent: Instance, size: number, color: Color3?
 		local band = box(3, 16, 26, 2.4, 0)
 		band.BackgroundTransparency = 0.6
 		box(14, 14.5, 4, 5, 1)
+	elseif kind == "camera" then
+		-- (26 Nov) the camera button: a body with a lens and the top bump
+		local body = box(3, 9, 26, 18, 4)
+		body.BackgroundTransparency = 1
+		new("UIStroke", { Color = col, Thickness = math.max(1.5, 3 * k), Parent = body })
+		box(10, 5, 9, 4.5, 1.5)
+		local lens = box(11, 12, 10, 10, -1)
+		lens.BackgroundTransparency = 1
+		new("UIStroke", { Color = col, Thickness = math.max(1.5, 2.6 * k), Parent = lens })
+	elseif kind == "headlight" then
+		-- the lights button: a lamp with three beams
+		box(3, 8, 12, 16, -1)
+		for i = 0, 2 do
+			box(18, 8.5 + i * 6, 11, 3, 1.5)
+		end
+	elseif kind == "radio" then
+		-- the radio button: a set with a speaker, two dial lines and an aerial
+		local body = box(3, 11, 26, 18, 3)
+		body.BackgroundTransparency = 1
+		new("UIStroke", { Color = col, Thickness = math.max(1.5, 3 * k), Parent = body })
+		box(7, 15, 10, 10, -1)
+		box(20, 15.5, 6, 2.6, 1.3)
+		box(20, 21.5, 6, 2.6, 1.3)
+		box(9, 1.5, 2.6, 11, 1.3, -35)
+	elseif kind == "dots" then
+		-- the car menu: three dots
+		for i = 0, 2 do
+			box(3.5 + i * 9.5, 13, 6, 6, -1)
+		end
 	elseif kind == "house" then
 		-- a house: a pitched roof over a body with a door (housing)
 		box(2.5, 9, 17, 3.4, 1.7, -38) -- roof
@@ -2319,6 +2359,7 @@ function UI.closeGarage()
 end
 
 function UI.openGarage(data: GarageData, callbacks: GarageCallbacks)
+	Audio.ui("Open")
 	UI.closeGarage()
 	local owned: { [string]: boolean } = {}
 	for _, id in data.Owned do
@@ -2845,6 +2886,12 @@ function UI.setSpeed(mph: number, frac: number, gear: string, rpm: number, launc
 	end
 end
 
+-- (26 Nov) on a phone the level / job bars hide while you drive: the guide pill takes the top edge then
+function UI.topBarsHidden(): boolean
+	local bars = hud and hud:FindFirstChild("TopBars")
+	return bars ~= nil and not (bars :: Frame).Visible
+end
+
 -- the car's own rev scale (CarStats.redline, x1000 rpm), when a car is attached
 function UI.setSpeedoCar(redline: number, electric: boolean)
 	HudSpeedo.setCar(redline, electric)
@@ -2940,7 +2987,9 @@ end
 function UI.setLampMode(mode: string?)
 	if lampButton then
 		-- (19 Nov: a tile in the phone's car menu, always there; L's plain on / off without a mode)
-		lampButton.Text = if mode then string.upper(mode) else "LIGHTS"
+		if lampMark then
+			lampMark.Text = if mode == "auto" then "A" elseif mode == "low" then "L" elseif mode == "high" then "H" else ""
+		end
 		local stroke = lampButton:FindFirstChildWhichIsA("UIStroke")
 		if stroke then
 			stroke.Color = if mode == "high" then BEAM_BLUE elseif mode == "off" then Theme.Danger else Color3.fromRGB(70, 230, 110)
@@ -3283,7 +3332,7 @@ function UI.levelUp(level: number, reward: number)
 	local cashStroke = new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = cash })
 	tween(scale, 0.45, { Scale = 1 }, Enum.EasingStyle.Back)
 	UI.flash(Theme.Accent2)
-	Audio.boom(0.5)
+	Audio.ui("LevelUp") -- (26 Nov: the night-drive stinger; the music steps back under it)
 	UI.toast("Level " .. level .. " reached!" .. (if reward > 0 then "  +" .. formatCash(reward) else ""), Theme.Accent2)
 	task.delay(2.6, function()
 		if levelUpFrame ~= f then
@@ -3366,6 +3415,11 @@ showPopup = function(text: string, amount: number, color: Color3)
 	new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = main })
 	local money = label({ Text = if amount > 0 then "+" .. formatCash(amount) else "", TextSize = 24, Font = Enum.Font.GothamBlack, TextColor3 = Theme.Money, Position = UDim2.fromOffset(0, 38), Size = UDim2.new(1, 0, 0, 28), Parent = holder })
 	money.Visible = amount > 0 -- (a popup with nothing paid: just the words)
+	-- (26 Nov) money in: the coin sound. Only money-coloured popups (pay, delivery, heist, paycheck): cut-ups are
+	-- coloured by kind and already have Audio.cutUp
+	if amount > 0 and color == Theme.Money then
+		Audio.ui("Cash")
+	end
 	new("UIStroke", { Color = Color3.new(0, 0, 0), Thickness = 2, Transparency = 0.4, Parent = money })
 	main.TextSize = 50
 	tween(main, 0.25, { TextSize = 34 }, Enum.EasingStyle.Back)

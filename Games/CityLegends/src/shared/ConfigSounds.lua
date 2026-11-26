@@ -32,6 +32,16 @@ return function(Config)
 		CutUp = "rbxassetid://9126229255", -- Whoosh By Fast Airy Swooshing
 		PassBy = "rbxassetid://9113003539", -- Race Car Pass By (cutscene)
 		Impact = "rbxassetid://9120769331", -- Sonic Boom Low End Impact (title hit)
+		-- (2026-11-26) the UI sound family "night drive" (code-made: tools/ui_sounds/cl_ui.py; vault
+		-- City Legends/2026-11-26 UI pass - sounds, HUD buttons, guide pill.md). Before: one built-in tick for everything
+		UIClick = { "rbxassetid://86747139108751", "rbxassetid://125513135454735", "rbxassetid://126667847847217" },
+		UITab = "rbxassetid://115513551178968",
+		UIOpen = "rbxassetid://95577240285283",
+		UIClose = "rbxassetid://107719827280501",
+		UIConfirm = "rbxassetid://79545227579857",
+		UICash = "rbxassetid://133517145681997",
+		UILevelUp = "rbxassetid://124355330848730",
+		UIError = "rbxassetid://100566362650239",
 		-- night-drive playlist from Roblox's licensed music partners (public domain)
 		Music = {
 			"rbxassetid://140215257631273", -- Eclipse Drift (DistroKid)

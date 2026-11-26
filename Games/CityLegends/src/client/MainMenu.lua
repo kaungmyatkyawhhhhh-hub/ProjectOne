@@ -257,6 +257,8 @@ local blur: BlurEffect? = nil
 local isOpen = false
 local startMode = false -- the start screen: no car yet (nothing to go back to)
 local tabName = "CAMPAIGN"
+local openedAt = 0
+local TAB_PITCH = { 1, 1.12, 1.26, 1.5, 1.68 } -- (A minor pentatonic steps over CL_Tab's E)
 local TABS = { "CAMPAIGN", "CARS", "HOUSES", "JOBS", "STORE" } -- (19 Nov: JOBS)
 local tabButtons: { [string]: TextButton } = {}
 local tabBadges: { [string]: Frame } = {}
@@ -2219,6 +2221,10 @@ switchTab = function(name: string)
 		api.openCars()
 		return
 	end
+	-- (26 Nov) a tab of its own sound, a step higher for each tab to the right (not on the menu's own opening)
+	if name ~= tabName and os.clock() - openedAt > 0.2 then
+		Audio.ui("Tab", TAB_PITCH[table.find(TABS, name) or 1])
+	end
 	tabName = name
 	for n, b in tabButtons do
 		local on = n == name
@@ -2382,6 +2388,7 @@ closeMenu = function()
 		return
 	end
 	isOpen = false
+	Audio.ui("Close")
 	if sub then
 		closeSub()
 	end
@@ -2447,7 +2454,8 @@ function MainMenu.open(start: boolean?)
 	local target = fitScale()
 	scaler.Scale = if calm then target else target * 0.96
 	tween(scaler, 0.22, { Scale = target }, Enum.EasingStyle.Quint)
-	Audio.play("swoosh", 0.25, 1.3)
+	Audio.ui("Open")
+	openedAt = os.clock()
 	GuiService.SelectedObject = nil -- (the HUD's MENU button may still hold the gamepad selection)
 	if sub then
 		closeSub()

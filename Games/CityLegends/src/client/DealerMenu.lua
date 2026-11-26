@@ -1233,6 +1233,9 @@ local function build(root: Frame)
 	-----------------------------------------------------------------
 	local toastId = 0
 	local function showMsg(str: string, color: Color3?, iconName: string?)
+		if color == RED then
+			Audio.ui("Error")
+		end
 		toastId += 1
 		local mine = toastId
 		toastText.Text = str
@@ -1259,7 +1262,7 @@ local function build(root: Frame)
 	local function celebrate(id: string)
 		local over, card = modal(if compact then 420 else 460, if compact then 220 else 250, 100)
 		confetti(over)
-		Audio.cutUp(8, "NEW CAR")
+		Audio.ui("LevelUp") -- (26 Nov: a new car is a big moment: the level-up stinger, the music steps back)
 		caption("NEW CAR", { TextColor3 = GOLD, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(0, 22), Size = UDim2.new(1, 0, 0, fs(16)), ZIndex = 102, Parent = card })
 		text({ Text = Cars.get(id).Name, FontFace = HEAVY, TextSize = 26, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.fromOffset(20, 44), Size = UDim2.new(1, -40, 0, fs(60)), ZIndex = 102, Parent = card })
 		local driveNow = button("primary", "DRIVE IT NOW", "key", { AnchorPoint = Vector2.new(0, 1), Position = UDim2.new(0, 22, 1, -22), Size = UDim2.new(0.5, -28, 0, L.btnH), ZIndex = 102, Parent = card })
@@ -1575,6 +1578,7 @@ function DealerMenu.open(data: any, callbacks: Callbacks, focus: string?)
 	if open then
 		DealerMenu.close()
 	end
+	Audio.ui("Open")
 	open = true
 	UI.modalOpen = true
 	local owned: { [string]: boolean } = {}

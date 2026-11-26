@@ -74,7 +74,7 @@ local function build()
 		AnchorPoint = Vector2.new(0.5, 0),
 		-- (first test: in the StartPrompt's slot it hid the road, the dispatch sign and met the toasts)
 		Position = topSlot,
-		Size = UDim2.fromOffset(if touch then 470 else 560, h),
+		Size = UDim2.fromOffset(if touch then 420 else 560, h), -- (26 Nov: 470 touched the cash pill and its 2x chip at the top edge)
 		BackgroundColor3 = Theme.Panel,
 		BackgroundTransparency = 0.12,
 		Visible = false,
@@ -170,6 +170,11 @@ local function show(text: string, target: Vector3?, tap: (() -> ())?, low: boole
 	local pp = pill :: Frame
 	pp.AnchorPoint = if low then Vector2.new(0.5, 1) else Vector2.new(0.5, 0)
 	pp.Position = if low then UDim2.new(0.5, 0, 0.66, 0) else topSlot
+	-- (26 Nov, modern-HUD study: keep the middle third of a phone clear) while you drive on a phone the level and job
+	-- bars hide (UI.setSpeed), so the pill takes their place at the top edge instead of sitting over the road
+	if not low and UI.isTouch and UI.topBarsHidden() then
+		pp.Position = UDim2.new(0.5, 0, 0, 10)
+	end
 	pillText.Text = text
 	onTap = tap
 	arrow.Visible = target ~= nil

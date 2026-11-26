@@ -614,9 +614,10 @@ local function act(what: string, arg: { [string]: any }, okText: string?): boole
 		if okText then
 			showMsg(okText, GREEN)
 		end
-		Audio.cutUp(4, "UPGRADE")
+		Audio.ui("Confirm") -- (26 Nov: the UI family's confirm; was the cut-up chime)
 		refreshAll()
 	else
+		Audio.ui("Error")
 		showMsg(res.message or "Couldn't do that", Config.Theme.Danger)
 	end
 	return res.ok == true
@@ -1926,6 +1927,7 @@ function Workshop.open(carId: string)
 	if open then
 		Workshop.close()
 	end
+	Audio.ui("Open")
 	if not Cars.ById[carId] then
 		return
 	end
