@@ -70,6 +70,7 @@ Write a short plan; skip it only for a one-line tweak. It covers:
 - **Input:** touch, mouse and gamepad; what is selected first; how to close.
 - **What else can pop up at the same time.** Two things never shout at once; use the toast queue.
 - **Choice screens are for kids (owner, 27 Nov 2026, GYM ARC muscle picker):** "dont make it overcomplicated or overstimulating with many texts and making them hard to choose". Each option gets one big icon, one big word and at most one short line. No stat bars, percentages or lists on the cards. Show one clear default. Modern references (TDS, RIVALS) give the style, not the amount of detail.
+- **Simple doesn't mean plain (owner, 27 Nov 2026):** flat dark cards with thin line icons read as unfinished ("plain background"). Keep the text few, but fill each card's surface: either a lit art scene in the top two-thirds with a dark text band below (TDS mode cards), or a rich colour fill (gradient, faint stripes, grain, top shine, a huge faded silhouette as a watermark).
 
 ## 3. Build it correctly
 
