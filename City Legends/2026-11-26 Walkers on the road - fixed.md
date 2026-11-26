@@ -55,3 +55,11 @@ Before, for each district (bad segments): P1 340, P2 212, P3 1,170, P4 17, P7 10
 - No parked cars or standing spots yet (the old shortcut).
 
 Lesson filed in [[Map placement rules (every game)]] (26 Nov).
+
+## Pre-publish check (26 Nov, saved v2203)
+- After the last road swaps (RB10, RB6, RB11) and the P1-P3 building rebuild, I dumped the boxes again. It's the same set of boxes as the v2142 dump, so the walker data didn't change. Checker: 0 on a road, 0 off a pavement.
+- Play: Myanmar Plaza 457 walker checks, Sule 72, 0 on the road.
+- Repo vs Studio scripts: 202 match. 1 was different: CarSkin. Studio had half of the 21 Nov tail-lamp fix (the `if cutTail` check without the line that sets `cutTail`), so cars with cut tail lenses still got the extra red glow. I copied the repo's CarSkin into Studio. In Play the car's plate and tail lamps look right and there are no CarSkin errors.
+- Studio has two identical copies of `Client.SVJClusterArt` (left alone, same content).
+
+![[2026-11-26 Walkers - Myanmar Plaza pre-publish check (v2203).jpg]]
