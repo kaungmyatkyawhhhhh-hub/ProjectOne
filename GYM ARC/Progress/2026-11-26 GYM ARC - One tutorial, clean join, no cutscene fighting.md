@@ -56,3 +56,8 @@ Fix in `ReplicatedFirst.GuiGuard`: when the hold ends, the HUD eases in by area:
 Each one fades up over 0.28 s with `Theme.FadeWindow`. The parts in `Kit.HudAsideParts` also glide in from their edge (Back easing, 0.32 s). If a gui's own script changes Enabled while it waits, the gui is handed back to the script.
 
 Checked in Play (returning player: menu → PLAY → town shot): the HUD fades in by area, with no one-frame pop. Not checked: phone size; a fresh player after the intro (same code path).
+
+## Pass 4 (v1962): time to read, Benny's muscles, audible clicks
+- First tutorial step (GoBench, autoGo) now waits until Coach Dex's dialog closes (max 10 s) + 0.8 s before dashing to the bench. Before: dash 1.4 s after "Welcome!". Tested: dialog at 0.07 s after the intro, dash at 9.93 s.
+- IntroCutscene `dressMuscles(model)`: the cutscene Benny copy gets `MuscleRig.new(model,{static=false,keepBody=true,style})` + `rig:Snap(Decode(MuscleG))` (MuscleClient only dresses NPCs in the world, so copies were skinny). Used in Play() and PlayShort(). Checked on the shove frame: bulky arms.
+- Button sounds (TDS-style tick on every click): Config/Sounds Click 0.1 -> 0.5 (basePitch 1.12), TabTick 0.05 -> 0.3, Select 0.08 -> 0.35. Click was there but under the music (0.1 x UI group 0.55). Levels measured, not heard.
