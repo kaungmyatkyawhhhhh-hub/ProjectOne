@@ -198,3 +198,10 @@ Owner: "do the hotbar shine and skill tree reveal too" (points 7-8). GYM ARC has
 - phone size;
 - the buy-flash spreading to the neighbours: the Road and the Star Track have no buy action.
 
+
+## Pick screens (27 Nov, for the GYM ARC muscle picker)
+Owner: "study modern formal GUI like Tower Defense Simulator Modern GUI and alot more that is similar".
+- **TDS mode picker** (`05_mode_t18.2.jpg`, 18 s into the video): no window, just the blurred world. Header top-left in plain bold sentence case ("Survival") with one grey line under it; status chips on the right of the header row (green "Most Popular", "6.14K Playing"); red square X. Cards are near-black charcoal with a 1-2 px light outline and ~6 px corners, art in the top part fading into the dark, then the name bold white + one grey description line, both left-aligned at the bottom-left. Bento sizes (the featured mode is a big tall card). Locked card: dimmed, a dark pill with a lock + "Complete Hardcore to unlock."
+- **RIVALS matchmaking** (`06_rivals_matchmaking_ref.jpg`, an ArtStation redesign shown in search): pick 1 of 3 like ours. Frosted glass cards, a small emblem on top, the big word (1v1 / 2v2 / 3v3) in the middle, a small label; the chosen card is lifted, brighter, with a gold glow and its own action button; small centred header ("BETA / MATCHMAKING").
+- **What makes it "modern, formal":** dark neutral glass, colour only as an accent (glow, outline, bars), plain geometric sans in sentence case (no italic shouting), left alignment and generous spacing, one element lifted to show the choice.
+- **Gemini lesson:** a prompt that lists the current screen's look gets the current screen back (v1). Give it the content only, say "do NOT keep its look", attach the reference screens and describe the target design in detail (v2: `GYM ARC/Assets/picker_gemini/picker_gemini_v2.png`).
