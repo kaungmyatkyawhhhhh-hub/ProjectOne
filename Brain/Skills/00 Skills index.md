@@ -122,3 +122,4 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 - 2026-11-26: roblox-chatgpt-art-pipeline: owner prefers Gemini for images that must not look AI-made (card GFX, render enhancement); ChatGPT stays for raw icon/VFX sheets. Vault copy only: re-upload the plugin skill.
 - 2026-11-27: roblox-chatgpt-art-pipeline: Gemini follows prompts literally; for a redesign give the screenshot as content only, attach studied style references (TDS, RIVALS) and describe the target design, never the current look (owner correction). Vault copy only: re-upload the plugin skill.
 - 2026-11-27: roblox-ui-pro: choice screens are for kids: one big icon + one big word + at most one short line per option, no stats/percentages (owner correction on the GYM ARC picker v2).
+- 2026-11-27 roblox-ui-pro: simple choice cards still need a filled surface (art scene or textured colour), never plain dark glass + line icons (owner: GYM ARC picker).
