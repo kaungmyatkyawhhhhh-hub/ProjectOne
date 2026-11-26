@@ -51,3 +51,23 @@ Owner: "these cutscene texts could look better if it was like TDS 2026 solar req
 **Checked in Play:** the fresh-player intro (video). Story call-outs: the script loads without errors, but no call-out shot was played in the test.
 
 **Not done yet:** the other cinematics still have their old look: GrowthFX, GymReveal, AlterFX, TrainerStories, Launch and Roll. Phone size is not checked.
+
+## Pass 2 (v1960, saved, NOT published): a 15 s intro with acting
+Owner: "the tds one is so cinematic". Asked about the length, the owner picked **about 15 s** (the 5 s cap came from the funnel loss in the old 50 s intro).
+
+- `Config/Onboarding.IntroCutsceneLength` = 15. This plays the existing SHORT cut of `IntroCutscene.Play`, the copy of the set far above the map, now in the film look:
+  1. the street, with a small quiet title "EVERYONE STARTS TINY";
+  2. Benny walks in carrying his bar, blocks the door and drops the bar ("Benny: Where do you think YOU'RE going, twig? Lift THIS first.");
+  3. the shove and the fall ("Benny: Weak. Skinny. This gym is for REAL lifters.");
+  4. the MEMBERSHIP poster ("You: A membership... I could get strong too.");
+  5. the gold vision of future-you over a beaten Benny ("You: One day, YOU'LL be the big one.");
+  6. a dip to black and a cut to behind you, with the tutorial path on the floor.
+- The captions are now one film subtitle. The name and caption lines and the dark caption fade are gone.
+- Depth of field follows each shot's subject, and the warm Cine grade is on for the whole scene.
+- Some SHORT beats are trimmed: about 16.4 s measured.
+- The vision's god rays are removed (house rule: no sunburst).
+- The ending is a dip to black and a cut, no longer a swing through the sky from the set.
+
+**Checked in Play** (fresh player, two videos): every beat above, no errors.
+
+**Watch:** the Intro funnel (`Intro_Done` seconds / skipped) for drop-off against the 5 s version. **Not checked:** phone size.
