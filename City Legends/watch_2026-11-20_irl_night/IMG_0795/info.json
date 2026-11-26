@@ -1,0 +1,35 @@
+{
+ "file": "C:\\Users\\kaung\\Downloads\\IrlReferences\\IMG_0795.MOV  (on the chat PC, not in the vault)",
+ "bytes": 23520279,
+ "duration_s": 8.59,
+ "codec": "hevc",
+ "stored_size": [
+  1920,
+  1080
+ ],
+ "fps": 59.93,
+ "rotation": -90.0,
+ "shown_size": [
+  1080,
+  1920
+ ],
+ "portrait": true,
+ "has_audio": true,
+ "tags": {
+  "com.apple.quicktime.creationdate": "2026-11-20T18:52:20+0630",
+  "com.apple.quicktime.location.accuracy.horizontal": "23.714608",
+  "com.apple.quicktime.location.ISO6709": "+16.8439+096.1514+021.062/",
+  "com.apple.quicktime.make": "Apple",
+  "com.apple.quicktime.model": "iPhone 17 Pro",
+  "com.apple.quicktime.software": "27.0.1",
+  "encoder": "Lavf60.16.100",
+  "creation_time": "2026-11-20T12:22:20.000000Z"
+ },
+ "gps_start": {
+  "lat": 16.8439,
+  "lon": 96.1514,
+  "maps": "https://www.google.com/maps?q=16.8439,96.1514"
+ },
+ "sheet_every_s": 0.5,
+ "scene_cuts": 0
+}

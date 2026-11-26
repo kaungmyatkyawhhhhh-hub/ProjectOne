@@ -1,0 +1,32 @@
+{
+ "level_dbfs_per_0.5s": [
+  -12.6,
+  -13.2,
+  -13.6,
+  -17.2
+ ],
+ "level_summary": {
+  "median": -13.4,
+  "quiet_10pct": -16.1,
+  "loud_10pct": -12.8,
+  "max": -12.6
+ },
+ "band_share": {
+  "rumble <150 Hz": 0.222,
+  "low 150-600": 0.606,
+  "mid 600-2k": 0.167,
+  "presence 2-5k": 0.005,
+  "air 5k+": 0.001
+ },
+ "loudest_moments_s": [
+  0.0
+ ],
+ "sound_starts_s": [
+  0.13,
+  0.44,
+  1.25,
+  1.44
+ ],
+ "sound_starts_per_s": 1.72,
+ "silent": false
+}
