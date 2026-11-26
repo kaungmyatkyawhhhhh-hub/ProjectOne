@@ -57,3 +57,5 @@ Studio Play on this PC, spawn on Kabar Aye, settled values (what streams in from
   - 25 fps while it loads, again on every fast travel;
   - most players are on cheap phones, so expect worse there, and memory is the risk.
 - Not measured on a real phone. Studio's memory tags count all of Studio, so only part counts and fps compare.
+
+**Owner's decision (27 Nov): "Use 4096".** Set and saved as version 2252 -> 2253 (`default.project.json` matches). Watch on phones after publishing: memory crashes, the fps dip after joining and after fast travel. If phones suffer, 2048 is the measured fallback.
