@@ -61,3 +61,19 @@ Checked in Play (returning player: menu → PLAY → town shot): the HUD fades i
 - First tutorial step (GoBench, autoGo) now waits until Coach Dex's dialog closes (max 10 s) + 0.8 s before dashing to the bench. Before: dash 1.4 s after "Welcome!". Tested: dialog at 0.07 s after the intro, dash at 9.93 s.
 - IntroCutscene `dressMuscles(model)`: the cutscene Benny copy gets `MuscleRig.new(model,{static=false,keepBody=true,style})` + `rig:Snap(Decode(MuscleG))` (MuscleClient only dresses NPCs in the world, so copies were skinny). Used in Play() and PlayShort(). Checked on the shove frame: bulky arms.
 - Button sounds (TDS-style tick on every click): Config/Sounds Click 0.1 -> 0.5 (basePitch 1.12), TabTick 0.05 -> 0.3, Select 0.08 -> 0.35. Click was there but under the music (0.1 x UI group 0.55). Levels measured, not heard.
+
+## Pass 5 (v1964): clicks you can hear, a real muscle picker
+- Owner: "clicks cant hear". The click clip 9114212934 itself peaks at 5/1000 PlaybackLoudness: silent at any volume. Click, Select, TabTick and DialogNext now use Roblox's "UI Bright Click" 15675059323 (peak 212 raw, 103 in game at Click 0.35 x UI 0.55). RepTick keeps the old soft tick.
+- Owner: the PICK YOUR NEXT MUSCLE icons were the same as the Run Cards, and the frame, background and buttons looked like placeholders. New ChatGPT art (one chat, the boost icon sheet as style reference), `Assets/pick_muscle_2026-11-26/`:
+
+| piece | id |
+|---|---|
+| icon_legs (squat, thighs glow orange) | 102184921421552 |
+| icon_abs (crunch, six-pack glows gold, clothed) | 122240811217104 |
+| icon_back (pull-up from behind, back glows purple) | 74633281653190 |
+| panel (gold rim, bolts, diamond plate, chevron header) | 132824241363420 |
+| button (gold pill) | 76159087926069 |
+| card_legs / card_abs / card_back | 113982329234903 / 86459323226447 / 137939004459369 |
+
+- TutorialClient: the panel is the image at its own aspect (560x427 at UIScale 0.86, pops in with Back easing), each choice is one ImageButton (card + hero + gold pill with dark italic word, Theme.BindPress). First card sheet came back with sunburst rays: redone with "NO sunburst", green key.
+- Checked on PC in Play (screenshot). Not checked: phone size, the real path to the picker (needs a full bench set).

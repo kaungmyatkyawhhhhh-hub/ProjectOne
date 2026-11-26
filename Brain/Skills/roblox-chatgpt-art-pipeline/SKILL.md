@@ -88,6 +88,12 @@ Give the coding Claude: ImageLabel ScaleType Slice + SliceCenter; particles use 
 - An icon scan must include the UI kit's shared helpers (the coin, icon tiles, result/reward cards, toasts, the top-bar currency), not only feature configs: the owner found the coin and the win-card trophy after the first scan. Grep the kit for every place a line-icon NAME becomes an object picture, and fix it once there (a name → art map such as `UI.IconArt`); buttons, tabs and settings keep line icons.
 - Cutting a grid sheet: ChatGPT's pieces cross the cell lines. Assign each piece to the cell its CENTRE falls in (label the whole sheet, glow to the nearest piece) instead of cropping cells; a tiny-size icon (the coin) keeps only its main body, no sparkles.
 
+## Lessons (26 Nov, GYM ARC muscle picker: owner "buttons & background & frame look like placeholders", "same icons as cards")
+- Card/tile backgrounds: "a radial glow" or "sunlit glow" makes ChatGPT draw SUNBURST RAYS (against GYM ARC's no-sunburst rule). Always write "NO sunburst, NO light rays, NO radiating stripes; a smooth soft radial glow" for card insides.
+- A purple/violet piece on a MAGENTA key gets its pink centre eaten: purple art goes on a GREEN #00FF00 sheet with "no pink, no magenta".
+- A picker / choice popup must not reuse the art of another system (the Run Cards emblems): draw each choice as the hero DOING the action (squat, crunch, pull-up) with the worked part glowing; readable and clearly new.
+- A whole popup in one sheet works: empty window panel (gold rim, bolts, diamond plate, chevron header band) + empty coloured cards + an empty gold pill; use the panel at its own aspect (no 9-slice) and place content in fractions of it.
+
 ## Tool setup notes (the workspace is temporary)
 - The tools live in a Python venv (numpy, scipy, Pillow; optional torch + spandrel, rembg). Hugging Face needs huggingface.co + *.hf.co allowed; GitHub release downloads need github.com.
 - Check every model's LICENCE before use (commercial game). Prefer MIT/Apache/CC0/CC-BY.
