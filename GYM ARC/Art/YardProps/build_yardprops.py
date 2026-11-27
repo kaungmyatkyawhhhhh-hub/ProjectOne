@@ -31,7 +31,7 @@ class M:
 def bulb(m, c, x, z_top, S, w=16, h=46, ang=0.0):
     """C9 bulb hanging from z_top: black socket then a teardrop pointing down (sheet: 32 px wide, ~46 px tall), tilted by ang about Y."""
     n0 = {k: len(v) for k, v in m.V.items()}
-    m.lathe("Wire", [(9 * S, z_top - 14 * S), (9 * S, z_top)], 6, (x, 0))
+    m.lathe("Wire", [(12 * S, z_top - 14 * S), (12 * S, z_top + 5 * S)], 4, (x, 0))
     prof = [(0.01 * S, z_top - 12 * S - h * S), (w * 0.55 * S, z_top - 12 * S - h * 0.82 * S), (w * S, z_top - 12 * S - h * 0.45 * S),
             (w * 0.8 * S, z_top - 12 * S - h * 0.12 * S), (8 * S, z_top - 12 * S)]
     m.lathe(c, prof, 8, (x, 0))
@@ -102,10 +102,10 @@ m.lathe("Iron", [(R(84), Z(760)), (R(84), Z(750)), (R(70), Z(742)), (R(58), Z(72
 m.lathe("Iron", [(R(19), Z(690)), (R(19), Z(560))], 8)
 m.lathe("Iron", [(R(24), Z(548)), (R(30), Z(540)), (R(30), Z(528))], 8)   # lantern seat
 # lantern: glass frustum (wide top 72 px at y 480, 51 px at y 520), iron frame posts, roof and finial
-m.lathe("Glass", [(R(51), Z(528)), (R(72), Z(480))], 6, rot=0)
+m.lathe("Glass", [(R(40), Z(526)), (R(72), Z(480))], 6, rot=0)
 for i in range(6):
     a = 2 * math.pi * i / 6
-    for (r0, y0), (r1, y1) in [((R(54), 528), (R(75), 480))]:
+    for (r0, y0), (r1, y1) in [((R(37), 526), (R(69), 480))]:
         p0 = Vector((r0 * math.cos(a), r0 * math.sin(a), Z(y0))); p1 = Vector((r1 * math.cos(a), r1 * math.sin(a), Z(y1)))
         d = 3 * S; m.add("Iron", [p0 + Vector((-d, -d, 0)), p0 + Vector((d, -d, 0)), p0 + Vector((d, d, 0)), p0 + Vector((-d, d, 0)),
                                    p1 + Vector((-d, -d, 0)), p1 + Vector((d, -d, 0)), p1 + Vector((d, d, 0)), p1 + Vector((-d, d, 0))],
@@ -114,22 +114,22 @@ m.lathe("Iron", [(R(78), Z(482)), (R(84), Z(470)), (R(40), Z(452)), (R(14), Z(44
 m.lathe("Iron", [(R(6), Z(446)), (R(10), Z(440)), (R(12), Z(433)), (R(6), Z(426))], 6)
 # bow + pine sprig on the pole (front, y 540-595)
 for sg in (1, -1):
-    m.add("Pine", [Vector((sg * 10 * S, -12 * S, Z(560))), Vector((sg * 42 * S, -6 * S, Z(540))), Vector((sg * 40 * S, -6 * S, Z(582))),
-                   Vector((sg * 10 * S, -16 * S, Z(566)))], [(0, 1, 2, 3) if sg > 0 else (3, 2, 1, 0)])
-    loop = [(sg * 2 * S, Z(558)), (sg * 34 * S, Z(542)), (sg * 34 * S, Z(576)), (sg * 2 * S, Z(568))]
-    tail = [(sg * 2 * S, Z(566)), (sg * 16 * S, Z(570)), (sg * 26 * S, Z(600)), (sg * 15 * S, Z(592)), (sg * 7 * S, Z(604))]
+    m.add("Pine", [Vector((sg * 10 * S, -12 * S, Z(552))), Vector((sg * 42 * S, -6 * S, Z(532))), Vector((sg * 40 * S, -6 * S, Z(574))),
+                   Vector((sg * 10 * S, -16 * S, Z(558)))], [(0, 1, 2, 3) if sg > 0 else (3, 2, 1, 0)])
+    loop = [(sg * 2 * S, Z(550)), (sg * 34 * S, Z(534)), (sg * 34 * S, Z(568)), (sg * 2 * S, Z(560))]
+    tail = [(sg * 2 * S, Z(558)), (sg * 16 * S, Z(562)), (sg * 26 * S, Z(592)), (sg * 15 * S, Z(584)), (sg * 7 * S, Z(596))]
     for poly in (loop, tail):
         pts = poly if sg > 0 else poly[::-1]; n = len(pts)
         fr = [Vector((x, -22 * S, z)) for x, z in pts]; bk = [Vector((x, -14 * S, z)) for x, z in pts]
         m.add("Red", fr + bk, [tuple(range(n)), tuple(range(2 * n - 1, n - 1, -1))] + [(i, n + i, n + (i + 1) % n, (i + 1) % n) for i in range(n)])
-m.box("Red", -6 * S, 6 * S, -24 * S, -12 * S, Z(568), Z(557))
+m.box("Red", -6 * S, 6 * S, -24 * S, -12 * S, Z(560), Z(549))
 export(m, "Lamp", {"front": (S, CX, GY, False), "side": (S, 780, GY, True)})
 
 # ---------- LIGHT STRING (wire 234-641 sagging y 869 -> ~899; 7 bulbs at x 257..616) ----------
 S = 1 / 407; m = M(); CX, ZY = 437.5, 869
 X = lambda x: (x - CX) * S; Z = lambda y: (ZY - y) * S
 wy = lambda x: 869 + 36 * (1 - ((x - CX) / 203.5) ** 2)
-wire(m, [(X(x), Z(wy(x))) for x in range(234, 646, 14)], 3 * S)
+wire(m, [(X(x), Z(wy(x))) for x in range(234, 646, 14)], 4 * S)
 for x, c in zip((257, 315, 375, 436, 496, 556, 616), ("Red", "Yellow", "Green", "Blue", "Red", "Yellow", "Green")):
     slope = 72 * (x - CX) / 203.5 ** 2          # d(wy)/dx in px
     bulb(m, c, X(x), Z(wy(x) + 2), S, 17, 48, ang=-0.35 * math.atan(slope))

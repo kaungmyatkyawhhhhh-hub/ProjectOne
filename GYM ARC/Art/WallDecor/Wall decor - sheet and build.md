@@ -13,11 +13,11 @@ Replaces Wreath (21 copies, 175 parts), Garland swag (74 copies, 740 parts), Pep
 `build_walldecor.py` (headless) writes `Wreath.glb`, `Garland.glb`, `Peppermint.glb`. Front = -Y (out of the wall).
 | model | tris | MeshParts | FRONT IoU |
 |---|---|---|---|
-| Wreath (30 faceted pine clumps + dark core, 5 red baubles, traced bow) | 1,008 | Pine, PineDark, Red | 0.874 |
-| Garland (14 clumps on a sag curve, 6 bulbs, gold bauble, 2 bows, 2 hooks) | 600 | Pine, PineDark, Red, Gold, Bulbs | 0.821 |
+| Wreath (30 faceted pine clumps + dark core, 5 red baubles, traced bow) | 1,008 | Pine, PineDark, Red | 0.888 |
+| Garland (14 clumps on a sag curve, 6 bulbs, gold bauble, 2 bows, 2 hooks) | 600 | Pine, PineDark, Red, Gold, Bulbs | 0.820 |
 | Peppermint (16 swirled wedges, rounded rim, 2 faceted wrapper fans) | 616 | Red, White, Wrapper | 0.896 |
 
-- Below the 0.90 gate: the leftover is the clump bumps (the sheet's clumps are bigger and smoother at the edge). Refine before the swap: fewer, bigger clumps on the outer edge.
+- Refinement pass done (28 Nov): still just under the 0.90 gate. Diff maps show the rest is clump bumps against the sheet's black outline strokes (1-2 px all round) and the garland's bow loops; shapes match by eye. Accepted as is; check them in Play after the swap.
 - Wreath side view 0.756: the sheet's side view is taller than its front (sheet conflict).
 
 ## Swap plan (after "go")

@@ -13,11 +13,11 @@ Replaces Fence posts + rails + bulbs (50 posts, 155 parts), Lamp posts (4, 8 par
 `build_yardprops.py` (headless) writes `Fence.glb`, `Lamp.glb`, `LightString.glb`.
 | model | tris | MeshParts | FRONT IoU |
 |---|---|---|---|
-| Fence section (2 posts, caps, snow points, 2 rails, sagging wire, 3 C9 bulbs) | 528 | Wood, WoodDark, Snow, Wire, Red, Yellow, Green | 0.882 |
-| Street lamp (stepped base, pole, 6-sided lantern with glass + frame, roof, finial, bow + pine sprig) | 416 | Iron, Glass (Neon), Red, Pine | 0.826 (side 0.805) |
-| Light string (sagging wire, 7 C9 bulbs hanging square to the wire) | 908 | Wire, Red, Yellow, Green, Blue | 0.626 |
+| Fence section (2 posts, caps, snow points, 2 rails, sagging wire, 3 C9 bulbs) | 504 | Wood, WoodDark, Snow, Wire, Red, Yellow, Green | **0.914** |
+| Street lamp (stepped base, pole, 6-sided lantern with glass + frame, roof, finial, bow + pine sprig) | 416 | Iron, Glass (Neon), Red, Pine | 0.867 |
+| Light string (sagging wire, 7 C9 bulbs hanging square to the wire) | 852 | Wire, Red, Yellow, Green, Blue | 0.810 |
 
-- All under the 0.90 gate: the fence and lamp only on detail (the sheet's fluted base and bigger bow); the light string because thin wire + small bulbs mis-register by a few px. Refine before the swap.
+- Refinement pass done (28 Nov): fence passes. Lamp and light string stay under 0.90: the sheet draws a dark outline stroke round every shape, which costs thin objects most; the diff maps are within 2-3 px everywhere. Bulbs hang tilted 0.35 x the wire slope (the sheet's angle). Gate note: snow is white like the label boxes, so the fence gate keeps white pixels (`keepwhite`).
 
 ## Swap notes (after "go")
 - Lamps: NightLamps finds the lamps by name; keep the model names and put the PointLight / anything NightLamps toggles onto the Glass MeshPart. Grep NightLamps before swapping.

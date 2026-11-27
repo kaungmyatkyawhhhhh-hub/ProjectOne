@@ -70,7 +70,7 @@ def export(m, name, gate_views):
 S = 1 / 290; m = M()
 RM, TUBE = 106 * S, 39 * S
 for i in range(30):                                     # pine clumps round the ring, two staggered rows
-    a = 2 * math.pi * i / 30; rr = RM + (0.3 if i % 2 else -0.25) * TUBE
+    a = 2 * math.pi * i / 30; rr = RM + (0.25 if i % 2 else -0.45) * TUBE
     rot = Matrix.Rotation(random.uniform(0, 6.28), 3, "Y") @ Matrix.Rotation(random.uniform(0, 6.28), 3, "X")
     m.ico("Pine" if i % 3 else "PineDark", (rr * math.cos(a), 0, rr * math.sin(a)), 36 * S, 1, (1, 1.15, 1), rot)
 for i in range(12):                                     # darker core ring behind, fills the gaps
@@ -79,7 +79,7 @@ for i in range(12):                                     # darker core ring behin
 for bx, bz in ((255, 92), (158, 142), (342, 151), (144, 230), (343, 237)):
     m.ico("Red", ((bx - 245) * S, -30 * S, (190 - bz) * S), 17 * S, 1)
 bow(m, 0, (190 - 268) * S, S, -46 * S, -28 * S)
-export(m, "Wreath", {"front": (S, 245, 200, False), "side": (S, 623, 200, True)})
+export(m, "Wreath", {"front": (S, 247, 200, False), "side": (S, 623, 200, True)})
 
 # ---------- GARLAND SWAG (front: hooks ~ (55,470) and (405,470), dips to y 565 at x 230; bauble (245,600) r 22) ----------
 S = 1 / 350; m = M()
