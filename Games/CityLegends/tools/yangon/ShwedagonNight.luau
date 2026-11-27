@@ -38,9 +38,10 @@ local ROUGH_016 = "rbxassetid://100767250547240"
 -- photo-measured (blueprint section 4): floodlit gold median (150,110,6)-(205,137,52), highlights to (255,234,89)
 M.LOOK = {
 	-- glow = emissive near the camera (the floods do the rest), far = at 3000+ studs (WorldFx ramps it: the haze eats it);
-	-- tuned in Play 27 Nov (0.55 read as a flat orange blob up close; 3 from Kandawgyi reads as the ref's glowing cone)
-	Stupa = { color = rgb(255, 208, 112), tint = rgb(255, 196, 96), glow = 0.3, far = 3 },
-	Shrine = { color = rgb(255, 208, 112), tint = rgb(255, 186, 84), glow = 0.2, far = 1 },
+	-- tuned in Play 27-28 Nov: 0.55 near read as a flat orange blob, 0.3 still flattened the tiers (coordinator 28 Nov:
+	-- "one flat blown-out yellow blob"); 0.16 keeps the tier banding. Far 3 was a faint orange cone from Kandawgyi: 12 + a paler tint reads as the brightest thing there
+	Stupa = { color = rgb(255, 208, 112), tint = rgb(255, 226, 150), glow = 0.16, far = 12 },
+	Shrine = { color = rgb(255, 208, 112), tint = rgb(255, 204, 116), glow = 0.08, far = 4 },
 }
 M.FLOOD = rgb(255, 196, 120) -- warm gold-white (blueprint: about 255,190,110)
 
@@ -129,7 +130,7 @@ end
 -- rings of floodlights: { count, radius, height over the platform, aim radius, aim height, angle, brightness, offset deg }
 M.RINGS = {
 	-- (wide and soft: 60-70 deg at brightness 6-7 put round hot spots on the gold, 120 deg at 1.4 reads as a wash + glints)
-	{ n = 4, r = 128, y = 19.6, ar = 99, ay = 50, angle = 120, b = 1.4, off = 45, lamp = true }, -- plinth top corners -> terraces (r 128: inside the ring of plinth stupas, 9 studs clear of their boxes; 140 stood in one)
+	{ n = 4, r = 128, y = 19.6, ar = 99, ay = 50, angle = 120, b = 0.9, off = 45, lamp = true }, -- plinth top corners -> terraces (r 128: inside the ring of plinth stupas, 9 studs clear of their boxes; 140 stood in one)
 	{ n = 6, r = 88, y = 76, ar = 40, ay = 118, angle = 120, b = 1.4, off = 0 }, -- over the dais -> bell
 	{ n = 4, r = 50, y = 126, ar = 14, ay = 185, angle = 120, b = 1.4, off = 30 }, -- over the bell shoulder -> rings, lotus, bud
 }
@@ -199,6 +200,52 @@ function M.rig(): string
 	return string.format("rig: %d lights (%d with lamp boxes), hti sparkle", nLight, M.RINGS[1].n)
 end
 
+-- (28 Nov, coordinator: from Kandawgyi "the brightest thing in the view with a halo and the whole hill of smaller stupas
+-- glowing", "the golden reflection on Kandawgyi lake") a halo sprite behind the stupa in the Persistent FarVisible model
+-- (WorldFx fades it in with distance; its anchor's attribute Reflect lays the lake streak), and the gold small stupas moved
+-- into FarVisible so they are on every client from across the city (they were streamed out past ~4000 studs)
+M.HALO = { y = 140, size = Vector2.new(480, 620), farScale = 1.6, alpha = 0.9, brightness = 4, color = rgb(255, 190, 90) }
+M.FAR_GROUPS = { "PlinthStupa", "CardinalStupa", "PStupa", "Naungdawgyi" }
+function M.halo(): string
+	local far = landmark():FindFirstChild("FarVisible")
+	local old = far:FindFirstChild("HaloAnchor")
+	if old then
+		old:Destroy()
+	end
+	local a = anchor(far, "HaloAnchor", CFrame.new(M.AXIS + Vector3.new(0, M.HALO.y, 0)), Vector3.new(1, 1, 1), false)
+	a:SetAttribute("Reflect", true)
+	local g = Instance.new("BillboardGui")
+	g.Name = "NightHalo"
+	g.Size = UDim2.fromScale(M.HALO.size.X, M.HALO.size.Y)
+	g.LightInfluence = 0
+	g.Brightness = M.HALO.brightness
+	g.AlwaysOnTop = false -- (the stupa in front of the halo's plane hides its middle: the glow shows round the edge)
+	g.Enabled = false
+	g:SetAttribute("BaseSize", M.HALO.size)
+	g:SetAttribute("FarScale", M.HALO.farScale)
+	g:SetAttribute("HaloAlpha", M.HALO.alpha)
+	local img = Instance.new("ImageLabel")
+	img.Name = "Glow"
+	img.BackgroundTransparency = 1
+	img.Size = UDim2.fromScale(1, 1)
+	img.Image = "rbxassetid://83825952241880" -- the street lamps' soft glow sprite (city/lamp_glow.py)
+	img.ImageColor3 = M.HALO.color
+	img.ImageTransparency = 1
+	img.Parent = g
+	g:AddTag("NightGold")
+	g.Parent = a
+	local moved = 0
+	for _, name in M.FAR_GROUPS do
+		local m = landmark().Visual:FindFirstChild(name)
+		if m then
+			m:SetAttribute("MovedFrom", "Visual")
+			m.Parent = far
+			moved += 1
+		end
+	end
+	return string.format("halo + reflect anchor; %d gold stupa groups moved into FarVisible", moved)
+end
+
 -- the night state in Edit (in Play WorldFx does it by the tags)
 function M.preview(night: boolean): string
 	local lib = ReplicatedStorage:FindFirstChild("NightGold")
@@ -254,7 +301,7 @@ function M.check(): string
 end
 
 function M.build(): string
-	return table.concat({ M.templates(), M.tag(), M.rig(), M.check() }, "\n")
+	return table.concat({ M.templates(), M.tag(), M.rig(), M.halo(), M.check() }, "\n")
 end
 
 function M.undo()
@@ -265,6 +312,16 @@ function M.undo()
 	local rig = landmark():FindFirstChild("Night")
 	if rig then
 		rig:Destroy()
+	end
+	local far = landmark().FarVisible
+	if far:FindFirstChild("HaloAnchor") then
+		far.HaloAnchor:Destroy()
+	end
+	for _, m in far:GetChildren() do
+		if m:GetAttribute("MovedFrom") == "Visual" then
+			m:SetAttribute("MovedFrom", nil)
+			m.Parent = landmark().Visual
+		end
 	end
 	for _, d in landmark():GetDescendants() do
 		if d:HasTag("NightGold") then

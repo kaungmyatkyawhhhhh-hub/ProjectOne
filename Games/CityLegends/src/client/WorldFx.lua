@@ -70,9 +70,15 @@ end
 -- SurfaceAppearance ReplicatedStorage.NightGold[<attribute NightSA>] (glows from across the city with no real light),
 -- by day it is taken off (the part's own gold variant shows); tagged ParticleEmitters (the hti sparkle) run at night only
 local nightGold: { [SurfaceAppearance]: { part: BasePart, glow: number, far: number } } = {}
+local nightHalo: { [BillboardGui]: true } = {}
 function WorldFx.setNightGold(p: Instance)
 	if p:IsA("ParticleEmitter") then
 		p.Enabled = lampsLit
+		return
+	end
+	if p:IsA("BillboardGui") then -- the far halo: shown at night, faded in with distance by the loop below
+		p.Enabled = lampsLit
+		nightHalo[p] = if lampsLit then true else nil
 		return
 	end
 	if not p:IsA("BasePart") then
@@ -98,15 +104,111 @@ CollectionService:GetInstanceAddedSignal("NightGold"):Connect(function(p)
 end)
 -- far away the haze swallows the glow: the emissive grows from its near value (within NEAR) to the template's FarGlow
 -- (at FAR), checked twice a second (a few hundred SurfaceAppearances at most)
+-- (28 Nov, coordinator: "the brightest thing in the view with a halo", "the golden reflection on Kandawgyi lake")
+-- a halo BillboardGui (tag NightGold, attributes HaloAlpha / FarScale; its ImageLabel "Glow") fades in from NEAR to FAR and
+-- grows FarScale x; when its anchor part has attribute Reflect, a local gold streak lies on the water between the camera
+-- and the anchor while the camera is at a shore (a run of terrain Water starting within 220 studs along the line of sight)
+-- the streak: 6 flat pieces from the shore under the camera out over the lake, each wider than the last (the mirror image
+-- of the stupa keeps about the same width on screen, so it narrows toward the viewer); each wears the soft round lamp-glow
+-- sprite (soft sides and ends) and overlaps its neighbours by a quarter so they blend into one tapering streak; each piece
+-- sits 0.1 higher than the one before (overlapping coplanar pictures would flicker). Tested 28 Nov: one 1,200-stud piece
+-- read as a round blob at the far shore, 3 hard-edged bands read as a road arrow.
+local streak: Folder? = nil
+local STREAK_SPLIT = { 0, 0.06, 0.14, 0.26, 0.42, 0.65, 1 }
+local STREAK_W = 260 -- the reflection's width = this x (distance along the streak / distance to the stupa)
+local STREAK_IMAGE = "rbxassetid://83825952241880" -- the street lamps' soft glow sprite (tools/yangon/city/lamp_glow.py)
+local function hideStreak()
+	if streak then
+		streak.Parent = nil
+	end
+end
+local waterRay = RaycastParams.new()
+waterRay.FilterType = Enum.RaycastFilterType.Include
+waterRay.IgnoreWater = false
+local function placeStreak(src: Vector3, cam: Vector3, color: Color3)
+	local flat = Vector3.new(src.X - cam.X, 0, src.Z - cam.Z)
+	local dist = flat.Magnitude
+	if dist < 400 or dist > 7000 then
+		return hideStreak()
+	end
+	local d = flat.Unit
+	waterRay.FilterDescendantsInstances = { workspace.Terrain }
+	local s0, s1, wy = nil, nil, 0
+	for s = 8, math.min(dist - 300, 1600), 24 do
+		local p = cam + d * s
+		local hit = workspace:Raycast(Vector3.new(p.X, cam.Y + 300, p.Z), Vector3.new(0, -900, 0), waterRay)
+		local wet = hit ~= nil and hit.Material == Enum.Material.Water
+		if wet and not s0 then
+			if s > 220 then
+				break
+			end
+			s0, wy = s, hit.Position.Y
+		elseif wet then
+			s1 = s
+		elseif s0 then
+			break
+		end
+	end
+	if not (s0 and s1 and s1 - s0 > 40 and cam.Y - wy < 160) then
+		return hideStreak()
+	end
+	if not streak then
+		local f = Instance.new("Folder")
+		f.Name = "NightReflection"
+		for k = 1, #STREAK_SPLIT - 1 do
+			local p = Instance.new("Part")
+			p.Name = "Piece" .. k
+			p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch, p.CastShadow = true, false, false, false, false
+			p.Transparency = 1
+			local gui = Instance.new("SurfaceGui")
+			gui.Face = Enum.NormalId.Top
+			gui.LightInfluence = 0
+			gui.Brightness = 1.6
+			gui.CanvasSize = Vector2.new(256, 64)
+			gui.Parent = p
+			local img = Instance.new("ImageLabel")
+			img.Name = "Glow"
+			img.BackgroundTransparency = 1
+			img.Size = UDim2.fromScale(1, 1)
+			img.Image = STREAK_IMAGE
+			img.ImageTransparency = 0.2
+			img.Parent = gui
+			p.Parent = f
+		end
+		streak = f
+	end
+	local f = streak :: Folder
+	local len = s1 - s0 + 24
+	for k = 1, #STREAK_SPLIT - 1 do
+		local p = f:FindFirstChild("Piece" .. k) :: Part
+		local a, b = s0 + len * STREAK_SPLIT[k], s0 + len * STREAK_SPLIT[k + 1]
+		local grow = (b - a) * 0.25
+		a, b = a - grow, b + grow
+		local mid = (a + b) / 2
+		local c = cam + d * mid
+		local y = wy + 0.6 + 0.1 * k
+		p.Size = Vector3.new(math.max(2, STREAK_W * mid / dist), 0.2, b - a)
+		p.CFrame = CFrame.lookAt(Vector3.new(c.X, y, c.Z), Vector3.new(c.X + d.X, y, c.Z + d.Z))
+		local glow = (p:FindFirstChildOfClass("SurfaceGui") :: SurfaceGui):FindFirstChild("Glow") :: ImageLabel
+		glow.ImageColor3 = color
+	end
+	f.Parent = workspace.CurrentCamera
+end
 do
-	local NEAR, FAR = 500, 3000
+	local NEAR, FAR = 900, 3500 -- (28 Nov: 500 let the glow wash out the tiers from the platform edge)
 	local acc = 0
 	RunService.Heartbeat:Connect(function(dt)
 		acc += dt
-		if acc < 0.5 or next(nightGold) == nil then
+		if acc < 0.5 then
 			return
 		end
 		acc = 0
+		if next(nightHalo) == nil then
+			hideStreak()
+			if next(nightGold) == nil then
+				return
+			end
+		end
 		local cam = workspace.CurrentCamera.CFrame.Position
 		for sa, g in nightGold do
 			if sa.Parent ~= g.part or not g.part:IsDescendantOf(workspace) then -- (taken off, or streamed out)
@@ -115,6 +217,29 @@ do
 			end
 			local k = math.clamp(((g.part.Position - cam).Magnitude - NEAR) / (FAR - NEAR), 0, 1)
 			sa.EmissiveStrength = g.glow + (g.far - g.glow) * k
+		end
+		local reflected = false
+		for gui in nightHalo do
+			local at = gui.Parent
+			if not (at and at:IsA("BasePart") and at:IsDescendantOf(workspace)) then
+				nightHalo[gui] = nil
+				continue
+			end
+			local k = math.clamp(((at.Position - cam).Magnitude - NEAR) / (FAR - NEAR), 0, 1)
+			local base = gui:GetAttribute("BaseSize") or Vector2.new(400, 600)
+			local s = 1 + ((gui:GetAttribute("FarScale") or 1) - 1) * k
+			gui.Size = UDim2.fromScale(base.X * s, base.Y * s)
+			local glow = gui:FindFirstChild("Glow")
+			if glow and glow:IsA("ImageLabel") then
+				glow.ImageTransparency = 1 - (gui:GetAttribute("HaloAlpha") or 0.6) * k
+			end
+			if at:GetAttribute("Reflect") and not reflected then
+				reflected = true
+				placeStreak(at.Position, cam, (glow and glow:IsA("ImageLabel")) and glow.ImageColor3 or Color3.fromRGB(255, 200, 100))
+			end
+		end
+		if not reflected then
+			hideStreak()
 		end
 	end)
 end
