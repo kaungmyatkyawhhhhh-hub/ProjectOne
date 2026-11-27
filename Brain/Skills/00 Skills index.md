@@ -33,6 +33,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/robux-revenue-sim/SKILL\|robux-revenue-sim]] | Forecast or improve a Roblox game's Robux revenue: Monte Carlo sim of players, retention, would-be payers and each offer, calibrated to the Creator Dashboard; Robux + DevEx USD ranges, per-offer split, price sweep. (Local skill in `~/.claude/skills`.) |
 
 ## Log
+- 2026-11-27 roblox-icon-thumbnail: second correction (owner: "for roblox, the build should look robust"): sturdy chunky frame to match the blocky head, keep V + natural waist. Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: correction to 'Aesthetic build' (owner: waist and arms too small, obliques; Power Lifters + David Laid at 16 are his aesthetic): natural waist about 2/3 shoulders, big arms. Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: 'Aesthetic build' lesson (owner: v4 build 'ugly, not aesthetic'): classic proportions from a bodybuilding study, proportion-guide reference, measure the V-taper. Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: 'Fill the frame' lesson (owner: v3 'way better but other game icons still look better'): head ~35% of width, saturated background, one hook prop, critique vs top-5 sheet before showing. Plugin skill: re-upload needed.
