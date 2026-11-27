@@ -44,3 +44,9 @@ Study: [[2026-11-27 GYM ARC - Icon study (gym icons + top CTR)]]. Files in `Asse
 - Finals: `gymarc_v3_normal_logo(_512).png`, `gymarc_v3_xmas_logo(_512).png`. Size test: `icon_size_test_v3.png`.
 - 64 px: normal lum 0.52 / 4% dark, Christmas 0.53 / 4% dark (gym median 0.51 / 11%). v2 was 0.34 / 33%.
 - Known weak spot: at 60 px the Christmas cue (tree, presents) is small; the two icons look alike at a glance.
+
+## v4 (owner on v3: "way better but other game icons still look better")
+- Gap, measured against the top 5 gym icons (`v3/compare_v3_vs_top.png`): head 18% of the width vs 34-37%, character saturation half theirs, flat light, three things to read (giant, tiny kid, logo).
+- Fix (same ChatGPT chat, comparison sheet attached): waist-up, head ~35%, double-biceps flex filling both edges, eyes to camera, hard warm key + cyan rim, royal-blue radial background, height ruler on the right edge, no small kid. Christmas: festive red, snow, string lights, candy-cane ruler.
+- Gemini pass on the normal one only (Gemini's image limit was hit until 1:28 PM; ChatGPT's Christmas one was already clean).
+- Logo top-left at 40% width. Files: `Assets/icon_2026-11-27/v4/gymarc_v4_*_logo(_512).png`, size test `icon_size_test_v4.png`. 64 px: normal lum 0.49 / 9% dark, Christmas 0.50 / 16% dark (gym median 0.51 / 11%).
