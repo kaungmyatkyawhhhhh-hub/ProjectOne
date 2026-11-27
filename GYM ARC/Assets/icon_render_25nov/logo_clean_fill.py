@@ -26,11 +26,20 @@ def fade(mask, top, bot):
     return top*(1-t) + bot*t
 out = np.zeros_like(rgb); out[al > 0.02] = hx('0a0a12')  # black plate + outline
 out = np.where(gym[..., None], fade(gym, hx('ffffff'), hx('d9dce6')), out)
-# Power Lifters 400 KG plate look: dark saturated core, neon colour toward the letter edges, pale highlight on the edge
+# Power Lifters 400 KG plate look (owner's pick): vivid glossy colour, soft bright sheen streak across the upper part,
+# deep shade at the bottom, neon edge glow and a pale edge line.
+ys, xs = np.nonzero(arc); yy, xx = np.mgrid[:a.shape[0], :a.shape[1]]
+ty = np.clip((yy - ys.min())/(ys.max() - ys.min() + 1e-6), 0, 1)[..., None]
+tx = np.clip((xx - xs.min())/(xs.max() - xs.min() + 1e-6), 0, 1)[..., None]
+light, mid, deep = np.clip(c_top*0.55 + 0.45, 0, 1), c_top, c_bot*0.55
+ss = lambda e0, e1, x: np.clip((x - e0)/(e1 - e0), 0, 1)**2*(3 - 2*np.clip((x - e0)/(e1 - e0), 0, 1))
+plate = light + (mid - light)*ss(0.0, 0.42, ty)
+plate = plate + (deep - plate)*ss(0.5, 1.0, ty)
+u = ty*0.85 - tx*0.15  # slightly diagonal sheen, like light hitting a curved plate from the top-left
+plate = plate + (np.clip(c_top*0.25 + 0.75, 0, 1) - plate)*0.6*np.exp(-((u - 0.22)/0.06)**2)
 de = ndimage.distance_transform_edt(arc)[..., None]
-core, rim, hi = c_bot*0.78, c_top, np.clip(c_top*0.35 + 0.65, 0, 1)
-plate = core + (rim - core)*np.exp(-de/24.0)
-plate = np.where(de < 2.2, hi, plate)
+plate = plate + (np.clip(c_top*1.15, 0, 1) - plate)*0.45*np.exp(-de/6.0)
+plate = np.where(de < 2.2, np.clip(c_top*0.35 + 0.65, 0, 1), plate)
 out = np.where(arc[..., None], plate, out)
 logo = Image.fromarray((np.dstack([out, al])*255).astype('uint8'))
 pad = 40; W, Hh = logo.size; canvas = Image.new('RGBA', (W+2*pad, Hh+2*pad), (0, 0, 0, 0))
