@@ -2,7 +2,7 @@
 the big roads & overhead roads are always asphalt"; vault `City Legends/2026-11-27 Roads - realistic surfaces by road type.md`).
 
 Tileable 1024 px maps, all procedural (numpy + PIL), seeded = rebuildable:
-  asphalt_*   big roads + flyover decks (MaterialVariant YgnRoadAsphalt, base Asphalt, StudsPerTile 24 = about 7.5 m):
+  asphalt_*   big roads + flyover decks (MaterialVariant YgnRoadAsphalt, base Asphalt, StudsPerTile 40 (v3, owner 27 Nov: the grain must show at driving distance; finer tiles fade to plain grey)):
               aggregate stones in dark binder (some pale quartz chips), tone blotches at two sizes (about 8 and 2 studs)
               so the 24-stud repeat doesn't read, no cracks (cracks / patches / tar seams are mesh regions, sparse);
               normal = stones raised; roughness = binder 0.9, stone tops 0.45-0.65 (sun sparkle).
@@ -86,14 +86,14 @@ def asphalt():
     chips = np.clip(blur((rng.random((N, N)) > 0.9965).astype(float), 0.6) * 9, 0, 1)   # pale quartz chips
     tone_l = fbm(rng, ((4, 0.6), (8, 0.4)))     # about 6-8 stud blotches (stops the 24-stud tile reading)
     tone_s = fbm(rng, ((16, 0.5), (32, 0.5)))   # about 1-2 stud blotches
-    v = 0.55 + 0.068 * np.clip(g, -2.5, 2.5) + 0.07 * (tone_l - 0.5) + 0.035 * (tone_s - 0.5)
+    v = 0.55 + 0.11 * np.clip(g, -2.5, 2.5) + 0.022 * (tone_l - 0.5) + 0.012 * (tone_s - 0.5)   # owner 27 Nov: fine even speckle, no blotches
     v = v * (1 - chips) + 0.80 * chips
     v = v / v.mean() * 0.59                                # mean about 150
     rgb = np.dstack([v * 0.99, v * 1.0, v * 1.015])        # very slightly cool, as dry tarmac
     peak = np.clip((g - 1.0) / 1.2, 0, 1)                  # stone tops: smoother, catch the sun
     rough = 0.93 - 0.40 * peak - 0.25 * chips - 0.03 * (tone_l - 0.5)
     save('asphalt_color.png', rgb, 'RGB')
-    save('asphalt_normal.png', normal_map(0.12 * g + 0.25 * chips, 9.0), 'RGB')
+    save("asphalt_normal.png", normal_map(0.12 * g + 0.25 * chips, 15.0), "RGB")
     save('asphalt_roughness.png', rough, 'L')
     return v
 
@@ -132,9 +132,88 @@ def concrete():
     return v
 
 
+# street-aligned concrete (owner 27 Nov: "i dont see concrete roads with details & texture"): the small streets' RC
+# meshes carry road-local UVs (road_surface_split.street_uv): U = along / 2 (one tile = 64 studs = 4 slabs of 16), V = across
+# (one tile = 32 studs, the centre line at V = 0). Image columns = along (16 px a stud), rows = across (32 px a stud).
+SPAN_U, SPAN_V = 64.0, 32.0
+PXU, PXV = N / SPAN_U, N / SPAN_V
+
+
+def ablur(a, su, sv):
+    """wrap-around gaussian blur with sigmas in studs along / across"""
+    ku = np.fft.fftfreq(N)[None, :]
+    kv = np.fft.fftfreq(N)[:, None]
+    g = np.exp(-2 * np.pi ** 2 * ((su * PXU) ** 2 * ku ** 2 + (sv * PXV) ** 2 * kv ** 2))
+    return np.real(np.fft.ifft2(np.fft.fft2(a) * g))
+
+
+def agrain(rng, sigma):
+    g = ablur(rng.standard_normal((N, N)), sigma, sigma)
+    return (g - g.mean()) / g.std()
+
+
+def concrete_street():
+    rng = np.random.default_rng(1711)
+    U = (np.arange(N) + 0.5) / PXU                   # studs along, per column
+    V = (np.arange(N) + 0.5) / PXV                   # studs across, per row (0 = centre line)
+    Vs = np.where(V > SPAN_V / 2, V - SPAN_V, V)     # signed: -16 .. 16
+    uu, vv = np.meshgrid(U, Vs)
+    slab = (uu // 16).astype(int)                    # 4 slabs along
+    side = (vv > 0).astype(int)
+    tones = 1 + rng.uniform(-0.07, 0.07, (4, 2))
+    v = tones[slab, side] * (0.70 + 0.035 * agrain(rng, 0.03) + 0.02 * agrain(rng, 0.12))
+    # broad stains (tile-sized, soft) and worn spots
+    stain = np.clip((ablur(rng.random((N, N)), 2.0, 2.0) - 0.5) * 40 + 0.0, 0, 1)
+    v *= 1 - 0.10 * np.clip(ablur(rng.standard_normal((N, N)), 2.5, 1.2) * 6, 0, 1)
+    # tyre paths: one lane each way, wheels at about 4.5 and 8.5 studs from the centre, worn darker + smoother
+    track = sum(np.exp(-((np.abs(vv) - c) / 0.9) ** 2) for c in (4.3, 8.7))
+    track = track * (0.85 + 0.3 * ablur(rng.random((N, N)), 3.0, 0.4))
+    v *= 1 - 0.14 * np.clip(track, 0, 1.2)
+    # dust and grime toward the edges (most lanes are about 20 studs wide: edges at 9-11 from the centre)
+    edge = np.clip((np.abs(vv) - 8.5) / 2.5, 0, 1) * (0.8 + 0.4 * ablur(rng.random((N, N)), 1.5, 0.6))
+    # repaired slab: slab 2, side 0 darker and greyer, sharp edge
+    rep = (slab == 2) & (side == 0) & (np.abs(vv) > 0.3)
+    v = np.where(rep, v * 0.74, v)
+    # spalled corner: slab 1, side 1, at the joint near the centre
+    cu, cv = 16.0, 0.0
+    du, dv = uu - cu, vv - cv
+    spall = (du > 0) & (dv > 0) & (du / 3.2 + dv / 2.2 + 0.25 * np.sin(du * 3) < 1)
+    rim = (du > 0) & (dv > 0) & ~spall & (du / 3.7 + dv / 2.6 + 0.25 * np.sin(du * 3) < 1)
+    v = np.where(spall, v * 0.62, np.where(rim, v * 0.8, v))
+    # hairline cracks: across slab 0 side 0 and slab 3 side 1, along slab 1 side 0
+    crack = np.zeros((N, N))
+    def walk(u0, v0, ang, length):
+        u, w, a = u0, v0, ang
+        for _ in range(int(length / 0.08)):
+            a += rng.normal(0, 0.06)
+            u, w = u + np.cos(a) * 0.08, w + np.sin(a) * 0.08
+            c, r = int((u % SPAN_U) * PXU), int((w % SPAN_V) * PXV)
+            crack[r, c] = 1
+    walk(9.0, 0.5, np.pi / 2 + 0.2, 13)       # across a whole half, slab 0
+    walk(57.0, -0.5, -np.pi / 2 - 0.1, 9)     # across, slab 3, other side
+    walk(18.0, 5.5, 0.05, 10)                 # along, slab 1
+    walk(40.0, -11.0, 0.3, 4)                 # short one near an edge
+    crack = np.clip(ablur(crack, 0.03, 0.03) * 8, 0, 1)
+    v *= 1 - 0.35 * crack
+    # sawn joints: across at 0 / 16 / 32 / 48 studs, along the centre (V = 0, wraps): dark, slightly worn wide
+    ju = np.minimum(uu % 16, 16 - uu % 16)
+    jv = np.abs(vv)
+    joint = np.clip(1 - (np.minimum(ju, jv) - 0.12) / 0.12, 0, 1)
+    v *= 1 - 0.45 * joint
+    v = v / v.mean() * 0.62
+    rgb = np.dstack([v * 1.0, v * 0.995, v * 0.965])
+    rgb = rgb * (1 - edge[..., None] * np.array([0.05, 0.07, 0.12]))   # brown-grey dirt
+    h = 0.4 * agrain(rng, 0.03) * 0.15 - 1.5 * joint - 0.8 * crack - 0.6 * spall + 0.1 * rep
+    rough = np.clip(0.84 - 0.10 * np.clip(track, 0, 1) + 0.05 * spall, 0, 1)
+    save('concrete_color.png', rgb, 'RGB')
+    save('concrete_normal.png', normal_map(h, 3.0), 'RGB')
+    save('concrete_roughness.png', rough, 'L')
+    return v
+
+
 if __name__ == '__main__':
     a = asphalt()
-    c = concrete()
+    c = concrete_street()
     # self-check: tileable (edges meet) and sane means
     for nm in ('asphalt_color.png', 'concrete_color.png'):
         im = np.asarray(Image.open(os.path.join(out, nm)).convert('L'), float)

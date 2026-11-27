@@ -47,6 +47,7 @@ FILE_MESHES = 100
 WHITE = (255, 255, 255)
 # patches and tar seams ride in the R mesh as vertex colours (a .glb's vertex colour tints the MaterialVariant): no extra
 # meshes for them (each is a unique mesh asset to stream)
+ONLY = set(c for c in os.environ.get('RSURF_ONLY', '').split(',') if c)   # pilot: only these cells
 MERGE = {'RP': 'R', 'RT': 'R'}
 TINT = {'RP': (196, 196, 200), 'RT': (110, 110, 116)}
 rng = np.random.default_rng(1127)
@@ -106,6 +107,7 @@ class Classifier:
         self.B = np.array([s[1] for s in S], float)
         self.H = np.array([s[2] for s in S], float)
         self.C = [s[3] for s in S]
+        self.Rd = np.array([s[4] for s in S])
         self.tree = cKDTree(((self.A + self.B) / 2)[:, [0, 2]])
 
     def many(self, P, k=48):
@@ -128,9 +130,13 @@ class Classifier:
         score = np.where(ok, score, np.inf)
         j = np.argmin(score, axis=1)
         C = np.array(self.C, dtype=object)
-        out = C[I[np.arange(len(P)), j]]
-        out[~np.isfinite(score[np.arange(len(P)), j])] = 'R'
-        return out
+        seg = I[np.arange(len(P)), j]
+        out = C[seg]
+        bad = ~np.isfinite(score[np.arange(len(P)), j])
+        out[bad] = 'R'
+        road = self.Rd[seg]
+        road[bad] = -1
+        return out, road
 
 
 # ------------------------------------------------------------------------------------------------ patches, seams
@@ -186,6 +192,38 @@ def _wavy(cx, cz, dx, dz, l, w):
     return LineString(pts).buffer(w / 2, cap_style='flat', join_style='mitre', mitre_limit=2.0)
 
 
+def street_uv(T, rid, roads):
+    """small-street concrete: road-local UVs in texture tiles (U = along / 64, V = across / 32 from the centre line) so
+    the concrete map's slab joints, centre joint and tyre paths follow the street (road_textures.concrete_street).
+    Roblox projects a MaterialVariant in WORLD space on a MeshPart (tested 27 Nov: the joints ran at 45 degrees on a
+    diagonal street), so these meshes wear a SurfaceAppearance, which does use the mesh UVs (YangonRoadSurface).
+    Vertex colours don't show under a SurfaceAppearance: corners stay white."""
+    V = T.reshape(-1, 3)
+    R = np.repeat(rid, 3)
+    UV = np.zeros((len(V), 2))
+    C = np.full((len(V), 3), 255.0)
+    for r in np.unique(R):
+        m = R == r
+        if r < 0:
+            UV[m] = V[m][:, [0, 2]] / 32.0
+            continue
+        sm = roads[r]['s']
+        P = np.array([(q[0], q[2]) for q in sm], float)
+        line = LineString(P)
+        pts = shapely.points(V[m][:, 0], V[m][:, 2])
+        u = shapely.line_locate_point(line, pts)
+        a = shapely.get_coordinates(shapely.line_interpolate_point(line, u))
+        b = shapely.get_coordinates(shapely.line_interpolate_point(line, np.minimum(u + 0.5, line.length)))
+        b2 = shapely.get_coordinates(shapely.line_interpolate_point(line, np.maximum(u - 0.5, 0)))
+        d = b - b2
+        q = V[m][:, [0, 2]] - a
+        t = np.hypot(q[:, 0], q[:, 1]) * np.sign(d[:, 0] * q[:, 1] - d[:, 1] * q[:, 0] + 1e-12)
+        seed = np.random.default_rng(r)
+        UV[m, 0] = (u + seed.uniform(0, 64)) / 64.0
+        UV[m, 1] = t / 32.0
+    return UV.reshape(-1, 3, 2), np.clip(C, 0, 255).reshape(-1, 3, 3)
+
+
 def uv_of(p, n):
     """box projection, 1 UV = 1 stud (roads05_bake.uv_of)"""
     ax = int(np.argmax(np.abs(n)))
@@ -232,13 +270,14 @@ def main(work):
     classify = Classifier(S)
     ov = big_overlays(roads, decks)
     otree = shapely.STRtree([g for _, g, _ in ov])
+    coloured = collections.defaultdict(list)   # (kind, cell) -> [(triangles, per-corner colours, per-corner UVs)]
     print('network segments', len(S), 'overlays', collections.Counter(k for k, _, _ in ov))
     glbs = {}
     out = collections.defaultdict(list)   # (kind, cell) -> triangles
     swap = collections.defaultdict(list)  # cell -> old place rows
     stats = collections.Counter()
     for row, m in sorted(match.items(), key=lambda kv: str(kv[0])):
-        if m['kind'] != 'R':
+        if m['kind'] != 'R' or (ONLY and m['cell'] not in ONLY):
             continue
         if m['glb'] not in glbs:
             glbs[m['glb']] = read_glb(os.path.join(ROOT, m['glb']))
@@ -247,9 +286,14 @@ def main(work):
         stats['area_in'] += area(T)
         swap[m['cell']].append(row)
         mids = T.mean(1)
-        cls = classify.many(mids)
-        for k in ('RC', 'RA', 'RU'):
+        cls, rid = classify.many(mids)
+        for k in ('RA', 'RU'):
             out[(k, m['cell'])].extend(T[cls == k])
+        rc = cls == 'RC'
+        if rc.any():
+            ts = T[rc]
+            uv, cs = street_uv(ts, rid[rc], roads)
+            coloured[('RC', m['cell'])].append((ts, cs, uv))
         TB = T[cls == 'R']
         # overlays on this mesh's big triangles (same level only)
         if len(TB):
@@ -277,10 +321,18 @@ def main(work):
         stats['tris_' + kind] += len(ts)
         stats['area_out'] += area(ts)
         stats['area_' + kind] += area(ts)
-        merged[(MERGE.get(kind, kind), cell)].append((ts, TINT.get(kind, WHITE)))
+        tint = np.array(TINT.get(kind, WHITE), float)
+        merged[(MERGE.get(kind, kind), cell)].append((ts, np.broadcast_to(tint, (len(ts), 3, 3)), None))
+    for (kind, cell), parts in coloured.items():
+        for ts, cs, uv in parts:
+            stats['tris_' + kind] += len(ts)
+            stats['area_out'] += area(ts)
+            stats['area_' + kind] += area(ts)
+            merged[(kind, cell)].append((ts, cs, uv))
     for (kind, cell), parts in sorted(merged.items()):
-        ts = np.concatenate([t for t, _ in parts])
-        cs = [c for t, c in parts for _ in range(len(t))]
+        ts = np.concatenate([t for t, _, _ in parts])
+        cs = np.concatenate([np.asarray(c, float).reshape(-1, 3, 3) for t, c, _ in parts])
+        uvs = np.concatenate([u if u is not None else np.full((len(t), 3, 2), np.nan) for t, _, u in parts])
         for s0 in range(0, len(ts), MAX_TRIS):
             chunk = ts[s0:s0 + MAX_TRIS]
             P = chunk.reshape(-1, 3)
@@ -288,12 +340,15 @@ def main(work):
             centre, size = (lo + hi) / 2, np.maximum(hi - lo, 0.05)
             assert size.max() <= 2048, (kind, cell, size)
             mesh = Mesh()
-            for t, rgb in zip(chunk, cs[s0:s0 + MAX_TRIS]):
+            for t, rgb, tuv in zip(chunk, cs[s0:s0 + MAX_TRIS], uvs[s0:s0 + MAX_TRIS]):
                 n = np.cross(t[1] - t[0], t[2] - t[0])
                 if np.linalg.norm(n) < 1e-9:
                     continue
-                uv = [uv_of(q, n) for q in t]
-                mesh.tri(tuple(t[0]), tuple(t[1]), tuple(t[2]), uv[0], uv[1], uv[2], rgb)
+                uv = [uv_of(q, n) for q in t] if np.isnan(tuv[0, 0]) else [tuple(q) for q in tuv]
+                k0 = len(mesh.C)
+                mesh.tri(tuple(t[0]), tuple(t[1]), tuple(t[2]), uv[0], uv[1], uv[2], (255, 255, 255))
+                if len(mesh.C) > k0:   # per-corner colours (slab tones, tyre paths, edge dirt)
+                    mesh.C[k0:] = [tuple(int(max(0, min(255, round(v)))) for v in q) for q in rgb]
             named.append((code(kind, '%ss%d' % (cell, s0 // MAX_TRIS), tuple(centre), tuple(size)), mesh, len(chunk)))
     files, cur, ct = [], [], 0
     for item in named:

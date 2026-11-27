@@ -1,6 +1,28 @@
 {
- "_note": "Open Cloud images (group 33151111) of road_textures.py's maps, 27 Nov 2026. Decal ids in _decals.",
- "YgnRoadAsphalt": {"color": 106420386734912, "normal": 118937246156752, "roughness": 119840276812247},
- "YgnRoadConcrete": {"color": 91186461247844, "normal": 111294739232406, "roughness": 74085596867182},
- "_decals": {"asphalt": [109971747197940, 115083857834757, 70878417325737], "concrete": [94322817947362, 79729490584637, 112170415182930]}
+ "_note": "Open Cloud images (group 33151111) of road_textures.py's maps, 27 Nov 2026. v2: asphalt colour without blotches, street-aligned concrete (concrete_street).",
+ "YgnRoadAsphalt": {
+  "color": 77760241649520,
+  "normal": 106226455470004,
+  "roughness": 119840276812247,
+  "StudsPerTile": 40,
+  "_v": "v3: grain 0.11, normal x15; StudsPerTile 40 (12 / 24 faded to plain grey at driving distance, tested in Play 27 Nov)"
+ },
+ "YgnRoadConcrete": {
+  "color": 130716823674053,
+  "normal": 135714052142659,
+  "roughness": 98118529041453,
+  "_as": "SurfaceAppearance YgnRoadConcreteSA (street UVs)"
+ },
+ "_decals": {
+  "asphalt": [
+   109971747197940,
+   115083857834757,
+   70878417325737
+  ],
+  "concrete": [
+   94322817947362,
+   79729490584637,
+   112170415182930
+  ]
+ }
 }

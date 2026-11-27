@@ -22,17 +22,17 @@ local SS = game:GetService("ServerStorage")
 local S = {}
 
 S.IDS = {
-	YgnRoadAsphalt = { color = 106420386734912, normal = 118937246156752, roughness = 119840276812247, base = Enum.Material.Asphalt, spt = 24 },
-	YgnRoadConcrete = { color = 91186461247844, normal = 111294739232406, roughness = 74085596867182, base = Enum.Material.Concrete, spt = 32 },
+	YgnRoadAsphalt = { color = 77760241649520, normal = 106226455470004, roughness = 119840276812247, base = Enum.Material.Asphalt, spt = 40 }, -- v3; 40 studs a tile so the grain still reads at driving distance (12 and 24 faded to plain grey)
+	YgnRoadConcrete = { color = 130716823674053, normal = 135714052142659, roughness = 98118529041453, base = Enum.Material.Concrete, spt = 32 },
 }
 
 -- kind -> { base material, variant, colour } (the maps are neutral grey: the colour sets the shade)
 S.LOOK = {
-	R = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(150, 150, 152) },
+	R = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(78, 78, 80) }, -- owner 27 Nov: dark charcoal (swatch 25,25,25), a bit lighter than the old near-black
 	RP = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(112, 112, 116) },
 	RT = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(62, 62, 66) },
-	RA = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(170, 168, 164) },
-	RC = { Enum.Material.Concrete, "YgnRoadConcrete", Color3.fromRGB(205, 203, 196) },
+	RA = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(104, 103, 100) }, -- lane asphalt: a little lighter
+	RC = { Enum.Material.Concrete, "YgnRoadConcrete", Color3.fromRGB(228, 224, 214) }, -- SurfaceAppearance tint (pale, as the lane clips)
 	RU = { Enum.Material.Pebble, "YgnGravel", Color3.fromRGB(176, 160, 136) },
 }
 
@@ -54,11 +54,37 @@ local function root()
 	return workspace.Yangon1to1.Roads.Meshes
 end
 
+-- small-street concrete wears a SurfaceAppearance: a MaterialVariant is projected in world space on a MeshPart, so the
+-- street-aligned joints / tyre paths (mesh UVs from road_surface_split.street_uv) need one (tested 27 Nov)
+local function concreteSA()
+	local t = SS:FindFirstChild("YgnRoadConcreteSA")
+	if not t then
+		local d = S.IDS.YgnRoadConcrete
+		t = Instance.new("SurfaceAppearance")
+		t.Name = "YgnRoadConcreteSA"
+		t.ColorMap = "rbxassetid://" .. d.color
+		t.NormalMap = "rbxassetid://" .. d.normal
+		t.RoughnessMap = "rbxassetid://" .. d.roughness
+		t.Parent = SS
+	end
+	return t
+end
+
 local function style(p: BasePart, kind: string)
 	local L = S.LOOK[kind]
 	p.Material = L[1]
-	p.MaterialVariant = L[2]
 	p.Color = L[3]
+	if kind == "RC" then
+		p.MaterialVariant = ""
+		local sa = p:FindFirstChildOfClass("SurfaceAppearance")
+		if not sa then
+			sa = concreteSA():Clone()
+			sa.Parent = p
+		end
+		pcall(function() sa.Color = L[3] end) -- SurfaceAppearance.Color tints the map (newer Studio)
+	else
+		p.MaterialVariant = L[2]
+	end
 end
 
 function S.look()
@@ -108,7 +134,7 @@ function S.place(holding: Instance, cells: { [string]: boolean })
 		if m:IsA("MeshPart") then
 			local kind, cell, centre = parse(m.Name)
 			local cm = kind and root():FindFirstChild("Cell_" .. cell)
-			if cm and S.LOOK[kind] then
+			if cm and S.LOOK[kind] and cells[cell] then -- only the cells being swapped (a file holds other cells too)
 				local p = m:Clone()
 				p.Name = "RMesh" .. kind
 				p.CFrame = CFrame.new(centre)
@@ -121,10 +147,11 @@ function S.place(holding: Instance, cells: { [string]: boolean })
 				p:SetAttribute("RSurf", true)
 				style(p, kind)
 				p.Parent = cm
+				p.CollisionFidelity = Enum.CollisionFidelity.Box -- after parenting (a clone's fidelity doesn't stick)
 				placed += 1
 			end
 		end
-		if i % 200 == 0 then
+		if i % 20 == 0 then
 			task.wait()
 		end
 	end

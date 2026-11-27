@@ -32,8 +32,11 @@ OSM (Yangon extract, `surface` tags): residential 12,740 ways, 96% untagged; of 
 
 ## What changed
 1. **New maps** (`tools/road_surface/road_textures.py`, procedural, seeded, 1024 px, 6 maps):
-   - `YgnRoadAsphalt` (base Asphalt, 24 studs a tile ≈ 7.5 m): fine aggregate grain with a few pale quartz chips, tone blotches at about 7 and 1.5 studs so the tile doesn't read, no cracks in the tile; normal from the grain; roughness 0.93 on the binder, 0.5 on stone tops (sun sparkle).
-   - `YgnRoadConcrete` (base Concrete, 32 studs a tile): pale warm grey, worn areas showing aggregate, stains, a few hairline cracks.
+   - `YgnRoadAsphalt` (base Asphalt, **40 studs a tile**, final v3): fine even aggregate grain with a few pale quartz chips, only faint tone (owner: "fine even speckle", no blotches), no cracks in the tile; normal from the grain (strength 15); roughness 0.93 on the binder, 0.5 on stone tops (sun sparkle). Colour (78, 78, 80): dark charcoal, a little lighter than the old near-black, per the owner's swatch.
+   - Small-street concrete (`YgnRoadConcreteSA`, a SurfaceAppearance, tint 228, 224, 214): a **street-aligned** map, one tile = 64 studs along x 32 across: 4 cast slabs of 16 studs with sawn joints across and a centre joint along, each slab half its own tone, one repaired (darker) slab, a spalled corner at a joint, hairline cracks, darker smoother tyre paths at about 4 and 9 studs from the centre, dust toward the edges.
+   - **Why a SurfaceAppearance:** Roblox projects a MaterialVariant in world space on a MeshPart (tested: the joints ran at 45 degrees on a diagonal street). A SurfaceAppearance uses the mesh UVs, and the split gives the concrete meshes road-local UVs (along / 64, across / 32 from the centre line).
+
+![[refs_2026-11-27_road_surfaces/concrete_street_map.jpg]]
    - Colour maps are neutral; each road kind's Part colour sets the shade.
 
 ![[refs_2026-11-27_road_surfaces/new_maps_asphalt_concrete.jpg]]
@@ -59,14 +62,44 @@ Old library maps (asphalt worn with the repeating crack, patched, oily, lane sla
 | new texture maps | | 6 (2 x colour / normal / roughness, 1024 px); `YgnAsphaltWorn` stays in the place but is no longer used by the roads once swapped |
 | glb files to upload | | 97 (~5 MB each) in `imports/sync/RSURF_glb/` |
 
-Image ids (approved): asphalt 106420386734912 / 118937246156752 / 119840276812247, concrete 91186461247844 / 111294739232406 / 74085596867182 (`tools/road_surface/ids.json`). The two MaterialVariants were made in Studio (Edit) on 27 Nov.
+Image ids (approved, `tools/road_surface/ids.json`): asphalt v3 colour 77760241649520, normal 106226455470004, roughness 119840276812247; concrete v3 colour 130716823674053, normal 135714052142659, roughness 98118529041453. Models: 97 in `tools/road_surface/model_ids.txt`.
 
-## State at the end of 27 Nov: NOT swapped in Studio yet
-- Studio's MCP stopped answering at about 12:20 (the first Studio shut down; the reopened one stayed unreachable for 50+ minutes, its log shows the Assistant's networking hanging and network time-outs). Three 10 MB glb uploads were in flight when it went: **upload at most ~5 MB a file** (the split now writes 45,000-triangle files).
-- So the place still shows the old roads. No place save was made by this job.
-- **To finish** (Studio "City Legends", lock held): upload the 97 glbs in `imports/sync/RSURF_glb/` as Models (group 33151111), `InsertService:LoadAsset` each into one holding folder, put `tools/road_surface/YangonRoadSurface.luau` into `ServerStorage.ClaudeTools.YangonRoadSurface` (Source; the copy there now is a placeholder), `S.variants()`, `S.place(holding, cells)` with every cell in `swap.json`, then the after shots at the same 3 spots / 2 times, a grazing close-up of paint on the new surfaces, a Play test (test store), save, delete the holding folder and, once checked, `ServerStorage.RoadSurfaceOld`.
-- Tune by eye after the swap: `S.LOOK` colours (R 150, RC 205, RA 170) against the Yangon frames (main road ~140 grey, lanes ~180).
+## Done in Studio (27 Nov, evening)
+- All 896 new meshes placed (891 + the 5 pilot ones), 0 duplicates; the 420 old `RMeshR` are in `ServerStorage.RoadSurfaceOld` (attribute `OldCell`; `YangonRoadSurface.undo()` puts them back).
+- **Every other visible asphalt piece now uses the same variant** (owner: "some are plain, some are with texture"): `VisibleFix_*` RoadFill (172), the car parks (361), drives, drive ramps, the Legends Service forecourt, `Visual/ASP`, the `DRV` meshes: 561 pieces to `YgnRoadAsphalt` and colour 78, 78, 80 (old values in attributes `OldColor` / `OldVariant`). The base Asphalt override (`RivAsphalt`) is unchanged, so a NEW plain Asphalt part would still look different.
+- **Why the asphalt looked plain:** at 12 or 24 studs a tile the fine grain blurred into flat grey at driving distance, while the plain Asphalt pieces kept Roblox's coarse default speckle. At 40 studs a tile the grain reads all the way down the road (pictures below). Lesson: on a big road, judge grain at chase-camera distance, not close up.
+- Saved to Roblox (Team Create; version 2379 after the swap, then a later save with the tile size). Store back on `CityLegends_v1`, `PreviewHour` removed.
+- Play check (test store, noon and 17:30): about 60 fps at the spawn and on the deck, the same as before the change (59). No flicker in the grazing close-ups (lines 0.08 over the road, patches and seams in the road's own plane).
+
+## After (Play)
+Main road, noon (first swap, 24 studs a tile) / the owner's "plain" look / the fix (40 studs a tile), noon and 17:30:
+![[refs_2026-11-27_road_surfaces/after_main_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/asphalt_fix_before_plain_play.jpg]]
+![[refs_2026-11-27_road_surfaces/asphalt_fix_after_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/asphalt_fix_after_1730_play.jpg]]
+Owner's swatch (dark charcoal, fine grain) and a close-up of the new asphalt:
+![[Owner ref - asphalt colour (darker, fine grain) 2026-11-27.png]]
+![[refs_2026-11-27_road_surfaces/asphalt_close_play.jpg]]
+Small street (Maw Ya Waddy St) noon / 17:30 / close-up:
+![[refs_2026-11-27_road_surfaces/after_small_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/after_small_1730_play.jpg]]
+![[refs_2026-11-27_road_surfaces/after_concrete_closeup_play.jpg]]
+Flyover deck noon / 17:30 / grazing close-up of the lines:
+![[refs_2026-11-27_road_surfaces/after_deck_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/after_deck_1730_play.jpg]]
+![[refs_2026-11-27_road_surfaces/after_graze_deck_paint_play.jpg]]
+(The "after" small-street and deck shots were taken with the asphalt at 24 studs a tile, before the fix.)
+
+## Traps found
+- **A MaterialVariant on a MeshPart is projected in world space**: road-aligned detail needs a SurfaceAppearance plus mesh UVs.
+- Fresh images can stay flat grey for minutes in a variant or SurfaceAppearance: wait before changing anything.
+- Each Studio restart lost the unsaved swap (twice). Save right after a big placement.
+- 10 MB glb uploads came just before an Assistant hang: upload ~5 MB files, two at a time.
+- `S.place` sets CollisionFidelity Box after parenting: about 12 minutes for 896 meshes.
 
 ## Not done / not checked
-- **Wheel-path darkening:** not done. The road UVs are world x / z (box projection), so a lane-aligned darkening can't live in the tiled texture; cutting strips along every lane would add hundreds of thousands of triangles. A later bake could carry lane-aligned vertex colours if the road mesh were denser.
+- **Wheel paths:** small streets have them in the concrete map. On the big roads they are still not done: The road UVs are world x / z (box projection), so a lane-aligned darkening can't live in the tiled texture; cutting strips along every lane would add hundreds of thousands of triangles. A later bake could carry lane-aligned vertex colours if the road mesh were denser.
 - Tone at the zebra / paint edges was not tuned separately.
+- Not checked on a real phone: texture memory (2 new MaterialVariant maps sets + 1 SurfaceAppearance set, 1024 px) and the +9% road triangles.
+- Concrete streets wider than about 30 studs repeat the joint / tyre pattern across; the edge dust assumes about 20-stud lanes.
+- `ServerStorage.RoadSurfaceOld` (420 old meshes) should be deleted once the owner is happy (place size).
