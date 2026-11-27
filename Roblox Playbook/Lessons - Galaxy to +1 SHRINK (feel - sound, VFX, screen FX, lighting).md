@@ -864,3 +864,10 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Cause:** the SpotLight sat in the lamp head, 25-30 studs up. Roblox caps light range at 60, so a high light reaches only a small circle with a weak edge, whatever the angle. Main-road lamps were also on every second pole only.
 - **Fix:** a white PointLight on an Attachment 10-14 studs under the head, brightness 3, range 60. It lights road, pavement, walls, cars and tree canopies, and the pools meet. A lamp goes on every pole (30-40 m apart, as in the clips), and every head gets a soft glow sprite (BillboardGui, LightInfluence 0). Low-end mode turns the real lights off and keeps the heads and glows. Vault `City Legends/2026-11-27 Night streetlights - realistic.md`.
 - **Rule:** in Roblox, a street lamp's light goes on an Attachment well under the head, never inside a high head. Space the lamps so the 60-stud pools overlap, and give each head a glow sprite. Street lamps are white unless the owner says otherwise.
+
+## 2026-11-27 City Legends: NPCs walked into bins and walked like mannequins (motion)
+- **What felt bad (owner):** "the characters are walking into trash bins ... ANIMATION MUST LOOK LIKE AN ACTUAL HUMAN GOING AROUND, NOT JUST ROTATING CHARACTER", "the npc characters walking animation is unnatural too".
+- **Cause:** walkers snapped their yaw to each path point and only had a rigid arm / leg swing; the furniture wasn't in the avoidance grid (kit tiles were tagged before they entered the Workspace, so the tag signal skipped them).
+- **Fix:** a procedural gait from biomechanics (stride matched to speed, knees, ankles, pelvis bob / sway / turn, chest counter-turn, overlap), eased rate-limited steering that curves round things early with the head leading, keyed actions with anticipation / contact / follow-through; a periodic re-scan of tagged parts.
+- **Rule:** NPC motion is judged in motion: film it (frame strips) before reporting. Never snap a rotation; turn heads first, then chest, then hips. Match stride to speed so feet don't slide. Anything spawned into the world after start must be picked up by a re-scan, not only by a tag-added signal.
+

@@ -481,6 +481,7 @@ local hairShift = Vector3.zero -- the kit head's HairAttachment against the clas
 type Figure = {
 	model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal?, scale: number, hairOff: CFrame, bald: boolean,
 	geo: Geo, hairKind: string, tex: { any }, hairSize: Vector3, extraOf: { [number]: { k: number, i: number } },
+	shadow: boolean?, rig: any?, rigGeo: any?,
 }
 type Walker = {
 	fig: Figure, mode: string, path: { Vector3 }?, k: number, dir: number, pos: Vector3, yaw: number, speed: number,
@@ -489,7 +490,8 @@ type Walker = {
 	-- (27 Nov, PedMotion) gait "walk" / "run", steering, knock-overs, crossings, phones
 	gait: string?, walkSpeed: number?, speedNow: number?, yawRate: number?, lean: number?, twist: number?,
 	act: any?, knockAt: any?, knocker: boolean?, knockDone: boolean?, avoid: any?, cross: any?, glance: any?,
-	runT: number?, hurry: boolean?, phone: string?, pauseYaw: number?, scanT: number?,
+	runT: number?, hurry: boolean?, phone: string?, pauseYaw: number?, scanT: number?, forceKind: string?,
+	forceRun: boolean?, flipAt: number?,
 }
 
 local pedWant = 0 -- people wanted out now (pedTick)
@@ -715,6 +717,7 @@ local function setHair(f: Figure, kind: string)
 	f.parts[3]:Destroy()
 	f.parts[3] = p
 	f.hairOff = (src:GetAttribute("Off") :: CFrame?) or CFrame.new(0, 0.6, 0)
+	f.shadow = nil -- (the new hair piece: pedTick sets its shadow again)
 	f.hairSize = src.Size
 end
 
@@ -810,11 +813,35 @@ end
 local BLOCK_CELL, BLOCK_PAD = 32, 0.9
 local blockCells: { [number]: { BasePart } } = {}
 local blockKeys: { [BasePart]: { number } } = {}
+-- (27 Nov) kit pieces can be turned any way (the bin template lies on its side: its Y axis is horizontal), so a
+-- part's footprint is its two most level axes: { vertical axis, the two level axes, half sizes } by object axis 1-3
+local blockShape: { [BasePart]: { v: number, a: number, b: number, h: { number } } } = {}
+local function shapeOf(q: BasePart)
+	local sh = blockShape[q]
+	if sh then
+		return sh
+	end
+	local cf = q.CFrame
+	local ups = { math.abs(cf.RightVector.Y), math.abs(cf.UpVector.Y), math.abs(cf.LookVector.Y) }
+	local v = if ups[1] >= ups[2] and ups[1] >= ups[3] then 1 elseif ups[2] >= ups[3] then 2 else 3
+	local a, b = if v == 1 then 2 else 1, if v == 3 then 2 else 3
+	sh = { v = v, a = a, b = b, h = { q.Size.X / 2, q.Size.Y / 2, q.Size.Z / 2 } }
+	blockShape[q] = sh
+	return sh
+end
+local function axisOf(cf: CFrame, i: number): Vector3
+	return if i == 1 then cf.RightVector elseif i == 2 then cf.UpVector else cf.LookVector
+end
+local function comp(v: Vector3, i: number): number
+	return if i == 1 then v.X elseif i == 2 then v.Y else v.Z
+end
+
 local function blockAdd(q: Instance)
 	if not q:IsA("BasePart") or blockKeys[q] or not q:IsDescendantOf(workspace) then
 		return
 	end
-	local r = Vector2.new(q.Size.X, q.Size.Z).Magnitude / 2 + BLOCK_PAD + 2 -- (+2: a walker's own width, curving early)
+	local sh = shapeOf(q)
+	local r = Vector2.new(sh.h[sh.a], sh.h[sh.b]).Magnitude + BLOCK_PAD + 2 -- (+2: a walker's own width, curving early)
 	local p = q.Position
 	local keys = {}
 	for gx = math.floor((p.X - r) / BLOCK_CELL), math.floor((p.X + r) / BLOCK_CELL) do
@@ -837,6 +864,7 @@ local function blockRemove(q: Instance)
 		return
 	end
 	blockKeys[q :: any] = nil
+	blockShape[q :: any] = nil
 	for _, k in keys do
 		local list = blockCells[k]
 		local i = list and table.find(list, q :: any)
@@ -860,17 +888,19 @@ local function clearOf(p: Vector3, toward: Vector3): Vector3
 	for _ = 1, 2 do
 		local moved = false
 		for _, q in list do
+			local sh = shapeOf(q)
 			local lp = q.CFrame:PointToObjectSpace(p)
-			local h = q.Size / 2
-			local hx, hz = h.X + BLOCK_PAD, h.Z + BLOCK_PAD
-			if math.abs(lp.X) < hx and math.abs(lp.Z) < hz and lp.Y > -h.Y - 6 and lp.Y < h.Y + 1 then
+			local la, lb = comp(lp, sh.a), comp(lp, sh.b)
+			local ha, hb = sh.h[sh.a] + BLOCK_PAD, sh.h[sh.b] + BLOCK_PAD
+			if math.abs(la) < ha and math.abs(lb) < hb and math.abs(comp(lp, sh.v)) < sh.h[sh.v] + 6 then
 				local ld = q.CFrame:VectorToObjectSpace(toward)
+				local da, db = comp(ld, sh.a), comp(ld, sh.b)
 				local t = math.huge
-				if math.abs(ld.X) > 1e-3 then
-					t = math.min(t, ((if ld.X > 0 then hx else -hx) - lp.X) / ld.X)
+				if math.abs(da) > 1e-3 then
+					t = math.min(t, ((if da > 0 then ha else -ha) - la) / da)
 				end
-				if math.abs(ld.Z) > 1e-3 then
-					t = math.min(t, ((if ld.Z > 0 then hz else -hz) - lp.Z) / ld.Z)
+				if math.abs(db) > 1e-3 then
+					t = math.min(t, ((if db > 0 then hb else -hb) - lb) / db)
 				end
 				if t < math.huge then
 					p += toward * (t + 0.05)
@@ -937,7 +967,7 @@ local LOOK_AHEAD = 2.6 -- seconds of walking checked for things in the way
 local KNOCK_SHARE = 1 / 25
 local CROSS_RUN = 1 / 10
 local binTag: { [Instance]: boolean } = {}
-type Fallen = { cf: CFrame, anch: boolean, coll: boolean, t: number }
+type Fallen = { cf: CFrame, anch: boolean, coll: boolean, mless: boolean, t: number }
 local fallen: { [BasePart]: Fallen } = {}
 
 local function heading(yaw: number): Vector3
@@ -993,8 +1023,9 @@ local function obstacleAhead(w: Walker, dist: number): (BasePart?, number, numbe
 					local rel = q.Position - w.pos
 					local along = rel:Dot(hd)
 					if along > 0.2 and along < dist and math.abs(rel.Y) < 8 then
-						local h = q.Size / 2
-						local ext = math.abs(side:Dot(q.CFrame.RightVector)) * h.X + math.abs(side:Dot(q.CFrame.LookVector)) * h.Z
+						local sh = shapeOf(q)
+						local ext = math.abs(side:Dot(axisOf(q.CFrame, sh.a))) * sh.h[sh.a]
+							+ math.abs(side:Dot(axisOf(q.CFrame, sh.b))) * sh.h[sh.b]
 						local need = ext + 0.95 * w.fig.scale + 0.35
 						local lat = rel:Dot(side)
 						if math.abs(lat) < need and along < bestAlong then
@@ -1013,13 +1044,20 @@ local function knockBin(q: BasePart, dir: Vector3, kind: string)
 	if fallen[q] then
 		return
 	end
-	fallen[q] = { cf = q.CFrame, anch = q.Anchored, coll = q.CanCollide, t = 0 }
+	-- (its first home is kept on the part: a second knock never takes a fallen spot as home)
+	local home = q:GetAttribute("PedHome") :: CFrame?
+	if not home then
+		home = q.CFrame
+		q:SetAttribute("PedHome", home)
+	end
+	fallen[q] = { cf = home :: CFrame, anch = q.Anchored, coll = q.CanCollide, mless = q.Massless, t = 0 }
 	q.Anchored = false
 	q.CanCollide = true
-	local sp = if kind == "kick" then 19 elseif kind == "push" then 14 else 12
-	local up = if kind == "kick" then 8 else 4
+	q.Massless = false -- (the kit pieces are massless: one alone slid without tipping; tested in Play)
+	local sp = if kind == "kick" then 17 elseif kind == "push" then 14 else 12
+	local up = if kind == "kick" then 7 else 5
 	q.AssemblyLinearVelocity = dir * sp + Vector3.new(0, up, 0)
-	q.AssemblyAngularVelocity = Vector3.yAxis:Cross(dir) * (if kind == "kick" then 7 else 5)
+	q.AssemblyAngularVelocity = Vector3.yAxis:Cross(dir) * (if kind == "kick" then 10 else 8)
 		+ Vector3.new(0, rng:NextNumber(-2, 2), 0)
 end
 
@@ -1033,6 +1071,7 @@ local function binsTick(dt: number, cam: Vector3, look: Vector3)
 			if (st.t > 12 and away) or st.t > 90 then
 				q.Anchored = st.anch
 				q.CanCollide = st.coll
+				q.Massless = st.mless
 				q.CFrame = st.cf
 				q.AssemblyLinearVelocity = Vector3.zero
 				q.AssemblyAngularVelocity = Vector3.zero
@@ -1075,10 +1114,26 @@ local function findCross(w: Walker): (number?, number?, Vector3?)
 		end
 	end
 	if bestPt then
-		crossRay.FilterDescendantsInstances = { pedFolder :: Instance, carFolder :: Instance }
-		local a, b = p + Vector3.new(0, 2.5, 0), bestPt + Vector3.new(0, 2.5, 0)
-		if workspace:Raycast(a, b - a, crossRay) then
-			return nil
+		-- nothing big in the way at chest height (a building, a wall); poles, signs, props and cars don't count
+		local skip: { Instance } = { pedFolder :: Instance, carFolder :: Instance }
+		for _, n in { "PlayerCars", "Traffic" } do
+			local f = workspace:FindFirstChild(n)
+			if f then
+				table.insert(skip, f)
+			end
+		end
+		local a, b = p + Vector3.new(0, 3.5, 0), bestPt + Vector3.new(0, 3.5, 0)
+		for _ = 1, 5 do
+			crossRay.FilterDescendantsInstances = skip
+			local hit = workspace:Raycast(a, b - a, crossRay)
+			if not hit then
+				break
+			end
+			local sz = hit.Instance.Size
+			if math.max(sz.X, sz.Y, sz.Z) > 14 then
+				return nil
+			end
+			table.insert(skip, hit.Instance)
 		end
 	end
 	return bestPi, bestK, bestPt
@@ -1197,12 +1252,13 @@ local function stepWalk(w: Walker, dt: number): boolean
 			if not t then
 				-- the end of the pavement: cross to the next one ahead (looking both ways first), or turn back
 				local pi, k, pt = nil, nil, nil
-				if rng:NextNumber() < 0.6 then
+				if w.forceRun or rng:NextNumber() < 0.6 then
 					pi, k, pt = findCross(w)
 				end
 				if pi and pt then
 					w.cross = { pi = pi, k = k :: number, pt = pt }
-					if w.gait ~= "run" and rng:NextNumber() < CROSS_RUN then
+					if w.gait ~= "run" and (w.forceRun or rng:NextNumber() < CROSS_RUN) then
+						w.forceRun = nil
 						setGait(w, "run")
 						w.mode = "cross"
 					elseif w.gait == "run" then
@@ -1214,6 +1270,13 @@ local function stepWalk(w: Walker, dt: number): boolean
 					return false
 				end
 				w.dir = -w.dir
+				-- (a stub of a path: turned at both ends within a few seconds) someone new elsewhere instead
+				local now = os.clock()
+				if w.flipAt and now - w.flipAt < 4 then
+					w.gone = true
+					return false
+				end
+				w.flipAt = now
 				if rng:NextNumber() < 0.35 then
 					w.mode = "pause"
 					w.timer = rng:NextNumber(2, 6)
@@ -1248,7 +1311,7 @@ local function stepWalk(w: Walker, dt: number): boolean
 				local side = Vector3.new(-hd.Z, 0, hd.X)
 				if w.knocker and not w.knockDone and binTag[q] and w.gait ~= "run" then
 					local r = rng:NextNumber()
-					local kind = if r < 0.4 then "kick" elseif r < 0.75 then "push" else "slam"
+					local kind = w.forceKind or (if r < 0.4 then "kick" elseif r < 0.75 then "push" else "slam")
 					local spot
 					local ext = need - 0.95 * s - 0.35 -- the bin's half width this way
 					if kind == "slam" then
@@ -1286,12 +1349,28 @@ local function stepWalk(w: Walker, dt: number): boolean
 	if d > 0.01 then
 		w.pos = Vector3.new(w.pos.X, w.pos.Y + (g.Y - w.pos.Y) * math.min(1, step / d), w.pos.Z)
 	end
+	-- (27 Nov) never inside another person: ease apart from anyone nearer than 2.4 studs (20 people: cheap)
+	for _, o in active do
+		if o ~= w and not o.held then
+			local dx, dz = w.pos.X - o.pos.X, w.pos.Z - o.pos.Z
+			local d = math.sqrt(dx * dx + dz * dz)
+			local need = 2.4 * math.max(s, o.fig.scale)
+			if d < need and d > 0.01 and math.abs(w.pos.Y - o.pos.Y) < 4 then
+				local k = math.min(1, dt * 6) * (need - d) / d
+				w.pos += Vector3.new(dx * k, 0, dz * k)
+			end
+		end
+	end
 	-- (a corner of a shelter on the line) never inside one
 	if w.mode ~= "cross" then
 		local kerb = kerbSide(w)
 		if kerb then
 			w.pos = clearOf(w.pos, kerb)
 		end
+	end
+	if w.fig.model:GetAttribute("Staged") then -- (Studio staging: what the walker is doing)
+		w.fig.model:SetAttribute("Dbg", string.format("%s goal %s avoid %s knock %s", w.mode, tostring(g),
+			tostring(w.avoid and w.avoid.q:GetFullName()), tostring(w.knockAt and w.knockAt.kind)))
 	end
 	local cad = if w.gait == "run" then PedMotion.runCadence(v, s) else PedMotion.walkCadence(v, s)
 	w.phase += cad / 2 * dt
@@ -1372,9 +1451,13 @@ local function spawnWalker(cam: Vector3, gap: number, radius: number): boolean
 	end
 	-- a third walk in twos, side by side at one pace (friends, a couple, a parent and child)
 	if who ~= "monk" and rng:NextNumber() < 0.3 and #active < pedWant then
-		local side = if lat + 1.3 <= hi then 1.3 else -1.3
+		-- (27 Nov) shoulder to shoulder, 3 studs apart (1.3 put two Blocky bodies inside each other); the pair keep
+		-- their lines (no drift each), so they never cross into each other
+		local side = if lat + 3 <= hi + 1 then 3 else -3
 		local who2 = if who == "kid" or rng:NextNumber() < 0.15 then "kid" elseif rng:NextNumber() < 0.5 then "man" else "woman"
-		walker(takeFigure(who2), lat + side, speed, phase + 1.3)
+		local w2 = walker(takeFigure(who2), lat + side, speed, phase + 0.45)
+		w1.latLo, w1.latHi, w2.latLo, w2.latHi = nil, nil, nil, nil
+		w1.phone, w1.knocker, w2.knocker = nil, false, false
 	end
 	return true
 end
@@ -1407,6 +1490,24 @@ local function spawnStander(cam: Vector3, gap: number, radius: number): boolean
 	return true
 end
 
+-- (27 Nov, owner: "the npc,traffic needs shadows ... npc needs shadows") people cast shadows: the body pieces (torso,
+-- head, arms, legs, hair; not the hands and feet: tiny), only within SHADOW_R of the camera and not on Low graphics /
+-- low-end mode (pedShadowOk, from the start's quality check)
+local SHADOW_R = 120
+local blockScanT = 0
+local pedShadowOk = true
+local function shadowWant(f: Figure, on: boolean)
+	if f.shadow == on then
+		return
+	end
+	f.shadow = on
+	for k, p in f.parts do
+		local ex = f.extraOf[k]
+		local tiny = ex and (ex.k == 4 or ex.k == 5 or ex.k == 6 or ex.k == 7) and ex.i == 3
+		p.CastShadow = on and not tiny
+	end
+end
+
 local function pedTick(cam: Vector3, cap: number)
 	local cfg = Config.YangonStreetLife
 	local want = cap
@@ -1433,6 +1534,136 @@ local function pedTick(cam: Vector3, cap: number)
 			spawnStander(cam, cfg.PedMinGap, cfg.PedRadius)
 		else
 			spawnWalker(cam, cfg.PedMinGap, cfg.PedRadius)
+		end
+	end
+	for _, w in active do
+		shadowWant(w.fig, pedShadowOk and flat(w.pos, cam) < SHADOW_R)
+	end
+	-- (27 Nov) street kit tiles are built and tagged before they're parented into the Workspace, so the tag signal
+	-- finds them outside it: pick up any PedBlock part now in the Workspace every few seconds
+	blockScanT -= cfg.PedCheck
+	if blockScanT <= 0 then
+		blockScanT = 4
+		for _, q in CollectionService:GetTagged("PedBlock") do
+			if not blockKeys[q] then
+				blockAdd(q)
+			end
+		end
+		for q in blockKeys do -- (a tile taken down: its pieces leave the grid)
+			if not q:IsDescendantOf(workspace) then
+				blockRemove(q)
+			end
+		end
+	end
+	-- Studio test hook: player attribute TestPedStage = "bin" | "kick" | "push" | "slam" | "cross" puts the walker
+	-- nearest the camera on the pavement path 14 studs before the nearest bin (a knocker for kick / push / slam), or
+	-- 6 studs before its path's end as a runner who will cross; its model gets attribute Staged
+	local lp = game:GetService("Players").LocalPlayer
+	local stage = RunService:IsStudio() and lp and lp:GetAttribute("TestPedStage")
+	if type(stage) == "string" then
+		lp:SetAttribute("TestPedStage", nil)
+		local best, bd = nil, math.huge
+		for _, w in active do
+			if w.path and not w.held and flat(w.pos, cam) < bd then
+				best, bd = w, flat(w.pos, cam)
+			end
+		end
+		if best then
+			for _, w in active do
+				w.fig.model:SetAttribute("Staged", nil)
+			end
+			local w = best
+			w.act, w.knockAt, w.avoid, w.cross, w.mode = nil, nil, nil, nil, "walk"
+			if stage == "run" then -- a hurrying runner on the pavement
+				w.hurry = true
+				setGait(w, "run")
+			elseif stage == "cross" then
+				-- a pavement end near the camera with a crossing ahead; the walker starts 8 points before it
+				local cx, cz = math.floor(cam.X / CELL), math.floor(cam.Z / CELL)
+				local found = false
+				for gx = cx - 1, cx + 1 do
+					for gz = cz - 1, cz + 1 do
+						local list = pathCells[cellKey(gx, gz)]
+						for e = 1, (if list then #list // 2 else 0) do
+							local pts = paths[list[2 * e - 1]]
+							local n = #pts
+							if not found and n > 12 then
+								local d = pts[n] - pts[n - 1]
+								local probe = { pos = pts[n], yaw = math.atan2(-d.X, -d.Z), path = pts } :: any
+								if findCross(probe) then
+									w.path, w.dir, w.k = pts, 1, n - 2
+									w.pos = pts[n - 3]
+									local d2 = pts[n - 2] - pts[n - 3]
+									w.yaw = math.atan2(-d2.X, -d2.Z)
+									w.latLo, w.latHi = nil, nil
+									found = true
+								end
+							end
+						end
+					end
+				end
+				w.forceRun = true
+				w.fig.model:SetAttribute("StageCross", found)
+			else
+				-- the bin nearest the camera that a long pavement path runs past (its point nearest the bin 25+
+				-- studs from both ends of the path: walkers turn at path ends)
+				local bin, bpi, bk, best = nil, nil, nil, math.huge
+				for q in binTag do
+					if q:IsDescendantOf(workspace) and not fallen[q] and flat(q.Position, cam) < 300 then
+						local pi0, k0, d0 = nil, nil, math.huge
+						local cx, cz = math.floor(q.Position.X / CELL), math.floor(q.Position.Z / CELL)
+						for gx = cx - 1, cx + 1 do
+							for gz = cz - 1, cz + 1 do
+								local list = pathCells[cellKey(gx, gz)]
+								if list then
+									for e = 1, #list // 2 do
+										local pi, k = list[2 * e - 1], list[2 * e]
+										local pts = paths[pi]
+										local d = flat(pts[k], q.Position)
+										if d < d0 and flat(pts[k], pts[1]) > 25 and flat(pts[k], pts[#pts]) > 25 then
+											pi0, k0, d0 = pi, k, d
+										end
+									end
+								end
+							end
+						end
+						if pi0 and d0 < 6 and flat(q.Position, cam) < best then
+							bin, bpi, bk, best = q, pi0, k0, flat(q.Position, cam)
+						end
+					end
+				end
+				if bin then
+					w.fig.model:SetAttribute("StageBin", bin.Position)
+					if bpi then
+						local pts = paths[bpi]
+						-- walk toward the bin from about 14 studs before it along the path
+						local k0 = bk
+						local dir = if pts[bk - 1] then 1 else -1
+						while pts[k0 - dir] and flat(pts[k0 - dir], bin.Position) < 14 do
+							k0 -= dir
+						end
+						k0 = if pts[k0 - dir] then k0 - dir else k0
+						w.path, w.dir, w.k = pts, dir, k0 + dir
+						w.pos = pts[k0]
+						local nx = pts[k0 + dir] or bin.Position
+						-- on the line that runs into the bin
+						local dd = Vector3.new(nx.X - pts[k0].X, 0, nx.Z - pts[k0].Z)
+						dd = if dd.Magnitude > 0.01 then dd.Unit else Vector3.xAxis
+						local away = Vector3.new(-dd.Z, 0, dd.X) * dir
+						local lat = (bin.Position - pts[k0]):Dot(away)
+						w.lat = lat
+						w.latLo = math.min(if pathWide[bpi] then -0.6 else -1.5, lat)
+						w.latHi = math.max(if pathWide[bpi] then 3 else 1.5, lat)
+						local dv = nx - w.pos
+						w.yaw = math.atan2(-dv.X, -dv.Z)
+						w.knocker = stage ~= "bin"
+						w.knockDone = false
+						w.forceKind = if stage ~= "bin" then stage else nil
+						setGait(w, "walk")
+					end
+				end
+			end
+			w.fig.model:SetAttribute("Staged", true)
 		end
 	end
 end
@@ -1541,6 +1772,7 @@ function YangonStreetLife.start(qualityScale: (() -> number)?)
 		local function caps(): (number, number)
 			local q = if qualityScale then qualityScale() else 1
 			local k = if q <= cfg.LowScale then 0.5 else math.min(q, 1)
+			pedShadowOk = q > cfg.LowScale and workspace:GetAttribute("TestPedShadows") ~= false
 			return math.floor(cfg.CarMax * k), math.floor(cfg.PedMax * k)
 		end
 		local carCap, pedCap = caps()
