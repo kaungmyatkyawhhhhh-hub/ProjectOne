@@ -287,6 +287,7 @@ Traffic uses the "lite" runtime meshes first. The owner thinks the procedural ca
 
 ## Open or paused
 
+- **PAUSED by the owner (28 Nov, weekly usage running low; "ill tell u to continue later"):** (1) Myanmar Plaza, Melia and Sedona interiors are inaccurate; also the Sedona exterior and its SEDONA sign. (2) Novotel Yangon Max is in the wrong position; the real one has an underground car park, a lobby "and stuff", and ours has no interior. (3) The Central is wrong in its entirety. Rules for the redo: current dated photos only (prefer 2023-2026; newest wins; drop outdated ones, e.g. the 2019 Myanmar Plaza look), interiors only from real photos, side-by-side checks. Not started in Studio.
 - **Sounds:** making all sounds "high quality and accurate" was paused; ask the owner before resuming. There is no real rain sound yet; it uses a filtered built-in wind. `Config.Sounds.Rain` takes an id.
 - **Untested in Roblox:**
   - the new HUD (level/XP bar, analog rev counter, side buttons, daily gift card);
