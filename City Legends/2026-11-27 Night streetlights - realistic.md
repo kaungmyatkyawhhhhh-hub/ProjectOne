@@ -65,9 +65,20 @@ How to read the table:
 - The FPS columns are not like for like. The before run had other helpers' Studio work going on (every spot read about 15). Within the after run: flyover normal 43 fps against low-end 57 fps.
 - Downtown and flyover gain about 10-18 real lights each (the extra roadside lamps). That is the cost of the wide pools there.
 
+## Night sky (follow-up, coordinator OK, Studio v2364)
+
+The sky was navy with stars because the "Day" skybox was used all night. Every real night frame (19:22-20:00) has a black sky. `DayCycle.rivieraSky` now picks the near-black `RivieraSkies.Night` box from 20.4 h to 4.6 h with StarCount 0. Nothing else changed: the 13 h and 16.5-18.3 h keys, the Sunset box, the blue hour (19.6 h, Day box) and dawn (Dusk box from 5 h) are as before.
+
+| 21:00 before | 21:00 after |
+|---|---|
+| ![[refs_2026-11-27_night_lights/after_main_road.jpg]] | ![[refs_2026-11-27_night_lights/sky_after_main_road_21h.jpg]] |
+
+Checks: 20:21, just before the swap: ![[refs_2026-11-27_night_lights/sky_check_2021_before_switch.jpg]]. Sunset 18.3: ![[refs_2026-11-27_night_lights/sky_check_sunset_1830.jpg]]. Dawn 5.6: ![[refs_2026-11-27_night_lights/sky_check_dawn_0536.jpg]].
+
+**Known step:** a Roblox Sky can't fade between two skyboxes, so at 20.4 h the navy sky turns black in one frame. I tried hiding the swap with thicker Atmosphere, but density 0.6 fogged the whole city, so it was dropped. The swap is set late in the blue hour, when the sky is already dark.
+
 ## Not done / not checked
 
-- **Sky still navy with stars.** The fix is a near-black night skybox in `DayCycle.rivieraSky`. That code sits outside the night keys I was allowed to change, so it needs a go-ahead.
 - **Not measured on a real phone.** Lights and glows were counted in Studio only. The 47 glows are BillboardGuis (cheap, but not profiled).
 - Twin-head Y-arm median lamps (0801, downtown 0804 1:17), yellow LED strips on poles (0806), and lit shop fascias / fairy-light columns: real, not built in this pass.
 - Lamp pop-in at speed: not filmed. Flyovers outside P1: should work the same way, but only the Myanmar Plaza flyover was looked at.

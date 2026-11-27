@@ -133,11 +133,16 @@ end
 -- only their textures kept, 2026-11-02), picked by the hour
 -- (the clear blue Day sky also makes the navy blue hour and night once the sun is down: the
 -- Night box is near black, kept for later)
+local NIGHT_SKY_FROM, NIGHT_SKY_TO = 20.4, 4.6
 local function rivieraSky(hour: number): string
 	if hour >= 16.9 and hour < 19.2 then
 		return "Sunset" -- (2026-11-06: big clouds lit from below, Creator Store model 135758030102263, only its 6 pictures kept)
 	elseif hour >= 5 and hour < 6.8 then
 		return "Dusk"
+	elseif hour >= NIGHT_SKY_FROM or hour < NIGHT_SKY_TO then
+		-- (27 Nov, night streetlights: every real Yangon night frame has a black sky, no navy, no stars) the near-black
+		-- Night box once the blue hour has gone dark, back to Day before the dawn colours
+		return "Night"
 	end
 	return "Day"
 end
@@ -328,7 +333,7 @@ function DayCycle.start()
 			(sky :: any)[f] = if src then (src :: any)[f] else baseSky[f]
 		end
 		sky.MoonAngularSize = if src then 7 else baseSky.MoonAngularSize
-		sky.StarCount = if src then 2000 else baseSky.StarCount
+		sky.StarCount = if name == "Night" then 0 elseif src then 2000 else baseSky.StarCount -- (27 Nov: no stars over Yangon)
 		sky.SunAngularSize = if name == "Sunset" then 9 else baseSky.SunAngularSize
 	end
 	RunService.Heartbeat:Connect(function(dt)
