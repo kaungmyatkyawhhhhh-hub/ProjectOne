@@ -59,19 +59,28 @@ Other shots are in `refs_2026-11-27_dala_build/`: a day side view and a grazing 
 - **Toll:** no yellow / black island stripes and no red-white hoop barriers. The booths are opaque white boxes with yellow frames, because see-through glass would show an empty inside.
 - **Unrelated, still open:** the 21 Nov list in `build/city_1to1/rebuild_progress.json` (dala_bridge). That covers the old generic deck still running under the bridge (seen in the side shots), the bend fillers, the lanes, and the Dala end land. The bridge stays out of Workspace until those are done.
 
-## Evening update: real lights instead of neon (owner, 27 Nov)
+## Evening update: no neon, lit like the real one (owner, 27 Nov; built, saved v2342, still in ServerStorage)
 The owner said: "why are the things neon in dala bridge? irl its not neon, the lighting is just really good and nice and bright irl", and "the lighting is not the same".
 
-**Builder changes (`tools/yangon/DalaBridge.luau`):**
-- **Pylons and cables:** they no longer turn Neon at night. They stay plain cream and are lit by real lights.
-- **Pylon floods:** warm-white floodlights (`Flood`: a SpotLight, range 60, brightness 3, angle 70). There are two diagonal floods per level, every ~50 studs, up each leg, lower leg and head shaft.
-- **Lilac:** comes from lilac floods on the inner faces of the legs. The old neon strips (`Wash`) are gone.
-- **Flood LodRange 2500,** so the pylons still read from the banks.
-- **Deck lamps:** they now light like the new street lamps (`Config.NightLamps`, `YangonStreetKit.lampLight`):
-  - a white PointLight hung 14 studs under the head
-  - the `LampHalo` glow sprite, with `MaxDistance` 3000 so the lamp rows show from the banks like in the clip
-  - no SpotLight in the head any more
+![[refs_2026-11-27_dala_build/Compare - v2 side view at night (no neon).jpg]]
+![[refs_2026-11-27_dala_build/Compare - v2 on the deck (no neon).jpg]]
+![[refs_2026-11-27_dala_build/Dala v2 pylon close (no neon).jpg]]
 
-**State:** the changes are in the builder only. Studio was closed while this was being done, so the bridge in ServerStorage is still the earlier version. Rebuild when the place is open, with the steps at the top of this note. Then:
-- compare a night shot with the clip
-- check FPS with ~64 floods + 137 lamp lights (WorldFx turns on only the ones in range)
+**What the bridge does at night now** (builder `tools/yangon/DalaBridge.luau`, rebuilt, 4,799 instances):
+- **Pylons are not Neon any more.**
+  - Every face of the legs, heads and beams shows floodlit concrete at full brightness: SurfaceGui `NightLit`, LightInfluence 0, a tiled concrete picture with formwork lines.
+  - There is no Neon bloom, the grain shows, and it reads from the banks (`MaxDistance` 4000).
+  - The inner faces of the legs use the lilac picture (night clip p2 0:43 / 0:47).
+  - Images: `imports/sync/dala_pylon_lit.png` = 110669942445834, `dala_pylon_lilac.png` = 110183071369087.
+- **Deck lamps** light like the new street lamps:
+  - a white PointLight hung 14 studs under each head (`Config.NightLamps` values)
+  - the `LampHalo` glow sprite with `MaxDistance` 3000, so the lamp row shows from the banks like in the clip
+- **Cables:** a dim night glow on the stays only (140,138,130). The clip's cable fans read pale cream. This is the only Neon left on the bridge apart from the small lamp-type pieces (lamp heads, slot window, under-beam lights, anchor uplights).
+
+**Tried and dropped:** real floodlights (64 SpotLights up the pylons). Roblox drew them as spotty ovals up close and not at all from the bank.
+
+**Needs the street-lamp work in Studio:** the night switch for `LampHalo` (BillboardGui sprites, and now SurfaceGuis too: `IsA("LayerCollector")`) is in `src/client/WorldFx.lua`. That file is the street-lamp session's uncommitted work: my two-word change is in the working copy, but neither is in Studio yet. Until it is synced, the sprites and pylon night faces stay off in Play.
+
+**The same day's NPC fix** ([[2026-11-27 Far NPCs - smoother]]) is now in Studio too:
+- `YangonStreetLife`: my one change applied by find/replace.
+- `Traffic`: another session had already synced the whole file, my change included.

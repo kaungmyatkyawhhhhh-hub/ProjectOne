@@ -25,9 +25,10 @@ Two FPS savings from 6 and 26 Nov made far NPCs move in steps.
 - Cheap now that the owner cut walkers to `PedMax` 20.
 
 ## State
-- **Repo only for now:** Studio had no place open when this was made.
+- **In Studio (saved v2342):** `Traffic` (synced by another session) and `YangonStreetLife` (my one change by find/replace).
+- **Not checked yet:** FPS and smoothness in Play.
+- **Commit note:** commit 09e6cf41 also swept other sessions' uncommitted edits in these two files into the repo.
 - **Still to do:**
-  - Copy `Traffic.lua` and `YangonStreetLife.lua` into Studio (`tools/yangon/pack_sync.py` -> upload -> QuickSync).
   - Watch far traffic in Play.
   - Check FPS on the phone preview.
 - **Before any publish:** the scripts must match (the 26 Nov rule).

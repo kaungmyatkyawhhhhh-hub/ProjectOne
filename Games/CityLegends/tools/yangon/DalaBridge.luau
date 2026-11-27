@@ -64,13 +64,16 @@ local C = {
 	asphalt = Color3.fromRGB(58, 58, 62), concrete = Color3.fromRGB(168, 166, 160), steel = Color3.fromRGB(205, 205, 200),
 	pylon = Color3.fromRGB(214, 210, 198), cable = Color3.fromRGB(226, 222, 204), yellow = Color3.fromRGB(230, 222, 114),
 	white = Color3.fromRGB(235, 235, 230), lamp = Color3.fromRGB(236, 244, 255), rail = Color3.fromRGB(190, 192, 196),
-	-- (27 Nov) no night colours: pylons and cables are not neon any more, real floodlights light them (owner: "irl its not neon")
+	cableNight = Color3.fromRGB(140, 138, 130), -- (27 Nov) a dim night glow on the stays only: the clip's cable fans read pale cream
 	deck = Color3.fromRGB(178, 174, 166), -- pale grey deck under white lamps (night clip p2 1:19, p1 0:21, p1 1:31 concrete)
 	silver = Color3.fromRGB(196, 198, 200), railWhite = Color3.fromRGB(222, 224, 222), capCream = Color3.fromRGB(214, 204, 172),
 	reflector = Color3.fromRGB(240, 196, 40), red = Color3.fromRGB(200, 40, 36), signGreen = Color3.fromRGB(46, 132, 124),
 	bronze = Color3.fromRGB(118, 90, 58), screen = Color3.fromRGB(214, 220, 222),
 }
 
+local LIT_TEX = "rbxassetid://110669942445834" -- imports/sync/dala_pylon_lit.png: floodlit warm-white concrete (night only)
+local LILAC_TEX = "rbxassetid://110183071369087" -- imports/sync/dala_pylon_lilac.png: the legs' inner faces
+local NIGHT_LIT = { Leg = true, LowerLeg = true, Head = true, HeadBeam = true, Cap = true, CrossBeam = true }
 local BARS_TEX = "rbxassetid://128299204776548" -- imports/sync/dala_rail_bars.png (Decal 131639002789551, group 33151111)
 
 local function W(ll) return Vector3.new(30000 + (ll[1] - 96.14) * KX * S, 0, 30000 - (ll[2] - 16.82) * KY * S) end
@@ -146,19 +149,6 @@ local function neon(parent, name, size, cf, color)
 	local p = part(parent, name, size, cf, color, Enum.Material.Neon)
 	p.Transparency = 1
 	p:AddTag("FacadeNight")
-	return p
-end
--- a floodlight: an invisible box whose SpotLight is aimed at `target` (night only through WorldFx's LOD, with a long LodRange
--- so the lit pylons still read from the river bank)
-local function flood(parent, at, target, color, bright, angle)
-	local p = part(parent, "Flood", Vector3.new(0.5, 0.5, 0.5), CFrame.lookAt(at, target), color)
-	p.Transparency = 1
-	local l = Instance.new("SpotLight")
-	l.Face, l.Angle, l.Range, l.Brightness, l.Color, l.Shadows, l.Enabled = Enum.NormalId.Front, angle, 60, bright, color, false, false
-	l:SetAttribute("LodRange", 2500)
-	l:AddTag("LODLight")
-	l:AddTag("DayOff")
-	l.Parent = p
 	return p
 end
 local function beam(parent, name, a, b, tx, ty, color) -- a box from a to b
@@ -503,29 +493,26 @@ function M.build()
 				frameUI(rim, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.9, 0.88), C.bronze)
 			end
 		end
-		-- (27 Nov, owner: "irl its not neon, the lighting is just really good and nice and bright") the pylon is plain cream
-		-- concrete lit by warm-white floods; lilac floods on the inner faces of the legs (night clip p2 0:43 / 0:47)
-		local warm, lilac = Color3.fromRGB(255, 242, 222), Color3.fromRGB(168, 132, 255)
+		-- (27 Nov, owner: "irl its not neon, the lighting is just really good and nice and bright") at night every face of the
+		-- pylon shows floodlit concrete at full brightness (SurfaceGui, LightInfluence 0, no Neon bloom, seen from the banks);
+		-- the inner faces of the legs lilac (night clip p2 0:43 / 0:47). Real lights were tried: Roblox drew them as spotty
+		-- ovals up close and not at all from the bank. WorldFx shows them at night (tag LampHalo)
+		local mid = pf.PileCap.Position
 		for _, pc in pf:GetChildren() do
-			if pc.Name == "Leg" or pc.Name == "LowerLeg" or pc.Name == "Head" then
-				local c = pc.CFrame
-				local axis = if pc.Name == "Head" then c.UpVector else c.LookVector
-				local len = if pc.Name == "Head" then pc.Size.Y else pc.Size.Z
-				local across = if pc.Name == "Head" then c.LookVector else c.UpVector -- along the road
-				local levels = math.max(2, math.floor(len / 50))
-				for k = 1, levels do
-					local q = c.Position + axis * len * ((k - 0.5) / levels - 0.5)
-					for _, sd in { 1, -1 } do
-						local off = (c.RightVector * sd + across * sd).Unit * 16
-						flood(pf, q + off - axis * 6, q + axis * 6, warm, 3, 70)
-					end
-				end
-				if pc.Name == "Leg" then
-					local inward = -math.sign(base:PointToObjectSpace(pc.Position).X) * base.RightVector
-					for _, t in { -0.15, 0.2 } do
-						local q = c.Position + axis * len * t
-						flood(pf, q + inward * 14 - axis * 4, q, lilac, 4, 50)
-					end
+			if NIGHT_LIT[pc.Name] then
+				for _, face in Enum.NormalId:GetEnumItems() do
+					local nrm = pc.CFrame:VectorToWorldSpace(Vector3.FromNormalId(face))
+					local toMid = Vector3.new(mid.X - pc.Position.X, 0, mid.Z - pc.Position.Z)
+					local inner = (pc.Name == "Leg" or pc.Name == "LowerLeg") and toMid.Magnitude > 1 and nrm:Dot(toMid.Unit) > 0.5
+					local g = Instance.new("SurfaceGui")
+					g.Name, g.Face, g.LightInfluence, g.Brightness, g.Enabled = "NightLit", face, 0, 1, false
+					g.SizingMode, g.PixelsPerStud, g.MaxDistance = Enum.SurfaceGuiSizingMode.PixelsPerStud, 4, 4000
+					local img = Instance.new("ImageLabel")
+					img.Size, img.BackgroundTransparency, img.Image = UDim2.fromScale(1, 1), 1, if inner then LILAC_TEX else LIT_TEX
+					img.ScaleType, img.TileSize = Enum.ScaleType.Tile, UDim2.fromOffset(128, 128) -- 32 studs a tile
+					img.Parent = g
+					g:AddTag("LampHalo")
+					g.Parent = pc
 				end
 			end
 		end
@@ -560,7 +547,7 @@ function M.build()
 					local a = (df * CFrame.new(sx * 10.6 * S, 0.6, 0)).Position -- on the anchor strip
 					local b = P(sx * 2.6, hTop, side * 1.5)
 					local u = (b - a).Unit
-					rod(cables, "Stay", a + u * 1.4 * S, b, 0.9, C.cable)
+					glow(rod(cables, "Stay", a + u * 1.4 * S, b, 0.9, C.cable), C.cableNight)
 					-- the cream bell anchor cap (night clip p2 1:19 / 1:23, p1 0:21): wide bell on the strip, body up the cable
 					rod(cables, "CapBell", a - u * 0.25 * S, a + u * 0.45 * S, 0.85 * S, C.capCream)
 					rod(cables, "CapBody", a + u * 0.4 * S, a + u * 1.6 * S, 0.55 * S, C.capCream)
@@ -598,7 +585,7 @@ function M.build()
 	end
 	flush(piers)
 
-	-- ---- lamps: white (the game's Yangon lamp colours), on the outer barriers; a SpotLight on every fourth ----
+	-- ---- lamps: white (the game's Yangon lamp colours), on the outer barriers; light and glow like the street lamps ----
 	local lamps = group("Lamps")
 	local nLamp = 0
 	local function lamp(L, s, sx)
