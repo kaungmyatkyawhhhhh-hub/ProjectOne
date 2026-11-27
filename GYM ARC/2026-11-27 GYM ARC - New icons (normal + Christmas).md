@@ -227,3 +227,5 @@ Test "taller" separately with a small starter avatar next to the giant.
 - Uploaded `v9/gymarc_v16_bluedb_512.png` in Creator Hub → Places → GYM ARC (80031260599632) → Icon → Save. Universe 10769199336.
 - It replaced the old tanned-bodybuilder icon with the "1000 LB" plate.
 - Thumbnails API right after: state `InReview` (Roblox moderation); it goes live once approved.
+- **Update (same evening):** the owner said "actually do golden v17". Uploaded `v9/gymarc_v17_gold_512.png`; it's live and approved (thumbnails API state `Completed`, the colour check matches gold v17).
+  - The first Save click didn't take; I uploaded it again, then clicked Save.
