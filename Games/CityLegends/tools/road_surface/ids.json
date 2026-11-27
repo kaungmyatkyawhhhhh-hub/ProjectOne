@@ -1,17 +1,18 @@
 {
  "_note": "Open Cloud images (group 33151111) of road_textures.py's maps, 27 Nov 2026. v2: asphalt colour without blotches, street-aligned concrete (concrete_street).",
  "YgnRoadAsphalt": {
-  "color": 77760241649520,
-  "normal": 106226455470004,
-  "roughness": 119840276812247,
-  "StudsPerTile": 40,
-  "_v": "v3: grain 0.11, normal x15; StudsPerTile 40 (12 / 24 faded to plain grey at driving distance, tested in Play 27 Nov)"
+  "color": 132495685801163,
+  "normal": 111398551171073,
+  "roughness": 118818663269495,
+  "StudsPerTile": 16,
+  "_v": "v4: hard-edged 1-3 px stones, dark binder (owner: small sharp, not big blurry rubble)"
  },
  "YgnRoadConcrete": {
-  "color": 130716823674053,
-  "normal": 135714052142659,
-  "roughness": 98118529041453,
-  "_as": "SurfaceAppearance YgnRoadConcreteSA (street UVs)"
+  "color": 140378176617994,
+  "normal": 131246815654167,
+  "roughness": 111691553348338,
+  "_as": "SurfaceAppearance YgnRoadConcreteSA (street UVs)",
+  "_v": "v4: continuous cast concrete, no joints/panels, irregular non-mirrored wear (owner 27 Nov)"
  },
  "_decals": {
   "asphalt": [

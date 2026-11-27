@@ -2,7 +2,7 @@
 the big roads & overhead roads are always asphalt"; vault `City Legends/2026-11-27 Roads - realistic surfaces by road type.md`).
 
 Tileable 1024 px maps, all procedural (numpy + PIL), seeded = rebuildable:
-  asphalt_*   big roads + flyover decks (MaterialVariant YgnRoadAsphalt, base Asphalt, StudsPerTile 40 (v3, owner 27 Nov: the grain must show at driving distance; finer tiles fade to plain grey)):
+  asphalt_*   big roads + flyover decks (MaterialVariant YgnRoadAsphalt, base Asphalt, StudsPerTile 16 (v4, owner 27 Nov: small sharp stones, not big blurry rubble)):
               aggregate stones in dark binder (some pale quartz chips), tone blotches at two sizes (about 8 and 2 studs)
               so the 24-stud repeat doesn't read, no cracks (cracks / patches / tar seams are mesh regions, sparse);
               normal = stones raised; roughness = binder 0.9, stone tops 0.45-0.65 (sun sparkle).
@@ -81,19 +81,36 @@ def grain(rng, sigma):
 
 
 def asphalt():
+    """v4 (owner 27 Nov: "the asphalt road texture rubbles are too big ... they look blurry ... need to be sharp"):
+    crisp, small aggregate - hard-edged stones 1-3 px (StudsPerTile 16: 64 px a stud, stones about 0.5-1.5 cm), each its
+    own grey, in a dark binder with fine sand; domed normal per stone; stone tops glossier. No soft blur, no blotches."""
+    from scipy.spatial import cKDTree
     rng = np.random.default_rng(1127)
-    g = 0.55 * grain(rng, 0.7) + 0.45 * grain(rng, 1.5)   # aggregate grain (stones about 1-2 cm = 1-3 px)
-    chips = np.clip(blur((rng.random((N, N)) > 0.9965).astype(float), 0.6) * 9, 0, 1)   # pale quartz chips
-    tone_l = fbm(rng, ((4, 0.6), (8, 0.4)))     # about 6-8 stud blotches (stops the 24-stud tile reading)
-    tone_s = fbm(rng, ((16, 0.5), (32, 0.5)))   # about 1-2 stud blotches
-    v = 0.55 + 0.11 * np.clip(g, -2.5, 2.5) + 0.022 * (tone_l - 0.5) + 0.012 * (tone_s - 0.5)   # owner 27 Nov: fine even speckle, no blotches
-    v = v * (1 - chips) + 0.80 * chips
-    v = v / v.mean() * 0.59                                # mean about 150
-    rgb = np.dstack([v * 0.99, v * 1.0, v * 1.015])        # very slightly cool, as dry tarmac
-    peak = np.clip((g - 1.0) / 1.2, 0, 1)                  # stone tops: smoother, catch the sun
-    rough = 0.93 - 0.40 * peak - 0.25 * chips - 0.03 * (tone_l - 0.5)
+    n = 60000
+    pts = rng.random((n, 2)) * N
+    rad = rng.uniform(0.9, 2.6, n) * (rng.random(n) < 0.85) + rng.uniform(2.6, 4.2, n) * 0   # mostly small stones
+    rad = np.where(rad == 0, rng.uniform(2.6, 3.8, n), rad)
+    tone = np.where(rng.random(n) < 0.03, rng.uniform(0.62, 0.74, n), rng.uniform(0.27, 0.46, n))   # a few pale chips
+    off = np.array([(dx, dy) for dx in (-N, 0, N) for dy in (-N, 0, N)])
+    tree = cKDTree(np.concatenate([pts + o for o in off]))
+    yy, xx = np.mgrid[0:N, 0:N]
+    q = np.stack([xx.ravel() + 0.5, yy.ravel() + 0.5], 1)
+    d, i = tree.query(q)
+    i = i % n
+    d = d.reshape(N, N)
+    i = i.reshape(N, N)
+    r = rad[i]
+    stone = d < r
+    dome = np.where(stone, np.sqrt(np.maximum(r * r - d * d, 0)) / r, 0)
+    sand = rng.random((N, N))
+    binder = 0.19 + 0.05 * sand
+    v = np.where(stone, tone[i] * (0.85 + 0.15 * dome), binder)
+    v = v / v.mean() * 0.42
+    rgb = np.dstack([v * 0.99, v * 1.0, v * 1.015])
+    h = dome * 1.0 + 0.15 * sand
+    rough = np.where(stone, 0.55 - 0.15 * dome, 0.95)
     save('asphalt_color.png', rgb, 'RGB')
-    save("asphalt_normal.png", normal_map(0.12 * g + 0.25 * chips, 15.0), "RGB")
+    save('asphalt_normal.png', normal_map(h, 2.2), 'RGB')
     save('asphalt_roughness.png', rough, 'L')
     return v
 
@@ -153,63 +170,57 @@ def agrain(rng, sigma):
 
 
 def concrete_street():
-    rng = np.random.default_rng(1711)
-    U = (np.arange(N) + 0.5) / PXU                   # studs along, per column
-    V = (np.arange(N) + 0.5) / PXV                   # studs across, per row (0 = centre line)
-    Vs = np.where(V > SPAN_V / 2, V - SPAN_V, V)     # signed: -16 .. 16
+    """small-street cast concrete, v4 (owner 27 Nov: "i dont think concrete comes in panels and symmetrical gradient
+    line?"): ONE continuous surface - no slab joints, no centre joint, no per-panel tones, nothing mirrored across the
+    street. Irregular soft blotches at several sizes, two tyre-polish paths that wander and fade (not symmetric), oil /
+    dirt stains, a few random hairline cracks and two blobby cement repairs. Tile = 64 studs along x 32 across."""
+    rng = np.random.default_rng(1811)
+    U = (np.arange(N) + 0.5) / PXU
+    V = (np.arange(N) + 0.5) / PXV
+    Vs = np.where(V > SPAN_V / 2, V - SPAN_V, V)      # -16 .. 16 from the centre line
     uu, vv = np.meshgrid(U, Vs)
-    slab = (uu // 16).astype(int)                    # 4 slabs along
-    side = (vv > 0).astype(int)
-    tones = 1 + rng.uniform(-0.07, 0.07, (4, 2))
-    v = tones[slab, side] * (0.70 + 0.035 * agrain(rng, 0.03) + 0.02 * agrain(rng, 0.12))
-    # broad stains (tile-sized, soft) and worn spots
-    stain = np.clip((ablur(rng.random((N, N)), 2.0, 2.0) - 0.5) * 40 + 0.0, 0, 1)
-    v *= 1 - 0.10 * np.clip(ablur(rng.standard_normal((N, N)), 2.5, 1.2) * 6, 0, 1)
-    # tyre paths: one lane each way, wheels at about 4.5 and 8.5 studs from the centre, worn darker + smoother
-    track = sum(np.exp(-((np.abs(vv) - c) / 0.9) ** 2) for c in (4.3, 8.7))
-    track = track * (0.85 + 0.3 * ablur(rng.random((N, N)), 3.0, 0.4))
-    v *= 1 - 0.14 * np.clip(track, 0, 1.2)
-    # dust and grime toward the edges (most lanes are about 20 studs wide: edges at 9-11 from the centre)
-    edge = np.clip((np.abs(vv) - 8.5) / 2.5, 0, 1) * (0.8 + 0.4 * ablur(rng.random((N, N)), 1.5, 0.6))
-    # repaired slab: slab 2, side 0 darker and greyer, sharp edge
-    rep = (slab == 2) & (side == 0) & (np.abs(vv) > 0.3)
-    v = np.where(rep, v * 0.74, v)
-    # spalled corner: slab 1, side 1, at the joint near the centre
-    cu, cv = 16.0, 0.0
-    du, dv = uu - cu, vv - cv
-    spall = (du > 0) & (dv > 0) & (du / 3.2 + dv / 2.2 + 0.25 * np.sin(du * 3) < 1)
-    rim = (du > 0) & (dv > 0) & ~spall & (du / 3.7 + dv / 2.6 + 0.25 * np.sin(du * 3) < 1)
-    v = np.where(spall, v * 0.62, np.where(rim, v * 0.8, v))
-    # hairline cracks: across slab 0 side 0 and slab 3 side 1, along slab 1 side 0
+
+    def soft(su, sv):
+        g = ablur(rng.standard_normal((N, N)), su, sv)
+        return (g - g.mean()) / g.std()
+
+    v = 0.70 + 0.030 * agrain(rng, 0.03) + 0.015 * agrain(rng, 0.10)
+    v *= 1 + 0.045 * soft(6.0, 4.0) + 0.030 * soft(2.5, 1.8) + 0.015 * soft(0.9, 0.7)   # irregular tone, no panels
+    # tyre polish: two paths that wander along the street and fade in and out, at different offsets (not mirrored)
+    track = np.zeros((N, N))
+    for c0, amp, k, ph in ((4.6, 1.3, 1, 0.7), (-6.3, 1.0, 2, 2.1)):
+        centre = c0 + amp * np.sin(2 * np.pi * k * uu / SPAN_U + ph) + 0.5 * np.sin(2 * np.pi * (k + 2) * uu / SPAN_U + ph * 1.7)
+        width = 1.1 + 0.35 * np.sin(2 * np.pi * 3 * uu / SPAN_U + ph)
+        track += np.exp(-((vv - centre) / width) ** 2)
+    fade = np.clip(0.55 + 0.6 * soft(9.0, 6.0), 0, 1)
+    track = np.clip(track, 0, 1) * fade
+    v *= 1 - 0.07 * track
+    # stains: a few soft dark oil / water marks, brownish dirt blotches
+    oil = np.clip((soft(1.8, 1.4) - 1.6) / 1.2, 0, 1)
+    dirt = np.clip((soft(4.0, 3.0) - 1.0) / 1.5, 0, 1)
+    v *= 1 - 0.16 * oil
+    # two blobby cement repairs (irregular outlines, slightly greyer and smoother)
+    rep = soft(1.6, 1.3) > 2.3   # a few irregular cement repairs (noise islands, not shapes)
+    v = np.where(rep, v * 0.86 + 0.02, v)
+    # a few random hairline cracks
     crack = np.zeros((N, N))
-    def walk(u0, v0, ang, length):
-        u, w, a = u0, v0, ang
-        for _ in range(int(length / 0.08)):
-            a += rng.normal(0, 0.06)
+    for _ in range(5):
+        u, w, a = rng.uniform(0, SPAN_U), rng.uniform(-14, 14), rng.uniform(0, 2 * np.pi)
+        for _ in range(int(rng.uniform(4, 11) / 0.08)):
+            a += rng.normal(0, 0.09)
             u, w = u + np.cos(a) * 0.08, w + np.sin(a) * 0.08
-            c, r = int((u % SPAN_U) * PXU), int((w % SPAN_V) * PXV)
-            crack[r, c] = 1
-    walk(9.0, 0.5, np.pi / 2 + 0.2, 13)       # across a whole half, slab 0
-    walk(57.0, -0.5, -np.pi / 2 - 0.1, 9)     # across, slab 3, other side
-    walk(18.0, 5.5, 0.05, 10)                 # along, slab 1
-    walk(40.0, -11.0, 0.3, 4)                 # short one near an edge
-    crack = np.clip(ablur(crack, 0.03, 0.03) * 8, 0, 1)
-    v *= 1 - 0.35 * crack
-    # sawn joints: across at 0 / 16 / 32 / 48 studs, along the centre (V = 0, wraps): dark, slightly worn wide
-    ju = np.minimum(uu % 16, 16 - uu % 16)
-    jv = np.abs(vv)
-    joint = np.clip(1 - (np.minimum(ju, jv) - 0.12) / 0.12, 0, 1)
-    v *= 1 - 0.45 * joint
-    v = v / v.mean() * 0.62
+            crack[int((w % SPAN_V) * PXV) % N, int((u % SPAN_U) * PXU) % N] = 1
+    crack = np.clip(ablur(crack, 0.03, 0.03) * 7, 0, 1)
+    v *= 1 - 0.30 * crack
+    v = v / v.mean() * 0.64
     rgb = np.dstack([v * 1.0, v * 0.995, v * 0.965])
-    rgb = rgb * (1 - edge[..., None] * np.array([0.05, 0.07, 0.12]))   # brown-grey dirt
-    h = 0.4 * agrain(rng, 0.03) * 0.15 - 1.5 * joint - 0.8 * crack - 0.6 * spall + 0.1 * rep
-    rough = np.clip(0.84 - 0.10 * np.clip(track, 0, 1) + 0.05 * spall, 0, 1)
+    rgb = rgb * (1 - dirt[..., None] * np.array([0.04, 0.06, 0.10]))
+    h = 0.06 * agrain(rng, 0.03) - 0.8 * crack + 0.05 * rep
+    rough = np.clip(0.85 - 0.12 * track - 0.06 * rep - 0.1 * oil, 0, 1)
     save('concrete_color.png', rgb, 'RGB')
     save('concrete_normal.png', normal_map(h, 3.0), 'RGB')
     save('concrete_roughness.png', rough, 'L')
     return v
-
 
 if __name__ == '__main__':
     a = asphalt()

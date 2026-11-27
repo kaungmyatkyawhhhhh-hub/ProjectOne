@@ -22,16 +22,16 @@ local SS = game:GetService("ServerStorage")
 local S = {}
 
 S.IDS = {
-	YgnRoadAsphalt = { color = 77760241649520, normal = 106226455470004, roughness = 119840276812247, base = Enum.Material.Asphalt, spt = 40 }, -- v3; 40 studs a tile so the grain still reads at driving distance (12 and 24 faded to plain grey)
-	YgnRoadConcrete = { color = 130716823674053, normal = 135714052142659, roughness = 98118529041453, base = Enum.Material.Concrete, spt = 32 },
+	YgnRoadAsphalt = { color = 132495685801163, normal = 111398551171073, roughness = 118818663269495, base = Enum.Material.Asphalt, spt = 16 }, -- v4: small sharp stones (owner 27 Nov: "rubbles too big ... blurry")
+	YgnRoadConcrete = { color = 140378176617994, normal = 131246815654167, roughness = 111691553348338, base = Enum.Material.Concrete, spt = 32 },
 }
 
 -- kind -> { base material, variant, colour } (the maps are neutral grey: the colour sets the shade)
 S.LOOK = {
-	R = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(78, 78, 80) }, -- owner 27 Nov: dark charcoal (swatch 25,25,25), a bit lighter than the old near-black
+	R = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(110, 110, 112) }, -- owner 27 Nov: dark charcoal (swatch 25,25,25); the v4 map is darker (mean 0.42), so the tint is higher
 	RP = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(112, 112, 116) },
 	RT = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(62, 62, 66) },
-	RA = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(104, 103, 100) }, -- lane asphalt: a little lighter
+	RA = { Enum.Material.Asphalt, "YgnRoadAsphalt", Color3.fromRGB(140, 139, 135) }, -- lane asphalt: a little lighter
 	RC = { Enum.Material.Concrete, "YgnRoadConcrete", Color3.fromRGB(228, 224, 214) }, -- SurfaceAppearance tint (pale, as the lane clips)
 	RU = { Enum.Material.Pebble, "YgnGravel", Color3.fromRGB(176, 160, 136) },
 }
