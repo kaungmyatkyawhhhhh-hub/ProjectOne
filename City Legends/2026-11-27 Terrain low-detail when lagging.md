@@ -56,3 +56,32 @@ Main cost: rendering, not scripts. Terrain is the biggest share, because the 409
   - fewer terrain materials under roads, where nobody sees them (today's Asphalt / Concrete beds add material changes per chunk);
   - plain parts for far ground.
 - Fewer shadow casters: 19,884 parts cast shadows. Small props, kerbs and road pieces could have `CastShadow` off.
+
+## Round 2: lag cuts (28 Nov, measured in Studio Play, v2424)
+Same three spots each time (by Myanmar Plaza): **A** a street at car height, **B** the grass field, **C** an aerial over the city. Studio was throttled to 15 fps (window not in front), so the render CPU time per frame is the number to compare. FrameRateManager's batch count barely moved at 15 fps.
+
+| Cut | Before | After |
+|---|---|---|
+| **1. Small props / flat pieces stop casting shadows** (`client/ShadowTrim.lua`) | 20,869 shadow casters | 16,007 (5,502 trimmed in the map folders) |
+| render CPU at A / B / C | 16.2 / 15.2 / 19.0 ms | 14.2 / 14.6 / 15.0 ms |
+| **2. Terrain under roads back to Grass** (test only, a 2.5 km square, client side) | C terrain: 1,724 batches, 2.42 M indices | 1,720 batches, 2.42 M indices: **no cost**, so the 27 Nov pavement-gap pass stays |
+| **3. Hidden terrain carved out** (test only, under 2,266 road / pavement boxes round C, keeping a 4-stud layer) | 1,720 batches, 2.42 M indices | 1,669-1,708 batches, 2.26-2.37 M indices: **-2 to -7%, inside the noise** |
+
+- **ShadowTrim:**
+  - A part stops casting shadows when its biggest size is under 3 studs, or it stands under 6 studs tall.
+  - Trees, palms, lamps (by name) and anything inside a car model keep their shadows. Car models are spotted by Chassis / Wheels / DriveSeat / VehicleSeat / CarId.
+  - Owner rule (28 Nov): cars are never touched. Traffic (180 casters) and YangonStreetLife are not in the watched folders.
+  - It watches Yangon1to1, YgnKitNear, YangonRoadside, YangonMedians and City, so streamed and client-built parts follow the rule too.
+  - Buildings (9,636 shells) and kit walls (5,327) keep their shadows.
+  - Checked live in Play: 11,301 map parts still cast, 23,728 don't, no errors.
+- **Carving buried terrain is not done.**
+  - Terrain only draws its outer surface; the buried volume costs nothing. Here it is a thin skin about 19 studs deep: surface 69% Grass, 27% Asphalt / Concrete / Pavement under roads.
+  - Carving the inside adds an underside, and carving the top away leaves walls at the road edges.
+  - The test saved about 4% of the terrain triangles, which is within the noise. For a whole-map, hard-to-undo terrain edit that isn't worth it.
+  - The visual check after the test carve showed no holes (street shot unchanged).
+- **Terrain is still the biggest single cost:** about 1,700 draw calls and 2.3-2.5 M indices at every spot, the same with or without sun shadows. It comes from how far terrain is streamed (StreamingTargetRadius 4096).
+- **Streaming per device is not possible:**
+  - `StreamingTargetRadius` / `MinRadius` are one value for the whole place, set on the server. No API sets them per player.
+  - Roblox already streams out early on low-memory devices (Opportunistic).
+  - The only real lever is the place-wide radius, which is the owner's call (4096 since 27 Nov). Shwedagon (Persistent) and the client-side lamp look-ahead don't depend on it.
+- **Fix:** the 27 Nov preload read `MaterialVariant.ColorMap`, which game scripts can't read ("lacking capability Plugin"). It now preloads the variant instances themselves. Not yet re-checked in Play.
