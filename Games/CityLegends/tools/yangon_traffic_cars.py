@@ -125,6 +125,27 @@ class Car:
             m.quad(self.pt(hw(p0[1]), p0[1], p0[0]), self.pt(hw(p1[1]), p1[1], p1[0]),
                    self.pt(-hw(p1[1]), p1[1], p1[0]), self.pt(-hw(p0[1]), p0[1], p0[0]), col)
 
+    def pillar(self, m, prof, hin, hout, col):
+        """a window pillar: a slab on each side between the glass (hin) and hout. Never across the car: the
+        profile is clipped from the glass, so a face across would lie in the windscreen's plane (2026-11-27,
+        owner: "car windshields are flickering / overlapping")"""
+        if area2(prof) < 0:
+            prof = prof[::-1]
+        tris = ear_clip(prof)
+        for s in (1, -1):
+            for (i, j, k) in tris:
+                P = [self.pt(s * hout(prof[q][1]), prof[q][1], prof[q][0]) for q in (i, j, k)]
+                if s > 0:
+                    m.tri(P[0], P[2], P[1], col)
+                else:
+                    m.tri(P[0], P[1], P[2], col)
+        for q in range(len(prof)):
+            p0, p1 = prof[q], prof[(q + 1) % len(prof)]
+            m.quad(self.pt(hout(p0[1]), p0[1], p0[0]), self.pt(hout(p1[1]), p1[1], p1[0]),
+                   self.pt(hin(p1[1]), p1[1], p1[0]), self.pt(hin(p0[1]), p0[1], p0[0]), col)
+            m.quad(self.pt(-hin(p0[1]), p0[1], p0[0]), self.pt(-hin(p1[1]), p1[1], p1[0]),
+                   self.pt(-hout(p1[1]), p1[1], p1[0]), self.pt(-hout(p0[1]), p0[1], p0[0]), col)
+
     def box(self, m, x0, x1, y0, y1, a0, a1, col):
         c = [self.pt(x, y, a) for a in (a0, a1) for y in (y0, y1) for x in (x0, x1)]
         # c index = ai*4 + yi*2 + xi
@@ -197,7 +218,7 @@ def probox():
     for a0, a1 in ((0.03, 0.20), (1.30, 1.40), (2.30, 2.50), (2.92, 3.22)):  # D, C(B), A pillars
         part = clip_a(gh, a0, a1)
         if part:
-            c.extrude(c.body, part, lambda y: ghw(y) + 0.02, PAINT)
+            c.pillar(c.body, part, ghw, lambda y: ghw(y) + 0.02, PAINT)
     # lamps, grille, bumpers, mirrors, the taxi roof sign
     c.pair(c.detail, 0.40, 0.78, 0.58, 0.74, L - 0.02, L + 0.02, LAMP)
     c.box(c.detail, -0.38, 0.38, 0.46, 0.68, L - 0.02, L + 0.015, TRIM)
@@ -228,7 +249,7 @@ def hiace():
     for a0, a1 in ((0.02, 0.16), (1.05, 1.95), (2.85, 3.00), (3.60, 3.80), (4.00, 4.30)):
         part = clip_a(gh, a0, a1)
         if part:
-            c.extrude(c.body, part, lambda y: ghw(y) + 0.02, PAINT)
+            c.pillar(c.body, part, ghw, lambda y: ghw(y) + 0.02, PAINT)
     c.pair(c.detail, 0.45, 0.80, 0.78, 0.94, L - 0.02, L + 0.02, LAMP)
     c.box(c.detail, -0.42, 0.42, 0.62, 0.86, L - 0.02, L + 0.015, TRIM)
     c.box(c.detail, -W / 2 + 0.02, W / 2 - 0.02, 0.22, 0.44, L - 0.04, L + 0.06, TRIM)
@@ -254,10 +275,11 @@ def carry():
     c.extrude(c.detail, gh, ghw, GLASS)
     c.extrude(c.body, [(cab0 + 0.02, H - 0.03), (L - 0.29, H - 0.03), (L - 0.31, H), (cab0 + 0.04, H)],
               lambda y: ghw(H - 0.03) + 0.015, PAINT)
-    for a0, a1 in ((cab0, cab0 + 0.55), (L - 0.50, L - 0.06)):  # the cab's back wall and the door pillar
-        part = clip_a(gh, a0, a1)
-        if part:
-            c.extrude(c.body, part, lambda y: ghw(y) + 0.02, PAINT)
+    # the cab's back wall: across the car, 0.02 behind the glass (never in its plane)
+    c.extrude(c.body, [(a - 0.02, H if y > H - 0.035 else y) for a, y in clip_a(gh, cab0, cab0 + 0.55)],
+              lambda y: ghw(min(y, H - 0.03)) + 0.02, PAINT)
+    part = clip_a(gh, L - 0.50, L - 0.06)  # the door pillar
+    c.pillar(c.body, part, ghw, lambda y: ghw(y) + 0.02, PAINT)
     # the bed: chassis, floor, low drop sides (white), a headboard guard
     c.box(c.detail, -0.35, 0.35, 0.30, 0.55, 0.30, cab0, TRIM)
     c.box(c.detail, -W / 2, W / 2, 0.55, 0.66, 0.0, cab0 - 0.03, (0.55, 0.56, 0.58))
@@ -290,15 +312,15 @@ def ybs_bus():
     while a < L - 1.0:
         part = clip_a(gh, a, a + 0.12)
         if part:
-            c.extrude(c.body, part, lambda y: ghw(y) + 0.02, PAINT)
+            c.pillar(c.body, part, ghw, lambda y: ghw(y) + 0.02, PAINT)
         a += 1.2
     c.extrude(c.detail, [(0.0, 2.85), (L - 0.10, 2.85), (L - 0.10, H - 0.05), (0.05, H - 0.05)], hw, WHITE)
     c.box(c.detail, -W / 2 + 0.15, W / 2 - 0.15, H - 0.05, H + 0.05, 1.0, L - 1.5, (0.78, 0.79, 0.80))
     c.box(c.detail, -0.80, 0.80, 2.55, 2.80, L - 0.11, L - 0.07, WHITE)
     c.box(c.detail, -0.70, 0.70, 2.58, 2.77, L - 0.07, L - 0.05, (0.12, 0.05, 0.03))
     c.pair(c.detail, 0.85, 1.15, 0.65, 0.85, L - 0.02, L + 0.02, LAMP)
-    c.box(c.detail, -W / 2, W / 2, 0.32, 0.58, L - 0.03, L + 0.07, TRIM)
-    c.box(c.detail, -W / 2, W / 2, 0.34, 0.58, -0.07, 0.02, TRIM)
+    c.box(c.detail, -W / 2 - 0.02, W / 2 + 0.02, 0.32, 0.58, L - 0.03, L + 0.07, TRIM)  # (0.02 proud: not in the side's plane)
+    c.box(c.detail, -W / 2 - 0.02, W / 2 + 0.02, 0.34, 0.58, -0.07, 0.02, TRIM)
     c.pair(c.detail, 0.95, 1.20, 0.70, 1.20, -0.02, 0.02, TAIL)
     c.pair(c.detail, W / 2, W / 2 + 0.20, 2.10, 2.40, L - 0.25, L - 0.15, TRIM)
     c.four(af, ar, r, 0.28, W / 2 - 0.20)
