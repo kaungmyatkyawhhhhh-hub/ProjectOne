@@ -31,9 +31,9 @@ class M:
 def bulb(m, c, x, z_top, S, w=16, h=46, ang=0.0):
     """C9 bulb hanging from z_top: black socket then a teardrop pointing down (sheet: 32 px wide, ~46 px tall), tilted by ang about Y."""
     n0 = {k: len(v) for k, v in m.V.items()}
-    m.lathe("Wire", [(6 * S, z_top - 12 * S), (6 * S, z_top)], 6, (x, 0))
+    m.lathe("Wire", [(9 * S, z_top - 14 * S), (9 * S, z_top)], 6, (x, 0))
     prof = [(0.01 * S, z_top - 12 * S - h * S), (w * 0.55 * S, z_top - 12 * S - h * 0.82 * S), (w * S, z_top - 12 * S - h * 0.45 * S),
-            (w * 0.8 * S, z_top - 12 * S - h * 0.12 * S), (6.5 * S, z_top - 12 * S)]
+            (w * 0.8 * S, z_top - 12 * S - h * 0.12 * S), (8 * S, z_top - 12 * S)]
     m.lathe(c, prof, 8, (x, 0))
     if ang:
         for k in (c, "Wire"):
@@ -88,7 +88,7 @@ for p0, p1 in ((245, 309), (541, 604)):
     m.box("Wood", X(p0), X(p1), -h, h, 0, Z(197))
     m.box("WoodDark", X(c) - 37 * S, X(c) + 37 * S, -37 * S, 37 * S, Z(197), Z(171))           # cap block
     m.pyramid("Snow", X(c), 0, 37 * S, Z(171), Z(133))                                          # snow-topped pointed cap
-for y0, y1 in ((205, 229), (277, 301)):
+for y0, y1 in ((203, 233), (275, 306)):
     m.box("Wood", X(300), X(550), -10 * S, 10 * S, Z(y1), Z(y0))
 wire(m, [(X(x), Z(186 + 8 * (1 - ((x - 424) / 120) ** 2))) for x in range(309, 545, 12)], 2.5 * S)
 for x, c in ((352, "Red"), (426, "Yellow"), (499, "Green")):
@@ -132,5 +132,5 @@ wy = lambda x: 869 + 36 * (1 - ((x - CX) / 203.5) ** 2)
 wire(m, [(X(x), Z(wy(x))) for x in range(234, 646, 14)], 3 * S)
 for x, c in zip((257, 315, 375, 436, 496, 556, 616), ("Red", "Yellow", "Green", "Blue", "Red", "Yellow", "Green")):
     slope = 72 * (x - CX) / 203.5 ** 2          # d(wy)/dx in px
-    bulb(m, c, X(x), Z(wy(x) + 2), S, ang=-math.atan(slope))
+    bulb(m, c, X(x), Z(wy(x) + 2), S, 17, 48, ang=-0.35 * math.atan(slope))
 export(m, "LightString", {"front": (S, CX, ZY, False)})
