@@ -17,7 +17,7 @@ inner &= ~np.isin(lab, ring)
 # split the words by height (GYM on top, ARC below): colour-based split left the chrome highlight lines in ARC
 rows = np.nonzero(inner.any(1))[0]; prof = inner.sum(1)
 mid = rows.min() + (rows.max()-rows.min())//3 + int(np.argmin(prof[rows.min() + (rows.max()-rows.min())//3: rows.min() + 2*(rows.max()-rows.min())//3]))
-letters = ndimage.binary_closing(inner, iterations=2) & (dist > 8)
+letters = ndimage.binary_closing(inner, iterations=5) & (dist > 30)
 gym = letters.copy(); gym[mid:] = False
 arc = letters.copy(); arc[:mid] = False
 H = a.shape[0]; yy = np.arange(H)[:, None]

@@ -113,3 +113,7 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 - Measured palettes (k-means): Power Lifters is 32% near-black plum, purple only as glow, orange skin. Gym Star: dark teal base, cyan light, warm skin. Ours was 23% flat saturated blue.
 - Three designed palettes rendered in ChatGPT, background and lighting only: midnight navy + amber, deep teal + gold, crimson + gold. Logos: `icon_render_25nov/gymarc_logo_v12_{navy,teal,crimson}.png` (`recolor_logo_palette.py`).
 - Sheet: `v9/palette_options_v9.png`.
+
+## v10 logos (27 Nov, owner: "i still dont like the gradient")
+- The old logo had chrome bands and stripes in the letters. Rebuilt Power Lifters style: clean white "GYM", a soft-fade colour "ARC", a black plate and a thick orange neon border glow (`icon_render_25nov/logo_clean_fill.py` makes `gymarc_logo_v13_{navy,teal,crimson}.png`).
+- Icons: `v9/gymarc_v10_{navy,teal,crimson}.png`, logo at 0.58 of the width. Sheet: `v9/logo_options_v10.png`.
