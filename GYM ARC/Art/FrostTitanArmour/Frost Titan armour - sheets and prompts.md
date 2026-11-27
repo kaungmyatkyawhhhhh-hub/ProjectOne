@@ -42,8 +42,16 @@ Scripts here, rebuild from them: `analyse_sheet.py` (sheet -> `profiles.json`, m
 
 Export: `FrostTitanArmour.fbx`, 10 objects (PauldronL/R, BracerL/R, IceCrown + a Glow piece each, for Neon).
 
-## Blocked (27 Nov)
-- Studio's `AssetService:CreateAssetAsync` is "not available yet".
-- The Open Cloud upload (open_cloud_invoke, group 33151111) needs this folder approved in Studio: Assistant Settings -> MCP Permissions -> approved upload directories.
+## Upload + fit (27 Nov)
+- Uploaded through Open Cloud (owner approved the vault folder): Model asset 128781560477931 (group 33151111), meshes approved/active, type Mesh (e.g. PauldronL 100633187555398). Inserted into ServerStorage.ArmourImport, fitted and welded onto the statue (FrostArmour folder), Ice + Neon glow, bracers x1.31.
+- **Open problem:** the meshes draw in Edit but fail in Play ("ContentId ... failed due to: Asset type does not match requested type"), so the pieces render as boxes in game. Not solved yet; next try is Studio's own 3D Importer on FrostTitanArmour.fbx.
 
-Then: insert the model, size each piece on the statue (UpperArm / Head / LowerArm), materials Ice + Neon glow, weld, Play screenshots, retake the shop cards.
+## Statue fixes (27 Nov, owner: "the guy dont have any muscles rn", "textures are blurry ... realistic like 4k")
+- No muscles: MuscleClient dropped the statue to low detail past 60 studs (NPC LOD). The statue has `KeepDetail = true` and MuscleClient keeps such models at full detail.
+- Blurry: stock Ice stretched over a 2.1x giant. Two generated PBR MaterialVariants (colour + normal + roughness + metalness): `FrostTitanIce` (base Ice, StudsPerTile 6, set as the place's Ice override, so the 27 Ice parts on the Street change too) and `FrostTitanIceStone` (base Marble, StudsPerTile 5) for the muscle shells via MuscleMarble / MarbleColor / MarbleVariant. Roblox caps textures at 1024 px, so "4K" detail comes from the maps and tight tiling, not file size.
+
+## VFX (27 Nov, owner: "layered realistic vfxs ... in cutscenes too")
+`Shared/VFX/FrostFX` (copy: `GYM ARC/Scripts/FrostFX.luau`), built from HofVFX's own flipbooks: Gather (anticipation), Burst (white-hot core, light pulse, flipbook burst + ring, flat shockwave, frost sparks, lit snow mist, wisp, falling glints, shake, flash), GroundWave, Snowfall (snow past the lens), Aura (pooling mist, rising motes, wisp, breathing light, glow pieces pulse).
+- Christmas cutscene (3 s): snow past the lens, the star gathers frost 0.2-0.6, bursts at 0.6 with shake + soft flash, a mist ring rolls off the tree at 0.7, then the title.
+- MEGA GIFT burst: a gold FrostFX burst under the ribbons and canes, shake, soft flash, mist off the pad.
+- Statue: the lasting cold aura (MegaLiftClient, while the statue is in Workspace.NPCs).
