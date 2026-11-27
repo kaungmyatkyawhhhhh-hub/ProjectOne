@@ -961,32 +961,39 @@ end
 
 local LIGHT_R = 220
 local AD_R = 320
--- (27 Nov, owner: "the lighting angle is too low ... not spread out like the ones in real life", "irl, night lights are
--- white, not dim") a white PointLight hung 10 studs under the head, so the pool spreads over road, pavement, walls and
--- trees and meets the next lamp's (was a SpotLight in the head, angle 135, brightness 4), and a glow sprite on the head
--- (tag LampHalo: WorldFx shows it at night)
+-- (27 Nov, owner: "match the streetlights lighting with the ones in the video clips") a SpotLight in the head facing down,
+-- wide (Config.NightLamps.Angle) so the pools are soft and meet the next lamp's, about 1 in SodiumEvery an old orange
+-- sodium head; and a small glow sprite on the head (tag LampHalo: WorldFx shows it at night). The SpotLight sits on an
+-- Attachment named LampLight, turned so it faces straight down whatever way the head is turned.
 local function lampLight(head: BasePart)
+	local p = head.Position
+	local sodium = (math.floor(p.X / 7) * 31 + math.floor(p.Z / 7) * 17) % NL.SodiumEvery == 0
+	local tint = if sodium then NL.Sodium else NL.Color
 	local a = Instance.new("Attachment")
 	a.Name = "LampLight"
-	a.Position = Vector3.new(0, -10, 0)
-	local l = Instance.new("PointLight")
-	l.Color, l.Brightness, l.Range, l.Shadows = NL.Color, NL.Brightness, NL.Range, false
+	a.CFrame = head.CFrame:ToObjectSpace(CFrame.new(p) * CFrame.Angles(-math.pi / 2, 0, 0)) -- (its front, the light's Face, points down)
+	local l = Instance.new("SpotLight")
+	l.Face = Enum.NormalId.Front
+	l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = tint, NL.Brightness, NL.Range, NL.Angle, NL.Shadows
 	l.Enabled = false -- (the main loop turns on the near ones at night)
 	CollectionService:AddTag(l, "RoadsideLamp")
 	l.Parent = a
 	a.Parent = head
+	if sodium then
+		head.Color = NL.Sodium
+	end
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "LampHalo"
 	bb.Size = UDim2.fromScale(NL.GlowSize, NL.GlowSize)
 	bb.LightInfluence = 0
-	bb.Brightness = 2
+	bb.Brightness = NL.GlowBrightness
 	bb.MaxDistance = 1400
 	bb.Enabled = isNight()
 	local img = Instance.new("ImageLabel")
 	img.BackgroundTransparency = 1
 	img.Size = UDim2.fromScale(1, 1)
 	img.Image = NL.Glow
-	img.ImageColor3 = NL.Color
+	img.ImageColor3 = tint
 	img.Parent = bb
 	CollectionService:AddTag(bb, "LampHalo")
 	bb.Parent = head

@@ -1954,18 +1954,26 @@ Config.Jobs = (function()
 	return t
 end)()
 
--- (2026-11-27, owner: "the lighting angle is too low ... not spread out like the ones in real life", "irl, night lights
--- are white, not dim") Yangon street lamps: a white PointLight hung DROP studs under the head (on an Attachment), so its
--- 60-stud reach spreads a wide pool over road, pavement, walls and trees that meets the next lamp's; a soft glow sprite
--- (BillboardGui tag LampHalo, tools/yangon/city/lamp_glow.py) on the head at night. Used by tools/yangon/YangonStreetKit
--- (the P1 kit lamps) and client/YangonRoadside (the poles elsewhere, and the flyover deck lamps)
+-- Yangon street lamps (27 Nov, owner: "match the streetlights lighting with the ones in the video clips"; vault "2026-11-27
+-- Clip catalogue - Night drive past The Central ..." and refs_2026-11-27): in the clips each head is a small sharp cold-white
+-- point with a little glare (not a big glowing ball) and the road under it is an even pale grey: wide soft overlapping
+-- pools, neutral-white on the ground, people and cars throwing shadows. So: a SpotLight in the head facing down, Angle
+-- 170 (almost a half sphere), shadows on; a small glow sprite (BillboardGui tag LampHalo, tools/yangon/city/lamp_glow.py).
+-- About 1 in SodiumEvery roadside lamps is an old orange sodium head (0799 0:41, 1:57; 0810 0:09). Used by
+-- tools/yangon/YangonStreetKit (the P1 kit lamps), client/YangonRoadside (poles elsewhere, flyover deck lamps) and
+-- client/YangonMedians (the twin median lamps).
 Config.NightLamps = {
-	Color = Color3.fromRGB(240, 244, 255),
-	Head = Color3.fromRGB(236, 244, 255),
-	Brightness = 3,
+	Color = Color3.fromRGB(250, 246, 238), -- the light on the ground
+	Head = Color3.fromRGB(236, 244, 255), -- the LED head itself
+	Brightness = 5,
 	Range = 60,
+	Angle = 170,
+	Shadows = true,
+	Sodium = Color3.fromRGB(255, 172, 88),
+	SodiumEvery = 8,
 	Glow = "rbxassetid://83825952241880",
-	GlowSize = 11,
+	GlowSize = 3.2,
+	GlowBrightness = 3,
 }
 
 return Config

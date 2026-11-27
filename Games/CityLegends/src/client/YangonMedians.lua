@@ -42,6 +42,7 @@ end)
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 local Config = require(Shared:WaitForChild("Config"))
+local NL = Config.NightLamps
 
 local YangonMedians = {}
 
@@ -51,7 +52,9 @@ local ROADS = { ["Pyay Road"] = true, ["Kabar Aye Pagoda Road"] = true }
 local LOAD, DROP = 520, 680
 local CHUNK = 160
 local STEP = 8 -- studs per kerb block
-local RED, WHITE = Color3.fromRGB(176, 34, 30), Color3.fromRGB(226, 226, 220)
+-- (27 Nov, owner: kerbs "not realistic") old dirty matte paint, as measured on the Myanmar Plaza photos (red 111, 46, 41
+-- in shade / white 191, 187, 174), not fresh racetrack colours; every other kerb in the city is plain concrete
+local RED, WHITE = Color3.fromRGB(146, 50, 44), Color3.fromRGB(196, 192, 182)
 local SOIL = Color3.fromRGB(52, 84, 40)
 local TYRE, BOX = Color3.fromRGB(58, 58, 62), Color3.fromRGB(232, 232, 228)
 local LEAF = { Color3.fromRGB(58, 104, 44), Color3.fromRGB(70, 118, 50), Color3.fromRGB(48, 92, 40) }
@@ -233,7 +236,8 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 				local head = part(m, Vector3.new(2.3, 0.36, 0.95), cf * CFrame.new(side * 6.9, 29.55, 0), LED, Enum.Material.Neon)
 				local l = Instance.new("SpotLight")
 				l.Face = Enum.NormalId.Bottom
-				l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = Color3.fromRGB(232, 240, 255), 4, 60, 135, false
+				-- (27 Nov) the same light as every street lamp (Config.NightLamps, matched to the night clips)
+				l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = NL.Color, NL.Brightness, NL.Range, NL.Angle, NL.Shadows
 				l.Enabled = lampsOn
 				CollectionService:AddTag(l, "MedianLamp")
 				l.Parent = head

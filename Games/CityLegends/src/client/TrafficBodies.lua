@@ -236,6 +236,25 @@ local function prepare(template: Model): Model
 			end
 		end
 	end
+	-- (27 Nov, owner: "traffic will have shadows that are light in fps") the car's big solid pieces cast the shadow
+	-- (the bodies are cut into many paint pieces: each one at least 15% of the biggest, at most 10); wheels, small trim
+	-- and glass stay off
+	local solids = {}
+	for _, p in partsOf(m) do
+		if p ~= root and p ~= body and not wheelParts[p] and p.Transparency < 0.3 then
+			table.insert(solids, p)
+		end
+	end
+	table.sort(solids, function(a, b)
+		return a.Size.X * a.Size.Y * a.Size.Z > b.Size.X * b.Size.Y * b.Size.Z
+	end)
+	for i = 1, math.min(10, #solids) do
+		local v = solids[i].Size
+		local v1 = solids[1].Size
+		if v.X * v.Y * v.Z >= 0.15 * v1.X * v1.Y * v1.Z then
+			solids[i].CastShadow = true
+		end
+	end
 	-- (no brake-light strips: traffic cars have no lights, owner 2026-11-02)
 	m:SetAttribute("Length", box.Z)
 	m:SetAttribute("Width", box.X)

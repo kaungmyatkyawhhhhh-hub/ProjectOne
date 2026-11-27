@@ -159,6 +159,8 @@ local YANGON_DAY = table.freeze({
 	shiftTop = Color3.fromRGB(255, 246, 230),
 })
 local YANGON_SKY_FILL = 0.3
+-- (27 Nov) daytime sun vs sky fill, measured in Play: noon keys x1.35 sun, outdoor fill -36 %, ambient -30 %, sky light -40 %
+local SUN_PUNCH = table.freeze({ brightness = 0.35, outdoor = 0.36, ambient = 0.3, exposure = -0.12, skyFill = 0.4 })
 local YANGON_LOOK = false -- owner, 2026-11-16: Riviera (Monaco) light in Yangon too; true brings the warm hazy look back
 -- (2026-11-16, the street survey: Yangon's midday sky is pale and hazy, zenith about 150, 185, 220 with a near-white band
 -- at the horizon, not deep blue) more haze over the day, less glare
@@ -399,8 +401,18 @@ function DayCycle.start()
 				(k :: any)[key] = base + (v - base) * mid
 			end
 		end
+		-- (27 Nov, owner: "the shadows on the cars arent showing") real daylight is a strong sun over a weak sky fill;
+		-- the keys' sky fill was so high that every shadow washed out (a 30-stud test pillar cast none you could see).
+		-- In full day the sun gets stronger and the sky fill weaker, so cars, people and poles have real shadows.
+		local sunUp = math.clamp(math.min((hour - 7) / 1.5, (17.5 - hour) / 1), 0, 1)
+		if sunUp > 0 then
+			k.brightness *= 1 + SUN_PUNCH.brightness * sunUp
+			k.outdoor = k.outdoor:Lerp(Color3.new(0, 0, 0), SUN_PUNCH.outdoor * sunUp)
+			k.ambient = k.ambient:Lerp(Color3.new(0, 0, 0), SUN_PUNCH.ambient * sunUp)
+			k.exposure += SUN_PUNCH.exposure * sunUp
+		end
 		local diffuse = if look.Ambient == "High" then 1 else Config.Look.AmbientLow
-		Lighting.EnvironmentDiffuseScale = diffuse * (1 - (1 - YANGON_SKY_FILL) * mid)
+		Lighting.EnvironmentDiffuseScale = diffuse * (1 - (1 - YANGON_SKY_FILL) * mid) * (1 - SUN_PUNCH.skyFill * sunUp)
 		if not look.Haze then
 			k.haze, k.density, k.offset = 0, k.density * 0.5, 0
 		end

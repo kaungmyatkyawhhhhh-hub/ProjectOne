@@ -9,7 +9,7 @@
 	Classes -> look (colours ride in the vertex colours, so every template is white):
 	  SCO Concrete + YgnConcreteBare   SMT Metal + YgnSteelPainted   SPL SmoothPlastic   SFB Fabric + YgnCanvas
 	  SGL Glass, 0.55 transparent      SNE lamp head: SmoothPlastic (236, 244, 255), tag LampGlow (Neon at night via
-	                                   WorldFx), K.lampLight: a white PointLight hung under it + a glow sprite (27 Nov)
+	                                   WorldFx), K.lampLight: a wide white SpotLight down + a glow sprite (27 Nov)
 
 	local K = require(game.ServerStorage.ClaudeTools.YangonStreetKit:Clone())
 	K.templates(holding)              -> n templates into ReplicatedStorage.YgnKit.Templates (CollisionFidelity Box)
@@ -52,11 +52,11 @@ function K.parse(name: string)
 end
 
 -- (2026-11-27, owner: "the lighting angle is too low ... not spread out like the ones in real life", "irl, night lights
--- are white, not dim") every kit lamp head: white Neon-at-night head (tag LampGlow), a white PointLight on an Attachment
--- hung under the head (main-road lamps 14 studs, pole lamps 10) so the pool spreads over road, pavement, walls and trees
--- and meets the next lamp's, tagged LODLight + DayOff for WorldFx; and a glow sprite (tag LampHalo, WorldFx shows it at
--- night). Was a SpotLight in the head (angle 120-135, brightness 5): a 30-stud pool with dark road between lamps, and
--- the plain side-street pole lamps (ppolel) were amber sodium.
+-- are white, not dim"; later "match the streetlights lighting with the ones in the video clips") every kit lamp head:
+-- white Neon-at-night head (tag LampGlow), a wide SpotLight (Config.NightLamps: angle 170) facing down from the head,
+-- tagged LODLight + DayOff for WorldFx; and a small glow sprite (tag LampHalo, WorldFx shows it at night). History: a
+-- SpotLight at angle 120-135 left a 30-stud pool and dark road between lamps; a PointLight hung under the head lit
+-- the pole and tree undersides and gave no clear pool.
 local NL = require(RS:WaitForChild("Shared"):WaitForChild("Config")).NightLamps
 function K.lampLight(q: BasePart, id: string)
 	for _, ch in q:GetChildren() do
@@ -66,12 +66,14 @@ function K.lampLight(q: BasePart, id: string)
 	end
 	q.Color = NL.Head
 	CollectionService:AddTag(q, "LampGlow")
-	local main = id == "lamp1" or id == "lamp2"
+		-- (27 Nov, owner: "match the streetlights lighting with the ones in the video clips") a wide SpotLight in the head
+	-- facing straight down (Config.NightLamps), on an Attachment turned so its front points down
 	local a = Instance.new("Attachment")
 	a.Name = "LampLight"
-	a.Position = Vector3.new(0, if main then -14 else -10, 0)
-	local l = Instance.new("PointLight")
-	l.Color, l.Brightness, l.Range, l.Shadows = NL.Color, NL.Brightness, NL.Range, false
+	a.CFrame = q.CFrame:ToObjectSpace(CFrame.new(q.Position) * CFrame.Angles(-math.pi / 2, 0, 0))
+	local l = Instance.new("SpotLight")
+	l.Face = Enum.NormalId.Front
+	l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = NL.Color, NL.Brightness, NL.Range, NL.Angle, NL.Shadows
 	l.Enabled = false -- (WorldFx turns on the near ones at night)
 	l.Parent = a
 	CollectionService:AddTag(l, "LODLight")
@@ -81,7 +83,7 @@ function K.lampLight(q: BasePart, id: string)
 	bb.Name = "LampHalo"
 	bb.Size = UDim2.fromScale(NL.GlowSize, NL.GlowSize)
 	bb.LightInfluence = 0
-	bb.Brightness = 2
+	bb.Brightness = NL.GlowBrightness
 	bb.MaxDistance = 1400
 	bb.Enabled = false
 	local img = Instance.new("ImageLabel")
