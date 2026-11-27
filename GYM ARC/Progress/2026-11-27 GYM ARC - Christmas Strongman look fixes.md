@@ -21,6 +21,23 @@ Before: [[2026-11-27 GYM ARC - Christmas Strongman (event redo)]]. Owner's scree
 - Part count: Xmas folder 2,858 parts (was 2,248). New parts have no collision, no query, no shadows. Phone FPS still not measured.
 - FastEvents cleared, FreshPlayer = true, no TestTutorialStep. Not saved: needs the owner's OK.
 
+## Round 2: Gemini + ChatGPT art-director review (owner: "u can ask gemini and chatgpt for help")
+Both got the 4 after-screenshots and the same brief (tough art director, 3 fixes per shot, phone-safe, gym stays bright). Chats: Gemini "Roblox Gym Christmas Event Feedback", ChatGPT "Art direction feedback".
+
+| Their point (both unless marked) | What I did |
+|---|---|
+| Too many random-coloured bulbs and floating baubles | Ceiling bulbs now mostly warm white (#FFF1D6), 1 in 8 red, 1 in 8 green. Baubles cut from 16 to 9, only near the walls, red + gold. |
+| Banner looks like a flat ad, things block it | Gold side trims and rod end caps; the baubles in front removed. |
+| Harsh yellow neon fights everything | Lift pad edge to soft gold, the MEGA GIFT LIFT and CANDY CANE SHOP sign trims to gold metal (the marquee bulbs give the glow). |
+| Tree star is a flat blocky shape | A real five-point star (wedge triangles) with a round core; a red tree skirt with a white fur rim. |
+| Hide exposed buildings with pines (ChatGPT) | 7 bigger pines on the far ridge. The towers still peeking at the top left are not map parts (probably the skybox), so they stay. |
+| Teal chest clashes; sign sub-text tiny (Gemini) | Tried the white tank: it renders beige like skin, so the deep blue tank (ChatGPT's dark navy against the ice). Sign: "FROST TITAN" + bigger "LEGENDARY • 750 CANES". |
+| Black poles in front of the arch; loud yellow sign border | The two canopy posts now wear candy-cane sleeves; MERRY CHRISTMAS! has a gold frame and 30 warm marquee bulbs. |
+| White balls by the planters look like placeholders (Gemini) | Drifts and planter snow flattened into low caps. |
+
+Skipped: stone plaza path, re-shaping every pine, decluttering the neighbour shops (not Christmas work), "LEGENDARY ALTAR" (Gemini misread: "alter" is our word).
+After round 2: `Assets/xmas_preview/after2/1-4`. 0 errors. Xmas folder 2,905 parts.
+
 ## Known limits
 - From right inside the door, the z -12 pendant cord crosses the banner's small line; from the gym floor it's clear.
 - The terrain stays snow if the kill switch turns the event off mid-server (a new server has grass).
