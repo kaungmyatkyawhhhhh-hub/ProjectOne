@@ -59,7 +59,68 @@ function WorldFx.setDaylight(d: number)
 		for _, p in CollectionService:GetTagged("LandmarkGlow") do
 			WorldFx.setLandmarkGlow(p)
 		end
+		for _, p in CollectionService:GetTagged("NightGold") do
+			WorldFx.setNightGold(p)
+		end
 	end)
+end
+
+-- (27 Nov, owner: "at night ... shwedagon pagoda reflects golden light ... shiny & glossy & bright") Shwedagon's gold
+-- (tag "NightGold", tools/yangon/ShwedagonNight.luau): at night a part wears a copy of the glossy emissive gold
+-- SurfaceAppearance ReplicatedStorage.NightGold[<attribute NightSA>] (glows from across the city with no real light),
+-- by day it is taken off (the part's own gold variant shows); tagged ParticleEmitters (the hti sparkle) run at night only
+local nightGold: { [SurfaceAppearance]: { part: BasePart, glow: number, far: number } } = {}
+function WorldFx.setNightGold(p: Instance)
+	if p:IsA("ParticleEmitter") then
+		p.Enabled = lampsLit
+		return
+	end
+	if not p:IsA("BasePart") then
+		return
+	end
+	local cur = p:FindFirstChild("NightGoldSA")
+	if lampsLit and not cur then
+		local lib = ReplicatedStorage:FindFirstChild("NightGold")
+		local sa = lib and lib:FindFirstChild(p:GetAttribute("NightSA") or "")
+		if sa then
+			local c = sa:Clone()
+			c.Name = "NightGoldSA"
+			c.Parent = p
+			nightGold[c] = { part = p, glow = c.EmissiveStrength, far = sa:GetAttribute("FarGlow") or c.EmissiveStrength }
+		end
+	elseif not lampsLit and cur then
+		nightGold[cur] = nil
+		cur:Destroy()
+	end
+end
+CollectionService:GetInstanceAddedSignal("NightGold"):Connect(function(p)
+	WorldFx.setNightGold(p)
+end)
+-- far away the haze swallows the glow: the emissive grows from its near value (within NEAR) to the template's FarGlow
+-- (at FAR), checked twice a second (a few hundred SurfaceAppearances at most)
+do
+	local NEAR, FAR = 500, 3000
+	local acc = 0
+	RunService.Heartbeat:Connect(function(dt)
+		acc += dt
+		if acc < 0.5 or next(nightGold) == nil then
+			return
+		end
+		acc = 0
+		local cam = workspace.CurrentCamera.CFrame.Position
+		for sa, g in nightGold do
+			if sa.Parent ~= g.part or not g.part:IsDescendantOf(workspace) then -- (taken off, or streamed out)
+				nightGold[sa] = nil
+				continue
+			end
+			local k = math.clamp(((g.part.Position - cam).Magnitude - NEAR) / (FAR - NEAR), 0, 1)
+			sa.EmissiveStrength = g.glow + (g.far - g.glow) * k
+		end
+	end)
+end
+-- (the Persistent stupa is already there at start; a night start never calls setDaylight's switch)
+for _, p in CollectionService:GetTagged("NightGold") do
+	WorldFx.setNightGold(p)
 end
 
 -- (whole-Yangon landmarks, 14 Nov 2026) the gold of Shwedagon, Sule and the other pagodas (tag "LandmarkGlow", set by

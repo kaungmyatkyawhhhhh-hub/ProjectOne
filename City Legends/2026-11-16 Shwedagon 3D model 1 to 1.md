@@ -83,7 +83,7 @@ Copies in this folder: "Shwedagon 1to1 - vs photo (...)".
 - **Stairways** are straight lines from the top to the foot (the real S and N have slight bends). They have no paintings, lamps, ogres, 1842 arch, crocodiles or escalators. The shop fronts are flat dark openings.
 - **Animals** are block stand-ins. **Chinthe** are simplified.
 - **Hill**: the TEMP heightfield is smooth, with sparse slope trees; the real hill is dense forest. The middle terrace (museums, parking) is not modelled.
-- **Night**: no floodlights or glow yet (blueprint section 4).
+- **Night**: no floodlights or glow yet (blueprint section 4). **Done 27 Nov:** [[2026-11-27 Shwedagon night floodlighting]] (glossy emissive gold at night, 14 floods, hti sparkle).
 - The far views wash out in the current Edit haze (Atmosphere), unlike the clear photos.
 - 3 OSM buildings at the stair tops are left out, because the corridors use that space.
 
