@@ -61,6 +61,8 @@ M.SURFACES = {
 	{ name = "YgnPavementSlabs", base = "Pavement", studsPerTile = 9.0, pattern = "Regular", fixed = true, file = "pavement_slabs_broken" },
 	{ name = "YgnPaversMall", base = "Pavement", studsPerTile = 5.4, pattern = "Regular", fixed = true, file = "pavers_forecourt" },
 	{ name = "YgnKerb", base = "Concrete", studsPerTile = 6.0, pattern = "Regular", fixed = false, file = "kerb_stone" },
+	-- 1:1 pavements (RMeshP, Sandstone): the kerb's fine concrete, tinted by each part's grey (27 Nov, "blurry" fix)
+	{ name = "YgnPavementFine", base = "Sandstone", studsPerTile = 9.0, pattern = "Regular", fixed = false, file = "kerb_stone" },
 	{ name = "YgnDrainSlab", base = "Concrete", studsPerTile = 3.0, pattern = "Regular", fixed = true, file = "drain_cover" },
 	{ name = "YgnCorrugatedRust", base = "CorrodedMetal", studsPerTile = 6.0, pattern = "Regular", fixed = true, file = "corrugated_rust" },
 	{ name = "YgnCorrugatedBlue", base = "Metal", studsPerTile = 3.6, pattern = "Regular", fixed = true, file = "corrugated_blue" },
@@ -210,6 +212,14 @@ M.RULES = {
 		{ match = "PierCap", variant = "YgnConcreteBare" },
 		{ match = "Girder", variant = "YgnConcreteStained" },
 		{ match = "Barrier", variant = "YgnConcreteBare" },
+	},
+	-- 1:1 road meshes (Yangon1to1.Roads.Meshes, 27 Nov 2026, owner: "those look blurry"): plain Concrete / Sandstone
+	-- fell to the Monaco base overrides (RivConcrete2, 22 studs a tile) = a smeared blotch next to the car.
+	meshRoads = {
+		{ match = "RMeshKR", variant = "YgnKerb", keep = true },
+		{ match = "RMeshKW", variant = "YgnKerb", keep = true },
+		{ match = "RMeshB", variant = "YgnKerb", keep = true },
+		{ match = "RMeshP", variant = "YgnPavementFine", keep = true },
 	},
 }
 
