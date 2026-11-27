@@ -91,11 +91,14 @@ export type Npc = {
 	held: number,
 }
 
-type Obstacle = { pos: Vector3, fwd: Vector3, speed: number, halfLen: number, width: number, self: Npc? }
+type Obstacle = { pos: Vector3, fwd: Vector3, speed: number, halfLen: number, width: number, self: Npc?, ped: boolean? }
 
 local Traffic = {}
 local bumpAhead: (Npc) -> boolean
 Traffic.cars = {} :: { Npc }
+-- (27 Nov, owner: people cross on the lights) street people on the road, filled every frame by YangonStreetLife:
+-- cars stop for them like for a stopped car (never the gridlock breaker, racers don't weave round them)
+Traffic.peds = {} :: { Obstacle }
 
 local rng = Random.new()
 local graph = CityLayout.buildGraph()
@@ -760,8 +763,8 @@ local function lookAheadGap(npc: Npc, obstacles: { Obstacle }, reach: number?, p
 					if gap < best then
 						best = gap
 						bestSpeed = math.max(0, o.speed * o.fwd:Dot(fwd))
-						bestAlign = o.fwd:Dot(fwd)
-						bestPlayer = o.self == nil
+						bestAlign = if o.ped then 1 else o.fwd:Dot(fwd)
+						bestPlayer = o.self == nil and not o.ped
 					end
 				end
 			end
@@ -1901,6 +1904,9 @@ function Traffic.update(dt: number)
 	end
 	for _, pc in playerCarCache do
 		table.insert(obstacleList, pc)
+	end
+	for _, o in Traffic.peds do
+		table.insert(obstacleList, o)
 	end
 
 	table.clear(movedParts)

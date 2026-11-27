@@ -5,7 +5,8 @@
 	  * every car in workspace.PlayerCars (yours and other players') is checked against this screen's walkers each
 	    frame. The walkers are client-only (each player has their own), so each player's game flings its own people
 	    when any car drives into them: nothing goes over the network, and everyone sees a fling.
-	  * slower than RAG_KMH: the walker stumbles (pushed aside out of the car's way, a short stop).
+	  * slower than RAG_KMH: the walker stumbles back (YangonStreetLife.bump: an eased push, hands on the bonnet,
+	    kept in front of the car while it pushes, then a step aside or a shaken fist).
 	  * faster: the walker's 7 parts (an R6 Roblox avatar) become a ragdoll (BallSocketConstraints with limits at
 	    neck, shoulders and both hips, hair welded to the head), thrown with the car's speed at the contact point plus
 	    some lift and a tumble, so a faster hit throws them further. A soft thud plays; your own car loses a little
@@ -210,6 +211,7 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 		end
 	end
 	w.held = true
+	w.bump, w.flee, w.act = nil, nil, nil -- (27 Nov: a stumble or a run cut short by the ragdoll)
 	if IS_STUDIO and Players.LocalPlayer then
 		Players.LocalPlayer:SetAttribute("PedHitLog", string.format("rag %.0f kmh t=%.1f", speed / Config.mphToSps(KMH), os.clock()))
 	end
@@ -221,18 +223,11 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 	return true
 end
 
--- a slow nudge: pushed out of the car's way, a short stop
+-- a slow nudge (27 Nov, owner: "they just teleport 2 studs away"): no jump; YangonStreetLife's bump pushes them back
+-- over half a second, stumbling, hands on the bonnet, and keeps them in front of the car while it pushes
 local function stumble(w: any, root: BasePart, v: Vector3)
-	local right = root.CFrame.RightVector
-	local side = if (w.pos - root.Position):Dot(right) >= 0 then 1 else -1
-	local push = Vector3.new(right.X, 0, right.Z).Unit * side * 1.6 + Vector3.new(v.X, 0, v.Z) * 0.08
-	w.pos += push
-	if w.mode == "walk" then
-		w.mode = "pause"
-		w.timer = 0.9
-	end
-	if StreetLife.pose then
-		StreetLife.pose(w, false)
+	if StreetLife.bump then
+		StreetLife.bump(w, root, v)
 	end
 	w.bumpT = os.clock()
 	if IS_STUDIO and Players.LocalPlayer then

@@ -127,24 +127,30 @@ local function runP(P, t: number, v: number, cad: number, L: number, look: numbe
 	P.nkPitch = 0.18 -- the head comes up against the lean
 end
 
--- standing: weight on one leg (that knee straight, the other a little bent), breathing, a slow drift
+-- standing: weight on one leg (that knee straight, the other a little bent), breathing, a slow drift.
+-- (27 Nov, owner: "also add an idle animation") side runs -1..1: the weight moves over to the other leg every 7 s
+-- or so (an eased shift over about a second, the hips and chest swaying with it), the breath lifts the chest and
+-- shoulders, the arms hang loose and sway a little, the head drifts (glances come from the walker's look)
 local function idleP(P, t: number, look: number, side: number)
 	local br = sin(t * 1.9)
-	P.kneeL = if side > 0 then 0.18 else 0.02
-	P.kneeR = if side > 0 then 0.02 else 0.18
-	P.hipL = if side > 0 then 0.08 else 0
-	P.hipR = if side > 0 then 0 else 0.08
+	P.kneeL = 0.1 + 0.08 * side
+	P.kneeR = 0.1 - 0.08 * side
+	P.hipL = 0.04 + 0.04 * side
+	P.hipR = 0.04 - 0.04 * side
 	P.ankleL = -(P.hipL - P.kneeL)
 	P.ankleR = -(P.hipR - P.kneeR)
 	P.pelRoll = 0.05 * side
-	P.chRoll = -0.03 * side
+	P.chRoll = -0.03 * side + 0.01 * sin(t * 0.6)
 	P.bx = 0.07 * side
-	P.shL = 0.04 + 0.02 * br
-	P.shR = 0.04 + 0.02 * sin(t * 1.9 + 0.7)
-	P.elL, P.elR = 0.18, 0.18
-	P.sabL, P.sabR = 0.08, 0.08
+	P.by = 0.012 * br
+	P.shL = 0.04 + 0.02 * br + 0.03 * sin(t * 0.8)
+	P.shR = 0.04 + 0.02 * sin(t * 1.9 + 0.7) + 0.03 * sin(t * 0.8 + 2)
+	P.elL, P.elR = 0.18 + 0.04 * sin(t * 0.7), 0.18 + 0.04 * sin(t * 0.7 + 1.3)
+	P.sabL, P.sabR = 0.08 - 0.03 * side, 0.08 + 0.03 * side
 	P.chPitch = -0.015 * br
 	P.nkYaw = look
+	P.nkPitch = 0.03 * sin(t * 0.45)
+	P.nkRoll = 0.025 * sin(t * 0.33 + 1) - 0.02 * side
 end
 
 ---------------------------------------------------------------------
@@ -191,6 +197,30 @@ local ACTIONS = {
 			abL = 0.12, sabL = 0.3, by = -0.1, nkYaw = -0.4 } },
 		{ 0.95, { hipL = 0.12, kneeL = 0.22, sabR = 0.2, by = -0.04, nkYaw = -0.3 } },
 		{ 1.35, {} },
+	} },
+	-- (27 Nov, owner: a slow bump "they just teleport 2 studs away") bumped by a slow car: a flinch back, both hands
+	-- out onto the bonnet, two stumbling steps back (right then left), the hands come down. YangonStreetLife moves the
+	-- body back with it and plays 0.12-0.5 back and forth while the car keeps pushing
+	bumped = { dur = 1.0, contact = 99, keys = {
+		{ 0.0, {} },
+		{ 0.12, { chPitch = 0.18, pelPitch = 0.06, shL = 1.1, shR = 1.2, elL = 0.7, elR = 0.6, sabL = 0.15, sabR = 0.15,
+			hipR = -0.35, kneeR = 0.35, kneeL = 0.15, nkPitch = 0.12, by = -0.05 } },
+		{ 0.3, { chPitch = 0.14, shL = 1.25, shR = 1.3, elL = 0.45, elR = 0.4, sabL = 0.12, sabR = 0.12, hipR = -0.2,
+			kneeR = 0.1, hipL = -0.38, kneeL = 0.45, nkPitch = 0.1, by = -0.06 } },
+		{ 0.5, { chPitch = 0.08, shL = 0.9, shR = 1.0, elL = 0.6, elR = 0.6, hipL = -0.15, kneeL = 0.12, hipR = -0.05,
+			nkPitch = 0.05 } },
+		{ 1.0, {} },
+	} },
+	-- shaking a fist at the driver: the right arm up, the forearm pumping, then down
+	fist = { dur = 1.6, contact = 99, keys = {
+		{ 0.0, {} },
+		{ 0.3, { shR = 2.4, elR = 1.4, sabR = 0.25, chPitch = 0.06, nkPitch = 0.1 } },
+		{ 0.45, { shR = 2.6, elR = 0.8, sabR = 0.25, chPitch = 0.08, nkPitch = 0.12 } },
+		{ 0.6, { shR = 2.4, elR = 1.5, sabR = 0.25, chPitch = 0.06, nkPitch = 0.1 } },
+		{ 0.75, { shR = 2.6, elR = 0.8, sabR = 0.25, chPitch = 0.08, nkPitch = 0.12 } },
+		{ 0.9, { shR = 2.4, elR = 1.4, sabR = 0.25, chPitch = 0.06, nkPitch = 0.1 } },
+		{ 1.2, { shR = 0.9, elR = 0.7, sabR = 0.1 } },
+		{ 1.6, {} },
 	} },
 }
 PedMotion.ACTIONS = ACTIONS
@@ -367,7 +397,10 @@ function PedMotion.angles(w, moving: boolean): { [string]: number }
 		local v = w.speedNow or w.speed
 		walkP(P, w.phase % 1, v, PedMotion.walkCadence(v, s), r.legLen * s, look)
 	else
-		idleP(P, w.t or 0, look, if (w.lat or 0) > 0 then 1 else -1)
+		-- (the weight shift: a slow wave per person, flattened so each leg holds it a while)
+		local t = w.t or 0
+		local seed = w.pos.X * 0.37 + w.pos.Z * 0.21
+		idleP(P, t, look, clamp(sin(t * 0.45 + seed) * 2.5, -1, 1))
 	end
 	-- a phone: at the ear (right hand up, elbow folded) or in the hand (looking down at it)
 	if w.phone == "ear" and not w.act then

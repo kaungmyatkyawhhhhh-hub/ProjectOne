@@ -26,6 +26,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local TrafficBodies = require(script.Parent:WaitForChild("TrafficBodies"))
 local PedMotion = require(script.Parent:WaitForChild("PedMotion"))
+local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
+local CityLayout = require(Shared:WaitForChild("CityLayout"))
+local Traffic = require(script.Parent:WaitForChild("Traffic"))
 
 local YangonStreetLife = {}
 
@@ -56,6 +59,7 @@ local pathWide: { boolean } = {}
 local pathCells: { [number]: { number } } = {} -- flat: path, point, path, point ...
 local schools: { Vector2 } = {}
 local worship: { Vector2 } = {}
+local meetAt: { Vector3 } = {} -- (2026-11-28) "meet" spots: the People's Square car meet's onlookers
 
 local function addCell(cells: { [number]: { number } }, x: number, z: number, ...: number)
 	local key = cellKey(math.floor(x / CELL), math.floor(z / CELL))
@@ -96,7 +100,7 @@ local function loadChunks(): ({ string }, number, number)
 	end
 	-- extra chunks made by other tools, in the same format and origin (optional): the Myanmar Plaza mall's shoppers
 	-- (tools/yangon/city/mall_life.py, 2026-11-16)
-	for _, name in { "YangonStreetLifeMall" } do
+	for _, name in { "YangonStreetLifeMall", "YangonStreetLifeMeet" } do -- (2026-11-28) + the People's Square car meet's crowd and show cars
 		local m = Shared:FindFirstChild(name)
 		if m then
 			local ok3, s = pcall(require, m)
@@ -134,6 +138,9 @@ local function parse()
 				table.insert(spotPos, Vector3.new(x, tonumber(b[4]) / 10, z))
 				table.insert(spotYaw, math.rad(tonumber(b[5]) / 10))
 				table.insert(spotKind, b[6])
+				if b[6] == "meet" then
+					table.insert(meetAt, spotPos[#spotPos])
+				end
 				addCell(spotCells, x, z, #spotPos)
 			elseif tag == "K" then
 				table.insert(schools, Vector2.new(tonumber(b[2]) / 10 + OX, tonumber(b[3]) / 10 + OZ))
@@ -494,6 +501,10 @@ type Walker = {
 	act: any?, knockAt: any?, knocker: boolean?, knockDone: boolean?, avoid: any?, cross: any?, glance: any?,
 	runT: number?, hurry: boolean?, phone: string?, pauseYaw: number?, scanT: number?, forceKind: string?,
 	forceRun: boolean?, flipAt: number?,
+	-- (27 Nov) signal crossings and the idle phone look
+	peekT: number?, peekOn: boolean?, obs: any?, forceSig: any?, sigStr: string?,
+	-- (27 Nov) players' cars: running off, fear, the check timer
+	flee: any?, fearT: number?, carT: number?, bump: any?,
 }
 
 local pedWant = 0 -- people wanted out now (pedTick)
@@ -1099,6 +1110,30 @@ end
 -- nothing solid between (raycast at chest height) and no big climb
 local crossRay = RaycastParams.new()
 crossRay.FilterType = Enum.RaycastFilterType.Exclude
+-- nothing big in the way at chest height (a building, a wall); poles, signs, props and cars don't count
+local function lineClear(p: Vector3, q: Vector3): boolean
+	local skip: { Instance } = { pedFolder :: Instance, carFolder :: Instance }
+	for _, n in { "PlayerCars", "Traffic" } do
+		local f = workspace:FindFirstChild(n)
+		if f then
+			table.insert(skip, f)
+		end
+	end
+	local a, b = p + Vector3.new(0, 3.5, 0), q + Vector3.new(0, 3.5, 0)
+	for _ = 1, 5 do
+		crossRay.FilterDescendantsInstances = skip
+		local hit = workspace:Raycast(a, b - a, crossRay)
+		if not hit then
+			return true
+		end
+		local sz = hit.Instance.Size
+		if math.max(sz.X, sz.Y, sz.Z) > 14 then
+			return false
+		end
+		table.insert(skip, hit.Instance)
+	end
+	return true
+end
 local function findCross(w: Walker): (number?, number?, Vector3?)
 	local p = w.pos
 	local hd = heading(w.yaw)
@@ -1128,29 +1163,558 @@ local function findCross(w: Walker): (number?, number?, Vector3?)
 		end
 	end
 	if bestPt then
-		-- nothing big in the way at chest height (a building, a wall); poles, signs, props and cars don't count
-		local skip: { Instance } = { pedFolder :: Instance, carFolder :: Instance }
-		for _, n in { "PlayerCars", "Traffic" } do
-			local f = workspace:FindFirstChild(n)
-			if f then
-				table.insert(skip, f)
-			end
-		end
-		local a, b = p + Vector3.new(0, 3.5, 0), bestPt + Vector3.new(0, 3.5, 0)
-		for _ = 1, 5 do
-			crossRay.FilterDescendantsInstances = skip
-			local hit = workspace:Raycast(a, b - a, crossRay)
-			if not hit then
-				break
-			end
-			local sz = hit.Instance.Size
-			if math.max(sz.X, sz.Y, sz.Z) > 14 then
-				return nil
-			end
-			table.insert(skip, hit.Instance)
+		if not lineClear(p, bestPt) then
+			return nil
 		end
 	end
 	return bestPi, bestK, bestPt
+end
+
+---------------------------------------------------------------------
+-- (owner, 27 Nov: "make it so that npc characters can cross the road when the traffic light is green. ... if 1 side
+-- traffic light is clear, let npc characters go and then wait at a place where it meets the other side lane that has
+-- the red light. and when that red light becomes green, they continue") signal crossings. At a pavement end by a
+-- signalled junction (RivieraTraffic.build().signals, the lights YangonSignals draws and Traffic obeys) a walker
+-- crosses to a pavement across a road whose lane pieces the crossing line cuts square. The lanes it cuts are split by
+-- the way their cars go: one carriageway per direction. Each is a stage, and a stage starts only while that traffic
+-- has red with time left to get over; between the two the walker waits where the carriageways meet (the median, or
+-- the centre line when there is none: never in a live lane). People on the road are obstacles for Traffic, so cars
+-- turning in on their green wait for them too.
+---------------------------------------------------------------------
+local SIG_CELL = 64
+local SIG_PACE = 1.3 -- crossing on the lights: a brisker walk
+local sigState = 0 -- 0 not tried, 1 ready, -1 no signals
+local sigCells: { [number]: { any } } = {} -- approaches by the cell of their junction's centre
+local laneCells: { [number]: { any } } = {} -- lane pieces near a junction, by the cells their chord touches
+local groundRay = RaycastParams.new()
+groundRay.FilterType = Enum.RaycastFilterType.Include
+
+local function sigInit(): boolean
+	if sigState ~= 0 then
+		return sigState > 0
+	end
+	local ok, g = pcall(RivieraTraffic.build)
+	if not ok or not g or not g.signals or #g.signals == 0 then
+		sigState = -1
+		return false
+	end
+	sigState = 1
+	for _, s in g.signals do
+		local key = cellKey(math.floor(s.center.X / SIG_CELL), math.floor(s.center.Z / SIG_CELL))
+		sigCells[key] = sigCells[key] or {}
+		table.insert(sigCells[key], s)
+	end
+	for _, seg in g.lanes do
+		if seg.kind == "lane" then
+			local m = (seg.p0 + seg.p2) / 2
+			local gx, gz = math.floor(m.X / SIG_CELL), math.floor(m.Z / SIG_CELL)
+			local near = false
+			for dx = -2, 2 do
+				for dz = -2, 2 do
+					near = near or sigCells[cellKey(gx + dx, gz + dz)] ~= nil
+				end
+			end
+			if near then
+				local seen = {}
+				for _, q in { seg.p0, m, seg.p2 } do
+					local key = cellKey(math.floor(q.X / SIG_CELL), math.floor(q.Z / SIG_CELL))
+					if not seen[key] then
+						seen[key] = true
+						laneCells[key] = laneCells[key] or {}
+						table.insert(laneCells[key], seg)
+					end
+				end
+			end
+		end
+	end
+	return true
+end
+
+-- the junction (its approaches) whose middle is within reach of p, or nil
+local function junctionNear(p: Vector3): { any }?
+	local gx, gz = math.floor(p.X / SIG_CELL), math.floor(p.Z / SIG_CELL)
+	local best, bd = nil, math.huge
+	for dx = -2, 2 do
+		for dz = -2, 2 do
+			for _, s in sigCells[cellKey(gx + dx, gz + dz)] or {} do
+				local d = flat(s.center, p)
+				if d < s.radius + 45 and d < bd and math.abs(s.center.Y - p.Y) < 8 then
+					best, bd = s.i, d
+				end
+			end
+		end
+	end
+	if not best then
+		return nil
+	end
+	local list = {}
+	for dx = -2, 2 do
+		for dz = -2, 2 do
+			for _, s in sigCells[cellKey(gx + dx, gz + dz)] or {} do
+				if s.i == best then
+					table.insert(list, s)
+				end
+			end
+		end
+	end
+	return list
+end
+
+-- the stages of a crossing a -> b at a junction (its approaches), or nil when the line doesn't cut its lanes square
+local function crossingPlan(a: Vector3, b: Vector3, approaches: { any }): any?
+	local ab = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	local L = ab.Magnitude
+	if L < 8 then
+		return nil
+	end
+	local cdir = ab / L
+	local right = cdir:Cross(Vector3.yAxis)
+	local hits, seen = {}, {}
+	for k = 0, math.ceil(L / 32) do
+		local q = a + ab * math.min(1, k * 32 / L)
+		local gx, gz = math.floor(q.X / SIG_CELL), math.floor(q.Z / SIG_CELL)
+		for dx = -1, 1 do
+			for dz = -1, 1 do
+				for _, seg in laneCells[cellKey(gx + dx, gz + dz)] or {} do
+					if not seen[seg] then
+						seen[seg] = true
+						-- where the chords cross (flat)
+						local r = ab
+						local s = Vector3.new(seg.p2.X - seg.p0.X, 0, seg.p2.Z - seg.p0.Z)
+						local den = r.X * s.Z - r.Z * s.X
+						if math.abs(den) > 1e-6 then
+							local qp = Vector3.new(seg.p0.X - a.X, 0, seg.p0.Z - a.Z)
+							local t = (qp.X * s.Z - qp.Z * s.X) / den
+							local u = (qp.X * r.Z - qp.Z * r.X) / den
+							if t > 0 and t < 1 and u >= 0 and u <= 1 then
+								local y = seg.p0.Y + (seg.p2.Y - seg.p0.Y) * u
+								if math.abs(y - (a.Y + (b.Y - a.Y) * t)) < 5 then
+									local d = s.Unit
+									if math.abs(d:Dot(cdir)) > 0.5 then
+										return nil -- (along the road or across the junction box: not a crossing)
+									end
+									table.insert(hits, { t = t * L, y = y, side = if d:Dot(right) > 0 then 1 else -1, dir = d })
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	if #hits == 0 then
+		return nil
+	end
+	table.sort(hits, function(x, y)
+		return x.t < y.t
+	end)
+	-- the carriageways: runs of lanes going one way
+	local groups = {}
+	for _, h in hits do
+		local g = groups[#groups]
+		if g and g.side == h.side then
+			g.t1 = h.t
+			g.y = h.y
+		else
+			if #groups == 2 then
+				return nil -- (more than two runs: not one road)
+			end
+			table.insert(groups, { side = h.side, t0 = h.t, t1 = h.t, y = h.y, dir = h.dir })
+		end
+	end
+	for _, g in groups do
+		for _, s in approaches do
+			if math.abs(s.dir:Dot(g.dir)) > 0.7 then
+				g.axis = s.axis
+				break
+			end
+		end
+	end
+	if #groups == 2 then
+		groups[1].axis = groups[1].axis or groups[2].axis
+		groups[2].axis = groups[2].axis or groups[1].axis
+	end
+	if not groups[1].axis then
+		return nil -- (a road this junction's lights don't hold)
+	end
+	local stages = {}
+	if #groups == 1 then
+		stages[1] = { to = b, axis = groups[1].axis, len = L }
+	else
+		-- wait where the two carriageways meet: half way between their nearest lanes' middles
+		local tw = (groups[1].t1 + groups[2].t0) / 2
+		local w = a + ab * (tw / L)
+		local y = (groups[1].y + groups[2].y) / 2
+		local root = Config.mapRoot and Config.mapRoot()
+		if root then
+			groundRay.FilterDescendantsInstances = { root }
+			local hit = workspace:Raycast(Vector3.new(w.X, y + 6, w.Z), Vector3.new(0, -12, 0), groundRay)
+			if hit then
+				y = hit.Position.Y
+			end
+		end
+		w = Vector3.new(w.X, y, w.Z)
+		stages[1] = { to = w, axis = groups[1].axis, len = tw }
+		stages[2] = { to = b, axis = groups[2].axis, len = L - tw }
+	end
+	return { i = approaches[1].i, stages = stages, k = 1 }
+end
+
+-- may this stage start now: its traffic has red, with time left to get over
+local function gateOpen(w: Walker, sg: any, st: any): boolean
+	local now = workspace:GetServerTimeNow()
+	if CityLayout.lightState(sg.i, 0, st.axis, now) ~= "R" then
+		return false
+	end
+	-- (people step out briskly on the lights: SIG_PACE; a wide carriageway that takes longer than a whole red starts
+	-- as the red starts: cars are held then, and Traffic stops for people on the road anyway)
+	local L = Config.Lights
+	local need = math.min(st.len / math.max(w.speed * SIG_PACE, 4.2) + 1.0, L.Cycle - L.Green - L.Yellow - 1.5)
+	return CityLayout.lightTimeLeft(sg.i, 0, st.axis, now) >= need
+end
+
+-- a signal crossing from this pavement end: (path, index, far point, plan) or nil. It goes over a zebra: each arm of
+-- the junction has one just before its lanes end, square to the road. The walker walks along the kerb to the zebra's
+-- near end (plan.pre, up to ZEBRA_WALK studs, crossing no lanes), waits there, crosses on the zebra's line in its
+-- stages to the far end, then walks on to the far pavement's path (the returned point)
+local ZEBRA_BACK = 5 -- studs back from the first approach lane's end (measured from above, 28 Nov) to the zebra's middle
+local ZEBRA_WALK = 35
+local function findSignalCross(w: Walker): (number?, number?, Vector3?, any?)
+	if not sigInit() then
+		return nil
+	end
+	local p = w.pos
+	local approaches = junctionNear(p)
+	if not approaches then
+		return nil
+	end
+	-- the arms: approaches grouped by heading (30-degree buckets), the middle of their stop points
+	local arms, byKey = {}, {}
+	for _, ap in approaches do
+		local key = math.floor((math.atan2(ap.dir.X, ap.dir.Z) + math.pi) / (math.pi / 6) + 0.5) % 12
+		local arm = byKey[key]
+		if not arm then
+			arm = { dir = ap.dir, sum = Vector3.zero, n = 0, first = math.huge }
+			byKey[key] = arm
+			table.insert(arms, arm)
+		end
+		arm.sum += ap.pos
+		arm.n += 1
+		arm.first = math.min(arm.first, ap.pos:Dot(arm.dir))
+	end
+	local best, bestScore = nil, math.huge
+	for _, arm in arms do
+		local dir = Vector3.new(arm.dir.X, 0, arm.dir.Z).Unit
+		local perp = dir:Cross(Vector3.yAxis)
+		local mid = arm.sum / arm.n
+		local z = mid + dir * (arm.first - mid:Dot(arm.dir) - ZEBRA_BACK)
+		local sp = Vector3.new(p.X - z.X, 0, p.Z - z.Z):Dot(perp)
+		local za = Vector3.new(z.X + perp.X * sp, p.Y, z.Z + perp.Z * sp)
+		local walkA = flat(za, p)
+		-- (the kerb walk must not cross a road of its own: a plan between p and za means lanes in the way)
+		if walkA < ZEBRA_WALK and (walkA < 2 or not crossingPlan(p, za, approaches)) then
+			local cx, cz = math.floor(z.X / CELL), math.floor(z.Z / CELL)
+			for gx = cx - 1, cx + 1 do
+				for gz = cz - 1, cz + 1 do
+					local list = pathCells[cellKey(gx, gz)]
+					for e = 1, (if list then #list // 2 else 0) do
+						local pi, k = list[2 * e - 1], list[2 * e]
+						local pts = paths[pi]
+						local q = pts[k]
+						if pts ~= w.path and q and math.abs(q.Y - p.Y) < 4 then
+							local sq = Vector3.new(q.X - z.X, 0, q.Z - z.Z):Dot(perp)
+							if sq * sp < 0 and math.abs(sq - sp) > 10 then
+								local zb = Vector3.new(z.X + perp.X * sq, q.Y, z.Z + perp.Z * sq)
+								local walkB = flat(zb, q)
+								local score = walkA + walkB + rng:NextNumber(0, 15)
+								if walkB < ZEBRA_WALK and score < bestScore then
+									local plan = crossingPlan(za, zb, approaches)
+									if plan and lineClear(za, zb) then
+										plan.pre = za
+										best, bestScore = { pi = pi, k = k, q = q, plan = plan }, score
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	if best then
+		return best.pi, best.k, best.q, best.plan
+	end
+	return nil
+end
+
+-- (owner, 27 Nov: "also add an idle animation") standing people now and then take the phone out for a look
+local function idleTick(w: Walker, dt: number)
+	w.peekT = (w.peekT or rng:NextNumber(2, 8)) - dt
+	if (w.peekT :: number) > 0 then
+		return
+	end
+	if w.peekOn then
+		w.phone, w.peekOn = nil, nil
+		w.peekT = rng:NextNumber(6, 16)
+	elseif not w.phone and rng:NextNumber() < 0.4 then
+		w.phone, w.peekOn = "hand", true
+		w.peekT = rng:NextNumber(2, 4.5)
+	else
+		w.peekT = rng:NextNumber(5, 12)
+	end
+end
+
+local function idleEnd(w: Walker)
+	if w.peekOn then
+		w.phone, w.peekOn = nil, nil
+	end
+end
+
+---------------------------------------------------------------------
+-- (owner, 27 Nov: "make it so that npc characters can start running if ur car is near them and faces them, and also
+-- if ur car stands in their way, they can turn around because theyre scared or walk around ur car") players' cars.
+-- A car coming at someone (moving toward them, them in its path, nearer the faster it goes): a startled look, then a
+-- run sideways out of its path, then calm again with a look back. A car standing near: a wary look. A car standing
+-- across the way: walk round it (like a bin, past its far end) or, scared or with no room, turn round.
+---------------------------------------------------------------------
+local pcars: { any } = {}
+local pcarT = 0
+local function refreshPCars(dt: number)
+	pcarT -= dt
+	if pcarT > 0 then
+		return
+	end
+	pcarT = 0.15
+	table.clear(pcars)
+	local f = workspace:FindFirstChild("PlayerCars")
+	if not f then
+		return
+	end
+	for _, m in f:GetChildren() do
+		local root = if m:IsA("Model") then m.PrimaryPart else nil
+		if root then
+			local v = root.AssemblyLinearVelocity
+			local lv = root.CFrame.LookVector
+			local fwd = Vector3.new(lv.X, 0, lv.Z)
+			table.insert(pcars, {
+				pos = root.Position, root = root, vel = Vector3.new(v.X, 0, v.Z),
+				fwd = if fwd.Magnitude > 0.01 then fwd.Unit else Vector3.zAxis,
+				halfLen = ((m:GetAttribute("Length") :: number?) or 14) / 2, width = (m:GetAttribute("Width") :: number?) or 6,
+			})
+		end
+	end
+end
+
+-- a car's half extent along a flat direction
+local function carExt(c: any, d: Vector3): number
+	local r = c.fwd:Cross(Vector3.yAxis)
+	return math.abs(d:Dot(c.fwd)) * c.halfLen + math.abs(d:Dot(r)) * c.width / 2
+end
+
+-- what a car near w is doing to it: "flee" (coming at it) with the car, its moving direction, lateral offset and
+-- speed; "wary" (standing close by) with the car; or nil
+local function carThreat(w: Walker): (string?, any?, Vector3?, number, number)
+	for _, c in pcars do
+		local rel = w.pos - c.pos
+		local d = math.sqrt(rel.X * rel.X + rel.Z * rel.Z)
+		if d < 45 and math.abs(rel.Y) < 8 then
+			local sp = c.vel.Magnitude
+			-- (over ~11 km/h: slower, they hold their ground and a nudge is a stumble back: PedHits / bump)
+			if sp > 9 then
+				local dir = c.vel / sp
+				local along = rel:Dot(dir) - c.halfLen
+				local lat = rel:Dot(dir:Cross(Vector3.yAxis))
+				if along > -1 and along < 8 + sp * 2.2 and math.abs(lat) < c.width / 2 + 3 then
+					return "flee", c, dir, lat, sp
+				end
+			elseif d < c.halfLen + 10 then
+				return "wary", c, nil, 0, sp
+			end
+		end
+	end
+	return nil, nil, nil, 0, 0
+end
+
+-- start the flight: a point beside the car's path, away from the road when it can be (and nothing big in the way)
+local function startFlee(w: Walker, c: any, dir: Vector3, lat: number, sp: number)
+	local right = dir:Cross(Vector3.yAxis)
+	local sgn = if lat > 0.6 then 1 elseif lat < -0.6 then -1 else 0
+	if sgn == 0 then
+		local kerb = kerbSide(w)
+		sgn = if kerb and right:Dot(kerb) > 0 then -1 elseif kerb then 1 elseif rng:NextNumber() < 0.5 then 1 else -1
+	end
+	local function spot(s: number): Vector3
+		local p = w.pos + right * (s * (c.width / 2 + 4.5) - lat) + dir * 1.5
+		return Vector3.new(p.X, w.pos.Y, p.Z)
+	end
+	local p = spot(sgn)
+	if not lineClear(w.pos, p) then
+		p = spot(-sgn)
+	end
+	idleEnd(w)
+	local toCar = c.pos - w.pos
+	w.flee = {
+		p = p, t = 0, startle = math.clamp(0.42 - sp * 0.01, 0.12, 0.4), prev = w.mode, car = c,
+		lookYaw = math.clamp(wrapA(math.atan2(-toCar.X, -toCar.Z) - w.yaw), -1.4, 1.4),
+	}
+	w.mode = "flee" -- (its own mode: no kerb wait, pause or crossing step runs while it lasts)
+	w.fearT = 10
+end
+
+-- (27 Nov, owner: "when i go slow near npc character and bump them with my car, they just teleport 2 studs away rn")
+-- a slow bump (PedHits): pushed back over half a second along the car's push (eased), facing the car with the hands
+-- out on the bonnet and stumbling steps back (PedMotion "bumped"). While the car keeps pushing they keep stepping
+-- back in front of it (never inside its box); then a look, and a step aside out of its way or a shaken fist.
+local function startBump(w: Walker, root: BasePart, v: Vector3)
+	local model = root:FindFirstAncestorOfClass("Model")
+	local vf = Vector3.new(v.X, 0, v.Z)
+	local sp = vf.Magnitude
+	local away = Vector3.new(w.pos.X - root.Position.X, 0, w.pos.Z - root.Position.Z)
+	local dir = if sp > 0.1 then vf / sp elseif away.Magnitude > 0.01 then away.Unit else heading(w.yaw)
+	local rv = root.CFrame.RightVector
+	local right = Vector3.new(rv.X, 0, rv.Z)
+	if right.Magnitude > 0.01 then
+		right = right.Unit
+		dir = (dir + right * (if away:Dot(right) >= 0 then 0.35 else -0.35)).Unit
+	end
+	local b = w.bump
+	if b then -- (bumped again while stumbling: a fresh push from here)
+		b.dir, b.x, b.t, b.D = dir, 0, 0, math.clamp(0.6 + sp * 0.1, 0.6, 2)
+		return
+	end
+	idleEnd(w)
+	w.flee, w.avoid, w.knockAt = nil, nil, nil
+	w.bump = {
+		dir = dir, root = root, t = 0, dur = 0.5, x = 0, D = math.clamp(1 + sp * 0.12, 1, 2.6),
+		halfL = (((model and model:GetAttribute("Length")) :: number?) or 16) / 2,
+		halfW = (((model and model:GetAttribute("Width")) :: number?) or 7) / 2,
+	}
+	w.act = { kind = "bumped", t = 0 }
+	w.fearT = 10
+end
+
+local function bumpStep(w: Walker, dt: number)
+	local b = w.bump :: any
+	local root = b.root :: BasePart
+	b.t += dt
+	-- facing the car (eased: the body comes round to it)
+	if root.Parent then
+		local to = root.Position - w.pos
+		w.yaw += wrapA(math.atan2(-to.X, -to.Z) - w.yaw) * math.min(1, dt * 6)
+	end
+	w.yawRate, w.twist, w.lean = 0, 0, 0
+	-- the push: eased out over dur
+	local a = math.clamp(b.t / b.dur, 0, 1)
+	local x = b.D * a * a * (3 - 2 * a)
+	w.pos += b.dir * (x - b.x)
+	b.x = x
+	-- never inside the car: in front of it, a hand's width off, while it keeps coming
+	local pushed = false
+	if root.Parent then
+		local lv = root.CFrame.LookVector
+		local f = Vector3.new(lv.X, 0, lv.Z)
+		f = if f.Magnitude > 0.01 then f.Unit else Vector3.zAxis
+		local r = f:Cross(Vector3.yAxis)
+		local rel = Vector3.new(w.pos.X - root.Position.X, 0, w.pos.Z - root.Position.Z)
+		local perp = b.dir:Cross(Vector3.yAxis)
+		local supp = math.abs(b.dir:Dot(f)) * b.halfL + math.abs(b.dir:Dot(r)) * b.halfW + 1.1 * w.fig.scale
+		local wide = math.abs(perp:Dot(f)) * b.halfL + math.abs(perp:Dot(r)) * b.halfW + 1.1 * w.fig.scale
+		local d = rel:Dot(b.dir)
+		if d < supp and d > -supp and math.abs(rel:Dot(perp)) < wide then
+			w.pos += b.dir * (supp - d)
+			pushed = true
+		end
+	end
+	-- the stumble: played on, or back and forth over the steps while pushed
+	local act = w.act
+	if not act or act.kind ~= "bumped" then
+		act = { kind = "bumped", t = 0.3 }
+		w.act = act
+	end
+	if pushed and act.t >= 0.5 then
+		b.rev = true
+	end
+	if b.rev then
+		act.t -= dt
+		if act.t <= 0.12 then
+			act.t = 0.12
+			b.rev = nil
+		end
+	else
+		act.t += dt
+	end
+	if not pushed and not b.rev and act.t >= PedMotion.ACTIONS.bumped.dur then
+		-- over it: a look at the car, then out of its way (a step aside) or a shaken fist at the driver
+		w.bump = nil
+		w.act = nil
+		local to = root.Position - w.pos
+		w.glance = { yaw = math.clamp(wrapA(math.atan2(-to.X, -to.Z) - w.yaw), -1.5, 1.5), t = 1.2 }
+		if rng:NextNumber() < 0.35 then
+			w.act = { kind = "fist", t = 0 }
+		elseif w.mode ~= "stand" and root.Parent then
+			local perp = b.dir:Cross(Vector3.yAxis)
+			local s = if rng:NextNumber() < 0.5 then 1 else -1
+			local p = w.pos + perp * s * (b.halfW + 3.5) + b.dir * 1.5
+			p = Vector3.new(p.X, w.pos.Y, p.Z)
+			if not lineClear(w.pos, p) then
+				p = w.pos - perp * s * (b.halfW + 3.5) + b.dir * 1.5
+				p = Vector3.new(p.X, w.pos.Y, p.Z)
+			end
+			w.avoid = { q = root, p = p, car = true }
+			if w.mode == "pause" or w.mode == "look" then
+				w.mode = "walk"
+			end
+		end
+	end
+end
+YangonStreetLife.bump = startBump
+
+-- a car standing across the way ahead within dist: walk round it, or turn back (scared, or no room). true = acted
+local function carBlocked(w: Walker, dist: number): boolean
+	local hd = heading(w.yaw)
+	local side = Vector3.new(-hd.Z, 0, hd.X)
+	for _, c in pcars do
+		if c.vel.Magnitude < 3 then
+			local rel = c.pos - w.pos
+			local along = rel:Dot(hd)
+			local alongExt = carExt(c, hd)
+			if along > 0 and along - alongExt < dist and math.abs(rel.Y) < 8 then
+				local need = carExt(c, side) + 0.95 * w.fig.scale + 0.6
+				local lat = rel:Dot(side)
+				if math.abs(lat) < need then
+					local scared = (w.fearT or 0) > 0
+					local function round(sgn: number): Vector3?
+						local p = c.pos + side * sgn * (need + 1.4) + hd * (alongExt + 1)
+						p = Vector3.new(p.X, w.pos.Y, p.Z)
+						if lineClear(w.pos, p) then
+							return p
+						end
+						return nil
+					end
+					local first = if math.abs(lat) > 0.25 then -math.sign(lat) else (if rng:NextNumber() < 0.5 then 1 else -1)
+					local p = round(first) or round(-first)
+					local back = w.mode ~= "cross" and w.path ~= nil and (not p or rng:NextNumber() < (if scared then 0.8 else 0.3))
+					if back then
+						-- turn round on the spot (eased), then walk back the way they came
+						-- (heading for k + dir: the way back starts at that point, just behind once turned)
+						if w.path and w.path[w.k + w.dir] then
+							w.k += w.dir
+						end
+						w.dir = -w.dir
+						w.mode = "pause"
+						w.timer = rng:NextNumber(0.5, 1.1)
+						w.pauseYaw = w.yaw + math.pi * (if rng:NextNumber() < 0.5 then 1 else -1)
+						w.avoid = nil
+						return true
+					elseif p then
+						w.avoid = { q = c.root, p = p, car = true }
+						return true
+					end
+				end
+			end
+		end
+	end
+	return false
 end
 
 local function setGait(w: Walker, gait: string)
@@ -1158,8 +1722,33 @@ local function setGait(w: Walker, gait: string)
 	w.speed = if gait == "run" then rng:NextNumber(RUN_SPEED[1], RUN_SPEED[2]) else (w.walkSpeed or 3)
 end
 
+-- never inside another person: ease apart from anyone nearer than 2.4 studs (20 people: cheap); also while waiting
+-- at a crossing, where a few stand on one spot
+local function separate(w: Walker, dt: number)
+	local s = w.fig.scale
+	for _, o in active do
+		if o ~= w and not o.held then
+			local dx, dz = w.pos.X - o.pos.X, w.pos.Z - o.pos.Z
+			local d = math.sqrt(dx * dx + dz * dz)
+			local need = 2.4 * math.max(s, o.fig.scale)
+			if d < need and math.abs(w.pos.Y - o.pos.Y) < 4 then
+				if d < 0.01 then -- (exactly on one spot: a nudge sideways)
+					dx, dz, d = 0.3, 0.1, 0.32
+				end
+				local k = math.min(1, dt * 6) * (need - d) / d
+				w.pos += Vector3.new(dx * k, 0, dz * k)
+			end
+		end
+	end
+end
+
 local function stepWalk(w: Walker, dt: number): boolean
 	local s = w.fig.scale
+	-- (27 Nov) bumped by a slow car: the stumble back, nothing else
+	if w.bump then
+		bumpStep(w, dt)
+		return false
+	end
 	-- a knock-over under way (a keyed action, standing on the spot)
 	if w.act then
 		local act = w.act
@@ -1185,7 +1774,78 @@ local function stepWalk(w: Walker, dt: number): boolean
 		end
 		return false
 	end
-	if w.mode == "pause" or w.mode == "look" then
+	-- (27 Nov) a player's car: coming at them -> startled, then run out of its path; standing close -> a wary look
+	w.fearT = math.max(0, (w.fearT or 0) - dt)
+	w.carT = (w.carT or 0) - dt
+	if not w.flee and #pcars > 0 and (w.carT :: number) <= 0 then
+		w.carT = 0.15
+		local kind, c, dir, lat, sp = carThreat(w)
+		if kind == "flee" then
+			startFlee(w, c, dir :: Vector3, lat, sp)
+		elseif kind == "wary" and not w.glance and rng:NextNumber() < 0.25 then
+			local toCar = c.pos - w.pos
+			w.glance = { yaw = math.clamp(wrapA(math.atan2(-toCar.X, -toCar.Z) - w.yaw), -1.5, 1.5), t = rng:NextNumber(1, 2) }
+		end
+	end
+	local fleeGoal: Vector3? = nil
+	if w.flee then
+		local fl = w.flee
+		fl.t += dt
+		if fl.t < fl.startle then
+			-- the start: frozen for a beat, the head snapping round to the car
+			w.yawRate, w.twist, w.lean = 0, 0, 0
+			w.glance = { yaw = fl.lookYaw, t = 0.1 }
+			return false
+		end
+		if w.gait ~= "run" then
+			setGait(w, "run")
+		end
+		if flat(fl.p, w.pos) < 1.2 or fl.t > fl.startle + 3.5 then
+			-- safe: calm down to a walk, a look back at the car, carry on (a crossing is finished, not dropped
+			-- in the road)
+			w.flee = nil
+			if not w.hurry then
+				setGait(w, "walk")
+			end
+			local toCar = fl.car.pos - w.pos
+			w.glance = { yaw = math.clamp(wrapA(math.atan2(-toCar.X, -toCar.Z) - w.yaw), -1.6, 1.6), t = 1.4 }
+			local onRoad = fl.prev == "cross" or (fl.prev == "wait" and w.cross and w.cross.sig and w.cross.sig.k > 1)
+			if onRoad then
+				w.mode = "cross"
+				if w.cross and w.cross.sig then
+					w.cross.sig.k = #w.cross.sig.stages
+				end
+			else
+				w.mode = "walk"
+				w.cross = nil
+			end
+			w.avoid = nil
+		else
+			fleeGoal = fl.p
+		end
+	end
+	-- (27 Nov) at a signal crossing: waiting at the kerb or where the carriageways meet, facing across, until this
+	-- stage's traffic has red with time to get over
+	if not fleeGoal and w.mode == "wait" and w.cross and w.cross.sig then
+		local sg = w.cross.sig
+		local st = sg.stages[sg.k]
+		local to = st.to - w.pos
+		if Vector3.new(to.X, 0, to.Z).Magnitude > 0.3 then
+			w.yaw += wrapA(math.atan2(-to.X, -to.Z) - w.yaw) * math.min(1, dt * 2.5)
+		end
+		w.yawRate, w.twist, w.lean = 0, 0, 0
+		idleTick(w, dt)
+		separate(w, dt)
+		if gateOpen(w, sg, st) then
+			idleEnd(w)
+			w.mode = "cross"
+		end
+		return false
+	end
+	if not fleeGoal and (w.mode == "pause" or w.mode == "look") then
+		if w.mode == "pause" then
+			idleTick(w, dt)
+		end
 		w.timer -= dt
 		if w.pauseYaw then
 			w.yaw += wrapA(w.pauseYaw - w.yaw) * math.min(1, dt * 1.6)
@@ -1196,21 +1856,48 @@ local function stepWalk(w: Walker, dt: number): boolean
 		if w.timer <= 0 then
 			w.mode = if w.mode == "look" then "cross" else "walk"
 			w.pauseYaw = nil
+			idleEnd(w)
 		end
 		return false
 	end
 	-- (27 Nov) now and then a stop on the way: a look at a shop, the phone, the street (turned to, not snapped)
-	if w.mode == "walk" and w.gait ~= "run" and rng:NextNumber() < dt / 45 then
+	if not fleeGoal and w.mode == "walk" and w.gait ~= "run" and rng:NextNumber() < dt / 45 then
 		w.mode = "pause"
 		w.timer = rng:NextNumber(2, 7)
 		w.pauseYaw = w.yaw + rng:NextNumber(0.5, 1.6) * (if rng:NextNumber() < 0.5 then -1 else 1)
 		return false
 	end
 	-- where to: the crossing's far side, a bin to knock, a way round something, or the next path point
-	local goal: Vector3?
-	if w.mode == "cross" and w.cross then
+	local goal: Vector3? = fleeGoal
+	-- (27 Nov) to the zebra's near end along the kerb, then wait there for the lights
+	if not goal and w.mode == "towait" and w.cross and w.cross.sig then
+		goal = w.cross.sig.pre
+		if flat(goal :: Vector3, w.pos) < 0.9 then
+			w.mode = "wait"
+			return false
+		end
+	end
+	if not goal and w.mode == "cross" and w.cross then
 		goal = w.cross.pt
-		if flat(goal, w.pos) < 1.4 then
+		local sg = w.cross.sig
+		if sg and sg.k <= #sg.stages then
+			goal = sg.stages[sg.k].to
+			if flat(goal :: Vector3, w.pos) < 1.0 then
+				-- over this carriageway: on to the next only if its traffic is held too, else wait here; after the
+				-- last, off the zebra to the far pavement's path
+				sg.k += 1
+				if sg.k <= #sg.stages then
+					if not gateOpen(w, sg, sg.stages[sg.k]) then
+						w.mode = "wait"
+						return false
+					end
+					goal = sg.stages[sg.k].to
+				else
+					goal = w.cross.pt
+				end
+			end
+		end
+		if goal == w.cross.pt and flat(goal :: Vector3, w.pos) < 1.4 then
 			local c = w.cross
 			w.path = paths[c.pi]
 			w.k = c.k
@@ -1249,11 +1936,19 @@ local function stepWalk(w: Walker, dt: number): boolean
 			end
 		end
 	end
-	if not goal and w.avoid then
+	-- (a car standing on the crossing: round it)
+	if not goal and w.mode == "cross" and not w.avoid and #pcars > 0 then
+		w.scanT = (w.scanT or 0) - dt
+		if (w.scanT :: number) <= 0 then
+			w.scanT = 0.3
+			carBlocked(w, 8)
+		end
+	end
+	if not fleeGoal and w.avoid then
 		local av = w.avoid
 		local hd = heading(w.yaw)
 		av.t = (av.t or 0) + dt
-		if not av.q.Parent or (av.q.Position - w.pos):Dot(hd) < -0.6 or flat(av.p, w.pos) < 0.8 or av.t > 6 then
+		if not av.q.Parent or (not av.car and (av.q.Position - w.pos):Dot(hd) < -0.6) or flat(av.p, w.pos) < 0.8 or av.t > 6 then
 			w.avoid = nil
 		else
 			goal = av.p
@@ -1265,11 +1960,28 @@ local function stepWalk(w: Walker, dt: number): boolean
 			local t = target(w)
 			if not t then
 				-- the end of the pavement: cross to the next one ahead (looking both ways first), or turn back
-				local pi, k, pt = nil, nil, nil
-				if w.forceRun or rng:NextNumber() < 0.6 then
+				local pi, k, pt, sig = nil, nil, nil, nil
+				-- (27 Nov) by a signalled junction: cross on the lights (most do)
+				if type(w.forceSig) == "table" then -- (Studio staging: the crossing it was staged for)
+					local c = w.forceSig
+					pi, k, pt, sig = c.pi, c.k, c.pt, c.sig
+					sig.k = 1
+					w.forceSig = nil
+				elseif rng:NextNumber() < 0.75 then
+					pi, k, pt, sig = findSignalCross(w)
+				end
+				if not pi and (w.forceRun or rng:NextNumber() < 0.6) then
 					pi, k, pt = findCross(w)
 				end
-				if pi and pt then
+				if pi and pt and sig then
+					w.cross = { pi = pi, k = k :: number, pt = pt, sig = sig }
+					if w.gait ~= "run" and (w.forceRun or rng:NextNumber() < CROSS_RUN) then
+						w.forceRun = nil
+						setGait(w, "run")
+					end
+					w.mode = if sig.pre and flat(sig.pre, w.pos) > 0.9 then "towait" else "wait"
+					return false
+				elseif pi and pt then
 					w.cross = { pi = pi, k = k :: number, pt = pt }
 					if w.gait ~= "run" and (w.forceRun or rng:NextNumber() < CROSS_RUN) then
 						w.forceRun = nil
@@ -1319,6 +2031,10 @@ local function stepWalk(w: Walker, dt: number): boolean
 		w.scanT = (w.scanT or 0) - dt
 		if (w.scanT :: number) <= 0 then
 			w.scanT = 0.3
+			-- (27 Nov) a player's car standing in the way first: round it or back the way they came
+			if #pcars > 0 and not w.avoid and carBlocked(w, math.max(6, w.speed * LOOK_AHEAD)) then
+				return false
+			end
 			local q, need, lat = obstacleAhead(w, math.max(6, w.speed * LOOK_AHEAD))
 			if q then
 				local hd = heading(w.yaw)
@@ -1356,6 +2072,9 @@ local function stepWalk(w: Walker, dt: number): boolean
 	local dy = steer(w, g, dt)
 	-- slower into a sharp turn; feet keep to the stride (cadence from the speed)
 	local v = w.speed * (1 - 0.3 * math.min(1, math.abs(dy) / 1.4))
+	if w.mode == "cross" and w.cross and w.cross.sig and w.gait ~= "run" then
+		v *= SIG_PACE
+	end
 	local hd = heading(w.yaw)
 	local step = v * dt
 	local d = flat(g, w.pos)
@@ -1364,17 +2083,7 @@ local function stepWalk(w: Walker, dt: number): boolean
 		w.pos = Vector3.new(w.pos.X, w.pos.Y + (g.Y - w.pos.Y) * math.min(1, step / d), w.pos.Z)
 	end
 	-- (27 Nov) never inside another person: ease apart from anyone nearer than 2.4 studs (20 people: cheap)
-	for _, o in active do
-		if o ~= w and not o.held then
-			local dx, dz = w.pos.X - o.pos.X, w.pos.Z - o.pos.Z
-			local d = math.sqrt(dx * dx + dz * dz)
-			local need = 2.4 * math.max(s, o.fig.scale)
-			if d < need and d > 0.01 and math.abs(w.pos.Y - o.pos.Y) < 4 then
-				local k = math.min(1, dt * 6) * (need - d) / d
-				w.pos += Vector3.new(dx * k, 0, dz * k)
-			end
-		end
-	end
+	separate(w, dt)
 	-- (a corner of a shelter on the line) never inside one
 	if w.mode ~= "cross" then
 		local kerb = kerbSide(w)
@@ -1530,6 +2239,14 @@ local function pedTick(cam: Vector3, cap: number)
 	elseif cam.Y > 300 then
 		want = math.floor(cap / 3)
 	end
+	-- (2026-11-28) at the car meet a crowd stands round the drift pad: more people there, mostly standing
+	local share = cfg.SpotShare
+	for _, q in meetAt do
+		if flat(q, cam) < 260 and cam.Y < 300 then
+			want, share = cap + 14, 0.85
+			break
+		end
+	end
 	pedWant = want
 	local k = 1
 	while k <= #active do
@@ -1544,7 +2261,7 @@ local function pedTick(cam: Vector3, cap: number)
 	local tries = 0
 	while #active < want and tries < 8 do
 		tries += 1
-		if rng:NextNumber() < cfg.SpotShare then
+		if rng:NextNumber() < share then
 			spawnStander(cam, cfg.PedMinGap, cfg.PedRadius)
 		else
 			spawnWalker(cam, cfg.PedMinGap, cfg.PedRadius)
@@ -1591,6 +2308,54 @@ local function pedTick(cam: Vector3, cap: number)
 			if stage == "run" then -- a hurrying runner on the pavement
 				w.hurry = true
 				setGait(w, "run")
+			elseif stage == "sigcross" then
+				-- (27 Nov) a pavement end near the camera with a signal crossing ahead (two stages first); the walker
+				-- starts 3 points before it; attribute StageSig = how many stages
+				local cx, cz = math.floor(cam.X / CELL), math.floor(cam.Z / CELL)
+				local best2, best1 = nil, nil
+				local seenP = {}
+				for gx = cx - 3, cx + 3 do
+					for gz = cz - 3, cz + 3 do
+						local list = pathCells[cellKey(gx, gz)]
+						for e = 1, (if list then #list // 2 else 0) do
+							local pi = list[2 * e - 1]
+							local pts = paths[pi]
+							local n = #pts
+							if not seenP[pi] and n > 5 and not best2 then
+								seenP[pi] = true
+								for _, en in { { n, n - 1, 1 }, { 1, 2, -1 } } do
+									local pe, pn = pts[en[1]], pts[en[2]]
+									local d = pe - pn
+									local probe = { pos = pe, yaw = math.atan2(-d.X, -d.Z), path = pts } :: any
+									local cpi, ck, cq, plan = findSignalCross(probe)
+									if plan then
+										local rec = { pts = pts, n = n, dir = en[3], stages = #plan.stages, cross = { pi = cpi, k = ck, pt = cq, sig = plan } }
+										if #plan.stages == 2 then
+											best2 = best2 or rec
+										else
+											best1 = best1 or rec
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+				local rec = best2 or best1
+				if rec then
+					local pts, n = rec.pts, rec.n
+					-- 10 studs before the end, on the last stretch, heading for the end
+					local e, e2 = if rec.dir > 0 then n else 1, if rec.dir > 0 then n - 1 else 2
+					local back = pts[e2] - pts[e]
+					w.path, w.dir, w.k = pts, rec.dir, e2
+					w.pos = pts[e] + back.Unit * math.min(10, back.Magnitude * 0.9)
+					local nx = pts[e] - w.pos
+					w.yaw = math.atan2(-nx.X, -nx.Z)
+					w.latLo, w.latHi = nil, nil
+					w.lat = 0
+					w.forceSig = rec.cross
+				end
+				w.fig.model:SetAttribute("StageSig", if rec then rec.stages else 0)
 			elseif stage == "cross" then
 				-- a pavement end near the camera with a crossing ahead; the walker starts 8 points before it
 				local cx, cz = math.floor(cam.X / CELL), math.floor(cam.Z / CELL)
@@ -1684,6 +2449,7 @@ end
 
 local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 	binsTick(dt, cam, look)
+	refreshPCars(dt)
 	for _, w in active do
 		w.acc += dt
 		if w.held or w.gone then
@@ -1700,14 +2466,28 @@ local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 			if d > 20 and (w.pos - cam):Dot(look) < 0 then
 				every = math.huge
 			end
+			if w.bump then -- (being pushed: every frame, so the car never goes into them)
+				every = 0
+			end
 			if w.acc >= every then
 				local a = w.acc
 				w.acc = 0
 				w.t = (w.t or 0) + a
-				if w.yawTo then
-					w.yaw += (w.yawTo - w.yaw) * math.min(1, a * 2)
+				if w.bump then
+					bumpStep(w, a)
+				else
+					if w.yawTo then
+						w.yaw += (w.yawTo - w.yaw) * math.min(1, a * 2)
+					end
+					lookStep(w, a)
+					idleTick(w, a)
+					if w.act then -- (a shaken fist after a bump)
+						w.act.t += a
+						if w.act.t >= PedMotion.ACTIONS[w.act.kind].dur then
+							w.act = nil
+						end
+					end
 				end
-				lookStep(w, a)
 				pose(w, false)
 			elseif every == math.huge then
 				w.acc = 0
@@ -1727,7 +2507,7 @@ local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 				w.acc = 0
 				w.t = (w.t or 0) + a
 				if d < 60 then
-					if w.mode == "pause" then
+					if w.mode == "pause" or w.mode == "wait" then
 						lookStep(w, a)
 					else
 						easeLook(w, a)
@@ -1735,6 +2515,27 @@ local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 				end
 				pose(w, moving)
 			end
+		end
+	end
+	-- (27 Nov) people on the road (crossing, or waiting where the carriageways meet) are obstacles for Traffic
+	local peds = Traffic.peds
+	table.clear(peds)
+	for _, w in active do
+		local sg = w.cross and w.cross.sig
+		-- (where in a signal crossing, on the model: for Studio checks; set only when it changes)
+		local str = if sg then string.format("%s %d/%d", w.mode, sg.k, #sg.stages) else nil
+		if (str or "") ~= w.sigStr then
+			w.sigStr = str or ""
+			w.fig.model:SetAttribute("Sig", str)
+		end
+		if not w.held and not w.gone and (w.mode == "cross" or w.mode == "flee" or (w.mode == "wait" and sg and sg.k > 1)) then
+			local o = w.obs
+			if not o then
+				o = { pos = w.pos, fwd = heading(w.yaw), speed = 0, halfLen = 1, width = 2.4, ped = true }
+				w.obs = o
+			end
+			o.pos, o.fwd = w.pos, heading(w.yaw)
+			table.insert(peds, o)
 		end
 	end
 end
