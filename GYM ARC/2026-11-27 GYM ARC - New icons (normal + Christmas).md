@@ -105,3 +105,6 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 ## v8b (27 Nov, owner: "logo too small ... look at powerlifters gradients and colors and logo size")
 - The logo is now 0.55 of the width, recoloured gold (`icon_render_25nov/gymarc_logo_v11_gold.png`, made by `recolor_logo_gold.py`). Silver "GYM" + gold "ARC" with a warm border, the same two-tone recipe as Power Lifters (purple word = their plates, orange border = their skin).
 - Output: `v7/gymarc_v8b_biglogo.png` (+ `_512`, `_sizetest`). `compose_v7.py` takes an optional 4th arg, the logo PNG.
+
+## Colour options (27 Nov, owner: "good but i dont like the gold text and our icon color")
+- `v7/colour_options_v8.png`: v8 with the background and logo hue-shifted to blue, green, red, purple, teal and orange (`colour_options.py`, blue-hue mask). A preview only; the chosen scheme gets a proper ChatGPT render.
