@@ -109,28 +109,35 @@ function LowEnd.applyWorld()
 end
 
 local function autoWatch()
-	-- (once per join: 25 s of frames after the map is in)
+	-- (27 Nov, owner: "when ur lagging, the terrain is in like the roblox optimizing state" and it stays) this used
+	-- to check once per join, so one lag spell (the load, a fast travel) kept the flat Low look for the whole
+	-- session. Now it checks every minute: 25 s of frames, then low-end on under 28 fps, back off at 55+.
 	task.wait(10)
-	local frames, t0 = 0, os.clock()
-	local conn = RunService.RenderStepped:Connect(function()
-		frames += 1
-	end)
-	task.wait(25)
-	conn:Disconnect()
-	if frames == 0 then
-		return -- (2026-11-20) a locked / minimised PC draws nothing: that is not a slow device
+	local drops = 0
+	while drops < 3 do -- shortcut: after 3 drops a flip-flopping device stays low-end; raise if players complain
+		local frames, t0 = 0, os.clock()
+		local conn = RunService.RenderStepped:Connect(function()
+			frames += 1
+		end)
+		task.wait(25)
+		conn:Disconnect()
+		-- (2026-11-20) a locked / minimised PC draws nothing: that is not a slow device
+		-- (the workspace hook is Studio-only, as in decide(): a TestLowEnd left saved in the place switched Auto off live)
+		local auto = LowEnd.mode == "Auto" and (player and player:GetAttribute("TestLowEnd")) == nil
+			and not (RunService:IsStudio() and workspace:GetAttribute("TestLowEnd") ~= nil)
+		if frames > 0 and auto then
+			local fps = frames / (os.clock() - t0)
+			local mem = Stats:GetTotalMemoryUsageMb()
+			if LowEnd.on and fps >= 55 and mem < 1800 then
+				set(false)
+			elseif not LowEnd.on and fps < 28 then
+				set(true)
+				drops += 1
+			end
+			print(string.format("[LowEnd] auto: %.0f fps, %.0f MB -> %s", fps, mem, if LowEnd.on then "low-end" else "normal"))
+		end
+		task.wait(35)
 	end
-	if LowEnd.mode ~= "Auto" or (player and player:GetAttribute("TestLowEnd") ~= nil) or workspace:GetAttribute("TestLowEnd") ~= nil then
-		return
-	end
-	local fps = frames / (os.clock() - t0)
-	local mem = Stats:GetTotalMemoryUsageMb()
-	if LowEnd.on and fps >= 55 and mem < 1800 then
-		set(false)
-	elseif not LowEnd.on and fps < 28 then
-		set(true)
-	end
-	print(string.format("[LowEnd] auto: %.0f fps, %.0f MB -> %s", fps, mem, if LowEnd.on then "low-end" else "normal"))
 end
 
 local function decide()
