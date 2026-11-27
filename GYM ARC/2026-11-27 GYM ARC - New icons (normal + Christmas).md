@@ -84,3 +84,6 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 - 64 px: lum 0.44, near-black 5%.
 - `compose_v7.py <art> <out> [logo_frac]` uses the cached `ref_icons/`.
 - Christmas comes next, from v7e, after the owner's OK.
+
+## v7f (27 Nov, owner: "looks bad. just try to have gym star's character physique")
+- Attached `v7/ref_icons/Gym_Star_512.png` as a physique-only reference. Output: `v7/gymarc_v7f_gymstar_build_gpt.png`, logo: `gymarc_v7f_normal_logo.png`. 64 px: lum 0.46, near-black 8%.
