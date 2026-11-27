@@ -36,3 +36,11 @@ date: 2026-11-27
 - ChatGPT enhanced each draft (`*_gpt.png`), then Gemini made it look less AI-made and enhanced it again (`*_final_art.png`). The logo is added in code, as before.
 - The Christmas Gemini pass was first sent the normal image by mistake; I resent it with the right file.
 - At 64 px: normal is 3.8% near-white and 32.3% near-black; Christmas is 3.1% and 35.8%.
+
+## v3 (after the icon study, 27 Nov 2026)
+Study: [[2026-11-27 GYM ARC - Icon study (gym icons + top CTR)]]. Files in `Assets/icon_2026-11-27/v3/`.
+- Reference: `layout_mock_normal.png`, our real avatar cut from the 4'0" -> 7'0" render and placed at the icon layout (giant waist-up right, small kid bottom-left, empty logo zone top-left, bright blue).
+- ChatGPT pass (`*_gpt.png`) with the prompt in `prompts.md`, Christmas in the same chat; Gemini de-AI pass (`*_final_art.png`); code grade (`grade_v3.py`: background deeper and more saturated, characters kept); logo top-left at 50% width (`compose_v3.py`).
+- Finals: `gymarc_v3_normal_logo(_512).png`, `gymarc_v3_xmas_logo(_512).png`. Size test: `icon_size_test_v3.png`.
+- 64 px: normal lum 0.52 / 4% dark, Christmas 0.53 / 4% dark (gym median 0.51 / 11%). v2 was 0.34 / 33%.
+- Known weak spot: at 60 px the Christmas cue (tree, presents) is small; the two icons look alike at a glance.
