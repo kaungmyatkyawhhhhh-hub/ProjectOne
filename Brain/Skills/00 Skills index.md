@@ -33,6 +33,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/robux-revenue-sim/SKILL\|robux-revenue-sim]] | Forecast or improve a Roblox game's Robux revenue: Monte Carlo sim of players, retention, would-be payers and each offer, calibrated to the Creator Dashboard; Robux + DevEx USD ranges, per-offer split, price sweep. (Local skill in `~/.claude/skills`.) |
 
 ## Log
+- 2026-11-27 roblox-icon-thumbnail: fourth correction (owner: character must be the icon, ~80% of frame, small logo, plain blurred background; one harmonising skin tone; close crop must keep a long torso). Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: third correction (owner: aesthetic build + bigger legs, arms/legs same gold; Muscle Legends small-vs-giant layout is "sloppy", use one professional hero and show the hook in the scene). Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: second correction (owner: "for roblox, the build should look robust"): sturdy chunky frame to match the blocky head, keep V + natural waist. Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: correction to 'Aesthetic build' (owner: waist and arms too small, obliques; Power Lifters + David Laid at 16 are his aesthetic): natural waist about 2/3 shoulders, big arms. Plugin skill: re-upload needed.
