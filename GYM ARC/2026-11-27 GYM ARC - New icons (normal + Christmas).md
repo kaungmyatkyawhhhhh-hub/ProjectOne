@@ -126,3 +126,39 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 - v13 (owner sent our original logo: "like this gradient"): the original `gymarc_logo_v10_blue_simple.png` at 0.58 of the width on the navy palette, `v9/gymarc_v13_navy_origlogo.png`. On the dark navy it pops; on the old flat blue it blended in.
 - v14 logo tones (owner: "change the color of logo a bit, dont change gradient, just the tone ... to suit the palette"): the original logo hue is 192 (cyan) and the icon's blue lights are 214. Hue rotations of only the blue layers (`icon_render_25nov/logo_tone.py`): +10 sky, +22 matching the background lights, +32 royal. Sheet: `v9/logo_tone_options_v14.png`.
 - v15 (owner: "another version where the dumbbell is blue too", and the lightest gradient colour should be a "SUPER SUPER light blue", not white): the "ARC" white highlight is now tinted light blue (`logo_tone.py <deg> <out> 0.16`, files `gymarc_logo_v10_tone*_lb.png`), tone B (+22). Glossy electric-blue dumbbell render: `v9/gymarc_v9_navy_bluedb_gpt.png`. Icons: `v9/gymarc_v15_{golddb,bluedb}.png`, sheet `v9/dumbbell_options_v15.png`.
+
+## v15 critique: ChatGPT + Gemini (27 Nov)
+Same text-only prompt to both, with `critique_sheet_v15.png` + `gymarc_v15_bluedb.png`.
+
+**They disagree on A vs B.**
+- ChatGPT: **A (gold)**, 8.6/10 vs 8.2. With B, the dumbbell, logo, rim light and background are all blue, so nothing separates. Gold reads as a valuable endgame item. Make the gold slightly less orange so it doesn't melt into the skin.
+- Gemini: **B (blue)**, by a narrow margin. The blue pops against the warm skin and ties to "ARC"; the gold blends with the skin.
+
+**Where both agree:**
+- Neither icon shows the "taller" hook.
+- It reads at 64 px and has more personality than Gym Universe and Strongman.
+- Cheap AI tells:
+  - over-glossy, airbrushed skin and shirt;
+  - too many glowing edges;
+  - hair strands that are too fine;
+  - abs that look painted on under the tee.
+- It's simpler and cleaner that wins, not more detail.
+
+**ChatGPT's top fixes:**
+1. Logo 25% smaller (about 0.42–0.45 of the width), with half the outer glow. Gemini says the opposite: keep it big, but use a thicker outer stroke and a simpler gradient.
+2. Make the physique the hero:
+   - shoulders +10%, upper arms +10–15%;
+   - simpler, larger muscle shapes;
+   - the tee stretches like real fabric.
+3. Palette navy #071225 / gold #FFC94A / skin #FFAA54 / white #F4F5F8 / blue #2585FF, with 30% less bloom and a few broad metal reflections.
+4. Face 8–10% bigger, with no sweat drops ("struggling"), simpler hair and less shiny goggles.
+5. "1000 LB" on the plate. The dumbbell 10% smaller, crop slightly wider to show more arm and torso.
+
+Test "taller" separately with a small starter avatar next to the giant.
+
+**Gemini's top fixes:**
+1. Show "taller": a low angle or a height cue.
+2. Fix the hand grip and tone down the airbrush.
+3. Logo readable at 64 px: a thicker stroke, a simpler gradient.
+4. Rim light to separate the hair from the dark background.
+5. One progression cue, without clutter; keep 70%+ of the frame on the character.
