@@ -179,3 +179,14 @@ Test "taller" separately with a small starter avatar next to the giant.
 - **Logo:** `v9/compose_v16.py` adds a thick dark-navy outer stroke (Gemini). The width is 0.53 (was 0.58) so it clears the goggles; this is a middle ground between ChatGPT's 0.43 and the owner's "bigger".
 - **Files:** `v9/gymarc_v16_{bluedb,golddb}_gpt.png` (raw), `v9/gymarc_v16_{bluedb,golddb}.png` (icons), `v9/compare_v16.png` (before/after vs Power Lifters and Gym Star).
 - **Watch:** removing the painted abs also softened the tapered waist. If the owner misses the V-taper, ask for it back in words.
+
+## v16 Christmas, made from gold v16 (27 Nov)
+- **Owner pick: "Gold v16"**, so the normal icon is `v9/gymarc_v16_golddb.png`.
+- **Christmas icon:** `v9/gymarc_v16_xmas.png` (raw `_gpt`). Made in the same ChatGPT chat with "keep exactly the same gold image, only add Christmas":
+  - Santa hat;
+  - red bow on the dumbbell;
+  - warm red/gold/green string-light bokeh, a pine tree and soft snowflakes;
+  - snow on the plates and shoulders.
+- **Logo:** same as normal, `compose_v16.py` at 0.53 with the thick stroke.
+- **Sheet:** `v9/compare_v16_xmas.png`.
+- **Note:** ChatGPT dropped the goggles under the hat. 64 px: lum 0.45, dark 22%.
