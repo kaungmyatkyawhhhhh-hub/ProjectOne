@@ -190,3 +190,19 @@ Test "taller" separately with a small starter avatar next to the giant.
 - **Logo:** same as normal, `compose_v16.py` at 0.53 with the thick stroke.
 - **Sheet:** `v9/compare_v16_xmas.png`.
 - **Note:** ChatGPT dropped the goggles under the hat. 64 px: lum 0.45, dark 22%.
+
+## Christmas logo + v16 gold vs blue verdict (27 Nov)
+- **Owner: "make the logo christmas themed too".** Made in code, as always (`icon_render_25nov/logo_snow.py <in> <out> [depth=40]`):
+  - the tops of the solid logo silhouette get fluffy snow caps with a few drips;
+  - the caps go white to icy blue;
+  - a dark navy edge separates the white snow from the silver "GYM".
+  - Files: logo `icon_render_25nov/gymarc_logo_v16_xmas_snow.png`, icon `v9/gymarc_v16_xmas_snowlogo.png` (`compose_v16.py ... 0.53 9 <logo>`).
+- **Owner: "ask chatgpt and gemini for v16 gold or blue".** Both pick **v16 GOLD**:
+  - **ChatGPT:** gold 8.7 > v15 gold 8.3 > Gym Star 8.2 > v16 blue 8.0. v16 beats v15: a natural shirt, less glow, cleaner. Its fixes:
+    - logo 15% smaller;
+    - shoulders and arms +10%, fewer shirt wrinkles;
+    - "1000 LB" on the plate.
+  - **Gemini:** gold is high-tier value and a distinct colour next to the competitors' purple and cyan. v16 is only barely better than v15 (composition); it still doesn't show "taller". Its fixes:
+    - a "taller" cue or a stat badge;
+    - more rim and edge separation at 64 px;
+    - more breathing room between the logo and the hair.
