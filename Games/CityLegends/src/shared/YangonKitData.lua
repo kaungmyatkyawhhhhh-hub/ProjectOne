@@ -54,9 +54,11 @@ local function rgb(r, g, b)
 end
 
 -- landmark_glb3d.GROUPS (midday calibrated) for the wall codes the generator uses (same as YangonKitPlace)
+-- (2026-11-27, TorqX look) KW0 / KW4 / KW6 toned from near pure white to stained off-whites (white walls blew out in sun);
+-- the shells in Studio were recoloured to match (place_pack.WALL). Landmarks keep their own colours.
 KD.WALL = {
-	KW0 = rgb(252, 255, 250), KW1 = rgb(255, 215, 153), KW2 = rgb(178, 242, 255), KW3 = rgb(199, 168, 130),
-	KW4 = rgb(226, 248, 255), KW5 = rgb(255, 197, 187), KW6 = rgb(255, 252, 243), KW7 = rgb(208, 255, 165),
+	KW0 = rgb(226, 224, 216), KW1 = rgb(255, 215, 153), KW2 = rgb(178, 242, 255), KW3 = rgb(199, 168, 130),
+	KW4 = rgb(200, 208, 204), KW5 = rgb(255, 197, 187), KW6 = rgb(222, 212, 194), KW7 = rgb(208, 255, 165),
 	KWG = rgb(162, 160, 150), KWB = rgb(173, 209, 250), KWC = rgb(144, 145, 136), KWD2 = rgb(181, 172, 162),
 	-- (2026-11-16, real places: places_1to1.py) fuel stations, car parks, courts, playgrounds
 	PCN = rgb(196, 194, 188), PAS = rgb(84, 84, 86), PLN = rgb(236, 236, 230), PLY = rgb(232, 196, 64),

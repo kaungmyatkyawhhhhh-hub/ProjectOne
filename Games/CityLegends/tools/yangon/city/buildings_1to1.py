@@ -1055,11 +1055,11 @@ def main():
 
     # -------------------------------------------------------------------------------------------------- write
     named_kit = []
-    cls_name = {"W": "KWX", "M": "KGR", "C": "KAR", "R": "KRO"}
+    cls_name = {"W": "KWX", "M": "KGR", "C": "KAR", "R": "KRO", "G": "KGG"}
     kit_meta = {}
     for pid, d in kit.data.items():
         kit_meta[pid] = dict(key=list(d["key"]), w=d["w"], h=d["h"], parts={})
-        for c in "WMCR":
+        for c in "WMCRG":
             m = d[c]
             if not m.T:
                 continue

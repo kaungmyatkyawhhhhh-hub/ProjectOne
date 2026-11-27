@@ -41,8 +41,8 @@ end
 
 -- landmark_glb3d.GROUPS (midday calibrated) for the wall codes the generator uses
 P.WALL = {
-	KW0 = rgb(252, 255, 250), KW1 = rgb(255, 215, 153), KW2 = rgb(178, 242, 255), KW3 = rgb(199, 168, 130),
-	KW4 = rgb(226, 248, 255), KW5 = rgb(255, 197, 187), KW6 = rgb(255, 252, 243), KW7 = rgb(208, 255, 165),
+	KW0 = rgb(226, 224, 216), KW1 = rgb(255, 215, 153), KW2 = rgb(178, 242, 255), KW3 = rgb(199, 168, 130),
+	KW4 = rgb(200, 208, 204), KW5 = rgb(255, 197, 187), KW6 = rgb(222, 212, 194), KW7 = rgb(208, 255, 165),
 	KWG = rgb(162, 160, 150), KWB = rgb(173, 209, 250), KWC = rgb(144, 145, 136), KWD2 = rgb(181, 172, 162),
 }
 -- YangonMaterials RULES.kit, plus the cell groups
@@ -53,6 +53,11 @@ P.VARIANT = {
 	KGR = "YgnSteelPainted", KAR = "YgnCanvas", KCO = "YgnConcreteBare", KRG = "YgnCorrugatedZinc",
 	KRF = "YgnCorrugatedRust", KRB = "YgnCorrugatedBlue", KRT = "YgnClayRoofTile",
 }
+
+-- (2026-11-27) the window glass (kit class G, KGG_<pid>; the mesh's vertex colour is white): Glass material, blue-grey.
+-- Tried in Play: SmoothPlastic + Reflectance 0.15-0.3 read as flat royal-blue paint (the reflection is only the sky);
+-- a MaterialVariant turns Reflectance off. Glass gives a muted slate pane with a sheen.
+P.GLASS = { material = Enum.Material.Glass, color = rgb(70, 78, 84), reflectance = 0 }
 
 local function number(s: string): number
 	if string.sub(s, 1, 1) == "n" then
@@ -124,7 +129,7 @@ function P.templates(holding: Instance, into: Instance?): number
 	P.store = store
 	local n = 0
 	for _, m in meshParts(holding) do
-		if m.kind == "KWX" or m.kind == "KGR" or m.kind == "KAR" or m.kind == "KRO" then
+		if m.kind == "KWX" or m.kind == "KGR" or m.kind == "KAR" or m.kind == "KRO" or m.kind == "KGG" then
 			local name = m.kind .. "_" .. m.id
 			local q = store:FindFirstChild(name)
 			if not q then
@@ -141,6 +146,11 @@ function P.templates(holding: Instance, into: Instance?): number
 					look(q, "KGR")
 				elseif m.kind == "KAR" then
 					look(q, "KAR")
+				elseif m.kind == "KGG" then
+					q.Material = P.GLASS.material
+					q.Color = P.GLASS.color
+					q.Reflectance = P.GLASS.reflectance
+					q.CastShadow = false
 				end
 				q:SetAttribute("C", m.c)
 				q:SetAttribute("S", m.size)
@@ -265,7 +275,7 @@ end
 function P.cells(holding: Instance, folder: Instance): number
 	local n = 0
 	for _, m in meshParts(holding) do
-		if m.kind ~= "KWX" and m.kind ~= "KGR" and m.kind ~= "KAR" and m.kind ~= "KRO" then
+		if m.kind ~= "KWX" and m.kind ~= "KGR" and m.kind ~= "KAR" and m.kind ~= "KRO" and m.kind ~= "KGG" then
 			local cell = string.match(m.id, "^c(.-)s%d+$") or m.id
 			local cm = folder:FindFirstChild("Cell_" .. cell)
 			if not cm then

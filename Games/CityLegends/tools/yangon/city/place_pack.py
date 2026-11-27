@@ -43,8 +43,8 @@ SYNC = os.path.join(ROOT, "imports", "sync", "ygn1to1_%s" % T)
 B1 = os.path.join(ROOT, "build", "city_1to1")
 LIMIT = 19_000_000
 
-WALL = {"KW0": (252, 255, 250), "KW1": (255, 215, 153), "KW2": (178, 242, 255), "KW3": (199, 168, 130),
-        "KW4": (226, 248, 255), "KW5": (255, 197, 187), "KW6": (255, 252, 243), "KW7": (208, 255, 165),
+WALL = {"KW0": (226, 224, 216), "KW1": (255, 215, 153), "KW2": (178, 242, 255), "KW3": (199, 168, 130),
+        "KW4": (200, 208, 204), "KW5": (255, 197, 187), "KW6": (222, 212, 194), "KW7": (208, 255, 165),
         "KWG": (162, 160, 150), "KWB": (173, 209, 250), "KWC": (144, 145, 136), "KWD2": (181, 172, 162)}
 CONC_MAP = "rbxassetid://90233226321161"   # YgnConcreteBare colour map (build/materials/uploaded_ids.json)
 CONC_TILE = 2.71 * 3                       # its StudsPerTile (tile 2.71 m)

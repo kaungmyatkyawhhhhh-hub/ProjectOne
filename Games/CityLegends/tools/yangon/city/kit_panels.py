@@ -13,6 +13,9 @@ Each panel is up to three MeshParts, one per material class, named like the Yang
   M  "KGR" -> glass, grilles, cages, frames, AC units, shutters, shop insides, roller shutters: Metal + YgnSteelPainted,
        Color white, the colours in the vertex colours (landmark_glb3d.GROUPS, the midday-calibrated kit colours).
   C  "KAR" -> awnings, signs, banners, laundry, tarps, nets: Fabric + YgnCanvas, Color white, vertex colours.
+  G  "KGG" -> (2026-11-27) the window glass (group KGL) on its own: Glass material, blue-grey (YangonKitPlace.GLASS)
+       (inside KGR it was dark flat paint: one material can't be glass and grilles / signs / shutters at once).
+       Vertex colour white; the glass tint is the part's Color (YangonKitPlace.GLASS).
 Window panes for the night layer are NOT in the panels: every window's pane is returned as a quad, and the placer
 lights ~22% of them per building in the cell night meshes (tag FacadeNight).
 
@@ -61,6 +64,7 @@ WALL_K = {"KWX": 1.0, "KW0": 1.0, "KWG": 0.74, "KCO": 0.82, "KSU": 0.84, "KST": 
           "KGM3": 0.8, "KGB": 0.72, "KW1": 1.0, "KW4": 1.0, "KW6": 1.0}
 CLOTH = {"KAW", "KAR", "KTP", "KNT", "KS1", "KS2", "KS3", "KS4", "KSW", "KSV", "KL1", "KL2", "KL3", "KL4", "KL5", "KL6"}
 NIGHT = {"NWH", "NWA", "NWY", "NWC"}
+GLASS_G = {"KGL"}          # window glass (class G, see the top)
 ROOF_G = {"KRO", "KRS2"}   # the pitched roof sheet of the hip / gable pieces (class R: named by the sheet code in Studio)
 # per-bay repaints inside a wall mesh are relative tints (the part's Color is the building's wall colour)
 PAINT_TINT = {"KW1": (1.0, 0.93, 0.8), "KW4": (0.95, 0.99, 1.0), "KW6": (1.0, 1.0, 1.0), "KWB": (0.85, 0.92, 1.0)}
@@ -778,7 +782,7 @@ class Kit:
         return pid
 
     def _collect(self, g, w, h, key):
-        out = dict(W=Mesh(), M=Mesh(), C=Mesh(), R=Mesh(), panes=[], w=w, h=h, key=key)
+        out = dict(W=Mesh(), M=Mesh(), C=Mesh(), R=Mesh(), G=Mesh(), panes=[], w=w, h=h, key=key)
         for grp, tris in g.g.items():
             if grp in NIGHT:
                 for i in range(0, len(tris) - 1, 2):  # front_quad: two triangles a quad
@@ -795,6 +799,8 @@ class Kit:
             elif grp in CLOTH:
                 # (cloth went into the metal class: 2 parts a panel, not 3; YgnSteelPainted is neutral like YgnCanvas)
                 cls, rgb = "M", tuple(min(255, v * 1.15) for v in GROUPS[grp][1])
+            elif grp in GLASS_G:
+                cls, rgb = "G", (255, 255, 255)
             elif grp in ROOF_G:
                 cls, rgb = "R", ((150, 150, 150) if grp == "KRS2" else (255, 255, 255))
             else:

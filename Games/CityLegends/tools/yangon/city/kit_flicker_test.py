@@ -52,7 +52,7 @@ def main():
     for pid, q in pid_of.items():
         d = kit.data[q]
         items = []
-        for c in "WMCR":
+        for c in "WMCRG":
             items += list(mesh_tris(d[c], c))
         bad, tris = check(items)
         if bad:
@@ -102,7 +102,7 @@ def main():
         sz = float(w[8]) if len(w) > 8 else 1.0
         c, s_ = math.cos(yaw), math.sin(yaw)
         d = kit.data[pid]
-        for cl in "WMCR":
+        for cl in "WMCRG":
             m = d[cl]
             for k in range(0, len(m.T), 3):
                 tri = []
