@@ -8,7 +8,7 @@ import glob, json, os, re, struct, sys
 import numpy as np
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-OUT = os.path.join(ROOT, 'build', 'city_1to1', 'roadbugs_25nov')
+OUT = os.environ.get('RB_OUT') or os.path.join(ROOT, 'build', 'city_1to1', 'roadbugs_25nov')  # RB_OUT: another work dir (road_surface_split)
 
 
 def num(t):
@@ -28,7 +28,7 @@ class _P8:
         self.path = path
 
     def __getitem__(self, name):
-        return np.load(os.path.join(OUT, 'p8', name + '.npy'))
+        return np.load(os.path.join(ROOT, 'build', 'city_1to1', 'roadbugs_25nov', 'p8', name + '.npy'))  # one dump for every work dir
 
 
 def read_glb(path):

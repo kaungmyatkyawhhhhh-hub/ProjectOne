@@ -1,0 +1,6 @@
+{
+ "_note": "Open Cloud images (group 33151111) of road_textures.py's maps, 27 Nov 2026. Decal ids in _decals.",
+ "YgnRoadAsphalt": {"color": 106420386734912, "normal": 118937246156752, "roughness": 119840276812247},
+ "YgnRoadConcrete": {"color": 91186461247844, "normal": 111294739232406, "roughness": 74085596867182},
+ "_decals": {"asphalt": [109971747197940, 115083857834757, 70878417325737], "concrete": [94322817947362, 79729490584637, 112170415182930]}
+}
