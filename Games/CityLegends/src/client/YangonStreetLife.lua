@@ -25,6 +25,7 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local TrafficBodies = require(script.Parent:WaitForChild("TrafficBodies"))
+local PedMotion = require(script.Parent:WaitForChild("PedMotion"))
 
 local YangonStreetLife = {}
 
@@ -485,6 +486,10 @@ type Walker = {
 	fig: Figure, mode: string, path: { Vector3 }?, k: number, dir: number, pos: Vector3, yaw: number, speed: number,
 	lat: number, phase: number, acc: number, timer: number, spot: number?, held: boolean?, gone: boolean?,
 	latLo: number?, latHi: number?, look: number?, lookTo: number?, lookT: number?, t: number?, yawTo: number?,
+	-- (27 Nov, PedMotion) gait "walk" / "run", steering, knock-overs, crossings, phones
+	gait: string?, walkSpeed: number?, speedNow: number?, yawRate: number?, lean: number?, twist: number?,
+	act: any?, knockAt: any?, knocker: boolean?, knockDone: boolean?, avoid: any?, cross: any?, glance: any?,
+	runT: number?, hurry: boolean?, phone: string?, pauseYaw: number?, scanT: number?,
 }
 
 local pedWant = 0 -- people wanted out now (pedTick)
@@ -766,38 +771,14 @@ local function lookStep(w: Walker, dt: number)
 	w.look = cur + ((w.lookTo or 0) - cur) * math.min(1, dt * 3)
 end
 
--- the classic Roblox walk: arms and legs swing from shoulders and hips (opposite), the body dips as the legs open;
--- standing: a little arm sway and the head looking round
+-- (27 Nov) the pose comes from PedMotion: a procedural walk / run with knees, elbows, ankles, pelvis and chest, the
+-- standing idle and the keyed knock-over actions (see its header and the vault research note)
 local function pose(w: Walker, moving: boolean)
 	local f = w.fig
-	local g = f.geo
-	local cen = g.cen
 	local s = f.scale
-	local root = CFrame.new(w.pos) * CFrame.Angles(0, w.yaw, 0)
-	local t = w.t or 0
-	local sw = if moving then math.sin(w.phase) else 0
-	local legA = sw * g.leg
-	local armA = if moving then sw * g.arm else math.sin(t * 1.6 + w.lat * 3) * 0.04
-	local dip = if moving then 2 * (1 - math.cos(legA)) * s else math.sin(t * 2.1) * 0.015 * s
-	local up = root * CFrame.new(0, -dip, 0)
-	local shR, hipR = g.shoulder, g.hip
-	local shL, hipL = Vector3.new(-shR.X, shR.Y, shR.Z), Vector3.new(-hipR.X, hipR.Y, hipR.Z)
-	local cfs = f.cfs
-	local head = up * CFrame.new(g.neck * s) * CFrame.Angles(0, w.look or 0, 0) * CFrame.new((cen[2] - g.neck) * s)
-	cfs[1] = up * CFrame.new(cen[1] * s)
-	cfs[2] = head
-	cfs[3] = head * (f.hairOff - f.hairOff.Position + (f.hairOff.Position + hairShift) * s)
-	cfs[4] = up * CFrame.new(hipL * s) * CFrame.Angles(legA, 0, 0) * CFrame.new((cen[4] - hipL) * s)
-	cfs[5] = up * CFrame.new(shL * s) * CFrame.Angles(-armA, 0, 0) * CFrame.new((cen[5] - shL) * s)
-	cfs[6] = up * CFrame.new(shR * s) * CFrame.Angles(armA, 0, 0) * CFrame.new((cen[6] - shR) * s)
-	cfs[7] = up * CFrame.new(hipR * s) * CFrame.Angles(-legA, 0, 0) * CFrame.new((cen[7] - hipR) * s)
-	local extra = g.extra
-	if extra then
-		for idx, ex in f.extraOf do
-			cfs[idx] = cfs[ex.k] * CFrame.new(extra[ex.k][ex.i].rel * s)
-		end
-	end
-	workspace:BulkMoveTo(f.parts, cfs, Enum.BulkMoveMode.FireCFrameChanged)
+	local P = PedMotion.angles(w, moving)
+	local ho = f.hairOff
+	PedMotion.build(f, P, CFrame.new(w.pos) * CFrame.Angles(0, w.yaw, 0), s, ho - ho.Position + (ho.Position + hairShift) * s)
 end
 
 local function flat(a: Vector3, b: Vector3): number
@@ -833,7 +814,7 @@ local function blockAdd(q: Instance)
 	if not q:IsA("BasePart") or blockKeys[q] or not q:IsDescendantOf(workspace) then
 		return
 	end
-	local r = q.Size.Magnitude / 2 + BLOCK_PAD
+	local r = Vector2.new(q.Size.X, q.Size.Z).Magnitude / 2 + BLOCK_PAD + 2 -- (+2: a walker's own width, curving early)
 	local p = q.Position
 	local keys = {}
 	for gx = math.floor((p.X - r) / BLOCK_CELL), math.floor((p.X + r) / BLOCK_CELL) do
@@ -942,66 +923,379 @@ local function kerbSide(w: Walker): Vector3?
 	return -Vector3.new(-d.Z, 0, d.X) * w.dir
 end
 
+-- (27 Nov, owner: "the characters are walking into trash bins, make it so that they can go around (ANIMATION MUST LOOK
+-- LIKE AN ACTUAL HUMAN GOING AROUND, NOT JUST ROTATING CHARACTER ...)", "1 in 25 people knocks the trash bin down",
+-- "1 in 10 people that cross the road will run") walkers steer: the heading turns at a limited, eased rate toward the
+-- next point; things tagged PedBlock 2-3 s ahead are passed on a curve that starts early (the head turns first, the
+-- chest leads the hips, the body leans into the curve); a knocker (1 in 25) walks up to the first bin (tag PedBin) and
+-- kicks, pushes or shoulder-slams it (PedMotion's keyed actions; the bin tips over on the client's physics and is put
+-- back unseen); at a pavement's end a walker looks both ways and crosses to the next pavement ahead (1 in 10 run)
+local WALK_SPEED = { 2.6, 3.8 } -- studs a second: an easy stroll; the stride then stays human on Roblox's short legs
+local RUN_SPEED = { 9, 11.5 }
+local TURN_RATE = { walk = 2.3, run = 3.0 } -- rad/s at most
+local LOOK_AHEAD = 2.6 -- seconds of walking checked for things in the way
+local KNOCK_SHARE = 1 / 25
+local CROSS_RUN = 1 / 10
+local binTag: { [Instance]: boolean } = {}
+type Fallen = { cf: CFrame, anch: boolean, coll: boolean, t: number }
+local fallen: { [BasePart]: Fallen } = {}
+
+local function heading(yaw: number): Vector3
+	return Vector3.new(-math.sin(yaw), 0, -math.cos(yaw))
+end
+
+local function wrapA(a: number): number
+	return (a + math.pi) % (2 * math.pi) - math.pi
+end
+
+-- turn toward p: eased, rate-limited; the head turns first, the chest a little ahead of the hips, lean into the curve
+local function steer(w: Walker, p: Vector3, dt: number): number
+	local to = Vector3.new(p.X - w.pos.X, 0, p.Z - w.pos.Z)
+	local dy = if to.Magnitude > 0.05 then wrapA(math.atan2(-to.X, -to.Z) - w.yaw) else 0
+	local maxR = TURN_RATE[w.gait or "walk"] or 2.3
+	local rateTo = math.clamp(dy * 2.4, -maxR, maxR)
+	local rate = w.yawRate or 0
+	rate += (rateTo - rate) * math.min(1, dt * 5)
+	w.yawRate = rate
+	w.yaw += rate * dt
+	w.lookTo = math.clamp(dy * 0.9, -1.1, 1.1)
+	w.twist = math.clamp(dy * 0.3, -0.25, 0.25)
+	w.lean = math.clamp(rate * w.speed * 0.012, -0.08, 0.08)
+	return dy
+end
+
+local function easeLook(w: Walker, dt: number)
+	local to = w.lookTo or 0
+	if w.glance then -- (after a knock-over) a look back at the bin
+		w.glance.t -= dt
+		to = w.glance.yaw
+		if w.glance.t <= 0 then
+			w.glance = nil
+		end
+	end
+	local cur = w.look or 0
+	w.look = cur + (to - cur) * math.min(1, dt * 4)
+end
+
+-- the nearest PedBlock part in the way within `dist` ahead: part, the clearance needed and which side it is on
+local function obstacleAhead(w: Walker, dist: number): (BasePart?, number, number)
+	local hd = heading(w.yaw)
+	local side = Vector3.new(-hd.Z, 0, hd.X)
+	local best, bestAlong, bestNeed, bestLat = nil, math.huge, 0, 0
+	local seen = {}
+	for _, a in { 0, 0.5, 1 } do
+		local p = w.pos + hd * (dist * a)
+		local list = blockCells[cellKey(math.floor(p.X / BLOCK_CELL), math.floor(p.Z / BLOCK_CELL))]
+		if list and not seen[list] then
+			seen[list] = true
+			for _, q in list do
+				if q.Parent and not fallen[q] then
+					local rel = q.Position - w.pos
+					local along = rel:Dot(hd)
+					if along > 0.2 and along < dist and math.abs(rel.Y) < 8 then
+						local h = q.Size / 2
+						local ext = math.abs(side:Dot(q.CFrame.RightVector)) * h.X + math.abs(side:Dot(q.CFrame.LookVector)) * h.Z
+						local need = ext + 0.95 * w.fig.scale + 0.35
+						local lat = rel:Dot(side)
+						if math.abs(lat) < need and along < bestAlong then
+							best, bestAlong, bestNeed, bestLat = q, along, need, lat
+						end
+					end
+				end
+			end
+		end
+	end
+	return best, bestNeed, bestLat
+end
+
+-- a bin tips over: free on the client's physics, pushed the way it was hit, put back later unseen
+local function knockBin(q: BasePart, dir: Vector3, kind: string)
+	if fallen[q] then
+		return
+	end
+	fallen[q] = { cf = q.CFrame, anch = q.Anchored, coll = q.CanCollide, t = 0 }
+	q.Anchored = false
+	q.CanCollide = true
+	local sp = if kind == "kick" then 19 elseif kind == "push" then 14 else 12
+	local up = if kind == "kick" then 8 else 4
+	q.AssemblyLinearVelocity = dir * sp + Vector3.new(0, up, 0)
+	q.AssemblyAngularVelocity = Vector3.yAxis:Cross(dir) * (if kind == "kick" then 7 else 5)
+		+ Vector3.new(0, rng:NextNumber(-2, 2), 0)
+end
+
+local function binsTick(dt: number, cam: Vector3, look: Vector3)
+	for q, st in fallen do
+		st.t += dt
+		if not q.Parent then
+			fallen[q] = nil
+		else
+			local away = (q.Position - cam).Magnitude > 90 or (q.Position - cam):Dot(look) < 0
+			if (st.t > 12 and away) or st.t > 90 then
+				q.Anchored = st.anch
+				q.CanCollide = st.coll
+				q.CFrame = st.cf
+				q.AssemblyLinearVelocity = Vector3.zero
+				q.AssemblyAngularVelocity = Vector3.zero
+				fallen[q] = nil
+			end
+		end
+	end
+end
+
+-- a crossing from the end of this pavement: the nearest point of another pavement path 16-75 studs ahead, with
+-- nothing solid between (raycast at chest height) and no big climb
+local crossRay = RaycastParams.new()
+crossRay.FilterType = Enum.RaycastFilterType.Exclude
+local function findCross(w: Walker): (number?, number?, Vector3?)
+	local p = w.pos
+	local hd = heading(w.yaw)
+	local cx, cz = math.floor(p.X / CELL), math.floor(p.Z / CELL)
+	local best, bestPi, bestK, bestPt = math.huge, nil, nil, nil
+	for gx = cx - 1, cx + 1 do
+		for gz = cz - 1, cz + 1 do
+			local list = pathCells[cellKey(gx, gz)]
+			if list then
+				for e = 1, #list // 2 do
+					local pi, k = list[2 * e - 1], list[2 * e]
+					local pts = paths[pi]
+					local q = pts[k]
+					if pts ~= w.path and q and math.abs(q.Y - p.Y) < 4 then
+						local d = flat(q, p)
+						if d > 16 and d < 75 then
+							local dv = Vector3.new(q.X - p.X, 0, q.Z - p.Z) / d
+							local dot = dv:Dot(hd)
+							local score = d * (1.6 - dot)
+							if dot > 0.3 and score < best then
+								best, bestPi, bestK, bestPt = score, pi, k, q
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	if bestPt then
+		crossRay.FilterDescendantsInstances = { pedFolder :: Instance, carFolder :: Instance }
+		local a, b = p + Vector3.new(0, 2.5, 0), bestPt + Vector3.new(0, 2.5, 0)
+		if workspace:Raycast(a, b - a, crossRay) then
+			return nil
+		end
+	end
+	return bestPi, bestK, bestPt
+end
+
+local function setGait(w: Walker, gait: string)
+	w.gait = gait
+	w.speed = if gait == "run" then rng:NextNumber(RUN_SPEED[1], RUN_SPEED[2]) else (w.walkSpeed or 3)
+end
+
 local function stepWalk(w: Walker, dt: number): boolean
-	if w.mode == "pause" then
-		w.timer -= dt
-		if w.timer <= 0 then
-			w.mode = "walk"
+	local s = w.fig.scale
+	-- a knock-over under way (a keyed action, standing on the spot)
+	if w.act then
+		local act = w.act
+		local A = PedMotion.ACTIONS[act.kind]
+		local q = act.bin
+		if act.kind ~= "slam" and q and q.Parent then
+			steer(w, q.Position, dt)
+		end
+		w.yawRate = 0
+		local before = act.t
+		act.t += dt
+		if before < A.contact and act.t >= A.contact and q and q.Parent then
+			local d = Vector3.new(q.Position.X - w.pos.X, 0, q.Position.Z - w.pos.Z)
+			knockBin(q, if d.Magnitude > 0.05 then d.Unit else heading(w.yaw), act.kind)
+		end
+		if act.t >= A.dur then
+			w.act = nil
+			w.knockDone = true
+			if q then
+				local d = q.Position - w.pos
+				w.glance = { yaw = math.clamp(wrapA(math.atan2(-d.X, -d.Z) - w.yaw), -1.6, 1.6), t = 1.6 }
+			end
 		end
 		return false
 	end
-	-- (27 Nov) now and then a stop on the way: a look at a shop, the phone, the street
-	if rng:NextNumber() < dt / 45 then
+	if w.mode == "pause" or w.mode == "look" then
+		w.timer -= dt
+		if w.pauseYaw then
+			w.yaw += wrapA(w.pauseYaw - w.yaw) * math.min(1, dt * 1.6)
+		end
+		if w.mode == "look" then -- before crossing: left, right, then go
+			w.lookTo = if w.timer > 0.65 then -0.95 elseif w.timer > 0.2 then 0.95 else 0
+		end
+		if w.timer <= 0 then
+			w.mode = if w.mode == "look" then "cross" else "walk"
+			w.pauseYaw = nil
+		end
+		return false
+	end
+	-- (27 Nov) now and then a stop on the way: a look at a shop, the phone, the street (turned to, not snapped)
+	if w.mode == "walk" and w.gait ~= "run" and rng:NextNumber() < dt / 45 then
 		w.mode = "pause"
 		w.timer = rng:NextNumber(2, 7)
-		w.yaw += rng:NextNumber(0.5, 1.6) * (if rng:NextNumber() < 0.5 then -1 else 1)
+		w.pauseYaw = w.yaw + rng:NextNumber(0.5, 1.6) * (if rng:NextNumber() < 0.5 then -1 else 1)
 		return false
 	end
-	local remaining = w.speed * dt
-	for _ = 1, 4 do
-		local t = target(w)
-		if not t then
-			-- the end of the pavement: turn back, sometimes after a look round
-			w.dir = -w.dir
-			if rng:NextNumber() < 0.35 then
-				w.mode = "pause"
-				w.timer = rng:NextNumber(2, 6)
-				return false
+	-- where to: the crossing's far side, a bin to knock, a way round something, or the next path point
+	local goal: Vector3?
+	if w.mode == "cross" and w.cross then
+		goal = w.cross.pt
+		if flat(goal, w.pos) < 1.4 then
+			local c = w.cross
+			w.path = paths[c.pi]
+			w.k = c.k
+			local pts = w.path :: { Vector3 }
+			local nxt = pts[c.k + 1] or pts[c.k - 1]
+			local dv = if nxt then Vector3.new(nxt.X - pts[c.k].X, 0, nxt.Z - pts[c.k].Z) else heading(w.yaw)
+			w.dir = if pts[c.k + 1] and dv:Dot(heading(w.yaw)) >= 0 then 1 elseif pts[c.k - 1] then -1 else 1
+			w.latLo, w.latHi = if pathWide[c.pi] then -0.6 else -1.5, if pathWide[c.pi] then 3 else 1.5
+			w.lat = math.clamp(w.lat, w.latLo :: number, w.latHi :: number)
+			w.cross = nil
+			w.mode = "walk"
+			if w.gait == "run" and not w.hurry then
+				w.runT = rng:NextNumber(0.8, 2.5) -- a few more strides, then back to a walk
 			end
-			t = target(w)
-			if not t then
-				return false
-			end
+			goal = nil
 		end
-		local to = t - w.pos
-		local fl = Vector3.new(to.X, 0, to.Z)
-		local L = fl.Magnitude
-		if L > 0.05 then
-			w.yaw = math.atan2(-fl.X, -fl.Z)
+	end
+	if w.runT then
+		w.runT -= dt
+		if w.runT <= 0 then
+			w.runT = nil
+			setGait(w, "walk")
 		end
-		if L <= remaining then
-			w.pos = t
-			w.k += w.dir
-			remaining -= L
-			-- drift across the pavement a little at each point (no one walks a ruled line)
-			if w.latLo then
-				w.lat = math.clamp(w.lat + rng:NextNumber(-0.5, 0.5), w.latLo, w.latHi :: number)
-			end
+	end
+	if not goal and w.knockAt then
+		local q = w.knockAt.bin
+		w.knockAt.t = (w.knockAt.t or 0) + dt
+		if not q.Parent or fallen[q] or w.knockAt.t > 7 then -- (can't get there: give it up)
+			w.knockAt = nil
 		else
-			w.pos += to * (remaining / L)
-			remaining = 0
-		end
-		if remaining <= 0.001 then
-			break
+			goal = w.knockAt.spot
+			if flat(goal, w.pos) < 0.45 then
+				w.act = { kind = w.knockAt.kind, t = 0, bin = q }
+				w.knockAt = nil
+				return false
+			end
 		end
 	end
-	-- (a corner of a shelter on the straight line to the next point) never inside one
-	local kerb = kerbSide(w)
-	if kerb then
-		w.pos = clearOf(w.pos, kerb)
+	if not goal and w.avoid then
+		local av = w.avoid
+		local hd = heading(w.yaw)
+		av.t = (av.t or 0) + dt
+		if not av.q.Parent or (av.q.Position - w.pos):Dot(hd) < -0.6 or flat(av.p, w.pos) < 0.8 or av.t > 6 then
+			w.avoid = nil
+		else
+			goal = av.p
+		end
 	end
-	-- (R6 legs at 0.55 rad: ~4.2 studs a stride; shorter people step faster)
-	w.phase += w.speed * dt * 1.5 / w.fig.scale
+	if not goal then
+		-- the path: points reached (or passed close by) move on, drifting across the pavement
+		for _ = 1, 4 do
+			local t = target(w)
+			if not t then
+				-- the end of the pavement: cross to the next one ahead (looking both ways first), or turn back
+				local pi, k, pt = nil, nil, nil
+				if rng:NextNumber() < 0.6 then
+					pi, k, pt = findCross(w)
+				end
+				if pi and pt then
+					w.cross = { pi = pi, k = k :: number, pt = pt }
+					if w.gait ~= "run" and rng:NextNumber() < CROSS_RUN then
+						setGait(w, "run")
+						w.mode = "cross"
+					elseif w.gait == "run" then
+						w.mode = "cross"
+					else
+						w.mode = "look"
+						w.timer = 1.1
+					end
+					return false
+				end
+				w.dir = -w.dir
+				if rng:NextNumber() < 0.35 then
+					w.mode = "pause"
+					w.timer = rng:NextNumber(2, 6)
+					return false
+				end
+				t = target(w)
+				if not t then
+					return false
+				end
+			end
+			local d = flat(t, w.pos)
+			if d < 1.6 or (d < 3.5 and (t - w.pos):Dot(heading(w.yaw)) < 0) then
+				w.k += w.dir
+				if w.latLo then
+					w.lat = math.clamp(w.lat + rng:NextNumber(-0.5, 0.5), w.latLo, w.latHi :: number)
+				end
+			else
+				goal = t
+				break
+			end
+		end
+		if not goal then
+			return false
+		end
+		-- something in the way 2-3 s ahead: curve round it early (or, for a knocker, walk up to the bin)
+		w.scanT = (w.scanT or 0) - dt
+		if (w.scanT :: number) <= 0 then
+			w.scanT = 0.3
+			local q, need, lat = obstacleAhead(w, math.max(6, w.speed * LOOK_AHEAD))
+			if q then
+				local hd = heading(w.yaw)
+				local side = Vector3.new(-hd.Z, 0, hd.X)
+				if w.knocker and not w.knockDone and binTag[q] and w.gait ~= "run" then
+					local r = rng:NextNumber()
+					local kind = if r < 0.4 then "kick" elseif r < 0.75 then "push" else "slam"
+					local spot
+					local ext = need - 0.95 * s - 0.35 -- the bin's half width this way
+					if kind == "slam" then
+						-- passing with the bin on the right: the right arm's outside 0.05 off it, the barge closes the gap
+						spot = q.Position - side * (ext + 2.05 * s) - hd * 0.2
+					else
+						-- standing off so the kicking foot / the pushing hands just reach it at full stretch
+						local back = q.Position - w.pos
+						back = Vector3.new(back.X, 0, back.Z).Unit
+						spot = q.Position - back * (ext + (if kind == "kick" then 1.9 else 2.35) * s)
+					end
+					w.knockAt = { bin = q, spot = Vector3.new(spot.X, w.pos.Y, spot.Z), kind = kind }
+				else
+					local sgn = if math.abs(lat) > 0.25 then -math.sign(lat) else 1
+					if math.abs(lat) <= 0.25 then -- dead ahead: pass on the side away from the kerb
+						local kerb = kerbSide(w)
+						if kerb then
+							sgn = if side:Dot(kerb) > 0 then -1 else 1
+						end
+					end
+					local p = q.Position + side * sgn * (need + 0.5)
+					w.avoid = { q = q, p = Vector3.new(p.X, w.pos.Y, p.Z) }
+				end
+			end
+		end
+	end
+	local g = goal :: Vector3
+	local dy = steer(w, g, dt)
+	-- slower into a sharp turn; feet keep to the stride (cadence from the speed)
+	local v = w.speed * (1 - 0.3 * math.min(1, math.abs(dy) / 1.4))
+	local hd = heading(w.yaw)
+	local step = v * dt
+	local d = flat(g, w.pos)
+	w.pos += hd * step
+	if d > 0.01 then
+		w.pos = Vector3.new(w.pos.X, w.pos.Y + (g.Y - w.pos.Y) * math.min(1, step / d), w.pos.Z)
+	end
+	-- (a corner of a shelter on the line) never inside one
+	if w.mode ~= "cross" then
+		local kerb = kerbSide(w)
+		if kerb then
+			w.pos = clearOf(w.pos, kerb)
+		end
+	end
+	local cad = if w.gait == "run" then PedMotion.runCadence(v, s) else PedMotion.walkCadence(v, s)
+	w.phase += cad / 2 * dt
+	w.speedNow = v
 	return true
 end
 
@@ -1030,11 +1324,17 @@ local function spawnWalker(cam: Vector3, gap: number, radius: number): boolean
 			return false
 		end
 	end
-	local cfg = Config.YangonStreetLife
 	local who = whoAt(p.X, p.Z)
-	local speed = rng:NextNumber(cfg.WalkSpeed[1], cfg.WalkSpeed[2])
+	local speed = rng:NextNumber(WALK_SPEED[1], WALK_SPEED[2])
 	if who == "monk" then
-		speed = math.min(speed, 3.4)
+		speed = math.min(speed, 3)
+	end
+	-- (27 Nov) a few in a hurry (a late commuter: running), some on the phone (at the ear / looking at it)
+	local r = rng:NextNumber()
+	local hurry = who ~= "monk" and r < 0.03
+	local phone = if who == "monk" or hurry then nil elseif r < 0.09 then "ear" elseif r < 0.17 then "hand" else nil
+	if phone == "hand" then
+		speed *= 0.82
 	end
 	local dir = if rng:NextNumber() < 0.5 then 1 else -1
 	-- across the pavement (lat > 0 away from the kerb): the whole width, not one line (narrow paths are the middle
@@ -1044,6 +1344,7 @@ local function spawnWalker(cam: Vector3, gap: number, radius: number): boolean
 		local w: Walker = {
 			fig = f, mode = "walk", path = pts, k = if dir > 0 then k else k + 1, dir = dir, pos = p, yaw = 0,
 			speed = sp, lat = lat, phase = phase, acc = 0, timer = 0, spot = nil, latLo = lo, latHi = hi,
+			gait = "walk", walkSpeed = sp, knocker = who ~= "monk" and rng:NextNumber() < KNOCK_SHARE,
 		}
 		-- start on the line, shifted sideways like the rest of the walk
 		local t = target(w)
@@ -1062,7 +1363,13 @@ local function spawnWalker(cam: Vector3, gap: number, radius: number): boolean
 	end
 	local lat = rng:NextNumber(lo, hi)
 	local phase = rng:NextNumber(0, 6)
-	walker(takeFigure(who), lat, speed, phase)
+	local w1 = walker(takeFigure(who), lat, speed, phase)
+	w1.phone = phone
+	if hurry then
+		w1.hurry = true
+		setGait(w1, "run")
+		return true
+	end
 	-- a third walk in twos, side by side at one pace (friends, a couple, a parent and child)
 	if who ~= "monk" and rng:NextNumber() < 0.3 and #active < pedWant then
 		local side = if lat + 1.3 <= hi then 1.3 else -1.3
@@ -1131,6 +1438,7 @@ local function pedTick(cam: Vector3, cap: number)
 end
 
 local function pedFrame(dt: number, cam: Vector3, look: Vector3)
+	binsTick(dt, cam, look)
 	for _, w in active do
 		w.acc += dt
 		if w.held or w.gone then
@@ -1161,7 +1469,9 @@ local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 			end
 		else
 			local d = flat(w.pos, cam)
-			local every = if d < 70 then 0 elseif d < 140 then 0.1 else 0.25
+			-- (27 Nov, owner: "the npcs from far away are laggy": 4 moves a second past 140 studs read as stutter; with
+			-- PedMax 20 a pose every frame near and 30 a second far is cheap)
+			local every = if d < 90 then 0 else 1 / 30
 			-- (2026-11-26, FPS) behind the camera and not right beside it: out of view, posed at the far rate
 			if d > 20 and (w.pos - cam):Dot(look) < 0 then
 				every = 0.25
@@ -1172,7 +1482,11 @@ local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 				w.acc = 0
 				w.t = (w.t or 0) + a
 				if d < 60 then
-					lookStep(w, a)
+					if w.mode == "pause" then
+						lookStep(w, a)
+					else
+						easeLook(w, a)
+					end
 				end
 				pose(w, moving)
 			end
@@ -1206,6 +1520,16 @@ function YangonStreetLife.start(qualityScale: (() -> number)?)
 		pf.Parent = f
 		f.Parent = workspace
 		carFolder, pedFolder = cf, pf
+		-- (27 Nov) bins (tag PedBin, also PedBlock: the kit template SPL_bin) can be knocked over
+		CollectionService:GetInstanceAddedSignal("PedBin"):Connect(function(q)
+			binTag[q] = true
+		end)
+		CollectionService:GetInstanceRemovedSignal("PedBin"):Connect(function(q)
+			binTag[q] = nil
+		end)
+		for _, q in CollectionService:GetTagged("PedBin") do
+			binTag[q] = true
+		end
 		CollectionService:GetInstanceAddedSignal("PedBlock"):Connect(blockAdd)
 		CollectionService:GetInstanceRemovedSignal("PedBlock"):Connect(blockRemove)
 		for _, q in CollectionService:GetTagged("PedBlock") do
