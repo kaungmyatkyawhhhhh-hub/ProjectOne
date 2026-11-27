@@ -131,18 +131,28 @@ def plate(sc, piece, depth_ratio, thick_px, y_off, name, mirror=False):
 def crown(sc):
     ct, cf = P["crown_top"], P["crown_front"]
     tw, th = ct["box"][2], ct["box"][3]
-    ro = (tw + th) / 4
+    # the sheet draws the front view ~1.4x the top view; the front wins (what players see), the top gives the shape:
+    # the side gems at +-72 deg reach ro*sin72 + their own radius = half the front width
+    ro = cf_w = P["crown_front"]["box"][2] / 2 / (math.sin(math.radians(72)) + 0.34 * 0.9)
     # inner radius: the hole of the top view (rows through the centre: the gap between the ice spans)
     m = ct["rows"][th // 2]
     ri = ro * 0.62
     fw, fh = cf["box"][2], cf["box"][3]
     cols = cf["cols"]
     band_px = fh * 0.33
-    N = 15
+    N = 30
     verts, faces = [], []
+    good_ = [i for i, c in enumerate(cols) if c]
+    cx_, half_ = (good_[0] + good_[-1]) / 2, (good_[-1] - good_[0]) / 2
+    lowest = max(c[1] for c in cols if c)
+    def lift(a):  # the sheet's bottom edge at this angle's x (front and back share it), up from the lowest point
+        i = int(round(cx_ + math.sin(a) * ro / (half_ / half_) * 1.0))
+        i = min(max(i, good_[0]), good_[-1])
+        return min(band_px * 0.7, lowest - cols[i][1]) if cols[i] else 0
     for k in range(N):
         a = 2 * math.pi * k / N
-        for r, z in ((ro, 0), (ro, band_px), (ri, band_px), (ri, 0)):
+        z0 = lift(a)
+        for r, z in ((ro, z0), (ro, band_px + z0 * 0.4), (ri, band_px + z0 * 0.4), (ri, z0)):
             verts.append(Vector((r * math.sin(a), -r * math.cos(a), z)) * PX)
     for k in range(N):
         a, b = 4 * k, 4 * ((k + 1) % N)
@@ -161,9 +171,9 @@ def crown(sc):
         lo = max(0, i - 6)
         tops = [cols[j][0] for j in range(lo, min(len(cols), i + 7)) if cols[j]]
         height = fh - min(tops)
-        tip = max(height - band_px, band_px * 0.8)
-        rg = ro * (0.42 if phi_deg == 0 else 0.34)  # chunky gem points, as the sheet (no thin spikes)
-        base = Vector((ro * 0.86 * sx, -ro * 0.86 * math.cos(phi), band_px * 0.55))
+        tip = max(height - band_px - lift(phi) * 0.6, band_px * 0.8)
+        rg = ro * {0: 0.42, 72: 0.36, -72: 0.36}.get(phi_deg, 0.26)  # chunky gem points, as the sheet (no thin spikes)
+        base = Vector((ro * 0.97 * sx, -ro * 0.97 * math.cos(phi), band_px * 0.55 + lift(phi) * (0.4 if phi_deg in (72, -72) else 1)))
         i0 = len(gv)
         gv.append((base + Vector((0, 0, tip + band_px * 0.45))) * PX)
         gv.append((base + Vector((0, 0, -band_px * 0.25))) * PX)
@@ -201,11 +211,12 @@ def bracer(sc, name, mirror=False):
         rs_ = sd["rows"][min(len(sd["rows"]) - 1, int(t * (len(sd["rows"]) - 1)))]
         # the ATTACH label's leader line cuts the left side of the front view: the half-width from the right edge
         a = rf_[1] - fr["box"][2] / 2
-        b = (rs_[1] - rs_[0]) / 2 * 0.85
+        b = (rs_[1] - rs_[0]) / 2
+        lean = (rs_[1] + rs_[0]) / 2 - sd["box"][2] / 2  # the side view leans: each row's own centre
         z = (0.5 - t) * H
         for q in range(N):
             ang = 2 * math.pi * q / N
-            verts.append(Vector((a * math.cos(ang) * (-1 if mirror else 1), b * math.sin(ang), z)) * PX)
+            verts.append(Vector((a * math.cos(ang) * (-1 if mirror else 1), b * math.sin(ang) + lean, z)) * PX)
     for k in range(rows - 1):
         for q in range(N):
             a0, a1 = k * N + q, k * N + (q + 1) % N
@@ -228,13 +239,14 @@ def bracer(sc, name, mirror=False):
         rf_ = fr["rows"][r]
         rs_ = sd["rows"][min(len(sd["rows"]) - 1, int(t * (len(sd["rows"]) - 1)))]
         a = (rf_[1] - fr["box"][2] / 2) * 1.03
-        b = (rs_[1] - rs_[0]) / 2 * 0.85 * 1.03
+        b = (rs_[1] - rs_[0]) / 2 * 1.03
         z = (0.5 - t) * H
         i0 = len(bv)
         for q in range(N):
             ang = 2 * math.pi * q / N
             for dz, kk in ((-3, 1.0), (3, 1.0), (3, 0.95), (-3, 0.95)):
-                bv.append(Vector((a * kk * math.cos(ang) * (-1 if mirror else 1), b * kk * math.sin(ang), z + dz)) * PX)
+                lean = (rs_[1] + rs_[0]) / 2 - sd["box"][2] / 2
+                bv.append(Vector((a * kk * math.cos(ang) * (-1 if mirror else 1), b * kk * math.sin(ang) + lean, z + dz)) * PX)
         for q in range(N):
             a0, b0 = i0 + 4 * q, i0 + 4 * ((q + 1) % N)
             for s in range(4):

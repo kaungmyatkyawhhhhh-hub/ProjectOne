@@ -33,7 +33,8 @@ if cam.name not in sc.collection.objects:
     sc.collection.objects.link(cam)
 sc.camera = cam
 meshes = [o for o in sc.objects if o.type == "MESH"]
-for name, (objs, d) in VIEWS.items():
+# the first render after a rebuild misses the freshly linked camera: render the first view twice
+for name, (objs, d) in [next(iter(VIEWS.items()))] + list(VIEWS.items()):
     for o in meshes:
         o.hide_render = o.name not in objs
     pts = [o.matrix_world @ Vector(c) for o in meshes if o.name in objs for c in o.bound_box]
@@ -41,12 +42,19 @@ for name, (objs, d) in VIEWS.items():
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
     c = (lo + hi) / 2
     size = hi - lo
-    d = Vector(d)
+    d = Vector(d).normalized()
     cam.location = c + d * 50
     up = Vector((0, 1, 0)) if abs(d.z) > 0.9 else Vector((0, 0, 1))
-    cam.rotation_euler = (-d).to_track_quat("-Z", "Y" if up.y else "Y").to_euler()
-    if abs(d.z) < 0.9:
-        cam.rotation_euler = (-d).to_track_quat("-Z", "Z").to_euler()
+    back = d
+    right = up.cross(back).normalized()
+    true_up = back.cross(right)
+    from mathutils import Matrix
+    cam.matrix_world = Matrix((
+        (right.x, true_up.x, back.x, cam.location.x),
+        (right.y, true_up.y, back.y, cam.location.y),
+        (right.z, true_up.z, back.z, cam.location.z),
+        (0, 0, 0, 1)))
+    bpy.context.view_layer.update()
     # frame 1.3x the larger extent, keeping 100 px per unit
     if abs(d.x) > 0.9:
         w, h = size.y, size.z

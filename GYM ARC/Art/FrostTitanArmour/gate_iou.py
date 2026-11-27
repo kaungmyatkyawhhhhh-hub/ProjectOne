@@ -3,13 +3,16 @@
 import cv2, numpy as np, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 views = ["plate1", "plate2", "plate3", "crown_front", "crown_top", "bracer_front", "bracer_side"]
-mirror = {"bracer_side": False}
+UNIFORM = {"crown_top"}  # front view wins (the sheet draws it ~1.4x the top view)
 ok = True
 for v in views:
     m = cv2.imread(os.path.join(HERE, f"mask_{v}.png"), 0) > 127
     r = cv2.imread(os.path.join(HERE, "gate", f"{v}.png"), 0) > 60
     ys, xs = np.nonzero(r)
     r = r[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    if v in UNIFORM:  # sheet views drawn at different scales: this view is compared for shape (uniform scale, no stretch)
+        k = m.shape[1] / r.shape[1]
+        r = cv2.resize(r.astype(np.uint8), (m.shape[1], max(1, round(r.shape[0] * k))), interpolation=cv2.INTER_NEAREST) > 0
     H, W = max(m.shape[0], r.shape[0]) + 20, max(m.shape[1], r.shape[1]) + 20
     A = np.zeros((H, W), bool)
     B = np.zeros((H, W), bool)
