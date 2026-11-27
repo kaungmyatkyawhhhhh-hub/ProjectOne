@@ -4,6 +4,8 @@ created: 2026-11-27
 ---
 # Pedestrians: realistic people, no more rows (27 Nov 2026)
 
+> **Replaced the same day (owner: realistic people are "terrifying", use Roblox characters):** see [[2026-11-27 People - Roblox characters]]. The row fixes below still hold; the realistic bodies are out.
+
 **Owner (comparing with TorqX Racing):** the street people look like blocky Roblox figures standing in rows along the kerb. Make them look like real people and stop the rows. Related: [[2026-11-27 TorqX match - road surface, worn paint, render distance]].
 
 ## What made the rows

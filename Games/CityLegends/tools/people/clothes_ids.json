@@ -1,0 +1,33 @@
+{
+ "_note": "Decal asset ids (group 33151111). 'decal' = the single templates (imports/people/clothes, uploaded first, not used by the game); 'atlas' = the two atlases the game uses (image ids in src/shared/PedClothes.lua)",
+ "decal": {
+  "shirt_white": 110199575379458,
+  "shirt_blue": 88358635271580,
+  "shirt_cream": 110220979703986,
+  "shirt_navy": 88570525251374,
+  "tee_red": 136654763722288,
+  "tee_black": 87444659172154,
+  "blouse_white": 80184637104517,
+  "blouse_pink": 70890822346927,
+  "blouse_yellow": 116130381331655,
+  "blouse_lilac": 124209536706060,
+  "longyi_green": 83654552295019,
+  "longyi_blue": 90735579361790,
+  "longyi_brown": 105156131849170,
+  "longyi_grey": 116772144491665,
+  "longyi_maroon": 117962302673757,
+  "htamein_pink": 104567038665837,
+  "htamein_teal": 118573052690824,
+  "htamein_purple": 98884147467499,
+  "htamein_gold": 139604410756740,
+  "uniform_shirt": 120822506920722,
+  "uniform_longyi": 121737415649006,
+  "robe_shirt": 138347844058836,
+  "robe_pants": 71280789832443,
+  "jeans_blue": 100622668420434
+ },
+ "atlas": {
+  "shirts": 108837918839483,
+  "pants": 127064658584205
+ }
+}

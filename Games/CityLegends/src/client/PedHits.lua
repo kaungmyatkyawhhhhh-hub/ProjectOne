@@ -6,8 +6,8 @@
 	    frame. The walkers are client-only (each player has their own), so each player's game flings its own people
 	    when any car drives into them: nothing goes over the network, and everyone sees a fling.
 	  * slower than RAG_KMH: the walker stumbles (pushed aside out of the car's way, a short stop).
-	  * faster: the walker's 8 parts become a ragdoll (BallSocketConstraints with limits at neck, shoulders and
-	    hips, hair welded to the head, sandals to the longyi), thrown with the car's speed at the contact point plus
+	  * faster: the walker's 7 parts (an R6 Roblox avatar) become a ragdoll (BallSocketConstraints with limits at
+	    neck, shoulders and both hips, hair welded to the head), thrown with the car's speed at the contact point plus
 	    some lift and a tumble, so a faster hit throws them further. A soft thud plays; your own car loses a little
 	    speed. After GET_UP seconds, once still, the joints go and the walker stands up where they landed and walks
 	    back to its path; if they landed somewhere bad (off the pavement level, far away, nothing under them) they
@@ -52,8 +52,8 @@ local BAD_DROP, BAD_FAR = 4, 120 -- studs from the walker's height / start that 
 local CAR_KEEP = 0.94 -- your car keeps this share of its speed per ragdoll hit
 local CHECK_R = 320 -- only cars this near the camera are checked
 
--- part numbers in a YangonStreetLife figure: 1 shirt, 2 head, 3 hair, 4 longyi, 5 / 6 arms, 7 / 8 feet
-local COLLIDE = { [1] = true, [2] = true, [4] = true, [5] = true, [6] = true }
+-- part numbers in a YangonStreetLife figure (R6, 27 Nov): 1 torso, 2 head, 3 hair, 4 left leg, 5 / 6 arms, 7 right leg
+local COLLIDE = { [1] = true, [2] = true, [4] = true, [5] = true, [6] = true, [7] = true }
 
 type Rag = { w: any, t0: number, made: { Instance }, nocol: { Instance }, start: Vector3, phase: string, pt: number, from: { CFrame }?, to: { CFrame }? }
 local rags: { Rag } = {}
@@ -138,24 +138,23 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 	local P = f.parts
 	local s = f.scale
 	local made: { Instance } = {}
-	-- neck, shoulders, hip; hair and sandals ride along
-	-- (27 Nov) joints from the figure's body layout (YangonStreetLife GEO: the real pieces or the old blocks)
+	-- neck, shoulders, both hips; the hair rides along
+	-- (27 Nov) joints from the figure's own body layout (YangonStreetLife geoFor: R6 at its build)
 	local g = f.geo
 	local c = g.cen
-	local shR = g.shoulder
-	local shL = Vector3.new(-shR.X, shR.Y, shR.Z)
+	local shR, hipR = g.shoulder, g.hip
+	local shL, hipL = Vector3.new(-shR.X, shR.Y, shR.Z), Vector3.new(-hipR.X, hipR.Y, hipR.Z)
 	socket(P[1], (g.neck - c[1]) * s, P[2], (g.neck - c[2]) * s, 1, 35, 40, made)
 	socket(P[1], (shL - c[1]) * s, P[5], (shL - c[5]) * s, -1, 100, 70, made)
 	socket(P[1], (shR - c[1]) * s, P[6], (shR - c[6]) * s, -1, 100, 70, made)
-	socket(P[1], (g.waist - c[1]) * s, P[4], (g.waist - c[4]) * s, -1, 40, 30, made)
+	socket(P[1], (hipL - c[1]) * s, P[4], (hipL - c[4]) * s, -1, 60, 20, made)
+	socket(P[1], (hipR - c[1]) * s, P[7], (hipR - c[7]) * s, -1, 60, 20, made)
 	weld(P[2], P[3], made)
-	weld(P[4], P[7], made)
-	weld(P[4], P[8], made)
-	-- arms clear of the longyi
-	for _, k in { 5, 6 } do
+	-- arms clear of the legs, the legs of each other
+	for _, pair in { { 5, 4 }, { 5, 7 }, { 6, 4 }, { 6, 7 }, { 4, 7 } } do
 		local n = Instance.new("NoCollisionConstraint")
-		n.Part0, n.Part1 = P[k], P[4]
-		n.Parent = P[k]
+		n.Part0, n.Part1 = P[pair[1]], P[pair[2]]
+		n.Parent = P[pair[1]]
 		table.insert(made, n)
 	end
 	-- thrown clear of the car that hit them (it often overlaps them already)
@@ -281,6 +280,11 @@ local function finish(i: number)
 	if r.phase == "fade" then
 		for _, part in w.fig.parts do
 			part.Transparency = 0 -- (dress() sets the hair again when the figure is reused)
+			for _, d in part:GetChildren() do
+				if d:IsA("Decal") then
+					d.Transparency = 0
+				end
+			end
 		end
 		w.gone = true -- the walker system takes it back and puts someone new elsewhere
 	elseif w.mode == "walk" then
@@ -334,6 +338,12 @@ local function step(dt: number)
 			for k, part in P do
 				if not (k == 3 and r.w.fig.bald) then
 					part.Transparency = a
+				end
+				-- (27 Nov) the face and the clothes Textures fade with it (a Decal ignores its part's Transparency)
+				for _, d in part:GetChildren() do
+					if d:IsA("Decal") then
+						d.Transparency = a
+					end
 				end
 			end
 			if a >= 1 then

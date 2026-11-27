@@ -8,9 +8,9 @@
 	    pooled. Every Config.YangonStreetLife.CarCheck seconds the spots within CarRadius of the camera (a 128-stud
 	    grid, never a full scan) fill up to CarMax, nearest first; a car goes back to the pool past CarKeep. 70% are
 	    repainted white / silver / grey (Yangon's Probox / Mark II / Hiace look), half up on the pavement on main roads.
-	  * people: 8 parts each (shirt, head with a face, hair, longyi, two arms, two feet; since 27 Nov low-poly
-	    MeshParts from tools/people/people_mesh.py, the old blocks only if they fail to load), men in longyi and shirt,
-	    women in htamein and blouse, monks in maroon robes now and then (more near monasteries and pagodas), kids in
+	  * people: classic R6 Roblox avatars (owner, 27 Nov: Roblox characters, never realistic people): 7 parts each
+	    (torso, Roblox head with a Roblox face, Roblox hair, legs, arms), clothes as Textures cropped out of two
+	    shared atlases (tools/people/roblox_clothes.py, shared/PedClothes): men in longyi and shirt, women in htamein and blouse, monks in maroon robes now and then (more near monasteries and pagodas), kids in
 	    the green and white school uniform near schools. They walk the pavement paths at 3-5 studs a second and turn
 	    back where the pavement ends (spread across the pavement, drifting, a third in twos, stopping now and then),
 	    or stand at bus stops, tea shops and shop fronts (off the exact mark and facing). Anchored, no collisions, moved
@@ -375,104 +375,87 @@ end
 ---------------------------------------------------------------------
 -- People
 ---------------------------------------------------------------------
+-- (27 Nov, owner: "make it just roblox character, like the tiktok video car game, not some realistic looking people
+-- because thats terrifying and kids gonna get scared because the game is in roblox and they expect roblox character")
+-- classic R6 Roblox avatars: block body, the Roblox head with Roblox faces, Roblox hair, Roblox-style clothes.
+-- Yangon shows only in the clothes (tools/people/roblox_clothes.py, shared/PedClothes): longyi checks, htamein, eingyi
+-- blouses, the monk's robe, the green and white school uniform, a T-shirt and jeans. Skin = Roblox's body colours.
+-- The clothes are Textures cropped out of two shared atlases (no Humanoid: its Shirt / Pants composite cost ~1.4 MB of
+-- character texture a person in Studio, 58 MB for 40; the atlases are 2 pictures for everyone).
 local SKIN = {
-	Color3.fromRGB(226, 186, 148), Color3.fromRGB(210, 166, 126), Color3.fromRGB(192, 146, 106),
-	Color3.fromRGB(170, 124, 86), Color3.fromRGB(146, 102, 68),
+	Color3.fromRGB(234, 184, 146), Color3.fromRGB(204, 142, 105), Color3.fromRGB(255, 204, 153),
+	Color3.fromRGB(175, 122, 89), Color3.fromRGB(124, 92, 70), Color3.fromRGB(245, 205, 48),
 }
-local MEN_SHIRT = {
-	Color3.fromRGB(240, 240, 236), Color3.fromRGB(240, 240, 236), Color3.fromRGB(178, 200, 224), Color3.fromRGB(232, 222, 196),
-	Color3.fromRGB(150, 152, 156), Color3.fromRGB(40, 50, 80), Color3.fromRGB(120, 40, 46), Color3.fromRGB(110, 116, 80),
+local HAIR_COLS = {
+	Color3.fromRGB(28, 24, 22), Color3.fromRGB(28, 24, 22), Color3.fromRGB(46, 34, 26), Color3.fromRGB(70, 48, 32),
 }
-local MEN_LONGYI = { -- paso: dark checks and plains
-	Color3.fromRGB(44, 74, 56), Color3.fromRGB(36, 46, 76), Color3.fromRGB(96, 70, 52), Color3.fromRGB(104, 40, 46),
-	Color3.fromRGB(70, 84, 104), Color3.fromRGB(34, 34, 38), Color3.fromRGB(60, 96, 70),
-}
-local WOMEN_TOP = { -- eingyi
-	Color3.fromRGB(244, 244, 240), Color3.fromRGB(232, 168, 180), Color3.fromRGB(240, 222, 150), Color3.fromRGB(164, 196, 230),
-	Color3.fromRGB(190, 170, 214), Color3.fromRGB(240, 190, 150), Color3.fromRGB(176, 220, 196),
-}
-local WOMEN_LONGYI = { -- htamein: bright
-	Color3.fromRGB(170, 40, 100), Color3.fromRGB(100, 50, 120), Color3.fromRGB(30, 110, 120), Color3.fromRGB(196, 150, 60),
-	Color3.fromRGB(170, 40, 40), Color3.fromRGB(40, 70, 150), Color3.fromRGB(30, 120, 80),
-}
-local ROBE = { Color3.fromRGB(122, 36, 34), Color3.fromRGB(138, 50, 38), Color3.fromRGB(110, 34, 40) }
-local UNIFORM_TOP, UNIFORM_LONGYI = Color3.fromRGB(244, 244, 240), Color3.fromRGB(34, 110, 60)
-local HAIR = Color3.fromRGB(20, 18, 16)
-local SANDAL = Color3.fromRGB(60, 44, 34)
--- Roblox's own classic faces (as Pedestrians)
+local CLOTH: any = nil -- shared/PedClothes (atlases, garment cells, face slots)
+local MEN_TOP = { "shirt_white", "shirt_white", "shirt_blue", "shirt_cream", "shirt_navy", "tee_red", "tee_black" }
+local MEN_LOW = { "longyi_green", "longyi_blue", "longyi_brown", "longyi_grey", "longyi_maroon" }
+local WOMEN_TOP = { "blouse_white", "blouse_pink", "blouse_yellow", "blouse_lilac" }
+local WOMEN_LOW = { "htamein_pink", "htamein_teal", "htamein_purple", "htamein_gold" }
+-- Roblox's own classic faces (the smile first, twice as likely)
 local FACES = {
-	"rbxasset://textures/face.png",
+	"rbxasset://textures/face.png", "rbxasset://textures/face.png",
 	"rbxassetid://7074749", "rbxassetid://7074780", "rbxassetid://7074882", "rbxassetid://7075130",
-	"rbxassetid://7075412", "rbxassetid://7076096", "rbxassetid://7317606", "rbxassetid://15885042",
-	"rbxassetid://7699086", "rbxassetid://7131308", "rbxassetid://7317591", "rbxassetid://7074712",
-	"rbxassetid://7074827", "rbxassetid://7074932", "rbxassetid://7075459", "rbxassetid://7076053",
+	"rbxassetid://7075412", "rbxassetid://7076096", "rbxassetid://7317606", "rbxassetid://7131308",
+	"rbxassetid://7074712", "rbxassetid://7074827",
 }
 
--- the parts (feet on the ground, facing -Z): 1 shirt, 2 head, 3 hair, 4 longyi, 5 / 6 arms, 7 / 8 feet
--- (27 Nov, owner: "the street people look like blocky Roblox figures") two bodies in one layout: GEO.real = the
--- Blender pieces of tools/people/people_mesh.py (imports/people/people.json: centres and sizes in studs, 1.6-1.8 m
--- people at 3 studs a metre, ~1,700 triangles), GEO.blocks = the old 8 blocks, only if the meshes fail to load.
--- cen = each part's centre, shoulder = the right shoulder pivot (the left is mirrored), neck / waist = PedHits' joints.
+-- the parts (feet on the ground, facing -Z): 1 torso, 2 head, 3 hair, 4 left leg, 5 / 6 left / right arm, 7 right leg.
+-- cen = each part's centre, shoulder / hip = the right pivots (the left are mirrored), neck / waist: PedHits' joints.
+-- Each figure gets its own copy scaled for its build (geoFor), so PedHits' sockets match what is drawn.
 type Geo = {
-	cen: { Vector3 }, size: { Vector3 }, hair: { [string]: { Vector3 } }, shoulder: Vector3, neck: Vector3,
-	waist: Vector3, swing: number, stride: number,
+	cen: { Vector3 }, size: { Vector3 }, shoulder: Vector3, hip: Vector3, neck: Vector3, waist: Vector3,
+	arm: number, leg: number,
 }
-local GEO: { [string]: Geo } = {
-	real = {
-		cen = {
-			Vector3.new(0, 3.52, -0.005), Vector3.new(0, 4.72, 0.02), Vector3.new(0, 4.939, 0.057), Vector3.new(0, 1.685, 0),
-			Vector3.new(-0.5675, 2.995, -0.0507), Vector3.new(0.5675, 2.995, -0.0507), Vector3.new(-0.19, 0.25, -0.075),
-			Vector3.new(0.19, 0.25, -0.075),
-		},
-		size = {
-			Vector3.new(1.56, 1.8, 0.79), Vector3.new(0.57, 0.92, 0.6), Vector3.new(0.5695, 0.6671, 0.6934), Vector3.new(0.98, 2.93, 0.72),
-			Vector3.new(0.325, 2.07, 0.3525), Vector3.new(0.325, 2.07, 0.3525), Vector3.new(0.3, 0.5, 0.75), Vector3.new(0.3, 0.5, 0.75),
-		},
-		hair = { -- kind = { centre, size }
-			short = { Vector3.new(0, 4.939, 0.057), Vector3.new(0.5695, 0.6671, 0.6934) },
-			bun = { Vector3.new(0, 4.907, 0.095), Vector3.new(0.5695, 0.7306, 0.7695) },
-		},
-		shoulder = Vector3.new(0.54, 4.15, 0), neck = Vector3.new(0, 4.4, 0), waist = Vector3.new(0, 3, 0),
-		swing = 0.22, stride = 0.35, -- (short sleeves are on the shirt: the arm swings less)
+local R6: Geo = {
+	cen = {
+		Vector3.new(0, 3, 0), Vector3.new(0, 4.5, 0), Vector3.new(0, 5.1, 0.05), Vector3.new(-0.5, 1, 0),
+		Vector3.new(-1.5, 3, 0), Vector3.new(1.5, 3, 0), Vector3.new(0.5, 1, 0),
 	},
-	blocks = {
-		cen = {
-			Vector3.new(0, 3, 0), Vector3.new(0, 4.5, 0), Vector3.new(0, 5.05, 0.02), Vector3.new(0, 1.225, 0),
-			Vector3.new(-1.5, 3, 0), Vector3.new(1.5, 3, 0), Vector3.new(-0.5, 0.175, -0.1), Vector3.new(0.5, 0.175, -0.1),
-		},
-		size = {
-			Vector3.new(2, 2, 1), Vector3.new(2, 1, 1), Vector3.new(1.32, 0.32, 1.32), Vector3.new(2, 1.75, 1.1),
-			Vector3.new(1, 2, 1), Vector3.new(1, 2, 1), Vector3.new(0.8, 0.35, 1), Vector3.new(0.8, 0.35, 1),
-		},
-		hair = {
-			short = { Vector3.new(0, 5.05, 0.02), Vector3.new(1.32, 0.32, 1.32) },
-			bun = { Vector3.new(0, 4.75, 0.3), Vector3.new(1.34, 1.25, 0.9) },
-		},
-		shoulder = Vector3.new(1.5, 3.5, 0), neck = Vector3.new(0, 4, 0), waist = Vector3.new(0, 2, 0),
-		swing = 0.4, stride = 0.45,
+	size = {
+		Vector3.new(2, 2, 1), Vector3.new(2, 1, 1), Vector3.new(1.3, 0.4, 1.3), Vector3.new(1, 2, 1),
+		Vector3.new(1, 2, 1), Vector3.new(1, 2, 1), Vector3.new(1, 2, 1),
 	},
+	shoulder = Vector3.new(1.5, 3.5, 0), hip = Vector3.new(0.5, 2, 0), neck = Vector3.new(0, 4, 0),
+	waist = Vector3.new(0, 2, 0), arm = 0.6, leg = 0.55,
 }
--- the pieces (Model asset 94912674677470, group 33151111; tools/people/people_mesh.py checks 0 near-parallel faces
--- under 0.05 studs between them, the no-flicker rule) and the pictures: Decals, since a MeshPart's TextureID
--- ignores alpha (the heads came out black): the face on the head's Front (1 plain, 2 thanaka on the cheeks), the
--- flip-flop strap on each foot's Top; transparent round them, so the part's Color is the skin
-local MESH = {
-	Torso = 95116517230231, Head = 122525154005592, HairShort = 125077740186727, HairBun = 74908404628379,
-	Longyi = 117548162675945, ArmL = 90339926999789, ArmR = 140321970177029, Foot = 101755076151555,
-}
-local PIECE = { "Torso", "Head", "HairShort", "Longyi", "ArmL", "ArmR", "Foot", "Foot" }
-local FACE = { "rbxassetid://127110709777252", "rbxassetid://139673625040739" }
-local SANDAL_STRAP = "rbxassetid://127958667677139"
-local templates: { [string]: MeshPart }? = nil
+local NAMES = { "Torso", "Head", "Hair", "Left Leg", "Left Arm", "Right Arm", "Right Leg" }
+local NPART = #NAMES
+local geoCache: { [number]: Geo } = {}
+-- bw = build (shoulder width): 0.9 thin .. 1.15 broad; the torso widens and the arms move out with it
+local function geoFor(bw: number): Geo
+	local key = math.floor(bw * 20 + 0.5)
+	local g = geoCache[key]
+	if g then
+		return g
+	end
+	bw = key / 20
+	local cen, size = table.clone(R6.cen), table.clone(R6.size)
+	size[1] = Vector3.new(2 * bw, 2, 1)
+	cen[5] = Vector3.new(-(bw + 0.5), 3, 0)
+	cen[6] = Vector3.new(bw + 0.5, 3, 0)
+	g = {
+		cen = cen, size = size, shoulder = Vector3.new(bw + 0.5, 3.5, 0), hip = R6.hip, neck = R6.neck,
+		waist = R6.waist, arm = R6.arm, leg = R6.leg,
+	}
+	geoCache[key] = g
+	return g
+end
+-- Roblox hair: ReplicatedStorage.PedKit.Hair (Studio, saved in the place): the handles of Roblox's own free catalog
+-- hairs (Pal Hair, Brown Hair, Updo ...; attribute Off = the handle's CFrame from the head's centre at scale 1, from its
+-- HairAttachment; Long = women's), texture cleared so Part.Color is the hair colour; with no kit a plain block cap
+local hairKit: { [string]: { BasePart } } = { short = {}, long = {} }
 
 type Figure = {
-	model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal?, scale: number, hairAt: Vector3, bald: boolean,
-	geo: Geo, hairKind: string,
+	model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal?, scale: number, hairOff: CFrame, bald: boolean,
+	geo: Geo, hairKind: string, tex: { Texture }, hairSize: Vector3,
 }
 type Walker = {
 	fig: Figure, mode: string, path: { Vector3 }?, k: number, dir: number, pos: Vector3, yaw: number, speed: number,
 	lat: number, phase: number, acc: number, timer: number, spot: number?, held: boolean?, gone: boolean?,
-	latLo: number?, latHi: number?,
+	latLo: number?, latHi: number?, look: number?, lookTo: number?, lookT: number?, t: number?, yawTo: number?,
 }
 
 local pedWant = 0 -- people wanted out now (pedTick)
@@ -488,36 +471,54 @@ local function quiet(p: BasePart)
 	p.CastShadow = false
 end
 
--- the mesh templates, once (AssetService on the client, meshes the game's group owns); left nil = the old blocks
+-- the clothes' image ids and the hair kit, once
 local function loadTemplates()
-	local AssetService = game:GetService("AssetService")
-	local t = {}
-	for name, id in MESH do
-		local uri = "rbxassetid://" .. id
-		local opts = { CollisionFidelity = Enum.CollisionFidelity.Box, RenderFidelity = Enum.RenderFidelity.Automatic }
-		local ok, mp = pcall(function()
-			return AssetService:CreateMeshPartAsync(Content.fromUri(uri), opts)
-		end)
-		if not ok then
-			ok, mp = pcall(function()
-				return (AssetService :: any):CreateMeshPartAsync(uri, opts)
-			end)
-		end
-		if not ok or not mp then
-			warn("[CityLegends] YangonStreetLife: people meshes failed, blocks instead:", mp)
-			return
-		end
-		quiet(mp)
-		mp.Material = Enum.Material.SmoothPlastic -- (Fabric glittered on the longyi)
-		if name == "Head" or name == "Foot" then
-			local d = Instance.new("Decal")
-			d.Name = "pic"
-			d.Face = if name == "Head" then Enum.NormalId.Front else Enum.NormalId.Top
-			d.Parent = mp
-		end
-		t[name] = mp
+	local ok, ids = pcall(require, Shared:WaitForChild("PedClothes", 5) :: ModuleScript)
+	if ok and type(ids) == "table" then
+		CLOTH = ids
+	else
+		warn("[CityLegends] YangonStreetLife: no PedClothes, plain clothes")
 	end
-	templates = t
+	local kit = ReplicatedStorage:FindFirstChild("PedKit")
+	local hairs = kit and kit:FindFirstChild("Hair")
+	if hairs then
+		for _, h in hairs:GetChildren() do
+			if h:IsA("BasePart") then
+				local kind = if h:GetAttribute("Long") then "long" else "short"
+				table.insert(hairKit[kind], h)
+			end
+		end
+	end
+end
+
+-- the clothed faces: { part number, atlas ("shirt" / "pants"), slot group (T / R / L), face }
+local FACE_IDS = { F = Enum.NormalId.Front, B = Enum.NormalId.Back, L = Enum.NormalId.Left, R = Enum.NormalId.Right, U = Enum.NormalId.Top }
+local CLOTHED: { { any } } = {}
+for _, e in { { 1, "shirt", "T" }, { 5, "shirt", "L" }, { 6, "shirt", "R" }, { 4, "pants", "L" }, { 7, "pants", "R" } } do
+	for _, face in { "F", "B", "L", "R", "U" } do
+		table.insert(CLOTHED, { e[1], e[2], e[3], face })
+	end
+end
+
+-- crop each Texture to its garment's slot for the part's present size (studs per tile = the whole atlas)
+local function setClothes(f: Figure, top: string, low: string)
+	if not CLOTH then
+		return
+	end
+	local A, cw, ch, cols = CLOTH.size, CLOTH.cellW, CLOTH.cellH, CLOTH.cols
+	for i, c in CLOTHED do
+		local t = f.tex[i]
+		local part = f.parts[c[1]]
+		local cell = CLOTH[c[2]][if c[2] == "shirt" then top else low] or 0
+		local r = CLOTH.slots[c[3]][c[4]]
+		local x, y = (cell % cols) * cw + r[1], (cell // cols) * ch + r[2]
+		local sz = part.Size
+		local face = c[4]
+		local W, H = if face == "L" or face == "R" then sz.Z else sz.X, if face == "U" then sz.Z else sz.Y
+		local su, sv = W * A / r[3], H * A / r[4]
+		t.StudsPerTileU, t.StudsPerTileV = su, sv
+		t.OffsetStudsU, t.OffsetStudsV = x / A * su, y / A * sv
+	end
 end
 
 local function newFigure(): Figure
@@ -525,37 +526,43 @@ local function newFigure(): Figure
 	model.Name = "Person"
 	local parts = {}
 	local face: Decal? = nil
-	local geo = if templates then GEO.real else GEO.blocks
-	for k = 1, 8 do
-		local p: BasePart
-		if templates then
-			p = templates[PIECE[k]]:Clone()
-		else
-			p = Instance.new("Part")
-			quiet(p)
-			p.Material = if k == 4 then Enum.Material.Fabric else Enum.Material.SmoothPlastic
-			p.TopSurface = Enum.SurfaceType.Smooth
-			p.BottomSurface = Enum.SurfaceType.Smooth
-			if k == 2 then
-				local mesh = Instance.new("SpecialMesh")
-				mesh.MeshType = Enum.MeshType.Head
-				mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
-				mesh.Parent = p
-				local d = Instance.new("Decal")
-				d.Name = "face"
-				d.Face = Enum.NormalId.Front
-				d.Parent = p
-				face = d
-			end
+	for k = 1, NPART do
+		local p = Instance.new("Part")
+		quiet(p)
+		p.Material = Enum.Material.SmoothPlastic
+		p.TopSurface = Enum.SurfaceType.Smooth
+		p.BottomSurface = Enum.SurfaceType.Smooth
+		p.Name = NAMES[k]
+		p.Size = R6.size[k]
+		if k == 2 then
+			local mesh = Instance.new("SpecialMesh")
+			mesh.MeshType = Enum.MeshType.Head
+			mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+			mesh.Parent = p
+			local d = Instance.new("Decal")
+			d.Name = "face"
+			d.Face = Enum.NormalId.Front
+			d.Parent = p
+			face = d
 		end
-		p.Name = "P" .. k
-		p.Size = geo.size[k]
 		p.Parent = model
 		parts[k] = p
 	end
+	-- the clothes: one Texture per clothed face, cropped out of the shared atlases in dress()
+	local tex = {}
+	if CLOTH then
+		for i, c in CLOTHED do
+			local t = Instance.new("Texture")
+			t.Texture = "rbxassetid://" .. CLOTH.atlas[c[2]]
+			t.Face = FACE_IDS[c[4]]
+			t.Parent = parts[c[1]]
+			tex[i] = t
+		end
+	end
 	return {
-		model = model, parts = parts, cfs = table.create(8, CFrame.new()), face = face, scale = 1,
-		hairAt = geo.hair.short[1], bald = false, geo = geo, hairKind = "short",
+		model = model, parts = parts, cfs = table.create(NPART, CFrame.new()), face = face, scale = 1,
+		hairOff = CFrame.new(R6.cen[3] - R6.cen[2]), bald = false, geo = R6, hairKind = "", tex = tex,
+		hairSize = R6.size[3],
 	}
 end
 
@@ -591,94 +598,102 @@ local function whoAt(x: number, z: number): string
 	return if rng:NextNumber() < 0.5 then "man" else "woman"
 end
 
+-- the hair piece: a copy of one of the kit's Roblox hairs (a MeshPart's MeshId can't change at run time), or the cap
+local function setHair(f: Figure, kind: string)
+	local list = hairKit[kind]
+	if #list == 0 then
+		list = hairKit.short
+	end
+	if #list == 0 then
+		return
+	end
+	local src = pick(list)
+	local p = src:Clone()
+	quiet(p)
+	p.Name = "Hair"
+	p.Parent = f.model
+	f.parts[3]:Destroy()
+	f.parts[3] = p
+	f.hairOff = (src:GetAttribute("Off") :: CFrame?) or CFrame.new(0, 0.6, 0)
+	f.hairSize = src.Size
+end
+
 local function dress(f: Figure, who: string)
 	local skin = pick(SKIN)
-	local g = f.geo
-	local real = g == GEO.real
 	local top, low, hairKind, bald
-	local armL = nil
 	if who == "monk" then
-		local robe = pick(ROBE)
-		top, low, armL, hairKind, bald = robe, robe, robe, "short", true -- the robe over the left shoulder
+		top, low, hairKind, bald = "robe_shirt", "robe_pants", "short", true
 	elseif who == "kid" then
-		top, low, hairKind, bald = UNIFORM_TOP, UNIFORM_LONGYI, if rng:NextNumber() < 0.5 then "bun" else "short", false
+		top, low, hairKind, bald = "uniform_shirt", "uniform_longyi", if rng:NextNumber() < 0.5 then "long" else "short", false
 	elseif who == "woman" then
-		top, low, hairKind, bald = pick(WOMEN_TOP), pick(WOMEN_LONGYI), "bun", false
+		top, low, hairKind, bald = pick(WOMEN_TOP), pick(WOMEN_LOW), "long", false
 	else
-		top, low, hairKind, bald = pick(MEN_SHIRT), pick(MEN_LONGYI), "short", false
+		-- now and then a young man in a T-shirt and jeans
+		if rng:NextNumber() < 0.15 then
+			top, low = if rng:NextNumber() < 0.5 then "tee_red" else "tee_black", "jeans_blue"
+		else
+			top, low = pick(MEN_TOP), pick(MEN_LOW)
+		end
+		hairKind, bald = "short", false
 	end
-	-- real bodies: short sleeves are on the shirt, so the arms are skin; the blocks' arms are sleeves or skin
-	if not armL then
-		armL = if real or rng:NextNumber() < 0.6 then skin else top
-	end
-	local armR = if real or who == "monk" then skin else armL
-	local girl = who == "woman" or (who == "kid" and hairKind == "bun")
-	local s = if who == "kid" then rng:NextNumber(0.66, 0.78) elseif girl then rng:NextNumber(0.91, 0.98)
-		else rng:NextNumber(0.95, 1.03)
+	local girl = who == "woman" or (who == "kid" and hairKind == "long")
+	local s = if who == "kid" then rng:NextNumber(0.68, 0.8) elseif girl then rng:NextNumber(0.9, 0.98)
+		else rng:NextNumber(0.95, 1.05)
+	local bw = if who == "kid" then 1 elseif girl then rng:NextNumber(0.9, 1.02) else rng:NextNumber(0.95, 1.15)
 	f.scale = s
 	f.bald = bald
-	-- the hair piece: a real body swaps the mesh (a MeshPart's MeshId can't change at run time)
-	if real and templates and f.hairKind ~= hairKind then
-		local old = f.parts[3]
-		local p = templates[if hairKind == "bun" then "HairBun" else "HairShort"]:Clone()
-		p.Name = "P3"
-		p.Parent = f.model
-		f.parts[3] = p
-		old:Destroy()
+	f.geo = geoFor(bw)
+	if f.hairKind ~= hairKind or rng:NextNumber() < 0.5 then
+		setHair(f, hairKind)
 	end
 	f.hairKind = hairKind
-	local hair = g.hair[hairKind]
-	f.hairAt = hair[1]
-	local narrow = if girl then 0.92 else 1 -- women and girls a little narrower in the shoulders and longyi
-	local feet = if real then skin else SANDAL -- (real feet: the atlas draws the sandal over the skin)
-	local colours = { top, skin, HAIR, low, armL, armR, feet, feet }
 	for k, p in f.parts do
-		p.Color = colours[k]
-		local sz = if k == 3 then hair[2] else g.size[k]
-		if k == 1 or k == 4 then
-			sz = Vector3.new(sz.X * narrow, sz.Y, sz.Z)
-		end
-		p.Size = sz * s
+		p.Color = if k == 3 then pick(HAIR_COLS) else skin
+		p.Size = (if k == 3 then f.hairSize else f.geo.size[k]) * s
 	end
+	setClothes(f, top, low)
 	f.parts[3].Transparency = if bald then 1 else 0
 	if f.face then
 		f.face.Texture = pick(FACES)
-	else
-		-- (a picture not loaded yet draws nothing: the plain skin shows; PreloadAsync said Failure for these in
-		-- Studio even while they drew, so it is no gate)
-		local face = f.parts[2]:FindFirstChild("pic") :: Decal?
-		if face then
-			face.Texture = FACE[if girl and rng:NextNumber() < 0.6 then 2 else 1] -- thanaka on most women's cheeks
-		end
-		for _, k in { 7, 8 } do
-			local strap = f.parts[k]:FindFirstChild("pic") :: Decal?
-			if strap then
-				strap.Texture = SANDAL_STRAP
-			end
-		end
 	end
 end
 
+-- head turns: a slow look round (shops, the street, now and then the camera), eased
+local function lookStep(w: Walker, dt: number)
+	w.lookT = (w.lookT or 0) - dt
+	if (w.lookT :: number) <= 0 then
+		w.lookT = rng:NextNumber(1.5, 5)
+		w.lookTo = if rng:NextNumber() < 0.45 then 0 else rng:NextNumber(-0.9, 0.9)
+	end
+	local cur = w.look or 0
+	w.look = cur + ((w.lookTo or 0) - cur) * math.min(1, dt * 3)
+end
+
+-- the classic Roblox walk: arms and legs swing from shoulders and hips (opposite), the body dips as the legs open;
+-- standing: a little arm sway and the head looking round
 local function pose(w: Walker, moving: boolean)
 	local f = w.fig
 	local g = f.geo
 	local cen = g.cen
 	local s = f.scale
 	local root = CFrame.new(w.pos) * CFrame.Angles(0, w.yaw, 0)
+	local t = w.t or 0
 	local sw = if moving then math.sin(w.phase) else 0
-	local bob = if moving then math.abs(math.cos(w.phase)) * 0.06 * s else 0
-	local up = root * CFrame.new(0, bob, 0)
-	local shR = g.shoulder
-	local shL = Vector3.new(-shR.X, shR.Y, shR.Z)
+	local legA = sw * g.leg
+	local armA = if moving then sw * g.arm else math.sin(t * 1.6 + w.lat * 3) * 0.04
+	local dip = if moving then 2 * (1 - math.cos(legA)) * s else math.sin(t * 2.1) * 0.015 * s
+	local up = root * CFrame.new(0, -dip, 0)
+	local shR, hipR = g.shoulder, g.hip
+	local shL, hipL = Vector3.new(-shR.X, shR.Y, shR.Z), Vector3.new(-hipR.X, hipR.Y, hipR.Z)
 	local cfs = f.cfs
+	local head = up * CFrame.new(g.neck * s) * CFrame.Angles(0, w.look or 0, 0) * CFrame.new((cen[2] - g.neck) * s)
 	cfs[1] = up * CFrame.new(cen[1] * s)
-	cfs[2] = up * CFrame.new(cen[2] * s)
-	cfs[3] = up * CFrame.new(f.hairAt * s)
-	cfs[4] = root * CFrame.new(cen[4] * s + Vector3.new(0, bob * 0.5, 0)) * CFrame.Angles(sw * 0.03, 0, 0)
-	cfs[5] = up * CFrame.new(shL * s) * CFrame.Angles(-sw * g.swing, 0, 0) * CFrame.new((cen[5] - shL) * s)
-	cfs[6] = up * CFrame.new(shR * s) * CFrame.Angles(sw * g.swing, 0, 0) * CFrame.new((cen[6] - shR) * s)
-	cfs[7] = root * CFrame.new(cen[7] * s + Vector3.new(0, math.max(0, sw) * 0.12 * s, -sw * g.stride * s))
-	cfs[8] = root * CFrame.new(cen[8] * s + Vector3.new(0, math.max(0, -sw) * 0.12 * s, sw * g.stride * s))
+	cfs[2] = head
+	cfs[3] = head * (f.hairOff - f.hairOff.Position + f.hairOff.Position * s)
+	cfs[4] = up * CFrame.new(hipL * s) * CFrame.Angles(legA, 0, 0) * CFrame.new((cen[4] - hipL) * s)
+	cfs[5] = up * CFrame.new(shL * s) * CFrame.Angles(-armA, 0, 0) * CFrame.new((cen[5] - shL) * s)
+	cfs[6] = up * CFrame.new(shR * s) * CFrame.Angles(armA, 0, 0) * CFrame.new((cen[6] - shR) * s)
+	cfs[7] = up * CFrame.new(hipR * s) * CFrame.Angles(-legA, 0, 0) * CFrame.new((cen[7] - hipR) * s)
 	workspace:BulkMoveTo(f.parts, cfs, Enum.BulkMoveMode.FireCFrameChanged)
 end
 
@@ -882,7 +897,8 @@ local function stepWalk(w: Walker, dt: number): boolean
 	if kerb then
 		w.pos = clearOf(w.pos, kerb)
 	end
-	w.phase += w.speed * dt * 1.45
+	-- (R6 legs at 0.55 rad: ~4.2 studs a stride; shorter people step faster)
+	w.phase += w.speed * dt * 1.5 / w.fig.scale
 	return true
 end
 
@@ -1017,14 +1033,29 @@ local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 		if w.held or w.gone then
 			w.acc = 0
 		elseif w.mode == "stand" then
-			-- now and then a look round
+			-- now and then a turn (eased), the head looking round and a little sway: posed only near and in view
 			w.timer -= dt
 			if w.timer <= 0 then
 				w.timer = rng:NextNumber(4, 14)
-				w.yaw = spotYaw[w.spot :: number] + rng:NextNumber(-0.7, 0.7)
-				pose(w, false)
+				w.yawTo = spotYaw[w.spot :: number] + rng:NextNumber(-0.7, 0.7)
 			end
-			w.acc = 0
+			local d = flat(w.pos, cam)
+			local every = if d < 40 then 0.05 elseif d < 90 then 0.25 else math.huge
+			if d > 20 and (w.pos - cam):Dot(look) < 0 then
+				every = math.huge
+			end
+			if w.acc >= every then
+				local a = w.acc
+				w.acc = 0
+				w.t = (w.t or 0) + a
+				if w.yawTo then
+					w.yaw += (w.yawTo - w.yaw) * math.min(1, a * 2)
+				end
+				lookStep(w, a)
+				pose(w, false)
+			elseif every == math.huge then
+				w.acc = 0
+			end
 		else
 			local d = flat(w.pos, cam)
 			local every = if d < 70 then 0 elseif d < 140 then 0.1 else 0.25
@@ -1033,8 +1064,13 @@ local function pedFrame(dt: number, cam: Vector3, look: Vector3)
 				every = 0.25
 			end
 			if w.acc >= every then
-				local moving = stepWalk(w, w.acc)
+				local a = w.acc
+				local moving = stepWalk(w, a)
 				w.acc = 0
+				w.t = (w.t or 0) + a
+				if d < 60 then
+					lookStep(w, a)
+				end
 				pose(w, moving)
 			end
 		end
