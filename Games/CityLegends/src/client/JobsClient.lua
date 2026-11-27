@@ -218,7 +218,8 @@ local function refreshTarget()
 		ringLabel.Text = if job and job.id == "delivery" then "" else text or ""
 	end
 	myWaypoint = true
-	Minimap.setWaypoint(pos)
+	-- (27 Nov, owner: "the delivery job beam are annoying") delivery: the minimap blip only, no light beam in the world
+	Minimap.setWaypoint(pos, job ~= nil and job.id == "delivery")
 end
 
 local function setState(st: any)
@@ -227,6 +228,7 @@ local function setState(st: any)
 	end
 	state = st
 	stateAt = os.clock()
+	Activities.showDispatch(st.job == "delivery")
 	refreshBar()
 	refreshTarget()
 	refreshAsk()

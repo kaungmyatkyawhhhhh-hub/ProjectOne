@@ -570,13 +570,13 @@ end
 -- spot, until you get there or set another (nil clears it)
 local waypoint: Vector3? = nil
 local beacon: Part? = nil
-function Minimap.setWaypoint(pos: Vector3?)
+function Minimap.setWaypoint(pos: Vector3?, noBeam: boolean?)
 	waypoint = pos
 	if beacon then
 		beacon:Destroy()
 		beacon = nil
 	end
-	if pos then
+	if pos and not noBeam then
 		local b = Instance.new("Part")
 		b.Name = "Waypoint"
 		b.Anchored = true

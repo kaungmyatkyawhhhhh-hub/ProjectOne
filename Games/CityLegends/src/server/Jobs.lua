@@ -71,7 +71,9 @@ local function saved(player: Player): any
 		s.xp = {}
 	end
 	for id, n in s.xp do
-		if not JobRules.byId(J, id) or type(n) ~= "number" or n ~= n or n < 0 then
+		-- (27 Nov) jobs switched off for release (Config.Jobs.Off) keep their XP for when they come back
+		local known = JobRules.byId(J, id) or (J.Off and JobRules.byId({ List = J.Off }, id))
+		if not known or type(n) ~= "number" or n ~= n or n < 0 then
 			s.xp[id] = nil
 		end
 	end

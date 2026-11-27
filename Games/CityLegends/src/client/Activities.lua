@@ -89,6 +89,8 @@ end
 
 -- (2026-11-06) the Racing Hub's signs: only close to, or five of them fill the screen
 local HUB_SIGN_RANGE = 45
+local dispatchSigns: { BillboardGui } = {}
+local dispatchShown = false
 
 local function ring(pos: Vector3, color: Color3, diameter: number): BasePart
 	return part({
@@ -146,6 +148,13 @@ local function buildWorld()
 		local p = ring(d.pos - Vector3.new(0, Config.City.CurbHeight, 0), Color3.fromRGB(40, 150, 255), 24)
 		p.Transparency = 1 -- (owner, 2026-11-21: "remove the delivery job blue neon circle area"): sign only
 		billboard(p, "DELIVERY JOBS", d.name .. " · stop here", Color3.fromRGB(90, 180, 255))
+		-- (27 Nov, owner: "the delivery job beam are annoying ... make it show for only that specific job") hidden
+		-- unless your job is Delivery (JobsClient calls Activities.showDispatch)
+		local bb = p:FindFirstChildOfClass("BillboardGui")
+		if bb then
+			bb.Enabled = dispatchShown
+			table.insert(dispatchSigns, bb)
+		end
 	end
 	for k, pos in ActivityData.chips do
 		local chip = part({
@@ -1042,6 +1051,14 @@ function Activities.init()
 	end)
 	refreshLabels()
 	RunService.Heartbeat:Connect(update)
+end
+
+-- (27 Nov) the dispatch rings' DELIVERY JOBS signs show only while your job is Delivery
+function Activities.showDispatch(on: boolean)
+	dispatchShown = on
+	for _, bb in dispatchSigns do
+		bb.Enabled = on
+	end
 end
 
 return Activities

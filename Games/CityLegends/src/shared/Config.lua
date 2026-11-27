@@ -1895,7 +1895,7 @@ Config.Jobs = (function()
 	local function v(x: number, y: number, z: number): Vector3
 		return Vector3.new(x, y, z)
 	end
-	return {
+	local t = {
 		On = true,
 		-- the Job Center kiosk on Myanmar Plaza's forecourt, facing Kabar Aye Pagoda Road (spawn is just south)
 		Center = CFrame.lookAt(v(34742, 40.6, 27586), v(34700, 40.6, 27586)),
@@ -1932,6 +1932,10 @@ Config.Jobs = (function()
 				ranks = { "Shop Helper", "Sales Clerk", "Senior Clerk", "Floor Manager", "Boutique Owner" } },
 		},
 		-- the YBS line: real bus stops on the map (street kit), driven in this order, then round again
+		-- (27 Nov, owner: "rn lets have 3 jobs only to not complicate things in release") only these are offered; the others
+		-- stay in List's data below (moved to Off) so they come back by adding their id here. A save on an Off job is cleared
+		-- by JobRules (an unknown cur). Delivery = the new-player guide's job, Taxi = the Yangon car job, Tea Shop = the AFK post.
+		Live = { delivery = true, taxi = true, tea = true },
 		BusStops = {
 			{ name = "Myanmar Plaza", pos = v(34538.1, 40.36, 27663.0) },
 			{ name = "Inya Lake", pos = v(34598.9, 45.33, 27203.8) },
@@ -1942,6 +1946,12 @@ Config.Jobs = (function()
 			{ name = "Pyay Road", pos = v(34178.9, 60.18, 28812.6) },
 		},
 	}
+	local live, off = {}, {}
+	for _, job in t.List do
+		table.insert(if t.Live[job.id] then live else off, job)
+	end
+	t.List, t.Off = live, off
+	return t
 end)()
 
 return Config
