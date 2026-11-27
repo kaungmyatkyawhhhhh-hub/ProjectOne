@@ -25,7 +25,7 @@ local IS_STUDIO = RunService:IsStudio()
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local StreetLife = require(script.Parent:WaitForChild("YangonStreetLife"))
-local Audio = require(script.Parent:WaitForChild("Audio"))
+local PedSounds = require(script.Parent:WaitForChild("PedSounds"))
 local Driving = require(script.Parent:WaitForChild("Driving"))
 
 local PedHits = {}
@@ -214,7 +214,7 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 		Players.LocalPlayer:SetAttribute("PedHitLog", string.format("rag %.0f kmh t=%.1f", speed / Config.mphToSps(KMH), os.clock()))
 	end
 	table.insert(rags, { w = w, t0 = os.clock(), made = made, nocol = nocol, start = w.pos, phase = "rag", pt = 0 })
-	Audio.play("thud", math.clamp(0.35 + speed / 120, 0.35, 0.8), 0.75 + math.random() * 0.1, P[1])
+	PedSounds.hit(w, P[1], speed, true) -- (27 Nov: thud by speed, a Roblox "oof", a tumble)
 	if car == Driving.getModel() and Driving.slowBy then
 		Driving.slowBy(CAR_KEEP)
 	end
@@ -238,7 +238,7 @@ local function stumble(w: any, root: BasePart, v: Vector3)
 	if IS_STUDIO and Players.LocalPlayer then
 		Players.LocalPlayer:SetAttribute("PedHitLog", string.format("stumble t=%.1f", os.clock()))
 	end
-	Audio.play("thud", 0.18, 1.1, w.fig.parts[1])
+	PedSounds.hit(w, w.fig.parts[1], Vector3.new(v.X, 0, v.Z).Magnitude, false)
 end
 
 local rayParams = RaycastParams.new()
@@ -442,6 +442,7 @@ function PedHits.start()
 	end
 	started = true
 	RunService.Heartbeat:Connect(step)
+	PedSounds.start(StreetLife) -- (27 Nov) the nearest walker's footsteps
 end
 
 -- (for a look in Studio)

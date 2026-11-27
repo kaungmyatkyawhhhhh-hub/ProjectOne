@@ -32,6 +32,15 @@ return function(Config)
 		CutUp = "rbxassetid://9126229255", -- Whoosh By Fast Airy Swooshing
 		PassBy = "rbxassetid://9113003539", -- Race Car Pass By (cutscene)
 		Impact = "rbxassetid://9120769331", -- Sonic Boom Low End Impact (title hit)
+		-- (27 Nov) street sounds, code-made (tools/street_sounds/cl_street.py; vault City Legends/2026-11-27 Traffic
+		-- pass-by and footstep sounds.md): traffic roar loop, horns, slipper steps, a person bumped by a car
+		StreetRoar = "rbxassetid://118487038419336",
+		HornCar = "rbxassetid://123306159679736",
+		HornBus = "rbxassetid://134615287932247",
+		Step = { "rbxassetid://96298460174140", "rbxassetid://78290550392105", "rbxassetid://124790381652670", "rbxassetid://73974542726865" },
+		ThudSoft = "rbxassetid://95173200422307",
+		ThudHeavy = "rbxassetid://98925219324457",
+		Tumble = "rbxassetid://123280563435719",
 		-- (2026-11-26) the UI sound family "night drive" (code-made: tools/ui_sounds/cl_ui.py; vault
 		-- City Legends/2026-11-26 UI pass - sounds, HUD buttons, guide pill.md). Before: one built-in tick for everything
 		UIClick = { "rbxassetid://86747139108751", "rbxassetid://125513135454735", "rbxassetid://126667847847217" },

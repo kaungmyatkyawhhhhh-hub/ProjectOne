@@ -39,11 +39,11 @@ end
 local function click(p: BasePart, frost: boolean)
 	local s = Instance.new("Sound")
 	s.SoundId = "rbxasset://sounds/volume_slider.ogg"
-	s.Volume = if frost then 0.3 else 0.35
+	s.Volume = if frost then 0.5 else 0.58 -- (28 Nov: was 0.3 / 0.35 = -30 dBFS, now ~-25, like the doors)
 	s.PlaybackSpeed = if frost then 1.15 else 1.8
 	s.RollOffMode = Enum.RollOffMode.InverseTapered
-	s.RollOffMinDistance = 4
-	s.RollOffMaxDistance = 30
+	s.RollOffMinDistance = 10
+	s.RollOffMaxDistance = 45
 	s.Parent = p
 	s:Play()
 	s.Ended:Once(function()

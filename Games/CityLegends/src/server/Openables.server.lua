@@ -38,34 +38,37 @@ local SCRAPE = "rbxassetid://9116893799" -- Metal tank scrape (gate dragging in 
 local RATTLE = "rbxassetid://9118209193" -- Boxy metal shake, rattle
 local CLANG = "rbxassetid://9116684884" -- Metal impacts, multiple hits, rattles
 local THUD = "rbxasset://sounds/action_jump_land.mp3"
+-- (28 Nov, owner: "the myitta nyunt house interaction sounds are so low") volumes set from measured files (loudest
+-- 0.18 s RMS, AudioPlayer:GetWaveformAsync): each open / close lands at about -22 dBFS, no layer under -28, peaks
+-- under -1 dB (the latch and squeak files are 30-40 dB quieter than the drawer's; Volume goes to 10 at most)
 local SOUNDS = {
 	door = {
-		open = { start = { { DOOR_LATCH, 0.4, 1.0, 0, 0.35 }, { DOOR_SQUEAK, 0.35, 0.95, 0, 1.1 } } },
-		close = { start = { { DOOR_SQUEAK, 0.25, 1.05, 0.2, 0.6 } }, settle = { { CAR_CLOSE, 0.45, 0.7, 0, nil }, { DOOR_LATCH, 0.35, 1.1, 0.4, 0.4 } } },
+		open = { start = { { DOOR_LATCH, 10, 1.0, 0, 0.35 }, { DOOR_SQUEAK, 9.55, 0.95, 0, 1.1 } } },
+		close = { start = { { DOOR_SQUEAK, 4.79, 1.05, 0.2, 0.6 } }, settle = { { CAR_CLOSE, 2.95, 0.7, 0, nil }, { DOOR_LATCH, 9.23, 1.1, 0.4, 0.4 } } },
 	},
 	wardrobe = {
-		open = { start = { { SMALL_DOOR, 0.3, 1.2, 0, 0.8 } }, settle = { { CHAIN, 0.25, 1.3, 0, 0.6 } } },
-		close = { start = { { SMALL_DOOR, 0.2, 1.3, 0.3, 0.5 } }, settle = { { WOOD_KNOCK, 0.3, 1.5, 0, 0.5 } } },
+		open = { start = { { SMALL_DOOR, 3.46, 1.2, 0, 0.8 } }, settle = { { CHAIN, 2.88, 1.3, 0, 0.6 } } },
+		close = { start = { { SMALL_DOOR, 2.92, 1.3, 0.3, 0.5 } }, settle = { { WOOD_KNOCK, 0.75, 1.5, 0, 0.5 } } },
 	},
 	cabinet = {
-		open = { start = { { SMALL_DOOR, 0.25, 1.45, 0, 0.6 } } },
-		close = { settle = { { WOOD_KNOCK, 0.25, 1.9, 0, 0.4 } } },
+		open = { start = { { SMALL_DOOR, 5.82, 1.45, 0, 0.6 } } },
+		close = { settle = { { WOOD_KNOCK, 0.75, 1.9, 0, 0.4 } } },
 	},
 	fridge = {
-		open = { start = { { CAR_OPEN, 0.3, 1.35, 0, 0.5 } } },
-		close = { settle = { { CAR_CLOSE, 0.4, 1.15, 0, nil }, { THUD, 0.2, 1.4, 0, nil } } },
+		open = { start = { { CAR_OPEN, 3.27, 1.35, 0, 0.5 } } },
+		close = { settle = { { CAR_CLOSE, 2.95, 1.15, 0, nil }, { THUD, 1.48, 1.4, 0, nil } } },
 	},
 	drawer = {
-		open = { start = { { DRAWER, 0.35, 1.0, 0, 0.55 } } },
-		close = { start = { { DRAWER, 0.3, 1.05, 0.7, 0.5 } }, settle = { { WOOD_KNOCK, 0.2, 2.0, 0, 0.3 } } },
+		open = { start = { { DRAWER, 0.46, 1.0, 0, 0.55 } } },
+		close = { start = { { DRAWER, 0.46, 1.05, 0.7, 0.5 } }, settle = { { WOOD_KNOCK, 0.38, 2.0, 0, 0.3 } } },
 	},
 	slider = {
-		open = { start = { { SLIDER, 0.4, 0.95, 0, 0.7 } } },
-		close = { start = { { SLIDER, 0.35, 1.0, 0, 0.6 } }, settle = { { WOOD_KNOCK, 0.25, 1.3, 0, 0.4 } } },
+		open = { start = { { SLIDER, 0.85, 0.95, 0, 0.7 } } },
+		close = { start = { { SLIDER, 0.85, 1.0, 0, 0.6 } }, settle = { { WOOD_KNOCK, 0.61, 1.3, 0, 0.4 } } },
 	},
 	gate = {
-		open = { start = { { RATTLE, 0.3, 1.1, 0, 0.6 }, { SCRAPE, 0.25, 1.4, 0, 0.7 } } },
-		close = { start = { { SCRAPE, 0.25, 1.3, 0.3, 0.6 } }, settle = { { CLANG, 0.35, 1.2, 0, 0.7 } } },
+		open = { start = { { RATTLE, 0.21, 1.1, 0, 0.6 }, { SCRAPE, 0.2, 1.4, 0, 0.7 } } },
+		close = { start = { { SCRAPE, 0.22, 1.3, 0.3, 0.6 } }, settle = { { CLANG, 0.31, 1.2, 0, 0.7 } } },
 	},
 }
 
@@ -88,8 +91,8 @@ local function play(where: BasePart, specs: { any }?)
 		snd.PlaybackSpeed = sp[3] * (0.96 + math.random() * 0.08)
 		snd.TimePosition = sp[4] or 0
 		snd.RollOffMode = Enum.RollOffMode.InverseTapered
-		snd.RollOffMinDistance = 4
-		snd.RollOffMaxDistance = 30
+		snd.RollOffMinDistance = 10 -- (full level where you stand to use it)
+		snd.RollOffMaxDistance = 45
 		snd.Parent = where
 		snd:Play()
 		local len = sp[5]
