@@ -25,5 +25,6 @@ Built with Graphify 0.9.104 from the 52 notes in `Roblox Playbook/Research notes
 
 ## The coloured graph (separate vault)
 - Colours come from Graphify's **Obsidian export**: one note per concept (673 notes) tagged `#community/<topic>` + colour groups in its own `.obsidian/graph.json`. It's kept as a SEPARATE vault so the 673 notes don't clutter the main vault's search and graph.
-- File: `Research Graph vault.zip` (this folder). Extract it to `C:\ObsidianOne\` → Obsidian → Open folder as vault → `C:\ObsidianOne\Research Graph` → Graph view. It also has `graph.canvas`.
+- File: `Research Graph vault.zip` (this folder). Extract it next to the main vault (`D:\ObsidianOne\` since the vault moved to D:; it was `C:\ObsidianOne\` before) → Obsidian → Open folder as vault → `D:\ObsidianOne\Research Graph` → Graph view. It also has `graph.canvas`.
+- **It is not synced by Obsidian Git** (it lives outside the main vault), so each PC needs its own extract. 27 Nov: it had vanished from both PCs' vault lists (the old `C:` folder was gone after the vault moved to `D:`); re-extracted on this PC.
 - Rebuilds replace the zip; extract again over the old folder.
