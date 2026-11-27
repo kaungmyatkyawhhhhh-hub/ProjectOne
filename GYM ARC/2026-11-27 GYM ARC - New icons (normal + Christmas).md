@@ -50,3 +50,9 @@ Study: [[2026-11-27 GYM ARC - Icon study (gym icons + top CTR)]]. Files in `Asse
 - Fix (same ChatGPT chat, comparison sheet attached): waist-up, head ~35%, double-biceps flex filling both edges, eyes to camera, hard warm key + cyan rim, royal-blue radial background, height ruler on the right edge, no small kid. Christmas: festive red, snow, string lights, candy-cane ruler.
 - Gemini pass on the normal one only (Gemini's image limit was hit until 1:28 PM; ChatGPT's Christmas one was already clean).
 - Logo top-left at 40% width. Files: `Assets/icon_2026-11-27/v4/gymarc_v4_*_logo(_512).png`, size test `icon_size_test_v4.png`. 64 px: normal lum 0.49 / 9% dark, Christmas 0.50 / 16% dark (gym median 0.51 / 11%).
+
+## v5 (owner on v4: "our character's build look ugly because its not aesthetic" + "study about bodybuilding aesthetics first")
+- Study: [[2026-11-27 GYM ARC - Bodybuilding aesthetics study (for character art)]].
+- Reference: `v5/proportion_guide.png` (shoulders 3 heads, waist half the shoulders, biceps about head-sized) + the v4 art for identity. One follow-up narrowed the waist (the V was only 1.36 : 1).
+- Front double biceps, mid-thigh crop, fitted white tee, sculpted gold arms, same blue / festive-red backgrounds and ruler. ChatGPT then Gemini for both; logo top-left at 36%.
+- Files: `v5/gymarc_v5_*_logo(_512).png`, `v5/icon_size_test_v5.png`. 64 px: normal lum 0.43 / 5% dark, Christmas 0.41 / 23% dark.
