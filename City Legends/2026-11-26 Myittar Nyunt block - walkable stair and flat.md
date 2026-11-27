@@ -112,3 +112,6 @@ The ids are Pro Sound Effects sounds (Roblox's free public library) and the game
 - Play on the test store: every kind opened and closed through the test hook and moved back to within 0.004 studs; the right sounds fired; the fridge light came on and went off. Store back to v1, then saved **v2193**.
 - Shots (Play): wardrobe open with clothes; fridge open; bathroom slider open; front door open with the screen and bike; bike close-up; living room (owner's layout); window frosted next to a clear one; PC desk on the window wall (`... (Play) - after.jpg`).
 - Not done: no sound check by ear (Studio audio can't be heard from here), and no test on a real phone.
+
+## Cortion (27 Nov)
+An NPC lives in the flat now: [[2026-11-27 Cortion - Myittar Nyunt NPC]] (PC, TV, sleep, shower, pray, windows; kick with E).

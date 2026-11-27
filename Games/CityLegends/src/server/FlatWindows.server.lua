@@ -94,6 +94,22 @@ for _, p in CollectionService:GetTagged(TAG) do
 	add(p)
 end
 
+-- ServerStorage.FlatWindowSet:Invoke(windowId, frosted) switches a window to that state, with its tick (server/Cortion:
+-- he clears a window to look out and frosts it again when he walks off); live too
+do
+	local f = Instance.new("BindableFunction")
+	f.Name = "FlatWindowSet"
+	f.OnInvoke = function(id: string, frost: boolean)
+		local ps = panesOf(id)
+		if ps[1] and (frosted[id] == true) ~= frost then
+			last[id] = nil
+			toggle(ps[1])
+		end
+		return #ps
+	end
+	f.Parent = game:GetService("ServerStorage")
+end
+
 -- Studio test hook (Play only, never live): ServerStorage.FlatWindowsTest:Invoke(windowId) switches that window
 if game:GetService("RunService"):IsStudio() then
 	local f = Instance.new("BindableFunction")

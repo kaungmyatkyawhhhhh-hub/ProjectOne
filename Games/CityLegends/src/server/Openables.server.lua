@@ -310,6 +310,20 @@ for _, m in CollectionService:GetTagged(TAG) do
 end
 CollectionService:GetInstanceAddedSignal(TAG):Connect(add)
 
+-- ServerStorage.OpenableOpen:Invoke(model) opens it if it is shut (server/Cortion walks through doors); live too
+do
+	local f = Instance.new("BindableFunction")
+	f.Name = "OpenableOpen"
+	f.OnInvoke = function(m: Model)
+		local it = items[m]
+		if it and not it.moving and m:GetAttribute("Open") ~= true then
+			toggle(it)
+		end
+		return it ~= nil
+	end
+	f.Parent = game:GetService("ServerStorage")
+end
+
 -- Studio test hook (Play only, never live): ServerStorage.OpenablesTest:Invoke(modelName) toggles the first match
 if RunService:IsStudio() then
 	local f = Instance.new("BindableFunction")
