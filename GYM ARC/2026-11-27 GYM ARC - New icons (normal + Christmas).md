@@ -221,3 +221,9 @@ Test "taller" separately with a small starter avatar next to the giant.
   - raws `_gpt`;
   - sheet `v9/compare_v17.png`.
 - **Not done:** "1000 LB" on the plate and a "taller" badge. The owner hasn't asked for text on the icon.
+
+## LIVE: v16 blue uploaded (27 Nov, 20:15)
+- The owner said "v17 is better", then: "change gym arc icon to v16 blue rn".
+- Uploaded `v9/gymarc_v16_bluedb_512.png` in Creator Hub → Places → GYM ARC (80031260599632) → Icon → Save. Universe 10769199336.
+- It replaced the old tanned-bodybuilder icon with the "1000 LB" plate.
+- Thumbnails API right after: state `InReview` (Roblox moderation); it goes live once approved.
