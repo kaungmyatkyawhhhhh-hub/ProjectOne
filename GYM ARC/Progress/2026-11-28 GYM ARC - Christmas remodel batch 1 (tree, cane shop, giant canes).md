@@ -17,6 +17,12 @@ Owner: the Christmas and Gem Cave objects "look like trash"; remodel every one w
 - Studio screenshots (Edit) look clean: tree reads as the sheet, shop matches the sheet, canes spiral with gold bands and hooks toward the rig.
 - Notes per model: `GYM ARC/Art/XmasTree`, `Art/CaneShop`, `Art/GiantCane`.
 
+## Batch 2: presents (saved, version 2052)
+| Present (all 28) | 110979000029899 | 444 each | ~190 -> 84 | front 0.939, side 0.906 |
+|---|---|---|---|---|
+
+One scaled mesh per present (Box, Lid, Ribbon MeshParts, old colours kept). MegaLift's Present.Box / Present.Lid and the FreeGift prompt still work by name. Note: `Art/Present`. Christmas folder total: 2,547 parts now.
+
 ## Not checked yet
 - A Play run for console errors and phone FPS: the Christmas build session was editing scripts, so I did not start Play. To do after the next batch.
 
