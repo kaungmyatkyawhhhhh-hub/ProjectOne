@@ -20,5 +20,30 @@ PauldronPlate1, PauldronPlate2, PauldronPlate3 (x2, mirrored; attach: shoulder t
 1. Turnaround: "Full turnaround design sheet of an ICE ARMOUR SET for the giant muscular 'Frost Titan' ice statue in the attached Roblox screenshot ... two big layered glacier-ice SHOULDER PAULDRONS (3 overlapping curved plates each, thick chunky faceted ice, frosty white edges, a faint cyan glow line along each plate edge), a low jagged ICE CROWN circlet (5 short thick points, not thin spikes), and two forearm ICE BRACERS ... 3-4 colours only: pale ice blue, deep glacier blue, frost white, cyan glow. NO thin needle spikes, NO clusters of shards. 1536x1024, orthographic, flat MAGENTA #FF00FF: TOP ROW SIDE, BOTTOM LEFT TOP, BOTTOM RIGHT FRONT."
 2. Exploded: "Technical EXPLODED-VIEW diagram of ONLY the ice armour pieces ... LEFT PAULDRON with its 3 plates pulled apart vertically ... RIGHT PAULDRON (assembled), ICE CROWN (front and top), LEFT/RIGHT BRACER (front and side) ... dashed alignment lines ... ATTACH dots ... flat MAGENTA."
 
-## Next
-Blender (owner's, MCP addon not connected on 27 Nov): build one object per piece from the exploded silhouettes, gates (IoU >= 0.90 per view, zero open edges, backface check), FBX, import, weld to the statue's UpperArm / Head / LowerArm, Play screenshots.
+## Owner rule (27 Nov)
+"not just armor, i mean for LITERALLY ANYTHING ... if the model is built in blender greatly with low triangles, it lags less than builds with parts and look better". Written into the skill (vault copy, re-upload needed) and memory.
+
+## Build (Blender 5.2, scene "GYM ARC Armour")
+Scripts here, rebuild from them: `analyse_sheet.py` (sheet -> `profiles.json`, masks: all non-magenta outside the label boxes, leader lines and attach dots kept then opened away), `build_armour.py`, `gate_render.py`, `gate_iou.py`, `export_armour.py`.
+- Plates: curved roof-tile shells from each plate's front outline (droop = height - thickness), nested like stacked bowls, glow rim strip under each.
+- Crown: the front outline wrapped on a ring (x = R sin a), faceted ridge, glow strip.
+- Bracers: lofted from the front width and the side width + lean per row, 2 glow bands where the sheet is most cyan.
+- 18 objects, 7,560 tris for the whole set (both sides). Every mesh watertight: 0 open edges, 0 non-manifold, positive volume.
+
+| view | IoU | |
+|---|---|---|
+| plate1 | 0.952 | pass |
+| plate2 | 0.964 | pass |
+| plate3 | 0.947 | pass |
+| crown front | 0.910 | pass |
+| crown top | 0.337 | sheet conflict (step 1b): the top view is drawn ~0.7x the front, a ring thick enough for it fails the front; front wins |
+| bracer front | 0.959 | pass |
+| bracer side | 0.928 | pass |
+
+Export: `FrostTitanArmour.fbx`, 10 objects (PauldronL/R, BracerL/R, IceCrown + a Glow piece each, for Neon).
+
+## Blocked (27 Nov)
+- Studio's `AssetService:CreateAssetAsync` is "not available yet".
+- The Open Cloud upload (open_cloud_invoke, group 33151111) needs this folder approved in Studio: Assistant Settings -> MCP Permissions -> approved upload directories.
+
+Then: insert the model, size each piece on the statue (UpperArm / Head / LowerArm), materials Ice + Neon glow, weld, Play screenshots, retake the shop cards.
