@@ -63,9 +63,7 @@ local BLACK, WHITE = Color3.fromRGB(24, 24, 26), Color3.fromRGB(228, 228, 224)
 local CABLE = Color3.fromRGB(20, 20, 22)
 local BOXGREY = Color3.fromRGB(120, 124, 126)
 local GALV = Color3.fromRGB(170, 174, 178)
-local LED = Color3.fromRGB(236, 244, 255)
 local NL = Config.NightLamps
-local DECK_H = 30 -- flyover lamp posts (10 m) from the parapet top
 local NO_LAMPS = { ["Pyay Road"] = true, ["Kabar Aye Pagoda Road"] = true } -- their planted medians have lamps
 
 local function baseRoad(name: string?): string
@@ -769,6 +767,23 @@ local function backed(at: Vector3, out: Vector3): boolean
 	return true
 end
 
+local GAP_R = 50 -- (28 Nov) a NO_LAMPS road gets a lamp where none stands within this (see gapLampSpot)
+local function lampNear(at: Vector3, r: number, m: Instance?): boolean
+	local function close(q: Vector3): boolean
+		return Vector3.new(q.X - at.X, 0, q.Z - at.Z).Magnitude < r and math.abs(q.Y - at.Y) < 60
+	end
+	for _, h in CollectionService:GetTagged("LampGlow") do
+		if h:IsA("BasePart") and h:IsDescendantOf(workspace) and close(h.Position) then
+			return true
+		end
+	end
+	for _, h in if m then m:GetDescendants() else {} do
+		if h:IsA("BasePart") and h:HasTag("LampGlow") and close(h.Position) then
+			return true
+		end
+	end
+	return false
+end
 -- resolved pole spots (main-road poles): id -> base | false; nil = not known yet (kit round it not built)
 local resolved: { [number]: Vector3 | false } = {}
 local unlit: { [number]: boolean } = {} -- (27 Nov) resolved poles that stand without a lamp
@@ -785,7 +800,8 @@ local function resolve(poles, id: number, sets): Vector3?
 		resolved[id] = false
 		return nil
 	end
-	local lamp = if not NO_LAMPS[p.road] then -p.right else nil
+	-- (28 Nov) a NO_LAMPS road's pole carries a lamp too where no median / kit lamp stands near (Kabar Aye was dark)
+	local lamp = if not NO_LAMPS[p.road] or not lampNear(p.pos - p.right * 6, GAP_R) then -p.right else nil
 	-- (27 Nov) a lamp on every pole; where the arm would touch something the pole stands without one (unlit)
 	for pass = 1, if lamp then 2 else 1 do
 		for _, off in { 0, -1.5, 1.5, 3, 4.5 } do
@@ -959,29 +975,63 @@ local function wire(holder: BasePart, sets, a: Vector3, b: Vector3, width: numbe
 	return pts
 end
 
+local KD = require(Shared:WaitForChild("YangonKitData"))
+local stopKit = nil
+local function kitPieces(pid: string)
+	if not stopKit then
+		local store = ReplicatedStorage:FindFirstChild("YgnKit")
+		store = store and store:FindFirstChild("Templates")
+		if not store then
+			return nil
+		end
+		stopKit = KD.index(store)
+	end
+	return stopKit[pid]
+end
+-- clone a street-kit piece the way YangonKitData lays a P record
+local function kitPut(m: Instance, pid: string, cf: CFrame): any
+	local pieces = kitPieces(pid)
+	if not pieces then
+		return false
+	end
+	local head = nil
+	for _, tp in pieces do
+		local q = tp.part:Clone()
+		q.Size = tp.size
+		q.CFrame = cf * CFrame.new(tp.c) * (tp.r or CFrame.identity)
+		q.Parent = m
+		if tp.kind == "SNE" then
+			head = q
+		end
+	end
+	return head or true -- (a lamp piece: its head, the SNE part)
+end
+
 local LIGHT_R = 220
+local LOOK_AHEAD = 2.5 -- s: build and light for where the camera will be (top speed ~ see Config / vault note)
+local SHADOW_N = 8 -- street lamps that cast shadows at once (the nearest ahead)
+local BUILD_MS, BUILD_MS_FAST = 4, 9 -- chunk building a beat (beats are 0.05 s apart while building)
 local AD_R = 320
 -- (27 Nov, owner: "match the streetlights lighting with the ones in the video clips") a SpotLight in the head facing down,
--- wide (Config.NightLamps.Angle) so the pools are soft and meet the next lamp's, about 1 in SodiumEvery an old orange
--- sodium head; and a small glow sprite on the head (tag LampHalo: WorldFx shows it at night). The SpotLight sits on an
+-- wide (Config.NightLamps.Angle) so the pools are soft and meet the next lamp's; (28 Nov, owner: "in the small roads u
+-- should make the streetlight dimmed yellow") a side-street lamp is dim warm yellow (NL.SideStreet), every main-road one
+-- cold white; and a small glow sprite on the head (tag LampHalo: WorldFx shows it at night). The SpotLight sits on an
 -- Attachment named LampLight, turned so it faces straight down whatever way the head is turned.
-local function lampLight(head: BasePart)
+local function lampLight(head: BasePart, side: boolean?)
 	local p = head.Position
-	local sodium = (math.floor(p.X / 7) * 31 + math.floor(p.Z / 7) * 17) % NL.SodiumEvery == 0
-	local tint = if sodium then NL.Sodium else NL.Color
+	local tint = if side then NL.SideStreet else NL.Color
 	local a = Instance.new("Attachment")
 	a.Name = "LampLight"
 	a.CFrame = head.CFrame:ToObjectSpace(CFrame.new(p) * CFrame.Angles(-math.pi / 2, 0, 0)) -- (its front, the light's Face, points down)
 	local l = Instance.new("SpotLight")
 	l.Face = Enum.NormalId.Front
-	l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = tint, NL.Brightness, NL.Range, NL.Angle, NL.Shadows
+	l.Color, l.Brightness, l.Range, l.Angle = tint, if side then NL.SideBrightness else NL.Brightness, NL.Range, NL.Angle
+	l.Shadows = false -- (the main loop gives shadows to the SHADOW_N nearest lamps ahead)
 	l.Enabled = false -- (the main loop turns on the near ones at night)
 	CollectionService:AddTag(l, "RoadsideLamp")
 	l.Parent = a
 	a.Parent = head
-	if sodium then
-		head.Color = NL.Sodium
-	end
+	head.Color = if side then NL.SideStreet else NL.Head
 	local bb = Instance.new("BillboardGui")
 	bb.Name = "LampHalo"
 	bb.Size = UDim2.fromScale(NL.GlowSize, NL.GlowSize)
@@ -999,13 +1049,25 @@ local function lampLight(head: BasePart)
 	bb.Parent = head
 end
 
--- a flyover lamp post: a slim galvanised pole on the parapet, a single arm out over the lanes, the head under its end
+-- (27 Nov, owner: "streetlights dont look like real life ones too") the lamps are street-kit meshes (street_kit.py
+-- lamp1 / plamp: a tapered galvanised pole on a plinth with a curved arm, or a curved bracket on the concrete pole, and
+-- a slim LED head whose only glowing face is the flat lens underneath: SNE, tag LampGlow, Neon at night by WorldFx).
+-- The kit head's own light and glow are swapped for this file's (RoadsideLamp, lit by the main loop).
+local function kitLamp(m: Instance, pid: string, roadSide: CFrame, side: boolean?): BasePart?
+	local head = kitPut(m, pid, roadSide * CFrame.Angles(0, math.pi, 0)) -- (the kit's arm points along +Z)
+	if typeof(head) == "Instance" then
+		for _, ch in head:GetChildren() do
+			ch:Destroy()
+		end
+		lampLight(head, side)
+		return head
+	end
+	return nil
+end
+
+-- a flyover lamp post: the kit's single-arm pole on the parapet, its arm out over the lanes
 local function buildDeckLamp(m: Instance, p, base: Vector3)
-	local roadSide = CFrame.lookAt(base, base - p.right)
-	part(m, Vector3.new(0.55, DECK_H, 0.55), roadSide * CFrame.new(0, DECK_H / 2, 0), GALV, Enum.Material.Metal)
-	part(m, Vector3.new(0.3, 0.3, 6), roadSide * CFrame.new(0, DECK_H - 0.15, -3.275), GALV, Enum.Material.Metal)
-	local head = part(m, Vector3.new(0.9, 0.3, 2.2), roadSide * CFrame.new(0, DECK_H - 0.45, -(0.275 + 6 + 0.2)), LED, Enum.Material.Neon)
-	lampLight(head)
+	kitLamp(m, "lamp1", CFrame.lookAt(base, base - p.right))
 end
 
 local function buildPole(m: Instance, dir: Vector3, right: Vector3, base: Vector3, id: number, lamp: string?): BasePart
@@ -1032,10 +1094,8 @@ local function buildPole(m: Instance, dir: Vector3, right: Vector3, base: Vector
 		end
 	end
 	if lamp then
-		-- a galvanised arm out over the road from the pole's face, the lamp head under its end
-		part(m, Vector3.new(0.3, 0.3, 7), roadSide * CFrame.new(0, POLE_H - 1.5, -(W / 2 + 3.5)), GALV, Enum.Material.Metal)
-		local head = part(m, Vector3.new(0.9, 0.3, 2.2), roadSide * CFrame.new(0, POLE_H - 1.8, -(W / 2 + 6.2)), LED, Enum.Material.Neon)
-		lampLight(head)
+		-- a curved bracket out over the road from the pole's face, the LED head at its end (kit piece plamp)
+		kitLamp(m, "plamp", roadSide, lamp == "side")
 	end
 	return shaft
 end
@@ -1116,34 +1176,6 @@ end
 ---------------------------------------------------------------------
 -- (27 Nov) YBS bus stops at the real OSM stops off P1 (P1's street layer has its own), and manhole covers
 ---------------------------------------------------------------------
-local KD = require(Shared:WaitForChild("YangonKitData"))
-local stopKit = nil
-local function kitPieces(pid: string)
-	if not stopKit then
-		local store = ReplicatedStorage:FindFirstChild("YgnKit")
-		store = store and store:FindFirstChild("Templates")
-		if not store then
-			return nil
-		end
-		stopKit = KD.index(store)
-	end
-	return stopKit[pid]
-end
--- clone a street-kit piece the way YangonKitData lays a P record
-local function kitPut(m: Instance, pid: string, cf: CFrame): boolean
-	local pieces = kitPieces(pid)
-	if not pieces then
-		return false
-	end
-	for _, tp in pieces do
-		local q = tp.part:Clone()
-		q.Size = tp.size
-		q.CFrame = cf * CFrame.new(tp.c) * (tp.r or CFrame.identity)
-		q.Parent = m
-	end
-	return true
-end
-
 local SHELTER_L, SHELTER_D = 13.2, 5.4 -- the busd piece's box (plinth) along / across
 -- every point of a box (local frame cf, half sizes hx / hz, heights 0.5..h) is clear of the kit, the map and my things;
 -- the ground under its corners and middle is pavement / grass at one height (returned)
@@ -1626,6 +1658,31 @@ local function chunkXZ(key: string): (number, number)
 	return (tonumber(kx) :: number) * CHUNK, (tonumber(kz) :: number) * CHUNK
 end
 
+-- (28 Nov, owner: "on kabaraye road, the streetlamps are so far away from each other and it becomes dark on some
+-- spots") the roads in NO_LAMPS were left to their median lamps, but most of their length has no median wide enough
+-- (Kabar Aye: no lamp at all for 3 km, gaps up to 480 studs in P1). At each pole spot of such a road with no lamp head
+-- within GAP_R, the power pole gets its lamp (resolve) or, with no pole there (P1 kit districts), a galvanised
+-- single-arm kit post (lamp1) stands at the kerb (real: 30-40 m apart, kerb side).
+local function gapLampSpot(p, sets): Vector3?
+	local _, under = ground(p.pos - p.right * 10.5)
+	if under == "D" then
+		return nil -- (decks have their parapet lamps)
+	end
+	for _, along in { 0, 8, -8, 16, -16 } do
+		for _, off in { 0, -1.5, 1.5, 3 } do
+			local at = p.pos + p.right * off + p.dir * along
+			local y, kind = ground(at)
+			if y and (kind == "P" or kind == "T") then
+				local base = Vector3.new(at.X, y, at.Z)
+				if poleClear(sets, base, -p.right) then
+					return base
+				end
+			end
+		end
+	end
+	return nil
+end
+
 -- nil = not ready yet (try again later); false = nothing here
 local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boolean): Model | false | nil
 	local x0, z0 = chunkXZ(key)
@@ -1656,6 +1713,13 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 		if deck then
 			any = true
 			buildDeckLamp(m, p, deck)
+		elseif not base and NO_LAMPS[p.road] and not lampNear(p.pos - p.right * 6, GAP_R, m) then
+			local lb = gapLampSpot(p, sets)
+			if lb then
+				any = true
+				kitLamp(m, "lamp1", CFrame.lookAt(lb, lb - p.right))
+				regAdd(poleReg, lb, key)
+			end
 		end
 		if base then
 			any = true
@@ -1737,7 +1801,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 			if base then
 				any = true
 				local h = sideHash(c)
-				local shaft = buildPole(m, c.axis, c.n, base, h, if not sideUnlit[c.id] then "white" else nil)
+				local shaft = buildPole(m, c.axis, c.n, base, h, if not sideUnlit[c.id] then "side" else nil)
 				-- the next pole forward along the street
 				local best, bd = nil, 150
 				for _, o in around do
@@ -1909,45 +1973,105 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 		folder.Name = "YangonRoadside"
 		folder.Parent = workspace
 		local built: { [string]: Model | false } = {}
+		local prevAt, prevT, vel = nil, os.clock(), Vector3.zero
 		while true do
 			local q = if qualityScale then qualityScale() else 1
 			local full = q > 0.5
 			local load = if full then LOAD else LOAD * 0.7
 			local cam = workspace.CurrentCamera
 			local at = if cam then cam.CFrame.Position else Vector3.zero
-			-- the lamps' lights: at night, normal quality, within LIGHT_R of the camera (phones: few lights)
+			-- (27 Nov, owner: "when u go fast, the streetlights & its lighting take time to load") everything is built and
+			-- lit for where the camera WILL be: LOOK_AHEAD s ahead at its present speed (smoothed, flat)
+			local now = os.clock()
+			if prevAt and now > prevT then
+				local v = (at - prevAt) / (now - prevT)
+				vel = vel:Lerp(Vector3.new(v.X, 0, v.Z), 0.5)
+				if vel.Magnitude > 600 then -- (top speed: 273 mph = 349 studs/s, tuned more)
+					vel = Vector3.zero -- (a teleport, not driving)
+				end
+			end
+			prevAt, prevT = at, now
+			local ahead = at + vel * LOOK_AHEAD
+			local fast = vel.Magnitude > 60
+			-- the lamps' lights: at night, normal quality, within LIGHT_R of the camera or of the point ahead (phones: few
+			-- lights); only the SHADOW_N nearest the point ahead cast shadows (FPS)
 			local lampsOn = isNight()
+			local lit = {}
 			for _, l in CollectionService:GetTagged("RoadsideLamp") do
 				local h = l.Parent
 				if l:IsA("Light") and h and h:IsA("Attachment") then
-					l.Enabled = lampsOn and full and (h.WorldPosition - at).Magnitude < LIGHT_R
+					local w = h.WorldPosition
+					local on = lampsOn and full and ((w - at).Magnitude < LIGHT_R or (w - ahead).Magnitude < LIGHT_R)
+					l.Enabled = on
+					if on then
+						table.insert(lit, l)
+					end
+				end
+			end
+			for _, l in CollectionService:GetTagged("LODLight") do
+				local h = l.Parent
+				if l.Enabled and h and h.Name == "LampLight" and h:IsA("Attachment") then
+					table.insert(lit, l) -- (the street kit's and medians' lamps: WorldFx turns them on, shadows are kept here)
+				end
+			end
+			local d = {}
+			for _, l in lit do
+				local w = (l.Parent :: Attachment).WorldPosition
+				d[l] = math.min((w - ahead).Magnitude, (w - at).Magnitude * 1.5)
+			end
+			table.sort(lit, function(x, y)
+				return d[x] < d[y]
+			end)
+			for i, l in lit do
+				local shade = NL.Shadows and full and i <= SHADOW_N
+				if (l :: Light).Shadows ~= shade then
+					(l :: Light).Shadows = shade
 				end
 			end
 			-- billboards: backlit (no light influence) at night within AD_R of the camera
 			for _, sg in CollectionService:GetTagged("RoadsideAd") do
 				local h = sg.Parent
 				if sg:IsA("SurfaceGui") and h and h:IsA("BasePart") then
-					local lit = lampsOn and (h.Position - at).Magnitude < AD_R
-					sg.LightInfluence = if lit then 0 else 1
-					sg.Brightness = if lit then 1.3 else 1
+					local on = lampsOn and (h.Position - at).Magnitude < AD_R
+					sg.LightInfluence = if on then 0 else 1
+					sg.Brightness = if on then 1.3 else 1
 				end
 			end
-			local cx, cz = math.floor(at.X / CHUNK), math.floor(at.Z / CHUNK)
-			local reach = math.ceil(load / CHUNK)
-			local made = 0
-			for dx = -reach, reach do
-				for dz = -reach, reach do
-					local key = (cx + dx) .. "," .. (cz + dz)
-					if built[key] == nil and made < 2 then
-						local mx, mz = (cx + dx + 0.5) * CHUNK, (cz + dz + 0.5) * CHUNK
-						if Vector3.new(mx - at.X, 0, mz - at.Z).Magnitude < load then
-							local r = buildChunk(ctx, key, chunks[key], folder, full)
-							if r ~= nil then
-								built[key] = r
-								made += 1
+			-- chunks within load of the camera or of the point ahead, the nearest to the point ahead first, built for up to
+			-- BUILD_MS a beat (more chunks a beat when moving fast)
+			local want = {}
+			for _, c in { at, ahead } do
+				local cx, cz = math.floor(c.X / CHUNK), math.floor(c.Z / CHUNK)
+				local reach = math.ceil(load / CHUNK)
+				for dx = -reach, reach do
+					for dz = -reach, reach do
+						local key = (cx + dx) .. "," .. (cz + dz)
+						if built[key] == nil and not want[key] then
+							local mx, mz = (cx + dx + 0.5) * CHUNK, (cz + dz + 0.5) * CHUNK
+							local dist = Vector3.new(mx - c.X, 0, mz - c.Z).Magnitude
+							if dist < load then
+								want[key] = Vector3.new(mx - ahead.X, 0, mz - ahead.Z).Magnitude
 							end
 						end
 					end
+				end
+			end
+			local order = {}
+			for key in want do
+				table.insert(order, key)
+			end
+			table.sort(order, function(x, y)
+				return want[x] < want[y]
+			end)
+			local made, t0 = 0, os.clock()
+			for _, key in order do
+				if (os.clock() - t0) * 1000 > (if fast then BUILD_MS_FAST else BUILD_MS) then
+					break
+				end
+				local r = buildChunk(ctx, key, chunks[key], folder, full)
+				if r ~= nil then
+					built[key] = r
+					made += 1
 				end
 			end
 			for key, m in built do
@@ -1961,7 +2085,7 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 					built[key] = nil
 				end
 			end
-			task.wait(if made >= 2 then 0.05 else 1)
+			task.wait(if made > 0 or fast then 0.05 else 0.25)
 		end
 	end)
 end

@@ -297,12 +297,10 @@ def make_poles():
             p.ring("SMT", (0.55, RACK_Y - 3.6, 0), (1, 0, 0), 0.9, 0.06, BLACK, n1=14, n2=4)
             p.box("SMT", (0.38, RACK_Y - 5.4, 0), (0.3, 1.2, 0.9), (150, 152, 150))
         if "lamp" in kind:
-            # an LED cobra head on a 1.8 m arm toward the road (local -X... the road is local +Z side: see street_1to1)
-            y0 = RACK_Y + 2.2
-            pts = [(0, y0, 0.25), (0, y0 + 0.9, 2.0), (0, y0 + 1.5, 4.0), (0, y0 + 1.6, 5.2)]
-            for a, b in zip(pts, pts[1:]):
-                p.prism("SMT", a, b, 0.09, 0.08, GALV, n=6)
-            p.box("SNE", (0, y0 + 1.42, 5.75), (0.6, 0.3, 1.5), HEAD)
+            # (27 Nov) the LED head on a long curved bracket toward the road (local +Z), as plamp
+            y0 = RACK_Y + 1.6
+            hw = (0.30 + (0.16 - 0.30) * y0 / POLE_H) * S / 2
+            bracket_lamp(p, y0, hw, 5.6)
         # the head of the lamp variant is SNE: YangonStreetKit adds the light to it
 
 
@@ -342,20 +340,131 @@ def make_transformer():
 
 
 # ============================================================================================== street lamps
-def lamp_post(p, h, arms):
-    """a galvanised octagonal post 10 m, tapering 0.2 -> 0.1 m, arms (direction z sign) of 2 m with a white LED head"""
-    p.prism("SMT", (0, -0.5, 0), (0, 0.45, 0), 0.75, 0.75, (150, 150, 150), n=8)       # base flange
-    p.prism("SMT", (0, 0.45, 0), (0, h, 0), 0.32, 0.17, GALV, n=8, caps=(True, True))
+# (2026-11-27, owner: "streetlights dont look like real life ones too"; clips 0797 / 0802-0809, research 2.3) real Yangon
+# lamps: a grey galvanised octagonal pole tapering 0.20 -> 0.09 m on a concrete plinth with a bolted base plate and an
+# access door, a curved arm rising out over the road, and a SLIM flat LED head (0.72 x 0.32 x 0.09 m) whose glowing face
+# is only the flat lens underneath (class SNE: Neon at night via WorldFx). Twin-arm poles stand in wide medians; old
+# concrete power poles carry the same head on a long curved bracket (ppolel / ppolebl, plamp for YangonRoadside).
+LAMP_H = 23.4              # the straight shaft's top (7.8 m); the arm sweeps up from it to the head at about 9.4 m
+HOUSING = (150, 154, 158)  # the head's grey die-cast housing
+PLINTH = (176, 172, 164)
+
+
+def bezier(P, n):
+    out = []
+    for k in range(n + 1):
+        t = k / n
+        a = [(1 - t) ** 3, 3 * t * (1 - t) ** 2, 3 * t * t * (1 - t), t ** 3]
+        out.append(tuple(sum(a[i] * P[i][j] for i in range(4)) for j in range(3)))
+    return out
+
+
+def tube(p, cls, pts, radii, rgb, n=8, caps=(True, True)):
+    """a swept n-sided tube through pts (radius per point); rings share corners, the frame is carried along the bend"""
+    T = []
+    for i in range(len(pts)):
+        a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
+        T.append(_unit(_sub(b, a)))
+    ref = (1.0, 0.0, 0.0) if abs(T[0][0]) < 0.9 else (0.0, 0.0, 1.0)
+    e1 = _unit(_cross(T[0], ref))
+    rings = []
+    for i, c in enumerate(pts):
+        if i:
+            # parallel transport: take the last frame's e1 off the new tangent
+            e1 = _unit(_sub(e1, _mul(T[i], _dot(e1, T[i]))))
+        e2 = _cross(T[i], e1)
+        dirs = [_add(_mul(e1, math.cos(2 * math.pi * k / n + math.pi / n)), _mul(e2, math.sin(2 * math.pi * k / n + math.pi / n))) for k in range(n)]
+        rings.append([(_add(c, _mul(d, radii[i])), d) for d in dirs])
+    for i in range(len(pts) - 1):
+        A, B = rings[i], rings[i + 1]
+        for k in range(n):
+            k2 = (k + 1) % n
+            p.face(cls, [A[k][0], A[k2][0], B[k2][0], B[k][0]], _add(A[k][1], A[k2][1]), rgb)
+    for end, flag, sg in ((0, caps[0], -1), (len(pts) - 1, caps[1], 1)):
+        if flag:
+            R = rings[end]
+            for k in range(1, n - 1):
+                p.face(cls, [R[0][0], R[k][0], R[k + 1][0]], _mul(T[end], sg), rgb)
+
+
+def led_head(p, tip, sgn, tilt=math.radians(6)):
+    """the slim LED head on the arm tip, pointing along +-Z (sgn), its nose tilted up by tilt: a grey housing (SMT) and
+    the flat lens under it (SNE, its top face left out, so no faces share a plane)"""
+    U = (0.0, math.sin(tilt), sgn * math.cos(tilt))
+    V = (0.0, math.cos(tilt), -sgn * math.sin(tilt))
+    W = (1.0, 0.0, 0.0)
+
+    def P(u, v, w):  # metres in the head's frame -> studs in the piece
+        return _add(tip, _add(_mul(U, u * S), _add(_mul(V, v * S), _mul(W, w * S))))
+    # stations along the head: u, half width, top height (a low wedge, thinner at the nose)
+    st = [(-0.05, 0.045, 0.07), (0.10, 0.06, 0.08), (0.20, 0.15, 0.09), (0.55, 0.16, 0.08), (0.66, 0.14, 0.065), (0.72, 0.08, 0.05)]
+    bot = -0.03
+    for (u0, w0, h0), (u1, w1, h1) in zip(st, st[1:]):
+        for s_ in (-1, 1):
+            p.face("SMT", [P(u0, bot, s_ * w0), P(u1, bot, s_ * w1), P(u1, h1, s_ * (w1 - 0.02)), P(u0, h0, s_ * (w0 - 0.02))], _mul(W, s_), HOUSING)
+        p.face("SMT", [P(u0, h0, -(w0 - 0.02)), P(u1, h1, -(w1 - 0.02)), P(u1, h1, w1 - 0.02), P(u0, h0, w0 - 0.02)], V, HOUSING)
+        p.face("SMT", [P(u0, bot, -w0), P(u1, bot, -w1), P(u1, bot, w1), P(u0, bot, w0)], _mul(V, -1), HOUSING)
+    for (u, w, h), sg in ((st[0], -1), (st[-1], 1)):
+        p.face("SMT", [P(u, bot, -w), P(u, bot, w), P(u, h, w - 0.02), P(u, h, -(w - 0.02))], _mul(U, sg), HOUSING)
+    # the lens: a thin flat slab under the wide part
+    lo, hi, hw, t = 0.24, 0.60, 0.12, 0.02
+    c = P((lo + hi) / 2, bot - t / 2, 0)
+    q = Piece("tmp")
+    q.box("SNE", (0, 0, 0), ((hi - lo) * S, t * S, 2 * hw * S), HEAD, skip=("+y",))
+    m, mm = q.m["SNE"], p.mesh("SNE")
+    k0 = len(mm.P)
+    # the slab was built along X: turn it onto the head's axes (x -> U, y -> V, z -> W)
+    mm.P += [_add(c, _add(_mul(U, v[0]), _add(_mul(V, v[1]), _mul(W, v[2])))) for v in m.P]
+    mm.N += [_add(_mul(U, v[0]), _add(_mul(V, v[1]), _mul(W, v[2]))) for v in m.N]
+    mm.U += m.U
+    mm.C += m.C
+    mm.T += [x + k0 for x in m.T]
+
+
+def curved_arm(p, start, sgn, reach, rise, r0=0.18, r1=0.12):
+    """an arm from start (inside the pole) curving up and out to reach (studs from the pole axis) along +-Z; returns its
+    tip (where the head's back end sits)"""
+    x, y, z = start
+    P = [start, (x, y + rise * 0.75, z + sgn * reach * 0.02), (x, y + rise * 1.02, z + sgn * reach * 0.35), (x, y + rise, sgn * reach)]
+    pts = bezier(P, 7)
+    tube(p, "SMT", pts, [r0 + (r1 - r0) * k / 7 for k in range(8)], GALV, n=8, caps=(False, True))
+    return pts[-1]
+
+
+def lamp_post(p, arms):
+    """a galvanised octagonal post on a concrete plinth: base plate, anchor nuts, a base sleeve, the access door, one or
+    two curved arms with an LED head"""
+    p.box("SCO", (0, -0.4, 0), (2.0, 1.8, 2.0), PLINTH)                                  # plinth, 0.17 m out of the ground
+    p.box("SMT", (0, 0.56, 0), (1.25, 0.12, 1.25), (140, 142, 144), skip=("-y",))       # base plate
+    for sx in (-0.45, 0.45):
+        for sz in (-0.45, 0.45):
+            p.prism("SMT", (sx, 0.62, sz), (sx, 0.78, sz), 0.08, 0.08, (90, 92, 94), n=6, caps=(False, True))
+    p.prism("SMT", (0, 0.62, 0), (0, 2.0, 0), 0.40, 0.37, GALV, n=8, caps=(False, True), rot=math.pi / 8)   # sleeve
+    p.prism("SMT", (0, 2.0, 0), (0, LAMP_H, 0), 0.31, 0.17, GALV, n=8, caps=(False, True), rot=math.pi / 8)
+    # the access door on the back (away from the road, -Z): a plate standing 0.08 proud of the face (closer flickers)
+    yd = 3.6
+    rr = (0.31 + (0.17 - 0.31) * (yd - 2.0) / (LAMP_H - 2.0)) * math.cos(math.pi / 8)
+    p.box("SMT", (0, yd, -(rr - 0.02)), (0.36, 1.3, 0.2), (150, 154, 156), skip=("+z",))
     for sgn in arms:
-        pts = [(0, h - 1.2, 0), (0, h - 0.2, sgn * 1.5), (0, h + 0.2, sgn * 3.6), (0, h + 0.3, sgn * 5.4)]
-        for a, b in zip(pts, pts[1:]):
-            p.prism("SMT", a, b, 0.12, 0.1, GALV, n=6)
-        p.box("SNE", (0, h + 0.12, sgn * 6.3), (0.36 * S / 1.2, 0.36, 0.7 * S), HEAD)
+        # (exploded sheet 27 Nov + clips 0797 / 0809) a swan-neck from the shaft top: up, over, out ~1.7 m (twin: a Y)
+        reach = 5.0 if len(arms) == 1 else 5.6
+        tip = curved_arm(p, (0, LAMP_H - 0.5, 0), sgn, reach, 5.3, r0=0.15, r1=0.09)
+        led_head(p, _add(tip, (0, -0.05, sgn * -0.1)), sgn)
+
+
+def bracket_lamp(p, y0, z0, reach=6.0):
+    """(old concrete power poles) a mounting plate on the pole's road face, a long curved arm with a brace, the LED head"""
+    p.box("SMT", (0, y0 + 0.6, z0 + 0.05), (0.5, 1.6, 0.1), STEEL, skip=("-z",))
+    tip = curved_arm(p, (0, y0, z0 + 0.06), 1, reach, 1.6, r0=0.11, r1=0.08)
+    p.prism("SMT", (0, y0 - 0.5, z0 + 0.08), (0, y0 + 0.75, 2.2), 0.06, 0.06, STEEL, n=6)   # the brace
+    led_head(p, _add(tip, (0, -0.05, -0.1)), 1)
 
 
 def make_lamps():
-    lamp_post(piece("lamp1"), 10.0 * S, (1,))
-    lamp_post(piece("lamp2"), 10.0 * S, (1, -1))
+    lamp_post(piece("lamp1"), (1,))
+    lamp_post(piece("lamp2"), (1, -1))
+    # YangonRoadside's concrete pole (0.95 studs square, 27 high): the bracket alone, origin on the pole's axis at ground
+    bracket_lamp(piece("plamp"), 27 - 3.0, 0.475)
 
 
 # ============================================================================================== traffic signals
@@ -657,8 +766,12 @@ def build():
     return KIT
 
 
-def export():
+def export(only=None):
     build()
+    if only:
+        for k in list(KIT):
+            if k not in only:
+                del KIT[k]
     os.makedirs(GLB, exist_ok=True)
     os.makedirs(OUT, exist_ok=True)
     named, meta, bad_total = [], {}, 0
@@ -682,11 +795,12 @@ def export():
             nm = code(cls, pid, cen, siz)
             named.append((nm, m))
             meta[pid]["parts"][cls] = dict(name=nm, tris=m.tris, lo=lo, hi=hi)
-    path = os.path.join(GLB, "street_kit.glb")
+    path = os.path.join(GLB, "street_lamps.glb" if only else "street_kit.glb")
     info = write_glb(path, named, generator="street_kit.py")
     n, bad = check_glb(path, info)
     assert not bad, bad
-    json.dump(meta, open(os.path.join(OUT, "kit_meta.json"), "w"), indent=1)
+    if not only:
+        json.dump(meta, open(os.path.join(OUT, "kit_meta.json"), "w"), indent=1)
     tot = sum(v["tris"] for v in meta.values())
     print("street kit: %d pieces, %d meshes, %d triangles, flicker pairs %d -> %s" % (len(KIT), n, tot, bad_total, path))
     for pid, v in meta.items():
@@ -695,4 +809,6 @@ def export():
 
 
 if __name__ == "__main__":
-    export()
+    # (27 Nov) `python street_kit.py lamps`: only the lamp pieces -> street_lamps.glb (YangonStreetKit.templates replaces
+    # just those templates)
+    export(("lamp1", "lamp2", "plamp", "ppolel", "ppolebl") if sys.argv[1:] == ["lamps"] else None)

@@ -13,36 +13,19 @@
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
-local CollectionService = game:GetService("CollectionService")
 
 -- (owner, 2026-11-22: "add road street lights like the actual yangon depending on the location") a divided main road
--- in Yangon is lit from its median: galvanised 10 m poles with two short arms and white LED heads, every 30-35 m
--- (vault: 2026-11-16 Research - Yangon street furniture, 2.3). Their lights follow the time of day.
-local GALV = Color3.fromRGB(170, 174, 178)
-local LED = Color3.fromRGB(236, 244, 255)
+-- in Yangon is lit from its median: galvanised 10 m poles with two curved arms and white LED heads, every 30-35 m
+-- (vault: 2026-11-16 Research - Yangon street furniture, 2.3). (27 Nov, owner: "streetlights dont look like real life
+-- ones too") the post is the street kit's twin-arm lamp2 (street_kit.py), with the kit's own light and glow (tags
+-- LODLight + DayOff + LampHalo: WorldFx lights it at night near the camera).
 local LAMP_EVERY = 12 -- pieces of 8 studs: one post every 96 studs (32 m)
-local function isNight(): boolean
-	local t = Lighting.ClockTime
-	return t < 6.2 or t > 17.8
-end
-local lampsOn = isNight()
-Lighting:GetPropertyChangedSignal("ClockTime"):Connect(function()
-	local n = isNight()
-	if n ~= lampsOn then
-		lampsOn = n
-		for _, l in CollectionService:GetTagged("MedianLamp") do
-			if l:IsA("Light") then
-				l.Enabled = n
-			end
-		end
-	end
-end)
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local RivieraTraffic = require(Shared:WaitForChild("RivieraTraffic"))
 local Config = require(Shared:WaitForChild("Config"))
-local NL = Config.NightLamps
+local KD = require(Shared:WaitForChild("YangonKitData"))
+local lampKit = nil -- the lamp2 template pieces
 
 local YangonMedians = {}
 
@@ -229,19 +212,18 @@ local function buildChunk(key: string, pieces: { any }, folder: Instance): Model
 		local len = (b - a).Magnitude
 		local cf = CFrame.lookAt(mid, mid + Vector3.new(b.X - a.X, 0, b.Z - a.Z))
 		if idx % LAMP_EVERY == 0 and w >= 2.2 then
-			part(m, Vector3.new(0.9, 30, 0.9), cf * CFrame.new(0, 15, 0), GALV, Enum.Material.Metal, nil, true) -- the post
-			part(m, Vector3.new(1.5, 1.2, 1.5), cf * CFrame.new(0, 0.6, 0), GALV, Enum.Material.Metal)
-			part(m, Vector3.new(12.4, 0.45, 0.45), cf * CFrame.new(0, 29.7, 0), GALV, Enum.Material.Metal) -- both arms
-			for side = -1, 1, 2 do
-				local head = part(m, Vector3.new(2.3, 0.36, 0.95), cf * CFrame.new(side * 6.9, 29.55, 0), LED, Enum.Material.Neon)
-				local l = Instance.new("SpotLight")
-				l.Face = Enum.NormalId.Bottom
-				-- (27 Nov) the same light as every street lamp (Config.NightLamps, matched to the night clips)
-				l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = NL.Color, NL.Brightness, NL.Range, NL.Angle, NL.Shadows
-				l.Enabled = lampsOn
-				CollectionService:AddTag(l, "MedianLamp")
-				l.Parent = head
+			if not lampKit then
+				local store = ReplicatedStorage:FindFirstChild("YgnKit")
+				store = store and store:FindFirstChild("Templates")
+				lampKit = store and KD.index(store).lamp2 or {}
 			end
+			local at = cf * CFrame.Angles(0, math.pi / 2, 0) -- (the kit's arms point along +-Z: across the road)
+			for _, tp in lampKit do
+				local q = tp.part:Clone()
+				q.CFrame = at * CFrame.new(tp.c)
+				q.Parent = m
+			end
+			part(m, Vector3.new(0.6, 30, 0.6), cf * CFrame.new(0, 15, 0), Color3.new(), Enum.Material.SmoothPlastic, nil, true).Transparency = 1 -- (the post's collision)
 		end
 		-- the strip: a planted soil bed with a red-and-white banded kerb down each side (bands STEP / 2 long)
 		local hash = math.floor(mid.X / STEP + 0.5) + math.floor(mid.Z / STEP + 0.5)
@@ -343,20 +325,30 @@ function YangonMedians.start()
 		folder.Name = "YangonMedians"
 		folder.Parent = workspace
 		local built: { [string]: Model } = {}
+		local prevAt, prevT, vel = nil, os.clock(), Vector3.zero
 		while true do
 			local cam = workspace.CurrentCamera
 			local at = if cam then cam.CFrame.Position else Vector3.zero
-			local cx, cz = math.floor(at.X / CHUNK), math.floor(at.Z / CHUNK)
-			local reach = math.ceil(LOAD / CHUNK)
+			-- (27 Nov, owner: lamps "take time to load" at speed) also build round where the camera will be in 2.5 s
+			local now = os.clock()
+			if prevAt and now > prevT then
+				local v = (at - prevAt) / (now - prevT)
+				vel = if v.Magnitude > 600 then Vector3.zero else vel:Lerp(Vector3.new(v.X, 0, v.Z), 0.5)
+			end
+			prevAt, prevT = at, now
 			local made = 0
-			for dx = -reach, reach do
-				for dz = -reach, reach do
-					local key = (cx + dx) .. "," .. (cz + dz)
-					if chunks[key] and not built[key] and made < 3 then
-						local mx, mz = (cx + dx + 0.5) * CHUNK, (cz + dz + 0.5) * CHUNK
-						if Vector3.new(mx - at.X, 0, mz - at.Z).Magnitude < LOAD then
-							built[key] = buildChunk(key, chunks[key], folder)
-							made += 1
+			for _, c in { at + vel * 2.5, at } do
+				local cx, cz = math.floor(c.X / CHUNK), math.floor(c.Z / CHUNK)
+				local reach = math.ceil(LOAD / CHUNK)
+				for dx = -reach, reach do
+					for dz = -reach, reach do
+						local key = (cx + dx) .. "," .. (cz + dz)
+						if chunks[key] and not built[key] and made < 4 then
+							local mx, mz = (cx + dx + 0.5) * CHUNK, (cz + dz + 0.5) * CHUNK
+							if Vector3.new(mx - c.X, 0, mz - c.Z).Magnitude < LOAD then
+								built[key] = buildChunk(key, chunks[key], folder)
+								made += 1
+							end
 						end
 					end
 				end
@@ -369,7 +361,7 @@ function YangonMedians.start()
 					built[key] = nil
 				end
 			end
-			task.wait(if made >= 3 then 0.05 else 1)
+			task.wait(if made > 0 or vel.Magnitude > 60 then 0.05 else 0.5)
 		end
 	end)
 end

@@ -64,7 +64,11 @@ function K.lampLight(q: BasePart, id: string)
 			ch:Destroy()
 		end
 	end
-	q.Color = NL.Head
+	-- (28 Nov, owner: "in the small roads u should make the streetlight dimmed yellow") the lamps on the power poles
+	-- (ppolel / ppolebl: the small streets) are dim warm yellow; the galvanised posts (lamp1 / lamp2) stay cold white
+	local side = id == "ppolel" or id == "ppolebl"
+	local tint = if side then NL.SideStreet else NL.Color
+	q.Color = if side then NL.SideStreet else NL.Head
 	CollectionService:AddTag(q, "LampGlow")
 		-- (27 Nov, owner: "match the streetlights lighting with the ones in the video clips") a wide SpotLight in the head
 	-- facing straight down (Config.NightLamps), on an Attachment turned so its front points down
@@ -73,7 +77,8 @@ function K.lampLight(q: BasePart, id: string)
 	a.CFrame = q.CFrame:ToObjectSpace(CFrame.new(q.Position) * CFrame.Angles(-math.pi / 2, 0, 0))
 	local l = Instance.new("SpotLight")
 	l.Face = Enum.NormalId.Front
-	l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = NL.Color, NL.Brightness, NL.Range, NL.Angle, NL.Shadows
+	l.Color, l.Brightness, l.Range, l.Angle = tint, if side then NL.SideBrightness else NL.Brightness, NL.Range, NL.Angle
+	l.Shadows = false -- (27 Nov) YangonRoadside gives shadows to the few nearest lamps ahead (FPS)
 	l.Enabled = false -- (WorldFx turns on the near ones at night)
 	l.Parent = a
 	CollectionService:AddTag(l, "LODLight")
@@ -90,7 +95,7 @@ function K.lampLight(q: BasePart, id: string)
 	img.BackgroundTransparency = 1
 	img.Size = UDim2.fromScale(1, 1)
 	img.Image = NL.Glow
-	img.ImageColor3 = NL.Color
+	img.ImageColor3 = tint
 	img.Parent = bb
 	CollectionService:AddTag(bb, "LampHalo")
 	bb.Parent = q

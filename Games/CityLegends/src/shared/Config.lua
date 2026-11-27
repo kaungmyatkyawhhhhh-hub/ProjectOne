@@ -1969,8 +1969,11 @@ Config.NightLamps = {
 	Range = 60,
 	Angle = 170,
 	Shadows = true,
-	Sodium = Color3.fromRGB(255, 172, 88),
-	SodiumEvery = 8,
+	-- (28 Nov, owner: "in the small roads u should make the streetlight dimmed yellow") side streets / small roads:
+	-- a dim warm sodium-like lamp (YangonRoadside side-street poles, kit pole lamps ppolel / ppolebl); main roads,
+	-- flyovers and medians stay cold white. Replaces the 27 Nov "1 in 8 sodium" rule.
+	SideStreet = Color3.fromRGB(255, 180, 95),
+	SideBrightness = 2.2,
 	Glow = "rbxassetid://83825952241880",
 	GlowSize = 3.2,
 	GlowBrightness = 3,

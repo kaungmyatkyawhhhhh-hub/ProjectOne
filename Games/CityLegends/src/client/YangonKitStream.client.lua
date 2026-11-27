@@ -198,6 +198,8 @@ end
 
 local stopped = false
 local lastPos: Vector3? = nil
+local lastT, vel = 0, Vector2.zero
+local AHEAD = 2.5 -- s of look-ahead at the camera's speed
 local mult = 1
 local function readMult()
 	local plr = Players.LocalPlayer
@@ -215,28 +217,41 @@ local function refresh()
 		return
 	end
 	local p = cam.CFrame.Position
-	lastPos = p
+	-- (27 Nov, owner: "when u go fast, the streetlights ... take time to load") tiles load round where the camera will be
+	-- in AHEAD s too, nearest to that point first
+	local now = os.clock()
+	if lastPos and now > lastT then
+		local v = (p - lastPos) / (now - lastT)
+		vel = if v.Magnitude > 600 then Vector2.zero else Vector2.new(v.X, v.Z)
+	end
+	lastPos, lastT = p, now
 	local here = Vector2.new(p.X, p.Z)
+	local ahead = here + vel * AHEAD
 	for key in folders do
-		if (centre[key] - here).Magnitude > loadOf[key] * mult + (UNLOAD - LOAD) then
+		local keep = loadOf[key] * mult + (UNLOAD - LOAD)
+		if (centre[key] - here).Magnitude > keep and (centre[key] - ahead).Magnitude > keep then
 			unload(key)
 		end
 	end
 	table.clear(queue)
 	local r = math.ceil(LOAD * mult / tileSize) + 1
-	local ci, cj = math.floor(p.X / tileSize), math.floor(p.Z / tileSize)
-	for i = ci - r, ci + r do
-		for j = cj - r, cj + r do
-			for pre in prefixes do
-				local key = pre .. i .. "_" .. j
-				if tiles[key] and not folders[key] and (centre[key] - here).Magnitude <= loadOf[key] * mult then
-					table.insert(queue, key)
+	local seen = {}
+	for _, c in { here, ahead } do
+		local ci, cj = math.floor(c.X / tileSize), math.floor(c.Y / tileSize)
+		for i = ci - r, ci + r do
+			for j = cj - r, cj + r do
+				for pre in prefixes do
+					local key = pre .. i .. "_" .. j
+					if tiles[key] and not folders[key] and not seen[key] and (centre[key] - c).Magnitude <= loadOf[key] * mult then
+						seen[key] = true
+						table.insert(queue, key)
+					end
 				end
 			end
 		end
 	end
 	table.sort(queue, function(a, b)
-		return (centre[a] - here).Magnitude < (centre[b] - here).Magnitude
+		return (centre[a] - ahead).Magnitude < (centre[b] - ahead).Magnitude
 	end)
 end
 
@@ -276,8 +291,9 @@ RunService.Heartbeat:Connect(function(dt)
 			end
 		end
 	end
-	-- start the nearest waiting tile, then keep building until the frame's budget is spent
-	while (os.clock() - t0) * 1000 < FRAME_MS do
+	-- start the nearest waiting tile, then keep building until the frame's budget is spent (twice the budget at speed)
+	local budget = if vel.Magnitude > 60 then FRAME_MS * 2 else FRAME_MS
+	while (os.clock() - t0) * 1000 < budget do
 		local key = next(jobs)
 		if not key then
 			local nk = table.remove(queue, 1)
@@ -297,7 +313,7 @@ RunService.Heartbeat:Connect(function(dt)
 		end
 		local list = jobs[key]
 		local job = list[1]
-		if job == nil or job:step(STEP_PARTS, t0 + FRAME_MS / 1000) then
+		if job == nil or job:step(STEP_PARTS, t0 + budget / 1000) then
 			if job then
 				table.remove(list, 1)
 			end
