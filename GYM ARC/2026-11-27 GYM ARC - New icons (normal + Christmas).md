@@ -117,3 +117,8 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 ## v10 logos (27 Nov, owner: "i still dont like the gradient")
 - The old logo had chrome bands and stripes in the letters. Rebuilt Power Lifters style: clean white "GYM", a soft-fade colour "ARC", a black plate and a thick orange neon border glow (`icon_render_25nov/logo_clean_fill.py` makes `gymarc_logo_v13_{navy,teal,crimson}.png`).
 - Icons: `v9/gymarc_v10_{navy,teal,crimson}.png`, logo at 0.58 of the width. Sheet: `v9/logo_options_v10.png`.
+
+## v11 logos (27 Nov, owner: flat fills "even worse now, the powerlifters plate gradient is good"; he meant the 400 KG weight plate)
+- That plate is edge-lit: a dark violet core, hot neon magenta toward the rims, a pale pink edge highlight.
+- "ARC" is now shaded the same way by distance from the letter edge (`logo_clean_fill.py`). "GYM" stays white.
+- Icons: `v9/gymarc_v11_{navy,teal,crimson}.png`, sheet `v9/logo_options_v11.png`.

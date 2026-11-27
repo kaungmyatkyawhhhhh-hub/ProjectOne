@@ -29,7 +29,7 @@ out = np.where(gym[..., None], fade(gym, hx('ffffff'), hx('d9dce6')), out)
 # Power Lifters 400 KG plate look: dark saturated core, neon colour toward the letter edges, pale highlight on the edge
 de = ndimage.distance_transform_edt(arc)[..., None]
 core, rim, hi = c_bot*0.78, c_top, np.clip(c_top*0.35 + 0.65, 0, 1)
-plate = core + (rim - core)*np.exp(-de/15.0)
+plate = core + (rim - core)*np.exp(-de/24.0)
 plate = np.where(de < 2.2, hi, plate)
 out = np.where(arc[..., None], plate, out)
 logo = Image.fromarray((np.dstack([out, al])*255).astype('uint8'))
