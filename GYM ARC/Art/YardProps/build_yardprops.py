@@ -28,12 +28,18 @@ class M:
         b = [Vector((cx + half * math.cos(math.pi / 4 + 2 * math.pi * i / n) * math.sqrt(2), cy + half * math.sin(math.pi / 4 + 2 * math.pi * i / n) * math.sqrt(2), z0)) for i in range(n)]
         s.add(c, b + [Vector((cx, cy, z1))], [tuple(range(n - 1, -1, -1))] + [(i, (i + 1) % n, n) for i in range(n)])
 
-def bulb(m, c, x, z_top, S, w=16, h=46):
-    """C9 bulb hanging from z_top: black socket then a teardrop pointing down (sheet: 32 px wide, ~46 px tall)."""
+def bulb(m, c, x, z_top, S, w=16, h=46, ang=0.0):
+    """C9 bulb hanging from z_top: black socket then a teardrop pointing down (sheet: 32 px wide, ~46 px tall), tilted by ang about Y."""
+    n0 = {k: len(v) for k, v in m.V.items()}
     m.lathe("Wire", [(6 * S, z_top - 12 * S), (6 * S, z_top)], 6, (x, 0))
     prof = [(0.01 * S, z_top - 12 * S - h * S), (w * 0.55 * S, z_top - 12 * S - h * 0.82 * S), (w * S, z_top - 12 * S - h * 0.45 * S),
             (w * 0.8 * S, z_top - 12 * S - h * 0.12 * S), (6.5 * S, z_top - 12 * S)]
     m.lathe(c, prof, 8, (x, 0))
+    if ang:
+        for k in (c, "Wire"):
+            for i in range(n0[k], len(m.V[k])):
+                vx, vy, vz = m.V[k][i]; dx, dz = vx - x, vz - z_top
+                m.V[k][i] = (x + dx * math.cos(ang) + dz * math.sin(ang), vy, z_top - dx * math.sin(ang) + dz * math.cos(ang))
 
 def wire(m, pts, r):
     """thin square tube through pts (x, z) in the XZ plane."""
@@ -86,7 +92,7 @@ for y0, y1 in ((205, 229), (277, 301)):
     m.box("Wood", X(300), X(550), -10 * S, 10 * S, Z(y1), Z(y0))
 wire(m, [(X(x), Z(186 + 8 * (1 - ((x - 424) / 120) ** 2))) for x in range(309, 545, 12)], 2.5 * S)
 for x, c in ((352, "Red"), (426, "Yellow"), (499, "Green")):
-    bulb(m, c, X(x), Z(193), S, 12, 40)
+    bulb(m, c, X(x), Z(192), S, 16, 46)
 export(m, "Fence", {"front": (S, CX, GY, False)})
 
 # ---------- LAMP (cx 429.5, ground 760; base 388-472 tapering to pole 420-439 at y 690; lantern roof 387-471 at y 470) ----------
@@ -94,7 +100,7 @@ S = 1 / 335; m = M(); CX, GY = 429.5, 760
 Z = lambda y: (GY - y) * S; R = lambda w: w / 2 * S
 m.lathe("Iron", [(R(84), Z(760)), (R(84), Z(750)), (R(70), Z(742)), (R(58), Z(722)), (R(40), Z(700)), (R(34), Z(690))])
 m.lathe("Iron", [(R(19), Z(690)), (R(19), Z(560))], 8)
-m.lathe("Iron", [(R(30), Z(600)), (R(30), Z(592)), (R(56), Z(578)), (R(64), Z(560)), (R(30), Z(548)), (R(29), Z(530))], 8)   # collar + lantern seat
+m.lathe("Iron", [(R(24), Z(548)), (R(30), Z(540)), (R(30), Z(528))], 8)   # lantern seat
 # lantern: glass frustum (wide top 72 px at y 480, 51 px at y 520), iron frame posts, roof and finial
 m.lathe("Glass", [(R(51), Z(528)), (R(72), Z(480))], 6, rot=0)
 for i in range(6):
@@ -108,10 +114,10 @@ m.lathe("Iron", [(R(78), Z(482)), (R(84), Z(470)), (R(40), Z(452)), (R(14), Z(44
 m.lathe("Iron", [(R(6), Z(446)), (R(10), Z(440)), (R(12), Z(433)), (R(6), Z(426))], 6)
 # bow + pine sprig on the pole (front, y 540-595)
 for sg in (1, -1):
-    m.add("Pine", [Vector((sg * 10 * S, -12 * S, Z(560))), Vector((sg * 44 * S, -6 * S, Z(548))), Vector((sg * 40 * S, -6 * S, Z(575))),
+    m.add("Pine", [Vector((sg * 10 * S, -12 * S, Z(560))), Vector((sg * 42 * S, -6 * S, Z(540))), Vector((sg * 40 * S, -6 * S, Z(582))),
                    Vector((sg * 10 * S, -16 * S, Z(566)))], [(0, 1, 2, 3) if sg > 0 else (3, 2, 1, 0)])
-    loop = [(sg * 2 * S, Z(560)), (sg * 30 * S, Z(546)), (sg * 30 * S, Z(574)), (sg * 2 * S, Z(566))]
-    tail = [(sg * 2 * S, Z(566)), (sg * 14 * S, Z(570)), (sg * 20 * S, Z(596)), (sg * 12 * S, Z(588)), (sg * 6 * S, Z(598))]
+    loop = [(sg * 2 * S, Z(558)), (sg * 34 * S, Z(542)), (sg * 34 * S, Z(576)), (sg * 2 * S, Z(568))]
+    tail = [(sg * 2 * S, Z(566)), (sg * 16 * S, Z(570)), (sg * 26 * S, Z(600)), (sg * 15 * S, Z(592)), (sg * 7 * S, Z(604))]
     for poly in (loop, tail):
         pts = poly if sg > 0 else poly[::-1]; n = len(pts)
         fr = [Vector((x, -22 * S, z)) for x, z in pts]; bk = [Vector((x, -14 * S, z)) for x, z in pts]
@@ -122,8 +128,9 @@ export(m, "Lamp", {"front": (S, CX, GY, False), "side": (S, 780, GY, True)})
 # ---------- LIGHT STRING (wire 234-641 sagging y 869 -> ~899; 7 bulbs at x 257..616) ----------
 S = 1 / 407; m = M(); CX, ZY = 437.5, 869
 X = lambda x: (x - CX) * S; Z = lambda y: (ZY - y) * S
-wy = lambda x: 869 + 26 * (1 - ((x - CX) / 203.5) ** 2)
+wy = lambda x: 869 + 36 * (1 - ((x - CX) / 203.5) ** 2)
 wire(m, [(X(x), Z(wy(x))) for x in range(234, 646, 14)], 3 * S)
 for x, c in zip((257, 315, 375, 436, 496, 556, 616), ("Red", "Yellow", "Green", "Blue", "Red", "Yellow", "Green")):
-    bulb(m, c, X(x), Z(wy(x) + 2), S)
+    slope = 72 * (x - CX) / 203.5 ** 2          # d(wy)/dx in px
+    bulb(m, c, X(x), Z(wy(x) + 2), S, ang=-math.atan(slope))
 export(m, "LightString", {"front": (S, CX, ZY, False)})
