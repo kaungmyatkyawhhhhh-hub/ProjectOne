@@ -11,8 +11,8 @@ VIEWS = {  # name: (objects, view direction from the target towards the eye, up)
     "plate1": (["PauldronPlate1L", "PauldronPlate1LRim"], (0, -1, 0)),
     "plate2": (["PauldronPlate2L", "PauldronPlate2LRim"], (0, -1, 0)),
     "plate3": (["PauldronPlate3L", "PauldronPlate3LRim"], (0, -1, 0)),
-    "crown_front": (["IceCrown", "IceCrownGems", "IceCrownRim"], (0, -1, 0)),
-    "crown_top": (["IceCrown", "IceCrownGems", "IceCrownRim"], (0, 0, 1)),
+    "crown_front": (["IceCrown", "IceCrownRim"], (0, -1, 0)),
+    "crown_top": (["IceCrown", "IceCrownRim"], (0, 0, 1)),
     "bracer_front": (["BracerL", "BracerLBand"], (0, -1, 0)),
     "bracer_side": (["BracerL", "BracerLBand"], (1, 0, 0)),
 }

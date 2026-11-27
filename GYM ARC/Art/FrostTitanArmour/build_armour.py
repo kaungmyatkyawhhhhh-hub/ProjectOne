@@ -129,71 +129,53 @@ def plate(sc, piece, depth_ratio, thick_px, y_off, name, mirror=False):
 
 
 def crown(sc):
-    ct, cf = P["crown_top"], P["crown_front"]
-    tw, th = ct["box"][2], ct["box"][3]
-    # the sheet draws the front view ~1.4x the top view; the front wins (what players see), the top gives the shape:
-    # the side gems at +-72 deg reach ro*sin72 + their own radius = half the front width
-    ro = cf_w = P["crown_front"]["box"][2] / 2 / (math.sin(math.radians(72)) + 0.34 * 0.9)
-    # inner radius: the hole of the top view (rows through the centre: the gap between the ice spans)
-    m = ct["rows"][th // 2]
-    ri = ro * 0.62
-    fw, fh = cf["box"][2], cf["box"][3]
+    """The front silhouette (columns: top and bottom edge) wrapped onto a ring: column x sits at angle asin(x / R),
+    so the front view is the sheet's outline; the back half repeats it. The outer face has a raised middle ridge
+    (faceted gem points). The sheet's top view is drawn at another scale (~0.7x): the front wins (step 1b)."""
+    cf = P["crown_front"]
     cols = cf["cols"]
-    band_px = fh * 0.33
-    N = 30
-    verts, faces = [], []
-    good_ = [i for i, c in enumerate(cols) if c]
-    cx_, half_ = (good_[0] + good_[-1]) / 2, (good_[-1] - good_[0]) / 2
-    lowest = max(c[1] for c in cols if c)
-    def lift(a):  # the sheet's bottom edge at this angle's x (front and back share it), up from the lowest point
-        i = int(round(cx_ + math.sin(a) * ro / (half_ / half_) * 1.0))
-        i = min(max(i, good_[0]), good_[-1])
-        return min(band_px * 0.7, lowest - cols[i][1]) if cols[i] else 0
-    for k in range(N):
-        a = 2 * math.pi * k / N
-        z0 = lift(a)
-        for r, z in ((ro, z0), (ro, band_px + z0 * 0.4), (ri, band_px + z0 * 0.4), (ri, z0)):
-            verts.append(Vector((r * math.sin(a), -r * math.cos(a), z)) * PX)
-    for k in range(N):
-        a, b = 4 * k, 4 * ((k + 1) % N)
-        for q in range(4):
-            faces.append((a + q, a + (q + 1) % 4, b + (q + 1) % 4, b + q))
-    band = obj(sc, "IceCrown", verts, faces, mat("Ice", ICE))
-    # five gems: heights read from the front silhouette at x = ro*sin(phi), phi = 0, +-72 (front), +-144 (back)
-    gv, gf = [], []
     good = [i for i, c in enumerate(cols) if c]
-    cx = (good[0] + good[-1]) / 2
-    half = (good[-1] - good[0]) / 2
-    for phi_deg in (0, 72, -72, 144, -144):
-        phi = math.radians(phi_deg)
-        sx = math.sin(phi)
-        i = int(round(cx + sx * half * 0.92))
-        lo = max(0, i - 6)
-        tops = [cols[j][0] for j in range(lo, min(len(cols), i + 7)) if cols[j]]
-        height = fh - min(tops)
-        tip = max(height - band_px - lift(phi) * 0.6, band_px * 0.8)
-        rg = ro * {0: 0.42, 72: 0.36, -72: 0.36}.get(phi_deg, 0.26)  # chunky gem points, as the sheet (no thin spikes)
-        base = Vector((ro * 0.97 * sx, -ro * 0.97 * math.cos(phi), band_px * 0.55 + lift(phi) * (0.4 if phi_deg in (72, -72) else 1)))
-        i0 = len(gv)
-        gv.append((base + Vector((0, 0, tip + band_px * 0.45))) * PX)
-        gv.append((base + Vector((0, 0, -band_px * 0.25))) * PX)
-        for k in range(6):
-            a = phi + math.pi * k / 3
-            gv.append((base + Vector((rg * math.cos(a), rg * math.sin(a), band_px * 0.45))) * PX)
-        for k in range(6):
-            a, b = i0 + 2 + k, i0 + 2 + (k + 1) % 6
-            gf.append((i0, a, b))
-            gf.append((i0 + 1, b, a))
-    obj(sc, "IceCrownGems", gv, gf, mat("Ice", ICE))
+    x0, x1 = good[0], good[-1]
+    R = (x1 - x0) / 2
+    T = R * 0.16  # thin: a thick ring shows the points' inner faces in the front view (front wins over the top view)
+    lowest = max(cols[i][1] for i in good)
+    n = 40
+    prof = []
+    for k in range(n + 1):
+        u = -1 + 2 * k / n
+        u = math.copysign(abs(u) ** 0.8, u)  # more columns near the edges, where the ring turns away
+        i = int(round((x0 + x1) / 2 + u * R))
+        i = min(max(i, x0), x1)
+        top, bot = cols[i]
+        prof.append((math.asin(max(-0.999, min(0.999, u))), lowest - top, lowest - bot))
+    loop = [(a, t, b) for a, t, b in prof] + [(math.pi - a, t * 0.92, b) for a, t, b in reversed(prof[1:-1])]
+    L = len(loop)
+    verts, faces = [], []
+    for a, t, b in loop:
+        d = Vector((math.sin(a), -math.cos(a), 0))
+        mid = (t + b) / 2
+        bulge = T * (0.55 if t - b > (lowest - min(c[0] for c in [cols[j] for j in good])) * 0.5 else 0.35)
+        Rb = R  # (the 0.91 front-view fit; the ridge may stand slightly past the outline)
+        verts += [d * Rb + Vector((0, 0, b)), d * (Rb + bulge) + Vector((0, 0, mid)), d * Rb + Vector((0, 0, t)),
+                  d * (Rb - T) + Vector((0, 0, t - T * 0.3)), d * (Rb - T) + Vector((0, 0, b))]
+    verts = [v * PX for v in verts]
+    for k in range(L):
+        a0, b0 = 5 * k, 5 * ((k + 1) % L)
+        for q in range(5):
+            faces.append((a0 + q, b0 + q, b0 + (q + 1) % 5, a0 + (q + 1) % 5))
+    band = obj(sc, "IceCrown", verts, faces, mat("Ice", ICE))
+    # glow line: a thin strip just outside the band, a quarter of the way up from the bottom edge
     rv, rf = [], []
-    for k in range(N):
-        a = 2 * math.pi * k / N
-        for r, z in ((ro * 1.03, band_px * 0.18), (ro * 1.03, band_px * 0.36), (ro * 0.98, band_px * 0.36), (ro * 0.98, band_px * 0.18)):
-            rv.append(Vector((r * math.sin(a), -r * math.cos(a), z)) * PX)
-    for k in range(N):
-        a, b = 4 * k, 4 * ((k + 1) % N)
+    for a, t, b in loop:
+        d = Vector((math.sin(a), -math.cos(a), 0))
+        z = b + min(t - b, 40) * 0.25
+        Rb = R
+        for r, dz in ((Rb + T * 0.12, 0), (Rb + T * 0.12, 6), (Rb - T * 0.2, 6), (Rb - T * 0.2, 0)):
+            rv.append((d * r + Vector((0, 0, z + dz))) * PX)
+    for k in range(L):
+        a0, b0 = 4 * k, 4 * ((k + 1) % L)
         for q in range(4):
-            rf.append((a + q, a + (q + 1) % 4, b + (q + 1) % 4, b + q))
+            rf.append((a0 + q, b0 + q, b0 + (q + 1) % 4, a0 + (q + 1) % 4))
     obj(sc, "IceCrownRim", rv, rf, mat("Glow", GLOW, 3.0))
     return band
 
@@ -269,8 +251,7 @@ def build():
         bracer(sc, f"Bracer{side}", mir).location = (x, 0, -6)
         sc.objects[f"Bracer{side}Band"].location = (x, 0, -6)
     crown(sc).location = (0, 0, 3)
-    for n in ("IceCrownGems", "IceCrownRim"):
-        sc.objects[n].location = (0, 0, 3)
+    sc.objects["IceCrownRim"].location = (0, 0, 3)
     tris = 0
     for ob in sc.objects:
         if ob.type == "MESH":

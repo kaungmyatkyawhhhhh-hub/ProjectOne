@@ -1,4 +1,4 @@
-# Power Lifters-style logo: clean near-solid letter fills (soft vertical fade, no chrome bands), white top word,
+# Power Lifters-style logo: white top word; second word shaded like their 400 KG plate (dark core, neon edges, pale edge highlight),
 # thick neon border glow around the whole logo. Letter shapes come from gymarc_logo_v10_blue_simple.png.
 # usage: python logo_clean_fill.py <name> <word2_top_hex> <word2_bottom_hex> <border_hex>
 import sys, numpy as np
@@ -26,7 +26,12 @@ def fade(mask, top, bot):
     return top*(1-t) + bot*t
 out = np.zeros_like(rgb); out[al > 0.02] = hx('0a0a12')  # black plate + outline
 out = np.where(gym[..., None], fade(gym, hx('ffffff'), hx('d9dce6')), out)
-out = np.where(arc[..., None], fade(arc, c_top, c_bot), out)
+# Power Lifters 400 KG plate look: dark saturated core, neon colour toward the letter edges, pale highlight on the edge
+de = ndimage.distance_transform_edt(arc)[..., None]
+core, rim, hi = c_bot*0.78, c_top, np.clip(c_top*0.35 + 0.65, 0, 1)
+plate = core + (rim - core)*np.exp(-de/15.0)
+plate = np.where(de < 2.2, hi, plate)
+out = np.where(arc[..., None], plate, out)
 logo = Image.fromarray((np.dstack([out, al])*255).astype('uint8'))
 pad = 40; W, Hh = logo.size; canvas = Image.new('RGBA', (W+2*pad, Hh+2*pad), (0, 0, 0, 0))
 shape = Image.new('L', canvas.size, 0); shape.paste(Image.fromarray(((al > 0.3)*255).astype('uint8')), (pad, pad))
