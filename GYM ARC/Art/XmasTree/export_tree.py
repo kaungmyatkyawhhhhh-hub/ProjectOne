@@ -5,6 +5,7 @@ sc = bpy.data.scenes["GYM ARC Xmas"]
 vl = sc.view_layers[0]
 for o in sc.objects:
     o.select_set(o.get("xmas_part") == "tree", view_layer=vl)
-with bpy.context.temp_override(window=bpy.context.window, scene=sc, view_layer=vl):
+assert bpy.context.scene == sc, "run with GYM ARC Xmas as the active scene"
+if True:
   bpy.ops.export_scene.gltf(filepath=os.path.join(HERE, "XmasTree.glb"), use_selection=True, export_format="GLB", export_yup=True, export_apply=True)
 print("glb", os.path.getsize(os.path.join(HERE, "XmasTree.glb")))

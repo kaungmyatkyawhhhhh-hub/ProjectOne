@@ -21,8 +21,10 @@ COL = {"Foliage": (0.13, 0.42, 0.12, 1), "FoliageTop": (0.33, 0.66, 0.2, 1), "Tr
 
 
 def scene():
+    if not bpy.context.window:                 # headless (blender -b): build in the one scene; a 2nd scene crashes the glTF export
+        bpy.context.scene.name = "GYM ARC Xmas"
     sc = bpy.data.scenes.get("GYM ARC Xmas") or bpy.data.scenes.new("GYM ARC Xmas")
-    bpy.context.window.scene = sc
+    if bpy.context.window: bpy.context.window.scene = sc
     for ob in list(sc.collection.objects):
         if ob.get("xmas_part") == "tree":
             bpy.data.objects.remove(ob, do_unlink=True)
