@@ -91,4 +91,21 @@ function A.apply(ids: { number }): string
 	return string.format("kgr replaced %d, kgg added %d, kwx replaced %d, skipped %d %s", kgr, kgg, kwx, #skipped, table.concat(skipped, " ", 1, math.min(#skipped, 10)))
 end
 
+-- (2026-11-27 review) newer / villa-type panels keep the clean painted render: attribute MV on their KWX templates
+-- (pids from city/kit_walls_clean.txt, written by kit_walls.py); YangonKitData uses MV over the code's variant
+function A.clean(pids: { string }, variant: string?): string
+	local store = RS.YgnKit.Templates
+	local n, miss = 0, 0
+	for _, pid in pids do
+		local q = store:FindFirstChild("KWX_" .. pid)
+		if q then
+			q:SetAttribute("MV", variant or "YgnRenderPainted")
+			n += 1
+		else
+			miss += 1
+		end
+	end
+	return string.format("MV set on %d KWX templates, %d missing", n, miss)
+end
+
 return A

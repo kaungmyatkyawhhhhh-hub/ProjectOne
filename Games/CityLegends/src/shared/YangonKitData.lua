@@ -72,17 +72,31 @@ KD.MAT = { PLT = Enum.Material.Neon, PGL = Enum.Material.Glass, PFG = Enum.Mater
 	PFR = Enum.Material.SmoothPlastic, PFB = Enum.Material.SmoothPlastic, PFY = Enum.Material.SmoothPlastic,
 	PPD = Enum.Material.SmoothPlastic, PLY = Enum.Material.SmoothPlastic, PCW = Enum.Material.SmoothPlastic, PCR = Enum.Material.SmoothPlastic }
 KD.VARIANT = {
-	-- (2026-11-27, owner: "less blocky, more like real life") every ordinary wall is the stained render: real Yangon
-	-- walls read 15-35% darker than their paint with rain / mildew streaks (Critique 16 Nov); the clean painted render
-	-- made flat pastel boxes. Flat roof slabs (KCO) are stained concrete, not near-white bare concrete.
-	KW0 = "YgnRenderStained", KW1 = "YgnRenderStained", KW2 = "YgnRenderStained", KW3 = "YgnRenderStained",
-	KW4 = "YgnRenderStained", KW5 = "YgnRenderStained", KW6 = "YgnRenderStained", KW7 = "YgnRenderStained",
-	KWB = "YgnRenderStained", KWG = "YgnRenderStained", KWD2 = "YgnRenderStained", KWC = "YgnRenderStained",
+	-- (2026-11-27, owner: "less blocky, more like real life"; review the same day: the stained render read cold and
+	-- grimy with a 9-stud repeat) ordinary walls wear the light, warm weathered render (36-stud tile, render_weathered.py);
+	-- the dark grime is the panels' own vertex stains under slabs / roof edge / AC units. Plain side and party walls:
+	-- KD.SIDE. Newer / villa-type panels: their template's MV attribute (the clean painted render). Flat roof slabs
+	-- (KCO) are stained concrete, not near-white bare concrete.
+	KW0 = "YgnRenderWeathered", KW1 = "YgnRenderWeathered", KW2 = "YgnRenderWeathered", KW3 = "YgnRenderWeathered",
+	KW4 = "YgnRenderWeathered", KW5 = "YgnRenderWeathered", KW6 = "YgnRenderWeathered", KW7 = "YgnRenderWeathered",
+	KWB = "YgnRenderWeathered", KWG = "YgnRenderStained", KWD2 = "YgnRenderStained", KWC = "YgnRenderStained",
 	KGR = "YgnSteelPainted", KAR = "YgnCanvas", KCO = "YgnConcreteStained", KRG = "YgnCorrugatedZinc",
 	KRF = "YgnCorrugatedRust", KRB = "YgnCorrugatedBlue", KRT = "YgnClayRoofTile",
 	PCN = "YgnConcreteStained", PAS = "YgnAsphaltWorn", PLN = "YgnConcreteBare", PCS = "YgnSteelPainted",
 	PST = "YgnSteelPainted", PRB = "YgnBrickRed", PCG = "YgnConcreteBare", PSD = "YgnDirtPacked",
 }
+
+-- plain side / party walls (B records in a wall colour): more rain streaks than a front (no slabs to hang them from)
+KD.SIDE = {
+	KW0 = "YgnRenderWeatheredSide", KW1 = "YgnRenderWeatheredSide", KW2 = "YgnRenderWeatheredSide",
+	KW3 = "YgnRenderWeatheredSide", KW4 = "YgnRenderWeatheredSide", KW5 = "YgnRenderWeatheredSide",
+	KW6 = "YgnRenderWeatheredSide", KW7 = "YgnRenderWeatheredSide", KWB = "YgnRenderWeatheredSide",
+}
+
+-- a variant name only if MaterialService has it (else the code's own look stays)
+local function hasVariant(name: string?): boolean
+	return name ~= nil and name ~= "" and MaterialService:FindFirstChild(name) ~= nil
+end
 
 local looks = {} -- code -> { material, variant name }
 function KD.look(q: BasePart, code: string, color: Color3?)
@@ -960,6 +974,9 @@ function Job:step(budget: number, untilClock: number?): boolean
 			else
 				visual(q)
 				KD.look(q, code, KD.WALL[code])
+				if hasVariant(KD.SIDE[code]) then
+					q.MaterialVariant = KD.SIDE[code]
+				end
 			end
 			table.insert(batch, q)
 			made += 1
@@ -988,6 +1005,10 @@ function Job:step(budget: number, untilClock: number?): boolean
 					if tp.kind == "KWX" then
 						q.Name = code
 						KD.look(q, code, KD.WALL[code])
+						local mv = tp.part:GetAttribute("MV")
+						if KD.VARIANT[code] ~= "YgnRenderStained" and hasVariant(mv) then
+							q.MaterialVariant = mv -- (newer / villa-type panels: the clean painted render)
+						end
 					end
 					table.insert(batch, q)
 					made += 1

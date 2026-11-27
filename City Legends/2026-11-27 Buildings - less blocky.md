@@ -61,11 +61,44 @@ Already fine, so left alone: window reveals (0.35 m), sills, grilles, cages, AC 
   - The placed sample has 60 pairs across instances. Every listed pair is between `market` panels (p2ad0ddb1, p5e64db40, p60ee56fa, p89865b18) whose walls cross each other at one spot (around 30090, 19, 45175).
   - Market panels have no parapet and no floor bands, so this change did not touch them. These pairs are old.
   - **Open:** those crossing market walls in P3 are an old overlap to fix in `buildings_1to1.py`.
-- Saved in Studio (Team Create save at 06:23 UTC, not published). Studio closed the place after the Play test stopped. On reopening, every edit was still there, but PlayerData was still on `CityLegends_test`: it was put back to `CityLegends_v1` before the save. The first save attempt timed out ("server publish request timed out"); the second one worked.
+- Saved in Studio (Team Create save at 06:23 UTC; v2 saved at 07:42 UTC; not published). Studio closed the place after the Play test stopped. On reopening, every edit was still there, but PlayerData was still on `CityLegends_test`: it was put back to `CityLegends_v1` before the save. The first save attempt timed out ("server publish request timed out"); the second one worked.
+
+## Review fix, same day (v2): lighter, warmer, no 9-stud repeat
+Review of the first pass: the township walls read cold blue-grey and grimy, nothing like real Yangon's warm, sun-faded walls with dark rain streaks, and the stained render's 9-stud tile showed on big blank walls. Checked again against the Yankin 5-storey / 30th St walk-up refs: the wall itself is a light faded paint, and the dark grime sits in streaks under slabs and the roof edge, on side walls and under AC units.
+
+| # | Change | Where |
+|---|---|---|
+| 1 | New light, warm wall render **`YgnRenderWeathered`**, **36 studs a tile** (was 9): the painted render's grain, soft blotches at two scales, a few faint streaks; mean close to the painted render, so each wall keeps its own colour | `tools/yangon/city/render_weathered.py`; `KD.VARIANT` KW0-KW7 / KWB |
+| 2 | Plain side / party walls get **`YgnRenderWeatheredSide`** (48 studs a tile, more and longer warm-grey streaks) | `KD.SIDE` in `YangonKitData` (B records) |
+| 3 | The strong grime is the panels' own vertex stains, now darker: streaks under slabs and the roof edge (KST 0.66 -> 0.5, KSU 0.84 -> 0.74), top-storey grime (KGM 0.93/0.88/0.8 -> 0.88/0.82/0.74), drips under AC units | `kit_panels.WALL_K`, `kit_walls.py` -> 6 Models -> `KitGlassApply` (519 KWX replaced) |
+| 4 | **Newer and villa-type** panels (house, villa, condo, condo bands and tops: 144 panels) keep the clean painted render: attribute `MV` on their KWX templates | `kit_walls_clean.txt` (written by `kit_walls.py`), `KitGlassApply.clean`, `YangonKitData` reads `MV` |
+| 5 | Far shells: streaks and mottling about 40% lighter | `shell_facades.weather()`, 12 new colour maps |
+
+- The KWG / KWD2 / KWC groups keep the stained render on purpose: these are the stained grey and black colonial fronts that are real on Merchant Rd and Pansodan.
+- Ids are in `tools/yangon/city/kit_walls_ids.json`: `models_v2`, `render_weathered`, `shell_color_v2`.
+- The colour maps used in the place are the second uploads: front 89183000986470, side 82472838975172. The first side upload gave HTTP 502, so a copy with one pixel changed went up.
+- Part counts are unchanged (kit within 300 studs: township 926, rooftops 1,035, downtown 803, spawn 64).
+- PC FPS in this run was 55-60; Studio load was lighter this time, so this does not compare with the first run.
+
+**My own read of the v2 pictures:**
+- **Downtown:** no longer too dirty. Walls are warm tan or white with soft weathering, and only the stained colonial fronts are dark.
+- **Township street:** now on the clean side at street distance. The side wall shows soft streaks, but the fronts read pale. Part of the cold blue cast is the noon light (`DayCycle`, which this task did not touch).
+- **Close up:** walk-up fronts show darker top storeys and streak patches. The vertex streaks are rectangles: blocky up close, not natural drips.
+- **Rooftops:** the walk-up reads fairly clean. The roof is stained concrete with a visible slab lip.
+- If it needs to be dirtier, the next step is to raise the vertex stains (`WALL_K`), not the wall map.
+
+| Spot | v2 (after the review) |
+|---|---|
+| Township street | ![[2026-11-27 Buildings less blocky - township street noon (Play) - after v2.jpg]] |
+| Township rooftops | ![[2026-11-27 Buildings less blocky - township rooftops noon (Play) - after v2.jpg]] |
+| Downtown street | ![[2026-11-27 Buildings less blocky - downtown street noon (Play) - after v2.jpg]] |
+| Kabar Aye spawn | ![[2026-11-27 Buildings less blocky - Kabar Aye spawn noon (Play) - after v2.jpg]] |
+| Walk-up fronts close | ![[2026-11-27 Buildings less blocky - walk-up fronts close (Play) - after v2.jpg]] |
+| Maps (front, side; 2 x 2 tiles on a KW6 wall) | ![[2026-11-27 Buildings less blocky - weathered render maps v2 (front, side).png]] |
 
 ## Not checked / risks
-- The stained render tiles every 9 studs. On a big blank side wall the blotch repeat can be seen up close.
-- Every ordinary wall now looks old. Real villas are cleaner (87% neutral, lightly stained), so a per-age or per-archetype choice could come later.
+- (v1) The stained render tiled every 9 studs and the blotches repeated on big blank walls: fixed in v2 (36 / 48-stud tiles).
+- (v1) Every ordinary wall looked old: in v2, villa, house and condo panels keep the clean render. Plain side walls of villas still use the side render, because B records carry no archetype.
 - The far shells' new maps were checked in the preview picture only, not in Play from a distance (moving the camera loads the kit there).
 - Fresh meshes take a few seconds to load on a client: the first frames after the update showed roofs with no walls, until the walls loaded.
 - New districts: a full `buildings_1to1.py` run writes the lip itself. For existing panels, run `kit_walls.py` and `KitGlassApply`.

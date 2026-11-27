@@ -50,9 +50,9 @@ P.VARIANT = {
 	-- (2026-11-27, owner: "less blocky, more like real life") every ordinary wall is the stained render: real Yangon
 	-- walls read 15-35% darker than their paint with rain / mildew streaks (Critique 16 Nov); the clean painted render
 	-- made flat pastel boxes. Flat roof slabs (KCO) are stained concrete, not near-white bare concrete.
-	KW0 = "YgnRenderStained", KW1 = "YgnRenderStained", KW2 = "YgnRenderStained", KW3 = "YgnRenderStained",
-	KW4 = "YgnRenderStained", KW5 = "YgnRenderStained", KW6 = "YgnRenderStained", KW7 = "YgnRenderStained",
-	KWB = "YgnRenderStained", KWG = "YgnRenderStained", KWD2 = "YgnRenderStained", KWC = "YgnRenderStained",
+	KW0 = "YgnRenderWeathered", KW1 = "YgnRenderWeathered", KW2 = "YgnRenderWeathered", KW3 = "YgnRenderWeathered",
+	KW4 = "YgnRenderWeathered", KW5 = "YgnRenderWeathered", KW6 = "YgnRenderWeathered", KW7 = "YgnRenderWeathered",
+	KWB = "YgnRenderWeathered", KWG = "YgnRenderStained", KWD2 = "YgnRenderStained", KWC = "YgnRenderStained",
 	KGR = "YgnSteelPainted", KAR = "YgnCanvas", KCO = "YgnConcreteStained", KRG = "YgnCorrugatedZinc",
 	KRF = "YgnCorrugatedRust", KRB = "YgnCorrugatedBlue", KRT = "YgnClayRoofTile",
 }

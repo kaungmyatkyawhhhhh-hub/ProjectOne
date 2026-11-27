@@ -60,8 +60,10 @@ ARCH = {
 }
 
 # class of each kit group
-WALL_K = {"KWX": 1.0, "KW0": 1.0, "KWG": 0.74, "KCO": 0.82, "KSU": 0.84, "KST": 0.66, "KGM1": 0.93, "KGM2": 0.88,
-          "KGM3": 0.8, "KGB": 0.72, "KW1": 1.0, "KW4": 1.0, "KW6": 1.0}
+# (2026-11-27 review) the wall map itself is now light (YgnRenderWeathered); the strong grime lives HERE, where rain really
+# runs: streaks under slabs and the roof edge (KST / KSU), the top storey (KGM), drips under AC units (KST)
+WALL_K = {"KWX": 1.0, "KW0": 1.0, "KWG": 0.74, "KCO": 0.82, "KSU": 0.74, "KST": 0.5, "KGM1": 0.88, "KGM2": 0.82,
+          "KGM3": 0.74, "KGB": 0.72, "KW1": 1.0, "KW4": 1.0, "KW6": 1.0}
 CLOTH = {"KAW", "KAR", "KTP", "KNT", "KS1", "KS2", "KS3", "KS4", "KSW", "KSV", "KL1", "KL2", "KL3", "KL4", "KL5", "KL6"}
 NIGHT = {"NWH", "NWA", "NWY", "NWC"}
 GLASS_G = {"KGL"}          # window glass (class G, see the top)

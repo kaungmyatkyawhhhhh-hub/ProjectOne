@@ -1,5 +1,5 @@
 {
- "_note": "2026-11-27 buildings less blocky. models = kit_walls.py output (imports/sync/kit_walls/kit_walls_<n>.glb, KWX meshes with the roof slab lip + heavier walk-up floor slabs), Models in group 33151111, applied with tools/yangon/KitGlassApply.luau (KWX branch). shell_color = shell_facades.py weathered colour maps (Images, group 33151111) per set, phases 0-3, set as ColorMap of MaterialVariant YgnShell<Set><k> (normal / roughness unchanged). First upload (109736744198331 ...) had the lip on the tower crowns too (flicker with the striped crown): replaced, unused.",
+ "_note": "2026-11-27 buildings less blocky. models = kit_walls.py output (imports/sync/kit_walls/kit_walls_<n>.glb, KWX meshes with the roof slab lip + heavier walk-up floor slabs), Models in group 33151111, applied with tools/yangon/KitGlassApply.luau (KWX branch). shell_color = shell_facades.py weathered colour maps (Images, group 33151111) per set, phases 0-3, set as ColorMap of MaterialVariant YgnShell<Set><k> (normal / roughness unchanged). First upload (109736744198331 ...) had the lip on the tower crowns too (flicker with the striped crown): replaced, unused. REVIEW 27 Nov (coordinator: too grimy / cold / 9-stud repeat): models_v2 = walls with stronger targeted vertex stains (WALL_K); render_weathered = YgnRenderWeathered / YgnRenderWeatheredSide maps (render_weathered.py; StudsPerTile 36 / 48); shell_color_v2 = lighter shell maps; clean panels = kit_walls_clean.txt (MV YgnRenderPainted).",
  "models": [
   94490941888235,
   137817908796959,
@@ -26,6 +26,48 @@
    133538058357718,
    120896670610171,
    112300741547000
+  ]
+ },
+ "models_v2": [
+  109687037064998,
+  135565688331593,
+  129961618084939,
+  85658993663329,
+  95804596428090,
+  130701329724741
+ ],
+ "render_weathered": {
+  "YgnRenderWeathered": {
+   "color": 133591518388418,
+   "normal": 131863541673613,
+   "roughness": 92080306755964,
+   "studs": 36
+  },
+  "YgnRenderWeatheredSide": {
+   "color": 109073953941588,
+   "normal": 84481170184972,
+   "roughness": 85828876974202,
+   "studs": 48
+  }
+ },
+ "shell_color_v2": {
+  "Walkup": [
+   124046514361204,
+   123250854956954,
+   90589299640579,
+   134155771557204
+  ],
+  "Shop": [
+   84262062695439,
+   114076287979450,
+   114210179441227,
+   130013445845015
+  ],
+  "Villa": [
+   73137567778872,
+   93338632044807,
+   137888860522046,
+   121668212297576
   ]
  }
 }

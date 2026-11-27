@@ -22,6 +22,7 @@ from glb import write_glb, check_glb, code  # noqa: E402
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 OUT = os.path.join(ROOT, "imports", "sync", "kit_walls")
 FILE_MESHES = 90
+CLEAN = {"house", "villa", "condo", "condo_band", "condo_top"}
 
 
 def main():
@@ -75,6 +76,11 @@ def main():
     for b in bad[:20]:
         print("BAD", b)
     json.dump(sorted(n for n, _ in named), open(os.path.join(OUT, "names.json"), "w"), indent=0)
+    # (2026-11-27 review) newer / villa-type archetypes keep the clean painted render: their KWX templates get attribute
+    # MV = "YgnRenderPainted" (KitGlassApply.clean); YangonKitData uses it over the code's variant
+    clean = sorted(p for p in want if p in meta and meta[p]["key"][0] in CLEAN)
+    open(os.path.join(HERE, "kit_walls_clean.txt"), "w").write(" ".join(clean))
+    print("clean (painted) panels", len(clean))
     sys.exit(1 if bad else 0)
 
 

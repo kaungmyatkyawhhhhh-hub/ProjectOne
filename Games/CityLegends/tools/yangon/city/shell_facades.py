@@ -155,7 +155,7 @@ def weather(col, rough, floors, seed):
     g = np.random.default_rng(seed + 7)
     dark = np.zeros((PX, PX))
     # mottling: low-frequency blotches (tile-periodic: wrap the noise grid)
-    for cells, amp in ((8, 0.16), (24, 0.08)):
+    for cells, amp in ((8, 0.09), (24, 0.05)):   # (review 27 Nov: lighter)
         n = g.random((cells, cells))
         n = np.tile(n, (3, 3))
         big = np.array(Image.fromarray((n * 255).astype(np.uint8)).resize((PX * 3, PX * 3), Image.BICUBIC)).astype(float) / 255
@@ -167,7 +167,7 @@ def weather(col, rough, floors, seed):
         while x < TILE:
             w = g.uniform(0.6, 3.2)
             L = g.uniform(2.0, 8.5)
-            s = g.uniform(0.12, 0.38)
+            s = g.uniform(0.08, 0.24)
             a, b = px(x), min(PX, px(x + w))
             t0 = (PX - px(f * FLOOR)) % PX   # the floor line (the band's underside); rows go down
             n = px(L)
@@ -181,7 +181,7 @@ def weather(col, rough, floors, seed):
                 n2 = px(L * g.uniform(0.7, 1.2))
                 f2 = np.linspace(1, 0, n2)[:, None]
                 rows2 = (t0 + np.arange(n2)) % PX
-                dark[np.ix_(rows2, np.arange(c, c + cw) % PX)] += 0.25 * f2
+                dark[np.ix_(rows2, np.arange(c, c + cw) % PX)] += 0.15 * f2
             x += w + g.uniform(0.5, 4.0)
     dark = np.array(Image.fromarray(np.clip(dark * 255, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.5))).astype(float) / 255
     dark = np.where(rough < 0.2, dark * 0.25, dark)   # glass: a film only
