@@ -44,7 +44,8 @@ Export: `FrostTitanArmour.fbx`, 10 objects (PauldronL/R, BracerL/R, IceCrown + a
 
 ## Upload + fit (27 Nov)
 - Uploaded through Open Cloud (owner approved the vault folder): Model asset 128781560477931 (group 33151111), meshes approved/active, type Mesh (e.g. PauldronL 100633187555398). Inserted into ServerStorage.ArmourImport, fitted and welded onto the statue (FrostArmour folder), Ice + Neon glow, bracers x1.31.
-- **Open problem:** the meshes draw in Edit but fail in Play ("ContentId ... failed due to: Asset type does not match requested type"), so the pieces render as boxes in game. Not solved yet; next try is Studio's own 3D Importer on FrostTitanArmour.fbx.
+- Those Open Cloud meshes drew in Edit but failed in Play ("ContentId ... failed due to: Asset type does not match requested type"). **Fixed:** re-imported FrostTitanArmour.fbx with Studio's 3D Importer (Myanmar Builders Club) and `ApplyMesh` onto the fitted pieces (size / weld kept): PauldronL 88508133740322, PauldronR 133172039659070, IceCrown 123100862235923, BracerL 133381482426930, BracerR 90687970393629 (+ Glow pieces). All load in Play. Lesson: for game meshes use the 3D Importer, not the Open Cloud Model upload.
+- The "boxes" on the shoulders after that were not the armour: the 14 upper-arm stage templates had empty meshes (see GYM ARC - Muscles and Bodies, 27 Nov).
 
 ## Statue fixes (27 Nov, owner: "the guy dont have any muscles rn", "textures are blurry ... realistic like 4k")
 - No muscles: MuscleClient dropped the statue to low detail past 60 studs (NPC LOD). The statue has `KeepDetail = true` and MuscleClient keeps such models at full detail.

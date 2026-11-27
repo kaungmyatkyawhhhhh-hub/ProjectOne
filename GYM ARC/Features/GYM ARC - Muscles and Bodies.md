@@ -135,3 +135,8 @@ Owner: "if you're in the same area as NPCs, don't make their muscle meshes disap
 
 ## Arm stage meshes were empty (2 Nov)
 The 14 arm stage templates (`ReplicatedStorage.BodyStages.BS_*Arm_Arm_g*`) had lost their meshes (empty MeshId), so every run printed "[BodyStages] biceps reshape skipped ... Failed to load mesh" 14 times and players far away had plain arms. Restored from `Config/StageMeshBackup` (the 19 Oct reshape meshes, g000 the 15 Oct low-poly one). The biceps reshape works again, no warnings. Only `ServerStorage._Leftovers` (unused) still has 2 empty mesh parts.
+
+## Arm stage meshes were empty AGAIN (27 Nov) + guard
+- Same bug: all 14 `BS_*Arm_Arm_g*` templates had empty MeshIds and `BicepsReshaped = true`, so every body seen from afar (NPCs, the Frost Titan statue) had box upper arms. Cause: BodyStages' biceps reshape ran in Edit (a plugin / MCP `require`) and swapped the templates for in-memory meshes, which save as empty.
+- Restored: g000 = the 15 Oct low-poly mesh (`new` in Config/StageMeshBackup), g020-g100 = the 19 Oct reshape meshes (`now`), gmon = the 3 Nov v3 spike-fix OBJs re-imported with the 3D Importer (Left 76172118237230, Right 81222985496389; sizes match the v3 bounds).
+- **Guard:** BodyStages now skips the reshape unless `RunService:IsRunning()`, so Edit can't wipe them again. In Play: reshape runs, no warnings, arms round.
