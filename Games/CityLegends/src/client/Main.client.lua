@@ -137,6 +137,27 @@ phase("sounds")
 UI.showLoading("Building the city...")
 
 local pendingAttach = false
+-- (27 Nov, owner: terrain "in like the roblox optimizing state" when lagging) the terrain's own MaterialVariants
+-- (MaterialService base overrides: road beds Asphalt / Concrete, Slate, Limestone) load behind the loading screen,
+-- so the ground never waits on them later and shows plain stand-in colours
+task.spawn(function()
+	local MS = game:GetService("MaterialService")
+	local maps = {}
+	for _, name in { "Asphalt", "Concrete", "Grass", "Ground", "LeafyGrass", "Mud", "Pavement", "Sand", "Slate", "Limestone", "Rock" } do
+		local ok, vname = pcall(MS.GetBaseMaterialOverride, MS, Enum.Material[name])
+		local v = ok and vname ~= "" and vname ~= name and MS:FindFirstChild(vname, true)
+		if v and v:IsA("MaterialVariant") then
+			for _, id in { v.ColorMap, v.NormalMap, v.RoughnessMap, v.MetalnessMap } do
+				if id ~= "" then
+					table.insert(maps, id)
+				end
+			end
+		end
+	end
+	if #maps > 0 then
+		pcall(game:GetService("ContentProvider").PreloadAsync, game:GetService("ContentProvider"), maps)
+	end
+end)
 local attaching = false -- (the watchdog waits while a car is being put on)
 local showMenu: () -> ()
 local MainMenu: any = nil
