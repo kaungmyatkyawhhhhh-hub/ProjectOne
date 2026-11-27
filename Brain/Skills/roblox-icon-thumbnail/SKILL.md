@@ -34,6 +34,7 @@ Watch in the browser, never download: seek the `<video>` element, draw N frames 
 1. Research: what the owner clicks + 10-20 live thumbnails/icons of the top games in the genre (thumbnails.roblox.com API in the browser). Save refs in the game's `Assets\...\refs\`.
 2. Render the real avatar in Blender (Cycles, white key on the face, strong coloured rim lights, dark background, DOF).
 3. ChatGPT makes the final art from a ONE-TRY prompt (templates in the recipe note): attach the render, ONE style reference, the logo for colours. Magenta/transparent rules as in the art pipeline. Attachments must come from the vault (commit the render into the vault, stage it, then upload); the outputs folder is rejected. Keep follow-ups (variants, the logo, a second thumbnail) in the SAME ChatGPT chat with "same exact style".
+3b. **Two-pass finish (owner, 27 Nov 2026, GYM ARC icons: Gemini-only art "look very bad"):** ChatGPT first, to enhance the picture (composition, polish, GFX finishing). Then give ChatGPT's result to Gemini to make it NOT look AI-generated and enhance it once more. Never ship a single-pass Gemini or ChatGPT image as an icon.
 4. Claude adds the logo in code (never let ChatGPT draw it), keeps the original resolution, saves everything to the vault.
 5. Small fixes: "keep EXACTLY the same, only change X"; otherwise fix locally (e.g. brighten the face by masking light low-saturation pixels).
 

@@ -33,6 +33,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/robux-revenue-sim/SKILL\|robux-revenue-sim]] | Forecast or improve a Roblox game's Robux revenue: Monte Carlo sim of players, retention, would-be payers and each offer, calibrated to the Creator Dashboard; Robux + DevEx USD ranges, per-offer split, price sweep. (Local skill in `~/.claude/skills`.) |
 
 ## Log
+- 2026-11-27 roblox-icon-thumbnail: two-pass finish, ChatGPT enhances then Gemini de-AIs and enhances again (owner: the Gemini-only GYM ARC icons "look very bad"). Plugin skill: re-upload needed.
 - 2026-11-27 roblox-ui-pro: lesson 'Finished, not placeholder' (Soft Sporty picker: smaller symmetrical cards, colour-matched borders, same lip, optical centring, tone-on-tone halftone, hide world glows).
 - 2026-11-26: owner rejected the ChatGPT-art muscle picker ("very bad", "look very AI generated and not modern") and said no ViewportFrames. **roblox-ui-pro** (local + vault copy): new popup lesson (TDS frameless look, no ViewportFrames). **roblox-chatgpt-art-pipeline** (vault copy only; plugin copy needs a re-upload): no ChatGPT chrome for modern screens.
 - 2026-11-26: owner: the GYM ARC muscle picker looked like placeholders. **roblox-chatgpt-art-pipeline** (vault copy only; the plugin copy needs a re-upload): new Lessons on card glows turning into sunburst rays, purple art on a green key, choice art as the hero doing the action, and a whole popup from one sheet.
