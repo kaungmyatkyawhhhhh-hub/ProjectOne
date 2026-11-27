@@ -1116,6 +1116,7 @@ local function buildStop(m: Instance, sets, s, key: string): boolean
 						part(m, Vector3.new(0.3, 2.4, 0.3), pcf * CFrame.new(sx * 1.6, 1.2, 0), GALV, Enum.Material.Metal)
 					end
 					local panel = part(m, Vector3.new(4, 5.8, 0.5), pcf * CFrame.new(0, 2.4 + 2.9, 0), Color3.fromRGB(200, 202, 206), Enum.Material.Metal)
+					CollectionService:AddTag(panel, "PedBlock") -- (walkers go round it: YangonStreetLife)
 					local n = (math.floor(s.p.X) + math.floor(s.p.Z)) % #SHELTER_ADS + 1
 					adFace(panel, Enum.NormalId.Front, SHELTER_ADS[n % #SHELTER_ADS + 1], true)
 					adFace(panel, Enum.NormalId.Back, SHELTER_ADS[(n + 1) % #SHELTER_ADS + 1], true)

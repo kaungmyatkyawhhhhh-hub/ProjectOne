@@ -18,6 +18,7 @@
 	  * counts follow the graphics setting: qualityScale() at or under LowScale (Low) halves them.
 ]]
 
+local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
@@ -704,6 +705,87 @@ local function retire(k: number)
 	active[#active] = nil
 end
 
+-- (27 Nov, owner: "fix the people walking through the shelters") things walkers go round: parts tagged PedBlock (the
+-- street kit's shelter body SMT_busd carries the tag on its template, so P1's street-layer shelters and
+-- YangonRoadside's own get it; YangonRoadside tags its free-standing ad panels). Kept in a 32-stud grid.
+local BLOCK_CELL, BLOCK_PAD = 32, 0.9
+local blockCells: { [number]: { BasePart } } = {}
+local blockKeys: { [BasePart]: { number } } = {}
+local function blockAdd(q: Instance)
+	if not q:IsA("BasePart") or blockKeys[q] or not q:IsDescendantOf(workspace) then
+		return
+	end
+	local r = q.Size.Magnitude / 2 + BLOCK_PAD
+	local p = q.Position
+	local keys = {}
+	for gx = math.floor((p.X - r) / BLOCK_CELL), math.floor((p.X + r) / BLOCK_CELL) do
+		for gz = math.floor((p.Z - r) / BLOCK_CELL), math.floor((p.Z + r) / BLOCK_CELL) do
+			local k = cellKey(gx, gz)
+			local list = blockCells[k]
+			if not list then
+				list = {}
+				blockCells[k] = list
+			end
+			table.insert(list, q)
+			table.insert(keys, k)
+		end
+	end
+	blockKeys[q] = keys
+end
+local function blockRemove(q: Instance)
+	local keys = blockKeys[q :: any]
+	if not keys then
+		return
+	end
+	blockKeys[q :: any] = nil
+	for _, k in keys do
+		local list = blockCells[k]
+		local i = list and table.find(list, q :: any)
+		if i then
+			list[i] = list[#list]
+			list[#list] = nil
+			if #list == 0 then
+				blockCells[k] = nil
+			end
+		end
+	end
+end
+
+-- p moved out of any PedBlock box (grown by BLOCK_PAD) along `toward` (flat unit vector: the kerb side), so a walker
+-- passes between a shelter and the kerb instead of through it
+local function clearOf(p: Vector3, toward: Vector3): Vector3
+	local list = blockCells[cellKey(math.floor(p.X / BLOCK_CELL), math.floor(p.Z / BLOCK_CELL))]
+	if not list then
+		return p
+	end
+	for _ = 1, 2 do
+		local moved = false
+		for _, q in list do
+			local lp = q.CFrame:PointToObjectSpace(p)
+			local h = q.Size / 2
+			local hx, hz = h.X + BLOCK_PAD, h.Z + BLOCK_PAD
+			if math.abs(lp.X) < hx and math.abs(lp.Z) < hz and lp.Y > -h.Y - 6 and lp.Y < h.Y + 1 then
+				local ld = q.CFrame:VectorToObjectSpace(toward)
+				local t = math.huge
+				if math.abs(ld.X) > 1e-3 then
+					t = math.min(t, ((if ld.X > 0 then hx else -hx) - lp.X) / ld.X)
+				end
+				if math.abs(ld.Z) > 1e-3 then
+					t = math.min(t, ((if ld.Z > 0 then hz else -hz) - lp.Z) / ld.Z)
+				end
+				if t < math.huge then
+					p += toward * (t + 0.05)
+					moved = true
+				end
+			end
+		end
+		if not moved then
+			break
+		end
+	end
+	return p
+end
+
 -- the point on a path k (toward k + dir), shifted sideways by lat: the paths run with their road on the left, so
 -- lat > 0 is away from the kerb whichever way the walker goes
 local function target(w: Walker): Vector3?
@@ -717,7 +799,29 @@ local function target(w: Walker): Vector3?
 		return b
 	end
 	d = d.Unit
-	return b + Vector3.new(-d.Z, 0, d.X) * (w.lat * w.dir)
+	local away = Vector3.new(-d.Z, 0, d.X) * w.dir
+	return clearOf(b + away * w.lat, -away)
+end
+
+-- the kerb side of a walker's current stretch (flat unit), for pushing it out of a PedBlock box
+local function kerbSide(w: Walker): Vector3?
+	local pts = w.path
+	if not pts then
+		return nil
+	end
+	local a, b = pts[w.k - w.dir], pts[w.k]
+	if not (a and b) then
+		a, b = pts[w.k], pts[w.k + w.dir]
+	end
+	if not (a and b) then
+		return nil
+	end
+	local d = Vector3.new(b.X - a.X, 0, b.Z - a.Z)
+	if d.Magnitude < 0.01 then
+		return nil
+	end
+	d = d.Unit
+	return -Vector3.new(-d.Z, 0, d.X) * w.dir
 end
 
 local function stepWalk(w: Walker, dt: number): boolean
@@ -773,6 +877,11 @@ local function stepWalk(w: Walker, dt: number): boolean
 			break
 		end
 	end
+	-- (a corner of a shelter on the straight line to the next point) never inside one
+	local kerb = kerbSide(w)
+	if kerb then
+		w.pos = clearOf(w.pos, kerb)
+	end
 	w.phase += w.speed * dt * 1.45
 	return true
 end
@@ -823,7 +932,8 @@ local function spawnWalker(cam: Vector3, gap: number, radius: number): boolean
 			local dd = Vector3.new(t.X - p.X, 0, t.Z - p.Z)
 			if dd.Magnitude > 0.05 then
 				dd = dd.Unit
-				w.pos = p + Vector3.new(-dd.Z, 0, dd.X) * (w.lat * w.dir)
+				local away = Vector3.new(-dd.Z, 0, dd.X) * w.dir
+				w.pos = clearOf(p + away * w.lat, -away)
 				w.yaw = math.atan2(-dd.X, -dd.Z)
 			end
 		end
@@ -957,6 +1067,11 @@ function YangonStreetLife.start(qualityScale: (() -> number)?)
 		pf.Parent = f
 		f.Parent = workspace
 		carFolder, pedFolder = cf, pf
+		CollectionService:GetInstanceAddedSignal("PedBlock"):Connect(blockAdd)
+		CollectionService:GetInstanceRemovedSignal("PedBlock"):Connect(blockRemove)
+		for _, q in CollectionService:GetTagged("PedBlock") do
+			blockAdd(q)
+		end
 		print(string.format("[CityLegends] YangonStreetLife: %d car spots, %d standing spots, %d paths (%.2f s)",
 			#carX, #spotPos, #paths, os.clock() - t0))
 		local camera = workspace.CurrentCamera
