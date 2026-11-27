@@ -35,12 +35,19 @@ Watch in the browser, never download: seek the `<video>` element, draw N frames 
 2. Render the real avatar in Blender (Cycles, white key on the face, strong coloured rim lights, dark background, DOF).
 3. ChatGPT makes the final art from a ONE-TRY prompt (templates in the recipe note): attach the render, ONE style reference, the logo for colours. Magenta/transparent rules as in the art pipeline. Attachments must come from the vault (commit the render into the vault, stage it, then upload); the outputs folder is rejected. Keep follow-ups (variants, the logo, a second thumbnail) in the SAME ChatGPT chat with "same exact style".
 3b. **Two-pass finish (owner, 27 Nov 2026, GYM ARC icons: Gemini-only art "look very bad"):** ChatGPT first, to enhance the picture (composition, polish, GFX finishing). Then give ChatGPT's result to Gemini to make it NOT look AI-generated and enhance it once more. Never ship a single-pass Gemini or ChatGPT image as an icon.
+3c. **Icons are not thumbnails (owner, 27 Nov 2026: two rounds rejected, "the reference image and the prompt is bad", study icons first).** Before any icon:
+   - Pull 20 live icons of the genre + the top charts (`make_sheet.py`) and measure them. Copy what the top ones share, not what our thumbnails do. Study: `GYM ARC/Research/2026-11-27 GYM ARC - Icon study (gym icons + top CTR).md`.
+   - One character, waist-up or closer, 70-90% of the frame, head big in the upper half, a face with eyes and an open expression (grin, shout, shock) that reads at 60 px. Hair over the eyes or a tiny decal mouth kills it.
+   - Show the hook as ONE before -> after (small vs giant), not two equal full-body figures.
+   - Bright, saturated, softly blurred background unless the genre is dark.
+   - Seasonal icon = the same layout, props and background swapped, so returning players still recognise it.
+   - **The reference is a LAYOUT MOCK**, not an old thumbnail: our real avatar cut out and placed at the exact sizes and positions, on the right background, with the logo zone left empty. The prompt names every position, size, expression and colour.
 4. Claude adds the logo in code (never let ChatGPT draw it), keeps the original resolution, saves everything to the vault.
 5. Small fixes: "keep EXACTLY the same, only change X"; otherwise fix locally (e.g. brighten the face by masking light low-saturation pixels).
 
 ## Tests before showing the owner (measure, don't guess)
 - **Small-size test:** view the icon at 150, 100 and 60 px side by side with the current icon and 2-3 top games' icons. The hero and the hook must still read at 60 px.
-- **Contrast numbers at 64 px:** about 10-15% near-white (lum > 215, low saturation) and 40-50% near-black (lum < 45). Busy bright art with < 30% dark fails: the face melts into the background.
+- **Contrast numbers at 64 px:** about 10-15% near-white (lum > 215, low saturation) and 40-50% near-black (lum < 45). Busy bright art with < 30% dark fails: the face melts into the background. **These are for dark/reveal THUMBNAILS only. Icons: measure the genre first** (`measure.py` in `GYM ARC/Research/icon_study_2026-11-27/`). Gym icons, 27 Nov 2026: median luminance 0.51, near-black 11%; our dark 0.34 / 33% icons were rejected.
 - **Blur test:** blur it; every key shape must still read.
 - **Finishing / grade check (owner 9 Nov: same character render, but the losing icon's lighting, VFX, background, colours, contrast and exposure were all worse, and it got ~23x fewer clicks).** The render is not the icon; the grade is. Measured on his winner vs loser:
   - exposure: mean luminance about 0.28 (winner) vs 0.46 (loser, washed out and over-exposed);
