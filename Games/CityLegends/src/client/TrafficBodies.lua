@@ -231,6 +231,13 @@ local function prepare(template: Model): Model
 			if p:IsA("MeshPart") and p.TextureID == "" and not keepColors then
 				p.Color = UNTEXTURED
 			end
+			-- (27 Nov, owner: "car paint need to be more glossy ... traffic cars too") the players' clear coat: one shared
+			-- MaterialVariant (CarFinish's gloss), so it costs nothing per car
+			if p:GetAttribute("TrafficPaint") then
+				p.Material = Enum.Material.SmoothPlastic
+				p.MaterialVariant = "CL_PaintGloss"
+				p.Reflectance = 0
+			end
 			if not wheelParts[p] and p ~= body then
 				weld(body, p)
 			end

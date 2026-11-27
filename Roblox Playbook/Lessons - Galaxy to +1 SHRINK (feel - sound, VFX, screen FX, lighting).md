@@ -871,3 +871,9 @@ Format per entry: **What felt bad** / **Cause** / **Galaxy fix** / **Rule for SH
 - **Fix:** a procedural gait from biomechanics (stride matched to speed, knees, ankles, pelvis bob / sway / turn, chest counter-turn, overlap), eased rate-limited steering that curves round things early with the head leading, keyed actions with anticipation / contact / follow-through; a periodic re-scan of tagged parts.
 - **Rule:** NPC motion is judged in motion: film it (frame strips) before reporting. Never snap a rotation; turn heads first, then chest, then hips. Match stride to speed so feet don't slide. Anything spawned into the world after start must be picked up by a re-scan, not only by a tag-added signal.
 
+
+## 2026-11-27 City Legends: car paint still not glossy after the 0.08 roughness change
+- **What felt bad (owner):** "im sure the car paint need to be more glossy and same for traffic cars too."
+- **Cause:** we only lowered roughness (0.2 to 0.08) on a metalness-0 MaterialVariant. In Roblox only the sky is reflected, and a dielectric clear coat only shines at grazing edges, so panels facing the camera still look like plastic. Traffic paint was plain SmoothPlastic + Reflectance 0.08.
+- **Fix:** `CL_PaintGloss` roughness 0.03 + metalness 0.7. Traffic paint uses the same variant, set once per template. Vault `City Legends/2026-11-27 Glossy car paint.md`.
+- **Rule:** for glossy car paint in Roblox, lower roughness is not enough. Add metalness (0.5-0.7) so the sky reflection and the sun highlight cover the panel. Compare in Play with the game's own lighting, at noon and at night, in one frame (swap the variant on one car). Edit-mode lighting hides the difference.
