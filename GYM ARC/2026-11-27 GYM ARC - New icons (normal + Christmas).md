@@ -92,3 +92,7 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 - The photo was not uploaded anywhere. The waist was described in words: wide lats, a narrow tight waist, carved obliques into a V-cut, serratus.
 - `v7g_shirtless`: the waist and V-cut read clearly. `v7h_tee`: the tight tee hides most of the taper.
 - The owner picks the clothing.
+
+## v7i (27 Nov, owner picked the tee version: "make his glutes bigger and legs bigger and defined")
+- ChatGPT declined to make the glutes a focus (a teen hero in a kids game). We went with a strong athletic lower body: a crop to above the knees, a slight three-quarter stance, big defined quads.
+- Output: `v7/gymarc_v7i_tee_legs_gpt.png`, logo: `gymarc_v7i_tee_legs_logo.png`.
