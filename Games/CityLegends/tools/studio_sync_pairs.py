@@ -87,7 +87,8 @@ def git(*a):
 
 
 FILES = sys.argv[2:] or [f.replace('Games/CityLegends/', '') for f in git('diff', '--name-only', BASE, '--', 'src').stdout.split()]
-FILES += [f for f in git('ls-files', '--others', '--exclude-standard', 'src').stdout.split() if f not in FILES]
+if not sys.argv[2:]:  # (27 Nov) files given = only those: never create another job's new scripts
+    FILES += [f for f in git('ls-files', '--others', '--exclude-standard', 'src').stdout.split() if f not in FILES]
 print('local SES=game:GetService("ScriptEditorService") local R={}')
 for f in FILES:
     inst = inst_of(f)

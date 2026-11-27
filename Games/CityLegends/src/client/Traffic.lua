@@ -27,6 +27,7 @@ local TrafficMix = require(Shared:WaitForChild("TrafficMix"))
 local ChauffeurRoute = require(Shared:WaitForChild("ChauffeurRoute"))
 local Audio = require(script.Parent:WaitForChild("Audio"))
 local LowEnd = require(script.Parent:WaitForChild("LowEnd"))
+local TrafficSounds = require(script.Parent:WaitForChild("TrafficSounds"))
 local RACER = TrafficMix.Racer
 local RACE = TrafficMix.Race
 local besideOf: (any) -> { any }?
@@ -1847,10 +1848,13 @@ end
 function Traffic.update(dt: number)
 	if not running or #Traffic.cars == 0 then
 		racerSounds(0)
+		TrafficSounds.step(0, {}, false)
 		return
 	end
 	dt = math.min(dt, 0.1)
 	racerSounds(dt)
+	-- (27 Nov) pass-by roar on the nearest cars and honks (TrafficSounds)
+	TrafficSounds.step(dt, Traffic.cars, true, (Traffic :: any).peds)
 	local dt0 = dt
 	refreshPlayerCars()
 	bumpRefresh -= dt
@@ -2129,6 +2133,9 @@ function Traffic.update(dt: number)
 			local reach = if npc.racer then math.max(T.LookAhead, npc.speed * RACER.LookAheadS) else pathReach
 			-- (a racer off its lane's middle has no lane path: its strip checks see for it)
 			local gap, otherSpeed, align, isPlayer = lookAheadGap(npc, obstacleList, reach, if math.abs(npc.off) < 2 then pathOff else nil)
+			-- (what it is waiting behind, for the honks: TrafficSounds)
+			local ahead: any = npc
+			ahead.gapNow, ahead.gapPlayer, ahead.gapAlign = gap, isPlayer, align
 			-- (and a car already overlapping the one ahead, gap under 0, isn't a normal queue either:
 			-- the gridlock breaker may take it through)
 			crossBlocked = crossBlocked or (gap < math.huge and align < 0.7) or gap < 0
