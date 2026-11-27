@@ -13,7 +13,7 @@ Saved in Studio (Team Create save, store back on `CityLegends_v1`). Not publishe
   - default body parts and the classic face
   - Roblox's free Brown Hair from `ReplicatedStorage.PedKit.Hair`
   - a white singlet (torso colour) and dark green trousers
-- **Fat belly:** a wider and deeper body scale (1.18 / 1.3) plus a white sphere on the front of the upper torso.
+- **Fat belly (round 2, 28 Nov):** a wider and deeper body scale (1.18 / 1.3), and his whole upper torso is one mesh with the gut built in. The singlet colour and shading run on without a seam, the gut hangs over the trouser-green waist, and it follows every pose. The first version, a white ball stuck on his front, was replaced.
 - **Name tag:** "Cortion" in white over his head.
 - He lives in `Workspace.Cortion` (Atomic streaming). The server owns him and walks him, so every player sees the same Cortion.
 - He only runs while a player is within 160 studs of the flat. Otherwise he stands still and his timers pause.
@@ -91,7 +91,36 @@ All channels ease toward their target, so there is no snapping between poses. Si
 - kick while asleep (frame sheet)
 - walk animation frame sheet (taken before the door-leaf fix)
 
+## Round 2 (28 Nov): belly, clipping, sound (coordinator's review)
+- **Belly:** `Games/CityLegends/tools/cortion/torso_mesh.py` builds the torso: a rounded box (superquadric) the size of his upper torso, whose lower front swells 0.55 studs into a gut and sags 0.2 over the waist. The underside is rounder so it curves into the waist, because a flat underside read as a block when he sat. It is one closed mesh (6,768 tris, watertight).
+  - Uploaded as Model 112368248282576 (group) and saved in the place as `ServerStorage.CortionKit.Torso`, attribute `Off` = its box centre.
+  - The server welds a copy to the hidden UpperTorso with a half turn: the importer turned the mesh round, so its gut came in on +Z.
+  - The lower torso is trouser colour, and his BodyColors is removed so it stays that way.
+- **Prayer:** he kneels 1.7 studs further back (block frame z 21.3) and bows a little less deep. Over a whole bow cycle his front-most point stays at z 24.73 or less; the cabinet front is at 25.40.
+- **Every pose checked for clipping** on the client (`GetPartsInPart` against the flat, every body part) and by eye:
+
+| Pose | Before | Fix |
+|---|---|---|
+| PC | backrest through his back, thighs through the desk top | He pulls the office chair out 0.9 studs before he sits and pushes it back after. He sits upright, thighs sloping down under the desk. The backrest is now 0.13-0.2 behind him; `GetPartsInPart` still flags it because it tests the mesh's rough collision shape. |
+| Couch | shins into the seat front, back into the back cushion, hair into the wall | He sits at the front of the seat, shins sloping forward, less slump. Only his thighs touch the seat. |
+| Bed | sunk into the mattress, legs through the folded blanket | Body 0.22 higher (his torso is 1.3 deep). Legs straight and tilted up, resting on the blanket. The head sinks a little into the pillow. |
+| Shower | leg in the bucket, hands in the walls and pipe | Stands at (39.2, 5.6), narrower scrub, spray re-aimed at his head. No overlaps. |
+| Windows | hands in the wall, gut on the sill | Stands 0.4-1.0 further back with his hands on the sill. A hand touches the sill lining at times. |
+| Hands on belly (TV) | | Hands rest on top of the gut. |
+- **Sound** (sounds check: his PC measured about -46 dB, while the flat's doors peak about -20 dB):
+  - keyboard Volume 0.22 -> 2.5
+  - shower 0.45 -> 1.2
+  - oof / thud 0.6 -> 1.2
+  - all with roll-off 10 / 50 studs
+  - new: the TV plays a studio-audience laugh (Pro Sound Effects 9114011965, 1.4) when he laughs
+  - Not measured after the change (Studio audio can't be heard from here).
+- Saved as version **2442**.
+- Re-shot: PC, TV, bed (with Zzz), bow + bow cycle sheet, shower, window, kick on the couch (video + sheet), player next to him, and the belly torso in Edit. The kick-while-asleep and walk sheets are still from round 1 (old belly).
+
 ## Lessons (traps found)
+- **Don't stick a primitive on a Blocky body for a body shape.** A sphere on a flat torso always reads as a ball glued on. Make the body part itself one mesh: the torso with the gut, welded to the hidden UpperTorso. When a GLB comes through Open Cloud, check its box centre's sign: it came in turned round.
+- **Check poses against the furniture on the client.** The server's parts stay in the T-pose. `GetPartsInPart` per body part catches real clipping, but a mesh's rough collision shape gives false alarms near a backrest: confirm those with a distance check.
+- **A fat NPC needs room.** Pull a chair out before sitting rather than squeezing between the backrest and the desk.
 - **New avatars come with `AnimationConstraint` joints, not Motor6D.** `CreateHumanoidModelFromDescription` now builds them. Cortion's are swapped for Motor6Ds at build time. The player-kick code accepts both kinds of joint, because both have `Transform`.
 - **`BillboardGui.StudsOffsetWorldSpace` turns with the part.** On a lying head it pushed the Zzz into the wall. Use `StudsOffset` for anything over a head that can lie down.
 - **Studio `screen_capture` did not show the ProximityPrompt UI.** Check the prompt with `PlayerGui.ProximityPrompts` (the "Prompt" BillboardGui with its ActionText) instead of a picture.

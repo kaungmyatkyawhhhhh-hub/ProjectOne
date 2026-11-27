@@ -124,8 +124,10 @@ local POSES = {}
 -- gaming: lean in, forearms on the desk, fingers going, mouse hand out right; every 9 s a win: arms up, lean back
 function POSES.pc(P, t)
 	sit(P)
-	P.chPitch, P.pelPitch = -0.14, -0.04
-	P.shL, P.elL, P.sabL = 0.72, 0.85, -0.04
+	P.hipL, P.hipR, P.kneeL, P.kneeR = 1.25, 1.25, 1.25, 1.25 -- thighs slope down under the desk top (server sitPose matches)
+	P.ankleL, P.ankleR = 0, 0
+	P.chPitch, P.pelPitch = -0.05, -0.02 -- (upright: his gut keeps him off the desk, his back off the chair)
+	P.shL, P.elL, P.sabL = 0.8, 0.8, -0.04
 	P.shR, P.elR, P.sabR = 0.62, 0.8, 0.14
 	P.elL += 0.06 * sin(t * 17)
 	P.wrL = 0.12 * sin(t * 21 + 0.5)
@@ -141,9 +143,12 @@ end
 -- watching TV: slumped back, hands on the belly, head to the screen; a laugh every 11 s
 function POSES.tv(P, t, look)
 	sit(P)
-	P.pelPitch, P.chPitch = 0.1, 0.16
-	P.shL, P.shR, P.elL, P.elR = 0.32, 0.32, 1.25, 1.25
-	P.sabL, P.sabR = -0.3, -0.3
+	P.kneeL, P.kneeR = 1.15, 1.15 -- shins slope forward, clear of the couch front (server sitPose matches)
+	P.ankleL, P.ankleR = -0.3, -0.3
+	P.pelPitch, P.chPitch = 0.04, 0.1 -- (a little slumped; more put his head through the wall behind the couch)
+	-- hands resting on top of the gut (not in it)
+	P.shL, P.shR, P.elL, P.elR = 0.55, 0.55, 0.95, 0.95
+	P.sabL, P.sabR = -0.16, -0.16
 	P.chYaw = look * 0.25
 	P.nkYaw = look * 0.75 + 0.05 * sin(t * 0.4)
 	P.chPitch += 0.012 * sin(t * 1.6) -- breathing
@@ -161,11 +166,13 @@ function POSES.sleep(P, t)
 		P.shL, P.shR, P.elL, P.elR = 0.2, 0.2, 0.6, 0.6
 		return
 	end
-	P.hipL, P.hipR, P.kneeL, P.kneeR = 0.06, 0.04, 0.1, 0.06
+	-- straight legs tilted up a little, resting on the folded blanket at the foot of the bed (top 0.37 over the
+	-- mattress), not through it
+	P.hipL, P.hipR, P.kneeL, P.kneeR = 0.24, 0.22, 0.02, 0.02
 	P.ankleL, P.ankleR = 0.25, 0.3
 	P.abL, P.abR = 0.08, 0.06
-	P.shL, P.shR, P.elL, P.elR = 0.28, 0.22, 0.95, 0.9
-	P.sabL, P.sabR = -0.18, -0.15
+	P.shL, P.shR, P.elL, P.elR = 0.5, 0.45, 0.9, 0.85
+	P.sabL, P.sabR = -0.1, -0.08
 	local br = sin(t * 1.25)
 	P.chPitch = 0.035 * br
 	P.shL += 0.03 * br
@@ -180,7 +187,7 @@ function POSES.shower(P, t)
 	P.kneeL, P.kneeR = 0.06, 0.1
 	P.nkPitch = -0.18
 	local s = sin(t * 9)
-	local head = { shL = 2.45, shR = 2.45, elL = 1.5, elR = 1.5, sabL = 0.35 + 0.12 * s, sabR = 0.35 - 0.12 * s }
+	local head = { shL = 2.45, shR = 2.45, elL = 1.5, elR = 1.5, sabL = 0.22 + 0.1 * s, sabR = 0.22 - 0.1 * s } -- (narrow: the bathroom walls are close)
 	local belly = {
 		shL = 0.5 + 0.14 * sin(t * 7), elL = 1.4, sabL = -0.38 + 0.12 * cos(t * 7),
 		shR = 0.45 + 0.14 * sin(t * 7 + 2), elR = 1.35, sabR = -0.3 + 0.12 * cos(t * 7 + 2),
@@ -202,7 +209,7 @@ function POSES.pray(P, t)
 	P.nkPitch = -0.12
 	local e = hump(t % 6, 1.4, 4.6)
 	e = clamp(e * 1.25, 0, 1) -- hold at the bottom
-	P.pelPitch = -0.85 * e
+	P.pelPitch = -0.75 * e
 	P.chPitch = -0.25 * e
 	P.nkPitch += -0.2 * e
 	P.shL += 0.65 * e
@@ -222,13 +229,13 @@ function POSES.window(P, t)
 	P.ankleL, P.ankleR = P.kneeL, P.kneeR
 	P.pelRoll = 0.04 * side
 	P.chPitch, P.pelPitch = -0.12, -0.04
-	P.shL, P.shR, P.elL, P.elR, P.sabL, P.sabR = 0.6, 0.6, 0.5, 0.5, -0.06, -0.06
+	P.shL, P.shR, P.elL, P.elR, P.sabL, P.sabR = 0.78, 0.78, 0.3, 0.3, -0.04, -0.04 -- (hands on the sill top, not in the wall)
 	P.wrL, P.wrR = -0.5, -0.5
 	P.nkYaw = 0.6 * sin(t * 0.33) + 0.12 * sin(t * 0.9)
 	P.chYaw = 0.12 * sin(t * 0.33)
 	P.nkPitch = 0.05 * sin(t * 0.21) - 0.08
 	local lean = hump(t % 10, 5, 8)
-	P.bz = -0.25 * lean
+	P.bz = -0.06 * lean
 	P.chPitch -= 0.1 * lean
 end
 

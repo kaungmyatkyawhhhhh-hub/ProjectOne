@@ -7,7 +7,7 @@
 	activity ... and most importantly, add an animation to everything he does").
 
 	A Roblox R15 Blocky avatar (default body parts, classic face, a Roblox catalog hair from ReplicatedStorage.PedKit,
-	wider / deeper body scale + a belly sphere on the upper torso), name tag "Cortion", in Workspace.Cortion
+	wider / deeper body scale + an upper-torso mesh with a gut, tools/cortion/torso_mesh.py), name tag "Cortion", in Workspace.Cortion
 	(Atomic streaming). The server walks him (Humanoid:MoveTo along hand waypoints in the Myittar Nyunt flat, doors
 	opened through Openables' OpenableOpen) and runs a weighted random day: PC (monitor on with a racing game),
 	TV (picture on, scenes change), sleep (yellow room bed), shower (rare; water, sound), pray at the shrine's
@@ -51,8 +51,8 @@ local N = {
 	L1 = Vector2.new(24.4, 15), L2 = Vector2.new(24.6, 24.4), D1 = Vector2.new(27.3, 7.6), D2 = Vector2.new(35.4, 7.4),
 	B1 = Vector2.new(38.7, 5.4),
 	-- activity spots (he stands here, then the pose moves his body onto the seat / bed)
-	PC = Vector2.new(15.1, 22.3), TV = Vector2.new(23.2, 20.4), BED = Vector2.new(3.0, 20.4), PRAY = Vector2.new(-9.4, 23.0),
-	SHOWER = Vector2.new(40.3, 5.9), WIN_S = Vector2.new(24.8, 26.9), WIN_W = Vector2.new(-10.7, 19.6),
+	PC = Vector2.new(15.1, 21.6), TV = Vector2.new(23.2, 20.4), BED = Vector2.new(3.0, 20.4), PRAY = Vector2.new(-9.4, 21.3),
+	SHOWER = Vector2.new(39.2, 5.6), WIN_S = Vector2.new(24.8, 25.9), WIN_W = Vector2.new(-9.7, 19.6),
 }
 local EDGES = {
 	{ "H1", "H2" }, { "H2", "H3" }, { "H3", "H4" }, { "H4", "H5" }, { "H5", "H6" },
@@ -138,24 +138,37 @@ local function build(): Model
 	hum.BreakJointsOnDeath = false
 	hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
 	hum.MaxHealth, hum.Health = math.huge, math.huge
-	-- the belly: a sphere on the front of the upper torso, singlet white
+	-- the belly (coordinator 28 Nov: "a plain white ball glued onto his front ... make it part of him"): his whole
+	-- upper torso is one mesh with the gut in it (tools/cortion/torso_mesh.py -> Model 112368248282576, saved in
+	-- the place as ServerStorage.CortionKit.Torso, attribute Off = its box centre as imported). It is welded to the
+	-- hidden UpperTorso (joints unchanged), so the shirt colour and shading run on without a seam in every pose; the
+	-- lower torso is trouser colour, the gut hangs over it
 	local ut = m:FindFirstChild("UpperTorso") :: BasePart
-	local s = ut.Size
-	local belly = Instance.new("Part")
-	belly.Name = "Belly"
-	belly.Size = Vector3.new(s.X * 0.9, s.Y * 0.95, s.Z * 1.25)
-	belly.Color = SINGLET
-	belly.Material = Enum.Material.SmoothPlastic
-	belly.CanCollide, belly.CanQuery, belly.CanTouch, belly.Massless = false, false, false, true
-	local mesh = Instance.new("SpecialMesh")
-	mesh.MeshType = Enum.MeshType.Sphere
-	mesh.Parent = belly
-	local w = Instance.new("Weld")
-	w.Part0, w.Part1 = ut, belly
-	w.C0 = CFrame.new(0, -s.Y * 0.28, -s.Z * 0.45) -- (the Blocky torso tapers: further back it poked out behind)
-	w.Parent = belly
-	belly.CFrame = ut.CFrame * w.C0
-	belly.Parent = m
+	local lt = m:FindFirstChild("LowerTorso") :: BasePart
+	local bc = m:FindFirstChildOfClass("BodyColors")
+	if bc then
+		bc:Destroy() -- (it paints both torso parts one colour; the parts keep the colours it already gave them)
+	end
+	lt.Color = PANTS
+	local kit = ServerStorage:FindFirstChild("CortionKit")
+	local tpl = kit and kit:FindFirstChild("Torso") :: MeshPart?
+	if tpl then
+		local t = tpl:Clone()
+		t.Name = "BellyTorso"
+		t.Color = SINGLET
+		t.Material = ut.Material
+		local off = (tpl:GetAttribute("Off") :: Vector3?) or Vector3.zero
+		local w = Instance.new("Weld")
+		w.Part0, w.Part1 = ut, t
+		-- the importer turned the mesh round (its gut came in on +Z): half turn, box centre mirrored forward
+		w.C0 = CFrame.new(off.X, off.Y, -off.Z) * CFrame.Angles(0, math.pi, 0)
+		w.Parent = t
+		t.CFrame = ut.CFrame * w.C0
+		t.Parent = m
+		ut.Transparency = 1
+	else
+		warn("Cortion: ServerStorage.CortionKit.Torso missing, no belly")
+	end
 	-- Roblox hair from the street people's kit (short black)
 	local kit = ReplicatedStorage:FindFirstChild("PedKit")
 	local hairs = kit and kit:FindFirstChild("Hair")
@@ -223,9 +236,11 @@ local foot = ankle.C1.Position.Y + (model:FindFirstChild("LeftFoot") :: BasePart
 local legHalf = (model:FindFirstChild("LeftUpperLeg") :: BasePart).Size.Z / 2
 
 -- pose = where the body goes from the standing root (root space: -Z ahead, +X right)
-local function sitPose(seatTop: number, ahead: number): CFrame
-	-- seated, the hip sits at shin + foot (knee height) over the floor; the thigh's underside should touch the seat
-	return CFrame.new(0, seatTop + legHalf - (shin + foot), -ahead)
+local function sitPose(seatTop: number, ahead: number, hip: number?, knee: number?): CFrame
+	-- seated, the hip sits where the legs reach (client/Cortion's drop); the thigh's underside should touch the seat.
+	-- hip / knee = the pose's angles (client POSES; default sit() = 1.5 / 1.45)
+	local h, k = hip or 1.5, knee or 1.45
+	return CFrame.new(0, seatTop + legHalf - (thigh * math.cos(h) + shin * math.cos(h - k) + foot), -ahead)
 end
 local function kneelPose(): CFrame
 	return CFrame.new(0, legHalf - (shin * math.cos(1.45) + foot), 0)
@@ -314,8 +329,9 @@ do
 		light.Parent = p
 		pc.light = light
 		local snd = Instance.new("Sound")
-		snd.SoundId, snd.Volume, snd.Looped = "rbxassetid://9116157899", 0.22, true -- Keyboard Typing 42 (Pro Sound Effects)
-		snd.RollOffMode, snd.RollOffMinDistance, snd.RollOffMaxDistance = Enum.RollOffMode.InverseTapered, 4, 30
+		-- (28 Nov, sounds check: 0.22 measured about -46 dB; the flat's doors peak about -20 dB)
+		snd.SoundId, snd.Volume, snd.Looped = "rbxassetid://9116157899", 2.5, true -- Keyboard Typing 42 (Pro Sound Effects)
+		snd.RollOffMode, snd.RollOffMinDistance, snd.RollOffMaxDistance = Enum.RollOffMode.InverseTapered, 10, 50
 		snd.Parent = p
 		pc.sound = snd
 		-- the screen is off until he plays (it used to glow all the time)
@@ -373,6 +389,11 @@ if tv.sky and tv.land then
 	tv.light = Instance.new("SurfaceLight")
 	tv.light.Face, tv.light.Range, tv.light.Brightness, tv.light.Angle, tv.light.Enabled = Enum.NormalId.Front, 14, 1, 120, false
 	tv.light.Parent = tv.sky
+	-- the studio audience laughs with him (his laugh is at 7 s into every 11 s of the act; the TV comes on 0.9 s in)
+	tv.laugh = Instance.new("Sound")
+	tv.laugh.SoundId, tv.laugh.Volume = "rbxassetid://9114011965", 1.4 -- Crowd Laugh Reverberant Interior 4 (Pro Sound Effects)
+	tv.laugh.RollOffMode, tv.laugh.RollOffMinDistance, tv.laugh.RollOffMaxDistance = Enum.RollOffMode.InverseTapered, 10, 50
+	tv.laugh.Parent = tv.sky
 	for _, p in { tv.sky, tv.land } do
 		p.Color, p.Material = OFF_LOOK.Color, OFF_LOOK.Material
 	end
@@ -383,6 +404,9 @@ local function setTV(on: boolean)
 	end
 	tv.on = on
 	tv.gSky.Enabled, tv.gLand.Enabled, tv.light.Enabled = on, on, on
+	if not on then
+		tv.laugh:Stop()
+	end
 	for _, p in { tv.sky, tv.land } do
 		p.Material = if on then Enum.Material.Neon else OFF_LOOK.Material
 		p.Color = OFF_LOOK.Color
@@ -404,6 +428,9 @@ local function setTV(on: boolean)
 						break
 					end
 					k += 1
+					if (k * 0.5 - 6.1) % 11 < 0.5 then
+						tv.laugh:Play()
+					end
 					tv.ball.Position = UDim2.fromScale(0.2 + 0.6 * (0.5 + 0.5 * math.sin(k * 0.7)), 0.3 + 0.3 * math.abs(math.sin(k * 1.3)))
 					tv.guy.Position = UDim2.fromScale(0.3 + 0.4 * (0.5 + 0.5 * math.sin(k * 0.45)), 0.1)
 					task.wait(0.5)
@@ -421,9 +448,9 @@ if shower.head then
 	sp.Name = "CortionShowerSpray"
 	sp.Size = Vector3.new(0.4, 0.1, 0.4)
 	sp.Transparency, sp.Anchored, sp.CanCollide, sp.CanQuery, sp.CanTouch = 1, true, false, false, false
-	-- aimed down and out from the wall, so the water lands on him (he stands 1.4 studs out from the pipe)
+	-- aimed down and out from the wall so the water lands on him (he stands about 2 studs out, clear of the bucket)
 	local hp = shower.head.Position - Vector3.new(0, 0.15, 0)
-	sp.CFrame = CFrame.lookAt(hp, hp + FRAME:VectorToWorldSpace(Vector3.new(-0.35, -1, 0.75)))
+	sp.CFrame = CFrame.lookAt(hp, hp + FRAME:VectorToWorldSpace(Vector3.new(-1.2, -1, 0.7)))
 	sp.Parent = shower.head
 	local e = Instance.new("ParticleEmitter")
 	e.EmissionDirection = Enum.NormalId.Front
@@ -433,15 +460,15 @@ if shower.head then
 	e.Size = NumberSequence.new(0.1, 0.06)
 	e.Transparency = NumberSequence.new(0.15, 0.55)
 	e.Lifetime = NumberRange.new(0.45, 0.6)
-	e.Speed = NumberRange.new(4, 5.5)
+	e.Speed = NumberRange.new(5, 6.5)
 	e.SpreadAngle = Vector2.new(12, 12)
 	e.Acceleration = Vector3.new(0, -25, 0)
 	e.Rate, e.Enabled = 240, false
 	e.Parent = sp
 	shower.emit = e
 	local snd = Instance.new("Sound")
-	snd.SoundId, snd.Volume, snd.Looped = "rbxassetid://365551014", 0.45, true -- BathRunning (Roblox)
-	snd.RollOffMode, snd.RollOffMinDistance, snd.RollOffMaxDistance = Enum.RollOffMode.InverseTapered, 4, 30
+	snd.SoundId, snd.Volume, snd.Looped = "rbxassetid://365551014", 1.2, true -- BathRunning (Roblox)
+	snd.RollOffMode, snd.RollOffMinDistance, snd.RollOffMaxDistance = Enum.RollOffMode.InverseTapered, 10, 50
 	snd.Parent = sp
 	shower.sound = snd
 end
@@ -453,6 +480,39 @@ local function setShower(on: boolean)
 		else
 			shower.sound:Stop()
 		end
+	end
+end
+
+-- the office chair at the PC: he pulls it out 0.9 studs before he sits (his gut and the backrest don't fit at the desk
+-- otherwise) and pushes it back in after; its parts stand within 1.4 studs of the seat (block frame x 15.15, z 23.95)
+local chair = {}
+for _, p in inside:GetDescendants() do
+	if p:IsA("BasePart") and p.Name:sub(1, 5) == "Chair" then
+		local l = FRAME:PointToObjectSpace(p.Position)
+		if math.abs(l.X - 15.15) < 1.4 and math.abs(l.Z - 23.95) < 1.4 and l.Y < FLOOR + 5 then
+			chair[p] = p.CFrame
+		end
+	end
+end
+local chairOut = false
+local function pullChair(out: boolean)
+	if out == chairOut then
+		return
+	end
+	chairOut = out
+	local shift = FRAME:VectorToWorldSpace(Vector3.new(0, 0, -0.9))
+	local t0 = os.clock()
+	while true do
+		local a = math.min(1, (os.clock() - t0) / 0.5)
+		a = a * a * (3 - 2 * a)
+		local k = if out then a else 1 - a
+		for p, cf in chair do
+			p.CFrame = cf + shift * k
+		end
+		if a >= 1 then
+			break
+		end
+		RunService.Heartbeat:Wait()
 	end
 end
 
@@ -471,12 +531,14 @@ type Act = { name: string, spot: string, face: string, weight: number, dur: Numb
 	start: (() -> ())?, stop: (() -> ())?, lines: { string } }
 
 local MATTRESS_TOP = 1.8
-local LIE = CFrame.fromMatrix(Vector3.new(0.3, MATTRESS_TOP + 0.5 - standY, -3.5), Vector3.new(0, 0, -1), Vector3.new(1, 0, 0), Vector3.new(0, -1, 0))
+-- body centre half his (scaled, 1.3 deep) torso above the mattress, a hair more so nothing sinks into the sheet
+local LIE = CFrame.fromMatrix(Vector3.new(0.3, MATTRESS_TOP + 0.72 - standY, -3.5), Vector3.new(0, 0, -1), Vector3.new(1, 0, 0), Vector3.new(0, -1, 0))
 local ACTS: { Act } = {
-	{ name = "pc", spot = "PC", face = "pz", weight = 30, dur = NumberRange.new(30, 45), pose = sitPose(1.85, 1.7),
+	{ name = "pc", spot = "PC", face = "pz", weight = 30, dur = NumberRange.new(30, 45), pose = sitPose(1.85, 1.7, 1.25, 1.25), -- (the chair pulled out 0.9: back off its backrest, knees short of the desk edge)
+		pre = function() pullChair(true) end, post = function() pullChair(false) end,
 		start = function() setPC(true) end, stop = function() setPC(false) end,
 		lines = { "HEY! I was about to win!", "My game! Noooo!", "Bro I was on the last lap!" } },
-	{ name = "tv", spot = "TV", face = "px", weight = 24, dur = NumberRange.new(30, 45), pose = sitPose(1.6, -2.3),
+	{ name = "tv", spot = "TV", face = "px", weight = 24, dur = NumberRange.new(30, 45), pose = sitPose(1.6, -1.7, 1.5, 1.15), -- (front of the seat, shins sloping forward past the seat edge)
 		start = function() setTV(true) end, stop = function() setTV(false) end,
 		lines = { "Ow! My show!", "It was the best part!", "Can't a guy watch TV?!" } },
 	{ name = "sleep", spot = "BED", face = "pz", weight = 12, dur = NumberRange.new(35, 50), pose = sitPose(MATTRESS_TOP, 1.2), pose2 = LIE,
@@ -732,8 +794,8 @@ end
 local function oof()
 	for _, id in { "rbxasset://sounds/uuhhh.mp3", "rbxasset://sounds/action_jump_land.mp3" } do
 		local s = Instance.new("Sound")
-		s.SoundId, s.Volume = id, 0.6
-		s.RollOffMode, s.RollOffMinDistance, s.RollOffMaxDistance = Enum.RollOffMode.InverseTapered, 4, 40
+		s.SoundId, s.Volume = id, 1.2
+		s.RollOffMode, s.RollOffMinDistance, s.RollOffMaxDistance = Enum.RollOffMode.InverseTapered, 10, 50
 		s.Parent = root
 		s:Play()
 		task.delay(3, function()
@@ -765,6 +827,9 @@ end
 local function run(a)
 	kicked = false
 	walkTo(a.spot)
+	if a.pre then
+		a.pre()
+	end
 	glide(spotCF(a), 0.45)
 	setAct(a.name, a.pose, a.pose2, a.look)
 	addPrompt()
@@ -806,6 +871,9 @@ local function run(a)
 	if winOf[a] then
 		window(winOf[a], true)
 	end
+	if a.post then
+		a.post()
+	end
 	kicked = false
 	model:SetAttribute("KickDir", nil)
 end
@@ -833,6 +901,7 @@ task.spawn(function()
 			setPC(false)
 			setTV(false)
 			setShower(false)
+			pullChair(false)
 			task.wait(2)
 		end
 		last = a
