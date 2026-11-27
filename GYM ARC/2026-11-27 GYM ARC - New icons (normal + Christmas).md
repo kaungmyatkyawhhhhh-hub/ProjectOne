@@ -64,3 +64,23 @@ Study: [[2026-11-27 GYM ARC - Icon study (gym icons + top CTR)]]. Files in `Asse
 - Gemini's pass turned the gold arms into skin, so it was dropped; ChatGPT art is used as is.
 - 64 px: lum 0.43–0.44, near-black 4–5%. Size test: `icon_size_test_v6.png`.
 - Next: the owner picks a build, then the Christmas version in the same ChatGPT chat.
+
+## v7 (27 Nov, live owner notes while iterating)
+Owner notes, in order:
+- picked the aesthetic build, with bigger legs;
+- "the icon dont make much sense";
+- legs and arms must be the same skin;
+- the Muscle Legends small-vs-giant layout is "sloppy, i want professionalism";
+- "focused like 30% character, 30% logo, 30% background, which is bad";
+- one skin tone that suits the colours;
+- the torso looked short, so he looked fat.
+
+Steps in `Assets/icon_2026-11-27/v7/`:
+- `gymarc_v7_normal_gpt.png`: small kid vs giant (rejected as sloppy).
+- `v7b`: single full-body hero (face too small).
+- `v7c`: knee-up hero.
+- `v7d`: waist-up close-up with gold arms.
+- **`v7e`, current**: waist-up, character about 80% of the frame, one warm tan skin, long torso with a V-taper, small logo (28%), blurred blue background, a thin ruler with a gold head mark. Logo version: `gymarc_v7e_normal_logo.png`; size test: `gymarc_v7e_normal_logo_sizetest.png`.
+- 64 px: lum 0.44, near-black 5%.
+- `compose_v7.py <art> <out> [logo_frac]` uses the cached `ref_icons/`.
+- Christmas comes next, from v7e, after the owner's OK.
