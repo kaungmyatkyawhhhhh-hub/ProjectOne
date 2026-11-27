@@ -93,8 +93,11 @@ local RIVIERA_KEYS: { Key } = {
 	{ hour = 7.2, brightness = 2.5, ambient = rgb(150, 158, 174), outdoor = rgb(174, 186, 206), shiftTop = rgb(232, 236, 248), exposure = 0.2, density = 0.33, haze = 2.3, glare = 0.1, atmo = rgb(220, 224, 230), decay = rgb(186, 192, 204), bloom = 0.2, rays = 0.02, tint = rgb(244, 247, 255), water = rgb(66, 102, 124), sat = 0.01, con = -0.09, soft = 0.5, cover = 0.74, fog = 0.85 },
 	-- morning: still cold, the mist lifting
 	{ hour = 8.5, brightness = 2.83, ambient = rgb(156, 163, 178), outdoor = rgb(179, 191, 209), shiftTop = rgb(238, 240, 248), exposure = 0.12, density = 0.3, haze = 2, glare = 0.1, atmo = rgb(222, 224, 226), decay = rgb(196, 198, 204), bloom = 0.2, rays = 0.02, tint = rgb(246, 248, 255), water = rgb(70, 108, 128), sat = 0.02, con = -0.09, soft = 0.45, cover = 0.72, fog = 0.55 },
-	-- day: cool, a light haze left over the far towers
-	{ hour = 13, brightness = 3.15, ambient = rgb(154, 161, 176), outdoor = rgb(177, 188, 206), shiftTop = rgb(246, 246, 250), exposure = 0.06, density = 0.25, haze = 1.5, glare = 0.15, atmo = rgb(222, 228, 236), decay = rgb(170, 186, 208), bloom = 0.2, rays = 0.03, tint = rgb(250, 251, 255), water = rgb(54, 110, 140), sat = 0.06, con = -0.05, soft = 0.35, cover = 0.6, fog = 0.15 },
+	-- day: a light haze left over the far towers
+	-- (27 Nov, owner: "the game still dont look like the tiktok video car game", TorqX midday: muted, warm-neutral,
+	-- a pale hazy sky, crisp shadows against darker shade; was ambient 154,161,176, outdoor 177,188,206, atmo 222,228,236,
+	-- decay 170,186,208, haze 1.5 (2.3 tuned live: 2.8 read as fog), sat 0.06, soft 0.35, cover 0.6: a bright blue, shadowless, cartoon-clear noon)
+	{ hour = 13, brightness = 3.3, ambient = rgb(136, 134, 136), outdoor = rgb(160, 158, 158), shiftTop = rgb(255, 246, 230), exposure = 0.06, density = 0.27, haze = 2.3, glare = 0.3, atmo = rgb(226, 222, 214), decay = rgb(178, 176, 174), bloom = 0.25, rays = 0.04, tint = rgb(255, 251, 244), water = rgb(54, 110, 140), sat = -0.02, con = 0.02, soft = 0.22, cover = 0.45, fog = 0.2 },
 	-- afternoon, warming
 	-- (27 Nov, owner: "get close to that game reference", TorqX: a strong low sun against darker shade, glow toward the
 	-- sun) the sun is stronger and the shade fill lower from here on, so lit and shaded sides read apart

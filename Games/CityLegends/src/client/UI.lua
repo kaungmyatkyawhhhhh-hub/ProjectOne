@@ -2867,23 +2867,111 @@ end
 -- mph, speed fraction of top speed (unused), gear ("N", "R", "1".."7"), rpm 0..1 (1 = the car's
 -- redline), launch control held, manual gearbox
 local manualBox = false
-local touchMoving = false
+local touchMoving = false -- (since 27 Nov on every device, not only phones: "moving" for the calm HUD)
 local pillFade = function(_moving: boolean) end -- (set with the pills, below)
+
+-- (27 Nov, owner: TorqX "look polished", ~15 HUD panels while driving) the calm driving screen: while the car moves
+-- only the speedometer, cash, minimap and messages you must act on stay; these HUD parts hide and come back exactly
+-- as they were when you stop (or leave the car). Other code may show / hide them meanwhile: that wish is kept for later.
+local CALM = { "GoalTracker", "RewardsPill", "DailyCard", "SideButtons" }
+local CALM_DEEP = { "Cash2xBadge", "CarStrip" } -- (found anywhere in the HUD)
+local calmWant: { [GuiObject]: boolean } = {}
+local calmOwn = false
+local calmOn = false
+local lastSpeedAt = 0
+local function calmParts(): { GuiObject }
+	local out = {}
+	if not hud then
+		return out
+	end
+	for _, n in CALM do
+		local g = hud:FindFirstChild(n)
+		if g and g:IsA("GuiObject") then
+			table.insert(out, g)
+		end
+	end
+	for _, n in CALM_DEEP do
+		local g = hud:FindFirstChild(n, true)
+		if g and g:IsA("GuiObject") then
+			table.insert(out, g)
+		end
+	end
+	-- the keys-list button next to the cash (unnamed TextButton right under the HUD)
+	for _, c in hud:GetChildren() do
+		if c:IsA("TextButton") and c.Name == "TextButton" then
+			table.insert(out, c)
+		end
+	end
+	return out
+end
+local function setCalm(on: boolean)
+	if on == calmOn then
+		return
+	end
+	calmOn = on
+	calmOwn = true
+	if on then
+		for _, g in calmParts() do
+			if calmWant[g] == nil then
+				calmWant[g] = g.Visible
+				g:GetPropertyChangedSignal("Visible"):Connect(function()
+					if calmOwn then
+						return
+					end
+					calmWant[g] = g.Visible
+					if calmOn and g.Visible then
+						calmOwn = true
+						g.Visible = false
+						calmOwn = false
+					end
+				end)
+			else
+				calmWant[g] = g.Visible
+			end
+			g.Visible = false
+		end
+	else
+		for g, want in calmWant do
+			if g.Parent then
+				g.Visible = want
+			end
+		end
+	end
+	calmOwn = false
+end
+task.spawn(function()
+	-- out of the car (no speed coming in): the full HUD again
+	while true do
+		task.wait(0.5)
+		if calmOn and os.clock() - lastSpeedAt > 0.6 then
+			touchMoving = false
+			setCalm(false)
+			local bars = hud and hud:FindFirstChild("TopBars")
+			if bars then
+				(bars :: Frame).Visible = not hudLevelOff
+			end
+			pillFade(false)
+		end
+	end
+end)
+
 function UI.setSpeed(mph: number, frac: number, gear: string, rpm: number, launch: boolean?, manual: boolean?)
 	HudSpeedo.update(mph, gear, rpm, speedKmh, if manual ~= nil then manual else manualBox, launch == true)
+	lastSpeedAt = os.clock()
 	if touchReadout then
 		touchReadout(if speedKmh then mph * 1.609 else mph, frac, gear)
-		-- (19 Nov) on a phone the level and job bars go while you drive (back when you stop) and
-		-- the GET OUT pill fades, so the road stays clear
-		local moving = math.abs(mph) > (if touchMoving then 4 else 8)
-		if moving ~= touchMoving then
-			touchMoving = moving
-			local bars = hud:FindFirstChild("TopBars")
-			if bars then
-				(bars :: Frame).Visible = not moving and not hudLevelOff
-			end
-			pillFade(moving)
+	end
+	-- (19 Nov phones, 27 Nov every device) the level and job bars go while you drive (back when you stop), the
+	-- GET OUT pill fades and the calm HUD hides the rest, so the road stays clear
+	local moving = math.abs(mph) > (if touchMoving then 4 else 8)
+	if moving ~= touchMoving then
+		touchMoving = moving
+		local bars = hud:FindFirstChild("TopBars")
+		if bars then
+			(bars :: Frame).Visible = not moving and not hudLevelOff
 		end
+		pillFade(moving)
+		setCalm(moving)
 	end
 end
 
@@ -2950,7 +3038,7 @@ function UI.setHudPart(part: string, on: boolean)
 		hudLevelOff = not on
 		local bars = hud and hud:FindFirstChild("TopBars")
 		if bars then
-			(bars :: Frame).Visible = on and not (UI.isTouch and touchMoving)
+			(bars :: Frame).Visible = on and not touchMoving
 		end
 	elseif part == "goals" then
 		UI.hudGoalsOff = not on
