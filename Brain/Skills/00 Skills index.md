@@ -33,6 +33,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/robux-revenue-sim/SKILL\|robux-revenue-sim]] | Forecast or improve a Roblox game's Robux revenue: Monte Carlo sim of players, retention, would-be payers and each offer, calibrated to the Creator Dashboard; Robux + DevEx USD ranges, per-offer split, price sweep. (Local skill in `~/.claude/skills`.) |
 
 ## Log
+- 2026-11-27 roblox-3d-model-from-sheet: owner rule, use it for LITERALLY ANYTHING 3D (props, decor, details), low-tri Blender meshes instead of Part builds (less lag, better look). Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: seventh note (owner: logo too small; match Power Lifters logo size ~55% and two-tone gradient tied to the hero prop, warm border on cool background). Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: sixth note (owner: hero must do an action, tight zoom like Power Lifters; borrow framing only). Plugin skill: re-upload needed.
 - 2026-11-27 roblox-icon-thumbnail: fifth correction (owner: use the Gym Star physique; attach the named reference image instead of describing the body again). Plugin skill: re-upload needed.

@@ -5,6 +5,8 @@ description: "Use when making a 3D model (shark, fish, creature, prop) for a Rob
 
 # Roblox 3D model from a design sheet
 
+**OWNER RULE (27 Nov): use this skill for LITERALLY ANYTHING 3D, not only creatures.** Props, decor, stalls, trees, statue armour and details: every build is a low-triangle Blender mesh imported as MeshParts, never an assembly of Roblox Parts/Wedges/Cylinders built in code (owner: "if the model is built in blender greatly with low triangles, it lags less than builds with parts and look better"). Code-built spikes on the GYM ARC Frost Titan were rejected as ugly. Existing Part builds get converted.
+
 **OWNER RULE (9 Nov): ALL models must be HIGH QUALITY.** No placeholder or "good enough" model ever ships; a model is done only when every gate in step 4 passes, it looks Fisch-level from the game camera, it moves smoothly, it works in Studio, and the owner approves it. The full checklist is in the game's home note (MEGA BITE: "RULE: ALL models must be HIGH QUALITY").
 
 The owner's rules: no Creator Store models, no AI model generators (Meshy, Tripo, Hyper3D, Hunyuan). Claude is the artist. ChatGPT is fine for 2D design sheets. Read first: vault `Brain\00 BRAIN.md`, the game's art notes (for MEGA BITE: `Shark art research`, `Art style guide`), and `Roblox Playbook\Research notes\MEGA BITE\2026-11-09 Research - Blender modelling skills for Claude.md`.
