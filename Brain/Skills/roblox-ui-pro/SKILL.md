@@ -145,6 +145,11 @@ Everything is in `references/develuper-style.md`. The short version:
 - **Sound with a job:** use the `roblox-game-sounds` skill.
 - **Off-limits:** spiky sunburst rays, radial glows behind items, emoji icons, default grey Frames, and stock Roblox icons.
 - **When the owner dislikes a result:** measure it against his frame and fix the numbers (see "Fitting" in the reference). Then write the lesson into the reference file and the vault copy.
+- **Shop and reward items are cut-out icons, never world screenshots** (owner, 27 Nov, GYM ARC Christmas shop: "it look so bad. i thought u took tips from the popular games").
+  - Shoot the model in Play on a magenta key wall, then have ChatGPT polish it into a glossy game icon with a thick navy outline on flat magenta. Key it out (`GYM ARC/Scripts/make_shop_card.py` in the vault does the key and the outline).
+  - The item stands on a dark per-item stage, with a **soft** glow in the item's colour behind it (a soft blur only, never rays). This is the one allowed exception to "no radial glows". Add a rarity chip in the corner, and give the top item a wider card, a faint shimmer (about 14%) and a few drifting motes.
+  - Calendar or collection grids: give rarer slots their own art (for example a purple epic present and a deluxe final one), a faint rarity fill, a gold fill plus an "OPEN!" pill on ready slots, a dimmed slot with a green check once claimed, and a "x/24 OPENED" line.
+  - The pill at the top right shows what matters on that tab: the currency on the shop tab, "N READY!" or a countdown on the calendar tab. Add a small "ENDS IN N DAYS" when the event is timed.
 
 ## 5. Verify in Studio (the loop)
 
@@ -169,6 +174,14 @@ Do not save or publish the place without the owner's OK. Play sessions are fine.
 - For screens players judge by eye, also run `quality-nerd-kid-sim`.
 - Where popups stack, run `overstimulated-kid-sim`.
 - For first-minute flows, run `impatient-kid-sim`.
+- **Review loop to 9/10** (owner, 27 Nov: "keep looping like asking gemini and chatgpt until they say its perfect, above 9/10 rating"):
+  - Put both tabs side by side in one live Play screenshot and upload it to ChatGPT and Gemini in the owner's Chrome (`file_upload` on the hidden file input; on Gemini, open "Upload & tools" first).
+  - Ask each for a strict score per tab against named top games (Pet Sim 99, Bee Swarm), plus only the concrete changes still needed.
+  - Apply the changes, re-shoot, and repeat until both rate every tab 9 or higher. Say what was kept on purpose (the house kit, kids' rules, no false stat tags) so they stop asking for it.
+  - Show the owned and claimed states too, through the real remotes on FreshPlayer data. Reviewers mark down what they can't see.
+  - The GYM ARC Christmas panel took 5 rounds (6.5 → 9.0 Rewards, 5.5 → 9.2 Calendar).
+- `Kit.Modal.open()` waits while the player is on a machine (the "never opens by itself while training" rule). To screenshot a window, press the machine's STOP first (`MachineHud.Root.Group.Exit` via `user_mouse_input` with `instance_path`).
+- `Kit.Text` adds a `TextStroke` UIStroke. Remove it for dark text on a gold pill, or the text turns to mush.
 
 ## 7. Report
 
