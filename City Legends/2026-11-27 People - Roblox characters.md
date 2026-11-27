@@ -66,3 +66,18 @@ The FPS numbers are noisy on this PC (the "before" run was slower overall; Studi
 - Mall shoppers (standers) not looked at up close after the change.
 - Only one long hair (the updo); more Roblox women's hairs would add variety.
 - Hats and caps not added.
+
+## Update: Roblox's Blocky body, 20 people (27 Nov, later)
+**Owner:** "the characters blocky are too sharp and the corners need rounding, so i think u need to use the real roblox character from "Avatar" "Character" "Blocky"". Also: "the npc characters are too much": `Config.YangonStreetLife.PedMax` 40 -> 20.
+
+- **The Blocky body is Roblox's default R15 body** (the bevelled blocks with the hand / foot lips). The catalog search found no Roblox-made "Blocky" bundle (only UGC copies), and `Players:CreateHumanoidModelFromDescription` with an empty HumanoidDescription (scales 1, proportion / body type 0) builds exactly that body. Its 15 MeshParts went into `ReplicatedStorage.PedKit.Body` (Studio, saved): one folder per R6 limb (`Torso`, `Left Arm` ...) with the R15 pieces `1`, `2`, `3` top down (attribute `Off` = the piece's centre from the limb box's centre, folder attribute `Box`), plus `Head` (texture cleared so the skin colour shows, attribute `HairAt`).
+- **In the game:** each limb's first piece is its part 1-7 (pose and PedHits' joints unchanged); the other pieces are parts 8+ that follow their limb (`extraOf`), and PedHits welds them to it in a ragdoll. 16 parts a person (was 7), 20 people = 320 parts (was 280 at 40 people).
+- **Clothes:** each piece shows its own slice of the limb's picture in the atlas. Hands stay bare skin (8 Textures a person fewer).
+- **Traps found:**
+  - **A Texture on a MeshPart takes the face's middle as its origin; on a Part, the corner.** Tested side by side in Studio: the clothes came out shifted half a face (wrong colours) until the offset gained W/2, H/2 on MeshParts.
+  - **UnionAsync of MeshParts now returns a MeshPart** whose geometry only lives in the place (MeshContent None). In Edit it drew fine; in Play it drew a checkerboard. So the R15 pieces are kept as they are, not joined.
+  - A union takes the colours of the parts it was made from; only white sources let Part.Color tint it. A union's CFrame is its first part's, not its box centre.
+- **Checked in Play:** clothes land right on the rounded pieces (shirt collar / pocket / short sleeves, longyi checks, blouse, htamein); faces sit on the Blocky head; a 58 km/h hit ragdolled a person with every piece staying on its limb (largest sideways drift 0.004 studs), and they stood up again; no loose parts left.
+- **Numbers (20 people, Studio Play, PC):** looking at the crowd 58.8 FPS without people, 58.0 with them (one more run was noisy: 49.1 with, warming up); 320 parts; 1,080 textures and decals; character texture memory 6.1 MB.
+- Pictures: ![[2026-11-27 People - Blocky body (noon close-up).jpg]] ![[2026-11-27 People - Blocky body (rounded corners, very close).jpg]] ![[2026-11-27 People - Blocky body (evening, pavement).jpg]]
+- Studio saved as version 2326 (not published). Note: version 2321 was saved earlier in this job while the PlayerData store was still on the test store; 2326 has it back on `CityLegends_v1`.

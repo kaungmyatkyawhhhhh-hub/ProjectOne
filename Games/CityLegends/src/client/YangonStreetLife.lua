@@ -407,7 +407,7 @@ local FACES = {
 -- Each figure gets its own copy scaled for its build (geoFor), so PedHits' sockets match what is drawn.
 type Geo = {
 	cen: { Vector3 }, size: { Vector3 }, shoulder: Vector3, hip: Vector3, neck: Vector3, waist: Vector3,
-	arm: number, leg: number,
+	arm: number, leg: number, extra: { [number]: { { size: Vector3, rel: Vector3 } } }?,
 }
 local R6: Geo = {
 	cen = {
@@ -421,6 +421,15 @@ local R6: Geo = {
 	shoulder = Vector3.new(1.5, 3.5, 0), hip = Vector3.new(0.5, 2, 0), neck = Vector3.new(0, 4, 0),
 	waist = Vector3.new(0, 2, 0), arm = 0.6, leg = 0.55,
 }
+-- (27 Nov, owner: "the characters blocky are too sharp and the corners need rounding ... use the real roblox character
+-- from Avatar > Character > Blocky") ReplicatedStorage.PedKit.Body (Studio, saved in the place): Roblox's Blocky body =
+-- the default R15 body parts (bevelled blocks), made in Studio with Players:CreateHumanoidModelFromDescription. One
+-- folder per R6 limb (Torso, Left Arm ...) holding its R15 pieces "1", "2" (, "3") top down, attribute Off = the piece's
+-- centre from the limb box's centre, folder attribute Box = the limb box; plus Head (MeshPart, attribute HairAt). The
+-- limb's first piece is its part 1-7 (PedHits' joints), the others follow it (parts 8+). Without the kit: R6 blocks.
+type LimbKit = { box: Vector3, pieces: { { tpl: BasePart, off: Vector3, size: Vector3, a: number, b: number } } }
+local limbKit: { [number]: LimbKit } = {}
+local LIMB_K = { 1, 4, 5, 6, 7 }
 local NAMES = { "Torso", "Head", "Hair", "Left Leg", "Left Arm", "Right Arm", "Right Leg" }
 local NPART = #NAMES
 local geoCache: { [number]: Geo } = {}
@@ -436,9 +445,27 @@ local function geoFor(bw: number): Geo
 	size[1] = Vector3.new(2 * bw, 2, 1)
 	cen[5] = Vector3.new(-(bw + 0.5), 3, 0)
 	cen[6] = Vector3.new(bw + 0.5, 3, 0)
+	-- the Blocky pieces: each limb's pieces stretched to fill its R6 box; cen / size become the first piece's
+	local extra = {}
+	for _, k in LIMB_K do
+		local lk = limbKit[k]
+		if lk then
+			local F = size[k] / lk.box
+			local p1 = lk.pieces[1]
+			local c0 = cen[k]
+			cen[k] = c0 + p1.off * F
+			size[k] = p1.size * F
+			local ex = {}
+			for i = 2, #lk.pieces do
+				local pc = lk.pieces[i]
+				ex[i] = { size = pc.size * F, rel = (pc.off - p1.off) * F }
+			end
+			extra[k] = ex
+		end
+	end
 	g = {
 		cen = cen, size = size, shoulder = Vector3.new(bw + 0.5, 3.5, 0), hip = R6.hip, neck = R6.neck,
-		waist = R6.waist, arm = R6.arm, leg = R6.leg,
+		waist = R6.waist, arm = R6.arm, leg = R6.leg, extra = extra,
 	}
 	geoCache[key] = g
 	return g
@@ -447,10 +474,12 @@ end
 -- hairs (Pal Hair, Brown Hair, Updo ...; attribute Off = the handle's CFrame from the head's centre at scale 1, from its
 -- HairAttachment; Long = women's), texture cleared so Part.Color is the hair colour; with no kit a plain block cap
 local hairKit: { [string]: { BasePart } } = { short = {}, long = {} }
+local headKit: BasePart? = nil
+local hairShift = Vector3.zero -- the kit head's HairAttachment against the classic head's (0, 0.6, 0)
 
 type Figure = {
 	model: Model, parts: { BasePart }, cfs: { CFrame }, face: Decal?, scale: number, hairOff: CFrame, bald: boolean,
-	geo: Geo, hairKind: string, tex: { Texture }, hairSize: Vector3,
+	geo: Geo, hairKind: string, tex: { any }, hairSize: Vector3, extraOf: { [number]: { k: number, i: number } },
 }
 type Walker = {
 	fig: Figure, mode: string, path: { Vector3 }?, k: number, dir: number, pos: Vector3, yaw: number, speed: number,
@@ -480,6 +509,36 @@ local function loadTemplates()
 		warn("[CityLegends] YangonStreetLife: no PedClothes, plain clothes")
 	end
 	local kit = ReplicatedStorage:FindFirstChild("PedKit")
+	local body = kit and kit:FindFirstChild("Body")
+	if body then
+		for _, k in LIMB_K do
+			local f = body:FindFirstChild(NAMES[k])
+			local box = f and f:GetAttribute("Box") :: Vector3?
+			if f and box then
+				local lk: LimbKit = { box = box, pieces = {} }
+				for i = 1, 3 do
+					local pc = f:FindFirstChild(tostring(i)) :: BasePart?
+					if pc then
+						local off = (pc:GetAttribute("Off") :: Vector3?) or Vector3.zero
+						-- the piece's share of the limb's height, top down (its slice of the clothes picture)
+						local a = math.clamp((box.Y / 2 - off.Y - pc.Size.Y / 2) / box.Y, 0, 1)
+						local b = math.clamp(a + pc.Size.Y / box.Y, 0, 1)
+						table.insert(lk.pieces, { tpl = pc, off = off, size = pc.Size, a = a, b = b })
+					end
+				end
+				if #lk.pieces > 0 then
+					limbKit[k] = lk
+				end
+			end
+		end
+		local head = body:FindFirstChild("Head") :: BasePart?
+		headKit = head
+		if head then -- the head sits on the neck at its own size; PedHits reads R6 (geoFor copies it)
+			R6.size[2] = head.Size
+			R6.cen[2] = R6.neck + Vector3.new(0, head.Size.Y / 2, 0)
+			hairShift = ((head:GetAttribute("HairAt") :: Vector3?) or Vector3.new(0, 0.6, 0)) - Vector3.new(0, 0.6, 0)
+		end
+	end
 	local hairs = kit and kit:FindFirstChild("Hair")
 	if hairs then
 		for _, h in hairs:GetChildren() do
@@ -491,14 +550,9 @@ local function loadTemplates()
 	end
 end
 
--- the clothed faces: { part number, atlas ("shirt" / "pants"), slot group (T / R / L), face }
+-- the clothed limbs: part number -> atlas ("shirt" / "pants"), slot group (T / R / L)
 local FACE_IDS = { F = Enum.NormalId.Front, B = Enum.NormalId.Back, L = Enum.NormalId.Left, R = Enum.NormalId.Right, U = Enum.NormalId.Top }
-local CLOTHED: { { any } } = {}
-for _, e in { { 1, "shirt", "T" }, { 5, "shirt", "L" }, { 6, "shirt", "R" }, { 4, "pants", "L" }, { 7, "pants", "R" } } do
-	for _, face in { "F", "B", "L", "R", "U" } do
-		table.insert(CLOTHED, { e[1], e[2], e[3], face })
-	end
-end
+local CLOTHED = { [1] = { "shirt", "T" }, [5] = { "shirt", "L" }, [6] = { "shirt", "R" }, [4] = { "pants", "L" }, [7] = { "pants", "R" } }
 
 -- crop each Texture to its garment's slot for the part's present size (studs per tile = the whole atlas)
 local function setClothes(f: Figure, top: string, low: string)
@@ -506,18 +560,22 @@ local function setClothes(f: Figure, top: string, low: string)
 		return
 	end
 	local A, cw, ch, cols = CLOTH.size, CLOTH.cellW, CLOTH.cellH, CLOTH.cols
-	for i, c in CLOTHED do
-		local t = f.tex[i]
-		local part = f.parts[c[1]]
-		local cell = CLOTH[c[2]][if c[2] == "shirt" then top else low] or 0
-		local r = CLOTH.slots[c[3]][c[4]]
-		local x, y = (cell % cols) * cw + r[1], (cell // cols) * ch + r[2]
+	for _, c in f.tex do
+		local t = c.t
+		local cell = CLOTH[c.atlas][if c.atlas == "shirt" then top else low] or 0
+		local r = CLOTH.slots[c.group][c.face]
+		-- a Blocky piece shows its own slice (a..b, top down) of the limb's picture
+		local h = r[4] * (c.b - c.a)
+		local x, y = (cell % cols) * cw + r[1], (cell // cols) * ch + r[2] + r[4] * c.a
+		local part = f.parts[c.part]
 		local sz = part.Size
-		local face = c[4]
+		local face = c.face
 		local W, H = if face == "L" or face == "R" then sz.Z else sz.X, if face == "U" then sz.Z else sz.Y
-		local su, sv = W * A / r[3], H * A / r[4]
+		local su, sv = W * A / r[3], H * A / h
+		-- (27 Nov, tested in Studio) on a MeshPart a Texture's origin is the face's middle, on a Part its corner
+		local mid = if part:IsA("MeshPart") then 0.5 else 0
 		t.StudsPerTileU, t.StudsPerTileV = su, sv
-		t.OffsetStudsU, t.OffsetStudsV = x / A * su, y / A * sv
+		t.OffsetStudsU, t.OffsetStudsV = x / A * su + W * mid, y / A * sv + H * mid
 	end
 end
 
@@ -526,19 +584,46 @@ local function newFigure(): Figure
 	model.Name = "Person"
 	local parts = {}
 	local face: Decal? = nil
+	local extraOf = {}
+	local tex = {}
+	-- the clothes: one Texture per clothed face, cropped out of the shared atlases in dress() (U only on a limb's top)
+	local function clothe(p: BasePart, idx: number, k: number, a: number, b: number, top: boolean)
+		local c = CLOTHED[k]
+		if not (c and CLOTH) then
+			return
+		end
+		for _, fc in { "F", "B", "L", "R", "U" } do
+			if fc ~= "U" or top then
+				local t = Instance.new("Texture")
+				t.Texture = "rbxassetid://" .. CLOTH.atlas[c[1]]
+				t.Face = FACE_IDS[fc]
+				t.Parent = p
+				table.insert(tex, {
+					t = t, part = idx, atlas = c[1], group = c[2], face = fc,
+					a = if fc == "U" then 0 else a, b = if fc == "U" then 1 else b,
+				})
+			end
+		end
+	end
 	for k = 1, NPART do
-		local p = Instance.new("Part")
+		local lk = limbKit[k]
+		local src = if lk then lk.pieces[1].tpl elseif k == 2 then headKit else nil
+		local p: BasePart = if src then src:Clone() else Instance.new("Part")
 		quiet(p)
 		p.Material = Enum.Material.SmoothPlastic
-		p.TopSurface = Enum.SurfaceType.Smooth
-		p.BottomSurface = Enum.SurfaceType.Smooth
+		if p:IsA("Part") then
+			p.TopSurface = Enum.SurfaceType.Smooth
+			p.BottomSurface = Enum.SurfaceType.Smooth
+		end
 		p.Name = NAMES[k]
 		p.Size = R6.size[k]
 		if k == 2 then
-			local mesh = Instance.new("SpecialMesh")
-			mesh.MeshType = Enum.MeshType.Head
-			mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
-			mesh.Parent = p
+			if not src then
+				local mesh = Instance.new("SpecialMesh")
+				mesh.MeshType = Enum.MeshType.Head
+				mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+				mesh.Parent = p
+			end
 			local d = Instance.new("Decal")
 			d.Name = "face"
 			d.Face = Enum.NormalId.Front
@@ -547,22 +632,32 @@ local function newFigure(): Figure
 		end
 		p.Parent = model
 		parts[k] = p
+		clothe(p, k, k, if lk then lk.pieces[1].a else 0, if lk then lk.pieces[1].b else 1, true)
 	end
-	-- the clothes: one Texture per clothed face, cropped out of the shared atlases in dress()
-	local tex = {}
-	if CLOTH then
-		for i, c in CLOTHED do
-			local t = Instance.new("Texture")
-			t.Texture = "rbxassetid://" .. CLOTH.atlas[c[2]]
-			t.Face = FACE_IDS[c[4]]
-			t.Parent = parts[c[1]]
-			tex[i] = t
+	-- the Blocky limbs' other pieces (parts 8+), posed with their limb
+	for _, k in LIMB_K do
+		local lk = limbKit[k]
+		if lk then
+			for i = 2, #lk.pieces do
+				local pc = lk.pieces[i]
+				local p = pc.tpl:Clone()
+				quiet(p)
+				p.Material = Enum.Material.SmoothPlastic
+				p.Name = NAMES[k] .. i
+				p.Parent = model
+				table.insert(parts, p)
+				extraOf[#parts] = { k = k, i = i }
+				-- (hands stay bare skin: 8 Textures a person fewer)
+				if not ((k == 5 or k == 6) and i == #lk.pieces) then
+					clothe(p, #parts, k, pc.a, pc.b, false)
+				end
+			end
 		end
 	end
 	return {
-		model = model, parts = parts, cfs = table.create(NPART, CFrame.new()), face = face, scale = 1,
+		model = model, parts = parts, cfs = table.create(#parts, CFrame.new()), face = face, scale = 1,
 		hairOff = CFrame.new(R6.cen[3] - R6.cen[2]), bald = false, geo = R6, hairKind = "", tex = tex,
-		hairSize = R6.size[3],
+		hairSize = R6.size[3], extraOf = extraOf,
 	}
 end
 
@@ -647,9 +742,11 @@ local function dress(f: Figure, who: string)
 		setHair(f, hairKind)
 	end
 	f.hairKind = hairKind
+	local extra = f.geo.extra
 	for k, p in f.parts do
 		p.Color = if k == 3 then pick(HAIR_COLS) else skin
-		p.Size = (if k == 3 then f.hairSize else f.geo.size[k]) * s
+		local ex = f.extraOf[k]
+		p.Size = (if k == 3 then f.hairSize elseif ex and extra then extra[ex.k][ex.i].size else f.geo.size[k]) * s
 	end
 	setClothes(f, top, low)
 	f.parts[3].Transparency = if bald then 1 else 0
@@ -689,11 +786,17 @@ local function pose(w: Walker, moving: boolean)
 	local head = up * CFrame.new(g.neck * s) * CFrame.Angles(0, w.look or 0, 0) * CFrame.new((cen[2] - g.neck) * s)
 	cfs[1] = up * CFrame.new(cen[1] * s)
 	cfs[2] = head
-	cfs[3] = head * (f.hairOff - f.hairOff.Position + f.hairOff.Position * s)
+	cfs[3] = head * (f.hairOff - f.hairOff.Position + (f.hairOff.Position + hairShift) * s)
 	cfs[4] = up * CFrame.new(hipL * s) * CFrame.Angles(legA, 0, 0) * CFrame.new((cen[4] - hipL) * s)
 	cfs[5] = up * CFrame.new(shL * s) * CFrame.Angles(-armA, 0, 0) * CFrame.new((cen[5] - shL) * s)
 	cfs[6] = up * CFrame.new(shR * s) * CFrame.Angles(armA, 0, 0) * CFrame.new((cen[6] - shR) * s)
 	cfs[7] = up * CFrame.new(hipR * s) * CFrame.Angles(-legA, 0, 0) * CFrame.new((cen[7] - hipR) * s)
+	local extra = g.extra
+	if extra then
+		for idx, ex in f.extraOf do
+			cfs[idx] = cfs[ex.k] * CFrame.new(extra[ex.k][ex.i].rel * s)
+		end
+	end
 	workspace:BulkMoveTo(f.parts, cfs, Enum.BulkMoveMode.FireCFrameChanged)
 end
 

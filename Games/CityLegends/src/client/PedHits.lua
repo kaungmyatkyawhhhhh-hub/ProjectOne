@@ -150,6 +150,10 @@ local function ragdoll(w: any, car: Model, root: BasePart, at: Vector3, v: Vecto
 	socket(P[1], (hipL - c[1]) * s, P[4], (hipL - c[4]) * s, -1, 60, 20, made)
 	socket(P[1], (hipR - c[1]) * s, P[7], (hipR - c[7]) * s, -1, 60, 20, made)
 	weld(P[2], P[3], made)
+	-- (27 Nov) the Blocky body's other pieces (parts 8+) ride on their limb
+	for i, ex in f.extraOf or {} do
+		weld(P[ex.k], P[i], made)
+	end
 	-- arms clear of the legs, the legs of each other
 	for _, pair in { { 5, 4 }, { 5, 7 }, { 6, 4 }, { 6, 7 }, { 4, 7 } } do
 		local n = Instance.new("NoCollisionConstraint")
