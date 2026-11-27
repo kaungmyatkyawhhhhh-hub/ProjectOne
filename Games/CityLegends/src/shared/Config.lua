@@ -320,9 +320,13 @@ Config.Traffic = {
 	Wander = 0.14, -- each car's speed drifts this share up and down
 	WanderPeriod = { 14, 34 }, -- seconds per drift, per car
 	TurnSpeedMph = 22,
-	Accel = 28, -- studs/s^2
-	Brake = 70,
-	EmergencyBrake = 140,
+	-- (owner, 27 Nov 2026: "the cars rn are unnatural") real pull-away and braking at 3 studs a metre, eased in and out
+	-- (jerk), so no car changes speed in one frame; braking for lights, turns and cars ahead is planned at PlanBrake
+	Accel = 8, -- studs/s^2 (about 2.7 m/s^2: 0-30 mph in ~5 s; was 28)
+	Brake = 14, -- normal braking (about 0.5 g; was 70)
+	EmergencyBrake = 27, -- hard stop (about 0.95 g; was 140)
+	PlanBrake = 9, -- what stops and gaps are planned with (about 0.3 g)
+	Jerk = 30, -- studs/s^3 the pull or braking builds up at (emergency: x4)
 	StopGap = 15, -- studs between bumpers in a stopped queue (21 Nov, owner: a 1-car gap to cut through; was 4)
 	StopLineMargin = 1.2, -- studs between the front bumper and the stop line at a red light
 	-- Legends Isle's mountain roads (owner, 2026-10-30: "reduce traffic on the mountain")
@@ -362,12 +366,15 @@ Config.Traffic = {
 	RivieraMax = 90, -- (64 before, then 32 before that, 2026-11-03: "add more traffic cars throughout the map"; 22 before that; owner 2026-11-02 again: "add more cars traffic")
 	-- (12 before that: "add a little more traffic, the city monaco is kinda dead")
 	FollowGap = 18, -- ...and at least a car length once moving (owner, 2026-10-29; 21 Nov: 16 -> 18)...
-	Headway = 0.5, -- ...plus this many seconds of travel
+	Headway = 1.5, -- ...plus this many seconds of travel (27 Nov: 0.5 -> 1.5, a real following gap)
 	LookAhead = 70,
 	RecycleDistance = 700,
 	RespawnMin = 220,
 	RespawnMax = 520,
 	StuckTime = 6,
+	-- (27 Nov) the look of real car motion: body roll / pitch on the chassis (DrivingFeel's springs x these)
+	BodyRollK = 1.4,
+	BodyPitchK = 1.4,
 	-- Weighted pick of classes used for NPCs
 	ClassWeights = { Sedan = 40, SUV = 25, Coupe = 18, Supercar = 6, Hypercar = 2 },
 	-- the imported low-poly traffic cars (ReplicatedStorage.TrafficModels, TrafficBodies): length in

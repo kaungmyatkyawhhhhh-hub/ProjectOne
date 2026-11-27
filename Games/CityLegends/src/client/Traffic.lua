@@ -1749,10 +1749,8 @@ local function driveSpeed(npc: Npc, target: number, dt: number)
 end
 
 -- the obstacle an everyday car's step would run into: its box (a hair round it) overlapping another's deeper after the
--- step than before. A traffic car waits for one whose middle is ahead of its own (along its heading) when it
--- is not itself ahead of that one; when both or neither are (crossing paths, level at a merge) the one ahead along their
--- mean heading has the way, so exactly one waits (dead level: the lower number goes). A player's car has the way unless
--- it is behind
+-- step than before. Of two traffic cars the one ahead along their mean heading has the way, so exactly one waits (dead
+-- level: the lower number goes); a player's car has the way unless it is behind
 -- how deep two flat boxes overlap (the least push along the four axes that would part them; under 0 = apart)
 local function boxDepth(p: Vector3, f: Vector3, hl: number, hw: number, q: Vector3, g: Vector3, ol: number, ow: number): number
 	local r, gr = f:Cross(Vector3.yAxis), g:Cross(Vector3.yAxis)
@@ -1785,18 +1783,10 @@ local function stepBlocked(npc: Npc, np: Vector3, nf: Vector3, obstacles: { Obst
 					local rel = op - pos
 					local prio
 					if me then
-						local aheadOfMe, meAhead = rel:Dot(fwd) > 0, -rel:Dot(of) > 0
-						if aheadOfMe ~= meAhead then
-							prio = aheadOfMe -- (a long bus's middle can be beside us while its tail swings across our way)
-						else
-							local along = rel:Dot(fwd + of) -- (crossing, or level at a merge)
-							prio = if math.abs(along) > 0.5 then along > 0 else indexOf(me) < indexOf(npc)
-						end
-						-- a car already waiting is never driven into either, unless it is behind us; two that wait for each
-						-- other 4 s: the lower number may go on by the rule above
-						if not prio and me.held > 0.3 and not (meAhead and not aheadOfMe) then
-							prio = npc.held < 4 or indexOf(npc) > indexOf(me)
-						end
+						-- (27 Nov, measured: "whose middle is ahead along my own heading" and "never drive into a waiting
+						-- car" both made standoffs that ended in overlaps at merges; the mean heading alone does not)
+						local along = rel:Dot(fwd + of)
+						prio = if math.abs(along) > 0.5 then along > 0 else indexOf(me) < indexOf(npc)
 					else
 						prio = rel:Dot(fwd) > -npc.halfLen
 					end
