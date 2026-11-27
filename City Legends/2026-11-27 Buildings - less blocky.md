@@ -57,7 +57,8 @@ Already fine, so left alone: window reveals (0.35 m), sills, grilles, cages, AC 
 - Parts near the camera did not change. The totals differ only by how far streaming had got.
 - FPS was 11-15 before and 25-59 after. That gap is Studio load (other sessions, the menu still up in the first run), not this change. With the same parts and +0.4% wall triangles, phone cost should be about the same. **Not measured on a phone.**
 - Flicker test `kit_flicker_test.py P1`: kit 436 pieces, **0** flickering pairs (the first try had 6 on tower crowns: fixed). Placed sample: 2 pairs, both the old KWC compound walls (same as before). Shells: 0.
-- P3 (downtown) flicker test: see the end of `build/kit_walls/flicker_P3.txt`.
+- P3 (downtown) flicker test: still running after 1.5 h when this note was written (output goes to `Games/CityLegends/build/kit_walls/flicker_P3.txt`). The colonial rows keep their old parapet band, so the only new P3 geometry is the floor slab edges of the walk-ups.
+- Saved in Studio (Team Create save at 06:23 UTC, not published). Studio closed the place after the Play test stopped. On reopening, every edit was still there, but PlayerData was still on `CityLegends_test`: it was put back to `CityLegends_v1` before the save. The first save attempt timed out ("server publish request timed out"); the second one worked.
 
 ## Not checked / risks
 - The stained render tiles every 9 studs. On a big blank side wall the blotch repeat can be seen up close.
