@@ -162,7 +162,7 @@ def crown(sc):
         tops = [cols[j][0] for j in range(lo, min(len(cols), i + 7)) if cols[j]]
         height = fh - min(tops)
         tip = max(height - band_px, band_px * 0.8)
-        rg = ro * (0.30 if phi_deg == 0 else 0.24)
+        rg = ro * (0.42 if phi_deg == 0 else 0.34)  # chunky gem points, as the sheet (no thin spikes)
         base = Vector((ro * 0.86 * sx, -ro * 0.86 * math.cos(phi), band_px * 0.55))
         i0 = len(gv)
         gv.append((base + Vector((0, 0, tip + band_px * 0.45))) * PX)
@@ -199,7 +199,8 @@ def bracer(sc, name, mirror=False):
         t = k / (rows - 1)
         rf_ = fr["rows"][min(H - 1, int(t * (H - 1)))]
         rs_ = sd["rows"][min(len(sd["rows"]) - 1, int(t * (len(sd["rows"]) - 1)))]
-        a = (rf_[1] - rf_[0]) / 2
+        # the ATTACH label's leader line cuts the left side of the front view: the half-width from the right edge
+        a = rf_[1] - fr["box"][2] / 2
         b = (rs_[1] - rs_[0]) / 2 * 0.85
         z = (0.5 - t) * H
         for q in range(N):
@@ -226,7 +227,7 @@ def bracer(sc, name, mirror=False):
         t = r / (H - 1)
         rf_ = fr["rows"][r]
         rs_ = sd["rows"][min(len(sd["rows"]) - 1, int(t * (len(sd["rows"]) - 1)))]
-        a = (rf_[1] - rf_[0]) / 2 * 1.03
+        a = (rf_[1] - fr["box"][2] / 2) * 1.03
         b = (rs_[1] - rs_[0]) / 2 * 0.85 * 1.03
         z = (0.5 - t) * H
         i0 = len(bv)
