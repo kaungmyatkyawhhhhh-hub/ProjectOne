@@ -160,7 +160,7 @@ function FrostFX.Burst(pos: Vector3, size: number?, opts: { [string]: any }?)
 		Size = nseq({ { 0, s * 0.09 }, { 1, s * 0.03 } }) }):Emit(if lo then 26 else 60)
 	-- 4 rolling snow mist (lit by the scene, so it reads as real cold air, not a glow)
 	smoke(h, { Color = seq(Color3.fromHex("#F4FBFF"), Color3.fromHex("#CFE6F5")), Lifetime = NumberRange.new(1.6, 2.6),
-		Size = nseq({ { 0, s * 0.5 }, { 1, s * 1.5 } }), Transparency = nseq({ { 0, 1 }, { 0.15, 0.55 }, { 1, 1 } }),
+		Size = nseq({ { 0, s * 0.4 }, { 1, s * 1.1 } }), Transparency = nseq({ { 0, 1 }, { 0.15, 0.72 }, { 1, 1 } }),
 		Speed = NumberRange.new(s * 0.6, s * 1.2), SpreadAngle = Vector2.new(180, 180), Drag = 2.2, Rotation = NumberRange.new(0, 360),
 		RotSpeed = NumberRange.new(-30, 30), Acceleration = Vector3.new(0, 1.5, 0) }):Emit(if lo then 8 else 16)
 	-- 5 the cold wisp swirling out, and slow glints drifting down after
@@ -183,11 +183,11 @@ end
 function FrostFX.GroundWave(pos: Vector3, radius: number?)
 	local r = radius or 16
 	local h = holder(pos + Vector3.new(0, 0.6, 0), 4, Vector3.new(r * 0.3, 0.2, r * 0.3))
-	smoke(h, { Color = seq(WHITE, Color3.fromHex("#D6ECF8")), Lifetime = NumberRange.new(1.4, 2.2), Size = nseq({ { 0, 2.5 }, { 1, 7 } }),
-		Transparency = nseq({ { 0, 1 }, { 0.2, 0.45 }, { 1, 1 } }), Speed = NumberRange.new(r * 0.9, r * 1.3), Drag = 2.4,
+	smoke(h, { Color = seq(WHITE, Color3.fromHex("#D6ECF8")), Lifetime = NumberRange.new(1.4, 2.2), Size = nseq({ { 0, 1.5 }, { 1, 4.5 } }),
+		Transparency = nseq({ { 0, 1 }, { 0.2, 0.68 }, { 1, 1 } }), Speed = NumberRange.new(r * 0.9, r * 1.3), Drag = 2.4,
 		Shape = Enum.ParticleEmitterShape.Cylinder, ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface, ShapeInOut = Enum.ParticleEmitterShapeInOut.Outward,
 		ShapePartial = 1, EmissionDirection = Enum.NormalId.Top, SpreadAngle = Vector2.new(4, 4), Rotation = NumberRange.new(0, 360),
-		RotSpeed = NumberRange.new(-25, 25), Acceleration = Vector3.new(0, 0.6, 0) }):Emit(if low() then 14 else 32)
+		RotSpeed = NumberRange.new(-25, 25), Acceleration = Vector3.new(0, 0.6, 0) }):Emit(if low() then 10 else 22)
 	HofVFX.Emitter(h, TEX.Sparkle, { Color = seq(WHITE, ICE), Lifetime = NumberRange.new(0.8, 1.3), Size = NumberSequence.new(0.35), Speed = NumberRange.new(r, r * 1.6),
 		Drag = 2.5, Shape = Enum.ParticleEmitterShape.Cylinder, ShapeStyle = Enum.ParticleEmitterShapeStyle.Surface,
 		ShapeInOut = Enum.ParticleEmitterShapeInOut.Outward, SpreadAngle = Vector2.new(10, 10), Acceleration = Vector3.new(0, -2, 0) }):Emit(if low() then 16 else 40)
