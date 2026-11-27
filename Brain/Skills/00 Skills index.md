@@ -33,6 +33,7 @@ Back to [[00 BRAIN]]. Whole plugins (firecrawl, caveman, headroom, ponytail) are
 | [[Skills/robux-revenue-sim/SKILL\|robux-revenue-sim]] | Forecast or improve a Roblox game's Robux revenue: Monte Carlo sim of players, retention, would-be payers and each offer, calibrated to the Creator Dashboard; Robux + DevEx USD ranges, per-offer split, price sweep. (Local skill in `~/.claude/skills`.) |
 
 ## Log
+- 2026-11-28 roblox-vfx-reveal: section 4c, screen-VFX lessons from the GYM ARC Christmas pass (3 review rounds to ChatGPT 9.2 / Gemini 9.1): Sibling ZIndex + burst parent holder, big moments above the HUD, stacked soft glows, filled sparkle sprite, tier ladder with legendary glints instead of rays, rarity pill, currency after the name lands, unlock showcase, scale to screen height, no invented reward art.
 - 2026-11-28 roblox-chatgpt-art-pipeline: Gemini icon restyle pass (label STYLE vs CONTENT ONLY attachments, detailed target + AVOID list, no glossy re-attach, overlay + zoom capture since Chrome blocks Gemini downloads, gsub id swap). Plugin skill: re-upload needed.
 - 2026-11-27 roblox-ui-pro: shop items are cut-out polished icons, never world screenshots (soft item glow allowed, no rays); calendar grid states; ChatGPT + Gemini review loop until both rate 9+; Kit.Modal waits while training; strip Kit.Text's stroke on gold pills.
 - 2026-11-27 roblox-3d-model-from-sheet: import with Studio's 3D Importer, not the Open Cloud Model upload (Open Cloud meshes failed in Play); ApplyMesh to swap; check in Play. Plugin skill: re-upload needed.

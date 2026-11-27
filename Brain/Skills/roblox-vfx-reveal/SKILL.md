@@ -101,6 +101,38 @@ Order matters. The hit lands on frame 0:
   - de-duplicate on the client (one celebration per 2 s): single purchases often arrive twice (PromptPurchaseFinished + the record step).
 - **Over UI, use UI effects.** World parts (glowBurst, shockwave) are hidden behind a full-screen ViewportFrame stage or a menu. Use `uiBurst` (glow + ring in the overlay ScreenGui) there.
 
+## 4c. Screen-VFX lessons (GYM ARC Christmas, 28 Nov: reviewed to ChatGPT 9.2 / Gemini 9.1 in 3 rounds)
+Module: GYM ARC `ReplicatedStorage.Shared.VFX.XmasFX`, with Burst, Fly, Bump, Twinkle and Showcase.
+
+**Layering**
+- **The VFX ScreenGui must be `ZIndexBehavior.Sibling`.** With Global, burst parts went behind a full-screen backdrop.
+- **Give the burst a `parent`.** Pass a full-screen holder Frame inside the reveal's own gui, with a ZIndex under the reward. Drawn in its own top layer, the legendary gold glow and wash hid the reward icon completely.
+- **Big moments sit above the HUD.** Use a DisplayOrder above tutorial hints and toasts (GYM ARC: 84, over TapHint 61). Both reviewers marked "the HUD bleeds through the scrim" as the top flaw.
+
+**Look**
+- **The soft-glow texture is faint on dark.** Stack 2–3 copies at ImageTransparency 0: colour, colour, then a paler smaller core.
+- **Use a filled 4-point sparkle sprite, not an outline icon.** The outline "sparkles" icon read as clip-art. `make_sparkle.py` (vault GYM ARC/Scripts) draws a 256 px white glow sprite; tint it per use.
+- **Use a tier ladder in one Burst(tier).** Rings = tier (0.12 s apart). Tier 3 adds a 0.45 gold wash, plus 5 big white glints flaring one after another. Those glints are the legendary "signature" that stands in for rays, which are never allowed.
+- **Put the rarity word in a solid pill in its colour** (dark text), so it reads through the wash.
+
+**Timing**
+- Anticipation: shake with rising ticks, then a 0.1 s squash, then a white flash and the burst.
+- Currency flies into the counter **only after the name has landed** (about 0.9 s). Lift the scrim (to ~0.6) as the currency flies, so the counter's bump shows.
+
+**Showcase and screen sizes**
+- **Unlock showcase for shop buys:**
+  - scrim at 0.18;
+  - stacked glow, then the item pops to 250 px with a wobble;
+  - "<RARITY> UNLOCKED!" and the name slam in (UIScale 2 → 1);
+  - a "TAP TO CONTINUE" hint after 0.8 s;
+  - 2.2 s, or a tap to skip.
+- **Kit.Text adds a `TextStroke`:** destroy it on any text that fades in from transparent, or the outline shows alone.
+- **Scale big moments to the screen height:** `k = clamp(viewY / 640, 0.5–0.6, 1)` on offsets and sizes, with text never below 0.7–0.75×. Anchor hints under the text stack, never to the screen bottom (they landed on the stamina bar).
+
+**Art and testing**
+- **Don't invent reward art** for an item that has no in-game look yet. Both reviewers accepted an honest placeholder icon once told why.
+- **Capture timing:** the reward pops after the flash, so screenshot about 0.4 s after the pop, or it looks missing. Before calling something missing, check the live gui tree (`GetChildren`, sizes, UIScale).
+
 ## 5. Verify in Studio (the loop)
 1. Start Play. In the Client datamodel, put the kit in ReplicatedStorage, `require` it, and call each effect on the local character.
    - Over MCP, create a ModuleScript and set its `Source`. `loadstring` is disabled in the client.
