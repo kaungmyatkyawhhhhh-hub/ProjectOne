@@ -97,8 +97,36 @@ Flyover deck noon / 17:30 / grazing close-up of the lines:
 - 10 MB glb uploads came just before an Assistant hang: upload ~5 MB files, two at a time.
 - `S.place` sets CollisionFidelity Box after parenting: about 12 minutes for 896 meshes.
 
+## Round 2 (27 Nov, night): owner corrections, applied and saved (version 2397)
+**Owner on the concrete:** "i dont think concrete comes in panels and symmetrical gradient line?" The first concrete map had slab joints (across and down the middle), a tone per panel and tyre / edge bands mirrored left-right.
+- **Now (v4):** one continuous cast-concrete surface. No joints, no panels. Irregular soft blotches at several sizes, two tyre-polish paths that wander and fade at DIFFERENT offsets (not mirrored), oil / dirt stains, a few random hairline cracks, irregular cement repairs. Same SurfaceAppearance and street UVs, pale tint 228,224,214.
+- **Lesson (permanent):** Yangon concrete streets are continuous. Never draw panels or joints, and never put anything symmetric across the street.
+
+**Owner on the asphalt:** "only the batch 0.5 roads are correct in color and other road asphalt became gray ... the asphalt road texture rubbles are too big ... they look blurry ... need to be sharp".
+- **Grey:** the swapped `RMeshR` meshes were placed with the module's old default colour (150,150,152). The module copy in Studio came from a save made before its colours were updated. The road fill pieces and the two pilot cells had the right charcoal, which is the "correct" look the owner meant. Now every `RMeshR` and every other asphalt piece has one colour, 110,110,112 on the v4 map (mean 0.42). Lane asphalt is 140,139,135.
+- **Big, blurry grain:** the earlier maps were blurred noise, made bigger to show at distance. **v4** has hard-edged 1-3 px stones (60,000 per tile), each its own grey, a few pale chips (3%), dark sandy binder, a domed normal per stone and glossier stone tops. StudsPerTile 16 (64 px a stud): stones about 0.5-1.5 cm, sharp close up, a fine even speckle down the road.
+- **Lesson:** don't fix "plain at distance" by making the grain bigger. Make it crisp (hard-edged small stones) at a small tile size.
+
+Before (grey, big blurry grain) / after, main road noon, down the road and close:
+![[refs_2026-11-27_road_surfaces/asphalt_fix_after_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/v4_asphalt_main_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/asphalt_close_play.jpg]]
+![[refs_2026-11-27_road_surfaces/v4_asphalt_close_play.jpg]]
+Owner's swatch and the v4 map close-up:
+![[Owner ref - asphalt colour (darker, fine grain) 2026-11-27.png]]
+![[refs_2026-11-27_road_surfaces/v4_asphalt_map_detail.png]]
+A road-fill asphalt piece next to a concrete street (same asphalt look as the road meshes):
+![[refs_2026-11-27_road_surfaces/v4_asphalt_roadfill_patch_play.jpg]]
+Concrete before (panels, mirrored bands) / after (continuous), same street:
+![[refs_2026-11-27_road_surfaces/after_small_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/v4_concrete_street_noon_play.jpg]]
+![[refs_2026-11-27_road_surfaces/v4_concrete_close_play.jpg]]
+![[refs_2026-11-27_road_surfaces/concrete_street_map_v4.jpg]]
+Play: 59-60 fps (as before). Ids: asphalt v4 colour 132495685801163 / normal 111398551171073 / roughness 118818663269495; concrete v4 colour 140378176617994 / normal 131246815654167 / roughness 111691553348338.
+Not checked: 17:30 with the v4 maps; a real phone.
+
 ## Not done / not checked
-- **Wheel paths:** small streets have them in the concrete map. On the big roads they are still not done: The road UVs are world x / z (box projection), so a lane-aligned darkening can't live in the tiled texture; cutting strips along every lane would add hundreds of thousands of triangles. A later bake could carry lane-aligned vertex colours if the road mesh were denser.
+- **Wheel paths:** small streets have wandering tyre polish in the concrete map. On the big roads they are still not done: The road UVs are world x / z (box projection), so a lane-aligned darkening can't live in the tiled texture; cutting strips along every lane would add hundreds of thousands of triangles. A later bake could carry lane-aligned vertex colours if the road mesh were denser.
 - Tone at the zebra / paint edges was not tuned separately.
 - Not checked on a real phone: texture memory (2 new MaterialVariant maps sets + 1 SurfaceAppearance set, 1024 px) and the +9% road triangles.
 - Concrete streets wider than about 30 studs repeat the joint / tyre pattern across; the edge dust assumes about 20-stud lanes.
