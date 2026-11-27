@@ -69,27 +69,27 @@ def export(m, name, gate_views):
 # ---------- WREATH (front: centre 245,190, outer R 145, hole r 67; side depth 579-667) ----------
 S = 1 / 290; m = M()
 RM, TUBE = 106 * S, 39 * S
-for i in range(24):                                     # pine clumps round the ring, two staggered rows
-    a = 2 * math.pi * i / 24; rr = RM + (0.25 if i % 2 else -0.2) * TUBE
+for i in range(30):                                     # pine clumps round the ring, two staggered rows
+    a = 2 * math.pi * i / 30; rr = RM + (0.3 if i % 2 else -0.25) * TUBE
     rot = Matrix.Rotation(random.uniform(0, 6.28), 3, "Y") @ Matrix.Rotation(random.uniform(0, 6.28), 3, "X")
-    m.ico("Pine" if i % 3 else "PineDark", (rr * math.cos(a), 0, rr * math.sin(a)), 45 * S, 1, (1, 0.95, 1), rot)
+    m.ico("Pine" if i % 3 else "PineDark", (rr * math.cos(a), 0, rr * math.sin(a)), 36 * S, 1, (1, 1.15, 1), rot)
 for i in range(12):                                     # darker core ring behind, fills the gaps
     a = 2 * math.pi * (i + 0.5) / 12
     m.ico("PineDark", (RM * math.cos(a), 6 * S, RM * math.sin(a)), 40 * S, 0, (1, 0.8, 1))
 for bx, bz in ((255, 92), (158, 142), (342, 151), (144, 230), (343, 237)):
     m.ico("Red", ((bx - 245) * S, -30 * S, (190 - bz) * S), 17 * S, 1)
 bow(m, 0, (190 - 268) * S, S, -46 * S, -28 * S)
-export(m, "Wreath", {"front": (S, 245, 190, False), "side": (S, 623, 190, True)})
+export(m, "Wreath", {"front": (S, 245, 200, False), "side": (S, 623, 200, True)})
 
 # ---------- GARLAND SWAG (front: hooks ~ (55,470) and (405,470), dips to y 565 at x 230; bauble (245,600) r 22) ----------
 S = 1 / 350; m = M()
-X0, X1, YT, YB, XC = 55, 405, 478, 565, 230
+X0, X1, YT, YB, XC = 70, 420, 478, 566, 245
 def gy(x): return YT + (YB - YT) * (1 - ((x - XC) / (X1 - XC if x > XC else XC - X0)) ** 2)
 N = 14
 for i in range(N):
     x = X0 + 10 + (X1 - X0 - 20) * i / (N - 1)
     rot = Matrix.Rotation(random.uniform(0, 6.28), 3, "Y") @ Matrix.Rotation(random.uniform(0, 6.28), 3, "Z")
-    m.ico("Pine" if i % 3 else "PineDark", ((x - 230) * S, 0, (470 - gy(x) - 8) * S), 44 * S, 1, (1, 0.8, 1), rot)
+    m.ico("Pine" if i % 3 else "PineDark", ((x - 230) * S, 0, (470 - gy(x) - 10) * S), 48 * S, 1, (1, 0.8, 1.05), rot)
 for i in range(6):                                      # warm bulbs on the front of the garland
     x = X0 + 40 + (X1 - X0 - 80) * i / 5
     m.ico("Bulbs", ((x - 230) * S, -26 * S, (470 - gy(x) - 8) * S), 9 * S, 0, (0.75, 0.75, 1.15))
@@ -97,7 +97,11 @@ m.ico("Gold", ((245 - 230) * S, -12 * S, (470 - 600) * S), 22 * S, 1)
 m.ico("Gold", ((245 - 230) * S, -12 * S, (470 - 576) * S), 6 * S, 0)
 for hx in (X0 + 8, X1 - 8):                             # small bows at the hooks
     bow(m, (hx - 230) * S, (470 - 462) * S, S * 0.7, -44 * S, -32 * S)
-export(m, "Garland", {"front": (S, 230, 470, False)})
+    m.add("PineDark", [], [])
+for hx in (X0 - 3, X1 + 12):
+    bm_ = [(hx - 8, 437), (hx + 8, 437), (hx + 8, 462), (hx - 8, 462)]
+    m.plate("PineDark", [((x - 230) * S, (470 - y) * S) for x, y in bm_], -8 * S, 8 * S)
+export(m, "Garland", {"front": (S, 230, 478, False)})
 
 # ---------- PEPPERMINT (front: disc centre 244.5,846.5, R 117; wrappers to x 24 / 456; side thickness 45) ----------
 S = 1 / 234; m = M()
