@@ -8,6 +8,7 @@ Recorded 20 Nov 2026, about 18:48-20:00, at night (photo GPS: 16.84 N 96.15 E do
 The original (3:51, recorded 19:41:49, GPS 16.7750, 96.1393) was too big to copy, so the owner trimmed it on the iPhone into two halves:
 - [[IMG_0808_part1/WATCH|IMG_0808_part1]]: 1:55.9 long, the start of the video.
 - [[IMG_0808_part2/WATCH|IMG_0808_part2]]: 1:58.1 long, the end of the video. The two halves add up to ~3 s more than the original, so part 2 probably starts around 1:53 of the original with a few seconds of overlap (not checked; match the frames at the seam). Sound pictures are in each half's `audio/` (the iPhone's spatial-audio track can't be read; the normal stereo track was used).
+**Studied 27 Nov (Claude Code): the halves are SWAPPED.** part2 is the start (Yangon ramp, side view, onto the deck); part1 is the end (deck, Dala approach, toll). part2 1:49-1:59 = part1 0:01-0:11. Notes: [[2026-11-27 Clip catalogue - Yangon-Dala cable-stayed bridge at night (0808)]].
 What it shows (chat Claude's quick look at part1's first sheet only): driving across a big **cable-stayed bridge at night**: cream/beige concrete pylons (tall A/H shape with a slot window near the top), fans of cream stay cables, cream cylindrical cable-anchor caps along the side barrier, tall lamp posts with cold white lamps, a yellow centre line, metal guard rail. The GPS fits the Yangon–Dala bridge; confirm from signs in the frames. The game already has a "Dala Bridge WIP" (see [[2026-11-23 Live cleanup - half-finished builders, place size, road fixes]]), so this is the reference for building it properly: pylon shape and count, cable count and fan pattern, deck lanes, lamp spacing, anchor caps, night lighting.
 
 ## Videos
@@ -71,3 +72,18 @@ What the photos show (quick look by the chat Claude; check yourself):
 
 ## Requests for the chat Claude
 - (done 27 Nov) IMG_0808 arrived as two halves and is prepared above.
+- **(27 Nov, Claude Code) sharper frames wanted** (`--at`, full size unless said):
+  - IMG_0808_part2 1:37-1:47 every 0.5 s: windscreen view along the deck. Needed to count the lanes on the deck and see whether there is a centre median or barrier.
+  - IMG_0808_part2 0:43, 0:47, 0:51: to count the stay cables per plane on each side of pylon 1.
+  - IMG_0808_part2 1:29-1:31: the bronze plaque on the pylon leg (text).
+  - IMG_0808_part1 1:30-1:32: the gantry sign text ("Sat Ein Tann Beach" spelling).
+  - IMG_0808_part1 1:44-1:50: the Burmese text on the toll board.
+  - IMG_0808_part2 0:19: the white ribbed structure next to the ramp.
+  - IMG_0807 0:04-0:06 and 0:28-0:30 every 0.25 s (count the cables and see the pylon legs); 0:52-0:54 (pylon top); 1:32-1:34 (blue booth).
+  - IMG_0803 0:01.5-0:02.0: the shape on top of the roundabout monument.
+  - IMG_0804 0:38-0:40: is the red-white bar a barrier arm?
+  - IMG_0809 2.0-3.0 (amber lane display), 7.0-8.0 (Burmese toll board), 9.0-11.0 (green roadside board).
+  - IMG_0811 1.6-2.0: the left sign panel "...ship)" and the red caution text.
+  - IMG_0820 14.0-15.0: the word before "...MARKET".
+  - IMG_0819 1.5-2.0: the red digits (signal countdown?).
+- **(27 Nov) all clips and photos studied.** Notes: [[2026-11-27 Clip catalogue - Yangon-Dala cable-stayed bridge at night (0808)]], [[2026-11-27 Clip catalogue - GG Gaming Fest hall (0792-0795)]], [[2026-11-27 Clip catalogue - Night drive past The Central, Sedona, Melia (0797-0801)]], [[2026-11-27 Clip catalogue - Night roundabout to downtown (0802-0806)]], [[2026-11-27 Clip catalogue - Under the flyover by the cable-stayed bridge (0807)]], [[2026-11-27 Clip catalogue - Dala side toll plaza and town junction (0809)]], [[2026-11-27 Clip catalogue - Return bridge ramp, Junction City and night streets (0810-0822)]]. Stills: `refs_2026-11-27/`.

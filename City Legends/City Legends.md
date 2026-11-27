@@ -11,6 +11,27 @@
 > **TREES (2026-11-27, owner: "Trees next"):** the broadleaf tree `ot1` (Toolbox acacia) is now our rain tree: leaf-card crown, 1,670 triangles, one part; a 220-triangle far look; 187 placed acacias became RainTree / FlameTree. Saved v2261, backup `ServerStorage.TreeBackup_20261127`, undo `tools/yangon/RainTree.luau`. See [[2026-11-27 Trees - new broadleaf tree]].
 > **PALMS (2026-11-27):** the flat star-card palms are now real coconut palms (CocoPalm / CocoPalmT, 1,190 tris, one part instead of 3) and toddy fan palms (300 tris): streamed op1/op2 templates, 152 placed palms, the median ToddyPalm, and the palms baked into the Myanmar Plaza and Sedona landmarks (their baked broad trees became rain trees). Saved v2276, backup `ServerStorage.PalmBackup_20261127`, undo `tools/yangon/Palms.luau`. See [[2026-11-27 Palms - real palms]].
 
+> **NIGHT CLIP STUDY (2026-11-27, owner clips of 20 Nov):** every night clip and photo has been catalogued, with times for every item.
+>
+> **Yangon–Dala bridge (IMG_0808, the most important):**
+> - 2 pylons, each shaped like a diamond with a slotted two-shaft head.
+> - Cream semi-fan cables ending in bell-shaped anchor caps.
+> - Pale deck with a yellow edge line, a 2-rail guard rail and an outer vertical-bar railing.
+> - Cold-white lamps and a lilac pylon wash.
+> - A Dala gantry and a toll plaza.
+> - An 11-point change list for our `DalaBridge_WIP_21Nov`. The two halves of IMG_0808 are swapped.
+>
+> **Notes:**
+> - [[2026-11-27 Clip catalogue - Yangon-Dala cable-stayed bridge at night (0808)]]
+> - [[2026-11-27 Clip catalogue - Under the flyover by the cable-stayed bridge (0807)]]
+> - [[2026-11-27 Clip catalogue - Dala side toll plaza and town junction (0809)]]
+> - [[2026-11-27 Clip catalogue - Return bridge ramp, Junction City and night streets (0810-0822)]]
+> - [[2026-11-27 Clip catalogue - Night roundabout to downtown (0802-0806)]]
+> - [[2026-11-27 Clip catalogue - Night drive past The Central, Sedona, Melia (0797-0801)]]
+> - [[2026-11-27 Clip catalogue - GG Gaming Fest hall (0792-0795)]]
+>
+> Stills are in `refs_2026-11-27/`. Requests for sharper frames are in [[watch_2026-11-20_irl_night/00 INDEX]].
+
 > **DAYTIME CLIP STUDY (2026-11-23, full catalogue 24 Nov):** 11 owner clips of real Yangon by day (stairwell, flat, main roads, YBS, side streets, toll plaza, old highway) studied; ranked list of what the game must match (wires, toddy palms, traffic mix, lane-arrow gantries); 4 full catalogues (every building, road, room, car, plate, sign every 2 s) + 61 stills in `refs_23nov`. See [[2026-11-23 Real Yangon by day - clip study (what the game must match)]].
 
 > **TEST RUN (cloud, 2026-11-21, Lune 0.8.9): all 23 Lune tests pass** after the day's fixes (traffic dead ends + traps + unused inner lanes in `RivieraTraffic.lua`, `Garages.lua` destroy-while-walking for `world_test`). Repo only: sync to Studio on the PC (prompt `PC to-do - sync todays cloud fixes and finish last night`). Tests need the root: `lune run tools/<name>.luau .`.
