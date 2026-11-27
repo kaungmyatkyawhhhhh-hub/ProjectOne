@@ -39,7 +39,7 @@ stack("Glow", [(268, 142), (268, 132)])
 
 def crystal(base, h, r, tilt, yaw):
     """6-sided ice crystal: prism with a pointed top, tilted outward by tilt (rad) in the direction yaw."""
-    lo = ring(r, 0, 6, 0); hi = ring(r, h * 0.7, 6, 0); tip = Vector((0, 0, h))
+    lo = ring(r, 0, 6, 0); hi = ring(r, h * 0.6, 6, 0); tip = Vector((0, 0, h))
     m = Matrix.Rotation(yaw, 3, "Z") @ Matrix.Rotation(tilt, 3, "Y")
     verts = [base + m @ v for v in lo + hi + [tip]]
     faces = [tuple(range(5, -1, -1))] + [(i, (i + 1) % 6, 6 + (i + 1) % 6, 6 + i) for i in range(6)] + [(6 + i, 6 + (i + 1) % 6, 12) for i in range(6)]
@@ -48,10 +48,10 @@ def crystal(base, h, r, tilt, yaw):
 # 4 ice clusters on the top tier rim (TOP + SIDE views: left, right, front, back), each a tall centre crystal + 2 leaning ones
 for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
     d = Vector((math.cos(a), math.sin(a), 0)); t = Vector((-d.y, d.x, 0))
-    c = d * 240 * S + Vector((0, 0, Z(146)))
-    crystal(c, 78 * S, 20 * S, 0, a)
-    crystal(c + t * 26 * S, 50 * S, 14 * S, 0.45, a + math.pi / 2)
-    crystal(c - t * 26 * S, 50 * S, 14 * S, 0.45, a - math.pi / 2)
+    c = d * 222 * S + Vector((0, 0, Z(146)))
+    crystal(c, 84 * S, 27 * S, 0, a)
+    crystal(c + t * 30 * S, 60 * S, 19 * S, 0.5, a + math.pi / 2)
+    crystal(c - t * 30 * S, 60 * S, 19 * S, 0.5, a - math.pi / 2)
 
 # plaque: bevelled plate on the middle tier's front slope (front view x 301-474, y 156-208)
 w, h, th = 173 / 2 * S, 52 / 2 * S, 0.03
