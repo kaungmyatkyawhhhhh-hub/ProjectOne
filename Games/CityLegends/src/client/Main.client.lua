@@ -147,16 +147,16 @@ task.spawn(function()
 		local ok, vname = pcall(MS.GetBaseMaterialOverride, MS, Enum.Material[name])
 		local v = ok and vname ~= "" and vname ~= name and MS:FindFirstChild(vname, true)
 		if v and v:IsA("MaterialVariant") then
-			for _, id in { v.ColorMap, v.NormalMap, v.RoughnessMap, v.MetalnessMap } do
-				if id ~= "" then
-					table.insert(maps, id)
-				end
-			end
+			table.insert(maps, v) -- (game scripts can't read ColorMap: PreloadAsync loads the instance's own maps)
 		end
 	end
 	if #maps > 0 then
 		pcall(game:GetService("ContentProvider").PreloadAsync, game:GetService("ContentProvider"), maps)
 	end
+end)
+-- (28 Nov, lag cuts) small props, trim and flat pieces stop casting shadows on this screen
+pcall(function()
+	require(script.Parent:WaitForChild("ShadowTrim")).start()
 end)
 local attaching = false -- (the watchdog waits while a car is being put on)
 local showMenu: () -> ()
