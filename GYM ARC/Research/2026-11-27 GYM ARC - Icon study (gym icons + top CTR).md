@@ -47,7 +47,7 @@ date: 2026-11-27
 - **The logo covered the lower third.**
 
 ## Rules for the new GYM ARC icons
-- Layout: the **giant 7'0" version, waist-up, fills the right 2/3**, its head big in the upper half, with a proud open grin and a flex. The **small 4'0" version** sits bottom-left, looking up in shock. That is the Muscle Legends "weak → strong" pattern, done with height, which is our hook.
+- Layout (updated 27 Nov after the owner called the small-vs-giant layout "sloppy"): ONE polished hero, low camera, towering over the gym, a clean ruler with a gold marker at his head. No second small character.
 - Bright background: a lit, softly blurred gym in sky blue and white, and gold. Target at 64 px: luminance 0.45–0.55, near-black ≤ 15%.
 - Keep the real avatar's look (black messy hair, white shirt, grey shorts, gold muscles) but show the eyes and mouth, so the face can carry emotion.
 - One big gold "7'0"" number at most. The logo goes in code, in the top-left zone the layout leaves empty, at a readable size.
