@@ -123,6 +123,8 @@ On the approaches the edges are different: Jersey-type concrete barriers (Yangon
 **Already right:** 2 pylons; an inverted-Y top with a two-shaft slotted head; cream concrete; two cable planes at the outer edges; cream cables; lamps on both edges in cold white; lilac tint on the pylon; a lit crossbeam under the deck; a curved approach viaduct.
 
 **Change these (in order of how much they show):**
+
+> **Status 27 Nov (built, saved v2295, still in ServerStorage):** 1 done, 2 done, 3 done, 4 done, 5 kept at 1.0 m (check with sharper frames), 6 done, 7 done, 8 done, 9 done (beach sign's Burmese line not done: unreadable), 10 done, 11 done. Details, pictures and what is left: [[2026-11-27 Dala Bridge - IRL night changes]].
 1. **The lower pylon legs must form a V:** the two `LowerLeg`s converge to **one narrow footing at the water** instead of standing apart on a wide 90×60 pile cap (real: p2 0:47, 0:51). Shrink the pile cap to fit the single footing.
 2. **Deck colour:** change the dark asphalt (58,58,62) to a **pale grey/beige** deck surface (real: p2 1:19, p1 0:21). At night the real deck reads almost white under the lamps.
 3. **Edge barrier:** replace the solid 3.6-tall barrier + 12-wide walkway with the real stack:
