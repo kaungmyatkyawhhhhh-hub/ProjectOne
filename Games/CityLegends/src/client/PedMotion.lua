@@ -20,6 +20,7 @@ local PedMotion = {}
 
 local cos, sin, exp, clamp, pi = math.cos, math.sin, math.exp, math.clamp, math.pi
 local TAU = 2 * pi
+local KNEE_MAX, ELBOW_MAX = 1.45, 1.6
 
 -- wrapped bump round c (t in cycles)
 local function bump(t: number, c: number, w: number): number
@@ -261,7 +262,11 @@ local function rigOf(f): any
 				if idx then
 					local e = g.extra[k][i]
 					local c = g.cen[k] + e.rel
-					table.insert(out, { idx = idx, c = c, j = c + Vector3.new(0, e.size.Y / 2, 0) })
+					-- (27 Nov, owner: "i can see their skin between the joints") the elbow / knee hinge sits on the
+					-- edge the bend opens (elbow: back, knee: front), so the pieces stay joined there and only
+					-- overlap inside the bend; a hand / foot hinges on its middle
+					local z = if i ~= 2 then 0 elseif k == 5 or k == 6 then e.size.Z / 2 else -e.size.Z / 2
+					table.insert(out, { idx = idx, c = c, j = c + Vector3.new(0, e.size.Y / 2, z) })
 				end
 			end
 		end
@@ -376,6 +381,13 @@ function PedMotion.angles(w, moving: boolean): { [string]: number }
 	-- turning: the chest leads the hips, the body leans into the curve
 	P.chYaw += w.twist or 0
 	P.pelRoll += w.lean or 0
+	-- past about 90 degrees a hinged block pokes out of the piece above it (Roblox's own walk / run bend about
+	-- this far); the phone-at-ear elbow keeps its fold
+	P.kneeL, P.kneeR = clamp(P.kneeL, 0, KNEE_MAX), clamp(P.kneeR, 0, KNEE_MAX)
+	P.elL = clamp(P.elL, 0, ELBOW_MAX)
+	if w.phone ~= "ear" or w.act then
+		P.elR = clamp(P.elR, 0, ELBOW_MAX)
+	end
 	return P
 end
 

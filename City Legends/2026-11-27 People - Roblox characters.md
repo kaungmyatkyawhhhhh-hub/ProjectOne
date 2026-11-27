@@ -15,7 +15,7 @@ Reference: the TorqX clip, a normal Roblox avatar ragdolled on the crossing (`re
 ## What the people are now
 - **Classic R6 Roblox avatars:** 7 anchored parts (torso, head with Roblox's head mesh, hair, 2 arms, 2 legs), still posed with BulkMoveTo.
 - **Faces:** Roblox's classic faces (the smile most often). No thanaka, no custom faces.
-- **Hair:** Roblox's own free catalog hairs (Pal Hair, Stylish Brown Hair, Brown Hair, Chestnut Spikes, Messy Hair, Trecky Hair, Brown Charmer Hair, Shaggy; women and some schoolgirls: Lavender Updo, a bun). Kept in `ReplicatedStorage.PedKit.Hair` (Studio), texture cleared so the hair takes a dark colour. Monks: bald.
+- **Hair:** Roblox's own free catalog hairs (Pal Hair, Stylish Brown Hair, Brown Hair, Chestnut Spikes, Messy Hair, Trecky Hair, Brown Charmer Hair (Shaggy = Sideswept Bangs and Messy Hair taken out later the same day: see [[2026-11-27 NPC hair and joints]]); women and some schoolgirls: Lavender Updo, a bun). Kept in `ReplicatedStorage.PedKit.Hair` (Studio), texture cleared so the hair takes a dark colour. Monks: bald.
 - **Skin:** Roblox body colours, classic yellow included.
 - **Clothes (the Yangon part):** Roblox-style shirt / pants templates drawn by `tools/people/roblox_clothes.py`:
   - men: white / blue / cream / navy shirts, red and black T-shirts with jeans now and then, longyi checks in green, blue, brown, grey, maroon (knot at the front);

@@ -558,7 +558,10 @@ local function loadTemplates()
 end
 
 -- the clothed limbs: part number -> atlas ("shirt" / "pants"), slot group (T / R / L)
-local FACE_IDS = { F = Enum.NormalId.Front, B = Enum.NormalId.Back, L = Enum.NormalId.Left, R = Enum.NormalId.Right, U = Enum.NormalId.Top }
+local FACE_IDS = {
+	F = Enum.NormalId.Front, B = Enum.NormalId.Back, L = Enum.NormalId.Left, R = Enum.NormalId.Right,
+	U = Enum.NormalId.Top, D = Enum.NormalId.Bottom,
+}
 local CLOTHED = { [1] = { "shirt", "T" }, [5] = { "shirt", "L" }, [6] = { "shirt", "R" }, [4] = { "pants", "L" }, [7] = { "pants", "R" } }
 
 -- crop each Texture to its garment's slot for the part's present size (studs per tile = the whole atlas)
@@ -570,14 +573,15 @@ local function setClothes(f: Figure, top: string, low: string)
 	for _, c in f.tex do
 		local t = c.t
 		local cell = CLOTH[c.atlas][if c.atlas == "shirt" then top else low] or 0
-		local r = CLOTH.slots[c.group][c.face]
+		-- a joint face (c.joint) shows the front's thin row at that edge of the piece
+		local r = CLOTH.slots[c.group][if c.joint then "F" else c.face]
 		-- a Blocky piece shows its own slice (a..b, top down) of the limb's picture
 		local h = r[4] * (c.b - c.a)
 		local x, y = (cell % cols) * cw + r[1], (cell // cols) * ch + r[2] + r[4] * c.a
 		local part = f.parts[c.part]
 		local sz = part.Size
 		local face = c.face
-		local W, H = if face == "L" or face == "R" then sz.Z else sz.X, if face == "U" then sz.Z else sz.Y
+		local W, H = if face == "L" or face == "R" then sz.Z else sz.X, if face == "U" or face == "D" then sz.Z else sz.Y
 		local su, sv = W * A / r[3], H * A / h
 		-- (27 Nov, tested in Studio) on a MeshPart a Texture's origin is the face's middle, on a Part its corner
 		local mid = if part:IsA("MeshPart") then 0.5 else 0
@@ -594,21 +598,29 @@ local function newFigure(): Figure
 	local extraOf = {}
 	local tex = {}
 	-- the clothes: one Texture per clothed face, cropped out of the shared atlases in dress() (U only on a limb's top)
-	local function clothe(p: BasePart, idx: number, k: number, a: number, b: number, top: boolean)
+	-- (27 Nov, owner: "i can see their skin between the joints") the faces a joint opens (a piece's bottom, the top
+	-- of a lower piece) wear the clothes too: the front's 2-pixel row at that edge (a short sleeve's row stays skin)
+	local function clothe(p: BasePart, idx: number, k: number, a: number, b: number, top: boolean, sole: boolean)
 		local c = CLOTHED[k]
 		if not (c and CLOTH) then
 			return
 		end
-		for _, fc in { "F", "B", "L", "R", "U" } do
-			if fc ~= "U" or top then
+		local e = 2 / 64
+		for _, fc in { "F", "B", "L", "R", "U", "D" } do
+			if not (fc == "D" and sole) then
 				local t = Instance.new("Texture")
 				t.Texture = "rbxassetid://" .. CLOTH.atlas[c[1]]
 				t.Face = FACE_IDS[fc]
 				t.Parent = p
-				table.insert(tex, {
-					t = t, part = idx, atlas = c[1], group = c[2], face = fc,
-					a = if fc == "U" then 0 else a, b = if fc == "U" then 1 else b,
-				})
+				local ent = { t = t, part = idx, atlas = c[1], group = c[2], face = fc, a = a, b = b }
+				if fc == "U" and top then
+					ent.a, ent.b = 0, 1
+				elseif fc == "U" then
+					ent.joint, ent.b = true, math.min(1, a + e)
+				elseif fc == "D" then
+					ent.joint, ent.a = true, math.max(0, b - e)
+				end
+				table.insert(tex, ent)
 			end
 		end
 	end
@@ -639,7 +651,7 @@ local function newFigure(): Figure
 		end
 		p.Parent = model
 		parts[k] = p
-		clothe(p, k, k, if lk then lk.pieces[1].a else 0, if lk then lk.pieces[1].b else 1, true)
+		clothe(p, k, k, if lk then lk.pieces[1].a else 0, if lk then lk.pieces[1].b else 1, true, not lk and (k == 4 or k == 7))
 	end
 	-- the Blocky limbs' other pieces (parts 8+), posed with their limb
 	for _, k in LIMB_K do
@@ -656,7 +668,7 @@ local function newFigure(): Figure
 				extraOf[#parts] = { k = k, i = i }
 				-- (hands stay bare skin: 8 Textures a person fewer)
 				if not ((k == 5 or k == 6) and i == #lk.pieces) then
-					clothe(p, #parts, k, pc.a, pc.b, false)
+					clothe(p, #parts, k, pc.a, pc.b, false, (k == 4 or k == 7) and i == #lk.pieces)
 				end
 			end
 		end
