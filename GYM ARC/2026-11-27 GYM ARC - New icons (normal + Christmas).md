@@ -96,3 +96,8 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 ## v7i (27 Nov, owner picked the tee version: "make his glutes bigger and legs bigger and defined")
 - ChatGPT declined to make the glutes a focus (a teen hero in a kids game). We went with a strong athletic lower body: a crop to above the knees, a slight three-quarter stance, big defined quads.
 - Output: `v7/gymarc_v7i_tee_legs_gpt.png`, logo: `gymarc_v7i_tee_legs_logo.png`.
+
+## v8 (27 Nov, owner: "we need him to do some actions and make him the real focused zoomed in like how powerlifters does it")
+- Attached the Power Lifters icon as a framing-only reference. Action: a giant gold dumbbell curl toward the camera, a tight zoom, a low angle, blue and gold (not Power Lifters purple).
+- Output: `v7/gymarc_v8_action_gpt.png`, logo: `gymarc_v8_action_logo.png`, size test: `gymarc_v8_action_logo_sizetest.png`.
+- 64 px: lum 0.51, near-black 9%.
