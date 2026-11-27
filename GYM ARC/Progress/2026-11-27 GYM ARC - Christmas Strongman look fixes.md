@@ -38,7 +38,14 @@ Both got the 4 after-screenshots and the same brief (tough art director, 3 fixes
 Skipped: stone plaza path, re-shaping every pine, decluttering the neighbour shops (not Christmas work), "LEGENDARY ALTAR" (Gemini misread: "alter" is our word).
 After round 2: `Assets/xmas_preview/after2/1-4`. 0 errors. Xmas folder 2,905 parts.
 
+## Round 3: skins, proportions, shop cards
+- **Gingerbread skin:** own Gemini art (`Assets/xmas_art/gingerbread_skin_gemini.png`, colour-corrected; rbxassetid://89682963502782) on SkinStages Alter_Gingerbread + _T. No longer the Clay art.
+- **Owner: "what is this proportions??"** The scaled statue was a squat blob (huge head, stub legs). Cause: the server stores each NPC part's shaped size in attributes (PropY / PropBaseY / WidX / WidZ on the parts and rig attachments) and MuscleClient puts those exact sizes back. `ScaleTo(2.1)` grew the parts but not the attributes, so the client shrank the body back to 1x under 2.1x muscles. Fix: all 60 Prop/Wid attributes on FrostTitanStatue x2.1 (attribute `ShapeScaled = 2.1` marks it), statue raised 2.5 so the feet stand on the pedestal top (4.12 vs 4.09). Now a normal V-taper body.
+- **Rule for later:** never `ScaleTo` a muscle NPC/statue without scaling its Prop*/Wid* attributes by the same factor.
+- **Shop cards retaken** from the fixed bodies: Frost Titan rbxassetid://139051325997447, Gingerbread rbxassetid://131435503018121 (Config/Advent.Shop). Files: `Assets/xmas_art/frost_titan_card.png`, `gingerbread_card.png`.
+- Play: 0 errors.
+
 ## Known limits
 - From right inside the door, the z -12 pendant cord crosses the banner's small line; from the gym floor it's clear.
 - The terrain stays snow if the kill switch turns the event off mid-server (a new server has grass).
-- The Gingerbread skin still reuses the Clay art (not part of this pass).
+- Gingerbread card photo has navy shoes (the NPC muscle shell takes the leg colour); the worn skin on players is unaffected.
