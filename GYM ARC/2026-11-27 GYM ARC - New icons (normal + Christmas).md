@@ -123,3 +123,4 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 - "ARC" is now shaded the same way by distance from the letter edge (`logo_clean_fill.py`). "GYM" stays white.
 - Icons: `v9/gymarc_v11_{navy,teal,crimson}.png`, sheet `v9/logo_options_v11.png`.
 - v12 (owner sent the plate crop: "like this shiny gradient"): "ARC" has a vivid glossy fill, a light top, a soft sheen streak, a deep bottom and an edge glow. Icons: `v9/gymarc_v12_{navy,teal,crimson}.png`, sheet `v9/logo_options_v12.png`.
+- v13 (owner sent our original logo: "like this gradient"): the original `gymarc_logo_v10_blue_simple.png` at 0.58 of the width on the navy palette, `v9/gymarc_v13_navy_origlogo.png`. On the dark navy it pops; on the old flat blue it blended in.
