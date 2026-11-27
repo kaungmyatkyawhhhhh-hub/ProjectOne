@@ -524,6 +524,130 @@ function P.central()
 	return n .. ", car park " .. P.carpark("centralPark", "TheCentralCarPark", "The Central")
 end
 
+-- (2026-11-28, owner: "most importantly, do the People's park near shwedagon pagoda, people do car meets & drift a lot
+-- there") the car meet on People's Square: one smooth asphalt drift pad on the square's own ground line (the paving's
+-- 24-stud profile, so no step), tyre-mark decals that never overlap, twin white lamps (Config.NightLamps look) along
+-- both long sides, the invisible MeetZone (server Dealership's meet bonus + the minimap's M), and the crowd / show-car
+-- spots for client YangonStreetLife (returned as chunk lines; save them as src/shared/YangonStreetLifeMeet.lua)
+P.MEET = { s0 = -170, s1 = 170, half = 62 } -- along the square / half across (the square's globe lamps stand at 80)
+P.MARKS = { donut = "rbxassetid://116259565084700", arc = "rbxassetid://128409324099510" } -- tools/yangon/city/tyre_marks.py uploads
+local ORIGIN = { 27900, -6500 } -- YangonStreetLife's origin
+function P.meet()
+	local m = model("CarMeet")
+	local pf = profile(P.RECTS.square, 24.2)
+	local M = P.MEET
+	local LIFT = 0.86 -- pad top over the ground line (the paving is 0.6, its bands 0.68)
+	ribbon(m, pf, "DriftPad", 0, M.half * 2, LIFT, 0.7, ASPH, Enum.Material.Asphalt, M.s0, M.s1, false, true)
+	for _, p in m:GetChildren() do
+		p.CastShadow = false
+		pcall(function() p.MaterialVariant = "YgnRoadAsphalt" end)
+	end
+	-- the meet zone (Dealership reads it): pad middle, X across, Z along
+	local mid = frameAt(pf, (M.s0 + M.s1) / 2, 0, LIFT)
+	local z = part(m, "MeetZone", Vector3.new(M.half * 2, 30, M.s1 - M.s0), mid, DARK, nil, false)
+	z.Transparency, z.CanQuery, z.CanTouch = 1, false, false
+	-- tyre marks: decals on invisible carriers 0.16 over the pad (a 26-stud mark spans a profile joint: up to ~0.13 of bend),
+	-- never overlapping (centres 38+ apart); the car's own skids (0.07 up) pass under them
+	local rngM = Random.new(2811)
+	local placed = {}
+	for i = 1, 400 do
+		if #placed >= 11 then break end
+		local s, o = rngM:NextNumber(M.s0 + 20, M.s1 - 20), rngM:NextNumber(-M.half + 18, M.half - 18)
+		local ok = true
+		for _, q in placed do
+			if (q - Vector2.new(s, o)).Magnitude < 38 then ok = false break end
+		end
+		if ok then
+			table.insert(placed, Vector2.new(s, o))
+			local f = frameAt(pf, s, o, LIFT) * CFrame.Angles(0, rngM:NextNumber(0, math.pi * 2), 0)
+			local c = part(m, "TyreMarks", Vector3.new(26, 0.05, 26), f * CFrame.new(0, 0.16 - 0.025, 0), DARK, nil, false)
+			c.Transparency, c.CanQuery, c.CanTouch, c.CastShadow = 1, false, false, false
+			local d = Instance.new("Decal")
+			d.Face = Enum.NormalId.Top
+			d.Texture = if #placed % 3 == 0 then P.MARKS.arc else P.MARKS.donut
+			d.Transparency = 0.15
+			d.Parent = c
+		end
+	end
+	-- lamps: the street kit's twin lamp2 (as client YangonMedians places it: its own light + glow, tags LODLight / DayOff
+	-- / LampHalo, so WorldFx lights it at night), one post every 54 studs along both long sides, arms across the pad
+	local KD = require(RS.Shared.YangonKitData)
+	local kit = KD.index(RS.YgnKit.Templates).lamp2 or {}
+	local NL = require(RS.Shared.Config).NightLamps
+	local CS = game:GetService("CollectionService")
+	local nLamp, nLight = 0, 0
+	for _, side in { -1, 1 } do
+		for s = M.s0 + 10, M.s1 - 9, 54 do
+			local f = frameAt(pf, s, side * (M.half + 6), 0.6)
+			f = CFrame.lookAt(f.Position, f.Position + pf.u) * CFrame.Angles(0, math.pi / 2, 0)
+			local lm = Instance.new("Model")
+			lm.Name = "MeetLamp"
+			for _, tp in kit do
+				local q = tp.part:Clone()
+				q.CFrame = f * CFrame.new(tp.c)
+				q.Parent = lm
+			end
+			local post = part(lm, "PostCollide", Vector3.new(0.6, 30, 0.6), f * CFrame.new(0, 15, 0), DARK, nil, true)
+			post.Transparency = 1
+			local lit = false
+			for _, d in lm:GetDescendants() do
+				if d:IsA("Light") then lit = true nLight += 1 end
+			end
+			if not lit then -- (no kit light: one white NightLamps light under the heads)
+				local a = Instance.new("Attachment")
+				a.Name, a.Position = "LampLight", Vector3.new(0, 14, 0)
+				a.Parent = post
+				local l = Instance.new("PointLight")
+				l.Color, l.Brightness, l.Range, l.Shadows = NL.Color, NL.Brightness, NL.Range, false
+				l.Parent = a
+				CS:AddTag(l, "DayOff")
+				nLight += 1
+			end
+			lm.Parent = m
+			nLamp += 1
+		end
+	end
+	-- street-life lines: show cars nose-in at both ends of the pad, onlookers along the long sides and the ends
+	local lines = {}
+	local function enc(p, yaw)
+		return string.format("%d %d %d %d", math.round((p.X - ORIGIN[1]) * 10), math.round((p.Z - ORIGIN[2]) * 10), math.round(p.Y * 10), math.round(math.deg(yaw) * 10))
+	end
+	local function yawTo(p, q)
+		local d = q - p
+		return math.atan2(-d.X, -d.Z) -- (YangonStreetLife: CFrame.Angles(0, yaw, 0), front -Z)
+	end
+	local centre = at(pf, 0, 0, LIFT)
+	local kinds = { "A", "B", "C", "D", "E" }
+	for _, e in { -1, 1 } do
+		local k = 0
+		for o = -48, 48, 12 do
+			k += 1
+			local p = at(pf, e * ((M.s1 - M.s0) / 2 + 14), o, 0.6)
+			local faceTo = at(pf, 0, o * 0.6, 0.6)
+			table.insert(lines, "C " .. enc(p, yawTo(p, faceTo)) .. " " .. kinds[(k % #kinds) + 1] .. " 11 0")
+		end
+	end
+	local nS = 0
+	for _, side in { -1, 1 } do
+		for s = M.s0 + 4, M.s1 - 4, 9 do
+			if (s - M.s0) % 54 > 6 then -- (not on a lamp)
+				local p = at(pf, s, side * (M.half + rngM:NextNumber(5, 12)), 0.6)
+				table.insert(lines, "S " .. enc(p, yawTo(p, at(pf, s, 0, 0.6))) .. " meet")
+				nS += 1
+			end
+		end
+	end
+	for _, e in { -1, 1 } do
+		for o = -54, 54, 9 do
+			local p = at(pf, e * ((M.s1 - M.s0) / 2 + 30), o + rngM:NextNumber(-2, 2), 0.6)
+			table.insert(lines, "S " .. enc(p, yawTo(p, centre)) .. " meet")
+			nS += 1
+		end
+	end
+	m:SetAttribute("Lamps", nLamp)
+	m:SetAttribute("Marks", #placed)
+	return table.concat(lines, "\n"), string.format("pad %d parts, %d marks, %d lamps (%d kit pieces, %d lights), %d spots", #m:GetChildren(), #placed, nLamp, #kit, nLight, nS)
+end
 function P.all()
 	local out = {}
 	table.insert(out, "garden " .. P.garden())

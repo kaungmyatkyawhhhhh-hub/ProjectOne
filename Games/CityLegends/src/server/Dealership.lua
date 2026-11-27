@@ -567,9 +567,18 @@ function Dealership.init(ctx: any)
 	-- the meet: how many players' cars are parked there (the map shows it), and a small bonus each
 	-- minute for each other car there while yours is parked too
 	local minuteAt: { [Player]: number } = {}
+	-- (2026-11-28, owner: "do the People's park near shwedagon pagoda, people do car meets & drift a lot there") in
+	-- Yangon the meet is People's Square: the invisible MeetZone part tools/yangon/PeoplesPark.luau P.meet() builds
+	local parks = workspace:FindFirstChild("Yangon1to1") and workspace.Yangon1to1:FindFirstChild("Parks")
+	local cm = parks and parks:FindFirstChild("CarMeet")
+	local zone = cm and cm:FindFirstChild("MeetZone")
 	task.spawn(function()
 		while true do
 			task.wait(5)
+			if zone and zone:IsA("BasePart") and (not meet or meet.cf ~= zone.CFrame) then -- (the dealer's block may build after init)
+				meet = { cf = zone.CFrame, size = zone.Size }
+				workspace:SetAttribute("MeetSpot", zone.Position)
+			end
 			local m = meet
 			if not m then
 				continue
