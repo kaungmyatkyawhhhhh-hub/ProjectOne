@@ -85,6 +85,17 @@ local function centreOf(parts: { BasePart }): Vector3
 	return (lo + hi) / 2
 end
 
+-- the world box size round the parts (a wheel's height = its diameter: Traffic spins it at the real speed)
+local function sizeOf(parts: { BasePart }): Vector3
+	local lo, hi = Vector3.one * math.huge, -Vector3.one * math.huge
+	for _, p in parts do
+		local c, h = p.Position, p.CFrame:VectorToWorldSpace(p.Size / 2)
+		local e = Vector3.new(math.abs(h.X), math.abs(h.Y), math.abs(h.Z))
+		lo, hi = lo:Min(c - e), hi:Max(c + e)
+	end
+	return hi - lo
+end
+
 local function weld(a: BasePart, b: BasePart)
 	local w = Instance.new("WeldConstraint")
 	w.Part0 = a
@@ -168,6 +179,7 @@ local function prepare(template: Model): Model
 	m.PrimaryPart = root
 
 	local wheelParts: { [BasePart]: boolean } = {}
+	local hubY, hubs, wheelR = 0, 0, 0
 	for _, name in WHEELS do
 		local w = partOf(m, name)
 		local parts = if w then partsOf(w) else {}
@@ -187,8 +199,26 @@ local function prepare(template: Model): Model
 			for _, p in parts do
 				wheelParts[p] = true
 			end
+			hubY += motor.C0.Position.Y
+			hubs += 1
+			wheelR += math.max(sizeOf(parts).Y, 0.4) / 2
 		end
 	end
+	-- (27 Nov, owner: "none of our good car physics") the body hangs on its own Motor6D (BodyTilt) at the wheel hubs'
+	-- height, so Traffic can roll and pitch it on the chassis while the wheels stay on the road
+	local pivot = cf * CFrame.new(0, if hubs > 0 then hubY / hubs else -box.Y * 0.25, 0)
+	local body = Instance.new("Part")
+	body.Name = "BodyRoot"
+	body.Size = Vector3.new(0.2, 0.2, 0.2)
+	body.Transparency = 1
+	body.CFrame = pivot
+	body.Parent = m
+	local tilt = Instance.new("Motor6D")
+	tilt.Name = "BodyTilt"
+	tilt.Part0 = root
+	tilt.Part1 = body
+	tilt.C0 = cf:ToObjectSpace(pivot)
+	tilt.Parent = root
 	for _, p in partsOf(m) do
 		if p ~= root then
 			p.Anchored = false
@@ -201,8 +231,8 @@ local function prepare(template: Model): Model
 			if p:IsA("MeshPart") and p.TextureID == "" and not keepColors then
 				p.Color = UNTEXTURED
 			end
-			if not wheelParts[p] then
-				weld(root, p)
+			if not wheelParts[p] and p ~= body then
+				weld(body, p)
 			end
 		end
 	end
@@ -210,6 +240,7 @@ local function prepare(template: Model): Model
 	m:SetAttribute("Length", box.Z)
 	m:SetAttribute("Width", box.X)
 	m:SetAttribute("Height", box.Y)
+	m:SetAttribute("WheelR", if hubs > 0 then wheelR / hubs else 1.1)
 	m:SetAttribute("TrafficBody", m.Name)
 	if entry then
 		m:SetAttribute("TrafficId", entry.id)

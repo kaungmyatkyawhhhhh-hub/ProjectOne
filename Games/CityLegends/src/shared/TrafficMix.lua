@@ -82,8 +82,11 @@ TrafficMix.Hurry = { ids = { ybs = true, probox = true }, chance = 0.3, mph = { 
 -- racer driving (Traffic.lua profile "racer")
 TrafficMix.Racer = {
 	MinMph = 100, -- cruise at least this on a lane whose bends allow it
-	Accel = 40, -- studs/s^2 (about 1.3 g)
-	Brake = 95, -- studs/s^2 used for planning (about 1.1 g x 0.95 margin)
+	Accel = 24, -- studs/s^2 (about 0.85 g, a supercar's launch; 27 Nov: was 40)
+	Brake = 40, -- studs/s^2 used for planning (about 1.4 g at G = 28; 27 Nov: was 95, 3.4 g)
+	MaxBrake = 48, -- the hardest a racer really brakes (Config.Traffic.EmergencyBrake for everyday cars)
+	Headway = 0.6, -- s of travel kept behind a car ahead (everyday cars: Config.Traffic.Headway)
+	LaneChangeS = 2.4, -- (27 Nov, owner: "the cut up is just a car rotated") seconds a whole-lane move takes at speed: an S-curve
 	TurnSlowPerDeg = 0.03, -- (owner, 2026-11-21: "rare cars slow down on turn every 1 degree = 3% slower ... 10 degrees = 30% slower so 100 mph to 70 mph"; was a 0.9 g bend rule)
 	LookAheadS = 2.6, -- seconds of travel looked ahead for cars (at least Config.Traffic.LookAhead)
 	PassGap = 4, -- studs: closer than this behind a player's car a racer never rolls forward
