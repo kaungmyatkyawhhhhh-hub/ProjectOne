@@ -78,6 +78,7 @@ def build():
     tips = []                                   # (position, tier index) of each jagged tip, for baubles
     for t, (yt, rt, yb, rb) in enumerate(TIERS):
         rot = (t % 2) * math.pi / SEG           # stagger the points tier to tier
+        if t: yt, rt = yt - 16, rt * 0.86       # top tucked up inside the tier above (no see-through gap)
         zt, zb = Z(yt), Z(yb)
         zm = zt + (zb - zt) * 0.55              # light-green cap ends here
         rm = rt + (rb - rt) * 0.55
@@ -87,10 +88,13 @@ def build():
         for i in range(SEG):
             tip = i % 2 == 0
             r = rb * S * (1.0 if tip else 0.86)
-            z = zb - (0.35 if tip else -0.25)
+            z = zb - (0.6 if tip else -0.2)
             a = rot + 2 * math.pi * i / SEG
             E.append(Vector((r * math.cos(a), r * math.sin(a), z)))
-            if tip: tips.append((E[-1].copy(), t))
+            if tip:                              # bauble seat: on the dark band, 75% down the tier, at the tip's angle
+                f = 0.78
+                rr, zz = (rt + (rb - rt) * f) * S, zt + (zb - zt) * f
+                tips.append((Vector((rr * math.cos(a), rr * math.sin(a), zz)), t))
         U = ring(rt * S * 0.75, zb + 0.15, rot=rot)  # underside back to the core
         cz = Vector((0, 0, zt + 0.05))
         # light cap: top disc + sloped band A->M
@@ -99,6 +103,9 @@ def build():
         # dark band M->E, underside E->U, U closed
         fol.add(M + E, [(i, (i + 1) % SEG, SEG + (i + 1) % SEG, SEG + i) for i in range(SEG)])
         fol.add(E + U, [(i, (i + 1) % SEG, SEG + (i + 1) % SEG, SEG + i) for i in range(SEG)])
+        cm = Vector((0, 0, zm))                 # hidden disc at the colour seam so both pieces are watertight
+        top.add([cm] + M, [(0, 1 + i, 1 + (i + 1) % SEG) for i in range(SEG)])
+        fol.add([cm] + M, [(0, 1 + (i + 1) % SEG, 1 + i) for i in range(SEG)])
         cu = Vector((0, 0, zb + 0.15))
         fol.add([cu] + U, [(0, 1 + i, 1 + (i + 1) % SEG) for i in range(SEG)])
     # trunk: short octagonal post from the ground to inside tier 5
@@ -123,7 +130,7 @@ def build():
             F.append((i * 6 + j, i * 6 + (j + 1) % 6, ((i + 1) % 24) * 6 + (j + 1) % 6, ((i + 1) % 24) * 6 + j))
     misc["Fur"].add(V, F)
     # star: chunky bevelled 5-point star facing +/-Y (front), centre at the sheet's star centre
-    sc_z, R_out, R_in, depth = Z(64), 54 * S, 24 * S, 0.9
+    sc_z, R_out, R_in, depth = Z(69), 59 * S, 34 * S, 0.95
     pts = []
     for i in range(10):
         a = math.pi / 2 + i * math.pi / 5
@@ -135,12 +142,11 @@ def build():
     kinds = ["BaubleRed", "BaubleGold", "BaubleSilver"]
     k = 0
     for n, (p, t) in enumerate(tips):
-        if (n + t) % 2: continue
         d = Vector((p.x, p.y, 0)).normalized()
-        c = p + d * 0.2 - Vector((0, 0, 0.75))
-        ico(misc[kinds[k % 3]], c, 0.72); k += 1
+        c = p - d * 0.15
+        ico(misc[kinds[k % 3]], c, 0.8, sub=2); k += 1
         cap = Vector(c) + Vector((0, 0, 0.72))
-        ico(misc["BaubleGold"], cap, 0.22, sub=0)
+        ico(misc["BaubleGold"], cap, 0.24, sub=1)
     # bulb string: 4 turns spiralling down the cone surface, bulbs every ~1.6 studs
     z0, z1 = Z(140), Z(490)
     def surf_r(z):
@@ -149,7 +155,7 @@ def build():
             if yt <= y <= yb: return (rt + (rb - rt) * (y - yt) / (yb - yt)) * S + 0.15
         return 60 * S
     path = []
-    N = 360
+    N = 200
     for i in range(N + 1):
         f = i / N
         z = z0 + (z1 - z0) * f
@@ -162,12 +168,12 @@ def build():
     for i, p in enumerate(path):
         tdir = (path[min(i + 1, N)] - path[max(i - 1, 0)]).normalized()
         nrm = Vector((p.x, p.y, 0)).normalized(); bi = tdir.cross(nrm).normalized()
-        for q in (nrm * w + bi * w, -nrm * w + bi * w, -nrm * w - bi * w, nrm * w - bi * w):
+        for q in (nrm * w * 1.5, -nrm * w + bi * w * 1.3, -nrm * w - bi * w * 1.3):
             V.append(p + q)
     for i in range(N):
-        for j in range(4):
-            F.append((i * 4 + j, i * 4 + (j + 1) % 4, (i + 1) * 4 + (j + 1) % 4, (i + 1) * 4 + j))
-    F += [(3, 2, 1, 0), (N * 4, N * 4 + 1, N * 4 + 2, N * 4 + 3)]
+        for j in range(3):
+            F.append((i * 3 + j, i * 3 + (j + 1) % 3, (i + 1) * 3 + (j + 1) % 3, (i + 1) * 3 + j))
+    F += [(2, 1, 0), (N * 3, N * 3 + 1, N * 3 + 2)]
     misc["Wire"].add(V, F)
     acc_len, last = 0.0, None
     for p in path:
