@@ -162,3 +162,20 @@ Test "taller" separately with a small starter avatar next to the giant.
 3. Logo readable at 64 px: a thicker stroke, a simpler gradient.
 4. Rim light to separate the hair from the dark background.
 5. One progression cue, without clutter; keep 70%+ of the frame on the character.
+
+## v16: critique fixes applied (27 Nov)
+- **Owner: "do both".** Both versions were remade in the same ChatGPT chat as the critique ("Icon Comparison Review"). The raw blue art was attached with the agreed fixes:
+  - slightly lower camera;
+  - bigger face;
+  - shoulders and arms fuller;
+  - a real cotton tee (no painted abs);
+  - 30% less bloom;
+  - matte skin;
+  - simpler hair;
+  - no sweat drops;
+  - a natural grip;
+  - a blue rim on the hair.
+- **The gold version** is "the same image, only the dumbbell yellow-gold #FFC94A".
+- **Logo:** `v9/compose_v16.py` adds a thick dark-navy outer stroke (Gemini). The width is 0.53 (was 0.58) so it clears the goggles; this is a middle ground between ChatGPT's 0.43 and the owner's "bigger".
+- **Files:** `v9/gymarc_v16_{bluedb,golddb}_gpt.png` (raw), `v9/gymarc_v16_{bluedb,golddb}.png` (icons), `v9/compare_v16.png` (before/after vs Power Lifters and Gym Star).
+- **Watch:** removing the painted abs also softened the tapered waist. If the owner misses the V-taper, ask for it back in words.
