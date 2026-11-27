@@ -95,3 +95,49 @@ Searched without result:
 - The two thin upright things in the middle are not built.
 - No sign or letters are built. If the owner knows what the new sign says, it can go on the inner wall.
 - Neither satellite image gives a capture date. Google's credit says 2026; the HAGL site still showed the old ring in an aerial uploaded in July 2025. So the change most likely happened in 2025-2026.
+
+## Round 2 (27 Nov): no grass, straight lines
+
+Owner, on the before/after picture:
+- "im pretty sure the big markings are straight irl in frotn of plaza"
+- "there is no grass on myanmar plaza area"
+- "platform is white at mm plaza and pavement is okay"
+
+**No grass.**
+- The two lawn sectors are gone. That area is now part of the white platform (`mp_front_2026.BEDS = ()`).
+- The platform stays white (MAR), as the owner says. The public pavement is unchanged.
+- **Where the grass came from:** the game cut the Myanmar Centre lot into two polygons: the corner plot, and the mall plot from z 27228 south. They left a 25-stud strip between them, plus the corner plot outside the old ring. Neither had any paving mesh over it, so terrain Grass (at about y 42, 3-4 studs under the pavement) showed through. That was the grass field beside the pavement in the owner's view.
+- **The fix:** a grey plaza-paving forecourt (group PAV, the same look as the plaza paving under the mall) covers that strip and the corner plot round the platform. It is about 12,500 sq studs, at the pavement plane + 0.13 (under the platform's + 0.20, so no flicker). It is the site closed by a 30-stud radius (that closes the notch at the mall's north-west corner), minus the buildings, minus every road and pavement box + 0.3 (the road box list was redone: 251 boxes).
+- Two hidden fill sheets stop terrain showing through holes in the old mall paving: "holes" (the podium minus the old paving, 0.12 under the mall floor) and "under" (the whole front site at plane - 0.30).
+- An early version also paved the verge between the kerb and the site line. That sheet lay on the road mesh and showed as a dark strip at street level, so it was dropped (v10). The public pavement is untouched.
+- It is walkable: the collision is 471 short raster boxes (at most 12 studs long, each set on the sloped plane), plus 126 for the platform and 16 for the wall. The fill sheets have no collision of their own (they sit under walkable surfaces).
+- Terrain inside the Plaza front: every Grass and Ground voxel is now Pavement, and terrain poking up through the new paving was carved down to min(plane - 1.6, 42.76) (212 voxels carved, about 56,800 converted over the passes).
+- **Kept:** the roof gardens round the dome and on the terraces (`DroneMatch.RoofGardens`, the terrace hedge and lawn meshes). They are on the roofs, not the "area", and the 2025 aerial shows green there. The hedge row along No. 1 Industrial Road (the patched HDG) is also kept: it is a hedge, not a lawn.
+
+**Straight road markings.**
+- **Why they bent:** `roads05_paint.py` centres the lane lines on the carriageway's width. Kabar Aye Pagoda Road's east side widens for a turn lane (its right half goes from 32.6 to 40.5 studs over z 27128-27032). So every lane line and the white double centre line jogged 2-4 studs east between z 27160 and 27100, then back. That looks like the lines bending toward the Plaza.
+- The road's own centreline is straight: direction (0.13, -0.99) the whole way from z 27700 to 26970. The real road is straight here, as both satellite images show.
+- **The fix, at the source:** `tools/yangon/city/paint_straight.py`. `STRAIGHT` lists the stretch:
+  - the lines keep their offsets from before the flare: lanes -21.35 / -11.3 / 14.45 / 24.5, double centre line -0.75 / 4.25;
+  - the three northbound turn arrows go to the straight lanes' middles;
+  - the stop line now starts at the centre line.
+
+  `roads05_paint.py` calls `straighten()` last, so any re-run of the paint keeps it. The bake's own data was patched too: `build/city_1to1/roads05_RBM/paint.json`, original kept as `paint.json.bak27`.
+- **Into the game (mesh-only):** `tools/yangon/city/mp_lines_patch.py` takes the moved items' triangles out of cell 22x17's white line mesh and lays the straight ones in. Each new piece sits on the road surface mesh in 3-stud pieces, at the old paint's height over it (0.088). This touched only the `RMeshL` of that cell; no road surface or material changed. The old MeshId is kept in attribute `OldMeshId_lines27`.
+- **Lane count:** 3 + 3, from OSM lanes = 3 and the game's lines; I didn't check it at street level. The flare is a wider outer lane on the east side.
+
+**Built (round 2), Studio place version 2347 (saved, not published):**
+- `MyanmarCentre.Front2026` from asset 123619769893698 (front v10: 5 meshes, flicker check 0); the patched old meshes from 99739996241452.
+- `Cell_22x17.RMeshL` from asset 94001462504490 (`imports/sync/landmarks/mc1/mp_lines_L22x17.glb`: 576 old line triangles out, 682 in).
+- 613 `Col_front26` boxes in `MyanmarCentre.Collide`.
+- Play test on store `CityLegends_test`: the server and client started with no new errors; the store is back on `CityLegends_v1`.
+
+**Pictures:**
+- ![[2026-11-27 Myanmar Plaza front - round 2, owner angle, before and after (Edit).jpg]]
+- ![[2026-11-27 Myanmar Plaza front - round 2, street level after (Edit).jpg]]
+
+**Open points:**
+- A strip of terrain (now Pavement) shows at the front edge between the kerb verge and the new paving: lighter grey-green bricks, not grass.
+- The "holes" sheet sits 0.12 under the mall floor: fine in the views checked, but if the mall floor is moved, re-run `mp_front_2026.py`.
+- `mc3d.plinth()` still builds the old 2019 sign: switch it before any full re-export.
+

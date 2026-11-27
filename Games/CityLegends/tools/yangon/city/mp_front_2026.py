@@ -70,10 +70,129 @@ LOT = SITE.buffer(-1.0).difference(ROADS.buffer(1.0))
 R_FILL = 49.5          # paving fills the old lawn / hedge zone out to the site edge
 R_IN_WALL = (16.5, 17.7)
 WALL_TOP = 2.7         # ~0.9 m
-BEDS = ((-54, -18), (18, 54))
+BEDS = ()   # (27 Nov, owner: "there is no grass on myanmar plaza area") the satellite's two lawn sectors are paved: was ((-54, -18), (18, 54))
 BED_R = (19.8, 31.2)
 POOL = (-22, 22, 4.5, 15.0)
 Z_SLAB = 0.20          # the old plaza paving (PAV) is at 0.06: 0.14 apart
+Z_FCT = 0.13           # the forecourt paving (owner: no grass on the Plaza area): 0.07 over PAV, 0.07 under the platform
+# the Plaza's front only (Kabar Aye Pagoda Road and the corner, world x < 34900, z < 27460): the pavement plane fits
+# there (further south and east the pavements are up to 3 studs off it)
+FRONT = Polygon([(34560 - X1.OX1, -(27040 - X1.OZ1)), (34900 - X1.OX1, -(27040 - X1.OZ1)),
+                 (34900 - X1.OX1, -(27460 - X1.OZ1)), (34560 - X1.OX1, -(27460 - X1.OZ1))])
+Z_UNDER = -0.30        # the edge fill inside the site: 0.36 under the plaza paving, so it shows only in its gaps
+
+
+def _edge_fill():
+    """(27 Nov, round 2) The plaza paving (mc3d PAV) stops 2-5 studs short of the site edge along the roads, and the
+    gap showed the terrain 3-4 studs below (green-brown Ground) all along Kabar Aye Pagoda Road; the forecourt in front
+    of the mall's north-west corner had holes too. A paving sheet under the PAV level fills the site's whole front
+    (FRONT box, buildings out); where PAV lies over it, it stays hidden."""
+    full = SITE.buffer(16, join_style=2).buffer(-16, join_style=2)
+    blds = unary_union([Polygon([(x * S, y * S) for x, y in LAY[k]]).buffer(0) for k in ("podium", "A", "B", "melia_osm")])
+    return full.intersection(FRONT).difference(blds).difference(ROADS.buffer(0.3)).buffer(-0.01)
+
+
+def _pav_footprint():
+    """The placed plaza paving (mc1_2.glb PAV, up-facing triangles) as a model-frame shape."""
+    name, c, P, N, U, C, T = read(os.path.join(D, "mc1_2.glb"), "PAV_mc1gs98")
+    tris = []
+    for k in range(0, len(T), 3):
+        if N[T[k]][1] < 0.9:
+            continue
+        pts = [(c[0] - P[i][0] - X1.OX1, -(c[2] - P[i][2] - X1.OZ1)) for i in T[k:k + 3]]
+        q = Polygon(pts)
+        if q.area > 1e-6:
+            tris.append(q.buffer(0.002))
+    return unary_union(tris)
+
+
+def _pod_holes():
+    """(27 Nov, round 2) In front of the mall's north-west chamfer the podium outline is not built (no floor, no
+    paving): terrain showed through. Paving there, inside the podium outline but outside the shopfront line (POD 3.5
+    in) and the plaza paving; laid at the mall floor level - 0.12 (or the pavement plane - 0.3 where that is lower),
+    so it stays under the floor band and the paving wherever they exist."""
+    pod = Polygon([(x * S, y * S) for x, y in LAY["podium"]]).buffer(0)
+    # (the whole podium in the front box: where the mall's floor exists at y0 this sheet is 0.12 under it, hidden)
+    return pod.intersection(FRONT).difference(_pav_footprint()).difference(ROADS.buffer(0.3)).buffer(-0.01)
+
+
+def _floor_footprint():
+    """Everything the mall model lays at ground-floor level (up-facing triangles within 1.5 of y0, any group), from
+    mc1.glb: where the podium outline is really built."""
+    import struct
+    y0 = LAY["ground"]["y0"]
+    path = os.path.join(D, "mc1.glb")
+    b = open(path, "rb").read()
+    js = json.loads(b[20:20 + struct.unpack("<I", b[12:16])[0]])
+    tris = []
+    for nd in js["nodes"]:
+        if "mesh" not in nd:
+            continue
+        name, c, P, N, U, C, T = read(path, nd["name"])
+        for k in range(0, len(T), 3):
+            if N[T[k]][1] < 0.9:
+                continue
+            ys = [c[1] + P[i][1] for i in T[k:k + 3]]
+            if abs(sum(ys) / 3 - y0) > 1.5:
+                continue
+            q = Polygon([(c[0] - P[i][0] - X1.OX1, -(c[2] - P[i][2] - X1.OZ1)) for i in T[k:k + 3]])
+            if q.area > 1e-6:
+                tris.append(q.buffer(0.002))
+    return unary_union(tris)
+
+
+def _cap_under(g, grp, shape, y0):
+    """A cap whose height is min(Z_UNDER over the plane, y0 - 0.12 world) at each vertex (ground layer)."""
+    import shapely
+    geoms = [shape] if shape.geom_type == "Polygon" else list(getattr(shape, "geoms", []))
+    for G in geoms:
+        if G.geom_type != "Polygon" or G.area < 1e-3:
+            continue
+        for t in shapely.constrained_delaunay_triangles(G).geoms:
+            c3 = list(t.exterior.coords)[:3]
+            a = (c3[1][0] - c3[0][0]) * (c3[2][1] - c3[0][1]) - (c3[1][1] - c3[0][1]) * (c3[2][0] - c3[0][0])
+            if abs(a) < 1e-9:
+                continue
+            if a < 0:
+                c3 = [c3[0], c3[2], c3[1]]
+            v = []
+            for x, y in c3:
+                X, Z = X1.OX1 + x, X1.OZ1 - y
+                v.append((x, y, min(Z_UNDER, y0 - 0.12 - X1.plane_y(PLANE, X, Z))))
+            g.tri(grp, v[0], v[1], v[2])
+
+
+def _flat_boxes(shape, ztop, out):
+    """Raster collision boxes for a paving cap on the sloped pavement plane: each run cut into pieces of at most 12
+    studs, each set at the plane under its own middle (a 130-stud flat box was 0.7 off at its ends)."""
+    for cx, cy, z0, sx, sy, sz, _ in raster_boxes(shape, -1.0, ztop, 2.0):
+        k = max(1, int(math.ceil(sx / 12.0)))
+        for i in range(k):
+            px = cx - sx / 2 + sx * (i + 0.5) / k
+            X, Z = X1.OX1 + px, X1.OZ1 - cy
+            out.append([round(X, 2), round(X1.plane_y(PLANE, X, Z) + z0 + sz / 2, 2), round(Z, 2), round(sx / k, 2),
+                        round(sz, 2), round(sy, 2), 0])
+
+
+def _forecourt():
+    """(27 Nov) The ground between the corner plot and the mall plot (the two site polygons leave a 25-stud strip of
+    terrain grass in front of the mall) and the corner plot round the platform: grey plaza paving (PAV), as the
+    satellite's paved forecourt. The two polygons are closed only near the corner (world x < 34860, z < 27260), then
+    the road / pavement boxes (1 stud), the buildings and the platform come out."""
+    from shapely.geometry import box as sbox
+    near = sbox(34560 - X1.OX1, -(27260 - X1.OZ1), 34860 - X1.OX1, -(27040 - X1.OZ1))
+    closed = SITE.buffer(30, join_style=2).buffer(-30, join_style=2).intersection(near)   # 30: the notch at the mall's NW corner (16 left it open)
+    blds = unary_union([Polygon([(x * S, y * S) for x, y in LAY[k]]).buffer(0) for k in ("podium", "A", "B", "melia_osm")])
+    main = max(SITE.geoms, key=lambda q: q.area) if SITE.geom_type != "Polygon" else Polygon()
+    fct = closed.difference(main.buffer(-0.01))
+    # (27 Nov, round 2) the verge: the site outline stops 1-6 studs short of the pavement, and that strip showed
+    # terrain grass all along Kabar Aye Pagoda Road. Paved too, wherever the strip borders a pavement / road box.
+    full = SITE.buffer(16, join_style=2).buffer(-16, join_style=2)
+    verge = full.buffer(10, join_style=2).difference(full).intersection(ROADS.buffer(10)).intersection(FRONT)
+    # (the verge strip outside the site is NOT paved: between the road boxes it reached onto the road mesh, which the
+    # boxes don't fully cover; the gaps it was for are inside the site and are filled by _edge_fill / _pod_holes)
+    del verge
+    return fct.difference(blds).difference(ROADS.buffer(0.3)).buffer(-0.01)
 
 
 class GG(Geo):
@@ -105,6 +224,14 @@ def build():
     wall = sector(R_IN_WALL[0], R_IN_WALL[1], -80, 80).intersection(LOT)
     slab = sector(0, R_FILL, -90, 90).intersection(LOT)
     top = slab.difference(unary_union(beds + [pool, wall]))
+    fct = _forecourt().difference(slab.buffer(0.01))
+    g.capshape("PAV", fct, Z_FCT)
+    g.wallshape("PAV", fct, -1.0, Z_FCT)
+    under = _edge_fill().difference(fct.buffer(0.01)).difference(slab.buffer(0.01))
+    g.capshape("PAV", under, Z_UNDER)
+    g.wallshape("PAV", under, -1.5, Z_UNDER)
+    holes = _pod_holes().difference(under.buffer(0.01)).difference(fct.buffer(0.01)).difference(slab.buffer(0.01))
+    _cap_under(g, "PAV", holes, LAY["ground"]["y0"])
     g.capshape("MAR", top, Z_SLAB)
     g.wallshape("MAR", slab, -1.0, Z_SLAB)
     for b in beds:
@@ -136,10 +263,9 @@ def build():
         X, Z = X1.OX1 + mx, X1.OZ1 - my
         boxes.append([round(X, 2), round(X1.plane_y(PLANE, X, Z) + h / 2, 2), round(Z, 2), round(L, 2), round(h, 2), round(w, 2), round(yaw, 4)])  # CFrame.Angles(0, yaw, 0) lays X along (dx, -dy) world
     # the paving: walkable at its own top (the old lawn ring was walked on the terrain 0.7 below)
-    for cx, cy, z0, sx, sy, sz, _ in raster_boxes(slab, -1.0, Z_SLAB, 2.0):
-        X, Z = X1.OX1 + cx, X1.OZ1 - cy
-        boxes.append([round(X, 2), round(X1.plane_y(PLANE, X, Z) + z0 + sz / 2, 2), round(Z, 2), round(sx, 2), round(sz, 2), round(sy, 2), 0])
-    return g, boxes, {"slab": slab.area, "beds": [b.area for b in beds], "pool": pool.area, "wall": wall.area}
+    _flat_boxes(slab, Z_SLAB, boxes)
+    _flat_boxes(fct, Z_FCT, boxes)
+    return g, boxes, {"holes": holes.area, "under": under.area, "fct": fct.area, "slab": slab.area, "beds": [b.area for b in beds], "pool": pool.area, "wall": wall.area}
 
 
 def old_zone(t):

@@ -1100,6 +1100,9 @@ if __name__ == '__main__':
     P = build(data, sig)
     P.items, tst = tidy(data, P.items)
     print('tidy', tst)
+    # (27 Nov) straight lines where a flare would make them jog (Kabar Aye at Myanmar Plaza): paint_straight.STRAIGHT
+    from paint_straight import straighten
+    print('straightened', straighten(P.items))
     kinds = {}
     for it in P.items:
         kinds[it['w']] = kinds.get(it['w'], 0) + 1

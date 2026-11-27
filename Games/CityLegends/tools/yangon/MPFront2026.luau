@@ -13,6 +13,10 @@
 	Needs ServerStorage.ClaudeTools.LandmarkPlace3D (group looks).
 	Done 27 Nov: M.run(129480979539349, 99739996241452) (front v2, patch; group 33151111), then M.collide with all 46
 	boxes of imports/sync/landmarks/mc1/mc1_front26.json "coll" (16 wall + 30 paving).
+	Round 2 (27 Nov, owner: no grass, straight lines): LandmarkPlace3D.place(LoadAsset(123619769893698), MC, "Front2026")
+	(front v10: no lawns, PAV forecourt, hidden fill sheets) + 613 Col_front26 (16 wall + 126 platform + 471 forecourt);
+	terrain Grass / Ground under the front -> Pavement; Cell_22x17.RMeshL <- asset 94001462504490 (straight lines).
+	Studio v2347.
 ]]
 local InsertService = game:GetService("InsertService")
 local ServerStorage = game:GetService("ServerStorage")
