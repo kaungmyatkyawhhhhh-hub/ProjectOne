@@ -64,8 +64,7 @@ local C = {
 	asphalt = Color3.fromRGB(58, 58, 62), concrete = Color3.fromRGB(168, 166, 160), steel = Color3.fromRGB(205, 205, 200),
 	pylon = Color3.fromRGB(214, 210, 198), cable = Color3.fromRGB(226, 222, 204), yellow = Color3.fromRGB(230, 222, 114),
 	white = Color3.fromRGB(235, 235, 230), lamp = Color3.fromRGB(236, 244, 255), rail = Color3.fromRGB(190, 192, 196),
-	pylonNight = Color3.fromRGB(124, 122, 116), -- 27 Nov: 164,157,142 bloomed the whole pylon into a white blob at night (Edit shot)
-	cableNight = Color3.fromRGB(120, 116, 104), violet = Color3.fromRGB(150, 120, 205), -- the LED wash on the legs, IMG_0808 46 s
+	-- (27 Nov) no night colours: pylons and cables are not neon any more, real floodlights light them (owner: "irl its not neon")
 	deck = Color3.fromRGB(178, 174, 166), -- pale grey deck under white lamps (night clip p2 1:19, p1 0:21, p1 1:31 concrete)
 	silver = Color3.fromRGB(196, 198, 200), railWhite = Color3.fromRGB(222, 224, 222), capCream = Color3.fromRGB(214, 204, 172),
 	reflector = Color3.fromRGB(240, 196, 40), red = Color3.fromRGB(200, 40, 36), signGreen = Color3.fromRGB(46, 132, 124),
@@ -147,6 +146,19 @@ local function neon(parent, name, size, cf, color)
 	local p = part(parent, name, size, cf, color, Enum.Material.Neon)
 	p.Transparency = 1
 	p:AddTag("FacadeNight")
+	return p
+end
+-- a floodlight: an invisible box whose SpotLight is aimed at `target` (night only through WorldFx's LOD, with a long LodRange
+-- so the lit pylons still read from the river bank)
+local function flood(parent, at, target, color, bright, angle)
+	local p = part(parent, "Flood", Vector3.new(0.5, 0.5, 0.5), CFrame.lookAt(at, target), color)
+	p.Transparency = 1
+	local l = Instance.new("SpotLight")
+	l.Face, l.Angle, l.Range, l.Brightness, l.Color, l.Shadows, l.Enabled = Enum.NormalId.Front, angle, 60, bright, color, false, false
+	l:SetAttribute("LodRange", 2500)
+	l:AddTag("LODLight")
+	l:AddTag("DayOff")
+	l.Parent = p
 	return p
 end
 local function beam(parent, name, a, b, tx, ty, color) -- a box from a to b
@@ -463,17 +475,14 @@ function M.build()
 		local up = base.LookVector
 		for _, sx in { -1, 1 } do
 			local a, b = P(sx * LEG_X, deckH - 5), P(sx * 2.6, headBase + 1)
-			glow(part(pf, "Leg", Vector3.new(2.6 * S, 5 * S, (b - a).Magnitude), CFrame.lookAt((a + b) / 2, b, up), C.pylon), C.pylonNight)
+			part(pf, "Leg", Vector3.new(2.6 * S, 5 * S, (b - a).Magnitude), CFrame.lookAt((a + b) / 2, b, up), C.pylon)
 			a, b = P(sx * 1.4, 3), P(sx * LEG_X, deckH - 4) -- closing in to ONE footing at the water (night clip p2 0:47 / 0:51)
-			glow(part(pf, "LowerLeg", Vector3.new(2.6 * S - 0.3, 5 * S - 0.3, (b - a).Magnitude), CFrame.lookAt((a + b) / 2, b, up), C.pylon), C.pylonNight)
-			glow(part(pf, "Head", Vector3.new(2.2 * S, (top - headBase) * S, 5 * S), CFrame.new(P(sx * 2.6, (top + headBase) / 2)) * base.Rotation, C.pylon), C.pylonNight)
-			-- the violet wash on the inner face of each leg only (night clip p2 0:43 / 0:47: warm white pylon, lilac inside the legs)
-			a, b = P(sx * (LEG_X - 1.45), deckH + 2), P(sx * 1.15, headBase - 3)
-			neon(pf, "Wash", Vector3.new(0.3, 2 * S, (b - a).Magnitude), CFrame.lookAt((a + b) / 2, b, up), C.violet)
+			part(pf, "LowerLeg", Vector3.new(2.6 * S - 0.3, 5 * S - 0.3, (b - a).Magnitude), CFrame.lookAt((a + b) / 2, b, up), C.pylon)
+			part(pf, "Head", Vector3.new(2.2 * S, (top - headBase) * S, 5 * S), CFrame.new(P(sx * 2.6, (top + headBase) / 2)) * base.Rotation, C.pylon)
 		end
-		glow(part(pf, "HeadBeam", Vector3.new(7.4 * S, 3 * S, 5.2 * S), CFrame.new(P(0, headBase)) * base.Rotation, C.pylon), C.pylonNight)
-		glow(part(pf, "Cap", Vector3.new(7.4 * S, 2 * S, 5.2 * S), CFrame.new(P(0, top - 1)) * base.Rotation, C.pylon), C.pylonNight)
-		glow(part(pf, "CrossBeam", Vector3.new((2 * LEG_X + 2.6) * S, 3 * S, 5.2 * S), CFrame.new(P(0, deckH - BOX_DEPTH - 2.2)) * base.Rotation, C.pylon), C.pylonNight)
+		part(pf, "HeadBeam", Vector3.new(7.4 * S, 3 * S, 5.2 * S), CFrame.new(P(0, headBase)) * base.Rotation, C.pylon)
+		part(pf, "Cap", Vector3.new(7.4 * S, 2 * S, 5.2 * S), CFrame.new(P(0, top - 1)) * base.Rotation, C.pylon)
+		part(pf, "CrossBeam", Vector3.new((2 * LEG_X + 2.6) * S, 3 * S, 5.2 * S), CFrame.new(P(0, deckH - BOX_DEPTH - 2.2)) * base.Rotation, C.pylon)
 		part(pf, "PileCap", Vector3.new(9 * S, 7 * S, 12 * S), CFrame.new(P(0, 1.5)) * base.Rotation, C.concrete) -- one narrow footing
 		-- the lit window at the top of the slot, under the cap (night clip p1 0:21, p2 0:43); 0.1 m clear of the shafts and cap
 		neon(pf, "TopLight", Vector3.new(2.8 * S, 2 * S, 1 * S), CFrame.new(P(0, top - 3.1)) * base.Rotation, C.lamp)
@@ -492,6 +501,32 @@ function M.build()
 				local g = gui(pl, if best.nx > 0 then Enum.NormalId.Right else Enum.NormalId.Left, 30)
 				local rim = frameUI(g, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.86, 0.82), Color3.fromRGB(150, 118, 76))
 				frameUI(rim, UDim2.fromScale(0.5, 0.5), UDim2.fromScale(0.9, 0.88), C.bronze)
+			end
+		end
+		-- (27 Nov, owner: "irl its not neon, the lighting is just really good and nice and bright") the pylon is plain cream
+		-- concrete lit by warm-white floods; lilac floods on the inner faces of the legs (night clip p2 0:43 / 0:47)
+		local warm, lilac = Color3.fromRGB(255, 242, 222), Color3.fromRGB(168, 132, 255)
+		for _, pc in pf:GetChildren() do
+			if pc.Name == "Leg" or pc.Name == "LowerLeg" or pc.Name == "Head" then
+				local c = pc.CFrame
+				local axis = if pc.Name == "Head" then c.UpVector else c.LookVector
+				local len = if pc.Name == "Head" then pc.Size.Y else pc.Size.Z
+				local across = if pc.Name == "Head" then c.LookVector else c.UpVector -- along the road
+				local levels = math.max(2, math.floor(len / 50))
+				for k = 1, levels do
+					local q = c.Position + axis * len * ((k - 0.5) / levels - 0.5)
+					for _, sd in { 1, -1 } do
+						local off = (c.RightVector * sd + across * sd).Unit * 16
+						flood(pf, q + off - axis * 6, q + axis * 6, warm, 3, 70)
+					end
+				end
+				if pc.Name == "Leg" then
+					local inward = -math.sign(base:PointToObjectSpace(pc.Position).X) * base.RightVector
+					for _, t in { -0.15, 0.2 } do
+						local q = c.Position + axis * len * t
+						flood(pf, q + inward * 14 - axis * 4, q, lilac, 4, 50)
+					end
+				end
 			end
 		end
 		for _, sx in { -1, 1 } do -- traffic keeps right: +s traffic on +x sees the sign before the pylon, -s traffic on -x
@@ -525,10 +560,10 @@ function M.build()
 					local a = (df * CFrame.new(sx * 10.6 * S, 0.6, 0)).Position -- on the anchor strip
 					local b = P(sx * 2.6, hTop, side * 1.5)
 					local u = (b - a).Unit
-					glow(rod(cables, "Stay", a + u * 1.4 * S, b, 0.9, C.cable), C.cableNight)
+					rod(cables, "Stay", a + u * 1.4 * S, b, 0.9, C.cable)
 					-- the cream bell anchor cap (night clip p2 1:19 / 1:23, p1 0:21): wide bell on the strip, body up the cable
-					glow(rod(cables, "CapBell", a - u * 0.25 * S, a + u * 0.45 * S, 0.85 * S, C.capCream), C.cableNight)
-					glow(rod(cables, "CapBody", a + u * 0.4 * S, a + u * 1.6 * S, 0.55 * S, C.capCream), C.cableNight)
+					rod(cables, "CapBell", a - u * 0.25 * S, a + u * 0.45 * S, 0.85 * S, C.capCream)
+					rod(cables, "CapBody", a + u * 0.4 * S, a + u * 1.6 * S, 0.55 * S, C.capCream)
 					local road = -sx * df.RightVector
 					road = (road - u * road:Dot(u)).Unit -- across the body, toward the road
 					local rp = a + u * 1.15 * S + road * (0.275 * S + 0.04)
@@ -587,14 +622,23 @@ function M.build()
 		local head = part(lamps, "Head", Vector3.new(4.5, 0.5, 1.5), flat * CFrame.new(hx, y0 + 30.2, 0), C.lamp)
 		head:AddTag("LampGlow")
 		nLamp += 1
-		if nLamp % 4 == 0 then
-			local l = Instance.new("SpotLight")
-			l.Face, l.Angle, l.Range, l.Brightness, l.Color = Enum.NormalId.Bottom, 120, 60, 7, Color3.fromRGB(232, 240, 255)
-			l.Shadows, l.Enabled = false, false
-			l:AddTag("LODLight")
-			l:AddTag("DayOff")
-			l.Parent = head
-		end
+		local at = Instance.new("Attachment")
+		at.Name, at.Position = "LampLight", Vector3.new(0, -14, 0)
+		local l = Instance.new("PointLight")
+		l.Color, l.Brightness, l.Range, l.Shadows, l.Enabled = Color3.fromRGB(240, 244, 255), 3, 60, false, false
+		l:AddTag("LODLight")
+		l:AddTag("DayOff")
+		l.Parent = at
+		at.Parent = head
+		local bb = Instance.new("BillboardGui")
+		bb.Name, bb.Size, bb.LightInfluence, bb.Brightness, bb.Enabled = "LampHalo", UDim2.fromScale(11, 11), 0, 2, false
+		bb.MaxDistance = 3000 -- the bridge's lamp rows read from the banks (night clip p2 0:43)
+		local img = Instance.new("ImageLabel")
+		img.BackgroundTransparency, img.Size = 1, UDim2.fromScale(1, 1)
+		img.Image, img.ImageColor3 = "rbxassetid://83825952241880", Color3.fromRGB(240, 244, 255)
+		img.Parent = bb
+		bb:AddTag("LampHalo")
+		bb.Parent = head
 	end
 	for s = sStart + 10 * S, sEnd - 5 * S, LAMP_GAP * S do
 		if math.abs(s - sPlaza) > PLAZA_HALF then
