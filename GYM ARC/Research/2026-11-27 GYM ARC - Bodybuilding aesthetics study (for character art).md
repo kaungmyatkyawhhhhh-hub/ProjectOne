@@ -6,6 +6,15 @@ date: 2026-11-27
 
 **Why:** the owner rejected the v4 icons: "our character's build look ugly because its not aesthetic", then "it needs the aesthetic proportions too, study about bodybuilding aesthetics first". The v4 giant was puffy: a balloon shirt, lumpy gold blob arms, no waist.
 
+## Owner correction (27 Nov 2026, after v5)
+v5 used the "waist = half the shoulders" rule and looked weird: "the arms and the waist is too small, its suppose to not be that small because of the obliques". His examples of aesthetic: the Power Lifters icon build, and David Laid at 16.
+- **Use instead:** a natural waist about 2/3 of the shoulders (about 1.5 : 1) with thick obliques and serratus.
+- **Arms:** biceps about as wide as the head.
+- **Traps:** big, sloping up to the neck.
+- **Look:** lean and natural, with dense, deeply separated muscle.
+
+The ratios below are the textbook background; the owner's examples win.
+
 ## Ratios (sources at the bottom)
 - **Shoulders : waist = 1.618 : 1**, the Adonis index or golden ratio (measured as circumference). For drawn widths in heroic art, use shoulders about 3 head-widths and the **waist about half the shoulder width** (about 2 : 1), so the V still reads when the icon is small and blurred.
 - **Chest : waist about 1.7–1.8**: Steve Reeves measured 54 in chest and 30 in waist.
