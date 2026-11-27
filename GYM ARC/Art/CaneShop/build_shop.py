@@ -12,7 +12,7 @@ FX = 486                          # front view centre x
 SX = 1000                         # side view: front edge of the floor
 Z = lambda y: (GY - y) * S
 X = lambda x: (x - FX) * S
-U = lambda x: -((x - SX) * S - 4.0)   # side px -> Blender y (front at +4 -> flipped so the front is -Y)
+U = lambda x: (x - SX) * S - 4.0      # side px -> Blender y: the front (customer side) is -Y
 
 COL = {"Red": (0.80, 0.07, 0.08, 1), "White": (0.96, 0.93, 0.88, 1), "Wood": (0.62, 0.36, 0.13, 1),
        "WoodDark": (0.40, 0.21, 0.08, 1), "Gold": (0.98, 0.70, 0.12, 1), "Bulbs": (1.0, 0.86, 0.45, 1),
@@ -78,8 +78,11 @@ def build():
         box("Wood", x0, x1, bw0, U(1195), Z(400), Z(540))
         box("Wood", x0, x1, bw0, U(1290), Z(400), Z(215))
         box("Wood", x0, x1, U(1200), U(1195), Z(400), Z(215))
+        box("Wood", x0, x1, bw0, U(1195), Z(215) - 0.01, Z(128))          # wall above the window, up to the roof
     # shelf (x 285-690, y 342-358) + 2 brackets
     box("Wood", X(285), X(690), U(1318), U(1250), Z(358), Z(342))
+    for bx in (320, 655):                                            # 2 shelf brackets (exploded sheet)
+        box("WoodDark", X(bx) - 0.12, X(bx) + 0.12, U(1318), U(1280), Z(342), Z(380))
     # 3 santa hats on the shelf (cone + brim + pompom), centres x 350, 488, 618
     for hx in (350, 488, 618):
         cx, cy, zb = X(hx), U(1284), Z(342)
@@ -97,6 +100,7 @@ def build():
         x = X(250 + i * 40)
         box("WoodDark", x - 0.03, x + 0.03, cf - 0.02, cf + 0.01, Z(536), Z(449))
     box("Gold", X(246), X(730), cb + 0.05, cf - 0.06, Z(445), Z(430))
+    box("Gold", X(248), X(728), cb, cf - 0.06, Z(540), Z(528))      # gold base strip (exploded sheet)
     box("Wood", X(235), X(740), U(1195), U(1010), Z(430), Z(402))
     # gold feet + candy cane posts + gold caps (front x 188-247 / 728-788; side x 1120-1180)
     pc_y = U(1150)
@@ -109,8 +113,8 @@ def build():
     n = 9
     xa, xb = X(160), X(815)
     yf, yb_ = U(1005), U(1268)
-    zf, zb_ = Z(185), Z(126)
-    t = 0.55
+    zf, zb_ = Z(176), Z(118)
+    t = 0.7
     for k in range(n):
         c = "Red" if k % 2 == 0 else "White"
         x0 = xa + (xb - xa) * k / n; x1 = xa + (xb - xa) * (k + 1) / n
@@ -144,7 +148,7 @@ def build():
     # sign: white board x 285-692 y 20-115 with gold frame, red end posts + gold caps (x 245-285 / 692-730)
     sy0, sy1 = U(1200), U(1160)
     box("Sign", X(292), X(685), sy0, sy1, Z(108), Z(28))
-    box("Gold", X(282), X(695), sy0 + 0.05, sy1 - 0.05, Z(118), Z(18))
+    box("Gold", X(282), X(695), sy1 + 0.08, sy0 - 0.08, Z(118), Z(18))   # frame sits just behind the board face
     for ex in ((248, 284), (693, 729)):
         box("Red", X(ex[0]), X(ex[1]), sy0 + 0.1, sy1 - 0.1, Z(205), Z(40))
         box("Gold", X(ex[0]) - 0.08, X(ex[1]) + 0.08, sy0 + 0.05, sy1 - 0.05, Z(40), Z(28))
@@ -183,8 +187,8 @@ def main():
     cam.data.type = "ORTHO"
     sc.render.engine = "BLENDER_WORKBENCH"; sc.display.shading.light = "FLAT"; sc.display.shading.color_type = "MATERIAL"
     sc.render.film_transparent = True; sc.render.resolution_percentage = 100
-    for name, w, h, loc, rot in (("front", 768, 600, (X(384), -50, Z(300)), (math.pi / 2, 0, 0)),
-                                 ("side", 768, 600, (-50, U(1234), Z(300)), (math.pi / 2, 0, -math.pi / 2))):
+    for name, w, h, loc, rot in (("front", 768, 600, (X(484), -50, Z(300)), (math.pi / 2, 0, 0)),
+                                 ("side", 768, 600, (50, U(1234), Z(300)), (math.pi / 2, 0, math.pi / 2))):
         sc.render.resolution_x, sc.render.resolution_y = w, h
         cam.data.ortho_scale = w * S; cam.location = loc; cam.rotation_euler = rot
         sc.render.filepath = os.path.join(HERE, "gate", name + ".png"); bpy.ops.render.render(write_still=True)
@@ -195,3 +199,7 @@ def main():
 
 
 main()
+# overall bbox (Blender coords) for placing in Studio
+import itertools
+_vs = [o.matrix_world @ v.co for o in bpy.context.scene.objects if o.get("xmas_part") == "shop" for v in o.data.vertices]
+print("BBOX min", [round(min(v[i] for v in _vs), 3) for i in range(3)], "max", [round(max(v[i] for v in _vs), 3) for i in range(3)])
