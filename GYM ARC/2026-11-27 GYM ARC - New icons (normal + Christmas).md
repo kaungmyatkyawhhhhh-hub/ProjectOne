@@ -56,3 +56,11 @@ Study: [[2026-11-27 GYM ARC - Icon study (gym icons + top CTR)]]. Files in `Asse
 - Reference: `v5/proportion_guide.png` (shoulders 3 heads, waist half the shoulders, biceps about head-sized) + the v4 art for identity. One follow-up narrowed the waist (the V was only 1.36 : 1).
 - Front double biceps, mid-thigh crop, fitted white tee, sculpted gold arms, same blue / festive-red backgrounds and ruler. ChatGPT then Gemini for both; logo top-left at 36%.
 - Files: `v5/gymarc_v5_*_logo(_512).png`, `v5/icon_size_test_v5.png`. 64 px: normal lum 0.43 / 5% dark, Christmas 0.41 / 23% dark.
+
+## v6 (27 Nov, after "arms and waist too small" + "build should look robust")
+- ChatGPT edit of the v5 art in a new chat. Two builds, normal only so far, files in `Assets/icon_2026-11-27/v6/`:
+  - **v6a aesthetic**: natural waist about 2/3 of the shoulders with obliques, biceps about head-wide (`gymarc_v6a_aesthetic_normal_logo.png`).
+  - **v6b robust**: the same, plus a thick neck, wider deeper torso, heavier shoulders and thighs (`gymarc_v6b_robust_normal_logo.png`).
+- Gemini's pass turned the gold arms into skin, so it was dropped; ChatGPT art is used as is.
+- 64 px: lum 0.43–0.44, near-black 4–5%. Size test: `icon_size_test_v6.png`.
+- Next: the owner picks a build, then the Christmas version in the same ChatGPT chat.
