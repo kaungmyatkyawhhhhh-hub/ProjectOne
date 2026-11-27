@@ -1,0 +1,31 @@
+{
+ "_note": "2026-11-27 buildings less blocky. models = kit_walls.py output (imports/sync/kit_walls/kit_walls_<n>.glb, KWX meshes with the roof slab lip + heavier walk-up floor slabs), Models in group 33151111, applied with tools/yangon/KitGlassApply.luau (KWX branch). shell_color = shell_facades.py weathered colour maps (Images, group 33151111) per set, phases 0-3, set as ColorMap of MaterialVariant YgnShell<Set><k> (normal / roughness unchanged). First upload (109736744198331 ...) had the lip on the tower crowns too (flicker with the striped crown): replaced, unused.",
+ "models": [
+  94490941888235,
+  137817908796959,
+  102493741996373,
+  76197741293489,
+  121024135853567,
+  131058493425772
+ ],
+ "shell_color": {
+  "Walkup": [
+   88278298711905,
+   96644310869933,
+   71842723199538,
+   76260120430204
+  ],
+  "Shop": [
+   89619336076092,
+   125778244831005,
+   82645637468709,
+   115889553515576
+  ],
+  "Villa": [
+   102684556744390,
+   133538058357718,
+   120896670610171,
+   112300741547000
+  ]
+ }
+}

@@ -129,7 +129,7 @@ def draw(name, p, seed):
                 ay = z + 1.2
                 rect(ax, ay, ax + 2.4, ay + 1.6, c=205, h=1.0, ro=0.6)
                 rect(ax + 0.2, ay + 0.2, ax + 2.2, ay + 1.4, c=170, h=1.0, ro=0.6)
-    # grime toward the bottom of each floor (light)
+    col = weather(col, rough, floors, seed)
     col = np.clip(col, 0, 255)
     # colour map: grey RGB (neutral; a touch of blue in the glass only)
     rgb = np.stack([col, col, col], -1)
@@ -145,6 +145,47 @@ def draw(name, p, seed):
     ln = np.sqrt(nx * nx + ny * ny + nz * nz)
     nrm = np.stack([(nx / ln + 1) * 127.5, (ny / ln + 1) * 127.5, (nz / ln + 1) * 127.5], -1)
     return (rgb.astype(np.uint8), nrm.astype(np.uint8), (np.clip(rough, 0, 1) * 255).astype(np.uint8))
+
+
+def weather(col, rough, floors, seed):
+    """(2026-11-27, owner: "less blocky, more realistic") the far shells get the stains the near kit walls have (stained
+    render): soft mildew mottling and dark rain streaks hanging from every floor slab, 20-55% darker (real walk-ups:
+    seen 171,190,180 against paint 210,221,220; stain lines 70,69,69). Its own random stream, so the window layout,
+    normal and roughness maps stay exactly as uploaded; the glass is left clean."""
+    g = np.random.default_rng(seed + 7)
+    dark = np.zeros((PX, PX))
+    # mottling: low-frequency blotches (tile-periodic: wrap the noise grid)
+    for cells, amp in ((8, 0.16), (24, 0.08)):
+        n = g.random((cells, cells))
+        n = np.tile(n, (3, 3))
+        big = np.array(Image.fromarray((n * 255).astype(np.uint8)).resize((PX * 3, PX * 3), Image.BICUBIC)).astype(float) / 255
+        big = big[PX:2 * PX, PX:2 * PX]
+        dark += amp * np.clip((big - 0.45) / 0.55, 0, 1)
+    # streaks under each floor slab: soft wide ones with a darker core, fading down
+    for f in range(floors):
+        x = g.uniform(0, 3)
+        while x < TILE:
+            w = g.uniform(0.6, 3.2)
+            L = g.uniform(2.0, 8.5)
+            s = g.uniform(0.12, 0.38)
+            a, b = px(x), min(PX, px(x + w))
+            t0 = (PX - px(f * FLOOR)) % PX   # the floor line (the band's underside); rows go down
+            n = px(L)
+            fade = (np.linspace(1, 0, n) ** 1.4)[:, None]
+            rows = (t0 + np.arange(n)) % PX
+            prof = np.sin(np.linspace(0, np.pi, max(1, b - a))) ** 0.6   # soft sides
+            dark[np.ix_(rows, np.arange(a, b) % PX)] += s * fade * prof[None, :]
+            if g.random() < 0.6:   # a dark core line
+                c = a + int(g.uniform(0.2, 0.8) * (b - a))
+                cw = max(2, px(g.uniform(0.08, 0.25)))
+                n2 = px(L * g.uniform(0.7, 1.2))
+                f2 = np.linspace(1, 0, n2)[:, None]
+                rows2 = (t0 + np.arange(n2)) % PX
+                dark[np.ix_(rows2, np.arange(c, c + cw) % PX)] += 0.25 * f2
+            x += w + g.uniform(0.5, 4.0)
+    dark = np.array(Image.fromarray(np.clip(dark * 255, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(1.5))).astype(float) / 255
+    dark = np.where(rough < 0.2, dark * 0.25, dark)   # glass: a film only
+    return col * (1.0 - np.clip(dark, 0, 0.6))
 
 
 def main():

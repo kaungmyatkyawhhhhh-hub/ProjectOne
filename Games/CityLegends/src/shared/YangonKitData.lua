@@ -72,10 +72,13 @@ KD.MAT = { PLT = Enum.Material.Neon, PGL = Enum.Material.Glass, PFG = Enum.Mater
 	PFR = Enum.Material.SmoothPlastic, PFB = Enum.Material.SmoothPlastic, PFY = Enum.Material.SmoothPlastic,
 	PPD = Enum.Material.SmoothPlastic, PLY = Enum.Material.SmoothPlastic, PCW = Enum.Material.SmoothPlastic, PCR = Enum.Material.SmoothPlastic }
 KD.VARIANT = {
-	KW0 = "YgnRenderPainted", KW1 = "YgnRenderPainted", KW2 = "YgnRenderPainted", KW3 = "YgnRenderPainted",
-	KW4 = "YgnRenderPainted", KW5 = "YgnRenderPainted", KW6 = "YgnRenderPainted", KW7 = "YgnRenderPainted",
-	KWB = "YgnRenderPainted", KWG = "YgnRenderStained", KWD2 = "YgnRenderStained", KWC = "YgnRenderStained",
-	KGR = "YgnSteelPainted", KAR = "YgnCanvas", KCO = "YgnConcreteBare", KRG = "YgnCorrugatedZinc",
+	-- (2026-11-27, owner: "less blocky, more like real life") every ordinary wall is the stained render: real Yangon
+	-- walls read 15-35% darker than their paint with rain / mildew streaks (Critique 16 Nov); the clean painted render
+	-- made flat pastel boxes. Flat roof slabs (KCO) are stained concrete, not near-white bare concrete.
+	KW0 = "YgnRenderStained", KW1 = "YgnRenderStained", KW2 = "YgnRenderStained", KW3 = "YgnRenderStained",
+	KW4 = "YgnRenderStained", KW5 = "YgnRenderStained", KW6 = "YgnRenderStained", KW7 = "YgnRenderStained",
+	KWB = "YgnRenderStained", KWG = "YgnRenderStained", KWD2 = "YgnRenderStained", KWC = "YgnRenderStained",
+	KGR = "YgnSteelPainted", KAR = "YgnCanvas", KCO = "YgnConcreteStained", KRG = "YgnCorrugatedZinc",
 	KRF = "YgnCorrugatedRust", KRB = "YgnCorrugatedBlue", KRT = "YgnClayRoofTile",
 	PCN = "YgnConcreteStained", PAS = "YgnAsphaltWorn", PLN = "YgnConcreteBare", PCS = "YgnSteelPainted",
 	PST = "YgnSteelPainted", PRB = "YgnBrickRed", PCG = "YgnConcreteBare", PSD = "YgnDirtPacked",

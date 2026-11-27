@@ -4,6 +4,8 @@
 	holds KGR_<pid>_<box> (the panel's metal / signs / shutters without the glass) and KGG_<pid>_<box> (the glass).
 	The old KGR_<pid> template is replaced (same look, new mesh and box); KGG_<pid> is added with YangonKitPlace's glass
 	look. YangonKitData clones every piece of a pid, so the client needs no change.
+	(2026-11-27, buildings less blocky) KWX_<pid>_<box> meshes (kit_walls.py: the wall class rebuilt with the roof slab
+	lip) replace the KWX_<pid> templates the same way (look copied from the old template; the client re-looks KWX).
 
 	local A = require(ServerStorage.ClaudeTools.KitGlassApply:Clone())
 	A.apply({ 117482044068796, ... })   -> "kgr replaced N, kgg added M, skipped ..."
@@ -17,7 +19,7 @@ local A = {}
 function A.apply(ids: { number }): string
 	local P = require(SS.ClaudeTools.YangonKitPlace:Clone())
 	local store = RS.YgnKit.Templates
-	local kgr, kgg, skipped = 0, 0, {}
+	local kgr, kgg, kwx, skipped = 0, 0, 0, {}
 	for _, id in ids do
 		local model = InsertService:LoadAsset(id)
 		for _, d in model:GetDescendants() do
@@ -28,7 +30,7 @@ function A.apply(ids: { number }): string
 				end
 				local name = kind and (kind .. "_" .. pid)
 				local old = name and store:FindFirstChild(name)
-				if kind == "KGR" and old then
+				if (kind == "KGR" or kind == "KWX") and old then
 					local q = d:Clone()
 					for _, ch in q:GetChildren() do
 						ch:Destroy()
@@ -50,7 +52,11 @@ function A.apply(ids: { number }): string
 					pcall(function()
 						q.CollisionFidelity = Enum.CollisionFidelity.Box
 					end)
-					kgr += 1
+					if kind == "KWX" then
+						kwx += 1
+					else
+						kgr += 1
+					end
 				elseif kind == "KGG" and not old then
 					local q = d:Clone()
 					for _, ch in q:GetChildren() do
@@ -82,7 +88,7 @@ function A.apply(ids: { number }): string
 		model:Destroy()
 		task.wait()
 	end
-	return string.format("kgr replaced %d, kgg added %d, skipped %d %s", kgr, kgg, #skipped, table.concat(skipped, " ", 1, math.min(#skipped, 10)))
+	return string.format("kgr replaced %d, kgg added %d, kwx replaced %d, skipped %d %s", kgr, kgg, kwx, #skipped, table.concat(skipped, " ", 1, math.min(#skipped, 10)))
 end
 
 return A

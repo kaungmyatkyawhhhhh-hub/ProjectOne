@@ -254,14 +254,32 @@ def stains_light(x0, x1, z, y, storey, age, holes):
         x += w + K.R.uniform(0.2, 1.2)
 
 
-def parapet(W, H, par, wall):
+def lip(grp, W, z, h, d):
+    """(2026-11-27, owner: "less blocky") a band with end caps: the roof slab's edge sticks out like the real walk-ups'
+    (Yankin / 30th St photos: a 0.3 m slab edge 0.3 m proud, darkest part of the wall). The caps close the open ends at
+    an outer corner; between two panels of one wall they meet back to back inside the band (facing apart: no flicker)."""
+    band(grp, W, z, h, d)
+    s_ = min(0.03, h * 0.3)
+    for x, nx in ((0.0, -1), (W, 1)):
+        K.face(grp, [(x, 0.0, z), (x, -d, z + s_), (x, -d, z + h - s_), (x, 0.0, z + h)], (nx, 0, 0))
+
+
+ROOF_LIP = (0.1, 0.32, 0.32)   # (2026-11-27) roof slab edge: from H - 0.1, 0.32 tall, 0.32 out (m)
+FLOOR_BAND = (0.18, 0.22)      # (2026-11-27) walk-up floor slab edges: 0.18 tall, 0.22 out (were 0.12 x 0.15)
+
+
+def parapet(W, H, par, wall, heavy=True):
     if par <= 0:
         return
-    band("KWG", W, H, 0.12, 0.1)
-    K.front_quad(wall, 0.0, W, H + 0.12, H + par, 0.0)
+    if heavy:   # colonial rows keep their own cornice under the parapet
+        lip("KWG", W, H - ROOF_LIP[0], ROOF_LIP[1], ROOF_LIP[2])
+    else:
+        band("KWG", W, H, 0.12, 0.1)
+    z0 = H + (ROOF_LIP[1] - ROOF_LIP[0] if heavy else 0.12)   # the wall starts on top of the slab edge
+    K.front_quad(wall, 0.0, W, z0, H + par, 0.0)
     K.face(wall, [(0.0, 0.0, H + par), (W, 0.0, H + par), (W, 0.18, H + par - 0.04), (0.0, 0.18, H + par - 0.04)], (0, 0.2, 1))
     K.face(wall, [(0.0, 0.18, H), (W, 0.18, H), (W, 0.18, H + par - 0.04), (0.0, 0.18, H + par - 0.04)], (0, 1, 0))
-    for (a, b, c, d) in K.rect_minus(0.0, W, H + 0.12, H + par, []):
+    for (a, b, c, d) in K.rect_minus(0.0, W, z0, H + par, []):
         K.front_quad(K.grime_group(0.6), a, b, c, d, -K.OFF_GRIME)
 
 
@@ -298,7 +316,7 @@ def p_walkup(W, bays, floors, role, shop, age, civic=False):
             window(x + BAY / 2 - 0.8, 0.95, 1.6, 1.4, 0.0, holes, wall, grille=True)
     for f in range(1, floors):
         z = GF + FH * (f - 1)
-        band("KWG", W, z - 0.12, 0.12, 0.15)
+        band("KWG", W, z - FLOOR_BAND[0], FLOOR_BAND[0], FLOOR_BAND[1])
         for k in range(bays):
             x = k * BAY
             r = K.R.random()
@@ -500,7 +518,7 @@ def p_condo_top(W, bays, role, age, stripe=False):
         K.face("KBC", [(0.0, -0.2, 1.5), (W, -0.2, 1.5), (W, 0.0, 1.3), (0.0, 0.0, 1.3)], (0, -1, 1))
         for xe, nx in ((0.0, -1), (W, 1)):
             K.face("KBC", [(xe, -0.2, 0.0), (xe, 0.0, 0.0), (xe, 0.0, 1.3), (xe, -0.2, 1.5)], (nx, 0, 0))
-    parapet(W, 0.0, ARCH["condo"]["par"], "KWX")
+    parapet(W, 0.0, ARCH["condo"]["par"], "KWX", heavy=False)   # (towers: the striped crowns have their own band)
     return 0.0
 
 
@@ -654,7 +672,7 @@ def p_colonial(W, bays, floors, role, shop, age):
         stains_light(0.0, W, GF + FC * (f - 1) - 0.22, 0.0, FC * 0.8, age, holes)
     stains_light(0.0, W, H - 0.35, 0.0, FC, age, holes)
     K.grime(0.0, W, H - FC if floors > 1 else 0.0, H, 0.0, age, holes)
-    parapet(W, H, A["par"], wall)
+    parapet(W, H, A["par"], wall, heavy=False)
     return H
 
 
@@ -667,7 +685,7 @@ def p_pier(arch, W, floors, role, age):
         GF = A["gf"]
         H = height("civic" if arch == "civic" else "walkup", floors)
         for f in range(1, floors):
-            band("KWG", W, GF + FH * (f - 1) - 0.12, 0.12, 0.15)
+            band("KWG", W, GF + FH * (f - 1) - FLOOR_BAND[0], FLOOR_BAND[0], FLOOR_BAND[1])
         K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
         stains_light(0.0, W, H, 0.0, FH, age, holes)
         K.grime(0.0, W, H - FH if floors > 1 else 0.0, H, 0.0, age, holes)
@@ -684,7 +702,7 @@ def p_pier(arch, W, floors, role, age):
         K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
         stains_light(0.0, W, H - 0.35, 0.0, FC, age, holes)
         K.grime(0.0, W, H - FC, H, 0.0, age, holes)
-        parapet(W, H, A["par"], wall)
+        parapet(W, H, A["par"], wall, heavy=False)
         return H
     if arch == "township":
         GF = ARCH["township"]["gf"]
@@ -717,7 +735,7 @@ def p_pier(arch, W, floors, role, age):
         K.facade(wall, 0.0, W, 0.0, H, 0.0, holes)
         return H
     if arch == "condo_top":
-        parapet(W, 0.0, ARCH["condo"]["par"], "KWX")
+        parapet(W, 0.0, ARCH["condo"]["par"], "KWX", heavy=False)   # (towers: the striped crowns have their own band)
         return 0.0
     E = ARCH["shed"]["gf"]   # shed / market
     H = E + FH * max(0, floors - 1)
