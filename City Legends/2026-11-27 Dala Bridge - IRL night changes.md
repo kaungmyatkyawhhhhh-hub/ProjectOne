@@ -58,3 +58,20 @@ Other shots are in `refs_2026-11-27_dala_build/`: a day side view and a grazing 
 - **Deck lamp row at night:** the real deck-edge lamp row is much brighter in side view. Ours shows faint dots at that distance. Night brightness in Play was not checked.
 - **Toll:** no yellow / black island stripes and no red-white hoop barriers. The booths are opaque white boxes with yellow frames, because see-through glass would show an empty inside.
 - **Unrelated, still open:** the 21 Nov list in `build/city_1to1/rebuild_progress.json` (dala_bridge). That covers the old generic deck still running under the bridge (seen in the side shots), the bend fillers, the lanes, and the Dala end land. The bridge stays out of Workspace until those are done.
+
+## Evening update: real lights instead of neon (owner, 27 Nov)
+The owner said: "why are the things neon in dala bridge? irl its not neon, the lighting is just really good and nice and bright irl", and "the lighting is not the same".
+
+**Builder changes (`tools/yangon/DalaBridge.luau`):**
+- **Pylons and cables:** they no longer turn Neon at night. They stay plain cream and are lit by real lights.
+- **Pylon floods:** warm-white floodlights (`Flood`: a SpotLight, range 60, brightness 3, angle 70). There are two diagonal floods per level, every ~50 studs, up each leg, lower leg and head shaft.
+- **Lilac:** comes from lilac floods on the inner faces of the legs. The old neon strips (`Wash`) are gone.
+- **Flood LodRange 2500,** so the pylons still read from the banks.
+- **Deck lamps:** they now light like the new street lamps (`Config.NightLamps`, `YangonStreetKit.lampLight`):
+  - a white PointLight hung 14 studs under the head
+  - the `LampHalo` glow sprite, with `MaxDistance` 3000 so the lamp rows show from the banks like in the clip
+  - no SpotLight in the head any more
+
+**State:** the changes are in the builder only. Studio was closed while this was being done, so the bridge in ServerStorage is still the earlier version. Rebuild when the place is open, with the steps at the top of this note. Then:
+- compare a night shot with the clip
+- check FPS with ~64 floods + 137 lamp lights (WorldFx turns on only the ones in range)
