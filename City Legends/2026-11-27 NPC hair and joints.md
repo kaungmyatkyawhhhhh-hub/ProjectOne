@@ -18,7 +18,14 @@ Owner (27 Nov, screenshot of a walker in a white shirt and blue checked longyi):
 - Kit hairs on one head (Sideswept Bangs in the middle): ![[2026-11-27 NPC hair and joints - kit hairs lineup (front).jpg]] ![[2026-11-27 NPC hair and joints - kit hairs lineup (side, Sideswept Bangs centre).jpg]]
 - After: ![[2026-11-27 NPC hair and joints - after (walk, side, mid-stride).jpg]] ![[2026-11-27 NPC hair and joints - after (run, side, elbow folded).jpg]] ![[2026-11-27 NPC hair and joints - after (run, front, knee up).jpg]] ![[2026-11-27 NPC hair and joints - after (runner and walker).jpg]] ![[2026-11-27 NPC hair and joints - after (hair on several NPCs).jpg]] ![[2026-11-27 NPC hair and joints - after (updo and spikes).jpg]]
 
+## Round 2: "torn paper" patches on the arm (same evening)
+- Coordinator review of "after (run, side, elbow folded)": ragged white blotches on the side of the arm.
+- Cause: not the sleeve picture (the templates draw the sleeve as a straight rectangle). In a bend the forearm overlaps the upper arm (and the shin the thigh), and their side faces lie in one plane (the hinge axis), so they **z-fought**: a ragged mix of the two faces. Colouring the pieces showed it: ![[2026-11-27 NPC hair and joints - torn-paper cause (pieces coloured, overlap in one plane).jpg]] (before: ![[2026-11-27 NPC hair and joints - torn-paper patches (forearm and upper arm z-fighting).jpg]]).
+- Fix: `geoFor` makes every lower piece (forearm, hand, shin, foot, pelvis) 0.1 stud narrower across the hinge axis, so in a bend it hides inside the piece above. Studio v2386.
+- After: ![[2026-11-27 NPC hair and joints - fixed (run, side, white shirt, elbow folded).jpg]] ![[2026-11-27 NPC hair and joints - fixed (run, side, blouse).jpg]] ![[2026-11-27 NPC hair and joints - fixed (walk, side, mid-stride).jpg]] ![[2026-11-27 NPC hair and joints - fixed (front).jpg]]
+
 ## Lessons
+- Hinged blocks that overlap in a bend must not share a side plane: inset the lower piece (z-fighting reads as torn paper, not as flicker, on a still frame).
 - A part split into pieces needs clothes on the faces its joints open, not just its outside.
 - Hinge a block joint on the edge the bend opens, and keep the bend under ~90 degrees.
 - Before adding a catalog hair to the kit, look at it alone on a bare head from the front and side: fringe / bangs accessories are not full hairs, and some hairs only read right with their texture.

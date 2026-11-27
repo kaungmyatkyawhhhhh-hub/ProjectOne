@@ -459,7 +459,9 @@ local function geoFor(bw: number): Geo
 			local ex = {}
 			for i = 2, #lk.pieces do
 				local pc = lk.pieces[i]
-				ex[i] = { size = pc.size * F, rel = (pc.off - p1.off) * F }
+				-- (27 Nov) 0.1 narrower across the hinge axis: in a bend the lower piece overlaps the one above, and
+				-- their side faces in one plane z-fought (ragged "torn paper" patches on the arm); inset they hide inside
+				ex[i] = { size = pc.size * F - Vector3.new(0.1, 0, 0), rel = (pc.off - p1.off) * F }
 			end
 			extra[k] = ex
 		end
