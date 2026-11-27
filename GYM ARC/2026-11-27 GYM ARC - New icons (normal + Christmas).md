@@ -108,3 +108,8 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 
 ## Colour options (27 Nov, owner: "good but i dont like the gold text and our icon color")
 - `v7/colour_options_v8.png`: v8 with the background and logo hue-shifted to blue, green, red, purple, teal and orange (`colour_options.py`, blue-hue mask). A preview only; the chosen scheme gets a proper ChatGPT render.
+
+## v9 palettes (27 Nov, owner: "the gradients are so ugly ... dont have a good color theme/palette")
+- Measured palettes (k-means): Power Lifters is 32% near-black plum, purple only as glow, orange skin. Gym Star: dark teal base, cyan light, warm skin. Ours was 23% flat saturated blue.
+- Three designed palettes rendered in ChatGPT, background and lighting only: midnight navy + amber, deep teal + gold, crimson + gold. Logos: `icon_render_25nov/gymarc_logo_v12_{navy,teal,crimson}.png` (`recolor_logo_palette.py`).
+- Sheet: `v9/palette_options_v9.png`.
