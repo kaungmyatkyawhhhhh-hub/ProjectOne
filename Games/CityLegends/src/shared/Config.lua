@@ -1954,4 +1954,18 @@ Config.Jobs = (function()
 	return t
 end)()
 
+-- (2026-11-27, owner: "the lighting angle is too low ... not spread out like the ones in real life", "irl, night lights
+-- are white, not dim") Yangon street lamps: a white PointLight hung DROP studs under the head (on an Attachment), so its
+-- 60-stud reach spreads a wide pool over road, pavement, walls and trees that meets the next lamp's; a soft glow sprite
+-- (BillboardGui tag LampHalo, tools/yangon/city/lamp_glow.py) on the head at night. Used by tools/yangon/YangonStreetKit
+-- (the P1 kit lamps) and client/YangonRoadside (the poles elsewhere, and the flyover deck lamps)
+Config.NightLamps = {
+	Color = Color3.fromRGB(240, 244, 255),
+	Head = Color3.fromRGB(236, 244, 255),
+	Brightness = 3,
+	Range = 60,
+	Glow = "rbxassetid://83825952241880",
+	GlowSize = 11,
+}
+
 return Config

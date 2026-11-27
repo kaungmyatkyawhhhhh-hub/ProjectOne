@@ -39,6 +39,11 @@ function WorldFx.setDaylight(d: number)
 				task.wait()
 			end
 		end
+		for _, g in CollectionService:GetTagged("LampHalo") do
+			if g:IsA("LayerCollector") then -- (27 Nov) also the Dala Bridge pylons' night faces (SurfaceGui)
+				g.Enabled = lit
+			end
+		end
 		for i, p in CollectionService:GetTagged("Window") do
 			WorldFx.setWindow(p)
 			if i % 600 == 0 then
@@ -104,6 +109,12 @@ end)
 CollectionService:GetInstanceAddedSignal("LampGlow"):Connect(function(p)
 	if p:IsA("BasePart") then
 		p.Material = if lampsLit then Enum.Material.Neon else Enum.Material.SmoothPlastic
+	end
+end)
+-- (27 Nov) the lamp heads' glow sprites (tag LampHalo: YangonStreetKit / YangonRoadside lamps) show at night only
+CollectionService:GetInstanceAddedSignal("LampHalo"):Connect(function(g)
+	if g:IsA("LayerCollector") then
+		g.Enabled = lampsLit
 	end
 end)
 
@@ -412,12 +423,15 @@ local function startLod(scale: number)
 			end
 			lightCursor += 1
 			local part = l.Parent
-			if part and part:IsA("BasePart") and not l:GetAttribute("NoLod") then
-				local dist = (part.Position - camPos).Magnitude
+			-- (27 Nov) street lamps hang their light on an Attachment under the head (YangonStreetKit.lampLight)
+			local at = if part and part:IsA("BasePart") then part.Position elseif part and part:IsA("Attachment") then part.WorldPosition else nil
+			if at and not l:GetAttribute("NoLod") then
+				local dist = (at - camPos).Magnitude
 				-- the Riviera's dense lamps: only those near the camera light the street (phones)
 				local own = l:GetAttribute("LodRange")
-				local range = if type(own) == "number" then own * lodS elseif part.Position.X > 9000 then rivieraLightRangeNow else lightRangeNow
-				local on = dist < range and (lampsLit or not l:HasTag("DayOff"))
+				local range = if type(own) == "number" then own * lodS elseif at.X > 9000 then rivieraLightRangeNow else lightRangeNow
+				-- (27 Nov) low-end mode: no real street-lamp lights at all (the heads and glow sprites still show)
+				local on = dist < range and (lampsLit or not l:HasTag("DayOff")) and not (LowEnd.on and l:HasTag("DayOff"))
 				if l.Enabled ~= on then
 					l.Enabled = on
 				end

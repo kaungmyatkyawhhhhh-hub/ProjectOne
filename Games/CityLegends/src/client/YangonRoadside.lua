@@ -4,11 +4,15 @@
 
 	  * main roads (RivieraTraffic's lanes, the outermost lane of each road and way): a concrete pole every EVERY studs on
 	    the kerb side, black-white banded foot, thick black cable bundles sagging from pole to pole, now and then wires
-	    across the road, a junction box / coil of spare cable / transformer; a white LED lamp arm on every second pole
-	    (roads without a planted median: Pyay Road's median has its own lamps); a pole billboard now and then.
+	    across the road, a junction box / coil of spare cable / transformer; a white LED lamp arm on every pole (27 Nov,
+	    was every second: real lamps stand 30-40 m apart; roads without a planted median: Pyay Road's median has its own
+	    lamps); a pole billboard now and then.
+	  * flyover decks (27 Nov, clips 0800 / 0807: single-arm cold-white lamps on the parapet line): a galvanised lamp
+	    post on the parapet at each pole spot of a deck lane, in every district (P1's kit has none on decks); no wires.
 	  * side streets (road collision boxes RoadBox "R" with no traffic lane in them): a pole on one side every SIDE_CELL
-	    studs, one wire and two bundles to the next pole along the street, an amber lamp on every second pole (owner,
-	    21 Nov: side-street power-pole lamps are amber).
+	    studs, one wire and two bundles to the next pole along the street, a white lamp on every pole (owner, 27 Nov:
+	    "irl, night lights are white, not dim"; was amber on every second pole). A pole whose lamp arm would touch
+	    something keeps standing without its lamp.
 	  * at big signalled junctions (4+ approaches, 4+ lanes): a camera gantry over the widest approach, 3-4 cameras
 	    (clips 0929: 4 cameras, 0930: 3).
 	  * at real compound gates (OSM barrier=gate, Shared.YangonRoadsideData): a guard booth with a red-white striped roof.
@@ -41,6 +45,8 @@ local YangonRoadside = {}
 local LOAD, DROP = 480, 640
 local CHUNK = 192
 local MH_EVERY, MH_END, MH_JUNCTION = 230, 60, 70 -- manholes: studs apart along a lane, kept off lane ends and junctions
+-- (27 Nov, owner: "there is a random rusted metal plate on the road, irl there isnt anything on the road") no covers
+local MANHOLES = false
 local outerPts: { [string]: { any } } = {} -- 64-stud cells -> outer-lane points { p, dir } (bus stops snap to them)
 local EVERY = 105 -- studs between main-road poles (35 m)
 local SIDE_CELL = 96 -- one side-street pole per cell of this size (CHUNK is a multiple of it)
@@ -57,8 +63,9 @@ local BLACK, WHITE = Color3.fromRGB(24, 24, 26), Color3.fromRGB(228, 228, 224)
 local CABLE = Color3.fromRGB(20, 20, 22)
 local BOXGREY = Color3.fromRGB(120, 124, 126)
 local GALV = Color3.fromRGB(170, 174, 178)
-local LED, LED_LIGHT = Color3.fromRGB(236, 244, 255), Color3.fromRGB(232, 240, 255)
-local AMBER, AMBER_LIGHT = Color3.fromRGB(255, 176, 92), Color3.fromRGB(255, 170, 96)
+local LED = Color3.fromRGB(236, 244, 255)
+local NL = Config.NightLamps
+local DECK_H = 30 -- flyover lamp posts (10 m) from the parapet top
 local NO_LAMPS = { ["Pyay Road"] = true, ["Kabar Aye Pagoda Road"] = true } -- their planted medians have lamps
 
 local function baseRoad(name: string?): string
@@ -187,19 +194,24 @@ local function plan(g, skipTile: (number, number) -> boolean)
 							local right = dir:Cross(Vector3.yAxis)
 							local pos = at + right * 10.5
 							local tx, tz = math.floor(pos.X / TILE), math.floor(pos.Z / TILE)
-							if inJunction(pos) or skipTile(tx, tz) then
+							-- (27 Nov) in a district whose kit has its own poles, the spot is kept only for a flyover lamp
+							-- post (deckOnly: resolve() never stands a pole there, no wires, no board)
+							local skip = skipTile(tx, tz)
+							if inJunction(pos) then
 								last = nil
 							else
 								local id = #poles + 1
 								local key = math.floor(pos.X / CHUNK) .. "," .. math.floor(pos.Z / CHUNK)
-								poles[id] = { pos = pos, right = right, dir = dir, road = baseRoad(l.road), way = l.way, chunk = key, prev = last }
+								poles[id] = { pos = pos, right = right, dir = dir, road = baseRoad(l.road), way = l.way, chunk = key, prev = if skip then nil else last, deckOnly = skip or nil }
 								chunks[key] = chunks[key] or { p = {}, b = {} }
 								table.insert(chunks[key].p, id)
-								byRoad[baseRoad(l.road)] = byRoad[baseRoad(l.road)] or {}
-								table.insert(byRoad[baseRoad(l.road)], id)
-								last = id
+								if not skip then
+									byRoad[baseRoad(l.road)] = byRoad[baseRoad(l.road)] or {}
+									table.insert(byRoad[baseRoad(l.road)], id)
+								end
+								last = if skip then nil else id
 								-- now and then a billboard on one green column, 35 studs on, back behind the pavement
-								if id % 9 == 4 then
+								if not skip and id % 9 == 4 then
 									local bpos = at + dir * 35 + right * 22
 									local bkey = math.floor(bpos.X / CHUNK) .. "," .. math.floor(bpos.Z / CHUNK)
 									boards[#boards + 1] = { pos = bpos, right = right, dir = dir, chunk = bkey, n = #boards + 1 }
@@ -759,35 +771,80 @@ end
 
 -- resolved pole spots (main-road poles): id -> base | false; nil = not known yet (kit round it not built)
 local resolved: { [number]: Vector3 | false } = {}
+local unlit: { [number]: boolean } = {} -- (27 Nov) resolved poles that stand without a lamp
 local function resolve(poles, id: number, sets): Vector3?
 	local r = resolved[id]
 	if r ~= nil then
 		return r or nil
 	end
 	local p = poles[id]
-	-- the lane under the spot must not be a deck (no poles on flyovers)
+	-- the lane under the spot must not be a deck (no poles on flyovers: deckSpot puts lamp posts there); deck-only
+	-- spots (districts whose kit has its own poles) stop here
 	local _, under = ground(p.pos - p.right * 10.5)
-	if under == "D" then
+	if under == "D" or p.deckOnly then
 		resolved[id] = false
 		return nil
 	end
-	local lamp = if id % 2 == 0 and not NO_LAMPS[p.road] then -p.right else nil
-	for _, off in { 0, -1.5, 1.5, 3, 4.5 } do
-		for _, along in { 0, 6, -6, 12, -12 } do
-			local at = p.pos + p.right * off + p.dir * along
-			local y, kind = ground(at)
-			if y and (kind == "P" or kind == "T") and backed(at, p.right) then
-				local base = Vector3.new(at.X, y, at.Z)
-				if poleClear(sets, base, lamp) then
-					resolved[id] = base
-					regAdd(poleReg, base, "") -- (kept for good: resolved spots never change)
-					return base
+	local lamp = if not NO_LAMPS[p.road] then -p.right else nil
+	-- (27 Nov) a lamp on every pole; where the arm would touch something the pole stands without one (unlit)
+	for pass = 1, if lamp then 2 else 1 do
+		for _, off in { 0, -1.5, 1.5, 3, 4.5 } do
+			for _, along in { 0, 6, -6, 12, -12 } do
+				local at = p.pos + p.right * off + p.dir * along
+				local y, kind = ground(at)
+				if y and (kind == "P" or kind == "T") and backed(at, p.right) then
+					local base = Vector3.new(at.X, y, at.Z)
+					if poleClear(sets, base, if pass == 1 then lamp else nil) then
+						resolved[id] = base
+						unlit[id] = pass == 2 or lamp == nil
+						regAdd(poleReg, base, "") -- (kept for good: resolved spots never change)
+						return base
+					end
 				end
 			end
 		end
 	end
 	resolved[id] = false
 	return nil
+end
+
+-- (27 Nov) flyover lamp posts: for a pole spot whose lane is a deck, the middle of the parapet beside that lane (the
+-- deck's collision has a raised strip 1.2-5 studs over the lane at its edge); nil when there is none
+local deckResolved: { [number]: Vector3 | false } = {}
+local function deckSpot(poles, id: number): Vector3?
+	local r = deckResolved[id]
+	if r ~= nil then
+		return r or nil
+	end
+	local p = poles[id]
+	local lane = p.pos - p.right * 10.5
+	local deckY, under = ground(lane)
+	if under ~= "D" or not deckY then
+		deckResolved[id] = false
+		return nil
+	end
+	local first, last, top = nil, nil, nil
+	for s = 0, 24, 0.25 do
+		local at = Vector3.new(lane.X, deckY, lane.Z) + p.right * s
+		local y = ground(at)
+		if not y or y < deckY - 1 then
+			break -- (off the deck's edge)
+		end
+		if y > deckY + 1.2 and y < deckY + 5 then
+			first = first or s
+			last, top = s, y
+		elseif first then
+			break
+		end
+	end
+	if not first or (last :: number) - first < 0.5 then
+		deckResolved[id] = false
+		return nil
+	end
+	local mid = Vector3.new(lane.X, 0, lane.Z) + p.right * ((first + (last :: number)) / 2)
+	local base = Vector3.new(mid.X, top :: number, mid.Z)
+	deckResolved[id] = base
+	return base
 end
 
 -- the cable anchors of a pole (world positions), by slot: 1-2 the top arm's ends, 3-5 the bundles on the road side
@@ -904,13 +961,44 @@ end
 
 local LIGHT_R = 220
 local AD_R = 320
-local function lampLight(head: BasePart, color: Color3)
-	local l = Instance.new("SpotLight")
-	l.Face = Enum.NormalId.Bottom
-	l.Color, l.Brightness, l.Range, l.Angle, l.Shadows = color, 4, 60, 135, false
+-- (27 Nov, owner: "the lighting angle is too low ... not spread out like the ones in real life", "irl, night lights are
+-- white, not dim") a white PointLight hung 10 studs under the head, so the pool spreads over road, pavement, walls and
+-- trees and meets the next lamp's (was a SpotLight in the head, angle 135, brightness 4), and a glow sprite on the head
+-- (tag LampHalo: WorldFx shows it at night)
+local function lampLight(head: BasePart)
+	local a = Instance.new("Attachment")
+	a.Name = "LampLight"
+	a.Position = Vector3.new(0, -10, 0)
+	local l = Instance.new("PointLight")
+	l.Color, l.Brightness, l.Range, l.Shadows = NL.Color, NL.Brightness, NL.Range, false
 	l.Enabled = false -- (the main loop turns on the near ones at night)
 	CollectionService:AddTag(l, "RoadsideLamp")
-	l.Parent = head
+	l.Parent = a
+	a.Parent = head
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "LampHalo"
+	bb.Size = UDim2.fromScale(NL.GlowSize, NL.GlowSize)
+	bb.LightInfluence = 0
+	bb.Brightness = 2
+	bb.MaxDistance = 1400
+	bb.Enabled = isNight()
+	local img = Instance.new("ImageLabel")
+	img.BackgroundTransparency = 1
+	img.Size = UDim2.fromScale(1, 1)
+	img.Image = NL.Glow
+	img.ImageColor3 = NL.Color
+	img.Parent = bb
+	CollectionService:AddTag(bb, "LampHalo")
+	bb.Parent = head
+end
+
+-- a flyover lamp post: a slim galvanised pole on the parapet, a single arm out over the lanes, the head under its end
+local function buildDeckLamp(m: Instance, p, base: Vector3)
+	local roadSide = CFrame.lookAt(base, base - p.right)
+	part(m, Vector3.new(0.55, DECK_H, 0.55), roadSide * CFrame.new(0, DECK_H / 2, 0), GALV, Enum.Material.Metal)
+	part(m, Vector3.new(0.3, 0.3, 6), roadSide * CFrame.new(0, DECK_H - 0.15, -3.275), GALV, Enum.Material.Metal)
+	local head = part(m, Vector3.new(0.9, 0.3, 2.2), roadSide * CFrame.new(0, DECK_H - 0.45, -(0.275 + 6 + 0.2)), LED, Enum.Material.Neon)
+	lampLight(head)
 end
 
 local function buildPole(m: Instance, dir: Vector3, right: Vector3, base: Vector3, id: number, lamp: string?): BasePart
@@ -939,8 +1027,8 @@ local function buildPole(m: Instance, dir: Vector3, right: Vector3, base: Vector
 	if lamp then
 		-- a galvanised arm out over the road from the pole's face, the lamp head under its end
 		part(m, Vector3.new(0.3, 0.3, 7), roadSide * CFrame.new(0, POLE_H - 1.5, -(W / 2 + 3.5)), GALV, Enum.Material.Metal)
-		local head = part(m, Vector3.new(0.9, 0.3, 2.2), roadSide * CFrame.new(0, POLE_H - 1.8, -(W / 2 + 6.2)), if lamp == "amber" then AMBER else LED, Enum.Material.Neon)
-		lampLight(head, if lamp == "amber" then AMBER_LIGHT else LED_LIGHT)
+		local head = part(m, Vector3.new(0.9, 0.3, 2.2), roadSide * CFrame.new(0, POLE_H - 1.8, -(W / 2 + 6.2)), LED, Enum.Material.Neon)
+		lampLight(head)
 	end
 	return shaft
 end
@@ -1355,6 +1443,7 @@ local function sideCandidates(key: string, laneGrid, inJunction, skipTile): { an
 end
 
 local sideResolved: { [string]: Vector3 | false } = {}
+local sideUnlit: { [string]: boolean } = {}
 local function sideHash(c): number
 	local gx, gz = string.match(c.id, "^(%-?%d+),(%-?%d+)$")
 	return math.abs((tonumber(gx) :: number) * 3 + (tonumber(gz) :: number) * 5)
@@ -1364,17 +1453,21 @@ local function resolveSide(c, sets): Vector3?
 	if r ~= nil then
 		return r or nil
 	end
-	local lamp = if sideHash(c) % 2 == 0 then -c.n else nil
-	for _, off in { 0, 1.5, -1, 3 } do
-		for _, along in { 0, 6, -6, 12, -12 } do
-			local at = c.pos + c.n * off + c.axis * along
-			local y, kind = ground(at)
-			if y and (kind == "P" or kind == "T") and backed(at, c.n) then
-				local base = Vector3.new(at.X, y, at.Z)
-				if poleClear(sets, base, lamp) then
-					sideResolved[c.id] = base
-					regAdd(poleReg, base, "")
-					return base
+	local lamp = -c.n
+	-- (27 Nov) a white lamp on every pole; where the arm would touch something the pole stands without one
+	for pass = 1, 2 do
+		for _, off in { 0, 1.5, -1, 3 } do
+			for _, along in { 0, 6, -6, 12, -12 } do
+				local at = c.pos + c.n * off + c.axis * along
+				local y, kind = ground(at)
+				if y and (kind == "P" or kind == "T") and backed(at, c.n) then
+					local base = Vector3.new(at.X, y, at.Z)
+					if poleClear(sets, base, if pass == 1 then lamp else nil) then
+						sideResolved[c.id] = base
+						sideUnlit[c.id] = pass == 2
+						regAdd(poleReg, base, "")
+						return base
+					end
 				end
 			end
 		end
@@ -1552,9 +1645,14 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 	for _, id in chunk and chunk.p or {} do
 		local p = poles[id]
 		local base = resolve(poles, id, sets)
+		local deck = not base and deckSpot(poles, id)
+		if deck then
+			any = true
+			buildDeckLamp(m, p, deck)
+		end
 		if base then
 			any = true
-			local lamp = if id % 2 == 0 and not NO_LAMPS[p.road] then "white" else nil
+			local lamp = if not unlit[id] then "white" else nil
 			local shaft = buildPole(m, p.dir, p.right, base, id, lamp)
 			local mine = anchors(p.dir, p.right, base)
 			-- the run back to the previous pole
@@ -1610,7 +1708,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 			any = true
 		end
 	end
-	for _, h in chunk and chunk.mh or {} do
+	for _, h in if MANHOLES and chunk then chunk.mh else {} do
 		if buildManhole(m, h) then
 			any = true
 		end
@@ -1632,7 +1730,7 @@ local function buildChunk(ctx, key: string, chunk, folder: Instance, full: boole
 			if base then
 				any = true
 				local h = sideHash(c)
-				local shaft = buildPole(m, c.axis, c.n, base, h, if h % 2 == 0 then "amber" else nil)
+				local shaft = buildPole(m, c.axis, c.n, base, h, if not sideUnlit[c.id] then "white" else nil)
 				-- the next pole forward along the street
 				local best, bd = nil, 150
 				for _, o in around do
@@ -1814,8 +1912,8 @@ function YangonRoadside.start(qualityScale: (() -> number)?)
 			local lampsOn = isNight()
 			for _, l in CollectionService:GetTagged("RoadsideLamp") do
 				local h = l.Parent
-				if l:IsA("Light") and h and h:IsA("BasePart") then
-					l.Enabled = lampsOn and full and (h.Position - at).Magnitude < LIGHT_R
+				if l:IsA("Light") and h and h:IsA("Attachment") then
+					l.Enabled = lampsOn and full and (h.WorldPosition - at).Magnitude < LIGHT_R
 				end
 			end
 			-- billboards: backlit (no light influence) at night within AD_R of the camera

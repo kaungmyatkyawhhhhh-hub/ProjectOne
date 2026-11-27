@@ -9,12 +9,13 @@
 	Classes -> look (colours ride in the vertex colours, so every template is white):
 	  SCO Concrete + YgnConcreteBare   SMT Metal + YgnSteelPainted   SPL SmoothPlastic   SFB Fabric + YgnCanvas
 	  SGL Glass, 0.55 transparent      SNE lamp head: SmoothPlastic (236, 244, 255), tag LampGlow (Neon at night via
-	                                   WorldFx), a white SpotLight down (range 42, brightness 5) tagged LODLight + DayOff
+	                                   WorldFx), K.lampLight: a white PointLight hung under it + a glow sprite (27 Nov)
 
 	local K = require(game.ServerStorage.ClaudeTools.YangonStreetKit:Clone())
 	K.templates(holding)              -> n templates into ReplicatedStorage.YgnKit.Templates (CollisionFidelity Box)
 	K.preview(centre, radius)         -> Edit only: builds the street tiles within radius into Workspace._StreetPreview
 	K.unpreview()
+	K.relight()                       -> (27 Nov) the lamp lights / glow again on the SNE templates already in place
 	K.shelterAd()                     -> (27 Nov) the invisible SAD_busd piece over the shelter's ad box: its two faces get
 	                                     lit made-up ads on each client (YangonRoadside, tag ShelterAd, lit at night)
 ]]
@@ -48,6 +49,62 @@ function K.parse(name: string)
 		return nil
 	end
 	return kind, id, Vector3.new(number(cx), number(cy), number(cz)), Vector3.new(number(sx), number(sy), number(sz))
+end
+
+-- (2026-11-27, owner: "the lighting angle is too low ... not spread out like the ones in real life", "irl, night lights
+-- are white, not dim") every kit lamp head: white Neon-at-night head (tag LampGlow), a white PointLight on an Attachment
+-- hung under the head (main-road lamps 14 studs, pole lamps 10) so the pool spreads over road, pavement, walls and trees
+-- and meets the next lamp's, tagged LODLight + DayOff for WorldFx; and a glow sprite (tag LampHalo, WorldFx shows it at
+-- night). Was a SpotLight in the head (angle 120-135, brightness 5): a 30-stud pool with dark road between lamps, and
+-- the plain side-street pole lamps (ppolel) were amber sodium.
+local NL = require(RS:WaitForChild("Shared"):WaitForChild("Config")).NightLamps
+function K.lampLight(q: BasePart, id: string)
+	for _, ch in q:GetChildren() do
+		if ch:IsA("Light") or ch.Name == "LampLight" or ch.Name == "LampHalo" then
+			ch:Destroy()
+		end
+	end
+	q.Color = NL.Head
+	CollectionService:AddTag(q, "LampGlow")
+	local main = id == "lamp1" or id == "lamp2"
+	local a = Instance.new("Attachment")
+	a.Name = "LampLight"
+	a.Position = Vector3.new(0, if main then -14 else -10, 0)
+	local l = Instance.new("PointLight")
+	l.Color, l.Brightness, l.Range, l.Shadows = NL.Color, NL.Brightness, NL.Range, false
+	l.Enabled = false -- (WorldFx turns on the near ones at night)
+	l.Parent = a
+	CollectionService:AddTag(l, "LODLight")
+	CollectionService:AddTag(l, "DayOff")
+	a.Parent = q
+	local bb = Instance.new("BillboardGui")
+	bb.Name = "LampHalo"
+	bb.Size = UDim2.fromScale(NL.GlowSize, NL.GlowSize)
+	bb.LightInfluence = 0
+	bb.Brightness = 2
+	bb.MaxDistance = 1400
+	bb.Enabled = false
+	local img = Instance.new("ImageLabel")
+	img.BackgroundTransparency = 1
+	img.Size = UDim2.fromScale(1, 1)
+	img.Image = NL.Glow
+	img.ImageColor3 = NL.Color
+	img.Parent = bb
+	CollectionService:AddTag(bb, "LampHalo")
+	bb.Parent = q
+end
+
+-- (27 Nov) the lamp lights again on the templates already in ReplicatedStorage.YgnKit.Templates (no glb reload)
+function K.relight(): number
+	local n = 0
+	for _, q in RS.YgnKit.Templates:GetChildren() do
+		local kind, id = string.match(q.Name, "^(%u+)_(%w+)$")
+		if kind == "SNE" and q:IsA("BasePart") then
+			K.lampLight(q, id :: string)
+			n += 1
+		end
+	end
+	return n
 end
 
 function K.templates(holding: Instance): number
@@ -100,24 +157,7 @@ function K.templates(holding: Instance): number
 		q.Color = Color3.new(1, 1, 1)
 		q.Transparency = if kind == "SGL" then 0.55 else 0
 		if kind == "SNE" then
-			-- (owner, 2026-11-21: the videos overrule "Yangon lights are white") main-road lamps stay white LED; the
-			-- plain side-street pole lamps (ppolel) are amber sodium as in the 0815 video, coil poles keep white
-			local amber = id == "ppolel"
-			q.Color = if amber then Color3.fromRGB(255, 176, 92) else Color3.fromRGB(236, 244, 255)
-			CollectionService:AddTag(q, "LampGlow")
-			local l = Instance.new("SpotLight")
-			l.Face = Enum.NormalId.Bottom
-			-- (21 Nov) main-road lamps (lamp1 / lamp2, about 30 studs up) light a wider pool: the videos' roads are lit
-			-- end to end; 42 lit only a 29-stud circle under each post
-			local main = id == "lamp1" or id == "lamp2"
-			l.Angle = if main then 135 else 120
-			l.Range = if main then 60 else 42
-			l.Brightness = 5
-			l.Color = if amber then Color3.fromRGB(255, 170, 96) else Color3.fromRGB(232, 240, 255)
-			l.Shadows = false
-			l.Parent = q
-			CollectionService:AddTag(l, "LODLight")
-			CollectionService:AddTag(l, "DayOff")
+			K.lampLight(q, id)
 		end
 		q:SetAttribute("C", c)
 		q:SetAttribute("S", size)
