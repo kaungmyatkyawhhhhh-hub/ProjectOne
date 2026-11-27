@@ -101,3 +101,7 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 - Attached the Power Lifters icon as a framing-only reference. Action: a giant gold dumbbell curl toward the camera, a tight zoom, a low angle, blue and gold (not Power Lifters purple).
 - Output: `v7/gymarc_v8_action_gpt.png`, logo: `gymarc_v8_action_logo.png`, size test: `gymarc_v8_action_logo_sizetest.png`.
 - 64 px: lum 0.51, near-black 9%.
+
+## v8b (27 Nov, owner: "logo too small ... look at powerlifters gradients and colors and logo size")
+- The logo is now 0.55 of the width, recoloured gold (`icon_render_25nov/gymarc_logo_v11_gold.png`, made by `recolor_logo_gold.py`). Silver "GYM" + gold "ARC" with a warm border, the same two-tone recipe as Power Lifters (purple word = their plates, orange border = their skin).
+- Output: `v7/gymarc_v8b_biglogo.png` (+ `_512`, `_sizetest`). `compose_v7.py` takes an optional 4th arg, the logo PNG.

@@ -1,8 +1,8 @@
 # v7: character-focused icon, smaller logo top-left, size test vs locally cached top gym icons (ref_icons/), 64 px stats.
-# usage: python compose_v7.py <art.png> <out_logo.png> [logo_frac]
+# usage: python compose_v7.py <art.png> <out_logo.png> [logo_frac] [logo_png]
 import sys, glob, os, numpy as np
 from PIL import Image, ImageDraw, ImageFilter
-LOGO = Image.open('../../icon_render_25nov/gymarc_logo_v10_blue_simple.png').convert('RGBA')
+LOGO = Image.open(sys.argv[4] if len(sys.argv) > 4 else '../../icon_render_25nov/gymarc_logo_v10_blue_simple.png').convert('RGBA')
 def compose(src, out, frac):
     im = Image.open(src).convert('RGBA').resize((1024, 1024), Image.LANCZOS)
     w = int(1024*frac); lg = LOGO.resize((w, int(LOGO.height*w/LOGO.width)), Image.LANCZOS)
