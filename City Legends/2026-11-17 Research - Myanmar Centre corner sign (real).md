@@ -1,5 +1,7 @@
 # Myanmar Centre corner sign (real) - research, 17 Nov 2026
 
+> **Replaced 27 Nov 2026:** this ring sign is the old design and stood partly on the road at 1:1. The corner now has the current low semicircle: [[2026-11-27 Myanmar Plaza front - current design, off the road]].
+
 Owner, 17 Nov: "the MYANMAR CENTRE sign is different in the real life modern myanmar plaza". Same day: "the canopies are suppose to be at middle. not on the left side".
 
 ## What the real sign is
