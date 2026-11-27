@@ -27,8 +27,8 @@ def stats(im):
     return dict(white=round(((lum > 215/255) & (sat < 0.25)).mean() * 100, 1), dark=round((lum < 45/255).mean() * 100, 1), mean=round(lum.mean(), 2))
 
 # the small kid's face sits low in the centre: the logo goes bottom-left, smaller
-n = compose('gymarc_icon_normal_raw.png', 'gymarc_icon_normal_logo.png', 0.44, 40)
-x = compose('gymarc_icon_xmas_raw2.png', 'gymarc_icon_xmas_logo.png', 0.44, 40)
+n = compose('gymarc_icon_normal_final_art.png', 'gymarc_icon_normal_logo.png', 0.44, 40)
+x = compose('gymarc_icon_xmas_final_art.png', 'gymarc_icon_xmas_logo.png', 0.44, 40)
 assert n.size == (1024, 1024) and x.size == (1024, 1024)
 shot = Image.open(SHOT).convert('RGB')
 comp = {'old GYM ARC': (346, 86), 'Arm Wrestle': (686, 86), 'Pet Sim': (1027, 86), 'Power Lifters': (1538, 86), 'Grow a Garden': (1197, 86)}
