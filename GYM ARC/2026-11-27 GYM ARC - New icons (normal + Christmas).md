@@ -87,3 +87,8 @@ Steps in `Assets/icon_2026-11-27/v7/`:
 
 ## v7f (27 Nov, owner: "looks bad. just try to have gym star's character physique")
 - Attached `v7/ref_icons/Gym_Star_512.png` as a physique-only reference. Output: `v7/gymarc_v7f_gymstar_build_gpt.png`, logo: `gymarc_v7f_normal_logo.png`. 64 px: lum 0.46, near-black 8%.
+
+## v7g / v7h (27 Nov, owner: "the obliques, waist should look like the guy on the right", from a transformation photo)
+- The photo was not uploaded anywhere. The waist was described in words: wide lats, a narrow tight waist, carved obliques into a V-cut, serratus.
+- `v7g_shirtless`: the waist and V-cut read clearly. `v7h_tee`: the tight tee hides most of the taper.
+- The owner picks the clothing.
