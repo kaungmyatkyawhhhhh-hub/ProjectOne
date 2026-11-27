@@ -56,3 +56,9 @@ Export: `FrostTitanArmour.fbx`, 10 objects (PauldronL/R, BracerL/R, IceCrown + a
 - Christmas cutscene (3 s): snow past the lens, the star gathers frost 0.2-0.6, bursts at 0.6 with shake + soft flash, a mist ring rolls off the tree at 0.7, then the title.
 - MEGA GIFT burst: a gold FrostFX burst under the ribbons and canes, shake, soft flash, mist off the pad.
 - Statue: the lasting cold aura (MegaLiftClient, while the statue is in Workspace.NPCs).
+
+## Shop cards retaken (27 Nov, owner: "Retake shop cards")
+- New body + armour on both cards. Play shots with the ShotCam render step (HUD off): FROST TITAN from 15 studs in front of the statue on its pedestal; GINGERBREAD from a clone of the statue with the armour, ice and glow removed, gingerbread skin A05639, red tank, face restored from the head's FaceTex.
+- 360x360 crops, uploaded: Gingerbread rbxassetid://85855929700394, FrostTitan rbxassetid://82106868309234 (Config/Advent Shop). Checked in the Christmas > Rewards panel in Play.
+- Files: `GYM ARC/Assets/xmas_art/frost_titan_card.png`, `gingerbread_card.png` (overwritten).
+- Note: `ContentProvider:PreloadAsync` on the string ids reports Failure for the old and new ids alike in Studio, so check cards by looking at the panel, not by preload.
