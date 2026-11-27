@@ -206,3 +206,18 @@ Test "taller" separately with a small starter avatar next to the giant.
     - a "taller" cue or a stat badge;
     - more rim and edge separation at 64 px;
     - more breathing room between the logo and the hair.
+
+## v17: second round of fixes (27 Nov)
+- **Owner: "Yes, apply fixes".** Same ChatGPT chat, with the v16 gold raw attached and "keep exactly, only":
+  - shoulders and arms 10% bigger, with a V-taper and obliques;
+  - 30% fewer tee wrinkles;
+  - crisper amber and icy rim lights and a darker navy around the silhouette;
+  - more space under the logo area.
+- **The Christmas version** is made from that new image, with the same Christmas additions; the goggles now sit on the hat brim.
+- **Logo:** 0.48 width (was 0.53) for breathing room, stroke 9; the Christmas icon uses the snow logo.
+- **Files:**
+  - `v9/gymarc_v17_gold.png` (normal);
+  - `v9/gymarc_v17_xmas.png` (Christmas);
+  - raws `_gpt`;
+  - sheet `v9/compare_v17.png`.
+- **Not done:** "1000 LB" on the plate and a "taller" badge. The owner hasn't asked for text on the icon.
