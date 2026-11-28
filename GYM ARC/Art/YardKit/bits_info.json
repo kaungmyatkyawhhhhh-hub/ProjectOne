@@ -1,0 +1,56 @@
+{
+ "Bits_TitanEdge": {
+  "group": "Titan",
+  "centre_off": [
+   0.0,
+   -0.06999999999999999,
+   -0.0
+  ],
+  "tris": 192
+ },
+ "Bits_TitanRing": {
+  "group": "Titan",
+  "centre_off": [
+   0.0,
+   -0.03,
+   -0.0
+  ],
+  "tris": 192
+ },
+ "Bits_TitanBase": {
+  "group": "Titan",
+  "centre_off": [
+   0.0,
+   -0.009999999999999981,
+   -0.0
+  ],
+  "tris": 92
+ },
+ "Bits_PhotoSnow": {
+  "group": "Photo",
+  "centre_off": [
+   -0.049415813473146386,
+   -0.09999999999999999,
+   4.440892098500626e-16
+  ],
+  "tris": 68
+ },
+ "Bits_PlinthRed": {
+  "group": "Plinth",
+  "centre_off": [
+   0.0,
+   0.275,
+   -0.0
+  ],
+  "tris": 28
+ },
+ "Bits_PlinthGold": {
+  "group": "Plinth",
+  "centre_off": [
+   0.0,
+   0.535,
+   -0.0
+  ],
+  "tris": 64
+ }
+}
