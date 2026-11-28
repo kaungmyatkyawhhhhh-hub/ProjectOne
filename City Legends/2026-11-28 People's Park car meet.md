@@ -62,7 +62,16 @@ Pictures:
 - `2026-11-28 People's Park build-out - fountain and garden basins, Shwedagon (Edit).jpg`
 
 Not done:
-- The amusement park rides and the water park slides (only the pools), kiosks / cafes (OSM points only), the aircraft display (no current photo).
+- The amusement park rides and the water park slides (only the pools), kiosks / cafes (OSM points only). (The aircraft display is built now: see below.)
 - The "path stub at the top-left" in the owner's shot was not identified separately; the OSM paths now join most loose ends.
 - No overlap scan run on the 7,900 new parts; trees are kept clear of paths / parts, but lamp heads under tree crowns were not checked.
 - In Edit the far lawn looks blue (sky reflection); in Play it is grass.
+
+## Aircraft display (28 Nov, owner: "i think it still there")
+- **What:** the retired Myanma Airways Fokker F27-600 Friendship **XY-ADZ**, towed from Yangon airport to People's Park in March 2013 for display (airhistory.net record). OSM node 3793702568 (`historic=aircraft`, "Fokker F27", edited Sept 2026, so still mapped). A second group, "historic airplanes" (node 3978265084, 2016 tag, the semi-derelict F27s spotters mention), sits at the park's north end: not built.
+- **Where / how:** Esri z19 satellite shows it at the node, on its own gear on bare ground just north of the south-edge footway, nose to the ENE (heading ~71 deg, nose toward the sandy path; tail by the fin's shadow). No stairs, plinth or fence visible from above and no current ground photo found, so none built.
+- **Livery (photo 2005):** white top, thin navy cheatline over the windows widening into a navy rear fuselage and fin, orange chakra on the fin, orange MYANMA AIRWAYS at the fin root, white XY-ADZ on the navy, grey belly, grey wing / Dart nacelles, black radome. Not modelled: the Burmese title and flag by the cockpit (Blender's text can't shape Burmese).
+- **Build:** `Games/CityLegends/tools/yangon/city/f27_display.py` (run in Blender; real F27-600 size x3: 70.7 x 87 x 25.5 studs; vertex colours; written with `glb.py`, since Blender 3.6's glTF exporter dropped the colours) -> Model asset 136820485104840 (rev 3) -> `Workspace.Yangon1to1.Parks.F27Display` (5 MeshParts, 5,232 tris; Color white so vertex colours show; collision PreciseConvexDecomposition, props no collide). KeepOut box `ReplicatedStorage.YgnKit.KeepOut.F27Display` keeps the streamed park trees out; a lamp, a bench and one path piece under the left main gear went to `ServerStorage.F27Replaced` (attribute `F27From`). Overlap scan after: 0.
+- **Checked in Play (11:00):** reads as the photo from the footway and the tail side; FPS ~25 in Studio Play on the loaded PC (same as before). Not visible from the car meet (~770 studs away, trees between). Shortcut: the skill's ChatGPT turnaround / exploded sheets were skipped (owner's usage nearly out); the real photo + satellite were the reference.
+
+Pictures: `2026-11-28 Aircraft display - F27 from the footway, day (Play).jpg`, `2026-11-28 Aircraft display - F27 tail and livery, day (Play).jpg`; refs in `refs_2026-11-28_aircraft/` (Commons photo by M Radzi Desa, GFDL; Esri satellite crop).
