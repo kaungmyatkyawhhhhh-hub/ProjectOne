@@ -92,6 +92,12 @@ Reference generators to copy from: `MEGA BITE\Art\GreatWhite\greatwhite_v2.py` (
 - The snout keeps one continuous section past the chin (no seam); end the nose with a small tapered station, not a flat cap.
 - Clip modules: reuse the shared clips re-scaled by SEG and add only the model's ability clip (6 KB instead of 16 KB to paste into Studio).
 
+## 4c. Swapping a Part assembly for one mesh (props, GYM ARC Gem Mine, 28 Nov 2026)
+- Build in the old parts' frame (Roblox units, Blender X = Roblox X, Blender Z = Roblox Y, Blender Y = -Roblox Z) and add two tiny markers far from the prop: KitRef at (0,-30,0) and KitRefX at (100,-30,0). After `insert_asset`, read the import yaw from them: `dx = KitRefX.Position - KitRef.Position`, `th = atan2(-dx.Z, dx.X)`, `origin = CFrame.new(KitRef.Position) * CFrame.Angles(0, th, 0) * CFrame.new(0, -h, -30)` (h = how far the marker's centre sits above its base, 0.15 for a 0.3 marker). Each part goes to `anchor * origin:ToObjectSpace(part.CFrame)`.
+- **Anchor on a stable PART (`BackWall.CFrame * offset`), never `Model:GetPivot()`.** The Plate Forge's model pivot had drifted and flipped, so the mesh came in mirrored 180° in Play.
+- Keep the old parts at Transparency 1 for collision and the scripts' names; back them up in `ServerStorage.RemodelBackup` and record old values in attributes (`OrigTransparencyR5`).
+- A big flat wall still reads as "a tall box" to reviewers. Step the top courses in, add a sloped cap, a mid-height ledge and corner pilasters (0.6 deep). A plain faceted face isn't enough.
+
 ## 5. Roblox export
 - Triangles under 20K per mesh (Roblox limit); **aim 5-15K for the whole creature** (owner, 18 Nov). One material: bake the colours into one 512 px texture. Up to 4 bone influences per vertex; the root bone at the origin. FBX with Add Leaf Bones off and embedded textures; import with the 3D Importer.
 - Rig: 8 spine bones plus a Jaw bone, weights by position along the body, a Swim action (carangiform; thunniform for big sharks).

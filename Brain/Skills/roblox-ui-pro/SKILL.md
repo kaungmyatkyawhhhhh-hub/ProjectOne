@@ -180,6 +180,9 @@ Do not save or publish the place without the owner's OK. Play sessions are fine.
   - Apply the changes, re-shoot, and repeat until both rate every tab 9 or higher. Say what was kept on purpose (the house kit, kids' rules, no false stat tags) so they stop asking for it.
   - Show the owned and claimed states too, through the real remotes on FreshPlayer data. Reviewers mark down what they can't see.
   - The GYM ARC Christmas panel took 5 rounds (6.5 → 9.0 Rewards, 5.5 → 9.2 Calendar).
+  - **Tell the reviewers what every button DOES** (owner, 28 Nov: "tell gemini and chatgpt about what the buttons do too, because rn they think some of it are not important which are important"). Read each button's script and give one line per button: what it opens and why players use it (SHOP = store, STATS = stat labels + tutorial, GENETICS = DNA reroll power system, TRAINERS = the coin gacha loop, ...). Name the dev-only ones (ADMIN) and the rotating slots. Without it, Gemini kept asking to hide 4 core buttons in a MORE drawer. With it, both dropped that, rated on spacing instead, and GYM ARC's HUD went 8.8 → 9.3 in two rounds.
+  - Hunt empty layout slots: the pager sat 28 px under its card because an empty but visible "Middle" frame plus a second list gap sat between them. Fix the order, not the padding.
+  - Never put a `--` comment in the middle of a line you patch with `UpdateSourceAsync`. It comments out the rest of the line, so the module fails to load and half the HUD vanishes. Use `--[[ ]]`.
 - `Kit.Modal.open()` waits while the player is on a machine (the "never opens by itself while training" rule). To screenshot a window, press the machine's STOP first (`MachineHud.Root.Group.Exit` via `user_mouse_input` with `instance_path`).
 - `Kit.Text` adds a `TextStroke` UIStroke. Remove it for dark text on a gold pill, or the text turns to mush.
 
