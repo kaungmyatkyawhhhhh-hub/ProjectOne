@@ -4,8 +4,8 @@
 # Blender: x = across the path, y = depth (front = -y = towards the player walking in), z = up. Origin = ground centre.
 import bpy, bmesh, math, os
 HERE = r"C:\ObsidianOne\Claude+Obsidian\GYM ARC\Art\YardKit"
-PAL = {"White": (244, 238, 226), "Red": (190, 35, 48), "Gold": (223, 182, 79), "Green": (36, 110, 62),
-       "GreenDark": (25, 80, 48), "Board": (158, 36, 49), "Wood": (92, 56, 34), "Snow": (231, 241, 250), "Stone": (158, 175, 192)}
+PAL = {"White": (244, 238, 226), "Red": (190, 35, 48), "Gold": (223, 182, 79), "Green": (36, 106, 62), "GreenLight": (57, 131, 79),
+       "GreenDark": (22, 71, 46), "RedDark": (130, 20, 35), "Board": (158, 36, 49), "Wood": (92, 56, 34), "Snow": (231, 241, 250), "Stone": (158, 175, 192)}
 G = {}; BEV = set()
 
 def add(col, V, F, bevel=False):
@@ -62,6 +62,7 @@ for sx in (-1, 1):
     x = sx * CX
     box("Stone", (x, 0, 0.5), (2.6, 2.6, 1.0))
     box("Snow", (x, 0, 1.08), (2.7, 2.7, 0.16))
+    box("Gold", (x, 0, 0.82), (2.72, 2.72, 0.16), bevel=False)
     z = 1.0; k = 0; tilt = math.radians(30)
     while z < H - 0.01:
         z1 = min(H, z + 1.1)
@@ -77,24 +78,42 @@ for zz in (H + 0.4, H + 3.4):
 for xx in (-6.6, 6.6):
     box("Gold", (xx, -0.5, H + 1.9), (0.22, 0.2, 3.2))
 box("Snow", (0, -0.2, H + 3.55), (13.2, 0.7, 0.18))
-# garland: sagging tube across the front of the beam + baubles
-pts = [(x, -0.75, H - 0.5 - 0.9 * math.sin(math.pi * (x + CX) / (2 * CX))) for x in [(-CX + 2 * CX * i / 14) for i in range(15)]]
-tube("Green", pts, 0.5, 6)
-for i in range(1, 14, 2):
-    p = pts[i]; tube("GreenDark", [(p[0] - 0.5, p[1] - 0.2, p[2] + 0.1), (p[0] + 0.5, p[1] - 0.2, p[2] - 0.1)], 0.42, 5)
-for i in (2, 4, 6, 8, 10, 12):
-    p = pts[i]; ball("Red" if i % 4 else "Gold", (p[0], p[1] - 0.35, p[2] - 0.75), 0.42)
-# bows on the column tops (front)
+# garland v2 (R3: "green pipe with cubes" -> overlapping faceted pine clumps in 3 greens), baubles on gold stems
+import random; random.seed(3)
+def clump(col, c, r):
+    n = 6; cx, cy, cz = c; V = [(cx, cy, cz - r * 0.7)]
+    for ring, (zf, rf) in enumerate(((-0.25, 1.0), (0.3, 0.8))):
+        V += [(cx + r * rf * (1 + random.uniform(-0.18, 0.18)) * math.cos(2 * math.pi * k / n + ring * 0.5),
+               cy + r * rf * (1 + random.uniform(-0.18, 0.18)) * math.sin(2 * math.pi * k / n + ring * 0.5),
+               cz + zf * r + random.uniform(-0.08, 0.08)) for k in range(n)]
+    V.append((cx, cy, cz + r * 0.75)); top = len(V) - 1
+    F = [(0, 1 + (k + 1) % n, 1 + k) for k in range(n)]
+    for k in range(n):
+        a, b = 1 + k, 1 + (k + 1) % n; c_, d = 1 + n + k, 1 + n + (k + 1) % n
+        F += [(a, b, d), (a, d, c_)]
+    F += [(1 + n + k, 1 + n + (k + 1) % n, top) for k in range(n)]
+    add(col, V, F)
+sag = lambda x: H - 0.5 - 0.9 * math.sin(math.pi * (x + CX) / (2 * CX))
+NC = 26
+for i in range(NC):
+    x = -CX + 2 * CX * i / (NC - 1)
+    clump(("GreenDark", "Green", "GreenLight")[i % 3], (x, -0.75 + random.uniform(-0.12, 0.12), sag(x)), 0.62)
+    if i % 2: clump(("Green", "GreenLight", "GreenDark")[i % 3], (x + 0.2, -1.05, sag(x) + 0.25), 0.42)
+for k, x in enumerate((-6.2, -3.7, -1.2, 1.2, 3.7, 6.2)):
+    z = sag(x) - 0.95; col = "Red" if k % 2 else "Gold"
+    ball(col, (x, -1.0, z), 0.42)
+    box("Gold", (x, -1.0, z + 0.55), (0.16, 0.16, 0.4), bevel=False)
+    box("Gold", (x, -1.0, z + 0.4), (0.3, 0.3, 0.14), bevel=False)
+# volumetric bows (R3: "flat"): two looped ribbon tubes, a knot and two tails per column top
+def loop_pts(x, z, side):
+    return [(x + side * (0.15 + 0.85 * (1 - math.cos(a)) / 2 * 1.3), -1.15 - 0.25 * math.sin(a), z + 0.55 * math.sin(a))
+            for a in [2 * math.pi * k / 10 for k in range(11)]]
 for sx in (-1, 1):
-    x = sx * CX; z = H - 0.6
+    x = sx * CX; z = H - 0.55
     for side in (-1, 1):
-        V = [(x, -1.0, z), (x + side * 1.1, -1.0, z + 0.6), (x + side * 1.1, -1.0, z - 0.6),
-             (x, -1.4, z), (x + side * 1.1, -1.4, z + 0.6), (x + side * 1.1, -1.4, z - 0.6)]
-        add("Red", V, [(0, 1, 2), (5, 4, 3), (0, 3, 4, 1), (1, 4, 5, 2), (2, 5, 3, 0)])
-        V = [(x, -1.2, z), (x + side * 0.4, -1.2, z - 1.4), (x + side * 0.8, -1.2, z - 1.2)]
-        V += [(v[0], v[1] - 0.2, v[2]) for v in V]
-        add("Red", V, [(0, 1, 2), (5, 4, 3), (0, 3, 4, 1), (1, 4, 5, 2), (2, 5, 3, 0)])
-    box("Gold", (x, -1.25, z), (0.45, 0.5, 0.45), bevel=False)
+        tube("Red", loop_pts(x, z, side), 0.3, 5)
+        tube("RedDark", [(x + side * 0.1, -1.2, z - 0.1), (x + side * 0.35, -1.25, z - 0.8), (x + side * 0.6, -1.2, z - 1.45)], 0.24, 4)
+    ball("RedDark", (x, -1.3, z), 0.42)
 
 for o_ in list(bpy.data.objects): bpy.data.objects.remove(o_, do_unlink=True)
 sc = bpy.context.scene; tris = 0
@@ -114,7 +133,7 @@ for ob in sc.objects:
     tris += sum(len(p.vertices) - 2 for p in ob.evaluated_get(dg).to_mesh().polygons)
 print("TRIS", tris)
 cam = bpy.data.objects.new("Cam", bpy.data.cameras.new("Cam")); sc.collection.objects.link(cam); sc.camera = cam
-cam.location = (9, -26, 9); cam.rotation_euler = (math.radians(84), 0, math.radians(19))
+cam.location = (6, -30, 9); cam.rotation_euler = (math.radians(86), 0, math.radians(11))
 sc.render.engine = "BLENDER_WORKBENCH"; sc.display.shading.light = "STUDIO"; sc.display.shading.color_type = "MATERIAL"
 sc.render.resolution_x, sc.render.resolution_y = 900, 700
 sc.render.filepath = os.path.join(HERE, "gate", "arch.png"); bpy.ops.render.render(write_still=True)
