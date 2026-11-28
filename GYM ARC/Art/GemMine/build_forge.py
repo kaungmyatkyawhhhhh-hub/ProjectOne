@@ -67,6 +67,9 @@ hull("StoneB", [R(sx * 4.2, 7.0, 6.0 + sz * 0.8) for sx in (-1, 1) for sz in (-1
 for sx in (-1, 1):  # sloped shoulders where each course steps in
     hull("StoneA", [R(sx * 7.0, 3.55, z) for z in (5.4, 6.6)] + [R(sx * 5.5, 3.55, z) for z in (5.4, 6.6)] + [R(sx * 5.5, 4.3, z) for z in (5.4, 6.6)])
     hull("StoneA", [R(sx * 5.5, 5.15, z) for z in (5.4, 6.6)] + [R(sx * 4.0, 5.15, z) for z in (5.4, 6.6)] + [R(sx * 4.0, 5.9, z) for z in (5.4, 6.6)])
+# (MAP-7: Gemini "horizontal stone ledge midway up", ChatGPT "two 0.6-stud-deep corner pilasters") ledge proud 0.6 of both faces
+cbox("StoneB", (0, 0.3, 6.0), (14.4, 0.55, 2.4), 0.12)
+for sx in (-1, 1): cbox("StoneB", (sx * 6.75, -1.65, 6.0), (1.1, 10.5, 2.4), 0.12)
 # timber
 for px in (6.6, -6.6): cbox("Wood", (px, 0.08, 5.3), (0.8, 14, 0.8), 0.12)
 cbox("Wood", (0, 6.98, 5.3), (14.6, 0.9, 1.0), 0.12)
