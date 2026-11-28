@@ -107,7 +107,7 @@ def gy(x): return YT + (YB - YT) * (1 - ((x - XC) / (X1 - XC if x > XC else XC -
 tube(m, [Vector(((x - 230) * S, 0, (470 - gy(x) - 10) * S)) for x in [X0 + 10 + (X1 - X0 - 20) * i / 8 for i in range(9)]], 40 * S, 5, False, 6 * S, depth=0.8, seed=5)
 for i in range(6):                                      # warm bulbs on the front of the garland
     x = X0 + 40 + (X1 - X0 - 80) * i / 5
-    m.ico("Bulbs", ((x - 230) * S, -26 * S, (470 - gy(x) - 8) * S), 9 * S, 0, (0.75, 0.75, 1.15))
+    m.ico("Bulbs", ((x - 230) * S, -40 * S, (470 - gy(x) - 20) * S), 14 * S, 0, (0.75, 0.75, 1.15))
 m.ico("Gold", ((245 - 230) * S, -12 * S, (470 - 600) * S), 22 * S, 0)
 m.ico("Gold", ((245 - 230) * S, -12 * S, (470 - 576) * S), 6 * S, 0)
 for hx in (X0 + 8, X1 - 8):                             # small bows at the hooks
@@ -120,7 +120,7 @@ export(m, "Garland", {"front": (S, 230, 478, False)})
 
 # ---------- PEPPERMINT (front: disc centre 244.5,846.5, R 117; wrappers to x 24 / 456; side thickness 45) ----------
 S = 1 / 234; m = M()
-R, D, NS, NR = 117 * S, 22 * S, 16, 4                   # 16 wedges = 8 red + 8 white, swirled
+R, D, NS, NR = 117 * S, 22 * S, 8, 2                    # LOW-POLY (28 Nov): 8 wedges = 4 red + 4 white, swirled over 2 rings
 def pt(k, j, y):
     r = R * (0.92 if j == NR + 1 else j / NR) if j <= NR else R
     a = 2 * math.pi * k / (NS * 2) - 0.75 * (min(j, NR) / NR)
