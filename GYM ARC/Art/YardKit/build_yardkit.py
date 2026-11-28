@@ -121,7 +121,6 @@ sphere(P, "Snow", o + Vector((0, 0, 0.15)), 0.9, 7, 3, s=(1, 1, 0.35), flat_bott
 arrow = [(-2.2, -0.42), (1.9, -0.42), (2.4, 0.0), (1.9, 0.42), (-2.2, 0.42)]
 for i, (z, yaw) in enumerate(((6.4, 0.0), (5.3, math.pi * 0.75), (4.2, -0.6))):
     prism(P, "WoodDark", arrow, 0.16, o + Vector((0, 0, z)), (0, 0, yaw))
-    sphere(P, "Snow", o + Vector(Euler((0, 0, yaw)).to_matrix() @ Vector((0.2, 0, 0.42))) + Vector((0, 0, z)), 0.5, 6, 3, s=(2.6, 0.3, 0.22))
 
 # 5 Ice crystal cluster (~3.5 tall)
 o = at("Crystals", 4); P = "Crystals"
