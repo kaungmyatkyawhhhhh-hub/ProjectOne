@@ -40,3 +40,29 @@ Tool: `Games/CityLegends/tools/yangon/PeoplesPark.luau` `P.meet()` (in `ServerSt
 - The dealer's old LEGENDS MEET car park stays built but no longer counts.
 - A player's own skid marks (0.07 up) pass under the painted marks; not checked for flicker where they cross.
 - Show cars are ordinary Yangon traffic bodies (the parked-car pool never uses rare / supercars).
+
+## People's Park build-out (28 Nov, owner: "do u not see how the people park is rn?" + "these too")
+
+Before: a bare field with a few paths, the fountain, the pale-blue basins and the meet pad. The car meet pad, its lamps, show cars and crowd are untouched.
+
+**Refs (dated):** OpenStreetMap extract `myanmar-261112.osm.pbf` (12 Nov 2026, ODbL): the park outline (way 374243908), 2 lakes, 3 ponds, 4 fountains, 112 footways + 71 park drives, 9 pools (the water park in the south-west corner), 2 pitches, 7 car parks, 2 bridges, 6 gates and **1,447 mapped trees**. Visitor guides (Lonely Planet, GPSmyCity, Wanderlog; undated) agree: big shade trees, lawns, lakes, the amusement park in the north-west, Shwedagon view. No recent photo found of the old aircraft display, so it is **not built**.
+
+**What is built** (`tools/yangon/PeoplesPark.luau` `P.grounds()`, data `tools/yangon/PeoplesParkOSM.luau` from `tools/yangon/city/peoples_park_osm.py`; Studio v2451):
+- Trees: 1,316 of the mapped OSM trees at their real spots + 1,058 fill trees on bare lawns (palms near the water), as streamed tree-kit records `ReplicatedStorage.YgnKit.Data_PPG` (same kit and LOD as the rest of the map), far looks `Green.Far.Cell_PP` (1,919). No trees on the meet, square, garden, fountains, car parks, pools, pitches or the Shwedagon sight line (checked: the ray from the pad to the stupa top is clear).
+- Paths: 2,596 paving pieces along the OSM footways / park drives, following the ground; joint discs at bends; each way sits a little higher than the last so crossings do not flicker; 468 pieces skipped where the map was already paved.
+- Water: terrain Water carved into the lakes / ponds that had none (west lake, ponds); the fountain basins are now dark slate floors under glassy water (the pale-blue slabs are gone, the big fountain too). Pools: 9 basins with pale pool tiles on paved decks.
+- 280 globe lamps (light tagged LODLight + DayOff) and 249 benches along the footways; 2 bridges with red rails; pitch lines + goals; 3 more car parks; 7 gate pillars at the OSM gates (one gate lost a pillar to a part already there); shrubs in the small gardens.
+- FPS (Studio Play, this PC): 14.9 with the new parts, 15.2 with them removed: no real cost.
+
+Pictures:
+- `2026-11-28 People's Park build-out - before, top-down (Edit).jpg`
+- `2026-11-28 People's Park build-out - after, top-down (Edit).jpg`
+- `2026-11-28 People's Park build-out - from the car meet (Play).jpg`
+- `2026-11-28 People's Park build-out - on the lawn by a path (Play).jpg`
+- `2026-11-28 People's Park build-out - fountain and garden basins, Shwedagon (Edit).jpg`
+
+Not done:
+- The amusement park rides and the water park slides (only the pools), kiosks / cafes (OSM points only), the aircraft display (no current photo).
+- The "path stub at the top-left" in the owner's shot was not identified separately; the OSM paths now join most loose ends.
+- No overlap scan run on the 7,900 new parts; trees are kept clear of paths / parts, but lamp heads under tree crowns were not checked.
+- In Edit the far lawn looks blue (sky reflection); in Play it is grass.
