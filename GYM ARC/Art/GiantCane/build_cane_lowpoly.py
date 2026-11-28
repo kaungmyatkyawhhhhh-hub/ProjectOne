@@ -83,7 +83,7 @@ sc.render.engine = "BLENDER_WORKBENCH"; sc.display.shading.light = "STUDIO"; sc.
 sc.render.film_transparent = True; sc.render.resolution_x, sc.render.resolution_y, sc.render.resolution_percentage = 768, 1024, 100
 sc.render.filepath = os.path.join(HERE, "gate", "side_lp.png"); bpy.ops.render.render(write_still=True)
 # 3/4 look render
-cam.data.type = "PERSP"; cam.location = (9, -9, 5); cam.rotation_euler = (math.radians(72), 0, math.radians(45))
+cam.data.type = "PERSP"; cam.location = Vector((9, -12, 6)); cam.rotation_euler = (Vector((0.8, 0, 4.3)) - cam.location).to_track_quat("-Z", "Y").to_euler()
 sc.render.filepath = os.path.join(HERE, "gate", "look_lp.png"); bpy.ops.render.render(write_still=True)
 bpy.data.objects.remove(cam, do_unlink=True)
 for o in sc.objects: o.select_set(o.get("xmas_part") == "cane")

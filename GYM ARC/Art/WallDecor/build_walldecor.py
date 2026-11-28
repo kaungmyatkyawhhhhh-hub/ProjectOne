@@ -23,6 +23,29 @@ class M:
         n = len(pts); fr = [Vector((x, y0, z)) for x, z in pts]; bk = [Vector((x, y1, z)) for x, z in pts]
         s.add(c, fr + bk, [tuple(range(n)), tuple(range(2 * n - 1, n - 1, -1))] + [(i, n + i, n + (i + 1) % n, (i + 1) % n) for i in range(n)])
 
+def tube(m, pts, r, n, closed, jit, depth=1.0, seed=3, dark=0.35):
+    """LOW-POLY faceted tube along pts (owner 28 Nov rule): n sides, staggered rings, flat facets coloured Pine/PineDark."""
+    rnd = random.Random(seed); L = len(pts); rings = []
+    for i, p in enumerate(pts):
+        a = pts[(i + 1) % L] if closed or i < L - 1 else p; b = pts[(i - 1) % L] if closed or i > 0 else p
+        t = (a - b).normalized(); u = Vector((0, 1, 0)); w = t.cross(u).normalized()
+        ring = []
+        for k in range(n):
+            ang = 2 * math.pi * (k + 0.5 * (i % 2)) / n
+            j = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-1, 1))) * jit
+            ring.append(p + w * math.cos(ang) * r + u * math.sin(ang) * r * depth + j)
+        rings.append(ring)
+    segs = L if closed else L - 1
+    for i in range(segs):
+        A, B = rings[i], rings[(i + 1) % L]
+        for k in range(n):
+            c = "PineDark" if rnd.random() < dark else "Pine"
+            if i % 2 == 0: m.add(c, [A[k], A[(k + 1) % n], B[k]], [(0, 2, 1)]); m.add(c, [A[(k + 1) % n], B[(k + 1) % n], B[k]], [(0, 2, 1)])
+            else: m.add(c, [A[k], B[(k + 1) % n], B[k]], [(0, 2, 1)]); m.add(c, [A[k], A[(k + 1) % n], B[(k + 1) % n]], [(0, 2, 1)])
+    if not closed:
+        for ring, ctr, flip in ((rings[0], pts[0], True), (rings[-1], pts[-1], False)):
+            for k in range(n): m.add("PineDark", [ctr, ring[k], ring[(k + 1) % n]], [(0, 1, 2) if flip else (0, 2, 1)])
+
 def bow(m, cx, cz, s, y0, y1, col="Red"):
     """ribbon bow traced from the wreath sheet (centre 250,268 px, 140 px wide), scaled by s (units per px)."""
     P = lambda pts, sg: [((cx + sg * (x - 250) * s), cz - (y - 268) * s) for x, y in pts]
@@ -69,15 +92,10 @@ def export(m, name, gate_views):
 # ---------- WREATH (front: centre 245,190, outer R 145, hole r 67; side depth 579-667) ----------
 S = 1 / 290; m = M()
 RM, TUBE = 106 * S, 39 * S
-for i in range(30):                                     # pine clumps round the ring, two staggered rows
-    a = 2 * math.pi * i / 30; rr = RM + (0.25 if i % 2 else -0.45) * TUBE
-    rot = Matrix.Rotation(random.uniform(0, 6.28), 3, "Y") @ Matrix.Rotation(random.uniform(0, 6.28), 3, "X")
-    m.ico("Pine" if i % 3 else "PineDark", (rr * math.cos(a), 0, rr * math.sin(a)), 36 * S, 1, (1, 1.15, 1), rot)
-for i in range(12):                                     # darker core ring behind, fills the gaps
-    a = 2 * math.pi * (i + 0.5) / 12
-    m.ico("PineDark", (RM * math.cos(a), 6 * S, RM * math.sin(a)), 40 * S, 0, (1, 0.8, 1))
+# LOW-POLY (owner 28 Nov): one faceted torus, 10 around x 5 sides, instead of 42 round clumps
+tube(m, [Vector((RM * math.cos(2 * math.pi * i / 10), 0, RM * math.sin(2 * math.pi * i / 10))) for i in range(10)], TUBE * 1.05, 5, True, TUBE * 0.12, depth=0.8)
 for bx, bz in ((255, 92), (158, 142), (342, 151), (144, 230), (343, 237)):
-    m.ico("Red", ((bx - 245) * S, -30 * S, (190 - bz) * S), 17 * S, 1)
+    m.ico("Red", ((bx - 245) * S, -30 * S, (190 - bz) * S), 17 * S, 0)
 bow(m, 0, (190 - 268) * S, S, -46 * S, -28 * S)
 export(m, "Wreath", {"front": (S, 247, 200, False), "side": (S, 623, 200, True)})
 
@@ -85,15 +103,12 @@ export(m, "Wreath", {"front": (S, 247, 200, False), "side": (S, 623, 200, True)}
 S = 1 / 350; m = M()
 X0, X1, YT, YB, XC = 70, 420, 478, 566, 245
 def gy(x): return YT + (YB - YT) * (1 - ((x - XC) / (X1 - XC if x > XC else XC - X0)) ** 2)
-N = 14
-for i in range(N):
-    x = X0 + 10 + (X1 - X0 - 20) * i / (N - 1)
-    rot = Matrix.Rotation(random.uniform(0, 6.28), 3, "Y") @ Matrix.Rotation(random.uniform(0, 6.28), 3, "Z")
-    m.ico("Pine" if i % 3 else "PineDark", ((x - 230) * S, 0, (470 - gy(x) - 10) * S), 48 * S, 1, (1, 0.8, 1.05), rot)
+# LOW-POLY (owner 28 Nov): one faceted sagging tube, 8 segments x 5 sides, instead of 14 round clumps
+tube(m, [Vector(((x - 230) * S, 0, (470 - gy(x) - 10) * S)) for x in [X0 + 10 + (X1 - X0 - 20) * i / 8 for i in range(9)]], 40 * S, 5, False, 6 * S, depth=0.8, seed=5)
 for i in range(6):                                      # warm bulbs on the front of the garland
     x = X0 + 40 + (X1 - X0 - 80) * i / 5
     m.ico("Bulbs", ((x - 230) * S, -26 * S, (470 - gy(x) - 8) * S), 9 * S, 0, (0.75, 0.75, 1.15))
-m.ico("Gold", ((245 - 230) * S, -12 * S, (470 - 600) * S), 22 * S, 1)
+m.ico("Gold", ((245 - 230) * S, -12 * S, (470 - 600) * S), 22 * S, 0)
 m.ico("Gold", ((245 - 230) * S, -12 * S, (470 - 576) * S), 6 * S, 0)
 for hx in (X0 + 8, X1 - 8):                             # small bows at the hooks
     bow(m, (hx - 230) * S, (470 - 462) * S, S * 0.7, -44 * S, -32 * S)
