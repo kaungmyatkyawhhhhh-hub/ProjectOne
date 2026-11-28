@@ -37,6 +37,7 @@ local YT = 190 -- towers' roof
 
 local STONE = Color3.fromRGB(150, 146, 140)
 local STONE_D = Color3.fromRGB(118, 114, 108)
+local STONE_T = Color3.fromRGB(244, 232, 214) -- (tints NovoStone; warm: the map's daylight is cool)
 local WHITE = Color3.fromRGB(236, 236, 230)
 local TAUPE = Color3.fromRGB(146, 124, 108)
 local GLASS = Color3.fromRGB(96, 124, 140)
@@ -48,16 +49,23 @@ local MARBLE = Color3.fromRGB(226, 214, 190)
 local TIMBER = Color3.fromRGB(198, 150, 92)
 local TIMBER_D = Color3.fromRGB(128, 86, 50)
 local BRONZE = Color3.fromRGB(150, 112, 64)
-local BLUE = Color3.fromRGB(26, 70, 170)
+local BLUE = Color3.fromRGB(28, 92, 214)
 local TILE = Color3.fromRGB(70, 190, 200)
 local WATER = Color3.fromRGB(60, 190, 215)
 local TERRA = Color3.fromRGB(160, 84, 60)
 local DECK = Color3.fromRGB(120, 84, 62)
-local COURT_R = Color3.fromRGB(176, 78, 62)
-local COURT_G = Color3.fromRGB(56, 128, 72)
+local COURT_R = Color3.fromRGB(150, 58, 46)
+local COURT_G = Color3.fromRGB(36, 104, 58)
 local LINE_W = Color3.fromRGB(240, 240, 236)
 local LINE_Y = Color3.fromRGB(232, 200, 50)
 local WARM = Color3.fromRGB(255, 226, 170)
+
+-- generated MaterialVariants in the place (Studio's material generator, 2026-11-28); "" when one is missing
+local MS = game:GetService("MaterialService")
+local function variant(name: string): string
+	return if MS:FindFirstChild(name, true) then name else "" -- (the generator files each one in its own folder)
+end
+local OAK, MARBLE_V, DECK_V, PAVER_V, POOL_V, STONE_V = variant("NovoOakLight"), variant("NovoMarble"), variant("NovoDeck"), variant("NovoPaver"), variant("NovoPoolTile"), variant("NovoStone")
 
 local count = 0
 local function raw(parent: Instance, name: string, size: Vector3, cf: CFrame, color: Color3, mat: Enum.Material?, props: { [string]: any }?): Part
@@ -115,7 +123,7 @@ local function text(p: BasePart, face: Enum.NormalId, str: string, color: Color3
 end
 local function lamp(p: BasePart, range: number, bright: number, color: Color3?)
 	local l = Instance.new("PointLight")
-	l.Range, l.Brightness, l.Shadows = range, bright, false
+	l.Range, l.Brightness, l.Shadows = range, bright, range > 40 -- (big lights cast shadows: without them they shine through the slabs into the floor below)
 	l.Color = color or WARM
 	l.Parent = p
 end
@@ -166,26 +174,31 @@ local function massing(root: Instance)
 	-- the middle block (its roof carries the small pool), the ballroom block (white roof), the court block
 	box(m, "MidBlock", 75, 215, YL, Y6, -168, -72, WHITE, Enum.Material.Concrete)
 	windows(m, 75, 215, -168, -72, YL + 8, Y6 - 6, 12)
-	box(m, "LinkBlock", 215, 232, YL, Y6, -112, -72, STONE, Enum.Material.Concrete)
+	box(m, "LinkBlock", 215, 232, YL, Y6, -112, -72, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
 	box(m, "SmallPoolDeck", 146, 182, Y6, Y6 + 0.3, -156, -120, DECK, Enum.Material.WoodPlanks, deco())
 	box(m, "SmallPool", 150, 178, Y6 + 0.3, Y6 + 0.5, -152, -124, WATER, Enum.Material.SmoothPlastic, deco({ Reflectance = 0.2 }))
 	box(m, "Ballroom", 64, 128, YL, 100, -72, -17, WHITE, Enum.Material.Concrete)
-	box(m, "CourtBlock", 128, 232, YL, Y6 - 0.3, -72, -17, STONE, Enum.Material.Concrete)
+	box(m, "CourtBlock", 128, 232, YL, Y6 - 0.3, -72, -17, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
 	-- the pool podium (south-east); its east end stands on the ground by the drive
-	box(m, "PoolPodium", 232, 265, YL, Y6 - 3, -112, -17, STONE, Enum.Material.Concrete)
-	box(m, "PoolPodiumEast", 265, 348, 54, Y6 - 3, -112, -17, STONE, Enum.Material.Concrete)
+	box(m, "PoolPodium", 232, 265, YL, Y6 - 3, -112, -17, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
+	box(m, "PoolPodiumEast", 265, 348, 54, Y6 - 3, -112, -17, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
 	box(m, "PodiumGlass", 348, 348.3, YL + 2, YL + 16, -104, -24, GLASS, Enum.Material.SmoothPlastic, deco({ Reflectance = 0.25 }))
 	for y = YL + 26, Y6 - 12, 12 do
 		box(m, "PodiumWindows", 348, 348.2, y, y + 5, -104, -24, DARKGLASS, Enum.Material.SmoothPlastic, deco({ Reflectance = 0.15 }))
 	end
+	for b = -104, -24, 10 do
+		box(m, "Pilaster", 348, 348.7, YL, Y6 - 3, b - 1.3, b + 1.3, STONE_T, Enum.Material.Limestone, deco({ MaterialVariant = STONE_V }))
+	end
+	box(m, "PodiumLedge", 348, 349, YL + 17, YL + 18.2, -112, -17, STONE_T, Enum.Material.Limestone, deco({ MaterialVariant = STONE_V }))
+	box(m, "PodiumCornice", 348, 348.8, Y6 - 4.2, Y6 - 3, -112, -17, STONE_T, Enum.Material.Limestone, deco({ MaterialVariant = STONE_V }))
 	-- the south strip past the lot plate stands on the ground (retaining side of the car park)
 	box(m, "SouthSkirt", 62, 348, 53, Y6 - 3, -17, -6, STONE_D, Enum.Material.Concrete)
 	-- front block above the lobby, notched round the lift shaft (217.4..225, -125.6..-118)
-	box(m, "FrontBlock", 227, 300, YC, Y6, -222, -112, STONE, Enum.Material.Concrete)
-	box(m, "FrontBlockW", 215, 227, YC, Y6, -222, -125.6, STONE, Enum.Material.Concrete)
-	box(m, "FrontBlockS", 215, 227, YC, Y6, -118, -112, STONE, Enum.Material.Concrete)
-	box(m, "FrontBlockLift", 225, 227, YC, Y6, -125.6, -118, STONE, Enum.Material.Concrete)
-	box(m, "FrontRoofFill", 215, 217.4, YC, Y6, -125.6, -118, STONE, Enum.Material.Concrete)
+	box(m, "FrontBlock", 227, 300, YC, Y6, -222, -112, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
+	box(m, "FrontBlockW", 215, 227, YC, Y6, -222, -125.6, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
+	box(m, "FrontBlockS", 215, 227, YC, Y6, -118, -112, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
+	box(m, "FrontBlockLift", 225, 227, YC, Y6, -125.6, -118, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
+	box(m, "FrontRoofFill", 215, 217.4, YC, Y6, -125.6, -118, STONE_T, Enum.Material.Limestone, { MaterialVariant = STONE_V })
 	-- its glass wall to Pyay Road (three floors of glass with bronze fins), the parapet with the name
 	box(m, "FrontGlass", 300, 300.3, YC + 3, Y6 - 6.5, -216, -128, GLASS, Enum.Material.SmoothPlastic, deco({ Reflectance = 0.3 }))
 	for b = -216, -128, 8 do
@@ -260,26 +273,92 @@ local function carPark(root: Instance)
 	for _, b in { -180, -122, -64 } do
 		for a = 100, 240, 70 do
 			local l = box(c, "Light", a - 6, a + 6, YL - 1.25, YL - 1.05, b - 0.4, b + 0.4, Color3.fromRGB(240, 246, 255), Enum.Material.Neon, deco())
-			lamp(l, 46, 1.1, Color3.fromRGB(236, 242, 255))
+			lamp(l, 64, 2.2, Color3.fromRGB(236, 242, 255))
 		end
 	end
+	-- extra strips without their own light, a blue and yellow band round the walls, EXIT over the gate inside
+	for _, b in { -208, -151, -93, -35 } do
+		for a = 100, 240, 70 do
+			box(c, "LightStrip", a - 6, a + 6, YL - 1.25, YL - 1.05, b - 0.4, b + 0.4, Color3.fromRGB(240, 246, 255), Enum.Material.Neon, deco())
+		end
+	end
+	local BAND = Color3.fromRGB(28, 78, 160)
+	box(c, "Band", 65, 150, YP + 2.6, YP + 4.2, -221, -220.9, BAND, Enum.Material.SmoothPlastic, deco())
+	box(c, "Band", 190, 264, YP + 2.6, YP + 4.2, -221, -220.9, BAND, Enum.Material.SmoothPlastic, deco())
+	box(c, "Band", 65, 264, YP + 2.6, YP + 4.2, -18.1, -18, BAND, Enum.Material.SmoothPlastic, deco())
+	box(c, "Band", 65, 65.1, YP + 2.6, YP + 4.2, -221, -18, BAND, Enum.Material.SmoothPlastic, deco())
+	box(c, "Band", 263.9, 264, YP + 2.6, YP + 4.2, -221, -18, BAND, Enum.Material.SmoothPlastic, deco())
+	local exit = box(c, "ExitSign", 162, 178, YL - 2.6, YL - 1.2, -220.9, -220.75, Color3.fromRGB(24, 120, 60), Enum.Material.Neon, deco())
+	text(exit, Enum.NormalId.Back, "EXIT", WHITE, 30, Enum.Font.GothamBold, 0)
 	local sg = box(c, "LiftSign", SA1 + 0.3, SA1 + 0.4, YP + 6.9, YP + 7.9, SB0 - 2, SB1 + 2, BLUE, Enum.Material.SmoothPlastic, deco())
 	text(sg, Enum.NormalId.Right, "LIFT   LOBBY · POOL", WHITE, 30, Enum.Font.GothamBold, 0.2)
 end
 
 ---------------------------------------------------------------- lobby (from the official photos)
+-- a ready-made piece from ServerStorage.VenueKit (cleaned Creator Store models saved in the place: pivot at the bottom
+-- middle, facing -Z); `paint` may recolour each part
+local function kitPiece(parent: Instance, name: string, a: number, y: number, b: number, yaw: number, scale: number?, paint: ((BasePart) -> ())?): Model?
+	local vk = game:GetService("ServerStorage"):FindFirstChild("VenueKit")
+	local src = vk and vk:FindFirstChild(name)
+	if not (src and src:IsA("Model")) then
+		return nil
+	end
+	local m = src:Clone()
+	if scale and scale ~= 1 then
+		m:ScaleTo(scale)
+	end
+	m:PivotTo(F * CFrame.new(a, y, b) * CFrame.Angles(0, math.rad(yaw), 0))
+	for _, d in m:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+			d.CastShadow = false
+			count += 1
+			if paint then
+				paint(d)
+			end
+		elseif d:IsA("LuaSourceContainer") then
+			d:Destroy()
+		end
+	end
+	m.Parent = parent
+	return m
+end
+-- the kit's modern chair in two colours (seat shell, legs stay dark)
+local function chairPaint(shell: Color3): (BasePart) -> ()
+	return function(p: BasePart)
+		-- the kit chair: a dark body (Plastic), a grey seat and two light cushions (Sand); small dark bits stay (legs)
+		if p.Material == Enum.Material.Sand then
+			p.Material = Enum.Material.Fabric
+			p.Color = if p.Color.R > 0.5 then shell:Lerp(Color3.new(1, 1, 1), 0.4) else shell
+		elseif p.Size.X * p.Size.Y * p.Size.Z > 6 then
+			p.Material = Enum.Material.Fabric
+			p.Color = shell
+		end
+	end
+end
+
 local function lobby(root: Instance)
 	local l = folder(root, "Lobby")
-	-- floor finish (cream marble) on the slab, timber in the lounge half
-	box(l, "Marble", 216, 299, YL, YL + 0.12, -221, -160, MARBLE, Enum.Material.SmoothPlastic, deco({ CanCollide = true, CanQuery = true }))
+	local WALL = Color3.fromRGB(255, 228, 176) -- (tints NovoOakLight: golden, as on the reception photo) -- honey timber, as on the reception photo
+	local CEIL = Color3.fromRGB(255, 232, 186)
+	local FLOOR = Color3.fromRGB(255, 238, 208) -- (tints NovoMarble)
+	local DARK = Color3.fromRGB(64, 46, 38) -- (warm dark brown: neutral darks turn navy under the cool ambient light)
+	-- floor finish (cream marble) on the slab, timber in the lounge half; both leave the lift shaft free
+	box(l, "Marble", 216, 299, YL, YL + 0.12, -221, -160, FLOOR, Enum.Material.CeramicTiles, deco({ CanCollide = true, CanQuery = true, MaterialVariant = MARBLE_V }))
 	box(l, "LoungeFloor", 227, 299, YL, YL + 0.12, -160, -113, TIMBER_D, Enum.Material.WoodPlanks, deco({ CanCollide = true, CanQuery = true }))
 	box(l, "LoungeFloor", 216, 227, YL, YL + 0.12, -160, -127, TIMBER_D, Enum.Material.WoodPlanks, deco({ CanCollide = true, CanQuery = true }))
-	-- walls: north, south, west (behind reception); east = glass with the entrance (b -200..-184)
-	box(l, "WallN", 215, 300, YL, YC, -222, -221, MARBLE, Enum.Material.SmoothPlastic)
-	box(l, "WallS", 227, 300, YL, YC, -113, -112, MARBLE, Enum.Material.SmoothPlastic)
-	box(l, "WallS", 215, 227, YL, YC, -116, -112, MARBLE, Enum.Material.SmoothPlastic)
-	box(l, "WallW", 215, 216, YL, YC, -221, SB0, MARBLE, Enum.Material.SmoothPlastic)
-	box(l, "WallW", 215, 217.4, YL, YC, SB1, -116, MARBLE, Enum.Material.SmoothPlastic)
+	-- walls in honey timber with a dark skirting; east = glass with the entrance (b -200..-184)
+	box(l, "WallN", 215, 300, YL, YC, -222, -221, WALL, Enum.Material.Wood, { MaterialVariant = OAK })
+	box(l, "WallS", 227, 300, YL, YC, -113, -112, WALL, Enum.Material.Wood, { MaterialVariant = OAK })
+	box(l, "WallS", 215, 227, YL, YC, -116, -112, WALL, Enum.Material.Wood, { MaterialVariant = OAK })
+	box(l, "WallW", 215, 216, YL, YC, -221, SB0, WALL, Enum.Material.Wood, { MaterialVariant = OAK })
+	box(l, "WallW", 215, 217.4, YL, YC, SB1, -116, WALL, Enum.Material.Wood, { MaterialVariant = OAK })
+	box(l, "Skirting", 216, 299.4, YL + 0.12, YL + 0.9, -221, -220.85, DARK, Enum.Material.SmoothPlastic, deco())
+	box(l, "Skirting", 227, 299.4, YL + 0.12, YL + 0.9, -113.15, -113, DARK, Enum.Material.SmoothPlastic, deco())
+	for a = 228, 292, 16 do -- timber joints on the long walls
+		box(l, "Joint", a - 0.1, a + 0.1, YL + 0.9, YC - 0.6, -221, -220.92, TIMBER_D, Enum.Material.SmoothPlastic, deco())
+		box(l, "Joint", a - 0.1, a + 0.1, YL + 0.9, YC - 0.6, -113.08, -113, TIMBER_D, Enum.Material.SmoothPlastic, deco())
+	end
 	local glass = { Transparency = 0.72 }
 	box(l, "GlassE", 299.5, 299.8, YL, YC, -221, -200, GLASS, Enum.Material.SmoothPlastic, glass)
 	box(l, "GlassE", 299.5, 299.8, YL, YC, -184, -113, GLASS, Enum.Material.SmoothPlastic, glass)
@@ -287,77 +366,122 @@ local function lobby(root: Instance)
 	for _, b in { -221, -200, -184, -160, -136, -113 } do
 		box(l, "Mullion", 299.4, 299.9, YL, YC, b - 0.25, b + 0.25, WHITE, Enum.Material.Metal, deco())
 	end
-	box(l, "DoorHead", 299.3, 300, YL + 9.6, YL + 10.4, -200, -184, WHITE, Enum.Material.Metal, deco())
-	box(l, "Mat", 290, 299, YL + 0.12, YL + 0.2, -198, -186, Color3.fromRGB(92, 64, 44), Enum.Material.Fabric, deco())
-	-- the security scanner by the door, and the two big dark pots
+	box(l, "Transom", 299.4, 299.9, YL + 10, YL + 10.4, -221, -113, WHITE, Enum.Material.Metal, deco())
+	box(l, "Mat", 289, 299, YL + 0.12, YL + 0.2, -199, -185, Color3.fromRGB(92, 64, 44), Enum.Material.Fabric, deco())
+	-- by the door: the security scanner, two palms in dark pots, a luggage cart
 	box(l, "Scanner", 292, 296, YL + 0.12, YL + 4.4, -182, -176, CHAR, Enum.Material.Metal)
-	for _, b in { -203, -181 } do
-		cyl(l, "Pot", 296.5, b, YL + 0.12, YL + 3.6, 3.4, Color3.fromRGB(40, 26, 20), Enum.Material.SmoothPlastic)
-		cyl(l, "PotPlant", 296.5, b, YL + 3.6, YL + 9, 0.5, Color3.fromRGB(70, 110, 50), Enum.Material.Grass, deco())
-		raw(l, "PotLeaves", Vector3.new(7, 4, 7), F * CFrame.new(296.5, YL + 10, b), Color3.fromRGB(62, 120, 52), Enum.Material.Grass, deco({ Shape = Enum.PartType.Ball }))
+	box(l, "ScannerBelt", 291.6, 296.4, YL + 2.2, YL + 2.5, -183.5, -174.5, DARK, Enum.Material.Rubber, deco())
+	for _, b in { -203.5, -180.5 } do
+		if not kitPiece(l, "PottedPalm", 296.2, YL + 0.12, b, 0, 1.7) then
+			cyl(l, "Pot", 296.5, b, YL + 0.12, YL + 3.6, 3.4, Color3.fromRGB(40, 26, 20), Enum.Material.SmoothPlastic)
+		end
 	end
-	-- timber ceiling soffit with the dark ring over the reception
-	box(l, "Ceiling", 227, 299.4, YC - 0.5, YC, -221, -113, Color3.fromRGB(214, 180, 128), Enum.Material.Wood, deco())
-	box(l, "Ceiling", 216, 227, YC - 0.5, YC, -221, -127, Color3.fromRGB(214, 180, 128), Enum.Material.Wood, deco())
-	cyl(l, "CeilingRing", 240, -192, YC - 1.3, YC - 0.5, 44, CHAR, Enum.Material.SmoothPlastic, deco())
-	cyl(l, "CeilingDisc", 240, -192, YC - 1.7, YC - 1.3, 39, Color3.fromRGB(230, 196, 140), Enum.Material.Wood, deco())
-	-- the reception wall: timber panels with tall dark glossy panels (sparkle lights) between
+	kitPiece(l, "LuggageCart", 286, YL + 0.12, -206, 200, 0.8)
+	-- timber ceiling with the dark ring over the reception, lit from inside the ring
+	box(l, "Ceiling", 227, 299.4, YC - 0.5, YC, -221, -113, CEIL, Enum.Material.Wood, deco({ MaterialVariant = OAK }))
+	box(l, "Ceiling", 216, 227, YC - 0.5, YC, -221, -127, CEIL, Enum.Material.Wood, deco({ MaterialVariant = OAK }))
+	cyl(l, "CeilingRing", 240, -192, YC - 1.6, YC - 0.5, 46, DARK, Enum.Material.SmoothPlastic, deco())
+	cyl(l, "CeilingDisc", 240, -192, YC - 1.75, YC - 1.6, 41, CEIL, Enum.Material.SmoothPlastic, deco())
+	local ringGlow = cyl(l, "RingGlow", 240, -192, YC - 1.8, YC - 1.75, 36, Color3.fromRGB(255, 232, 196), Enum.Material.SmoothPlastic, deco())
+	lamp(ringGlow, 60, 1.6)
+	-- the reception wall: timber with tall dark panels (sparkle lights), two free dark columns in front
 	for i = 0, 6 do
 		local b0 = -219 + i * 8.2
-		if i % 2 == 0 then
-			box(l, "TimberPanel", 216, 216.6, YL, YC - 1.8, b0, b0 + 8, TIMBER, Enum.Material.Wood, deco())
-		else
-			local p = box(l, "DarkPanel", 216, 216.5, YL, YC - 1.8, b0, b0 + 8, Color3.fromRGB(24, 24, 28), Enum.Material.SmoothPlastic, deco())
-			for k = 1, 7 do
-				local yy = YL + 2 + k * 2.3
-				local bb = b0 + 1.2 + ((k * 37) % 56) / 10
-				box(p, "Sparkle", 216.5, 216.56, yy, yy + 0.22, bb, bb + 0.22, Color3.fromRGB(255, 250, 235), Enum.Material.Neon, deco())
+		if i % 2 == 1 then
+			local p = box(l, "DarkPanel", 216, 216.5, YL, YC - 1.8, b0, b0 + 8, DARK, Enum.Material.SmoothPlastic, deco())
+			for k = 1, 8 do
+				local yy = YL + 1.6 + k * 2.2
+				local bb = b0 + 1 + ((k * 37) % 60) / 10
+				box(p, "Sparkle", 216.5, 216.56, yy, yy + 0.2, bb, bb + 0.2, Color3.fromRGB(255, 250, 235), Enum.Material.Neon, deco())
 			end
 		end
 	end
-	-- three desk pods: white tops, timber fronts
-	for _, b in { -205, -192, -179 } do
-		box(l, "Desk", 224, 228, YL + 0.12, YL + 3.6, b - 5, b + 5, WHITE, Enum.Material.SmoothPlastic)
-		box(l, "DeskFront", 228, 228.3, YL + 0.12, YL + 2.6, b - 4.6, b + 4.6, TIMBER, Enum.Material.Wood, deco())
-		box(l, "DeskTop", 223.8, 228.5, YL + 3.6, YL + 3.8, b - 5.2, b + 5.2, WHITE, Enum.Material.SmoothPlastic, deco())
+	for _, b in { -214, -170 } do
+		local col = box(l, "DarkColumn", 232, 234.4, YL + 0.12, YC - 0.5, b - 1.2, b + 1.2, DARK, Enum.Material.SmoothPlastic)
+		for k = 1, 8 do
+			local yy = YL + 1.6 + k * 2.2
+			box(col, "Sparkle", 234.4, 234.46, yy, yy + 0.2, b - 0.8 + ((k * 23) % 14) / 10, b - 0.6 + ((k * 23) % 14) / 10, Color3.fromRGB(255, 250, 235), Enum.Material.Neon, deco())
+		end
 	end
-	local sign = box(l, "DeskSign", 216.6, 216.7, YL + 9, YL + 12, -197, -187, WHITE, Enum.Material.SmoothPlastic, deco())
+	-- three desk pods: white tops, timber fronts, a warm strip at the foot, a screen each
+	for _, b in { -205, -192, -179 } do
+		box(l, "Desk", 224, 228, YL + 0.12, YL + 3.6, b - 4.4, b + 4.4, WHITE, Enum.Material.SmoothPlastic)
+		for _, s in { -1, 1 } do
+			cyl(l, "DeskEnd", 226, b + s * 4.4, YL + 0.12, YL + 3.6, 4, WHITE, Enum.Material.SmoothPlastic)
+		end
+		box(l, "DeskFront", 228, 228.25, YL + 0.5, YL + 2.8, b - 4.2, b + 4.2, WALL, Enum.Material.Wood, deco({ MaterialVariant = OAK }))
+		box(l, "DeskGlow", 228, 228.2, YL + 0.14, YL + 0.4, b - 4.2, b + 4.2, WARM, Enum.Material.Neon, deco())
+		box(l, "DeskTop", 223.7, 228.5, YL + 3.6, YL + 3.8, b - 5, b + 5, WHITE, Enum.Material.SmoothPlastic, deco())
+		box(l, "Screen", 225.2, 225.4, YL + 3.8, YL + 5, b - 0.9, b + 0.9, DARK, Enum.Material.SmoothPlastic, deco())
+	end
+	local sign = box(l, "DeskSign", 216.6, 216.7, YL + 13.5, YL + 16.5, -198, -186, WHITE, Enum.Material.SmoothPlastic, deco())
 	text(sign, Enum.NormalId.Right, "NOVOTEL", Color3.fromRGB(20, 40, 110), 30, Enum.Font.GothamMedium, 0.2)
-	-- the lounge in front of the desks: round dark rug, round black table, blue-grey tub chairs
-	cyl(l, "Rug", 258, -192, YL + 0.12, YL + 0.2, 22, Color3.fromRGB(52, 52, 60), Enum.Material.Fabric, deco())
-	cyl(l, "Table", 258, -192, YL + 0.2, YL + 1.5, 7, Color3.fromRGB(18, 18, 20), Enum.Material.SmoothPlastic)
+	-- branch pendants (warm globes) over the desks
+	for i, b in { -210, -200, -192, -184, -174 } do
+		local drop = 9 + (i % 3) * 1.6
+		raw(l, "Pendant", Vector3.new(0.9, 0.9, 0.9), F * CFrame.new(231, YC - 1.8 - drop, b), WARM, Enum.Material.Neon, deco({ Shape = Enum.PartType.Ball }))
+		box(l, "PendantRod", 230.96, 231.04, YC - 1.8 - drop + 0.4, YC - 1.75, b - 0.04, b + 0.04, DARK, Enum.Material.Metal, deco())
+	end
+	-- the lounge in front of the desks: round dark rug, round black table with an orchid, four blue tub chairs
+	cyl(l, "Rug", 258, -192, YL + 0.12, YL + 0.2, 24, Color3.fromRGB(70, 66, 64), Enum.Material.Fabric, deco())
+	cyl(l, "Table", 258, -192, YL + 0.2, YL + 1.5, 7, Color3.fromRGB(40, 32, 30), Enum.Material.SmoothPlastic)
+	cyl(l, "OrchidPot", 258, -192, YL + 1.5, YL + 2.1, 1, Color3.fromRGB(150, 130, 96), Enum.Material.Metal, deco())
+	box(l, "OrchidStem", 257.96, 258.04, YL + 2.1, YL + 3.7, -192.04, -191.96, Color3.fromRGB(70, 110, 50), Enum.Material.SmoothPlastic, deco())
+	raw(l, "Orchid", Vector3.new(0.9, 0.7, 0.9), F * CFrame.new(258, YL + 3.9, -192), Color3.fromRGB(214, 80, 150), Enum.Material.SmoothPlastic, deco({ Shape = Enum.PartType.Ball }))
 	for i = 0, 3 do
 		local ang = math.rad(45 + i * 90)
-		local a, b = 258 + math.cos(ang) * 8, -192 + math.sin(ang) * 8
-		cyl(l, "Chair", a, b, YL + 0.2, YL + 1.5, 3.6, Color3.fromRGB(96, 128, 172), Enum.Material.Fabric)
-		raw(l, "ChairBack", Vector3.new(0.6, 2.4, 3.4), F * CFrame.new(a + math.cos(ang) * 1.7, YL + 2.6, b + math.sin(ang) * 1.7) * CFrame.Angles(0, -ang, 0), Color3.fromRGB(96, 128, 172), Enum.Material.Fabric, deco())
-	end
-	-- branch pendants (warm globes) over the desks
-	for _, b in { -208, -192, -176 } do
-		local g = raw(l, "Pendant", Vector3.new(0.9, 0.9, 0.9), F * CFrame.new(232, YL + 12, b), WARM, Enum.Material.Neon, deco({ Shape = Enum.PartType.Ball }))
-		lamp(g, 26, 0.9)
-		box(l, "PendantRod", 231.95, 232.05, YL + 12.4, YC - 1.7, b - 0.05, b + 0.05, CHAR, Enum.Material.Metal, deco())
-	end
-	-- the lobby lounge (south half, timber floor): wire armchairs with turquoise cushions, purple rugs, sparkle balls,
-	-- the deli counter on the south wall
-	for i, pos in { { 250, -146 }, { 270, -146 }, { 250, -128 }, { 270, -128 } } do
-		box(l, "PurpleRug", pos[1] - 8, pos[1] + 8, YL + 0.12, YL + 0.18, pos[2] - 6, pos[2] + 6, Color3.fromRGB(96, 60, 150), Enum.Material.Fabric, deco())
-		cyl(l, "LowTable", pos[1], pos[2], YL + 0.18, YL + 1.4, 3.2, Color3.fromRGB(110, 40, 36), Enum.Material.Wood)
-		for _, s in { -1, 1 } do
-			box(l, "WireChair", pos[1] + s * 4.4 - 1.5, pos[1] + s * 4.4 + 1.5, YL + 0.18, YL + 2.6, pos[2] - 1.6, pos[2] + 1.6, Color3.fromRGB(40, 40, 44), Enum.Material.DiamondPlate)
-			box(l, "Cushion", pos[1] + s * 4.4 - 1.2, pos[1] + s * 4.4 + 1.2, YL + 1.3, YL + 1.8, pos[2] - 1.3, pos[2] + 1.3, Color3.fromRGB(70, 196, 206), Enum.Material.Fabric, deco())
+		local a, b = 258 + math.cos(ang) * 8.5, -192 + math.sin(ang) * 8.5
+		-- kit chairs face -Z: turn them to look at the table
+		local yaw = math.deg(math.atan2(math.cos(ang), math.sin(ang)))
+		if not kitPiece(l, "SuiteChair", a, YL + 0.2, b, yaw, 1.15, chairPaint(Color3.fromRGB(150, 180, 216))) then
+			cyl(l, "Chair", a, b, YL + 0.2, YL + 1.5, 3.6, Color3.fromRGB(150, 180, 216), Enum.Material.Fabric)
 		end
-		local ball = raw(l, "SparkleBall", Vector3.new(3.2, 3.2, 3.2), F * CFrame.new(pos[1], YC - 5 - (i % 2) * 2.5, pos[2]), Color3.fromRGB(255, 252, 240), Enum.Material.Neon, deco({ Shape = Enum.PartType.Ball, Transparency = 0.15 }))
-		lamp(ball, 30, 0.8)
 	end
-	box(l, "Deli", 262, 290, YL + 0.12, YL + 3.6, -119, -114.5, Color3.fromRGB(60, 44, 36), Enum.Material.Wood)
-	box(l, "DeliGlass", 264, 288, YL + 3.6, YL + 5.6, -118.6, -115, Color3.fromRGB(190, 220, 230), Enum.Material.SmoothPlastic, { Transparency = 0.6 })
-	local menu = box(l, "DeliBoard", 266, 286, YL + 8, YL + 12, -113.2, -113.05, CHAR, Enum.Material.SmoothPlastic, deco())
+	-- the lobby lounge (south half, timber floor): turquoise chairs round low tables on purple rugs, sparkle balls,
+	-- the deli counter on the south wall
+	for i, pos in { { 248, -146 }, { 272, -146 }, { 248, -127 }, { 272, -127 } } do
+		box(l, "PurpleRug", pos[1] - 8, pos[1] + 8, YL + 0.12, YL + 0.18, pos[2] - 6, pos[2] + 6, Color3.fromRGB(96, 60, 150), Enum.Material.Fabric, deco())
+		cyl(l, "LowTable", pos[1], pos[2], YL + 0.18, YL + 1.5, 3.4, Color3.fromRGB(110, 40, 36), Enum.Material.Wood)
+		for _, s in { -1, 1 } do
+			if not kitPiece(l, "SuiteChair", pos[1] + s * 5, YL + 0.18, pos[2], if s < 0 then -90 else 90, 1.1, chairPaint(Color3.fromRGB(70, 196, 206))) then
+				box(l, "Cushion", pos[1] + s * 5 - 1.2, pos[1] + s * 5 + 1.2, YL + 0.18, YL + 1.8, pos[2] - 1.3, pos[2] + 1.3, Color3.fromRGB(70, 196, 206), Enum.Material.Fabric)
+			end
+		end
+		for k, off in { { 0, 0, 3.4 }, { 2.6, 1.8, 2.2 }, { -2.2, -1.6, 1.6 } } do
+			raw(l, "SparkleBall", Vector3.new(off[3], off[3], off[3]), F * CFrame.new(pos[1] + off[1], YC - 5 - k * 1.7 - (i % 2), pos[2] + off[2]), Color3.fromRGB(255, 252, 240), Enum.Material.Neon, deco({ Shape = Enum.PartType.Ball, Transparency = 0.12 }))
+		end
+	end
+	box(l, "Deli", 258, 292, YL + 0.12, YL + 3.6, -119, -114.5, Color3.fromRGB(60, 44, 36), Enum.Material.Wood)
+	box(l, "DeliTop", 257.8, 292.2, YL + 3.6, YL + 3.8, -119.2, -114.3, Color3.fromRGB(32, 30, 30), Enum.Material.SmoothPlastic, deco())
+	box(l, "DeliGlass", 262, 280, YL + 3.8, YL + 5.8, -118.6, -115.2, Color3.fromRGB(190, 220, 230), Enum.Material.SmoothPlastic, { Transparency = 0.6 })
+	for a = 264, 278, 3.5 do
+		box(l, "Pastry", a, a + 1.6, YL + 3.82, YL + 4.3, -117.6, -116.2, Color3.fromRGB(214, 160, 90), Enum.Material.SmoothPlastic, deco())
+	end
+	local menu = box(l, "DeliBoard", 262, 290, YL + 8, YL + 12, -113.25, -113.1, CHAR, Enum.Material.SmoothPlastic, deco())
 	text(menu, Enum.NormalId.Front, "GOURMET BAR", WHITE, 24, Enum.Font.GothamMedium, 0.3)
-	for b = -216, -120, 24 do
-		local d = box(l, "Downlight", 280, 281, YC - 0.56, YC - 0.5, b, b + 1, WARM, Enum.Material.Neon, deco())
-		lamp(d, 36, 0.7)
+	for _, a in { 232, 296 } do
+		if not kitPiece(l, "SuitePlant", a, YL + 0.12, -116.5, 0, 1.4) then
+			cyl(l, "Planter", a, -116.5, YL + 0.12, YL + 3, 2.4, DARK, Enum.Material.SmoothPlastic)
+		end
 	end
+	-- warm light: ceiling spots as lit squares, and six hidden lights at mid height so walls and ceiling catch them
+	for _, p in { { 262, -206 }, { 288, -192 }, { 262, -172 }, { 244, -138 }, { 276, -138 } } do
+		box(l, "Downlight", p[1] - 0.8, p[1] + 0.8, YC - 0.56, YC - 0.5, p[2] - 0.8, p[2] + 0.8, WARM, Enum.Material.Neon, deco())
+	end
+	for _, p in { { 250, -206 }, { 284, -206 }, { 268, -178 }, { 240, -146 }, { 268, -134 }, { 290, -150 } } do
+		local src = box(l, "LightSource", p[1] - 0.2, p[1] + 0.2, YL + 11.8, YL + 12.2, p[2] - 0.2, p[2] + 0.2, WARM, Enum.Material.Neon, deco({ Transparency = 1 }))
+		lamp(src, 60, 3.6)
+	end
+	-- a timber slat screen between the reception hall and the lounge, a sofa group by the glass
+	for a = 236, 260, 2 do
+		box(l, "Slat", a, a + 0.9, YL + 0.12, YL + 15, -160.4, -159.6, WALL, Enum.Material.Wood, { MaterialVariant = OAK })
+	end
+	box(l, "SlatHead", 235.6, 261.3, YL + 15, YL + 15.6, -160.6, -159.4, TIMBER_D, Enum.Material.WoodPlanks, deco())
+	kitPiece(l, "SuiteSofa", 284, YL + 0.12, -170, 180, 0.85, function(p: BasePart)
+		p.Color = Color3.fromRGB(196, 204, 216)
+		p.Material = Enum.Material.Fabric
+	end)
+	kitPiece(l, "SuiteFig", 270, YL + 0.12, -164, 0, 1.3)
 end
 
 ---------------------------------------------------------------- forecourt and porte-cochere
@@ -418,14 +542,14 @@ local function poolDeck(root: Instance)
 	local d = folder(root, "PoolDeck")
 	local y0, y1 = Y6 - 3, Y6
 	-- deck round the pool (main a 244..340, b -78..-52; shallow wing a 244..290, b -52..-34)
-	box(d, "DeckN", 232, 348, y0, y1, -112, -78, DECK, Enum.Material.WoodPlanks)
-	box(d, "DeckS", 232, 348, y0, y1, -34, -17, TERRA, Enum.Material.Brick)
-	box(d, "DeckS2", 232, 348, y0, y1, -17, -6, TERRA, Enum.Material.Brick)
-	box(d, "DeckW", 232, 244, y0, y1, -78, -34, DECK, Enum.Material.WoodPlanks)
-	box(d, "DeckE", 340, 348, y0, y1, -78, -52, TERRA, Enum.Material.Brick)
-	box(d, "DeckSE", 290, 348, y0, y1, -52, -34, TERRA, Enum.Material.Brick)
-	box(d, "PoolFloor", 244, 340, y0, y0 + 0.2, -78, -52, TILE, Enum.Material.SmoothPlastic)
-	box(d, "PoolFloor", 244, 290, y0, y0 + 0.2, -52, -34, TILE, Enum.Material.SmoothPlastic)
+	box(d, "DeckN", 232, 348, y0, y1, -112, -78, Color3.fromRGB(230, 214, 200), Enum.Material.WoodPlanks, { MaterialVariant = DECK_V })
+	box(d, "DeckS", 232, 348, y0, y1, -34, -17, Color3.fromRGB(236, 214, 204), Enum.Material.Brick, { MaterialVariant = PAVER_V })
+	box(d, "DeckS2", 232, 348, y0, y1, -17, -6, Color3.fromRGB(236, 214, 204), Enum.Material.Brick, { MaterialVariant = PAVER_V })
+	box(d, "DeckW", 232, 244, y0, y1, -78, -34, Color3.fromRGB(230, 214, 200), Enum.Material.WoodPlanks, { MaterialVariant = DECK_V })
+	box(d, "DeckE", 340, 348, y0, y1, -78, -52, Color3.fromRGB(236, 214, 204), Enum.Material.Brick, { MaterialVariant = PAVER_V })
+	box(d, "DeckSE", 290, 348, y0, y1, -52, -34, Color3.fromRGB(236, 214, 204), Enum.Material.Brick, { MaterialVariant = PAVER_V })
+	box(d, "PoolFloor", 244, 340, y0, y0 + 0.2, -78, -52, Color3.fromRGB(226, 246, 248), Enum.Material.CeramicTiles, { MaterialVariant = POOL_V })
+	box(d, "PoolFloor", 244, 290, y0, y0 + 0.2, -52, -34, Color3.fromRGB(226, 246, 248), Enum.Material.CeramicTiles, { MaterialVariant = POOL_V })
 	local water = { Transparency = 0.45, Reflectance = 0.25, CanCollide = false, CanTouch = false }
 	box(d, "Water", 244, 340, y0 + 0.2, y1 - 0.4, -78, -52, WATER, Enum.Material.Glass, water)
 	box(d, "Water", 244, 290, y0 + 0.2, y1 - 0.4, -51.95, -34, WATER, Enum.Material.Glass, water)
@@ -441,15 +565,39 @@ local function poolDeck(root: Instance)
 		box(d, "Planter", a, a + 12, y1, y1 + 1.6, -110.5, -107.5, Color3.fromRGB(96, 100, 104), Enum.Material.Concrete)
 		box(d, "Hedge", a + 0.3, a + 11.7, y1 + 1.6, y1 + 3.4, -110.2, -107.8, Color3.fromRGB(58, 112, 50), Enum.Material.Grass, deco())
 	end
-	-- loungers (blue on black frames) and blue umbrellas on the timber side
-	for a = 250, 334, 12 do
-		box(d, "Lounger", a, a + 2.6, y1 + 0.5, y1 + 0.9, -90, -83, CHAR, Enum.Material.Fabric)
-		box(d, "LoungerPad", a + 0.15, a + 2.45, y1 + 0.9, y1 + 1.2, -89.8, -83.2, BLUE, Enum.Material.Fabric, deco())
-		raw(d, "LoungerBack", Vector3.new(2.3, 0.3, 2.6), F * CFrame.new(a + 1.3, y1 + 1.9, -90.6) * CFrame.Angles(math.rad(-50), 0, 0), BLUE, Enum.Material.Fabric, deco())
+	-- loungers (blue pads on dark frames) along both long sides, square blue umbrellas, palms in planters
+	local function lounger(a: number, b0: number, dir: number)
+		-- dir +1: head toward -b (north side, feet to the pool); -1: the other way
+		local b1 = b0 + 7
+		box(d, "Lounger", a, a + 2.6, y1 + 0.5, y1 + 0.9, b0, b1, CHAR, Enum.Material.Fabric)
+		box(d, "LoungerPad", a + 0.15, a + 2.45, y1 + 0.9, y1 + 1.2, b0 + 0.2, b1 - 0.2, BLUE, Enum.Material.Fabric, deco())
+		local head = if dir > 0 then b0 - 0.4 else b1 + 0.4
+		raw(d, "LoungerBack", Vector3.new(2.3, 0.3, 2.8), F * CFrame.new(a + 1.3, y1 + 1.9, head) * CFrame.Angles(math.rad(-48 * dir), 0, 0), BLUE, Enum.Material.Fabric, deco())
+		for _, la in { a + 0.2, a + 2.2 } do
+			box(d, "LoungerLeg", la, la + 0.2, y1, y1 + 0.5, b0 + 0.6, b0 + 0.8, CHAR, Enum.Material.Metal, deco())
+			box(d, "LoungerLeg", la, la + 0.2, y1, y1 + 0.5, b1 - 0.8, b1 - 0.6, CHAR, Enum.Material.Metal, deco())
+		end
 	end
-	for a = 256, 328, 24 do
-		cyl(d, "UmbrellaPole", a + 7, -93, y1, y1 + 8.4, 0.3, Color3.fromRGB(200, 200, 204), Enum.Material.Metal, deco({ CanCollide = true }))
-		cyl(d, "Umbrella", a + 7, -93, y1 + 8.4, y1 + 8.9, 11, BLUE, Enum.Material.Fabric, deco())
+	local function umbrella(a: number, b: number)
+		cyl(d, "UmbrellaPole", a, b, y1, y1 + 8.6, 0.3, Color3.fromRGB(200, 200, 204), Enum.Material.Metal, deco({ CanCollide = true }))
+		box(d, "Umbrella", a - 5, a + 5, y1 + 7.6, y1 + 7.9, b - 5, b + 5, BLUE, Enum.Material.Fabric, deco())
+		box(d, "UmbrellaMid", a - 3.2, a + 3.2, y1 + 7.9, y1 + 8.5, b - 3.2, b + 3.2, BLUE, Enum.Material.Fabric, deco())
+		box(d, "UmbrellaTop", a - 1.2, a + 1.2, y1 + 8.5, y1 + 9, b - 1.2, b + 1.2, BLUE, Enum.Material.Fabric, deco())
+		box(d, "UmbrellaTrim", a - 5.05, a + 5.05, y1 + 7.5, y1 + 7.6, b - 5.05, b + 5.05, WHITE, Enum.Material.Fabric, deco())
+	end
+	for a = 250, 334, 12 do
+		lounger(a, -90, 1)
+		lounger(a + 4, -90, 1)
+	end
+	for a = 296, 332, 12 do
+		lounger(a, -48, -1)
+	end
+	for a = 259, 331, 24 do
+		umbrella(a + 3.3, -94)
+	end
+	for _, pos in { { 247, -100 }, { 294, -104 }, { 342, -100 }, { 342, -40 } } do
+		box(d, "PalmPlanter", pos[1] - 2.2, pos[1] + 2.2, y1, y1 + 2.2, pos[2] - 2.2, pos[2] + 2.2, Color3.fromRGB(96, 100, 104), Enum.Material.Concrete)
+		kitPiece(d, "PottedPalm", pos[1], y1 + 2.2, pos[2], 0, 2.2)
 	end
 	-- two striped cabanas on the terracotta side
 	for _, a in { 300, 322 } do
@@ -680,6 +828,9 @@ function M.build(parent: Instance?): string
 	mark("Route1", 318, YL - 1.5, -150, 0, 1) -- the valet's way off the court
 	mark("Route2", 346, YL - 3.2, -124, 1, 0)
 	mark("CarParkGate", 170, YP, -226, 0, -1)
+	mark("Desk1", 222, YL + 0.12, -205, 1, 0) -- a receptionist stands here, facing the hall
+	mark("Desk2", 222, YL + 0.12, -192, 1, 0) -- a receptionist stands here, facing the hall
+	mark("Desk3", 222, YL + 0.12, -179, 1, 0) -- a receptionist stands here, facing the hall
 	mark("SuiteFrame", 150, YL, -120, 1, 0) -- the suite floors' frame (they stand high above the hotel)
 	root.Parent = parent or workspace.Yangon1to1.Landmarks
 	return string.format("%s built: %d parts in %s", NAME, count, root.Parent:GetFullName())

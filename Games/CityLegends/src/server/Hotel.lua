@@ -1164,6 +1164,14 @@ local function buildReal(kit: any, parent: Instance, lm: Instance): boolean
 	end)
 	local valet: Look = { jacket = NAVY, legs = Color3.fromRGB(20, 20, 24), skin = Color3.fromRGB(196, 150, 116), cap = true }
 	staff(kit, model, standCF * CFrame.new(0, 0, 2.6), valet, "Valet")
+	-- reception staff in the hotel's purple jackets (as on the lobby photo), one at each desk that has a marker
+	local desk: Look = { jacket = Color3.fromRGB(150, 40, 130), legs = Color3.fromRGB(24, 24, 30), skin = Color3.fromRGB(206, 160, 124), cap = false }
+	for i = 1, 3 do
+		local d = mark("Desk" .. i)
+		if d then
+			staff(kit, model, d, desk, "Reception")
+		end
+	end
 
 	-- the suite upgrades: a plinth per tier along the wall (the first buys the Skyline Suite, each next one upgrades)
 	local suites = H.Suites
