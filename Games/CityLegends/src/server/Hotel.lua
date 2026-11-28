@@ -1117,7 +1117,131 @@ local function build(kit: any, parent: Instance, frame: CFrame, lot: number)
 	}
 end
 
+-- (2026-11-28, owner: the Novotel "is in the wrong position ... the real one has an underground car park, a lobby")
+-- The real Novotel Yangon Max stands in Workspace.Yangon1to1.Landmarks.NovotelYangonMax (tools/yangon/Novotel.luau:
+-- lobby, forecourt, car park, pool deck, court; no rooms). With it in the place no building is made here: only the
+-- venue's working pieces at the model's Markers (LookVector = the way a piece faces), and the four suite floors, which
+-- stand SUITE_SKY above the hotel (out of sight from the street: the real hotel has 12 floors, the suites would
+-- double it; the lobby's SUITES lift takes owners up as before).
+local SUITE_SKY = 1400
+local function realModel(): Instance?
+	local map = workspace:FindFirstChild("Yangon1to1")
+	local lms = map and map:FindFirstChild("Landmarks")
+	local lm = lms and lms:FindFirstChild("NovotelYangonMax")
+	return if lm and lm:FindFirstChild("Markers") then lm else nil
+end
+
+local function buildReal(kit: any, parent: Instance, lm: Instance): boolean
+	local marks = lm:FindFirstChild("Markers") :: Instance
+	local function mark(name: string): CFrame?
+		local p = marks:FindFirstChild(name)
+		return if p and p:IsA("BasePart") then p.CFrame else nil
+	end
+	local bayCF, entranceCF, standCF, galleryCF = mark("ValetBay"), mark("Entrance"), mark("ValetStand"), mark("SuiteGallery")
+	local liftCF, boardCF, stopCF, suiteCF = mark("SuiteLift"), mark("Board"), mark("LobbyStop"), mark("SuiteFrame")
+	local r1, r2 = mark("Route1"), mark("Route2")
+	if not (bayCF and entranceCF and standCF and galleryCF and liftCF and boardCF and stopCF and suiteCF and r1 and r2) then
+		return false
+	end
+	local mk, deco = kit.mk, kit.deco
+	local model = Instance.new("Model")
+	model.Name = "NovotelVenue"
+	model.Parent = parent
+	local NAVY = Color3.fromRGB(20, 40, 110)
+	local WHITE = Color3.fromRGB(240, 240, 236)
+
+	-- the valet bay under the canopy (HotelClient shows VALET while your car stands in it) and the stand by the doors
+	local bay = deco(model, Vector3.new(18, 5, 26), bayCF * CFrame.new(0, 2, 0), Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, { transparency = 1, name = "ValetBay" })
+	CollectionService:AddTag(bay, "HotelValetBay")
+	mk(model, Vector3.new(4, 4.2, 2.4), standCF * CFrame.new(0, 2.1, 0), WALNUT, Enum.Material.Wood)
+	local standTop = deco(model, Vector3.new(4.4, 0.3, 2.8), standCF * CFrame.new(0, 4.35, 0), WHITE, Enum.Material.SmoothPlastic, { name = "ValetStand" })
+	local standSign = deco(model, Vector3.new(4, 1.2, 0.2), standCF * CFrame.new(0, 3, -1.3), NAVY, Enum.Material.SmoothPlastic)
+	kit.surfaceText(standSign, Enum.NormalId.Front, "VALET", WHITE, nil, nil, Enum.Font.GothamBold, Vector2.new(300, 90))
+	local getCar = prompt(standTop, "Get my car", "Valet", Enum.KeyCode.E, 0.4, 12)
+	CollectionService:AddTag(getCar, "HotelValetStand")
+	getCar.Triggered:Connect(function(player: Player)
+		Hotel.retrieve(player)
+	end)
+	local valet: Look = { jacket = NAVY, legs = Color3.fromRGB(20, 20, 24), skin = Color3.fromRGB(196, 150, 116), cap = true }
+	staff(kit, model, standCF * CFrame.new(0, 0, 2.6), valet, "Valet")
+
+	-- the suite upgrades: a plinth per tier along the wall (the first buys the Skyline Suite, each next one upgrades)
+	local suites = H.Suites
+	for k, s in suites do
+		local at = galleryCF * CFrame.new(-(k - 1) * 10, 0, 0)
+		mk(model, Vector3.new(4, 4, 4), at * CFrame.new(0, 2, 0), CHARCOAL, Enum.Material.SmoothPlastic)
+		deco(model, Vector3.new(4.2, 0.2, 4.2), at * CFrame.new(0, 4.1, 0), WHITE, Enum.Material.SmoothPlastic)
+		local mini = deco(model, Vector3.new(1.6, 2 + k * 0.8, 1.6), at * CFrame.new(0, 5.2 + k * 0.4, 0), Color3.fromRGB(60, 90, 130), Enum.Material.SmoothPlastic)
+		local cost = upgradeCost(k)
+		local card = deco(model, Vector3.new(3.6, 3.2, 0.2), at * CFrame.new(0, 2, -2.12), BLACK, Enum.Material.SmoothPlastic)
+		kit.surfaceText(card, Enum.NormalId.Front, s.name .. "\n" .. money(cost) .. "\n" .. money(s.perMinute) .. " / MIN\n" .. s.adds, WHITE, nil, nil, Enum.Font.GothamMedium, Vector2.new(300, 260))
+		local buy = prompt(mini, if k == 1 then "Buy suite" else "Upgrade", titleCase(s.name) .. "  " .. money(cost), Enum.KeyCode.E, 1.5, 9)
+		CollectionService:AddTag(buy, "HotelTier") -- (HotelClient words it for this player)
+		buy:SetAttribute("Tier", k)
+		buy.Triggered:Connect(function(player: Player)
+			Hotel.upgrade(player, k)
+		end)
+	end
+	-- the residents' board over the plinths, the suites' lift door beside them
+	local boardPart = deco(model, Vector3.new(44, 9, 0.3), boardCF * CFrame.new(0, 0, -0.2), BLACK, Enum.Material.SmoothPlastic)
+	local _, _, boardLabel = kit.surfaceText(boardPart, Enum.NormalId.Front, "", WHITE, nil, nil, Enum.Font.GothamMedium, Vector2.new(1200, 245))
+	for _, sx in { -1, 1 } do
+		deco(model, Vector3.new(3.6, 10, 0.3), liftCF * CFrame.new(sx * 1.85, 5, -0.2), Color3.fromRGB(150, 154, 160), Enum.Material.Metal)
+	end
+	deco(model, Vector3.new(0.1, 10, 0.32), liftCF * CFrame.new(0, 5, -0.22), BLACK, Enum.Material.SmoothPlastic)
+	local plate = deco(model, Vector3.new(7.6, 1.6, 0.2), liftCF * CFrame.new(0, 11.2, -0.15), NAVY, Enum.Material.SmoothPlastic)
+	kit.surfaceText(plate, Enum.NormalId.Front, "SUITES", WHITE, nil, nil, Enum.Font.GothamMedium, Vector2.new(400, 84))
+	local panel = deco(model, Vector3.new(1, 2.4, 0.3), liftCF * CFrame.new(-5, 4.6, -0.2), CHARCOAL, Enum.Material.Metal)
+	local up = prompt(panel, "Up to my suite", "Elevator", Enum.KeyCode.E, 0, 10)
+	CollectionService:AddTag(up, "HotelSuiteLift") -- (HotelClient words it for this player)
+	up.Triggered:Connect(function(player: Player)
+		Hotel.goUp(player)
+	end)
+
+	-- the suite floors (Towers.suite), high above the hotel
+	for k, s in suites do
+		local spec = {
+			id = s.id,
+			name = s.name,
+			block = { -1, -1 },
+			height = 0,
+			price = s.price,
+			rent = 0,
+			accent = GOLD,
+			perMinute = s.perMinute,
+			levelName = titleCase(s.name),
+		}
+		local yP = SUITE_SKY + (k - 1) * SUITE_STEP
+		local stops = Towers.suite(kit, model, spec, { frame = suiteCF, yP = yP, roof = k == #suites, tier = k, kitFurniture = suiteKit() })
+		stops.lobby = stopCF
+		dressSuite(kit, model, suiteCF, yP, k)
+	end
+
+	site = {
+		frame = entranceCF,
+		bay = bayCF.Position,
+		bayCF = bayCF,
+		entrance = entranceCF * CFrame.new(0, 3.2, 0),
+		garage = { r1.Position, r2.Position },
+		board = boardLabel,
+	}
+	return true
+end
+
 function Hotel.buildWorld(kit: any, parent: Instance)
+	local lm = realModel()
+	if lm then
+		local ok, res = pcall(buildReal, kit, parent, lm)
+		if ok and res then
+			return
+		end
+		warn("[CityLegends] Novotel (real building) venue build failed:", res)
+		local half = parent:FindFirstChild("NovotelVenue")
+		if half then
+			half:Destroy()
+		end
+		return -- (never the old hotel on top of the real one)
+	end
 	local frame, lot = WestLayout.site("hotel")
 	local ok, err = pcall(build, kit, parent, frame, lot)
 	if not ok then

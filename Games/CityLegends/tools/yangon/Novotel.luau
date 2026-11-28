@@ -271,7 +271,7 @@ end
 local function lobby(root: Instance)
 	local l = folder(root, "Lobby")
 	-- floor finish (cream marble) on the slab, timber in the lounge half
-	box(l, "Marble", 216, 299, YL, YL + 0.12, -221, -160, MARBLE, Enum.Material.SmoothPlastic, deco({ CanCollide = true, CanQuery = true, Reflectance = 0.12 }))
+	box(l, "Marble", 216, 299, YL, YL + 0.12, -221, -160, MARBLE, Enum.Material.SmoothPlastic, deco({ CanCollide = true, CanQuery = true }))
 	box(l, "LoungeFloor", 227, 299, YL, YL + 0.12, -160, -113, TIMBER_D, Enum.Material.WoodPlanks, deco({ CanCollide = true, CanQuery = true }))
 	box(l, "LoungeFloor", 216, 227, YL, YL + 0.12, -160, -127, TIMBER_D, Enum.Material.WoodPlanks, deco({ CanCollide = true, CanQuery = true }))
 	-- walls: north, south, west (behind reception); east = glass with the entrance (b -200..-184)
@@ -280,7 +280,7 @@ local function lobby(root: Instance)
 	box(l, "WallS", 215, 227, YL, YC, -116, -112, MARBLE, Enum.Material.SmoothPlastic)
 	box(l, "WallW", 215, 216, YL, YC, -221, SB0, MARBLE, Enum.Material.SmoothPlastic)
 	box(l, "WallW", 215, 217.4, YL, YC, SB1, -116, MARBLE, Enum.Material.SmoothPlastic)
-	local glass = { Transparency = 0.72, Reflectance = 0.2 }
+	local glass = { Transparency = 0.72 }
 	box(l, "GlassE", 299.5, 299.8, YL, YC, -221, -200, GLASS, Enum.Material.SmoothPlastic, glass)
 	box(l, "GlassE", 299.5, 299.8, YL, YC, -184, -113, GLASS, Enum.Material.SmoothPlastic, glass)
 	box(l, "GlassHead", 299.5, 299.8, YL + 10, YC, -200, -184, GLASS, Enum.Material.SmoothPlastic, glass)
@@ -292,14 +292,14 @@ local function lobby(root: Instance)
 	-- the security scanner by the door, and the two big dark pots
 	box(l, "Scanner", 292, 296, YL + 0.12, YL + 4.4, -182, -176, CHAR, Enum.Material.Metal)
 	for _, b in { -203, -181 } do
-		cyl(l, "Pot", 296.5, b, YL + 0.12, YL + 3.6, 3.4, Color3.fromRGB(40, 26, 20), Enum.Material.SmoothPlastic, { Reflectance = 0.25 })
+		cyl(l, "Pot", 296.5, b, YL + 0.12, YL + 3.6, 3.4, Color3.fromRGB(40, 26, 20), Enum.Material.SmoothPlastic)
 		cyl(l, "PotPlant", 296.5, b, YL + 3.6, YL + 9, 0.5, Color3.fromRGB(70, 110, 50), Enum.Material.Grass, deco())
 		raw(l, "PotLeaves", Vector3.new(7, 4, 7), F * CFrame.new(296.5, YL + 10, b), Color3.fromRGB(62, 120, 52), Enum.Material.Grass, deco({ Shape = Enum.PartType.Ball }))
 	end
 	-- timber ceiling soffit with the dark ring over the reception
 	box(l, "Ceiling", 227, 299.4, YC - 0.5, YC, -221, -113, Color3.fromRGB(214, 180, 128), Enum.Material.Wood, deco())
 	box(l, "Ceiling", 216, 227, YC - 0.5, YC, -221, -127, Color3.fromRGB(214, 180, 128), Enum.Material.Wood, deco())
-	cyl(l, "CeilingRing", 240, -192, YC - 1.3, YC - 0.5, 44, CHAR, Enum.Material.SmoothPlastic, deco({ Reflectance = 0.3 }))
+	cyl(l, "CeilingRing", 240, -192, YC - 1.3, YC - 0.5, 44, CHAR, Enum.Material.SmoothPlastic, deco())
 	cyl(l, "CeilingDisc", 240, -192, YC - 1.7, YC - 1.3, 39, Color3.fromRGB(230, 196, 140), Enum.Material.Wood, deco())
 	-- the reception wall: timber panels with tall dark glossy panels (sparkle lights) between
 	for i = 0, 6 do
@@ -307,7 +307,7 @@ local function lobby(root: Instance)
 		if i % 2 == 0 then
 			box(l, "TimberPanel", 216, 216.6, YL, YC - 1.8, b0, b0 + 8, TIMBER, Enum.Material.Wood, deco())
 		else
-			local p = box(l, "DarkPanel", 216, 216.5, YL, YC - 1.8, b0, b0 + 8, Color3.fromRGB(24, 24, 28), Enum.Material.SmoothPlastic, deco({ Reflectance = 0.35 }))
+			local p = box(l, "DarkPanel", 216, 216.5, YL, YC - 1.8, b0, b0 + 8, Color3.fromRGB(24, 24, 28), Enum.Material.SmoothPlastic, deco())
 			for k = 1, 7 do
 				local yy = YL + 2 + k * 2.3
 				local bb = b0 + 1.2 + ((k * 37) % 56) / 10
@@ -325,7 +325,7 @@ local function lobby(root: Instance)
 	text(sign, Enum.NormalId.Right, "NOVOTEL", Color3.fromRGB(20, 40, 110), 30, Enum.Font.GothamMedium, 0.2)
 	-- the lounge in front of the desks: round dark rug, round black table, blue-grey tub chairs
 	cyl(l, "Rug", 258, -192, YL + 0.12, YL + 0.2, 22, Color3.fromRGB(52, 52, 60), Enum.Material.Fabric, deco())
-	cyl(l, "Table", 258, -192, YL + 0.2, YL + 1.5, 7, Color3.fromRGB(18, 18, 20), Enum.Material.SmoothPlastic, { Reflectance = 0.4 })
+	cyl(l, "Table", 258, -192, YL + 0.2, YL + 1.5, 7, Color3.fromRGB(18, 18, 20), Enum.Material.SmoothPlastic)
 	for i = 0, 3 do
 		local ang = math.rad(45 + i * 90)
 		local a, b = 258 + math.cos(ang) * 8, -192 + math.sin(ang) * 8
@@ -658,17 +658,29 @@ function M.build(parent: Instance?): string
 	task.wait()
 	court(root)
 	lift(root)
-	-- marker parts for the game's venue code (valet bay under the canopy, the door, the board)
+	-- marker parts for the game's venue code (src/server/Hotel.lua, buildReal): LookVector = the way the piece faces
 	local marks = folder(root, "Markers")
-	for name, v in { ValetBay = { 318, YL - 1.1, -192 }, Entrance = { 304, YL, -192 }, Desk = { 232, YL, -192 }, CarParkGate = { 170, YP, -226 } } do
+	local function mark(name: string, a: number, y: number, b: number, da: number, db: number)
 		local p = Instance.new("Part")
 		p.Name = name
 		p.Anchored, p.CanCollide, p.CanQuery, p.CanTouch = true, false, false, false
 		p.Transparency = 1
 		p.Size = Vector3.new(1, 1, 1)
-		p.CFrame = F * CFrame.new(v[1], v[2], v[3])
+		local pos = F * Vector3.new(a, y, b)
+		p.CFrame = CFrame.lookAt(pos, pos + F:VectorToWorldSpace(Vector3.new(da, 0, db)))
 		p.Parent = marks
 	end
+	mark("ValetBay", 318, YL - 1.25, -192, 0, 1) -- on the paving under the canopy; cars leave to the south
+	mark("Entrance", 304, YL, -192, -1, 0) -- outside the doors, facing in
+	mark("ValetStand", 303.4, YL - 0.15, -180, 1, 0) -- by the doors, facing the court
+	mark("SuiteGallery", 244, YL + 0.12, -217.5, 0, 1) -- first plinth on the north wall; the next ones follow toward Pyay Road
+	mark("SuiteLift", 290, YL + 0.12, -221, 0, 1) -- the suites' lift door on the north wall
+	mark("Board", 262, YL + 14, -221, 0, 1) -- the residents' board over the plinths
+	mark("LobbyStop", 290, YL + 3.2, -214, 0, 1) -- where you arrive from your suite
+	mark("Route1", 318, YL - 1.5, -150, 0, 1) -- the valet's way off the court
+	mark("Route2", 346, YL - 3.2, -124, 1, 0)
+	mark("CarParkGate", 170, YP, -226, 0, -1)
+	mark("SuiteFrame", 150, YL, -120, 1, 0) -- the suite floors' frame (they stand high above the hotel)
 	root.Parent = parent or workspace.Yangon1to1.Landmarks
 	return string.format("%s built: %d parts in %s", NAME, count, root.Parent:GetFullName())
 end
