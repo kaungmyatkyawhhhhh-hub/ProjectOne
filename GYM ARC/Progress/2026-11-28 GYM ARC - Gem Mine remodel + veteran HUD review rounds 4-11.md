@@ -18,6 +18,7 @@ Follows [[2026-11-28 GYM ARC - Full-game review round 2 (Mythic aura, GUI, audio
 | R8 | 8.9 / 9.1 | 9.2 | 9.0 / 8.9 | 9.1 |
 | R9 (daytime) | 8.9 / 9.1 | **9.3** | **9.2 / 9.1** | **9.3** |
 | R10 | 8.9 / (not re-rated) | - | - | - |
+| R11 (frames 48,49,62) | **9.0** PASS, "freeze the Gem Mine" | - | - | - |
 
 - Gemini: everything 9+ ("nothing blocks 9+").
 - ChatGPT: HUD 9.3 ("freeze the design"); stage shot 9.1. Front shot still 8.9; its last two notes are the machine frames (done in R11, **not re-rated yet**: the Chrome review tabs closed) and the photographic ceiling texture (not done).
@@ -68,6 +69,6 @@ Follows [[2026-11-28 GYM ARC - Full-game review round 2 (Mythic aura, GUI, audio
 In the session folder `review_r7` / `review_r8` / `review_r9` (R7_gem_a/b, R8_gem_a/b + forge_back, R9_gem_a/b, R10/R11_gem_a).
 
 ## Next
-- Send R11_gem_a (frames lifted) to ChatGPT for the last 8.9 → 9 shot.
-- If it still asks: soften the ceiling's photographic terrain texture, and close the bright seams in the masonry joints (0.03-0.05 studs).
+- Done: every score is now 9+ on both reviewers.
+- Optional polish (ChatGPT: "could push toward 9.2"): soften the ceiling's photographic terrain texture by about 40%.
 - Not checked: phone sizes, night time after the mood change (the mood is the same at any hour, so it should hold), the cutscenes.
