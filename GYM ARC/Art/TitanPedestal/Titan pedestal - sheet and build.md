@@ -16,3 +16,5 @@ Replaces `Xmas.Yard.TitanPedestal` (18 parts). PREP ONLY: built and exported, NO
 
 ## Swap plan (after "go")
 Upload `TitanPedestal.glb`, scale to the old pedestal's footprint (radius) and height, keep the model name `TitanPedestal` and anything AdventService uses (it moves the Frost Titan statue; check the statue's stand height after the swap). Keep TitanSign.
+
+Swapped 28 Nov: Model **121613224912725** (pedestal moved to (80,-162) in the bigger yard). Old Base/Top/Step = invisible colliders.

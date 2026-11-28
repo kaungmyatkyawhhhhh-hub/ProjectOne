@@ -17,3 +17,5 @@ Replaces the Part-built frame of `Xmas.Yard.LiftRig` (~136 parts: posts, beams, 
 
 ## Swap plan (after "go")
 Keep `rig.Pad` (MegaLiftClient uses Pad.Position for the ground wave; name the Pad MeshPart `Pad`), `rig.Cable`, `rig.Present`, the GiantCanes and every rig attribute (RiseHeight, CableTop). Fit the mesh to the old frame's posts/pad bounding box; check the pulley sits at CableTop.
+
+Swapped 28 Nov: Model **79991385849553**; Pad + Posts kept invisible (collision / MegaLift), SignBoard invisible with its SurfaceGui in front of the mesh sign. Rig moved to (-14,-172).

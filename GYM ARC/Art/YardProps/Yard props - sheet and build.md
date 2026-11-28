@@ -23,3 +23,6 @@ Replaces Fence posts + rails + bulbs (50 posts, 155 parts), Lamp posts (4, 8 par
 - Lamps: NightLamps finds the lamps by name; keep the model names and put the PointLight / anything NightLamps toggles onto the Glass MeshPart. Grep NightLamps before swapping.
 - Fence: StrongmanYard etc. reference `Fence`; keep the folder names. One mesh per post pair; fit each to the old post spacing.
 - Light strings: one mesh per span between hooks; the bulb count per span follows the old run length.
+
+## Low-poly pass + swap (28 Nov)
+Bulbs 5-sided (3 rings), wires 6-8 segments. Fence 250 tris -> **136174487561012** (79 sections, span ~5.5, round the expanded yard). Lamp 416 tris -> **138440086597146** (12 lamps). Light string now 4 bulbs per span, 220 tris -> **76886121186183** (90 spans of ~8 studs along the 8 old ceiling chains; Glow lights kept).

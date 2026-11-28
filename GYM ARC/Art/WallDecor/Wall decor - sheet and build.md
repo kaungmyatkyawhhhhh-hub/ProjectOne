@@ -22,3 +22,6 @@ Replaces Wreath (21 copies, 175 parts), Garland swag (74 copies, 740 parts), Pep
 
 ## Swap plan (after "go")
 Scale each copy to the old copy's bounding box with front facing out of the wall (old parts' LookVector). Wrapper: Transparency 0.25.
+
+## Low-poly rebuild + swap (28 Nov, owner low-poly rule)
+Wreath = one faceted torus (10 x 5, Pine/PineDark facets) + 20-tri baubles: 268 tris -> **72906414238969** (7 wreaths). Garland = one faceted sagging tube (8 x 5) + bigger bulbs: 410 tris -> **106693871043857** (68 swags, hung between the old bow pairs). Peppermint = 8 swirl wedges over 2 rings: 200 tris -> **133013461585821** (the 15 old "plates" were 3 floor stacks of 5 candies: placed flat, no wrapper, solid). Old clump script kept as `build_walldecor_clumps_old.py`. Backups `RemodelBackup.Makeover_*`.
