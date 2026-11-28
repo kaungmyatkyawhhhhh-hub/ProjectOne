@@ -6,7 +6,7 @@ created: 2026-11-28
 
 Owner (28 Nov): "Novotel Yangon Max is in the wrong position; the real one has an underground car park, a lobby and stuff". Then: "you dont need to build the rooms. just build the swimming pool area and car parking and hotel lobby", "also build the basketball court", "do it on the studio place i opened", "I give u access to do everything", "i will leave my pc overnight do what u have to do".
 
-**State: LIVE in the place, saved v2466, not published.** `Workspace.Yangon1to1.Landmarks.NovotelYangonMax` (about 1,150 parts), built by `Games/CityLegends/tools/yangon/Novotel.luau` (`ServerStorage.ClaudeTools.Novotel`). The old Monaco-style hotel is no longer built on the lot.
+**State: LIVE in the place, saved v2468 (last save of the night; Edit lighting put back), not published.** `Workspace.Yangon1to1.Landmarks.NovotelYangonMax` (about 1,150 parts), built by `Games/CityLegends/tools/yangon/Novotel.luau` (`ServerStorage.ClaudeTools.Novotel`). The old Monaco-style hotel is no longer built on the lot.
 
 ## What was wrong
 - The lot was already on the real spot (OSM way 471327865, 459 Pyay Road). The **building** was wrong: the old Monaco hotel on a 200 lot, facing the side lane.
