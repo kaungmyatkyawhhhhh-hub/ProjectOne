@@ -12,7 +12,7 @@ Z = lambda y: (GROUND - y) * S
 
 # tiers measured from the side profile: (y_top, r_top, y_bottom, r_bottom) in px
 TIERS = [(118, 40, 166, 72), (169, 54, 250, 103), (253, 86, 339, 139), (341, 107, 439, 181), (441, 155, 500, 190)]
-SEG = 16                           # 8 jagged points per tier edge = 16 rim verts
+SEG = 10                           # LOW-POLY (28 Nov): 5 jagged points per tier edge = 10 rim verts
 
 COL = {"Foliage": (0.13, 0.42, 0.12, 1), "FoliageTop": (0.33, 0.66, 0.2, 1), "Trunk": (0.45, 0.26, 0.1, 1),
        "Skirt": (0.78, 0.09, 0.08, 1), "Fur": (0.96, 0.96, 0.94, 1), "Star": (0.98, 0.78, 0.15, 1),
@@ -116,20 +116,20 @@ def build():
     misc["Trunk"].add(B + T, [(i, (i + 1) % 8, 8 + (i + 1) % 8, 8 + i) for i in range(8)] + [tuple(range(7, -1, -1)), tuple(range(8, 16))])
     # skirt: thin 24-gon disc, red; fur: ring tube round its edge
     rs = 170 * S
-    D0, D1 = ring(rs, 0.05, 24), ring(rs * 0.97, 0.35, 24)
-    misc["Skirt"].add(D0 + D1, [(i, (i + 1) % 24, 24 + (i + 1) % 24, 24 + i) for i in range(24)] + [tuple(range(23, -1, -1)), tuple(range(24, 48))])
+    D0, D1 = ring(rs, 0.05, 12), ring(rs * 0.97, 0.35, 12)
+    misc["Skirt"].add(D0 + D1, [(i, (i + 1) % 12, 12 + (i + 1) % 12, 12 + i) for i in range(12)] + [tuple(range(11, -1, -1)), tuple(range(12, 24))])
     fr, tube = 182 * S, 0.55
     V, F = [], []
-    for i in range(24):
-        a = 2 * math.pi * i / 24
+    for i in range(12):
+        a = 2 * math.pi * i / 12
         bump = 1.0 + 0.18 * (i % 2)            # scalloped fluffy rim
-        for j in range(6):
-            b = 2 * math.pi * j / 6
+        for j in range(4):
+            b = 2 * math.pi * j / 4
             rr = fr + tube * bump * math.cos(b)
             V.append(Vector((rr * math.cos(a), rr * math.sin(a), tube * bump * (1 + math.sin(b)) * 0.8)))
-    for i in range(24):
-        for j in range(6):
-            F.append((i * 6 + j, i * 6 + (j + 1) % 6, ((i + 1) % 24) * 6 + (j + 1) % 6, ((i + 1) % 24) * 6 + j))
+    for i in range(12):
+        for j in range(4):
+            F.append((i * 4 + j, i * 4 + (j + 1) % 4, ((i + 1) % 12) * 4 + (j + 1) % 4, ((i + 1) % 12) * 4 + j))
     misc["Fur"].add(V, F)
     # star: chunky bevelled 5-point star facing +/-Y (front), centre at the sheet's star centre
     sc_z, R_out, R_in, depth = Z(69), 59 * S, 34 * S, 0.95
@@ -146,9 +146,9 @@ def build():
     for n, (p, t) in enumerate(tips):
         d = Vector((p.x, p.y, 0)).normalized()
         c = p - d * 0.15
-        ico(misc[kinds[k % 3]], c, 0.8, sub=2); k += 1
+        ico(misc[kinds[k % 3]], c, 0.85, sub=0); k += 1   # faceted 20-tri bauble
         cap = Vector(c) + Vector((0, 0, 0.72))
-        ico(misc["BaubleGold"], cap, 0.24, sub=1)
+        ico(misc["BaubleGold"], cap, 0.24, sub=0)
     # bulb string: 4 turns spiralling down the cone surface, bulbs every ~1.6 studs
     z0, z1 = Z(140), Z(490)
     def surf_r(z):
@@ -157,7 +157,7 @@ def build():
             if yt <= y <= yb: return (rt + (rb - rt) * (y - yt) / (yb - yt)) * S + 0.15
         return 60 * S
     path = []
-    N = 200
+    N = 48                                      # low-poly wire: 12 segments per turn
     for i in range(N + 1):
         f = i / N
         z = z0 + (z1 - z0) * f
@@ -181,7 +181,7 @@ def build():
     for p in path:
         if last is not None: acc_len += (p - last).length
         last = p
-        if acc_len >= 1.6:
+        if acc_len >= 2.4:
             acc_len = 0.0
             ico(misc["Bulbs"], p + Vector((p.x, p.y, 0)).normalized() * 0.12, 0.26, sub=0)
     objs = [make(sc, "Foliage", fol), make(sc, "FoliageTop", top)] + [make(sc, k, a) for k, a in misc.items() if a.v and k not in ("Foliage", "FoliageTop")]
