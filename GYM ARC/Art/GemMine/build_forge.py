@@ -63,7 +63,7 @@ while y < 7.0:
         x += w
     y += h; row += 1
 # sloped cap on the stepped top: a low faceted ridge along X
-hull("StoneB", [R(sx * 4.2, 7.0, sz * 0.8) for sx in (-1, 1) for sz in (-1, 1)] + [R(sx * 3.6, 7.8, 0) for sx in (-1, 1)])
+hull("StoneB", [R(sx * 4.2, 7.0, 6.0 + sz * 0.8) for sx in (-1, 1) for sz in (-1, 1)] + [R(sx * 3.6, 7.8, 6.0) for sx in (-1, 1)])
 for sx in (-1, 1):  # sloped shoulders where each course steps in
     hull("StoneA", [R(sx * 7.0, 3.55, z) for z in (5.4, 6.6)] + [R(sx * 5.5, 3.55, z) for z in (5.4, 6.6)] + [R(sx * 5.5, 4.3, z) for z in (5.4, 6.6)])
     hull("StoneA", [R(sx * 5.5, 5.15, z) for z in (5.4, 6.6)] + [R(sx * 4.0, 5.15, z) for z in (5.4, 6.6)] + [R(sx * 4.0, 5.9, z) for z in (5.4, 6.6)])
