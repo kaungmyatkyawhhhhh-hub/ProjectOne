@@ -32,9 +32,9 @@ def bulb(m, c, x, z_top, S, w=16, h=46, ang=0.0):
     """C9 bulb hanging from z_top: black socket then a teardrop pointing down (sheet: 32 px wide, ~46 px tall), tilted by ang about Y."""
     n0 = {k: len(v) for k, v in m.V.items()}
     m.lathe("Wire", [(12 * S, z_top - 14 * S), (12 * S, z_top + 5 * S)], 4, (x, 0))
-    prof = [(0.01 * S, z_top - 12 * S - h * S), (w * 0.55 * S, z_top - 12 * S - h * 0.82 * S), (w * S, z_top - 12 * S - h * 0.45 * S),
-            (w * 0.8 * S, z_top - 12 * S - h * 0.12 * S), (8 * S, z_top - 12 * S)]
-    m.lathe(c, prof, 8, (x, 0))
+    # LOW-POLY (owner 28 Nov): 5 sides, 3 rings + tip
+    prof = [(0.01 * S, z_top - 12 * S - h * S), (w * S, z_top - 12 * S - h * 0.5 * S), (8 * S, z_top - 12 * S)]
+    m.lathe(c, prof, 5, (x, 0))
     if ang:
         for k in (c, "Wire"):
             for i in range(n0[k], len(m.V[k])):
@@ -90,7 +90,7 @@ for p0, p1 in ((245, 309), (541, 604)):
     m.pyramid("Snow", X(c), 0, 37 * S, Z(171), Z(133))                                          # snow-topped pointed cap
 for y0, y1 in ((203, 233), (275, 306)):
     m.box("Wood", X(300), X(550), -10 * S, 10 * S, Z(y1), Z(y0))
-wire(m, [(X(x), Z(186 + 8 * (1 - ((x - 424) / 120) ** 2))) for x in range(309, 545, 12)], 2.5 * S)
+wire(m, [(X(x), Z(186 + 8 * (1 - ((x - 424) / 120) ** 2))) for x in list(range(309, 545, 40)) + [544]], 2.5 * S)   # 6 segments (low-poly)
 for x, c in ((352, "Red"), (426, "Yellow"), (499, "Green")):
     bulb(m, c, X(x), Z(192), S, 16, 46)
 export(m, "Fence", {"front": (S, CX, GY, False)})
@@ -129,8 +129,9 @@ export(m, "Lamp", {"front": (S, CX, GY, False), "side": (S, 780, GY, True)})
 S = 1 / 407; m = M(); CX, ZY = 437.5, 869
 X = lambda x: (x - CX) * S; Z = lambda y: (ZY - y) * S
 wy = lambda x: 869 + 36 * (1 - ((x - CX) / 203.5) ** 2)
-wire(m, [(X(x), Z(wy(x))) for x in range(234, 646, 14)], 4 * S)
-for x, c in zip((257, 315, 375, 436, 496, 556, 616), ("Red", "Yellow", "Green", "Blue", "Red", "Yellow", "Green")):
+wire(m, [(X(x), Z(wy(x))) for x in list(range(234, 641, 51)) + [641]], 4 * S)   # 8 segments (low-poly)
+# 4 bulbs per span (28 Nov): Studio lays 8-stud spans along the ceiling chains -> bulbs ~2 studs apart, 0.47 x 0.67 like the old ones
+for x, c in zip((285, 386, 488, 590), ("Red", "Yellow", "Green", "Blue")):
     slope = 72 * (x - CX) / 203.5 ** 2          # d(wy)/dx in px
-    bulb(m, c, X(x), Z(wy(x) + 2), S, 17, 48, ang=-0.35 * math.atan(slope))
+    bulb(m, c, X(x), Z(wy(x) + 2), S, 24, 34, ang=-0.35 * math.atan(slope))
 export(m, "LightString", {"front": (S, CX, ZY, False)})
