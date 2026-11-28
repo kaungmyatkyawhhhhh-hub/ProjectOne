@@ -7,7 +7,7 @@ from mathutils import Vector
 HERE = r"C:\ObsidianOne\Claude+Obsidian\GYM ARC\Art\YardKit"
 random.seed(5)
 T = Vector((34, -152)); R_IN, R_OUT = 11.4, 19.0
-PAL = {"Stone": (189, 207, 220), "StoneDark": (158, 175, 192), "Gold": (223, 182, 79), "RedTrim": (160, 29, 43)}
+PAL = {"Stone": (189, 207, 220), "StoneDark": (158, 175, 192), "Gold": (188, 153, 77), "RedTrim": (160, 29, 43)}
 G = {}
 TOP, BOT, INS = 0.28, -0.25, 0.14
 
@@ -27,9 +27,9 @@ def slab(col, quad, top=TOP, ins=INS):
     # winding: Blender y = -z mirrors the plane, so flip all faces
     add(col, V, [tuple(reversed(f)) for f in F])
 
-def jit(p, a=0.14): return Vector((p[0] + random.uniform(-a, a), p[1] + random.uniform(-a, a)))
+def jit(p, a=0.0): return Vector((p[0] + random.uniform(-a, a), p[1] + random.uniform(-a, a)))
 
-def path(A, B, w, tile=2.6, gap=0.2):
+def path(A, B, w, tile=2.5, gap=0.1):
     A, B = Vector(A), Vector(B); d = (B - A); L = d.length; d.normalize(); n = Vector((-d.y, d.x))
     rows = max(1, round(L / tile)); tl = L / rows; cols = max(1, round(w / tile)); tw = w / cols
     for r in range(rows):
@@ -42,9 +42,9 @@ def path(A, B, w, tile=2.6, gap=0.2):
             l0, l1 = r * tl + gap / 2, (r + 1) * tl - gap / 2
             q = [A + d * l0 + n * s0, A + d * l1 + n * s0, A + d * l1 + n * s1, A + d * l0 + n * s1]
             q = [jit(p) for p in q]
-            slab("StoneDark" if random.random() < 0.35 else "Stone", q)
+            slab("StoneDark" if random.random() < 0.25 else "Stone", q)
 
-def ring(r0, r1, col, step=2.6, gap=0.2, top=TOP, ins=INS, j=0.12):
+def ring(r0, r1, col, step=2.6, gap=0.1, top=TOP, ins=INS, j=0.0):
     n = max(8, round(2 * math.pi * (r0 + r1) / 2 / step)); ph = random.uniform(0, 1)
     for k in range(n):
         a0 = 2 * math.pi * (k + ph) / n + gap / 2 / ((r0 + r1) / 2); a1 = 2 * math.pi * (k + 1 + ph) / n - gap / 2 / ((r0 + r1) / 2)
@@ -57,15 +57,17 @@ def ring(r0, r1, col, step=2.6, gap=0.2, top=TOP, ins=INS, j=0.12):
 ring(R_IN - 0.7, R_IN, "RedTrim", step=3.2, gap=0.12, top=0.34, ins=0.08, j=0)
 for r0 in (R_IN, R_IN + 2.55, R_IN + 5.1):
     ring(r0, min(r0 + 2.55, R_OUT), None)
-ring(R_OUT, R_OUT + 0.9, "Gold", step=3.4, gap=0.12, top=0.38, ins=0.1, j=0)
+ring(R_OUT, R_OUT + 0.6, "Gold", step=3.0, gap=0.08, top=0.46, ins=0.12, j=0)
 
 def edge_pt(target, extra=0.0):
-    d = (Vector(target) - T).normalized(); return T + d * (R_OUT + 0.9 + extra)
+    d = (Vector(target) - T).normalized(); return T + d * (R_OUT + 0.6 + extra)
 # main path: door (0,-94) -> plaza
 path((0, -95), edge_pt((0, -95)), 12)
-for tgt, stop in (((-24, -126), 7.5), ((-14, -172), 9.5), ((80, -162), 10.5)):
-    a = edge_pt(tgt); b = Vector(tgt) - (Vector(tgt) - a).normalized() * stop
-    path(a, b, 9)
+# round 2: branches run flush into a 12x10 interaction plaza at each attraction; new photo-corner branch
+for tgt, stop, w in (((-24, -126), 6.5, 9), ((-14, -172), 8.5, 9), ((80, -162), 9.5, 9), ((84, -118), 7.0, 8)):
+    a = edge_pt(tgt); u = (Vector(tgt) - a).normalized(); b = Vector(tgt) - u * stop
+    path(a, b - u * 10, w)
+    path(b - u * 10, b, 12)
 
 for o_ in list(bpy.data.objects): bpy.data.objects.remove(o_, do_unlink=True)
 sc = bpy.context.scene; info = {}
