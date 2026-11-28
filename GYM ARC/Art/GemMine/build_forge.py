@@ -41,20 +41,32 @@ def tcyl(col, c, r0, r1, h, n=6):
     hull(col, pts)
 
 # back wall: core slab, then masonry rows on the back face (z 6.5 out) and the front face (z 5.5 out)
-cbox("StoneA", (0, 0.08, 6.0), (14, 14, 0.8), 0.15)
+# (MAP-6: "reads like a tall boxy block": the top two courses step in 1.5 per side under a sloped cap, and two blocks
+# on the left stick out 0.35 more)
+cbox("StoneA", (0, -1.66, 6.0), (14, 10.52, 0.8), 0.15)
+cbox("StoneA", (0, 4.4, 6.0), (11, 1.6, 0.8), 0.1)
+cbox("StoneA", (0, 6.14, 6.0), (8, 1.88, 0.8), 0.1)
 y = -6.9
 row = 0
 while y < 7.0:
     h = 1.6 if y + 1.6 < 7.05 else 7.05 - y
-    x = -7.0 + (0.9 if row % 2 else 0.0)
-    if row % 2: cbox("StoneB", (-7.0 + 0.45, y + h / 2, 6.0), (0.9, h - 0.12, 1.2), 0.07)
-    while x < 6.95:
-        w = min(random.uniform(2.2, 3.4), 7.0 - x)
+    inset = 0.0 if y < 3.6 else (1.5 if y < 5.2 else 3.0)
+    x0, x1 = -7.0 + inset, 7.0 - inset
+    x = x0 + (0.9 if row % 2 else 0.0)
+    if row % 2: cbox("StoneB", (x0 + 0.45, y + h / 2, 6.0), (0.9, h - 0.12, 1.2), 0.07)
+    while x < x1 - 0.05:
+        w = min(random.uniform(2.2, 3.4), x1 - x)
         if w > 0.5:
             col = "StoneB" if random.random() < 0.5 else "StoneA"
-            cbox(col, (x + w / 2, y + h / 2, 6.0), (w - 0.12, h - 0.12, 1.2 + random.uniform(0, 0.12)), 0.08)
+            deep = 0.7 if (row in (2, 5) and x < x0 + 1.0) else 0.0
+            cbox(col, (x + w / 2, y + h / 2, 6.0), (w - 0.12, h - 0.12, 1.2 + random.uniform(0, 0.12) + deep), 0.08)
         x += w
     y += h; row += 1
+# sloped cap on the stepped top: a low faceted ridge along X
+hull("StoneB", [R(sx * 4.2, 7.0, sz * 0.8) for sx in (-1, 1) for sz in (-1, 1)] + [R(sx * 3.6, 7.8, 0) for sx in (-1, 1)])
+for sx in (-1, 1):  # sloped shoulders where each course steps in
+    hull("StoneA", [R(sx * 7.0, 3.55, z) for z in (5.4, 6.6)] + [R(sx * 5.5, 3.55, z) for z in (5.4, 6.6)] + [R(sx * 5.5, 4.3, z) for z in (5.4, 6.6)])
+    hull("StoneA", [R(sx * 5.5, 5.15, z) for z in (5.4, 6.6)] + [R(sx * 4.0, 5.15, z) for z in (5.4, 6.6)] + [R(sx * 4.0, 5.9, z) for z in (5.4, 6.6)])
 # timber
 for px in (6.6, -6.6): cbox("Wood", (px, 0.08, 5.3), (0.8, 14, 0.8), 0.12)
 cbox("Wood", (0, 6.98, 5.3), (14.6, 0.9, 1.0), 0.12)
